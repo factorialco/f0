@@ -31,6 +31,8 @@ export interface KanbanProps<TRecord extends RecordType> {
    */
   lanes: ReadonlyArray<KanbanLaneAttributes<TRecord>>
 
+  loading?: boolean
+
   /** Render a card for a given record */
   renderCard: (
     item: TRecord,

@@ -4,12 +4,10 @@ import type {
 } from "@/components/F0Card/types"
 import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import { DataCollectionDataAdapter } from "@/experimental"
 import { useDataCollectionLanesData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
 import { useSelectableLanes } from "@/experimental/OneDataCollection/hooks/useSelectableLanes"
 import {
   InfiniteScrollPaginatedResponse,
-  PaginatedDataAdapter,
   PaginationInfo,
   type RecordType,
 } from "@/hooks/datasource"
@@ -73,16 +71,6 @@ export const KanbanCollection = <
     throw new Error("Grouping is not supported in Kanban yet")
   }
 
-  const isInfiniteScrollPagination = (
-    dataAdapter: DataCollectionDataAdapter<R, Filters>
-  ): dataAdapter is PaginatedDataAdapter<R, Filters> => {
-    return dataAdapter.paginationType === "infinite-scroll"
-  }
-
-  if (!isInfiniteScrollPagination(source.dataAdapter)) {
-    throw new Error("Infinite scroll pagination is required in Kanban")
-  }
-
   const [instanceId] = useState(() => Symbol("kanban-visualization"))
 
   const idProvider = source.idProvider
@@ -134,6 +122,9 @@ export const KanbanCollection = <
         fetchMore: hasMore ? () => laneData.loadMore() : undefined,
       }
     }),
+    loading: Object.values(lanesHooks).some(
+      (laneHook) => laneHook.isInitialLoading
+    ),
     getKey: (item, index) =>
       idProvider ? String(idProvider(item, index)) : index,
     renderCard: (item, index, total, laneId) => {
@@ -210,7 +201,71 @@ export const KanbanCollection = <
           sourceId: string,
           toIndex: number | null
         ) => {
-          await onMove(fromLaneId, toLaneId, sourceId, toIndex)
+          // Find the source record by sourceId
+          const sourceLane = laneItems.find((lane) => lane.id === fromLaneId)
+          const sourceRecord = sourceLane?.items.find((item, index) => {
+            const itemId = String(
+              idProvider ? idProvider(item as R, index) : index
+            )
+            return itemId === sourceId
+          })
+
+          if (!sourceRecord) {
+            console.error(
+              `Source record with id ${sourceId} not found in lane ${fromLaneId}`
+            )
+            return
+          }
+
+          // Find the destiny record and position
+          let destinyRecord:
+            | { record: R; position: "above" | "below" }
+            | undefined
+
+          if (toIndex !== null) {
+            const destinyLane = laneItems.find((lane) => lane.id === toLaneId)
+            if (destinyLane && destinyLane.items.length > 0) {
+              if (toIndex === 0) {
+                // Moving to the top
+                destinyRecord = {
+                  record: destinyLane.items[0] as R,
+                  position: "above",
+                }
+              } else if (toIndex >= destinyLane.items.length) {
+                // Moving to the bottom
+                destinyRecord = {
+                  record: destinyLane.items[destinyLane.items.length - 1] as R,
+                  position: "below",
+                }
+              } else {
+                // Moving between items
+                destinyRecord = {
+                  record: destinyLane.items[toIndex] as R,
+                  position: "above",
+                }
+              }
+            }
+          }
+
+          // If no destiny record found, we're moving to an empty lane or to the end
+          if (!destinyRecord) {
+            const destinyLane = laneItems.find((lane) => lane.id === toLaneId)
+            if (destinyLane && destinyLane.items.length > 0) {
+              // Moving to the end of a non-empty lane
+              destinyRecord = {
+                record: destinyLane.items[destinyLane.items.length - 1] as R,
+                position: "below",
+              }
+            } else {
+              // Moving to an empty lane - use the source record as reference
+              destinyRecord = {
+                record: sourceRecord as R,
+                position: "below",
+              }
+            }
+          }
+
+          await onMove(fromLaneId, toLaneId, sourceRecord as R, destinyRecord)
         }
       : undefined,
   }
