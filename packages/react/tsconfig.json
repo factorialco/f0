@@ -24,7 +24,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "~/*": ["./*"]
-    }
+    },
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src", ".storybook", "src/tokens"],
   "exclude": [
