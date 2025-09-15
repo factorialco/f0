@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.186.1](https://github.com/factorialco/f0/compare/f0-react-v1.186.0...f0-react-v1.186.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* **AvatarList:** correct gap between avatars ([#2562](https://github.com/factorialco/f0/issues/2562)) ([2f21bd9](https://github.com/factorialco/f0/commit/2f21bd9818cbd5495bf6fcfd7867e6f95965f76b))
+
 ## [1.186.0](https://github.com/factorialco/f0/compare/f0-react-v1.185.0...f0-react-v1.186.0) (2025-09-15)
 
 
