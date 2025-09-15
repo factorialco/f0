@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 import { TableColumnDefinition } from ".."
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { useSticky } from "../useSticky"
 
 export type RowProps<
   R extends RecordType,
@@ -91,6 +92,12 @@ const RowComponentInner = <
 
   const key = `table-row-${groupIndex}-${index}`
 
+  const { getStickyPosition } = useSticky(
+    frozenColumnsLeft,
+    columns,
+    !!source.selectable
+  )
+
   const {
     primaryItemActions,
     dropdownItemActions,
@@ -129,18 +136,7 @@ const RowComponentInner = <
           href={itemHref}
           onClick={itemOnClick}
           width={column.width}
-          sticky={
-            cellIndex < frozenColumnsLeft
-              ? {
-                  left: columns
-                    .slice(0, Math.max(0, cellIndex))
-                    .reduce(
-                      (acc, column) => acc + (column.width ?? 0),
-                      checkColumnWidth
-                    ),
-                }
-              : undefined
-          }
+          sticky={getStickyPosition(cellIndex)}
         >
           <div
             className={cn(
