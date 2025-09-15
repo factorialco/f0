@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.186.2](https://github.com/factorialco/f0/compare/f0-react-v1.186.1...f0-react-v1.186.2) (2025-09-15)
+
+
+### Bug Fixes
+
+* **CommunityPost:** fix comment button growing unexpectedly ([#2563](https://github.com/factorialco/f0/issues/2563)) ([f9d1902](https://github.com/factorialco/f0/commit/f9d1902aebeb7d8e8a673861b518010bf7a322d9))
+
 ## [1.186.1](https://github.com/factorialco/f0/compare/f0-react-v1.186.0...f0-react-v1.186.1) (2025-09-15)
 
 
