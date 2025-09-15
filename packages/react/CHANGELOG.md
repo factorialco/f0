@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.184.0](https://github.com/factorialco/f0/compare/f0-react-v1.183.0...f0-react-v1.184.0) (2025-09-15)
+
+
+### Features
+
+* datenavigator show compare to date in navigation button ([#2547](https://github.com/factorialco/f0/issues/2547)) ([455508f](https://github.com/factorialco/f0/commit/455508f07dcf6f2ddbc2048121a804b125d2b520))
+
 ## [1.183.0](https://github.com/factorialco/f0/compare/f0-react-v1.182.1...f0-react-v1.183.0) (2025-09-12)
 
 
