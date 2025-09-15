@@ -1,49 +1,52 @@
-# F0 Design System
+# F0 React Native
 
-F0 is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
+React Native implementation of the F0 Design System.
 
-## Packages
-
-This monorepo contains the following packages:
-
-- `@factorialco/f0-core`: Core tokens and utilities shared across platforms (located in `packages/core`)
-- `@factorialco/f0-react-native`: React Native implementation of the design system (located in `packages/react-native`)
-- `@factorialco/f0-react`: React implementation of the design system (existing)
-
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm 9+
-
-### Setup
+## Installation
 
 ```bash
-# Install dependencies
-pnpm install
+npm install @factorialco/f0-react-native
+# or
+yarn add @factorialco/f0-react-native
+# or
+pnpm add @factorialco/f0-react-native
 ```
+
+## Usage
+
+```tsx
+import { ExampleComponent } from "@factorialco/f0-react-native";
+
+export default function App() {
+  return <ExampleComponent text="Hello from F0!" />;
+}
+```
+
+## Icons
+
+The package includes a set of icons that can be imported and used in your React Native application.
+
+```tsx
+import { Icon, AppIcons } from "@factorialco/f0-react-native";
+
+// Basic usage
+<Icon icon={AppIcons.Calendar} size="sm" />;
+<Icon icon={AppIcons.Calendar} size="md" />;
+<Icon icon={AppIcons.Calendar} size="lg" />;
+```
+
+## Development
 
 ### Building
 
 ```bash
-# Build all packages
 pnpm build
-
-# Build a specific package
-pnpm --filter @factorialco/f0-core build
-pnpm --filter @factorialco/f0-react-native build
 ```
 
 ### Testing
 
 ```bash
-# Run tests for all packages
 pnpm test
-
-# Run tests for a specific package
-pnpm --filter @factorialco/f0-core test
-pnpm --filter @factorialco/f0-react-native test
 ```
 
 ## License

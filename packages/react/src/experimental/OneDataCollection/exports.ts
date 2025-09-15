@@ -1,8 +1,0 @@
-export type * from "../../components/OneFilterPicker/exports"
-export type * from "./actions"
-export { OneDataCollection, useDataSource } from "./index"
-export type * from "./item-actions"
-export type * from "./navigationFilters/types"
-export type * from "./sortings"
-export type * from "./summary"
-export type * from "./types"
