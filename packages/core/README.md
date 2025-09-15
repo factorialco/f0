@@ -1,6 +1,6 @@
-# Factorial One Core
+# F0 Core
 
-Core tokens and utilities for the Factorial One Design System.
+Core tokens and utilities for the F0 Design System.
 
 ## Installation
 

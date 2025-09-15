@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.183.0](https://github.com/factorialco/f0/compare/f0-react-v1.182.1...f0-react-v1.183.0) (2025-09-12)
+
+
+### Features
+
+* **ai-chat:** temporary allow setting agent ([#2579](https://github.com/factorialco/f0/issues/2579)) ([7730e8d](https://github.com/factorialco/f0/commit/7730e8db6adaa00fa776e20000d79eb29697d180))
+
+## [1.182.1](https://github.com/factorialco/f0/compare/f0-react-v1.182.0...f0-react-v1.182.1) (2025-09-12)
+
+
+### Bug Fixes
+
+* add missing bottom padding on list ([#2577](https://github.com/factorialco/f0/issues/2577)) ([568c0f4](https://github.com/factorialco/f0/commit/568c0f41203b275f26854077e29d27e242a914ad))
+
 ## [1.182.0](https://github.com/factorialco/factorial-one/compare/f0-react-v1.181.0...f0-react-v1.182.0) (2025-09-11)
 
 

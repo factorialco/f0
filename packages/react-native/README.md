@@ -1,6 +1,6 @@
-# Factorial One React Native
+# F0 React Native
 
-React Native implementation of the Factorial One Design System.
+React Native implementation of the F0 Design System.
 
 ## Installation
 
@@ -18,7 +18,7 @@ pnpm add @factorialco/f0-react-native
 import { ExampleComponent } from "@factorialco/f0-react-native";
 
 export default function App() {
-  return <ExampleComponent text="Hello from Factorial One!" />;
+  return <ExampleComponent text="Hello from F0!" />;
 }
 ```
 

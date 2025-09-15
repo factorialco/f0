@@ -1,6 +1,6 @@
-# Factorial One Design System
+# F0 Design System
 
-Factorial One is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
+F0 is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
 
 ## Packages
 

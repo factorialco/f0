@@ -12,7 +12,7 @@ jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
-  test:
+  size:
     needs: detect-changes
     name: "[⚛️ REACT] Size"
     if: |
@@ -21,6 +21,9 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,4 +45,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           directory: packages/react
           package_manager: pnpm
-          script: pnpm size:ci

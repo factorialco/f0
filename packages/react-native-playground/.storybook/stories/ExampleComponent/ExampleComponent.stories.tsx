@@ -29,7 +29,7 @@ export const Default: Story = {};
 
 export const CustomText: Story = {
   args: {
-    text: "Hello from Factorial One!",
+    text: "Hello from F0!",
   },
 };
 

@@ -1,6 +1,6 @@
 # Icon Component
 
-The Icon component is used to render SVG icons from the Factorial One Design System in React Native applications.
+The Icon component is used to render SVG icons from the F0 Design System in React Native applications.
 
 ## Import Pattern
 

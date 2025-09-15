@@ -17,7 +17,7 @@ const meta: Meta<typeof CompanyAvatar> = {
     },
   },
   args: {
-    name: "Factorial One",
+    name: "F0",
     size: "medium",
   },
   decorators: [

@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.182.0",
+  "version": "1.183.0",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -23,7 +23,6 @@
     "dev:coder": "pnpm build --watch -- --buildSync",
     "start": "pnpm run dev",
     "size": "pnpm run build && size-limit",
-    "size:ci": "size-limit --json",
     "build": "tsc --project ./tsconfig-build.json && run-p build-icons && BUILD_TYPES=true vite build -- --tailwind",
     "build:tsup": "tsup && pnpm run build:tailwind && run-p build-icons",
     "build-icons": "tsc --project ./tsconfig-build-icons.json",
