@@ -9,7 +9,12 @@ type CardAvatarVariant =
   | AvatarVariant
   | { type: "emoji"; emoji: string }
   | { type: "file"; file: File }
-  | { type: "icon"; icon: IconType }
+  | {
+      type: "icon"
+      icon: IconType
+      color?: `#${string}`
+      backgroundColor?: `#${string}`
+    }
 
 interface CardAvatarProps {
   /**
@@ -42,7 +47,14 @@ const AvatarRender = ({
     return <F0AvatarFile file={avatar.file} size={compact ? "sm" : "lg"} />
   }
   if (avatar.type === "icon") {
-    return <F0AvatarIcon icon={avatar.icon} size={compact ? "sm" : "lg"} />
+    return (
+      <F0AvatarIcon
+        icon={avatar.icon}
+        size={compact ? "sm" : "lg"}
+        color={avatar.color}
+        backgroundColor={avatar.backgroundColor}
+      />
+    )
   }
   return <F0Avatar avatar={avatar} size={compact ? "sm" : "lg"} />
 }

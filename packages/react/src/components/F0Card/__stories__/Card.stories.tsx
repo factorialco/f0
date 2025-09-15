@@ -200,13 +200,16 @@ export const WithEmoji: Story = {
   },
 }
 
-export const WithIcon: Story = {
+export const WithIconAndImage: Story = {
   args: {
     ...Default.args,
     avatar: {
       type: "icon",
       icon: Lightbulb,
+      color: "#877FED",
+      backgroundColor: "#E9E0FD",
     },
+    image: image,
   },
 }
 
