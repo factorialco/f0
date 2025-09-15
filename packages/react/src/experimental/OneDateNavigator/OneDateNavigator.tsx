@@ -4,7 +4,7 @@ import {
 } from "@/ui/DatePickerPopup/OneDatePickerPopup"
 import { useMemo, useState } from "react"
 import { granularityDefinitions } from "../OneCalendar"
-import { DateRange } from "../OneCalendar/types"
+import { DateRange, DateRangeComplete } from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 export interface OneDatePickerProps
@@ -21,10 +21,14 @@ export function OneDateNavigator({
   hideNavigation = false,
   hideGoToCurrent = false,
   compareTo,
+  defaultCompareTo,
   onCompareToChange,
   ...props
 }: OneDatePickerProps) {
   const [value, setValue] = useState<DatePickerValue | undefined>(defaultValue)
+  const [compareToValue, setCompareToValue] = useState<
+    DateRangeComplete | DateRangeComplete[] | undefined
+  >()
   const [isOpen, setIsOpen] = useState(false)
 
   const granularityDefinition = useMemo(() => {
@@ -34,6 +38,13 @@ export function OneDateNavigator({
   const handleSelect = (value: DatePickerValue | undefined) => {
     setValue(value)
     onSelect?.(value)
+  }
+
+  const handleCompareToChange = (
+    compareTo: DateRangeComplete | DateRangeComplete[] | undefined
+  ) => {
+    setCompareToValue(compareTo)
+    onCompareToChange?.(compareTo)
   }
 
   const handleNavigationChange = (date: DateRange) => {
@@ -55,10 +66,12 @@ export function OneDateNavigator({
       open={isOpen}
       onOpenChange={setIsOpen}
       compareTo={compareTo}
-      onCompareToChange={onCompareToChange}
+      defaultCompareTo={defaultCompareTo}
+      onCompareToChange={handleCompareToChange}
     >
       <DatePickerTrigger
         value={value}
+        compareToValue={compareToValue}
         highlighted={isOpen}
         navigation={!hideNavigation}
         onDateChange={handleNavigationChange}

@@ -38,19 +38,32 @@ const AiChatProviderCmp = ({
   mode = "popup",
   greeting,
   children,
+  agent,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
-    <CopilotKit runtimeUrl="/copilotkit" {...copilotKitProps}>
-      <AiChatStateProvider
-        enabled={enabled}
-        initialMode={mode}
-        greeting={greeting}
-      >
-        {children}
-      </AiChatStateProvider>
+    <AiChatStateProvider
+      enabled={enabled}
+      initialMode={mode}
+      greeting={greeting}
+      agent={agent}
+    >
+      <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
+    </AiChatStateProvider>
+  )
+}
+
+const AiChatKitWrapper = ({
+  children,
+  ...copilotKitProps
+}: Omit<CopilotKitProps, "agent">) => {
+  const { agent } = useAiChat()
+
+  return (
+    <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
+      {children}
     </CopilotKit>
   )
 }

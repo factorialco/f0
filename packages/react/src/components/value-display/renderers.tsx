@@ -9,6 +9,7 @@ import { DotTagCell } from "./types/dotTag.tsx"
 import { FileCell } from "./types/file.tsx"
 import { FolderCell } from "./types/folder.tsx"
 import { IconCell } from "./types/icon.tsx"
+import { LongTextCell } from "./types/longText.tsx"
 import { NumberCell } from "./types/number.tsx"
 import { PercentageCell } from "./types/percentage.tsx"
 import { PersonCell } from "./types/person.tsx"
@@ -34,6 +35,7 @@ export type ValueDisplayRenderer = (
 
 export const valueDisplayRenderers = {
   text: TextCell,
+  longText: LongTextCell,
   number: NumberCell,
   date: DateCell,
   amount: AmountCell,

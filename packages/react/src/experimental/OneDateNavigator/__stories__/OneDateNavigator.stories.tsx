@@ -237,3 +237,10 @@ export const WithCompareTo: Story = {
     },
   },
 }
+
+export const WithDefaultCompareTo: Story = {
+  args: {
+    ...WithCompareTo.args,
+    defaultCompareTo: "1",
+  },
+}

@@ -1,12 +1,13 @@
 ---
-description: "Factorial One DS - Overview and Key Principles"
+description: "F0 DS - Overview and Key Principles"
 globs: ""
 alwaysApply: true
 ---
 
-# Factorial One Design System - Overview
+# F0 Design System - Overview
 
 ## Key Principles
+
 - Write modular, reusable components following atomic design principles.
 - Use TypeScript with strict type safety.
 - Follow functional and declarative programming patterns.
@@ -16,11 +17,14 @@ alwaysApply: true
 - pnpm package manager is used to run all commands
 
 ## Project Structure
+
 - `/packages/core`: Core component library and utilities
+
   - Shared types, utilities, and base configurations
   - Platform-agnostic business logic and helpers
 
 - `/packages/react`: Web Components Library
+
   - `/src/components`: Production-ready UI components
   - `/src/experimental`: Components in development phase
   - `/src/lib`: Shared utilities and handlers
@@ -28,16 +32,19 @@ alwaysApply: true
   - Stories and tests alongside components (`*.stories.tsx`, `*.spec.tsx`)
 
 - `/packages/react-native`: Mobile Components Library
+
   - Native implementations of the design system
   - Platform-specific adaptations of core components
   - Mobile-first user experience patterns
 
 - `/packages/playground`: Development Environment
+
   - Testing ground for new components
   - Integration examples
   - Development tools and utilities
 
 - `/packages/examples`: Implementation Examples
+
   - Real-world usage examples
   - Integration patterns
   - Best practices demonstrations
@@ -47,13 +54,15 @@ alwaysApply: true
   - Icon components for both platforms
 
 ## Documentation Structure
+
 Each component should include:
+
 - Component file (`index.tsx`)
 - Story file (`*.stories.tsx`) for Storybook documentation
 - Test file (`*.spec.tsx`) for unit/integration tests
 - Documentation file (`*.mdx`) when needed for complex components
 
-# Factorial One DS - Master Index
+# F0 DS - Master Index
 
 Below are existing rules containing specific guidelines. **Before generating any code or response, analyze the user's request for keywords related to these topics. If keywords match, PRIORITIZE and APPLY the corresponding @-rule's instructions.** Explicitly state which rule you are consulting if relevant.
 

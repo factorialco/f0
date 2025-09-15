@@ -1,5 +1,5 @@
-import { FileAvatar } from "@factorialco/factorial-one-react-native";
-import { Check } from "@factorialco/factorial-one-react-native/src/icons/app";
+import { FileAvatar } from "@factorialco/f0-react-native";
+import { Check } from "@factorialco/f0-react-native/src/icons/app";
 import type { Meta, StoryObj } from "@storybook/react";
 import { View } from "react-native";
 
