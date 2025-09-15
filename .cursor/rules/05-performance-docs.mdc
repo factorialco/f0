@@ -1,15 +1,19 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
-description: "Factorial One DS - Performance Guidelines and Documentation"
-globs: ""
+description:
+globs:
 alwaysApply: false
 ---
 
+---
+
+description: "F0 DS - Performance Guidelines and Documentation"
+globs: ""
+alwaysApply: false
+
+---
+
 # Performance Guidelines
+
 - Implement code splitting where beneficial.
 - Use `React.memo()` for expensive renders.
 - Optimize bundle size with tree shaking.
@@ -17,6 +21,7 @@ alwaysApply: false
 - Use appropriate image optimization.
 
 # Documentation
+
 - Include **JSDoc** comments for public APIs.
 - Write comprehensive **Storybook stories**.
 - Document component variants and props.
