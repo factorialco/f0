@@ -70,6 +70,7 @@ type ProductUpdatesProp = {
       dismissable: boolean
       onClose?: () => void
       trackVisibility?: (open: boolean) => void
+      type?: "one-campaign" | undefined
     }>
   }
 }
@@ -490,6 +491,7 @@ const DiscoverMoreProducts = ({
                 isVisible={true}
                 trackVisibility={product.trackVisibility}
                 onClick={() => handleProductClick(product.onClick)}
+                type={product.type}
               />
             ))}
           </Carousel>
