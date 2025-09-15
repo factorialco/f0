@@ -108,7 +108,24 @@ export function DropdownInternal({
           />
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align}>
+      <DropdownMenuContent
+        align={align}
+        onClick={(e) => {
+          console.log("test onClick")
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onMouseDown={(e) => {
+          console.log("test onMouseDown")
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onMouseUp={(e) => {
+          console.log("test onMouseUp")
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
         {items.map((item, index) =>
           item.type === "separator" ? (
             <DropdownMenuSeparator key={index} />
