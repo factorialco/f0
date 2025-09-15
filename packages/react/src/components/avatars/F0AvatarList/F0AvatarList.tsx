@@ -42,9 +42,9 @@ export const F0AvatarList = ({
   }
 
   const gaps = {
-    xs: -0.5,
+    xs: -2,
     sm: -3,
-    md: -10,
+    md: -4,
   } satisfies Record<AvatarListSize, number>
   const gap = gaps[size] ?? 0
 
@@ -99,17 +99,22 @@ export const F0AvatarList = ({
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}
       renderOverflowIndicator={(count) => (
-        <MaxCounter
-          count={(initialRemainingCount ?? 0) + count}
-          size={size}
-          type={type === "person" ? "rounded" : "base"}
-          avatarType={type}
-          list={
-            initialRemainingCount
-              ? undefined
-              : avatars.slice(avatars.length - count)
-          }
-        />
+        <div
+          className="flex h-fit w-fit items-center"
+          style={{ marginLeft: gap }}
+        >
+          <MaxCounter
+            count={(initialRemainingCount ?? 0) + count}
+            size={size}
+            type={type === "person" ? "rounded" : "base"}
+            avatarType={type}
+            list={
+              initialRemainingCount
+                ? undefined
+                : avatars.slice(avatars.length - count)
+            }
+          />
+        </div>
       )}
       overflowIndicatorWithPopover={false}
     />
