@@ -3,10 +3,7 @@ import { ScrollView } from "react-native";
 import { View } from "react-native";
 import { Text } from "react-native";
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-  ModuleAvatar,
-  ModuleIcons,
-} from "@factorialco/factorial-one-react-native";
+import { ModuleAvatar, ModuleIcons } from "@factorialco/f0-react-native";
 
 const meta = {
   title: "Components/Avatars/ModuleAvatar",

@@ -173,7 +173,7 @@ export const ListCollection = <
         aria-live={showFullscreenLoading ? "polite" : undefined}
         aria-busy={showFullscreenLoading ? "true" : undefined}
       >
-        <div className="min-h-0 flex-1 overflow-auto">
+        <div className="min-h-0 flex-1 overflow-auto pb-3">
           <AnimatePresence>
             {isInitialLoading && (
               <motion.div
@@ -260,7 +260,7 @@ export const ListCollection = <
             paginationInfo.hasMore && (
               <div
                 ref={loadingIndicatorRef}
-                className="h-10 w-full"
+                className="w-full"
                 aria-hidden="true"
               />
             )}

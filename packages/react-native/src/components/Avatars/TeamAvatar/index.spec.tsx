@@ -4,7 +4,7 @@ import { TeamAvatar } from "./";
 
 describe("TeamAvatar", () => {
   it("Snapshot", () => {
-    const { toJSON } = render(<TeamAvatar name="Factorial One" />);
+    const { toJSON } = render(<TeamAvatar name="F0" />);
 
     expect(toJSON()).toMatchSnapshot();
   });
