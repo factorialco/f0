@@ -61,6 +61,7 @@ type ProductUpdatesProp = {
   crossSelling?: {
     isVisible: boolean
     sectionTitle: string
+
     onClose?: () => void
     products: Array<{
       title: string
@@ -465,16 +466,18 @@ const DiscoverMoreProducts = ({
               {crossSelling?.sectionTitle}
             </p>
 
-            <div className="relative z-10 h-6 w-6">
-              <Button
-                variant="ghost"
-                icon={CrossIcon}
-                size="sm"
-                hideLabel
-                onClick={handleClose}
-                label="Close"
-              />
-            </div>
+            {onClose && (
+              <div className="relative z-10 h-6 w-6">
+                <Button
+                  variant="ghost"
+                  icon={CrossIcon}
+                  size="sm"
+                  hideLabel
+                  onClick={handleClose}
+                  label="Close"
+                />
+              </div>
+            )}
           </div>
 
           <Carousel
