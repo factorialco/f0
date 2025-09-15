@@ -43,6 +43,7 @@ import {
   OnSelectItemsCallback,
   RecordType,
 } from "@/hooks/datasource"
+import React from "react"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 
 /**
@@ -347,7 +348,7 @@ const OneDataCollectionComp = <
               Object.entries(navigationFilters).map(([key, filter]) => {
                 const filterDef = navigationFilterTypes[filter.type]
                 return (
-                  <div key={key}>
+                  <React.Fragment key={key}>
                     {filterDef.render({
                       filter: filter,
                       value: currentNavigationFilters[key]!,
@@ -358,7 +359,7 @@ const OneDataCollectionComp = <
                         })
                       },
                     })}
-                  </div>
+                  </React.Fragment>
                 )
               })}
           </div>

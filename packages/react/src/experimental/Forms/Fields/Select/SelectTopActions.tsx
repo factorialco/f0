@@ -13,7 +13,7 @@ interface SelectTopActionsProps<
   showSearchBox?: boolean
   searchBoxPlaceholder?: string
   onSearchChange: (value: string) => void
-  searchValue: string | undefined
+  searchValue?: string
   searchInputRef: React.RefObject<HTMLInputElement>
   onFocus?: () => void
   onBlur?: () => void
