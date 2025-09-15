@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.186.0](https://github.com/factorialco/f0/compare/f0-react-v1.185.0...f0-react-v1.186.0) (2025-09-15)
+
+
+### Features
+
+* Select ellipsis in label ([#2590](https://github.com/factorialco/f0/issues/2590)) ([799ed4b](https://github.com/factorialco/f0/commit/799ed4b0e4e6150a244e69df50dba368b3764780))
+
 ## [1.185.0](https://github.com/factorialco/f0/compare/f0-react-v1.184.0...f0-react-v1.185.0) (2025-09-15)
 
 
