@@ -16,6 +16,7 @@ export interface AiChatState {
   greeting?: string
   initialMode: AiChatMode
   enabled: boolean
+  agent?: string
 }
 
 type AiChatProviderReturnValue = {
@@ -27,12 +28,14 @@ type AiChatProviderReturnValue = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   shouldPlayEntranceAnimation: boolean
   setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>
-} & Pick<AiChatState, "greeting">
+  tmp_setAgent: (agent?: string) => void
+} & Pick<AiChatState, "greeting" | "agent">
 
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
   initialMode,
+  agent: initialAgent,
   ...rest
 }) => {
   const [mode, setMode] = useState<AiChatMode>(initialMode)
@@ -40,6 +43,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [open, setOpen] = useState(false)
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(true)
+  const [agent, setAgent] = useState<string | undefined>(initialAgent)
+
+  const tmp_setAgent = (newAgent?: string) => {
+    setAgent(newAgent)
+  }
 
   useEffect(() => {
     setEnabledInternal(enabled)
@@ -66,6 +74,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setOpen,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
+        agent,
+        tmp_setAgent,
       }}
     >
       {children}
@@ -87,6 +97,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setOpen: () => {},
       shouldPlayEntranceAnimation: true,
       setShouldPlayEntranceAnimation: () => {},
+      agent: undefined,
+      tmp_setAgent: () => {},
     }
   }
 

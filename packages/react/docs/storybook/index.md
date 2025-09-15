@@ -8,9 +8,9 @@ way to test and develop components in isolation, and to document them.
 We can group the users of Storybook into two categories:
 
 - factorial's developers and designers
-- factorial-one developers and designers
+- f0 developers and designers
 
-Most of the content is shared content for both groups, but for the factorial-one developers and designers needs to know
+Most of the content is shared content for both groups, but for the f0 developers and designers needs to know
 more about the components internal.
 
 Check the next sections for futher information
@@ -19,7 +19,7 @@ Check the next sections for futher information
 
 The objective is to write documentation as much as possible, and as many component have subcomponents is a good practice
 to document the subcomponents as well, but as we want to provide concise information, avoiding anything unnecessary for
-the ones are not developing `factorial-one` we will use the `internal` tag to hide the content from the public.
+the ones are not developing `f0` we will use the `internal` tag to hide the content from the public.
 
 The stories with this tags will not shown in the sidebar in the public build, but they will be available running
 storybook in local.
