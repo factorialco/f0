@@ -1,26 +1,21 @@
 import { CopilotKit, CopilotKitProps } from "@copilotkit/react-core"
-import { CopilotPopup, CopilotSidebar } from "@copilotkit/react-ui"
+import { CopilotSidebar } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
 import {
   AssistantMessage,
   ChatButton,
+  ChatHeader,
   ChatTextarea,
+  ChatWindow,
   MessagesContainer,
-  PopupHeader,
-  PopupWindow,
-  SidebarHeader,
-  SidebarWindow,
   UserMessage,
 } from "./components"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
-export type AiChatMode = "popup" | "sidebar"
-
 export type AiChatProviderProps = {
   enabled?: boolean
-  mode?: AiChatMode
   greeting?: string
 } & Pick<
   CopilotKitProps,
@@ -35,7 +30,6 @@ export type AiChatProviderProps = {
 
 const AiChatProviderCmp = ({
   enabled = false,
-  mode = "popup",
   greeting,
   children,
   agent,
@@ -44,12 +38,7 @@ const AiChatProviderCmp = ({
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
-    <AiChatStateProvider
-      enabled={enabled}
-      initialMode={mode}
-      greeting={greeting}
-      agent={agent}
-    >
+    <AiChatStateProvider enabled={enabled} greeting={greeting} agent={agent}>
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
   )
@@ -69,36 +58,21 @@ const AiChatKitWrapper = ({
 }
 
 const AiChatCmp = () => {
-  const { enabled, mode, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen } = useAiChat()
 
-  if (!enabled) {
+  if (!enabled || !open) {
     return null
   }
 
-  return mode === "sidebar" ? (
+  return (
     <CopilotSidebar
       className="h-full py-1 xs:pr-1"
-      defaultOpen={open}
+      defaultOpen
       onSetOpen={(open) => {
         setOpen(open)
       }}
-      Window={SidebarWindow}
-      Header={SidebarHeader}
-      Messages={MessagesContainer}
-      Button={ChatButton}
-      Input={ChatTextarea}
-      UserMessage={UserMessage}
-      AssistantMessage={AssistantMessage}
-    />
-  ) : (
-    <CopilotPopup
-      clickOutsideToClose={false}
-      defaultOpen={open}
-      onSetOpen={(open) => {
-        setOpen(open)
-      }}
-      Window={PopupWindow}
-      Header={PopupHeader}
+      Window={ChatWindow}
+      Header={ChatHeader}
       Messages={MessagesContainer}
       Button={ChatButton}
       Input={ChatTextarea}

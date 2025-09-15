@@ -13,6 +13,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
+import { Switch, useAiChat } from "@/experimental"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -128,6 +129,7 @@ export function PageHeader({
     },
     ...breadcrumbs,
   ]
+  const { enabled: hasAiEnabled, setOpen, open } = useAiChat()
   const hasStatus = statusTag && Object.keys(statusTag).length !== 0
   const hasNavigation = breadcrumbs.length > 0
   const hasActions = !embedded && actions.length > 0
@@ -280,6 +282,16 @@ export function PageHeader({
                 {actions.map((action, index) => (
                   <PageAction key={index} action={action} />
                 ))}
+              </div>
+            )}
+            {hasAiEnabled && (
+              <div>
+                <Switch
+                  onCheckedChange={(val) => {
+                    setOpen(val)
+                  }}
+                  checked={open}
+                />
               </div>
             )}
           </div>
