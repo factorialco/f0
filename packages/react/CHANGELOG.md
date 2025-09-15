@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.185.0](https://github.com/factorialco/f0/compare/f0-react-v1.184.0...f0-react-v1.185.0) (2025-09-15)
+
+
+### Features
+
+* **F0ChipList:** export F0ChipList component ([#2586](https://github.com/factorialco/f0/issues/2586)) ([6051524](https://github.com/factorialco/f0/commit/60515240d6650ea373cc993ea2872e0e69736a7b))
+
 ## [1.184.0](https://github.com/factorialco/f0/compare/f0-react-v1.183.0...f0-react-v1.184.0) (2025-09-15)
 
 
