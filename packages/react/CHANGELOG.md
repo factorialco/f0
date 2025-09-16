@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.190.0](https://github.com/factorialco/f0/compare/f0-react-v1.189.3...f0-react-v1.190.0) (2025-09-16)
+
+
+### Features
+
+* AiChat design updates ([#2597](https://github.com/factorialco/f0/issues/2597)) ([71cd534](https://github.com/factorialco/f0/commit/71cd534fd90ca64886f06ce4ecbff03e1ff50506))
+
 ## [1.189.3](https://github.com/factorialco/f0/compare/f0-react-v1.189.2...f0-react-v1.189.3) (2025-09-16)
 
 
