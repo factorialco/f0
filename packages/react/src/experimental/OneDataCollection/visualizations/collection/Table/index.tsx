@@ -459,9 +459,9 @@ export const TableCollection = <
             paginationInfo.hasMore && (
               <tr>
                 <td
-                  colSpan={columns.length + (source.selectable ? 1 : 0)}
+                  colSpan={columns.length + (source.selectable ? 1 : 0) + 1}
                   ref={loadingIndicatorRef}
-                  className="h-10 w-full"
+                  className="h-10"
                   aria-hidden="true"
                 ></td>
               </tr>
