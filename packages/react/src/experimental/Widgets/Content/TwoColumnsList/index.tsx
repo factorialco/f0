@@ -7,14 +7,14 @@ interface TwoColumnsItemType {
 
 interface TwoColumnsListType {
   title?: string
-  titleValue?: string | ReactNode
+  titleValue?: string
   list: TwoColumnsItemType[]
 }
 
 const Item = ({ title, info }: TwoColumnsItemType) => (
   <div className="flex items-center justify-between">
     <p className="flex text-f1-foreground-secondary">{title}</p>
-    <div className="basis-16 justify-self-end text-right font-medium">
+    <div className="max-w-32 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-right font-medium">
       {info}
     </div>
   </div>
