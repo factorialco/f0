@@ -101,7 +101,7 @@ export const MessagesContainer = ({
           {showWelcomeBlock && (
             <motion.div
               key="welcome"
-              className="flex flex-col px-2"
+              className="absolute top-1/2 flex translate-y-[-50%] flex-col px-2"
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
