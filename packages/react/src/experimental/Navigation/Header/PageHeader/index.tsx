@@ -283,11 +283,11 @@ export function PageHeader({
                 ))}
               </div>
             )}
-            <div>
-              <OneSwitch />
-            </div>
           </div>
         )}
+        <div>
+          <OneSwitch />
+        </div>
       </div>
     </div>
   )
