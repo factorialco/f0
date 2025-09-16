@@ -43,9 +43,8 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           animate={{ opacity: 1, width: 360 }}
           exit={{ opacity: 0, width: 0 }}
           transition={{
-            duration: 0.4,
+            duration: 0.3,
             ease: [0, 0, 0.1, 1],
-            delay: shouldPlayEntranceAnimation ? 0.1 : 0,
           }}
           onAnimationComplete={() => {
             if (shouldPlayEntranceAnimation) {
@@ -61,7 +60,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             transition={{
               duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
               ease: "easeOut",
-              delay: shouldPlayEntranceAnimation ? 0.4 : 0,
+              delay: shouldPlayEntranceAnimation ? 0.2 : 0,
             }}
           >
             <ChatWindowContext.Provider value={chatWindowContext}>
