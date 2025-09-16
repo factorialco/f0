@@ -8,20 +8,16 @@ import {
   useEffect,
   useState,
 } from "react"
-import { AiChatMode } from ".."
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 export interface AiChatState {
   greeting?: string
-  initialMode: AiChatMode
   enabled: boolean
   agent?: string
 }
 
 type AiChatProviderReturnValue = {
-  mode: AiChatMode
-  setMode: React.Dispatch<React.SetStateAction<AiChatMode>>
   enabled: boolean
   setEnabled: React.Dispatch<React.SetStateAction<boolean>>
   open: boolean
@@ -34,11 +30,9 @@ type AiChatProviderReturnValue = {
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
-  initialMode,
   agent: initialAgent,
   ...rest
 }) => {
-  const [mode, setMode] = useState<AiChatMode>(initialMode)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
@@ -66,8 +60,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     <AiChatStateContext.Provider
       value={{
         ...rest,
-        mode,
-        setMode,
         enabled: enabledInternal,
         setEnabled: setEnabledInternal,
         open,
@@ -89,8 +81,6 @@ export function useAiChat(): AiChatProviderReturnValue {
   if (context === null) {
     console.error("useAiChatLabels must be used within an AiChatLabelsProvider")
     return {
-      mode: "popup",
-      setMode: () => {},
       enabled: false,
       setEnabled: () => {},
       open: false,
