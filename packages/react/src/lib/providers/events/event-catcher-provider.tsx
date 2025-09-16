@@ -18,6 +18,7 @@ export interface EventCatcherProviderProps {
   children: ReactNode
   onEvent: EventCatcherFunction
   enabled?: boolean
+  // If not provided, all events will be caught
   catchEvents?: string[]
 }
 
@@ -25,7 +26,6 @@ export function F0EventCatcherProvider({
   children,
   onEvent,
   enabled = true,
-  // If not provided, all events will be caught
   catchEvents,
 }: EventCatcherProviderProps): JSX.Element {
   const isDev = useIsDev()
