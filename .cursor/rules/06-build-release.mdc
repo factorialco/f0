@@ -1,12 +1,15 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
+
 ---
-description: "Factorial One DS - Build and Release Instructions"
+
+description: "F0 DS - Build and Release Instructions"
 globs: ""
 alwaysApply: false
+
 ---
 
 # Build and Release

@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "mainEntryPointFilePath": "./dist/factorial-one.d.ts",
+  "mainEntryPointFilePath": "./dist/f0.d.ts",
   "apiReport": {
     "enabled": false
   },
@@ -9,7 +9,7 @@
   },
   "dtsRollup": {
     "enabled": true,
-    "untrimmedFilePath": "./dist/factorial-one.rollup.d.ts"
+    "untrimmedFilePath": "./dist/f0.rollup.d.ts"
   },
   "messages": {
     "extractorMessageReporting": {

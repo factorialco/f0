@@ -1,21 +1,21 @@
-# Factorial One Core
+# F0 Core
 
-Core tokens and utilities for the Factorial One Design System.
+Core tokens and utilities for the F0 Design System.
 
 ## Installation
 
 ```bash
-npm install @factorialco/factorial-one-core
+npm install @factorialco/f0-core
 # or
-yarn add @factorialco/factorial-one-core
+yarn add @factorialco/f0-core
 # or
-pnpm add @factorialco/factorial-one-core
+pnpm add @factorialco/f0-core
 ```
 
 ## Usage
 
 ```tsx
-import { semanticColors, spacing, fontSizes } from '@factorialco/factorial-one-core';
+import { semanticColors, spacing, fontSizes } from "@factorialco/f0-core"
 
 // Use tokens in your styles
 const styles = {
@@ -27,7 +27,7 @@ const styles = {
     fontSize: fontSizes.base,
     color: semanticColors.foreground.default.light,
   },
-};
+}
 ```
 
 ## Available Tokens
@@ -57,4 +57,4 @@ pnpm test
 
 ## License
 
-MIT 
+MIT

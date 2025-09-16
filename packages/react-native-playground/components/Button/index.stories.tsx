@@ -1,8 +1,8 @@
 import React from "react";
 import { ScrollView, View, Text } from "react-native";
 import type { StoryFn } from "@storybook/react";
-import { Button } from "@factorialco/factorial-one-react-native";
-import { AppIcons } from "@factorialco/factorial-one-react-native";
+import { Button } from "@factorialco/f0-react-native";
+import { AppIcons } from "@factorialco/f0-react-native";
 
 import {
   configureReanimatedLogger,

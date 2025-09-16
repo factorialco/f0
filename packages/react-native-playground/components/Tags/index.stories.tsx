@@ -4,7 +4,7 @@ import {
   dotTagColors,
   AppIcons,
   RawTag,
-} from "@factorialco/factorial-one-react-native";
+} from "@factorialco/f0-react-native";
 import type { Meta, StoryFn } from "@storybook/react";
 import { ScrollView, View, Text } from "react-native";
 

@@ -3,17 +3,17 @@
   "release-type": "node",
   "packages": {
     "packages/react": {
-      "pull-request-header": "🤖 Factorial-one React package stable release 🚀",
+      "pull-request-header": "🤖 F0 React package stable release 🚀",
       "pull-request-title-pattern": "chore${scope}: 🤖 React package release${component} ${version} 🚀",
       "group-pull-request-title-pattern": "chore${scope}: 🤖 React package release ${version} 🚀"
     },
     "packages/react-native": {
-      "pull-request-header": "🤖 Factorial-one React Native 📱 stable release 🚀",
+      "pull-request-header": "🤖 F0 React Native 📱 stable release 🚀",
       "pull-request-title-pattern": "chore${scope}: 🤖 React Native 📱 release${component} ${version}",
       "group-pull-request-title-pattern": "chore${scope}: 🤖 React Native 📱 release ${version}"
     },
     "packages/core": {
-      "pull-request-header": "🤖 Factorial-one Core stable release 🚀",
+      "pull-request-header": "🤖 F0 Core stable release 🚀",
       "pull-request-title-pattern": "chore${scope}: 🤖 Core 🎯 release${component} ${version}",
       "group-pull-request-title-pattern": "chore${scope}: 🤖 Core 🎯 release ${version}"
     }

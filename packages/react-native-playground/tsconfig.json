@@ -4,7 +4,7 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@factorialco/factorial-one-core": ["../core/src"],
+      "@factorialco/f0-core": ["../core/src"],
       "~/*": ["*"]
     }
   },

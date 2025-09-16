@@ -1,4 +1,4 @@
-import { DetailsItem } from "@factorialco/factorial-one-react-native";
+import { DetailsItem } from "@factorialco/f0-react-native";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { View } from "react-native";
 

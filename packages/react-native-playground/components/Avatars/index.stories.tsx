@@ -7,8 +7,8 @@ import {
   ModuleAvatar,
   ModuleIcons,
   PersonAvatar,
-} from "@factorialco/factorial-one-react-native";
-import { Check } from "@factorialco/factorial-one-react-native/src/icons/app";
+} from "@factorialco/f0-react-native";
+import { Check } from "@factorialco/f0-react-native/src/icons/app";
 import type { Meta, StoryFn } from "@storybook/react";
 import { icons } from "lucide-react-native";
 import { ScrollView, View, Text } from "react-native";
@@ -127,10 +127,10 @@ export const AvatarsShowCase = () => {
         CompanyAvatar
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
-        <CompanyAvatar name="Factorial One" />
+        <CompanyAvatar name="F0" />
         <CompanyAvatar
           src="https://avatars.githubusercontent.com/u/21041797?s=48&v=4"
-          name="Factorial One"
+          name="F0"
         />
       </View>
     </ScrollView>

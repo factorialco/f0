@@ -1,8 +1,8 @@
 {
-  "name": "@factorialco/factorial-one-react-native",
-  "version": "0.19.0",
+  "name": "@factorialco/f0-react-native",
+  "version": "0.20.0",
   "type": "module",
-  "description": "React Native components for Factorial One Design System",
+  "description": "React Native components for F0 Design System",
   "main": "src/index.ts",
   "module": "src/index.ts",
   "exports": {
@@ -52,7 +52,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@factorialco/factorial-one-core": "1.9.0",
+    "@factorialco/f0-core": "workspace:*",
     "clsx": "^2.1.1",
     "cva": "1.0.0-beta.3",
     "expo-clipboard": "^7.1.4",
@@ -79,6 +79,7 @@
     "react-native-svg": "^15.8.0",
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "babel-jest": "^29.7.0"
   }
 }

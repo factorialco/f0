@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, View, Text } from "react-native";
 import type { Meta, StoryObj } from "@storybook/react";
-import { EmojiAvatar } from "@factorialco/factorial-one-react-native";
+import { EmojiAvatar } from "@factorialco/f0-react-native";
 
 const meta = {
   title: "Components/Avatars/EmojiAvatar",

@@ -1,4 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { ChevronDown } from "@/icons/app"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
@@ -83,38 +84,52 @@ export const Trigger = ({
   const avatar =
     flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
 
+  const showAvatar = !hiddenAvatar && !!avatar
+
   return (
-    <InputField
-      label={label}
-      labelIcon={labelIcon}
-      icon={!!icon && !value ? icon : undefined}
-      error={error}
-      status={status}
-      hint={hint}
-      hideLabel={hideLabel}
-      maxLength={maxLength}
-      clearable={false}
-      value={value}
-      placeholder={placeholder}
-      disabled={disabled}
-      loading={loading}
-      required={required}
-      readonly={readonly}
-      avatar={hiddenAvatar ? undefined : avatar}
-      append={
-        append ?? (
-          <div className="h-[16px] w-[16px]">
-            <F0Icon
-              icon={ChevronDown}
-              size="sm"
-              color="default"
-              className="rounded-2xs p-0.5"
-            />
-          </div>
-        )
-      }
-    >
-      <input />
-    </InputField>
+    <>
+      <InputField
+        label={label}
+        labelIcon={labelIcon}
+        {...(showAvatar
+          ? {
+              avatar: {
+                type: "person",
+                firstName: avatar,
+                lastName: "",
+              },
+            }
+          : {
+              icon: !!icon && !value ? icon : undefined,
+            })}
+        error={error}
+        status={status}
+        hint={hint}
+        hideLabel={hideLabel}
+        maxLength={maxLength}
+        clearable={false}
+        value={value || ""}
+        placeholder={placeholder}
+        disabled={disabled}
+        loading={loading}
+        required={required}
+        readonly={readonly}
+        append={
+          append ?? (
+            <div className="h-[16px] w-[16px]">
+              <F0Icon
+                icon={ChevronDown}
+                size="sm"
+                color="default"
+                className="rounded-2xs p-0.5"
+              />
+            </div>
+          )
+        }
+        className="min-w-[100px]"
+      >
+        <OneEllipsis tag="span">{value || ""}</OneEllipsis>
+      </InputField>
+    </>
   )
 }

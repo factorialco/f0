@@ -1,4 +1,4 @@
-const { baseConfig } = require("@factorialco/factorial-one-core/tailwind");
+const { baseConfig } = require("@factorialco/f0-core/tailwind");
 const { hairlineWidth } = require("nativewind/theme");
 
 /** @type {import("tailwindcss").Config} */

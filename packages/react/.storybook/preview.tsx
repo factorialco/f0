@@ -89,7 +89,7 @@ const preview: Preview = {
       },
     },
     html: {
-      root: "#factorial-one-layout",
+      root: "#f0-layout",
       highlighter: {
         showLineNumbers: true, // default: false
         wrapLines: true, // default: true

@@ -40,8 +40,7 @@ to authenticate with external services.
 ### Required
 
 - `NPMJS_TOKEN`: The token to publish the package to the npmjs.com registry,
-  this token requires read and write access to the package
-  @factorialco/factorial-one
+  this token requires read and write access to the package @factorialco/f0
 - `RELEASE_PLEASE_GH_TOKEN`: This is a PAT (Personal Access Token) with **read
   and write access to code and pull requests**. This token is used by the
   `release-please` action approve the PRs and create the release notes (Why is

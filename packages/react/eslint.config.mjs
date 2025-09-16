@@ -117,17 +117,17 @@ export default [
       ],
     },
   },
-  // Restrict barrel imports for all files except exports.ts and factorial-one.ts
+  // Restrict barrel imports for all files except exports.ts and f0.ts
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
-    ignores: ["**/exports.ts", "**/factorial-one.ts"],
+    ignores: ["**/exports.ts", "**/f0.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: [
             {
-              name: "@/factorial-one",
+              name: "@/f0",
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
             },
@@ -135,12 +135,12 @@ export default [
           patterns: [
             {
               group: [
-                // factorial-one patterns (all variations)
-                "*factorial-one",
-                "*factorial-one.ts",
-                "*/factorial-one",
-                "**/factorial-one",
-                "**/factorial-one.ts",
+                // F0 patterns (all variations)
+                "*f0",
+                "*f0.ts",
+                "*/f0",
+                "**/f0",
+                "**/f0.ts",
                 // exports patterns (all variations)
                 "*exports",
                 "*exports.ts",
@@ -158,12 +158,12 @@ export default [
       ],
     },
   },
-  // Restrict barrel imports for exports.ts and factorial-one.ts files (allow exports.ts imports)
+  // Restrict barrel imports for exports.ts and f0.ts files (allow exports.ts imports)
   {
     files: [
       "**/exports.ts",
       "**/exports.tsx",
-      "**/factorial-one.ts",
+      "**/f0.ts",
       "**/experimental.ts",
     ],
     ignores: [],
@@ -173,7 +173,7 @@ export default [
         {
           paths: [
             {
-              name: "@/factorial-one",
+              name: "@/f0",
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
             },
@@ -181,12 +181,12 @@ export default [
           patterns: [
             {
               group: [
-                // factorial-one patterns (all variations)
-                "*factorial-one",
-                "*factorial-one.ts",
-                "*/factorial-one",
-                "**/factorial-one",
-                "**/factorial-one.ts",
+                // F0 patterns (all variations)
+                "*f0",
+                "*f0.ts",
+                "*/f0",
+                "**/f0",
+                "**/f0.ts",
               ],
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",

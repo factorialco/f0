@@ -35,6 +35,7 @@ import { isInfiniteScrollPagination, useData } from "../../../useData"
 import { useSelectable } from "../../../useSelectable"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
+import { useSticky } from "./useSticky"
 
 export type WithOptionalSorting<
   R extends RecordType,
@@ -262,6 +263,13 @@ export const TableCollection = <
 
   const skeletonColumns =
     columns.length + (source.itemActions ? 1 : 0) + (source.selectable ? 1 : 0)
+
+  const { getStickyPosition, checkColumnWidth } = useSticky(
+    frozenColumnsLeft,
+    columns,
+    !!source.selectable
+  )
+
   /*
    * Initial loading
    */
@@ -280,10 +288,8 @@ export const TableCollection = <
     })
   }
 
-  const checkColumnWidth = source.selectable ? 52 : 0
-
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="test flex h-full min-h-0 flex-col gap-4">
       <OneTable loading={isLoading}>
         <TableHeader sticky={true}>
           <TableRow>
@@ -315,18 +321,7 @@ export const TableCollection = <
                 )}
                 width={column.width}
                 align={column.align}
-                sticky={
-                  index < frozenColumnsLeft
-                    ? {
-                        left: columns
-                          .slice(0, Math.max(0, index))
-                          .reduce(
-                            (acc, column) => acc + (column.width ?? 0),
-                            checkColumnWidth
-                          ),
-                      }
-                    : undefined
-                }
+                sticky={getStickyPosition(index)}
                 {...column}
                 onSortClick={
                   sorting
@@ -464,9 +459,9 @@ export const TableCollection = <
             paginationInfo.hasMore && (
               <tr>
                 <td
-                  colSpan={columns.length + (source.selectable ? 1 : 0)}
+                  colSpan={columns.length + (source.selectable ? 1 : 0) + 1}
                   ref={loadingIndicatorRef}
-                  className="h-10 w-full"
+                  className="h-10"
                   aria-hidden="true"
                 ></td>
               </tr>
@@ -496,18 +491,7 @@ export const TableCollection = <
                   key={`summary-${String(column.label)}`}
                   firstCell={cellIndex === 0}
                   width={column.width}
-                  sticky={
-                    cellIndex < frozenColumnsLeft
-                      ? {
-                          left: columns
-                            .slice(0, Math.max(0, cellIndex))
-                            .reduce(
-                              (acc, column) => acc + (column.width ?? 0),
-                              checkColumnWidth
-                            ),
-                        }
-                      : undefined
-                  }
+                  sticky={getStickyPosition(cellIndex)}
                 >
                   {cellIndex === 0 &&
                   !source.selectable &&

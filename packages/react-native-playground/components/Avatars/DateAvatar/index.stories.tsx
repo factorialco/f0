@@ -1,4 +1,4 @@
-import { DateAvatar } from "@factorialco/factorial-one-react-native";
+import { DateAvatar } from "@factorialco/f0-react-native";
 import type { Meta, StoryObj } from "@storybook/react";
 import { View } from "react-native";
 

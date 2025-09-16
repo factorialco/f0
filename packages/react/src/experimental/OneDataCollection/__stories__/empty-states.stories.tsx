@@ -47,6 +47,10 @@ const BaseExampleComponent = ({
     dataAdapter,
     currentFilters,
     sortings,
+    search: {
+      enabled: true,
+      sync: true,
+    },
   })
 
   const mockVisualizations = getMockVisualizations()

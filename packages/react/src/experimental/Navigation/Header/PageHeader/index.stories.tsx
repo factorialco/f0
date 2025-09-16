@@ -271,6 +271,23 @@ export const WithProductUpdate: Story = {
         },
         products: [
           {
+            title: "Factorial Next: AI Edition 2025",
+            description:
+              "Join the event to discover ONE, our most important launch yet. Live on 7 Oct at 16:30 (Spain)",
+            onClick: () => {
+              alert("onClick")
+            },
+            onClose: () => {
+              alert("onClose")
+            },
+            module: "discover",
+            dismissable: false,
+            trackVisibility: (open) => {
+              console.log("trackOpenChange", open)
+            },
+            type: "one-campaign",
+          },
+          {
             title: "Benefits",
             description:
               "Improve your team’s salary without impacting your budget through flexible compensation.",

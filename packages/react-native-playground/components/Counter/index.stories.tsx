@@ -1,5 +1,5 @@
 import type { StoryFn } from "@storybook/react";
-import { Counter } from "@factorialco/factorial-one-react-native";
+import { Counter } from "@factorialco/f0-react-native";
 import { ScrollView, View, Text } from "react-native";
 
 const meta = {
