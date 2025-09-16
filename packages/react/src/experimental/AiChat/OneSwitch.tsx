@@ -1,6 +1,7 @@
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import * as SwitchPrimitive from "@radix-ui/react-switch"
+import { useState } from "react"
 import OneIcon from "./OneIcon"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
@@ -10,6 +11,7 @@ export const OneSwitch = ({
 }: React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
+  const [isHover, setIsHover] = useState(false)
 
   if (!enabled) {
     return null
@@ -32,14 +34,20 @@ export const OneSwitch = ({
           className
         )}
         disabled={disabled}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
       >
         <SwitchPrimitive.Thumb
           className={cn(
-            "block h-[1.375rem] w-[1.375rem] translate-x-[0.25rem] rounded-full bg-f1-background transition-transform duration-300 group-hover:bg-gradient-to-r group-hover:from-[hsl(229,57%,76%)] group-hover:via-[hsl(348,80%,50%)] group-hover:to-[hsl(18,80%,50%)] *:group-hover:hidden data-[state=checked]:translate-x-[1.25rem] data-[state=checked]:bg-transparent"
+            "block h-[1.375rem] w-[1.375rem] translate-x-[5px] rounded-full transition-transform duration-300 data-[state=checked]:translate-x-[21px]"
           )}
         >
           <div>
-            <OneIcon size="sm" background={open ? "white" : undefined} />
+            <OneIcon
+              size="sm"
+              background={open ? "white" : undefined}
+              hover={isHover}
+            />
           </div>
         </SwitchPrimitive.Thumb>
       </SwitchPrimitive.Root>
