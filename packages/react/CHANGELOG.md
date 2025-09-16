@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.187.1](https://github.com/factorialco/f0/compare/f0-react-v1.187.0...f0-react-v1.187.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **datacollection:** one col sticky ([#2592](https://github.com/factorialco/f0/issues/2592)) ([beec2da](https://github.com/factorialco/f0/commit/beec2daaa3463a02d4f10efbc7d06d3b1917e2d1))
+
 ## [1.187.0](https://github.com/factorialco/f0/compare/f0-react-v1.186.2...f0-react-v1.187.0) (2025-09-16)
 
 
