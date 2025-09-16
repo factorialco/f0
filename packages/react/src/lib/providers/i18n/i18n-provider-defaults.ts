@@ -177,8 +177,6 @@ export const defaultTranslations = {
   },
   notifications: "Notifications",
   ai: {
-    expandChat: "Expand chat",
-    minimizeChat: "Minimize chat window",
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
