@@ -179,7 +179,8 @@ export const defaultTranslations = {
   ai: {
     expandChat: "Expand chat",
     minimizeChat: "Minimize chat window",
-    openChat: "Open Chat",
+    openChat: "Open Chat with One AI",
+    closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
     welcome: "I'm One. Ask or make anything.",
     initialMessage: "How can I help you today?",

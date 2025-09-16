@@ -6,12 +6,14 @@ import { Ref, forwardRef, useId } from "react"
 
 interface OneIconProps extends SVGProps<SVGSVGElement> {
   spin?: boolean
-  size?: "md" | "lg"
+  background?: string
+  size?: "sm" | "md" | "lg"
 }
 
 const sizeVariants = cva({
   variants: {
     size: {
+      sm: "h-[1.375rem] w-[1.375rem]",
       md: "h-8 w-8",
       lg: "h-10 w-10",
     },
@@ -51,7 +53,7 @@ const pieces = [
 ]
 
 const OneIcon = (
-  { spin = false, size = "md", ...svgProps }: OneIconProps,
+  { spin = false, size = "md", background, ...svgProps }: OneIconProps,
   ref: Ref<SVGSVGElement>
 ) => {
   const clipPathId = useId()
@@ -69,6 +71,7 @@ const OneIcon = (
     <div
       className={cn(sizeVariants({ size }), className)}
       style={{
+        background: "transparent",
         perspective: spin ? "10px" : undefined,
         transformStyle: spin ? "preserve-3d" : undefined,
       }}
@@ -77,19 +80,22 @@ const OneIcon = (
         width="100%"
         height="100%"
         viewBox="0 0 32 32"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
         ref={ref}
         animate={{
           "--gradient-angle": ["0deg", "360deg"],
         }}
-        transition={{
-          "--gradient-angle": {
-            duration: 6,
-            ease: "linear",
-            repeat: Infinity,
-          },
-        }}
+        transition={
+          !background
+            ? {
+                "--gradient-angle": {
+                  duration: 6,
+                  ease: "linear",
+                  repeat: Infinity,
+                },
+              }
+            : undefined
+        }
         style={
           {
             "--gradient-angle": "0deg",
@@ -148,7 +154,9 @@ const OneIcon = (
               style={{
                 width: "100%",
                 height: "100%",
-                background: `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
+                background:
+                  background ??
+                  `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
               }}
             />
           </motion.foreignObject>
