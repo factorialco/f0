@@ -2,7 +2,7 @@ import { useLayout } from "@/components/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { F0Icon } from "../../components/F0Icon"
 import { Spinner } from "../../icons/app"
 
@@ -33,6 +33,7 @@ import type {
 } from "./types"
 export * from "./navigationFilters/types"
 
+import { useEventEmitter } from "./useEventEmitter"
 import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
 
@@ -142,6 +143,16 @@ const OneDataCollectionComp = <
     sortings,
   } = source
   const [currentVisualization, setCurrentVisualization] = useState(0)
+
+  const defaultSortings = useRef(currentSortings)
+
+  const { emitSortingChange } = useEventEmitter<Sortings>({
+    defaultSorting: defaultSortings.current,
+  })
+
+  useEffect(() => {
+    emitSortingChange(currentSortings)
+  }, [emitSortingChange, currentSortings])
 
   const primaryActionItem = useMemo(
     () => primaryActions && primaryActions(),
@@ -263,20 +274,17 @@ const OneDataCollectionComp = <
     [search, visualizations]
   )
 
-  const { emptyState, setEmptyStateType: setEmptyStateType } = useEmptyState(
-    emptyStates,
-    {
-      retry: () => {
-        setEmptyStateType(false)
-        setCurrentFilters({ ...currentFilters })
-      },
-      clearFilters: () => {
-        setEmptyStateType(false)
-        setCurrentFilters({})
-        setCurrentSearch(undefined)
-      },
-    }
-  )
+  const { emptyState, setEmptyStateType } = useEmptyState(emptyStates, {
+    retry: () => {
+      setEmptyStateType(false)
+      setCurrentFilters({ ...currentFilters })
+    },
+    clearFilters: () => {
+      setEmptyStateType(false)
+      setCurrentFilters({})
+      setCurrentSearch(undefined)
+    },
+  })
 
   const getEmptyStateType = (
     totalItems: number | undefined,
@@ -325,7 +333,7 @@ const OneDataCollectionComp = <
   return (
     <div
       className={cn(
-        "flex flex-col gap-4",
+        "flex w-full flex-col gap-4",
         layout === "standard" && "-mx-6",
         fullHeight && "h-full"
       )}

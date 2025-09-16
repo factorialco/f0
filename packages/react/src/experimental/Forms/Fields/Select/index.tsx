@@ -1,5 +1,6 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 
 import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
@@ -148,13 +149,13 @@ const SelectValue = forwardRef<
   { item: SelectItemObject<string> }
 >(function SelectValue({ item }, ref) {
   return (
-    <div className="flex items-center gap-1.5" ref={ref}>
+    <div className="flex min-w-0 flex-1 items-center gap-1.5" ref={ref}>
       {item.icon && (
         <div className="h-5 shrink-0 text-f1-icon">
           <F0Icon icon={item.icon} />
         </div>
       )}
-      {item.label}
+      <OneEllipsis tag="span">{item.label}</OneEllipsis>
     </div>
   )
 })

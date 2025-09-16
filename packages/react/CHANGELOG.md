@@ -1,5 +1,89 @@
 # Changelog
 
+## [1.189.2](https://github.com/factorialco/f0/compare/f0-react-v1.189.1...f0-react-v1.189.2) (2025-09-16)
+
+
+### Bug Fixes
+
+* **datacollection:** clear search on clear from empty state ([#2565](https://github.com/factorialco/f0/issues/2565)) ([fe6d273](https://github.com/factorialco/f0/commit/fe6d273a27c25409d9f5d0c3a4a9566be71997e5))
+
+## [1.189.1](https://github.com/factorialco/f0/compare/f0-react-v1.189.0...f0-react-v1.189.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* emit preset event with filter values ([#2603](https://github.com/factorialco/f0/issues/2603)) ([681dc3d](https://github.com/factorialco/f0/commit/681dc3d384cdad33b6f9372acf401e068658a4a3))
+
+## [1.189.0](https://github.com/factorialco/f0/compare/f0-react-v1.188.1...f0-react-v1.189.0) (2025-09-16)
+
+
+### Features
+
+* product card one campaign ([#2594](https://github.com/factorialco/f0/issues/2594)) ([1e5999d](https://github.com/factorialco/f0/commit/1e5999df5ea724c4c4651c93e6712afecc52257d))
+
+## [1.188.1](https://github.com/factorialco/f0/compare/f0-react-v1.188.0...f0-react-v1.188.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* add missing export for event catcher provider ([#2601](https://github.com/factorialco/f0/issues/2601)) ([3f3ee2a](https://github.com/factorialco/f0/commit/3f3ee2a75b012badfa18ef0035cfc87b39cb30b5))
+
+## [1.188.0](https://github.com/factorialco/f0/compare/f0-react-v1.187.1...f0-react-v1.188.0) (2025-09-16)
+
+
+### Features
+
+* add tracking to data collection ([#2424](https://github.com/factorialco/f0/issues/2424)) ([95df1d8](https://github.com/factorialco/f0/commit/95df1d893c29c8805d503cbdb828128dd16d49a8))
+
+## [1.187.1](https://github.com/factorialco/f0/compare/f0-react-v1.187.0...f0-react-v1.187.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **datacollection:** one col sticky ([#2592](https://github.com/factorialco/f0/issues/2592)) ([beec2da](https://github.com/factorialco/f0/commit/beec2daaa3463a02d4f10efbc7d06d3b1917e2d1))
+
+## [1.187.0](https://github.com/factorialco/f0/compare/f0-react-v1.186.2...f0-react-v1.187.0) (2025-09-16)
+
+
+### Features
+
+* add value to two-columns-list title ([#2506](https://github.com/factorialco/f0/issues/2506)) ([7b63287](https://github.com/factorialco/f0/commit/7b632871fa248ed10b48bc0f816418935b46bd8c))
+
+## [1.186.2](https://github.com/factorialco/f0/compare/f0-react-v1.186.1...f0-react-v1.186.2) (2025-09-15)
+
+
+### Bug Fixes
+
+* **CommunityPost:** fix comment button growing unexpectedly ([#2563](https://github.com/factorialco/f0/issues/2563)) ([f9d1902](https://github.com/factorialco/f0/commit/f9d1902aebeb7d8e8a673861b518010bf7a322d9))
+
+## [1.186.1](https://github.com/factorialco/f0/compare/f0-react-v1.186.0...f0-react-v1.186.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* **AvatarList:** correct gap between avatars ([#2562](https://github.com/factorialco/f0/issues/2562)) ([2f21bd9](https://github.com/factorialco/f0/commit/2f21bd9818cbd5495bf6fcfd7867e6f95965f76b))
+
+## [1.186.0](https://github.com/factorialco/f0/compare/f0-react-v1.185.0...f0-react-v1.186.0) (2025-09-15)
+
+
+### Features
+
+* Select ellipsis in label ([#2590](https://github.com/factorialco/f0/issues/2590)) ([799ed4b](https://github.com/factorialco/f0/commit/799ed4b0e4e6150a244e69df50dba368b3764780))
+
+## [1.185.0](https://github.com/factorialco/f0/compare/f0-react-v1.184.0...f0-react-v1.185.0) (2025-09-15)
+
+
+### Features
+
+* **F0ChipList:** export F0ChipList component ([#2586](https://github.com/factorialco/f0/issues/2586)) ([6051524](https://github.com/factorialco/f0/commit/60515240d6650ea373cc993ea2872e0e69736a7b))
+
+## [1.184.0](https://github.com/factorialco/f0/compare/f0-react-v1.183.0...f0-react-v1.184.0) (2025-09-15)
+
+
+### Features
+
+* datenavigator show compare to date in navigation button ([#2547](https://github.com/factorialco/f0/issues/2547)) ([455508f](https://github.com/factorialco/f0/commit/455508f07dcf6f2ddbc2048121a804b125d2b520))
+
 ## [1.183.0](https://github.com/factorialco/f0/compare/f0-react-v1.182.1...f0-react-v1.183.0) (2025-09-12)
 
 
