@@ -87986,7 +87986,9 @@ const BPt = ({ text: e }) => /* @__PURE__ */ b(
                       "div",
                       {
                         className: ue(
-                          "pointer-events-none my-auto flex h-5 shrink-0 gap-0.5 pl-2"
+                          "align-start pointer-events-none flex min-h-5 shrink-0 gap-0.5 self-start pl-2",
+                          f === "sm" && "pt-[5px]",
+                          f === "md" && "pt-[9px]"
                         ),
                         children: [
                           h && /* @__PURE__ */ b(
