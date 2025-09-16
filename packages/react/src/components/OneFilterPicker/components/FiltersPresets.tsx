@@ -6,7 +6,7 @@ import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
   value: FiltersState<Filters>
-  onPresetsChange: (filter: FiltersState<Filters>, label: string) => void
+  onPresetsChange: (filter: FiltersState<Filters>) => void
   presets: PresetsDefinition<Filters>
 }
 
@@ -29,8 +29,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         selected={isSelected}
         onClick={() =>
           onPresetsChange?.(
-            isSelected ? ({} as FiltersState<Filters>) : preset.filter,
-            preset.label
+            isSelected ? ({} as FiltersState<Filters>) : preset.filter
           )
         }
         data-visible={isVisible}
@@ -55,8 +54,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         )}
         onClick={() =>
           onPresetsChange?.(
-            isSelected ? ({} as FiltersState<Filters>) : preset.filter,
-            preset.label
+            isSelected ? ({} as FiltersState<Filters>) : preset.filter
           )
         }
         data-visible={true}
