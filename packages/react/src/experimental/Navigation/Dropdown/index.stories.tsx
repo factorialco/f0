@@ -46,18 +46,6 @@ export const Default: Story = {
       },
     ],
   },
-  decorators: [
-    (Story) => (
-      <div
-        className="h-full w-full"
-        onClick={() => console.log("test onClick")}
-        onMouseUp={() => console.log("test onMouseUp")}
-        onMouseDown={() => console.log("test onMouseDown")}
-      >
-        <Story />
-      </div>
-    ),
-  ],
 }
 
 export const PlayTest: Story = {

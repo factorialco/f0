@@ -2,7 +2,7 @@ import { useLayout } from "@/components/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
 import { F0Icon } from "../../components/F0Icon"
 import { Spinner } from "../../icons/app"
@@ -43,8 +43,10 @@ import type {
 import { DataError } from "./useData"
 import { CustomEmptyStates, useEmptyState } from "./useEmptyState"
 
+import { useEventEmitter } from "./useEventEmitter"
 import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
+
 /**
  * A hook that manages data source state and filtering capabilities for a collection.
  * It creates and returns a reusable data source that can be shared across different
@@ -318,6 +320,16 @@ const OneDataCollectionComp = <
   } = source
   const [currentVisualization, setCurrentVisualization] = useState(0)
 
+  const defaultSortings = useRef(currentSortings)
+
+  const { emitSortingChange } = useEventEmitter<Sortings>({
+    defaultSorting: defaultSortings.current,
+  })
+
+  useEffect(() => {
+    emitSortingChange(currentSortings)
+  }, [emitSortingChange, currentSortings])
+
   const primaryActionItem = useMemo(
     () => primaryActions && primaryActions(),
     [primaryActions]
@@ -492,7 +504,7 @@ const OneDataCollectionComp = <
   return (
     <div
       className={cn(
-        "flex flex-col gap-4",
+        "flex w-full flex-col gap-4",
         layout === "standard" && "-mx-6",
         fullHeight && "h-full"
       )}

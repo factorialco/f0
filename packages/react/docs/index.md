@@ -1,7 +1,7 @@
 # f0
 
-`f0` is a set of component, hooks, utilities used as foundations for
-the factorial's app
+`f0` is a set of component, hooks, utilities used as foundations for the
+factorial's app
 
 - [Getting started](getting-started.md)
 - Development

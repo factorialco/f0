@@ -108,29 +108,23 @@ export function DropdownInternal({
           />
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align={align}
-        onClick={(e) => {
-          console.log("test onClick")
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onMouseDown={(e) => {
-          console.log("test onMouseDown")
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onMouseUp={(e) => {
-          console.log("test onMouseUp")
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
+      <DropdownMenuContent align={align}>
         {items.map((item, index) =>
           item.type === "separator" ? (
             <DropdownMenuSeparator key={index} />
           ) : (
-            <DropdownItem key={index} item={item} />
+            <DropdownItem
+              key={index}
+              item={{
+                ...item,
+                onClick: () => {
+                  // Seems to be a bug on radi-ui that mix the animation events, and if the dropdown triggers a dialog, the dialog will be closed before the dropdown is closed
+                  setTimeout(() => {
+                    item.onClick?.()
+                  }, 200)
+                },
+              }}
+            />
           )
         )}
       </DropdownMenuContent>
