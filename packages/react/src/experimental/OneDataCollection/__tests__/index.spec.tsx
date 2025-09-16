@@ -1044,12 +1044,14 @@ describe("Collections", () => {
     await userEvent.click(editButton)
 
     // Verify our handler was called with the correct item
-    expect(handleEdit).toHaveBeenCalledTimes(1)
-    expect(handleEdit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ...mockData[0],
-        [GROUP_ID_SYMBOL]: undefined,
-      })
+    await waitFor(() => expect(handleEdit).toHaveBeenCalledTimes(1))
+    await waitFor(() =>
+      expect(handleEdit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...mockData[0],
+          [GROUP_ID_SYMBOL]: undefined,
+        })
+      )
     )
   })
 

@@ -87,7 +87,9 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
             ) : (
               <button
                 key={item.label}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
                   item.onClick?.()
                   setOpen(false)
                 }}
