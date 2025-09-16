@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.189.3](https://github.com/factorialco/f0/compare/f0-react-v1.189.2...f0-react-v1.189.3) (2025-09-16)
+
+
+### Bug Fixes
+
+* dropdown item propagation ([#2589](https://github.com/factorialco/f0/issues/2589)) ([4d8805f](https://github.com/factorialco/f0/commit/4d8805fac05df2ca61194ee84017b56264152bb9))
+
 ## [1.189.2](https://github.com/factorialco/f0/compare/f0-react-v1.189.1...f0-react-v1.189.2) (2025-09-16)
 
 
