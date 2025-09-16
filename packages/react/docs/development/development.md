@@ -1,6 +1,5 @@
 # Development
 
-
 ## Install nodejs
 
 The recommended approach is to use the `asdf` dependency manager. On MacOS +
@@ -44,5 +43,6 @@ $ npm start
 - Go to the `f0` folder: `cd f0`
 - Run `pnpm link --global` to add the package to the local links
 - Go to your package: `cd factorial/frontend`
-- Run `pnpm link --global @factorialco/f0` to use the local version of the package
+- Run `pnpm link --global @factorialco/f0` to use the local version of the
+  package
 - NOTE: Remember to run `pnpm i` to install the dependencies

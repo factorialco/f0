@@ -7,7 +7,7 @@ import { Check } from "@factorialco/f0-react-native/src/icons/app";
 export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const;
 
 const PersonAvatarExample = (
-  props: PersonAvatarProps & { hasBadge: boolean }
+  props: PersonAvatarProps & { hasBadge: boolean },
 ) => {
   return <PersonAvatar {...props} />;
 };

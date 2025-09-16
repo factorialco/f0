@@ -107,7 +107,7 @@ export const IconsShowcase: Story = {
     const filteredIcons = (
       selectedType === "app" ? appIconList : moduleIconList
     ).filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     const TabButton = ({
@@ -157,7 +157,7 @@ export const IconsShowcase: Story = {
               label="App Icons"
               count={
                 appIconList.filter((item) =>
-                  item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  item.name.toLowerCase().includes(searchTerm.toLowerCase()),
                 ).length
               }
             />
@@ -166,7 +166,7 @@ export const IconsShowcase: Story = {
               label="Module Icons"
               count={
                 moduleIconList.filter((item) =>
-                  item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  item.name.toLowerCase().includes(searchTerm.toLowerCase()),
                 ).length
               }
             />
