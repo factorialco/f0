@@ -32,13 +32,15 @@ export function F0EventCatcherProvider({
 
   const handleEvent = useCallback<EventCatcherFunction>(
     (eventName, params) => {
-      if (enabled && (!catchEvents || catchEvents.includes(eventName))) {
-        if (isDev) {
-          console.log("Event caught:", eventName, params)
-        }
-
-        onEvent(eventName, params)
+      if (!enabled || (catchEvents && !catchEvents.includes(eventName))) {
+        return
       }
+
+      if (isDev) {
+        console.log("Event caught:", eventName, params)
+      }
+
+      onEvent(eventName, params)
     },
     [enabled, catchEvents, onEvent, isDev]
   )

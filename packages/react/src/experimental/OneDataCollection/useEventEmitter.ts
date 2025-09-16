@@ -3,10 +3,10 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
-import { EventScalar, useEventCatcher } from "../../lib/providers/events"
+import { EventScalar, useF0EventCatcher } from "../../lib/providers/events"
 import { SortingsDefinition, SortingsState } from "./sortings"
 
-type UseTrackingParams<Sortings extends SortingsDefinition> = {
+type UseEventEmitterParams<Sortings extends SortingsDefinition> = {
   defaultFilters?: FiltersState<FiltersDefinition>
   defaultSorting?: SortingsState<Sortings>
 }
@@ -20,20 +20,20 @@ const isScalar = (value: unknown): value is EventScalar => {
   )
 }
 
-export const useTracking = <Sortings extends SortingsDefinition>({
+export const useEventEmitter = <Sortings extends SortingsDefinition>({
   defaultFilters,
   defaultSorting,
-}: UseTrackingParams<Sortings>) => {
+}: UseEventEmitterParams<Sortings>) => {
   const latestFilters = useRef<
-    UseTrackingParams<Sortings>["defaultFilters"] | undefined
+    UseEventEmitterParams<Sortings>["defaultFilters"] | undefined
   >(defaultFilters)
   const latestSortings = useRef<
-    UseTrackingParams<Sortings>["defaultSorting"] | undefined
+    UseEventEmitterParams<Sortings>["defaultSorting"] | undefined
   >(defaultSorting)
 
-  const { onEvent } = useEventCatcher()
+  const { onEvent } = useF0EventCatcher()
 
-  const trackFilterChange = useCallback(
+  const emitFilterChange = useCallback(
     (filters: FiltersState<FiltersDefinition>) => {
       const newFilter = Object.entries(filters ?? {}).find(
         ([field, value]) => latestFilters.current?.[field] !== value
@@ -51,7 +51,7 @@ export const useTracking = <Sortings extends SortingsDefinition>({
     [onEvent]
   )
 
-  const trackSortingChange = useCallback(
+  const emitSortingChange = useCallback(
     (sortings: SortingsState<Sortings>) => {
       if (
         (latestSortings?.current?.field === sortings?.field &&
@@ -71,7 +71,7 @@ export const useTracking = <Sortings extends SortingsDefinition>({
     [onEvent]
   )
 
-  const trackPresetClick = useCallback(
+  const emitPresetClick = useCallback(
     (preset: string) => {
       onEvent("datacollection.preset-click", {
         name: preset,
@@ -81,8 +81,8 @@ export const useTracking = <Sortings extends SortingsDefinition>({
   )
 
   return {
-    trackFilterChange,
-    trackSortingChange,
-    trackPresetClick,
+    emitFilterChange,
+    emitSortingChange,
+    emitPresetClick,
   }
 }

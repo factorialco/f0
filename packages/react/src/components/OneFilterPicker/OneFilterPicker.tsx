@@ -5,7 +5,7 @@ import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersP
 import { FiltersContext } from "./context"
 import { PresetsDefinition } from "./types"
 
-import { useTracking } from "@/experimental/OneDataCollection/useTracking"
+import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
 import { cn } from "@/lib/utils"
 import type { FiltersDefinition, FiltersState } from "./types"
 
@@ -94,7 +94,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
 }: OneFilterPickerRootProps<Definition>) => {
   const defaultFilters = useRef(value)
 
-  const { trackFilterChange, trackPresetClick } = useTracking({
+  const { emitFilterChange, emitPresetClick } = useEventEmitter({
     defaultFilters: defaultFilters.current,
   })
 
@@ -131,8 +131,8 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
           setFiltersValue(value as FiltersState<Definition>),
         isFiltersOpen,
         setIsFiltersOpen,
-        trackFilterChange,
-        trackPresetClick,
+        emitFilterChange,
+        emitPresetClick,
       }}
     >
       {children}
@@ -152,7 +152,7 @@ const FiltersControls = () => {
     setIsFiltersOpen,
     setFiltersValue,
     presets,
-    trackFilterChange,
+    emitFilterChange,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -162,7 +162,7 @@ const FiltersControls = () => {
     : undefined
 
   const handleFilterChange = (filters: FiltersState<FiltersDefinition>) => {
-    trackFilterChange(filters)
+    emitFilterChange(filters)
     setFiltersValue(filters)
   }
 
@@ -192,14 +192,14 @@ FiltersControls.displayName = "OneFilterPicker.Controls"
  * Filter presets
  */
 const FiltersPresets = () => {
-  const { presets, value, setFiltersValue, trackPresetClick } =
+  const { presets, value, setFiltersValue, emitPresetClick } =
     useContext(FiltersContext)
 
   const handlePresetClick = (
     presetFilter: FiltersState<FiltersDefinition>,
     presetLabel: string
   ) => {
-    trackPresetClick(presetLabel)
+    emitPresetClick(presetLabel)
     setFiltersValue(presetFilter)
   }
 

@@ -43,7 +43,7 @@ import type {
 import { DataError } from "./useData"
 import { CustomEmptyStates, useEmptyState } from "./useEmptyState"
 
-import { useTracking } from "./useTracking"
+import { useEventEmitter } from "./useEventEmitter"
 import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
 
@@ -318,13 +318,13 @@ const OneDataCollectionComp = <
 
   const defaultSortings = useRef(currentSortings)
 
-  const { trackSortingChange } = useTracking<Sortings>({
+  const { emitSortingChange } = useEventEmitter<Sortings>({
     defaultSorting: defaultSortings.current,
   })
 
   useEffect(() => {
-    trackSortingChange(currentSortings)
-  }, [trackSortingChange, currentSortings])
+    emitSortingChange(currentSortings)
+  }, [emitSortingChange, currentSortings])
 
   const primaryActionItem = useMemo(
     () => primaryActions && primaryActions(),
