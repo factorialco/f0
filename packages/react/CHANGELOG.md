@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.189.0](https://github.com/factorialco/f0/compare/f0-react-v1.188.1...f0-react-v1.189.0) (2025-09-16)
+
+
+### Features
+
+* product card one campaign ([#2594](https://github.com/factorialco/f0/issues/2594)) ([1e5999d](https://github.com/factorialco/f0/commit/1e5999df5ea724c4c4651c93e6712afecc52257d))
+
 ## [1.188.1](https://github.com/factorialco/f0/compare/f0-react-v1.188.0...f0-react-v1.188.1) (2025-09-16)
 
 
