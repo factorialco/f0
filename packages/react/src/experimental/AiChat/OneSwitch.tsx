@@ -40,7 +40,7 @@ export const OneSwitch = ({
       >
         <SwitchPrimitive.Thumb
           className={cn(
-            "block h-[1.375rem] w-[1.375rem] translate-x-[5px] rounded-full transition-transform duration-300 data-[state=checked]:translate-x-[21px]"
+            "block h-[1.375rem] w-[1.375rem] translate-x-[0.3125rem] rounded-full transition-transform duration-300 data-[state=checked]:translate-x-[1.3125rem]"
           )}
           style={{
             transitionTimingFunction: "cubic-bezier(0.175,0.885,0.32,1.5)",
