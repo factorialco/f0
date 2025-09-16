@@ -1,4 +1,4 @@
-import { useChatContext, type WindowProps } from "@copilotkit/react-ui"
+import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { createContext, useContext, useMemo, useState } from "react"
 import { useAiChat } from "../providers/AiChatStateProvider"
@@ -18,8 +18,7 @@ const ChatWindowContext = createContext<ChatWindowContextType>({
 export const useChatWindowContext = () => useContext(ChatWindowContext)
 
 export const SidebarWindow = ({ children }: WindowProps) => {
-  const { open } = useChatContext()
-  const { shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation } =
+  const { open, shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation } =
     useAiChat()
   const [messageContainerScrollTop, setMessageContainerScrollTop] = useState(0)
   const chatWindowContext = useMemo(
@@ -35,21 +34,40 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     <AnimatePresence>
       {open && (
         <motion.div
+          key="chat-window"
           aria-hidden={!open}
-          className="relative flex h-full w-[360px] flex-col overflow-hidden bg-f1-special-page shadow xs:rounded-xl"
-          initial={shouldPlayEntranceAnimation ? { opacity: 0, x: 100 } : false}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 100 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="relative flex h-full max-w-[360px] flex-col overflow-hidden bg-f1-special-page shadow xs:rounded-xl"
+          initial={
+            shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
+          }
+          animate={{ opacity: 1, width: 360 }}
+          exit={{ opacity: 0, width: 0 }}
+          transition={{
+            duration: 0.4,
+            ease: [0, 0, 0.1, 1],
+            delay: shouldPlayEntranceAnimation ? 0.1 : 0,
+          }}
           onAnimationComplete={() => {
             if (shouldPlayEntranceAnimation) {
               setShouldPlayEntranceAnimation(false)
             }
           }}
         >
-          <ChatWindowContext.Provider value={chatWindowContext}>
-            {children}
-          </ChatWindowContext.Provider>
+          <motion.div
+            className="relative flex h-full w-[360px] flex-col overflow-x-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+              ease: "easeOut",
+              delay: shouldPlayEntranceAnimation ? 0.4 : 0,
+            }}
+          >
+            <ChatWindowContext.Provider value={chatWindowContext}>
+              {children}
+            </ChatWindowContext.Provider>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

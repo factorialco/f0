@@ -4,10 +4,12 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
+import { useAiChat } from "../providers/AiChatStateProvider"
 import { useChatWindowContext } from "./ChatWindow"
 
 export const ChatHeader = (props: HeaderProps) => {
-  const { setOpen, labels } = useChatContext()
+  const { labels } = useChatContext()
+  const { setOpen } = useAiChat()
   const { messageContainerScrollTop } = useChatWindowContext()
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"

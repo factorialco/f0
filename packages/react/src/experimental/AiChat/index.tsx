@@ -60,16 +60,16 @@ const AiChatKitWrapper = ({
 const AiChatCmp = () => {
   const { enabled, open, setOpen } = useAiChat()
 
-  if (!enabled || !open) {
+  if (!enabled) {
     return null
   }
 
   return (
     <CopilotSidebar
       className="h-full py-1 xs:pr-1"
-      defaultOpen
-      onSetOpen={(open) => {
-        setOpen(open)
+      defaultOpen={open}
+      onSetOpen={(isOpen) => {
+        setOpen(isOpen)
       }}
       Window={ChatWindow}
       Header={ChatHeader}
