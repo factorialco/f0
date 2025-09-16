@@ -72,9 +72,18 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
   )
 
   const emitPresetClick = useCallback(
-    (preset: string) => {
+    (filters: FiltersState<FiltersDefinition>) => {
+      const newFilter = Object.entries(filters ?? {}).find(
+        ([field, value]) => latestFilters.current?.[field] !== value
+      )
+
+      if (!newFilter || !isScalar(newFilter[1])) return
+
+      latestFilters.current = filters
+
       onEvent("datacollection.preset-click", {
-        name: preset,
+        name: newFilter?.[0],
+        value: newFilter?.[1],
       })
     },
     [onEvent]
