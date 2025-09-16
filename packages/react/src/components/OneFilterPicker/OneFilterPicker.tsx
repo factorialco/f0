@@ -195,11 +195,8 @@ const FiltersPresets = () => {
   const { presets, value, setFiltersValue, emitPresetClick } =
     useContext(FiltersContext)
 
-  const handlePresetClick = (
-    presetFilter: FiltersState<FiltersDefinition>,
-    presetLabel: string
-  ) => {
-    emitPresetClick(presetLabel)
+  const handlePresetClick = (presetFilter: FiltersState<FiltersDefinition>) => {
+    emitPresetClick(presetFilter)
     setFiltersValue(presetFilter)
   }
 
