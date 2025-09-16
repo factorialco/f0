@@ -1,4 +1,4 @@
-import { ModuleAvatar } from "@/experimental/Information/ModuleAvatar"
+import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
 import { BreadcrumbItemType } from "@/experimental/Navigation/Header/Breadcrumbs/types"
@@ -66,7 +66,7 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
           "module" in item &&
           item.module &&
           (isOnly || isFirst) && (
-            <ModuleAvatar module={item.module} size={isOnly ? "lg" : "sm"} />
+            <F0AvatarModule module={item.module} size={isOnly ? "lg" : "sm"} />
           )}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}

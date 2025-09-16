@@ -1,7 +1,7 @@
 import { Button } from "@/components/Actions/Button"
 import { OneDropdownButton } from "@/components/Actions/OneDropdownButton"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import {
   Dropdown,
   DropdownItem,

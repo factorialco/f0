@@ -1,8 +1,5 @@
-import { ComponentProps } from "react"
-import { BaseAvatar } from "../BaseAvatar"
 import { AvatarBadge } from "../F0Avatar/types"
-
-type BaseAvatarProps = ComponentProps<typeof BaseAvatar>
+import { BaseAvatarProps } from "../internal/BaseAvatar/types"
 
 export type F0AvatarCompanyProps = {
   name: string

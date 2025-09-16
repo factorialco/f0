@@ -1,5 +1,7 @@
 import { StandardLayout } from "@/components/layouts/StandardLayout"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ComponentProps } from "react"
 import { fn } from "storybook/test"
 import * as Icon from "../../../../icons/app"
 import { SectionHeader } from "./index"
@@ -76,4 +78,18 @@ export const InLayout: Story = {
       </StandardLayout>
     ),
   ],
+}
+
+type SectionHeaderProps = ComponentProps<typeof SectionHeader>
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    return (
+      <div>
+        <SectionHeader title="Title" description="Description" />
+        <SectionHeader {...(Default.args as SectionHeaderProps)} />
+        <SectionHeader {...(NoAction.args as SectionHeaderProps)} />
+      </div>
+    )
+  },
 }

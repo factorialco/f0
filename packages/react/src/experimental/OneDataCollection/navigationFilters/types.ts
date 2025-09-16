@@ -1,3 +1,4 @@
+import { TranslationsType } from "@/lib/providers/i18n"
 import {
   DateNavigatorFilterDefinition,
   DateValue,
@@ -13,7 +14,8 @@ export type NavigationFilter<T, InitialValue = T> = {
    */
   valueConverter?: (
     defaultValue: InitialValue,
-    filterDef: NavigationFilterComponentProps<T>["filter"]
+    filterDef: NavigationFilterComponentProps<T>["filter"],
+    i18n: TranslationsType
   ) => T
   /**
    * Renders the filter component.

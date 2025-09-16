@@ -1,19 +1,49 @@
-import { SolidPause as SolidPauseIcon } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { F0AvatarAlert } from "../F0AvatarAlert"
+import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
+import {
+  alertAvatarSizes,
+  alertAvatarTypes,
+  F0AvatarAlert,
+} from "../F0AvatarAlert"
 
 const meta: Meta<typeof F0AvatarAlert> = {
   component: F0AvatarAlert,
   title: "Avatars/AvatarAlert",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
+  parameters: {
+    docs: {
+      description: {
+        component: [
+          "An avatar component that displays an alert icon and color based on the type.",
+        ]
+          .map((line) => `<p>${line}</p>`)
+          .join(""),
+      },
+    },
+  },
+  argTypes: {
+    ...getBaseAvatarArgTypes(["size", "aria-label", "aria-labelledby"]),
+    type: {
+      control: "select",
+      options: alertAvatarTypes,
+      description: "The type of the avatar",
+      table: {
+        type: {
+          summary: "AlertAvatarType",
+        },
+      },
+    },
+  },
 }
 
 export default meta
 type Story = StoryObj<typeof F0AvatarAlert>
 
-const SIZES = ["sm", "md", "lg"] as const
-const TYPES = ["info", "warning", "critical", "positive"] as const
+const SIZES = alertAvatarSizes
+const TYPES = alertAvatarTypes
 export const Default: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <div className="flex w-fit flex-col gap-2">
       {SIZES.map((size) => (
@@ -25,11 +55,4 @@ export const Default: Story = {
       ))}
     </div>
   ),
-}
-
-export const WithCustomIcon: Story = {
-  args: {
-    type: "warning",
-    icon: SolidPauseIcon,
-  },
 }

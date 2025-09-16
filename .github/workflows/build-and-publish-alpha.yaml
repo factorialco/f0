@@ -35,8 +35,8 @@ jobs:
 
       - name: Build
         run: |
-          pnpm --filter @factorialco/factorial-one-core build
-          pnpm --filter @factorialco/factorial-one-react build
+          pnpm --filter @factorialco/f0-core build
+          pnpm --filter @factorialco/f0-react build
 
       - name: Publish to release branch npm/alpha-pr-${{ github.event.pull_request.number }}
         uses: ./.github/actions/publish-release-branch
@@ -67,8 +67,8 @@ jobs:
 
       - name: Build
         run: |
-          pnpm --filter @factorialco/factorial-one-react-core build
-          pnpm --filter @factorialco/factorial-one-react-native build
+          pnpm --filter @factorialco/f0-react-core build
+          pnpm --filter @factorialco/f0-react-native build
 
       - name: Publish to release branch npm/alpha-pr-${{ github.event.pull_request.number }}-react-native
         uses: ./.github/actions/publish-release-branch
@@ -100,7 +100,7 @@ jobs:
 
       - name: Build
         run: |
-          pnpm --filter @factorialco/factorial-one-react-core build
+          pnpm --filter @factorialco/f0-react-core build
 
       - name: Publish to release branch npm/alpha-pr-${{ github.event.pull_request.number }}-core
         uses: ./.github/actions/publish-release-branch

@@ -56,4 +56,4 @@ runs:
         LAST=$(git log -n 1 'origin/${{ inputs.branch-name }}' --pretty=format:"%H")
 
         # Print the message
-        echo "::notice title='Package published'::Use pnpm i github:factorialco/factorial-one#${{ inputs.branch-name }} to install the package (or pnpm i github:factorialco/factorial-one#${LAST} to install this specific commit)"
+        echo "::notice title='Package published'::Use pnpm i github:factorialco/f0#${{ inputs.branch-name }} to install the package (or pnpm i github:factorialco/f0#${LAST} to install this specific commit)"

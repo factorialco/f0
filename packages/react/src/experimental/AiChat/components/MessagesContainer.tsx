@@ -3,13 +3,13 @@ import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core"
-import { useChatContext, type MessagesProps } from "@copilotkit/react-ui"
+import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import OneIcon from "../OneIcon"
-import { useAiChatLabels } from "../providers/AiChatLabelsProvider"
+import { useAiChat } from "../providers/AiChatStateProvider"
 import { useChatWindowContext } from "./ChatWindow"
 
 // corresponds to padding pt-14 applied for the header
@@ -29,15 +29,14 @@ export const MessagesContainer = ({
   markdownTagRenderers,
 }: MessagesProps) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
-  const context = useChatContext()
   const { messages, interrupt } = useCopilotChat()
 
-  const { greeting } = useAiChatLabels()
+  const { greeting } = useAiChat()
   const translations = useI18n()
   const [longestTurnHeight, setLongestTurnHeight] = useState<number>(0)
   const initialMessages = useMemo(
-    () => makeInitialMessages(context.labels.initial),
-    [context.labels.initial]
+    () => makeInitialMessages(translations.ai.initialMessage),
+    [translations.ai.initialMessage]
   )
   const showWelcomeBlock =
     messages.length == 0 && (greeting || initialMessages.length > 0)
@@ -107,19 +106,57 @@ export const MessagesContainer = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <OneIcon className="my-4 h-10 w-10 cursor-pointer rounded-xl" />
+              <motion.div
+                className="flex w-fit justify-center"
+                initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
+                transition={{
+                  opacity: { duration: 0.2, ease: "easeOut", delay: 0.1 },
+                  scale: { duration: 0.3, ease: [0.25, 0.46, 0.45, 1.94] },
+                  filter: { duration: 0.2, ease: "easeOut", delay: 0.1 },
+                }}
+              >
+                <OneIcon spin size="lg" className="my-4" />
+              </motion.div>
               {greeting && (
-                <p className="text-lg font-medium text-f1-foreground-secondary">
+                <motion.p
+                  className="text-lg font-medium text-f1-foreground-secondary"
+                  initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
+                  animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+                  exit={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
+                  transition={{
+                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.2 },
+                    filter: { duration: 0.2, ease: "easeOut", delay: 0.2 },
+                    translateY: {
+                      duration: 0.2,
+                      ease: [0.25, 0.46, 0.45, 1.94],
+                      delay: 0.2,
+                    },
+                  }}
+                >
                   {greeting}
-                </p>
+                </motion.p>
               )}
               {initialMessages.map((message) => (
-                <p
+                <motion.p
                   className="text-2xl font-semibold text-f1-foreground"
                   key={message.id}
+                  initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
+                  animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+                  exit={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
+                  transition={{
+                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.4 },
+                    filter: { duration: 0.2, ease: "easeOut", delay: 0.4 },
+                    translateY: {
+                      duration: 0.2,
+                      ease: [0.25, 0.46, 0.45, 1.94],
+                      delay: 0.4,
+                    },
+                  }}
                 >
                   {message.content}
-                </p>
+                </motion.p>
               ))}
             </motion.div>
           )}

@@ -1,4 +1,4 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { AlertCircle, InfoCircle, Warning } from "@/icons/app"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
@@ -28,7 +28,7 @@ export const F0TagAlert = forwardRef<HTMLDivElement, Props>(
           }[level]
         )}
         left={
-          <Icon
+          <F0Icon
             icon={iconMap[level]}
             size="md"
             aria-hidden

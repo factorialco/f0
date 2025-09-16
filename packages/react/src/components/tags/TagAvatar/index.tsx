@@ -17,7 +17,7 @@ export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
       <BaseTag
         ref={ref}
         className="border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]"
-        left={<F0Avatar avatar={avatar} size="xsmall" />}
+        left={<F0Avatar avatar={avatar} size="xs" />}
         text={text}
         onClick={onClick}
       />

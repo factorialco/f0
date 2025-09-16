@@ -1,4 +1,6 @@
-import { FileDef } from "./types"
+import { BadgeProps } from "@/experimental/Information/Badge"
+import { F0AvatarModuleProps } from "../F0AvatarModule"
+import { AvatarFileSize, FileDef } from "./types"
 
 type FileTypeInfo = {
   type: string
@@ -127,7 +129,7 @@ const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
 }
 
 const getFileTypeInfo = (file: FileDef): FileTypeInfo => {
-  const mimeType = file.type.toLowerCase()
+  const mimeType = (file.type || "").toLowerCase()
 
   const matchedMimeKey = Object.keys(MIME_MATCH_MAP).find((key) =>
     mimeType.includes(key)
@@ -137,13 +139,37 @@ const getFileTypeInfo = (file: FileDef): FileTypeInfo => {
     return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]]
   }
 
-  const extension = file.name.toLowerCase().split(".").pop()
+  const extension = (file.name || "").toLowerCase().split(".").pop()
 
   if (extension && EXTENSION_MAP[extension]) {
     return FILE_TYPE_MAP[EXTENSION_MAP[extension]]
   }
 
   return FILE_TYPE_MAP.default
+}
+
+export const getBadgeSize = (size?: AvatarFileSize): BadgeProps["size"] => {
+  const sizeMap: Partial<
+    Record<Exclude<AvatarFileSize, undefined>, BadgeProps["size"]>
+  > = {
+    lg: "sm",
+    sm: "sm",
+  } as const
+
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.sm
+}
+
+export const getAvatarSize = (
+  size?: AvatarFileSize
+): F0AvatarModuleProps["size"] | undefined => {
+  const sizeMap: Partial<
+    Record<Exclude<AvatarFileSize, undefined>, F0AvatarModuleProps["size"]>
+  > = {
+    lg: "xs",
+    sm: "xs",
+  } as const
+
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.sm
 }
 
 export { getFileTypeInfo }

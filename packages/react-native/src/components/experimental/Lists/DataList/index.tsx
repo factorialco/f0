@@ -12,7 +12,8 @@ import { View, Text } from "react-native";
 export type DataListProps = {
   children: ReactElement<Items>[] | ReactElement<Items>;
   label?: string;
-  isHorizontal?: boolean;
+  isHorizontalItem?: boolean;
+  tableView?: boolean;
 };
 
 type Items =
@@ -24,21 +25,23 @@ type Items =
 const _DataList = ({
   children,
   label,
-  isHorizontal = false,
+  isHorizontalItem = false,
+  tableView = false,
 }: DataListProps) => {
   return (
     <View
       className={cn(
-        isHorizontal
-          ? "flex min-h-12 flex-shrink flex-row py-1.5 pl-3 pr-1.5"
+        isHorizontalItem
+          ? "flex min-h-12 flex-shrink flex-row"
           : "min-w-32 max-w-72",
+        tableView ? "px-[8px] pb-[10px] pt-[14px]" : "",
       )}
     >
       {!!label && (
         <Text
           className={cn(
             "px-1.5 text-f1-foreground-secondary",
-            isHorizontal ? "mt-1.5 w-36 shrink-0" : "mb-0.5",
+            isHorizontalItem ? "mt-1.5 w-36 shrink-0" : "",
           )}
         >
           {label}

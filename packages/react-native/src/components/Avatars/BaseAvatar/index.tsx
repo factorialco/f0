@@ -89,7 +89,7 @@ export const BaseAvatar = ({
 
   return (
     <View
-      className={`flex inline-flex ${badge && badge.type === "module" ? "p-[3px]" : ""}`}
+      className={`inline-flex ${badge && badge.type === "module" ? "p-[3px]" : ""}`}
     >
       <View className="h-fit w-fit">
         <AvatarComponent

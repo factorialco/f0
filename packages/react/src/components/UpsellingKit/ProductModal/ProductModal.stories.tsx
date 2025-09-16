@@ -1,7 +1,6 @@
 import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
 import UpsellIcon from "@/icons/app/Upsell"
-import SalesIcon from "@/icons/modules/Sales"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { ProductModal } from "./index"
@@ -41,10 +40,6 @@ const meta = {
     modalTitle: {
       control: "text",
       description: "Title of the modal",
-    },
-    modalIcon: {
-      control: "object",
-      description: "Icon of the modal",
     },
     title: {
       control: "text",
@@ -101,7 +96,7 @@ export const Default: Story = {
     isOpen: true,
     onClose: () => {},
     modalTitle: "Sales invoices",
-    modalIcon: SalesIcon,
+    modalModule: "finance-sales",
     title: "Boost your team's salary without impacting your budget",
     image: "https://placehold.co/280x300", // 3:4 ratio
     benefits: [

@@ -1,5 +1,5 @@
 import { ButtonHTMLAttributes } from "react"
-import { Icon } from "../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../components/F0Icon"
 import { Search } from "../../../../icons/app"
 import { cn, focusRing } from "../../../../lib/utils"
 import { Shortcut } from "../../../Information/Shortcut"
@@ -27,7 +27,7 @@ export function SearchBar({
         {...props}
       >
         <div className="flex items-center gap-1">
-          <Icon icon={Search} size="md" />
+          <F0Icon icon={Search} size="md" />
           <span>{placeholder}</span>
         </div>
         <div className="hidden xs:block">

@@ -1,6 +1,6 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { ChevronDown, Circle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -145,7 +145,7 @@ const Selector = ({
               transition={{ duration: 0.2 }}
               className="flex h-3 w-3 shrink-0 items-center justify-center text-f1-icon-bold"
             >
-              <Icon icon={ChevronDown} size="xs" />
+              <F0Icon icon={ChevronDown} size="xs" />
             </motion.div>
           </div>
         </div>

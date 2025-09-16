@@ -2,8 +2,8 @@
  * Tag cell type for displaying single tags with optional icons.
  * Used for labeling or categorizing items in data collections.
  */
+import { IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { IconType } from "@/components/Utilities/Icon"
 
 interface TagValue {
   label: string

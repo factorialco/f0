@@ -2,7 +2,7 @@
 
 exports[`PersonAvatar Snapshot 1`] = `
 <View
-  className="flex inline-flex "
+  className="inline-flex "
 >
   <View
     className="h-fit w-fit"

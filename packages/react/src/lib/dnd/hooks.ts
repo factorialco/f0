@@ -22,17 +22,19 @@ export function useDraggable(args: {
   }, [ctx, ref, payload, disabled, handleRef])
 }
 
-export function useDroppableList(args: {
+export function useDroppableList(args?: {
   ref: React.RefObject<HTMLElement>
   id: string
   accepts: string[]
 }) {
   const ctx = useDndContextOptional()
-  const { ref, id, accepts } = args
+  const ref = args?.ref
+  const id = args?.id
+  const accepts = args?.accepts
 
   useEffect(() => {
-    if (!ref.current) return
-    if (!ctx) return
+    if (!ref?.current) return
+    if (!ctx || !id || !accepts) return
     return ctx.driver.registerDroppable(ref.current, { id, accepts })
   }, [ctx, ref, id, accepts])
 }

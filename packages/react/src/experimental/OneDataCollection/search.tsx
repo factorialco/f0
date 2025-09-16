@@ -6,7 +6,7 @@ import {
 } from "motion/react"
 import { useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
-import { Icon } from "../../components/Utilities/Icon"
+import { F0Icon } from "../../components/F0Icon"
 import { CrossedCircle, Search as SearchIcon, Spinner } from "../../icons/app"
 import { useI18n } from "../../lib/providers/i18n"
 import { cn, focusRing } from "../../lib/utils"
@@ -19,9 +19,9 @@ interface SearchProps {
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
-    <Icon icon={Spinner} className="animate-spin" />
+    <F0Icon icon={Spinner} className="animate-spin" />
   ) : (
-    <Icon icon={SearchIcon} className="text" />
+    <F0Icon icon={SearchIcon} className="text" />
   )
 }
 
@@ -126,7 +126,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                     role="button"
                     aria-label={i18n.actions.clear}
                   >
-                    <Icon
+                    <F0Icon
                       icon={CrossedCircle}
                       className="text-f1-icon-secondary transition-colors hover:text-f1-icon"
                       size="md"
@@ -181,7 +181,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                         role="button"
                         aria-label={i18n.actions.clear}
                       >
-                        <Icon
+                        <F0Icon
                           icon={CrossedCircle}
                           className="text-f1-icon-secondary transition-colors hover:text-f1-icon"
                           size="md"

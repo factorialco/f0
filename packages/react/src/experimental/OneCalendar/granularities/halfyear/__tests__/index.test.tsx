@@ -7,10 +7,11 @@ describe("halfyearGranularity", () => {
   const baseDate = new Date(2024, 0, 1) // January 1, 2024
   const secondHalfDate = new Date(2024, 6, 1) // July 1, 2024
   const invalidDate = new Date("Invalid Date")
+  const i18n = {}
 
   describe("toRangeString", () => {
     it("formats a single date correctly", () => {
-      const result = halfyearGranularity.toRangeString(baseDate)
+      const result = halfyearGranularity.toRangeString(baseDate, i18n)
       expect(result).toEqual({
         from: "H1 2024",
         to: undefined,
@@ -18,10 +19,13 @@ describe("halfyearGranularity", () => {
     })
 
     it("formats a date range correctly", () => {
-      const result = halfyearGranularity.toRangeString({
-        from: baseDate,
-        to: secondHalfDate,
-      })
+      const result = halfyearGranularity.toRangeString(
+        {
+          from: baseDate,
+          to: secondHalfDate,
+        },
+        i18n
+      )
       expect(result).toEqual({
         from: "H1 2024",
         to: "H2 2024",
@@ -29,7 +33,7 @@ describe("halfyearGranularity", () => {
     })
 
     it("handles undefined input", () => {
-      const result = halfyearGranularity.toRangeString(undefined)
+      const result = halfyearGranularity.toRangeString(undefined, i18n)
       expect(result).toEqual({
         from: "",
         to: undefined,
@@ -57,22 +61,25 @@ describe("halfyearGranularity", () => {
 
   describe("toString", () => {
     it("formats a single date correctly", () => {
-      const result = halfyearGranularity.toString(baseDate)
+      const result = halfyearGranularity.toString(baseDate, i18n)
       expect(result).toBe("H1 2024")
     })
 
     it("formats a date range correctly", () => {
-      const result = halfyearGranularity.toString({
-        from: baseDate,
-        to: secondHalfDate,
-      })
+      const result = halfyearGranularity.toString(
+        {
+          from: baseDate,
+          to: secondHalfDate,
+        },
+        i18n
+      )
       expect(result).toBe("H1 2024 → H2 2024")
     })
   })
 
   describe("fromString", () => {
     it("parses a single half-year string correctly", () => {
-      const result = halfyearGranularity.fromString("H1 2024")
+      const result = halfyearGranularity.fromString("H1 2024", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2024, 5, 30, 23, 59, 59, 999),
@@ -80,7 +87,7 @@ describe("halfyearGranularity", () => {
     })
 
     it("parses a half-year range string correctly", () => {
-      const result = halfyearGranularity.fromString("H1 2024 → H2 2024")
+      const result = halfyearGranularity.fromString("H1 2024 → H2 2024", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2024, 11, 31, 23, 59, 59, 999),
@@ -88,7 +95,7 @@ describe("halfyearGranularity", () => {
     })
 
     it("handles invalid input", () => {
-      const result = halfyearGranularity.fromString("invalid")
+      const result = halfyearGranularity.fromString("invalid", i18n)
       expect(result).toEqual({
         from: invalidDate,
         to: invalidDate,
@@ -177,7 +184,7 @@ describe("halfyearGranularity", () => {
 
   describe("label", () => {
     it("formats the label correctly", () => {
-      const result = halfyearGranularity.label(baseDate)
+      const result = halfyearGranularity.label(baseDate, i18n)
       expect(result).toBe("2020 → 2024")
     })
   })

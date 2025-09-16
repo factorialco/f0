@@ -1,4 +1,4 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { CrossedCircle } from "@/icons/app"
 import { cn } from "@/lib/utils.ts"
@@ -386,14 +386,17 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   size === "md" && "left-3 top-2.5"
                 )}
               >
-                <Icon
+                <F0Icon
                   onClick={handleClickContent}
                   icon={icon}
                   color="default"
                 />
               </div>
             )}
-            <div onClick={handleClickChildren} className="w-full">
+            <div
+              onClick={handleClickChildren}
+              className="w-full min-w-0 flex-1"
+            >
               {cloneElement(children as React.ReactElement, {
                 onChange: handleChange,
                 onBlur: props.onBlur,
@@ -455,13 +458,19 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         className="mr-px mt-px flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
                         onClick={handleClear}
                       >
-                        <Icon icon={CrossedCircle} color="bold" size="md" />
+                        <F0Icon icon={CrossedCircle} color="bold" size="md" />
                       </motion.div>
                     )}
                   </AnimatePresence>
                 )}
                 {(append || appendTag) && (
-                  <div className="mt-px flex h-fit items-center pr-px">
+                  <div
+                    className={cn(
+                      "mt-px flex h-fit items-center",
+                      size === "sm" && "h-[24px] pr-0.5",
+                      size === "md" && "pr-0.1 h-[25px]"
+                    )}
+                  >
                     {append}
                     {appendTag && <AppendTag text={appendTag} />}
                   </div>

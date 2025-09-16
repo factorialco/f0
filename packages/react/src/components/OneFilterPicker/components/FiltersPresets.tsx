@@ -27,7 +27,12 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         key={index}
         label={preset.label}
         selected={isSelected}
-        onClick={() => onPresetsChange?.(preset.filter, preset.label)}
+        onClick={() =>
+          onPresetsChange?.(
+            isSelected ? ({} as FiltersState<Filters>) : preset.filter,
+            preset.label
+          )
+        }
         data-visible={isVisible}
         number={preset.itemsCount?.(value) ?? undefined}
       />
@@ -48,7 +53,12 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
             "bg-f1-background-selected hover:bg-f1-background-selected",
           focusRing()
         )}
-        onClick={() => onPresetsChange?.(preset.filter, preset.label)}
+        onClick={() =>
+          onPresetsChange?.(
+            isSelected ? ({} as FiltersState<Filters>) : preset.filter,
+            preset.label
+          )
+        }
         data-visible={true}
       >
         {preset.label}

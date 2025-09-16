@@ -1,11 +1,10 @@
-import { ItemActionsDropdown } from "@/experimental/OneDataCollection/ItemActions/ItemActionsDropdown"
 import { forwardRef } from "react"
 
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import {
-  filterItemActions,
-  ItemActionsDefinition,
-} from "@/experimental/OneDataCollection/item-actions"
+import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
+import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { SortingsDefinition } from "@/experimental/OneDataCollection/sortings"
@@ -19,7 +18,7 @@ import { TableCell, TableRow } from "@/experimental/OneTable"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 import { TableColumnDefinition } from ".."
-import { actionsToDropdownItems } from "../../utils"
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 
 export type RowProps<
   R extends RecordType,
@@ -92,10 +91,23 @@ const RowComponentInner = <
 
   const key = `table-row-${groupIndex}-${index}`
 
-  const itemActions = filterItemActions(source.itemActions, item)
+  const {
+    primaryItemActions,
+    dropdownItemActions,
+    mobileDropdownItemActions,
+    handleDropDownOpenChange,
+    dropDownOpen,
+  } = useItemActions({ source, item })
 
   return (
-    <TableRow ref={ref} key={key}>
+    <TableRow
+      ref={ref}
+      key={key}
+      className={cn(
+        "group transition-colors hover:bg-f1-background-hover",
+        "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']"
+      )}
+    >
       {source.selectable && (
         <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
           {id !== undefined && (
@@ -140,21 +152,36 @@ const RowComponentInner = <
           </div>
         </TableCell>
       ))}
+
+      {/** Mobile item actions */}
       {source.itemActions && (
-        <TableCell
-          key={`table-cell-${groupIndex}-${index}-actions`}
-          width={68}
-          sticky={{
-            right: 0,
-          }}
-          href={itemHref}
-          onClick={itemOnClick}
-        >
-          <ItemActionsDropdown
-            items={actionsToDropdownItems(itemActions)}
-            className="pointer-events-auto"
-          />
-        </TableCell>
+        <>
+          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+              <ItemActionsRow
+                primaryItemActions={primaryItemActions}
+                dropdownItemActions={dropdownItemActions}
+                handleDropDownOpenChange={handleDropDownOpenChange}
+              />
+            </ItemActionsRowContainer>
+          </td>
+
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-actions`}
+            width={68}
+            sticky={{
+              right: 0,
+            }}
+            href={itemHref}
+            className="table-cell md:hidden"
+          >
+            <ItemActionsMobile
+              items={mobileDropdownItemActions}
+              onOpenChange={handleDropDownOpenChange}
+            />
+          </TableCell>
+        </>
       )}
     </TableRow>
   )

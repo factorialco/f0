@@ -1,5 +1,5 @@
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { useMemo } from "react"
@@ -77,7 +77,7 @@ export const Trigger = ({
       </span>
       <div className="p-0.5">
         <div className="h-[16px] w-[16px]">
-          <Icon
+          <F0Icon
             icon={ChevronDown}
             size="sm"
             className="rounded-2xs bg-f1-background-secondary p-0.5"

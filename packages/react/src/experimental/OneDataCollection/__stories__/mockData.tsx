@@ -513,6 +513,46 @@ export const getMockVisualizations = (options?: {
       ],
     },
   },
+  kanban: {
+    type: "kanban",
+    options: {
+      lanes: [
+        {
+          id: "eng",
+          title: "Engineering",
+          variant: "info",
+        },
+        {
+          id: "prod",
+          title: "Product",
+          variant: "neutral",
+        },
+        {
+          id: "design",
+          title: "Design",
+          variant: "positive",
+        },
+        {
+          id: "other",
+          title: "Other",
+          variant: "warning",
+        },
+      ],
+      title: (u) => u.name,
+      description: (u) => u.role,
+      avatar: (u) => ({
+        type: "person",
+        firstName: u.name.split(" ")[0] ?? "",
+        lastName: u.name.split(" ")[1] ?? "",
+      }),
+      metadata: (u) => [
+        { icon: Envelope, property: { type: "text", value: u.email } },
+        { icon: Building, property: { type: "text", value: u.department } },
+        { icon: Briefcase, property: { type: "text", value: u.role } },
+        { icon: Star, property: { type: "text", value: u.id } },
+      ],
+    },
+  },
 })
 // Example of using the object-based approach (recommended)
 export const sortings = {
@@ -606,10 +646,7 @@ export const filterUsers = (
 
   // Handle department filter
   const departmentFilterValues = filterValues.department
-  if (
-    Array.isArray(departmentFilterValues) &&
-    departmentFilterValues.length > 0
-  ) {
+  if (Array.isArray(departmentFilterValues)) {
     filteredUsers = filteredUsers.filter((user) =>
       departmentFilterValues.some((d) => d === user.department)
     )
@@ -750,6 +787,7 @@ export const ExampleComponent = ({
   dataAdapter,
   primaryActions,
   secondaryActions,
+  searchBar = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -786,6 +824,7 @@ export const ExampleComponent = ({
   paginationType?: PaginationType
   primaryActions?: PrimaryActionsDefinition
   secondaryActions?: SecondaryActionsDefinition
+  searchBar?: boolean
 }) => {
   const mockVisualizations = getMockVisualizations({
     frozenColumns,
@@ -835,11 +874,24 @@ export const ExampleComponent = ({
     defaultSelectedItems,
     bulkActions,
     totalItemSummary,
+    search: searchBar
+      ? {
+          enabled: true,
+          sync: true,
+          debounceTime: 300,
+        }
+      : undefined,
     dataAdapter: dataAdapter ?? {
       fetchData: useObservable
         ? createObservableDataFetch()
         : createPromiseDataFetch(),
     },
+    lanes: [
+      { id: "eng", filters: { department: ["Engineering"] } },
+      { id: "prod", filters: { department: ["Product"] } },
+      { id: "design", filters: { department: ["Design"] } },
+      { id: "other", filters: { department: ["Marketing"] } },
+    ],
   })
 
   return (
@@ -863,6 +915,7 @@ export const ExampleComponent = ({
             mockVisualizations.table,
             mockVisualizations.card,
             mockVisualizations.list,
+            mockVisualizations.kanban,
           ]
         }
       />
@@ -876,6 +929,7 @@ interface DataAdapterOptions<TRecord> {
   useObservable?: boolean
   paginationType?: PaginationType
   perPage?: number
+  search?: string
 }
 
 export function createDataAdapter<
@@ -893,6 +947,7 @@ export function createDataAdapter<
   useObservable = false,
   paginationType,
   perPage = 20,
+  search = "",
 }: DataAdapterOptions<TRecord>): DataAdapter<
   TRecord,
   TFilters,
@@ -934,16 +989,23 @@ export function createDataAdapter<
       filteredRecords = filteredRecords.filter(
         (record) =>
           record.name.toLowerCase().includes(searchTerm) ||
-          record.email.toLowerCase().includes(searchTerm)
+          record.email.toLowerCase().includes(searchTerm) ||
+          record.department.toLowerCase().includes(searchTerm)
+      )
+    }
+
+    if (search) {
+      const searchTerm = search.toLowerCase()
+      filteredRecords = filteredRecords.filter(
+        (record) =>
+          record.name.toLowerCase().includes(searchTerm) ||
+          record.email.toLowerCase().includes(searchTerm) ||
+          record.department.toLowerCase().includes(searchTerm)
       )
     }
 
     // Apply department filter if provided
-    if (
-      "department" in filters &&
-      Array.isArray(filters.department) &&
-      filters.department.length > 0
-    ) {
+    if ("department" in filters && Array.isArray(filters.department)) {
       filteredRecords = filteredRecords.filter((record) =>
         (filters.department as string[]).includes(record.department)
       )

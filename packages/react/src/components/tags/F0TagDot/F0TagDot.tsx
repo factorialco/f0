@@ -1,6 +1,6 @@
 import { BaseTag } from "@/components/tags/BaseTag"
 import { useTextFormatEnforcer } from "@/lib/text"
-import { baseColors } from "@factorialco/factorial-one-core"
+import { baseColors } from "@factorialco/f0-core"
 import { forwardRef } from "react"
 import type { NewColor, Props } from "./types"
 

@@ -4,7 +4,7 @@ import {
   pulseIcon,
   pulseIconColor,
 } from "@/components/avatars/F0AvatarPulse"
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
 import { Node } from "@tiptap/core"
@@ -107,7 +107,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
                       key={index}
                       className="-ml-1.5 flex items-center justify-center rounded-full bg-f1-background"
                     >
-                      <Icon
+                      <F0Icon
                         icon={pulseIcon[day.mood]}
                         size="lg"
                         color={pulseIconColor[day.mood]}
@@ -199,7 +199,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
                       className="flex flex-row items-center gap-2"
                     >
                       <div className="flex items-center justify-center rounded-full">
-                        <Icon
+                        <F0Icon
                           icon={pulseIcon[day.mood]}
                           size="lg"
                           color={pulseIconColor[day.mood]}

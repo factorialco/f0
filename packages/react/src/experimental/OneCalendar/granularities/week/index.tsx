@@ -15,7 +15,7 @@ import {
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
-import { GranularityDefinition } from "../types"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { WeekView } from "./WeekView"
 
 export function toWeekGranularityDateRange<
@@ -57,9 +57,20 @@ export const weekGranularity: GranularityDefinition = {
         : false,
     }
   },
-  toRangeString: (date) => formatDateRange(date, "'W'I yyyy"),
+  toRangeString: (date) => {
+    return formatDateRange(date, "'W'I yyyy")
+  },
   toRange: (date) => toWeekGranularityDateRange(date),
-  toString: (date) => formatDateToString(date, "'W'I yyyy"),
+  toString: (date, i18n, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatDateToString(date, "'W'I yyyy"),
+      long: i18n.date.granularities.week.long
+        .replace("%{month}", formatDateToString(date, "MMM"))
+        .replace("%{year}", formatDateToString(date, "yyyy"))
+        .replace("%{day}", formatDateToString(date, "d")),
+    }
+    return formats[format] ?? formats.default
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

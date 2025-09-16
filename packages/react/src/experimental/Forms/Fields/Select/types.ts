@@ -1,5 +1,5 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
-import type { IconType } from "@/components/Utilities/Icon"
+import type { IconType } from "@/components/F0Icon"
 
 export type SelectItemObject<T, R = unknown> = {
   type?: "item"

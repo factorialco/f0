@@ -1016,13 +1016,22 @@ describe("Collections", () => {
       expect(screen.getByText("jane@example.com")).toBeInTheDocument()
     })
 
+    // Find the table rows first to trigger hover behavior
+    const tableRows = screen.getAllByRole("row").slice(1) // Skip header row
+    expect(tableRows).toHaveLength(2)
+
+    // Hover over the first row to make desktop actions visible
+    await userEvent.hover(tableRows[0])
+
     // Find and click the actions button (typically has MoreVertical icon or similar)
+    // so we expect 4 buttons total (2 desktop + 2 mobile for 2 rows)
     const actionsButtons = await waitFor(() =>
       screen.getAllByRole("button", { name: /actions/i })
     )
-    expect(actionsButtons).toHaveLength(2) // One for each row
+    expect(actionsButtons).toHaveLength(4) // Desktop + Mobile
 
-    // Click the actions button for the first row
+    // Find the desktop version of the actions (first 2 are desktop, last 2 are mobile)
+    // Click the actions button for the first row (desktop version)
     await userEvent.click(actionsButtons[0])
 
     // The Radix dropdown content should now be in the document

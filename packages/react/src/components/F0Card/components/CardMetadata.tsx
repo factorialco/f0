@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { valueDisplayRenderers } from "@/components/value-display"
 import React from "react"
 import { CardMetadata as CardMetadataType } from "../types"
@@ -36,7 +36,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
     return (
       <div className="flex h-8 items-center gap-1.5 font-medium">
         {"icon" in metadata && (
-          <Icon icon={metadata.icon} color="default" size="md" />
+          <F0Icon icon={metadata.icon} color="default" size="md" />
         )}
         <span>Unsupported property type: {type}</span>
       </div>
@@ -51,7 +51,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
   return (
     <div className="flex h-8 items-center gap-1.5 font-medium">
       {"icon" in metadata && (
-        <Icon icon={metadata.icon} color="default" size="md" />
+        <F0Icon icon={metadata.icon} color="default" size="md" />
       )}
       {typedRenderer(value, { visualization: "card" })}
     </div>

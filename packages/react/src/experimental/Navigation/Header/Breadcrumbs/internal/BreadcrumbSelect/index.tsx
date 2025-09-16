@@ -1,7 +1,7 @@
 import { Skeleton } from "@/ui/skeleton"
 import { motion } from "motion/react"
 import { useEffect, useMemo, useState } from "react"
-import { Icon } from "../../../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../../../components/F0Icon"
 import { ChevronDown } from "../../../../../../icons/app"
 import {
   Select,
@@ -98,7 +98,7 @@ export function BreadcrumbSelect({
             animate={{ rotate: localOpen ? 180 : 0 }}
             className="h-[16px] w-[16px]"
           >
-            <Icon
+            <F0Icon
               icon={ChevronDown}
               size="sm"
               className="rounded-2xs bg-f1-background-secondary p-0.5"

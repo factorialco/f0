@@ -1,5 +1,5 @@
 import { Button } from "@/components/Actions/Button"
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "@/experimental/RichText/CoreEditor/Extensions/MoodTracker"
@@ -292,7 +292,7 @@ const AIBlockHeader: React.FC<AIBlockHeaderProps> = ({
           ease: "easeInOut",
         }}
       >
-        {displayEmoji ?? <Icon icon={Ai} />}
+        {displayEmoji ?? <F0Icon icon={Ai} />}
       </motion.span>
       <p className="text-f1-text-primary text-lg font-semibold">
         {displayTitle}

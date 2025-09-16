@@ -6,7 +6,7 @@ import {
 } from "@/ui/drawer"
 import { useState } from "react"
 import { Button } from "../../../components/Actions/Button"
-import { Icon } from "../../../components/Utilities/Icon"
+import { F0Icon } from "../../../components/F0Icon/index.tsx"
 import { EllipsisHorizontal } from "../../../icons/app"
 import { Link } from "../../../lib/linkHandler"
 import { cn } from "../../../lib/utils.ts"
@@ -100,7 +100,7 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
                       item.critical && "text-f1-icon-critical"
                     )}
                   >
-                    <Icon icon={item.icon} size="md" />
+                    <F0Icon icon={item.icon} size="md" />
                   </span>
                 )}
                 <span

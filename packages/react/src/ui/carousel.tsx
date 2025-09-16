@@ -4,7 +4,7 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
 import * as React from "react"
-import { Icon } from "../components/Utilities/Icon"
+import { F0Icon } from "../components/F0Icon"
 import { ArrowLeft, ArrowRight } from "../icons/app"
 
 import { SPACE_FOR_WIDGET_SHADOW } from "../experimental/Navigation/Carousel/DynamicCarousel"
@@ -241,7 +241,7 @@ const CarouselPrevious = React.forwardRef<
         onClick={scrollPrev}
         {...props}
       >
-        <Icon size="sm" icon={ArrowLeft} />
+        <F0Icon size="sm" icon={ArrowLeft} />
         <span className="sr-only">Previous</span>
       </Button>
     </div>
@@ -275,7 +275,7 @@ const CarouselNext = React.forwardRef<
         onClick={scrollNext}
         {...props}
       >
-        <Icon size="sm" icon={ArrowRight} />
+        <F0Icon size="sm" icon={ArrowRight} />
         <span className="sr-only">Next</span>
       </Button>
     </div>

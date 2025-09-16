@@ -1,4 +1,4 @@
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 
 // Base TOC item interface without children
 interface BaseTOCItem {

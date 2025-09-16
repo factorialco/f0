@@ -1,6 +1,6 @@
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { Icon, IconType } from "@/components/Utilities/Icon"
 import { Counter } from "@/experimental/Information/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
@@ -75,7 +75,7 @@ const MenuItemContent = ({
   return (
     <div className="flex w-full items-center justify-between">
       <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
-        <Icon
+        <F0Icon
           icon={item.icon}
           size="md"
           className={cn(
@@ -224,7 +224,7 @@ const FavoriteItem = ({
               draggable={false}
             >
               {item.type === "icon" ? (
-                <Icon
+                <F0Icon
                   icon={item.icon}
                   size="md"
                   className={cn(
@@ -233,7 +233,7 @@ const FavoriteItem = ({
                   )}
                 />
               ) : item.avatar ? (
-                <F0Avatar size="xsmall" avatar={item.avatar} />
+                <F0Avatar size="xs" avatar={item.avatar} />
               ) : null}
 
               <OneEllipsis
@@ -260,7 +260,7 @@ const FavoriteItem = ({
             items={dropdownItems}
           >
             <div className="flex items-center justify-center" role="list">
-              <Icon icon={EllipsisHorizontal} size="sm" />
+              <F0Icon icon={EllipsisHorizontal} size="sm" />
             </div>
           </Dropdown>
         </div>
@@ -343,7 +343,7 @@ const BaseCategory = ({
               transition={{ duration: shouldReduceMotion ? 0 : 0.1 }}
               className="h-3 w-3"
             >
-              <Icon
+              <F0Icon
                 icon={ChevronDown}
                 size="xs"
                 className="text-f1-icon-secondary"

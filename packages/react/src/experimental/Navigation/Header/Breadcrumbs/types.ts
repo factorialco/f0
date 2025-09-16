@@ -1,5 +1,5 @@
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { SelectItemObject } from "@/experimental/Forms/Fields/Select"
-import { ModuleId } from "@/experimental/Information/ModuleAvatar"
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import { BreadcrumbSelectProps } from "./internal/BreadcrumbSelect"

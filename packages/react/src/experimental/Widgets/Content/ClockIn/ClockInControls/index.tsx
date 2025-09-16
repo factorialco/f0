@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
+import { IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { IconType } from "@/components/Utilities/Icon"
 import { Select } from "@/experimental/Forms/Fields/Select"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { motion } from "motion/react"

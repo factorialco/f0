@@ -40,7 +40,6 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
 
     if (!src) return <img ref={ref} {...props} />
     const extraProps = src(props)
-
     return <img ref={ref} {...props} {...extraProps} />
   }
 )

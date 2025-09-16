@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { Placeholder } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Action } from "../Action"
@@ -65,7 +65,7 @@ export const AsLink: Story = {
     children: "Link Action",
     href: "https://example.com",
     target: "_blank",
-    append: <Icon icon={Placeholder} size="sm" />,
+    append: <F0Icon icon={Placeholder} size="sm" />,
   },
 }
 
@@ -95,14 +95,14 @@ export const Disabled: Story = {
 export const WithPrepend: Story = {
   args: {
     children: "Action with Prepend",
-    prepend: <Icon icon={Placeholder} />,
+    prepend: <F0Icon icon={Placeholder} />,
   },
 }
 
 export const WithAppendOutside: Story = {
   args: {
     children: "Action with Append",
-    append: <Icon icon={Placeholder} />,
+    append: <F0Icon icon={Placeholder} />,
     appendOutside: true,
   },
 }

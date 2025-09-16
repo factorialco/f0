@@ -29,6 +29,7 @@ import {
   DataSource,
   GroupingDefinition,
   InfiniteScrollPaginatedResponse,
+  LaneDataSource,
   PageBasedPaginatedResponse,
   PaginatedResponse,
   PaginationInfo,
@@ -44,6 +45,45 @@ import {
 export interface DataError {
   message: string
   cause?: unknown
+}
+
+/**
+ * Merges global filters with lane-specific filters using intersection logic.
+ * For array-based filters (like InFilter), it finds the intersection of values.
+ * For other filter types, lane filters override global filters.
+ *
+ * @param globalFilters - The global filters applied to all lanes
+ * @param laneFilters - The lane-specific filters
+ * @returns The merged filters with proper intersection logic
+ */
+function mergeFiltersWithIntersection<T extends Record<string, unknown>>(
+  globalFilters: T,
+  laneFilters: T
+): T {
+  const result: Record<string, unknown> = { ...globalFilters }
+
+  for (const [key, laneValue] of Object.entries(laneFilters)) {
+    const globalValue = globalFilters[key]
+
+    // If both values exist and are arrays (InFilter case), find intersection
+    if (
+      Array.isArray(globalValue) &&
+      Array.isArray(laneValue) &&
+      globalValue.length > 0 &&
+      laneValue.length > 0
+    ) {
+      // Find intersection of the two arrays
+      const intersection = globalValue.filter((item) =>
+        laneValue.includes(item)
+      )
+      result[key] = intersection
+    } else {
+      // For non-array filters or when one is empty, lane filter takes precedence
+      result[key] = laneValue
+    }
+  }
+
+  return result as T
 }
 
 /**
@@ -68,6 +108,27 @@ export type WithGroupId<RecordType> = RecordType & {
 }
 
 /**
+ * Pagination info for lanes (simplified version for state management)
+ */
+export type LanePaginationInfo = {
+  total: number
+  perPage: number
+  type: "infinite-scroll"
+  cursor: string | null
+  hasMore: boolean
+}
+
+/**
+ * Data state for a single lane (always uses infinite scroll)
+ */
+export type LaneDataState<R> = {
+  data: Data<R>
+  isLoading: boolean
+  isLoadingMore: boolean
+  paginationInfo: LanePaginationInfo | null
+}
+
+/**
  * Hook return type for useData
  */
 interface UseDataReturn<R> {
@@ -85,6 +146,10 @@ interface UseDataReturn<R> {
   loadMore: () => void
   totalItems: number | undefined
   summaries?: R // Add summaries to the return type
+
+  // For lanes data:
+  lanesData?: Record<string, LaneDataState<R>>
+  fetchMoreForLane?: (laneId: string) => Promise<void>
 }
 
 type DataType<T> = PromiseState<T>
@@ -232,9 +297,13 @@ export function useData<
     currentNavigationFilters,
     currentGrouping,
     grouping,
+    lanes,
     idProvider = (item, index): string | number =>
       "id" in item ? `${item.id}` : index || JSON.stringify(item),
   } = source
+
+  const hasLanes = useMemo(() => lanes && lanes.length > 0, [lanes])
+
   const cleanup = useRef<(() => void) | undefined>()
 
   const {
@@ -267,6 +336,24 @@ export function useData<
       : deferredSearch
 
   const [summariesData, setSummariesData] = useState<R | undefined>(undefined)
+
+  // Initialize lanes data structure
+  const [lanesData, setLanesData] = useState<
+    Record<string, LaneDataState<R>> | undefined
+  >(() => {
+    if (!hasLanes) return undefined
+
+    const initialLanesData: Record<string, LaneDataState<R>> = {}
+    lanes!.forEach((lane) => {
+      initialLanesData[lane.id] = {
+        data: { type: "flat", records: [] },
+        isLoading: false,
+        isLoadingMore: false,
+        paginationInfo: null,
+      }
+    })
+    return initialLanesData
+  })
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items
@@ -372,6 +459,7 @@ export function useData<
   )
 
   const data = useMemo(() => {
+    // if (hasLanes) return { type: "flat" as const, records: [] }
     // Add the groupId to the data if grouping is enabled
     const data: WithGroupId<R>[] = rawData.map((record) => ({
       ...record,
@@ -437,8 +525,10 @@ export function useData<
       })
       setIsInitialLoading(false)
       setIsLoading(false)
+      setIsLoadingMore(false)
       // Clear the cleanup reference when an error occurs
       cleanup.current = undefined
+      isLoadingMoreRef.current = false
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the onError changes
     [setError, setIsInitialLoading, setIsLoading]
@@ -502,7 +592,6 @@ export function useData<
         function fetcher(): PromiseOrObservable<ResultType> {
           setTotalItems(undefined)
 
-          // TODO: Default perPage value from somewhere
           const defaultPerPage = 20
 
           // Safely access perPage, defaulting to 20 if not available
@@ -602,7 +691,7 @@ export function useData<
 
   // In loadMore function
   const loadMore = useCallback(() => {
-    if (!paginationInfo || isLoading) return
+    if (!paginationInfo || isLoading || isLoadingMore) return
 
     if (!isInfiniteScrollPagination(paginationInfo)) {
       console.warn(
@@ -616,7 +705,7 @@ export function useData<
       const currentCursor = paginationInfo.cursor
 
       setIsLoadingMore(true)
-      setIsLoading(true)
+      setIsLoading(false)
       isLoadingMoreRef.current = true
 
       // Use named parameters
@@ -630,6 +719,7 @@ export function useData<
   }, [
     fetchDataAndUpdate,
     isLoading,
+    isLoadingMore,
     mergedFilters,
     paginationInfo,
     currentNavigationFilters,
@@ -655,9 +745,209 @@ export function useData<
     mergedFilters,
     setIsLoading,
     currentNavigationFilters,
-
     dataAdapter.paginationType,
   ])
+
+  // Helper function to fetch data for a specific lane
+  const fetchLaneData = useCallback(
+    async (
+      lane: LaneDataSource<Filters>,
+      options: {
+        appendMode?: boolean
+        cursor?: string | null
+      } = {}
+    ) => {
+      const { appendMode = false, cursor = "0" } = options
+
+      // Merge global filters with lane-specific filters using intersection logic
+      const laneFilters = mergeFiltersWithIntersection(
+        mergedFilters,
+        lane.filters
+      )
+
+      try {
+        // Use the same sortings logic as global fetch
+        const sortings: SortingsStateMultiple = [
+          ...(currentSortings
+            ? [
+                {
+                  field: currentSortings.field as string,
+                  order: currentSortings.order,
+                },
+              ]
+            : []),
+          ...(currentGrouping
+            ? [
+                {
+                  field: currentGrouping.field as string,
+                  order: currentGrouping.order,
+                },
+              ]
+            : []),
+        ]
+
+        // Call the dataAdapter with lane-specific filters (always infinite-scroll)
+        const result = await dataAdapter.fetchData({
+          filters: laneFilters,
+          search: searchValue,
+          sortings,
+          navigationFilters: currentNavigationFilters,
+          pagination: {
+            cursor,
+            perPage: "perPage" in dataAdapter ? dataAdapter.perPage || 20 : 20,
+          },
+        })
+
+        // Process the result - for lanes we expect a resolved paginated response
+        const records = "records" in result ? result.records : []
+
+        const processedRecords = records.map((record) => ({
+          ...record,
+          [GROUP_ID_SYMBOL]:
+            (currentGrouping?.field &&
+              getValueByPath(record, currentGrouping.field as string)) ||
+            undefined,
+        }))
+
+        // Update lane data with real data
+        setLanesData((prev) =>
+          prev
+            ? {
+                ...prev,
+                [lane.id]: {
+                  data: {
+                    type: "flat",
+                    records: appendMode
+                      ? [
+                          ...(prev[lane.id]?.data.records || []),
+                          ...processedRecords,
+                        ]
+                      : processedRecords,
+                  },
+                  isLoading: false,
+                  isLoadingMore: false,
+                  paginationInfo:
+                    "total" in result
+                      ? {
+                          total: Number(result.total) || 0,
+                          perPage:
+                            "perPage" in dataAdapter
+                              ? dataAdapter.perPage || 20
+                              : 20,
+                          type: "infinite-scroll" as const,
+                          cursor:
+                            "cursor" in result &&
+                            typeof result.cursor === "string"
+                              ? result.cursor
+                              : null,
+                          hasMore: Boolean(
+                            "hasMore" in result ? result.hasMore : false
+                          ),
+                        }
+                      : null,
+                },
+              }
+            : prev
+        )
+      } catch {
+        setLanesData((prev) =>
+          prev
+            ? {
+                ...prev,
+                [lane.id]: {
+                  ...prev[lane.id],
+                  isLoading: false,
+                },
+              }
+            : prev
+        )
+      }
+    },
+    [
+      mergedFilters,
+      currentSortings,
+      currentGrouping,
+      dataAdapter,
+      searchValue,
+      currentNavigationFilters,
+      setLanesData,
+    ]
+  )
+
+  // Fetch data for each lane (initial load and when dependencies change)
+  useEffect(() => {
+    if (!hasLanes || !lanes) return
+
+    lanes.forEach((lane) => {
+      // Set loading state BEFORE calling fetchLaneData
+      setLanesData((prev) =>
+        prev
+          ? {
+              ...prev,
+              [lane.id]: {
+                ...prev[lane.id],
+                isLoading: true,
+                isLoadingMore: false,
+              },
+            }
+          : prev
+      )
+
+      // For initial load or when filters/search change, reload from cursor "0"
+      fetchLaneData(lane, { appendMode: false, cursor: "0" })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    hasLanes,
+    lanes,
+    mergedFilters,
+    dataAdapter,
+    currentSortings,
+    currentGrouping,
+    searchValue,
+    currentNavigationFilters,
+    // Intentionally not including fetchLaneData to avoid infinite loops
+  ])
+
+  // Function to fetch more data for a specific lane
+  const fetchMoreForLane = useCallback(
+    async (laneId: string) => {
+      if (!hasLanes || !lanes) return
+
+      const lane = lanes.find((l) => l.id === laneId)
+      if (!lane) return
+
+      // Access current lanesData without adding it as dependency to avoid loops
+      setLanesData((currentLanesData) => {
+        const laneData = currentLanesData?.[laneId]
+        if (!laneData?.paginationInfo) return currentLanesData
+
+        const paginationInfo = laneData.paginationInfo
+        if (!paginationInfo || !paginationInfo.hasMore) return currentLanesData
+
+        // Set loading more state BEFORE calling fetchLaneData
+        const updatedLanesData = currentLanesData
+          ? {
+              ...currentLanesData,
+              [laneId]: {
+                ...currentLanesData[laneId],
+                isLoading: false,
+                isLoadingMore: true,
+              },
+            }
+          : currentLanesData
+
+        // Use fetchLaneData with append mode and current cursor
+        fetchLaneData(lane, {
+          appendMode: true,
+          cursor: paginationInfo.cursor,
+        })
+
+        return updatedLanesData
+      })
+    },
+    [hasLanes, lanes, fetchLaneData]
+  )
 
   useEffect(() => {
     return () => {
@@ -676,6 +966,8 @@ export function useData<
     loadMore,
     totalItems,
     summaries: summariesData, // Add summaries to the return object
+    lanesData, // Lanes data state
+    fetchMoreForLane: hasLanes ? fetchMoreForLane : undefined, // Fetch more function for lanes
   }
 }
 

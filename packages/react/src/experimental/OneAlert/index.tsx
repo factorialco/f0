@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ExternalLink } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
@@ -89,7 +89,7 @@ export const OneAlert = ({
               )}
             >
               {link.label}
-              <Icon icon={ExternalLink} size="sm" />
+              <F0Icon icon={ExternalLink} size="sm" />
             </a>
           )}
           <Button

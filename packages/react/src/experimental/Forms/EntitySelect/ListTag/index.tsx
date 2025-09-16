@@ -1,6 +1,6 @@
-import { BaseAvatar } from "@/components/avatars/BaseAvatar"
+import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
+import { F0Icon } from "@/components/F0Icon"
 import { BaseTag } from "@/components/tags/BaseTag"
-import { Icon } from "@/components/Utilities/Icon"
 import { EntitySelectSubEntity } from "@/experimental/Forms/EntitySelect/types"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -36,7 +36,7 @@ export const ListTag = ({
         }
         right={
           !disabled && (
-            <Icon
+            <F0Icon
               icon={Cross}
               size="sm"
               className="cursor-pointer text-f1-icon-secondary"

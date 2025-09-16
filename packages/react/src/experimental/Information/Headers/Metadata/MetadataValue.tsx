@@ -1,9 +1,10 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
+import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
+import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { Icon } from "@/components/Utilities/Icon"
 import { AlertCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { MetadataItem } from "./index"
@@ -36,7 +37,7 @@ export function MetadataValue({
     case "avatar":
       return (
         <div className="flex items-center gap-1">
-          <F0Avatar avatar={value.variant} size="xsmall" />
+          <F0Avatar avatar={value.variant} size="xs" />
           {value.text && <span>{value.text}</span>}
         </div>
       )
@@ -46,10 +47,13 @@ export function MetadataValue({
     case "list":
       return (
         <F0AvatarList
-          avatars={value.avatars}
-          size="xsmall"
-          type={value.variant}
-          max={3}
+          {...({
+            type: value.variant,
+            avatars: value.avatars,
+            size: "xs" as const,
+            max: 3,
+          } as F0AvatarListProps)}
+          // TS dont narrow correctly the type of the list when destructuring the value
         />
       )
 
@@ -105,7 +109,7 @@ export function MetadataValue({
 
       return (
         <div className="flex items-center justify-center gap-0.5 font-medium">
-          <Icon icon={icon} color={iconColor} />
+          <F0Icon icon={icon} color={iconColor} />
           <span className={textColor}>{value.formattedDate}</span>
         </div>
       )

@@ -28,7 +28,7 @@ if (buildTailwind) {
 
 /* Build sync */
 const defaultCoderWorkspaceFolder =
-  "/home/factorial/workspace/factorial/frontend/node_modules/@factorialco/factorial-one-react"
+  "/home/factorial/workspace/factorial/frontend/node_modules/@factorialco/f0-react"
 
 const buildSyncArg = process.argv.find((arg) => arg.startsWith("--buildSync"))
 const buildSync = !!buildSyncArg
@@ -83,7 +83,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        ["factorial-one"]: resolve(__dirname, "src/factorial-one.ts"),
+        ["f0"]: resolve(__dirname, "src/f0.ts"),
         ["experimental"]: resolve(__dirname, "src/experimental.ts"),
       },
       fileName: (_, entryName) => {
@@ -108,7 +108,7 @@ export default defineConfig({
     setupFiles: ["./vite/vitest.setup.ts"],
     coverage: {
       // you can include other reporters, but 'json-summary' is required, json is recommended
-      reporter: ["text", "json-summary", "json"],
+      reporter: ["text", "json-summary", "json", "html"],
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
     },

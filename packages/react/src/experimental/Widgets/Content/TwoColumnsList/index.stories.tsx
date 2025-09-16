@@ -61,3 +61,20 @@ export const Progress: Story = {
     ],
   },
 }
+
+export const TitleWithValue: Story = {
+  args: {
+    title: "Work time balance",
+    titleValue: "-68h",
+    list: [
+      {
+        title: "Effective worked time",
+        info: "100h",
+      },
+      {
+        title: "Planned time",
+        info: "168h",
+      },
+    ],
+  },
+}

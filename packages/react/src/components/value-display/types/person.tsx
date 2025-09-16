@@ -23,7 +23,7 @@ export const PersonCell = (args: PersonCellValue) => (
         src: args.src,
         badge: args.badge,
       }}
-      size="xsmall"
+      size="xs"
     />
     <span className="text-f1-foreground">
       {args.firstName.toString()} {args.lastName.toString()}

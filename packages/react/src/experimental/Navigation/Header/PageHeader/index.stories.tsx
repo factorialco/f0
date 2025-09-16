@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { Briefcase, EllipsisHorizontal, Settings } from "../../../../icons/app"
+import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
 const meta = {
@@ -280,7 +280,7 @@ export const WithProductUpdate: Story = {
             onClose: () => {
               alert("onClose")
             },
-            icon: Briefcase,
+            module: "project_management",
             dismissable: false,
             trackVisibility: (open) => {
               console.log("trackOpenChange", open)
@@ -295,7 +295,7 @@ export const WithProductUpdate: Story = {
             onClose: () => {
               alert("onClose")
             },
-            icon: Briefcase,
+            module: "project_management",
             dismissable: false,
             trackVisibility: (open) => {
               console.log("trackOpenChange", open)

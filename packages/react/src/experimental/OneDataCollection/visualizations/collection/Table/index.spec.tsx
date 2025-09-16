@@ -7,6 +7,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
@@ -907,6 +908,112 @@ describe("TableCollection", () => {
 
       // Clean up mock
       consoleSpy.mockRestore()
+    })
+  })
+
+  describe("Item Actions", () => {
+    const testPersonWithActions = {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      displayName: "Dr. John Doe",
+    }
+
+    const createTestSourceWithActions = (
+      itemActions: ItemActionsDefinition<Person>
+    ): DataSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      TestNavigationFilters,
+      GroupingDefinition<Person>
+    > => ({
+      ...createTestSource([testPersonWithActions]),
+      itemActions,
+    })
+
+    it("renders actions as buttons and dropdown", async () => {
+      const mockAction = vi.fn()
+
+      const itemActions: ItemActionsDefinition<Person> = (_item) => [
+        {
+          label: "Edit User",
+          type: "primary", // Required for button rendering
+          onClick: mockAction,
+        },
+        {
+          label: "View Profile",
+          type: "secondary", // Goes to dropdown
+          onClick: mockAction,
+        },
+      ]
+
+      render(
+        <TestWrapper>
+          <TableCollection
+            columns={testColumns}
+            source={createTestSourceWithActions(itemActions)}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </TestWrapper>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument()
+      })
+
+      // Verify primary action is rendered as button
+      expect(
+        screen.getByRole("button", { name: /edit user/i })
+      ).toBeInTheDocument()
+
+      // Secondary actions go to dropdown (just verify dropdown exists)
+      // ItemActionsRenderer renders both desktop and mobile versions,
+      // so we expect 2 buttons total (1 desktop + 1 mobile for 1 row)
+      const actionsButtons = screen.getAllByRole("button", { name: /actions/i })
+      expect(actionsButtons).toHaveLength(2) // Desktop + Mobile
+      expect(actionsButtons[0]).toBeInTheDocument()
+    })
+
+    it("calls onClick handlers when buttons are clicked", async () => {
+      const user = userEvent.setup()
+      const actionMock = vi.fn()
+
+      const itemActions: ItemActionsDefinition<Person> = (_item) => [
+        {
+          label: "Edit User",
+          type: "primary",
+          onClick: actionMock,
+        },
+      ]
+
+      render(
+        <TestWrapper>
+          <TableCollection
+            columns={testColumns}
+            source={createTestSourceWithActions(itemActions)}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </TestWrapper>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument()
+      })
+
+      const actionButton = screen.getByRole("button", {
+        name: /edit user/i,
+      })
+
+      await user.click(actionButton)
+
+      expect(actionMock).toHaveBeenCalledTimes(1)
     })
   })
 })

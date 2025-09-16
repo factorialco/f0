@@ -1,5 +1,5 @@
 import { Button as ActionButton } from "@/components/Actions/Button"
-import { Icon, IconProps, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import {
   FaceNegative,
   FaceNeutral,
@@ -13,14 +13,16 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Button } from "@/ui/button"
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
-import { BaseAvatar } from "../BaseAvatar"
+import { BaseAvatar } from "../internal/BaseAvatar"
 
-export type Pulse =
-  | "superNegative"
-  | "negative"
-  | "neutral"
-  | "positive"
-  | "superPositive"
+export const pulses = [
+  "superNegative",
+  "negative",
+  "neutral",
+  "positive",
+  "superPositive",
+] as const
+export type Pulse = (typeof pulses)[number]
 
 export const pulseIcon: Record<Pulse, IconType> = {
   superNegative: FaceSuperNegative,
@@ -30,7 +32,7 @@ export const pulseIcon: Record<Pulse, IconType> = {
   superPositive: FaceSuperPositive,
 }
 
-export const pulseIconColor: Record<Pulse, IconProps["color"]> = {
+export const pulseIconColor: Record<Pulse, F0IconProps["color"]> = {
   superNegative: "mood-super-negative",
   negative: "mood-negative",
   neutral: "mood-neutral",
@@ -40,11 +42,26 @@ export const pulseIconColor: Record<Pulse, IconProps["color"]> = {
 
 type BaseAvatarProps = ComponentProps<typeof BaseAvatar>
 
-type Props = {
+export type F0AvatarPulseProps = {
+  /**
+   * The first name of the person.
+   */
   firstName: string
+  /**
+   * The last name of the person.
+   */
   lastName: string
+  /**
+   * The source of the person's image.
+   */
   src?: string
+  /**
+   * The pulse to display on the avatar.
+   */
   pulse?: Pulse
+  /**
+   * The callback to be called when the pulse is clicked.
+   */
   onPulseClick: () => void
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
 
@@ -56,7 +73,7 @@ export const F0AvatarPulse = ({
   "aria-labelledby": ariaLabelledby,
   pulse,
   onPulseClick,
-}: Props) => {
+}: F0AvatarPulseProps) => {
   const translations = useI18n()
   const [showWave, setShowWave] = useState(!pulse)
 
@@ -129,7 +146,7 @@ export const F0AvatarPulse = ({
               type="rounded"
               name={[firstName, lastName]}
               src={src}
-              size="xlarge"
+              size="xl"
               color="random"
               aria-label={ariaLabel}
               aria-labelledby={ariaLabelledby}
@@ -147,7 +164,10 @@ export const F0AvatarPulse = ({
                   round
                   aria-label={translations.actions.edit}
                 >
-                  <Icon icon={pulseIcon[pulse]} color={pulseIconColor[pulse]} />
+                  <F0Icon
+                    icon={pulseIcon[pulse]}
+                    color={pulseIconColor[pulse]}
+                  />
                 </Button>
               </div>
             ) : (

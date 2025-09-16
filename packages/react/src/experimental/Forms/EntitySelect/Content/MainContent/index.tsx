@@ -320,7 +320,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             singleSelector={singleSelector}
             goToFirst={goToFirst}
             goToLast={goToLast}
-            hideLine={vi.index === flattenedList.length - 1}
+            hideLine={index === flattenedList.length - 1}
             disabled={disabled}
             hiddenAvatar={hiddenAvatar}
           />

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 import { Select, SelectProps } from "../index"
 
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import { Appearance, Circle, Desktop, Plus } from "@/icons/app"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
@@ -54,7 +54,7 @@ const items = [
   },
   {
     id: "system",
-    name: "System",
+    name: "System with a long label can overflow",
     description: "A theme that adapts to the system's default appearance",
     tag: "Unpaid",
   },

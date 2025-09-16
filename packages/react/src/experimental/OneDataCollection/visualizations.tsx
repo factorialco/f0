@@ -1,8 +1,8 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useState } from "react"
 import { Button } from "../../components/Actions/Button"
+import { F0Icon, IconType } from "../../components/F0Icon"
 import type { FiltersDefinition } from "../../components/OneFilterPicker/types"
-import { Icon, IconType } from "../../components/Utilities/Icon"
 import { Kanban, Sliders, Table } from "../../icons/app"
 import { useI18n } from "../../lib/providers/i18n"
 import { cn, focusRing } from "../../lib/utils"
@@ -206,7 +206,7 @@ export const VisualizationSelector = <
                   key={visualization.type}
                   onClick={() => handleVisualizationChange(index)}
                 >
-                  <Icon icon={IconVisualization} />
+                  <F0Icon icon={IconVisualization} />
                   {label}
                 </button>
               )

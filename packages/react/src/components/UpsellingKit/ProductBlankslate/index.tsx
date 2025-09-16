@@ -1,7 +1,7 @@
 // packages/react/src/experimental/ProductBlankslate/index.tsx
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { ModuleAvatar } from "@/experimental/Information/ModuleAvatar"
 import { CheckCircle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
@@ -13,7 +13,7 @@ type ProductBlankslateProps = {
   benefits: string[]
   actions?: React.ReactNode
   withShadow?: boolean
-  icon?: IconType
+  module?: ModuleId
   moduleName?: string
   tag?: {
     label: string
@@ -35,7 +35,7 @@ interface BenefitItemProps {
 
 const BenefitItem = ({ text }: BenefitItemProps) => (
   <div className="flex flex-row items-start gap-2">
-    <Icon icon={CheckCircle} size="md" className="text-f1-icon-positive" />
+    <F0Icon icon={CheckCircle} size="md" className="text-f1-icon-positive" />
     <span>{text}</span>
   </div>
 )
@@ -51,7 +51,7 @@ export const ProductBlankslate = forwardRef<
       benefits,
       actions,
       withShadow = true,
-      icon,
+      module,
       moduleName,
       tag,
     },
@@ -79,7 +79,7 @@ export const ProductBlankslate = forwardRef<
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center gap-2">
-                {icon && <ModuleAvatar icon={icon} />}
+                {module && <F0AvatarModule module={module} />}
                 {moduleName && (
                   <p className="text-base font-medium text-f1-foreground">
                     {moduleName}

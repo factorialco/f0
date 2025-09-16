@@ -1,6 +1,6 @@
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { forwardRef } from "react"
-import { Icon } from "../../../components/Utilities/Icon"
+import { F0Icon } from "../../../components/F0Icon/index.tsx"
 import { ChevronDown, ChevronUp } from "../../../icons/app"
 import { cn } from "../../../lib/utils.ts"
 
@@ -31,7 +31,7 @@ const SelectScrollButton = ({ variant, ...props }: Props) => {
         )}
         {...props}
       >
-        <Icon icon={variant === "up" ? ChevronUp : ChevronDown} size="sm" />
+        <F0Icon icon={variant === "up" ? ChevronUp : ChevronDown} size="sm" />
       </WrapperComponent>
     )
   })

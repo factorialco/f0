@@ -913,6 +913,12 @@ export const WithMultipleVisualizations: Story = {
         data: mockUsers,
         delay: 500,
       }),
+      lanes: [
+        { id: "eng", filters: { department: ["Engineering"] } },
+        { id: "prod", filters: { department: ["Product"] } },
+        { id: "design", filters: { department: ["Design"] } },
+        { id: "other", filters: { department: ["Marketing"] } },
+      ],
     })
 
     const visualizations = Object.values(

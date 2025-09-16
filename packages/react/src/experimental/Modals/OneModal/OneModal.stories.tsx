@@ -166,6 +166,35 @@ export const WithFullscreenPosition: Story = {
   },
 }
 
+export const WithFullscreenPositionAndActions: Story = {
+  args: {
+    ...WithFullscreenPosition.args,
+    children: (
+      <>
+        <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
+        <OneModal.Content tabs={TABS}>
+          <ExamplePersonList numberOfItems={3} />
+        </OneModal.Content>
+        <OneModal.Footer>
+          <div className="flex flex-1 flex-row gap-3">
+            <ButtonInternal
+              label="Approve"
+              icon={CheckDoubleIcon}
+              onClick={() => {}}
+            />
+            <ButtonInternal
+              label="Reject"
+              icon={CrossIcon}
+              variant="critical"
+              onClick={() => {}}
+            />
+          </div>
+        </OneModal.Footer>
+      </>
+    ),
+  },
+}
+
 export const WithModule: Story = {
   args: {
     ...Default.args,

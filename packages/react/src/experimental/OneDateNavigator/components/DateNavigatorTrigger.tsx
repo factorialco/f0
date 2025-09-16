@@ -2,6 +2,7 @@ import { Button } from "@/components/Actions/Button"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
 import type {
   DateRange,
+  DateRangeComplete,
   GranularityDefinition,
 } from "@/experimental/OneCalendar"
 import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
@@ -18,6 +19,7 @@ import { DatePickerValue } from "../types"
 
 type DateNavigatorTriggerProps = {
   value: DatePickerValue | undefined
+  compareToValue?: DateRangeComplete | DateRangeComplete[]
   disabled?: boolean
   error?: boolean
   className?: string
@@ -38,6 +40,7 @@ const DateNavigatorTrigger = forwardRef<
   (
     {
       value,
+      compareToValue,
       onDateChange,
       disabled,
       error,
@@ -53,13 +56,26 @@ const DateNavigatorTrigger = forwardRef<
   ) => {
     const i18n = useI18n()
 
-    const current = useMemo(() => {
+    const currentLabel = useMemo(() => {
       if (!value || !value.value) {
-        return i18n.date.selectDate
+        return [i18n.date.selectDate]
       }
+
       const granularity = granularityDefinitions[value.granularity]
-      return granularity.toString(value.value) ?? i18n.date.selectDate
-    }, [value, i18n.date.selectDate])
+
+      const values = [
+        value.value,
+        Array.isArray(compareToValue) ? compareToValue[0] : compareToValue,
+      ]
+        .filter((v) => v !== undefined)
+        .sort((a, b) => a?.from.getTime() - b?.from.getTime())
+
+      return values.map((v) => granularity.toString(v, i18n, "long"))
+    }, [value, i18n, compareToValue])
+
+    const label = useMemo(() => {
+      return Object.values(currentLabel).join(" ⸱ ")
+    }, [currentLabel])
 
     const handleNavigation = (date: DateRange | false) => {
       if (!date) {
@@ -156,7 +172,7 @@ const DateNavigatorTrigger = forwardRef<
         <ButtonInternal
           size="sm"
           variant="ghost"
-          label={current}
+          label={label}
           onClick={onClick}
           disabled={disabled}
           className={cn(highlighted && "bg-f1-background-secondary-hover")}

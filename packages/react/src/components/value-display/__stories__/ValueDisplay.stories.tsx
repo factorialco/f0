@@ -151,6 +151,69 @@ export const TextWithPlaceholder: Story = {
   },
 }
 
+export const LongTextType: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description",
+      render: () => ({
+        type: "longText",
+        value:
+          "This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.",
+      }),
+    },
+  },
+}
+
+export const LongTextWithLines: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description (2 lines)",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: "This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.",
+          lines: 2,
+        },
+      }),
+    },
+  },
+}
+
+export const LongTextWithLinesAndTooltip: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description (2 lines)",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: "This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.",
+          lines: 2,
+          tooltip: true,
+        },
+      }),
+    },
+  },
+}
+
+export const LongTextWithPlaceholder: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: undefined,
+          placeholder: "No description available",
+        },
+      }),
+    },
+  },
+}
+
 export const NumberInputAsObject: Story = {
   args: {
     item: mockItem,
@@ -563,6 +626,64 @@ export const FolderType: Story = {
         type: "folder",
         value: {
           name: "My folder",
+        },
+      }),
+    },
+  },
+}
+
+export const PercentageInputAsObject: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: 42,
+      }),
+    },
+  },
+}
+
+export const PercentageValueInputAsObject: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: { percentage: 50 },
+      }),
+    },
+  },
+}
+
+export const PercentageWithLabel: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: {
+          percentage: 75,
+          label: "324 out of 432",
+        },
+      }),
+    },
+  },
+}
+
+export const PercentageWithPlaceholder: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: {
+          percentage: undefined,
+          placeholder: "There is no data yet",
         },
       }),
     },

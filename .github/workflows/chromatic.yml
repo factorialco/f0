@@ -34,7 +34,7 @@ jobs:
 
       - name: Build Core
         run: |
-          pnpm --filter @factorialco/factorial-one-core build
+          pnpm --filter @factorialco/f0-core build
 
       - name: Run Chromatic
         id: chromatic

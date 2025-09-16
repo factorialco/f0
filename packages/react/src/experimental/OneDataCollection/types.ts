@@ -1,9 +1,9 @@
+import { IconType } from "@/components/F0Icon"
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/components/OneFilterPicker/types"
-import { IconType } from "@/components/Utilities/Icon"
 import { Observable } from "zen-observable-ts"
 import { PromiseState } from "../../lib/promise-to-observable"
 import { PrimaryActionsDefinition, SecondaryActionsDefinition } from "./actions"
@@ -94,6 +94,8 @@ export type DataSourceDefinition<
   /** Grouping configuration */
   grouping?: Grouping
   currentGrouping?: GroupingState<Record, Grouping>
+  /** Lanes configuration */
+  lanes?: ReadonlyArray<LaneDataSource<Filters>>
 }
 
 export type CollectionSearchOptions = {
@@ -474,6 +476,8 @@ export type DataSource<
   setCurrentSummaries?: React.Dispatch<React.SetStateAction<R | undefined>>
   /** Function to provide an id for a record, necessary for append mode */
   idProvider?: (item: R, index?: number) => string | number | symbol
+  /** Lanes data sources */
+  lanes?: ReadonlyArray<LaneDataSource<Filters>>
 }
 
 /**
@@ -484,3 +488,28 @@ export type PromiseOrObservable<T> =
   | T
   | Promise<T>
   | Observable<PromiseState<T>>
+
+/**
+ * Represents a single lane configuration with its own filters
+ * @template Filters - The available filter configurations for this lane
+ */
+export type LaneDataSource<Filters extends FiltersDefinition> = {
+  /** Unique identifier for the lane */
+  id: string
+  /** Current state of applied filters for this lane */
+  filters: FiltersState<Filters>
+}
+
+/**
+ * Data adapter configuration that supports lanes (must use infinite-scroll)
+ * @template Record - The type of records in the collection
+ * @template Filters - The available filter configurations
+ */
+export type LanesSupportedDataAdapter<
+  Record extends RecordType,
+  Filters extends FiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition,
+> = PaginatedDataAdapter<Record, Filters, NavigationFilters> & {
+  /** Lanes require infinite-scroll pagination */
+  paginationType: Extract<PaginationType, "infinite-scroll">
+}

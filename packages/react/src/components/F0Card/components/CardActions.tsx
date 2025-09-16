@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { Link, type LinkProps } from "@/components/Actions/Link"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { CardFooter } from "@/ui/Card"
 import { useMediaQuery } from "usehooks-ts"

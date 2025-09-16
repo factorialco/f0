@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import {
   forwardRef,
@@ -157,7 +157,7 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
                     {item.emoji ? (
                       <span className="text-base">{item.emoji}</span>
                     ) : item.icon ? (
-                      <Icon
+                      <F0Icon
                         icon={item.icon}
                         className="text-f1-foreground-secondary"
                       />
