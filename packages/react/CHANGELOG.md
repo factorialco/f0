@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.187.0](https://github.com/factorialco/f0/compare/f0-react-v1.186.2...f0-react-v1.187.0) (2025-09-16)
+
+
+### Features
+
+* add value to two-columns-list title ([#2506](https://github.com/factorialco/f0/issues/2506)) ([7b63287](https://github.com/factorialco/f0/commit/7b632871fa248ed10b48bc0f816418935b46bd8c))
+
 ## [1.186.2](https://github.com/factorialco/f0/compare/f0-react-v1.186.1...f0-react-v1.186.2) (2025-09-15)
 
 
