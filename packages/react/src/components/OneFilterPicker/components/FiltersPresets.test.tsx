@@ -36,13 +36,10 @@ describe("FiltersPresets", () => {
     await user.click(getByText("Engineering Active"))
 
     // Should call onPresetsChange with the preset's filter
-    expect(mockOnPresetsChange).toHaveBeenCalledWith(
-      {
-        department: ["engineering"],
-        status: ["active"],
-      },
-      "Engineering Active"
-    )
+    expect(mockOnPresetsChange).toHaveBeenCalledWith({
+      department: ["engineering"],
+      status: ["active"],
+    })
   })
 
   it("should deselect preset when clicked and already selected", async () => {
@@ -65,7 +62,7 @@ describe("FiltersPresets", () => {
     await user.click(getByText("Engineering Active"))
 
     // Should call onPresetsChange with empty filters to deselect
-    expect(mockOnPresetsChange).toHaveBeenCalledWith({}, "Engineering Active")
+    expect(mockOnPresetsChange).toHaveBeenCalledWith({})
   })
 
   it("should toggle between different presets correctly", async () => {
@@ -83,25 +80,19 @@ describe("FiltersPresets", () => {
 
     // Click on first preset
     await user.click(getByText("Engineering Active"))
-    expect(mockOnPresetsChange).toHaveBeenCalledWith(
-      {
-        department: ["engineering"],
-        status: ["active"],
-      },
-      "Engineering Active"
-    )
+    expect(mockOnPresetsChange).toHaveBeenCalledWith({
+      department: ["engineering"],
+      status: ["active"],
+    })
 
     // Reset mock
     mockOnPresetsChange.mockClear()
 
     // Click on second preset
     await user.click(getByText("Marketing Only"))
-    expect(mockOnPresetsChange).toHaveBeenCalledWith(
-      {
-        department: ["marketing"],
-      },
-      "Marketing Only"
-    )
+    expect(mockOnPresetsChange).toHaveBeenCalledWith({
+      department: ["marketing"],
+    })
   })
 
   it("should work with dropdown preset items", async () => {
@@ -123,6 +114,6 @@ describe("FiltersPresets", () => {
     await user.click(getByText("Marketing Only"))
 
     // Should deselect the preset
-    expect(mockOnPresetsChange).toHaveBeenCalledWith({}, "Marketing Only")
+    expect(mockOnPresetsChange).toHaveBeenCalledWith({})
   })
 })

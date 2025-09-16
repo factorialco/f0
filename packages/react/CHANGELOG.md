@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.189.1](https://github.com/factorialco/f0/compare/f0-react-v1.189.0...f0-react-v1.189.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* emit preset event with filter values ([#2603](https://github.com/factorialco/f0/issues/2603)) ([681dc3d](https://github.com/factorialco/f0/commit/681dc3d384cdad33b6f9372acf401e068658a4a3))
+
+## [1.189.0](https://github.com/factorialco/f0/compare/f0-react-v1.188.1...f0-react-v1.189.0) (2025-09-16)
+
+
+### Features
+
+* product card one campaign ([#2594](https://github.com/factorialco/f0/issues/2594)) ([1e5999d](https://github.com/factorialco/f0/commit/1e5999df5ea724c4c4651c93e6712afecc52257d))
+
+## [1.188.1](https://github.com/factorialco/f0/compare/f0-react-v1.188.0...f0-react-v1.188.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* add missing export for event catcher provider ([#2601](https://github.com/factorialco/f0/issues/2601)) ([3f3ee2a](https://github.com/factorialco/f0/commit/3f3ee2a75b012badfa18ef0035cfc87b39cb30b5))
+
 ## [1.188.0](https://github.com/factorialco/f0/compare/f0-react-v1.187.1...f0-react-v1.188.0) (2025-09-16)
 
 

@@ -35,17 +35,23 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
 
   const emitFilterChange = useCallback(
     (filters: FiltersState<FiltersDefinition>) => {
-      const newFilter = Object.entries(filters ?? {}).find(
+      if (!filters) return
+
+      const changedFilter = Object.entries(filters).find(
         ([field, value]) => latestFilters.current?.[field] !== value
       )
 
-      if (!newFilter || !isScalar(newFilter[1])) return
+      if (!changedFilter) return
+
+      const [field, value] = changedFilter
+
+      if (!isScalar(value)) return
 
       latestFilters.current = filters
 
       onEvent("datacollection.filter-change", {
-        name: newFilter?.[0],
-        value: newFilter?.[1],
+        name: field,
+        value: value,
       })
     },
     [onEvent]
@@ -72,9 +78,24 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
   )
 
   const emitPresetClick = useCallback(
-    (preset: string) => {
+    (filters: FiltersState<FiltersDefinition>) => {
+      if (!filters) return
+
+      const changedFilter = Object.entries(filters).find(
+        ([field, value]) => latestFilters.current?.[field] !== value
+      )
+
+      if (!changedFilter) return
+
+      const [field, value] = changedFilter
+
+      if (!isScalar(value)) return
+
+      latestFilters.current = filters
+
       onEvent("datacollection.preset-click", {
-        name: preset,
+        name: field,
+        value: value,
       })
     },
     [onEvent]
