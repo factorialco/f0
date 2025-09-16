@@ -1,4 +1,4 @@
-import { AlertAvatarProps as AlertAvatarProps_2 } from '../../factorial-one';
+import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
 import { AlertTagCellValue } from './types/alertTag.tsx';
 import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
 import { AmountCellValue } from './types/amount.tsx';
@@ -10,7 +10,7 @@ import { AvatarListCellValue } from './types/avatarList.tsx';
 import { AvatarListCellValue as AvatarListCellValue_2 } from '../../value-display/types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { BarChartProps } from '../../../components/Charts/BarChart';
-import { baseColors } from '@factorialco/factorial-one-core';
+import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
 import { ClassValue } from 'cva';
 import { CompanyCellValue } from './types/company.tsx';
@@ -40,12 +40,13 @@ import { ForwardRefExoticComponent } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon.tsx';
-import { IconType as IconType_2 } from '../../factorial-one';
+import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
+import { LongTextCellValue } from './types/longText.tsx';
 import { NumberCellValue } from './types/number.tsx';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
 import { Observable } from 'zen-observable-ts';
@@ -236,7 +237,7 @@ export declare const AiChat: () => JSX_2.Element | null;
 
 declare type AiChatMode = "popup" | "sidebar";
 
-export declare const AiChatProvider: ({ enabled, mode, greeting, children, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const AiChatProvider: ({ enabled, mode, greeting, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
     enabled?: boolean;
@@ -253,12 +254,14 @@ declare type AiChatProviderReturnValue = {
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     shouldPlayEntranceAnimation: boolean;
     setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
-} & Pick<AiChatState, "greeting">;
+    tmp_setAgent: (agent?: string) => void;
+} & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
     greeting?: string;
     initialMode: AiChatMode;
     enabled: boolean;
+    agent?: string;
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -1138,6 +1141,8 @@ declare type CompareToDef = {
         units: GranularityDefinitionKey;
     } | ((value: DateRangeComplete) => DateRangeComplete | DateRangeComplete[]);
 };
+
+declare type CompareToDefKey = string;
 
 declare type Content = (ComponentProps<typeof DataList.Item> & {
     type: "item";
@@ -2443,7 +2448,6 @@ declare type InputFieldProps<T> = {
         onChange?: (value: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
         value?: T;
     };
-    icon?: IconType;
     isEmpty?: (value: T | undefined) => boolean;
     emptyValue?: T;
     maxLength?: number;
@@ -2452,8 +2456,13 @@ declare type InputFieldProps<T> = {
     appendTag?: string;
     lengthProvider?: (value: T | undefined) => number;
     loading?: boolean;
-    avatar?: string;
-};
+} & ({
+    icon?: never;
+    avatar?: AvatarVariant;
+} | {
+    icon?: IconType;
+    avatar?: never;
+});
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
 
@@ -3016,7 +3025,7 @@ export declare const OneDataCollection: <Record extends RecordType, Filters exte
     fullHeight?: boolean;
 }) => JSX.Element;
 
-export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, onCompareToChange, ...props }: OneDatePickerProps): JSX_2.Element;
+export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, ...props }: OneDatePickerProps): JSX_2.Element;
 
 declare interface OneDatePickerPopupProps {
     onSelect?: (value: DatePickerValue | undefined) => void;
@@ -3032,6 +3041,7 @@ declare interface OneDatePickerPopupProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     compareTo?: DatePickerCompareTo;
+    defaultCompareTo?: CompareToDefKey;
     onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
 }
 
@@ -3118,7 +3128,7 @@ export declare const OneFilterPicker: {
  * Props for the Filters component.
  * @template Definition - The type defining the structure of available filters
  */
-declare interface OneFilterPickerRootProps<Definition extends FiltersDefinition> {
+declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     /** The definition of available filters and their configurations */
     filters?: Definition;
     /** Current state of applied filters */
@@ -3129,7 +3139,7 @@ declare interface OneFilterPickerRootProps<Definition extends FiltersDefinition>
     onChange: (value: FiltersState<Definition>) => void;
     /** The children of the component */
     children?: React.ReactNode;
-}
+};
 
 export declare const OneModal: OneModalComponent;
 
@@ -3534,6 +3544,7 @@ declare type ProductUpdatesProp = {
             dismissable: boolean;
             onClose?: () => void;
             trackVisibility?: (open: boolean) => void;
+            type?: "one-campaign" | undefined;
         }>;
     };
 };
@@ -3691,6 +3702,11 @@ declare interface ReactionsProps {
     items: ReactionProps[];
     onInteraction?: (emoji: string) => void;
     locale?: string;
+    action?: {
+        label: string;
+        icon: IconType;
+        onClick: () => void;
+    };
 }
 
 /**
@@ -4456,6 +4472,7 @@ export declare const TwoColumnsList: ForwardRefExoticComponent<TwoColumnsListTyp
 
 declare interface TwoColumnsListType {
     title?: string;
+    titleValue?: string;
     list: TwoColumnsItemType[];
 }
 
@@ -4541,6 +4558,7 @@ declare type ValueDisplayRendererDefinition = {
 
 declare const valueDisplayRenderers: {
     readonly text: (args: TextCellValue) => JSX_2.Element;
+    readonly longText: (args: LongTextCellValue) => JSX_2.Element;
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly date: (args: DateCellValue) => JSX_2.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;

@@ -7,7 +7,7 @@ import { AvatarListCellValue } from '../../value-display/types/avatarList';
 import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList.tsx';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { AvatarProps as AvatarProps_2 } from '@radix-ui/react-avatar';
-import { baseColors } from '@factorialco/factorial-one-core';
+import { baseColors } from '@factorialco/f0-core';
 import { CategoryBarProps } from './CategoryBarChart';
 import { ChartConfig } from '../../ui/chart';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
@@ -23,7 +23,7 @@ import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag.tsx';
 import { F0IconProps as F0IconProps_2 } from './F0Icon';
-import { f1Colors } from '@factorialco/factorial-one-core';
+import { f1Colors } from '@factorialco/f0-core';
 import { FileCellValue } from '../../value-display/types/file';
 import { FileCellValue as FileCellValue_2 } from './types/file.tsx';
 import { FolderCellValue } from '../../value-display/types/folder';
@@ -41,6 +41,7 @@ import { JSX as JSX_2 } from 'react';
 import { LineChartConfig } from '../../ui/chart';
 import { LineChartPropsBase } from './utils/types';
 import { LinkProps as LinkProps_3 } from './Link';
+import { LongTextCellValue } from './types/longText.tsx';
 import { MouseEventHandler } from 'react';
 import { NumberCellValue } from '../../value-display/types/number';
 import { NumberCellValue as NumberCellValue_2 } from './types/number.tsx';
@@ -264,6 +265,21 @@ declare type BaseBannerProps = {
     isLoading?: boolean;
     children?: React.ReactNode;
 };
+
+declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
+    /**
+     * The label of the chip
+     * */
+    label: string;
+    /**
+     * If defined, the chip will be clickable
+     * */
+    onClick?: () => void;
+    /**
+     * If defined, the close icon will be displayed and the chip will be clickable
+     * */
+    onClose?: () => void;
+}
 
 declare type BaseColor = keyof typeof baseColors;
 
@@ -562,6 +578,37 @@ declare interface CheckboxProps extends DataAttributes {
      */
     name?: string;
 }
+
+declare type ChipProps = BaseChipProps & ChipVariants & {
+    variant?: "default" | "selected";
+};
+
+declare type ChipVariants = {
+    /**
+     * If defined, an avatar will be displayed in the chip
+     * */
+    avatar: AvatarVariant;
+    icon?: undefined;
+} | {
+    /**
+     * If defined, an icon will be displayed in the chip
+     * */
+    icon: IconType;
+    avatar?: undefined;
+} | {
+    avatar?: undefined;
+    icon?: undefined;
+};
+
+declare const chipVariants: (props?: ({
+    variant?: "default" | "selected" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 export declare type CompanyAvatarVariant = Extract<AvatarVariant, {
     type: "company";
@@ -902,6 +949,21 @@ export declare interface ErrorMessageProps {
     description: string;
 }
 
+declare type EventCatcherFunction = (eventName: EventName, params: EventParams) => void;
+
+declare interface EventCatcherProviderProps {
+    children: ReactNode;
+    onEvent: EventCatcherFunction;
+    enabled?: boolean;
+    catchEvents?: string[];
+}
+
+declare type EventName = "datacollection.filter-change" | "datacollection.sorting-change" | "datacollection.preset-click";
+
+declare type EventParams = Record<string, EventScalar | Array<EventScalar>>;
+
+declare type EventScalar = string | number | boolean | undefined | null;
+
 export declare const experimental: <T extends (...args: any[]) => any>(name: string, component: T) => T;
 
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
@@ -1088,6 +1150,16 @@ export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_2
 export declare const F0Checkbox: typeof _F0Checkbox;
 
 declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, ...rest }: CheckboxProps): JSX_2.Element;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0ChipList: {
+    ({ chips, max, remainingCount: initialRemainingCount, layout, }: Props): JSX_2.Element;
+    displayName: string;
+};
+
+export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
 export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps_2, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
@@ -1485,7 +1557,7 @@ export declare const OneFilterPicker: {
  * Props for the Filters component.
  * @template Definition - The type defining the structure of available filters
  */
-declare interface OneFilterPickerRootProps<Definition extends FiltersDefinition> {
+declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     /** The definition of available filters and their configurations */
     filters?: Definition;
     /** Current state of applied filters */
@@ -1496,7 +1568,7 @@ declare interface OneFilterPickerRootProps<Definition extends FiltersDefinition>
     onChange: (value: FiltersState<Definition>) => void;
     /** The children of the component */
     children?: React.ReactNode;
-}
+};
 
 export declare type PersonAvatarVariant = Extract<AvatarVariant, {
     type: "person";
@@ -1547,7 +1619,7 @@ declare type ProductBlankslateProps = {
     };
 };
 
-export declare function ProductCard({ title, description, onClick, onClose, isVisible, dismissable, trackVisibility, ...props }: ProductCardProps): false | JSX_2.Element;
+export declare function ProductCard({ title, description, onClick, onClose, isVisible, dismissable, trackVisibility, type, ...props }: ProductCardProps): false | JSX_2.Element;
 
 export declare type ProductCardProps = {
     title: string;
@@ -1558,6 +1630,7 @@ export declare type ProductCardProps = {
     dismissable?: boolean;
     trackVisibility?: (open: boolean) => void;
     module: ModuleId;
+    type?: "one-campaign" | undefined;
 };
 
 export declare function ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, }: ProductModalProps): JSX_2.Element;
@@ -1636,6 +1709,29 @@ declare type PromoteAction = {
 };
 
 declare type Props = {
+    /**
+     * Array of chips to display.
+     */
+    chips: Array<ChipProps>;
+    /**
+     * The maximum number of chips to display.
+     * @default 4
+     */
+    max?: number;
+    /**
+     * The remaining number to display.
+     */
+    remainingCount?: number;
+    /**
+     * The layout of the chip list.
+     * - "fill" - Chips will expand to fill the available width, with overflow items shown in a counter
+     * - "compact" - Chips will be stacked together up to the max limit, with remaining shown in counter
+     * @default "compact"
+     */
+    layout?: "fill" | "compact";
+};
+
+declare type Props_2 = {
     count: number;
     list?: TagCounterItem[];
 };
@@ -1690,7 +1786,7 @@ export declare interface TagCompanyProps {
 }
 
 export declare const TagCounter: {
-    ({ count, list }: Props): JSX_2.Element;
+    ({ count, list }: Props_2): JSX_2.Element;
     displayName: string;
 };
 
@@ -1963,6 +2059,7 @@ declare type ValueDisplayRendererContext_2 = {
 
 declare const valueDisplayRenderers: {
     readonly text: (args: TextCellValue_2) => JSX_2.Element;
+    readonly longText: (args: LongTextCellValue) => JSX_2.Element;
     readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly date: (args: DateCellValue_2) => JSX_2.Element;
     readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
