@@ -7,7 +7,6 @@ import { useAiChat } from "./providers/AiChatStateProvider"
 export const OneSwitch = ({
   className,
   disabled,
-  ...props
 }: React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
