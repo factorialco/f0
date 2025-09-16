@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.189.2](https://github.com/factorialco/f0/compare/f0-react-v1.189.1...f0-react-v1.189.2) (2025-09-16)
+
+
+### Bug Fixes
+
+* **datacollection:** clear search on clear from empty state ([#2565](https://github.com/factorialco/f0/issues/2565)) ([fe6d273](https://github.com/factorialco/f0/commit/fe6d273a27c25409d9f5d0c3a4a9566be71997e5))
+
 ## [1.189.1](https://github.com/factorialco/f0/compare/f0-react-v1.189.0...f0-react-v1.189.1) (2025-09-16)
 
 
