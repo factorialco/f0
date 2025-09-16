@@ -1036,6 +1036,66 @@ export const WithInfiniteScrollPagination: Story = {
   },
 }
 
+// This is a test to see if the table visualization works with one column
+export const WithInfiniteScrollPaginationOneCol: Story = {
+  render: () => {
+    // Create a fixed set of paginated users so we're not regenerating them on every render
+    const paginatedMockUsers = generateMockUsers(50)
+
+    const mockVisualizations = getMockVisualizations({
+      frozenColumns: 0,
+    })
+
+    const source = useDataSource({
+      filters,
+      presets: filterPresets,
+      sortings,
+      selectable: (item) => (item.id !== "user-1a" ? item.id : undefined),
+      bulkActions: (allSelected) => {
+        return {
+          primary: [
+            {
+              label: allSelected ? "Delete All" : "Delete",
+              icon: Delete,
+              id: "delete-all",
+            },
+          ],
+        }
+      },
+      dataAdapter: createDataAdapter({
+        data: paginatedMockUsers,
+        delay: 500,
+        paginationType: "infinite-scroll",
+        perPage: 10,
+      }),
+    })
+
+    return (
+      <div className="space-y-4" style={{ height: "500px", overflow: "auto" }}>
+        <OneDataCollection
+          source={source}
+          onSelectItems={(selectedItems) => {
+            console.log("Selected items", "->", selectedItems)
+          }}
+          onBulkAction={(action, selectedItems) => {
+            console.log(`Bulk action: ${action}`, "->", selectedItems)
+          }}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [{ label: "Name", render: (item) => item.name }],
+              },
+            },
+            mockVisualizations.card,
+            mockVisualizations.list,
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
 export const WithSynchronousData: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({

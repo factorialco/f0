@@ -492,7 +492,7 @@ const OneDataCollectionComp = <
   return (
     <div
       className={cn(
-        "flex flex-col gap-4",
+        "flex w-full flex-col gap-4",
         layout === "standard" && "-mx-6",
         fullHeight && "h-full"
       )}
