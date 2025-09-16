@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.188.0](https://github.com/factorialco/f0/compare/f0-react-v1.187.1...f0-react-v1.188.0) (2025-09-16)
+
+
+### Features
+
+* add tracking to data collection ([#2424](https://github.com/factorialco/f0/issues/2424)) ([95df1d8](https://github.com/factorialco/f0/commit/95df1d893c29c8805d503cbdb828128dd16d49a8))
+
 ## [1.187.1](https://github.com/factorialco/f0/compare/f0-react-v1.187.0...f0-react-v1.187.1) (2025-09-16)
 
 
