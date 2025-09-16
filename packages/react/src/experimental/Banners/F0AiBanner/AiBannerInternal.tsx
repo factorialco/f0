@@ -1,5 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
+import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -10,7 +11,7 @@ export const AiBannerInternal = forwardRef<
   HTMLDivElement,
   AiBannerInternalProps
 >(function AiBannerInternal(
-  { title, onClose, children, primaryAction, secondaryAction },
+  { title, onClose, content, primaryAction, secondaryAction },
   ref
 ) {
   return (
@@ -42,7 +43,7 @@ export const AiBannerInternal = forwardRef<
               : "rounded-[13.25px]"
           )}
         >
-          {children}
+          <RichTextDisplay content={content} />
         </div>
         {(secondaryAction || primaryAction) && (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">

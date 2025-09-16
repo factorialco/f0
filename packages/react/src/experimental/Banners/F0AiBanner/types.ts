@@ -1,5 +1,4 @@
 import { IconType } from "@/components/F0Icon"
-import { ReactNode } from "react"
 
 export type AiBannerAction = {
   label: string
@@ -10,7 +9,7 @@ export type AiBannerAction = {
 export interface AiBannerInternalProps {
   title: string
   onClose?: () => void
-  children: ReactNode
+  content: string
   primaryAction?: AiBannerAction
   secondaryAction?: AiBannerAction
 }
