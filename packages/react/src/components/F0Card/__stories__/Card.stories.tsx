@@ -206,8 +206,6 @@ export const WithIconAndImage: Story = {
     avatar: {
       type: "icon",
       icon: Lightbulb,
-      color: "#877FED",
-      backgroundColor: "#E9E0FD",
     },
     image: image,
   },

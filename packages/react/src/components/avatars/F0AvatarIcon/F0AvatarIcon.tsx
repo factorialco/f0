@@ -7,8 +7,6 @@ export const avatarIconSizes = ["sm", "md", "lg"] as const
 export type F0AvatarIconProps = {
   icon: IconType
   size?: (typeof avatarIconSizes)[number]
-  color?: `#${string}`
-  backgroundColor?: `#${string}`
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
 
 const sizes = {
@@ -22,17 +20,12 @@ export const F0AvatarIcon = ({
   size = "md",
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
-  color,
-  backgroundColor,
 }: F0AvatarIconProps) => {
-  const backgroundCSS =
-    backgroundColor !== undefined && `bg-[${backgroundColor}]`
   return (
     <div
       className={cn(
         "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background dark:bg-f1-background-inverse-secondary",
-        sizes[size],
-        backgroundColor && `${backgroundCSS} dark:${backgroundCSS}`
+        sizes[size]
       )}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
@@ -40,7 +33,6 @@ export const F0AvatarIcon = ({
       <F0Icon
         icon={icon}
         size={size}
-        {...(color !== undefined ? { color } : {})}
         className="text-f1-foreground-secondary"
       />
     </div>
