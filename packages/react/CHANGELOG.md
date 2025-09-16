@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.187.0](https://github.com/factorialco/f0/compare/f0-react-v1.186.2...f0-react-v1.187.0) (2025-09-16)
+
+
+### Features
+
+* add value to two-columns-list title ([#2506](https://github.com/factorialco/f0/issues/2506)) ([7b63287](https://github.com/factorialco/f0/commit/7b632871fa248ed10b48bc0f816418935b46bd8c))
+
+## [1.186.2](https://github.com/factorialco/f0/compare/f0-react-v1.186.1...f0-react-v1.186.2) (2025-09-15)
+
+
+### Bug Fixes
+
+* **CommunityPost:** fix comment button growing unexpectedly ([#2563](https://github.com/factorialco/f0/issues/2563)) ([f9d1902](https://github.com/factorialco/f0/commit/f9d1902aebeb7d8e8a673861b518010bf7a322d9))
+
+## [1.186.1](https://github.com/factorialco/f0/compare/f0-react-v1.186.0...f0-react-v1.186.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* **AvatarList:** correct gap between avatars ([#2562](https://github.com/factorialco/f0/issues/2562)) ([2f21bd9](https://github.com/factorialco/f0/commit/2f21bd9818cbd5495bf6fcfd7867e6f95965f76b))
+
+## [1.186.0](https://github.com/factorialco/f0/compare/f0-react-v1.185.0...f0-react-v1.186.0) (2025-09-15)
+
+
+### Features
+
+* Select ellipsis in label ([#2590](https://github.com/factorialco/f0/issues/2590)) ([799ed4b](https://github.com/factorialco/f0/commit/799ed4b0e4e6150a244e69df50dba368b3764780))
+
 ## [1.185.0](https://github.com/factorialco/f0/compare/f0-react-v1.184.0...f0-react-v1.185.0) (2025-09-15)
 
 

@@ -1,5 +1,6 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { ChevronDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -94,13 +95,13 @@ const SelectValue = forwardRef<
   { item: SelectItemObject<string> }
 >(function SelectValue({ item }, ref) {
   return (
-    <div className="flex items-center gap-1.5" ref={ref}>
+    <div className="flex min-w-0 flex-1 items-center gap-1.5" ref={ref}>
       {item.icon && (
         <div className="h-5 shrink-0 text-f1-icon">
           <F0Icon icon={item.icon} />
         </div>
       )}
-      {item.label}
+      <OneEllipsis tag="span">{item.label}</OneEllipsis>
     </div>
   )
 })
@@ -265,14 +266,17 @@ const SelectComponent = forwardRef(function Select<T extends string, R>(
                 className={cn(
                   "rounded-2xs bg-f1-background-secondary p-0.5",
                   "flex h-full items-center justify-center",
-                  !disabled && "cursor-pointer"
+                  !disabled && "cursor-pointer",
+                  size === "sm" && "-mr-[2px] -mt-[2px]",
+                  size === "md" && "-mt-[7px] h-[30px]"
                 )}
               >
                 <div
                   className={cn(
                     "origin-center transition-transform duration-200",
                     "flex items-center justify-center",
-                    openLocal && "rotate-180"
+                    openLocal && "rotate-180",
+                    size === "md" && "w-[22px]"
                   )}
                 >
                   <F0Icon
@@ -288,7 +292,7 @@ const SelectComponent = forwardRef(function Select<T extends string, R>(
             }
           >
             <button
-              className="flex w-full items-center justify-between"
+              className="flex min-w-0 flex-1 items-center justify-between"
               aria-label={label || placeholder}
             >
               {selectedOption && <SelectValue item={selectedOption} />}

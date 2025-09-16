@@ -54,7 +54,7 @@ const items = [
   },
   {
     id: "system",
-    name: "System",
+    name: "System with a long label can overflow",
     description: "A theme that adapts to the system's default appearance",
     tag: "Unpaid",
   },
