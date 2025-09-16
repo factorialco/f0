@@ -3,6 +3,7 @@ import { CopilotSidebar } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
+import { cn } from "@/lib/utils"
 import {
   AssistantMessage,
   ChatButton,
@@ -66,7 +67,7 @@ const AiChatCmp = () => {
 
   return (
     <CopilotSidebar
-      className="h-full py-1 xs:pr-1"
+      className={cn("h-full", open && "py-1 xs:pr-1")}
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
