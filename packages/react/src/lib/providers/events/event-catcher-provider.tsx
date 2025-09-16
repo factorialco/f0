@@ -7,7 +7,6 @@ import {
   useContext,
   useMemo,
 } from "react"
-import { useIsDev } from "../user-platafform"
 import { EventCatcherFunction } from "./types"
 
 type ContextType = { onEvent: EventCatcherFunction }
@@ -28,21 +27,15 @@ export function F0EventCatcherProvider({
   enabled = true,
   catchEvents,
 }: EventCatcherProviderProps): JSX.Element {
-  const isDev = useIsDev()
-
   const handleEvent = useCallback<EventCatcherFunction>(
     (eventName, params) => {
       if (!enabled || (catchEvents && !catchEvents.includes(eventName))) {
         return
       }
 
-      if (isDev) {
-        console.log("Event caught:", eventName, params)
-      }
-
       onEvent(eventName, params)
     },
-    [enabled, catchEvents, onEvent, isDev]
+    [enabled, catchEvents, onEvent]
   )
 
   const value = useMemo(() => ({ onEvent: handleEvent }), [handleEvent])
