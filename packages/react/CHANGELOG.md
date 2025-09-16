@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.188.1](https://github.com/factorialco/f0/compare/f0-react-v1.188.0...f0-react-v1.188.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* add missing export for event catcher provider ([#2601](https://github.com/factorialco/f0/issues/2601)) ([3f3ee2a](https://github.com/factorialco/f0/commit/3f3ee2a75b012badfa18ef0035cfc87b39cb30b5))
+
 ## [1.188.0](https://github.com/factorialco/f0/compare/f0-react-v1.187.1...f0-react-v1.188.0) (2025-09-16)
 
 
