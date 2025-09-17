@@ -1,6 +1,8 @@
 import { IconType } from "@/components/F0Icon"
-import { ActionProps, NavTarget } from "@/ui/Action"
+import { ActionProps, ButtonType, NavTarget } from "@/ui/Action"
 import { ButtonSize, ButtonVariant } from "./types"
+
+export type { ButtonType }
 
 export type ButtonInternalProps = Pick<
   ActionProps,
@@ -15,8 +17,12 @@ export type ButtonInternalProps = Pick<
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
     onClick?: (
-      event?: React.MouseEvent<HTMLElement, MouseEvent>
+      event: React.MouseEvent<HTMLElement, MouseEvent>
     ) => void | Promise<unknown>
+    /**
+     * The title of the button.
+     */
+    title?: string
     /**
      * The visible label for the button. Required for accessibility.
      */
@@ -53,7 +59,7 @@ export type ButtonInternalProps = Pick<
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean
-  } & (
+  } & ( // Target can only be used if href is provided
     | {
         /**
          * The URL to navigate to when the button is clicked.
@@ -63,10 +69,11 @@ export type ButtonInternalProps = Pick<
          * The target to navigate to when the button is clicked.
          */
         target?: NavTarget
+        type?: never
       }
-    // Target can only be used if href is provided
     | {
         href?: never
         target?: never
+        type?: ButtonType
       }
   )

@@ -1,4 +1,5 @@
-import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
+import { F0ButtonProps } from "@/components/actions/F0Button"
+import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { IconType } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
@@ -96,13 +97,12 @@ export function DropdownInternal({
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         {children || (
-          <F0Button
+          <ButtonInternal
             {...rest}
             hideLabel
             icon={icon}
             size={size}
             label="..."
-            round
             variant="outline"
             pressed={open}
           />

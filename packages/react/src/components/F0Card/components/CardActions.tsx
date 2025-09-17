@@ -59,7 +59,6 @@ export function CardActions({
                 variant="outline"
                 onClick={action.onClick}
                 hideLabel={isDesktop && index > 0}
-                round={isDesktop && index > 0}
                 size={isDesktop ? (compact ? "sm" : "md") : "lg"}
               />
             ))

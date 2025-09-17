@@ -16,9 +16,9 @@ export interface ActionCommonProps {
   prependOutside?: ReactNode
   appendOutside?: ReactNode
 
-  onClick?: (event?: React.MouseEvent<HTMLElement>) => void
-  onFocus?: (event?: React.FocusEvent<HTMLElement>) => void
-  onBlur?: (event?: React.FocusEvent<HTMLElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void
 
   disabled?: boolean
   loading?: boolean
@@ -33,6 +33,9 @@ export interface ActionCommonProps {
   mode?: "default" | "only"
 }
 
+export const buttonTypes = ["button", "submit", "reset"] as const
+export type ButtonType = (typeof buttonTypes)[number]
+
 export const navTargets = ["_blank", "_self", "_parent", "_top"] as const
 export type NavTarget = (typeof navTargets)[number]
 export interface LinkActionProps {
@@ -43,4 +46,6 @@ export interface LinkActionProps {
 export type ActionProps = ActionCommonProps &
   Partial<LinkActionProps> &
   ActionVariantProps &
-  DataAttributes
+  DataAttributes & {
+    type?: ButtonType
+  }

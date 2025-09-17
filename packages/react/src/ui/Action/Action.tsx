@@ -33,6 +33,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       variant,
       size = "md",
       mode = "default",
+      type = "button",
       ...props
     },
     ref
@@ -114,6 +115,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
         {...CommonProps}
         ref={ref as React.Ref<HTMLButtonElement>}
         data-pressed={pressed}
+        type={type}
       >
         {innerContent}
       </button>

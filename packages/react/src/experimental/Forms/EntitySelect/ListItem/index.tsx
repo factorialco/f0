@@ -254,7 +254,6 @@ const EntitySelectListItem = ({
     <>
       <div className="flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1">
         <F0Button
-          round
           hideLabel
           icon={expanded ? ChevronDown : ChevronRight}
           onClick={() => onExpand(!expanded)}

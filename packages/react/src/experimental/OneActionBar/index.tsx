@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { OneDropdownButton } from "@/components/actions/F0ButtonDropdown"
+import { F0ButtonDropdown } from "@/components/actions/F0ButtonDropdown"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { IconType } from "@/components/F0Icon"
 import {
@@ -129,7 +129,7 @@ export const OneActionBar = ({
                 <>
                   <MobileDropdown items={secondaryActions} />
                   {primaryActions.length > 1 ? (
-                    <OneDropdownButton
+                    <F0ButtonDropdown
                       items={primaryActions.map((action) => ({
                         value: action.label,
                         label: action.label,
@@ -178,7 +178,7 @@ export const OneActionBar = ({
                       />
                     ))}
                   {primaryActions.length > 1 ? (
-                    <OneDropdownButton
+                    <F0ButtonDropdown
                       items={primaryActions.map((action) => ({
                         value: action.label,
                         label: action.label,

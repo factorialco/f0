@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { OneDropdownButton } from "@/components/actions/F0ButtonDropdown"
+import { F0ButtonDropdown } from "@/components/actions/F0ButtonDropdown"
 import { Action } from "../../../Fields/Select/SelectBottomActions"
 
 interface Props {
@@ -52,7 +52,7 @@ const ListButtons = ({ primaryAction, secondaryActions }: ListButtonsProps) => {
   }
 
   return (
-    <OneDropdownButton
+    <F0ButtonDropdown
       items={items}
       value={primaryAction.label}
       disabled={primaryAction.disabled}

@@ -227,7 +227,6 @@ export function OneDatePickerPopup({
                     icon={ChevronLeft}
                     variant="neutral"
                     size="sm"
-                    round
                     hideLabel
                     label="Back"
                     onClick={handleBackToPresets}

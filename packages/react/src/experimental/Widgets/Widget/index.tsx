@@ -160,7 +160,6 @@ const Container = forwardRef<
                       hideLabel
                       label="hide/show"
                       variant="outline"
-                      round
                       onClick={togglePrivacyMode}
                       size="sm"
                     />

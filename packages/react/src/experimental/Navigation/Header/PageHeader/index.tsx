@@ -13,6 +13,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
+import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
@@ -83,28 +84,23 @@ function PageNavigationLink({
 }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
-    <Link
+    <F0Button
       href={href}
       title={label}
       aria-label={label}
       disabled={disabled}
       ref={ref}
-    >
-      <F0Button
-        size="sm"
-        variant="outline"
-        round
-        label={label}
-        icon={icon}
-        hideLabel
-        disabled={disabled}
-        onClick={(e) => {
-          e.preventDefault()
-          if (disabled) return
-          ref.current?.click()
-        }}
-      />
-    </Link>
+      size="sm"
+      variant="outline"
+      label={label}
+      icon={icon}
+      hideLabel
+      onClick={(e) => {
+        e.preventDefault()
+        if (disabled) return
+        ref.current?.click()
+      }}
+    />
   )
 }
 
@@ -160,7 +156,6 @@ export function PageHeader({
                   }}
                   variant="ghost"
                   hideLabel
-                  round
                   onClick={toggleSidebar}
                   label="Open main menu"
                   icon={Menu}
@@ -184,7 +179,6 @@ export function PageHeader({
                   <F0Button
                     variant="ghost"
                     hideLabel
-                    round
                     label="Back"
                     icon={ChevronLeft}
                     onClick={(e) => e.preventDefault()}
@@ -300,7 +294,7 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
   if ("actions" in action) {
     return (
       <Dropdown items={action.actions} open={isOpen} onOpenChange={setIsOpen}>
-        <F0Button
+        <ButtonInternal
           size="md"
           variant="outline"
           label={action.label}

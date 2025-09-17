@@ -65,7 +65,6 @@ export function DaytimePage({
                 label="Open main menu"
                 icon={Menu}
                 hideLabel
-                round
               />
             )}
             <div

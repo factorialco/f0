@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
   GroupingDefinition,
@@ -109,13 +109,12 @@ export const Settings = <
     <div className="flex gap-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild onClick={() => setOpen(!open)}>
-          <F0Button
+          <ButtonInternal
             variant="outline"
             label="Filters"
             icon={Sliders}
             onClick={() => {}}
             hideLabel
-            round
             pressed={open}
           />
         </PopoverTrigger>

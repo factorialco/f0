@@ -289,15 +289,9 @@ export const IconButtonGroup: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex items-center gap-2">
-      <F0Button variant="ghost" icon={Add} hideLabel round label="Add" />
-      <F0Button
-        variant="ghost"
-        icon={Archive}
-        hideLabel
-        round
-        label="Archive"
-      />
-      <F0Button variant="ghost" icon={Delete} hideLabel round label="Delete" />
+      <F0Button variant="ghost" icon={Add} hideLabel label="Add" />
+      <F0Button variant="ghost" icon={Archive} hideLabel label="Archive" />
+      <F0Button variant="ghost" icon={Delete} hideLabel label="Delete" />
     </div>
   ),
 }
@@ -317,7 +311,6 @@ export const States: Story = {
     const [asyncLoading, setAsyncLoading] = React.useState(false)
     return (
       <div className="flex gap-2">
-        <F0Button {...args} label="Pressed" pressed />
         <F0Button {...args} label="Disabled" disabled />
         <F0Button {...args} label="Loading" loading />
         <F0Button

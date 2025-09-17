@@ -126,7 +126,6 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             label="Stop generating"
             icon={SolidStop}
             hideLabel
-            round
           />
         ) : (
           <ButtonInternal
@@ -136,7 +135,6 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             label="Send message"
             icon={ArrowUp}
             hideLabel
-            round
           />
         )}
       </div>

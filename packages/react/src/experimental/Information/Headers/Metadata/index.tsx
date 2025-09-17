@@ -243,7 +243,6 @@ function MetadataItem({ item }: { item: MetadataItem }) {
                             key={`action-${index}`}
                             size="sm"
                             variant="neutral"
-                            round
                             label={action.label}
                             hideLabel
                             icon={action.icon}

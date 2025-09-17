@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
 import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ProductCard } from "@/components/UpsellingKit/ProductCard"
@@ -46,7 +46,7 @@ type ProductUpdatesProp = {
   hasUnread?: boolean
   currentModule: string
   onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"]
-  onHeaderClick?: ComponentProps<typeof DropdownMenuTrigger>["onClick"]
+  onHeaderClick?: F0ButtonProps["onClick"]
   onItemClick?: ComponentProps<typeof DropdownMenuItem>["onClick"]
   emptyScreen: {
     title: string
@@ -126,7 +126,6 @@ const ProductUpdates = ({
           variant="outline"
           icon={Megaphone}
           hideLabel
-          round
           label={label}
           pressed={open}
           append={
@@ -304,7 +303,7 @@ const Header = ({
 }: {
   title: string
   url: string
-  onClick: ComponentProps<typeof F0Button>["onClick"]
+  onClick: F0ButtonProps["onClick"]
 }) => (
   <a
     href={url}
@@ -313,7 +312,6 @@ const Header = ({
     <h2 className="text-base font-medium">{title}</h2>
     <F0Button
       variant="outline"
-      round
       size="sm"
       icon={ChevronRight}
       label={title}

@@ -170,7 +170,6 @@ export const VisualizationSelector = <
             icon={Sliders}
             onClick={() => {}}
             hideLabel
-            round
           />
         </PopoverTrigger>
         <PopoverContent

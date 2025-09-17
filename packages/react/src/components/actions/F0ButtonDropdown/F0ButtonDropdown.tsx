@@ -102,4 +102,4 @@ const F0ButtonDropdown = ({
   )
 }
 
-export { F0ButtonDropdown as OneDropdownButton }
+export { F0ButtonDropdown }

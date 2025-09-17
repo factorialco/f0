@@ -1,7 +1,7 @@
 import { F0Button } from "@/components/actions/F0Button"
 import {
   ButtonDropdownItem,
-  OneDropdownButton,
+  F0ButtonDropdown,
 } from "@/components/actions/F0ButtonDropdown"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
@@ -152,7 +152,6 @@ const SecondaryActionsButtons = ({
             size="md"
             label={action.label}
             disabled={disableButtons || action.disabled}
-            type="button"
             icon={"icon" in action ? action.icon : undefined}
           />
         ))}
@@ -179,7 +178,6 @@ const PrimaryActionButton = ({
       label={primaryAction.label || ""}
       disabled={disableButtons || primaryAction.disabled}
       icon={primaryAction.icon}
-      type="button"
     />
   )
 }
@@ -203,7 +201,7 @@ const renderPrimaryActionContent = ({
 }: PrimaryActionContentProps) => {
   if (!isFullscreen) {
     return primaryAction.subActions || includeSecondaryInDropdown ? (
-      <OneDropdownButton
+      <F0ButtonDropdown
         items={listOfActions}
         onClick={handleOnClick}
         variant={primaryAction.action.variant ?? "default"}
@@ -236,7 +234,6 @@ const renderPrimaryActionContent = ({
           label={sub.label}
           disabled={disableButtons || sub.disabled}
           icon={sub.icon}
-          type="button"
         />
       ))}
       {primaryAction.subActions?.length && <ToolbarDivider />}

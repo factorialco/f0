@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Add, Replace } from "../../../../icons/app/index.ts"
-import { OneDropdownButton } from "../index"
+import { Add, Replace } from "@/icons/app/index.ts"
+import { F0ButtonDropdown } from "../index"
 import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
 
 const meta = {
-  title: "DropdownButton",
-  component: OneDropdownButton,
+  title: "Actions/ButtonDropdown",
+  component: F0ButtonDropdown,
   parameters: {
     layout: "centered",
     design: {
       type: "figma",
-      url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Internal-Components?node-id=1751-49043",
+      url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Components?node-id=15914-56173",
     },
     docs: {
       description: {
@@ -21,7 +21,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     variant: "default",
     onClick: (value, item) => {
@@ -38,6 +38,11 @@ const meta = {
       control: "select",
       options: buttonDropdownSizes,
       description: "Size of the button",
+      table: {
+        type: {
+          summary: buttonDropdownSizes.join(" | "),
+        },
+      },
     },
     disabled: {
       control: "boolean",
@@ -45,8 +50,15 @@ const meta = {
     loading: {
       control: "boolean",
     },
+    items: {
+      table: {
+        type: {
+          summary: "ButtonDropdownItem[]",
+        },
+      },
+    },
   },
-} satisfies Meta<typeof OneDropdownButton>
+} satisfies Meta<typeof F0ButtonDropdown>
 
 export default meta
 type Story = StoryObj<typeof meta>

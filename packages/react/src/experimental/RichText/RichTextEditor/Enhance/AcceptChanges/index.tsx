@@ -41,7 +41,6 @@ const AcceptChanges = ({
         size="sm"
         variant="outline"
         icon={Cross}
-        type="button"
       />
 
       <F0Button
@@ -57,7 +56,6 @@ const AcceptChanges = ({
         size="sm"
         variant="outline"
         icon={Reset}
-        type="button"
       />
 
       <ToolbarDivider />
@@ -73,7 +71,6 @@ const AcceptChanges = ({
         size="sm"
         variant="default"
         icon={Check}
-        type="button"
       />
     </div>
   )

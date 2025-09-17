@@ -124,16 +124,14 @@ const Footer = ({
         >
           <F0Button
             onClick={(e) => {
-              e.preventDefault()
+              e?.preventDefault()
               setIsToolbarOpen(true)
             }}
             variant="outline"
             size="md"
             label="Toolbar"
             disabled={disableButtons}
-            type="button"
             hideLabel
-            round
             icon={TextSize}
           />
           {canUseFiles && (
@@ -151,10 +149,8 @@ const Footer = ({
                 }
               }}
               hideLabel
-              round
               label="Add Attachment"
               variant="outline"
-              type="button"
               disabled={disableButtons}
             />
           )}

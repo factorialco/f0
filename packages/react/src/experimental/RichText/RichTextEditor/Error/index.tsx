@@ -43,7 +43,6 @@ const Error = ({
             }
           }}
           label={closeErrorButtonLabel || "Continue editing"}
-          type="button"
           size="sm"
         />
       </div>

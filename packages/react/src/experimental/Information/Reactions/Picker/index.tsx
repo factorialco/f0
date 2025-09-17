@@ -1,10 +1,11 @@
-import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
+import { F0ButtonProps } from "@/components/actions/F0Button"
 import { Reaction } from "@/icons/app"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import EmojiPicker from "@emoji-mart/react"
 import { useState } from "react"
 
+import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import "./index.css"
 
 const EMOJI_BUTTON_SIZE = 36
@@ -32,7 +33,7 @@ export function Picker({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <F0Button
+        <ButtonInternal
           variant={variant}
           label="Add reaction"
           size={size}

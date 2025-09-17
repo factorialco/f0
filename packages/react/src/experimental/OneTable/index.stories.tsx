@@ -586,7 +586,6 @@ export const Actions: Story = {
                   variant="ghost"
                   icon={Ellipsis}
                   onClick={() => {}}
-                  round
                   label="Actions"
                 />
               </Dropdown>
@@ -666,7 +665,6 @@ export const WithLinks: Story = {
                   variant="ghost"
                   icon={Ellipsis}
                   onClick={() => {}}
-                  round
                   label="Actions"
                 />
               </Dropdown>
@@ -814,7 +812,6 @@ export const WithOnClick: Story = {
                     variant="ghost"
                     icon={Ellipsis}
                     onClick={() => {}}
-                    round
                     label="Actions"
                   />
                 </Dropdown>

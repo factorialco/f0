@@ -1,7 +1,7 @@
 import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
 import {
+  F0ButtonDropdown,
   F0ButtonDropdownProps,
-  OneDropdownButton,
 } from "@/components/actions/F0ButtonDropdown"
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
@@ -80,12 +80,12 @@ const DropdownButtonWithTooltip = memo(function DropdownButtonWithTooltip({
     return (
       <Tooltip description={tooltip}>
         <Wrapper>
-          <OneDropdownButton {...dropdownProps} />
+          <F0ButtonDropdown {...dropdownProps} />
         </Wrapper>
       </Tooltip>
     )
   }
-  return <OneDropdownButton {...dropdownProps} />
+  return <F0ButtonDropdown {...dropdownProps} />
 })
 
 export function BaseHeader({

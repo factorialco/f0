@@ -19,15 +19,13 @@ const Head = ({
       <div className="absolute right-3 top-3 z-50">
         <F0Button
           onClick={(e) => {
-            e.preventDefault()
+            e?.preventDefault()
             handleToggleFullscreen()
           }}
           label="Fullscreen"
           aria-label="Toggle fullscreen mode"
           variant="outline"
-          type="button"
           hideLabel
-          round
           size="sm"
           icon={isFullscreen ? Minimize : Maximize}
           disabled={disableAllButtons}

@@ -239,7 +239,6 @@ export function OneCalendar({
               variant="outline"
               label={i18n.navigation.previous}
               hideLabel
-              round
               icon={ChevronLeft}
               size="sm"
             />
@@ -248,7 +247,6 @@ export function OneCalendar({
               variant="outline"
               label={i18n.navigation.next}
               hideLabel
-              round
               icon={ChevronRight}
               size="sm"
             />

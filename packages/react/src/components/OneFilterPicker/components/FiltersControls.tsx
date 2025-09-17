@@ -1,4 +1,5 @@
 import { F0Button } from "@/components/actions/F0Button"
+import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -96,14 +97,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     <div className="flex items-center gap-2">
       <Popover open={isOpen} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
-          <F0Button
+          <ButtonInternal
             variant="outline"
             label={i18n.filters.label}
             icon={Filter}
             pressed={isOpen}
             onClick={() => onOpenChange(!isOpen)}
             hideLabel={hideLabel}
-            round={hideLabel}
             aria-controls={isOpen ? id : undefined}
           />
         </PopoverTrigger>

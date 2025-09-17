@@ -19,7 +19,7 @@ const meta = {
       url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Components?node-id=13235-148548&p=f&t=u27xbp3PH7jll0ic-0",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     onSelectedChange: (selected) => {
       console.log("Button toggle clicked", selected)

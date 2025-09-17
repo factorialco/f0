@@ -314,9 +314,7 @@ export const Toolbar = ({
           variant="neutral"
           size="md"
           disabled={disableButtons}
-          type="button"
           hideLabel
-          round
           label={labels.close}
           icon={Cross}
         />

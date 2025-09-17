@@ -37,7 +37,6 @@ export const CreateItem = ({
           label={label}
           onClick={() => onCreate()}
           icon={Plus}
-          round
           size="sm"
           variant="outline"
         />
