@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.193.1](https://github.com/factorialco/f0/compare/f0-react-v1.193.0...f0-react-v1.193.1) (2025-09-17)
+
+
+### Bug Fixes
+
+* **datacollection:** avatar list width ([#2610](https://github.com/factorialco/f0/issues/2610)) ([7ad7155](https://github.com/factorialco/f0/commit/7ad715518c356bba8c568af6e4cf7b45e53a0d80))
+
 ## [1.193.0](https://github.com/factorialco/f0/compare/f0-react-v1.192.0...f0-react-v1.193.0) (2025-09-17)
 
 
