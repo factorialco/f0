@@ -41,7 +41,7 @@ import { useSticky } from "./useSticky"
 export type WithOptionalSorting<
   R extends RecordType,
   Sortings extends SortingsDefinition,
-> = PropertyDefinition<R> & {
+> = Omit<PropertyDefinition<R>, "hide"> & {
   sorting?: SortingKey<Sortings>
 
   /**
