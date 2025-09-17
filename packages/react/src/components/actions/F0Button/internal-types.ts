@@ -1,12 +1,16 @@
 import { IconType } from "@/components/F0Icon"
 import { ActionProps, NavTarget } from "@/ui/Action"
-import { ButtonSize } from "./types"
+import { ButtonSize, ButtonVariant } from "./types"
 
 export type ButtonInternalProps = Pick<
   ActionProps,
-  "variant" | "size" | "disabled" | "className" | "pressed"
+  "size" | "disabled" | "className" | "pressed"
 > &
   DataAttributes & {
+    /**
+     * The variant of the button.
+     */
+    variant?: ButtonVariant
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */

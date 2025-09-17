@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
@@ -54,7 +54,7 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         {children || (
-          <F0Button
+          <ButtonInternal
             label="Other actions"
             icon={EllipsisHorizontal}
             variant="outline"
@@ -87,7 +87,9 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
             ) : (
               <button
                 key={item.label}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
                   item.onClick?.()
                   setOpen(false)
                 }}

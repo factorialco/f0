@@ -2,8 +2,8 @@ import {
   metadataRenderer,
   ValueDisplayRendererDefinition,
 } from "@/components/value-display"
+import { RecordType } from "@/hooks/datasource"
 import { ReactNode } from "react"
-import { RecordType } from "./types"
 import { VisualizationType } from "./visualizations/collection/types"
 
 export type RendererDefinition = ValueDisplayRendererDefinition

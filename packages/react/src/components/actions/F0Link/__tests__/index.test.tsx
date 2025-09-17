@@ -8,7 +8,7 @@ vi.mock("@/lib/linkHandler", async () => {
   return module
 })
 
-describe("Link", () => {
+describe("F0Link", () => {
   it("renders children correctly", () => {
     render(<F0Link href="/test">Click me</F0Link>)
     expect(screen.getByText("Click me")).toBeInTheDocument()

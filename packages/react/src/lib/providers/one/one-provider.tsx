@@ -49,7 +49,7 @@ export const LayoutProvider: React.FC<
     <LayoutContext.Provider value={{ element }}>
       <div
         ref={ref}
-        id="factorial-one-layout"
+        id="f0-layout"
         className={cn({
           "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]":
             fullScreen,

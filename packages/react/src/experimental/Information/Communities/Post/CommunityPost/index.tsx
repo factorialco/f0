@@ -1,4 +1,3 @@
-import { F0Button } from "@/components/actions/F0Button"
 import { F0Link } from "@/components/actions/F0Link"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
@@ -228,22 +227,19 @@ export const BaseCommunityPost = ({
           </div>
         )}
         <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        <div className="flex flex-row gap-2.5">
-          {!noReactionsButton && (
-            <F0Button
-              label={comment.label}
-              onClick={comment.onClick}
-              variant="outline"
-              icon={CommentIcon}
-              round
-              hideLabel
-            />
-          )}
-          <Reactions
-            items={reactions?.items ?? []}
-            onInteraction={reactions?.onInteraction}
-          />
-        </div>
+        <Reactions
+          items={reactions?.items ?? []}
+          onInteraction={reactions?.onInteraction}
+          action={
+            !noReactionsButton
+              ? {
+                  label: comment.label,
+                  onClick: comment.onClick,
+                  icon: CommentIcon,
+                }
+              : undefined
+          }
+        />
       </div>
     </div>
   )

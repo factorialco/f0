@@ -1,6 +1,7 @@
 import { Ai, Download, Pencil, Upload } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { OneDataCollection, useDataSource } from "../index"
+import { OneDataCollection } from ".."
+import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../item-actions"
 
 const meta = {
@@ -130,7 +131,7 @@ const createUserActions = (): ItemActionsDefinition<
 // Basic story showing all action types
 export const BasicActionsExample: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       dataAdapter: {
         fetchData: () => Promise.resolve({ records: mockUsers }),
       },
@@ -192,7 +193,7 @@ export const CardActionsExample: Story = {
     },
   },
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       dataAdapter: {
         fetchData: () => Promise.resolve({ records: mockUsers }),
       },

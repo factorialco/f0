@@ -1,5 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { EmojiImage } from "@/lib/emojis"
+import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { cva } from "cva"
@@ -67,6 +68,8 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
     },
     ref
   ) {
+    useTextFormatEnforcer(label, { disallowEmpty: true, disallowEmojis: true })
+
     const [loading, setLoading] = useState(false)
 
     const handleClick = async (
@@ -100,6 +103,7 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
         {...props}
         loading={isLoading}
         className={className}
+        mode={hideLabel ? "only" : "default"}
       >
         <div
           className={cn(isLoading && "invisible", "flex items-center gap-1")}
@@ -116,7 +120,11 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
             />
           )}
           {emoji && (
-            <EmojiImage emoji={emoji} size={size === "sm" ? "sm" : "md"} />
+            <EmojiImage
+              emoji={emoji}
+              size={size === "sm" ? "sm" : "md"}
+              alt={""}
+            />
           )}
           <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
           {append}

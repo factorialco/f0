@@ -60,7 +60,7 @@ const EllipsisWrapper = forwardRef<HTMLSpanElement, EllipsisWrapperProps>(
       <span
         ref={ref}
         className={cn(
-          "min-w-0 max-w-full overflow-hidden text-ellipsis",
+          "pointer-events-auto min-w-0 max-w-full overflow-hidden text-ellipsis",
           lines > 1
             ? `not-supports-[(-webkit-line-clamp:${lines})]:whitespace-nowrap display-[-webkit-box] whitespace-normal line-clamp-${lines}`
             : "block whitespace-nowrap",

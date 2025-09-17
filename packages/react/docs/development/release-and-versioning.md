@@ -72,35 +72,34 @@ The package is published in the npmjs package registry so you can use it in your
 project as a regular package.
 
 ```bash
-pnpm add @factorialco/factorial-one@latest
+pnpm add @factorialco/f0@latest
 ```
 
 Or to install an specific version go to
-https://www.npmjs.com/package/@factorialco/factorial-one?activeTab=versions and
-check the version you want to install and execute:
+https://www.npmjs.com/package/@factorialco/f0?activeTab=versions and check the
+version you want to install and execute:
 
 ```bash
-pnpm add @factorialco/factorial-one@[VERSION]
+pnpm add @factorialco/f0@[VERSION]
 ```
 
 ### Alpha versions
 
-Alpha version are published in a release branch in the factorial-one repo, those
-branches are named `npm/alpha-pr-<pr-number>` and are ephemeral branches that
-will be deleted after 5 days or after merge the PR to main.
+Alpha version are published in a release branch in the f0 repo, those branches
+are named `npm/alpha-pr-<pr-number>` and are ephemeral branches that will be
+deleted after 5 days or after merge the PR to main.
 
 Use the following command to install an alpha version:
 
 ```bash
-pnpm i github:factorialco/factorial-one#npm/alpha-pr-[PR_NUMBER]
+pnpm i github:factorialco/f0#npm/alpha-pr-[PR_NUMBER]
 ```
 
 or if you want to install an specific commit:
 
 ```bash
-pnpm i github:factorialco/factorial-one#COMMIT_SHA
+pnpm i github:factorialco/f0#COMMIT_SHA
 ```
 
-Visit
-https://github.com/factorialco/factorial-one/branches/all?query=npm%2Falpha to
-get the list of the alpha branches and the commits
+Visit https://github.com/factorialco/f0/branches/all?query=npm%2Falpha to get
+the list of the alpha branches and the commits

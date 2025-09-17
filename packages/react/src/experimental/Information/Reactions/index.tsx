@@ -1,3 +1,5 @@
+import { F0Button } from "@/components/actions/F0Button"
+import { IconType } from "@/components/F0Icon"
 import { Picker } from "./Picker"
 import { Reaction, ReactionProps } from "./reaction"
 
@@ -5,11 +7,30 @@ export interface ReactionsProps {
   items: ReactionProps[]
   onInteraction?: (emoji: string) => void
   locale?: string
+  action?: {
+    label: string
+    icon: IconType
+    onClick: () => void
+  }
 }
 
-export function Reactions({ items, onInteraction, locale }: ReactionsProps) {
+export function Reactions({
+  items,
+  onInteraction,
+  locale,
+  action,
+}: ReactionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
+      {action && (
+        <F0Button
+          label={action.label}
+          icon={action.icon}
+          onClick={action.onClick}
+          variant="outline"
+          hideLabel
+        />
+      )}
       <Picker onSelect={onInteraction} locale={locale} />
       {items.map((item) => (
         <Reaction

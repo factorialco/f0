@@ -9,9 +9,9 @@ In this scenario the regular release process (build, publish, update
 dependency's version on the consumer and update) is very slow and doesn't
 provide a fast feedback of the changes.
 
-Use the `factorial-one`'s source as dependencies has a lot of tradeoffs and
-issues: aliases, vite plugins, etc. needs to be configured in the same way in
-the consumer of `factorial-one`
+Use the `f0`'s source as dependencies has a lot of tradeoffs and issues:
+aliases, vite plugins, etc. needs to be configured in the same way in the
+consumer of `f0`
 
 ### Strategy
 
@@ -30,22 +30,21 @@ about the versioning and the commit and how to use it in local
 > IMPORTANT: Remember to remove use a stable version before to merge into `main`
 > or release
 
-### How to use local version of `factorial-one` in your local repo (ex. `factorial`'s monorepo) {#local}
+### How to use local version of `f0` in your local repo (ex. `factorial`'s monorepo) {#local}
 
-This applies when both `factorial-one` and `factorial`'s monorepo are in the
-local computer
+This applies when both `f0` and `factorial`'s monorepo are in the local computer
 
-1. Go to the `factorial-one` folder: `cd factorial-one`
+1. Go to the `f0` folder: `cd f0`
 2. Run `pnpm build:watch` to rebuild the project on any change
 3. Run `pnpm link --global` to add the package to the local links
 4. Go to the factorial app monorepo: `cd factorial/frontend`
-5. Run `pnpm link --global @factorialco/factorial-one-react` to use the local
-   version of the package
+5. Run `pnpm link --global @factorialco/f0-react` to use the local version of
+   the package
 
-### How to use local version of `factorial-one` in coder {#cder}
+### How to use local version of `f0` in coder {#cder}
 
-This applies when `factorial-one` is in your local computer and `factorial`'s
-monorepo is in coder's dev environment
+This applies when `f0` is in your local computer and `factorial`'s monorepo is
+in coder's dev environment
 
 **Prerequisites:**
 
@@ -63,13 +62,13 @@ monorepo is in coder's dev environment
 
 **Steps:**
 
-1. Go to the `factorial-one` folder: `cd factorial-one/packages/react`
+1. Go to the `f0` folder: `cd f0/packages/react`
 2. Run `pnpm dev:coder` to rebuild the project on any change and sync that build
    to coder workspace
 3. On the `factorial` project you may need to clean vite cache (rm -Rf
    frontend/node_modules/.vite) and restart frontend service: make
    session.frontend
 
-> Now on each change in the `factorial-one`'s source code, the changes will be
-> reflected in the coder workspace and the frontend will be reloaded using
-> always the latest `factorial-one`'s code.
+> Now on each change in the `f0`'s source code, the changes will be reflected in
+> the coder workspace and the frontend will be reloaded using always the latest
+> `f0`'s code.

@@ -27,9 +27,10 @@ const emojiVariants = cva({
 
 export interface EmojiImageProps extends VariantProps<typeof emojiVariants> {
   emoji: string
+  alt?: string
 }
 
-export function EmojiImage({ emoji, size }: EmojiImageProps) {
+export function EmojiImage({ emoji, size, alt }: EmojiImageProps) {
   const emojiEntity = parseEmoji(emoji)
 
   const motionProps = {
@@ -45,7 +46,7 @@ export function EmojiImage({ emoji, size }: EmojiImageProps) {
     <motion.img
       key={emojiEntity.url}
       src={emojiEntity.url}
-      alt={emoji}
+      alt={alt ?? emoji}
       className={emojiVariants({ size })}
       draggable={false}
       {...motionProps}

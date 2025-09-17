@@ -1,13 +1,18 @@
+import { Microphone, MicrophoneNegative } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useState } from "react"
-import { Microphone, MicrophoneNegative, Placeholder } from "../../../icons/app"
-import { F0ButtonToggle } from "./index"
+import { buttonToggleSizes, F0ButtonToggle } from "../index"
 
 const meta = {
   title: "Actions/ButtonToggle",
   component: F0ButtonToggle,
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component:
+          "A button that can be toggled between two states. Works like a checkbox",
+      },
+    },
   },
   tags: ["autodocs", "experimental"],
   args: {
@@ -26,9 +31,12 @@ const meta = {
     },
     size: {
       control: "select",
-      options: ["sm", "md", "lg"],
-      description:
-        "Sets the button size. 'md' for desktop, 'sm' for compact/secondary actions.",
+      options: buttonToggleSizes,
+      table: {
+        type: {
+          summary: buttonToggleSizes.join(" | "),
+        },
+      },
     },
     label: {
       control: "text",
@@ -36,7 +44,11 @@ const meta = {
         "The accessible label for the button. Required for accessibility.",
     },
     icon: {
-      description: "Icon to display in the button. Required prop.",
+      table: {
+        type: {
+          summary: "IconType | [IconType, IconType]",
+        },
+      },
     },
     disabled: {
       control: "boolean",
@@ -56,18 +68,13 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     label: "Default Toggle",
-    icon: Placeholder,
+    icon: [MicrophoneNegative, Microphone],
   },
-  render: (args) => {
-    const [selected, setSelected] = useState(false)
+}
 
-    return (
-      <F0ButtonToggle
-        {...args}
-        icon={selected ? Microphone : MicrophoneNegative}
-        selected={selected}
-        onSelectedChange={setSelected}
-      />
-    )
+export const SingleIcon: Story = {
+  args: {
+    label: "Single Icon Toggle",
+    icon: Microphone,
   },
 }

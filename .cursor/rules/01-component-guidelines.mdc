@@ -1,5 +1,5 @@
 ---
-description: "Factorial One DS - Component Guidelines"
+description: "F0 DS - Component Guidelines"
 globs: "packages/react/src/components/**/*.tsx"
 alwaysApply: true
 ---

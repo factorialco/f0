@@ -1,6 +1,6 @@
 @import "./reset.css";
 @import "../assets/fonts/style.css";
-@import "@factorialco/factorial-one-core/base.css";
+@import "@factorialco/f0-core/base.css";
 
 :root {
   --ds-sidebar-width: 240px;

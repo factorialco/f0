@@ -1,14 +1,13 @@
 import { FiltersState } from "@/components/OneFilterPicker/types"
-import {
-  BaseResponse,
-  DataAdapter,
-} from "@/experimental/OneDataCollection/types"
+import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import { DataCollectionDataAdapter } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
+import { BaseResponse } from "@/hooks/datasource/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { Observable } from "zen-observable-ts"
-import { OneDataCollection, useDataSource } from "../index"
+import { CustomEmptyStates } from "../hooks/useEmptyState"
+import { OneDataCollection } from "../index"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
-import { CustomEmptyStates } from "../useEmptyState"
 import {
   createPromiseDataFetch,
   filters,
@@ -34,7 +33,7 @@ const BaseExampleComponent = ({
   currentFilters,
   emptyStates,
 }: {
-  dataAdapter: DataAdapter<
+  dataAdapter: DataCollectionDataAdapter<
     MockUser,
     typeof filters,
     NavigationFiltersDefinition
@@ -42,11 +41,15 @@ const BaseExampleComponent = ({
   currentFilters?: FiltersState<typeof filters>
   emptyStates?: CustomEmptyStates
 }) => {
-  const dataSource = useDataSource({
+  const dataSource = useDataCollectionSource({
     filters,
     dataAdapter,
     currentFilters,
     sortings,
+    search: {
+      enabled: true,
+      sync: true,
+    },
   })
 
   const mockVisualizations = getMockVisualizations()

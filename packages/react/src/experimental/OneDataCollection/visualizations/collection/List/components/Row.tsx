@@ -1,22 +1,22 @@
 import { F0Link } from "@/components/actions/F0Link"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRow } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
-import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import { renderProperty } from "@/experimental/OneDataCollection/property-render"
-import { SortingsDefinition } from "@/experimental/OneDataCollection/sortings"
-import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
-  DataSource,
+  FiltersDefinition,
   GroupingDefinition,
   RecordType,
-} from "@/experimental/OneDataCollection/types"
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ItemActionsDefinition } from "../../../../item-actions"
+import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
+import { renderProperty } from "../../../../property-render"
+import { SummariesDefinition } from "../../../../summary"
 import { ItemDefinition, ListPropertyDefinition } from "../types"
 import { ItemTeaser } from "./ItemTeaser"
 
@@ -29,7 +29,7 @@ type RowProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     R,
     Filters,
     Sortings,

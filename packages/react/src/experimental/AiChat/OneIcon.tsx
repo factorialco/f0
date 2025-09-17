@@ -6,12 +6,15 @@ import { Ref, forwardRef, useId } from "react"
 
 interface OneIconProps extends SVGProps<SVGSVGElement> {
   spin?: boolean
-  size?: "md" | "lg"
+  hover?: boolean
+  background?: string
+  size?: "sm" | "md" | "lg"
 }
 
 const sizeVariants = cva({
   variants: {
     size: {
+      sm: "h-[1.375rem] w-[1.375rem]",
       md: "h-8 w-8",
       lg: "h-10 w-10",
     },
@@ -51,7 +54,13 @@ const pieces = [
 ]
 
 const OneIcon = (
-  { spin = false, size = "md", ...svgProps }: OneIconProps,
+  {
+    spin = false,
+    size = "md",
+    background,
+    hover = false,
+    ...svgProps
+  }: OneIconProps,
   ref: Ref<SVGSVGElement>
 ) => {
   const clipPathId = useId()
@@ -69,6 +78,7 @@ const OneIcon = (
     <div
       className={cn(sizeVariants({ size }), className)}
       style={{
+        background: "transparent",
         perspective: spin ? "10px" : undefined,
         transformStyle: spin ? "preserve-3d" : undefined,
       }}
@@ -77,19 +87,22 @@ const OneIcon = (
         width="100%"
         height="100%"
         viewBox="0 0 32 32"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
         ref={ref}
         animate={{
           "--gradient-angle": ["0deg", "360deg"],
         }}
-        transition={{
-          "--gradient-angle": {
-            duration: 6,
-            ease: "linear",
-            repeat: Infinity,
-          },
-        }}
+        transition={
+          !background
+            ? {
+                "--gradient-angle": {
+                  duration: 6,
+                  ease: "linear",
+                  repeat: Infinity,
+                },
+              }
+            : undefined
+        }
         style={
           {
             "--gradient-angle": "0deg",
@@ -99,6 +112,9 @@ const OneIcon = (
         {...(({ style: _style, ...rest }) => rest)(safeSvgProps)}
       >
         <defs>
+          <clipPath id={`${clipPathId}-circle`}>
+            <circle cx="16" cy="16" r="16" />
+          </clipPath>
           {pieces.map((piece) => (
             <clipPath key={piece.id} id={`${clipPathId}-${piece.id}`}>
               <path d={piece.path} />
@@ -106,53 +122,75 @@ const OneIcon = (
           ))}
         </defs>
 
-        {pieces.map((piece) => (
-          <motion.foreignObject
-            key={piece.id}
-            x="0"
-            y="0"
-            width="32"
-            height="32"
-            clipPath={`url(#${clipPathId}-${piece.id})`}
-            animate={{
-              "--rotate3d-angle": ["0deg", "180deg", "180deg", "360deg"],
-              filter: spin
-                ? ["blur(0px)", "blur(8px)", "blur(0px)"]
-                : undefined,
-            }}
-            transition={{
-              "--rotate3d-angle": {
-                delay: spin ? piece.delay : 0,
-                duration: 1.8,
-                ease: [0.65, 0, 0.35, 1],
-                times: [0, 0.99, 0.9999, 1],
-              },
-              filter: {
-                delay: spin ? piece.delay : 0,
-                duration: 1.8,
-                ease: [0.65, 0, 0.35, 1],
-                times: [0, 0.5, 1],
-              },
-            }}
-            style={
-              {
-                "--rotate3d-angle": "0deg",
-                transform: spin
-                  ? `rotate3d(${piece.rotateAxis}, var(--rotate3d-angle))`
+        <g clipPath={`url(#${clipPathId}-circle)`}>
+          {pieces.map((piece) => (
+            <motion.foreignObject
+              key={piece.id}
+              x="0"
+              y="0"
+              width="32"
+              height="32"
+              clipPath={`url(#${clipPathId}-${piece.id})`}
+              animate={{
+                "--rotate3d-angle": ["0deg", "180deg", "180deg", "360deg"],
+                "--scale": hover ? 8 : 1,
+                "--rotate": hover ? "90deg" : "0deg",
+                opacity: hover ? (piece.id === "left" ? 1 : 0) : 1,
+                filter: spin
+                  ? ["blur(0px)", "blur(8px)", "blur(0px)"]
                   : undefined,
-                transformOrigin: piece.transformOrigin,
-              } as React.CSSProperties
-            }
-          >
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                background: `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
               }}
-            />
-          </motion.foreignObject>
-        ))}
+              transition={{
+                "--rotate3d-angle": {
+                  delay: spin ? piece.delay : 0,
+                  duration: 1.8,
+                  ease: [0.65, 0, 0.35, 1],
+                  times: [0, 0.99, 0.9999, 1],
+                },
+                "--scale": {
+                  duration: hover ? 0.6 : 0.35,
+                  ease: [0.55, 0, 0.1, 1],
+                },
+                "--rotate": {
+                  duration: 0.35,
+                  ease: "easeInOut",
+                },
+                opacity: {
+                  duration: hover ? 0.8 : 0.1,
+                  ease: "easeInOut",
+                },
+                filter: {
+                  delay: spin ? piece.delay : 0,
+                  duration: 1.8,
+                  ease: [0.65, 0, 0.35, 1],
+                  times: [0, 0.5, 1],
+                },
+              }}
+              style={
+                {
+                  "--rotate3d-angle": "0deg",
+                  "--scale": 1,
+                  "--rotate": "0deg",
+                  transform: spin
+                    ? `rotate3d(${piece.rotateAxis}, var(--rotate3d-angle))`
+                    : `scale(var(--scale)) rotate(var(--rotate))`,
+                  transformOrigin: piece.transformOrigin,
+                  willChange: "transform",
+                } as React.CSSProperties
+              }
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background:
+                    background ??
+                    `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
+                }}
+              />
+            </motion.foreignObject>
+          ))}
+        </g>
       </motion.svg>
     </div>
   )

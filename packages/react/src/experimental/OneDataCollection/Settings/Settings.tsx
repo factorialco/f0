@@ -1,14 +1,18 @@
 import { F0Button } from "@/components/actions/F0Button"
+import { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import {
+  GroupingDefinition,
+  GroupingState,
+  RecordType,
+  SortingsDefinition,
+  SortingsState,
+} from "@/hooks/datasource"
 import { Sliders } from "@/icons/app"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useState } from "react"
-import { FiltersDefinition } from "../../../components/OneFilterPicker/types"
-import { GroupingDefinition, GroupingState } from "../grouping"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
-import { SortingsDefinition, SortingsState } from "../sortings"
 import { SummariesDefinition } from "../summary"
-import { RecordType } from "../types"
 import { Visualization } from "../visualizations/collection"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"

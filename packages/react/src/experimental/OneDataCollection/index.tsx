@@ -2,12 +2,13 @@ import { useLayout } from "@/components/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { useEffect, useMemo, useState } from "react"
-import { useDebounceValue } from "usehooks-ts"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { F0Icon } from "../../components/F0Icon"
 import { Spinner } from "../../icons/app"
 
 import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+import { DataError } from "@/hooks/datasource/useData"
 import { experimentalComponent } from "@/lib/experimental"
 import { Skeleton } from "@/ui/skeleton"
 import { OneFilterPicker } from "../../components/OneFilterPicker"
@@ -18,214 +19,39 @@ import type {
 import { OneActionBar } from "../OneActionBar"
 import { getSecondaryActions, MAX_EXPANDED_ACTIONS } from "./actions"
 import { CollectionActions } from "./CollectionActions/CollectionActions"
+import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { ItemActionsDefinition } from "./item-actions"
 import { navigationFilterTypes } from "./navigationFilters"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "./navigationFilters/types"
+import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Search } from "./search"
 import { Settings } from "./Settings"
-import { SortingsDefinition, SortingsState } from "./sortings"
 import { SummariesDefinition } from "./summary"
 import type {
   BulkActionDefinition,
-  CollectionSearchOptions,
-  DataSource,
-  DataSourceDefinition,
-  GroupingDefinition,
-  GroupingState,
   OnBulkActionCallback,
   OnLoadDataCallback,
-  OnSelectItemsCallback,
-  RecordType,
 } from "./types"
-import { DataError } from "./useData"
-import { CustomEmptyStates, useEmptyState } from "./useEmptyState"
+export * from "./navigationFilters/types"
 
+import { useEventEmitter } from "./useEventEmitter"
 import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
-/**
- * A hook that manages data source state and filtering capabilities for a collection.
- * It creates and returns a reusable data source that can be shared across different
- * visualizations and components.
- *
- * This hook is intentionally separated from the rendering components to:
- * 1. Enable sharing the same data source across multiple components
- * 2. Allow for state management outside the rendering layer
- * 3. Support more complex data filtering, querying, and pagination logic
- * 4. Provide a clean separation between data management and visualization
- *
- * @template Record - The type of records in the collection
- * @template Filters - The definition of available filters for the collection
- * @template ItemActions - The definition of available item actions
- * @template Actions - The definition of available actions for the collection
- *
- * @param options - Configuration object containing:
- *   - filters: Optional filter configurations for the collection
- *   - currentFilters: Initial state of the filters
- *   - dataAdapter: Adapter for data fetching and manipulation
- *   - itemActions: Optional item actions available
- *   - actions: Optional DataCollection actions
- *   - presets: Optional filter presets
- * @param deps - Dependency array for memoization, similar to useEffect dependencies
- *
- * @returns A DataSource object containing:
- * - filters: The available filter configurations
- * - currentFilters: The current state of the filters
- * - setCurrentFilters: Function to update the filter state
- * - dataAdapter: The data adapter for fetching/manipulating data
- * - itemActions: Available actions for records (items)
- * - actions: Available actions for the collection
- * - presets: Available filter presets
- */
-export const useDataSource = <
-  Record extends RecordType,
-  FiltersSchema extends FiltersDefinition,
-  Sortings extends SortingsDefinition,
-  Summaries extends SummariesDefinition,
-  ItemActions extends ItemActionsDefinition<Record>,
-  NavigationFilters extends NavigationFiltersDefinition,
-  Grouping extends GroupingDefinition<Record>,
->(
-  {
-    currentFilters: initialCurrentFilters = {},
-    currentGrouping: initialCurrentGrouping,
-    filters,
-    navigationFilters,
-    search,
-    defaultSorting,
-    summaries,
-    dataAdapter,
-    grouping,
-    ...rest
-  }: DataSourceDefinition<
-    Record,
-    FiltersSchema,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  >,
-  deps: ReadonlyArray<unknown> = []
-): DataSource<
-  Record,
-  FiltersSchema,
-  Sortings,
-  Summaries,
-  ItemActions,
-  NavigationFilters,
-  Grouping
-> => {
-  const i18n = useI18n()
-
-  const [currentFilters, setCurrentFilters] = useState<
-    FiltersState<FiltersSchema>
-  >(initialCurrentFilters)
-
-  const [currentNavigationFilters, setCurrentNavigationFilters] = useState<
-    NavigationFiltersState<NavigationFilters>
-  >(() => {
-    if (!navigationFilters) {
-      return {} as NavigationFiltersState<NavigationFilters>
-    }
-
-    return Object.fromEntries(
-      Object.entries(navigationFilters).map(([key, filter]) => {
-        const filterType = navigationFilterTypes[filter.type]
-        return [
-          key,
-          filterType.valueConverter
-            ? filterType.valueConverter(filter.defaultValue, filter, i18n)
-            : filter.defaultValue,
-        ]
-      })
-    ) as NavigationFiltersState<NavigationFilters>
-  })
-
-  const [currentSortings, setCurrentSortings] =
-    useState<SortingsState<Sortings> | null>(defaultSorting || null)
-
-  const searchOptions = {
-    enabled: false,
-    sync: false,
-    ...search,
-  } satisfies CollectionSearchOptions
-
-  const [currentSearch, setCurrentSearch] = useState<string | undefined>()
-
-  const [debouncedCurrentSearch, setDebouncedCurrentSearch] = useDebounceValue<
-    string | undefined
-  >(currentSearch, 200)
-
-  useEffect(() => {
-    if (searchOptions.sync) return
-    setDebouncedCurrentSearch(currentSearch)
-  }, [currentSearch, searchOptions.sync, setDebouncedCurrentSearch])
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const memoizedFilters = useMemo(() => filters, deps)
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const memoizedSummaries = useMemo(() => summaries, deps)
-
-  const [isLoading, setIsLoading] = useState(false)
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const memoizedDataAdapter = useMemo(() => dataAdapter, deps)
-
-  const defaultGrouping = grouping?.mandatory
-    ? {
-        field: Object.keys(
-          grouping.groupBy
-        )[0] as keyof typeof grouping.groupBy,
-        order: "asc" as const,
-      }
-    : undefined
-
-  const [currentGrouping, setCurrentGrouping] = useState<
-    GroupingState<Record, Grouping>
-  >(initialCurrentGrouping ?? defaultGrouping)
-
-  // For mandatory grouping, ensure we have a valid grouping state
-  if (grouping?.mandatory && !currentGrouping?.field) {
-    throw new Error("Grouping is mandatory but no grouping state is set")
-  }
-
-  return {
-    filters: memoizedFilters,
-    currentFilters,
-    setCurrentFilters,
-    currentSortings,
-    setCurrentSortings,
-    summaries: memoizedSummaries,
-    search,
-    currentSearch,
-    setCurrentSearch,
-    debouncedCurrentSearch,
-    isLoading,
-    setIsLoading,
-    dataAdapter: memoizedDataAdapter,
-    navigationFilters,
-    currentNavigationFilters,
-    setCurrentNavigationFilters,
-    setCurrentGrouping,
-    currentGrouping,
-    grouping,
-    idProvider: (item, index): string | number =>
-      "id" in item ? `${item.id}` : index || JSON.stringify(item),
-    ...rest,
-  }
-}
 
 const MotionIcon = motion.create(F0Icon)
 
+import {
+  GroupingDefinition,
+  OnSelectItemsCallback,
+  RecordType,
+} from "@/hooks/datasource"
+import React from "react"
+import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
- * It consumes a data source (created by useDataSource) and displays it through one or more visualizations.
+ * It consumes a data source (created by useDataCollectionSource) and displays it through one or more visualizations.
  *
- * DataCollection is separated from useDataSource to:
+ * DataCollection is separated from useDataCollectionSource to:
  * 1. Support the composition pattern - data sources can be created and managed independently
  * 2. Allow a single data source to be visualized in multiple ways simultaneously
  * 3. Enable reuse of the same data source in different parts of the application
@@ -244,13 +70,13 @@ const MotionIcon = motion.create(F0Icon)
  * - The selected visualization of the data
  */
 const OneDataCollectionComp = <
-  Record extends RecordType,
+  R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
-  ItemActions extends ItemActionsDefinition<Record>,
+  ItemActions extends ItemActionsDefinition<R>,
   NavigationFilters extends NavigationFiltersDefinition,
-  Grouping extends GroupingDefinition<Record>,
+  Grouping extends GroupingDefinition<R>,
 >({
   source,
   visualizations,
@@ -259,8 +85,8 @@ const OneDataCollectionComp = <
   emptyStates,
   fullHeight,
 }: {
-  source: DataSource<
-    Record,
+  source: DataCollectionSource<
+    R,
     Filters,
     Sortings,
     Summaries,
@@ -270,7 +96,7 @@ const OneDataCollectionComp = <
   >
   visualizations: ReadonlyArray<
     Visualization<
-      Record,
+      R,
       Filters,
       Sortings,
       Summaries,
@@ -279,8 +105,8 @@ const OneDataCollectionComp = <
       Grouping
     >
   >
-  onSelectItems?: OnSelectItemsCallback<Record, Filters>
-  onBulkAction?: OnBulkActionCallback<Record, Filters>
+  onSelectItems?: OnSelectItemsCallback<R, Filters>
+  onBulkAction?: OnBulkActionCallback<R, Filters>
   emptyStates?: CustomEmptyStates
   onTotalItemsChange?: (totalItems: number) => void
   fullHeight?: boolean
@@ -317,6 +143,16 @@ const OneDataCollectionComp = <
     sortings,
   } = source
   const [currentVisualization, setCurrentVisualization] = useState(0)
+
+  const defaultSortings = useRef(currentSortings)
+
+  const { emitSortingChange } = useEventEmitter<Sortings>({
+    defaultSorting: defaultSortings.current,
+  })
+
+  useEffect(() => {
+    emitSortingChange(currentSortings)
+  }, [emitSortingChange, currentSortings])
 
   const primaryActionItem = useMemo(
     () => primaryActions && primaryActions(),
@@ -377,7 +213,7 @@ const OneDataCollectionComp = <
 
   const i18n = useI18n()
 
-  const onSelectItemsLocal: OnSelectItemsCallback<Record, Filters> = (
+  const onSelectItemsLocal: OnSelectItemsCallback<R, Filters> = (
     selectedItems,
     clearSelectedItems
   ): void => {
@@ -446,6 +282,7 @@ const OneDataCollectionComp = <
     clearFilters: () => {
       setEmptyStateType(false)
       setCurrentFilters({})
+      setCurrentSearch(undefined)
     },
   })
 
@@ -466,7 +303,11 @@ const OneDataCollectionComp = <
     filters,
     isInitialLoading: isInitialLoadingFromCallback,
     search,
-  }: Parameters<OnLoadDataCallback<Record, Filters>>[0]) => {
+  }: Parameters<OnLoadDataCallback<R, Filters>>[0]) => {
+    if (isInitialLoadingFromCallback) {
+      return
+    }
+
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
@@ -492,7 +333,7 @@ const OneDataCollectionComp = <
   return (
     <div
       className={cn(
-        "flex flex-col gap-4",
+        "flex w-full flex-col gap-4",
         layout === "standard" && "-mx-6",
         fullHeight && "h-full"
       )}
@@ -514,16 +355,20 @@ const OneDataCollectionComp = <
             {navigationFilters &&
               Object.entries(navigationFilters).map(([key, filter]) => {
                 const filterDef = navigationFilterTypes[filter.type]
-                return filterDef.render({
-                  filter: filter,
-                  value: currentNavigationFilters[key]!,
-                  onChange: (value) => {
-                    setCurrentNavigationFilters({
-                      ...currentNavigationFilters,
-                      [key]: value,
-                    })
-                  },
-                })
+                return (
+                  <React.Fragment key={key}>
+                    {filterDef.render({
+                      filter: filter,
+                      value: currentNavigationFilters[key]!,
+                      onChange: (value) => {
+                        setCurrentNavigationFilters({
+                          ...currentNavigationFilters,
+                          [key]: value,
+                        })
+                      },
+                    })}
+                  </React.Fragment>
+                )
               })}
           </div>
         </div>
@@ -577,7 +422,6 @@ const OneDataCollectionComp = <
           )}
         </OneFilterPicker>
       </div>
-
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
       <div
         className={cn(
@@ -593,7 +437,6 @@ const OneDataCollectionComp = <
           onLoadError={onLoadError}
         />
       </div>
-
       {emptyState ? (
         <div className="flex flex-1 flex-col items-center justify-center">
           <OneEmptyState

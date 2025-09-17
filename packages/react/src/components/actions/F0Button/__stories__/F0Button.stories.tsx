@@ -195,7 +195,6 @@ export const IconVariants: Story = {
             label="Default"
             icon={Add}
             hideLabel
-            round
           />
           <F0Button
             {...args}
@@ -203,7 +202,6 @@ export const IconVariants: Story = {
             label="Outline"
             icon={Add}
             hideLabel
-            round
           />
           <F0Button
             {...args}
@@ -211,7 +209,6 @@ export const IconVariants: Story = {
             label="Neutral"
             icon={Archive}
             hideLabel
-            round
           />
           <F0Button
             {...args}
@@ -219,15 +216,13 @@ export const IconVariants: Story = {
             label="Ghost"
             icon={Save}
             hideLabel
-            round
           />
           <F0Button
             {...args}
             variant="critical"
-            label="Critical"
+            label="Critical "
             icon={Delete}
             hideLabel
-            round
           />
           <F0Button
             {...args}
@@ -235,14 +230,13 @@ export const IconVariants: Story = {
             label="Promote"
             icon={Add}
             hideLabel
-            round
           />
         </div>
       </div>
       <div>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Only emoji</div>
         <div className="flex gap-2">
-          <F0Button {...args} emoji="🥰" label="🥰" variant="neutral" round />
+          <F0Button {...args} emoji="🥰" label="Emoji" variant="neutral" />
         </div>
       </div>
     </div>
