@@ -1,9 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { Select, SelectProps } from "../index"
+import { Select, SelectItemObject, SelectProps } from "../index"
 
 import { IconType } from "@/components/F0Icon"
+import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Appearance, Circle, Desktop, Plus } from "@/icons/app"
+import {
+  DEPARTMENTS_MOCK,
+  FIRST_NAMES_MOCK,
+  getMockValue,
+  MOCK_ICONS,
+  ROLES_MOCK,
+  SURNAMES_MOCK,
+} from "@/mocks"
+
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
 
@@ -12,9 +22,20 @@ const SelectWithHooks = (props: SelectProps<string>) => {
   const [localValue, setLocalValue] = useState(props.value)
   const [, setSearchValue] = useState("")
   // Sets a click handler to change the label's value
-  const handleOnChange = (value: string, item?: Record<string, string>) => {
+  const handleOnChange = (
+    value: string,
+    item?: unknown,
+    option?: SelectItemObject<string>
+  ) => {
     setLocalValue(value)
-    console.log("selected value:", value, "- selected item:", item)
+    console.log(
+      "selected value:",
+      value,
+      "- original item:",
+      item,
+      "- selection option:",
+      option
+    )
   }
 
   const handleOnSearchChange = (value: string) => {
@@ -332,19 +353,197 @@ export const WithActions: Story = {
   },
 }
 
+const mockItems = Array.from({ length: 10000 }, (_, i) => ({
+  value: `option-${i}`,
+  label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
+  icon: getMockValue(MOCK_ICONS, i),
+  role: getMockValue(ROLES_MOCK, i),
+  department: getMockValue(DEPARTMENTS_MOCK, i),
+  description: `Description for option ${i}`,
+}))
+
+type MockItem = (typeof mockItems)[number]
+
 export const LargeList: Story = {
   args: {
     ...WithSearchBox.args,
+    value: "option-4",
     options: [
       ...(meta.args?.options || []),
       { type: "separator" },
-      ...Array.from({ length: 10000 }, (_, i) => ({
-        value: `option-${i}`,
-        label: `Option ${i}`,
-        icon: Circle,
-        description: `Description for option ${i}`,
-      })),
+      ...mockItems,
     ],
+  },
+}
+
+export const WithDataSourceNotPaginated: Story = {
+  args: {
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: createDataSourceDefinition<MockItem>({
+      dataAdapter: {
+        fetchData: (options) => {
+          const { search } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+
+              const res = {
+                records: results,
+              }
+              resolve(res)
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: (typeof mockItems)[number]) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithDataSourcePaginated: Story = {
+  args: {
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: createDataSourceDefinition<MockItem>({
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(
+              () => {
+                const pageSize = pagination.perPage ?? 10
+                const cursor = "cursor" in pagination ? pagination.cursor : null
+                const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+
+                const results = mockItems.filter(
+                  (item) =>
+                    !search ||
+                    item.label.toLowerCase().includes(search.toLowerCase())
+                )
+
+                const paginatedResults = results.slice(
+                  cursor ? Number(cursor) : 0,
+                  nextCursor
+                )
+
+                const res = {
+                  type: "infinite-scroll" as const,
+                  cursor: String(nextCursor),
+                  perPage: pageSize,
+                  hasMore: nextCursor < results.length,
+                  records: paginatedResults,
+                  total: results.length,
+                }
+                resolve(res)
+              },
+              100 + Math.random() * 100
+            )
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithDataSourceGrouping: Story = {
+  args: {
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        groupBy: {
+          role: {
+            name: "Role",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+          department: {
+            name: "Department",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.department === groupId).length,
+          },
+        },
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination, sortings } = options
+          return new Promise((resolve) => {
+            setTimeout(
+              () => {
+                const pageSize = pagination.perPage ?? 10
+                const cursor = "cursor" in pagination ? pagination.cursor : null
+                const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+
+                const sortField = sortings?.[0]?.field as keyof MockItem
+                const results = mockItems
+                  .sort((a, b) => {
+                    return (
+                      (a[sortField] as string)?.localeCompare(
+                        b[sortField] as string
+                      ) ?? 0
+                    )
+                  })
+                  .filter(
+                    (item) =>
+                      !search ||
+                      item.label.toLowerCase().includes(search.toLowerCase())
+                  )
+
+                const paginatedResults = results.slice(
+                  cursor ? Number(cursor) : 0,
+                  nextCursor
+                )
+
+                const res = {
+                  type: "infinite-scroll" as const,
+                  cursor: String(nextCursor),
+                  perPage: pageSize,
+                  hasMore: nextCursor < results.length,
+                  records: paginatedResults,
+                  total: results.length,
+                }
+                resolve(res)
+              },
+              100 + Math.random() * 100
+            )
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
   },
 }
 
@@ -362,7 +561,7 @@ export const WithCustomTrigger: Story = {
   },
   render: ({ value, options, placeholder, onChange, ...args }) => (
     <Select
-      label="Select a color"
+      label="Choose a color"
       value={value}
       options={options}
       placeholder={placeholder}

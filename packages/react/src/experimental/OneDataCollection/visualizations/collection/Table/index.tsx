@@ -1,12 +1,6 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
-import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import {
-  getAnimationVariants,
-  useGroups,
-} from "@/experimental/OneDataCollection/useGroups"
-import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/useInfiniteScrollPagination"
 import {
   OneTable,
   TableBody,
@@ -16,23 +10,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/experimental/OneTable"
+import {
+  FiltersDefinition,
+  getAnimationVariants,
+  GroupingDefinition,
+  isInfiniteScrollPagination,
+  RecordType,
+  SortingKey,
+  SortingsDefinition,
+  SortingsState,
+  useGroups,
+  useSelectable,
+} from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton.tsx"
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, Fragment, useEffect, useMemo, useState } from "react"
-import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
+import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
+import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
+import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
-import {
-  SortingKey,
-  SortingsDefinition,
-  SortingsState,
-} from "../../../sortings"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
-import { CollectionProps, GroupingDefinition, RecordType } from "../../../types"
-import { isInfiniteScrollPagination, useData } from "../../../useData"
-import { useSelectable } from "../../../useSelectable"
+import { CollectionProps } from "../../../types"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useSticky } from "./useSticky"
@@ -148,14 +149,18 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
-  } = useData<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>(
-    source,
-    {
-      onError: (error) => {
-        onLoadError(error)
-      },
-    }
-  )
+  } = useDataCollectionData<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(source, {
+    onError: (error) => {
+      onLoadError(error)
+    },
+  })
 
   const { currentSortings, setCurrentSortings, isLoading } = source
 
@@ -199,6 +204,7 @@ export const TableCollection = <
   )
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
+
     if (!summariesData || !source.summaries) return null
 
     return {

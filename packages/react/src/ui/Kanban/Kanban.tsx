@@ -1,5 +1,5 @@
 import { ScrollArea } from "@/experimental"
-import type { RecordType } from "@/experimental/OneDataCollection/types"
+import type { RecordType } from "@/hooks/datasource"
 import { useDndEvents } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"

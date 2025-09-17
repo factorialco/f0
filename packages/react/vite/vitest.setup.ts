@@ -6,6 +6,15 @@ afterEach(() => {
   cleanup()
 })
 
+// Global declaration for TestI18nProvider
+declare global {
+  const TestI18nProvider: ({
+    children,
+  }: {
+    children: React.ReactNode
+  }) => JSX.Element
+}
+
 vi.stubGlobal("CSS", { supports: () => true })
 
 vi.stubGlobal("matchMedia", (query: string) => ({

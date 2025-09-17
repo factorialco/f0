@@ -1,6 +1,6 @@
 import { F0Card } from "@/components/F0Card"
 import { DraggableF0Card } from "@/components/F0Card/__stories__/DraggableF0Card"
-import type { RecordType } from "@/experimental/OneDataCollection/types"
+import type { RecordType } from "@/hooks/datasource"
 import { ArrowUp, Clock, Delete, Pencil, Person, Search } from "@/icons/app"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"

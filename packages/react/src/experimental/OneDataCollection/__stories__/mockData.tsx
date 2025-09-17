@@ -1,16 +1,36 @@
 import { PromiseState } from "@/lib/promise-to-observable"
 import { Observable } from "zen-observable-ts"
 
-import { NewColor } from "@/components/tags/F0TagDot"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { cn } from "@/lib/utils"
+import { generateMockUsers, MockUser } from "@/mocks"
+export { generateMockUsers, type MockUser }
 
 import {
   FilterDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/components/OneFilterPicker"
-import { OneDataCollection, useDataSource } from ".."
+import {
+  BulkActionsDefinition,
+  DataCollectionBaseFetchOptions,
+  DataCollectionDataAdapter,
+  useDataCollectionSource,
+} from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import {
+  GroupingDefinition,
+  GroupingState,
+  SortingsStateMultiple,
+} from "@/hooks/datasource"
+import {
+  BaseResponse,
+  InfiniteScrollPaginatedResponse,
+  OnSelectItemsCallback,
+  PaginatedResponse,
+  PaginationType,
+  RecordType,
+  SelectedItemsState,
+} from "@/hooks/datasource/types"
 import {
   Ai,
   Briefcase,
@@ -23,47 +43,21 @@ import {
   Person,
   Star,
   Upload,
-} from "../../../icons/app"
+} from "@/icons/app"
+import { DEPARTMENTS_MOCK } from "@/mocks"
+import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinition,
   SecondaryActionsDefinition,
   SecondaryActionsItemDefinition,
 } from "../actions"
-import { GroupingDefinition, GroupingState } from "../grouping"
 import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
 } from "../navigationFilters/types"
-import { SortingsStateMultiple } from "../sortings"
-import {
-  BaseFetchOptions,
-  BaseResponse,
-  BulkActionDefinition,
-  DataAdapter,
-  InfiniteScrollPaginatedResponse,
-  OnBulkActionCallback,
-  OnSelectItemsCallback,
-  PaginatedResponse,
-  PaginationType,
-  RecordType,
-  SelectedItemsState,
-} from "../types"
+import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
-
-export const DEPARTMENTS_MOCK = [
-  "Engineering",
-  "Product",
-  "Design",
-  "Marketing",
-] as const
-
-export const MANAGERS_MOCK = [
-  "Eliseo Juan",
-  "Arnau Smith",
-  "Daniel Johnson",
-  "Lilian Williams",
-] as const
 
 // Example filter definition
 export const filters = {
@@ -79,36 +73,6 @@ export const filters = {
     },
   },
 } as const
-
-export const YEARS_OF_EXPERIENCIE_MOCK = [
-  8, 12, 4, 15, 7, 3, 11, 6, 13, 2, 9, 14, 5, 10, 1, 8, 13, 4, 11, 6,
-]
-export const START_DATE_MOCK = Array.from(
-  { length: 20 },
-  (_, i) => new Date(2025, 6, 30 + i)
-)
-
-export const PROJECTS_MOCK = [
-  "Project A",
-  "Project B",
-  "Project C",
-  "Project D",
-]
-export const PERFORMANCE_SCORE_MOCK = [
-  85, 92, 78, 95, 88, 73, 91, 82, 94, 77, 89, 96, 81, 87, 93, 76, 90, 84, 97,
-  80,
-]
-
-export const DOT_TAG_COLORS_MOCK: NewColor[] = [
-  "yellow",
-  "purple",
-  "lilac",
-  "barbie",
-  "smoke",
-  "army",
-  "flubber",
-  "indigo",
-]
 
 // Define presets for the filters
 export const filterPresets: PresetsDefinition<typeof filters> = [
@@ -137,151 +101,6 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
     },
   },
 ]
-
-export type MockUser = {
-  index: number
-  id: string
-  name: string
-  image: (typeof IMAGE_MOCK)[number]
-  email: string
-  role: string
-  department: (typeof DEPARTMENTS_MOCK)[number]
-  manager: (typeof MANAGERS_MOCK)[number]
-  status: string
-  isStarred: boolean
-  salary: number | undefined
-  joinedAt: Date
-  permissions: {
-    read?: boolean
-    write?: boolean
-    delete: boolean
-  }
-}
-
-export const FIRST_NAMES_MOCK = [
-  "Dani",
-  "Desirée",
-  "Eliseo",
-  "Arnau",
-  "Carlos",
-  "Lilian",
-  "Andrea",
-  "Mario",
-  "Nik",
-  "René",
-  "Sergio",
-  "Saúl",
-]
-
-export const SURNAMES_MOCK = [
-  "Smith",
-  "Johnson",
-  "Williams",
-  "Brown",
-  "Jones",
-  "Garcia",
-  "Miller",
-  "Davis",
-  "Rodriguez",
-  "Martinez",
-  "Hernandez",
-  "Lopez",
-  "Gonzalez",
-  "Wilson",
-  "Anderson",
-  "Thomas",
-  "Taylor",
-  "Moore",
-  "Jackson",
-  "Martin",
-  "Lee",
-  "Perez",
-  "Thompson",
-  "White",
-  "Harris",
-  "Sanchez",
-  "Clark",
-  "Ramirez",
-  "Lewis",
-  "Robinson",
-]
-
-export const IMAGE_MOCK = [
-  "/avatars/person01.jpg",
-  "/avatars/person02.jpg",
-  "/avatars/person03.jpg",
-  "/avatars/person04.jpg",
-  "/avatars/person05.jpg",
-  "/avatars/person06.jpg",
-  "/avatars/person07.jpg",
-  "/avatars/person08.jpg",
-]
-
-export const ROLES_MOCK = [
-  "Senior Engineer",
-  "Product Manager",
-  "Designer",
-  "Marketing Lead",
-  "Software Engineer",
-]
-
-export const STATUS_MOCK = ["active", "inactive", "active", "active", "active"]
-
-export const SALARY_MOCK = [
-  100000,
-  80000,
-  90000,
-  undefined,
-  120000,
-  95000,
-  85000,
-  110000,
-  undefined,
-  75000,
-  130000,
-  92000,
-  88000,
-  undefined,
-  115000,
-  105000,
-  82000,
-  98000,
-  undefined,
-  125000,
-  78000,
-  108000,
-  94000,
-  undefined,
-  135000,
-]
-
-export const generateMockUsers = (count: number): MockUser[] => {
-  return Array.from({ length: count }).map((_, index) => {
-    const department = DEPARTMENTS_MOCK[index % DEPARTMENTS_MOCK.length]
-    const name = `${FIRST_NAMES_MOCK[index % FIRST_NAMES_MOCK.length]} ${SURNAMES_MOCK[index % SURNAMES_MOCK.length]}`
-    const email = `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`
-    return {
-      index,
-      id: `user-${index + 1}`,
-      name,
-      email,
-      image: IMAGE_MOCK[index % IMAGE_MOCK.length],
-      role: ROLES_MOCK[index % ROLES_MOCK.length],
-      department,
-      status: STATUS_MOCK[index % STATUS_MOCK.length],
-      manager: MANAGERS_MOCK[index % MANAGERS_MOCK.length],
-      isStarred: index % 3 === 0,
-      href: `/users/user-${index + 1}`,
-      salary: SALARY_MOCK[index % SALARY_MOCK.length],
-      joinedAt: START_DATE_MOCK[index % START_DATE_MOCK.length],
-      permissions: {
-        read: index % 2 === 0,
-        write: index % 3 === 0,
-        delete: index % 4 === 0,
-      },
-    }
-  })
-}
 
 // Mock data
 export const mockUsers = generateMockUsers(10)
@@ -678,7 +497,10 @@ export const createObservableDataFetch = (delay = 0) => {
     filters,
     sortings: sortingsState,
     navigationFilters,
-  }: BaseFetchOptions<FiltersType, NavigationFiltersDefinition>) =>
+  }: DataCollectionBaseFetchOptions<
+    FiltersType,
+    NavigationFiltersDefinition
+  >) =>
     new Observable<PromiseState<BaseResponse<MockUser>>>((observer) => {
       observer.next({
         loading: true,
@@ -726,13 +548,20 @@ export const createObservableDataFetch = (delay = 0) => {
 }
 
 export const createPromiseDataFetch = (delay = 500) => {
-  return ({
-    filters,
-    sortings: sortingsState,
-    search,
-    navigationFilters,
-  }: BaseFetchOptions<FiltersType, NavigationFiltersDefinition>) =>
-    new Promise<BaseResponse<MockUser>>((resolve) => {
+  return (
+    options: DataCollectionBaseFetchOptions<
+      FiltersType,
+      NavigationFiltersDefinition
+    >
+  ) => {
+    const {
+      filters,
+      sortings: sortingsState,
+      search,
+      navigationFilters,
+    } = options
+
+    return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
         const filteredData = filterUsers(
           mockUsers,
@@ -765,12 +594,13 @@ export const createPromiseDataFetch = (delay = 500) => {
         })
       }, delay)
     })
+  }
 }
 
 // Utility functions for data fetching
 export type FiltersType = typeof filters
 
-// Example component using useDataSource
+// Example component using useDataCollectionSource
 export const ExampleComponent = ({
   useObservable = false,
   usePresets = false,
@@ -804,17 +634,14 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
-  dataAdapter?: DataAdapter<MockUser, FiltersType, NavigationFiltersDefinition>
+  dataAdapter?: DataCollectionDataAdapter<
+    MockUser,
+    FiltersType,
+    NavigationFiltersDefinition
+  >
   defaultSelectedItems?: SelectedItemsState
   selectable?: (item: MockUser) => string | number | undefined
-  bulkActions?: (
-    selectedItems: Parameters<OnBulkActionCallback<MockUser, FiltersType>>[1]
-  ) =>
-    | {
-        primary?: BulkActionDefinition[]
-        secondary?: BulkActionDefinition[]
-      }
-    | { warningMessage: string }
+  bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
@@ -830,7 +657,7 @@ export const ExampleComponent = ({
     frozenColumns,
   })
 
-  const dataSource = useDataSource({
+  const dataSource = useDataCollectionSource({
     filters,
     navigationFilters,
     presets: usePresets ? filterPresets : undefined,
@@ -948,7 +775,7 @@ export function createDataAdapter<
   paginationType,
   perPage = 20,
   search = "",
-}: DataAdapterOptions<TRecord>): DataAdapter<
+}: DataAdapterOptions<TRecord>): DataCollectionDataAdapter<
   TRecord,
   TFilters,
   TNavigationFilters
@@ -1105,7 +932,11 @@ export function createDataAdapter<
   }
 
   if (paginationType === "pages") {
-    const adapter: DataAdapter<TRecord, TFilters, TNavigationFilters> = {
+    const adapter: DataCollectionDataAdapter<
+      TRecord,
+      TFilters,
+      TNavigationFilters
+    > = {
       paginationType: "pages",
       perPage,
       fetchData: ({ filters, sortings, pagination }) => {
@@ -1169,7 +1000,11 @@ export function createDataAdapter<
 
     return adapter
   } else if (paginationType === "infinite-scroll") {
-    const adapter: DataAdapter<TRecord, TFilters, TNavigationFilters> = {
+    const adapter: DataCollectionDataAdapter<
+      TRecord,
+      TFilters,
+      TNavigationFilters
+    > = {
       paginationType: "infinite-scroll",
       perPage,
       fetchData: ({ filters, sortings, pagination }) => {
@@ -1240,7 +1075,11 @@ export function createDataAdapter<
   }
 
   // Not paginated
-  const adapter: DataAdapter<TRecord, TFilters, TNavigationFilters> = {
+  const adapter: DataCollectionDataAdapter<
+    TRecord,
+    TFilters,
+    TNavigationFilters
+  > = {
     fetchData: ({ filters, sortings }) => {
       if (useObservable) {
         return new Observable<PromiseState<BaseResponse<TRecord>>>(

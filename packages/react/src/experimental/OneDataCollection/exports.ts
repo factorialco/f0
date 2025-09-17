@@ -1,8 +1,11 @@
+export type * from "@/hooks/datasource/types/sortings.typings"
 export type * from "../../components/OneFilterPicker/exports"
 export type * from "./actions"
-export { OneDataCollection, useDataSource } from "./index"
+export { OneDataCollection } from "./index"
 export type * from "./item-actions"
 export type * from "./navigationFilters/types"
-export type * from "./sortings"
 export type * from "./summary"
 export type * from "./types"
+// For backwards compatibility
+export * from "@/hooks/datasource/types"
+export * from "./hooks/useDataCollectionSource"
