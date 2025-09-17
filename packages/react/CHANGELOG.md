@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.193.0](https://github.com/factorialco/f0/compare/f0-react-v1.192.0...f0-react-v1.193.0) (2025-09-17)
+
+
+### Features
+
+* **Card:** full height for cards in DataCollection ([#2613](https://github.com/factorialco/f0/issues/2613)) ([a88328d](https://github.com/factorialco/f0/commit/a88328dd47c7e2823e4f6a794f596cdf6322d4f5))
+
 ## [1.192.0](https://github.com/factorialco/f0/compare/f0-react-v1.191.0...f0-react-v1.192.0) (2025-09-17)
 
 
