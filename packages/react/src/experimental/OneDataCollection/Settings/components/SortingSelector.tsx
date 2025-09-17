@@ -1,13 +1,13 @@
 import { Button } from "@/components/Actions/Button"
 import { Select } from "@/experimental/Forms/Fields/Select"
-import { Ascending, Descending } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { useEffect, useState } from "react"
 import {
   SortingKey,
   SortingsDefinition,
   SortingsState,
-} from "../../../../hooks/datasource/types/sortings.typings"
+} from "@/hooks/datasource/types/sortings.typings"
+import { Ascending, Descending } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { useEffect, useState } from "react"
 
 export const EmptySortingValue = "__no-sorting__"
 

@@ -1053,7 +1053,7 @@ export const WithInfiniteScrollPaginationOneCol: Story = {
       frozenColumns: 0,
     })
 
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings,
