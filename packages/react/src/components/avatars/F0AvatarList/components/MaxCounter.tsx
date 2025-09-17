@@ -57,7 +57,11 @@ export const MaxCounter = ({
 }: Props) => {
   const counter = (
     <div
-      className={cn("cursor-default font-medium", sizeVariants({ size, type }))}
+      className={cn(
+        "font-medium",
+        sizeVariants({ size, type }),
+        (list || []).length > 1 ? "cursor-pointer" : "cursor-default"
+      )}
     >
       {size === "xs" ? (
         <F0Icon icon={EllipsisHorizontal} size="xs" />
