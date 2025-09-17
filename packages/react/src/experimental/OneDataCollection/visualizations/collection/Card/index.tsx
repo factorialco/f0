@@ -253,6 +253,7 @@ const GroupCards = <
               link={itemHref}
               compact={compact ? compact : false}
               metadata={metadata}
+              fullHeight={true}
             />
           </motion.div>
         )
