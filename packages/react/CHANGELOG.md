@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.191.0](https://github.com/factorialco/f0/compare/f0-react-v1.190.0...f0-react-v1.191.0) (2025-09-17)
+
+
+### Features
+
+* extract useDataSource and useData from  datacollection - select uses source ([#2216](https://github.com/factorialco/f0/issues/2216)) ([eaed0ac](https://github.com/factorialco/f0/commit/eaed0ace46c790649f7e6548ebbbe10b63fe5c41))
+
 ## [1.190.0](https://github.com/factorialco/f0/compare/f0-react-v1.189.3...f0-react-v1.190.0) (2025-09-16)
 
 
