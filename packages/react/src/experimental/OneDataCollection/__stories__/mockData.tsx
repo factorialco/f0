@@ -240,6 +240,18 @@ export const getMockVisualizations = (options?: {
           render: (item) => item.department,
         },
         {
+          label: "Manager",
+          icon: Person,
+          render: (item) => ({
+            type: "person",
+            value: {
+              firstName: item.manager.split(" ")[0],
+              lastName: item.manager.split(" ")[1],
+            },
+          }),
+          hide: (item) => item.name.startsWith("D"),
+        },
+        {
           label: "Teammates",
           icon: Person,
           render: (item) => ({
@@ -319,6 +331,17 @@ export const getMockVisualizations = (options?: {
           label: "Role 2",
           render: (item) => item.role,
           sorting: "role",
+        },
+        {
+          label: "Manager",
+          render: (item) => ({
+            type: "person",
+            value: {
+              firstName: item.manager.split(" ")[0],
+              lastName: item.manager.split(" ")[1],
+            },
+          }),
+          hide: (item) => item.name.startsWith("D"),
         },
         {
           label: "Department",

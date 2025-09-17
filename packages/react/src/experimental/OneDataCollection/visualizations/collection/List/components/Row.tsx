@@ -131,13 +131,15 @@ export const Row = <
         />
       </div>
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
-        {(fields || []).map((field) => (
-          <div key={String(field.label)} onClick={itemOnClick}>
-            <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
-              {renderCell(item, field)}
+        {(fields || [])
+          .filter((field) => !field.hide?.(item))
+          .map((field) => (
+            <div key={String(field.label)} onClick={itemOnClick}>
+              <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
+                {renderCell(item, field)}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
       {source.itemActions && (
         <>

@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { ExampleComponent, getMockVisualizations } from "../mockData"
+import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/Card",
@@ -20,7 +20,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const BasicListVisualization: Story = {
+export const BasicCardVisualization: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations()
     return <ExampleComponent visualizations={[mockVisualizations.card]} />

@@ -145,8 +145,14 @@ const GroupCards = <
   ): Array<CardMetadata> {
     return properties
       .map((property) => {
+        if (property.hide?.(item)) {
+          return null
+        }
+
         const result = property.render(item)
-        if (result === undefined) return null
+        if (result === undefined) {
+          return null
+        }
 
         const cardProperty = convertToCardMetadataProperty(result)
         if (!cardProperty) return null
@@ -253,6 +259,7 @@ const GroupCards = <
               link={itemHref}
               compact={compact ? compact : false}
               metadata={metadata}
+              fullHeight={true}
             />
           </motion.div>
         )
