@@ -1,12 +1,6 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
-import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import {
-  getAnimationVariants,
-  useGroups,
-} from "@/experimental/OneDataCollection/useGroups"
-import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/useInfiniteScrollPagination"
 import {
   OneTable,
   TableBody,
@@ -16,30 +10,38 @@ import {
   TableHeader,
   TableRow,
 } from "@/experimental/OneTable"
+import {
+  FiltersDefinition,
+  getAnimationVariants,
+  GroupingDefinition,
+  isInfiniteScrollPagination,
+  RecordType,
+  SortingKey,
+  SortingsDefinition,
+  SortingsState,
+  useGroups,
+  useSelectable,
+} from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton.tsx"
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, Fragment, useEffect, useMemo, useState } from "react"
-import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
+import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
+import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
+import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
-import {
-  SortingKey,
-  SortingsDefinition,
-  SortingsState,
-} from "../../../sortings"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
-import { CollectionProps, GroupingDefinition, RecordType } from "../../../types"
-import { isInfiniteScrollPagination, useData } from "../../../useData"
-import { useSelectable } from "../../../useSelectable"
+import { CollectionProps } from "../../../types"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
+import { useSticky } from "./useSticky"
 
 export type WithOptionalSorting<
   R extends RecordType,
   Sortings extends SortingsDefinition,
-> = PropertyDefinition<R> & {
+> = Omit<PropertyDefinition<R>, "hide"> & {
   sorting?: SortingKey<Sortings>
 
   /**
@@ -147,14 +149,18 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
-  } = useData<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>(
-    source,
-    {
-      onError: (error) => {
-        onLoadError(error)
-      },
-    }
-  )
+  } = useDataCollectionData<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(source, {
+    onError: (error) => {
+      onLoadError(error)
+    },
+  })
 
   const { currentSortings, setCurrentSortings, isLoading } = source
 
@@ -198,6 +204,7 @@ export const TableCollection = <
   )
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
+
     if (!summariesData || !source.summaries) return null
 
     return {
@@ -262,6 +269,13 @@ export const TableCollection = <
 
   const skeletonColumns =
     columns.length + (source.itemActions ? 1 : 0) + (source.selectable ? 1 : 0)
+
+  const { getStickyPosition, checkColumnWidth } = useSticky(
+    frozenColumnsLeft,
+    columns,
+    !!source.selectable
+  )
+
   /*
    * Initial loading
    */
@@ -280,10 +294,8 @@ export const TableCollection = <
     })
   }
 
-  const checkColumnWidth = source.selectable ? 52 : 0
-
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="test flex h-full min-h-0 flex-col gap-4">
       <OneTable loading={isLoading}>
         <TableHeader sticky={true}>
           <TableRow>
@@ -315,18 +327,7 @@ export const TableCollection = <
                 )}
                 width={column.width}
                 align={column.align}
-                sticky={
-                  index < frozenColumnsLeft
-                    ? {
-                        left: columns
-                          .slice(0, Math.max(0, index))
-                          .reduce(
-                            (acc, column) => acc + (column.width ?? 0),
-                            checkColumnWidth
-                          ),
-                      }
-                    : undefined
-                }
+                sticky={getStickyPosition(index)}
                 {...column}
                 onSortClick={
                   sorting
@@ -464,9 +465,9 @@ export const TableCollection = <
             paginationInfo.hasMore && (
               <tr>
                 <td
-                  colSpan={columns.length + (source.selectable ? 1 : 0)}
+                  colSpan={columns.length + (source.selectable ? 1 : 0) + 1}
                   ref={loadingIndicatorRef}
-                  className="h-10 w-full"
+                  className="h-10"
                   aria-hidden="true"
                 ></td>
               </tr>
@@ -496,18 +497,7 @@ export const TableCollection = <
                   key={`summary-${String(column.label)}`}
                   firstCell={cellIndex === 0}
                   width={column.width}
-                  sticky={
-                    cellIndex < frozenColumnsLeft
-                      ? {
-                          left: columns
-                            .slice(0, Math.max(0, cellIndex))
-                            .reduce(
-                              (acc, column) => acc + (column.width ?? 0),
-                              checkColumnWidth
-                            ),
-                        }
-                      : undefined
-                  }
+                  sticky={getStickyPosition(cellIndex)}
                 >
                   {cellIndex === 0 &&
                   !source.selectable &&

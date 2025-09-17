@@ -1,11 +1,7 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import {
-  SortingKey,
-  SortingsDefinition,
-} from "@/experimental/OneDataCollection/sortings"
+import { RecordType, SortingKey, SortingsDefinition } from "@/hooks/datasource"
 import { PropertyDefinition } from "../../../property-render"
-import { RecordType } from "../../../types"
 
 export type WithOptionalSorting<
   Record,

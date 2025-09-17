@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, View, Text } from "react-native";
 import type { Meta, StoryFn } from "@storybook/react";
-import { PageHeader } from "@factorialco/factorial-one-react-native";
+import { PageHeader } from "@factorialco/f0-react-native";
 
 const meta: Meta<typeof PageHeader> = {
   title: "Components/Navigation/PageHeader",

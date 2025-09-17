@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { OneDataCollection, useDataSource } from "../index"
+import { OneDataCollection } from ".."
+import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -40,7 +41,7 @@ type Story = StoryObj<typeof meta>
 export const BasicSummaryRow: Story = {
   parameters: { a11y: { skipCi: true } },
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
@@ -83,7 +84,7 @@ export const WithInfiniteScrollSummarySticky: Story = {
   parameters: { a11y: { skipCi: true } },
   render: () => {
     const paginatedMockUsers = generateMockUsers(50)
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       sortings,
       summaries: {
         salary: {
@@ -134,7 +135,7 @@ export const WithInfiniteScrollSummaryStickyFrozenColumns: Story = {
   parameters: { a11y: { skipCi: true } },
   render: () => {
     const paginatedMockUsers = generateMockUsers(50)
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       sortings,
       summaries: {
         salary: {

@@ -3,7 +3,7 @@ import {
   DropdownItemSeparator,
 } from "../Navigation/Dropdown/internal"
 
-import { RecordType } from "./types"
+import { RecordType } from "@/hooks/datasource"
 
 export type ActionDefinition =
   | DropdownItemSeparator

@@ -1,4 +1,4 @@
-import { baseColors } from "@factorialco/factorial-one-core";
+import { baseColors } from "@factorialco/f0-core";
 import { BaseTag } from "../BaseTag";
 import { useTextFormatEnforcer } from "../../../lib/text";
 import { View } from "react-native";

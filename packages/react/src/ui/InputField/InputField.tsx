@@ -393,7 +393,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 />
               </div>
             )}
-            <div onClick={handleClickChildren} className="w-full">
+            <div
+              onClick={handleClickChildren}
+              className="w-full min-w-0 flex-1"
+            >
               {cloneElement(children as React.ReactElement, {
                 onChange: handleChange,
                 onBlur: props.onBlur,

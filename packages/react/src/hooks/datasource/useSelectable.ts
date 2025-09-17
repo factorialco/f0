@@ -1,17 +1,14 @@
+import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import type { FiltersDefinition } from "../../components/OneFilterPicker/types"
-import { ItemActionsDefinition } from "./item-actions"
-import { NavigationFiltersDefinition } from "./navigationFilters/types"
-import type { SortingsDefinition } from "./sortings"
-import type { SummariesDefinition } from "./summary"
 import {
-  DataSource,
+  DataSourceDefinition,
   GroupingDefinition,
   OnSelectItemsCallback,
   PaginationInfo,
   RecordType,
   SelectedItemsState,
 } from "./types"
+import type { SortingsDefinition } from "./types/sortings.typings"
 import { Data, GROUP_ID_SYMBOL, GroupRecord, WithGroupId } from "./useData"
 
 export type AllSelectionStatus = {
@@ -21,7 +18,7 @@ export type AllSelectionStatus = {
   unselectedCount: number
 }
 
-type UseSelectable<R extends RecordType> = {
+export type UseSelectable<R extends RecordType> = {
   isAllSelected: boolean
   selectedItems: Map<number | string, R>
   selectedGroups: Map<string, GroupRecord<R>>
@@ -37,24 +34,13 @@ export function useSelectable<
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
-  Summaries extends SummariesDefinition,
-  ItemActions extends ItemActionsDefinition<R>,
-  NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
   data: Data<R>,
   paginationInfo: PaginationInfo | null,
-  source: DataSource<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  >,
+  source: DataSourceDefinition<R, Filters, Sortings, Grouping>,
   onSelectItems: OnSelectItemsCallback<R, Filters> | undefined,
-  defaultSelectedItems: SelectedItemsState | undefined
+  defaultSelectedItems?: SelectedItemsState | undefined
 ): UseSelectable<R> {
   const isGrouped = data.type === "grouped"
   const isPaginated = paginationInfo !== null
@@ -395,7 +381,7 @@ export function useSelectable<
             !!checked,
           ])
         ),
-        filters: source.currentFilters,
+        filters: source.currentFilters || {},
         selectedCount,
       },
       clearSelectedItems

@@ -5,7 +5,7 @@ import {
   DrawerTrigger,
 } from "@/ui/drawer"
 import { useState } from "react"
-import { Button } from "../../../components/Actions/Button"
+import { Button } from "../../../components/Actions/Button/index.tsx"
 import { F0Icon } from "../../../components/F0Icon/index.tsx"
 import { EllipsisHorizontal } from "../../../icons/app"
 import { Link } from "../../../lib/linkHandler"
@@ -87,7 +87,9 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
             ) : (
               <button
                 key={item.label}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
                   item.onClick?.()
                   setOpen(false)
                 }}

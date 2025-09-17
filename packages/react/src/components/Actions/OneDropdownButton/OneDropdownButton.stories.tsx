@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Add, Replace } from "../../../icons/app"
+import { Add, Replace } from "../../../icons/app/index.ts"
 import { OneDropdownButton } from "./index"
 import { oneDropdownButtonSizes, oneDropdownButtonVariants } from "./types.ts"
 
