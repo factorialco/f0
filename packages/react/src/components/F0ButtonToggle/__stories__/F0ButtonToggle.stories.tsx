@@ -1,9 +1,10 @@
 import { Microphone, MicrophoneNegative } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { buttonToggleSizes, F0ButtonToggle } from "../index"
 
 const meta = {
-  title: "Actions/ButtonToggle",
+  title: "ButtonToggle",
   component: F0ButtonToggle,
   parameters: {
     layout: "centered",
@@ -12,6 +13,10 @@ const meta = {
         component:
           "A button that can be toggled between two states. Works like a checkbox",
       },
+    },
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Components?node-id=13235-148548&p=f&t=u27xbp3PH7jll0ic-0",
     },
   },
   tags: ["autodocs", "experimental"],
@@ -77,4 +82,33 @@ export const SingleIcon: Story = {
     label: "Single Icon Toggle",
     icon: Microphone,
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    label: "Toggle me",
+    icon: [MicrophoneNegative, Microphone],
+  },
+  render: () => (
+    <div className="flex w-fit flex-row gap-2">
+      {buttonToggleSizes.map((size) => (
+        <>
+          <F0ButtonToggle
+            key={size}
+            size={size}
+            label="Toggle me"
+            icon={[MicrophoneNegative, Microphone]}
+          />
+          <F0ButtonToggle
+            key={size}
+            size={size}
+            label="Toggle me"
+            selected={true}
+            icon={Microphone}
+          />
+        </>
+      ))}
+    </div>
+  ),
 }

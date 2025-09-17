@@ -1,8 +1,7 @@
+import { IconType } from "@/components/F0Icon"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { IconType } from "../../Utilities/Icon"
-import { OneDropdownButton } from "./OneDropdownButton"
 
 // Mock the imported components
 vi.mock("@/ui/Action", () => ({
@@ -42,11 +41,11 @@ vi.mock("@/icons/app", () => ({
   ChevronDown: () => <div data-testid="chevron-icon">▼</div>,
 }))
 
-vi.mock("@/components/Utilities/Icon", () => ({
-  Icon: ({ icon: IconComponent }) => <IconComponent data-testid="icon" />,
+vi.mock("@/components/F0Icon", () => ({
+  F0Icon: ({ icon: IconComponent }) => <IconComponent data-testid="icon" />,
 }))
 
-describe("OneDropdownButton", () => {
+describe("F0ButtonDropdown", () => {
   const openDropdown = async (user: ReturnType<typeof userEvent.setup>) => {
     user.click(screen.getByTestId("button-menu"))
 

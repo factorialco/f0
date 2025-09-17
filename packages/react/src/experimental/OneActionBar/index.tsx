@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { OneDropdownButton } from "@/components/actions/OneDropdownButton"
+import { OneDropdownButton } from "@/components/actions/F0ButtonDropdown"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { IconType } from "@/components/F0Icon"
 import {

@@ -1,39 +1,19 @@
+import { F0Icon } from "@/components/F0Icon"
+import { DropdownInternal } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { ChevronDown } from "@/icons/app/index.ts"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils.ts"
+import { Action } from "@/ui/Action/index.tsx"
+import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants.ts"
 import { useMemo, useState } from "react"
-import { DropdownInternal } from "../../../experimental/Navigation/Dropdown/internal.tsx"
-import { ChevronDown } from "../../../icons/app/index.ts"
-import { cn, focusRing } from "../../../lib/utils.ts"
-import { Action } from "../../../ui/Action/index.tsx"
-import {
-  actionVariants,
-  buttonSizeVariants,
-} from "../../../ui/Action/variants.ts"
-import { F0Icon, IconType } from "../../F0Icon/index.tsx"
-import { OneDropdownButtonSize, OneDropdownButtonVariant } from "./types.ts"
+import { F0ButtonDropdownProps } from "./types.ts"
 
-export type OneDropdownButtonItem<T = string> = {
-  value: T
-  label: string
-  icon?: IconType
-  critical?: boolean
-}
-
-export type OneDropdownButtonProps<T = string> = {
-  size?: OneDropdownButtonSize
-  items: OneDropdownButtonItem<T>[]
-  variant?: OneDropdownButtonVariant
-  value?: T
-  disabled?: boolean
-  loading?: boolean
-  onClick: (value: T, item: OneDropdownButtonItem<T>) => void
-}
-
-const OneDropdownButton = ({
+const F0ButtonDropdown = ({
   items,
   onClick,
   value,
   ...props
-}: OneDropdownButtonProps) => {
+}: F0ButtonDropdownProps) => {
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -122,4 +102,4 @@ const OneDropdownButton = ({
   )
 }
 
-export { OneDropdownButton }
+export { F0ButtonDropdown as OneDropdownButton }

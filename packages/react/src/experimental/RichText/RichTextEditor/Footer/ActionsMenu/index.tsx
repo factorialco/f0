@@ -1,8 +1,8 @@
 import { F0Button } from "@/components/actions/F0Button"
 import {
+  ButtonDropdownItem,
   OneDropdownButton,
-  OneDropdownButtonItem,
-} from "@/components/actions/OneDropdownButton"
+} from "@/components/actions/F0ButtonDropdown"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
 import {
@@ -33,7 +33,7 @@ const normalizeSecondaryActions = (
 const createActionItems = (
   primaryAction?: primaryActionType,
   secondaryActions?: secondaryActionType[]
-): OneDropdownButtonItem<string>[] => {
+): ButtonDropdownItem<string>[] => {
   const primaryActionItems = primaryAction
     ? [
         {
@@ -187,7 +187,7 @@ const PrimaryActionButton = ({
 interface PrimaryActionContentProps {
   primaryAction: primaryActionType
   isFullscreen: boolean
-  listOfActions: OneDropdownButtonItem<string>[]
+  listOfActions: ButtonDropdownItem<string>[]
   handleOnClick: (labelID: string) => void
   disableButtons: boolean
   includeSecondaryInDropdown: boolean

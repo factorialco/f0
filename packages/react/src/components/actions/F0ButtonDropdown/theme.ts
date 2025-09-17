@@ -1,7 +1,7 @@
-import { OneDropdownButtonVariant } from "./types.ts"
+import { ButtonDropdownVariant } from "./types.ts"
 
 export const internalButtonVariantsStyles = (
-  variant?: OneDropdownButtonVariant
+  variant?: ButtonDropdownVariant
 ) => {
   const variants = {
     default: { borderColor: "hsl(var(--accent-60))" },

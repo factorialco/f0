@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { Picker } from "@/experimental/Information/Reactions/Picker"
 import {
   AlignTextCenter,

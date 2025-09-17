@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Add, Replace } from "../../../icons/app/index.ts"
-import { OneDropdownButton } from "./index"
-import { oneDropdownButtonSizes, oneDropdownButtonVariants } from "./types.ts"
+import { Add, Replace } from "../../../../icons/app/index.ts"
+import { OneDropdownButton } from "../index"
+import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
 
 const meta = {
   title: "DropdownButton",
@@ -31,12 +31,12 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      options: oneDropdownButtonVariants,
+      options: buttonDropdownVariants,
       description: "Visual style variant of the button",
     },
     size: {
       control: "select",
-      options: oneDropdownButtonSizes,
+      options: buttonDropdownSizes,
       description: "Size of the button",
     },
     disabled: {

@@ -1,5 +1,5 @@
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { IconType } from "@/components/F0Icon"
-import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
 import { cn } from "@/lib/utils"
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"

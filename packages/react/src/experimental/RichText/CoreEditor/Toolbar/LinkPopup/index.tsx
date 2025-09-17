@@ -1,5 +1,5 @@
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon } from "@/components/F0Icon"
-import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
 import { Badge } from "@/experimental/Information/Badge"
 import {
   Alert,

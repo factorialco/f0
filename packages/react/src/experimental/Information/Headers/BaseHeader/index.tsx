@@ -1,8 +1,8 @@
 import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
 import {
+  F0ButtonDropdownProps,
   OneDropdownButton,
-  OneDropdownButtonProps,
-} from "@/components/actions/OneDropdownButton"
+} from "@/components/actions/F0ButtonDropdown"
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
@@ -72,7 +72,7 @@ const ButtonWithTooltip = memo(function ButtonWithTooltip({
 const DropdownButtonWithTooltip = memo(function DropdownButtonWithTooltip({
   tooltip,
   ...dropdownProps
-}: OneDropdownButtonProps<string> & {
+}: F0ButtonDropdownProps<string> & {
   tooltip?: string
 }) {
   if (tooltip) {

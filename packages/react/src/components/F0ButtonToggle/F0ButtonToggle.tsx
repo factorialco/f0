@@ -61,6 +61,7 @@ export const F0ButtonToggle = forwardRef<
         onPressedChange={setLocalSelected}
         disabled={disabled}
         aria-label={label}
+        title={label}
         className={cn(
           "aspect-square px-0",
           "flex items-center justify-center",

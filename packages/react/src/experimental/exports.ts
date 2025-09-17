@@ -1,7 +1,6 @@
 import { Component } from "../lib/component"
 import { ScrollArea as ScrollAreaComponent } from "./Utilities/ScrollArea"
 
-export * from "./Actions/exports"
 export * from "./AiChat/exports"
 export * from "./Banners/exports"
 export * from "./Charts/exports"
@@ -24,8 +23,6 @@ export * from "./Overlays/Tooltip"
 export * from "./RichText/exports"
 export * from "./Utilities/exports"
 export * from "./Widgets/exports"
-
-export * from "../components/actions/OneDropdownButton"
 
 export const ScrollArea = Component(
   {
