@@ -86,11 +86,6 @@ const meta = {
       description:
         "Hides the label visually (for icon-only or emoji-only buttons), but keeps it accessible for screen readers.",
     },
-    pressed: {
-      control: "boolean",
-      description:
-        "If true, the button is visually active or selected (pressed state).",
-    },
     onClick: {
       action: "clicked",
       description:

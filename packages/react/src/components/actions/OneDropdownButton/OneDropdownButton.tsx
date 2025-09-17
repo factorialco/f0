@@ -76,9 +76,8 @@ const OneDropdownButton = ({
         loading={props.loading}
         data-testid="button-main"
         prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
-        appendOutside={true}
         className="rounded-r-none after:rounded-r-none"
-        append={
+        appendOutside={
           <DropdownInternal
             items={dropdownItems}
             align="end"

@@ -4,6 +4,7 @@ import { Skeleton } from "@/ui/skeleton"
 import type { VariantProps } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import React, { ReactNode } from "react"
+import { ActionSize } from "./types"
 import {
   actionVariants,
   buttonSizeVariants,
@@ -17,8 +18,8 @@ export interface ActionCommonProps {
 
   prepend?: ReactNode
   append?: ReactNode
-  prependOutside?: boolean
-  appendOutside?: boolean
+  prependOutside?: ReactNode
+  appendOutside?: ReactNode
 
   onClick?: (event?: React.MouseEvent<HTMLElement>) => void
   onFocus?: (event?: React.FocusEvent<HTMLElement>) => void
@@ -29,7 +30,7 @@ export interface ActionCommonProps {
   pressed?: boolean
 
   className?: string
-  size?: "sm" | "md" | "lg"
+  size?: ActionSize
 }
 
 export const navTargets = ["_blank", "_self", "_parent", "_top"] as const
@@ -88,9 +89,9 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
             iconVariants({ variant: defaultVariant })
           )}
         >
-          {prepend && !prependOutside && prepend}
+          {prepend}
           <span>{children}</span>
-          {append && !appendOutside && append}
+          {append}
         </div>
         <AnimatePresence>
           {loading && !isLinkStyled && (
@@ -147,9 +148,9 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
     if (prependOutside || appendOutside) {
       return (
         <div className="flex items-center">
-          {prependOutside && prepend}
+          {prependOutside}
           {mainElement}
-          {appendOutside && append}
+          {appendOutside}
         </div>
       )
     }

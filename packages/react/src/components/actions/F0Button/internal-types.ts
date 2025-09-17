@@ -1,11 +1,10 @@
 import { IconType } from "@/components/F0Icon"
-import { NavTarget } from "@/ui/Action"
-import { Button as ShadcnButton, sizes, variants } from "@/ui/button"
-import { ComponentProps } from "react"
+import { ActionProps, NavTarget } from "@/ui/Action"
+import { ButtonSize } from "./types"
 
 export type ButtonInternalProps = Pick<
-  ComponentProps<typeof ShadcnButton>,
-  "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed"
+  ActionProps,
+  "variant" | "size" | "disabled" | "className" | "pressed"
 > &
   DataAttributes & {
     /**
@@ -43,10 +42,6 @@ export type ButtonInternalProps = Pick<
      */
     append?: React.ReactNode
     /**
-     * Appends a React node as a separate button, visually grouped with the main button.
-     */
-    appendButton?: React.ReactNode
-    /**
      * If true, the button is inactive and does not respond to user interaction.
      */
     disabled?: boolean
@@ -54,15 +49,6 @@ export type ButtonInternalProps = Pick<
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean
-
-    /**
-     * The URL to navigate to when the button is clicked.
-     */
-    href?: string
-    /**
-     * The target to navigate to when the button is clicked.
-     */
-    target?: NavTarget
   } & (
     | {
         /**

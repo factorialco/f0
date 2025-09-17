@@ -62,7 +62,6 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
       variant = "default",
       size = "md",
       append,
-      appendButton,
       className,
       ...props
     },
@@ -100,6 +99,7 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
         onClick={handleClick}
         {...props}
         loading={isLoading}
+        className={className}
       >
         <div
           className={cn(isLoading && "invisible", "flex items-center gap-1")}
@@ -124,57 +124,6 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
       </Action>
     )
   }
-  //   return (
-  //     <ShadcnButton
-  //       title={hideLabel ? label : undefined}
-  //       onClick={handleClick}
-  //       disabled={disabled || isLoading}
-  //       ref={ref}
-  //       variant={variant}
-  //       size={size}
-  //       round={hideLabel}
-  //       appendButton={appendButton}
-  //       className={cn(className, "relative")}
-  //       {...props}
-  //       aria-busy={isLoading}
-  //     >
-  //       {isLoading && (
-  //         <div className="absolute inset-0 flex items-center justify-center">
-  //           <motion.div
-  //             className={cn(loadingVariants({ size, variant }))}
-  //             animate={{ rotate: 360 }}
-  //             transition={{
-  //               duration: 1,
-  //               repeat: Infinity,
-  //               ease: "linear",
-  //             }}
-  //             aria-label="Loading..."
-  //           />
-  //         </div>
-  //       )}
-  //       <div
-  //         className={cn(isLoading && "invisible", "flex items-center gap-1")}
-  //       >
-  //         {icon && (
-  //           <F0Icon
-  //             size={size === "sm" ? "sm" : "md"}
-  //             icon={icon}
-  //             className={
-  //               hideLabel
-  //                 ? iconOnlyVariants({ variant })
-  //                 : iconVariants({ variant })
-  //             }
-  //           />
-  //         )}
-  //         {emoji && (
-  //           <EmojiImage emoji={emoji} size={size === "sm" ? "sm" : "md"} />
-  //         )}
-  //         <span className={cn(hideLabel && "sr-only")}>{label}</span>
-  //         {append}
-  //       </div>
-  //     </ShadcnButton>
-  //   )
-  // }
 )
 
 export { ButtonInternal }
