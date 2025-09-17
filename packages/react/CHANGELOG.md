@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.192.0](https://github.com/factorialco/f0/compare/f0-react-v1.191.0...f0-react-v1.192.0) (2025-09-17)
+
+
+### Features
+
+* add support for icon color and background color to (F0Card) ([#2587](https://github.com/factorialco/f0/issues/2587)) ([5b970e2](https://github.com/factorialco/f0/commit/5b970e2ef2ec8f9e1b5726f4f370efe3e64a7b72))
+
 ## [1.191.0](https://github.com/factorialco/f0/compare/f0-react-v1.190.0...f0-react-v1.191.0) (2025-09-17)
 
 
