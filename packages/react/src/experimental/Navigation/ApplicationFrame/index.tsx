@@ -86,14 +86,14 @@ function ApplicationFrameContent({
   sidebar,
   banner,
 }: ApplicationFrameProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen, forceFloat } =
+  const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const { open: isAiChatOpen } = useAiChat()
 
   useEffect(() => {
-    forceFloat(isAiChatOpen)
-  }, [isAiChatOpen, forceFloat])
+    setForceFloat(isAiChatOpen)
+  }, [isAiChatOpen, setForceFloat])
 
   useAutoCloseSidebar()
 
