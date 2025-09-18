@@ -48,7 +48,7 @@ export function SidebarFooter({
               src={user.avatarUrl}
               firstName={user.firstName}
               lastName={user.lastName}
-              size="xsmall"
+              size="xs"
             />
             <OneEllipsis>{`${user.firstName} ${user.lastName}`}</OneEllipsis>
           </button>

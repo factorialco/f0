@@ -64,7 +64,7 @@ export const Trigger = ({
                 firstName={flattenedList[0].subItem.subName}
                 lastName={""}
                 src={flattenedList[0].subItem.subAvatar}
-                size="xsmall"
+                size="xs"
               />
               <span>{flattenedList[0].subItem.subName}</span>
             </div>
