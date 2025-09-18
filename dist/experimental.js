@@ -15698,7 +15698,7 @@ function oo() {
     sidebarState: "locked",
     toggleSidebar: () => {
     },
-    forceFloat: () => {
+    setForceFloat: () => {
     }
   } : t;
 }
@@ -15732,7 +15732,7 @@ function uT({ children: t }) {
         sidebarState: m,
         toggleSidebar: h,
         prevSidebarState: c,
-        forceFloat: i
+        setForceFloat: i
       },
       children: /* @__PURE__ */ d("div", { onPointerMove: p, className: "h-screen w-screen", children: t })
     }
@@ -16603,7 +16603,7 @@ function NT({
   sidebar: e,
   banner: n
 }) {
-  const { sidebarState: i, toggleSidebar: r, isSmallScreen: s, forceFloat: o } = oo(), a = Qs(), { open: l } = pr();
+  const { sidebarState: i, toggleSidebar: r, isSmallScreen: s, setForceFloat: o } = oo(), a = Qs(), { open: l } = pr();
   return ee(() => {
     o(l);
   }, [l, o]), ST(), /* @__PURE__ */ d(we, { children: /* @__PURE__ */ d(
