@@ -19,7 +19,6 @@ interface FrameContextType {
   sidebarState: SidebarState
   prevSidebarState: SidebarState | null
   toggleSidebar: () => void
-  forceFloatingMode: boolean
   setForceFloatingMode: (force: boolean) => void
 }
 
@@ -33,7 +32,6 @@ export function useSidebar(): FrameContextType {
       prevSidebarState: null,
       sidebarState: "locked",
       toggleSidebar: () => {},
-      forceFloatingMode: false,
       setForceFloatingMode: () => {},
     }
   }
@@ -114,7 +112,6 @@ export function FrameProvider({ children }: FrameProviderProps) {
         sidebarState,
         toggleSidebar,
         prevSidebarState,
-        forceFloatingMode,
         setForceFloatingMode,
       }}
     >
