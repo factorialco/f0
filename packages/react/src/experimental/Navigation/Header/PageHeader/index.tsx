@@ -95,11 +95,6 @@ function PageNavigationLink({
       label={label}
       icon={icon}
       hideLabel
-      onClick={(e) => {
-        e.preventDefault()
-        if (disabled) return
-        ref.current?.click()
-      }}
     />
   )
 }

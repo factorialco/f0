@@ -71,10 +71,7 @@ const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
     const [loading, setLoading] = useState(false)
 
     const handleClick = async (
-      event: React.MouseEvent<
-        HTMLElement | HTMLAnchorElement | HTMLButtonElement,
-        MouseEvent
-      >
+      event: React.MouseEvent<HTMLElement, MouseEvent>
     ) => {
       const result = onClick?.(event)
 
