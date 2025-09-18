@@ -57,9 +57,8 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
 /**
  * Custom hook to automatically close sidebar when AI chat opens on smaller screens
  */
-function useAutoCloseSidebar() {
+function useAutoCloseSidebar(isAiChatOpen: boolean) {
   const { sidebarState, toggleSidebar } = useSidebar()
-  const { open: isAiChatOpen } = useAiChat()
   const shouldAutoCloseSidebar = useMediaQuery("(max-width: 1440px)", {
     initializeWithValue: true,
   })
@@ -95,7 +94,7 @@ function ApplicationFrameContent({
     setForceFloat(isAiChatOpen)
   }, [isAiChatOpen, setForceFloat])
 
-  useAutoCloseSidebar()
+  useAutoCloseSidebar(isAiChatOpen)
 
   return (
     <>
