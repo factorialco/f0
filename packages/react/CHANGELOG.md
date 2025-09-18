@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.196.0](https://github.com/factorialco/f0/compare/f0-react-v1.195.1...f0-react-v1.196.0) (2025-09-18)
+
+
+### Features
+
+* **RichText:** enhance NotesTextEditor with new tag type and icon support ([#2571](https://github.com/factorialco/f0/issues/2571)) ([0a5f316](https://github.com/factorialco/f0/commit/0a5f316feeff12b57fb3c7a18362884abc21aebe))
+
 ## [1.195.1](https://github.com/factorialco/f0/compare/f0-react-v1.195.0...f0-react-v1.195.1) (2025-09-18)
 
 
