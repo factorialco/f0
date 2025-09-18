@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.195.1](https://github.com/factorialco/f0/compare/f0-react-v1.195.0...f0-react-v1.195.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* **avatar:** use short size values for ([#2621](https://github.com/factorialco/f0/issues/2621)) ([fb4acee](https://github.com/factorialco/f0/commit/fb4acee493f94edc8ad36c042619fe3af8648ced))
+
 ## [1.195.0](https://github.com/factorialco/f0/compare/f0-react-v1.194.0...f0-react-v1.195.0) (2025-09-18)
 
 
