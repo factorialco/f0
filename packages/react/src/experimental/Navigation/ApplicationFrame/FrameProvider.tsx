@@ -19,6 +19,8 @@ interface FrameContextType {
   sidebarState: SidebarState
   prevSidebarState: SidebarState | null
   toggleSidebar: () => void
+  forceFloatingMode: boolean
+  setForceFloatingMode: (force: boolean) => void
 }
 
 const FrameContext = createContext<FrameContextType | undefined>(undefined)
@@ -31,6 +33,8 @@ export function useSidebar(): FrameContextType {
       prevSidebarState: null,
       sidebarState: "locked",
       toggleSidebar: () => {},
+      forceFloatingMode: false,
+      setForceFloatingMode: () => {},
     }
   }
   return context
@@ -42,8 +46,10 @@ interface FrameProviderProps {
 
 export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
+  const [forceFloatingMode, setForceFloatingMode] = useState(false)
 
-  const isSmallScreen = useMediaQuery("(max-width: 900px)", {
+  const breakpoint = forceFloatingMode ? 1440 : 900
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
     initializeWithValue: true,
   })
 
@@ -108,6 +114,8 @@ export function FrameProvider({ children }: FrameProviderProps) {
         sidebarState,
         toggleSidebar,
         prevSidebarState,
+        forceFloatingMode,
+        setForceFloatingMode,
       }}
     >
       <div onPointerMove={handlePointerMove} className="h-screen w-screen">
