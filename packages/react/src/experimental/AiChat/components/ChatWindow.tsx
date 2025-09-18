@@ -1,6 +1,8 @@
+import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { createContext, useContext, useMemo, useState } from "react"
+import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 interface ChatWindowContextType {
@@ -18,8 +20,18 @@ const ChatWindowContext = createContext<ChatWindowContextType>({
 export const useChatWindowContext = () => useContext(ChatWindowContext)
 
 export const SidebarWindow = ({ children }: WindowProps) => {
-  const { open, shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation } =
-    useAiChat()
+  const {
+    open,
+    shouldPlayEntranceAnimation,
+    setShouldPlayEntranceAnimation,
+    autoClearMinutes,
+  } = useAiChat()
+  const { reset } = useCopilotChatInternal()
+  useAutoClear({
+    reset,
+    isOpen: open,
+    autoClearMinutes,
+  })
   const [messageContainerScrollTop, setMessageContainerScrollTop] = useState(0)
   const chatWindowContext = useMemo(
     () => ({
