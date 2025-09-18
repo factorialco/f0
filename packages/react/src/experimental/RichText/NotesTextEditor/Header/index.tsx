@@ -1,5 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { F0TagDot } from "@/components/tags/F0TagDot"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { Fragment } from "react"
 import { actionType, MetadataItemValue } from "../types"
@@ -16,6 +17,8 @@ const buildMetadataItems = ({ items }: { items: MetadataItemValue[] }) =>
         <F0TagStatus text={item.label} variant={item.variant} />
       ) : item.type === "dot-tag" ? (
         <F0TagDot text={item.label} color={item.color} />
+      ) : item.type === "tag" ? (
+        <F0TagRaw text={item.label} icon={item.icon} />
       ) : (
         item.type === "text" && (
           <div className="flex flex-row gap-2">
