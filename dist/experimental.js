@@ -16063,11 +16063,7 @@ function Tg({
       variant: "outline",
       label: n,
       icon: t,
-      hideLabel: !0,
-      onClick: (s) => {
-        var o;
-        s.preventDefault(), !i && ((o = r.current) == null || o.click());
-      }
+      hideLabel: !0
     }
   );
 }
