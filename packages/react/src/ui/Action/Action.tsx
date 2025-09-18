@@ -55,7 +55,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
     const compactClasses = cva({
       variants: {
         size: {
-          sm: "!px-1",
+          sm: "!px-[4px]",
           md: "!px-[6px]",
           lg: "!px-[10px]",
         },

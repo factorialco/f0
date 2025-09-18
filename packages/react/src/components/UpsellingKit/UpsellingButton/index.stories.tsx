@@ -11,7 +11,7 @@ const meta = {
       url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Web-components?node-id=41-1256&t=99GWQFvFLZtKW49N-4",
     },
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   args: {
     label: "Request Information",
     size: "md",

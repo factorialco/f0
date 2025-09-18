@@ -164,15 +164,11 @@ export const AllSizes: Story = {
 export const AllCompact: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4">
-      <Action size="sm" compact>
-        <F0Icon icon={Placeholder} />
-      </Action>
-      <Action size="md" compact>
-        <F0Icon icon={Placeholder} />
-      </Action>
-      <Action size="lg" compact>
-        <F0Icon icon={Placeholder} />
-      </Action>
+      {actionSizes.map((size) => (
+        <Action size={size} compact key={size} ariaLabel={size}>
+          <F0Icon icon={Placeholder} size={size === "sm" ? "sm" : "md"} />
+        </Action>
+      ))}
     </div>
   ),
 }
