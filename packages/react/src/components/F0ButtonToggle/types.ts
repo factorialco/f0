@@ -1,4 +1,4 @@
-import { IconType } from "@/f0"
+import { IconType } from "@/components/F0Icon"
 
 export const buttonToggleSizes = ["sm", "md", "lg"] as const
 export type ButtonToggleSize = (typeof buttonToggleSizes)[number]

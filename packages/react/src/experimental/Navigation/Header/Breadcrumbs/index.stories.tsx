@@ -1,7 +1,7 @@
+import { F0Button } from "@/components/actions/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
 import { SelectItemProps } from "@/experimental/Forms/Fields/Select/types"
-import { F0Button } from "@/f0"
 import { PaginatedFetchOptions } from "@/hooks/datasource"
 import {
   FIRST_NAMES_MOCK,
