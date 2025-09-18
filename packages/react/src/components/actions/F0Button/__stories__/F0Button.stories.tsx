@@ -142,7 +142,7 @@ export const WithHref: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    const button = canvas.getByRole("a")
+    const button = canvas.getByRole("link")
     await expect(button.dataset.test).toBe("data")
   },
 }
@@ -299,7 +299,7 @@ export const IconButtonGroup: Story = {
 export const OnlyEmoji: Story = {
   args: {
     emoji: "🥰",
-    label: "🥰",
+    label: "Emoji",
     variant: "neutral",
     hideLabel: true,
   },
