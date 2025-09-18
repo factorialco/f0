@@ -18909,7 +18909,10 @@ const whe = Nt({
   const i = /* @__PURE__ */ b(
     "div",
     {
-      className: le("cursor-default font-medium", whe({ size: t, type: n })),
+      className: le(
+        "cursor-default font-medium transition hover:bg-f1-background-secondary-hover",
+        whe({ size: t, type: n })
+      ),
       children: t === "xs" ? /* @__PURE__ */ b(It, { icon: Lk, size: "xs" }) : `+${e}`
     }
   );

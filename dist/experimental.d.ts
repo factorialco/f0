@@ -335,6 +335,14 @@ declare type AiChatProviderReturnValue = {
     shouldPlayEntranceAnimation: boolean;
     setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
     tmp_setAgent: (agent?: string) => void;
+    /**
+     * Set the amount of minutes after which the chat will be cleared automatically
+     * Set `null` to disable auto-clearing
+     *
+     * @default 15
+     */
+    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
+    autoClearMinutes: number | null;
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
