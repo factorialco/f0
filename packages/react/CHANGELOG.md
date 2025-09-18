@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.197.0](https://github.com/factorialco/f0/compare/f0-react-v1.196.0...f0-react-v1.197.0) (2025-09-18)
+
+
+### Features
+
+* **F0AiBanner:** new component for AI banner ([#2574](https://github.com/factorialco/f0/issues/2574)) ([d8653fb](https://github.com/factorialco/f0/commit/d8653fb02cf5f824014e2232b93cde44b77c4758))
+
+## [1.196.0](https://github.com/factorialco/f0/compare/f0-react-v1.195.1...f0-react-v1.196.0) (2025-09-18)
+
+
+### Features
+
+* **RichText:** enhance NotesTextEditor with new tag type and icon support ([#2571](https://github.com/factorialco/f0/issues/2571)) ([0a5f316](https://github.com/factorialco/f0/commit/0a5f316feeff12b57fb3c7a18362884abc21aebe))
+
+## [1.195.1](https://github.com/factorialco/f0/compare/f0-react-v1.195.0...f0-react-v1.195.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* **avatar:** use short size values for ([#2621](https://github.com/factorialco/f0/issues/2621)) ([fb4acee](https://github.com/factorialco/f0/commit/fb4acee493f94edc8ad36c042619fe3af8648ced))
+
 ## [1.195.0](https://github.com/factorialco/f0/compare/f0-react-v1.194.0...f0-react-v1.195.0) (2025-09-18)
 
 
