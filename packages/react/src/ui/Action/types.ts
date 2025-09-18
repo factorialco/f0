@@ -87,6 +87,11 @@ export interface ActionCommonProps {
    * make the left and right padding of the action smaller.
    */
   compact?: boolean
+
+  /**
+   * The aria label of the action.
+   */
+  ariaLabel?: string
 }
 
 export const buttonTypes = ["button", "submit", "reset"] as const

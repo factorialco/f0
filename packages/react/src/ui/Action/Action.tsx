@@ -36,6 +36,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       mode = "default",
       title,
       compact = false,
+      ariaLabel,
       ...props
     },
     ref
@@ -113,6 +114,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       disabled,
       className: cn(variantClasses, sizeClasses, focusRing(), className),
       "aria-busy": loading,
+      "aria-label": ariaLabel,
       title,
       ...props,
     }
