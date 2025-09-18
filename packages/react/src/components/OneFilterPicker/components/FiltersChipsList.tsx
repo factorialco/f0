@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { AnimatePresence } from "motion/react"
 import { useI18n } from "@/lib/providers/i18n"
+import { AnimatePresence } from "motion/react"
 import {
   FilterDefinitionsByType,
   FilterTypeDefinition,
