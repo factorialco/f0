@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.197.0](https://github.com/factorialco/f0/compare/f0-react-v1.196.0...f0-react-v1.197.0) (2025-09-18)
+
+
+### Features
+
+* **F0AiBanner:** new component for AI banner ([#2574](https://github.com/factorialco/f0/issues/2574)) ([d8653fb](https://github.com/factorialco/f0/commit/d8653fb02cf5f824014e2232b93cde44b77c4758))
+
 ## [1.196.0](https://github.com/factorialco/f0/compare/f0-react-v1.195.1...f0-react-v1.196.0) (2025-09-18)
 
 
