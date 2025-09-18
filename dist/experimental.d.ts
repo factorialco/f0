@@ -161,7 +161,7 @@ declare interface ActionCommonProps {
     /**
      * The aria label of the action.
      */
-    ariaLabel?: string;
+    "aria-label": string;
 }
 
 export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {

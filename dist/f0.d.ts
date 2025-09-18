@@ -138,7 +138,7 @@ declare interface ActionCommonProps {
     /**
      * The aria label of the action.
      */
-    ariaLabel?: string;
+    "aria-label": string;
 }
 
 declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
