@@ -58,6 +58,7 @@ const F0ButtonDropdown = ({
         disabled={props.disabled}
         loading={props.loading}
         data-testid="button-main"
+        aria-label={selectedItem.label}
         prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
         className="rounded-r-none after:rounded-r-none"
         appendOutside={

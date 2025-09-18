@@ -36,7 +36,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       mode = "default",
       title,
       compact = false,
-      ariaLabel,
+      "aria-label": ariaLabel,
       ...props
     },
     ref

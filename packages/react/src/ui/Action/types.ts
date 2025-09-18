@@ -91,7 +91,7 @@ export interface ActionCommonProps {
   /**
    * The aria label of the action.
    */
-  ariaLabel: string
+  "aria-label": string
 }
 
 export const buttonTypes = ["button", "submit", "reset"] as const

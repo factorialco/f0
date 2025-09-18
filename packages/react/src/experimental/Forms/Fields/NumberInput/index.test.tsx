@@ -9,14 +9,21 @@ const WithStepStory = composeStory(WithStep, Meta)
 
 describe("NumberInput", () => {
   test("renders the input", () => {
-    render(<NumberInput locale="es-ES" value={123.456} maxDecimals={2} />)
+    render(
+      <NumberInput
+        locale="es-ES"
+        value={123.456}
+        maxDecimals={2}
+        label="Number Input"
+      />
+    )
     const input = screen.getByRole("textbox")
     expect(input).toHaveValue("123,46")
   })
 
   describe("when the value is null", () => {
     test("renders an empty input", () => {
-      render(<NumberInput locale="en-US" value={null} />)
+      render(<NumberInput locale="en-US" value={null} label="Number Input" />)
       const input = screen.getByRole("textbox")
       expect(input).toHaveValue("")
     })
@@ -25,7 +32,14 @@ describe("NumberInput", () => {
   describe("when typing a number", () => {
     test("trigger the onChange callback with the number", async () => {
       const onChange = vi.fn()
-      render(<NumberInput locale="en-US" maxDecimals={0} onChange={onChange} />)
+      render(
+        <NumberInput
+          locale="en-US"
+          maxDecimals={0}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
 
       const input = screen.getByRole("textbox")
       await userEvent.type(input, "-34.")

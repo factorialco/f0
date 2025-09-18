@@ -83,6 +83,7 @@ export function SidebarIcon() {
       title="Close Sidebar"
       ref={buttonRef}
       compact
+      aria-label="Close Sidebar"
     >
       <div className={cn("hidden", { flex: !isSmallScreen })}>
         <SidebarIconSvg isExpanded={sidebarState === "locked"} />

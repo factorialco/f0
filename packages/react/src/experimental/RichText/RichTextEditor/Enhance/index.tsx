@@ -67,6 +67,9 @@ const EnhanceActivator = ({
           onClick={(e) => {
             handleEnhanceClick(e)
           }}
+          aria-label={
+            enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic"
+          }
           disabled={disableButtons || isLoadingEnhance}
           className={cn(
             "bg-gradient-to-r from-[#f9f0dd80] to-[#d4ccfd80] text-[#6143a7] dark:from-[#6143a7] dark:to-[#7846ef] dark:text-f1-foreground [&>button>svg]:text-[#6143a7] dark:[&>button>svg]:text-f1-foreground",

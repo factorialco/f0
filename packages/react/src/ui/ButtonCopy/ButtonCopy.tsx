@@ -16,6 +16,7 @@ export type ButtonCopyProps = Omit<
   | "icon"
   | "href"
   | "target"
+  | "aria-label"
 > & {
   valueToCopy: string
   copiedTooltipLabel?: string
