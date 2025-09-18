@@ -487,6 +487,22 @@ export const RendererTypes: Story = {
                   sorting: "email",
                 },
                 {
+                  label: "Company",
+                  render: () => ({
+                    type: "avatarList",
+                    value: {
+                      type: "company",
+                      avatarList: [
+                        {
+                          type: "company",
+                          name: "Test company",
+                          src: "https://cdn.join-staging.com/products/controlling_portal_de_icon.jpeg",
+                        },
+                      ],
+                    },
+                  }),
+                },
+                {
                   label: "Role",
                   render: (item) => ({
                     type: "status",

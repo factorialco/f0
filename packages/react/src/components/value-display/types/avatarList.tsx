@@ -34,13 +34,15 @@ export const AvatarListCell = (args: AvatarListCellValue) => {
   const type = args.type ?? ("person" as const)
 
   return (
-    <F0AvatarList
-      {...({
-        type,
-        avatars: args.avatarList,
-        size: "xs" as const,
-        max: args.max,
-      } as F0AvatarListProps)}
-    />
+    <div className="pointer-events-auto w-full">
+      <F0AvatarList
+        {...({
+          type,
+          avatars: args.avatarList,
+          size: "xs" as const,
+          max: args.max,
+        } as F0AvatarListProps)}
+      />
+    </div>
   )
 }
