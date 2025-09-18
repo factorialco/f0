@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.195.0](https://github.com/factorialco/f0/compare/f0-react-v1.194.0...f0-react-v1.195.0) (2025-09-18)
+
+
+### Features
+
+* **aiChat:** auto clear `AiChat` when closed after X minutes ([#2617](https://github.com/factorialco/f0/issues/2617)) ([e2d5c98](https://github.com/factorialco/f0/commit/e2d5c986c366c3678dec5223ceff2e8ddfa5c695))
+
+## [1.194.0](https://github.com/factorialco/f0/compare/f0-react-v1.193.1...f0-react-v1.194.0) (2025-09-18)
+
+
+### Features
+
+* avatarlist hover color in overflow count ([#2566](https://github.com/factorialco/f0/issues/2566)) ([4d04b21](https://github.com/factorialco/f0/commit/4d04b213e9e3b0abe44f29ae15fdd374a391f4ce))
+
+## [1.193.1](https://github.com/factorialco/f0/compare/f0-react-v1.193.0...f0-react-v1.193.1) (2025-09-17)
+
+
+### Bug Fixes
+
+* **datacollection:** avatar list width ([#2610](https://github.com/factorialco/f0/issues/2610)) ([7ad7155](https://github.com/factorialco/f0/commit/7ad715518c356bba8c568af6e4cf7b45e53a0d80))
+
+## [1.193.0](https://github.com/factorialco/f0/compare/f0-react-v1.192.0...f0-react-v1.193.0) (2025-09-17)
+
+
+### Features
+
+* **Card:** full height for cards in DataCollection ([#2613](https://github.com/factorialco/f0/issues/2613)) ([a88328d](https://github.com/factorialco/f0/commit/a88328dd47c7e2823e4f6a794f596cdf6322d4f5))
+
+## [1.192.0](https://github.com/factorialco/f0/compare/f0-react-v1.191.0...f0-react-v1.192.0) (2025-09-17)
+
+
+### Features
+
+* add support for icon color and background color to (F0Card) ([#2587](https://github.com/factorialco/f0/issues/2587)) ([5b970e2](https://github.com/factorialco/f0/commit/5b970e2ef2ec8f9e1b5726f4f370efe3e64a7b72))
+
 ## [1.191.0](https://github.com/factorialco/f0/compare/f0-react-v1.190.0...f0-react-v1.191.0) (2025-09-17)
 
 
