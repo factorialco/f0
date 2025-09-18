@@ -23,7 +23,6 @@ import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag.tsx';
 import { F0IconProps as F0IconProps_2 } from './F0Icon';
-import { F0LinkProps } from './F0Link';
 import { f1Colors } from '@factorialco/f0-core';
 import { FileCellValue } from '../../value-display/types/file';
 import { FileCellValue as FileCellValue_2 } from './types/file.tsx';
@@ -136,6 +135,10 @@ declare interface ActionCommonProps {
      * make the left and right padding of the action smaller.
      */
     compact?: boolean;
+    /**
+     * The aria label of the action.
+     */
+    ariaLabel?: string;
 }
 
 declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
@@ -457,6 +460,34 @@ declare type BaseTag<T extends {
 
 export declare const buildTranslations: (translations: TranslationsType) => TranslationsType;
 
+export declare type ButtonDropdownItem<T = string> = {
+    /**
+     * The value of the item.
+     */
+    value: T;
+    /**
+     * The label of the item.
+     */
+    label: string;
+    /**
+     * The icon of the item.
+     */
+    icon?: IconType;
+    /**
+     * Whether the item is critical.
+     * @default false
+     */
+    critical?: boolean;
+};
+
+export declare type ButtonDropdownSize = (typeof buttonDropdownSizes)[number];
+
+export declare const buttonDropdownSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonDropdownVariant = (typeof buttonDropdownVariants)[number];
+
+export declare const buttonDropdownVariants: readonly ["default", "outline", "neutral"];
+
 declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant"> & DataAttributes & {
     /**
      * The variant of the button.
@@ -679,7 +710,7 @@ declare interface CardSecondaryAction {
     onClick: () => void;
 }
 
-declare interface CardSecondaryLink extends Pick<LinkProps, "href" | "target" | "disabled"> {
+declare interface CardSecondaryLink extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
     label: string;
 }
 
@@ -1383,6 +1414,45 @@ export declare type F0AvatarTeamProps = {
 
 export declare const F0Button: ForwardRefExoticComponent<F0ButtonProps & RefAttributes<HTMLElement>>;
 
+export declare const F0ButtonDropdown: ({ items, onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined;
+
+export declare type F0ButtonDropdownProps<T = string> = {
+    /**
+     * The size of the button.
+     * @default "md"
+     */
+    size?: ButtonDropdownSize;
+    /**
+     * The items to display in the dropdown.
+     */
+    items: ButtonDropdownItem<T>[];
+    /**
+     * The variant of the button.
+     * @default "default"
+     */
+    variant?: ButtonDropdownVariant;
+    /**
+     * The value of the button.
+     */
+    value?: T;
+    /**
+     * The disabled state of the button.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * The loading state of the button.
+     * @default false
+     */
+    loading?: boolean;
+    /**
+     * The callback function to be called when the button is clicked.
+     * @param value The value of the item that was clicked.
+     * @param item The item that was clicked.
+     */
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
+};
+
 export declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
 
 export declare const F0ButtonToggle: ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>;
@@ -1447,6 +1517,12 @@ export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantPro
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
+}
+
+export declare const F0Link: ForwardRefExoticComponent<F0LinkProps & RefAttributes<HTMLAnchorElement>>;
+
+export declare interface F0LinkProps extends LinkProps, VariantProps<typeof linkVariants>, DataAttributes {
+    stopPropagation?: boolean;
 }
 
 export declare const F0TagAlert: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLDivElement>>;
@@ -1800,18 +1876,12 @@ export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBas
 lineType?: "natural" | "linear";
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-export declare const Link: ForwardRefExoticComponent<Omit<F0LinkProps & RefAttributes<HTMLAnchorElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
-
 declare type LinkContextValue = {
     currentPath?: string;
-    component?: (props: LinkProps_2, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element;
+    component?: (props: LinkProps, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element;
 };
 
-export declare interface LinkProps extends LinkProps_2, VariantProps<typeof linkVariants>, DataAttributes {
-    stopPropagation?: boolean;
-}
-
-declare type LinkProps_2 = AnchorHTMLAttributes<HTMLAnchorElement> & {
+declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     exactMatch?: boolean;
     disabled?: boolean;
 };
@@ -1908,7 +1978,7 @@ export declare const modules: {
     readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 };
 
-declare type NavigationItem = Pick<LinkProps_2, "href" | "exactMatch" | "onClick"> & {
+declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
 } & DataAttributes;
 
