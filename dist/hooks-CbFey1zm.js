@@ -18892,7 +18892,10 @@ const khe = Ut({
   const i = /* @__PURE__ */ b(
     "div",
     {
-      className: le("cursor-default font-medium", khe({ size: t, type: n })),
+      className: le(
+        "cursor-default font-medium transition hover:bg-f1-background-secondary-hover",
+        khe({ size: t, type: n })
+      ),
       children: t === "xs" ? /* @__PURE__ */ b(Mt, { icon: V3, size: "xs" }) : `+${e}`
     }
   );
