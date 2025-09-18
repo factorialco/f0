@@ -115,6 +115,7 @@ export const Settings = <
             icon={Sliders}
             onClick={() => {}}
             hideLabel
+            compact
             pressed={open}
           />
         </PopoverTrigger>
