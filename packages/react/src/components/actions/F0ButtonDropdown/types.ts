@@ -1,9 +1,9 @@
 import { IconType } from "@/components/F0Icon"
-import { sizes } from "@/ui/button.tsx"
+import { actionSizes } from "@/ui/Action"
 
 export const buttonDropdownVariants = ["default", "outline", "neutral"] as const
 export type ButtonDropdownVariant = (typeof buttonDropdownVariants)[number]
-export const buttonDropdownSizes = sizes
+export const buttonDropdownSizes = actionSizes
 export type ButtonDropdownSize = (typeof buttonDropdownSizes)[number]
 
 export type ButtonDropdownItem<T = string> = {

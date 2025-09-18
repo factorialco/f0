@@ -160,3 +160,19 @@ export const AllSizes: Story = {
     </div>
   ),
 }
+
+export const AllCompact: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Action size="sm" compact>
+        <F0Icon icon={Placeholder} />
+      </Action>
+      <Action size="md" compact>
+        <F0Icon icon={Placeholder} />
+      </Action>
+      <Action size="lg" compact>
+        <F0Icon icon={Placeholder} />
+      </Action>
+    </div>
+  ),
+}

@@ -1,13 +1,9 @@
-import { Button } from "@/ui/button"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { EmojiImage, getEmojiLabel, useEmojiConfetti } from "@/lib/emojis"
+import { cn } from "@/lib/utils"
+import { Action } from "@/ui/Action"
 import NumberFlow from "@number-flow/react"
 import { useRef, useState } from "react"
-import {
-  EmojiImage,
-  getEmojiLabel,
-  useEmojiConfetti,
-} from "../../../lib/emojis"
-import { cn } from "../../../lib/utils"
-import { Tooltip } from "../../Overlays/Tooltip"
 
 interface User {
   name: string
@@ -30,13 +26,10 @@ export function Reaction({
 }: ReactionProps) {
   const [isActive, setIsActive] = useState(hasReacted)
   const [count, setCount] = useState(initialCount)
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const buttonRef = useRef<HTMLElement>(null)
   const { fireEmojiConfetti } = useEmojiConfetti()
 
-  const handleClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    emoji: string
-  ) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>, emoji: string) => {
     event.stopPropagation()
     setCount(count + (isActive ? -1 : 1))
     setIsActive(!isActive)
@@ -50,21 +43,22 @@ export function Reaction({
   const tooltipContent = users?.map((user) => user.name).join(", ") || ""
 
   const button = (
-    <Button
+    <Action
       ref={buttonRef}
       variant="outline"
       size="md"
+      compact
       onClick={(event) => {
         handleClick(event, emoji)
       }}
       className={cn(
-        "flex items-center gap-1 font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100 [&>button]:mx-[-3px]",
+        "flex items-center gap-1 px-[3px] font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
         isActive &&
           "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
       )}
       aria-label={getEmojiLabel(emoji)}
+      prepend={<EmojiImage emoji={emoji} size="md" />}
     >
-      <EmojiImage emoji={emoji} size="md" />
       <NumberFlow
         value={count}
         spinTiming={{
@@ -76,7 +70,7 @@ export function Reaction({
           isActive ? "text-f1-foreground-selected" : "text-f1-foreground"
         )}
       />
-    </Button>
+    </Action>
   )
 
   return tooltipContent ? (

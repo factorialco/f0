@@ -1,5 +1,4 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { F0ButtonCopy } from "@/components/actions/internal/F0ButtonCopy"
 import { Spinner } from "@/experimental"
 import {
   ThumbsDown,
@@ -9,6 +8,7 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ButtonCopy } from "@/ui/ButtonCopy"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
@@ -82,7 +82,7 @@ export const AssistantMessage = ({
           >
             <div className="flex gap-1">
               <div>
-                <F0ButtonCopy
+                <ButtonCopy
                   variant="ghost"
                   valueToCopy={content}
                   disabled={isGenerating}

@@ -1,6 +1,7 @@
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
+import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
 import { ActionProps } from "./types"
@@ -33,7 +34,8 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       variant,
       size = "md",
       mode = "default",
-      type = "button",
+      title,
+      compact = false,
       ...props
     },
     ref
@@ -49,17 +51,32 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       ? linkSizeVariants({ size })
       : buttonSizeVariants({ size })
 
+    const compactClasses = cva({
+      variants: {
+        size: {
+          sm: "!px-1",
+          md: "!px-[6px]",
+          lg: "!px-[10px]",
+        },
+      },
+      defaultVariants: {
+        size: "md",
+      },
+    })
     const innerContent = (
       <>
         <div
           className={cn(
             "main flex items-center justify-center gap-1",
+            compact && compactClasses({ size }),
             loading && "opacity-0",
             iconVariants({ variant: localVariant, mode })
           )}
         >
           {prepend}
-          <span>{children}</span>
+          <span className={cn("flex items-center justify-center")}>
+            {children}
+          </span>
           {append}
         </div>
         <AnimatePresence>
@@ -96,6 +113,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       disabled,
       className: cn(variantClasses, sizeClasses, focusRing(), className),
       "aria-busy": loading,
+      title,
       ...props,
     }
 
@@ -115,7 +133,6 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
         {...CommonProps}
         ref={ref as React.Ref<HTMLButtonElement>}
         data-pressed={pressed}
-        type={type}
       >
         {innerContent}
       </button>

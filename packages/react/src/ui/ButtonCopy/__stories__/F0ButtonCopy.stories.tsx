@@ -2,16 +2,16 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import React, { useEffect } from "react"
 import { expect, userEvent, within } from "storybook/test"
-import { F0ButtonCopy } from "../F0ButtonCopy"
+import { ButtonCopy } from "../ButtonCopy"
 import { buttonCopySizes } from "../types"
 
 const meta = {
-  title: "Actions/ButtonCopy",
-  component: F0ButtonCopy,
+  title: "Components/ButtonCopy",
+  component: ButtonCopy,
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental", "internal"],
+  tags: ["autodocs", "internal"],
   args: {
     valueToCopy: "Hello World!",
     variant: "neutral",
@@ -62,7 +62,7 @@ const meta = {
       description: "Callback fired when the copy action is performed.",
     },
   },
-} satisfies Meta<typeof F0ButtonCopy>
+} satisfies Meta<typeof ButtonCopy>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -99,12 +99,12 @@ export const Variants: Story = {
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex gap-2">
-      <F0ButtonCopy {...args} variant="default" valueToCopy="Default copy" />
-      <F0ButtonCopy {...args} variant="outline" valueToCopy="Outline copy" />
-      <F0ButtonCopy {...args} variant="neutral" valueToCopy="Neutral copy" />
-      <F0ButtonCopy {...args} variant="ghost" valueToCopy="Ghost copy" />
-      <F0ButtonCopy {...args} variant="critical" valueToCopy="Critical copy" />
-      <F0ButtonCopy {...args} variant="promote" valueToCopy="Promote copy" />
+      <ButtonCopy {...args} variant="default" valueToCopy="Default copy" />
+      <ButtonCopy {...args} variant="outline" valueToCopy="Outline copy" />
+      <ButtonCopy {...args} variant="neutral" valueToCopy="Neutral copy" />
+      <ButtonCopy {...args} variant="ghost" valueToCopy="Ghost copy" />
+      <ButtonCopy {...args} variant="critical" valueToCopy="Critical copy" />
+      <ButtonCopy {...args} variant="promote" valueToCopy="Promote copy" />
     </div>
   ),
 }
@@ -113,9 +113,9 @@ export const Sizes: Story = {
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex items-center gap-4">
-      <F0ButtonCopy {...args} size="lg" valueToCopy="Large button copy" />
-      <F0ButtonCopy {...args} size="md" valueToCopy="Medium button copy" />
-      <F0ButtonCopy {...args} size="sm" valueToCopy="Small button copy" />
+      <ButtonCopy {...args} size="lg" valueToCopy="Large button copy" />
+      <ButtonCopy {...args} size="md" valueToCopy="Medium button copy" />
+      <ButtonCopy {...args} size="sm" valueToCopy="Small button copy" />
     </div>
   ),
 }
@@ -150,7 +150,7 @@ export const DifferentValues: Story = {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Email:</span>
-        <F0ButtonCopy
+        <ButtonCopy
           valueToCopy="user@example.com"
           copyTooltipLabel="Copy email"
           copiedTooltipLabel="Email copied!"
@@ -158,7 +158,7 @@ export const DifferentValues: Story = {
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">URL:</span>
-        <F0ButtonCopy
+        <ButtonCopy
           valueToCopy="https://factorial.com"
           copyTooltipLabel="Copy URL"
           copiedTooltipLabel="URL copied!"
@@ -166,7 +166,7 @@ export const DifferentValues: Story = {
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Token:</span>
-        <F0ButtonCopy
+        <ButtonCopy
           valueToCopy="test 1234567890"
           copyTooltipLabel="Copy token"
           copiedTooltipLabel="Token copied!"
@@ -174,7 +174,7 @@ export const DifferentValues: Story = {
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Code:</span>
-        <F0ButtonCopy
+        <ButtonCopy
           valueToCopy="const greeting = 'Hello World!'"
           copyTooltipLabel="Copy code"
           copiedTooltipLabel="Code copied!"
@@ -188,8 +188,8 @@ export const States: Story = {
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex gap-2">
-      <F0ButtonCopy {...args} valueToCopy="Normal state" />
-      <F0ButtonCopy {...args} valueToCopy="Disabled state" disabled />
+      <ButtonCopy {...args} valueToCopy="Normal state" />
+      <ButtonCopy {...args} valueToCopy="Disabled state" disabled />
     </div>
   ),
 }
@@ -204,7 +204,7 @@ export const InteractiveCopyTest: Story = {
 
     return (
       <div className="flex flex-col items-center gap-4">
-        <F0ButtonCopy
+        <ButtonCopy
           {...args}
           valueToCopy="Interactive copy test"
           onCopy={handleCopy}
@@ -253,7 +253,7 @@ export const AnimationStates: Story = {
     return (
       <div className="flex flex-col items-center gap-4">
         <div className="flex gap-2">
-          <F0ButtonCopy {...args} valueToCopy="Animation demo" />
+          <ButtonCopy {...args} valueToCopy="Animation demo" />
           <button
             onClick={triggerCopy}
             className="bg-blue-500 text-white rounded px-3 py-1 text-sm"
@@ -278,7 +278,7 @@ export const InContext: Story = {
         <span className="font-mono text-gray-700 mr-2 truncate text-sm">
           https://factorial.com/shared/abc123
         </span>
-        <F0ButtonCopy
+        <ButtonCopy
           {...args}
           valueToCopy="https://factorial.com/shared/abc123"
           copyTooltipLabel="Copy link"

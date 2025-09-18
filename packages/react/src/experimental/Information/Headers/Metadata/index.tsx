@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/actions/F0Button"
-import { F0ButtonCopy } from "@/components/actions/internal/F0ButtonCopy"
+import { ButtonCopy } from "@/ui/ButtonCopy"
 
 import {
   AvatarVariant,
@@ -228,7 +228,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
                   {item.actions?.map((action, index) => {
                     if (isMetadataCopyAction(action)) {
                       return (
-                        <F0ButtonCopy
+                        <ButtonCopy
                           key={`copy-${index}`}
                           valueToCopy={getValueToCopy(
                             item.value,

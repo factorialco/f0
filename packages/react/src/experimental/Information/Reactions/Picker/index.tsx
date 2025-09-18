@@ -35,6 +35,7 @@ export function Picker({
       <PopoverTrigger asChild>
         <ButtonInternal
           variant={variant}
+          compact
           label="Add reaction"
           size={size}
           icon={lastEmojiReaction ? undefined : Reaction}

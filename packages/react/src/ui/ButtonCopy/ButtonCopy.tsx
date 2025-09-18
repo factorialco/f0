@@ -1,25 +1,27 @@
+import { F0Icon } from "@/components/F0Icon"
 import { Check, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Button as ShadcnButton } from "@/ui/button"
+import { Action, ActionButtonVariant, ActionProps } from "@/ui/Action"
 import { AnimatePresence, motion } from "motion/react"
-import {
-  ComponentProps,
-  forwardRef,
-  MouseEventHandler,
-  useEffect,
-  useState,
-} from "react"
-import { F0Icon } from "../../../F0Icon"
-import { iconOnlyVariants } from "../../F0Button/internal"
+import { forwardRef, MouseEventHandler, useEffect, useState } from "react"
+import { iconOnlyVariants } from "../../components/actions/F0Button/internal"
 
-export type F0ButtonCopyProps = Omit<
-  ComponentProps<typeof ShadcnButton>,
-  "onClick" | "children" | "title" | "label" | "hideLabel" | "icon" | "round"
+export type ButtonCopyProps = Omit<
+  ActionProps,
+  | "onClick"
+  | "children"
+  | "title"
+  | "label"
+  | "hideLabel"
+  | "icon"
+  | "href"
+  | "target"
 > & {
   valueToCopy: string
   copiedTooltipLabel?: string
   copyTooltipLabel?: string
-  onCopy?: MouseEventHandler<HTMLButtonElement>
+  onCopy?: MouseEventHandler<HTMLElement>
+  variant?: ActionButtonVariant
 }
 
 const copyIconMotionVariants = {
@@ -29,7 +31,7 @@ const copyIconMotionVariants = {
 }
 const copyIconTransition = { duration: 0.15, ease: "easeOut" }
 
-export const F0ButtonCopy = forwardRef<HTMLButtonElement, F0ButtonCopyProps>(
+export const ButtonCopy = forwardRef<HTMLButtonElement, ButtonCopyProps>(
   (
     {
       valueToCopy,
@@ -63,7 +65,7 @@ export const F0ButtonCopy = forwardRef<HTMLButtonElement, F0ButtonCopyProps>(
       }
     }, [isCopying])
 
-    const handleCopyClick: MouseEventHandler<HTMLButtonElement> = (event) => {
+    const handleCopyClick: MouseEventHandler<HTMLElement> = (event) => {
       event.stopPropagation()
       window.navigator.clipboard.writeText(valueToCopy)
       setIsCopying(true)
@@ -71,16 +73,16 @@ export const F0ButtonCopy = forwardRef<HTMLButtonElement, F0ButtonCopyProps>(
     }
 
     return (
-      <ShadcnButton
+      <Action
         ref={ref}
         variant={variant}
         size={size}
-        round
         onClick={handleCopyClick}
         aria-live="polite"
         aria-label={currentTooltipLabel}
         title={currentTooltipLabel}
         {...props}
+        compact={true}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
@@ -95,20 +97,20 @@ export const F0ButtonCopy = forwardRef<HTMLButtonElement, F0ButtonCopyProps>(
               alignItems: "center",
               justifyContent: "center",
               verticalAlign: "middle",
-              width: "1em",
-              height: "1em",
             }}
           >
             <F0Icon
               size={size === "sm" ? "sm" : "md"}
               icon={isCopying ? Check : LayersFront}
-              className={iconOnlyVariants({ variant })}
+              className={iconOnlyVariants({
+                variant,
+              })}
             />
           </motion.span>
         </AnimatePresence>
-      </ShadcnButton>
+      </Action>
     )
   }
 )
 
-F0ButtonCopy.displayName = "F0CopyButton"
+ButtonCopy.displayName = "ButtonCopy"

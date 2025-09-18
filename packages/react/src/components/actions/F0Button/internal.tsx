@@ -48,94 +48,93 @@ export const iconOnlyVariants = cva({
 /**
  * A button component internal that includes the private slots and props
  */
-const ButtonInternal = forwardRef<
-  HTMLButtonElement | HTMLAnchorElement,
-  ButtonInternalProps
->(function Button(
-  {
-    label,
-    hideLabel,
-    onClick,
-    disabled,
-    loading: forceLoading,
-    icon,
-    emoji,
-    href,
-    target,
-    variant = "default",
-    size = "md",
-    append,
-    className,
-    type,
-    ...props
-  },
-  ref
-) {
-  useTextFormatEnforcer(label, { disallowEmpty: true, disallowEmojis: true })
+const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
+  function Button(
+    {
+      label,
+      hideLabel,
+      onClick,
+      disabled,
+      loading: forceLoading,
+      icon,
+      emoji,
+      href,
+      target,
+      variant = "default",
+      size = "md",
+      append,
+      className,
+      ...props
+    },
+    ref
+  ) {
+    useTextFormatEnforcer(label, { disallowEmpty: true, disallowEmojis: true })
 
-  const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
 
-  const handleClick = async (
-    event: React.MouseEvent<
-      HTMLElement | HTMLAnchorElement | HTMLButtonElement,
-      MouseEvent
-    >
-  ) => {
-    const result = onClick?.(event)
+    const handleClick = async (
+      event: React.MouseEvent<
+        HTMLElement | HTMLAnchorElement | HTMLButtonElement,
+        MouseEvent
+      >
+    ) => {
+      const result = onClick?.(event)
 
-    if (result instanceof Promise) {
-      setLoading(true)
+      if (result instanceof Promise) {
+        setLoading(true)
 
-      try {
-        await result
-      } finally {
-        setLoading(false)
+        try {
+          await result
+        } finally {
+          setLoading(false)
+        }
       }
     }
+
+    const isLoading = forceLoading || loading
+    const shouldHideLabel = hideLabel || emoji
+
+    return (
+      <Action
+        href={href}
+        target={target}
+        variant={variant}
+        size={size}
+        disabled={disabled || isLoading}
+        ref={ref}
+        onClick={handleClick}
+        {...props}
+        loading={isLoading}
+        className={className}
+        mode={hideLabel ? "only" : "default"}
+      >
+        <div
+          className={cn(isLoading && "invisible", "flex items-center gap-1")}
+        >
+          {icon && (
+            <F0Icon
+              size={size === "sm" ? "sm" : "md"}
+              icon={icon}
+              className={
+                hideLabel
+                  ? iconOnlyVariants({ variant })
+                  : iconVariants({ variant })
+              }
+            />
+          )}
+          {emoji && (
+            <EmojiImage
+              emoji={emoji}
+              size={size === "sm" ? "sm" : "md"}
+              alt={""}
+            />
+          )}
+          <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
+          {append}
+        </div>
+      </Action>
+    )
   }
-
-  const isLoading = forceLoading || loading
-  const shouldHideLabel = hideLabel || emoji
-
-  return (
-    <Action
-      href={href}
-      target={target}
-      variant={variant}
-      size={size}
-      disabled={disabled || isLoading}
-      ref={ref}
-      onClick={handleClick}
-      {...props}
-      loading={isLoading}
-      className={className}
-      mode={hideLabel ? "only" : "default"}
-      type={type}
-    >
-      <div className={cn(isLoading && "invisible", "flex items-center gap-1")}>
-        {icon && (
-          <F0Icon
-            size={size === "sm" ? "sm" : "md"}
-            icon={icon}
-            className={
-              hideLabel
-                ? iconOnlyVariants({ variant })
-                : iconVariants({ variant })
-            }
-          />
-        )}
-        {emoji && (
-          <EmojiImage
-            emoji={emoji}
-            size={size === "sm" ? "sm" : "md"}
-            alt={""}
-          />
-        )}
-        <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
-        {append}
-      </div>
-    </Action>
-  )
-})
+)
 
 export { ButtonInternal }

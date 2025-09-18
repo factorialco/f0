@@ -6,7 +6,7 @@ export type { ButtonType }
 
 export type ButtonInternalProps = Pick<
   ActionProps,
-  "size" | "disabled" | "className" | "pressed"
+  "size" | "disabled" | "className" | "pressed" | "compact"
 > &
   DataAttributes & {
     /**

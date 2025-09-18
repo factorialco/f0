@@ -1,7 +1,7 @@
 import { F0Icon } from "@/components/F0Icon"
 import { Ai } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
+import { Action } from "@/ui/Action"
 import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -59,7 +59,7 @@ const EnhanceActivator = ({
       }}
     >
       <Popover.Trigger asChild>
-        <Button
+        <Action
           type="button"
           ref={enhanceButtonRef}
           variant="outline"
@@ -76,7 +76,7 @@ const EnhanceActivator = ({
           <F0Icon icon={Ai} />
           {!hideLabel &&
             (enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic")}
-        </Button>
+        </Action>
       </Popover.Trigger>
       <Popover.Portal container={document.body}>
         <Popover.Content
