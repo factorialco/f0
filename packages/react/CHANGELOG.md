@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.194.0](https://github.com/factorialco/f0/compare/f0-react-v1.193.1...f0-react-v1.194.0) (2025-09-18)
+
+
+### Features
+
+* avatarlist hover color in overflow count ([#2566](https://github.com/factorialco/f0/issues/2566)) ([4d04b21](https://github.com/factorialco/f0/commit/4d04b213e9e3b0abe44f29ae15fdd374a391f4ce))
+
 ## [1.193.1](https://github.com/factorialco/f0/compare/f0-react-v1.193.0...f0-react-v1.193.1) (2025-09-17)
 
 
