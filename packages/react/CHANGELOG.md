@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.195.0](https://github.com/factorialco/f0/compare/f0-react-v1.194.0...f0-react-v1.195.0) (2025-09-18)
+
+
+### Features
+
+* **aiChat:** auto clear `AiChat` when closed after X minutes ([#2617](https://github.com/factorialco/f0/issues/2617)) ([e2d5c98](https://github.com/factorialco/f0/commit/e2d5c986c366c3678dec5223ceff2e8ddfa5c695))
+
+## [1.194.0](https://github.com/factorialco/f0/compare/f0-react-v1.193.1...f0-react-v1.194.0) (2025-09-18)
+
+
+### Features
+
+* avatarlist hover color in overflow count ([#2566](https://github.com/factorialco/f0/issues/2566)) ([4d04b21](https://github.com/factorialco/f0/commit/4d04b213e9e3b0abe44f29ae15fdd374a391f4ce))
+
 ## [1.193.1](https://github.com/factorialco/f0/compare/f0-react-v1.193.0...f0-react-v1.193.1) (2025-09-17)
 
 
