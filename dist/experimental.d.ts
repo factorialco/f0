@@ -298,6 +298,20 @@ declare type ActivityItemProps = {
     onVisible?: (id: string) => void;
 };
 
+declare type AiBannerAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+};
+
+declare interface AiBannerInternalProps {
+    title: string;
+    onClose?: () => void;
+    content: string;
+    primaryAction?: AiBannerAction;
+    secondaryAction?: AiBannerAction;
+}
+
 declare interface AIBlockConfig {
     buttons?: AIButton[];
     onClick: (type: string) => Promise<JSONContent_2 | null>;
@@ -2000,6 +2014,12 @@ declare interface ErrorMessageProps {
  */
 export declare type ExtractPropertyKeys<RecordType> = keyof RecordType;
 
+export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
+    Skeleton: () => JSX_2.Element;
+};
+
+export declare type F0AiBannerProps = AiBannerInternalProps;
+
 declare const F0AvatarAlert: ({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps) => JSX_2.Element;
 
 declare type F0AvatarCompanyProps = {
@@ -2844,6 +2864,10 @@ declare type MetadataItemValue_2 = {
     type: "dot-tag";
     label: string;
     color: NewColor;
+} | {
+    type: "tag";
+    label: string;
+    icon?: IconType;
 };
 
 declare interface MetadataProps {
@@ -4897,15 +4921,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
