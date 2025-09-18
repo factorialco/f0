@@ -74,35 +74,78 @@ declare type Action_2 = {
     label: string;
     onClick: () => void;
     icon?: IconType;
-    variant?: ButtonVariant_2;
+    variant?: ButtonVariant;
     size?: "md" | "lg";
     loading?: boolean;
 };
 
 declare interface ActionCommonProps {
+    /**
+     * The children of the action.
+     */
     children: ReactNode;
+    /**
+     * The prepend of the action.
+     */
     prepend?: ReactNode;
+    /**
+     * The append of the action.
+     */
     append?: ReactNode;
+    /**
+     * The prepend outside (next to the button) of the action.
+     */
     prependOutside?: ReactNode;
+    /**
+     * The append outside of the action.
+     */
     appendOutside?: ReactNode;
     onClick?: (event: React.MouseEvent<HTMLElement>) => void;
     onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
     onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+    /**
+     * The disabled state of the action.
+     */
     disabled?: boolean;
+    /**
+     * The loading state of the action.
+     */
     loading?: boolean;
+    /**
+     * The pressed state of the action.
+     */
     pressed?: boolean;
+    /**
+     * The class name of the action.
+     */
     className?: string;
+    /**
+     * The size of the action.
+     */
     size?: ActionSize;
     /**
      * The render mode.
      * @default "default"
      */
     mode?: "default" | "only";
+    /**
+     * The title of the action.
+     */
+    title?: string;
+    /**
+     * make the left and right padding of the action smaller.
+     */
+    compact?: boolean;
 }
 
-declare type ActionProps = ActionCommonProps & Partial<LinkActionProps> & ActionVariantProps & DataAttributes & {
+declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
+    href: string;
+    target?: NavTarget;
+} | {
     type?: ButtonType;
-};
+    href?: never;
+    target?: never;
+});
 
 declare type ActionSize = (typeof actionSizes)[number];
 
@@ -414,7 +457,7 @@ declare type BaseTag<T extends {
 
 export declare const buildTranslations: (translations: TranslationsType) => TranslationsType;
 
-declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant"> & DataAttributes & {
     /**
      * The variant of the button.
      */
@@ -492,8 +535,6 @@ declare type ButtonType = (typeof buttonTypes)[number];
 declare const buttonTypes: readonly ["button", "submit", "reset"];
 
 export declare type ButtonVariant = (typeof buttonVariants)[number];
-
-declare type ButtonVariant_2 = (typeof variants)[number];
 
 export declare const buttonVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
@@ -1340,7 +1381,7 @@ export declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0Button: ForwardRefExoticComponent<F0ButtonProps & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>;
+export declare const F0Button: ForwardRefExoticComponent<F0ButtonProps & RefAttributes<HTMLElement>>;
 
 export declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
 
@@ -1761,11 +1802,6 @@ lineType?: "natural" | "linear";
 
 export declare const Link: ForwardRefExoticComponent<Omit<F0LinkProps & RefAttributes<HTMLAnchorElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-declare interface LinkActionProps {
-    href: string;
-    target?: NavTarget;
-}
-
 declare type LinkContextValue = {
     currentPath?: string;
     component?: (props: LinkProps_2, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element;
@@ -2027,7 +2063,7 @@ export declare const PrivacyModeProvider: React_2.FC<{
     children: ReactNode;
 }>;
 
-declare const privateProps: readonly ["append", "className", "pressed"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact"];
 
 declare const privateProps_2: readonly ["forceVerticalMetadata"];
 
@@ -2200,7 +2236,7 @@ export declare type RecordType = Record<string, unknown>;
 
 declare type RegularAction = BaseAction & {
     type: "regular";
-    variant: ButtonVariant_2;
+    variant: ButtonVariant;
 };
 
 declare type SearchFilterDefinition = BaseFilterDefinition<"search">;
@@ -2777,8 +2813,6 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 export declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
 
-declare const variants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
-
 export declare const VerticalBarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
 showRatio?: boolean;
@@ -2840,15 +2874,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

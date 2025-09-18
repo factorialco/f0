@@ -102,24 +102,62 @@ declare type Action_2 = {
 };
 
 declare interface ActionCommonProps {
+    /**
+     * The children of the action.
+     */
     children: ReactNode;
+    /**
+     * The prepend of the action.
+     */
     prepend?: ReactNode;
+    /**
+     * The append of the action.
+     */
     append?: ReactNode;
+    /**
+     * The prepend outside (next to the button) of the action.
+     */
     prependOutside?: ReactNode;
+    /**
+     * The append outside of the action.
+     */
     appendOutside?: ReactNode;
     onClick?: (event: React.MouseEvent<HTMLElement>) => void;
     onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
     onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+    /**
+     * The disabled state of the action.
+     */
     disabled?: boolean;
+    /**
+     * The loading state of the action.
+     */
     loading?: boolean;
+    /**
+     * The pressed state of the action.
+     */
     pressed?: boolean;
+    /**
+     * The class name of the action.
+     */
     className?: string;
+    /**
+     * The size of the action.
+     */
     size?: ActionSize;
     /**
      * The render mode.
      * @default "default"
      */
     mode?: "default" | "only";
+    /**
+     * The title of the action.
+     */
+    title?: string;
+    /**
+     * make the left and right padding of the action smaller.
+     */
+    compact?: boolean;
 }
 
 export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {
@@ -135,9 +173,14 @@ export declare interface ActionItemProps {
     status: "inProgress" | "executing" | "completed";
 }
 
-declare type ActionProps = ActionCommonProps & Partial<LinkActionProps> & ActionVariantProps & DataAttributes & {
+declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
+    href: string;
+    target?: NavTarget;
+} | {
     type?: ButtonType;
-};
+    href?: never;
+    target?: never;
+});
 
 declare type ActionProps_2 = {
     /**
@@ -754,7 +797,7 @@ declare type ButtonDropdownItem<T = string> = {
     critical?: boolean;
 };
 
-declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant"> & DataAttributes & {
     /**
      * The variant of the button.
      */
@@ -2618,11 +2661,6 @@ export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps
 chart: LineChartProps;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-declare interface LinkActionProps {
-    href: string;
-    target?: NavTarget;
-}
-
 declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     exactMatch?: boolean;
     disabled?: boolean;
@@ -3524,7 +3562,7 @@ declare interface PrimaryDropdownAction<T> extends PrimaryAction {
 
 export declare const PrivateBox: FC<PropsWithChildren>;
 
-declare const privateProps: readonly ["append", "className", "pressed"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact"];
 
 declare const privateProps_2: readonly [];
 
@@ -4847,15 +4885,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
