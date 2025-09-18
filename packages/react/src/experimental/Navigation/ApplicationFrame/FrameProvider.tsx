@@ -1,3 +1,4 @@
+import { breakpoints } from "@factorialco/f0-core"
 import React, {
   createContext,
   PointerEvent,
@@ -46,7 +47,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
   const [forceFloat, setForceFloat] = useState(false)
 
-  const breakpoint = forceFloat ? 1440 : 900
+  const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
     initializeWithValue: true,
   })
