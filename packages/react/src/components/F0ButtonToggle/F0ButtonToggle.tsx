@@ -46,19 +46,24 @@ export const F0ButtonToggle = forwardRef<
 
     const [localSelected, setLocalSelected] = useState(selected)
 
-    useEffect(() => {
-      setLocalSelected(selected)
-    }, [selected])
+    const handleChange = (pressed: boolean) => {
+      setLocalSelected(pressed)
+      onSelectedChange?.(pressed)
+    }
 
     useEffect(() => {
-      onSelectedChange?.(localSelected)
-    }, [localSelected, onSelectedChange])
+      if (localSelected === selected) {
+        return
+      }
+      setLocalSelected(selected)
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when the selected prop changes
+    }, [selected])
 
     return (
       <TogglePrimitive.Root
         ref={ref}
         pressed={localSelected}
-        onPressedChange={setLocalSelected}
+        onPressedChange={handleChange}
         disabled={disabled}
         aria-label={label}
         title={label}

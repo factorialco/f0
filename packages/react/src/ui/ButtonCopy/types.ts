@@ -1,4 +1,4 @@
-import { sizes } from "@/ui/button"
+import { actionSizes } from "@/ui/Action"
 
-export const buttonCopySizes = sizes
+export const buttonCopySizes = actionSizes
 export type ButtonCopySize = (typeof buttonCopySizes)[number]

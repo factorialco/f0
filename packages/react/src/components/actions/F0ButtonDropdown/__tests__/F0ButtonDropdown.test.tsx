@@ -2,13 +2,13 @@ import { IconType } from "@/components/F0Icon"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
+import { F0ButtonDropdown } from "../index"
 // Mock the imported components
 vi.mock("@/ui/Action", () => ({
+  actionSizes: ["sm", "md", "lg"],
   Action: ({
     children,
     prepend,
-    append,
     onClick,
     appendOutside,
     disabled,
@@ -19,7 +19,7 @@ vi.mock("@/ui/Action", () => ({
         {prepend && <div data-testid="action-prepend">{prepend}</div>}
         <span data-testid="action-label">{children}</span>
       </button>
-      {appendOutside && <div data-testid="action-append">{append}</div>}
+      {appendOutside && <div data-testid="action-append">{appendOutside}</div>}
     </>
   ),
 }))
@@ -76,7 +76,7 @@ describe("F0ButtonDropdown", () => {
   })
 
   it("renders with default selection (first item)", () => {
-    render(<OneDropdownButton items={mockItems} onClick={mockOnClick} />)
+    render(<F0ButtonDropdown items={mockItems} onClick={mockOnClick} />)
 
     expect(screen.getByTestId("button-main")).toBeDefined()
     expect(screen.getByTestId("dropdown")).toBeDefined()
@@ -86,11 +86,7 @@ describe("F0ButtonDropdown", () => {
 
   it("renders with provided value", () => {
     render(
-      <OneDropdownButton
-        items={mockItems}
-        value="item2"
-        onClick={mockOnClick}
-      />
+      <F0ButtonDropdown items={mockItems} value="item2" onClick={mockOnClick} />
     )
 
     expect(screen.getByTestId("button-main")).toBeDefined()
@@ -99,11 +95,7 @@ describe("F0ButtonDropdown", () => {
 
   it("passes dropdown items excluding the selected item", () => {
     render(
-      <OneDropdownButton
-        items={mockItems}
-        value="item1"
-        onClick={mockOnClick}
-      />
+      <F0ButtonDropdown items={mockItems} value="item1" onClick={mockOnClick} />
     )
 
     const dropdownElement = screen.getByTestId("dropdown")
@@ -123,11 +115,7 @@ describe("F0ButtonDropdown", () => {
   it("calls onClick with correct values when button is clicked", async () => {
     const user = userEvent.setup()
     render(
-      <OneDropdownButton
-        items={mockItems}
-        value="item2"
-        onClick={mockOnClick}
-      />
+      <F0ButtonDropdown items={mockItems} value="item2" onClick={mockOnClick} />
     )
 
     await user.click(screen.getByTestId("button-main"))
@@ -139,7 +127,7 @@ describe("F0ButtonDropdown", () => {
   it("does not open dropdown when disabled", async () => {
     const user = userEvent.setup()
     render(
-      <OneDropdownButton
+      <F0ButtonDropdown
         items={mockItems}
         disabled={true}
         onClick={mockOnClick}
@@ -158,11 +146,7 @@ describe("F0ButtonDropdown", () => {
   it.skip("changes selected value when dropdown item is clicked", async () => {
     const user = userEvent.setup()
     render(
-      <OneDropdownButton
-        items={mockItems}
-        value="item1"
-        onClick={mockOnClick}
-      />
+      <F0ButtonDropdown items={mockItems} value="item1" onClick={mockOnClick} />
     )
 
     await openDropdown(user)

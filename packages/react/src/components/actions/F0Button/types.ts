@@ -1,6 +1,6 @@
-import { actionSizes, actionVariants } from "@/ui/Action"
+import { actionButtonVariants, actionSizes } from "@/ui/Action"
 
-export const buttonVariants = actionVariants
+export const buttonVariants = actionButtonVariants
 export type ButtonVariant = (typeof buttonVariants)[number]
 
 export const buttonSizes = actionSizes

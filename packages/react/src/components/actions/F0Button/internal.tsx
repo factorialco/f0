@@ -58,8 +58,6 @@ const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
       loading: forceLoading,
       icon,
       emoji,
-      href,
-      target,
       variant = "default",
       size = "md",
       append,
@@ -96,8 +94,6 @@ const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
 
     return (
       <Action
-        href={href}
-        target={target}
         variant={variant}
         size={size}
         disabled={disabled || isLoading}
