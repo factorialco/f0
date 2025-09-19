@@ -116,11 +116,7 @@ const RowComponentInner = <
       )}
     >
       {source.selectable && (
-        <TableCell
-          width={checkColumnWidth}
-          sticky={{ left: 0 }}
-          className="py-2.5"
-        >
+        <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
           {id !== undefined && (
             <div className="pointer-events-auto flex items-center justify-end">
               <Checkbox
