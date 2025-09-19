@@ -162,6 +162,7 @@ export const getMockVisualizations = (options?: {
           sorting: "role",
           id: "role",
           order: options?.table?.mockTableColOrderingAndHidding ? 2 : undefined,
+          noHiding: options?.table?.mockTableColOrderingAndHidding,
         },
         {
           id: "department",

@@ -15,7 +15,7 @@ import { ListCollection, ListCollectionProps } from "./List"
 import {
   TableCollection,
   TableCollectionProps,
-  settings as tableSettings,
+  settingsRenderer as tableSettingsRenderer,
 } from "./Table"
 
 export type VisualizacionTypeDefinition<Props> = {
@@ -125,7 +125,7 @@ export const collectionVisualizations: CollectionVisualizations<
         />
       )
     },
-    renderSettings: tableSettings,
+    renderSettings: tableSettingsRenderer,
   },
   list: {
     name: "List",

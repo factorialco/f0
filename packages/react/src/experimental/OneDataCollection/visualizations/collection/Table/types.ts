@@ -12,7 +12,11 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
-export * from "./settings"
+
+export type TableVisualizationSettings = {
+  order: ColId[]
+  hidden: ColId[]
+}
 
 export type WithOptionalSorting<
   R extends RecordType,

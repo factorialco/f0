@@ -59,39 +59,24 @@ export const useColumns = <
     getColsOrderFromDefinition(originalColumns)
   )
 
-  const sortAndHideColumns = (
-    columns: Readonly<TableColumnDefinition<R, Sortings, Summaries>[]>,
-    colsOrder: ColId[],
-    colsHidden: ColId[]
-  ) => {
-    return [...columns]
-      .sort((a, b) => colsOrder.indexOf(a.id) - colsOrder.indexOf(b.id))
-      .filter((column) => !colsHidden.includes(column.id))
-  }
-
-  // Get the original columns sorted and hidden to know which are the frozen columns
-  const originalColsPrepared = useMemo(() => {
-    return sortAndHideColumns(
-      originalColumns,
-      getColsOrderFromDefinition(originalColumns),
-      getColsHiddenFromDefinition(originalColumns)
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sortAndHideColumns is an stable function
-  }, [originalColumns])
-
-  const columns = useMemo(() => {
+  const columnsWithStatus = useMemo(() => {
     return [
       // Frozen columns can not be hidden even if the id is in status
-      ...originalColsPrepared.slice(0, frozenColumns),
+      ...[...originalColumns].slice(0, frozenColumns),
       // The rest of the columns are sorted and hidden using the status in colsOrder and colsHidden
-      ...originalColsPrepared
+      ...[...originalColumns]
         .slice(frozenColumns)
-        // Sort columns by defined order
-        .sort((a, b) => colsOrder.indexOf(a.id) - colsOrder.indexOf(b.id))
-        // Hide the columns
-        .filter((column) => !colsHidden.includes(column.id)),
-    ]
-  }, [colsHidden, frozenColumns, colsOrder, originalColsPrepared])
+        .sort((a, b) => colsOrder.indexOf(a.id) - colsOrder.indexOf(b.id)),
+    ].map((column, index) => ({
+      column,
+      hidden: !column.noHiding || colsHidden.includes(column.id),
+      order: index,
+    }))
+  }, [frozenColumns, colsOrder, colsHidden, originalColumns])
+
+  const columns = useMemo(() => {
+    return columnsWithStatus.map((column) => column.column)
+  }, [columnsWithStatus])
 
   return {
     columns,

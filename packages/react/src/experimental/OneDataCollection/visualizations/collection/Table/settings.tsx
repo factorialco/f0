@@ -5,7 +5,7 @@ import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { TableSettings } from "./components/TableSettings"
 import { TableVisualizationOptions } from "./types"
 
-export const settings = <
+export const settingsRenderer = <
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -16,5 +16,12 @@ export const settings = <
   if (!props.allowColumnHiding && !props.allowColumnReordering) {
     return null
   }
-  return <TableSettings columns={props.columns} />
+
+  console.log("props", props.columns)
+  return (
+    <TableSettings
+      columns={props.columns}
+      frozenColumns={props.frozenColumns || 0}
+    />
+  )
 }

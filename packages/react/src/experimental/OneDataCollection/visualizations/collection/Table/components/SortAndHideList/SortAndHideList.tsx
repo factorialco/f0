@@ -3,15 +3,17 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { Handle, LockLocked } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Reorder } from "motion/react"
+import { Reorder, useDragControls } from "motion/react"
 import { SortAndHideListItem } from "./types"
 
-export type SortAndHideListProps = {
-  items: SortAndHideListItem[]
+type ItemProps = {
+  item: SortAndHideListItem
+  onChangeVisibility: (item: SortAndHideListItem) => void
 }
 
-const Item = ({ item }: { item: SortAndHideListItem }) => {
-  const classes = "flex items-center gap-2 text-medium text-sm"
+const Item = ({ item, onChangeVisibility }: ItemProps) => {
+  const classes = "flex items-center gap-2 text-medium text-sm pr-4"
+  const controls = useDragControls()
 
   const content = (
     <div className={classes}>
@@ -21,6 +23,11 @@ const Item = ({ item }: { item: SortAndHideListItem }) => {
           item.sortable && "cursor-grab"
         )}
         style={{ width: "20px" }}
+        onPointerDown={(e) => {
+          if (item.sortable) {
+            controls.start(e)
+          }
+        }}
       >
         {item.sortable ? (
           <F0Icon icon={Handle} size="xs" />
@@ -37,9 +44,12 @@ const Item = ({ item }: { item: SortAndHideListItem }) => {
         <OneEllipsis>{item.label}</OneEllipsis>
       </span>
       <Switch
-        checked={item.hidden}
+        checked={item.visible}
         onCheckedChange={(checked) => {
-          console.log(checked)
+          onChangeVisibility({
+            ...item,
+            visible: checked,
+          })
         }}
         title={item.label}
         hideLabel
@@ -56,6 +66,8 @@ const Item = ({ item }: { item: SortAndHideListItem }) => {
       whileDrag={{
         scale: 1.05,
       }}
+      dragListener={false}
+      dragControls={controls}
     >
       {content}
     </Reorder.Item>
@@ -64,21 +76,33 @@ const Item = ({ item }: { item: SortAndHideListItem }) => {
   )
 }
 
-export const SortAndHideList = ({ items }: SortAndHideListProps) => {
-  const handleReorder = (newOrder: SortAndHideListItem[]) => {
-    console.log(newOrder)
+export type SortAndHideListProps = {
+  items: SortAndHideListItem[]
+  onChange?: (items: SortAndHideListItem[]) => void
+}
+
+export const SortAndHideList = ({ items, onChange }: SortAndHideListProps) => {
+  const onChangeVisibility = (item: SortAndHideListItem) => {
+    onChange?.(items.map((i) => (i.id === item.id ? i : i)))
   }
+
+  const handleOnChange = (items: SortAndHideListItem[]) => {
+    onChange?.(items)
+  }
+
   return (
-    <div>
-      <Reorder.Group
-        className="flex list-none flex-col gap-2"
-        values={items}
-        onReorder={handleReorder}
-      >
-        {items.map((item) => (
-          <Item item={item} key={item.id} />
-        ))}
-      </Reorder.Group>
-    </div>
+    <Reorder.Group
+      className="flex list-none flex-col gap-2"
+      values={items}
+      onReorder={handleOnChange}
+    >
+      {items.map((item) => (
+        <Item
+          item={item}
+          key={item.id}
+          onChangeVisibility={onChangeVisibility}
+        />
+      ))}
+    </Reorder.Group>
   )
 }

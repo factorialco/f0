@@ -3,6 +3,6 @@ export type SortAndHideListItem = {
   label: string
   sortable?: boolean
   canHide?: boolean
-  hidden?: boolean
+  visible?: boolean
   order?: number
 }
