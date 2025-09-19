@@ -12,8 +12,8 @@ import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { useChatWindowContext } from "./ChatWindow"
 
-// corresponds to padding pt-14 applied for the header
-const HEADER_HEIGHT_PX = 56
+// corresponds to padding pt-16 applied for the header
+const HEADER_HEIGHT_PX = 64
 
 export const MessagesContainer = ({
   inProgress,
@@ -170,7 +170,9 @@ export const MessagesContainer = ({
               key={`turn-${turnIndex}`}
               style={{
                 minHeight: isCurrentTurn
-                  ? containerHeight - HEADER_HEIGHT_PX
+                  ? // "scroll" the current turn up in the view to make space for the assistant response,
+                    // but leave 1/5 of the container height on the top to show part of the previous dialog
+                    containerHeight - HEADER_HEIGHT_PX - containerHeight / 5
                   : undefined,
               }}
             >
