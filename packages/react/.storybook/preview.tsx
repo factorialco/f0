@@ -76,6 +76,7 @@ const preview: Preview = {
   decorators: [FactorialOne, withTheme()],
 
   parameters: {
+    throwPlayFunctionExceptions: true,
     chromatic: { disableSnapshot: true, diffThreshold: 0.2 },
     a11y: {
       config: {

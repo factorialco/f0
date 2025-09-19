@@ -7,6 +7,7 @@ import {
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import React from "react"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarList } from "../F0AvatarList"
 import { avatarListSizes } from "../types"
@@ -240,11 +241,11 @@ export const Snapshot: Story = {
         <h4 className="mb-4 text-lg font-semibold">All avatars visible</h4>
 
         {avatarVariants.map((type) => (
-          <>
+          <React.Fragment key={`${type}-3`}>
             <h5 className="mb-2 text-lg font-semibold">{type}</h5>
             <div key={`${type}-3`} className="flex w-fit flex-col gap-2">
-              {avatarListSizes.map((size) => (
-                <div key={`${type}-${size}-3`} className="mb-3">
+              {avatarListSizes.map((size, idx) => (
+                <div key={`${type}-${size}-3-${idx}`} className="mb-3">
                   <F0AvatarList
                     size={size}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -254,16 +255,19 @@ export const Snapshot: Story = {
                 </div>
               ))}
             </div>
-          </>
+          </React.Fragment>
         ))}
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Overflow</h4>
         {avatarVariants.map((type) => (
-          <div key={`${type}-10`} className="flex w-fit flex-col gap-2">
-            {avatarListSizes.map((size) => (
-              <div key={`${type}-${size}-10`} className="mb-3 max-w-[270px]">
+          <div key={`overflow-${type}`} className="flex w-fit flex-col gap-2">
+            {avatarListSizes.map((size, idx) => (
+              <div
+                key={`${type}-${size}-10-${idx}`}
+                className="mb-3 max-w-[270px]"
+              >
                 <F0AvatarList
                   size={size}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any

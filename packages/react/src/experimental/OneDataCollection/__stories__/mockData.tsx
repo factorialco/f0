@@ -393,7 +393,7 @@ export const getMockVisualizations = (options?: {
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },
       ],
-      onMove: async () => {
+      onMove: async (): Promise<MockUser> => {
         // Simulate API call delay
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -401,6 +401,7 @@ export const getMockVisualizations = (options?: {
         if (Math.random() > 0.7) {
           throw new Error("Simulated move error")
         }
+        return mockUsers[0]
       },
     },
   },
