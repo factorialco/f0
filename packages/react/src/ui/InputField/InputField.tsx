@@ -1,3 +1,4 @@
+import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { CrossedCircle } from "@/icons/app"
@@ -21,6 +22,7 @@ export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
 const defaultEmptyValue = ""
 
 const defaultIsEmpty = (value: string | number | undefined | null) => {
+  console.log("value", value, defaultEmptyValue)
   return value === defaultEmptyValue || value
     ? value.toString().length === 0
     : true
@@ -184,7 +186,7 @@ export type InputFieldProps<T> = {
     ) => void
     value?: T
   }
-  icon?: IconType
+
   isEmpty?: (value: T | undefined) => boolean
   emptyValue?: T
   maxLength?: number
@@ -193,7 +195,16 @@ export type InputFieldProps<T> = {
   appendTag?: string
   lengthProvider?: (value: T | undefined) => number
   loading?: boolean
-}
+} & (
+  | {
+      icon?: never
+      avatar?: AvatarVariant
+    }
+  | {
+      icon?: IconType
+      avatar?: never
+    }
+)
 
 const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
   (
@@ -229,6 +240,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       name,
       role,
       appendTag,
+      avatar,
       "aria-controls": ariaControls,
       "aria-expanded": ariaExpanded,
       ...props
@@ -263,20 +275,9 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       )
     }
 
-    useEffect(
-      () => {
-        if (
-          localValue === value ||
-          value === emptyValue ||
-          value === undefined
-        ) {
-          return
-        }
-        setLocalValue(value)
-      },
-      // localValue is a dep because we want to recociliate both values, in some cases the value will not change for example when the parent limits the chars the user can input
-      [value, localValue, emptyValue]
-    )
+    useEffect(() => {
+      setLocalValue(value)
+    }, [value])
 
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -317,6 +318,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         onClickPlaceholder?.()
       }
     }
+
+    const hasPrependSlot = icon || avatar
 
     return (
       <div
@@ -379,23 +382,27 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             className="pointer-events-auto relative flex h-full w-full min-w-0 flex-1"
             onClick={handleClickContent}
           >
-            {icon && (
+            {(icon || avatar) && (
               <div
                 className={cn(
-                  "pointer-events-none absolute left-2 top-1.5 my-auto h-5 w-5 shrink-0",
-                  size === "md" && "left-3 top-2.5"
+                  "align-start pointer-events-none flex min-h-5 shrink-0 gap-0.5 self-start pl-2",
+                  size === "sm" && "pt-[5px]",
+                  size === "md" && "pt-[9px]"
                 )}
               >
-                <F0Icon
-                  onClick={handleClickContent}
-                  icon={icon}
-                  color="default"
-                />
+                {icon && (
+                  <F0Icon
+                    onClick={handleClickContent}
+                    icon={icon}
+                    color="default"
+                  />
+                )}
+                {avatar && <F0Avatar avatar={avatar} size="xs" />}
               </div>
             )}
             <div
               onClick={handleClickChildren}
-              className="w-full min-w-0 flex-1"
+              className="relative w-full min-w-0 flex-1"
             >
               {cloneElement(children as React.ReactElement, {
                 onChange: handleChange,
@@ -415,31 +422,31 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 className: cn(
                   "h-full w-full min-w-0 px-3",
                   "[&::-webkit-search-cancel-button]:hidden",
-                  icon && "pl-8",
-                  icon && size === "md" && "pl-9",
                   disabled && "cursor-not-allowed",
                   (children as React.ReactElement).props.className,
-                  inputElementVariants({ size })
+                  inputElementVariants({ size }),
+                  hasPrependSlot && "pl-1"
                 ),
               })}
+
+              {!noEdit && (
+                <div
+                  className={cn(
+                    "pointer-events-none absolute bottom-0 left-0 right-0 top-[1px] z-10 flex flex-1 justify-start overflow-hidden truncate px-3 text-f1-foreground-secondary transition-opacity",
+                    inputElementVariants({ size }),
+                    hasPrependSlot && "pl-1",
+                    placeholder && !hidePlaceholder && isEmpty(localValue)
+                      ? "opacity-1"
+                      : "opacity-0"
+                  )}
+                  onClick={handleClickPlaceholder}
+                  aria-hidden="true"
+                >
+                  {placeholder}
+                </div>
+              )}
             </div>
-            {!noEdit && (
-              <div
-                className={cn(
-                  "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity",
-                  icon && "pl-8",
-                  icon && size === "md" && "pl-9",
-                  inputElementVariants({ size }),
-                  placeholder && !hidePlaceholder && isEmpty(localValue)
-                    ? "opacity-1"
-                    : "opacity-0"
-                )}
-                onClick={handleClickPlaceholder}
-                aria-hidden="true"
-              >
-                {placeholder}
-              </div>
-            )}
+
             {(clearable || append || appendTag || loading) && (
               <div
                 className={cn(

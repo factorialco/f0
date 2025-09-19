@@ -149,7 +149,10 @@ const SelectValue = forwardRef<
   { item: SelectItemObject<string> }
 >(function SelectValue({ item }, ref) {
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-1.5" ref={ref}>
+    <div
+      className="flex min-w-0 flex-1 items-center gap-1.5 text-left"
+      ref={ref}
+    >
       {item.icon && (
         <div className="h-5 shrink-0 text-f1-icon">
           <F0Icon icon={item.icon} />

@@ -22,7 +22,7 @@ const mockRight: Task[] = [{ id: "t3", title: "Wire data" }]
 
 const meta = {
   component: Kanban,
-  title: "Kanban/Kanban",
+  title: "Components/Kanban",
   parameters: {
     docs: {
       story: { inline: false, height: "650px" },

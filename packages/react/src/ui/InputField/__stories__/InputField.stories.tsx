@@ -108,7 +108,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    label: "This is the label",
+    label: "Label text here",
     value: "",
     placeholder: "This is the placeholder",
     onChange: () => {},
@@ -288,5 +288,18 @@ export const WithAppendTag: Story = {
     ...Default.args,
     clearable: true,
     appendTag: "Label",
+  },
+}
+
+export const WithAvatar: Story = {
+  args: {
+    ...Default.args,
+    clearable: true,
+    avatar: {
+      type: "person",
+      firstName: "John",
+      lastName: "Doe",
+      src: "/avatars/person01.jpg",
+    },
   },
 }
