@@ -70,13 +70,17 @@ if (process.env.BUILD_TYPES) {
   )
 }
 
+const alias = {
+  "@": path.resolve(__dirname, "./src"),
+  "~": path.resolve(__dirname, "./"),
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), libInjectCss(), ...extraPlugins],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "~": path.resolve(__dirname, "./"),
+      ...alias,
       "@storybook-static": path.resolve(__dirname, "./.storybook/static"),
     },
   },
@@ -106,6 +110,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vite/vitest.setup.ts"],
+    alias: {
+      ...alias,
+    },
+    typecheck: {
+      tsconfig: "./tsconfig.test.json",
+    },
     coverage: {
       // you can include other reporters, but 'json-summary' is required, json is recommended
       reporter: ["text", "json-summary", "json", "html"],

@@ -1,9 +1,7 @@
 ---
-
-description: "F0 DS - TypeScript Usage and Testing Standards"
+description: "F0 - TypeScript Usage and Testing Standards"
 globs: "packages/react/**/\*.ts,packages/react/**/\*.tsx"
 alwaysApply: false
-
 ---
 
 # TypeScript Usage
@@ -13,6 +11,7 @@ alwaysApply: false
 - Use discriminated unions for complex state.
 - Export component prop interfaces.
 - Implement proper generic constraints.
+- `any` is a non aceptable type, avoid its use
 
 # Testing Standards
 

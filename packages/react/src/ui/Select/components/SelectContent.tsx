@@ -45,9 +45,14 @@ type SelectContentWithChildrenProps = SelectItemProps & {
 }
 
 // Union the types to create a discriminated union to avoid use children and items at the same time
-type SelectContentProps =
+type SelectContentProps = (
   | SelectContentWithItemsProps
   | SelectContentWithChildrenProps
+) & {
+  onScrollBottom?: () => void
+  onScrollTop?: () => void
+  isLoadingMore?: boolean
+}
 
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
@@ -60,6 +65,9 @@ const SelectContent = forwardRef<
       children,
       position = "popper",
       emptyMessage,
+      onScrollBottom,
+      onScrollTop,
+      isLoadingMore,
       ...props
     },
     ref
@@ -136,14 +144,18 @@ const SelectContent = forwardRef<
             transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
           }}
         >
-          {virtualItems.map((virtualItem) => (
+          {virtualItems.map((virtualItem, index) => (
             <div
               key={virtualItem.key}
               data-index={virtualItem.index}
               ref={virtualizer.measureElement}
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
-              {items[virtualItem.index].item}
+              {isLoadingMore && index === virtualItems.length - 1 ? (
+                <div className="h-10 w-full py-2 text-center">Loading....</div>
+              ) : (
+                items[virtualItem.index].item
+              )}
             </div>
           ))}
         </div>
@@ -186,6 +198,8 @@ const SelectContent = forwardRef<
               "flex flex-col overflow-y-auto",
               asList ? "max-h-full" : "max-h-[300px]"
             )}
+            onScrollBottom={onScrollBottom}
+            onScrollTop={onScrollTop}
           >
             {asList ? (
               viewportContent

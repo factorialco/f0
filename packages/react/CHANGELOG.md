@@ -1,5 +1,89 @@
 # Changelog
 
+## [1.197.1](https://github.com/factorialco/f0/compare/f0-react-v1.197.0...f0-react-v1.197.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* spacings and alignment in grouping selector ([#2630](https://github.com/factorialco/f0/issues/2630)) ([1f45de1](https://github.com/factorialco/f0/commit/1f45de13cf24105270d1180f6f7c2c0eae83f283))
+
+## [1.197.0](https://github.com/factorialco/f0/compare/f0-react-v1.196.0...f0-react-v1.197.0) (2025-09-18)
+
+
+### Features
+
+* **F0AiBanner:** new component for AI banner ([#2574](https://github.com/factorialco/f0/issues/2574)) ([d8653fb](https://github.com/factorialco/f0/commit/d8653fb02cf5f824014e2232b93cde44b77c4758))
+
+## [1.196.0](https://github.com/factorialco/f0/compare/f0-react-v1.195.1...f0-react-v1.196.0) (2025-09-18)
+
+
+### Features
+
+* **RichText:** enhance NotesTextEditor with new tag type and icon support ([#2571](https://github.com/factorialco/f0/issues/2571)) ([0a5f316](https://github.com/factorialco/f0/commit/0a5f316feeff12b57fb3c7a18362884abc21aebe))
+
+## [1.195.1](https://github.com/factorialco/f0/compare/f0-react-v1.195.0...f0-react-v1.195.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* **avatar:** use short size values for ([#2621](https://github.com/factorialco/f0/issues/2621)) ([fb4acee](https://github.com/factorialco/f0/commit/fb4acee493f94edc8ad36c042619fe3af8648ced))
+
+## [1.195.0](https://github.com/factorialco/f0/compare/f0-react-v1.194.0...f0-react-v1.195.0) (2025-09-18)
+
+
+### Features
+
+* **aiChat:** auto clear `AiChat` when closed after X minutes ([#2617](https://github.com/factorialco/f0/issues/2617)) ([e2d5c98](https://github.com/factorialco/f0/commit/e2d5c986c366c3678dec5223ceff2e8ddfa5c695))
+
+## [1.194.0](https://github.com/factorialco/f0/compare/f0-react-v1.193.1...f0-react-v1.194.0) (2025-09-18)
+
+
+### Features
+
+* avatarlist hover color in overflow count ([#2566](https://github.com/factorialco/f0/issues/2566)) ([4d04b21](https://github.com/factorialco/f0/commit/4d04b213e9e3b0abe44f29ae15fdd374a391f4ce))
+
+## [1.193.1](https://github.com/factorialco/f0/compare/f0-react-v1.193.0...f0-react-v1.193.1) (2025-09-17)
+
+
+### Bug Fixes
+
+* **datacollection:** avatar list width ([#2610](https://github.com/factorialco/f0/issues/2610)) ([7ad7155](https://github.com/factorialco/f0/commit/7ad715518c356bba8c568af6e4cf7b45e53a0d80))
+
+## [1.193.0](https://github.com/factorialco/f0/compare/f0-react-v1.192.0...f0-react-v1.193.0) (2025-09-17)
+
+
+### Features
+
+* **Card:** full height for cards in DataCollection ([#2613](https://github.com/factorialco/f0/issues/2613)) ([a88328d](https://github.com/factorialco/f0/commit/a88328dd47c7e2823e4f6a794f596cdf6322d4f5))
+
+## [1.192.0](https://github.com/factorialco/f0/compare/f0-react-v1.191.0...f0-react-v1.192.0) (2025-09-17)
+
+
+### Features
+
+* add support for icon color and background color to (F0Card) ([#2587](https://github.com/factorialco/f0/issues/2587)) ([5b970e2](https://github.com/factorialco/f0/commit/5b970e2ef2ec8f9e1b5726f4f370efe3e64a7b72))
+
+## [1.191.0](https://github.com/factorialco/f0/compare/f0-react-v1.190.0...f0-react-v1.191.0) (2025-09-17)
+
+
+### Features
+
+* extract useDataSource and useData from  datacollection - select uses source ([#2216](https://github.com/factorialco/f0/issues/2216)) ([eaed0ac](https://github.com/factorialco/f0/commit/eaed0ace46c790649f7e6548ebbbe10b63fe5c41))
+
+## [1.190.0](https://github.com/factorialco/f0/compare/f0-react-v1.189.3...f0-react-v1.190.0) (2025-09-16)
+
+
+### Features
+
+* AiChat design updates ([#2597](https://github.com/factorialco/f0/issues/2597)) ([71cd534](https://github.com/factorialco/f0/commit/71cd534fd90ca64886f06ce4ecbff03e1ff50506))
+
+## [1.189.3](https://github.com/factorialco/f0/compare/f0-react-v1.189.2...f0-react-v1.189.3) (2025-09-16)
+
+
+### Bug Fixes
+
+* dropdown item propagation ([#2589](https://github.com/factorialco/f0/issues/2589)) ([4d8805f](https://github.com/factorialco/f0/commit/4d8805fac05df2ca61194ee84017b56264152bb9))
+
 ## [1.189.2](https://github.com/factorialco/f0/compare/f0-react-v1.189.1...f0-react-v1.189.2) (2025-09-16)
 
 

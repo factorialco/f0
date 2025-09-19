@@ -20,6 +20,10 @@ const config: StorybookConfig = {
       titlePrefix: "Components",
     },
     {
+      directory: "../src/hooks",
+      titlePrefix: "Hooks",
+    },
+    {
       directory: "../src/experimental",
       titlePrefix: "Components",
     },

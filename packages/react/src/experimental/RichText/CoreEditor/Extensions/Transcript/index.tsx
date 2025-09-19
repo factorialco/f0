@@ -193,7 +193,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
                       <div key={index} className="flex flex-row gap-3">
                         {user?.imageUrl && (
                           <F0AvatarPerson
-                            size="xsmall"
+                            size="xs"
                             src={user.imageUrl}
                             firstName={user.fullname}
                             lastName={""}

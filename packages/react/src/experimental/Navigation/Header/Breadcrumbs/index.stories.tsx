@@ -1,3 +1,13 @@
+import { IconType } from "@/components/F0Icon"
+import { FiltersDefinition } from "@/components/OneFilterPicker"
+import { SelectItemProps } from "@/experimental/Forms/Fields/Select/types"
+import { PaginatedFetchOptions } from "@/hooks/datasource"
+import {
+  FIRST_NAMES_MOCK,
+  getMockValue,
+  MOCK_ICONS,
+  SURNAMES_MOCK,
+} from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { Button } from "../../../../ui/button"
@@ -96,6 +106,94 @@ export const WithSelectBreadcrumb: Story = {
       },
     ],
   },
+}
+
+const mockItemsLargeDataset = Array.from({ length: 10000 }, (_, i) => ({
+  value: `option-${i}`,
+  label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
+  icon: getMockValue(MOCK_ICONS, i),
+  description: `Description for option ${i}`,
+}))
+type MockItemLargeDataset = (typeof mockItemsLargeDataset)[number]
+
+export const WithSelectBreadcrumbWithDatasource: Story = {
+  render: () => {
+    const source = {
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options: PaginatedFetchOptions<FiltersDefinition>) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 10
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+
+              const results = mockItemsLargeDataset.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+
+              const paginatedResults = results.slice(
+                cursor ? Number(cursor) : 0,
+                nextCursor
+              )
+
+              const res = {
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: paginatedResults,
+                total: results.length,
+              }
+              resolve(res)
+            }, 100)
+          })
+        },
+      },
+    }
+
+    return (
+      <Breadcrumbs
+        breadcrumbs={[
+          {
+            id: "recruitment",
+            label: "Recruitment",
+            href: "/recruitment",
+            module: "ats",
+          },
+          {
+            id: "offers",
+            label: "Offers",
+            href: "/offers",
+          },
+          {
+            id: "my-entity",
+            type: "select",
+            searchbox: true,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            source: source as any,
+            mapOptions: (
+              item
+            ): SelectItemProps<string, MockItemLargeDataset> => ({
+              value: item.value as string,
+              label: item.label as string,
+              icon: item.icon as IconType,
+              description: item.description as string,
+            }),
+            label: `Offer 1`,
+            value: "option-1",
+            onChange: (value) => {
+              console.log("WithSelectBreadcrumb value", value)
+            },
+          },
+        ]}
+      />
+    )
+  },
+  args: {},
 }
 
 export const LongBreadcrumbs: Story = {

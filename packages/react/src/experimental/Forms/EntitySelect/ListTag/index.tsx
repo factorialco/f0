@@ -29,7 +29,7 @@ export const ListTag = ({
             <BaseAvatar
               src={entity.subAvatar}
               name={entity.subName}
-              size="xsmall"
+              size="xs"
               type="rounded"
             />
           )

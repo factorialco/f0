@@ -2,13 +2,13 @@ import { IconType } from "@/components/F0Icon"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import { Kanban, List, Table } from "@/icons/app"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
-  SummariesDefinition,
-} from "../../types"
+} from "@/hooks/datasource"
+import { Kanban, List, Table } from "@/icons/app"
+import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"

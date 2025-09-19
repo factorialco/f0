@@ -13,6 +13,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
+import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -284,6 +285,9 @@ export function PageHeader({
             )}
           </div>
         )}
+        <div>
+          <OneSwitch />
+        </div>
       </div>
     </div>
   )

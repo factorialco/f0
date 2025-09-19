@@ -103,6 +103,11 @@ export interface CardInternalProps {
    * Private prop
    */
   forceVerticalMetadata?: boolean
+
+  /**
+   * Whether the card should have a full height
+   */
+  fullHeight?: boolean
 }
 
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
@@ -124,6 +129,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       onSelect,
       onClick,
       forceVerticalMetadata = false,
+      fullHeight = false,
     },
     ref
   ) {
@@ -132,6 +138,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         className={cn(
           "group relative bg-f1-background shadow-none transition-all",
           compact && "p-3",
+          fullHeight && "h-full",
           (selectable || (otherActions && otherActions.length > 0)) &&
             !selected &&
             "hover:border-f1-border",
@@ -178,7 +185,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex grow flex-col gap-2">
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
               className={cn(

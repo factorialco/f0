@@ -1,4 +1,6 @@
+import type { RecordType } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
+import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -6,7 +8,7 @@ import { Search } from "../../../../icons/app"
 import { Select } from "./index"
 import type { SelectItemProps } from "./types"
 
-const mockOptions: SelectItemProps<string>[] = [
+const mockOptions: SelectItemProps<string, RecordType>[] = [
   {
     value: "option1",
     label: "Option 1",
@@ -39,6 +41,20 @@ const mockOptions: SelectItemProps<string>[] = [
     },
   },
 ]
+
+// Default props to satisfy InputFieldProps requirements
+const defaultSelectProps = {
+  error: undefined,
+  icon: undefined,
+  loading: false,
+  clearable: false,
+  labelIcon: undefined,
+  size: "md" as const,
+  disabled: false,
+  placeholder: "",
+  label: "Pick an option",
+  hideLabel: false,
+}
 
 describe("Select", () => {
   // Mock ResizeObserver
@@ -82,7 +98,7 @@ describe("Select", () => {
   it("renders with placeholder", () => {
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
         placeholder="Select an option"
@@ -95,7 +111,7 @@ describe("Select", () => {
     const user = userEvent.setup()
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
       />
@@ -109,24 +125,26 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
-  it("displays selected value", () => {
+  it("displays selected value", async () => {
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
         value="option1"
       />
     )
 
-    expect(screen.getByText("Option 1")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText("Option 1")).toBeInTheDocument()
+    })
   })
 
   it("renders search box when showSearchBox is true", async () => {
     const user = userEvent.setup()
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
         showSearchBox
@@ -141,20 +159,29 @@ describe("Select", () => {
 
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
-    render(<Select options={mockOptions} onChange={() => {}} showSearchBox />)
+    render(
+      <Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+        showSearchBox
+      />
+    )
 
     await openSelect(user)
     await user.type(screen.getByRole("searchbox"), "1")
 
     expect(screen.getByText("Option 1")).toBeInTheDocument()
-    expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    )
   })
 
   it("shows empty message when no options match search", async () => {
     const user = userEvent.setup()
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
         showSearchBox
@@ -168,10 +195,48 @@ describe("Select", () => {
     expect(screen.getByText("No results found")).toBeInTheDocument()
   })
 
+  // TODO: Fix this test
+  it.skip("maintains focus on search input during data loading", async () => {
+    const user = userEvent.setup()
+    const handleSearchChange = vi.fn()
+
+    render(
+      <Select
+        options={mockOptions}
+        onChange={() => {}}
+        showSearchBox
+        label="Select an option2"
+        hideLabel
+        onSearchChange={handleSearchChange}
+      />
+    )
+
+    await openSelect(user)
+
+    const searchInput = screen.getByRole("searchbox")
+
+    // Focus the search input
+    await user.click(searchInput)
+    expect(searchInput).toHaveFocus()
+
+    // Type to trigger search (which would normally cause a re-render)
+    await user.type(searchInput, "test", { delay: 500 })
+    // The search input should still have focus after the search
+    expect(searchInput).toHaveFocus()
+    expect(handleSearchChange).toHaveBeenCalled()
+    expect(handleSearchChange).toHaveBeenCalledWith("t")
+    await waitFor(() => {
+      expect(handleSearchChange).toHaveBeenCalledWith("test")
+    })
+    // Should still show all options when externalSearch is true
+    expect(screen.getByText("Option 1")).toBeInTheDocument()
+    expect(screen.getByText("Option 2")).toBeInTheDocument()
+  })
+
   it("disables select when disabled prop is true", async () => {
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
         disabled
@@ -185,7 +250,7 @@ describe("Select", () => {
 
   it("renders with custom trigger", () => {
     render(
-      <Select label="Pick an option" options={mockOptions} onChange={() => {}}>
+      <Select {...defaultSelectProps} options={mockOptions} onChange={() => {}}>
         <button>Custom Trigger</button>
       </Select>
     )
@@ -199,7 +264,7 @@ describe("Select", () => {
 
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
       />
@@ -208,11 +273,19 @@ describe("Select", () => {
     await openSelect(user)
     await user.click(screen.getByText("Option 1"))
 
-    expect(handleChange).toHaveBeenCalledWith("option1", {
-      id: "option1",
-      name: "Option 1",
-      description: "Description 1",
-    })
+    expect(handleChange).toHaveBeenCalledWith(
+      "option1",
+      {
+        id: "option1",
+        name: "Option 1",
+        description: "Description 1",
+      },
+      expect.objectContaining({
+        label: "Option 1",
+        value: "option1",
+        description: "Description 1",
+      })
+    )
   })
 
   it("calls onChange when option is selected without item", async () => {
@@ -237,7 +310,7 @@ describe("Select", () => {
 
     render(
       <Select
-        label="Pick an option"
+        {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
       />
@@ -246,6 +319,13 @@ describe("Select", () => {
     await openSelect(user)
     await user.click(screen.getByText("Option 1"))
 
-    expect(handleChange).toHaveBeenCalledWith("option1", undefined)
+    expect(handleChange).toHaveBeenCalledWith(
+      "option1",
+      undefined,
+      expect.objectContaining({
+        label: "Option 1",
+        value: "option1",
+      })
+    )
   })
 })

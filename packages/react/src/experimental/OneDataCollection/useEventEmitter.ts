@@ -1,10 +1,13 @@
+import {
+  SortingsDefinition,
+  SortingsState,
+} from "@/hooks/datasource/types/sortings.typings"
 import { useCallback, useRef } from "react"
 import {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
 import { EventScalar, useF0EventCatcher } from "../../lib/providers/events"
-import { SortingsDefinition, SortingsState } from "./sortings"
 
 type UseEventEmitterParams<Sortings extends SortingsDefinition> = {
   defaultFilters?: FiltersState<FiltersDefinition>

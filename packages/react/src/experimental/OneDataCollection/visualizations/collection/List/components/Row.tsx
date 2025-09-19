@@ -3,16 +3,20 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
+import {
+  FiltersDefinition,
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { FiltersDefinition } from "../../../../../../components/OneFilterPicker/types"
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
-import { SortingsDefinition } from "../../../../sortings"
 import { SummariesDefinition } from "../../../../summary"
-import { DataSource, GroupingDefinition, RecordType } from "../../../../types"
 import { ItemDefinition, ListPropertyDefinition } from "../types"
 import { ItemTeaser } from "./ItemTeaser"
 
@@ -25,7 +29,7 @@ type RowProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     R,
     Filters,
     Sortings,
@@ -123,13 +127,15 @@ export const Row = <
         />
       </div>
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
-        {(fields || []).map((field) => (
-          <div key={String(field.label)} onClick={itemOnClick}>
-            <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
-              {renderCell(item, field)}
+        {(fields || [])
+          .filter((field) => !field.hide?.(item))
+          .map((field) => (
+            <div key={String(field.label)} onClick={itemOnClick}>
+              <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
+                {renderCell(item, field)}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
       {source.itemActions && (
         <>

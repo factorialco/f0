@@ -19,7 +19,7 @@ export const MentionItem = ({ item, selected }: MentionItemProps) => {
         firstName={item.label}
         lastName=""
         src={item.image_url ?? undefined}
-        size="small"
+        size="sm"
       />
       <p className="text-neutral-100 text-md truncate text-ellipsis font-medium">
         {item.label}

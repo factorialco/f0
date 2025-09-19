@@ -8,10 +8,17 @@ type F1SearchBoxProps = {
   threshold?: number
   debounceTime?: number
   autoFocus?: boolean
-  onChange?: (value: string) => void
 } & Pick<
   InputFieldProps<string>,
-  "size" | "loading" | "clearable" | "placeholder" | "disabled" | "name"
+  | "size"
+  | "loading"
+  | "clearable"
+  | "placeholder"
+  | "disabled"
+  | "onBlur"
+  | "onFocus"
+  | "onChange"
+  | "name"
 >
 
 const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
@@ -20,6 +27,8 @@ const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
       value,
       threshold = 0,
       onChange,
+      onBlur,
+      onFocus,
       size = "sm",
       debounceTime = 0,
       clearable = false,
@@ -63,6 +72,8 @@ const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
         size={size}
         autoFocus={props.autoFocus}
         clearable={clearable}
+        onBlur={onBlur}
+        onFocus={onFocus}
         name={props.name}
       />
     )

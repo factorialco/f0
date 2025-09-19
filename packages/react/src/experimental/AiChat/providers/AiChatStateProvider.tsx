@@ -8,20 +8,16 @@ import {
   useEffect,
   useState,
 } from "react"
-import { AiChatMode } from ".."
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 export interface AiChatState {
   greeting?: string
-  initialMode: AiChatMode
   enabled: boolean
   agent?: string
 }
 
 type AiChatProviderReturnValue = {
-  mode: AiChatMode
-  setMode: React.Dispatch<React.SetStateAction<AiChatMode>>
   enabled: boolean
   setEnabled: React.Dispatch<React.SetStateAction<boolean>>
   open: boolean
@@ -29,21 +25,33 @@ type AiChatProviderReturnValue = {
   shouldPlayEntranceAnimation: boolean
   setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>
   tmp_setAgent: (agent?: string) => void
+  /**
+   * Set the amount of minutes after which the chat will be cleared automatically
+   * Set `null` to disable auto-clearing
+   *
+   * @default 15
+   */
+  setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
+  autoClearMinutes: number | null
 } & Pick<AiChatState, "greeting" | "agent">
+
+const DEFAULT_MINUTES_TO_RESET = 15
 
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
-  initialMode,
   agent: initialAgent,
   ...rest
 }) => {
-  const [mode, setMode] = useState<AiChatMode>(initialMode)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(true)
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
+
+  const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
+    DEFAULT_MINUTES_TO_RESET
+  )
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -66,8 +74,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     <AiChatStateContext.Provider
       value={{
         ...rest,
-        mode,
-        setMode,
         enabled: enabledInternal,
         setEnabled: setEnabledInternal,
         open,
@@ -76,6 +82,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setShouldPlayEntranceAnimation,
         agent,
         tmp_setAgent,
+        setAutoClearMinutes,
+        autoClearMinutes: enabledInternal ? autoClearMinutes : null,
       }}
     >
       {children}
@@ -89,8 +97,6 @@ export function useAiChat(): AiChatProviderReturnValue {
   if (context === null) {
     console.error("useAiChatLabels must be used within an AiChatLabelsProvider")
     return {
-      mode: "popup",
-      setMode: () => {},
       enabled: false,
       setEnabled: () => {},
       open: false,
@@ -99,6 +105,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setShouldPlayEntranceAnimation: () => {},
       agent: undefined,
       tmp_setAgent: () => {},
+      setAutoClearMinutes: () => {},
+      autoClearMinutes: null,
     }
   }
 

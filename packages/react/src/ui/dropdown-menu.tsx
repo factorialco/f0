@@ -81,6 +81,9 @@ const DropdownMenuItem = React.forwardRef<
   }
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
+    onClick={(e) => {
+      e.stopPropagation()
+    }}
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded py-2 pl-3 pr-5 text-base font-medium outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:h-full after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] first:pt-3 first:after:top-1 first:after:h-[calc(100%-0.25rem)] last:pb-3 last:after:bottom-1 last:after:h-[calc(100%-0.25rem)] hover:after:opacity-100 focus:after:opacity-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",

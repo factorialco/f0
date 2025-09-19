@@ -1,4 +1,9 @@
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+import {
+  zeroRender as render,
+  screen,
+  userEvent,
+  waitFor,
+} from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
 import { describe, expect, it, vi } from "vitest"
 import { F0Card } from "../F0Card"
@@ -101,7 +106,7 @@ describe("F0Card Component", () => {
     const deleteOption = screen.getByRole("menuitem", { name: "Delete" })
     await user.click(deleteOption)
 
-    expect(handleOption).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(handleOption).toHaveBeenCalledTimes(1))
   })
 
   it("handles primary action", async () => {

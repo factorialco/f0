@@ -1,6 +1,6 @@
 import type { Variant } from "@/components/tags/F0TagStatus"
+import type { RecordType } from "@/hooks/datasource"
 import { ReactNode } from "react"
-import { RecordType } from "../../experimental/OneDataCollection/types"
 
 export interface LaneProps<Record extends RecordType> {
   /**

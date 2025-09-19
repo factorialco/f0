@@ -1,5 +1,15 @@
+import {
+  FIRST_NAMES_MOCK,
+  MOCK_ICONS,
+  SURNAMES_MOCK,
+  getMockValue,
+} from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Search } from "../../../../../../icons/app"
+import {
+  SelectItemObject,
+  SelectItemProps,
+} from "../../../../../Forms/Fields/Select"
 import { BreadcrumbSelect } from "./index"
 const meta: Meta<typeof BreadcrumbSelect> = {
   title: "Navigation/BreadcrumbSelect",
@@ -9,7 +19,7 @@ const meta: Meta<typeof BreadcrumbSelect> = {
 
 export default meta
 
-type Story = StoryObj<typeof BreadcrumbSelect>
+type Story = StoryObj<typeof BreadcrumbSelect<string>>
 
 export const Default: Story = {
   args: {
@@ -44,8 +54,12 @@ export const Default: Story = {
 export const WithSearchbox: Story = {
   args: {
     value: "recruitment",
-    onChange: (value: string) => {
-      console.log("onChange BreadcrumbSelect", value)
+    onChange: (
+      value: string,
+      item?: unknown,
+      option?: SelectItemObject<string, unknown>
+    ) => {
+      console.log("onChange BreadcrumbSelect", value, item, option)
     },
     searchBoxPlaceholder: "Search",
     showSearchBox: true,
@@ -71,22 +85,46 @@ export const WithSearchbox: Story = {
   },
 }
 
-export const AsyncData: Story = {
+const mockItems = Array.from({ length: 30 }, (_, i) => ({
+  value: `option-${i}`,
+  label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
+  icon: getMockValue(MOCK_ICONS, i),
+  description: `Description for option ${i}`,
+}))
+
+type MockItem = (typeof mockItems)[number]
+
+export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
   args: {
-    ...Default.args,
-    options: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      return [
-        {
-          value: "recruitment",
-          label: "Recruitment",
+    value: "option-3",
+    source: {
+      dataAdapter: {
+        fetchData: async (options) => {
+          const { search } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+
+              const res = {
+                records: results,
+              }
+              resolve(res)
+            }, 100)
+          })
         },
-        {
-          value: "candidates",
-          label: "Candidates",
-          icon: Search,
-        },
-      ]
+      },
+    },
+    mapOptions: (item: MockItem): SelectItemProps<string, MockItem> => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+    }),
+    onChange: (value: string) => {
+      console.log("onChange BreadcrumbSelect", value)
     },
   },
   parameters: {
@@ -99,32 +137,77 @@ export const AsyncData: Story = {
   },
 }
 
-export const AsyncDataWithSearchbox: Story = {
+const mockItemsLargeDataset = Array.from({ length: 10000 }, (_, i) => ({
+  value: `option-${i}`,
+  label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
+  icon: getMockValue(MOCK_ICONS, i),
+  description: `Description for option ${i}`,
+}))
+
+type MockItemLargeDataSet = (typeof mockItemsLargeDataset)[number]
+
+export const AsyncDataWithLargeDataset: StoryObj<
+  typeof BreadcrumbSelect<string, (typeof mockItems)[number]>
+> = {
   args: {
-    ...WithSearchbox.args,
-    externalSearch: true,
-    options: async (search?: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      return [
-        {
-          value: "recruitment",
-          label: "Recruitment",
+    defaultItem: {
+      value: "option-3",
+      label: "Arnau Pérez",
+      icon: Search,
+    },
+    source: {
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 10
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+
+              const results = mockItemsLargeDataset.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+
+              const paginatedResults = results.slice(
+                cursor ? Number(cursor) : 0,
+                nextCursor
+              )
+
+              const res = {
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: paginatedResults,
+                total: results.length,
+              }
+              resolve(res)
+            }, 100)
+          })
         },
-        {
-          value: "candidates",
-          label: "Candidates",
-          icon: Search,
-        },
-      ].filter((option) =>
-        option.label.toLowerCase().includes(search?.toLowerCase() || "")
-      )
+      },
+    },
+    mapOptions: (
+      item: MockItemLargeDataSet
+    ): SelectItemProps<string, MockItemLargeDataSet> => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+    }),
+    showSearchBox: true,
+    onChange: (value: string) => {
+      console.log("onChange BreadcrumbSelect", value)
     },
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Combines async data loading with search functionality. The search is handled externally, making it suitable for server-side filtering.",
+          "Demonstrates loading options asynchronously. Shows a loading state while data is being fetched.",
       },
     },
   },

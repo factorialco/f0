@@ -1,5 +1,5 @@
 import type { Variant } from "@/components/tags/F0TagStatus"
-import type { RecordType } from "@/experimental/OneDataCollection/types"
+import type { RecordType } from "@/hooks/datasource"
 import type { ReactNode } from "react"
 
 export type KanbanLaneAttributes<TRecord extends RecordType> = {
@@ -56,14 +56,6 @@ export interface KanbanProps<TRecord extends RecordType> {
       toIndex: number | null
     ) => Promise<void>
   }
-
-  /**
-   * Future: a shared data source config. We mirror the DataCollection idea of
-   * having a common source and per-lane filters. Left undefined while backend
-   * integration is pending.
-   */
-  // dataSource?: DataSource<...> // intentionally omitted for now
-  // filters?: FiltersDefinition // example alignment
 }
 
 export type { RecordType }

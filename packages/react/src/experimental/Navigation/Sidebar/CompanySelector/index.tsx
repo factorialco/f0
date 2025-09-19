@@ -170,7 +170,7 @@ const SelectedCompanyLabel = ({
       <F0AvatarCompany
         name={company?.name?.[0]}
         src={company?.logo}
-        size="small"
+        size="sm"
         badge={
           withNotification ? { icon: Circle, type: "highlight" } : undefined
         }

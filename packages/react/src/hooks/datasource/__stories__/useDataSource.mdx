@@ -1,0 +1,601 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Datasource/useDataSource" />
+
+# useDataSource
+
+The `useDataSource` hook is the foundation of the datasource system. It creates
+and manages a data source with comprehensive state management for filters,
+search, sorting, navigation filters, and grouping. This hook is intentionally
+separated from rendering components to enable sharing the same data source
+across multiple visualizations.
+
+## Overview
+
+`useDataSource` creates a reusable data source that can be shared across
+different visualizations and components. It manages all the configuration and
+state needed for data collection functionality.
+
+### Key Benefits
+
+1. **Reusability** - Share the same data source across multiple components
+2. **State Management** - Centralized state for filters, search, sorting, and
+   grouping
+3. **Separation of Concerns** - Clean separation between data management and UI
+   rendering
+4. **Type Safety** - Full TypeScript support with generic types
+
+## API Reference
+
+### Parameters
+
+```tsx
+useDataSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>(
+  definition: DataSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>,
+  deps?: ReadonlyArray<unknown>
+)
+```
+
+### Generic Types
+
+- `R` - The type of records in the collection
+- `Filters` - Filter definitions extending `FiltersDefinition`
+- `Sortings` - Sorting definitions extending `SortingsDefinition`
+- `Summaries` - Summary definitions extending `SummariesDefinition`
+- `ItemActions` - Item action definitions extending `ItemActionsDefinition<R>`
+- `NavigationFilters` - Navigation filter definitions extending
+  `NavigationFiltersDefinition`
+- `Grouping` - Grouping definitions extending `GroupingDefinition<R>`
+
+### Configuration Options
+
+#### Core Configuration
+
+```tsx
+{
+  dataAdapter: DataAdapter<R, Filters, NavigationFilters>  // Required - handles data fetching
+  filters?: Filters                                        // Optional - filter definitions
+  currentFilters?: FiltersState<Filters>                  // Optional - initial filter state
+  presets?: PresetsDefinition<Filters>                    // Optional - filter presets
+}
+```
+
+#### Search Configuration
+
+```tsx
+{
+  search?: {
+    enabled: boolean          // Enable search functionality
+    sync?: boolean           // Synchronous search (no debouncing)
+    placeholder?: string     // Search input placeholder
+  }
+}
+```
+
+#### Sorting Configuration
+
+```tsx
+{
+  sortings?: Sortings                    // Available sorting fields
+  defaultSorting?: SortingsState<Sortings>  // Default sorting state
+}
+```
+
+#### Navigation & Grouping
+
+```tsx
+{
+  navigationFilters?: NavigationFilters     // Navigation-specific filters
+  grouping?: Grouping                      // Grouping configuration
+  currentGrouping?: GroupingState<R, Grouping>  // Initial grouping state
+}
+```
+
+#### Actions & Interactions
+
+```tsx
+{
+  itemActions?: ItemActions                        // Actions for individual items
+  primaryActions?: PrimaryActionsDefinition       // Primary collection actions
+  secondaryActions?: SecondaryActionsDefinition   // Secondary collection actions
+  itemUrl?: (item: R) => string | undefined       // URL generation for items
+  itemOnClick?: (item: R) => () => void           // Click handlers for items
+}
+```
+
+#### Selection & Bulk Operations
+
+```tsx
+{
+  selectable?: (item: R) => string | number | undefined  // Item selection value
+  defaultSelectedItems?: SelectedItemsState              // Default selected items
+  bulkActions?: (selectedItems) => {                     // Bulk actions for selected items
+    primary: BulkActionDefinition[]
+    secondary?: BulkActionDefinition[]
+  }
+}
+```
+
+#### Summary Configuration
+
+```tsx
+{
+  summaries?: Summaries & {
+    label?: string  // Optional label for the summaries row
+  }
+  totalItemSummary?: (totalItems: number) => string  // Total items summary text
+}
+```
+
+### Return Value
+
+The hook returns a `DataSource` object with all the configuration and state
+management functions:
+
+```tsx
+type DataSource<R, Filters, ...> = {
+  // Configuration (from input)
+  filters: Filters
+  dataAdapter: DataAdapter<R, Filters, NavigationFilters>
+  itemActions: ItemActions
+  // ... other configuration options
+
+  // State Management
+  currentFilters: FiltersState<Filters>
+  setCurrentFilters: (filters: FiltersState<Filters>) => void
+  currentSortings: SortingsState<Sortings>
+  setCurrentSortings: (sortings: SortingsState<Sortings>) => void
+  currentSearch: string | undefined
+  setCurrentSearch: (search: string | undefined) => void
+  debouncedCurrentSearch: string | undefined
+  isLoading: boolean
+  setIsLoading: (loading: boolean) => void
+  // ... other state management functions
+}
+```
+
+## Usage Examples
+
+### Basic Data Source
+
+```tsx
+import { useDataSource } from "@/hooks/datasource"
+
+type User = {
+  id: string
+  name: string
+  email: string
+  department: string
+}
+
+const filters = {
+  department: {
+    type: "select" as const,
+    options: [
+      { value: "engineering", label: "Engineering" },
+      { value: "marketing", label: "Marketing" },
+      { value: "sales", label: "Sales" },
+    ],
+  },
+}
+
+function UserList() {
+  const dataSource = useDataSource<User, typeof filters>({
+    filters,
+    dataAdapter: {
+      fetchData: async ({ filters }) => {
+        const response = await fetch("/api/users", {
+          method: "POST",
+          body: JSON.stringify({ filters }),
+        })
+        return response.json()
+      },
+    },
+  })
+
+  return <UserTable source={dataSource} />
+}
+```
+
+### Paginated Data Source
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  dataAdapter: {
+    paginationType: "pages",
+    perPage: 20,
+    fetchData: async ({ filters, pagination }) => {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        body: JSON.stringify({
+          filters,
+          page: pagination.currentPage,
+          perPage: pagination.perPage,
+        }),
+      })
+      return response.json()
+    },
+  },
+})
+```
+
+### Data Source with Search
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  search: {
+    enabled: true,
+    placeholder: "Search users...",
+  },
+  dataAdapter: {
+    fetchData: async ({ filters, search }) => {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        body: JSON.stringify({ filters, search }),
+      })
+      return response.json()
+    },
+  },
+})
+```
+
+### Data Source with Sorting
+
+```tsx
+const sortings = {
+  name: { label: "Name" },
+  email: { label: "Email" },
+  department: { label: "Department" },
+}
+
+const dataSource = useDataSource({
+  filters,
+  sortings,
+  defaultSorting: { name: "asc" },
+  dataAdapter: {
+    fetchData: async ({ filters, sortings }) => {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        body: JSON.stringify({ filters, sortings }),
+      })
+      return response.json()
+    },
+  },
+})
+```
+
+### Data Source with Grouping
+
+```tsx
+const grouping = {
+  groupBy: {
+    department: {
+      label: "Department",
+      getGroupKey: (item: User) => item.department,
+      getGroupLabel: (key: string) =>
+        key.charAt(0).toUpperCase() + key.slice(1),
+    },
+  },
+}
+
+const dataSource = useDataSource({
+  filters,
+  grouping,
+  currentGrouping: { field: "department", order: "asc" },
+  dataAdapter: {
+    fetchData: async ({ filters }) => {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        body: JSON.stringify({ filters }),
+      })
+      return response.json()
+    },
+  },
+})
+```
+
+### Data Source with Item Actions
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  itemActions: (item: User) => [
+    {
+      label: "Edit",
+      icon: Pencil,
+      onClick: () => openEditModal(item),
+      description: "Edit user details",
+    },
+    {
+      label: "Delete",
+      icon: Delete,
+      onClick: () => deleteUser(item.id),
+      critical: true,
+      description: "Delete user permanently",
+    },
+  ],
+  dataAdapter: {
+    fetchData: fetchUsers,
+  },
+})
+```
+
+### Data Source with Selection and Bulk Actions
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  selectable: (item: User) => item.id,
+  bulkActions: (selectedItems) => ({
+    primary: [
+      {
+        label: "Delete Selected",
+        icon: Delete,
+        onClick: () => deleteUsers(selectedItems),
+        critical: true,
+      },
+    ],
+    secondary: [
+      {
+        label: "Export Selected",
+        icon: Download,
+        onClick: () => exportUsers(selectedItems),
+      },
+    ],
+  }),
+  dataAdapter: {
+    fetchData: fetchUsers,
+  },
+})
+```
+
+### Observable Data Source
+
+```tsx
+import { Observable } from "zen-observable-ts"
+
+const dataSource = useDataSource({
+  filters,
+  dataAdapter: {
+    fetchData: ({ filters }) => {
+      return new Observable((observer) => {
+        // Emit loading state
+        observer.next({ type: "loading", data: undefined })
+
+        // Fetch data
+        fetchUsers(filters)
+          .then((data) => {
+            observer.next({ type: "success", data })
+            observer.complete()
+          })
+          .catch((error) => {
+            observer.next({ type: "error", error })
+            observer.complete()
+          })
+      })
+    },
+  },
+})
+```
+
+## Multi-Visualization Usage
+
+One of the key benefits of `useDataSource` is the ability to share the same data
+source across multiple visualizations:
+
+```tsx
+function Dashboard() {
+  const dataSource = useDataSource({
+    filters,
+    sortings,
+    search: { enabled: true },
+    dataAdapter: {
+      fetchData: fetchUsers,
+    },
+  })
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <UserTable source={dataSource} />
+        <UserChart source={dataSource} />
+      </div>
+      <UserCards source={dataSource} />
+    </div>
+  )
+}
+```
+
+## Advanced Patterns
+
+### Conditional Data Adapter
+
+```tsx
+const dataSource = useDataSource(
+  {
+    filters,
+    dataAdapter: useMemo(
+      () => ({
+        fetchData: async ({ filters }) => {
+          const endpoint = isArchived
+            ? "/api/archived-users"
+            : "/api/active-users"
+          const response = await fetch(endpoint, {
+            method: "POST",
+            body: JSON.stringify({ filters }),
+          })
+          return response.json()
+        },
+      }),
+      [isArchived]
+    ),
+  },
+  [isArchived]
+) // Dependency array for memoization
+```
+
+### Dynamic Filter Options
+
+```tsx
+const filters = useMemo(
+  () => ({
+    department: {
+      type: "select" as const,
+      options: departmentOptions, // Dynamic options from API
+    },
+  }),
+  [departmentOptions]
+)
+
+const dataSource = useDataSource(
+  {
+    filters,
+    dataAdapter: {
+      fetchData: fetchUsers,
+    },
+  },
+  [departmentOptions]
+) // Re-create when options change
+```
+
+## Best Practices
+
+### 1. Use Memoization for Dependencies
+
+```tsx
+const dataSource = useDataSource(
+  {
+    filters,
+    dataAdapter: useMemo(
+      () => ({
+        fetchData: expensiveDataFetcher,
+      }),
+      [dependencies]
+    ),
+  },
+  [dependencies]
+)
+```
+
+### 2. Extract Data Adapter Logic
+
+```tsx
+const useUserDataAdapter = (config: UserConfig) => {
+  return useMemo(
+    () => ({
+      fetchData: async ({ filters }) => {
+        // Complex data fetching logic
+      },
+    }),
+    [config]
+  )
+}
+
+const dataSource = useDataSource({
+  filters,
+  dataAdapter: useUserDataAdapter(config),
+})
+```
+
+### 3. Type Safety
+
+```tsx
+// Define clear types for your data
+type User = {
+  id: string
+  name: string
+  email: string
+  department: "engineering" | "marketing" | "sales"
+}
+
+// Use type-safe filter definitions
+const filters = {
+  department: {
+    type: "select" as const,
+    options: [
+      { value: "engineering" as const, label: "Engineering" },
+      { value: "marketing" as const, label: "Marketing" },
+      { value: "sales" as const, label: "Sales" },
+    ],
+  },
+} satisfies FiltersDefinition
+
+// Hook is fully typed
+const dataSource = useDataSource<User, typeof filters>({
+  filters,
+  dataAdapter: {
+    fetchData: async ({ filters }) => {
+      // filters.department is correctly typed as string[] | undefined
+    },
+  },
+})
+```
+
+## Related Hooks
+
+- [`useData`](/?path=/docs/hooks-datasource-usedata--docs) - For data fetching
+  and pagination
+- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For
+  selection management
+- [`useGroups`](/?path=/docs/hooks-datasource-usegroups--docs) - For group state
+  management
+
+## Common Patterns
+
+### Loading States
+
+The data source includes loading state management:
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  dataAdapter: {
+    fetchData: async ({ filters }) => {
+      // dataSource.isLoading is automatically managed
+      const data = await fetchUsers(filters)
+      return data
+    },
+  },
+})
+
+// Access loading state
+if (dataSource.isLoading) {
+  return <Loading />
+}
+```
+
+### Filter State Management
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  currentFilters: { department: ["engineering"] }, // Initial state
+  dataAdapter: { fetchData: fetchUsers },
+})
+
+// Access and update filter state
+const handleFilterChange = (newFilters) => {
+  dataSource.setCurrentFilters(newFilters)
+}
+```
+
+### Search Integration
+
+```tsx
+const dataSource = useDataSource({
+  filters,
+  search: { enabled: true },
+  dataAdapter: {
+    fetchData: async ({ filters, search }) => {
+      // search is debounced automatically
+      return fetchUsers({ filters, search })
+    },
+  },
+})
+
+// Access search state
+const currentSearch = dataSource.currentSearch
+const debouncedSearch = dataSource.debouncedCurrentSearch
+```

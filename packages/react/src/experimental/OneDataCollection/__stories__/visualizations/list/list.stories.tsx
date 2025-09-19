@@ -5,7 +5,7 @@ import {
   generateMockUsers,
   getMockVisualizations,
   mockUsers,
-} from "../mockData"
+} from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/List",

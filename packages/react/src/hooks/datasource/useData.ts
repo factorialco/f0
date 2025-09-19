@@ -1,4 +1,9 @@
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/components/OneFilterPicker/types"
 import { getValueByPath } from "@/lib/objectPaths"
+import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 import { groupBy } from "lodash"
 import {
   useCallback,
@@ -9,35 +14,20 @@ import {
   useState,
 } from "react"
 import { Observable } from "zen-observable-ts"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "../../components/OneFilterPicker/types"
-import {
-  PromiseState,
-  promiseToObservable,
-} from "../../lib/promise-to-observable"
-import { ItemActionsDefinition } from "./item-actions"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "./navigationFilters/types"
-import { SortingsDefinition } from "./sortings"
-import { SummariesDefinition } from "./summary"
 import {
   BaseFetchOptions,
-  DataSource,
   GroupingDefinition,
   InfiniteScrollPaginatedResponse,
-  LaneDataSource,
   PageBasedPaginatedResponse,
   PaginatedResponse,
   PaginationInfo,
   PaginationType,
   PromiseOrObservable,
   RecordType,
+  SortingsDefinition,
   SortingsStateMultiple,
 } from "./types"
+import { DataSource } from "./types/datasource.typings"
 
 /**
  * Represents an error that occurred during data fetching
@@ -48,45 +38,6 @@ export interface DataError {
 }
 
 /**
- * Merges global filters with lane-specific filters using intersection logic.
- * For array-based filters (like InFilter), it finds the intersection of values.
- * For other filter types, lane filters override global filters.
- *
- * @param globalFilters - The global filters applied to all lanes
- * @param laneFilters - The lane-specific filters
- * @returns The merged filters with proper intersection logic
- */
-function mergeFiltersWithIntersection<T extends Record<string, unknown>>(
-  globalFilters: T,
-  laneFilters: T
-): T {
-  const result: Record<string, unknown> = { ...globalFilters }
-
-  for (const [key, laneValue] of Object.entries(laneFilters)) {
-    const globalValue = globalFilters[key]
-
-    // If both values exist and are arrays (InFilter case), find intersection
-    if (
-      Array.isArray(globalValue) &&
-      Array.isArray(laneValue) &&
-      globalValue.length > 0 &&
-      laneValue.length > 0
-    ) {
-      // Find intersection of the two arrays
-      const intersection = globalValue.filter((item) =>
-        laneValue.includes(item)
-      )
-      result[key] = intersection
-    } else {
-      // For non-array filters or when one is empty, lane filter takes precedence
-      result[key] = laneValue
-    }
-  }
-
-  return result as T
-}
-
-/**
  * Response structure for non-paginated data
  */
 type SimpleResult<T> = T[]
@@ -94,9 +45,30 @@ type SimpleResult<T> = T[]
 /**
  * Hook options for useData
  */
-interface UseDataOptions<Filters extends FiltersDefinition> {
+export interface UseDataOptions<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+> {
   filters?: Partial<FiltersState<Filters>>
+  /**
+   * A function that is called when an error occurs during data fetching.
+   * It is called with the error object.
+   * @param error - The error object.
+   */
   onError?: (error: DataError) => void
+  /**
+   * A function that provides the fetch parameters for the data source.
+   * It is called before each fetch request and can be used to modify the fetch parameters.
+   * @param options - The fetch parameters for the data source.
+   * @returns The fetch parameters for the data source.
+   */
+  fetchParamsProvider?: <O extends BaseFetchOptions<Filters>>(options: O) => O
+  /**
+   * A function that is called when the data is fetched successfully.
+   * It is called with the response data.
+   * @param response - The response data.
+   */
+  onResponse?: (response: PaginatedResponse<R> | SimpleResult<R>) => void
 }
 
 /**
@@ -108,30 +80,9 @@ export type WithGroupId<RecordType> = RecordType & {
 }
 
 /**
- * Pagination info for lanes (simplified version for state management)
- */
-export type LanePaginationInfo = {
-  total: number
-  perPage: number
-  type: "infinite-scroll"
-  cursor: string | null
-  hasMore: boolean
-}
-
-/**
- * Data state for a single lane (always uses infinite scroll)
- */
-export type LaneDataState<R> = {
-  data: Data<R>
-  isLoading: boolean
-  isLoadingMore: boolean
-  paginationInfo: LanePaginationInfo | null
-}
-
-/**
  * Hook return type for useData
  */
-interface UseDataReturn<R> {
+export interface UseDataReturn<R extends RecordType> {
   data: Data<R>
   isInitialLoading: boolean
   isLoading: boolean
@@ -145,11 +96,9 @@ interface UseDataReturn<R> {
   // For infinite-scroll pagination:
   loadMore: () => void
   totalItems: number | undefined
-  summaries?: R // Add summaries to the return type
 
-  // For lanes data:
-  lanesData?: Record<string, LaneDataState<R>>
-  fetchMoreForLane?: (laneId: string) => Promise<void>
+  // Merged filters (default values and current values)
+  mergedFilters: FiltersState<FiltersDefinition>
 }
 
 type DataType<T> = PromiseState<T>
@@ -161,24 +110,18 @@ export type GroupRecord<RecordType> = {
   records: RecordType[]
 }
 
-export type Data<RecordType> = {
-  records: WithGroupId<RecordType>[]
-} & (
-  | {
-      type: "grouped"
-      groups: GroupRecord<WithGroupId<RecordType>>[]
-    }
-  | {
-      type: "flat"
-    }
-)
+export type Data<R extends RecordType> = {
+  records: WithGroupId<R>[]
+  type: "grouped" | "flat"
+  groups: GroupRecord<R>[]
+}
 
 /**
  * Custom hook for handling data fetching state
  */
-function useDataFetchState<Record>() {
+function useDataFetchState<R extends RecordType>() {
   const [isInitialLoading, setIsInitialLoading] = useState(true)
-  const [data, setData] = useState<Record[]>([])
+  const [data, setData] = useState<R[]>([])
   const [error, setError] = useState<DataError | null>(null)
 
   return {
@@ -200,6 +143,19 @@ function usePaginationState() {
   )
   return { paginationInfo, setPaginationInfo }
 }
+
+const defaultFetchDataAndUpdateOptions = <
+  Filters extends FiltersDefinition,
+  O extends BaseFetchOptions<Filters>,
+>(
+  options: O
+): O => options
+
+const defaultIdProvider = (
+  item: RecordType,
+  index?: number
+): string | number =>
+  "id" in item ? `${item.id}` : index || JSON.stringify(item)
 
 /**
  * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
@@ -268,23 +224,20 @@ function usePaginationState() {
  * - setPage: Function to navigate to a specific page
  */
 export function useData<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-  Sortings extends SortingsDefinition,
-  Summaries extends SummariesDefinition,
-  NavigationFilters extends NavigationFiltersDefinition,
-  Grouping extends GroupingDefinition<R>,
+  R extends RecordType = RecordType,
+  Filters extends FiltersDefinition = FiltersDefinition,
+  Sortings extends SortingsDefinition = SortingsDefinition,
+  Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
 >(
-  source: DataSource<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActionsDefinition<R>,
-    NavigationFilters,
-    Grouping
-  >,
-  { filters, onError }: UseDataOptions<Filters> = {}
+  source: DataSource<R, Filters, Sortings, Grouping>,
+  {
+    filters,
+    onError,
+    fetchParamsProvider = defaultFetchDataAndUpdateOptions,
+    onResponse,
+  }: UseDataOptions<R, Filters> = {},
+  // Deps to trigger fetchDataAndUpdate
+  deps: unknown[] = []
 ): UseDataReturn<R> {
   const {
     dataAdapter,
@@ -294,15 +247,10 @@ export function useData<
     currentSearch,
     isLoading,
     setIsLoading,
-    currentNavigationFilters,
     currentGrouping,
     grouping,
-    lanes,
-    idProvider = (item, index): string | number =>
-      "id" in item ? `${item.id}` : index || JSON.stringify(item),
+    idProvider = defaultIdProvider,
   } = source
-
-  const hasLanes = useMemo(() => lanes && lanes.length > 0, [lanes])
 
   const cleanup = useRef<(() => void) | undefined>()
 
@@ -317,43 +265,38 @@ export function useData<
 
   const { paginationInfo, setPaginationInfo } = usePaginationState()
 
+  // We need to use a ref to get the latest paginationInfo value
+  // because the paginationInfo is updated asynchronously
+  // and we need to use the latest value in the callback functions
+  // like loadMore, setPage, etc.
+  const paginationInfoRef = useRef(paginationInfo)
+  useEffect(() => {
+    paginationInfoRef.current = paginationInfo
+  }, [paginationInfo])
+
   const [totalItems, setTotalItems] = useState<number | undefined>(undefined)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   const isLoadingMoreRef = useRef(false)
 
-  const mergedFilters = useMemo(
-    () => ({ ...currentFilters, ...filters }),
-    [currentFilters, filters]
-  )
+  const mergedFilters = useMemo(() => {
+    return { ...currentFilters, ...filters }
+  }, [currentFilters, filters])
 
   const deferredSearch = useDeferredValue(currentSearch)
 
-  const searchValue = !search?.enabled
-    ? undefined
-    : search?.sync
-      ? currentSearch
-      : deferredSearch
-
-  const [summariesData, setSummariesData] = useState<R | undefined>(undefined)
-
-  // Initialize lanes data structure
-  const [lanesData, setLanesData] = useState<
-    Record<string, LaneDataState<R>> | undefined
-  >(() => {
-    if (!hasLanes) return undefined
-
-    const initialLanesData: Record<string, LaneDataState<R>> = {}
-    lanes!.forEach((lane) => {
-      initialLanesData[lane.id] = {
-        data: { type: "flat", records: [] },
-        isLoading: false,
-        isLoadingMore: false,
-        paginationInfo: null,
-      }
-    })
-    return initialLanesData
-  })
+  // We need to use a ref to get the latest search value
+  // because the search value is updated asynchronously
+  // and we need to use the latest value in the callback functions
+  // like loadMore, setPage, etc.
+  const searchValue = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    searchValue.current = !search?.enabled
+      ? undefined
+      : search?.sync
+        ? currentSearch
+        : deferredSearch
+  }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items
@@ -381,10 +324,11 @@ export function useData<
 
   const handleFetchSuccess = useCallback(
     (result: PaginatedResponse<R> | SimpleResult<R>, appendMode: boolean) => {
-      // Extract summaries data if available
-      const extractedSummaries =
-        "summaries" in result ? result.summaries : undefined
-      setSummariesData(extractedSummaries)
+      /**
+       * Call to the onResponse callback
+       */
+      onResponse?.(result)
+
       let records: R[] = []
       if ("records" in result) {
         records = result.records
@@ -395,23 +339,28 @@ export function useData<
         // Update pagination info based on the pagination type
         if (
           paginationType &&
-          ["pages", "infinite-scroll"].includes(paginationType)
+          ["pages", "infinite-scroll"].includes(paginationType) &&
+          paginationType !== "no-pagination"
         ) {
           // For page-based pagination
-          setPaginationInfo({
+          const common = {
             total: result.total,
             perPage: result.perPage,
-            type: paginationType,
-            // Pages pagination
-            ...(paginationType === "pages" && {
+          }
+          if (paginationType === "pages") {
+            setPaginationInfo({
+              ...common,
+              type: "pages" as const,
               currentPage: "currentPage" in result ? result.currentPage : 1,
               pagesCount:
                 "pagesCount" in result
                   ? result.pagesCount
                   : Math.ceil(result.total / result.perPage),
-            }),
-            // Infinite scroll pagination
-            ...(paginationType === "infinite-scroll" && {
+            })
+          } else if (paginationType === "infinite-scroll") {
+            setPaginationInfo({
+              ...common,
+              type: "infinite-scroll" as const,
               cursor:
                 "cursor" in result && result.cursor !== undefined
                   ? result.cursor
@@ -422,8 +371,9 @@ export function useData<
                 "hasMore" in result
                   ? result.hasMore
                   : rawData.length + result.records.length < result.total,
-            }),
-          })
+            })
+          }
+
           setTotalItems(result.total)
         }
       } else {
@@ -453,7 +403,6 @@ export function useData<
       setIsLoading,
       setIsLoadingMore,
       setTotalItems,
-      setSummariesData,
       isLoadingMoreRef,
     ]
   )
@@ -510,7 +459,18 @@ export function useData<
     /**
      * Flat data
      */
-    return { type: "flat" as const, records: data }
+    return {
+      type: "flat" as const,
+      records: data,
+      groups: [
+        {
+          key: "all",
+          label: "All",
+          itemCount: data.length,
+          records: data,
+        },
+      ],
+    }
   }, [rawData, currentGrouping, grouping, mergedFilters])
 
   const handleFetchError = useCallback(
@@ -537,25 +497,22 @@ export function useData<
   type ResultType = PaginatedResponse<R> | SimpleResult<R>
 
   // Define a type for the fetch parameters to make the function more maintainable
-  type FetchDataParams<
-    Filters extends FiltersDefinition,
-    NavigationFilters extends NavigationFiltersDefinition,
-  > = {
+  type FetchDataParams<Filters extends FiltersDefinition> = {
     filters: FiltersState<Filters>
     currentPage?: number
-    navigationFilters: NavigationFiltersState<NavigationFilters>
     appendMode?: boolean
     cursor?: string | null
+    search?: string | undefined
   }
 
   const fetchDataAndUpdate = useCallback(
     async ({
       filters,
       currentPage = 1,
-      navigationFilters,
+      search,
       appendMode = false,
       cursor = null,
-    }: FetchDataParams<Filters, NavigationFilters>) => {
+    }: FetchDataParams<Filters>) => {
       try {
         // Clean up any existing subscription before creating a new one
         if (cleanup.current) {
@@ -582,12 +539,13 @@ export function useData<
             : []),
         ]
 
-        const baseFetchOptions: BaseFetchOptions<Filters, NavigationFilters> = {
-          filters,
-          search: searchValue,
-          sortings,
-          navigationFilters,
-        }
+        const baseFetchOptions: BaseFetchOptions<Filters> = fetchParamsProvider(
+          {
+            filters,
+            search,
+            sortings,
+          }
+        )
 
         function fetcher(): PromiseOrObservable<ResultType> {
           setTotalItems(undefined)
@@ -601,23 +559,22 @@ export function useData<
               : defaultPerPage
 
           // Use appropriate pagination type based on dataAdapter configuration
-          if (dataAdapter.paginationType === "pages") {
-            return dataAdapter.fetchData({
-              ...baseFetchOptions,
-              pagination: { currentPage, perPage: perPageValue },
-            })
-          } else if (dataAdapter.paginationType === "infinite-scroll") {
-            // For infinite scroll, use the cursor parameter directly
-            return dataAdapter.fetchData({
-              ...baseFetchOptions,
-              pagination: { cursor, perPage: perPageValue },
-            })
-          } else {
-            return dataAdapter.fetchData({
-              ...baseFetchOptions,
-              pagination: {},
-            }) as PromiseOrObservable<ResultType>
-          }
+          return dataAdapter.fetchData({
+            ...baseFetchOptions,
+            pagination: {
+              ...(dataAdapter.paginationType === "pages"
+                ? {
+                    currentPage,
+                    perPage: perPageValue,
+                  }
+                : dataAdapter.paginationType === "infinite-scroll"
+                  ? {
+                      cursor,
+                      perPage: perPageValue,
+                    }
+                  : {}),
+            },
+          }) as PromiseOrObservable<ResultType>
         }
 
         const result = fetcher()
@@ -653,14 +610,17 @@ export function useData<
         handleFetchError(error)
       }
     },
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchDataAndUpdateParamsProvider must be stable
     [
       handleFetchError,
       dataAdapter,
       currentSortings,
       currentGrouping,
-      searchValue,
       handleFetchSuccess,
       setIsLoading,
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
+      ...deps,
     ]
   )
 
@@ -677,276 +637,91 @@ export function useData<
       fetchDataAndUpdate({
         filters: mergedFilters,
         currentPage: page,
-        navigationFilters: currentNavigationFilters,
+        search: searchValue.current,
       })
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we want to oberver ref current
     [
+      searchValue.current,
       fetchDataAndUpdate,
       mergedFilters,
       setIsLoading,
       paginationInfo,
-      currentNavigationFilters,
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
+      ...deps,
     ]
   )
 
   // In loadMore function
-  const loadMore = useCallback(() => {
-    if (!paginationInfo || isLoading || isLoadingMore) return
+  const loadMore = useCallback(
+    () => {
+      const currentPaginationInfo = paginationInfoRef.current
+      if (!currentPaginationInfo || isLoading || isLoadingMore) return
 
-    if (!isInfiniteScrollPagination(paginationInfo)) {
-      console.warn(
-        "loadMore is only applicable for infinite-scroll pagination type"
-      )
-      return
-    }
+      if (!isInfiniteScrollPagination(currentPaginationInfo)) {
+        console.warn(
+          "loadMore is only applicable for infinite-scroll pagination type"
+        )
+        return
+      }
 
-    if (paginationInfo.hasMore) {
-      // Extract the cursor from paginationInfo
-      const currentCursor = paginationInfo.cursor
+      if (currentPaginationInfo.hasMore) {
+        // Extract the cursor from paginationInfo
+        const currentCursor = currentPaginationInfo.cursor
 
-      setIsLoadingMore(true)
-      setIsLoading(false)
-      isLoadingMoreRef.current = true
+        setIsLoadingMore(true)
+        setIsLoading(true)
+        isLoadingMoreRef.current = true
 
-      // Use named parameters
-      fetchDataAndUpdate({
-        filters: mergedFilters,
-        navigationFilters: currentNavigationFilters,
-        appendMode: true,
-        cursor: currentCursor,
-      })
-    }
-  }, [
-    fetchDataAndUpdate,
-    isLoading,
-    isLoadingMore,
-    mergedFilters,
-    paginationInfo,
-    currentNavigationFilters,
-    setIsLoading,
-    setIsLoadingMore,
-  ])
-
-  useEffect(() => {
-    if (!isLoadingMoreRef.current) {
-      setIsLoading(true)
-      // Explicitly pass 0 as the initial position for infinite scroll
-      const initialPosition =
-        dataAdapter.paginationType === "infinite-scroll" ? 0 : 1
-      fetchDataAndUpdate({
-        filters: mergedFilters,
-        currentPage: initialPosition,
-        navigationFilters: currentNavigationFilters,
-        cursor: dataAdapter.paginationType === "infinite-scroll" ? "0" : null, // Pass "0" as initial cursor
-      })
-    }
-  }, [
-    fetchDataAndUpdate,
-    mergedFilters,
-    setIsLoading,
-    currentNavigationFilters,
-    dataAdapter.paginationType,
-  ])
-
-  // Helper function to fetch data for a specific lane
-  const fetchLaneData = useCallback(
-    async (
-      lane: LaneDataSource<Filters>,
-      options: {
-        appendMode?: boolean
-        cursor?: string | null
-      } = {}
-    ) => {
-      const { appendMode = false, cursor = "0" } = options
-
-      // Merge global filters with lane-specific filters using intersection logic
-      const laneFilters = mergeFiltersWithIntersection(
-        mergedFilters,
-        lane.filters
-      )
-
-      try {
-        // Use the same sortings logic as global fetch
-        const sortings: SortingsStateMultiple = [
-          ...(currentSortings
-            ? [
-                {
-                  field: currentSortings.field as string,
-                  order: currentSortings.order,
-                },
-              ]
-            : []),
-          ...(currentGrouping
-            ? [
-                {
-                  field: currentGrouping.field as string,
-                  order: currentGrouping.order,
-                },
-              ]
-            : []),
-        ]
-
-        // Call the dataAdapter with lane-specific filters (always infinite-scroll)
-        const result = await dataAdapter.fetchData({
-          filters: laneFilters,
-          search: searchValue,
-          sortings,
-          navigationFilters: currentNavigationFilters,
-          pagination: {
-            cursor,
-            perPage: "perPage" in dataAdapter ? dataAdapter.perPage || 20 : 20,
-          },
+        // Use named parameters
+        fetchDataAndUpdate({
+          filters: mergedFilters,
+          appendMode: true,
+          cursor: currentCursor,
+          search: searchValue.current,
         })
-
-        // Process the result - for lanes we expect a resolved paginated response
-        const records = "records" in result ? result.records : []
-
-        const processedRecords = records.map((record) => ({
-          ...record,
-          [GROUP_ID_SYMBOL]:
-            (currentGrouping?.field &&
-              getValueByPath(record, currentGrouping.field as string)) ||
-            undefined,
-        }))
-
-        // Update lane data with real data
-        setLanesData((prev) =>
-          prev
-            ? {
-                ...prev,
-                [lane.id]: {
-                  data: {
-                    type: "flat",
-                    records: appendMode
-                      ? [
-                          ...(prev[lane.id]?.data.records || []),
-                          ...processedRecords,
-                        ]
-                      : processedRecords,
-                  },
-                  isLoading: false,
-                  isLoadingMore: false,
-                  paginationInfo:
-                    "total" in result
-                      ? {
-                          total: Number(result.total) || 0,
-                          perPage:
-                            "perPage" in dataAdapter
-                              ? dataAdapter.perPage || 20
-                              : 20,
-                          type: "infinite-scroll" as const,
-                          cursor:
-                            "cursor" in result &&
-                            typeof result.cursor === "string"
-                              ? result.cursor
-                              : null,
-                          hasMore: Boolean(
-                            "hasMore" in result ? result.hasMore : false
-                          ),
-                        }
-                      : null,
-                },
-              }
-            : prev
-        )
-      } catch {
-        setLanesData((prev) =>
-          prev
-            ? {
-                ...prev,
-                [lane.id]: {
-                  ...prev[lane.id],
-                  isLoading: false,
-                },
-              }
-            : prev
-        )
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we want to oberver ref current
     [
+      fetchDataAndUpdate,
+      isLoading,
       mergedFilters,
-      currentSortings,
-      currentGrouping,
-      dataAdapter,
-      searchValue,
-      currentNavigationFilters,
-      setLanesData,
+      paginationInfoRef.current,
+      searchValue.current,
+      isLoadingMore,
+      setIsLoading,
+      setIsLoadingMore,
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
+      ...deps,
     ]
   )
 
-  // Fetch data for each lane (initial load and when dependencies change)
-  useEffect(() => {
-    if (!hasLanes || !lanes) return
-
-    lanes.forEach((lane) => {
-      // Set loading state BEFORE calling fetchLaneData
-      setLanesData((prev) =>
-        prev
-          ? {
-              ...prev,
-              [lane.id]: {
-                ...prev[lane.id],
-                isLoading: true,
-                isLoadingMore: false,
-              },
-            }
-          : prev
-      )
-
-      // For initial load or when filters/search change, reload from cursor "0"
-      fetchLaneData(lane, { appendMode: false, cursor: "0" })
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    hasLanes,
-    lanes,
-    mergedFilters,
-    dataAdapter,
-    currentSortings,
-    currentGrouping,
-    searchValue,
-    currentNavigationFilters,
-    // Intentionally not including fetchLaneData to avoid infinite loops
-  ])
-
-  // Function to fetch more data for a specific lane
-  const fetchMoreForLane = useCallback(
-    async (laneId: string) => {
-      if (!hasLanes || !lanes) return
-
-      const lane = lanes.find((l) => l.id === laneId)
-      if (!lane) return
-
-      // Access current lanesData without adding it as dependency to avoid loops
-      setLanesData((currentLanesData) => {
-        const laneData = currentLanesData?.[laneId]
-        if (!laneData?.paginationInfo) return currentLanesData
-
-        const paginationInfo = laneData.paginationInfo
-        if (!paginationInfo || !paginationInfo.hasMore) return currentLanesData
-
-        // Set loading more state BEFORE calling fetchLaneData
-        const updatedLanesData = currentLanesData
-          ? {
-              ...currentLanesData,
-              [laneId]: {
-                ...currentLanesData[laneId],
-                isLoading: false,
-                isLoadingMore: true,
-              },
-            }
-          : currentLanesData
-
-        // Use fetchLaneData with append mode and current cursor
-        fetchLaneData(lane, {
-          appendMode: true,
-          cursor: paginationInfo.cursor,
+  useEffect(
+    () => {
+      if (!isLoadingMoreRef.current) {
+        setIsLoading(true)
+        // Explicitly pass 0 as the initial position for infinite scroll
+        const initialPosition =
+          dataAdapter.paginationType === "infinite-scroll" ? 0 : 1
+        fetchDataAndUpdate({
+          filters: mergedFilters,
+          currentPage: initialPosition,
+          search: searchValue.current,
+          cursor: dataAdapter.paginationType === "infinite-scroll" ? "0" : null, // Pass "0" as initial cursor
         })
-
-        return updatedLanesData
-      })
+      }
     },
-    [hasLanes, lanes, fetchLaneData]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we want to oberver ref current
+    [
+      fetchDataAndUpdate,
+      mergedFilters,
+      setIsLoading,
+      dataAdapter.paginationType,
+      searchValue.current,
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
+      ...deps,
+    ]
   )
 
   useEffect(() => {
@@ -964,14 +739,11 @@ export function useData<
     paginationInfo,
     setPage,
     loadMore,
+    mergedFilters,
     totalItems,
-    summaries: summariesData, // Add summaries to the return object
-    lanesData, // Lanes data state
-    fetchMoreForLane: hasLanes ? fetchMoreForLane : undefined, // Fetch more function for lanes
   }
 }
 
-// TODO: move them to utils file???
 // Type guard functions to check pagination types
 export function isPageBasedPagination<R extends RecordType>(
   pagination: PaginationInfo | null

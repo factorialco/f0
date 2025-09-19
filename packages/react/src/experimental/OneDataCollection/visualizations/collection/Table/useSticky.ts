@@ -1,6 +1,6 @@
-import { SortingsDefinition } from "@/experimental/OneDataCollection/sortings"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
-import { RecordType } from "@/experimental/OneDataCollection/types"
+import { RecordType } from "@/hooks/datasource"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { useCallback } from "react"
 import { TableColumnDefinition } from "."
 

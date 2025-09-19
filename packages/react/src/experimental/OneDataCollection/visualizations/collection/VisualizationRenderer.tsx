@@ -2,19 +2,18 @@ import {
   CollectionProps,
   OnLoadDataCallback,
   OnLoadErrorCallback,
-  OnSelectItemsCallback,
 } from "../../types"
 
+import {
+  GroupingDefinition,
+  OnSelectItemsCallback,
+  RecordType,
+} from "@/hooks/datasource"
 import { FiltersDefinition } from "../../../../components/OneFilterPicker/types"
-import { GroupingDefinition } from "../../grouping"
+import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
-import {
-  DataSource,
-  RecordType,
-  SortingsDefinition,
-  SummariesDefinition,
-} from "../../types"
+import { SortingsDefinition, SummariesDefinition } from "../../types"
 import {
   collectionVisualizations,
   VisualizacionTypeDefinition,
@@ -37,13 +36,13 @@ import { Visualization } from "./types"
  */
 
 export const VisualizationRenderer = <
-  Record extends RecordType,
+  R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
-  ItemActions extends ItemActionsDefinition<Record>,
+  ItemActions extends ItemActionsDefinition<R>,
   NavigationFilters extends NavigationFiltersDefinition,
-  Grouping extends GroupingDefinition<Record>,
+  Grouping extends GroupingDefinition<R>,
 >({
   visualization,
   source,
@@ -52,7 +51,7 @@ export const VisualizationRenderer = <
   onLoadError,
 }: {
   visualization: Visualization<
-    Record,
+    R,
     Filters,
     Sortings,
     Summaries,
@@ -60,8 +59,8 @@ export const VisualizationRenderer = <
     NavigationFilters,
     Grouping
   >
-  source: DataSource<
-    Record,
+  source: DataCollectionSource<
+    R,
     Filters,
     Sortings,
     Summaries,
@@ -69,8 +68,8 @@ export const VisualizationRenderer = <
     NavigationFilters,
     Grouping
   >
-  onSelectItems: OnSelectItemsCallback<Record, Filters>
-  onLoadData: OnLoadDataCallback<Record, Filters>
+  onSelectItems: OnSelectItemsCallback<R, Filters>
+  onLoadData: OnLoadDataCallback<R, Filters>
   onLoadError: OnLoadErrorCallback
   clearSelectedItems?: () => void
 }): JSX.Element => {
@@ -87,7 +86,7 @@ export const VisualizationRenderer = <
     visualization.type
   ] as VisualizacionTypeDefinition<
     CollectionProps<
-      Record,
+      R,
       Filters,
       Sortings,
       Summaries,

@@ -101,7 +101,7 @@ export const MessagesContainer = ({
           {showWelcomeBlock && (
             <motion.div
               key="welcome"
-              className="flex flex-col px-2"
+              className="absolute top-1/2 flex translate-y-[-50%] flex-col px-2"
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
@@ -112,9 +112,9 @@ export const MessagesContainer = ({
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
                 transition={{
-                  opacity: { duration: 0.2, ease: "easeOut", delay: 0.1 },
+                  opacity: { duration: 0.2, ease: "easeOut", delay: 0.4 },
                   scale: { duration: 0.3, ease: [0.25, 0.46, 0.45, 1.94] },
-                  filter: { duration: 0.2, ease: "easeOut", delay: 0.1 },
+                  filter: { duration: 0.2, ease: "easeOut", delay: 0.4 },
                 }}
               >
                 <OneIcon spin size="lg" className="my-4" />
@@ -126,12 +126,12 @@ export const MessagesContainer = ({
                   animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
                   exit={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
                   transition={{
-                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.2 },
-                    filter: { duration: 0.2, ease: "easeOut", delay: 0.2 },
+                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.5 },
+                    filter: { duration: 0.2, ease: "easeOut", delay: 0.5 },
                     translateY: {
                       duration: 0.2,
                       ease: [0.25, 0.46, 0.45, 1.94],
-                      delay: 0.2,
+                      delay: 0.5,
                     },
                   }}
                 >
@@ -146,12 +146,12 @@ export const MessagesContainer = ({
                   animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
                   exit={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
                   transition={{
-                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.4 },
-                    filter: { duration: 0.2, ease: "easeOut", delay: 0.4 },
+                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.7 },
+                    filter: { duration: 0.2, ease: "easeOut", delay: 0.7 },
                     translateY: {
                       duration: 0.2,
                       ease: [0.25, 0.46, 0.45, 1.94],
-                      delay: 0.4,
+                      delay: 0.7,
                     },
                   }}
                 >
