@@ -32,6 +32,25 @@ export const getColsHiddenFromDefinition = <
     .map((column) => column.id)
 }
 
+type UseColumnsReturn<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+> = {
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
+  colsHidden: ColId[]
+  setColsHidden: (colsHidden: ColId[]) => void
+  colsOrder: ColId[]
+  setColsOrder: (colsOrder: ColId[]) => void
+  columnsWithStatus: {
+    column: TableColumnDefinition<R, Sortings, Summaries>
+    canHide: boolean
+    visible: boolean
+    sortable: boolean
+    order: number
+  }[]
+}
+
 /**
  * Hook to manage the columns state of the table (hide, order, etc)
  * @param originalColumns
@@ -45,13 +64,7 @@ export const useColumns = <
 >(
   originalColumns: Readonly<TableColumnDefinition<R, Sortings, Summaries>[]>,
   frozenColumns: number
-): {
-  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
-  colsHidden: ColId[]
-  setColsHidden: (colsHidden: ColId[]) => void
-  colsOrder: ColId[]
-  setColsOrder: (colsOrder: ColId[]) => void
-} => {
+): UseColumnsReturn<R, Sortings, Summaries> => {
   const [colsHidden, setColsHidden] = useState<ColId[]>(
     getColsHiddenFromDefinition(originalColumns)
   )
@@ -60,26 +73,41 @@ export const useColumns = <
   )
 
   const columnsWithStatus = useMemo(() => {
+    const cols = [...originalColumns]
+    const nonEditableColumns = frozenColumns || 1
     return [
       // Frozen columns can not be hidden even if the id is in status
-      ...[...originalColumns].slice(0, frozenColumns),
+      // The frist column is always visible and not sortable even if frozenColumns is 0
+      ...cols.slice(0, nonEditableColumns).map((column, index) => ({
+        column,
+        canHide: false,
+        visible: true,
+        sortable: false,
+        order: index,
+      })),
       // The rest of the columns are sorted and hidden using the status in colsOrder and colsHidden
-      ...[...originalColumns]
-        .slice(frozenColumns)
-        .sort((a, b) => colsOrder.indexOf(a.id) - colsOrder.indexOf(b.id)),
-    ].map((column, index) => ({
-      column,
-      hidden: !column.noHiding || colsHidden.includes(column.id),
-      order: index,
-    }))
+      ...cols
+        .slice(nonEditableColumns)
+        .sort((a, b) => colsOrder.indexOf(a.id) - colsOrder.indexOf(b.id))
+        .map((column, index) => ({
+          column,
+          canHide: !(column.noHiding ?? false),
+          visible: !colsHidden.includes(column.id),
+          sortable: true,
+          order: index + frozenColumns,
+        })),
+    ]
   }, [frozenColumns, colsOrder, colsHidden, originalColumns])
 
   const columns = useMemo(() => {
-    return columnsWithStatus.map((column) => column.column)
+    return columnsWithStatus
+      .filter((column) => column.visible)
+      .map((column) => column.column)
   }, [columnsWithStatus])
 
   return {
     columns,
+    columnsWithStatus,
     colsHidden,
     setColsHidden,
     colsOrder,

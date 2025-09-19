@@ -46,6 +46,7 @@ const Item = ({ item, onChangeVisibility }: ItemProps) => {
       <Switch
         checked={item.visible}
         onCheckedChange={(checked) => {
+          console.log("onCheckedChange", checked, item)
           onChangeVisibility({
             ...item,
             visible: checked,
@@ -83,7 +84,7 @@ export type SortAndHideListProps = {
 
 export const SortAndHideList = ({ items, onChange }: SortAndHideListProps) => {
   const onChangeVisibility = (item: SortAndHideListItem) => {
-    onChange?.(items.map((i) => (i.id === item.id ? i : i)))
+    onChange?.(items.map((i) => (i.id === item.id ? item : i)))
   }
 
   const handleOnChange = (items: SortAndHideListItem[]) => {
@@ -92,9 +93,11 @@ export const SortAndHideList = ({ items, onChange }: SortAndHideListProps) => {
 
   return (
     <Reorder.Group
-      className="flex list-none flex-col gap-2"
+      className="flex flex-1 list-none flex-col gap-2"
       values={items}
       onReorder={handleOnChange}
+      axis="y"
+      layoutScroll
     >
       {items.map((item) => (
         <Item

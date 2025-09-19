@@ -14,21 +14,21 @@ export const TableSettings = ({
   columns: originalColumns,
   frozenColumns,
 }: TableSettingsProps) => {
-  const { columns, setColsOrder, setColsHidden } = useColumns(
+  const { columnsWithStatus, setColsOrder, setColsHidden } = useColumns(
     originalColumns,
     frozenColumns
   )
 
   const items = useMemo(
     () =>
-      columns.map((column, index) => ({
-        id: column.id,
-        label: column.label,
-        sortable: index > frozenColumns,
-        canHide: !(column.noHiding ?? false),
-        visible: !(column.hidden ?? false),
+      columnsWithStatus.map((column) => ({
+        id: column.column.id,
+        label: column.column.label,
+        sortable: column.sortable,
+        canHide: column.canHide,
+        visible: column.visible,
       })),
-    [columns, frozenColumns]
+    [columnsWithStatus]
   )
 
   const onChangeSettings = (newOrder: SortAndHideListItem[]) => {
@@ -39,8 +39,8 @@ export const TableSettings = ({
   }
 
   return (
-    <div className="relative -mr-2 flex max-h-[200px] flex-col gap-2">
-      <ScrollArea className="flex h-[200px]">
+    <div className="relative -mr-2 flex h-[200px] flex-col">
+      <ScrollArea className="h-[200px]">
         <SortAndHideList items={items} onChange={onChangeSettings} />
       </ScrollArea>
     </div>
