@@ -1,3 +1,4 @@
+import { breakpoints } from "@factorialco/f0-core"
 import React, {
   createContext,
   PointerEvent,
@@ -19,6 +20,7 @@ interface FrameContextType {
   sidebarState: SidebarState
   prevSidebarState: SidebarState | null
   toggleSidebar: () => void
+  setForceFloat: (force: boolean) => void
 }
 
 const FrameContext = createContext<FrameContextType | undefined>(undefined)
@@ -31,6 +33,7 @@ export function useSidebar(): FrameContextType {
       prevSidebarState: null,
       sidebarState: "locked",
       toggleSidebar: () => {},
+      setForceFloat: () => {},
     }
   }
   return context
@@ -42,8 +45,10 @@ interface FrameProviderProps {
 
 export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
+  const [forceFloat, setForceFloat] = useState(false)
 
-  const isSmallScreen = useMediaQuery("(max-width: 900px)", {
+  const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
     initializeWithValue: true,
   })
 
@@ -108,6 +113,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
         sidebarState,
         toggleSidebar,
         prevSidebarState,
+        setForceFloat,
       }}
     >
       <div onPointerMove={handlePointerMove} className="h-screen w-screen">

@@ -9,8 +9,11 @@ import { cn, focusRing } from "../../../lib/utils"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 
-import { Fragment } from "react"
+import { breakpoints } from "@factorialco/f0-core"
+import { Fragment, useEffect, useRef } from "react"
+import { useMediaQuery } from "usehooks-ts"
 import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
+import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
 import { FrameProvider, useSidebar } from "./FrameProvider"
 
 interface ApplicationFrameProps {
@@ -52,13 +55,52 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   )
 }
 
+/**
+ * Custom hook to automatically close sidebar when AI chat opens on smaller screens
+ */
+function useAutoCloseSidebar(
+  isAiChatOpen: boolean,
+  shouldAutoCloseSidebar: boolean
+) {
+  const { sidebarState, toggleSidebar } = useSidebar()
+  const previousAiChatOpenRef = useRef(isAiChatOpen)
+
+  useEffect(() => {
+    const wasAiChatClosed = !previousAiChatOpenRef.current
+    const isAiChatOpening = wasAiChatClosed && isAiChatOpen
+
+    const shouldCloseSidebar =
+      isAiChatOpening && shouldAutoCloseSidebar && sidebarState !== "hidden"
+
+    if (shouldCloseSidebar) {
+      toggleSidebar()
+    }
+
+    previousAiChatOpenRef.current = isAiChatOpen
+  }, [isAiChatOpen, shouldAutoCloseSidebar, sidebarState, toggleSidebar])
+}
+
 function ApplicationFrameContent({
   children,
   sidebar,
   banner,
 }: ApplicationFrameProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+  const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
+    useSidebar()
   const shouldReduceMotion = useReducedMotion()
+  const { open: isAiChatOpen } = useAiChat()
+  const shouldAutoCloseSidebar = useMediaQuery(
+    `(max-width: ${breakpoints.xl}px)`,
+    {
+      initializeWithValue: true,
+    }
+  )
+
+  useEffect(() => {
+    setForceFloat(isAiChatOpen)
+  }, [isAiChatOpen, setForceFloat])
+
+  useAutoCloseSidebar(isAiChatOpen, shouldAutoCloseSidebar)
 
   return (
     <>
