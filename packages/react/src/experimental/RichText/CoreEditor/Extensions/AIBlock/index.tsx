@@ -373,7 +373,9 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
           <F0AiBanner.Skeleton compact />
         ) : hasSelectedAction ? (
           <F0AiBanner
-            title={`${displayEmoji} ${displayTitle}`}
+            title={
+              displayEmoji ? `${displayEmoji} ${displayTitle}` : displayTitle
+            }
             content={contentEditor?.getHTML() ?? ""}
             onClose={() => deleteNode()}
           />

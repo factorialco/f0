@@ -1,7 +1,7 @@
 import { NewColor } from "@/components/tags/F0TagDot"
 import { AcademicCap, List, Placeholder, Settings } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { NotesTextEditor } from "./index"
+import { NotesTextEditor, NotesTextEditorSkeleton } from "./index"
 
 const meta: Meta<typeof NotesTextEditor> = {
   title: "Rich text/NotesTextEditor",
@@ -343,5 +343,63 @@ export const Default: Story = {
         content: "Metadata",
       },
     ],
+  },
+}
+
+type SkeletonStory = StoryObj<typeof NotesTextEditorSkeleton>
+
+export const Skeleton: SkeletonStory = {
+  name: "Skeleton - Basic",
+  render: (args) => (
+    <div className="h-96 w-full">
+      <NotesTextEditorSkeleton {...args} />
+    </div>
+  ),
+  args: {
+    withHeader: false,
+    withTitle: true,
+    withPadding: false,
+  },
+}
+
+export const SkeletonWithHeader: SkeletonStory = {
+  name: "Skeleton - With Header",
+  render: (args) => (
+    <div className="h-96 w-full">
+      <NotesTextEditorSkeleton {...args} />
+    </div>
+  ),
+  args: {
+    withHeader: true,
+    withTitle: true,
+    withPadding: false,
+  },
+}
+
+export const SkeletonWithPadding: SkeletonStory = {
+  name: "Skeleton - With Padding",
+  render: (args) => (
+    <div className="h-96 w-full">
+      <NotesTextEditorSkeleton {...args} />
+    </div>
+  ),
+  args: {
+    withHeader: false,
+    withTitle: true,
+    withPadding: true,
+  },
+}
+
+export const SkeletonMinimal: SkeletonStory = {
+  name: "Skeleton - Minimal",
+  render: (args) => (
+    <div className="h-96 w-full">
+      <NotesTextEditorSkeleton {...args} />
+    </div>
+  ),
+  args: {
+    withHeader: false,
+    withTitle: false,
+    withPadding: false,
   },
 }
