@@ -101,6 +101,7 @@ const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
         className={className}
         mode={hideLabel ? "only" : "default"}
         aria-label={props.title || label}
+        title={props.title || (hideLabel ? label : undefined)}
       >
         <div
           className={cn(isLoading && "invisible", "flex items-center gap-1")}
