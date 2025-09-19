@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.197.1](https://github.com/factorialco/f0/compare/f0-react-v1.197.0...f0-react-v1.197.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* spacings and alignment in grouping selector ([#2630](https://github.com/factorialco/f0/issues/2630)) ([1f45de1](https://github.com/factorialco/f0/commit/1f45de13cf24105270d1180f6f7c2c0eae83f283))
+
 ## [1.197.0](https://github.com/factorialco/f0/compare/f0-react-v1.196.0...f0-react-v1.197.0) (2025-09-18)
 
 
