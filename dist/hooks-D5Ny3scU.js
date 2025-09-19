@@ -44188,7 +44188,7 @@ const Q5e = {
   ))
 );
 P4.displayName = "F0TagAlert";
-const Z5e = (e) => /* @__PURE__ */ b("div", { role: "alert-tag-cell", children: /* @__PURE__ */ b(P4, { level: e.level, text: e.label }) });
+const Z5e = (e) => /* @__PURE__ */ b("div", { "data-cell-type": "alert-tag", children: /* @__PURE__ */ b(P4, { level: e.level, text: e.label }) });
 function mH(e) {
   return typeof e == "object" && e !== null && "placeholder" in e && typeof e.placeholder == "string";
 }
@@ -44453,11 +44453,11 @@ const pMt = Object.keys(pH), x4 = Pe(
   }
 );
 x4.displayName = "F0TagDot";
-const a$e = (e) => /* @__PURE__ */ b("div", { role: "dot-tag-cell", children: /* @__PURE__ */ b(x4, { text: e.label, color: e.color }) }), i$e = (e) => /* @__PURE__ */ Z(
+const a$e = (e) => /* @__PURE__ */ b("div", { "data-cell-type": "dot-tag", children: /* @__PURE__ */ b(x4, { text: e.label, color: e.color }) }), i$e = (e) => /* @__PURE__ */ Z(
   "div",
   {
     className: "text-f1-text-default text-md flex items-center gap-2 font-medium",
-    role: "file-cell",
+    "data-cell-type": "file",
     children: [
       /* @__PURE__ */ b(Pv, { file: e }),
       " ",
@@ -44550,12 +44550,12 @@ const s$e = (e) => typeof e == "object" && e !== null && "lines" in e ? e.lines 
           "text-f1-foreground",
           n && "text-f1-foreground-secondary"
         ),
-        role: "percentage",
+        "data-cell-type": "percentage",
         children: t
       }
     );
   const r = Px / 2, a = r - W7 / 2, i = a - l$e, o = 2 * Math.PI * i, s = (100 - Math.min(Number(t), 100)) / 100 * o, u = typeof e == "object" && "label" in e;
-  return /* @__PURE__ */ Z("div", { className: "flex items-center gap-2", role: "percentage", children: [
+  return /* @__PURE__ */ Z("div", { className: "flex items-center gap-2", "data-cell-type": "percentage", children: [
     /* @__PURE__ */ Z(
       "svg",
       {
@@ -44645,7 +44645,7 @@ const s$e = (e) => typeof e == "object" && e !== null && "lines" in e ? e.lines 
   ))
 );
 M4.displayName = "F0TagStatus";
-const m$e = (e) => /* @__PURE__ */ b("div", { role: "status-cell", children: /* @__PURE__ */ b(M4, { variant: e.status, text: e.label }) }), p1 = Pe(
+const m$e = (e) => /* @__PURE__ */ b("div", { "data-cell-type": "status", children: /* @__PURE__ */ b(M4, { variant: e.status, text: e.label }) }), p1 = Pe(
   ({ text: e, additionalAccesibleText: t, icon: n, noBorder: r, className: a }, i) => (Tl(e, { disallowEmpty: !0 }), /* @__PURE__ */ b(
     $u,
     {
@@ -44669,7 +44669,7 @@ const m$e = (e) => /* @__PURE__ */ b("div", { role: "status-cell", children: /* 
   ))
 );
 p1.displayName = "F0TagRaw";
-const h$e = (e) => /* @__PURE__ */ b("div", { role: "tag-cell", children: /* @__PURE__ */ b(p1, { text: e.label, icon: e.icon }) }), p$e = {
+const h$e = (e) => /* @__PURE__ */ b("div", { "data-cell-type": "tag", children: /* @__PURE__ */ b(p1, { text: e.label, icon: e.icon }) }), p$e = {
   positive: Vee,
   negative: jee
 }, yH = Pe(
