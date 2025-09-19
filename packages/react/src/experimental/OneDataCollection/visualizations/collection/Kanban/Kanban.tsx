@@ -143,9 +143,9 @@ export const KanbanCollection = <
         useSelectable?.selectedItems.has(itemId)
 
       return (
-        <KanbanCard
+        <KanbanCard<R>
           key={dragId}
-          drag={{ id: dragId, type: "list-card", data: { laneId } }}
+          drag={{ id: dragId, type: "list-card", data: { ...item, laneId } }}
           id={String(item.id)}
           index={index}
           total={total}
@@ -194,80 +194,7 @@ export const KanbanCollection = <
       const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
       return allowReorder ? idx : -1
     },
-    onMove: onMove
-      ? async (
-          fromLaneId: string,
-          toLaneId: string,
-          sourceId: string,
-          toIndex: number | null
-        ) => {
-          // Find the source record by sourceId
-          const sourceLane = laneItems.find((lane) => lane.id === fromLaneId)
-          const sourceRecord = sourceLane?.items.find((item, index) => {
-            const itemId = String(
-              idProvider ? idProvider(item as R, index) : index
-            )
-            return itemId === sourceId
-          })
-
-          if (!sourceRecord) {
-            console.error(
-              `Source record with id ${sourceId} not found in lane ${fromLaneId}`
-            )
-            return
-          }
-
-          // Find the destiny record and position
-          let destinyRecord:
-            | { record: R; position: "above" | "below" }
-            | undefined
-
-          if (toIndex !== null) {
-            const destinyLane = laneItems.find((lane) => lane.id === toLaneId)
-            if (destinyLane && destinyLane.items.length > 0) {
-              if (toIndex === 0) {
-                // Moving to the top
-                destinyRecord = {
-                  record: destinyLane.items[0] as R,
-                  position: "above",
-                }
-              } else if (toIndex >= destinyLane.items.length) {
-                // Moving to the bottom
-                destinyRecord = {
-                  record: destinyLane.items[destinyLane.items.length - 1] as R,
-                  position: "below",
-                }
-              } else {
-                // Moving between items
-                destinyRecord = {
-                  record: destinyLane.items[toIndex] as R,
-                  position: "above",
-                }
-              }
-            }
-          }
-
-          // If no destiny record found, we're moving to an empty lane or to the end
-          if (!destinyRecord) {
-            const destinyLane = laneItems.find((lane) => lane.id === toLaneId)
-            if (destinyLane && destinyLane.items.length > 0) {
-              // Moving to the end of a non-empty lane
-              destinyRecord = {
-                record: destinyLane.items[destinyLane.items.length - 1] as R,
-                position: "below",
-              }
-            } else {
-              // Moving to an empty lane - use the source record as reference
-              destinyRecord = {
-                record: sourceRecord as R,
-                position: "below",
-              }
-            }
-          }
-
-          await onMove(fromLaneId, toLaneId, sourceRecord as R, destinyRecord)
-        }
-      : undefined,
+    onMove: onMove,
   }
 
   /**

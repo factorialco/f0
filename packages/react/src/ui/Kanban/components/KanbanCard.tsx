@@ -9,9 +9,9 @@ import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indi
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
 
-type DragConfig = { id: string; type?: string; data?: Record<string, unknown> }
+export type DragConfig<T = unknown> = { id: string; type?: string; data?: T }
 
-export function KanbanCard({
+export function KanbanCard<T = unknown>({
   drag,
   id,
   index,
@@ -21,7 +21,7 @@ export function KanbanCard({
   showIndicator = true,
   ...props
 }: {
-  drag: DragConfig
+  drag: DragConfig<T>
   id: string
   index: number
   total: number
@@ -32,7 +32,7 @@ export function KanbanCard({
   const ref = useRef<HTMLDivElement | null>(null)
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
-  useDraggable({
+  useDraggable<T>({
     ref: ref as React.RefObject<HTMLElement>,
     payload: { kind: drag.type ?? "list-card", id: drag.id, data: drag.data },
   })
