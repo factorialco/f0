@@ -155,6 +155,7 @@ export const KanbanCollection = <
           description={description ? description(item) : undefined}
           avatar={avatar ? avatar(item) : undefined}
           draggable={onMove !== undefined}
+          onClick={source.itemOnClick ? source.itemOnClick(item) : undefined}
           metadata={
             optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined
           }
