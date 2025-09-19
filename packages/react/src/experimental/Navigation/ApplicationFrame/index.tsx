@@ -9,6 +9,7 @@ import { cn, focusRing } from "../../../lib/utils"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 
+import { breakpoints } from "@factorialco/f0-core"
 import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
 import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
@@ -57,12 +58,11 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
 /**
  * Custom hook to automatically close sidebar when AI chat opens on smaller screens
  */
-function useAutoCloseSidebar(isAiChatOpen: boolean) {
+function useAutoCloseSidebar(
+  isAiChatOpen: boolean,
+  shouldAutoCloseSidebar: boolean
+) {
   const { sidebarState, toggleSidebar } = useSidebar()
-  const shouldAutoCloseSidebar = useMediaQuery("(max-width: 1440px)", {
-    initializeWithValue: true,
-  })
-
   const previousAiChatOpenRef = useRef(isAiChatOpen)
 
   useEffect(() => {
@@ -89,12 +89,18 @@ function ApplicationFrameContent({
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const { open: isAiChatOpen } = useAiChat()
+  const shouldAutoCloseSidebar = useMediaQuery(
+    `(max-width: ${breakpoints.xl}px)`,
+    {
+      initializeWithValue: true,
+    }
+  )
 
   useEffect(() => {
     setForceFloat(isAiChatOpen)
   }, [isAiChatOpen, setForceFloat])
 
-  useAutoCloseSidebar(isAiChatOpen)
+  useAutoCloseSidebar(isAiChatOpen, shouldAutoCloseSidebar)
 
   return (
     <>
