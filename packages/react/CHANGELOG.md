@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.198.1](https://github.com/factorialco/f0/compare/f0-react-v1.198.0...f0-react-v1.198.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* use Spinner in data collection ([#2628](https://github.com/factorialco/f0/issues/2628)) ([ca0427e](https://github.com/factorialco/f0/commit/ca0427e8079dff93b4419b9e37c94200786fea5e))
+
 ## [1.198.0](https://github.com/factorialco/f0/compare/f0-react-v1.197.1...f0-react-v1.198.0) (2025-09-19)
 
 
