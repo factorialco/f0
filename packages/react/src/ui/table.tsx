@@ -97,8 +97,14 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "relative h-[48px] whitespace-nowrap px-3 align-middle first:pl-6 last:pr-6",
+      "relative h-[48px] whitespace-nowrap p-3 align-top first:pl-6 last:pr-6",
       "[&:has([role=checkbox])]:px-2",
+      "[&:has([role=percentage])]:py-2",
+      "[&:has([role=status-cell])]:py-2.5",
+      "[&:has([role=tag-cell])]:py-2",
+      "[&:has([role=file-cell])]:py-2.5",
+      "[&:has([role=alert-tag-cell])]:py-2.5",
+      "[&:has([role=dot-tag-cell])]:py-2.5",
       className
     )}
     {...props}

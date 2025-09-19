@@ -12,5 +12,7 @@ interface TagValue {
 export type TagCellValue = TagValue
 
 export const TagCell = (args: TagCellValue) => (
-  <F0TagRaw text={args.label} icon={args.icon} />
+  <div role="tag-cell">
+    <F0TagRaw text={args.label} icon={args.icon} />
+  </div>
 )

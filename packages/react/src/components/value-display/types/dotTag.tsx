@@ -11,5 +11,7 @@ interface DotTagValue {
 export type DotTagCellValue = DotTagValue
 
 export const DotTagCell = (args: DotTagCellValue) => (
-  <F0TagDot text={args.label} color={args.color} />
+  <div role="dot-tag-cell">
+    <F0TagDot text={args.label} color={args.color} />
+  </div>
 )
