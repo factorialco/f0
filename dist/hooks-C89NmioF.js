@@ -44475,27 +44475,27 @@ const a$e = (e) => /* @__PURE__ */ b("div", { role: "dot-tag-cell", children: /*
   }
   return e.scrollWidth > e.clientWidth;
 }, vH = Pe(
-  ({ children: e, className: t, lines: n, onHasEllipsisChange: r, ...a }, i) => (Ke(() => {
-    if (!i || typeof i != "object") return;
-    const o = i.current;
-    if (!o) return;
-    r(N7(o, n));
-    const s = new ResizeObserver(() => {
-      r(N7(o, n));
+  ({ children: e, className: t, lines: n, onHasEllipsisChange: r, noTooltip: a, ...i }, o) => (Ke(() => {
+    if (!o || typeof o != "object") return;
+    const s = o.current;
+    if (!s) return;
+    r(N7(s, n));
+    const u = new ResizeObserver(() => {
+      r(N7(s, n));
     });
-    return s.observe(o), () => {
-      s.disconnect();
+    return u.observe(s), () => {
+      u.disconnect();
     };
-  }, [i, r, n]), /* @__PURE__ */ b(
+  }, [o, r, n]), /* @__PURE__ */ b(
     "span",
     {
-      ref: i,
+      ref: o,
       className: ue(
-        "pointer-events-auto min-w-0 max-w-full overflow-hidden text-ellipsis",
+        `${a ? "pointer-events-none" : "pointer-events-auto"} min-w-0 max-w-full overflow-hidden text-ellipsis`,
         n > 1 ? `not-supports-[(-webkit-line-clamp:${n})]:whitespace-nowrap display-[-webkit-box] whitespace-normal line-clamp-${n}` : "block whitespace-nowrap",
         t
       ),
-      ...a,
+      ...i,
       children: e
     }
   ))
@@ -44512,6 +44512,7 @@ const Am = Pe(
         onHasEllipsisChange: s,
         ...a,
         "data-testid": "one-ellipsis",
+        noTooltip: r,
         children: n
       }
     ), [e, t, n, c]);
