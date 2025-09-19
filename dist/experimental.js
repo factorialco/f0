@@ -22249,7 +22249,7 @@ const z9 = I.forwardRef(({ className: t, ...e }, n) => /* @__PURE__ */ f(
     ref: n,
     className: N(
       "relative h-[48px] whitespace-nowrap p-3 align-top first:pl-6 last:pr-6",
-      "[&:has([role=checkbox])]:px-2",
+      "[&:has([role=checkbox])]:px-2 [&:has([role=checkbox])]:py-2.5",
       "[&:has([role=percentage])]:py-2",
       "[&:has([role=status-cell])]:py-2.5",
       "[&:has([role=tag-cell])]:py-2",
@@ -22657,7 +22657,6 @@ const q9 = (t, e, n) => {
           {
             width: o,
             sticky: { left: 0 },
-            className: "py-2.5",
             children: h !== void 0 && /* @__PURE__ */ f("div", { className: "pointer-events-auto flex items-center justify-end", children: /* @__PURE__ */ f(
               jh,
               {
