@@ -11,7 +11,7 @@ interface StatusValue {
 export type StatusCellValue = StatusValue
 
 export const StatusCell = (args: StatusCellValue) => (
-  <div role="status-cell">
+  <div data-cell-type="status">
     <F0TagStatus variant={args.status} text={args.label} />
   </div>
 )

@@ -10,7 +10,7 @@ export type FileCellValue = ComponentProps<typeof F0AvatarFile>["file"]
 export const FileCell = (args: FileCellValue) => (
   <div
     className="text-f1-text-default text-md flex items-center gap-2 font-medium"
-    role="file-cell"
+    data-cell-type="file"
   >
     <F0AvatarFile file={args} /> <span>{args.name}</span>
   </div>

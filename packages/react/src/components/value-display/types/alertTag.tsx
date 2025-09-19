@@ -12,7 +12,7 @@ interface AlertTagValue {
 export type AlertTagCellValue = AlertTagValue
 
 export const AlertTagCell = (args: AlertTagCellValue) => (
-  <div role="alert-tag-cell">
+  <div data-cell-type="alert-tag">
     <F0TagAlert level={args.level} text={args.label} />
   </div>
 )
