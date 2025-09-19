@@ -1,7 +1,7 @@
+import { F0Button } from "@/components/F0Button"
+import { Delete } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { Button } from "../../../components/Actions/Button"
-import { Delete } from "../../../icons/app"
 import { Dialog } from "./index"
 
 const meta = {
@@ -91,7 +91,7 @@ export const WithTrigger = {
 
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <Button
+        <F0Button
           variant="critical"
           icon={Delete}
           label="Delete file"

@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
@@ -301,7 +301,7 @@ const AIBlockHeader: React.FC<AIBlockHeaderProps> = ({
 
     <div className="flex flex-row items-center gap-1">
       {canCollapse && (
-        <Button
+        <F0Button
           onClick={onToggleCollapse}
           variant="outline"
           size="sm"
@@ -348,7 +348,7 @@ const AIButtonsSection: React.FC<AIButtonsSectionProps> = ({
               ease: "easeOut",
             }}
           >
-            <Button
+            <F0Button
               onClick={() => onButtonClick(button.type)}
               variant="outline"
               size="md"

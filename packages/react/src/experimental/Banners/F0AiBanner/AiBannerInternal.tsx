@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 import { Cross } from "@/icons/app"
@@ -23,7 +23,7 @@ export const AiBannerInternal = forwardRef<
       <div className="flex flex-row items-center justify-between px-4 py-2">
         <OneEllipsis className="font-medium">{title}</OneEllipsis>
         {onClose && (
-          <Button
+          <F0Button
             variant="ghost"
             icon={Cross}
             size="sm"
@@ -49,7 +49,7 @@ export const AiBannerInternal = forwardRef<
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
             <div>
               {secondaryAction && (
-                <Button
+                <F0Button
                   label={secondaryAction.label}
                   onClick={secondaryAction.onClick}
                   variant="outline"
@@ -59,7 +59,7 @@ export const AiBannerInternal = forwardRef<
             </div>
             <div>
               {primaryAction && (
-                <Button
+                <F0Button
                   label={primaryAction.label}
                   onClick={primaryAction.onClick}
                   variant="outline"

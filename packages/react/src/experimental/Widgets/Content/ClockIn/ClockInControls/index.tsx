@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Select } from "@/experimental/Forms/Fields/Select"
@@ -192,7 +192,7 @@ export function ClockInControls({
             <div className="flex justify-center gap-2 @xs:justify-start">
               {status === "clocked-out" && (
                 <div className="mr-3 @xs:mr-0">
-                  <Button
+                  <F0Button
                     onClick={onClockIn}
                     label={labels.clockIn}
                     icon={SolidPlay}
@@ -216,7 +216,7 @@ export function ClockInControls({
                           selectContentClassName="min-w-80"
                         >
                           <div aria-label="Select break type">
-                            <Button
+                            <F0Button
                               label={labels.break}
                               variant="neutral"
                               icon={SolidPause}
@@ -225,7 +225,7 @@ export function ClockInControls({
                           </div>
                         </Select>
                       ) : (
-                        <Button
+                        <F0Button
                           onClick={handleClickBreakButton}
                           label={labels.break}
                           variant="neutral"
@@ -235,7 +235,7 @@ export function ClockInControls({
                       )}
                     </>
                   )}
-                  <Button
+                  <F0Button
                     onClick={onClockOut}
                     label={labels.clockOut}
                     variant="neutral"
@@ -245,14 +245,14 @@ export function ClockInControls({
               )}
               {status === "break" && (
                 <>
-                  <Button
+                  <F0Button
                     onClick={onClockOut}
                     label={labels.clockOut}
                     variant="neutral"
                     icon={SolidStop}
                     hideLabel
                   />
-                  <Button
+                  <F0Button
                     onClick={onClockIn}
                     label={labels.resume}
                     icon={SolidPlay}

@@ -1,8 +1,8 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import {
-  OneDropdownButton,
-  OneDropdownButtonItem,
-} from "@/components/Actions/OneDropdownButton"
+  ButtonDropdownItem,
+  F0ButtonDropdown,
+} from "@/components/F0ButtonDropdown"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
 import {
@@ -33,7 +33,7 @@ const normalizeSecondaryActions = (
 const createActionItems = (
   primaryAction?: primaryActionType,
   secondaryActions?: secondaryActionType[]
-): OneDropdownButtonItem<string>[] => {
+): ButtonDropdownItem<string>[] => {
   const primaryActionItems = primaryAction
     ? [
         {
@@ -142,7 +142,7 @@ const SecondaryActionsButtons = ({
       {/* Render button actions - these might be hidden in little mode */}
       {!shouldHideButtonActions &&
         buttonActions.map((action, index) => (
-          <Button
+          <F0Button
             key={`button-${index}`}
             onClick={(e) => {
               e.preventDefault()
@@ -152,7 +152,6 @@ const SecondaryActionsButtons = ({
             size="md"
             label={action.label}
             disabled={disableButtons || action.disabled}
-            type="button"
             icon={"icon" in action ? action.icon : undefined}
           />
         ))}
@@ -172,14 +171,13 @@ const PrimaryActionButton = ({
   onClick,
 }: PrimaryActionButtonProps) => {
   return (
-    <Button
+    <F0Button
       onClick={onClick}
       variant={primaryAction.variant ?? "default"}
       size="md"
       label={primaryAction.label || ""}
       disabled={disableButtons || primaryAction.disabled}
       icon={primaryAction.icon}
-      type="button"
     />
   )
 }
@@ -187,7 +185,7 @@ const PrimaryActionButton = ({
 interface PrimaryActionContentProps {
   primaryAction: primaryActionType
   isFullscreen: boolean
-  listOfActions: OneDropdownButtonItem<string>[]
+  listOfActions: ButtonDropdownItem<string>[]
   handleOnClick: (labelID: string) => void
   disableButtons: boolean
   includeSecondaryInDropdown: boolean
@@ -203,7 +201,7 @@ const renderPrimaryActionContent = ({
 }: PrimaryActionContentProps) => {
   if (!isFullscreen) {
     return primaryAction.subActions || includeSecondaryInDropdown ? (
-      <OneDropdownButton
+      <F0ButtonDropdown
         items={listOfActions}
         onClick={handleOnClick}
         variant={primaryAction.action.variant ?? "default"}
@@ -225,7 +223,7 @@ const renderPrimaryActionContent = ({
   return (
     <>
       {primaryAction.subActions?.map((sub) => (
-        <Button
+        <F0Button
           key={getLabelID(sub.label)}
           onClick={(e) => {
             e.preventDefault()
@@ -236,7 +234,6 @@ const renderPrimaryActionContent = ({
           label={sub.label}
           disabled={disableButtons || sub.disabled}
           icon={sub.icon}
-          type="button"
         />
       ))}
       {primaryAction.subActions?.length && <ToolbarDivider />}

@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { errorConfig } from "@/experimental/RichText/RichTextEditor/utils/types"
 import { Editor } from "@tiptap/react"
@@ -32,7 +32,7 @@ const Error = ({
         </p>
       </div>
       <div className="mr- flex-shrink-0">
-        <Button
+        <F0Button
           variant="outline"
           onClick={(e) => {
             e.preventDefault()
@@ -43,7 +43,6 @@ const Error = ({
             }
           }}
           label={closeErrorButtonLabel || "Continue editing"}
-          type="button"
           size="sm"
         />
       </div>

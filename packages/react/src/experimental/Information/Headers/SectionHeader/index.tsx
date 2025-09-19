@@ -1,8 +1,8 @@
+import { F0Button, type F0ButtonProps } from "@/components/F0Button"
+import type { IconType } from "@/components/F0Icon"
+import { F0Link } from "@/components/F0Link"
 import { useLayout } from "@/components/layouts/LayoutProvider"
-import { Button, type ButtonProps } from "../../../../components/Actions/Button"
-import { Link } from "../../../../components/Actions/Link"
-import type { IconType } from "../../../../components/F0Icon"
-import { cn } from "../../../../lib/utils"
+import { cn } from "@/lib/utils"
 
 type Props = {
   /** Main heading text */
@@ -12,7 +12,7 @@ type Props = {
   description: string
 
   /**  Complementary action specific to the section */
-  action?: Pick<ButtonProps, "label" | "onClick"> & {
+  action?: Pick<F0ButtonProps, "label" | "onClick"> & {
     icon?: IconType
     variant?: "default" | "outline"
   }
@@ -51,16 +51,16 @@ export const SectionHeader = ({
         </div>
         {link && (
           <div className="w-fit">
-            <Link href={link.href} target="_blank">
+            <F0Link href={link.href} target="_blank">
               {link.label}
-            </Link>
+            </F0Link>
           </div>
         )}
       </div>
       {action && (
         <>
           <div className="hidden md:block">
-            <Button
+            <F0Button
               label={action.label}
               variant={action.variant ?? "outline"}
               icon={action.icon}
@@ -69,7 +69,7 @@ export const SectionHeader = ({
             />
           </div>
           <div className="w-full md:hidden [&>button]:w-full">
-            <Button
+            <F0Button
               label={action.label}
               variant={action.variant ?? "outline"}
               icon={action.icon}

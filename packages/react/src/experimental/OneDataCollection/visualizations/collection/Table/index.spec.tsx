@@ -9,17 +9,15 @@ import {
   PaginatedFetchOptions,
   PaginationType,
 } from "@/hooks/datasource"
-import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
+import { zeroRender as render, TestProviders } from "@/testing/test-utils"
 import {
   act,
-  render,
   renderHook,
   screen,
   waitFor,
   within,
 } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { SummariesDefinition } from "../../../summary"
@@ -94,11 +92,6 @@ const createTestSource = (
   setCurrentGrouping: vi.fn(),
 })
 
-// Test wrapper component that provides I18nProvider
-const TestWrapper = ({ children }: { children: ReactNode }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
-)
-
 class MockIntersectionObserver implements IntersectionObserver {
   root: Document | Element | null = null
   rootMargin: string = ``
@@ -115,23 +108,21 @@ describe("TableCollection", () => {
   describe("rendering", () => {
     it("shows loading state initially", () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // The OneTable.Skeleton component uses aria-hidden="true" and role="presentation"
@@ -148,23 +139,21 @@ describe("TableCollection", () => {
 
     it("renders table with data after loading", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for loading state to disappear by checking for actual data
@@ -196,23 +185,21 @@ describe("TableCollection", () => {
       ]
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={columnsWithCustomRender}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithCustomRender}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -226,23 +213,21 @@ describe("TableCollection", () => {
   describe("edge cases", () => {
     it("handles empty data gracefully", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource([])}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource([])}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for loading state to finish
@@ -260,23 +245,21 @@ describe("TableCollection", () => {
       const error = new Error(errorMessage)
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource([], error)}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource([], error)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for loading state to finish
@@ -292,7 +275,7 @@ describe("TableCollection", () => {
       const { result } = renderHook(
         () => useDataCollectionData(createTestSource([], error)),
         {
-          wrapper: TestWrapper,
+          wrapper: TestProviders,
         }
       )
       await waitFor(() => {
@@ -371,25 +354,23 @@ describe("TableCollection", () => {
 
     it("renders pagination controls when pages pagination is enabled", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createPaginatedTestSource({
-              paginationType: "pages",
-            })}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createPaginatedTestSource({
+            paginationType: "pages",
+          })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -405,25 +386,23 @@ describe("TableCollection", () => {
         IntersectionObserver
       )
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createPaginatedTestSource({
-              paginationType: "infinite-scroll",
-            })}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createPaginatedTestSource({
+            paginationType: "infinite-scroll",
+          })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -436,23 +415,21 @@ describe("TableCollection", () => {
 
     it("shows loading state when switching pages", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createPaginatedTestSource({})}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createPaginatedTestSource({})}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for initial load
@@ -472,23 +449,21 @@ describe("TableCollection", () => {
 
     it("displays correct data for each page", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createPaginatedTestSource({})}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createPaginatedTestSource({})}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Check first page
@@ -510,26 +485,24 @@ describe("TableCollection", () => {
 
     it("handles edge case with single page", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createPaginatedTestSource({
-              totalItems: 5,
-              itemsPerPage: 10,
-            })}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createPaginatedTestSource({
+            totalItems: 5,
+            itemsPerPage: 10,
+          })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -540,26 +513,24 @@ describe("TableCollection", () => {
 
     it("handles edge case with empty data", async () => {
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createPaginatedTestSource({
-              totalItems: 0,
-              itemsPerPage: 10,
-            })}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createPaginatedTestSource({
+            totalItems: 0,
+            itemsPerPage: 10,
+          })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -597,23 +568,21 @@ describe("TableCollection", () => {
       ]
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={columnsWithSorting}
-            source={sortableSource}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithSorting}
+          source={sortableSource}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -644,33 +613,31 @@ describe("TableCollection", () => {
       }
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={[
-              {
-                label: "name",
-                render: (item: Person) => item.name,
-                sorting: "name" as const,
-              },
-              {
-                label: "email",
-                render: (item: Person) => item.email,
-              },
-            ]}
-            source={modifiedSource}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={[
+            {
+              label: "name",
+              render: (item: Person) => item.name,
+              sorting: "name" as const,
+            },
+            {
+              label: "email",
+              render: (item: Person) => item.email,
+            },
+          ]}
+          source={modifiedSource}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for the table to load and verify it's rendered
@@ -721,33 +688,31 @@ describe("TableCollection", () => {
       }
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={[
-              {
-                label: "name",
-                render: (item: Person) => item.name,
-                sorting: "name" as const,
-              },
-              {
-                label: "email",
-                render: (item: Person) => item.email,
-              },
-            ]}
-            source={modifiedSource}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={[
+            {
+              label: "name",
+              render: (item: Person) => item.name,
+              sorting: "name" as const,
+            },
+            {
+              label: "email",
+              render: (item: Person) => item.email,
+            },
+          ]}
+          source={modifiedSource}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for the table to load and verify it's rendered
@@ -801,33 +766,31 @@ describe("TableCollection", () => {
       }
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={[
-              {
-                label: "name",
-                render: (item: Person) => item.name,
-                sorting: "name" as const,
-              },
-              {
-                label: "email",
-                render: (item: Person) => item.email,
-              },
-            ]}
-            source={modifiedSource}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={[
+            {
+              label: "name",
+              render: (item: Person) => item.name,
+              sorting: "name" as const,
+            },
+            {
+              label: "email",
+              render: (item: Person) => item.email,
+            },
+          ]}
+          source={modifiedSource}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       // Wait for the table to load and verify it's rendered
@@ -875,23 +838,21 @@ describe("TableCollection", () => {
       ]
 
       render(
-        <TestWrapper>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={columnsWithSorting}
-            source={createTestSource()} // No sortings defined
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithSorting}
+          source={createTestSource()} // No sortings defined
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -948,15 +909,13 @@ describe("TableCollection", () => {
       ]
 
       render(
-        <TestWrapper>
-          <TableCollection
-            columns={testColumns}
-            source={createTestSourceWithActions(itemActions)}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection
+          columns={testColumns}
+          source={createTestSourceWithActions(itemActions)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {
@@ -989,15 +948,13 @@ describe("TableCollection", () => {
       ]
 
       render(
-        <TestWrapper>
-          <TableCollection
-            columns={testColumns}
-            source={createTestSourceWithActions(itemActions)}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </TestWrapper>
+        <TableCollection
+          columns={testColumns}
+          source={createTestSourceWithActions(itemActions)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
       )
 
       await waitFor(() => {

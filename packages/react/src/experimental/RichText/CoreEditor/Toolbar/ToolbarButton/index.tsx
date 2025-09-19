@@ -2,7 +2,7 @@ import { F0Icon, IconType } from "@/components/F0Icon"
 import { Shortcut } from "@/experimental/Information/Shortcut"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
+import { Action } from "@/ui/Action"
 import { ComponentProps, forwardRef } from "react"
 
 interface ToolbarButtonProps {
@@ -34,7 +34,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     ref
   ) => {
     const CustomButton = (
-      <Button
+      <Action
         ref={ref}
         variant="ghost"
         size="md"
@@ -46,17 +46,18 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         }}
         className={cn(
           active ? "text-f1-icon-selected" : "text-f1-foreground",
-          "flex items-center gap-1 border border-solid font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100 [&>button]:m-[-1px] [&>button]:aspect-square [&>button]:px-0",
+          "flex items-center gap-1 border border-solid font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100 [&>button]:aspect-square [&>button]:px-0",
           active
             ? "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
             : "border-f1-background bg-transparent hover:border-f1-background-secondary hover:bg-f1-background-secondary-hover",
-          showLabel && "w-full items-center justify-start px-2"
+          showLabel && "w-full items-center justify-start"
         )}
+        compact
         disabled={disabled}
         aria-label={label}
         {...props}
+        prepend={<F0Icon icon={icon} />}
       >
-        <F0Icon icon={icon} />
         {showLabel && (
           <span
             className={cn(
@@ -67,7 +68,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
             {label}
           </span>
         )}
-      </Button>
+      </Action>
     )
 
     return tooltip ? (

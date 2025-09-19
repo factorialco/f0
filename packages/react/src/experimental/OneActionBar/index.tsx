@@ -1,6 +1,6 @@
-import { Button } from "@/components/Actions/Button"
-import { OneDropdownButton } from "@/components/Actions/OneDropdownButton"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import {
   Dropdown,
@@ -108,7 +108,7 @@ export const OneActionBar = ({
                 />
                 <span> {selectedText}</span>
               </span>
-              <Button
+              <F0Button
                 variant="outline"
                 size="sm"
                 label={i18n.actions.unselect}
@@ -129,7 +129,7 @@ export const OneActionBar = ({
                 <>
                   <MobileDropdown items={secondaryActions} />
                   {primaryActions.length > 1 ? (
-                    <OneDropdownButton
+                    <F0ButtonDropdown
                       items={primaryActions.map((action) => ({
                         value: action.label,
                         label: action.label,
@@ -145,7 +145,7 @@ export const OneActionBar = ({
                       size="lg"
                     />
                   ) : primaryActions.length === 1 ? (
-                    <Button
+                    <F0Button
                       label={primaryActions[0].label}
                       icon={primaryActions[0].icon}
                       onClick={primaryActions[0].onClick}
@@ -168,7 +168,7 @@ export const OneActionBar = ({
                     .slice()
                     .reverse()
                     .map((action) => (
-                      <Button
+                      <F0Button
                         variant={action.critical ? "critical" : "outline"}
                         key={action.label}
                         label={action.label}
@@ -178,7 +178,7 @@ export const OneActionBar = ({
                       />
                     ))}
                   {primaryActions.length > 1 ? (
-                    <OneDropdownButton
+                    <F0ButtonDropdown
                       items={primaryActions.map((action) => ({
                         value: action.label,
                         label: action.label,
@@ -193,7 +193,7 @@ export const OneActionBar = ({
                       }}
                     />
                   ) : primaryActions.length === 1 ? (
-                    <Button
+                    <F0Button
                       label={primaryActions[0].label}
                       icon={primaryActions[0].icon}
                       onClick={primaryActions[0].onClick}

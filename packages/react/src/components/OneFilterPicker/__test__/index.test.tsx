@@ -1,9 +1,7 @@
-import { render, screen, waitFor } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
 import userEvent from "@testing-library/user-event"
-import React from "react"
 import { describe, expect, it, vi } from "vitest"
-import { defaultTranslations, I18nProvider } from "../../../lib/providers/i18n"
 import { OneFilterPicker } from "../index"
 import type { FiltersDefinition } from "../types"
 
@@ -25,10 +23,6 @@ const definition = {
   },
 } as const satisfies FiltersDefinition
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
-)
-
 describe("Filters", () => {
   describe("Filter State Management", () => {
     it("applies filters only when Apply button is clicked", async () => {
@@ -36,13 +30,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{}}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       // Open filter popover
@@ -69,16 +57,14 @@ describe("Filters", () => {
 
       // Render with initial state
       render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{
-              search: "test",
-              department: ["engineering"],
-            }}
-            onChange={onChange}
-          ></OneFilterPicker>
-        </TestWrapper>
+        <OneFilterPicker
+          filters={definition}
+          value={{
+            search: "test",
+            department: ["engineering"],
+          }}
+          onChange={onChange}
+        ></OneFilterPicker>
       )
 
       // Check for active filters in the UI
@@ -101,13 +87,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{}}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       // Open and configure filter
@@ -148,13 +128,7 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{}}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
       )
 
       // Open filter popover
@@ -174,13 +148,11 @@ describe("Filters", () => {
       const onChange = vi.fn()
 
       render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{ search: "test query" }}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker
+          filters={definition}
+          value={{ search: "test query" }}
+          onChange={onChange}
+        />
       )
 
       // Open filter popover
@@ -232,16 +204,14 @@ describe("Filters", () => {
 
       // Render with initial filters
       const { rerender } = render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{
-              department: ["engineering"],
-              search: "test",
-            }}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker
+          filters={definition}
+          value={{
+            department: ["engineering"],
+            search: "test",
+          }}
+          onChange={onChange}
+        />
       )
 
       // Find all close buttons in the document
@@ -257,15 +227,13 @@ describe("Filters", () => {
 
       // Simulate the update
       rerender(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{
-              search: "test",
-            }}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker
+          filters={definition}
+          value={{
+            search: "test",
+          }}
+          onChange={onChange}
+        />
       )
 
       // Verify department filter is gone
@@ -279,13 +247,11 @@ describe("Filters", () => {
 
       // Start with engineering selected
       const { rerender } = render(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{ department: ["engineering"] }}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker
+          filters={definition}
+          value={{ department: ["engineering"] }}
+          onChange={onChange}
+        />
       )
 
       // Open filter panel
@@ -306,13 +272,11 @@ describe("Filters", () => {
 
       // Update the component with the new state
       rerender(
-        <TestWrapper>
-          <OneFilterPicker
-            filters={definition}
-            value={{ department: ["design"] }}
-            onChange={onChange}
-          />
-        </TestWrapper>
+        <OneFilterPicker
+          filters={definition}
+          value={{ department: ["design"] }}
+          onChange={onChange}
+        />
       )
 
       // Verify the UI shows the updated filter
@@ -339,14 +303,12 @@ describe("Presets", () => {
     ]
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{}}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{}}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Verify preset buttons are rendered
@@ -369,14 +331,12 @@ describe("Presets", () => {
     ]
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{}}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{}}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Click on a preset
@@ -402,14 +362,12 @@ describe("Presets", () => {
 
     // Render with filters matching the first preset
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{ department: ["engineering"] }}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["engineering"] }}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Get the preset elements
@@ -442,14 +400,12 @@ describe("Presets", () => {
     ]
 
     const { rerender } = render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{}}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{}}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Click on the first preset
@@ -459,14 +415,12 @@ describe("Presets", () => {
 
     // Simulate the update
     rerender(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{ department: ["engineering"] }}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["engineering"] }}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Reset the mock to track new calls
@@ -489,14 +443,12 @@ describe("Presets", () => {
     ]
 
     const { rerender } = render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{}}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{}}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Apply a preset
@@ -506,14 +458,12 @@ describe("Presets", () => {
 
     // Simulate the update
     rerender(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{ department: ["engineering"] }}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["engineering"] }}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Reset the mock to track new calls
@@ -551,14 +501,12 @@ describe("Presets", () => {
     ]
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={definition}
-          value={{}}
-          presets={presets}
-          onChange={onChange}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={definition}
+        value={{}}
+        presets={presets}
+        onChange={onChange}
+      />
     )
 
     // Click on the preset
@@ -580,214 +528,196 @@ describe("Filters Type Safety", () => {
   it.skip("should enforce type safety in props", () => {
     // Valid usage - this should type check
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                type: "in",
-                label: "Status",
-                options: {
-                  options: [
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ],
-                },
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              type: "in",
+              label: "Status",
+              options: {
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ],
               },
-            } as const
-          }
-          value={{ status: ["active"] }}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+            },
+          } as const
+        }
+        value={{ status: ["active"] }}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                // @ts-expect-error - Invalid filter type in definition
-                type: "invalid",
-                label: "Status",
-              },
-            } as const
-          }
-          value={{}}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              // @ts-expect-error - Invalid filter type in definition
+              type: "invalid",
+              label: "Status",
+            },
+          } as const
+        }
+        value={{}}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              // @ts-expect-error - Missing options in "in" filter
-              status: {
-                type: "in",
-                label: "Status",
-              },
-            } as const
-          }
-          value={{}}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={
+          {
+            // @ts-expect-error - Missing options in "in" filter
+            status: {
+              type: "in",
+              label: "Status",
+            },
+          } as const
+        }
+        value={{}}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                type: "in",
-                label: "Status",
-                options: {
-                  options: [
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ],
-                },
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              type: "in",
+              label: "Status",
+              options: {
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ],
               },
-            } as const
-          }
-          // @ts-expect-error - Wrong value type for "in" filter (string instead of string[])
-          value={{ status: "active" }}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+            },
+          } as const
+        }
+        // @ts-expect-error - Wrong value type for "in" filter (string instead of string[])
+        value={{ status: "active" }}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                type: "in",
-                label: "Status",
-                options: {
-                  options: [
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ],
-                },
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              type: "in",
+              label: "Status",
+              options: {
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ],
               },
-            } as const
-          }
-          // @ts-expect-error - Invalid filter key in filters state
-          value={{ invalid: ["something"] }}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+            },
+          } as const
+        }
+        // @ts-expect-error - Invalid filter key in filters state
+        value={{ invalid: ["something"] }}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                type: "in",
-                label: "Status",
-                options: {
-                  options: [
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ],
-                },
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              type: "in",
+              label: "Status",
+              options: {
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ],
               },
-            } as const
-          }
-          // @ts-expect-error - Invalid value in options array
-          value={{ status: ["nonexistent"] }}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+            },
+          } as const
+        }
+        // @ts-expect-error - Invalid value in options array
+        value={{ status: ["nonexistent"] }}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              // @ts-expect-error - Missing required options in "in" filter
-              status: {
-                type: "in",
-                label: "Status",
-              },
-            } as const
-          }
-          value={{}}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+      <OneFilterPicker
+        filters={
+          {
+            // @ts-expect-error - Missing required options in "in" filter
+            status: {
+              type: "in",
+              label: "Status",
+            },
+          } as const
+        }
+        value={{}}
+        onChange={() => {}}
+      />
     )
   })
 
   it.skip("should enforce type safety in presets", () => {
     // Valid usage - this should type check
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                type: "in",
-                label: "Status",
-                options: {
-                  options: [
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ],
-                },
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              type: "in",
+              label: "Status",
+              options: {
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ],
               },
-            } as const
-          }
-          value={{}}
-          presets={[
-            {
-              label: "Active Only",
-              filter: { status: ["active"] },
             },
-          ]}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+          } as const
+        }
+        value={{}}
+        presets={[
+          {
+            label: "Active Only",
+            filter: { status: ["active"] },
+          },
+        ]}
+        onChange={() => {}}
+      />
     )
 
     render(
-      <TestWrapper>
-        <OneFilterPicker
-          filters={
-            {
-              status: {
-                type: "in",
-                label: "Status",
-                options: {
-                  options: [
-                    { value: "active", label: "Active" },
-                    { value: "inactive", label: "Inactive" },
-                  ],
-                },
+      <OneFilterPicker
+        filters={
+          {
+            status: {
+              type: "in",
+              label: "Status",
+              options: {
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ],
               },
-            } as const
-          }
-          value={{}}
-          presets={[
-            {
-              label: "Invalid Preset",
-              // @ts-expect-error - Invalid filter key in preset
-              filter: { invalid: ["something"] },
             },
-          ]}
-          onChange={() => {}}
-        />
-      </TestWrapper>
+          } as const
+        }
+        value={{}}
+        presets={[
+          {
+            label: "Invalid Preset",
+            // @ts-expect-error - Invalid filter key in preset
+            filter: { invalid: ["something"] },
+          },
+        ]}
+        onChange={() => {}}
+      />
     )
   })
 })

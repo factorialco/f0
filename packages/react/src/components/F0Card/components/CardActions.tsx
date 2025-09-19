@@ -1,6 +1,6 @@
-import { Button } from "@/components/Actions/Button"
-import { Link, type LinkProps } from "@/components/Actions/Link"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
+import { F0Link, type F0LinkProps } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
 import { CardFooter } from "@/ui/Card"
 import { useMediaQuery } from "usehooks-ts"
@@ -18,7 +18,7 @@ export interface CardSecondaryAction {
 }
 
 export interface CardSecondaryLink
-  extends Pick<LinkProps, "href" | "target" | "disabled"> {
+  extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
   label: string
 }
 
@@ -52,33 +52,32 @@ export function CardActions({
         <div className="flex w-full flex-col gap-md sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
           {Array.isArray(secondaryActions) ? (
             secondaryActions.map((action, index) => (
-              <Button
+              <F0Button
                 key={index}
                 label={action.label}
                 icon={action.icon}
                 variant="outline"
                 onClick={action.onClick}
                 hideLabel={isDesktop && index > 0}
-                round={isDesktop && index > 0}
                 size={isDesktop ? (compact ? "sm" : "md") : "lg"}
               />
             ))
           ) : (
-            <Link
+            <F0Link
               href={secondaryActions.href}
               target={secondaryActions.target}
               disabled={secondaryActions.disabled}
               data-testid="secondary-link"
             >
               {secondaryActions.label}
-            </Link>
+            </F0Link>
           )}
         </div>
       )}
 
       {primaryAction && (
         <div className="w-full sm:w-fit [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center">
-          <Button
+          <F0Button
             label={primaryAction.label}
             icon={primaryAction.icon}
             onClick={primaryAction.onClick}

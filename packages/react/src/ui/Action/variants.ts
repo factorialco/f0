@@ -221,3 +221,23 @@ export const iconVariants = cva({
     mode: "default",
   },
 })
+
+export const loadingVariants = cva({
+  base: "rounded-full border-solid border-t-transparent will-change-transform",
+  variants: {
+    size: {
+      sm: "h-3 w-3 border-[1px]",
+      md: "h-4 w-4 border-2",
+      lg: "h-5 w-5 border-2",
+    },
+    variant: {
+      default: "border-f1-foreground-inverse border-t-transparent",
+      outline: "border-f1-foreground border-t-transparent",
+      neutral: "border-f1-foreground border-t-transparent",
+      critical: "border-f1-icon-critical border-t-transparent",
+      ghost: "border-f1-foreground border-t-transparent",
+      promote: "border-f1-icon-promote border-t-transparent",
+      outlinePromote: "border-f1-icon-promote border-t-transparent",
+    },
+  },
+})

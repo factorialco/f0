@@ -1,48 +1,18 @@
-import { F0Icon } from "@/components/F0Icon"
-import { Spinner } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import type { VariantProps } from "cva"
+import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
-import React, { ReactNode } from "react"
+import React from "react"
+import { ActionProps } from "./types"
+import { isLinkStyled } from "./utils"
 import {
   actionVariants,
   buttonSizeVariants,
   iconVariants,
   linkSizeVariants,
+  loadingVariants,
 } from "./variants"
-
-export interface ActionCommonProps {
-  children: ReactNode
-
-  prepend?: ReactNode
-  append?: ReactNode
-  prependOutside?: boolean
-  appendOutside?: boolean
-
-  onClick?: (event?: React.MouseEvent<HTMLElement>) => void
-  onFocus?: (event?: React.FocusEvent<HTMLElement>) => void
-  onBlur?: (event?: React.FocusEvent<HTMLElement>) => void
-
-  disabled?: boolean
-  loading?: boolean
-  pressed?: boolean
-
-  className?: string
-  size?: "sm" | "md" | "lg"
-}
-
-export interface LinkActionProps {
-  href: string
-  target?: "_blank" | "_self" | "_parent" | "_top"
-}
-
-type ActionVariantProps = VariantProps<typeof actionVariants>
-
-export type ActionProps = ActionCommonProps &
-  Partial<LinkActionProps> &
-  ActionVariantProps
 
 export const Action = React.forwardRef<HTMLElement, ActionProps>(
   (
@@ -63,51 +33,75 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       target,
       variant,
       size = "md",
+      mode = "default",
+      title,
+      compact = false,
+      "aria-label": ariaLabel,
+      ...props
     },
     ref
   ) => {
     const isLink = !!href
-    const defaultVariant = isLink ? variant || "link" : variant || "default"
+    const localVariant = isLink ? variant || "link" : variant || "default"
     const variantClasses = actionVariants({
-      variant: defaultVariant,
+      variant: localVariant,
       pressed,
     })
-    const isLinkStyled =
-      defaultVariant === "link" || defaultVariant === "mention"
-    const sizeClasses = isLinkStyled
+
+    const sizeClasses = isLinkStyled(localVariant)
       ? linkSizeVariants({ size })
       : buttonSizeVariants({ size })
 
+    const compactClasses = cva({
+      variants: {
+        size: {
+          sm: "!px-[4px]",
+          md: "!px-[6px]",
+          lg: "!px-[10px]",
+        },
+      },
+      defaultVariants: {
+        size: "md",
+      },
+    })
     const innerContent = (
       <>
         <div
           className={cn(
             "main flex items-center justify-center gap-1",
+            compact && compactClasses({ size }),
             loading && "opacity-0",
-            iconVariants({ variant: defaultVariant })
+            iconVariants({ variant: localVariant, mode })
           )}
         >
-          {prepend && !prependOutside && prepend}
-          <span>{children}</span>
-          {append && !appendOutside && append}
+          {prepend}
+          <span className={cn("flex items-center justify-center")}>
+            {children}
+          </span>
+          {append}
         </div>
         <AnimatePresence>
-          {loading && !isLinkStyled && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.1, ease: "easeInOut" }}
-              className={cn(
-                "absolute inset-0 flex items-center justify-center",
-                iconVariants({ variant: defaultVariant, mode: "only" })
+          {loading && (
+            <>
+              {!isLinkStyled(localVariant) ? (
+                <Skeleton className="absolute inset-0 my-auto h-full w-full" />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    className={cn(
+                      loadingVariants({ size, variant: localVariant })
+                    )}
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    aria-label="Loading..."
+                  />
+                </div>
               )}
-            >
-              <F0Icon icon={Spinner} className="animate-spin" />
-            </motion.div>
-          )}
-          {loading && isLinkStyled && (
-            <Skeleton className="absolute inset-0 my-auto h-full w-full" />
+            </>
           )}
         </AnimatePresence>
       </>
@@ -120,6 +114,9 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       disabled,
       className: cn(variantClasses, sizeClasses, focusRing(), className),
       "aria-busy": loading,
+      "aria-label": ariaLabel,
+      title,
+      ...props,
     }
 
     const mainElement = isLink ? (
@@ -146,9 +143,9 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
     if (prependOutside || appendOutside) {
       return (
         <div className="flex items-center">
-          {prependOutside && prepend}
+          {prependOutside}
           {mainElement}
-          {appendOutside && append}
+          {appendOutside}
         </div>
       )
     }

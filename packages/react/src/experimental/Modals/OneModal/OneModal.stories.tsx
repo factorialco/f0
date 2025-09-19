@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"

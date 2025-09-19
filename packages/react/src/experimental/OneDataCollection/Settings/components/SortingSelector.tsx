@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { Select } from "@/experimental/Forms/Fields/Select"
 import {
   SortingKey,
@@ -74,7 +74,7 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
 
         {localSortings?.field !== EmptySortingValue && (
           <div>
-            <Button
+            <F0Button
               hideLabel
               label={i18n.collections.sorting.toggleDirection}
               variant="outline"

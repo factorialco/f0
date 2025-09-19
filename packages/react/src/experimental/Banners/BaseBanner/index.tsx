@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { withSkeleton } from "@/lib/skeleton"
@@ -89,7 +89,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
           {/* Actions */}
           <div className="flex gap-3">
             {primaryAction && (
-              <Button
+              <F0Button
                 onClick={primaryAction.onClick}
                 label={primaryAction.label}
                 variant={primaryAction.variant || "default"}
@@ -98,7 +98,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
               />
             )}
             {secondaryAction && (
-              <Button
+              <F0Button
                 onClick={secondaryAction.onClick}
                 label={secondaryAction.label}
                 variant={secondaryAction.variant || "outline"}
@@ -113,7 +113,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
         {/* Close button */}
         {onClose && (
           <div className="absolute right-2 top-2 z-10">
-            <Button
+            <F0Button
               variant="ghost"
               icon={CrossIcon}
               size="sm"

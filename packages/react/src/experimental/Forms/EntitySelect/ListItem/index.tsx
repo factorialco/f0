@@ -1,5 +1,5 @@
-import { Button } from "@/components/Actions/Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Counter } from "@/experimental/Information/Counter"
 import { CheckCircle } from "@/icons/app"
@@ -253,8 +253,7 @@ const EntitySelectListItem = ({
   return (
     <>
       <div className="flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1">
-        <Button
-          round
+        <F0Button
           hideLabel
           icon={expanded ? ChevronDown : ChevronRight}
           onClick={() => onExpand(!expanded)}

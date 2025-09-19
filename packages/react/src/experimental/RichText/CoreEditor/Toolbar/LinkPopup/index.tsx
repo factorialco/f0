@@ -1,5 +1,7 @@
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon } from "@/components/F0Icon"
-import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
 import { Badge } from "@/experimental/Information/Badge"
 import {
   Alert,
@@ -10,7 +12,6 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { Button } from "@/ui/button"
 import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -112,7 +113,8 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                 aria-label="Link popup"
               >
                 <div className="dark z-50 flex w-max flex-row gap-1 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
-                  <Button
+                  <ButtonInternal
+                    compact
                     variant="ghost"
                     size="md"
                     onClick={(e) => {
@@ -120,9 +122,10 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                       handleClose()
                     }}
                     className="[&>button]:aspect-square [&>button]:px-0"
-                  >
-                    <F0Icon icon={Cross} />
-                  </Button>
+                    label="Close link popup"
+                    hideLabel
+                    icon={Cross}
+                  ></ButtonInternal>
                   <div
                     className={cn(
                       "flex w-80 appearance-none items-center gap-2 rounded border-0 bg-f1-background py-1 pl-2 pr-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary",
@@ -179,16 +182,15 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                       />
                     )}
 
-                    <Button
+                    <F0Button
                       variant="outline"
                       type="button"
                       size="sm"
                       onClick={handlePaste}
-                    >
-                      {labels.linkPaste}
-                    </Button>
+                      label={labels.linkPaste}
+                    ></F0Button>
                   </div>
-                  <Button
+                  <F0Button
                     variant="default"
                     type="button"
                     size="sm"
@@ -196,9 +198,8 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                       e.preventDefault()
                       handleSave()
                     }}
-                  >
-                    {i18n.actions.save}
-                  </Button>
+                    label={i18n.actions.save}
+                  ></F0Button>
                 </div>
               </motion.div>
             )}

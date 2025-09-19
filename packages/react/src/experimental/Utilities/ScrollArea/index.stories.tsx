@@ -1,8 +1,8 @@
-import { Button } from "../../../components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { ScrollArea } from "./index"
 
+import { Placeholder } from "@/lib/storybook-utils/placeholder"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Placeholder } from "../../../lib/storybook-utils/placeholder"
 import { Alert, AlertTitle } from "../../Information/Alert"
 
 const meta = {
@@ -77,7 +77,7 @@ export const Comparison: Story = {
 
 const StackWithOverflow = ({ length = 20 }: { length?: number }) => (
   <div className="flex w-96 flex-col gap-4">
-    <Button
+    <F0Button
       label="Some button"
       onClick={() =>
         alert(

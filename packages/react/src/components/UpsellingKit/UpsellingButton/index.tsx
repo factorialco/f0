@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from "@/components/Actions/Button"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import {
   ErrorMessageProps,
   NextStepsProps,
@@ -12,7 +12,7 @@ export interface LoadingStateProps {
   label: string
 }
 
-export interface UpsellingButtonProps extends Omit<ButtonProps, "icon"> {
+export interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"> {
   variant?: "promote" | "outlinePromote"
   /**
    * The text to be displayed in the button
@@ -109,7 +109,7 @@ export function UpsellingButton({
 
   return (
     <>
-      <Button
+      <F0Button
         variant={variant}
         label={buttonLabel}
         icon={showIcon ? UpsellIcon : undefined}

@@ -12,7 +12,7 @@ export * from "@testing-library/react"
 import { MotionGlobalConfig } from "motion"
 MotionGlobalConfig.skipAnimations = true
 
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+const TestProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <UserPlatformProvider showExperimentalWarnings={false}>
       <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
@@ -23,6 +23,6 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
 const zeroRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper">
-): RenderResult => render(ui, { wrapper: AllTheProviders, ...options })
+): RenderResult => render(ui, { wrapper: TestProviders, ...options })
 
-export { userEvent, zeroRender }
+export { TestProviders, userEvent, zeroRender }

@@ -1,12 +1,11 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { ButtonVariant } from "@/ui/button"
 
 export type Action = {
   label: string
   onClick: () => void
   icon?: IconType
-  variant?: ButtonVariant
+  variant?: F0ButtonProps["variant"]
   disabled?: boolean
 }
 
@@ -19,7 +18,7 @@ export const SelectBottomActions = ({ actions }: SelectBottomActionsProps) => {
   return (
     <div className="flex w-full flex-row gap-2 border-0 border-t border-solid border-f1-border-secondary p-2">
       {actions.map((action) => (
-        <Button
+        <F0Button
           key={action.label}
           variant={action.variant}
           onClick={action.onClick}

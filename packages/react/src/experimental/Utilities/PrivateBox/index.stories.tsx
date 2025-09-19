@@ -1,7 +1,7 @@
 // Replace your-framework with the name of your framework
+import { F0Button } from "@/components/F0Button"
+import { usePrivacyMode } from "@/lib/privacyMode"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Button } from "../../../components/Actions/Button"
-import { usePrivacyMode } from "../../../lib/privacyMode"
 import { PrivateBox } from "./index"
 
 const meta: Meta = {
@@ -24,7 +24,7 @@ export const PrivateBoxExample: Story = {
           </PrivateBox>
         </p>
         <div className="self-start">
-          <Button
+          <F0Button
             label={`${enabled ? "Disable " : "Enable "} Privacy Mode`}
             onClick={toggle}
             variant="neutral"

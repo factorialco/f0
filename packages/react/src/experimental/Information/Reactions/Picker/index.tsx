@@ -1,10 +1,11 @@
+import { F0ButtonProps } from "@/components/F0Button"
+import { Reaction } from "@/icons/app"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import EmojiPicker from "@emoji-mart/react"
 import { useState } from "react"
-import { Button, ButtonProps } from "../../../../components/Actions/Button"
-import { Reaction } from "../../../../icons/app"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import "./index.css"
 
 const EMOJI_BUTTON_SIZE = 36
@@ -15,8 +16,8 @@ const MAX_FREQUENT_ROWS = 2
 interface PickerProps {
   onSelect?: (emoji: string) => void
   locale?: string
-  size?: ButtonProps["size"]
-  variant?: ButtonProps["variant"]
+  size?: F0ButtonProps["size"]
+  variant?: F0ButtonProps["variant"]
   lastEmojiReaction?: string
 }
 
@@ -32,8 +33,9 @@ export function Picker({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <ButtonInternal
           variant={variant}
+          compact
           label="Add reaction"
           size={size}
           icon={lastEmojiReaction ? undefined : Reaction}

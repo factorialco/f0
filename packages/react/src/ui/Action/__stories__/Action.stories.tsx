@@ -2,6 +2,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { Placeholder } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Action } from "../Action"
+import { actionSizes } from "../types"
 
 const meta: Meta<typeof Action> = {
   title: "Components/Action",
@@ -27,7 +28,7 @@ const meta: Meta<typeof Action> = {
       control: {
         type: "select",
       },
-      options: ["sm", "md", "lg"],
+      options: actionSizes,
     },
     pressed: {
       control: {
@@ -57,6 +58,7 @@ type Story = StoryObj<typeof Action>
 export const Basic: Story = {
   args: {
     children: "Basic Action",
+    "aria-label": "Basic Action",
   },
 }
 
@@ -66,6 +68,7 @@ export const AsLink: Story = {
     href: "https://example.com",
     target: "_blank",
     append: <F0Icon icon={Placeholder} size="sm" />,
+    "aria-label": "Link Action",
   },
 }
 
@@ -75,6 +78,7 @@ export const AsLinkWithButtonVariant: Story = {
     href: "https://example.com",
     target: "_blank",
     variant: "default",
+    "aria-label": "Link with Button Style",
   },
 }
 
@@ -82,6 +86,7 @@ export const AsButtonWithLinkVariant: Story = {
   args: {
     children: "Button with Link Style",
     variant: "link",
+    "aria-label": "Button with Link Style",
   },
 }
 
@@ -89,6 +94,7 @@ export const Disabled: Story = {
   args: {
     children: "Disabled Action",
     disabled: true,
+    "aria-label": "Disabled Action",
   },
 }
 
@@ -96,6 +102,7 @@ export const WithPrepend: Story = {
   args: {
     children: "Action with Prepend",
     prepend: <F0Icon icon={Placeholder} />,
+    "aria-label": "Action with Prepend",
   },
 }
 
@@ -104,6 +111,7 @@ export const WithAppendOutside: Story = {
     children: "Action with Append",
     append: <F0Icon icon={Placeholder} />,
     appendOutside: true,
+    "aria-label": "Action with Append",
   },
 }
 
@@ -113,6 +121,7 @@ export const LinkDisabled: Story = {
     href: "https://example.com",
     target: "_blank",
     disabled: true,
+    "aria-label": "Link Disabled",
   },
 }
 
@@ -153,9 +162,27 @@ export const AllVariants: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4">
-      <Action size="sm">Small</Action>
-      <Action size="md">Medium</Action>
-      <Action size="lg">Large</Action>
+      <Action size="sm" aria-label="Small">
+        Small
+      </Action>
+      <Action size="md" aria-label="Medium">
+        Medium
+      </Action>
+      <Action size="lg" aria-label="Large">
+        Large
+      </Action>
+    </div>
+  ),
+}
+
+export const AllCompact: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      {actionSizes.map((size) => (
+        <Action size={size} compact key={size} aria-label={size}>
+          <F0Icon icon={Placeholder} size={size === "sm" ? "sm" : "md"} />
+        </Action>
+      ))}
     </div>
   ),
 }

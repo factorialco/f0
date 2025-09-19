@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Picker } from "./Picker"
 import { Reaction, ReactionProps } from "./reaction"
@@ -23,12 +23,11 @@ export function Reactions({
   return (
     <div className="flex flex-wrap gap-2">
       {action && (
-        <Button
+        <F0Button
           label={action.label}
           icon={action.icon}
           onClick={action.onClick}
           variant="outline"
-          round
           hideLabel
         />
       )}

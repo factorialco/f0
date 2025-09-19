@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
@@ -43,7 +43,7 @@ const Header = ({ actions, metadata }: HeaderProps) => {
       </div>
       <div className="flex flex-row gap-2">
         {actions?.map((action, index) => (
-          <Button
+          <F0Button
             key={index}
             onClick={action.onClick}
             variant={action.variant || "outline"}

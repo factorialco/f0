@@ -1,9 +1,20 @@
 import { useEffect } from "react"
+import { parse } from "twemoji-parser"
 
 type Rules = {
   disallowEmpty?: boolean
   minLength?: number
   maxLength?: number
+  disallowEmojis?: boolean
+}
+
+/**
+ * Checks if the given text contains any emojis
+ */
+const containsEmojis = (text: string): boolean => {
+  // Use twemoji-parser to detect emojis reliably
+  const emojiEntities = parse(text)
+  return emojiEntities.length > 0
 }
 
 const textFormatEnforcer = (text: string, rules: Rules) => {
@@ -20,6 +31,10 @@ const textFormatEnforcer = (text: string, rules: Rules) => {
   if (rules.minLength !== undefined && text.length < rules.minLength) {
     throw Error(`"${text}" should have at least ${rules.minLength} characters`)
   }
+
+  if (rules.disallowEmojis && containsEmojis(text)) {
+    throw Error(`Emojis are not allowed here: "${text}"`)
+  }
 }
 
 export const useTextFormatEnforcer = (text?: string, rules?: Rules) => {
@@ -29,3 +44,5 @@ export const useTextFormatEnforcer = (text?: string, rules?: Rules) => {
     }
   }, [text, rules])
 }
+
+export { containsEmojis }

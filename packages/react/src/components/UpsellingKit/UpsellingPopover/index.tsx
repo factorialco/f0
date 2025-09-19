@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from "@/components/Actions/Button"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { PopoverContentProps } from "@radix-ui/react-popover"
@@ -11,8 +11,8 @@ type UpsellingPopoverProps = {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
   label: string
-  variant: ButtonProps["variant"]
-  size?: ButtonProps["size"]
+  variant: F0ButtonProps["variant"]
+  size?: F0ButtonProps["size"]
   side?: PopoverContentProps["side"]
   align?: PopoverContentProps["align"]
   icon?: IconType
@@ -99,7 +99,7 @@ export function UpsellingPopover({
     <>
       <Popover open={shouldShowPopover} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
-          <Button
+          <F0Button
             variant={variant}
             label={label}
             size={size}

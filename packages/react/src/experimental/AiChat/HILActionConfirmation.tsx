@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import Check from "@/icons/app/Check"
 
 export type HILActionConfirmationProps = {
@@ -20,7 +20,7 @@ export const HILActionConfirmation = ({
     <div className="flex flex-col gap-2">
       {text && <p>{text}</p>}
       <div className="flex gap-2">
-        <Button
+        <F0Button
           type="button"
           variant="outline"
           size="sm"
@@ -28,7 +28,7 @@ export const HILActionConfirmation = ({
           onClick={onConfirm}
           label={confirmationText}
         />
-        <Button
+        <F0Button
           type="button"
           variant="ghost"
           size="sm"

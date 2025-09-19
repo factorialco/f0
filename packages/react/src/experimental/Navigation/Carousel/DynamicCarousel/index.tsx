@@ -1,7 +1,6 @@
-import { F0Icon } from "@/components/F0Icon"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
 import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react"
 
 export const SPACE_FOR_WIDGET_SHADOW = 28
@@ -117,35 +116,35 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
       </div>
 
       {canScrollPrev && (
-        <Button
+        <ButtonInternal
           size="lg"
+          compact
           variant={"outline"}
-          round
           className={cn(
             "absolute opacity-100 transition-all",
             "-left-4 top-1/2 -translate-y-1/2 rounded-lg"
           )}
           onClick={scrollPrev}
-        >
-          <F0Icon icon={ChevronLeft} />
-          <span className="sr-only">Previous</span>
-        </Button>
+          icon={ChevronLeft}
+          label="Previous"
+          hideLabel
+        ></ButtonInternal>
       )}
 
       {canScrollNext && (
-        <Button
+        <ButtonInternal
           size="lg"
           variant={"outline"}
-          round
+          compact
           className={cn(
             "absolute opacity-100 transition-all",
             "-right-4 top-1/2 -translate-y-1/2 rounded-lg"
           )}
           onClick={scrollNext}
-        >
-          <F0Icon icon={ChevronRight} />
-          <span className="sr-only">Next</span>
-        </Button>
+          icon={ChevronRight}
+          label="Next"
+          hideLabel
+        ></ButtonInternal>
       )}
     </div>
   )
