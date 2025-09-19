@@ -2130,7 +2130,7 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "disabled" | "placeholder" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -2553,7 +2553,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "status" | "loading" | "disabled" | "append" | "hideLabel" | "maxLength" | "required" | "error" | "labelIcon" | "onClickContent" | "hint" | "clearable" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "clearable" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -4133,7 +4133,7 @@ declare interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
 }
 
 declare const spinnerVariants: (props?: ({
-    size?: "small" | "large" | "medium" | undefined;
+    size?: "small" | "medium" | "large" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -4426,7 +4426,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "status" | "hideLabel" | "maxLength" | "placeholder" | "error" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
