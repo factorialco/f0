@@ -12,10 +12,15 @@ import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
-import { TableCollection, TableCollectionProps } from "./Table"
+import {
+  TableCollection,
+  TableCollectionProps,
+  settings as tableSettings,
+} from "./Table"
 
 export type VisualizacionTypeDefinition<Props> = {
   render: (props: Props) => JSX.Element
+  renderSettings?: (props: Props) => JSX.Element
   name: string
   icon: IconType
 }
@@ -120,6 +125,7 @@ export const collectionVisualizations: CollectionVisualizations<
         />
       )
     },
+    renderSettings: tableSettings,
   },
   list: {
     name: "List",

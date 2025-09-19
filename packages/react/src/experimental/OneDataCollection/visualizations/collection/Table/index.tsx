@@ -37,6 +37,7 @@ import { CollectionProps } from "../../../types"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useSticky } from "./useSticky"
+export * from "./settings"
 
 export type WithOptionalSorting<
   R extends RecordType,

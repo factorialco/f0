@@ -149,6 +149,12 @@ export const Settings = <
                 sortings={sortings}
               />
             ),
+            visualizations[currentVisualization].renderSettings &&
+              visualizations[currentVisualization].renderSettings({
+                visualizations,
+                currentVisualization,
+                onVisualizationChange,
+              }),
           ]
             .filter(Boolean)
             .map((block, index, array) => (
