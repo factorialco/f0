@@ -1,24 +1,21 @@
 import { Button } from "@/components/Actions/Button"
-import { F0Icon, IconType } from "@/components/F0Icon"
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { IconType } from "@/components/F0Icon"
+import { F0AiBanner } from "@/experimental"
 import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "@/experimental/RichText/CoreEditor/Extensions/MoodTracker"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { TranscriptLabels } from "@/experimental/RichText/CoreEditor/Extensions/Transcript"
 import { ToolbarLabels } from "@/experimental/RichText/CoreEditor/Toolbar/types"
-import { Ai, ChevronDown, ChevronUp, Delete } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { JSONContent, Node } from "@tiptap/core"
 import {
   Editor,
-  EditorContent,
   NodeViewContent,
   NodeViewProps,
   NodeViewWrapper,
   ReactNodeViewRenderer,
   useEditor,
 } from "@tiptap/react"
-import { AnimatePresence, motion } from "motion/react"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createAIBlockEditorExtensions } from "./extensions"
 
@@ -70,22 +67,6 @@ declare module "@tiptap/core" {
     }
   }
 }
-
-const TextSkeleton = () => (
-  <div className="space-y-3">
-    <div className="flex space-x-2">
-      <div className="h-4 w-16 animate-pulse rounded bg-f1-background-secondary" />
-      <div className="h-4 w-32 animate-pulse rounded bg-f1-background-secondary" />
-    </div>
-    <div className="space-y-2">
-      <div className="h-4 w-full animate-pulse rounded bg-f1-background-secondary" />
-      <div className="h-4 w-4/5 animate-pulse rounded bg-f1-background-secondary" />
-      <div className="h-4 w-3/4 animate-pulse rounded bg-f1-background-secondary" />
-      <div className="h-4 w-full animate-pulse rounded bg-f1-background-secondary" />
-      <div className="h-4 w-1/2 animate-pulse rounded bg-f1-background-secondary" />
-    </div>
-  </div>
-)
 
 const useContentEditor = (
   data: AIBlockData | undefined,
@@ -256,170 +237,31 @@ const useDisplayInfo = (
   }, [data?.selectedTitle, data?.selectedEmoji, selectedAction, config])
 }
 
-interface AIBlockHeaderProps {
-  displayTitle: string
-  displayEmoji?: string
-  isLoading: boolean
-  canCollapse: boolean
-  isCollapsed: boolean
-  onToggleCollapse: () => void
-  onDropdownAction: (items: DropdownItem[]) => DropdownItem[]
-}
-
-const AIBlockHeader: React.FC<AIBlockHeaderProps> = ({
-  displayTitle,
-  displayEmoji,
-  isLoading,
-  canCollapse,
-  isCollapsed,
-  onToggleCollapse,
-  onDropdownAction,
-}) => (
-  <motion.div
-    className="flex flex-row items-center justify-between gap-2"
-    layout
-  >
-    <div className="flex flex-row items-center gap-2">
-      <motion.span
-        className="flex items-center text-lg"
-        animate={{
-          scale: isLoading ? [1, 1.1, 1] : 1,
-          rotate: isLoading ? [0, 5, -5, 0] : 0,
-        }}
-        transition={{
-          duration: isLoading ? 2 : 0.3,
-          repeat: isLoading ? Infinity : 0,
-          ease: "easeInOut",
-        }}
-      >
-        {displayEmoji ?? <F0Icon icon={Ai} />}
-      </motion.span>
-      <p className="text-f1-text-primary text-lg font-semibold">
-        {displayTitle}
-      </p>
-    </div>
-
-    <div className="flex flex-row items-center gap-1">
-      {canCollapse && (
-        <Button
-          onClick={onToggleCollapse}
-          variant="outline"
-          size="sm"
-          hideLabel
-          label={isCollapsed ? "Expand" : "Collapse"}
-          icon={isCollapsed ? ChevronDown : ChevronUp}
-        />
-      )}
-      <Dropdown items={onDropdownAction([])} size="sm" />
-    </div>
-  </motion.div>
-)
-
 interface AIButtonsSectionProps {
   config: AIBlockConfig
   isLoading: boolean
   onButtonClick: (type: string) => void
-  shouldShow: boolean
 }
 
 const AIButtonsSection: React.FC<AIButtonsSectionProps> = ({
   config,
   isLoading,
   onButtonClick,
-  shouldShow,
 }) => (
-  <AnimatePresence>
-    {shouldShow && (
-      <motion.div
-        className="relative flex flex-row flex-wrap items-center gap-2"
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-      >
-        {config.buttons?.map((button: AIButton, index: number) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{
-              delay: index * 0.1,
-              duration: 0.3,
-              ease: "easeOut",
-            }}
-          >
-            <Button
-              onClick={() => onButtonClick(button.type)}
-              variant="outline"
-              size="md"
-              emoji={button.emoji}
-              label={button.label}
-              disabled={isLoading}
-            />
-          </motion.div>
-        ))}
-      </motion.div>
-    )}
-  </AnimatePresence>
-)
-
-interface AIContentSectionProps {
-  isLoading: boolean
-  hasContent: boolean
-  isCollapsed: boolean
-  contentEditor: Editor | null
-}
-
-const AIContentSection: React.FC<AIContentSectionProps> = ({
-  isLoading,
-  hasContent,
-  isCollapsed,
-  contentEditor,
-}) => (
-  <AnimatePresence mode="wait">
-    {isLoading && (
-      <motion.div
-        key="loading"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-      >
-        <TextSkeleton />
-      </motion.div>
-    )}
-
-    {hasContent && !isLoading && !isCollapsed && contentEditor && (
-      <motion.div
-        key="content"
-        initial={{
-          height: 0,
-          opacity: 0,
-        }}
-        animate={{
-          height: "auto",
-          opacity: 1,
-        }}
-        exit={{
-          height: 0,
-          opacity: 0,
-        }}
-        transition={{
-          duration: 0.3,
-          ease: "easeInOut",
-          opacity: { duration: 0.2 },
-        }}
-        style={{
-          transformOrigin: "top",
-          overflow: "hidden",
-        }}
-      >
-        <div className="text-f1-text-primary">
-          <EditorContent editor={contentEditor} />
-        </div>
-      </motion.div>
-    )}
-  </AnimatePresence>
+  <div className="relative flex flex-row flex-wrap items-center gap-2">
+    {config.buttons?.map((button: AIButton, index: number) => (
+      <div key={index}>
+        <Button
+          onClick={() => onButtonClick(button.type)}
+          variant="outline"
+          size="md"
+          emoji={button.emoji}
+          label={button.label}
+          disabled={isLoading}
+        />
+      </div>
+    ))}
+  </div>
 )
 
 export const AIBlockView: React.FC<NodeViewProps> = ({
@@ -434,8 +276,10 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
     (node.attrs.config as AIBlockConfigWithLabels)
 
   const blockId = useRef(Math.random().toString(36).substr(2, 9)).current
-  const { isLoading, setIsLoading, isCollapsed, setIsCollapsed } =
-    useAIBlockState(data, node.attrs.isCollapsed ?? false)
+  const { isLoading, setIsLoading } = useAIBlockState(
+    data,
+    node.attrs.isCollapsed ?? false
+  )
   const { title: displayTitle, emoji: displayEmoji } = useDisplayInfo(
     data,
     config,
@@ -514,64 +358,8 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
     [config, setIsLoading, updateAttributes]
   )
 
-  const handleReset = useCallback(() => {
-    updateAttributes({
-      data: {
-        content: null,
-        selectedAction: undefined,
-        selectedTitle: undefined,
-        selectedEmoji: undefined,
-      },
-      isCollapsed: false,
-    })
-    setIsLoading(false)
-    setIsCollapsed(false)
-  }, [updateAttributes, setIsLoading, setIsCollapsed])
-
-  const handleToggleCollapse = useCallback(() => {
-    const newState = !isCollapsed
-    setIsCollapsed(newState)
-    updateAttributes({ isCollapsed: newState })
-  }, [isCollapsed, setIsCollapsed, updateAttributes])
-
-  const getDropdownItems = useCallback((): DropdownItem[] => {
-    const items: DropdownItem[] = []
-
-    if (config && (data?.selectedTitle || data?.selectedAction) && !isLoading) {
-      items.push({
-        label: config.labels?.reset || "Reset",
-        description: config.labels?.resetDescription || "Reset the block",
-        onClick: handleReset,
-      })
-    }
-
-    if (items.length > 0) {
-      items.push({
-        type: "separator" as const,
-      })
-    }
-
-    items.push({
-      label: config?.labels?.deleteBlock || "Delete",
-      icon: Delete,
-      critical: true,
-      onClick: () => deleteNode(),
-    })
-
-    return items
-  }, [
-    config,
-    data?.selectedTitle,
-    data?.selectedAction,
-    isLoading,
-    handleReset,
-    deleteNode,
-  ])
-
   const hasContent = Boolean(data?.content)
   const hasSelectedAction = Boolean(data?.selectedTitle || data?.selectedAction)
-  const canCollapse = hasSelectedAction && hasContent && !isLoading
-  const shouldShowButtons = !isLoading && !hasSelectedAction && !hasContent
 
   if (!data || !config) return null
 
@@ -580,44 +368,35 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
 
   return (
     <NodeViewWrapper contentEditable={false}>
-      <motion.div
-        className={cn(
-          "editor-ai-block my-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3",
-          !hasContent &&
-            !isLoading &&
-            "bg-gradient-to-t from-f1-background to-[#efeafa]"
+      <div className="mb-3">
+        {isLoading ? (
+          <F0AiBanner.Skeleton compact />
+        ) : hasSelectedAction ? (
+          <F0AiBanner
+            title={`${displayEmoji} ${displayTitle}`}
+            content={contentEditor?.getHTML() ?? ""}
+            onClose={() => deleteNode()}
+          />
+        ) : (
+          <div
+            className={cn(
+              "editor-ai-block mb-3 flex w-full flex-col gap-4 rounded-lg p-3",
+              !hasContent &&
+                !isLoading &&
+                "bg-gradient-to-l from-[#A1ADE51F] via-[#E519431F] to-[#E556191F]"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AIButtonsSection
+              config={config}
+              isLoading={isLoading}
+              onButtonClick={handleClick}
+            />
+          </div>
         )}
-        onClick={(e) => e.stopPropagation()}
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-      >
-        <AIBlockHeader
-          displayTitle={displayTitle}
-          displayEmoji={displayEmoji}
-          isLoading={isLoading}
-          canCollapse={canCollapse}
-          isCollapsed={isCollapsed}
-          onToggleCollapse={handleToggleCollapse}
-          onDropdownAction={getDropdownItems}
-        />
 
-        <AIButtonsSection
-          config={config}
-          isLoading={isLoading}
-          onButtonClick={handleClick}
-          shouldShow={shouldShowButtons}
-        />
-
-        <AIContentSection
-          isLoading={isLoading}
-          hasContent={hasContent}
-          isCollapsed={isCollapsed}
-          contentEditor={contentEditor}
-        />
-      </motion.div>
-      <NodeViewContent style={{ display: "none" }} />
+        <NodeViewContent style={{ display: "none" }} />
+      </div>
     </NodeViewWrapper>
   )
 }
