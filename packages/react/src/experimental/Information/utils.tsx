@@ -1,4 +1,4 @@
-import { ButtonDropdownItem } from "@/components/actions/F0ButtonDropdown"
+import { ButtonDropdownItem } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 
 export interface PrimaryAction {

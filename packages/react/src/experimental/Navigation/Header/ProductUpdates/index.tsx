@@ -1,5 +1,5 @@
-import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ProductCard } from "@/components/UpsellingKit/ProductCard"
 import AlertCircle from "@/icons/app/AlertCircle"

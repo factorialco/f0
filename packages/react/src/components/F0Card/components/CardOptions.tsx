@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"

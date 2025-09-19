@@ -1,12 +1,12 @@
 import { cva, type VariantProps } from "cva"
 import { forwardRef } from "react"
-import ExternalLink from "../../../icons/app/ExternalLink"
+import ExternalLink from "../../icons/app/ExternalLink"
 import {
   Link as BaseLink,
   LinkProps as BaseLinkProps,
-} from "../../../lib/linkHandler"
-import { cn, focusRing } from "../../../lib/utils"
-import { F0Icon } from "../../F0Icon"
+} from "../../lib/linkHandler"
+import { cn, focusRing } from "../../lib/utils"
+import { F0Icon } from "../F0Icon"
 
 const linkVariants = cva({
   base: "inline-flex flex-row items-center gap-1 text-base",

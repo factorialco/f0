@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { AnimatePresence } from "motion/react"
 import {

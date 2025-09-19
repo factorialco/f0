@@ -1,6 +1,6 @@
 "use client"
 
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"

@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {

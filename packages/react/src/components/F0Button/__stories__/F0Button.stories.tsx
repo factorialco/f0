@@ -7,7 +7,7 @@ import { expect, within } from "storybook/test"
 import { F0Button } from "../F0Button"
 
 const meta = {
-  title: "Actions/Button",
+  title: "Button",
   component: F0Button,
   parameters: {
     layout: "centered",

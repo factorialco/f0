@@ -72,8 +72,14 @@ export const Default: Story = {
   args: {
     valueToCopy: "This text will be copied!",
   },
-  play: async ({ canvasElement, step }) => {
+  play: async ({ canvasElement, step, args }) => {
     const canvas = within(canvasElement)
+
+    let clipboard = ""
+    navigator.clipboard.writeText = (text: string) => {
+      clipboard = text
+      return Promise.resolve()
+    }
 
     await step("Verify initial state", async () => {
       const button = canvas.getByRole("button")
@@ -91,6 +97,7 @@ export const Default: Story = {
       const button = canvas.getByRole("button")
       expect(button.getAttribute("aria-label")).toBe("Copied")
       expect(button.getAttribute("title")).toBe("Copied")
+      expect(clipboard).toBe(args.valueToCopy)
     })
   },
 }

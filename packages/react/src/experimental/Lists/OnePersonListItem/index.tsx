@@ -1,6 +1,6 @@
-import { F0Button } from "@/components/actions/F0Button"
 import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
 import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"

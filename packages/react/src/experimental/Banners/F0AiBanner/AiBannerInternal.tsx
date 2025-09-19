@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 import { Cross } from "@/icons/app"

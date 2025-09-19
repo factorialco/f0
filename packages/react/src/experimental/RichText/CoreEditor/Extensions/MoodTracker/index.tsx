@@ -1,9 +1,9 @@
-import { F0Button } from "@/components/actions/F0Button"
 import {
   Pulse,
   pulseIcon,
   pulseIconColor,
 } from "@/components/avatars/F0AvatarPulse"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"

@@ -1,6 +1,6 @@
-import { F0ButtonProps } from "@/components/actions/F0Button"
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
+import { F0ButtonProps } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"

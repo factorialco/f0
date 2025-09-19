@@ -6,8 +6,8 @@ import useEmblaCarousel, {
 } from "embla-carousel-react"
 import * as React from "react"
 
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
-import { ButtonInternalProps } from "@/components/actions/F0Button/internal-types"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ButtonInternalProps } from "@/components/F0Button/internal-types"
 import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
 import { cn } from "@/lib/utils"
 

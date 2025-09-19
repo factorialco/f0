@@ -6,7 +6,7 @@ import { expect, within } from "storybook/test"
 import { F0Link } from ".."
 
 const meta = {
-  title: "Actions/Link",
+  title: "Link",
   component: F0Link,
   parameters: {
     layout: "centered",

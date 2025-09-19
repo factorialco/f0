@@ -1,4 +1,4 @@
-import { ButtonVariant, F0Button } from "@/components/actions/F0Button"
+import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { ModuleId } from "@/experimental"
 import { useState } from "react"

@@ -1,6 +1,6 @@
 "use client"
 
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { FilterTypeComponentProps } from "../types"
 
 import { OneCalendar } from "@/experimental/OneCalendar"

@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"

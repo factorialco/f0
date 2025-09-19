@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { Select } from "@/experimental/Forms/Fields/Select"
 import {
   GroupingDefinition,

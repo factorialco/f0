@@ -1,6 +1,6 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { F0Link, type F0LinkProps } from "@/components/actions/F0Link"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
+import { F0Link, type F0LinkProps } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
 import { CardFooter } from "@/ui/Card"
 import { useMediaQuery } from "usehooks-ts"

@@ -1,4 +1,4 @@
-import { F0Link } from "@/components/actions/F0Link"
+import { F0Link } from "@/components/F0Link"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"

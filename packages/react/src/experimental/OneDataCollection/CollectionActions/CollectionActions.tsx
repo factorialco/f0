@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ellipsis } from "@/icons/app"
 import { useState } from "react"
 import { Dropdown } from "../../Navigation/Dropdown"

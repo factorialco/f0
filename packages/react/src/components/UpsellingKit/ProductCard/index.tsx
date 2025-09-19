@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import CrossIcon from "@/icons/app/Cross"
 import { useEffect, useState } from "react"

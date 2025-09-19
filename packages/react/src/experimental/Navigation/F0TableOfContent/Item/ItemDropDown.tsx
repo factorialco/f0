@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ellipsis } from "@/icons/app"
 import { Dropdown, DropdownItem } from "../../Dropdown"
 

@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/actions/F0Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Delete, Ellipsis, Pencil } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"

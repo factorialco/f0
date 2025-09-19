@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { Input } from "@/ui/input"
 
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {

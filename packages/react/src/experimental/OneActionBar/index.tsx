@@ -1,6 +1,6 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { F0ButtonDropdown } from "@/components/actions/F0ButtonDropdown"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import {
   Dropdown,

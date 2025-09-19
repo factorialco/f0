@@ -1,8 +1,8 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import {
   ButtonDropdownItem,
   F0ButtonDropdown,
-} from "@/components/actions/F0ButtonDropdown"
+} from "@/components/F0ButtonDropdown"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
 import {

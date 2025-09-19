@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { F0ButtonDropdown } from "@/components/actions/F0ButtonDropdown"
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Action } from "../../../Fields/Select/SelectBottomActions"
 
 interface Props {

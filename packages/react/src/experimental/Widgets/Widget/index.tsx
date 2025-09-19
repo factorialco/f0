@@ -1,4 +1,4 @@
-import { F0Button, type F0ButtonProps } from "@/components/actions/F0Button"
+import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"

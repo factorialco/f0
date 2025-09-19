@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon } from "@/components/F0Icon"
 import { Badge } from "@/experimental/Information/Badge"

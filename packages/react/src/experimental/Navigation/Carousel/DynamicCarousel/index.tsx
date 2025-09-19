@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react"

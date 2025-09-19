@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { F0Link } from "@/components/actions/F0Link/F0Link"
+import { F0Button } from "@/components/F0Button"
+import { F0Link } from "@/components/F0Link/F0Link"
 import DownloadIcon from "@/icons/app/Download"
 import { cn } from "@/lib/utils"
 import { type AssistantMessageProps } from "@copilotkit/react-ui"

@@ -1,5 +1,5 @@
 // Replace your-framework with the name of your framework
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { usePrivacyMode } from "@/lib/privacyMode"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { PrivateBox } from "./index"

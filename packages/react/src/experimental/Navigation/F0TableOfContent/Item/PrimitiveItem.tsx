@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { Counter } from "@/experimental"

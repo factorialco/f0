@@ -1,4 +1,4 @@
-import { F0Link } from "@/components/actions/F0Link"
+import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { cn, focusRing } from "@/lib/utils"

@@ -1,8 +1,8 @@
-import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import {
   F0ButtonDropdown,
   F0ButtonDropdownProps,
-} from "@/components/actions/F0ButtonDropdown"
+} from "@/components/F0ButtonDropdown"
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"

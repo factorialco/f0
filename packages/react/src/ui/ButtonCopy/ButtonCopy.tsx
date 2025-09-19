@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Action, ActionButtonVariant, ActionProps } from "@/ui/Action"
 import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, MouseEventHandler, useEffect, useState } from "react"
-import { iconOnlyVariants } from "../../components/actions/F0Button/internal"
+import { iconOnlyVariants } from "../../components/F0Button/internal"
 
 export type ButtonCopyProps = Omit<
   ActionProps,

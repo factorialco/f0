@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
   GroupingDefinition,

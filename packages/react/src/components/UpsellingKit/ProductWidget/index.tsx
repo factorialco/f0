@@ -1,4 +1,4 @@
-import { ButtonVariant, F0Button } from "@/components/actions/F0Button"
+import { ButtonVariant, F0Button } from "@/components/F0Button"
 import CrossIcon from "@/icons/app/Cross"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
 import { Label } from "@/ui/label"

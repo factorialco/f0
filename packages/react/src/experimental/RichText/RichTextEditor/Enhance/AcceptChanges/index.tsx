@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
 import {
   enhanceLabelsType,

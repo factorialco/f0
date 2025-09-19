@@ -1,4 +1,4 @@
-import { F0Button, F0ButtonProps } from "@/components/actions/F0Button"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import {
   F0AvatarAlert,
   type AlertAvatarProps,

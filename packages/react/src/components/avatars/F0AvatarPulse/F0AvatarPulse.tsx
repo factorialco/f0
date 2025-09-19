@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import {
   FaceNegative,

@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/actions/F0Button"
-import { ButtonInternal } from "@/components/actions/F0Button/internal"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import type {
   DateRange,
   DateRangeComplete,

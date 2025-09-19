@@ -5,7 +5,7 @@ import { F0ButtonDropdown } from "../index"
 import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
 
 const meta = {
-  title: "Actions/ButtonDropdown",
+  title: "ButtonDropdown",
   component: F0ButtonDropdown,
   parameters: {
     layout: "centered",

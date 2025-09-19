@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/actions/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { Picker } from "@/experimental/Information/Reactions/Picker"
 import {
