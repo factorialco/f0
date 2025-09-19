@@ -33,8 +33,8 @@ export type KanbanVisualizationOptions<
   onMove?: (
     fromLaneId: string,
     toLaneId: string,
-    sourceId: string,
-    toIndex: number | null
+    sourceRecord: Record,
+    destinyRecord: { record: Record; position: "above" | "below" }
   ) => Promise<void>
 }
 
