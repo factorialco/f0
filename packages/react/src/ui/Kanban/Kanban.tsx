@@ -12,7 +12,7 @@ const KANBAN_LANE_HEIGHT = 700
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
 ): JSX.Element {
-  const { lanes, renderCard, getKey, className, dnd } = props
+  const { lanes, renderCard, getKey, className, dnd, loading } = props
 
   // Horizontal edge zones for board autoscroll (debug visibility + logs)
   const [isDragging, setIsDragging] = useState(false)
@@ -105,7 +105,7 @@ export function Kanban<TRecord extends RecordType>(
   }, [isDragging])
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div className={cn("relative w-full px-4", className)}>
       <ScrollArea className={"w-full"}>
         <div className="mb-2 flex gap-2">
           {lanes.map(
@@ -129,7 +129,7 @@ export function Kanban<TRecord extends RecordType>(
                       return node
                     }}
                     emptyState={lane.emptyState}
-                    loading={lane.loading}
+                    loading={loading || lane.loading}
                     maxHeight={KANBAN_LANE_HEIGHT}
                     variant={lane.variant}
                     total={total}
