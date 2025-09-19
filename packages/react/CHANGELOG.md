@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.198.0](https://github.com/factorialco/f0/compare/f0-react-v1.197.1...f0-react-v1.198.0) (2025-09-19)
+
+
+### Features
+
+* 2 small fixes in kanban view ([#2576](https://github.com/factorialco/f0/issues/2576)) ([607bb09](https://github.com/factorialco/f0/commit/607bb09095db61d703e6aefec6642510f221fbf5))
+* enhance Kanban onMove functionality ([607bb09](https://github.com/factorialco/f0/commit/607bb09095db61d703e6aefec6642510f221fbf5))
+
 ## [1.197.1](https://github.com/factorialco/f0/compare/f0-react-v1.197.0...f0-react-v1.197.1) (2025-09-19)
 
 
