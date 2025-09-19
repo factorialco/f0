@@ -1,8 +1,8 @@
-import { C as v, L as pe, c as ve, P as H, a as b, f as ge, b as be, A as xe, B as Ce, d as ye, e as we, g as Ne, V as Le, h as U, i as W, j as Pe, k as Y, S as G, l as D, m as X, n as ke, O as Fe, o as J, p as Se, q as Me, F as K, r as De, s as Te, t as Be, D as Re, u as Ie, v as $e, w as Oe, x as Q, y as w, U as Z, z as Ee, E as _e, G as z, H as je, I as ee, J as ze, K as Ve, M as qe, N as Ae, Q as He, R as Ue, X as We, T as Ye, W as Ge, Y as Xe, Z as Je } from "./hooks-DxTCM2B_.js";
-import { ao as Ua, _ as Wa, aq as Ya, az as Ga, $ as Xa, a0 as Ja, a1 as Ka, a2 as Qa, a3 as Za, a4 as er, a5 as ar, a6 as rr, a8 as sr, a9 as tr, aa as lr, ab as or, av as nr, ad as ir, ae as dr, af as cr, ag as ur, aj as fr, ak as hr, al as mr, am as pr, ac as vr, an as gr, ai as br, aw as xr, ap as Cr, aA as yr, a7 as wr, ah as Nr, ar as Lr, as as Pr, at as kr, aB as Fr, au as Sr, ay as Mr, ax as Dr } from "./hooks-DxTCM2B_.js";
-import { jsx as e, jsxs as c, Fragment as O } from "react/jsx-runtime";
+import { C as v, L as pe, c as ve, P as H, a as b, f as ge, b as be, A as xe, B as Ce, d as ye, e as we, g as Ne, V as Le, h as U, i as G, j as Pe, k as W, S as Y, l as M, m as J, n as Se, O as Fe, o as X, p as ke, q as De, F as K, r as Me, s as Te, t as Be, D as Ie, u as Re, v as Oe, w as $e, x as Q, y as w, U as Z, z as Ee, E as _e, G as V, H as je, I as ee, J as Ve, K as ze, M as qe, N as Ae, Q as He, R as Ue, X as Ge, T as We, W as Ye, Y as Je, Z as Xe } from "./hooks-4x49EQQC.js";
+import { ay as Ua, _ as Ga, aA as Wa, aJ as Ya, $ as Ja, a0 as Xa, a1 as Ka, a2 as Qa, a3 as Za, a4 as es, a5 as as, a6 as ss, a8 as rs, a9 as ts, aa as ls, ab as os, aF as ns, ad as is, ae as cs, af as ds, ag as us, aj as fs, ak as hs, al as ms, am as ps, ao as vs, ac as gs, an as bs, ai as xs, aG as Cs, az as ys, at as ws, aw as Ns, as as Ls, aK as Ps, ar as Ss, aq as Fs, a7 as ks, ah as Ds, ap as Ms, au as Ts, aB as Bs, aC as Is, aD as Rs, aL as Os, av as $s, aE as Es, aI as _s, ax as js, aH as Vs } from "./hooks-4x49EQQC.js";
+import { jsx as e, jsxs as d, Fragment as $ } from "react/jsx-runtime";
 import * as E from "react";
-import Ke, { useState as g, forwardRef as B, useRef as ae, useImperativeHandle as Qe, Children as Ze, useEffect as re, createContext as ea } from "react";
+import Ke, { useState as g, forwardRef as B, useRef as ae, useImperativeHandle as Qe, Children as Ze, useEffect as se, createContext as ea } from "react";
 const Pa = {
   approvals: {
     history: "Approval history",
@@ -182,35 +182,33 @@ const Pa = {
   },
   notifications: "Notifications",
   ai: {
-    description: "Chat with AI",
-    expandChat: "Expand chat",
-    minimizeChat: "Minimize chat window",
-    openChat: "Open Chat",
+    openChat: "Open Chat with One AI",
+    closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
     welcome: "I'm One. Ask or make anything.",
     initialMessage: "How can I help you today?"
   }
-}, ka = v(
+}, Sa = v(
   {
     name: "Link",
     type: "info"
   },
   pe
 ), Fa = ["person", "team", "company", "file"];
-var _ = "Progress", j = 100, [aa, Sa] = ve(_), [ra, sa] = aa(_), se = E.forwardRef(
-  (a, r) => {
+var _ = "Progress", j = 100, [aa, ka] = ve(_), [sa, ra] = aa(_), re = E.forwardRef(
+  (a, s) => {
     const {
-      __scopeProgress: s,
+      __scopeProgress: r,
       value: t = null,
       max: l,
-      getValueLabel: d = ta,
+      getValueLabel: c = ta,
       ...n
     } = a;
-    (l || l === 0) && !V(l) && console.error(la(`${l}`, "Progress"));
-    const i = V(l) ? l : j;
+    (l || l === 0) && !z(l) && console.error(la(`${l}`, "Progress"));
+    const i = z(l) ? l : j;
     t !== null && !q(t, i) && console.error(oa(`${t}`, "Progress"));
-    const o = q(t, i) ? t : null, f = T(o) ? d(o, i) : void 0;
-    return /* @__PURE__ */ e(ra, { scope: s, value: o, max: i, children: /* @__PURE__ */ e(
+    const o = q(t, i) ? t : null, f = T(o) ? c(o, i) : void 0;
+    return /* @__PURE__ */ e(sa, { scope: r, value: o, max: i, children: /* @__PURE__ */ e(
       H.div,
       {
         "aria-valuemax": i,
@@ -222,15 +220,15 @@ var _ = "Progress", j = 100, [aa, Sa] = ve(_), [ra, sa] = aa(_), se = E.forwardR
         "data-value": o ?? void 0,
         "data-max": i,
         ...n,
-        ref: r
+        ref: s
       }
     ) });
   }
 );
-se.displayName = _;
+re.displayName = _;
 var te = "ProgressIndicator", le = E.forwardRef(
-  (a, r) => {
-    const { __scopeProgress: s, ...t } = a, l = sa(te, s);
+  (a, s) => {
+    const { __scopeProgress: r, ...t } = a, l = ra(te, r);
     return /* @__PURE__ */ e(
       H.div,
       {
@@ -238,40 +236,40 @@ var te = "ProgressIndicator", le = E.forwardRef(
         "data-value": l.value ?? void 0,
         "data-max": l.max,
         ...t,
-        ref: r
+        ref: s
       }
     );
   }
 );
 le.displayName = te;
-function ta(a, r) {
-  return `${Math.round(a / r * 100)}%`;
+function ta(a, s) {
+  return `${Math.round(a / s * 100)}%`;
 }
-function oe(a, r) {
-  return a == null ? "indeterminate" : a === r ? "complete" : "loading";
+function oe(a, s) {
+  return a == null ? "indeterminate" : a === s ? "complete" : "loading";
 }
 function T(a) {
   return typeof a == "number";
 }
-function V(a) {
+function z(a) {
   return T(a) && !isNaN(a) && a > 0;
 }
-function q(a, r) {
-  return T(a) && !isNaN(a) && a <= r && a >= 0;
+function q(a, s) {
+  return T(a) && !isNaN(a) && a <= s && a >= 0;
 }
-function la(a, r) {
-  return `Invalid prop \`max\` of value \`${a}\` supplied to \`${r}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${j}\`.`;
+function la(a, s) {
+  return `Invalid prop \`max\` of value \`${a}\` supplied to \`${s}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${j}\`.`;
 }
-function oa(a, r) {
-  return `Invalid prop \`value\` of value \`${a}\` supplied to \`${r}\`. The \`value\` prop must be:
+function oa(a, s) {
+  return `Invalid prop \`value\` of value \`${a}\` supplied to \`${s}\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${j} if no \`max\` prop is set)
   - \`null\` or \`undefined\` if the progress is indeterminate.
 
 Defaulting to \`null\`.`;
 }
-var ne = se, na = le;
-const ie = E.forwardRef(({ className: a, value: r, ...s }, t) => /* @__PURE__ */ e(
+var ne = re, na = le;
+const ie = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */ e(
   ne,
   {
     ref: t,
@@ -279,44 +277,44 @@ const ie = E.forwardRef(({ className: a, value: r, ...s }, t) => /* @__PURE__ */
       "relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary",
       a
     ),
-    ...s,
+    ...r,
     children: /* @__PURE__ */ e(
       na,
       {
         className: "h-full w-full flex-1 transition-all",
         style: {
-          backgroundColor: s.color,
-          transform: `translateX(-${100 - (r || 0)}%)`
+          backgroundColor: r.color,
+          transform: `translateX(-${100 - (s || 0)}%)`
         }
       }
     )
   }
 ));
 ie.displayName = ne.displayName;
-const ia = ({ value: a, max: r = 100, label: s, color: t }, l) => {
-  const d = t || be(0), n = a / r * 100;
-  return /* @__PURE__ */ c("div", { className: "flex items-center space-x-2", "aria-live": "polite", children: [
+const ia = ({ value: a, max: s = 100, label: r, color: t }, l) => {
+  const c = t || be(0), n = a / s * 100;
+  return /* @__PURE__ */ d("div", { className: "flex items-center space-x-2", "aria-live": "polite", children: [
     /* @__PURE__ */ e("div", { className: "flex-grow", children: /* @__PURE__ */ e(
       ie,
       {
-        color: d,
+        color: c,
         value: n,
         className: "w-full",
         "aria-valuemin": 0,
-        "aria-valuemax": r,
+        "aria-valuemax": s,
         "aria-valuenow": a,
         "aria-label": `${n.toFixed(1)}%`
       }
     ) }),
-    s && /* @__PURE__ */ e("div", { className: "flex-shrink-0 text-sm font-medium", children: s })
+    r && /* @__PURE__ */ e("div", { className: "flex-shrink-0 text-sm font-medium", children: r })
   ] });
-}, da = ge(ia), Ma = v(
+}, ca = ge(ia), Da = v(
   {
     name: "AreaChart",
     type: "info"
   },
   xe
-), Da = v(
+), Ma = v(
   {
     name: "BarChart",
     type: "info"
@@ -334,44 +332,44 @@ const ia = ({ value: a, max: r = 100, label: s, color: t }, l) => {
     type: "info"
   },
   we
-), Ra = v(
+), Ia = v(
   {
     name: "PieChart",
     type: "info"
   },
   Ne
-), Ia = v(
+), Ra = v(
   {
     name: "VerticalBarChart",
     type: "info"
   },
   Le
-), $a = v(
+), Oa = v(
   {
     name: "ProgressBarChart",
     type: "info"
   },
-  da
-), $ = ({ count: a, list: r }) => {
-  const [s, t] = g(!1), l = /* @__PURE__ */ e(D, { label: `+${a}` });
-  return r != null && r.length ? /* @__PURE__ */ c(U, { open: s, onOpenChange: t, children: [
-    /* @__PURE__ */ e(W, { asChild: !0, children: /* @__PURE__ */ e("button", { className: Pe("inline-flex flex-shrink-0 items-center"), children: l }) }),
+  ca
+), O = ({ count: a, list: s }) => {
+  const [r, t] = g(!1), l = /* @__PURE__ */ e(M, { label: `+${a}` });
+  return s != null && s.length ? /* @__PURE__ */ d(U, { open: r, onOpenChange: t, children: [
+    /* @__PURE__ */ e(G, { asChild: !0, children: /* @__PURE__ */ e("button", { className: Pe("inline-flex flex-shrink-0 items-center"), children: l }) }),
     /* @__PURE__ */ e(
-      Y,
+      W,
       {
         className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
         align: "end",
-        children: /* @__PURE__ */ c(G, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col", children: [
-          r.map((d, n) => /* @__PURE__ */ e(
+        children: /* @__PURE__ */ d(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col", children: [
+          s.map((c, n) => /* @__PURE__ */ e(
             "div",
             {
               className: "flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
-              children: /* @__PURE__ */ e(D, { ...d })
+              children: /* @__PURE__ */ e(M, { ...c })
             },
             n
           )),
           /* @__PURE__ */ e(
-            X,
+            J,
             {
               orientation: "vertical",
               className: "[&_div]:bg-f1-background"
@@ -382,11 +380,11 @@ const ia = ({ value: a, max: r = 100, label: s, color: t }, l) => {
     )
   ] }) : l;
 };
-$.displayName = "ChipCounter";
-const de = ({
+O.displayName = "ChipCounter";
+const ce = ({
   chips: a,
-  max: r = 4,
-  remainingCount: s,
+  max: s = 4,
+  remainingCount: r,
   layout: t = "compact"
 }) => {
   if (t === "fill")
@@ -394,59 +392,59 @@ const de = ({
       Fe,
       {
         items: a,
-        renderListItem: (o) => /* @__PURE__ */ e(D, { ...o }),
+        renderListItem: (o) => /* @__PURE__ */ e(M, { ...o }),
         renderDropdownItem: () => null,
-        forceShowingOverflowIndicator: s !== void 0,
+        forceShowingOverflowIndicator: r !== void 0,
         renderOverflowIndicator: (o) => /* @__PURE__ */ e(
-          $,
+          O,
           {
-            count: (s ?? 0) + o,
-            list: s ? void 0 : a.slice(a.length - o)
+            count: (r ?? 0) + o,
+            list: r ? void 0 : a.slice(a.length - o)
           }
         ),
         overflowIndicatorWithPopover: !1,
         className: "flex-1"
       }
     );
-  const l = a.slice(0, r), d = a.slice(r), n = s ?? a.length - r, i = n > 0;
-  return /* @__PURE__ */ c("div", { className: "flex items-center gap-2", children: [
-    l.map((o, f) => /* @__PURE__ */ e(D, { ...o }, f)),
+  const l = a.slice(0, s), c = a.slice(s), n = r ?? a.length - s, i = n > 0;
+  return /* @__PURE__ */ d("div", { className: "flex items-center gap-2", children: [
+    l.map((o, f) => /* @__PURE__ */ e(M, { ...o }, f)),
     i && /* @__PURE__ */ e(
-      $,
+      O,
       {
         count: n,
-        list: s ? void 0 : d
+        list: r ? void 0 : c
       }
     )
   ] });
 };
-de.displayName = "F0ChipList";
-const Oa = ke(
+ce.displayName = "F0ChipList";
+const $a = Se(
   "F0ChipList",
-  de
-), ca = {
+  ce
+), da = {
   xs: 1,
   sm: 2,
   md: 2,
   lg: 2
-}, ua = B(function({ widgets: r, children: s }, t) {
+}, ua = B(function({ widgets: s, children: r }, t) {
   const l = ae(null);
   Qe(t, () => l.current);
-  const d = Ze.toArray(r).filter((n) => !!n).map((n, i) => /* @__PURE__ */ e("div", { className: "h-full @5xl:h-auto [&>div]:h-full", children: n }, i));
-  return /* @__PURE__ */ e(J, { layout: "home", children: /* @__PURE__ */ c("div", { ref: l, className: "@container", children: [
-    /* @__PURE__ */ c("div", { className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden", children: [
-      /* @__PURE__ */ e(Se, { columns: ca, showArrows: !1, children: d }),
-      /* @__PURE__ */ e("main", { children: s })
+  const c = Ze.toArray(s).filter((n) => !!n).map((n, i) => /* @__PURE__ */ e("div", { className: "h-full @5xl:h-auto [&>div]:h-full", children: n }, i));
+  return /* @__PURE__ */ e(X, { layout: "home", children: /* @__PURE__ */ d("div", { ref: l, className: "@container", children: [
+    /* @__PURE__ */ d("div", { className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden", children: [
+      /* @__PURE__ */ e(ke, { columns: da, showArrows: !1, children: c }),
+      /* @__PURE__ */ e("main", { children: r })
     ] }),
-    /* @__PURE__ */ c("div", { className: "hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid", children: [
-      /* @__PURE__ */ e("div", { className: "col-span-3 flex flex-row gap-5 *:flex-1", children: d.slice(0, 3) }),
-      /* @__PURE__ */ e("main", { className: "col-span-2", children: s }),
-      /* @__PURE__ */ e("div", { className: "flex flex-1 flex-col gap-5", children: d.slice(3) })
+    /* @__PURE__ */ d("div", { className: "hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid", children: [
+      /* @__PURE__ */ e("div", { className: "col-span-3 flex flex-row gap-5 *:flex-1", children: c.slice(0, 3) }),
+      /* @__PURE__ */ e("main", { className: "col-span-2", children: r }),
+      /* @__PURE__ */ e("div", { className: "flex flex-1 flex-col gap-5", children: c.slice(3) })
     ] })
   ] }) });
 }), fa = B(
-  function({ children: r, sideContent: s, mainColumnPosition: t = "left" }, l) {
-    return /* @__PURE__ */ e("div", { ref: l, className: "h-full overflow-auto", children: /* @__PURE__ */ c(
+  function({ children: s, sideContent: r, mainColumnPosition: t = "left" }, l) {
+    return /* @__PURE__ */ e("div", { ref: l, className: "h-full overflow-auto", children: /* @__PURE__ */ d(
       "div",
       {
         className: b(
@@ -454,7 +452,7 @@ const Oa = ke(
           t === "right" ? "flex-col" : "flex-col-reverse"
         ),
         children: [
-          t === "right" && /* @__PURE__ */ e(A, { children: s }),
+          t === "right" && /* @__PURE__ */ e(A, { children: r }),
           /* @__PURE__ */ e(
             "main",
             {
@@ -462,37 +460,37 @@ const Oa = ke(
                 "h-fit min-h-full border-0 px-6 py-5 sm:basis-3/4 sm:border-solid",
                 t === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary"
               ),
-              children: r
+              children: s
             }
           ),
-          t === "left" && /* @__PURE__ */ e(A, { children: s })
+          t === "left" && /* @__PURE__ */ e(A, { children: r })
         ]
       }
     ) });
   }
-), A = ({ children: a }) => /* @__PURE__ */ e("aside", { className: "py-5 pl-2 pr-4 sm:basis-1/4 sm:pb-6", children: a }), ha = Me({
+), A = ({ children: a }) => /* @__PURE__ */ e("aside", { className: "py-5 pl-2 pr-4 sm:basis-1/4 sm:pb-6", children: a }), ha = De({
   base: "relative flex min-h-full w-full flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
       narrow: "max-w-screen-lg"
     }
   }
-}), ce = Ke.forwardRef(({ children: a, variant: r, className: s, ...t }, l) => /* @__PURE__ */ e(J, { layout: "standard", children: /* @__PURE__ */ e(
+}), de = Ke.forwardRef(({ children: a, variant: s, className: r, ...t }, l) => /* @__PURE__ */ e(X, { layout: "standard", children: /* @__PURE__ */ e(
   "section",
   {
     ref: l,
-    className: b("relative flex-1 overflow-auto", s),
+    className: b("relative flex-1 overflow-auto", r),
     ...t,
-    children: /* @__PURE__ */ e("div", { className: b(ha({ variant: r })), children: a })
+    children: /* @__PURE__ */ e("div", { className: b(ha({ variant: s })), children: a })
   }
 ) }));
-ce.displayName = "StandardLayout";
+de.displayName = "StandardLayout";
 const Ea = v(
   {
     name: "StandardLayout",
     type: "layout"
   },
-  ce
+  de
 ), _a = v(
   {
     name: "TwoColumnLayout",
@@ -505,20 +503,20 @@ const Ea = v(
     type: "layout"
   },
   ua
-), ma = ({ benefits: a }) => /* @__PURE__ */ e("div", { className: "flex flex-col gap-2", children: a.map((r, s) => /* @__PURE__ */ e(pa, { text: r }, s)) }), pa = ({ text: a }) => /* @__PURE__ */ c("div", { className: "flex flex-row items-start gap-2", children: [
+), ma = ({ benefits: a }) => /* @__PURE__ */ e("div", { className: "flex flex-col gap-2", children: a.map((s, r) => /* @__PURE__ */ e(pa, { text: s }, r)) }), pa = ({ text: a }) => /* @__PURE__ */ d("div", { className: "flex flex-row items-start gap-2", children: [
   /* @__PURE__ */ e(Te, { icon: Be, size: "md", className: "text-f1-icon-positive" }),
   /* @__PURE__ */ e("span", { children: a })
 ] }), ue = B(
   ({
     title: a,
-    image: r,
-    benefits: s,
+    image: s,
+    benefits: r,
     actions: t,
     withShadow: l = !0,
-    module: d,
+    module: c,
     moduleName: n,
     tag: i
-  }, o) => /* @__PURE__ */ c(
+  }, o) => /* @__PURE__ */ d(
     "div",
     {
       ref: o,
@@ -530,22 +528,22 @@ const Ea = v(
         /* @__PURE__ */ e("div", { className: "aspect-auto flex-shrink-0 overflow-hidden rounded-xl py-1 pl-1", children: /* @__PURE__ */ e(
           "img",
           {
-            src: r,
+            src: s,
             alt: "",
             className: "h-full w-full rounded-lg object-cover"
           }
         ) }),
-        /* @__PURE__ */ c("div", { className: "flex flex-col justify-center gap-8 px-8 py-5", children: [
-          /* @__PURE__ */ c("div", { className: "flex flex-col gap-5", children: [
-            /* @__PURE__ */ c("div", { className: "flex flex-col gap-2", children: [
-              /* @__PURE__ */ c("div", { className: "flex flex-row items-center gap-2", children: [
-                d && /* @__PURE__ */ e(K, { module: d }),
+        /* @__PURE__ */ d("div", { className: "flex flex-col justify-center gap-8 px-8 py-5", children: [
+          /* @__PURE__ */ d("div", { className: "flex flex-col gap-5", children: [
+            /* @__PURE__ */ d("div", { className: "flex flex-col gap-2", children: [
+              /* @__PURE__ */ d("div", { className: "flex flex-row items-center gap-2", children: [
+                c && /* @__PURE__ */ e(K, { module: c }),
                 n && /* @__PURE__ */ e("p", { className: "text-base font-medium text-f1-foreground", children: n })
               ] }),
-              i && /* @__PURE__ */ e("div", { className: "flex justify-start", children: /* @__PURE__ */ e(De, { icon: i.icon, text: i.label }) }),
+              i && /* @__PURE__ */ e("div", { className: "flex justify-start", children: /* @__PURE__ */ e(Me, { icon: i.icon, text: i.label }) }),
               /* @__PURE__ */ e("h2", { className: "font-bold text-xl text-f1-foreground", children: a })
             ] }),
-            /* @__PURE__ */ e(ma, { benefits: s })
+            /* @__PURE__ */ e(ma, { benefits: r })
           ] }),
           t && /* @__PURE__ */ e("div", { className: "flex gap-3", children: t })
         ] })
@@ -556,43 +554,43 @@ const Ea = v(
 ue.displayName = "ProductBlankslate";
 function va({
   isOpen: a,
-  onClose: r,
-  title: s,
+  onClose: s,
+  title: r,
   children: t,
   module: l,
-  portalContainer: d
+  portalContainer: c
 }) {
   const [n, i] = g(a);
-  return re(() => {
+  return se(() => {
     i(a);
-  }, [a]), /* @__PURE__ */ e(Re, { open: n, onOpenChange: (f) => {
-    i(f), f || r();
-  }, modal: !0, children: /* @__PURE__ */ c(
-    Ie,
+  }, [a]), /* @__PURE__ */ e(Ie, { open: n, onOpenChange: (f) => {
+    i(f), f || s();
+  }, modal: !0, children: /* @__PURE__ */ d(
+    Re,
     {
       className: "max-h-[620px] w-[760px] overflow-y-auto overflow-x-hidden bg-f1-background",
-      container: d,
+      container: c,
       children: [
-        /* @__PURE__ */ c("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
-          /* @__PURE__ */ c($e, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
+        /* @__PURE__ */ d("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
+          /* @__PURE__ */ d(Oe, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
             l && /* @__PURE__ */ e(K, { module: l, size: "lg" }),
-            s
+            r
           ] }),
           /* @__PURE__ */ e(
-            Oe,
+            $e,
             {
               variant: "outline",
               icon: Q,
-              onClick: r,
+              onClick: s,
               label: "Close modal",
               hideLabel: !0
             }
           )
         ] }),
-        /* @__PURE__ */ c(G, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col", children: [
+        /* @__PURE__ */ d(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col", children: [
           t,
           /* @__PURE__ */ e(
-            X,
+            J,
             {
               orientation: "vertical",
               className: "[&_div]:bg-f1-background"
@@ -603,13 +601,13 @@ function va({
     }
   ) });
 }
-function za({
+function Va({
   isOpen: a,
-  onClose: r,
-  title: s,
+  onClose: s,
+  title: r,
   image: t,
   benefits: l,
-  errorMessage: d,
+  errorMessage: c,
   successMessage: n,
   loadingState: i,
   nextSteps: o,
@@ -619,9 +617,9 @@ function za({
   modalModule: L,
   secondaryAction: u,
   portalContainer: x,
-  tag: k
+  tag: S
 }) {
-  const [R, F] = g(a), [C, y] = g(null), [P, m] = g(!1), S = async () => {
+  const [I, F] = g(a), [C, y] = g(null), [P, m] = g(!1), k = async () => {
     if (h != null && h.onClick) {
       m(!0);
       try {
@@ -632,34 +630,34 @@ function za({
         m(!1);
       }
     }
-  }, M = () => {
-    F(!1), r == null || r();
-  }, I = P;
-  return /* @__PURE__ */ c(O, { children: [
+  }, D = () => {
+    F(!1), s == null || s();
+  }, R = P;
+  return /* @__PURE__ */ d($, { children: [
     /* @__PURE__ */ e(
       va,
       {
-        isOpen: R,
-        onClose: M,
+        isOpen: I,
+        onClose: D,
         title: N,
         module: L,
         portalContainer: x,
         children: /* @__PURE__ */ e("div", { className: "pb-4 pl-4", children: /* @__PURE__ */ e(
           ue,
           {
-            title: s,
+            title: r,
             image: t,
             benefits: l,
             withShadow: !1,
-            tag: k,
-            actions: /* @__PURE__ */ c("div", { className: "flex gap-3", children: [
+            tag: S,
+            actions: /* @__PURE__ */ d("div", { className: "flex gap-3", children: [
               h && /* @__PURE__ */ e(
                 w,
                 {
                   variant: h.variant,
-                  label: I ? i.label : h.label,
+                  label: R ? i.label : h.label,
                   icon: h.icon || void 0,
-                  onClick: S,
+                  onClick: k,
                   loading: h.loading,
                   size: h.size
                 }
@@ -684,10 +682,10 @@ function za({
       {
         open: !0,
         onClose: () => {
-          M(), y(null);
+          D(), y(null);
         },
         success: C === "success",
-        errorMessage: d,
+        errorMessage: c,
         successMessage: n,
         nextSteps: o,
         closeLabel: f,
@@ -698,11 +696,11 @@ function za({
 }
 function ga({
   mediaUrl: a,
-  title: r,
-  description: s,
+  title: s,
+  description: r,
   onClose: t,
   dismissible: l,
-  width: d,
+  width: c,
   trackVisibility: n,
   actions: i,
   showConfirmation: o = !0
@@ -710,12 +708,12 @@ function ga({
   const [f, h] = g(!1), N = () => {
     h(!0), t && t();
   };
-  re(() => {
+  se(() => {
     n && n(!f);
   }, [n, f]);
   const L = a == null ? void 0 : a.includes(".mp4");
-  return /* @__PURE__ */ e(O, { children: f ? null : /* @__PURE__ */ c(Ee, { style: { width: d }, className: "relative bg-f1-background p-1", children: [
-    /* @__PURE__ */ c(_e, { children: [
+  return /* @__PURE__ */ e($, { children: f ? null : /* @__PURE__ */ d(Ee, { style: { width: c }, className: "relative bg-f1-background p-1", children: [
+    /* @__PURE__ */ d(_e, { children: [
       l && /* @__PURE__ */ e("div", { className: "absolute right-2 top-2 z-10", children: /* @__PURE__ */ e(
         w,
         {
@@ -727,7 +725,7 @@ function ga({
           label: "Close"
         }
       ) }),
-      /* @__PURE__ */ c("div", { children: [
+      /* @__PURE__ */ d("div", { children: [
         /* @__PURE__ */ e("div", { children: a && (L ? /* @__PURE__ */ e(
           "video",
           {
@@ -742,13 +740,13 @@ function ga({
           "img",
           {
             src: a,
-            alt: r,
+            alt: s,
             className: "h-full w-full rounded-md"
           }
         )) }),
-        /* @__PURE__ */ c("div", { className: "flex flex-col gap-[2px] p-3", children: [
-          /* @__PURE__ */ e(z, { className: "text-lg font-medium", children: r }),
-          /* @__PURE__ */ e(z, { className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary", children: s })
+        /* @__PURE__ */ d("div", { className: "flex flex-col gap-[2px] p-3", children: [
+          /* @__PURE__ */ e(V, { className: "text-lg font-medium", children: s }),
+          /* @__PURE__ */ e(V, { className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary", children: r })
         ] })
       ] })
     ] }),
@@ -780,8 +778,8 @@ function ga({
   ] }) });
 }
 const ba = B(
-  function({ primaryAction: r, secondaryAction: s, ...t }, l) {
-    const d = (o) => o.variant === "promote" ? /* @__PURE__ */ e(
+  function({ primaryAction: s, secondaryAction: r, ...t }, l) {
+    const c = (o) => o.variant === "promote" ? /* @__PURE__ */ e(
       ee,
       {
         label: o.label,
@@ -806,47 +804,47 @@ const ba = B(
         size: "md",
         icon: o.icon
       }
-    ), n = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0, i = (s == null ? void 0 : s.variant) !== "promote" ? s : void 0;
-    return /* @__PURE__ */ c(
-      ze,
+    ), n = (s == null ? void 0 : s.variant) !== "promote" ? s : void 0, i = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0;
+    return /* @__PURE__ */ d(
+      Ve,
       {
         ref: l,
         ...t,
         primaryAction: n,
         secondaryAction: i,
         children: [
-          (r == null ? void 0 : r.variant) === "promote" && d(r),
-          (s == null ? void 0 : s.variant) === "promote" && d(s)
+          (s == null ? void 0 : s.variant) === "promote" && c(s),
+          (r == null ? void 0 : r.variant) === "promote" && c(r)
         ]
       }
     );
   }
 );
 ba.displayName = "UpsellingBanner";
-function Va({
+function za({
   isOpen: a,
-  setIsOpen: r,
-  label: s,
+  setIsOpen: s,
+  label: r,
   variant: t = "promote",
   size: l = "md",
-  showIcon: d = !0,
+  showIcon: c = !0,
   side: n = "right",
   align: i = "center",
-  icon: o = Ve,
+  icon: o = ze,
   mediaUrl: f,
   title: h,
   description: N,
   width: L = "300px",
   trackVisibility: u,
   actions: x,
-  onClick: k,
-  hideLabel: R = !1
+  onClick: S,
+  hideLabel: I = !1
 }) {
-  const [F, C] = g(!1), [y, P] = g(null), [m, S] = g(null), M = (p) => {
-    r(p), k && k();
-  }, I = async (p) => {
+  const [F, C] = g(!1), [y, P] = g(null), [m, k] = g(null), D = (p) => {
+    s(p), S && S();
+  }, R = async (p) => {
     if (p.type === "upsell") {
-      S(p);
+      k(p);
       try {
         await p.onClick(), p.showConfirmation && (C(!0), P("success"));
       } catch {
@@ -854,26 +852,26 @@ function Va({
       }
     }
   }, fe = () => {
-    P(null), C(!1), S(null), r(!1);
+    P(null), C(!1), k(null), s(!1);
   }, he = a && !F, me = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
     ...p,
-    onClick: () => I(p)
+    onClick: () => R(p)
   } : p);
-  return /* @__PURE__ */ c(O, { children: [
-    /* @__PURE__ */ c(U, { open: he, onOpenChange: M, children: [
-      /* @__PURE__ */ e(W, { asChild: !0, children: /* @__PURE__ */ e(
+  return /* @__PURE__ */ d($, { children: [
+    /* @__PURE__ */ d(U, { open: he, onOpenChange: D, children: [
+      /* @__PURE__ */ e(G, { asChild: !0, children: /* @__PURE__ */ e(
         w,
         {
           variant: t,
-          label: s,
+          label: r,
           size: l,
-          icon: d ? o : void 0,
-          onClick: () => r(a),
-          hideLabel: R
+          icon: c ? o : void 0,
+          onClick: () => s(a),
+          hideLabel: I
         }
       ) }),
       /* @__PURE__ */ e(
-        Y,
+        W,
         {
           side: n,
           align: i,
@@ -884,7 +882,7 @@ function Va({
               mediaUrl: f,
               title: h,
               description: N,
-              onClose: () => r(!1),
+              onClose: () => s(!1),
               dismissible: !1,
               width: L,
               trackVisibility: u,
@@ -912,30 +910,30 @@ function Va({
 }
 const xa = ea(
   null
-), Ca = ({ children: a, fullScreen: r = !0 }) => {
-  const s = ae(null), [t, l] = g(s.current);
-  return Je(() => {
-    l(s.current);
+), Ca = ({ children: a, fullScreen: s = !0 }) => {
+  const r = ae(null), [t, l] = g(r.current);
+  return Xe(() => {
+    l(r.current);
   }, []), /* @__PURE__ */ e(xa.Provider, { value: { element: t }, children: /* @__PURE__ */ e(
     "div",
     {
-      ref: s,
+      ref: r,
       id: "f0-layout",
       className: b({
-        "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]": r
+        "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]": s
       }),
       children: a
     }
   ) });
 }, ya = ({
   children: a
-}) => /* @__PURE__ */ e(Xe, { reducedMotion: "user", children: a }), qa = ({
+}) => /* @__PURE__ */ e(Je, { reducedMotion: "user", children: a }), qa = ({
   children: a,
-  layout: r,
-  link: s,
+  layout: s,
+  link: r,
   privacyModeInitiallyEnabled: t,
   image: l,
-  i18n: d,
+  i18n: c,
   l10n: n,
   isDev: i = !1,
   showExperimentalWarnings: o = !1
@@ -944,82 +942,92 @@ const xa = ea(
   {
     isDev: i,
     showExperimentalWarnings: o,
-    children: /* @__PURE__ */ e(Ae, { ...n, children: /* @__PURE__ */ e(He, { ...d, children: /* @__PURE__ */ e(Ue, { ...s, children: /* @__PURE__ */ e(Ca, { ...r, children: /* @__PURE__ */ e(We, { children: /* @__PURE__ */ e(
-      Ye,
+    children: /* @__PURE__ */ e(Ae, { ...n, children: /* @__PURE__ */ e(He, { ...c, children: /* @__PURE__ */ e(Ue, { ...r, children: /* @__PURE__ */ e(Ca, { ...s, children: /* @__PURE__ */ e(Ge, { children: /* @__PURE__ */ e(
+      We,
       {
         initiallyEnabled: t,
-        children: /* @__PURE__ */ e(Ge, { ...l, children: a })
+        children: /* @__PURE__ */ e(Ye, { ...l, children: a })
       }
     ) }) }) }) }) })
   }
 ) });
 export {
-  Ma as AreaChart,
+  Da as AreaChart,
   Ua as Await,
-  Da as BarChart,
+  Ma as BarChart,
   w as Button,
   Ta as CategoryBarChart,
-  Wa as CopyButton,
-  Ya as DndProvider,
-  Ga as EmojiImage,
-  Xa as F0Avatar,
-  Ja as F0AvatarAlert,
+  Ga as CopyButton,
+  Wa as DndProvider,
+  Ya as EmojiImage,
+  Ja as F0Avatar,
+  Xa as F0AvatarAlert,
   Ka as F0AvatarCompany,
   Qa as F0AvatarDate,
   Za as F0AvatarEmoji,
-  er as F0AvatarFile,
-  ar as F0AvatarIcon,
-  rr as F0AvatarList,
+  es as F0AvatarFile,
+  as as F0AvatarIcon,
+  ss as F0AvatarList,
   K as F0AvatarModule,
-  sr as F0AvatarPerson,
-  tr as F0AvatarTeam,
-  lr as F0Card,
-  or as F0Checkbox,
-  Oa as F0ChipList,
-  nr as F0EventCatcherProvider,
+  rs as F0AvatarPerson,
+  ts as F0AvatarTeam,
+  ls as F0Card,
+  os as F0Checkbox,
+  $a as F0ChipList,
+  ns as F0EventCatcherProvider,
   Te as F0Icon,
-  ir as F0TagAlert,
-  dr as F0TagBalance,
-  cr as F0TagCompany,
-  ur as F0TagDot,
-  fr as F0TagList,
-  hr as F0TagPerson,
-  De as F0TagRaw,
-  mr as F0TagStatus,
-  pr as F0TagTeam,
+  is as F0TagAlert,
+  cs as F0TagBalance,
+  ds as F0TagCompany,
+  us as F0TagDot,
+  fs as F0TagList,
+  hs as F0TagPerson,
+  Me as F0TagRaw,
+  ms as F0TagStatus,
+  ps as F0TagTeam,
   qa as FactorialOneProvider,
+  vs as GROUP_ID_SYMBOL,
   ja as HomeLayout,
   Ba as LineChart,
-  ka as Link,
-  vr as OneFilterPicker,
-  Ra as PieChart,
-  Ye as PrivacyModeProvider,
+  Sa as Link,
+  gs as OneFilterPicker,
+  Ia as PieChart,
+  We as PrivacyModeProvider,
   ue as ProductBlankslate,
-  gr as ProductCard,
-  za as ProductModal,
+  bs as ProductCard,
+  Va as ProductModal,
   ga as ProductWidget,
-  $a as ProgressBarChart,
+  Oa as ProgressBarChart,
   Ea as StandardLayout,
-  br as TagCounter,
+  xs as TagCounter,
   _a as TwoColumnLayout,
   Z as UpsellRequestResponseDialog,
   ba as UpsellingBanner,
   ee as UpsellingButton,
-  Va as UpsellingPopover,
-  Ia as VerticalBarChart,
+  za as UpsellingPopover,
+  Ra as VerticalBarChart,
   Fa as avatarVariants,
-  xr as buildTranslations,
-  Cr as createAtlaskitDriver,
+  Cs as buildTranslations,
+  ys as createAtlaskitDriver,
+  ws as createDataSourceDefinition,
   Pa as defaultTranslations,
-  ke as experimental,
-  yr as getEmojiLabel,
-  wr as modules,
-  Nr as tagDotColors,
-  Lr as useDndEvents,
-  Pr as useDraggable,
-  kr as useDroppableList,
-  Fr as useEmojiConfetti,
-  Sr as usePrivacyMode,
-  Mr as useReducedMotion,
-  Dr as useXRay
+  Se as experimental,
+  Ns as getAnimationVariants,
+  Ls as getDataSourcePaginationType,
+  Ps as getEmojiLabel,
+  Ss as isInfiniteScrollPagination,
+  Fs as isPageBasedPagination,
+  ks as modules,
+  Ds as tagDotColors,
+  Ms as useData,
+  Ts as useDataSource,
+  Bs as useDndEvents,
+  Is as useDraggable,
+  Rs as useDroppableList,
+  Os as useEmojiConfetti,
+  $s as useGroups,
+  Es as usePrivacyMode,
+  _s as useReducedMotion,
+  js as useSelectable,
+  Vs as useXRay
 };

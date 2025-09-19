@@ -45,6 +45,7 @@ import { LongTextCellValue } from './types/longText.tsx';
 import { MouseEventHandler } from 'react';
 import { NumberCellValue } from '../../value-display/types/number';
 import { NumberCellValue as NumberCellValue_2 } from './types/number.tsx';
+import { Observable } from 'zen-observable-ts';
 import { PercentageCellValue } from './types/percentage.tsx';
 import { PersonCellValue } from '../../value-display/types/person';
 import { PersonCellValue as PersonCellValue_2 } from './types/person.tsx';
@@ -100,6 +101,19 @@ declare const alertAvatarVariants: (props?: ({
 })) | undefined) => string;
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
+
+export declare type AllSelectionStatus = {
+    checked: boolean;
+    indeterminate: boolean;
+    selectedCount: number;
+    unselectedCount: number;
+};
+
+declare type AnimationVariantsOptions = {
+    delay?: number;
+    duration?: number;
+    maxDelay?: number;
+};
 
 export declare const AreaChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "step" | "linear" | "natural" | "monotoneX";
@@ -284,6 +298,33 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 declare type BaseColor = keyof typeof baseColors;
 
 /**
+ * Base data adapter configuration for non-paginated collections
+ * @template R - The type of records in the collection
+ * @template Filters - The available filter configurations
+ */
+export declare type BaseDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters>, FetchReturn = BaseResponse<R>> = {
+    /** Indicates this adapter doesn't use pagination */
+    paginationType?: never | undefined;
+    /**
+     * Function to fetch data based on filter options
+     * @param options - The filter options to apply when fetching data
+     * @returns Array of records, promise of records, or observable of records
+     */
+    fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+};
+
+/**
+ * Base options for data fetching
+ * @template Filters - The available filter configurations
+ */
+export declare type BaseFetchOptions<Filters extends FiltersDefinition> = {
+    /** Currently applied filters */
+    filters: FiltersState<Filters>;
+    sortings: SortingsStateMultiple;
+    search?: string;
+};
+
+/**
  * Base definition for all filter types.
  * Provides common properties that all filters must implement.
  */
@@ -296,6 +337,34 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
      * Whether to hide the selector for this filter
      */
     hideSelector?: boolean;
+};
+
+/**
+ * Represents a base structure for paginated API responses, providing
+ * details about the records on the current page and pagination metadata.
+ *
+ * @template R The type of each record in the paginated response.
+ *
+ * @property {number} total The total number of records available.
+ * @property {number} perPage The number of records displayed per page.
+ */
+export declare type BasePaginatedResponse<R> = BaseResponse<R> & {
+    /** Total number of records available */
+    total: number;
+    /** Number of records per page */
+    perPage: number;
+};
+
+/**
+ * Base response type for collection data
+ * @template R - The type of records in the collection
+ *
+ * @property {R[]} records The list of records for the current page.
+ * @property {TRecord} [summaries] Optional summaries data for the collection.
+ */
+export declare type BaseResponse<R> = {
+    records: R[];
+    summaries?: R;
 };
 
 declare type BaseTag<T extends {
@@ -464,6 +533,10 @@ declare interface CardInternalProps {
      * Private prop
      */
     forceVerticalMetadata?: boolean;
+    /**
+     * Whether the card should have a full height
+     */
+    fullHeight?: boolean;
 }
 
 declare type CardMetadata = {
@@ -632,6 +705,16 @@ declare type CopyButtonProps = Omit<ComponentProps<typeof Button_2>, "onClick" |
 export declare function createAtlaskitDriver(instanceId: symbol): DndDriver;
 
 /**
+ * Create a data source definition from a data source definition
+ * This function is a helper to allow to infer the type of the data source definition
+ * from the data source definition.
+ *
+ * @param definition - The data source definition to create from
+ * @returns The created data source definition
+ */
+export declare const createDataSourceDefinition: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(definition: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>) => DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>;
+
+/**
  * Extracts the current filters type from filter options.
  * Creates a type mapping filter keys to their respective value types.
  * Used for type-safe access to filter values.
@@ -642,6 +725,92 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
 } ? {
     [Key in K]?: FilterValue<F["fields"][Key]>;
 } : Record<string, never>;
+
+export declare type Data<R extends RecordType> = {
+    records: WithGroupId<R>[];
+    type: "grouped" | "flat";
+    groups: GroupRecord<R>[];
+};
+
+/**
+ * Combined type for all possible data adapter configurations
+ * @template R - The type of records in the collection
+ * @template Filters - The available filter configurations
+ */
+export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
+
+/**
+ * Represents an error that occurred during data fetching
+ */
+export declare interface DataError {
+    message: string;
+    cause?: unknown;
+}
+
+/**
+ * Represents a data source with filtering capabilities and data fetching functionality.
+ * Extends DataSourceDefinition with runtime properties for state management.
+ * @template R - The type of records in the collection
+ * @template Filters - The available filter configurations for the collection
+ * @template ItemActions - The available actions that can be performed on records
+ */
+export declare type DataSource<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = DataSourceDefinition<R, Filters, Sortings, Grouping> & {
+    /** Current state of applied filters */
+    currentFilters: FiltersState<Filters>;
+    /** Function to update the current filters state */
+    setCurrentFilters: React.Dispatch<React.SetStateAction<FiltersState<Filters>>>;
+    /** Current state of applied sortings */
+    currentSortings: SortingsState<Sortings>;
+    /** Function to update the current sortings state */
+    setCurrentSortings: React.Dispatch<React.SetStateAction<SortingsState<Sortings>>>;
+    currentSearch: undefined | string;
+    debouncedCurrentSearch: undefined | string;
+    setCurrentSearch: (search: string | undefined) => void;
+    isLoading: boolean;
+    setIsLoading: (loading: boolean) => void;
+    /** Current state of applied grouping */
+    currentGrouping?: Grouping["mandatory"] extends true ? Exclude<GroupingState<R, Grouping>, undefined> : GroupingState<R, Grouping>;
+    /** Function to update the current grouping state */
+    setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>;
+    /** Function to provide an id for a record, necessary for append mode */
+    idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol;
+};
+
+/**
+ * Defines the structure and configuration of a data source for a collection.
+ * @template R - The type of records in the collection
+ * @template Filters - The available filter configurations for the collection
+ * @template ItemActions - The available actions that can be performed on records
+ * @template NavigationFilters - The available navigation filters for the collection
+ * @template Sortings - The available sortings for the collection
+ * @template ItemActions - The available actions that can be performed on records
+ * @template PrimaryActions - The available primary actions that can be performed on the collection
+ * @template SecondaryActions - The available actions that can be performed on the collection
+ * @template OtherActions - The available actions that can be performed on the collection
+ * @template Summaries - The available summaries for the collection
+ */
+export declare type DataSourceDefinition<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> = {
+    /** Available filter configurations */
+    filters?: Filters;
+    /** Current state of applied filters */
+    currentFilters?: FiltersState<Filters>;
+    /** Predefined filter configurations that can be applied */
+    presets?: PresetsDefinition<Filters>;
+    /** Search configuration */
+    search?: SearchOptions;
+    /** Available sorting fields. If not provided, sorting is not allowed. */
+    sortings?: Sortings;
+    defaultSorting?: SortingsState<Sortings>;
+    /** Data adapter responsible for fetching and managing data */
+    dataAdapter: DataAdapter<R, Filters>;
+    /** Selectable items value under the checkbox column (undefined if not selectable) */
+    selectable?: (item: R) => string | number | undefined;
+    /** Default selected items */
+    defaultSelectedItems?: SelectedItemsState;
+    /** Grouping configuration */
+    grouping?: Grouping;
+    currentGrouping?: GroupingState<R, Grouping>;
+};
 
 declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
     options?: DateFilterOptions_2;
@@ -841,10 +1010,8 @@ export declare const defaultTranslations: {
     };
     readonly notifications: "Notifications";
     readonly ai: {
-        readonly description: "Chat with AI";
-        readonly expandChat: "Expand chat";
-        readonly minimizeChat: "Minimize chat window";
-        readonly openChat: "Open Chat";
+        readonly openChat: "Open Chat with One AI";
+        readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "I'm One. Ask or make anything.";
         readonly initialMessage: "How can I help you today?";
@@ -1305,7 +1472,82 @@ declare type FilterTypeSchema<Options extends object = never> = {
  */
 export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : never;
 
+export declare const getAnimationVariants: (options?: AnimationVariantsOptions) => {
+    hidden: {
+        opacity: number;
+        y: number;
+    };
+    visible: (i: number) => {
+        opacity: number;
+        y: number;
+        transition: {
+            delay: number;
+            duration: number;
+            type: string;
+            stiffness: number;
+            damping: number;
+        };
+    };
+};
+
+/**
+ * Get the pagination type of a data adapter
+ * @param dataAdapter - The data adapter to get the pagination type of
+ * @returns The pagination type of the data adapter
+ */
+export declare const getDataSourcePaginationType: <D extends {
+    paginationType?: PaginationType | undefined | never;
+}>(dataAdapter: D) => PaginationType;
+
 export declare function getEmojiLabel(emoji: string): string;
+
+/**
+ * Symbol used to identify the groupId in the data
+ */
+export declare const GROUP_ID_SYMBOL: unique symbol;
+
+/**
+ * Defines the structure and configuration of a grouping options for a data source.
+ * @template RecordType - The type of records in the collection
+ */
+export declare type GroupingDefinition<R extends RecordType> = {
+    /** Whether grouping is mandatory or the user can chose not to group */
+    mandatory?: boolean;
+    hideSelector?: boolean;
+    groupBy: {
+        [K in RecordPaths<R>]?: {
+            /** The label for the grouping */
+            name: string;
+            /** The item count for the grouping */
+            label: (groupId: RecordPathValue<R, K>, filters: FiltersState<FiltersDefinition>) => string | Promise<string>;
+            itemCount?: (groupId: RecordPathValue<R, K>, filters: FiltersState<FiltersDefinition>) => number | undefined | Promise<number | undefined>;
+        };
+    };
+} & ({
+    /** Whether the grouping is non collapsible */
+    collapsible: true;
+    /** The initial open groups */
+    defaultOpenGroups?: boolean | string[];
+} | {
+    collapsible?: false;
+    defaultOpenGroups?: never;
+});
+
+/**
+ * The selected the grouping state
+ * @template Grouping - The grouping definition
+ */
+export declare type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
+    field: keyof Grouping["groupBy"];
+    order: SortOrder;
+} | undefined;
+
+export declare type GroupRecord<RecordType> = {
+    key: string;
+    label: string | Promise<string>;
+    itemCount: number | undefined | Promise<number | undefined>;
+    records: RecordType[];
+};
 
 export declare const HomeLayout: ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
@@ -1369,6 +1611,33 @@ declare type InFilterOptions_2<T> = {
     options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
 };
 
+/**
+ * Represents a paginated response structure tailored for infinite scroll implementations.
+ *
+ * @template TRecord The type of the individual record contained in the paginated response.
+ *
+ * @extends BasePaginatedResponse
+ *
+ * @property {"infinite-scroll"} type Identifies the pagination type as "infinite-scroll".
+ * @property {string | null} cursor The current position cursor used to fetch the next set of records.
+ * @property {boolean} hasMore Indicates whether there are additional records available for loading.
+ */
+export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResponse<TRecord> & {
+    type: Extract<PaginationType, "infinite-scroll">;
+    /**
+     * Represents the current position cursor for pagination.
+     * This is typically a string (often Base64-encoded) that represents
+     * the position of the last item in the current result set.
+     * Used to fetch the next page of results.
+     */
+    cursor: string | null;
+    /**
+     * A boolean flag indicating whether there are more items available for fetching.
+     * Used to determine if additional requests should be made for pagination.
+     */
+    hasMore: boolean;
+};
+
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
 declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
@@ -1380,6 +1649,10 @@ declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof Avata
 declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large", "xlarge", "xxlarge"];
 
 declare const internalAvatarTypes: readonly ["base", "rounded"];
+
+export declare function isInfiniteScrollPagination<R extends RecordType>(pagination: PaginationInfo | null): pagination is InfiniteScrollPaginatedResponse<R>;
+
+export declare function isPageBasedPagination<R extends RecordType>(pagination: PaginationInfo | null): pagination is PageBasedPaginatedResponse<R>;
 
 declare type L10nContextValue = {
     locale: string;
@@ -1570,6 +1843,82 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     children?: React.ReactNode;
 };
 
+export declare type OnSelectItemsCallback<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: SelectedItemsDetailedStatus<R, Filters> & {
+    byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>;
+}, clearSelectedItems: () => void) => void;
+
+/**
+ * Represents a paginated response with page-based navigation.
+ *
+ * Combines the base pagination response with additional properties specific to
+ * page-based pagination, allowing clients to navigate the dataset using page numbers.
+ *
+ * This type is useful for APIs returning data in discrete pages, where both the
+ * current page index and the total number of pages are provided.
+ *
+ * @template TRecord - The type of the individual records in the dataset.
+ *
+ * @property {"pages"} type - Indicates the pagination type is page-based.
+ * @property {number} currentPage - The index of the current page being viewed.
+ * @property {number} pagesCount - The total number of pages available.
+ */
+export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<TRecord> & {
+    type: Extract<PaginationType, "pages">;
+    /** Current page number (1-indexed) */
+    currentPage: number;
+    /** Total number of pages available */
+    pagesCount: number;
+};
+
+/**
+ * Paginated data adapter configuration
+ * @template R - The type of records in the collection
+ * @template Filters - The available filter configurations
+ */
+export declare type PaginatedDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>, FetchReturn = PaginatedResponse<R>> = {
+    /** Indicates this adapter uses page-based pagination */
+    paginationType: PaginationType;
+    /** Default number of records per page */
+    perPage?: number;
+    /**
+     * Function to fetch paginated data based on filter and pagination options
+     * @param options - The filter and pagination options to apply when fetching data
+     * @returns Paginated response with records and pagination info
+     */
+    fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+};
+
+export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
+    pagination: {
+        perPage?: number;
+    } & ({
+        currentPage: number;
+        cursor?: never;
+    } | {
+        cursor?: string | null;
+        currentPage?: never;
+    });
+};
+
+/**
+ * Response type for paginated collection data
+ * @template Record - The type of records in the collection
+ */
+export declare type PaginatedResponse<TRecord> = PageBasedPaginatedResponse<TRecord> | InfiniteScrollPaginatedResponse<TRecord>;
+
+/**
+ * Pagination state and controls
+ */
+export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "records"> | Omit<InfiniteScrollPaginatedResponse<unknown>, "records">;
+
+/**
+ * Defines the available pagination types used throughout the application.
+ * - "pages": Represents traditional page-based navigation with numbered pages.
+ * - "infinite-scroll": Represents continuous loading of content as the user scrolls.
+ * - "no-pagination": Represents a collection that does not use pagination.
+ */
+export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
+
 export declare type PersonAvatarVariant = Extract<AvatarVariant, {
     type: "person";
 }>;
@@ -1694,6 +2043,18 @@ label?: string;
 color?: string;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
+/**
+ * Utility type for handling both Promise and Observable return types.
+ * @template T - The type of the value being promised or observed
+ */
+export declare type PromiseOrObservable<T> = T | Promise<T> | Observable<PromiseState<T>>;
+
+declare interface PromiseState<T> {
+    loading: boolean;
+    error?: Error | null;
+    data?: T | null;
+}
+
 declare type PromoteAction = {
     variant: "promote";
     label: string;
@@ -1736,6 +2097,27 @@ declare type Props_2 = {
     list?: TagCounterItem[];
 };
 
+/**
+ * Utility type to get all possible paths through an object using dot notation
+ * @template T - The object type to traverse
+ */
+declare type RecordPaths<T> = T extends Record<string, unknown> ? {
+    [K in keyof T]: K extends string ? T[K] extends Record<string, unknown> ? K | `${K}.${RecordPaths<T[K]>}` : K : never;
+}[keyof T] : never;
+
+/**
+ * Utility type to get the value type at a given path
+ * @template T - The object type
+ * @template P - The path string
+ */
+declare type RecordPathValue<T, P extends string> = P extends keyof T ? T[P] : P extends `${infer K}.${infer Rest}` ? K extends keyof T ? RecordPathValue<T[K], Rest> : never : never;
+
+/**
+ * Represents a record type with string keys and unknown values.
+ * This type is used to represent the data structure of a collection.
+ */
+export declare type RecordType = Record<string, unknown>;
+
 declare type RegularAction = BaseAction & {
     type: "regular";
     variant: ButtonVariant;
@@ -1743,7 +2125,77 @@ declare type RegularAction = BaseAction & {
 
 declare type SearchFilterDefinition = BaseFilterDefinition<"search">;
 
+declare type SearchOptions = {
+    /** Whether search is enabled */
+    enabled: boolean;
+    /** Whether search is synchronous */
+    sync?: boolean;
+    /** Debounce time for search */
+    debounceTime?: number;
+};
+
+/**
+ * Represents a collection of selected items.
+ * @template T - The type of items in the collection
+ */
+export declare type SelectedItems<T> = ReadonlyArray<T>;
+
+export declare type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
+    allSelected: boolean | "indeterminate";
+    itemsStatus: ReadonlyArray<{
+        item: R;
+        checked: boolean;
+    }>;
+    groupsStatus: Record<string, boolean>;
+    filters: FiltersState<Filters>;
+    selectedCount: number;
+};
+
+/**
+ * Represents the selected items by id
+ */
+export declare type SelectedItemsState = {
+    allSelected?: boolean | "indeterminate";
+    items?: ReadonlyArray<{
+        id: string;
+        checked: boolean;
+    }>;
+    groups?: ReadonlyArray<{
+        groupId: string;
+        checked: boolean;
+    }>;
+};
+
+/**
+ * Response structure for non-paginated data
+ */
+declare type SimpleResult<T> = T[];
+
 declare const sizes: readonly ["sm", "md", "lg"];
+
+/**
+ * Type helper to extract keys from a SortingsDefinition
+ */
+export declare type SortingKey<Definition extends SortingsDefinition> = Definition extends readonly string[] ? Definition[number] : keyof Definition;
+
+export declare type SortingsDefinition = Record<string, {
+    label: string;
+}>;
+
+export declare type SortingsState<Definition extends SortingsDefinition> = {
+    field: keyof Definition;
+    order: SortOrder;
+} | null;
+
+/**
+ * Type helper to create a multiple sortings state (the main sorting and the grouping sorting)
+ */
+export declare type SortingsStateMultiple = {
+    field: string;
+    order: "asc" | "desc";
+}[];
+
+export declare type SortOrder = "asc" | "desc";
 
 declare type SrcProps = Pick<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "sizes">;
 
@@ -2015,6 +2467,152 @@ declare interface UpsellRequestResponseDialogProps {
     portalContainer?: HTMLElement | null;
 }
 
+/**
+ * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
+ *
+ * ## Why a Separate Hook?
+ *
+ * `useData` exists as a separate hook for three main reasons:
+ *
+ * - **Visualization-Specific Needs**: Different visualizations have unique data requirements:
+ *   - Card visualizations need grid-aligned pagination (multiples of grid columns)
+ *   - Table visualizations work best with row-optimized data fetching
+ *   - Custom visualizations may need specialized data transformations
+ *
+ * - **Separation of Concerns**: Maintains clear boundaries between:
+ *   - Data source configuration (managed by `useDataSource`)
+ *   - Data fetching & state management (handled by `useData`)
+ *   - UI presentation (implemented by visualization components)
+ *
+ * - **Extensibility**: New visualization types can be added without modifying core data logic,
+ *   as each visualization directly controls how it consumes data
+ *
+ * ## Core Features
+ *
+ * - Handles multiple data source types seamlessly (synchronous, Promise-based, Observable-based)
+ * - Manages pagination state with automatic page handling
+ * - Provides consistent loading states (`isInitialLoading`, `isLoading`)
+ * - Implements standardized error handling with detailed error information
+ * - Performs automatic cleanup of subscriptions to prevent memory leaks
+ * - Supports filter application with proper filter state management
+ *
+ * ## Usage in Visualizations
+ *
+ * Each visualization component calls `useData` directly to maintain control over its specific data needs:
+ *
+ * ```tsx
+ * // Example: CardCollection customizing pagination before calling useData
+ * function CardCollection({ source }) {
+ *   // Override source to ensure grid-friendly pagination (multiples of 2,3,4)
+ *   const adaptedSource = useMemo(() => ({
+ *     ...source,
+ *     dataAdapter: {
+ *       ...source.dataAdapter,
+ *       perPage: source.dataAdapter.perPage ?? 24,
+ *     }
+ *   }), [source]);
+ *
+ *   // Let useData handle the data fetching with our customized source
+ *   const { data, isInitialLoading, paginationInfo, setPage } = useData(adaptedSource);
+ *
+ *   // Rendering logic follows...
+ * }
+ * ```
+ *
+ * @template R - The type of records in the collection
+ * @template Filters - The filters type extending FiltersDefinition
+ *
+ * @param source - The data source object containing dataAdapter and filter state
+ * @param options - Optional configuration including filter overrides
+ *
+ * @returns {UseDataReturn<R>} An object containing:
+ * - data: The current collection records
+ * - isInitialLoading: Whether this is the first data load
+ * - isLoading: Whether any data fetch is in progress
+ * - error: Any error that occurred during data fetching
+ * - paginationInfo: Pagination state and metadata if available
+ * - setPage: Function to navigate to a specific page
+ */
+export declare function useData<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataSource<R, Filters, Sortings, Grouping>, { filters, onError, fetchParamsProvider, onResponse, }?: UseDataOptions<R, Filters>, deps?: unknown[]): UseDataReturn<R>;
+
+/**
+ * Hook options for useData
+ */
+export declare interface UseDataOptions<R extends RecordType, Filters extends FiltersDefinition> {
+    filters?: Partial<FiltersState<Filters>>;
+    /**
+     * A function that is called when an error occurs during data fetching.
+     * It is called with the error object.
+     * @param error - The error object.
+     */
+    onError?: (error: DataError) => void;
+    /**
+     * A function that provides the fetch parameters for the data source.
+     * It is called before each fetch request and can be used to modify the fetch parameters.
+     * @param options - The fetch parameters for the data source.
+     * @returns The fetch parameters for the data source.
+     */
+    fetchParamsProvider?: <O extends BaseFetchOptions<Filters>>(options: O) => O;
+    /**
+     * A function that is called when the data is fetched successfully.
+     * It is called with the response data.
+     * @param response - The response data.
+     */
+    onResponse?: (response: PaginatedResponse<R> | SimpleResult<R>) => void;
+}
+
+/**
+ * Hook return type for useData
+ */
+export declare interface UseDataReturn<R extends RecordType> {
+    data: Data<R>;
+    isInitialLoading: boolean;
+    isLoading: boolean;
+    isLoadingMore: boolean;
+    error: DataError | null;
+    paginationInfo: PaginationInfo | null;
+    setPage: (page: number) => void;
+    loadMore: () => void;
+    totalItems: number | undefined;
+    mergedFilters: FiltersState<FiltersDefinition>;
+}
+
+/**
+ * A hook that manages data source state and filtering capabilities for a collection.
+ * It creates and returns a reusable data source that can be shared across different
+ * visualizations and components.
+ *
+ * This hook is intentionally separated from the rendering components to:
+ * 1. Enable sharing the same data source across multiple components
+ * 2. Allow for state management outside the rendering layer
+ * 3. Support more complex data filtering, querying, and pagination logic
+ * 4. Provide a clean separation between data management and visualization
+ *
+ * @template R - The type of records in the collection
+ * @template Filters - The definition of available filters for the collection
+ * @template ItemActions - The definition of available item actions
+ * @template Actions - The definition of available actions for the collection
+ *
+ * @param options - Configuration object containing:
+ *   - filters: Optional filter configurations for the collection
+ *   - currentFilters: Initial state of the filters
+ *   - dataAdapter: Adapter for data fetching and manipulation
+ *   - itemActions: Optional item actions available
+ *   - actions: Optional DataCollection actions
+ *   - presets: Optional filter presets
+ * @param deps - Dependency array for memoization, similar to useEffect dependencies
+ *
+ * @returns A DataSource object containing:
+ * - filters: The available filter configurations
+ * - currentFilters: The current state of the filters
+ * - setCurrentFilters: Function to update the filter state
+ * - dataAdapter: The data adapter for fetching/manipulating data
+ * - itemActions: Available actions for records (items)
+ * - actions: Available actions for the collection
+ * - presets: Available filter presets
+ */
+export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ currentFilters: initialCurrentFilters, currentGrouping: initialCurrentGrouping, filters, search, defaultSorting, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: ReadonlyArray<unknown>): DataSource<R, FiltersSchema, Sortings, Grouping>;
+
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -2037,6 +2635,11 @@ export declare const useEmojiConfetti: () => {
     fireEmojiConfetti: (emoji: string, elementRef: RefObject<HTMLElement>) => void;
 };
 
+export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[], defaultOpenGroups?: boolean | GroupRecord<R>["key"][]) => {
+    openGroups: Record<string, boolean>;
+    setGroupOpen: (key: string, open: boolean) => void;
+};
+
 export declare const usePrivacyMode: () => {
     enabled: boolean;
     enable: () => void;
@@ -2045,6 +2648,20 @@ export declare const usePrivacyMode: () => {
 };
 
 export declare const useReducedMotion: () => boolean;
+
+export declare type UseSelectable<R extends RecordType> = {
+    isAllSelected: boolean;
+    selectedItems: Map<number | string, R>;
+    selectedGroups: Map<string, GroupRecord<R>>;
+    isPartiallySelected: boolean;
+    handleSelectItemChange: (item: R, checked: boolean) => void;
+    handleSelectAll: (checked: boolean) => void;
+    handleSelectGroupChange: (group: GroupRecord<R>, checked: boolean) => void;
+    groupAllSelectedStatus: Record<string, AllSelectionStatus>;
+    allSelectedStatus: AllSelectionStatus;
+};
+
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>(data: Data<R>, paginationInfo: PaginationInfo | null, source: DataSourceDefinition<R, Filters, Sortings, Grouping>, onSelectItems: OnSelectItemsCallback<R, Filters> | undefined, defaultSelectedItems?: SelectedItemsState | undefined): UseSelectable<R>;
 
 export declare const useXRay: () => {
     enabled: boolean;
@@ -2089,6 +2706,10 @@ label?: boolean;
 showRatio?: boolean;
 valueFormatter?: (value: string | number | undefined) => string | number;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+export declare type WithGroupId<RecordType> = RecordType & {
+    [GROUP_ID_SYMBOL]: unknown | undefined;
+};
 
 declare interface WithTooltipDescription {
     /**
