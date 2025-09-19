@@ -133,14 +133,19 @@ export const Settings = <
                 onVisualizationChange={handleVisualizationChange}
               />
             ),
-            hasGrouping && !grouping?.hideSelector && (
-              <GroupingSelector
-                key="grouping"
-                grouping={grouping}
-                currentGrouping={currentGrouping}
-                onGroupingChange={handleGroupingChange}
-              />
-            ),
+            hasGrouping &&
+              !grouping?.hideSelector &&
+              !(
+                !!grouping.mandatory &&
+                Object.entries(grouping.groupBy).length < 2
+              ) && (
+                <GroupingSelector
+                  key="grouping"
+                  grouping={grouping}
+                  currentGrouping={currentGrouping}
+                  onGroupingChange={handleGroupingChange}
+                />
+              ),
             hasSortings && (
               <SortingSelector
                 key="sorting"
