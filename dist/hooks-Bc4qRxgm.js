@@ -43872,6 +43872,7 @@ const i$e = Wt({
         className: f,
         mode: n ? "only" : "default",
         "aria-label": m.title || t,
+        title: m.title || (n ? t : void 0),
         children: /* @__PURE__ */ ee(
           "div",
           {
