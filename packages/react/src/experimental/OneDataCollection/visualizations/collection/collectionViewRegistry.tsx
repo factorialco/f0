@@ -20,7 +20,7 @@ import {
 
 export type VisualizacionTypeDefinition<Props> = {
   render: (props: Props) => JSX.Element
-  renderSettings?: (props: Props) => JSX.Element
+  renderSettings?: (props: Props) => JSX.Element | null
   name: string
   icon: IconType
 }
@@ -93,16 +93,16 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Table",
     icon: Table,
     render: <
-      Record extends RecordType,
+      R extends RecordType,
       Filters extends FiltersDefinition,
       Sortings extends SortingsDefinition,
       Summaries extends SummariesDefinition,
-      ItemActions extends ItemActionsDefinition<Record>,
+      ItemActions extends ItemActionsDefinition<R>,
       NavigationFilters extends NavigationFiltersDefinition,
-      Grouping extends GroupingDefinition<Record>,
+      Grouping extends GroupingDefinition<R>,
     >(
       props: TableCollectionProps<
-        Record,
+        R,
         Filters,
         Sortings,
         Summaries,
@@ -113,7 +113,7 @@ export const collectionVisualizations: CollectionVisualizations<
     ) => {
       return (
         <TableCollection<
-          Record,
+          R,
           Filters,
           Sortings,
           Summaries,

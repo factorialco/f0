@@ -106,7 +106,14 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
 export const mockUsers = generateMockUsers(10)
 
 export const getMockVisualizations = (options?: {
+  // @deprecated
   frozenColumns?: 0 | 1 | 2
+  table?: {
+    frozenColumns?: 0 | 1 | 2
+    allowColumnHiding?: boolean
+    allowColumnReordering?: boolean
+    mockTableColOrderingAndHidding?: boolean
+  }
 }): Record<
   Exclude<VisualizationType, "custom">,
   Visualization<
@@ -122,6 +129,8 @@ export const getMockVisualizations = (options?: {
   table: {
     type: "table",
     options: {
+      allowColumnHiding: options?.table?.allowColumnHiding,
+      allowColumnReordering: options?.table?.allowColumnReordering,
       frozenColumns: options?.frozenColumns,
       columns: [
         {
@@ -134,44 +143,63 @@ export const getMockVisualizations = (options?: {
               lastName: item.name.split(" ")[1],
             },
           }),
+          id: "name",
           sorting: "name",
+          hidden: options?.table?.mockTableColOrderingAndHidding
+            ? true
+            : undefined,
+          order: options?.table?.mockTableColOrderingAndHidding ? 3 : undefined,
         },
         {
           label: "Email",
           render: (item) => item.email,
           sorting: "email",
+          id: "email",
         },
         {
           label: "Role",
           render: (item) => item.role,
           sorting: "role",
+          id: "role",
+          order: options?.table?.mockTableColOrderingAndHidding ? 2 : undefined,
         },
         {
+          id: "department",
           label: "Department",
           render: (item) => item.department,
           sorting: "department",
+          order: options?.table?.mockTableColOrderingAndHidding ? 4 : undefined,
         },
         {
+          id: "email2",
           label: "Email 2",
           render: (item) => item.email,
           sorting: "email",
+          order: options?.table?.mockTableColOrderingAndHidding ? 1 : undefined,
         },
         {
+          id: "role2",
           label: "Role 2",
           render: (item) => item.role,
           sorting: "role",
         },
         {
+          id: "department2",
           label: "Department 2",
           render: (item) => item.department,
           sorting: "department",
+          order: options?.table?.mockTableColOrderingAndHidding
+            ? 10
+            : undefined,
         },
         {
+          id: "email3",
           label: "Email 3",
           render: (item) => item.email,
           sorting: "email",
         },
         {
+          id: "role3",
           label: "Role 3",
           render: (item) => item.role,
           sorting: "role",
@@ -180,21 +208,25 @@ export const getMockVisualizations = (options?: {
           label: "Department 3",
           render: (item) => item.department,
           sorting: "department",
+          id: "department3",
         },
         {
           label: "Email 4",
           render: (item) => item.email,
           sorting: "email",
+          id: "email4",
         },
         {
           label: "Role 4",
           render: (item) => item.role,
           sorting: "role",
+          id: "role4",
         },
         {
           label: "Department 4",
           render: (item) => item.department,
           sorting: "department",
+          id: "department4",
         },
         {
           label: "Permissions",
@@ -207,6 +239,8 @@ export const getMockVisualizations = (options?: {
               .filter(Boolean)
               .join(", "),
           sorting: "permissions.read",
+          id: "permissions",
+          order: options?.table?.mockTableColOrderingAndHidding ? 4 : undefined,
         },
       ],
     },
@@ -641,6 +675,10 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  /**
+   * mocks the table column ordering and hidding
+   */
+  mockTableColOrderingAndHidding = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -675,9 +713,15 @@ export const ExampleComponent = ({
   primaryActions?: PrimaryActionsDefinition
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean
+  mockTableColOrderingAndHidding?: boolean
 }) => {
   const mockVisualizations = getMockVisualizations({
-    frozenColumns,
+    table: {
+      frozenColumns,
+      allowColumnHiding: mockTableColOrderingAndHidding,
+      allowColumnReordering: mockTableColOrderingAndHidding,
+      mockTableColOrderingAndHidding,
+    },
   })
 
   const dataSource = useDataCollectionSource({

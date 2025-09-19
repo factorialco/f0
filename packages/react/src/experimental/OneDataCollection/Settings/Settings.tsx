@@ -149,12 +149,6 @@ export const Settings = <
     [currentVisualization]
   )
 
-  console.log(
-    "hasVisualizacionSettings",
-    hasVisualizacionSettings,
-    visualizacionSettings
-  )
-
   if (!shouldShowSettings) return null
 
   return (

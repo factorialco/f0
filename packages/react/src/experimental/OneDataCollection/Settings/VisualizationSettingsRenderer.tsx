@@ -76,7 +76,12 @@ export const hasVisualizacionSettings = <
     Grouping
   >
 ) => {
-  return getSettingsRenderer(visualization) !== null
+  const settingsRenderer = getSettingsRenderer(visualization)
+  if (settingsRenderer) {
+    return settingsRenderer(visualization.options) !== null
+  }
+
+  return false
 }
 
 /**
@@ -116,7 +121,7 @@ export const VisualizationSettingsRenderer = <
   const settingsRenderer = getSettingsRenderer(visualization)
 
   if (settingsRenderer) {
-    return settingsRenderer({})
+    return settingsRenderer(visualization.options)
   }
 
   return null

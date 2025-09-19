@@ -234,11 +234,6 @@ export const BasicTableView: Story = {
   },
 }
 
-// Examples with multiple visualizations
-export const TableFrozenCols: Story = {
-  render: () => <ExampleComponent frozenColumns={2} />,
-}
-
 // Basic examples with single visualization
 export const WithLinkedItems: Story = {
   render: () => {
