@@ -22652,22 +22652,15 @@ const q9 = (t, e, n) => {
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']"
       ),
       children: [
-        t.selectable && /* @__PURE__ */ f(
-          Xn,
+        t.selectable && /* @__PURE__ */ f(Xn, { width: o, sticky: { left: 0 }, children: h !== void 0 && /* @__PURE__ */ f("div", { className: "pointer-events-auto flex items-center justify-end", children: /* @__PURE__ */ f(
+          jh,
           {
-            width: o,
-            sticky: { left: 0 },
-            children: h !== void 0 && /* @__PURE__ */ f("div", { className: "pointer-events-auto flex items-center justify-end", children: /* @__PURE__ */ f(
-              jh,
-              {
-                checked: i.has(h),
-                onCheckedChange: n,
-                title: `Select ${t.selectable(e)}`,
-                hideLabel: !0
-              }
-            ) })
+            checked: i.has(h),
+            onCheckedChange: n,
+            title: `Select ${t.selectable(e)}`,
+            hideLabel: !0
           }
-        ),
+        ) }) }),
         r.map((C, _) => /* @__PURE__ */ f(
           Xn,
           {
