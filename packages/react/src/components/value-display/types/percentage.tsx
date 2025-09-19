@@ -32,6 +32,7 @@ export const PercentageCell = (args: PercentageCellValue) => {
           "text-f1-foreground",
           isPlaceholder && "text-f1-foreground-secondary"
         )}
+        data-cell-type="percentage"
       >
         {value}
       </span>
@@ -47,7 +48,7 @@ export const PercentageCell = (args: PercentageCellValue) => {
   const hasLabel = typeof args === "object" && "label" in args
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" data-cell-type="percentage">
       <svg
         viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
         className="h-7 w-7 -rotate-90 transform"

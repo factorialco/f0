@@ -36,7 +36,7 @@ export const LongTextCell = (args: LongTextCellValue) => {
   return (
     <OneEllipsis
       className={cn(
-        "my-3 whitespace-pre-wrap break-words text-f1-foreground",
+        "whitespace-pre-wrap break-words text-f1-foreground",
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
       )}
       lines={lines}
