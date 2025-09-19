@@ -12,6 +12,73 @@ import {
 } from "../visualizations/collection/collectionViewRegistry"
 import { Visualization } from "../visualizations/collection/types"
 
+const getSettingsRenderer = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  visualization: Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+) => {
+  if (visualization.type === "custom") {
+    return null
+  }
+
+  const visualizationType = collectionVisualizations[
+    visualization.type
+  ] as VisualizacionTypeDefinition<
+    CollectionProps<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping,
+      object
+    >
+  >
+
+  if (!visualizationType) {
+    throw new Error(`Visualization type ${visualization.type} not found`)
+  }
+
+  return visualizationType.renderSettings ?? null
+}
+
+export const hasVisualizacionSettings = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  visualization: Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+) => {
+  return getSettingsRenderer(visualization) !== null
+}
+
 /**
  * A component that renders the selected visualization settings for a collection.
  *
@@ -46,30 +113,11 @@ export const VisualizationSettingsRenderer = <
     Grouping
   >
 }): ReactNode => {
-  if (visualization.type === "custom") {
-    return null
+  const settingsRenderer = getSettingsRenderer(visualization)
+
+  if (settingsRenderer) {
+    return settingsRenderer({})
   }
 
-  const visualizationType = collectionVisualizations[
-    visualization.type
-  ] as VisualizacionTypeDefinition<
-    CollectionProps<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping,
-      object
-    >
-  >
-
-  if (!visualizationType) {
-    throw new Error(`Visualization type ${visualization.type} not found`)
-  }
-
-  console.log("Here")
-
-  return visualizationType.renderSettings?.({}) ?? null
+  return null
 }
