@@ -62,8 +62,8 @@ export const GroupingSelector = <
   ]
 
   return (
-    <div className="flex flex-col gap-0">
-      <div className="flex items-center gap-2 px-3">
+    <div className="flex flex-col gap-0 py-3">
+      <div className="flex items-end gap-2 px-3">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <Select
             label={i18n.collections.grouping.groupBy}
@@ -83,20 +83,18 @@ export const GroupingSelector = <
           />
         </div>
         {currentGrouping?.field && (
-          <div className="pb-1">
-            <Button
-              hideLabel
-              label={i18n.collections.grouping.toggleDirection}
-              variant="outline"
-              icon={currentGrouping?.order === "asc" ? ArrowUp : ArrowDown}
-              onClick={() =>
-                onGroupingChange?.({
-                  field: currentGrouping.field,
-                  order: currentGrouping.order === "asc" ? "desc" : "asc",
-                })
-              }
-            />
-          </div>
+          <Button
+            hideLabel
+            label={i18n.collections.grouping.toggleDirection}
+            variant="outline"
+            icon={currentGrouping?.order === "asc" ? ArrowUp : ArrowDown}
+            onClick={() =>
+              onGroupingChange?.({
+                field: currentGrouping.field,
+                order: currentGrouping.order === "asc" ? "desc" : "asc",
+              })
+            }
+          />
         )}
       </div>
     </div>
