@@ -10,7 +10,6 @@ import {
   ReactNodeViewRenderer,
 } from "@tiptap/react"
 import { format } from "date-fns"
-import { AnimatePresence, motion } from "motion/react"
 import React, { useState } from "react"
 
 export interface User {
@@ -105,18 +104,11 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
 
   return (
     <NodeViewWrapper contentEditable={false}>
-      <motion.div
-        className="editor-transcript my-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3"
+      <div
+        className="editor-transcript mb-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3"
         onClick={(e) => e.stopPropagation()}
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <motion.div
-          className="flex flex-row items-center justify-between gap-2"
-          layout
-        >
+        <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-3">
@@ -149,78 +141,39 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
             />
             <Dropdown items={dropdownItems} size="sm" />
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <motion.div
-              key="content"
-              initial={{
-                height: 0,
-                opacity: 0,
-                scaleY: 0,
-              }}
-              animate={{
-                height: "auto",
-                opacity: 1,
-                scaleY: 1,
-              }}
-              exit={{
-                height: 0,
-                opacity: 0,
-                scaleY: 0,
-              }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-                opacity: { duration: 0.2 },
-              }}
-              style={{
-                transformOrigin: "top",
-                overflow: "hidden",
-              }}
-            >
-              <motion.div
-                className="text-f1-text-primary"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-              >
-                <div className="scrollbar-macos flex max-h-[500px] flex-col gap-4 overflow-y-auto">
-                  {data.messages.map((message, index) => {
-                    const user = getUserById(message.userId)
-                    return (
-                      <div key={index} className="flex flex-row gap-3">
-                        {user?.imageUrl && (
-                          <F0AvatarPerson
-                            size="xs"
-                            src={user.imageUrl}
-                            firstName={user.fullname}
-                            lastName={""}
-                          />
-                        )}
-                        <div className="flex flex-col">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-f1-text-primary font-medium">
-                              {user?.fullname || "Unknown User"}
-                            </span>
-                            <span className="text-f1-text-tertiary text-xs">
-                              {formatDateTime(message.dateTime)}
-                            </span>
-                          </div>
-                          <p className="text-f1-text-secondary">
-                            {message.text}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })}
+        {isOpen && (
+          <div className="scrollbar-macos text-f1-text-primary flex max-h-[500px] flex-col gap-4 overflow-y-auto">
+            {data.messages.map((message, index) => {
+              const user = getUserById(message.userId)
+              return (
+                <div key={index} className="flex flex-row gap-3">
+                  {user?.imageUrl && (
+                    <F0AvatarPerson
+                      size="xs"
+                      src={user.imageUrl}
+                      firstName={user.fullname}
+                      lastName={""}
+                    />
+                  )}
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-f1-text-primary font-medium">
+                        {user?.fullname || "Unknown User"}
+                      </span>
+                      <span className="text-f1-text-tertiary text-xs">
+                        {formatDateTime(message.dateTime)}
+                      </span>
+                    </div>
+                    <p className="text-f1-text-secondary">{message.text}</p>
+                  </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+              )
+            })}
+          </div>
+        )}
+      </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>
   )
