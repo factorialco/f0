@@ -80,7 +80,6 @@ const NotesTextEditorComponent = forwardRef<
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
   const editorId = useId()
 
-  const [initialContent] = useState(() => initialEditorState?.content || "")
   const [title, setTitle] = useState(initialEditorState?.title || "")
 
   useEffect(() => {
@@ -111,7 +110,7 @@ const NotesTextEditorComponent = forwardRef<
       liveCompanionLabels,
       transcriptLabels
     ),
-    content: initialContent,
+    content: initialEditorState?.content,
     onUpdate: ({ editor }: { editor: Editor }) => {
       onChange(
         editor.isEmpty
