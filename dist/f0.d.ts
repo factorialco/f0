@@ -122,7 +122,7 @@ canBeBlurred?: boolean;
 blurArea?: "l" | "r" | "lr";
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-declare type AsAllowedList = "div" | "p" | "label" | "span" | "h1" | "h2" | "code";
+declare type AsAllowedList = "div" | "p" | "label" | "span" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "code";
 
 declare const Avatar: React_2.ForwardRefExoticComponent<Omit<AvatarPrimitive.AvatarProps & React_2.RefAttributes<HTMLSpanElement>, "ref"> & {
     size?: (typeof internalAvatarSizes)[number];
