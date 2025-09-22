@@ -44,7 +44,7 @@ const buttonVariants: Record<AlertVariant, "outline" | "promote" | "critical"> =
 interface AlertProps extends VariantProps<typeof alertVariants> {
   title: string
   description: string
-  action: {
+  action?: {
     label: string
     onClick?: () => void
   }
@@ -77,27 +77,31 @@ export const OneAlert = ({
             </p>
           </div>
         </div>
-        <div className="flex flex-row justify-end gap-3">
-          {link && (
-            <a
-              href={link.href}
-              target="_blank"
-              rel="noreferrer"
-              className={cn(
-                "flex items-center gap-1 rounded-sm px-2 py-0.5 text-base font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary-hover [&>svg]:text-f1-foreground-secondary",
-                focusRing()
-              )}
-            >
-              {link.label}
-              <F0Icon icon={ExternalLink} size="sm" />
-            </a>
-          )}
-          <Button
-            label={action.label}
-            variant={buttonVariants[variant]}
-            onClick={action.onClick}
-          />
-        </div>
+        {(action || link) && (
+          <div className="flex flex-row items-center justify-end gap-3">
+            {link && (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(
+                  "flex items-center gap-1 rounded-sm px-2 py-0.5 text-base font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary-hover [&>svg]:text-f1-foreground-secondary",
+                  focusRing()
+                )}
+              >
+                {link.label}
+                <F0Icon icon={ExternalLink} size="sm" />
+              </a>
+            )}
+            {action && (
+              <Button
+                label={action.label}
+                variant={buttonVariants[variant]}
+                onClick={action.onClick}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
