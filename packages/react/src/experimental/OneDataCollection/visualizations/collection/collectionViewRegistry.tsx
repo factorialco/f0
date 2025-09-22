@@ -19,12 +19,15 @@ import {
   TableVisualizationSettings,
 } from "./Table"
 
-export type VisualizacionTypeDefinition<Props, Settings = never> = {
+export type VisualizacionTypeDefinition<
+  Props,
+  Settings = Record<string, never>,
+> = {
   render: (props: Props) => JSX.Element
   renderSettings?: (props: Props) => JSX.Element | null
   name: string
   icon: IconType
-  settings?: Settings
+  settings: Settings
 }
 
 type CollectionVisualizations<
@@ -137,6 +140,7 @@ export const collectionVisualizations: CollectionVisualizations<
   list: {
     name: "List",
     icon: List,
+    settings: {},
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -174,6 +178,7 @@ export const collectionVisualizations: CollectionVisualizations<
   card: {
     name: "Card",
     icon: Kanban,
+    settings: {},
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -211,6 +216,7 @@ export const collectionVisualizations: CollectionVisualizations<
   kanban: {
     name: "Kanban",
     icon: Kanban,
+    settings: {},
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,

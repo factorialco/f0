@@ -73,6 +73,8 @@ const defaultItems = [
 export const Default: Story = {
   args: {
     items: defaultItems,
+    allowSorting: true,
+    allowHiding: true,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -127,13 +129,15 @@ export const Default: Story = {
 
 export const WithAllItemsVisible: Story = {
   args: {
+    allowSorting: true,
+    allowHiding: true,
     items: [
       {
         id: "name",
         label: "Name",
         sortable: true,
         canHide: true,
-        hidden: false,
+        visible: true,
         order: 1,
       },
       {
@@ -141,7 +145,7 @@ export const WithAllItemsVisible: Story = {
         label: "Email",
         sortable: true,
         canHide: true,
-        hidden: false,
+        visible: true,
         order: 2,
       },
       {
@@ -149,7 +153,7 @@ export const WithAllItemsVisible: Story = {
         label: "Role",
         sortable: true,
         canHide: true,
-        hidden: false,
+        visible: true,
         order: 3,
       },
     ],
@@ -170,13 +174,15 @@ export const WithAllItemsVisible: Story = {
 
 export const WithAllItemsHidden: Story = {
   args: {
+    allowSorting: true,
+    allowHiding: true,
     items: [
       {
         id: "optional1",
         label: "Optional Column 1",
         sortable: true,
         canHide: true,
-        hidden: true,
+        visible: true,
         order: 1,
       },
       {
@@ -184,7 +190,7 @@ export const WithAllItemsHidden: Story = {
         label: "Optional Column 2",
         sortable: true,
         canHide: true,
-        hidden: true,
+        visible: true,
         order: 2,
       },
       {
@@ -192,7 +198,7 @@ export const WithAllItemsHidden: Story = {
         label: "Optional Column 3",
         sortable: false,
         canHide: true,
-        hidden: true,
+        visible: true,
         order: 3,
       },
     ],
@@ -213,13 +219,15 @@ export const WithAllItemsHidden: Story = {
 
 export const WithMixedStates: Story = {
   args: {
+    allowSorting: true,
+    allowHiding: true,
     items: [
       {
         id: "required",
         label: "Required Column",
         sortable: true,
         canHide: false,
-        hidden: false,
+        visible: true,
         order: 1,
       },
       {
@@ -227,7 +235,7 @@ export const WithMixedStates: Story = {
         label: "Visible Optional",
         sortable: true,
         canHide: true,
-        hidden: false,
+        visible: true,
         order: 2,
       },
       {
@@ -235,7 +243,7 @@ export const WithMixedStates: Story = {
         label: "Hidden Optional",
         sortable: true,
         canHide: true,
-        hidden: true,
+        visible: false,
         order: 3,
       },
       {
@@ -243,7 +251,7 @@ export const WithMixedStates: Story = {
         label: "No Sort Available",
         sortable: false,
         canHide: true,
-        hidden: false,
+        visible: true,
         order: 4,
       },
     ],
@@ -284,6 +292,8 @@ export const WithMixedStates: Story = {
 export const EmptyList: Story = {
   args: {
     items: [],
+    allowSorting: true,
+    allowHiding: true,
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -302,13 +312,15 @@ export const EmptyList: Story = {
 
 export const SingleItem: Story = {
   args: {
+    allowSorting: true,
+    allowHiding: true,
     items: [
       {
         id: "only",
         label: "Only Column",
         sortable: true,
         canHide: false,
-        hidden: false,
+        visible: true,
         order: 1,
       },
     ],
@@ -330,6 +342,8 @@ export const SingleItem: Story = {
 
 export const LongLabels: Story = {
   args: {
+    allowSorting: true,
+    allowHiding: true,
     items: [
       {
         id: "long1",
@@ -337,7 +351,7 @@ export const LongLabels: Story = {
           "This is a very long column name that might wrap to multiple lines",
         sortable: true,
         canHide: true,
-        hidden: false,
+        visible: true,
         order: 1,
       },
       {
@@ -346,7 +360,7 @@ export const LongLabels: Story = {
           "Another extremely long column header that tests text overflow behavior",
         sortable: false,
         canHide: true,
-        hidden: true,
+        visible: false,
         order: 2,
       },
       {
@@ -354,7 +368,7 @@ export const LongLabels: Story = {
         label: "Short",
         sortable: true,
         canHide: false,
-        hidden: false,
+        visible: true,
         order: 3,
       },
     ],

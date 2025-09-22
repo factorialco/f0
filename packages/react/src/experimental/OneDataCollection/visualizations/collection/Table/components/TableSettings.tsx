@@ -7,7 +7,8 @@ import { SortAndHideList } from "./SortAndHideList"
 import { SortAndHideListItem } from "./SortAndHideList/types"
 
 type TableSettingsProps = {
-  columns: Readonly<TableColumnDefinition<never, never, never>[]>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- we dont care about the types here, just the columns names and props
+  columns: Readonly<TableColumnDefinition<any, any, any>[]>
   frozenColumns: number
   allowSorting: boolean
   allowHiding: boolean
@@ -33,7 +34,8 @@ export const TableSettings = ({
     () =>
       columnsWithStatus
         // If allowHiding is false, we show only the columns that are visible
-        .filter((column) => !allowHiding || column.visible)
+
+        .filter((column) => allowHiding || column.visible)
         .map((column) => ({
           id: column.column.id,
           label: column.column.label,

@@ -118,6 +118,10 @@ export const VisualizationSettingsRenderer = <
     Grouping
   >
 }): ReactNode => {
+  if (visualization.type === "custom") {
+    return null
+  }
+
   const settingsRenderer = getSettingsRenderer(visualization)
 
   if (settingsRenderer) {

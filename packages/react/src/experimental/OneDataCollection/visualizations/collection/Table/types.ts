@@ -51,31 +51,26 @@ export type TableColumnDefinition<
      * References a key in the Summaries definition, similar to how sorting works
      */
     summary?: SummaryKey<Summaries>
-  } & (
-    | {
-        id: ColId
-        /**
-         * The initial order of the column
-         */
-        order?: number
-        /**
-         * The initial state of the hidden (only applies if allowColumnHiding is true)
-         */
-        hidden?: boolean
 
-        /**
-         * Avoid hiding the column by the user
-         */
-        noHiding?: boolean
-      }
-    // If id is not provided, the column is not editable
-    | {
-        id: never
-        order?: never
-        hidden?: never
-        noHiding?: never
-      }
-  )
+    /**
+     * The id of the column (if not provided, the id will be the label of the column)
+     */
+    id?: ColId
+
+    /**
+     * The initial order of the column
+     */
+    order?: number
+    /**
+     * The initial state of the hidden (only applies if allowColumnHiding is true)
+     */
+    hidden?: boolean
+
+    /**
+     * Avoid hiding the column by the user
+     */
+    noHiding?: boolean
+  }
 
 export type TableVisualizationOptions<
   R extends RecordType,
