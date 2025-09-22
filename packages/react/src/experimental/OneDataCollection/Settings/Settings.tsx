@@ -157,12 +157,13 @@ export const Settings = <
         <PopoverTrigger asChild onClick={() => setOpen(!open)}>
           <Button
             variant="outline"
-            label="Filters"
+            label="Settings"
             icon={Sliders}
             onClick={() => {}}
             hideLabel
             round
             pressed={open}
+            aria-controls={open ? "settings" : undefined}
           />
         </PopoverTrigger>
         <PopoverContent
