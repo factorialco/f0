@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.199.1](https://github.com/factorialco/f0/compare/f0-react-v1.199.0...f0-react-v1.199.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* adjust width of datacollection to cover 100% of the width ([#2639](https://github.com/factorialco/f0/issues/2639)) ([583cc82](https://github.com/factorialco/f0/commit/583cc8205a3f04ae22b57aa4477d58bad9895753))
+
 ## [1.199.0](https://github.com/factorialco/f0/compare/f0-react-v1.198.1...f0-react-v1.199.0) (2025-09-22)
 
 
