@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.200.1](https://github.com/factorialco/f0/compare/f0-react-v1.200.0...f0-react-v1.200.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* change sign ([#2649](https://github.com/factorialco/f0/issues/2649)) ([a69d863](https://github.com/factorialco/f0/commit/a69d86353b81d53bd2d139b12db5368d88a13998))
+
+## [1.200.0](https://github.com/factorialco/f0/compare/f0-react-v1.199.2...f0-react-v1.200.0) (2025-09-22)
+
+
+### Features
+
+* add support to define default direction for groups in data collection ([#2642](https://github.com/factorialco/f0/issues/2642)) ([ced3a67](https://github.com/factorialco/f0/commit/ced3a6774b5f72ef0f41fc069a92d1fe57067956))
+
+## [1.199.2](https://github.com/factorialco/f0/compare/f0-react-v1.199.1...f0-react-v1.199.2) (2025-09-22)
+
+
+### Bug Fixes
+
+* **DateNavigator:** improve alignment ([#2643](https://github.com/factorialco/f0/issues/2643)) ([4cd00dc](https://github.com/factorialco/f0/commit/4cd00dcee56eb4ae352772dee168169d9d35498f))
+
 ## [1.199.1](https://github.com/factorialco/f0/compare/f0-react-v1.199.0...f0-react-v1.199.1) (2025-09-22)
 
 
