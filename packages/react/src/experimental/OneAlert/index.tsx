@@ -46,7 +46,7 @@ interface AlertProps extends VariantProps<typeof alertVariants> {
   description: string
   action?: {
     label: string
-    onClick?: () => void
+    onClick: () => void
   }
   link?: {
     label: string
