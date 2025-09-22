@@ -462,6 +462,7 @@ export const TableCollection = <
               </TableRow>
             ))}
           {isInfiniteScrollPagination(paginationInfo) &&
+            !isLoadingMore &&
             paginationInfo.hasMore && (
               <tr>
                 <td

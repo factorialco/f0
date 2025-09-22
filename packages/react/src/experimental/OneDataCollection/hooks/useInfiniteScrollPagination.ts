@@ -24,6 +24,7 @@ export const useInfiniteScrollPagination = (
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isLoading && !isLoadingMore) {
+          console.log("trigget loadMore")
           loadMore()
         }
       },

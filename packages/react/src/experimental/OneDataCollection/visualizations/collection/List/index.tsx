@@ -246,6 +246,7 @@ export const ListCollection = <
             <ListSkeleton source={source} fields={fields} count={5} />
           )}
           {isInfiniteScrollPagination(paginationInfo) &&
+            !isInitialLoading &&
             paginationInfo.hasMore && (
               <div
                 ref={loadingIndicatorRef}
