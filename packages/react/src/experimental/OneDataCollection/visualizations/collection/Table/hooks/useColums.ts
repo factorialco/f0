@@ -71,10 +71,10 @@ export const useColumns = <
   settings?: TableVisualizationSettings
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   const [colsHidden, setColsHidden] = useState<ColId[]>(
-    getColsHiddenFromDefinition(originalColumns)
+    settings?.hidden ?? getColsHiddenFromDefinition(originalColumns)
   )
   const [colsOrder, setColsOrder] = useState<ColId[]>(
-    getColsOrderFromDefinition(originalColumns)
+    settings?.order ?? getColsOrderFromDefinition(originalColumns)
   )
 
   useEffect(() => {
