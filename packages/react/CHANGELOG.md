@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.200.2](https://github.com/factorialco/f0/compare/f0-react-v1.200.1...f0-react-v1.200.2) (2025-09-22)
+
+
+### Bug Fixes
+
+* **datacollection:** table oveflow iwth item actions ([#2651](https://github.com/factorialco/f0/issues/2651)) ([0706a20](https://github.com/factorialco/f0/commit/0706a20f80414edbb4570eddde507205ae419cdb))
+
 ## [1.200.1](https://github.com/factorialco/f0/compare/f0-react-v1.200.0...f0-react-v1.200.1) (2025-09-22)
 
 
