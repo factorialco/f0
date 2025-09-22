@@ -56,7 +56,6 @@ const Item = ({
         <Switch
           checked={item.visible}
           onCheckedChange={(checked) => {
-            console.log("onCheckedChange", checked, item)
             onChangeVisibility({
               ...item,
               visible: checked,
