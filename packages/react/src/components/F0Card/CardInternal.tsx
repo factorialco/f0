@@ -217,7 +217,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 <CardTitle
                   className={cn(
                     "flex flex-row justify-between gap-1 text-lg font-semibold text-f1-foreground",
-                    compact && "shrink-0 text-base"
+                    compact && "line-clamp-2 text-base"
                   )}
                 >
                   {title}

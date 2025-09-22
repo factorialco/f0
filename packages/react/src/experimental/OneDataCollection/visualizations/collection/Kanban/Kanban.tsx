@@ -164,6 +164,7 @@ export const KanbanCollection = <
             optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined
           }
           compact
+          forceVerticalMetadata
           selectable={source.selectable !== undefined}
           selected={isSelected}
           data-testid={`kanban-card-${String(item.id)}`}
