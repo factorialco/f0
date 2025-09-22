@@ -5,6 +5,7 @@ import {
   GroupingState,
   RecordType,
 } from "@/hooks/datasource"
+import { SortOrder } from "@/hooks/datasource/types/sortings.typings"
 import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -75,7 +76,14 @@ export const GroupingSelector = <
                 value !== EmptyGroupingValue
                   ? {
                       field: value as keyof Grouping["groupBy"],
-                      order: currentGrouping?.order ?? "asc",
+                      order:
+                        (
+                          grouping.groupBy[
+                            value as keyof Grouping["groupBy"]
+                          ] as { defaultDirection?: SortOrder }
+                        )?.defaultDirection ??
+                        currentGrouping?.order ??
+                        "asc",
                     }
                   : undefined
               )
