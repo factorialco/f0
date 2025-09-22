@@ -1,6 +1,7 @@
+import { Link } from "@/components/Actions/Link"
 import { F0Card } from "@/components/F0Card"
 import { useDraggable } from "@/lib/dnd/hooks"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import {
   attachClosestEdge,
   extractClosestEdge,
@@ -30,6 +31,7 @@ export function KanbanCard<T = unknown>({
   showIndicator?: boolean
 } & React.ComponentProps<typeof F0Card>) {
   const ref = useRef<HTMLDivElement | null>(null)
+  const linkRef = useRef<HTMLAnchorElement | null>(null)
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
   useDraggable<T>({
@@ -74,6 +76,21 @@ export function KanbanCard<T = unknown>({
   const isFirst = index === 0
   const isLast = index === total - 1
 
+  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    if (!draggable) return
+    if (props.onClick) {
+      props.onClick()
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    if (linkRef.current) {
+      linkRef.current.click()
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
   return (
     <div
       ref={ref}
@@ -83,8 +100,23 @@ export function KanbanCard<T = unknown>({
         isFirst && "mt-1.5",
         isLast && "mb-1.5"
       )}
+      onClick={handleClick}
     >
-      <F0Card {...props} />
+      <F0Card {...props} disableOverlayLink={draggable} />
+      {props.link && (
+        <Link
+          ref={linkRef}
+          href={props.link}
+          style={{
+            zIndex: 1,
+          }}
+          className={cn(
+            "z-1 pointer-events-none absolute inset-0 block rounded-xl",
+            focusRing()
+          )}
+          aria-label={props.title}
+        />
+      )}
       {showIndicator && overEdge && (
         <DropIndicator edge={overEdge} type="terminal-no-bleed" gap="4px" />
       )}

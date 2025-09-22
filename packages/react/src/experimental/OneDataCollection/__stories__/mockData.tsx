@@ -699,6 +699,7 @@ export const ExampleComponent = ({
     currentGrouping: currentGrouping,
     primaryActions,
     secondaryActions,
+    itemUrl: (item) => `/users/${item.id}`,
     itemActions: (item) => [
       {
         label: "Edit",

@@ -108,6 +108,12 @@ export interface CardInternalProps {
    * Whether the card should have a full height
    */
   fullHeight?: boolean
+
+  /**
+   * When true, disables the full-card overlay link so parent components
+   * can manage drag-and-drop while still allowing click navigation via onClick
+   */
+  disableOverlayLink?: boolean
 }
 
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
@@ -130,6 +136,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       onClick,
       forceVerticalMetadata = false,
       fullHeight = false,
+      disableOverlayLink = false,
     },
     ref
   ) {
@@ -151,7 +158,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         data-testid="card"
         ref={ref}
       >
-        {link && (
+        {link && !disableOverlayLink && (
           <Link
             href={link}
             style={{

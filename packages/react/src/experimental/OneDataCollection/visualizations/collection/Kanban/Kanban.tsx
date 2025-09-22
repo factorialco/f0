@@ -142,6 +142,11 @@ export const KanbanCollection = <
         useSelectable &&
         useSelectable?.selectedItems.has(itemId)
 
+      const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
+      const itemOnClick = source.itemOnClick
+        ? source.itemOnClick(item)
+        : undefined
+
       return (
         <KanbanCard<R>
           key={dragId}
@@ -161,11 +166,14 @@ export const KanbanCollection = <
           compact
           selectable={source.selectable !== undefined}
           selected={isSelected}
+          data-testid={`kanban-card-${String(item.id)}`}
           onSelect={(selected) => {
             if (useSelectable) {
               useSelectable.handleSelectItemChange(item, selected)
             }
           }}
+          onClick={itemOnClick}
+          link={itemHref}
         />
       )
     },
