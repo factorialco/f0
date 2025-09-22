@@ -330,10 +330,13 @@ const OneDataCollectionComp = <
   return (
     <div
       className={cn(
-        "flex w-full flex-col gap-4",
+        "flex flex-col gap-4",
         layout === "standard" && "-mx-6",
         fullHeight && "h-full"
       )}
+      style={{
+        width: "calc(100% - 48px)", // To counteract the -mx-6 from the layout
+      }}
     >
       {((totalItems !== undefined && totalItemSummary(totalItems)) ||
         navigationFilters) && (
