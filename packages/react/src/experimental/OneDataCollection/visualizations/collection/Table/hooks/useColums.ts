@@ -1,7 +1,11 @@
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { SummariesDefinition } from "../../../../summary"
-import { ColId, TableColumnDefinition } from "../types"
+import {
+  ColId,
+  TableColumnDefinition,
+  TableVisualizationSettings,
+} from "../types"
 
 /**
  * Get the order of the columns from the definition and sort them by the order putting the ones with no order at the end
@@ -63,7 +67,8 @@ export const useColumns = <
   Summaries extends SummariesDefinition,
 >(
   originalColumns: Readonly<TableColumnDefinition<R, Sortings, Summaries>[]>,
-  frozenColumns: number
+  frozenColumns: number,
+  settings?: TableVisualizationSettings
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   const [colsHidden, setColsHidden] = useState<ColId[]>(
     getColsHiddenFromDefinition(originalColumns)
@@ -71,6 +76,19 @@ export const useColumns = <
   const [colsOrder, setColsOrder] = useState<ColId[]>(
     getColsOrderFromDefinition(originalColumns)
   )
+
+  useEffect(() => {
+    console.log("settings?.hidden", settings?.hidden)
+    if (settings?.hidden) {
+      setColsHidden(settings.hidden)
+    }
+  }, [settings?.hidden])
+
+  useEffect(() => {
+    if (settings?.order) {
+      setColsOrder(settings.order)
+    }
+  }, [settings?.order])
 
   const columnsWithStatus = useMemo(() => {
     const cols = [...originalColumns]

@@ -1,3 +1,4 @@
+import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useMemo } from "react"
 import { useColumns } from "../hooks/useColums"
@@ -14,9 +15,12 @@ export const TableSettings = ({
   columns: originalColumns,
   frozenColumns,
 }: TableSettingsProps) => {
-  const { columnsWithStatus, setColsOrder, setColsHidden } = useColumns(
+  const { settings, setSettings } = useDataCollectionSettings()
+
+  const { columnsWithStatus } = useColumns(
     originalColumns,
-    frozenColumns
+    frozenColumns,
+    settings.visualization.table
   )
 
   const items = useMemo(
@@ -32,10 +36,21 @@ export const TableSettings = ({
   )
 
   const onChangeSettings = (newOrder: SortAndHideListItem[]) => {
-    setColsOrder(newOrder.map((item) => item.id))
-    setColsHidden(
-      newOrder.filter((item) => !item.visible).map((item) => item.id)
-    )
+    // setColsOrder(newOrder.map((item) => item.id))
+    // setColsHidden(
+    //   newOrder.filter((item) => !item.visible).map((item) => item.id)
+    // )
+    setSettings((prev) => ({
+      ...prev,
+      visualization: {
+        table: {
+          order: newOrder.map((item) => item.id),
+          hidden: newOrder
+            .filter((item) => !item.visible)
+            .map((item) => item.id),
+        },
+      },
+    }))
   }
 
   return (

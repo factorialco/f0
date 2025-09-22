@@ -93,7 +93,7 @@ export const SortAndHideList = ({ items, onChange }: SortAndHideListProps) => {
 
   return (
     <Reorder.Group
-      className="flex flex-1 list-none flex-col gap-2"
+      className="flex flex-1 select-none list-none flex-col gap-2"
       values={items}
       onReorder={handleOnChange}
       axis="y"

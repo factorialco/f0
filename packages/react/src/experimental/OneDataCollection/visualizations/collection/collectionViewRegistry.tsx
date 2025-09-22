@@ -15,7 +15,7 @@ import { ListCollection, ListCollectionProps } from "./List"
 import {
   TableCollection,
   TableCollectionProps,
-  settingsRenderer as tableSettingsRenderer,
+  SettingsRenderer as tableSettingsRenderer,
 } from "./Table"
 
 export type VisualizacionTypeDefinition<Props> = {

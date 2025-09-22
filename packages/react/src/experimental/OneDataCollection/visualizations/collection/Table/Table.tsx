@@ -1,6 +1,7 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
+import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import {
   OneTable,
   TableBody,
@@ -38,7 +39,7 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { TableVisualizationOptions } from "./types"
 import { useSticky } from "./useSticky"
-export * from "./settings"
+export * from "./settings/SettingsRenderer"
 
 export const TableCollection = <
   R extends RecordType,
@@ -81,8 +82,18 @@ export const TableCollection = <
     )
   )
 
+  const { settings } = useDataCollectionSettings()
+
+  useEffect(() => {
+    console.log("settings in table", settings.visualization.table.hidden)
+  }, [settings.visualization.table.hidden])
+
   // Sorted and hidden columns
-  const { columns } = useColumns(originalColumns, frozenColumns)
+  const { columns } = useColumns(
+    originalColumns,
+    frozenColumns,
+    settings.visualization.table
+  )
 
   const {
     data,

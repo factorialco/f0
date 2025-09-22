@@ -46,6 +46,7 @@ import {
 } from "@/hooks/datasource"
 import React from "react"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { DataCollectionSettingsProvider } from "./Settings/SettingsProvider"
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -331,144 +332,148 @@ const OneDataCollectionComp = <
   ])
 
   return (
-    <div
-      className={cn(
-        "flex w-full flex-col gap-4",
-        layout === "standard" && "-mx-6",
-        fullHeight && "h-full"
-      )}
-    >
-      {((totalItems !== undefined && totalItemSummary(totalItems)) ||
-        navigationFilters) && (
-        <div className="border-f1-border-primary flex gap-4 px-4">
-          <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isInitialLoading &&
-              totalItems !== undefined &&
-              totalItemSummary(totalItems) && <Skeleton className="h-5 w-24" />}
-            {!isInitialLoading && totalItems !== undefined && (
-              <div className="flex h-5 items-center">
-                {totalItemSummary(totalItems)}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-1 flex-shrink justify-end">
-            {navigationFilters &&
-              Object.entries(navigationFilters).map(([key, filter]) => {
-                const filterDef = navigationFilterTypes[filter.type]
-                return (
-                  <React.Fragment key={key}>
-                    {filterDef.render({
-                      filter: filter,
-                      value: currentNavigationFilters[key]!,
-                      onChange: (value) => {
-                        setCurrentNavigationFilters({
-                          ...currentNavigationFilters,
-                          [key]: value,
-                        })
-                      },
-                    })}
-                  </React.Fragment>
-                )
-              })}
-          </div>
-        </div>
-      )}
-      <div
-        className={cn("flex flex-col gap-4 px-4", fullHeight && "max-h-full")}
-      >
-        <OneFilterPicker
-          filters={filters}
-          value={currentFilters}
-          presets={presets}
-          onChange={(value) => setCurrentFilters(value)}
-        >
-          {isLoading && (
-            <MotionIcon
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{
-                opacity: 0,
-              }}
-              size="lg"
-              icon={Spinner}
-              className="animate-spin"
-            />
-          )}
-          {search && (
-            <Search onChange={setCurrentSearch} value={currentSearch} />
-          )}
-          <Settings
-            visualizations={visualizations}
-            currentVisualization={currentVisualization}
-            onVisualizationChange={setCurrentVisualization}
-            grouping={grouping}
-            currentGrouping={currentGrouping}
-            onGroupingChange={setCurrentGrouping}
-            sortings={sortings}
-            currentSortings={currentSortings}
-            onSortingsChange={setCurrentSortings}
-          />
-          {hasCollectionsActions && (
-            <>
-              {elementsRightActions && (
-                <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-              )}
-              <CollectionActions
-                primaryActions={primaryActionItem}
-                secondaryActions={secondaryActionsItems}
-                otherActions={otherActionsItems}
-              />
-            </>
-          )}
-        </OneFilterPicker>
-      </div>
-      {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
+    <DataCollectionSettingsProvider>
       <div
         className={cn(
-          emptyState && "hidden",
-          fullHeight && "h-full min-h-0 flex-1"
+          "flex w-full flex-col gap-4",
+          layout === "standard" && "-mx-6",
+          fullHeight && "h-full"
         )}
       >
-        <VisualizationRenderer
-          visualization={visualizations[currentVisualization]}
-          source={source}
-          onSelectItems={onSelectItemsLocal}
-          onLoadData={onLoadData}
-          onLoadError={onLoadError}
-        />
-      </div>
-      {emptyState ? (
-        <div className="flex flex-1 flex-col items-center justify-center">
-          <OneEmptyState
-            emoji={emptyState.emoji}
-            title={emptyState.title}
-            description={emptyState.description}
-            actions={emptyState.actions}
+        {((totalItems !== undefined && totalItemSummary(totalItems)) ||
+          navigationFilters) && (
+          <div className="border-f1-border-primary flex gap-4 px-4">
+            <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
+              {isInitialLoading &&
+                totalItems !== undefined &&
+                totalItemSummary(totalItems) && (
+                  <Skeleton className="h-5 w-24" />
+                )}
+              {!isInitialLoading && totalItems !== undefined && (
+                <div className="flex h-5 items-center">
+                  {totalItemSummary(totalItems)}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-1 flex-shrink justify-end">
+              {navigationFilters &&
+                Object.entries(navigationFilters).map(([key, filter]) => {
+                  const filterDef = navigationFilterTypes[filter.type]
+                  return (
+                    <React.Fragment key={key}>
+                      {filterDef.render({
+                        filter: filter,
+                        value: currentNavigationFilters[key]!,
+                        onChange: (value) => {
+                          setCurrentNavigationFilters({
+                            ...currentNavigationFilters,
+                            [key]: value,
+                          })
+                        },
+                      })}
+                    </React.Fragment>
+                  )
+                })}
+            </div>
+          </div>
+        )}
+        <div
+          className={cn("flex flex-col gap-4 px-4", fullHeight && "max-h-full")}
+        >
+          <OneFilterPicker
+            filters={filters}
+            value={currentFilters}
+            presets={presets}
+            onChange={(value) => setCurrentFilters(value)}
+          >
+            {isLoading && (
+              <MotionIcon
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{
+                  opacity: 0,
+                }}
+                size="lg"
+                icon={Spinner}
+                className="animate-spin"
+              />
+            )}
+            {search && (
+              <Search onChange={setCurrentSearch} value={currentSearch} />
+            )}
+            <Settings
+              visualizations={visualizations}
+              currentVisualization={currentVisualization}
+              onVisualizationChange={setCurrentVisualization}
+              grouping={grouping}
+              currentGrouping={currentGrouping}
+              onGroupingChange={setCurrentGrouping}
+              sortings={sortings}
+              currentSortings={currentSortings}
+              onSortingsChange={setCurrentSortings}
+            />
+            {hasCollectionsActions && (
+              <>
+                {elementsRightActions && (
+                  <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+                )}
+                <CollectionActions
+                  primaryActions={primaryActionItem}
+                  secondaryActions={secondaryActionsItems}
+                  otherActions={otherActionsItems}
+                />
+              </>
+            )}
+          </OneFilterPicker>
+        </div>
+        {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
+        <div
+          className={cn(
+            emptyState && "hidden",
+            fullHeight && "h-full min-h-0 flex-1"
+          )}
+        >
+          <VisualizationRenderer
+            visualization={visualizations[currentVisualization]}
+            source={source}
+            onSelectItems={onSelectItemsLocal}
+            onLoadData={onLoadData}
+            onLoadError={onLoadError}
           />
         </div>
-      ) : (
-        <>
-          {bulkActions && (
-            <OneActionBar
-              isOpen={showActionBar}
-              selectedNumber={selectedItemsCount}
-              primaryActions={
-                "primary" in bulkActions ? bulkActions?.primary : []
-              }
-              secondaryActions={
-                "secondary" in bulkActions ? bulkActions?.secondary : []
-              }
-              warningMessage={
-                "warningMessage" in bulkActions
-                  ? bulkActions.warningMessage
-                  : undefined
-              }
-              onUnselect={() => clearSelectedItemsFunc?.()}
+        {emptyState ? (
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <OneEmptyState
+              emoji={emptyState.emoji}
+              title={emptyState.title}
+              description={emptyState.description}
+              actions={emptyState.actions}
             />
-          )}
-        </>
-      )}
-    </div>
+          </div>
+        ) : (
+          <>
+            {bulkActions && (
+              <OneActionBar
+                isOpen={showActionBar}
+                selectedNumber={selectedItemsCount}
+                primaryActions={
+                  "primary" in bulkActions ? bulkActions?.primary : []
+                }
+                secondaryActions={
+                  "secondary" in bulkActions ? bulkActions?.secondary : []
+                }
+                warningMessage={
+                  "warningMessage" in bulkActions
+                    ? bulkActions.warningMessage
+                    : undefined
+                }
+                onUnselect={() => clearSelectedItemsFunc?.()}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </DataCollectionSettingsProvider>
   )
 }
 
