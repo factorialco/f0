@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.199.0](https://github.com/factorialco/f0/compare/f0-react-v1.198.1...f0-react-v1.199.0) (2025-09-22)
+
+
+### Features
+
+* **dataCollection-table:** align dataCollection table cells to top ([#2627](https://github.com/factorialco/f0/issues/2627)) ([e9b9e3a](https://github.com/factorialco/f0/commit/e9b9e3a96601e326999645394dff14be44c27d19))
+
 ## [1.198.1](https://github.com/factorialco/f0/compare/f0-react-v1.198.0...f0-react-v1.198.1) (2025-09-19)
 
 
