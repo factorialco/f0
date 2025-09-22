@@ -147,7 +147,7 @@ const DateNavigatorTrigger = forwardRef<
       <div
         ref={ref}
         className={cn(
-          "inline-flex cursor-auto appearance-none gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover",
+          "inline-flex cursor-auto appearance-none justify-between gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover",
           "[%>*] py-1",
           focusRing("focus:ring-f1-border-hover"),
           disabled &&
