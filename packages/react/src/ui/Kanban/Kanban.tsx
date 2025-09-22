@@ -257,7 +257,6 @@ export function Kanban<TRecord extends RecordType>(
               return (
                 <div
                   key={lane.id ?? String(laneIndex)}
-                  className="shrink-0"
                   data-testid={`lane-${lane.id ?? String(laneIndex)}`}
                 >
                   <KanbanLane<TRecord>

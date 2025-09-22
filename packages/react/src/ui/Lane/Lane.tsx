@@ -44,7 +44,7 @@ export function Lane<Record extends RecordType>({
 
   return (
     <div
-      className={`shadow-sm flex min-w-80 max-w-72 flex-col`}
+      className={`shadow-sm flex min-w-[268px] max-w-[406px] flex-col`}
       style={{
         maxHeight: `${maxHeight}px`,
       }}
