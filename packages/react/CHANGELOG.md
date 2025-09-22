@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.199.2](https://github.com/factorialco/f0/compare/f0-react-v1.199.1...f0-react-v1.199.2) (2025-09-22)
+
+
+### Bug Fixes
+
+* **DateNavigator:** improve alignment ([#2643](https://github.com/factorialco/f0/issues/2643)) ([4cd00dc](https://github.com/factorialco/f0/commit/4cd00dcee56eb4ae352772dee168169d9d35498f))
+
 ## [1.199.1](https://github.com/factorialco/f0/compare/f0-react-v1.199.0...f0-react-v1.199.1) (2025-09-22)
 
 
