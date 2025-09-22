@@ -56,6 +56,8 @@ export const TableCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  allowColumnHiding,
+  allowColumnReordering,
 }: CollectionProps<
   R,
   Filters,
@@ -92,7 +94,9 @@ export const TableCollection = <
   const { columns } = useColumns(
     originalColumns,
     frozenColumns,
-    settings.visualization.table
+    settings.visualization.table,
+    allowColumnReordering,
+    allowColumnHiding
   )
 
   const {

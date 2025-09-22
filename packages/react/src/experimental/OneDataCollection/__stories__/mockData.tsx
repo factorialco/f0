@@ -112,7 +112,6 @@ export const getMockVisualizations = (options?: {
     frozenColumns?: 0 | 1 | 2
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
-    mockTableColOrderingAndHidding?: boolean
   }
 }): Record<
   Exclude<VisualizationType, "custom">,
@@ -145,10 +144,8 @@ export const getMockVisualizations = (options?: {
           }),
           id: "name",
           sorting: "name",
-          hidden: options?.table?.mockTableColOrderingAndHidding
-            ? true
-            : undefined,
-          order: options?.table?.mockTableColOrderingAndHidding ? 3 : undefined,
+          hidden: options?.table?.allowColumnHiding ? true : undefined,
+          order: options?.table?.allowColumnReordering ? 3 : undefined,
         },
         {
           label: "Email",
@@ -161,22 +158,22 @@ export const getMockVisualizations = (options?: {
           render: (item) => item.role,
           sorting: "role",
           id: "role",
-          order: options?.table?.mockTableColOrderingAndHidding ? 2 : undefined,
-          noHiding: options?.table?.mockTableColOrderingAndHidding,
+          order: options?.table?.allowColumnReordering ? 2 : undefined,
+          noHiding: options?.table?.allowColumnHiding,
         },
         {
           id: "department",
           label: "Department",
           render: (item) => item.department,
           sorting: "department",
-          order: options?.table?.mockTableColOrderingAndHidding ? 4 : undefined,
+          order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
         {
           id: "email2",
           label: "Email 2",
           render: (item) => item.email,
           sorting: "email",
-          order: options?.table?.mockTableColOrderingAndHidding ? 1 : undefined,
+          order: options?.table?.allowColumnReordering ? 1 : undefined,
         },
         {
           id: "role2",
@@ -189,9 +186,7 @@ export const getMockVisualizations = (options?: {
           label: "Department 2",
           render: (item) => item.department,
           sorting: "department",
-          order: options?.table?.mockTableColOrderingAndHidding
-            ? 10
-            : undefined,
+          order: options?.table?.allowColumnReordering ? 10 : undefined,
         },
         {
           id: "email3",
@@ -241,7 +236,7 @@ export const getMockVisualizations = (options?: {
               .join(", "),
           sorting: "permissions.read",
           id: "permissions",
-          order: options?.table?.mockTableColOrderingAndHidding ? 4 : undefined,
+          order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
       ],
     },
@@ -679,7 +674,8 @@ export const ExampleComponent = ({
   /**
    * mocks the table column ordering and hidding
    */
-  mockTableColOrderingAndHidding = false,
+  tableAllowColumnReordering = false,
+  tableAllowColumnHiding = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -714,14 +710,14 @@ export const ExampleComponent = ({
   primaryActions?: PrimaryActionsDefinition
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean
-  mockTableColOrderingAndHidding?: boolean
+  tableAllowColumnReordering?: boolean
+  tableAllowColumnHiding?: boolean
 }) => {
   const mockVisualizations = getMockVisualizations({
     table: {
       frozenColumns,
-      allowColumnHiding: mockTableColOrderingAndHidding,
-      allowColumnReordering: mockTableColOrderingAndHidding,
-      mockTableColOrderingAndHidding,
+      allowColumnHiding: tableAllowColumnHiding,
+      allowColumnReordering: tableAllowColumnReordering,
     },
   })
 

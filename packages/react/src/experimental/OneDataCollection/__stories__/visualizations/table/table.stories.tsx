@@ -24,14 +24,26 @@ export const BasicListVisualization: Story = {
   },
 }
 
-// Examples with multiple visualizations
 export const TableFrozenCols: Story = {
   render: () => <ExampleComponent frozenColumns={2} />,
 }
 
-// Examples with multiple visualizations
+export const TableColumnOrderingAndHidden: Story = {
+  render: () => (
+    <ExampleComponent
+      frozenColumns={2}
+      tableAllowColumnReordering
+      tableAllowColumnHiding
+    />
+  ),
+}
+
 export const TableColumnOrdering: Story = {
   render: () => (
-    <ExampleComponent frozenColumns={2} mockTableColOrderingAndHidding />
+    <ExampleComponent frozenColumns={2} tableAllowColumnReordering />
   ),
+}
+
+export const TableColumnHidden: Story = {
+  render: () => <ExampleComponent frozenColumns={2} tableAllowColumnHiding />,
 }

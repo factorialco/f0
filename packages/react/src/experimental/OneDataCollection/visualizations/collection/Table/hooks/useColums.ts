@@ -68,17 +68,20 @@ export const useColumns = <
 >(
   originalColumns: Readonly<TableColumnDefinition<R, Sortings, Summaries>[]>,
   frozenColumns: number,
-  settings?: TableVisualizationSettings
+  settings?: TableVisualizationSettings,
+  allowSorting?: boolean,
+  allowHiding?: boolean
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   const [colsHidden, setColsHidden] = useState<ColId[]>(
-    settings?.hidden ?? getColsHiddenFromDefinition(originalColumns)
+    (allowHiding ? settings?.hidden : undefined) ??
+      getColsHiddenFromDefinition(originalColumns)
   )
   const [colsOrder, setColsOrder] = useState<ColId[]>(
-    settings?.order ?? getColsOrderFromDefinition(originalColumns)
+    (allowSorting ? settings?.order : undefined) ??
+      getColsOrderFromDefinition(originalColumns)
   )
 
   useEffect(() => {
-    console.log("settings?.hidden", settings?.hidden)
     if (settings?.hidden) {
       setColsHidden(settings.hidden)
     }
@@ -109,9 +112,9 @@ export const useColumns = <
         .sort((a, b) => colsOrder.indexOf(a.id) - colsOrder.indexOf(b.id))
         .map((column, index) => ({
           column,
-          canHide: !(column.noHiding ?? false),
+          canHide: allowHiding ? !(column.noHiding ?? false) : false,
           visible: !colsHidden.includes(column.id),
-          sortable: true,
+          sortable: allowSorting,
           order: index + frozenColumns,
         })),
     ]

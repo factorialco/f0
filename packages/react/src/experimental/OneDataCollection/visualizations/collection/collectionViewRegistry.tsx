@@ -16,13 +16,15 @@ import {
   TableCollection,
   TableCollectionProps,
   SettingsRenderer as tableSettingsRenderer,
+  TableVisualizationSettings,
 } from "./Table"
 
-export type VisualizacionTypeDefinition<Props> = {
+export type VisualizacionTypeDefinition<Props, Settings = never> = {
   render: (props: Props) => JSX.Element
   renderSettings?: (props: Props) => JSX.Element | null
   name: string
   icon: IconType
+  settings?: Settings
 }
 
 type CollectionVisualizations<
@@ -43,7 +45,8 @@ type CollectionVisualizations<
       ItemActions,
       NavigationFilters,
       Grouping
-    >
+    >,
+    TableVisualizationSettings
   >
   list: VisualizacionTypeDefinition<
     ListCollectionProps<
@@ -126,6 +129,10 @@ export const collectionVisualizations: CollectionVisualizations<
       )
     },
     renderSettings: tableSettingsRenderer,
+    settings: {
+      order: [],
+      hidden: [],
+    },
   },
   list: {
     name: "List",

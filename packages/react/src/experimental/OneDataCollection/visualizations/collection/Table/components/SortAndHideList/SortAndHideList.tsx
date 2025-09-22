@@ -9,32 +9,41 @@ import { SortAndHideListItem } from "./types"
 type ItemProps = {
   item: SortAndHideListItem
   onChangeVisibility: (item: SortAndHideListItem) => void
+  allowSorting: boolean
+  allowHiding: boolean
 }
 
-const Item = ({ item, onChangeVisibility }: ItemProps) => {
+const Item = ({
+  item,
+  onChangeVisibility,
+  allowSorting,
+  allowHiding,
+}: ItemProps) => {
   const classes = "flex items-center gap-2 text-medium text-sm pr-4"
   const controls = useDragControls()
 
   const content = (
     <div className={classes}>
-      <div
-        className={cn(
-          "flex shrink-0 items-center justify-center text-f1-icon",
-          item.sortable && "cursor-grab"
-        )}
-        style={{ width: "20px" }}
-        onPointerDown={(e) => {
-          if (item.sortable) {
-            controls.start(e)
-          }
-        }}
-      >
-        {item.sortable ? (
-          <F0Icon icon={Handle} size="xs" />
-        ) : (
-          <F0Icon icon={LockLocked} size="sm" />
-        )}
-      </div>
+      {allowSorting && (
+        <div
+          className={cn(
+            "flex shrink-0 items-center justify-center text-f1-icon",
+            item.sortable && "cursor-grab"
+          )}
+          style={{ width: "20px" }}
+          onPointerDown={(e) => {
+            if (item.sortable) {
+              controls.start(e)
+            }
+          }}
+        >
+          {item.sortable ? (
+            <F0Icon icon={Handle} size="xs" />
+          ) : (
+            <F0Icon icon={LockLocked} size="sm" />
+          )}
+        </div>
+      )}
       <span
         className={cn(
           "flex-1",
@@ -43,19 +52,21 @@ const Item = ({ item, onChangeVisibility }: ItemProps) => {
       >
         <OneEllipsis>{item.label}</OneEllipsis>
       </span>
-      <Switch
-        checked={item.visible}
-        onCheckedChange={(checked) => {
-          console.log("onCheckedChange", checked, item)
-          onChangeVisibility({
-            ...item,
-            visible: checked,
-          })
-        }}
-        title={item.label}
-        hideLabel
-        disabled={!item.canHide}
-      />
+      {allowHiding && (
+        <Switch
+          checked={item.visible}
+          onCheckedChange={(checked) => {
+            console.log("onCheckedChange", checked, item)
+            onChangeVisibility({
+              ...item,
+              visible: checked,
+            })
+          }}
+          title={item.label}
+          hideLabel
+          disabled={!item.canHide}
+        />
+      )}
     </div>
   )
 
@@ -80,9 +91,16 @@ const Item = ({ item, onChangeVisibility }: ItemProps) => {
 export type SortAndHideListProps = {
   items: SortAndHideListItem[]
   onChange?: (items: SortAndHideListItem[]) => void
+  allowSorting: boolean
+  allowHiding: boolean
 }
 
-export const SortAndHideList = ({ items, onChange }: SortAndHideListProps) => {
+export const SortAndHideList = ({
+  items,
+  onChange,
+  allowSorting,
+  allowHiding,
+}: SortAndHideListProps) => {
   const onChangeVisibility = (item: SortAndHideListItem) => {
     onChange?.(items.map((i) => (i.id === item.id ? item : i)))
   }
@@ -104,6 +122,8 @@ export const SortAndHideList = ({ items, onChange }: SortAndHideListProps) => {
           item={item}
           key={item.id}
           onChangeVisibility={onChangeVisibility}
+          allowSorting={allowSorting}
+          allowHiding={allowHiding}
         />
       ))}
     </Reorder.Group>
