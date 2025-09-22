@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.200.0](https://github.com/factorialco/f0/compare/f0-react-v1.199.2...f0-react-v1.200.0) (2025-09-22)
+
+
+### Features
+
+* add support to define default direction for groups in data collection ([#2642](https://github.com/factorialco/f0/issues/2642)) ([ced3a67](https://github.com/factorialco/f0/commit/ced3a6774b5f72ef0f41fc069a92d1fe57067956))
+
 ## [1.199.2](https://github.com/factorialco/f0/compare/f0-react-v1.199.1...f0-react-v1.199.2) (2025-09-22)
 
 
