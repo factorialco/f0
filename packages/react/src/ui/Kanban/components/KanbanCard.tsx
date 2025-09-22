@@ -1,5 +1,5 @@
 import { Link } from "@/components/Actions/Link"
-import { F0Card } from "@/components/F0Card"
+import { CardInternal } from "@/components/F0Card/CardInternal"
 import { useDraggable } from "@/lib/dnd/hooks"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -29,7 +29,7 @@ export function KanbanCard<T = unknown>({
   laneId?: string
   draggable?: boolean
   showIndicator?: boolean
-} & React.ComponentProps<typeof F0Card>) {
+} & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
   const linkRef = useRef<HTMLAnchorElement | null>(null)
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
@@ -102,7 +102,7 @@ export function KanbanCard<T = unknown>({
       )}
       onClick={handleClick}
     >
-      <F0Card {...props} disableOverlayLink={draggable} />
+      <CardInternal {...props} disableOverlayLink={draggable} />
       {props.link && (
         <Link
           ref={linkRef}

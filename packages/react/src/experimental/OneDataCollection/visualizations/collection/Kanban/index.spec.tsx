@@ -5,9 +5,8 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
-import { render, screen } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import { userEvent, zeroRender } from "@/testing/test-utils"
+import { screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
@@ -21,10 +20,6 @@ type Person = RecordType & {
 
 type TestFilters = FiltersDefinition
 type TestNavigationFilters = NavigationFiltersDefinition
-
-const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
-)
 
 const createSource = (
   data: Person[]
@@ -87,30 +82,28 @@ describe("KanbanCollection - item click", () => {
       itemOnClick: (item: Person) => () => onItemClick(item),
     }
 
-    render(
-      <Wrapper>
-        <KanbanCollection<
-          Person,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<Person>,
-          TestNavigationFilters,
-          GroupingDefinition<Person>
-        >
-          lanes={[
-            { id: "todo", title: "Todo" },
-            { id: "doing", title: "Doing" },
-          ]}
-          title={(p) => p.name}
-          description={(p) => p.name}
-          metadata={() => []}
-          source={source}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-        />
-      </Wrapper>
+    zeroRender(
+      <KanbanCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
     )
 
     // Click first card (John)
