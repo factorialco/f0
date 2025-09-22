@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.199.0](https://github.com/factorialco/f0/compare/f0-react-v1.198.1...f0-react-v1.199.0) (2025-09-22)
+
+
+### Features
+
+* **dataCollection-table:** align dataCollection table cells to top ([#2627](https://github.com/factorialco/f0/issues/2627)) ([e9b9e3a](https://github.com/factorialco/f0/commit/e9b9e3a96601e326999645394dff14be44c27d19))
+
+## [1.198.1](https://github.com/factorialco/f0/compare/f0-react-v1.198.0...f0-react-v1.198.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* use Spinner in data collection ([#2628](https://github.com/factorialco/f0/issues/2628)) ([ca0427e](https://github.com/factorialco/f0/commit/ca0427e8079dff93b4419b9e37c94200786fea5e))
+
+## [1.198.0](https://github.com/factorialco/f0/compare/f0-react-v1.197.1...f0-react-v1.198.0) (2025-09-19)
+
+
+### Features
+
+* 2 small fixes in kanban view ([#2576](https://github.com/factorialco/f0/issues/2576)) ([607bb09](https://github.com/factorialco/f0/commit/607bb09095db61d703e6aefec6642510f221fbf5))
+* enhance Kanban onMove functionality ([607bb09](https://github.com/factorialco/f0/commit/607bb09095db61d703e6aefec6642510f221fbf5))
+
+## [1.197.1](https://github.com/factorialco/f0/compare/f0-react-v1.197.0...f0-react-v1.197.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* spacings and alignment in grouping selector ([#2630](https://github.com/factorialco/f0/issues/2630)) ([1f45de1](https://github.com/factorialco/f0/commit/1f45de13cf24105270d1180f6f7c2c0eae83f283))
+
 ## [1.197.0](https://github.com/factorialco/f0/compare/f0-react-v1.196.0...f0-react-v1.197.0) (2025-09-18)
 
 

@@ -9,7 +9,7 @@ import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
 
-const DEFAULT_MAX_LANE_HEIGHT = 700
+const DEFAULT_MAX_LANE_HEIGHT = 600
 
 export function Lane<Record extends RecordType>({
   title,

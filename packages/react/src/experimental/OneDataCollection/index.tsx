@@ -3,8 +3,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { F0Icon } from "../../components/F0Icon"
-import { Spinner } from "../../icons/app"
 
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
@@ -33,11 +31,10 @@ import type {
 } from "./types"
 export * from "./navigationFilters/types"
 
+import { Spinner } from "@/experimental/Information/Spinner"
 import { useEventEmitter } from "./useEventEmitter"
 import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
-
-const MotionIcon = motion.create(F0Icon)
 
 import {
   GroupingDefinition,
@@ -387,16 +384,16 @@ const OneDataCollectionComp = <
             onChange={(value) => setCurrentFilters(value)}
           >
             {isLoading && (
-              <MotionIcon
+              <motion.div
+                className="flex h-8 w-8 items-center justify-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{
                   opacity: 0,
                 }}
-                size="lg"
-                icon={Spinner}
-                className="animate-spin"
-              />
+              >
+                <Spinner size="small" />
+              </motion.div>
             )}
             {search && (
               <Search onChange={setCurrentSearch} value={currentSearch} />

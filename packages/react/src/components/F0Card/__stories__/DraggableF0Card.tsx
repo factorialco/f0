@@ -1,16 +1,15 @@
 import { useDraggable } from "@/lib/dnd/hooks"
+import { DragConfig } from "@/ui/Kanban/components/KanbanCard"
 import { useRef } from "react"
 import { F0Card } from "../F0Card"
 
-type DragConfig = { id: string; type?: string; data?: Record<string, unknown> }
-
-export function DraggableF0Card({
+export function DraggableF0Card<T = unknown>({
   drag,
   ...props
-}: { drag: DragConfig } & React.ComponentProps<typeof F0Card>) {
+}: { drag: DragConfig<T> } & React.ComponentProps<typeof F0Card>) {
   const ref = useRef<HTMLDivElement | null>(null)
 
-  useDraggable({
+  useDraggable<T>({
     ref: ref as React.RefObject<HTMLElement>,
     payload: { kind: drag.type ?? "f0-card", id: drag.id, data: drag.data },
   })
