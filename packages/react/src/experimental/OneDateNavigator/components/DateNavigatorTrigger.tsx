@@ -147,7 +147,7 @@ const DateNavigatorTrigger = forwardRef<
       <div
         ref={ref}
         className={cn(
-          "inline-flex cursor-auto appearance-none justify-between gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover",
+          "inline-flex cursor-auto appearance-none gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover",
           "[%>*] py-1",
           focusRing("focus:ring-f1-border-hover"),
           disabled &&
@@ -158,38 +158,45 @@ const DateNavigatorTrigger = forwardRef<
         // Prevent the date picker from being triggered when the user clicks on the input
         onClick={(e) => e.stopPropagation()}
       >
-        {navigation && (
-          <Button
+        <div
+          className={cn(
+            "flex flex-1 gap-1",
+            navigation ? "justify-between" : "justify-center"
+          )}
+        >
+          {navigation && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={ChevronLeft}
+              label="Previous"
+              hideLabel
+              disabled={!nextPrev?.prev}
+              onClick={() => handleNavigation(nextPrev?.prev ?? false)}
+            />
+          )}
+          <ButtonInternal
             size="sm"
             variant="ghost"
-            icon={ChevronLeft}
-            label="Previous"
-            hideLabel
-            disabled={!nextPrev?.prev}
-            onClick={() => handleNavigation(nextPrev?.prev ?? false)}
+            label={label}
+            onClick={onClick}
+            disabled={disabled}
+            className={cn(highlighted && "bg-f1-background-secondary-hover")}
           />
-        )}
-        <ButtonInternal
-          size="sm"
-          variant="ghost"
-          label={label}
-          onClick={onClick}
-          disabled={disabled}
-          className={cn(highlighted && "bg-f1-background-secondary-hover")}
-        />
-        {navigation && (
-          <Button
-            variant="ghost"
-            icon={ChevronRight}
-            label="Next"
-            hideLabel
-            size="sm"
-            disabled={!nextPrev?.next}
-            onClick={() => handleNavigation(nextPrev?.next ?? false)}
-          />
-        )}
+          {navigation && (
+            <Button
+              variant="ghost"
+              icon={ChevronRight}
+              label="Next"
+              hideLabel
+              size="sm"
+              disabled={!nextPrev?.next}
+              onClick={() => handleNavigation(nextPrev?.next ?? false)}
+            />
+          )}
+        </div>
         {!hideGoToCurrent && currentDate && (
-          <div className="border-l-solid flex-1 border-[#f00]">
+          <div className="border-l-solid flex-shrink-0 border-[#f00]">
             <Button
               size="sm"
               variant="ghost"
