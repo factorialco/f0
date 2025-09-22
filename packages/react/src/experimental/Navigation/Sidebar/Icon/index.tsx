@@ -1,6 +1,6 @@
 import { Button } from "@/ui/button"
 import { useEffect, useRef } from "react"
-import { Icon } from "../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../components/F0Icon"
 import { Cross } from "../../../../icons/app"
 import { cn } from "../../../../lib/utils"
 import { useSidebar } from "../../ApplicationFrame/FrameProvider"
@@ -88,7 +88,7 @@ export function SidebarIcon() {
         <SidebarIconSvg isExpanded={sidebarState === "locked"} />
       </div>
       <div className={cn("hidden", { flex: isSmallScreen })}>
-        <Icon icon={Cross} size="md" />
+        <F0Icon icon={Cross} size="md" />
       </div>
     </Button>
   )

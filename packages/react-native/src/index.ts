@@ -16,6 +16,3 @@ export * from "./components/experimental/Lists/DetailsItemsList";
 
 // Export icons
 export * from "./icons";
-
-// Export modules
-export * from "./modules/inbox/InboxView";

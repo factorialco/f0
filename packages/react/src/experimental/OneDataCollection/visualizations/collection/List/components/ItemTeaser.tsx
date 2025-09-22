@@ -1,8 +1,5 @@
+import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import {
-  Avatar,
-  AvatarVariant,
-} from "@/experimental/Information/Avatars/Avatar"
 
 export type ItemTeaserProps = {
   title: string
@@ -13,7 +10,7 @@ export type ItemTeaserProps = {
 export const ItemTeaser = ({ title, avatar, description }: ItemTeaserProps) => {
   return (
     <article className="flex w-[calc(100%-72px)] min-w-40 flex-col items-start gap-3 md:w-full md:flex-row md:items-center md:gap-2">
-      {avatar && <Avatar avatar={avatar} size="medium" />}
+      {avatar && <F0Avatar avatar={avatar} size="md" />}
       <div className="flex flex-1 flex-col gap-0.5">
         <header>
           <h3>

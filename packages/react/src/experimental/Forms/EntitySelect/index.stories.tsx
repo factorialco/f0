@@ -1,10 +1,10 @@
 import type { Meta } from "@storybook/react-vite"
 
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Plus } from "@/icons/app"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { ComponentProps, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
-import { RawTag } from "../../Information/Tags/RawTag"
 import { famousEmployees } from "./entity-select-name.factory"
 import {
   teamsWithEmployees,
@@ -513,7 +513,7 @@ export const WithCustomTrigger = {
           }}
         >
           <div className="flex justify-start gap-2">
-            <RawTag icon={open ? ChevronDown : ChevronRight} />
+            <F0TagRaw icon={open ? ChevronDown : ChevronRight} />
             <span className="my-auto">{`${numSelected} selected`}</span>
           </div>
         </EntitySelect>

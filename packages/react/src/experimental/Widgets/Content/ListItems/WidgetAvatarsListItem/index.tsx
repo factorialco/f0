@@ -1,22 +1,23 @@
-import { IconType } from "@/components/Utilities/Icon"
+import { PersonAvatarVariant } from "@/components/avatars/F0Avatar"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
+import { F0AvatarList } from "@/components/avatars/F0AvatarList"
+import { cn } from "@/lib/utils"
 import { ComponentProps } from "react"
-import { cn } from "../../../../../lib/utils"
-import { AlertAvatar } from "../../../../Information/Avatars/AlertAvatar"
-import { AvatarVariant } from "../../../../Information/Avatars/Avatar"
-import { AvatarList } from "../../../../Information/Avatars/AvatarList/index.tsx"
-import { EmojiAvatar } from "../../../../Information/Avatars/EmojiAvatar"
 
 export type WidgetAvatarsListItemProps = {
   id: string | number
   title: string
   subtitle: string
-  avatars: AvatarVariant[]
+  avatars: Omit<PersonAvatarVariant, "type">[] & Record<string, unknown>[]
   remainingCount?: number
   withPointerCursor?: boolean
   onClick?: (id: string | number) => void
 } & (
   | { emoji: string }
-  | { alert: ComponentProps<typeof AlertAvatar>["type"]; alertIcon?: IconType }
+  | {
+      alert: ComponentProps<typeof F0AvatarAlert>["type"]
+    }
 )
 
 type WrapperProps = {
@@ -71,20 +72,20 @@ export function WidgetAvatarsListItem({
       withEmoji={"emoji" in props && !!props.emoji}
       withPointerCursor={withPointerCursor}
     >
-      {"alert" in props && (
-        <AlertAvatar type={props.alert} icon={props.alertIcon} />
-      )}
-      {"emoji" in props && props.emoji && <EmojiAvatar emoji={props.emoji} />}
+      {"alert" in props && props.alert && <F0AvatarAlert type={props.alert} />}
+      {"emoji" in props && props.emoji && <F0AvatarEmoji emoji={props.emoji} />}
       <div className="flex-1">
         <p className="line-clamp-1 font-medium">{title}</p>
         <p className="line-clamp-1 text-f1-foreground-secondary">{subtitle}</p>
       </div>
-      <AvatarList
-        avatars={avatars}
-        remainingCount={remainingCount}
-        size={"emoji" in props && props.emoji ? "medium" : "small"}
-        type="person"
-      />
+      <div className="min-w-0 flex-1">
+        <F0AvatarList
+          avatars={avatars}
+          remainingCount={remainingCount}
+          size={"emoji" in props && props.emoji ? "md" : "sm"}
+          type="person"
+        />
+      </div>
     </Wrapper>
   )
 }

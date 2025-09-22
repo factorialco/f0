@@ -1,8 +1,8 @@
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Icon } from "@/components/F0Icon"
+import { ChevronDown } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { useMemo } from "react"
-import { Icon } from "../../../../components/Utilities/Icon"
-import { ChevronDown } from "../../../../icons/app"
-import { cn } from "../../../../lib/utils"
-import { PersonAvatar } from "../../../exports"
 import {
   EntitySelectEntity,
   EntitySelectSubEntity,
@@ -60,11 +60,11 @@ export const Trigger = ({
         ) : flattenedList.length === 1 ? (
           !hiddenAvatar ? (
             <div className="flex flex-row gap-2 p-0">
-              <PersonAvatar
+              <F0AvatarPerson
                 firstName={flattenedList[0].subItem.subName}
                 lastName={""}
                 src={flattenedList[0].subItem.subAvatar}
-                size="xsmall"
+                size="xs"
               />
               <span>{flattenedList[0].subItem.subName}</span>
             </div>
@@ -77,7 +77,7 @@ export const Trigger = ({
       </span>
       <div className="p-0.5">
         <div className="h-[16px] w-[16px]">
-          <Icon
+          <F0Icon
             icon={ChevronDown}
             size="sm"
             className="rounded-2xs bg-f1-background-secondary p-0.5"

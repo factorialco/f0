@@ -1,4 +1,3 @@
-import { Message } from "@copilotkit/runtime-client-gql"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { ChatTextarea } from "./ChatTextarea"
@@ -47,7 +46,11 @@ const ChatTextareaWrapper = () => {
       abortControllerRef.current = null
     }
 
-    return new Message({ type: "TextMessage" })
+    return {
+      id: `message-${Date.now()}`,
+      role: "assistant" as const,
+      content: `This is a mock response after 2 seconds of thinking. I've processed your message: "${message}"`,
+    }
   }
 
   const handleStop = () => {

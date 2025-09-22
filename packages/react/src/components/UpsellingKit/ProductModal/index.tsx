@@ -1,5 +1,6 @@
 import { Button } from "@/components/Actions/Button"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
+import { ModuleId } from "@/experimental"
 import { ButtonVariant } from "@/ui/button"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"
@@ -10,7 +11,7 @@ type ProductModalProps = {
   isOpen: boolean
   onClose: () => void
   modalTitle: string
-  modalIcon: IconType
+  modalModule: ModuleId
   title: string
   image: string
   benefits: string[]
@@ -21,20 +22,24 @@ type ProductModalProps = {
   successMessage: {
     title: string
     description: string
-    buttonLabel: string
-    buttonOnClick: () => void
+    buttonLabel?: string
+    buttonOnClick?: () => void
   }
   loadingState: {
     label: string
   }
-  nextSteps: {
+  closeLabel: string
+  nextSteps?: {
     title: string
     items: {
       text: string
       isCompleted?: boolean
     }[]
   }
-  closeLabel: string
+  tag?: {
+    label: string
+    icon: IconType
+  }
   primaryAction?: Action
   secondaryAction?: Action
   portalContainer?: HTMLElement | null
@@ -63,9 +68,10 @@ export function ProductModal({
   closeLabel,
   primaryAction,
   modalTitle,
-  modalIcon,
+  modalModule,
   secondaryAction,
   portalContainer,
+  tag,
 }: ProductModalProps) {
   const [isModalOpen, setIsOpen] = useState(isOpen)
   const [responseStatus, setResponseStatus] = useState<ResponseStatus>(null)
@@ -99,7 +105,7 @@ export function ProductModal({
         isOpen={isModalOpen}
         onClose={handleClose}
         title={modalTitle}
-        icon={modalIcon}
+        module={modalModule}
         portalContainer={portalContainer}
       >
         <div className="pb-4 pl-4">
@@ -108,6 +114,7 @@ export function ProductModal({
             image={image}
             benefits={benefits}
             withShadow={false}
+            tag={tag}
             actions={
               <div className="flex gap-3">
                 {primaryAction && (

@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": true,
     /* Shadcn */
     /* */
-    "types": ["vite/client", "@testing-library/jest-dom"],
+    "types": ["vite/client", "@testing-library/jest-dom", "vitest/globals"],
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "~/*": ["./*"]

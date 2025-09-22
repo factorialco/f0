@@ -76,6 +76,7 @@ const preview: Preview = {
   decorators: [FactorialOne, withTheme()],
 
   parameters: {
+    throwPlayFunctionExceptions: true,
     chromatic: { disableSnapshot: true, diffThreshold: 0.2 },
     a11y: {
       config: {
@@ -89,7 +90,7 @@ const preview: Preview = {
       },
     },
     html: {
-      root: "#factorial-one-layout",
+      root: "#f0-layout",
       highlighter: {
         showLineNumbers: true, // default: false
         wrapLines: true, // default: true

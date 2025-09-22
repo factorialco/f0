@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { Briefcase, EllipsisHorizontal, Settings } from "../../../../icons/app"
+import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
 const meta = {
@@ -271,6 +271,23 @@ export const WithProductUpdate: Story = {
         },
         products: [
           {
+            title: "Factorial Next: AI Edition 2025",
+            description:
+              "Join the event to discover ONE, our most important launch yet. Live on 7 Oct at 16:30 (Spain)",
+            onClick: () => {
+              alert("onClick")
+            },
+            onClose: () => {
+              alert("onClose")
+            },
+            module: "discover",
+            dismissable: false,
+            trackVisibility: (open) => {
+              console.log("trackOpenChange", open)
+            },
+            type: "one-campaign",
+          },
+          {
             title: "Benefits",
             description:
               "Improve your team’s salary without impacting your budget through flexible compensation.",
@@ -280,7 +297,7 @@ export const WithProductUpdate: Story = {
             onClose: () => {
               alert("onClose")
             },
-            icon: Briefcase,
+            module: "project_management",
             dismissable: false,
             trackVisibility: (open) => {
               console.log("trackOpenChange", open)
@@ -295,7 +312,7 @@ export const WithProductUpdate: Story = {
             onClose: () => {
               alert("onClose")
             },
-            icon: Briefcase,
+            module: "project_management",
             dismissable: false,
             trackVisibility: (open) => {
               console.log("trackOpenChange", open)

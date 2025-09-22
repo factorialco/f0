@@ -1,3 +1,4 @@
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import React from "react"
 import { expect, within } from "storybook/test"
@@ -106,6 +107,7 @@ export const Default: Story = {
 }
 
 export const Variants: Story = {
+  parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex gap-2">
       <Button {...args} variant="default" label="Default" />
@@ -120,6 +122,7 @@ export const Variants: Story = {
 }
 
 export const IconVariants: Story = {
+  parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex flex-col gap-6">
       <div>
@@ -205,6 +208,7 @@ export const IconVariants: Story = {
 
 // Size Variants
 export const Sizes: Story = {
+  parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex items-center gap-4">
       <Button {...args} size="lg" label="Large" />
@@ -214,7 +218,6 @@ export const Sizes: Story = {
   ),
 }
 
-// States
 export const Disabled: Story = {
   args: {
     disabled: true,
@@ -246,6 +249,7 @@ export const AsyncAction: Story = {
 }
 
 export const IconButtonGroup: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <div className="flex items-center gap-2">
       <Button variant="ghost" icon={Add} hideLabel round label="Add" />
@@ -265,6 +269,7 @@ export const OnlyEmoji: Story = {
 }
 
 export const States: Story = {
+  parameters: withSnapshot({}),
   render: (args) => {
     const [asyncLoading, setAsyncLoading] = React.useState(false)
     return (

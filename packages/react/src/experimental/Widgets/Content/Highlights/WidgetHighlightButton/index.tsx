@@ -1,4 +1,4 @@
-import { Icon, IconType } from "../../../../../components/Utilities/Icon"
+import { F0Icon, IconType } from "../../../../../components/F0Icon"
 import { cn } from "../../../../../lib/utils"
 
 type Props = {
@@ -57,7 +57,7 @@ export function WidgetHighlightButton({
           <p className="line-clamp-1 flex-1 text-f1-foreground-secondary">
             {label}
           </p>
-          <Icon icon={icon} size="md" className={iconClassName} />
+          <F0Icon icon={icon} size="md" className={iconClassName} />
         </div>
         <p className="line-clamp-1 flex-1 text-3xl font-semibold text-f1-foreground">
           {count}

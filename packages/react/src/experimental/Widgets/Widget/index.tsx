@@ -1,11 +1,8 @@
 import { Button, type ButtonProps } from "@/components/Actions/Button"
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0TagAlert } from "@/components/tags/F0TagAlert"
+import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
 import { Counter } from "@/experimental/Information/Counter"
-import { AlertTag } from "@/experimental/Information/Tags/AlertTag"
-import {
-  StatusTag,
-  StatusVariant,
-} from "@/experimental/Information/Tags/StatusTag"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/experimental/Utilities/PrivateBox"
 import { EyeInvisible, EyeVisible, InfoCircleLine } from "@/icons/app"
@@ -123,7 +120,7 @@ const Container = forwardRef<
                 )}
                 {header.info && (
                   <Tooltip label={header.info}>
-                    <Icon
+                    <F0Icon
                       icon={InfoCircleLine}
                       size="sm"
                       className="text-f1-foreground-secondary"
@@ -137,9 +134,9 @@ const Container = forwardRef<
                 )}
               </div>
               <div className="flex flex-row items-center gap-3">
-                {alert && <AlertTag text={alert} level="critical" />}
+                {alert && <F0TagAlert text={alert} level="critical" />}
                 {status && (
-                  <StatusTag text={status.text} variant={status.variant} />
+                  <F0TagStatus text={status.text} variant={status.variant} />
                 )}
                 {header.link && (
                   <CardLink

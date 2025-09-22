@@ -1,3 +1,15 @@
+import { TextCell } from "@/components/value-display/types/text"
+import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionData"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
+import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
+import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
+import {
+  BaseFetchOptions,
+  FiltersDefinition,
+  PaginatedFetchOptions,
+  PaginationType,
+} from "@/hooks/datasource"
+import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
   act,
   render,
@@ -6,27 +18,18 @@ import {
   waitFor,
   within,
 } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
-import {
-  defaultTranslations,
-  I18nProvider,
-} from "../../../../../lib/providers/i18n"
 import { ItemActionsDefinition } from "../../../item-actions"
-import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
-import { SortingsDefinition } from "../../../sortings"
 import { SummariesDefinition } from "../../../summary"
-import type {
-  BaseFetchOptions,
-  DataSource,
-  GroupingDefinition,
-  PaginatedFetchOptions,
-  PaginatedResponse,
-  PaginationType,
-} from "../../../types"
-import { useData } from "../../../useData"
 import { TableCollection } from "./index"
+
+vi.mock("../../property", () => ({
+  propertyRenderers: {
+    text: TextCell,
+  },
+}))
 
 type TestFilters = FiltersDefinition
 type TestNavigationFilters = NavigationFiltersDefinition
@@ -60,7 +63,7 @@ const testColumns = [
 const createTestSource = (
   data: Person[] = testData,
   error?: Error
-): DataSource<
+): DataCollectionSource<
   Person,
   TestFilters,
   SortingsDefinition,
@@ -287,7 +290,7 @@ describe("TableCollection", () => {
 
       // Verify error state
       const { result } = renderHook(
-        () => useData(createTestSource([], error)),
+        () => useDataCollectionData(createTestSource([], error)),
         {
           wrapper: TestWrapper,
         }
@@ -310,7 +313,7 @@ describe("TableCollection", () => {
       totalItems?: number
       itemsPerPage?: number
       paginationType?: PaginationType
-    }): DataSource<
+    }): DataCollectionSource<
       Person,
       TestFilters,
       SortingsDefinition,
@@ -336,11 +339,14 @@ describe("TableCollection", () => {
       dataAdapter: {
         paginationType,
         perPage: itemsPerPage,
-        fetchData: (async (
-          options: PaginatedFetchOptions<TestFilters, TestNavigationFilters>
+        fetchData: async (
+          options:
+            | BaseFetchOptions<TestFilters>
+            | PaginatedFetchOptions<TestFilters>
         ) => {
           // Handle both BaseFetchOptions and PaginatedFetchOptions
-          const currentPage = options.pagination?.currentPage ?? 1
+          const currentPage =
+            "pagination" in options ? (options.pagination?.currentPage ?? 1) : 1
           const pagesCount = Math.ceil(totalItems / itemsPerPage)
           const startIndex = (currentPage - 1) * itemsPerPage
           const endIndex = startIndex + itemsPerPage
@@ -357,10 +363,9 @@ describe("TableCollection", () => {
             currentPage,
             perPage: itemsPerPage,
             pagesCount,
+            type: "pages" as const,
           }
-        }) as (
-          options: BaseFetchOptions<TestFilters, TestNavigationFilters>
-        ) => Promise<PaginatedResponse<Person>>,
+        },
       },
     })
 
@@ -900,6 +905,112 @@ describe("TableCollection", () => {
 
       // Clean up mock
       consoleSpy.mockRestore()
+    })
+  })
+
+  describe("Item Actions", () => {
+    const testPersonWithActions = {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      displayName: "Dr. John Doe",
+    }
+
+    const createTestSourceWithActions = (
+      itemActions: ItemActionsDefinition<Person>
+    ): DataCollectionSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      TestNavigationFilters,
+      GroupingDefinition<Person>
+    > => ({
+      ...createTestSource([testPersonWithActions]),
+      itemActions,
+    })
+
+    it("renders actions as buttons and dropdown", async () => {
+      const mockAction = vi.fn()
+
+      const itemActions: ItemActionsDefinition<Person> = (_item) => [
+        {
+          label: "Edit User",
+          type: "primary", // Required for button rendering
+          onClick: mockAction,
+        },
+        {
+          label: "View Profile",
+          type: "secondary", // Goes to dropdown
+          onClick: mockAction,
+        },
+      ]
+
+      render(
+        <TestWrapper>
+          <TableCollection
+            columns={testColumns}
+            source={createTestSourceWithActions(itemActions)}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </TestWrapper>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument()
+      })
+
+      // Verify primary action is rendered as button
+      expect(
+        screen.getByRole("button", { name: /edit user/i })
+      ).toBeInTheDocument()
+
+      // Secondary actions go to dropdown (just verify dropdown exists)
+      // ItemActionsRenderer renders both desktop and mobile versions,
+      // so we expect 2 buttons total (1 desktop + 1 mobile for 1 row)
+      const actionsButtons = screen.getAllByRole("button", { name: /actions/i })
+      expect(actionsButtons).toHaveLength(2) // Desktop + Mobile
+      expect(actionsButtons[0]).toBeInTheDocument()
+    })
+
+    it("calls onClick handlers when buttons are clicked", async () => {
+      const user = userEvent.setup()
+      const actionMock = vi.fn()
+
+      const itemActions: ItemActionsDefinition<Person> = (_item) => [
+        {
+          label: "Edit User",
+          type: "primary",
+          onClick: actionMock,
+        },
+      ]
+
+      render(
+        <TestWrapper>
+          <TableCollection
+            columns={testColumns}
+            source={createTestSourceWithActions(itemActions)}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </TestWrapper>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument()
+      })
+
+      const actionButton = screen.getByRole("button", {
+        name: /edit user/i,
+      })
+
+      await user.click(actionButton)
+
+      expect(actionMock).toHaveBeenCalledTimes(1)
     })
   })
 })

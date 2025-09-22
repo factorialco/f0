@@ -78,7 +78,7 @@ export function OneCalendar({
       setSelectedInternal(date)
 
       // Set the input value
-      setInputValue(granularity.toRangeString(date))
+      setInputValue(granularity.toRangeString(date, i18n))
 
       const newViewDate = granularity.getViewDateFromDate(
         date instanceof Date ? date : date?.from || date?.to || new Date()
@@ -108,7 +108,7 @@ export function OneCalendar({
   }
 
   // Get header label
-  const getHeaderLabel = () => granularity.label(viewDate)
+  const getHeaderLabel = () => granularity.label(viewDate, i18n)
 
   // Handle selection of a date
   const handleSelect = (date: Date | DateRange | null) => {
@@ -141,7 +141,7 @@ export function OneCalendar({
     input: "from" | "to",
     inputValue: DateRangeString
   ) => {
-    const newDate = granularity.fromString(inputValue)
+    const newDate = granularity.fromString(inputValue, i18n)
     const error = newDate && newDate[input] && !isValidDate(newDate[input])
     setInputError((prev) => ({
       ...prev,
@@ -156,17 +156,19 @@ export function OneCalendar({
     const range = toDateRange(selected)
 
     const { from, to } = granularity.toRangeString(
-      range ? range : { from: new Date(), to: undefined }
+      range ? range : { from: new Date(), to: undefined },
+      i18n
     )
     setInputValue({
       from: from || "",
       to: to || "",
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the i18n changes
   }, [granularity, selected])
 
   const handleInputNavigate = (input: "from" | "to", direction: -1 | 1) => {
     const currentDate = inputValue[input]
-      ? granularity.fromString(inputValue[input])
+      ? granularity.fromString(inputValue[input], i18n)
       : undefined
     const newDate = currentDate
       ? granularity.navigate(currentDate.from, direction)
@@ -175,7 +177,7 @@ export function OneCalendar({
     if (isValidDate(newDate)) {
       const newInputValue = {
         ...inputValue,
-        [input]: granularity.toRangeString(newDate).from,
+        [input]: granularity.toRangeString(newDate, i18n).from,
       }
       setInputValue(newInputValue)
       setSelectFromInput(input, newInputValue)

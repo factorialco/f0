@@ -1,4 +1,4 @@
-import { Icon } from "../../../components/Utilities/Icon"
+import { F0Icon } from "../../../components/F0Icon"
 import { Question } from "../../../icons/app"
 import { cn, focusRing } from "../../../lib/utils"
 import { Dropdown, DropdownItem } from "../Dropdown"
@@ -47,7 +47,7 @@ export function OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
           )}
           aria-label={label}
         >
-          <Icon icon={Question} size="sm" />
+          <F0Icon icon={Question} size="sm" />
           {hasNewUpdate && (
             <div className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-f1-background-critical-bold ring-2 ring-f1-background-critical" />
           )}

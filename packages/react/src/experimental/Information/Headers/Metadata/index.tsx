@@ -1,21 +1,48 @@
+import { Button, CopyButton } from "@/components/Actions/Button"
+import {
+  AvatarVariant,
+  CompanyAvatarVariant,
+  PersonAvatarVariant,
+  TeamAvatarVariant,
+} from "@/components/avatars/F0Avatar"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { NewColor } from "@/components/tags/F0TagDot"
+import { StatusVariant } from "@/components/tags/F0TagStatus"
+import { MobileDropdown } from "@/experimental/Navigation/Dropdown"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { InfoCircleLine } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { memo, useState } from "react"
-import { Button, CopyButton } from "../../../../components/Actions/Button"
-import { Icon, IconType } from "../../../../components/Utilities/Icon"
-import { InfoCircleLine } from "../../../../icons/app"
-import { cn } from "../../../../lib/utils"
-import { MobileDropdown } from "../../../Navigation/Dropdown"
-import { Tooltip } from "../../../Overlays/Tooltip"
-import { AvatarVariant } from "../../Avatars/Avatar"
-import { NewColor } from "../../Tags/DotTag"
-import { StatusVariant } from "../../Tags/StatusTag"
 import { MetadataValue } from "./MetadataValue"
 
 type MetadataItemValue =
   | { type: "text"; content: string }
   | { type: "avatar"; variant: AvatarVariant; text: string }
   | { type: "status"; label: string; variant: StatusVariant }
-  | { type: "list"; variant: AvatarVariant["type"]; avatars: AvatarVariant[] }
+  | ({ type: "list" } & (
+      | {
+          variant: "person"
+          avatars: (
+            | PersonAvatarVariant
+            | (PersonAvatarVariant & Record<string, unknown>)
+          )[]
+        }
+      | {
+          variant: "team"
+          avatars: (
+            | TeamAvatarVariant
+            | (TeamAvatarVariant & Record<string, unknown>)
+          )[]
+        }
+      | {
+          variant: "company"
+          avatars: (
+            | CompanyAvatarVariant
+            | (CompanyAvatarVariant & Record<string, unknown>)
+          )[]
+        }
+    ))
   | { type: "data-list"; data: string[] }
   | { type: "tag-list"; tags: string[] }
   | { type: "dot-tag"; label: string; color: NewColor }
@@ -129,7 +156,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
               label={item.info.title}
               description={item.info.description}
             >
-              <Icon icon={InfoCircleLine} size="sm" />
+              <F0Icon icon={InfoCircleLine} size="sm" />
             </Tooltip>
           </div>
         )}

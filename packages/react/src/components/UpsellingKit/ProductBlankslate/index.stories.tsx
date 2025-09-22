@@ -11,7 +11,7 @@ const meta: Meta<typeof ProductBlankslate> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   argTypes: {
     benefits: {
       control: { type: "object" },

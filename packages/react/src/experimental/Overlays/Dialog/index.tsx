@@ -1,3 +1,8 @@
+import { Button, ButtonProps } from "@/components/Actions/Button"
+import {
+  F0AvatarAlert,
+  type AlertAvatarProps,
+} from "@/components/avatars/F0AvatarAlert"
 import {
   Dialog,
   DialogContent,
@@ -7,11 +12,6 @@ import {
   DialogTitle,
 } from "@/ui/dialog"
 import { forwardRef, useCallback, useState } from "react"
-import { Button, ButtonProps } from "../../../components/Actions/Button"
-import {
-  AlertAvatar,
-  type AlertAvatarProps,
-} from "../../Information/Avatars/AlertAvatar"
 
 type BaseAction = Pick<ButtonProps, "label" | "onClick" | "icon" | "disabled">
 
@@ -63,7 +63,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
           className="bottom-3 top-auto max-w-[400px] translate-y-0 sm:bottom-auto sm:top-[50%] sm:translate-y-[-50%]"
         >
           <DialogHeader className="flex flex-col gap-4 px-4 py-5">
-            <AlertAvatar type={header.type} size="lg" />
+            <F0AvatarAlert type={header.type} size="lg" />
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-xl sm:text-lg">
                 {header.title}

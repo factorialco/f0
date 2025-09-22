@@ -3,6 +3,7 @@ import type {
   GranularityDefinition,
 } from "@/experimental/OneCalendar"
 import { isValidDate } from "@/experimental/OneCalendar/utils"
+import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/ui/InputField/InputField"
 import { forwardRef, useEffect, useState } from "react"
@@ -43,15 +44,18 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
   ) => {
     const [localValue, setLocalValue] = useState("")
     const [error, setError] = useState(false)
+    const i18n = useI18n()
 
     useEffect(() => {
       if (granularity) {
-        setLocalValue(granularity.toString(value?.value))
+        setLocalValue(granularity.toString(value?.value, i18n))
       }
-    }, [value, granularity])
+    }, [value, granularity, i18n])
 
     const handleBlur = () => {
-      const range = granularity?.toRange(granularity?.fromString(localValue))
+      const range = granularity?.toRange(
+        granularity?.fromString(localValue, i18n)
+      )
       if (range && isValidDate(range?.from) && isValidDate(range?.to)) {
         onDateChange?.(range)
         onOpenChange?.(false)

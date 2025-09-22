@@ -1,7 +1,7 @@
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
+import { cn } from "@/lib/utils"
 import { RefObject } from "react"
-import { cn } from "../../../../../lib/utils"
-import { getAvatarColor } from "../../../Avatars/BaseAvatar/utils"
-import { PersonAvatar } from "../../../Avatars/exports"
 import { Picker } from "../../../Reactions/Picker"
 import { BACKGROUND_COLORS } from "../types"
 
@@ -55,11 +55,11 @@ export function CelebrationAvatar({
                 : {}
             }
           >
-            <PersonAvatar
+            <F0AvatarPerson
               src={src}
               firstName={firstName}
               lastName={lastName}
-              size="xxlarge"
+              size="2xl"
             />
           </div>
           {canReact && (

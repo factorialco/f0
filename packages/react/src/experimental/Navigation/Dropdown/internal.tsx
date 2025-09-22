@@ -1,3 +1,9 @@
+import { Button, ButtonProps } from "@/components/Actions/Button"
+import { AvatarVariant } from "@/components/avatars/F0Avatar"
+import { IconType } from "@/components/F0Icon"
+import { EllipsisHorizontal } from "@/icons/app"
+import { Link } from "@/lib/linkHandler"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,12 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 import React, { useState } from "react"
-import { Button, ButtonProps } from "../../../components/Actions/Button"
-import { IconType } from "../../../components/Utilities/Icon"
-import { EllipsisHorizontal } from "../../../icons/app"
-import { Link } from "../../../lib/linkHandler"
-import { cn } from "../../../lib/utils"
-import { AvatarVariant } from "../../Information/Avatars/Avatar"
 import { NavigationItem } from "../utils"
 import { DropdownItemContent } from "./DropdownItem"
 
@@ -113,7 +113,18 @@ export function DropdownInternal({
           item.type === "separator" ? (
             <DropdownMenuSeparator key={index} />
           ) : (
-            <DropdownItem key={index} item={item} />
+            <DropdownItem
+              key={index}
+              item={{
+                ...item,
+                onClick: () => {
+                  // Seems to be a bug on radi-ui that mix the animation events, and if the dropdown triggers a dialog, the dialog will be closed before the dropdown is closed
+                  setTimeout(() => {
+                    item.onClick?.()
+                  }, 200)
+                },
+              }}
+            />
           )
         )}
       </DropdownMenuContent>

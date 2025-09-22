@@ -1,7 +1,6 @@
-import { Button } from "@/components/Actions/Button"
 import { Link } from "@/components/Actions/Link"
-import { IconAvatar } from "@/experimental/Information/Avatars/IconAvatar"
-import { PersonAvatar } from "@/experimental/Information/Avatars/PersonAvatar"
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
@@ -103,14 +102,14 @@ export const BaseCommunityPost = ({
       <div className="hidden md:block">
         {author ? (
           <Link href={author.url} title={authorFullName} stopPropagation>
-            <PersonAvatar
+            <F0AvatarPerson
               firstName={author.firstName}
               lastName={author.lastName}
               src={author.avatarUrl}
             />
           </Link>
         ) : (
-          <IconAvatar icon={PersonIcon} className="rounded-full" />
+          <F0AvatarIcon icon={PersonIcon} />
         )}
       </div>
       <div className="flex flex-1 flex-col gap-3">
@@ -126,11 +125,11 @@ export const BaseCommunityPost = ({
                     stopPropagation
                   >
                     <span className="flex items-center">
-                      <PersonAvatar
+                      <F0AvatarPerson
                         firstName={author.firstName}
                         lastName={author.lastName}
                         src={author.avatarUrl}
-                        size="xsmall"
+                        size="xs"
                       />
                     </span>
                   </Link>
@@ -145,11 +144,7 @@ export const BaseCommunityPost = ({
                 </>
               ) : (
                 <div className="block md:hidden">
-                  <IconAvatar
-                    icon={PersonIcon}
-                    size="sm"
-                    className="size-5 rounded-full"
-                  />
+                  <F0AvatarIcon icon={PersonIcon} size="sm" />
                 </div>
               )}
               <span
@@ -232,22 +227,19 @@ export const BaseCommunityPost = ({
           </div>
         )}
         <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        <div className="flex flex-row gap-2.5">
-          {!noReactionsButton && (
-            <Button
-              label={comment.label}
-              onClick={comment.onClick}
-              variant="outline"
-              icon={CommentIcon}
-              round
-              hideLabel
-            />
-          )}
-          <Reactions
-            items={reactions?.items ?? []}
-            onInteraction={reactions?.onInteraction}
-          />
-        </div>
+        <Reactions
+          items={reactions?.items ?? []}
+          onInteraction={reactions?.onInteraction}
+          action={
+            !noReactionsButton
+              ? {
+                  label: comment.label,
+                  onClick: comment.onClick,
+                  icon: CommentIcon,
+                }
+              : undefined
+          }
+        />
       </div>
     </div>
   )

@@ -40,10 +40,18 @@ export const GroupHeader = ({
     onOpenChange?.(!isOpen)
   }
 
+  const handleGroupClick = () => {
+    if (showOpenChange) {
+      handleOpenChange()
+    } else if (selectable) {
+      onSelectChange?.(!select)
+    }
+  }
+
   return (
     <div
       className={cn("pointer-events-auto flex items-center gap-2", className)}
-      onClick={handleOpenChange}
+      onClick={handleGroupClick}
     >
       {selectable && (
         <F0Checkbox

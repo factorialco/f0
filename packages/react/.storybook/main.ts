@@ -20,6 +20,10 @@ const config: StorybookConfig = {
       titlePrefix: "Components",
     },
     {
+      directory: "../src/hooks",
+      titlePrefix: "Hooks",
+    },
+    {
       directory: "../src/experimental",
       titlePrefix: "Components",
     },
@@ -32,13 +36,6 @@ const config: StorybookConfig = {
           },
         ]),
   ],
-  managerHead: (head) => {
-    return `${head}
-      <link rel="icon" href="/${
-        process.env.STORYBOOK_PUBLIC_BUILD ? "favicon.svg" : "favicon-dev.svg"
-      }" type="image/svg+xml" />
-  `
-  },
   staticDirs: ["../public", "./static"],
   addons: [
     getAbsolutePath("@storybook/addon-links"),
@@ -70,7 +67,10 @@ const config: StorybookConfig = {
         : false,
   },
   typescript: {
-    reactDocgen: "react-docgen-typescript",
+    reactDocgen: "react-docgen",
+    reactDocgenTypescriptOptions: {
+      tsconfigPath: "../tsconfig.json",
+    },
   },
 }
 export default config

@@ -40,6 +40,11 @@ interface TableCellProps {
    * The number of columns the cell should span
    */
   colSpan?: number
+
+  /**
+   * The class name of the cell
+   */
+  className?: string
 }
 
 export function TableCell({
@@ -50,6 +55,7 @@ export function TableCell({
   firstCell = false,
   sticky,
   colSpan,
+  className,
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -72,7 +78,8 @@ export function TableCell({
           "bg-f1-background before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:bg-f1-background before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-[''] group-hover:before:bg-f1-background-hover",
         isSticky && "sticky z-10",
         isStickyRight &&
-          "bg-f1-background before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:bg-f1-background before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-[''] group-hover:before:bg-f1-background-hover"
+          "bg-f1-background before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:bg-f1-background before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-[''] group-hover:before:bg-f1-background-hover",
+        className
       )}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{

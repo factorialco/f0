@@ -1,11 +1,11 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import Star from "@/icons/app/Star"
 import StarFilled from "@/icons/app/StarFilled"
 import { cn, focusRing } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
-const IconMotion = motion.create(Icon)
+const IconMotion = motion.create(F0Icon)
 
 const iconVariants = {
   initial: { scale: 1 },

@@ -33,9 +33,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Basic: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   render: () => (
     <ExampleComponent
       frozenColumns={2}

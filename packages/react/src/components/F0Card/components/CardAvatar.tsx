@@ -1,21 +1,21 @@
-import {
-  Avatar,
-  AvatarVariant,
-} from "@/experimental/Information/Avatars/Avatar"
-import { EmojiAvatar } from "@/experimental/Information/Avatars/EmojiAvatar"
-import { FileAvatar } from "@/experimental/Information/Avatars/FileAvatar"
+import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
-type CardAvatarType =
+type CardAvatarVariant =
   | AvatarVariant
   | { type: "emoji"; emoji: string }
   | { type: "file"; file: File }
+  | { type: "icon"; icon: IconType }
 
 interface CardAvatarProps {
   /**
    * The avatar to display
    */
-  avatar: CardAvatarType
+  avatar: CardAvatarVariant
 
   /**
    * Whether the avatar is displayed with an overlay
@@ -32,18 +32,19 @@ const AvatarRender = ({
   avatar,
   compact = false,
 }: {
-  avatar: CardAvatarType
+  avatar: CardAvatarVariant
   compact?: boolean
 }) => {
   if (avatar.type === "emoji") {
-    return (
-      <EmojiAvatar emoji={avatar.emoji} size={compact ? "small" : "large"} />
-    )
+    return <F0AvatarEmoji emoji={avatar.emoji} size={compact ? "sm" : "lg"} />
   }
   if (avatar.type === "file") {
-    return <FileAvatar file={avatar.file} size={compact ? "small" : "large"} />
+    return <F0AvatarFile file={avatar.file} size={compact ? "sm" : "lg"} />
   }
-  return <Avatar avatar={avatar} size={compact ? "small" : "large"} />
+  if (avatar.type === "icon") {
+    return <F0AvatarIcon icon={avatar.icon} size={compact ? "sm" : "lg"} />
+  }
+  return <F0Avatar avatar={avatar} size={compact ? "sm" : "lg"} />
 }
 
 export function CardAvatar({
@@ -70,4 +71,4 @@ export function CardAvatar({
   )
 }
 
-export type { CardAvatarType }
+export type { CardAvatarVariant }

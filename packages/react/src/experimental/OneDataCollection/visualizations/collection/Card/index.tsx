@@ -1,15 +1,16 @@
 import { F0Card } from "@/components/F0Card"
+import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetadata"
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
-import { IconType } from "@/components/Utilities/Icon"
-import { AvatarVariant } from "@/experimental/Information/Avatars/Avatar"
+import { IconType } from "@/components/F0Icon"
 import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader/GroupHeader"
+import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import {
-  getAnimationVariants,
-  useGroups,
-} from "@/experimental/OneDataCollection/useGroups"
-import { useSelectable } from "@/experimental/OneDataCollection/useSelectable"
+import { GroupingDefinition, RecordType } from "@/hooks/datasource"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
+import { useSelectable } from "@/hooks/datasource/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
@@ -19,15 +20,8 @@ import type { FiltersDefinition } from "../../../../../components/OneFilterPicke
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { PropertyDefinition } from "../../../property-render"
-import { SortingsDefinition } from "../../../sortings"
 import { SummariesDefinition } from "../../../summary"
-import {
-  CollectionProps,
-  DataSource,
-  GroupingDefinition,
-  RecordType,
-} from "../../../types"
-import { useData } from "../../../useData"
+import { CollectionProps } from "../../../types"
 
 export type CardPropertyDefinition<T> = PropertyDefinition<T> & {
   icon?: IconType
@@ -41,7 +35,9 @@ export type CardVisualizationOptions<
   cardProperties: ReadonlyArray<CardPropertyDefinition<T>>
   title: (record: T) => string
   description?: (record: T) => string
-  avatar?: (record: T) => AvatarVariant
+  avatar?: (record: T) => CardAvatarVariant
+  image?: (record: T) => string
+  compact?: boolean
 }
 
 // Find the next number that is divisible by 2, 3, and 4
@@ -95,7 +91,7 @@ type GroupCardsProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<Record>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     Record,
     Filters,
     Sortings,
@@ -110,7 +106,9 @@ type GroupCardsProps<
   cardProperties: ReadonlyArray<CardPropertyDefinition<Record>>
   title: (record: Record) => string
   description?: (record: Record) => string
-  avatar?: (record: Record) => AvatarVariant
+  avatar?: (record: Record) => CardAvatarVariant
+  image?: (record: Record) => string
+  compact?: boolean
 }
 
 const GroupCards = <
@@ -130,6 +128,8 @@ const GroupCards = <
   title,
   description,
   avatar,
+  image,
+  compact,
 }: GroupCardsProps<
   Record,
   Filters,
@@ -145,11 +145,21 @@ const GroupCards = <
   ): Array<CardMetadata> {
     return properties
       .map((property) => {
+        if (property.hide?.(item)) {
+          return null
+        }
+
         const result = property.render(item)
-        if (result === undefined) return null
+        if (result === undefined) {
+          return null
+        }
 
         const cardProperty = convertToCardMetadataProperty(result)
         if (!cardProperty) return null
+        if (cardProperty.type === "file")
+          return {
+            property: cardProperty,
+          }
 
         return {
           icon: property.icon ?? Placeholder,
@@ -239,6 +249,7 @@ const GroupCards = <
               selectable={selectable}
               description={description ? description(item) : undefined}
               avatar={avatar ? avatar(item) : undefined}
+              image={image ? image(item) : undefined}
               selected={selectable && selectedItems.has(id)}
               onSelect={(selected) => handleSelectItemChange(item, selected)}
               secondaryActions={secondaryActions}
@@ -246,8 +257,10 @@ const GroupCards = <
               otherActions={otherActions}
               onClick={itemOnClick}
               link={itemHref}
+              compact={compact ? compact : false}
               metadata={metadata}
-            ></F0Card>
+              fullHeight={true}
+            />
           </motion.div>
         )
       })}
@@ -268,6 +281,8 @@ export const CardCollection = <
   title,
   description,
   avatar,
+  image,
+  compact,
   source,
   onSelectItems,
   onLoadData,
@@ -297,24 +312,25 @@ export const CardCollection = <
     return source.dataAdapter
   }, [source.dataAdapter])
 
-  const { data, paginationInfo, setPage, isInitialLoading } = useData<
-    Record,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(
-    {
-      ...source,
-      dataAdapter: overridenDataAdapter,
-    },
-    {
-      onError: (error) => {
-        onLoadError(error)
+  const { data, paginationInfo, setPage, isInitialLoading } =
+    useDataCollectionData<
+      Record,
+      Filters,
+      Sortings,
+      Summaries,
+      NavigationFilters,
+      Grouping
+    >(
+      {
+        ...source,
+        dataAdapter: overridenDataAdapter,
       },
-    }
-  )
+      {
+        onError: (error) => {
+          onLoadError(error)
+        },
+      }
+    )
 
   useEffect(() => {
     onLoadData({
@@ -413,6 +429,8 @@ export const CardCollection = <
                           cardProperties={cardProperties}
                           description={description}
                           avatar={avatar}
+                          image={image}
+                          compact={compact}
                         />
                       )}
                     </AnimatePresence>
@@ -430,6 +448,8 @@ export const CardCollection = <
                 cardProperties={cardProperties}
                 description={description}
                 avatar={avatar}
+                image={image}
+                compact={compact}
               />
             )}
           </>

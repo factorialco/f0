@@ -87,3 +87,15 @@ export const relativeSpacing: ThemeConfig["spacing"] = {
   80: "20rem",
   96: "24rem",
 }
+
+/*
+ * Spacing between elements
+ * This special scale is used for the gap between common elements.
+ * Docs: https://zeroheight.com/6cc527675/p/94c391-spacing/t/3409209197
+ */
+export const betweenSpacing: ThemeConfig["spacing"] = {
+  sm: relativeSpacing[1],
+  md: relativeSpacing[2],
+  lg: relativeSpacing[3],
+  xl: relativeSpacing[4],
+}

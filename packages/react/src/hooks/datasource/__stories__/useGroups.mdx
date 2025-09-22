@@ -1,0 +1,968 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Datasource/useGroups" />
+
+# useGroups
+
+The `useGroups` hook manages group expand/collapse state for grouped data
+collections. It provides functionality to control which groups are open or
+closed, with support for default states and smooth animations.
+
+## Overview
+
+`useGroups` is a lightweight hook that manages the visibility state of groups in
+a data collection. It works with the grouped data structure provided by
+`useData` and enables users to expand or collapse groups to show or hide their
+contents.
+
+### Key Features
+
+- **Group State Management**: Track open/closed state for each group
+- **Default Configuration**: Set default open/closed states for groups
+- **Bulk Operations**: Open or close all groups at once
+- **Animation Support**: Built-in animation variants for smooth transitions
+- **Persistent State**: Maintains state across re-renders
+- **Type Safe**: Full TypeScript support
+
+## API Reference
+
+### Parameters
+
+```tsx
+useGroups<R>(
+  groups: GroupRecord<R>[],
+  defaultOpenGroups?: boolean | GroupRecord<R>["key"][]
+)
+```
+
+### Parameters
+
+#### `groups: GroupRecord<R>[]`
+
+Array of group records from the data object returned by `useData`.
+
+#### `defaultOpenGroups?: boolean | GroupRecord<R>["key"][]`
+
+Default open state for groups. Can be:
+
+- `true` - All groups open by default
+- `false` - All groups closed by default
+- `string[]` - Array of group keys that should be open by default
+
+### Return Value
+
+```tsx
+interface UseGroupsReturn {
+  openGroups: Record<string, boolean> // Current open/closed state for each group
+  setGroupOpen: (key: string, open: boolean) => void // Function to toggle group state
+}
+```
+
+### Helper Functions
+
+#### `getAnimationVariants(options?: AnimationVariantsOptions)`
+
+Returns animation variants for use with framer-motion or similar animation
+libraries:
+
+```tsx
+interface AnimationVariantsOptions {
+  delay?: number // Delay between item animations (default: 0.03)
+  duration?: number // Animation duration (default: 0.03)
+  maxDelay?: number // Maximum delay cap (default: 20)
+}
+```
+
+## Usage Examples
+
+### Basic Group Management
+
+```tsx
+import { useDataSource, useData, useGroups } from "@/hooks/datasource"
+
+function GroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          {/* Group header with toggle */}
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {/* Group content */}
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Default Open Groups
+
+```tsx
+function GroupedUserListWithDefaults() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+
+  // Only open specific groups by default
+  const { openGroups, setGroupOpen } = useGroups(data.groups, [
+    "engineering",
+    "design",
+  ])
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### All Open by Default
+
+```tsx
+function GroupedUserListAllOpen() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+
+  // All groups open by default
+  const { openGroups, setGroupOpen } = useGroups(data.groups, true)
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### With Animations
+
+```tsx
+import { motion } from "framer-motion"
+import { getAnimationVariants } from "@/hooks/datasource"
+
+function AnimatedGroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  // Get animation variants
+  const variants = getAnimationVariants({
+    delay: 0.05,
+    duration: 0.2,
+    maxDelay: 1,
+  })
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <motion.div
+              className="group-content"
+              initial="hidden"
+              animate="visible"
+              variants={variants}
+            >
+              {group.records.map((user, index) => (
+                <motion.div
+                  key={user.id}
+                  className="group-item"
+                  variants={variants}
+                  custom={index}
+                >
+                  {user.name}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Bulk Group Operations
+
+```tsx
+function GroupedUserListWithBulkOperations() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  const openAllGroups = () => {
+    data.groups.forEach((group) => {
+      setGroupOpen(group.key, true)
+    })
+  }
+
+  const closeAllGroups = () => {
+    data.groups.forEach((group) => {
+      setGroupOpen(group.key, false)
+    })
+  }
+
+  const openGroupsCount = Object.values(openGroups).filter(Boolean).length
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {/* Bulk operations */}
+      <div className="bulk-operations">
+        <button onClick={openAllGroups}>
+          Expand All ({data.groups.length} groups)
+        </button>
+        <button onClick={closeAllGroups}>Collapse All</button>
+        <span>{openGroupsCount} groups open</span>
+      </div>
+
+      {/* Groups */}
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Persistent Group State
+
+```tsx
+function PersistentGroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+
+  // Get default state from localStorage
+  const getDefaultOpenGroups = () => {
+    const saved = localStorage.getItem("userList-openGroups")
+    return saved ? JSON.parse(saved) : ["engineering"]
+  }
+
+  const { openGroups, setGroupOpen } = useGroups(
+    data.groups,
+    getDefaultOpenGroups()
+  )
+
+  // Save state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(
+      "userList-openGroups",
+      JSON.stringify(Object.keys(openGroups).filter((key) => openGroups[key]))
+    )
+  }, [openGroups])
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Complex Group Headers
+
+```tsx
+function ComplexGroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups, ["engineering"])
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key} className="group">
+          {/* Complex group header */}
+          <div className="group-header">
+            <button
+              onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+              className="group-toggle"
+            >
+              <span className="toggle-icon">
+                {openGroups[group.key] ? "▼" : "▶"}
+              </span>
+            </button>
+
+            <div className="group-info">
+              <h3 className="group-title">{group.label}</h3>
+              <div className="group-meta">
+                <span className="item-count">{group.itemCount} users</span>
+                <span className="status">
+                  {openGroups[group.key] ? "Expanded" : "Collapsed"}
+                </span>
+              </div>
+            </div>
+
+            <div className="group-actions">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  console.log(`Export ${group.label}`)
+                }}
+              >
+                Export
+              </button>
+            </div>
+          </div>
+
+          {/* Group content */}
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  <div className="user-info">
+                    <span className="user-name">{user.name}</span>
+                    <span className="user-email">{user.email}</span>
+                  </div>
+                  <div className="user-role">{user.role}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## Advanced Patterns
+
+### Conditional Group Rendering
+
+```tsx
+function ConditionalGroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  // Only show groups with items
+  const visibleGroups = data.groups.filter((group) => group.itemCount > 0)
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {visibleGroups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Nested Group Management
+
+```tsx
+function NestedGroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  // Group users by role within each department
+  const getNestedGroups = (users) => {
+    const roleGroups = {}
+    users.forEach((user) => {
+      if (!roleGroups[user.role]) {
+        roleGroups[user.role] = []
+      }
+      roleGroups[user.role].push(user)
+    })
+    return roleGroups
+  }
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {Object.entries(getNestedGroups(group.records)).map(
+                ([role, users]) => (
+                  <div key={role} className="nested-group">
+                    <h4 className="nested-group-title">
+                      {role} ({users.length})
+                    </h4>
+                    {users.map((user) => (
+                      <div key={user.id} className="nested-group-item">
+                        {user.name}
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Group State Synchronization
+
+```tsx
+function SynchronizedGroupedUserList() {
+  const dataSource = useDataSource({
+    filters: userFilters,
+    grouping: {
+      groupBy: {
+        department: {
+          label: "Department",
+          getGroupKey: (user) => user.department,
+          getGroupLabel: (key) => key.charAt(0).toUpperCase() + key.slice(1),
+        },
+      },
+    },
+    currentGrouping: { field: "department", order: "asc" },
+    dataAdapter: { fetchData: fetchUsers },
+  })
+
+  const { data, isLoading } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  // Sync group state with URL parameters
+  const searchParams = new URLSearchParams(window.location.search)
+  const openGroupsParam = searchParams.get("openGroups")
+
+  useEffect(() => {
+    if (openGroupsParam) {
+      const openGroupKeys = openGroupsParam.split(",")
+      data.groups.forEach((group) => {
+        setGroupOpen(group.key, openGroupKeys.includes(group.key))
+      })
+    }
+  }, [openGroupsParam, data.groups, setGroupOpen])
+
+  useEffect(() => {
+    const openGroupKeys = Object.keys(openGroups).filter(
+      (key) => openGroups[key]
+    )
+    const params = new URLSearchParams(window.location.search)
+
+    if (openGroupKeys.length > 0) {
+      params.set("openGroups", openGroupKeys.join(","))
+    } else {
+      params.delete("openGroups")
+    }
+
+    window.history.replaceState({}, "", `${window.location.pathname}?${params}`)
+  }, [openGroups])
+
+  if (isLoading) return <div>Loading...</div>
+  if (data.type !== "grouped") return <div>Data is not grouped</div>
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((user) => (
+                <div key={user.id} className="group-item">
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## Best Practices
+
+### 1. Handle Empty Groups
+
+```tsx
+function GroupedList() {
+  const { data } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+            className="group-header"
+            disabled={group.itemCount === 0}
+          >
+            <span>{openGroups[group.key] ? "▼" : "▶"}</span>
+            <h3>
+              {group.label} ({group.itemCount || 0})
+            </h3>
+          </button>
+
+          {openGroups[group.key] && group.itemCount > 0 && (
+            <div className="group-content">
+              {group.records.map((item) => (
+                <div key={item.id}>{item.name}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### 2. Optimize Re-renders
+
+```tsx
+const GroupHeader = memo(({ group, isOpen, onToggle }) => (
+  <button onClick={() => onToggle(group.key, !isOpen)} className="group-header">
+    <span>{isOpen ? "▼" : "▶"}</span>
+    <h3>
+      {group.label} ({group.itemCount})
+    </h3>
+  </button>
+))
+
+function OptimizedGroupedList() {
+  const { data } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <GroupHeader
+            group={group}
+            isOpen={openGroups[group.key]}
+            onToggle={setGroupOpen}
+          />
+          {openGroups[group.key] && (
+            <div className="group-content">
+              {group.records.map((item) => (
+                <div key={item.id}>{item.name}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### 3. Use Animation Variants
+
+```tsx
+function AnimatedGroupedList() {
+  const { data } = useData(dataSource)
+  const { openGroups, setGroupOpen } = useGroups(data.groups)
+
+  const variants = getAnimationVariants({
+    delay: 0.02,
+    duration: 0.15,
+    maxDelay: 0.5,
+  })
+
+  return (
+    <div>
+      {data.groups.map((group) => (
+        <div key={group.key}>
+          <button
+            onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
+          >
+            {group.label}
+          </button>
+          {openGroups[group.key] && (
+            <motion.div initial="hidden" animate="visible" variants={variants}>
+              {group.records.map((item, index) => (
+                <motion.div key={item.id} variants={variants} custom={index}>
+                  {item.name}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+## Related Hooks
+
+- [`useDataSource`](/?path=/docs/hooks-datasource-usedatasource--docs) - For
+  creating data sources with grouping configuration
+- [`useData`](/?path=/docs/hooks-datasource-usedata--docs) - For data fetching
+  and getting grouped data
+- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For
+  selection management within groups
+
+## Common Patterns
+
+### Group State Management
+
+```tsx
+const { openGroups, setGroupOpen } = useGroups(data.groups, ["important-group"])
+
+// Check if group is open
+const isGroupOpen = openGroups[groupKey]
+
+// Toggle group
+const toggleGroup = (groupKey) => {
+  setGroupOpen(groupKey, !openGroups[groupKey])
+}
+
+// Open all groups
+const openAllGroups = () => {
+  data.groups.forEach((group) => {
+    setGroupOpen(group.key, true)
+  })
+}
+```
+
+### Animation Integration
+
+```tsx
+const variants = getAnimationVariants({
+  delay: 0.05,      // Delay between items
+  duration: 0.2,    // Animation duration
+  maxDelay: 1       // Maximum delay
+})
+
+// Use with framer-motion
+<motion.div
+  initial="hidden"
+  animate="visible"
+  variants={variants}
+>
+  {items.map((item, index) => (
+    <motion.div
+      key={item.id}
+      variants={variants}
+      custom={index}
+    >
+      {item.content}
+    </motion.div>
+  ))}
+</motion.div>
+```
+
+### Default State Configuration
+
+```tsx
+// All groups open
+const { openGroups } = useGroups(data.groups, true)
+
+// All groups closed
+const { openGroups } = useGroups(data.groups, false)
+
+// Specific groups open
+const { openGroups } = useGroups(data.groups, ["engineering", "design"])
+```

@@ -1,5 +1,5 @@
-import { IconType } from "@/components/Utilities/Icon"
-import { IconAvatar } from "@/experimental/Information/Avatars/IconAvatar"
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { IconType } from "@/components/F0Icon"
 import { Bell as BellIcon } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { withSkeleton } from "@/lib/skeleton"
@@ -52,7 +52,7 @@ export const BaseActivityItem = ({
       className="flex w-full cursor-pointer flex-row gap-2 rounded-lg p-2 pr-3 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"
       onClick={handleClick}
     >
-      <IconAvatar icon={icon ?? BellIcon} />
+      <F0AvatarIcon icon={icon ?? BellIcon} />
       <div className="flex-1">
         <p
           className="line-clamp-2 font-medium text-f1-foreground"

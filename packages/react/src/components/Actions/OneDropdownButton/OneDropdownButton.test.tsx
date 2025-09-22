@@ -1,31 +1,38 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
-import { defaultTranslations, I18nProvider } from "../../../lib/providers/i18n"
-import { IconType } from "../../Utilities/Icon"
-
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { IconType } from "../../Utilities/Icon"
 import { OneDropdownButton } from "./OneDropdownButton"
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
-)
-
 // Mock the imported components
-vi.mock("@/components/Actions/Button/internal.tsx", () => ({
-  ButtonInternal: ({ label, icon: Icon, onClick, appendButton, ...props }) => (
+vi.mock("@/ui/Action", () => ({
+  Action: ({
+    children,
+    prepend,
+    append,
+    onClick,
+    appendOutside,
+    disabled,
+    ...props
+  }) => (
     <>
-      <button onClick={onClick} {...props}>
-        {Icon && <Icon data-testid="button-icon" />}
-        <span data-testid="button-label">{label}</span>
+      <button onClick={onClick} disabled={disabled} {...props}>
+        {prepend && <div data-testid="action-prepend">{prepend}</div>}
+        <span data-testid="action-label">{children}</span>
       </button>
-      <div data-testid="button-append">{appendButton}</div>
+      {appendOutside && <div data-testid="action-append">{append}</div>}
     </>
   ),
 }))
 
 vi.mock("@/experimental/Navigation/Dropdown/internal.tsx", () => ({
-  DropdownInternal: ({ children, items }) => (
-    <div data-testid="dropdown" data-items={JSON.stringify(items)}>
+  DropdownInternal: ({ children, items, open, onOpenChange }) => (
+    <div
+      data-testid="dropdown"
+      data-items={JSON.stringify(items)}
+      data-open={open}
+      onClick={() => onOpenChange && onOpenChange(!open)}
+    >
       {children}
     </div>
   ),
@@ -35,17 +42,26 @@ vi.mock("@/icons/app", () => ({
   ChevronDown: () => <div data-testid="chevron-icon">▼</div>,
 }))
 
+vi.mock("@/components/Utilities/Icon", () => ({
+  Icon: ({ icon: IconComponent }) => <IconComponent data-testid="icon" />,
+}))
+
 describe("OneDropdownButton", () => {
   const openDropdown = async (user: ReturnType<typeof userEvent.setup>) => {
-    user.click(screen.getByRole("combobox"))
+    user.click(screen.getByTestId("button-menu"))
 
-    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByTestId("dropdown")).toHaveAttribute(
+        "data-open",
+        "true"
+      )
+    )
   }
 
-  const mockIcons: Record<string, () => IconType> = {
-    Icon1: () => (<div>Icon1</div>) as unknown as IconType,
-    Icon2: () => (<div>Icon2</div>) as unknown as IconType,
-    Icon3: () => (<div>Icon3</div>) as unknown as IconType,
+  const mockIcons: Record<string, IconType> = {
+    Icon1: (() => <div data-testid="icon1">Icon1</div>) as unknown as IconType,
+    Icon2: (() => <div data-testid="icon2">Icon2</div>) as unknown as IconType,
+    Icon3: (() => <div data-testid="icon3">Icon3</div>) as unknown as IconType,
   }
 
   const mockItems = [
@@ -61,40 +77,34 @@ describe("OneDropdownButton", () => {
   })
 
   it("renders with default selection (first item)", () => {
-    render(
-      <TestWrapper>
-        <OneDropdownButton items={mockItems} onClick={mockOnClick} />
-      </TestWrapper>
-    )
+    render(<OneDropdownButton items={mockItems} onClick={mockOnClick} />)
 
-    expect(screen.getByTestId("button-main")).toBeInTheDocument()
-    expect(screen.getByTestId("dropdown")).toBeInTheDocument()
-    expect(screen.getByTestId("chevron-icon")).toBeInTheDocument()
+    expect(screen.getByTestId("button-main")).toBeDefined()
+    expect(screen.getByTestId("dropdown")).toBeDefined()
+    expect(screen.getByTestId("chevron-icon")).toBeDefined()
+    expect(screen.getByTestId("action-label").textContent).toBe("Item 1")
   })
 
   it("renders with provided value", () => {
     render(
-      <TestWrapper>
-        <OneDropdownButton
-          items={mockItems}
-          value="item2"
-          onClick={mockOnClick}
-        />
-      </TestWrapper>
+      <OneDropdownButton
+        items={mockItems}
+        value="item2"
+        onClick={mockOnClick}
+      />
     )
 
-    expect(screen.getByTestId("button-main")).toBeInTheDocument()
+    expect(screen.getByTestId("button-main")).toBeDefined()
+    expect(screen.getByTestId("action-label").textContent).toBe("Item 2")
   })
 
   it("passes dropdown items excluding the selected item", () => {
     render(
-      <TestWrapper>
-        <OneDropdownButton
-          items={mockItems}
-          value="item1"
-          onClick={mockOnClick}
-        />
-      </TestWrapper>
+      <OneDropdownButton
+        items={mockItems}
+        value="item1"
+        onClick={mockOnClick}
+      />
     )
 
     const dropdownElement = screen.getByTestId("dropdown")
@@ -114,13 +124,11 @@ describe("OneDropdownButton", () => {
   it("calls onClick with correct values when button is clicked", async () => {
     const user = userEvent.setup()
     render(
-      <TestWrapper>
-        <OneDropdownButton
-          items={mockItems}
-          value="item2"
-          onClick={mockOnClick}
-        />
-      </TestWrapper>
+      <OneDropdownButton
+        items={mockItems}
+        value="item2"
+        onClick={mockOnClick}
+      />
     )
 
     await user.click(screen.getByTestId("button-main"))
@@ -129,16 +137,33 @@ describe("OneDropdownButton", () => {
     expect(mockOnClick).toHaveBeenCalledWith("item2", mockItems[1])
   })
 
+  it("does not open dropdown when disabled", async () => {
+    const user = userEvent.setup()
+    render(
+      <OneDropdownButton
+        items={mockItems}
+        disabled={true}
+        onClick={mockOnClick}
+      />
+    )
+
+    expect(screen.getByTestId("button-main").disabled).toBe(true)
+    expect(screen.getByTestId("button-menu").disabled).toBe(true)
+
+    await user.click(screen.getByTestId("button-menu"))
+
+    expect(screen.getByTestId("dropdown")).toHaveAttribute("data-open", "false")
+    expect(mockOnClick).not.toHaveBeenCalled()
+  })
+
   it.skip("changes selected value when dropdown item is clicked", async () => {
     const user = userEvent.setup()
     render(
-      <TestWrapper>
-        <OneDropdownButton
-          items={mockItems}
-          value="item1"
-          onClick={mockOnClick}
-        />
-      </TestWrapper>
+      <OneDropdownButton
+        items={mockItems}
+        value="item1"
+        onClick={mockOnClick}
+      />
     )
 
     await openDropdown(user)

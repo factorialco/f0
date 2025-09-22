@@ -31,7 +31,12 @@ const Select = (props: SelectProps) => {
   }
 
   return (
-    <div className="[&>div]:!relative">
+    <div
+      className="[&>div]:!relative"
+      onClick={(e) => {
+        e.preventDefault()
+      }}
+    >
       <SelectPrimitive.Root
         {...props}
         open={isOpen}

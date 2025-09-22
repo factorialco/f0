@@ -1,7 +1,11 @@
 import type { Config } from "tailwindcss"
 import { borderRadius } from "./src/tokens/borderRadius"
 import { baseColors, f1Colors } from "./src/tokens/colors"
-import { absoluteSpacing, relativeSpacing } from "./src/tokens/spacing"
+import {
+  absoluteSpacing,
+  betweenSpacing,
+  relativeSpacing,
+} from "./src/tokens/spacing"
 
 export const baseConfig: Omit<Config, "content"> = {
   darkMode: "class",
@@ -101,6 +105,8 @@ export const baseConfig: Omit<Config, "content"> = {
       minWidth: relativeSpacing,
       textIndent: relativeSpacing,
       width: relativeSpacing,
+      gap: betweenSpacing,
+      space: betweenSpacing,
       colors: {
         f1: f1Colors,
       },

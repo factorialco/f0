@@ -14,13 +14,15 @@ export type TextareaProps = Pick<
   | "label"
   | "labelIcon"
   | "icon"
-  | "error"
   | "hideLabel"
   | "maxLength"
   | "clearable"
   | "onBlur"
   | "onFocus"
   | "name"
+  | "status"
+  | "hint"
+  | "error"
 >
 
 const Textarea: React.FC<TextareaProps> = Component(

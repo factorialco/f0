@@ -12,6 +12,8 @@ export type InputProps = Omit<
     | "labelIcon"
     | "hideLabel"
     | "error"
+    | "status"
+    | "hint"
     | "disabled"
     | "required"
     | "size"
@@ -27,6 +29,7 @@ export type InputProps = Omit<
     | "onChange"
     | "role"
     | "onClickContent"
+    | "appendTag"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -38,6 +41,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       labelIcon,
       icon,
       error,
+      status,
+      hint,
       disabled,
       required,
       value,
@@ -52,6 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       append,
       onChange,
       role,
+      appendTag,
       lengthProvider,
       onClickContent,
       hideLabel,
@@ -66,6 +72,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         icon={icon}
         labelIcon={labelIcon}
         error={error}
+        status={status}
+        hint={hint}
         disabled={disabled}
         required={required}
         value={value as string}
@@ -86,6 +94,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onChange={onChange}
         onClickContent={onClickContent}
         name={name}
+        appendTag={appendTag}
       >
         <input
           type={type}

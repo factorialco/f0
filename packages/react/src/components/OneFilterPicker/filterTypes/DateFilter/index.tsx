@@ -41,7 +41,7 @@ export const dateFilter: FilterTypeDefinition<
 
     const granularity = getGranularitySimpleDefinition(options.view)
 
-    return granularity.toString(value)
+    return granularity.toString(value, context.i18n)
   },
   formHeight: 520,
 }

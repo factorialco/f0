@@ -9,47 +9,50 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
-import { type TextMessage } from "@copilotkit/runtime-client-gql"
 import { useCallback, useRef, useState } from "react"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
 
 export const AssistantMessage = ({
-  message,
   isGenerating,
-  isCurrentMessage: _isCurrentMessage,
   isLoading,
   markdownTagRenderers,
+  message,
   onCopy,
   onThumbsDown,
   onThumbsUp,
-  subComponent,
 }: AssistantMessageProps) => {
+  const content = message?.content || ""
+  const subComponent = message?.generativeUI?.()
+  const isEmptyMessage = !content && !subComponent
+
   const translations = useI18n()
-  const containerRef = useRef<HTMLDivElement>(null)
   const [reactionValue, setReactionValue] = useState<"like" | "dislike" | null>(
     null
   )
-  useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
-
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
-    setIsHovered(true)
-  }, [])
 
+    if (!isLoading && !isGenerating && !subComponent) {
+      setIsHovered(true)
+    }
+  }, [isGenerating, isLoading, subComponent])
   const handleMouseLeave = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       setIsHovered(false)
     }, 150)
   }, [])
 
+  if (!isLoading && !isGenerating && isEmptyMessage) {
+    return null
+  }
+
   return (
     <div
-      className="relative isolate flex w-fit max-w-[330px] flex-col items-start justify-center last:mb-8"
-      ref={containerRef}
+      className="relative isolate flex w-full flex-col items-start justify-center last:mb-8"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -60,9 +63,9 @@ export const AssistantMessage = ({
       )}
       {message && (
         <>
-          <div className="[&>div]:flex [&>div]:flex-col [&>div]:gap-1">
+          <div className="w-fit max-w-[min(90%,330px)] [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
             <Markdown
-              content={message}
+              content={content}
               components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}
             />
           </div>
@@ -80,11 +83,11 @@ export const AssistantMessage = ({
               <div>
                 <CopyButton
                   variant="ghost"
-                  valueToCopy={message}
+                  valueToCopy={content}
                   disabled={isGenerating}
                   onCopy={(e) => {
                     e.currentTarget.blur()
-                    onCopy?.(message)
+                    onCopy?.(content)
                   }}
                 />
               </div>
@@ -98,9 +101,7 @@ export const AssistantMessage = ({
                   disabled={isGenerating}
                   onClick={(e) => {
                     setReactionValue((val) => (val === "like" ? null : "like"))
-                    // Blocked! new version of the sdk changes the type of the `message` variable so we can pass it directly
-                    // the current version does not provide enough information to create `TextMessage` correctly
-                    onThumbsUp?.({} as TextMessage)
+                    onThumbsUp?.(message)
                     e.currentTarget.blur()
                   }}
                 />
@@ -119,9 +120,7 @@ export const AssistantMessage = ({
                     setReactionValue((val) =>
                       val === "dislike" ? null : "dislike"
                     )
-                    // Blocked! new version of the sdk changes the type of the `message` variable so we can pass it directly
-                    // the current version does not provide enough information to create `TextMessage` correctly
-                    onThumbsDown?.({} as TextMessage)
+                    onThumbsDown?.(message)
                     e.currentTarget.blur()
                   }}
                 />

@@ -1,7 +1,7 @@
 import { Button } from "@/components/Actions/Button"
 import { OneDropdownButton } from "@/components/Actions/OneDropdownButton"
-import { IconType } from "@/components/Utilities/Icon"
-import { AlertAvatar } from "@/experimental/Information/Avatars/AlertAvatar"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { IconType } from "@/components/F0Icon"
 import {
   Dropdown,
   DropdownItem,
@@ -56,7 +56,7 @@ interface OneActionBarProps {
 const Alert = ({ message }: { message: string }) => {
   return (
     <div className="flex w-full flex-row items-center gap-2 rounded-md bg-f1-background-warning p-2">
-      <AlertAvatar type="warning" size="sm" />
+      <F0AvatarAlert type="warning" size="sm" />
       <p className="flex-1 font-medium text-f1-foreground-warning">{message}</p>
     </div>
   )

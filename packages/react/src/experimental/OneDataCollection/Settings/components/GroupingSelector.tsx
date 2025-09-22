@@ -1,17 +1,21 @@
 import { Button } from "@/components/Actions/Button"
 import { Select } from "@/experimental/Forms/Fields/Select"
-import { ArrowDown, ArrowUp, Placeholder } from "@/icons/app"
+import {
+  GroupingDefinition,
+  GroupingState,
+  RecordType,
+} from "@/hooks/datasource"
+import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { GroupingDefinition, GroupingState } from "../../grouping"
-import { RecordType } from "../../types"
 
 type GroupingSelectorProps<
   R extends RecordType,
   Grouping extends GroupingDefinition<R>,
 > = {
-  grouping: Grouping
-  currentGrouping: GroupingState<R, Grouping> | undefined
-  onGroupingChange: (groupingState: GroupingState<R, Grouping>) => void
+  grouping?: Grouping
+  currentGrouping?: GroupingState<R, Grouping>
+  onGroupingChange?: (groupingState: GroupingState<R, Grouping>) => void
+  hideLabel?: boolean
 }
 
 const EmptyGroupingValue = "__no-grouping__"
@@ -23,8 +27,16 @@ export const GroupingSelector = <
   grouping,
   currentGrouping,
   onGroupingChange,
+  hideLabel = false,
 }: GroupingSelectorProps<R, Grouping>) => {
   const i18n = useI18n()
+  if (
+    !grouping ||
+    (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2)
+  ) {
+    return null
+  }
+
   const groupingOptions = [
     ...(!grouping.mandatory
       ? [
@@ -55,11 +67,11 @@ export const GroupingSelector = <
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <Select
             label={i18n.collections.grouping.groupBy}
-            labelIcon={Placeholder}
             options={groupingOptions}
+            hideLabel={hideLabel}
             value={currentGrouping?.field.toString() ?? EmptyGroupingValue}
             onChange={(value: string) =>
-              onGroupingChange(
+              onGroupingChange?.(
                 value !== EmptyGroupingValue
                   ? {
                       field: value as keyof Grouping["groupBy"],
@@ -71,20 +83,18 @@ export const GroupingSelector = <
           />
         </div>
         {currentGrouping?.field && (
-          <div className="pb-1">
-            <Button
-              hideLabel
-              label={i18n.collections.grouping.toggleDirection}
-              variant="outline"
-              icon={currentGrouping?.order === "asc" ? ArrowUp : ArrowDown}
-              onClick={() =>
-                onGroupingChange({
-                  field: currentGrouping.field,
-                  order: currentGrouping.order === "asc" ? "desc" : "asc",
-                })
-              }
-            />
-          </div>
+          <Button
+            hideLabel
+            label={i18n.collections.grouping.toggleDirection}
+            variant="outline"
+            icon={currentGrouping?.order === "asc" ? ArrowUp : ArrowDown}
+            onClick={() =>
+              onGroupingChange?.({
+                field: currentGrouping.field,
+                order: currentGrouping.order === "asc" ? "desc" : "asc",
+              })
+            }
+          />
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { cva } from "cva"
 import { motion } from "motion/react"
 import { ComponentProps, forwardRef, useState } from "react"
-import { Icon, IconType } from "../../Utilities/Icon"
+import { F0Icon, IconType } from "../../F0Icon"
 
 export type ButtonInternalProps = Pick<
   ComponentProps<typeof ShadcnButton>,
@@ -192,7 +192,7 @@ const ButtonInternal = forwardRef<HTMLButtonElement, ButtonInternalProps>(
           className={cn(isLoading && "invisible", "flex items-center gap-1")}
         >
           {icon && (
-            <Icon
+            <F0Icon
               size={size === "sm" ? "sm" : "md"}
               icon={icon}
               className={

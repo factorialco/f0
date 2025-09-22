@@ -1,3 +1,4 @@
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
@@ -42,6 +43,7 @@ export const Default: Story = {
 }
 
 export const Variants: Story = {
+  parameters: withSnapshot({}),
   render: (args) => (
     <div className="[&>h3]:mt-5 [&>h3]:pb-2">
       <h3 className="!m-0">Basic usage</h3>
@@ -57,6 +59,7 @@ export const Variants: Story = {
 }
 
 export const States: Story = {
+  parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex flex-row items-center justify-center space-x-6">
       <Link {...args} variant="link">

@@ -1,12 +1,13 @@
-import { Icon } from "../../../components/Utilities/Icon"
-import { cn } from "../../../lib/utils"
-import { Avatar, DropdownItemObject } from "../../exports"
+import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { F0Icon } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
+import { DropdownItemObject } from "./internal"
 
 export const DropdownItemContent = ({ item }: { item: DropdownItemObject }) => (
   <>
-    {item.avatar && <Avatar avatar={item.avatar} size="xsmall" />}
+    {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
     {item.icon && (
-      <Icon
+      <F0Icon
         icon={item.icon}
         size="md"
         className={cn("text-f1-icon", item.critical && "text-f1-icon-critical")}

@@ -7,10 +7,19 @@ describe("weekGranularity", () => {
   const baseDate = new Date(2024, 0, 15)
   const nextWeekDate = new Date(2024, 0, 22)
   const invalidDate = new Date("Invalid Date")
+  const i18n = {
+    date: {
+      granularities: {
+        week: {
+          long: "Week of %{day} %{month} %{year}",
+        },
+      },
+    },
+  }
 
   describe("toRangeString", () => {
     it("formats a single date correctly", () => {
-      const result = weekGranularity.toRangeString(baseDate)
+      const result = weekGranularity.toRangeString(baseDate, i18n)
       expect(result).toEqual({
         from: "W3 2024",
         to: undefined,
@@ -18,10 +27,13 @@ describe("weekGranularity", () => {
     })
 
     it("formats a date range correctly", () => {
-      const result = weekGranularity.toRangeString({
-        from: baseDate,
-        to: nextWeekDate,
-      })
+      const result = weekGranularity.toRangeString(
+        {
+          from: baseDate,
+          to: nextWeekDate,
+        },
+        i18n
+      )
       expect(result).toEqual({
         from: "W3 2024",
         to: "W4 2024",
@@ -29,7 +41,7 @@ describe("weekGranularity", () => {
     })
 
     it("handles undefined input", () => {
-      const result = weekGranularity.toRangeString(undefined)
+      const result = weekGranularity.toRangeString(undefined, i18n)
       expect(result).toEqual({
         from: "",
         to: undefined,
@@ -60,22 +72,30 @@ describe("weekGranularity", () => {
 
   describe("toString", () => {
     it("formats a single date correctly", () => {
-      const result = weekGranularity.toString(baseDate)
+      const result = weekGranularity.toString(baseDate, i18n)
       expect(result).toBe("W3 2024")
     })
 
+    it("formats a single date correctly with long format", () => {
+      const result = weekGranularity.toString(baseDate, i18n, "long")
+      expect(result).toBe("Week of 15 Jan 2024")
+    })
+
     it("formats a date range correctly", () => {
-      const result = weekGranularity.toString({
-        from: baseDate,
-        to: nextWeekDate,
-      })
+      const result = weekGranularity.toString(
+        {
+          from: baseDate,
+          to: nextWeekDate,
+        },
+        i18n
+      )
       expect(result).toBe("W3 2024 → W4 2024")
     })
   })
 
   describe("fromString", () => {
     it("parses a single week string correctly", () => {
-      const result = weekGranularity.fromString("W3 2024")
+      const result = weekGranularity.fromString("W3 2024", i18n)
       expect(result).toEqual({
         from: startOfISOWeek(new Date(2024, 0, 15)),
         to: endOfISOWeek(new Date(2024, 0, 15)),
@@ -83,7 +103,7 @@ describe("weekGranularity", () => {
     })
 
     it("parses a week range string correctly", () => {
-      const result = weekGranularity.fromString("W3 2024 - W4 2024")
+      const result = weekGranularity.fromString("W3 2024 - W4 2024", i18n)
       expect(result).toEqual({
         from: startOfISOWeek(new Date(2024, 0, 15)),
         to: endOfISOWeek(new Date(2024, 0, 22)),
@@ -91,7 +111,7 @@ describe("weekGranularity", () => {
     })
 
     it("handles different week formats", () => {
-      const result = weekGranularity.fromString("w3 2024")
+      const result = weekGranularity.fromString("w3 2024", i18n)
       expect(result).toEqual({
         from: startOfISOWeek(new Date(2024, 0, 15)),
         to: endOfISOWeek(new Date(2024, 0, 15)),
@@ -99,7 +119,7 @@ describe("weekGranularity", () => {
     })
 
     it("handles invalid input", () => {
-      const result = weekGranularity.fromString("invalid")
+      const result = weekGranularity.fromString("invalid", i18n)
       expect(result?.from).toStrictEqual(invalidDate)
       expect(result?.to).toStrictEqual(invalidDate)
     })
@@ -189,7 +209,7 @@ describe("weekGranularity", () => {
 
   describe("label", () => {
     it("formats the label correctly", () => {
-      const result = weekGranularity.label(baseDate)
+      const result = weekGranularity.label(baseDate, i18n)
       expect(result).toBe("January 2024")
     })
   })

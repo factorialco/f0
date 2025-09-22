@@ -1,6 +1,9 @@
 import { Button } from "@/components/Actions/Button"
-import { enhanceLabelsType, lastIntentType } from "@/experimental/exports"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
+import {
+  enhanceLabelsType,
+  lastIntentType,
+} from "@/experimental/RichText/RichTextEditor/utils/types"
 import { Check, Cross, Reset } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Editor } from "@tiptap/react"

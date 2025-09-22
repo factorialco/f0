@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { Button } from "@/components/Actions/Button"
 import { UseFormReturn } from "react-hook-form"
 import { number, z } from "zod"
 import { F0Checkbox } from "../../../components/F0Checkbox"
-import { Button } from "../../../factorial-one"
 import { Textarea } from "../../../ui/textarea"
 import { AutoGrid } from "../../Utilities/Layout/AutoGrid"
 import { Input } from "../Fields/Input"

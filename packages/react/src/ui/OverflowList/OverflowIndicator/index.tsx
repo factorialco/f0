@@ -1,11 +1,11 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { FC } from "react"
 
-const IconMotion = motion.create(Icon)
+const IconMotion = motion.create(F0Icon)
 
 interface OverflowIndicatorProps {
   totalItemsCount: number

@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { PersonAvatar } from "@/experimental/Information/Avatars/PersonAvatar"
 import { Badge } from "@/experimental/Information/Badge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"
@@ -44,11 +44,11 @@ export function SidebarFooter({
             )}
             onClick={onDropdownClick}
           >
-            <PersonAvatar
+            <F0AvatarPerson
               src={user.avatarUrl}
               firstName={user.firstName}
               lastName={user.lastName}
-              size="xsmall"
+              size="xs"
             />
             <OneEllipsis>{`${user.firstName} ${user.lastName}`}</OneEllipsis>
           </button>

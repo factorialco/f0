@@ -24,7 +24,8 @@ export interface DetailsItemType {
   title: string;
   content: Content | Content[];
   spacingAtTheBottom?: boolean;
-  isHorizontal?: boolean;
+  isHorizontalItem?: boolean;
+  tableView?: boolean;
 }
 
 const ItemContent: FC<{ content: Content }> = ({ content }) => (
@@ -40,7 +41,8 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
 export const DetailsItem = ({
   title,
   content,
-  isHorizontal = false,
+  isHorizontalItem = false,
+  tableView = false,
   spacingAtTheBottom,
 }: DetailsItemType) => {
   const contentArray = Array.isArray(content) ? content : [content];
@@ -49,10 +51,14 @@ export const DetailsItem = ({
     <View
       className={cn(
         "flex gap-0.5",
-        spacingAtTheBottom && !isHorizontal && "pb-3",
+        spacingAtTheBottom && !isHorizontalItem && "pb-3",
       )}
     >
-      <DataList label={title} isHorizontal={isHorizontal}>
+      <DataList
+        label={title}
+        isHorizontalItem={isHorizontalItem}
+        tableView={tableView}
+      >
         {contentArray.map((c, i) => (
           <ItemContent key={i} content={c} />
         ))}

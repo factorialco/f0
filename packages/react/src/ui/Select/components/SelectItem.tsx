@@ -1,6 +1,6 @@
 import * as SelectPrimitive from "@radix-ui/react-select"
 import * as React from "react"
-import { Icon } from "../../../components/Utilities/Icon"
+import { F0Icon } from "../../../components/F0Icon/index.tsx"
 import { CheckCircle } from "../../../icons/app"
 import { cn } from "../../../lib/utils.ts"
 
@@ -24,7 +24,7 @@ const SelectItem = React.forwardRef<
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     {withIndicator && (
       <SelectPrimitive.ItemIndicator className="flex text-f1-icon-selected">
-        <Icon icon={CheckCircle} size="md" />
+        <F0Icon icon={CheckCircle} size="md" />
       </SelectPrimitive.ItemIndicator>
     )}
   </SelectPrimitive.Item>

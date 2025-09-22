@@ -1,21 +1,10 @@
+import { Archive } from "@/icons/app"
+import { zeroRender as render } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
-import { fireEvent, render, screen } from "@testing-library/react"
-import React from "react"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { Archive } from "../../../icons/app"
-import { InputField } from "../InputField"
+import { fireEvent, screen } from "@testing-library/react"
 
-// Mock the motion/react module to properly handle AnimatePresence
-vi.mock("motion/react", () => ({
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="animate-presence">{children}</div>
-  ),
-  motion: {
-    circle: ({ children, ...props }: React.SVGProps<SVGCircleElement>) => (
-      <circle {...props}>{children}</circle>
-    ),
-  },
-}))
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { InputField, InputFieldStatusType } from "../InputField"
 
 describe("InputField", () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
@@ -151,7 +140,7 @@ describe("InputField", () => {
       const input = screen.getByRole("textbox")
       fireEvent.change(input, { target: { value: "123456" } })
 
-      expect(handleChange).not.toHaveBeenCalled()
+      expect(handleChange).toHaveBeenCalledWith("12345")
     })
 
     it("should display character count when maxLength is provided", () => {
@@ -224,7 +213,7 @@ describe("InputField", () => {
       const animatePresence = container.querySelector(
         "[data-testid='animate-presence']"
       )
-      expect(animatePresence).toBeEmptyDOMElement()
+      expect(animatePresence).toBeNull()
     })
   })
 
@@ -263,17 +252,6 @@ describe("InputField", () => {
       expect(screen.getByText("This is an error")).toBeInTheDocument()
     })
 
-    it("should display multiple error messages", () => {
-      render(
-        <InputField label="Test Label" error={["Error 1", "Error 2"]}>
-          <input />
-        </InputField>
-      )
-
-      expect(screen.getByText("Error 1")).toBeInTheDocument()
-      expect(screen.getByText("Error 2")).toBeInTheDocument()
-    })
-
     it("should apply error styling when error is present", () => {
       render(
         <InputField label="Test Label" error="This is an error">
@@ -283,6 +261,64 @@ describe("InputField", () => {
 
       const wrapper = screen.getByTestId("input-field-wrapper")
       expect(wrapper).toHaveClass("border-f1-border-critical-bold")
+    })
+  })
+
+  describe("Status handling", () => {
+    const statuses: Record<
+      string,
+      { type: InputFieldStatusType; message: string; expectedClass: string }
+    > = {
+      error: {
+        type: "error",
+        message: "This is an error",
+        expectedClass: "border-f1-border-critical-bold",
+      },
+      warning: {
+        type: "warning",
+        message: "This is a warning",
+        expectedClass: "border-f1-border-warning-bold",
+      },
+      info: {
+        type: "info",
+        message: "This is an info",
+        expectedClass: "border-f1-border-info-bold",
+      },
+    }
+
+    Object.entries(statuses).forEach(([type, status]) => {
+      it(`should display status message for ${type}`, () => {
+        render(
+          <InputField
+            label="Test Label"
+            status={{
+              type: status.type as InputFieldStatusType,
+              message: status.message,
+            }}
+          >
+            <input />
+          </InputField>
+        )
+
+        expect(screen.getByText(status.message)).toBeInTheDocument()
+      })
+
+      it(`should apply ${type} styling when ${type} is present`, () => {
+        render(
+          <InputField
+            label="Test Label"
+            status={{
+              type: status.type as InputFieldStatusType,
+              message: status.message,
+            }}
+          >
+            <input />
+          </InputField>
+        )
+
+        const wrapper = screen.getByTestId("input-field-wrapper")
+        expect(wrapper).toHaveClass(status.expectedClass)
+      })
     })
   })
 

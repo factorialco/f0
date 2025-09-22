@@ -13,7 +13,6 @@ export type TextareaProps = Omit<
     | "label"
     | "labelIcon"
     | "icon"
-    | "error"
     | "hideLabel"
     | "maxLength"
     | "clearable"
@@ -23,6 +22,9 @@ export type TextareaProps = Omit<
     | "onClear"
     | "onFocus"
     | "onBlur"
+    | "error"
+    | "status"
+    | "hint"
   >
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -40,6 +42,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       value,
       cols,
       rows,
+      status,
+      hint,
       onChange,
       placeholder,
       ...props
@@ -52,6 +56,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         labelIcon={labelIcon}
         icon={icon}
         error={error}
+        status={status}
+        hint={hint}
         hideLabel={hideLabel}
         maxLength={maxLength}
         clearable={clearable}

@@ -7,7 +7,6 @@ const meta = {
   component: ChevronToggle,
   parameters: {
     layout: "centered",
-    chromatic: { disableSnapshot: true },
   },
   tags: ["autodocs", "internal"],
 } satisfies Meta<typeof ChevronToggle>

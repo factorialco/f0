@@ -1,5 +1,5 @@
-import { IconType } from "@/components/Utilities/Icon"
-import { propertyRenderers } from "@/experimental/OneDataCollection/visualizations/property"
+import { IconType } from "@/components/F0Icon"
+import { valueDisplayRenderers } from "@/components/value-display"
 import { CardPropertyType } from "./components/CardMetadata"
 
 /**
@@ -9,11 +9,15 @@ import { CardPropertyType } from "./components/CardMetadata"
 export type CardMetadataProperty = {
   [K in CardPropertyType]: {
     type: K
-    value: Parameters<(typeof propertyRenderers)[K]>[0]
+    value: Parameters<(typeof valueDisplayRenderers)[K]>[0]
   }
 }[CardPropertyType]
 
-export type CardMetadata = {
-  icon: IconType
-  property: CardMetadataProperty
-}
+export type CardMetadata =
+  | {
+      icon: IconType
+      property: Exclude<CardMetadataProperty, { type: "file" }>
+    }
+  | {
+      property: Extract<CardMetadataProperty, { type: "file" }>
+    }

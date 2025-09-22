@@ -1,4 +1,4 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { Shortcut } from "@/experimental/Information/Shortcut"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
@@ -56,7 +56,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         aria-label={label}
         {...props}
       >
-        <Icon icon={icon} />
+        <F0Icon icon={icon} />
         {showLabel && (
           <span
             className={cn(

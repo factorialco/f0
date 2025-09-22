@@ -1,10 +1,10 @@
+import { F0AvatarDate } from "@/components/avatars/F0AvatarDate"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { ChevronRight } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
-import { Icon, IconType } from "../../../../components/Utilities/Icon"
-import { ChevronRight } from "../../../../icons/app"
-import { cn } from "../../../../lib/utils"
-import { DateAvatar } from "../../../Information/Avatars/DateAvatar"
-import { RawTag } from "../../../Information/Tags/RawTag"
-import { Tooltip } from "../../../Overlays/Tooltip"
 
 type Tag = {
   icon: IconType
@@ -22,7 +22,7 @@ const Tags = ({ tags, right }: { tags: Tag[]; right?: boolean }) => (
     {tags.map((tag) => {
       const Content = (
         <div>
-          <RawTag
+          <F0TagRaw
             icon={tag.icon}
             additionalAccesibleText={`${tag.label}: ${tag.description}`}
           />
@@ -136,15 +136,15 @@ export const CalendarEvent = forwardRef<HTMLDivElement, CalendarEventProps>(
             <div className="flex flex-row items-center">
               {fromDate && (
                 <>
-                  <DateAvatar date={fromDate} />
-                  <Icon
+                  <F0AvatarDate date={fromDate} />
+                  <F0Icon
                     icon={ChevronRight}
                     size="sm"
                     className="text-f1-foreground-tertiary"
                   />
                 </>
               )}
-              {toDate && <DateAvatar date={toDate} />}
+              {toDate && <F0AvatarDate date={toDate} />}
             </div>
           </div>
           {(leftTags || rightTags) && (

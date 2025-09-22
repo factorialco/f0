@@ -1,6 +1,6 @@
 import { EmojiImage } from "@/lib/emojis"
 import { forwardRef } from "react"
-import { Icon, IconType } from "../components/Utilities/Icon"
+import { F0Icon, IconType } from "../components/F0Icon"
 import { cn } from "../lib/utils"
 
 type IndicatorProps = {
@@ -23,7 +23,7 @@ export const Indicator = forwardRef<HTMLDivElement, IndicatorProps>(
           </p>
           {"icon" in props && props.icon && (
             <span className={cn("flex", color)}>
-              <Icon icon={props.icon} />
+              <F0Icon icon={props.icon} />
             </span>
           )}
           {"emoji" in props && props.emoji && (

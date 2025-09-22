@@ -1,7 +1,7 @@
 import { Button } from "@/components/Actions/Button"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { UpsellingButton } from "@/components/UpsellingKit/UpsellingButton"
-import { EmojiAvatar } from "@/experimental/Information/Avatars/EmojiAvatar"
-import { AlertAvatar } from "../Information/Avatars/AlertAvatar"
 import * as Types from "./types"
 
 export function OneEmptyState({
@@ -13,8 +13,8 @@ export function OneEmptyState({
 }: Types.OneEmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-5 p-8">
-      {variant === "default" && <EmojiAvatar emoji={emoji!} size="large" />}
-      {variant !== "default" && <AlertAvatar type={variant} size="lg" />}
+      {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
+      {variant !== "default" && <F0AvatarAlert type={variant} size="lg" />}
       <div className="flex flex-col items-center justify-center gap-0.5">
         <p className="text-center text-lg font-medium text-f1-foreground">
           {title}

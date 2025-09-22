@@ -1,6 +1,6 @@
 import { ComponentProps } from "react";
-import { BadgeProps } from "../../Badge";
 import { BaseAvatar } from "../BaseAvatar";
+import { AvatarBadge } from "../types";
 
 type BaseAvatarProps = ComponentProps<typeof BaseAvatar>;
 
@@ -9,7 +9,7 @@ export type PersonAvatarProps = {
   lastName: string;
   src?: string;
   size?: BaseAvatarProps["size"];
-  badge?: BadgeProps;
+  badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 export const PersonAvatar = ({

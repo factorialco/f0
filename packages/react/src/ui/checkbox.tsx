@@ -2,7 +2,7 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { AnimatePresence } from "motion/react"
 import * as React from "react"
 import { useId } from "react"
-import { Icon } from "../components/Utilities/Icon"
+import { F0Icon } from "../components/F0Icon"
 import { Check, Minus } from "../icons/app"
 import { cn, focusRing } from "../lib/utils"
 
@@ -43,9 +43,9 @@ const Checkbox = React.forwardRef<
         <AnimatePresence>
           <CheckboxPrimitive.Indicator className="absolute inset-0 z-[2] flex items-center justify-center text-current transition-none">
             {indeterminate ? (
-              <Icon icon={Minus} size="sm" />
+              <F0Icon icon={Minus} size="sm" />
             ) : (
-              <Icon icon={Check} size="sm" />
+              <F0Icon icon={Check} size="sm" />
             )}
           </CheckboxPrimitive.Indicator>
         </AnimatePresence>

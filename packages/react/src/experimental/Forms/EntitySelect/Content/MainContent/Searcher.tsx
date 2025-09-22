@@ -1,6 +1,6 @@
 import { CrossedCircle } from "@/icons/app"
 import { Search } from "lucide-react"
-import { Icon } from "../../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../../components/F0Icon"
 import { focusNextFocusable, focusPreviousFocusable } from "../../ListItem"
 
 export const Searcher = ({
@@ -35,7 +35,7 @@ export const Searcher = ({
 
   return (
     <div className="flex justify-between gap-1 rounded-[10px] border-[1px] border-solid border-f1-border px-2 py-[3px] transition-all focus-within:border-f1-border-hover hover:border-f1-border-hover">
-      <Icon icon={Search} size="md" />
+      <F0Icon icon={Search} size="md" />
       <input
         disabled={disabled}
         onKeyDown={handleKeyDown}
@@ -46,7 +46,7 @@ export const Searcher = ({
         onChange={(e) => onSearch(e.target.value)}
       />
       {search && (
-        <Icon
+        <F0Icon
           icon={CrossedCircle}
           size="md"
           onClick={() => onSearch("")}

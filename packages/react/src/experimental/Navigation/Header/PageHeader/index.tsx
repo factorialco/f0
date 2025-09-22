@@ -1,8 +1,8 @@
 import { Button } from "@/components/Actions/Button"
-import { IconType } from "@/components/Utilities/Icon"
-import { ModuleId } from "@/experimental/Information/ModuleAvatar"
-import type { StatusVariant } from "@/experimental/Information/Tags/StatusTag"
-import { StatusTag } from "@/experimental/Information/Tags/StatusTag"
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { IconType } from "@/components/F0Icon"
+import type { StatusVariant } from "@/components/tags/F0TagStatus"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
@@ -13,6 +13,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
+import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -222,7 +223,7 @@ export function PageHeader({
             {statusTag.tooltip ? (
               <Tooltip label={statusTag.tooltip}>
                 <div>
-                  <StatusTag
+                  <F0TagStatus
                     text={statusTag.text}
                     variant={statusTag.variant}
                     additionalAccesibleText={statusTag.tooltip}
@@ -230,7 +231,7 @@ export function PageHeader({
                 </div>
               </Tooltip>
             ) : (
-              <StatusTag text={statusTag.text} variant={statusTag.variant} />
+              <F0TagStatus text={statusTag.text} variant={statusTag.variant} />
             )}
           </div>
         )}
@@ -284,6 +285,9 @@ export function PageHeader({
             )}
           </div>
         )}
+        <div>
+          <OneSwitch />
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { Button } from "@/components/Actions/Button"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import {
   BaseBanner,
   type BannerAction,

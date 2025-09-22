@@ -1,8 +1,8 @@
 import { useLayout } from "@/components/layouts/LayoutProvider"
 import { Button, type ButtonProps } from "../../../../components/Actions/Button"
-import { Icon, type IconType } from "../../../../components/Utilities/Icon"
-import ExternalLink from "../../../../icons/app/ExternalLink"
-import { cn, focusRing } from "../../../../lib/utils"
+import { Link } from "../../../../components/Actions/Link"
+import type { IconType } from "../../../../components/F0Icon"
+import { cn } from "../../../../lib/utils"
 
 type Props = {
   /** Main heading text */
@@ -17,8 +17,8 @@ type Props = {
     variant?: "default" | "outline"
   }
 
-  /** Optional Link to related documentation (Help center or other link))*/
-  supportButton?: {
+  /** Optional link to related documentation (Help center or other link) */
+  link?: {
     label: string
     href: string
   }
@@ -31,7 +31,7 @@ export const SectionHeader = ({
   title,
   description,
   action,
-  supportButton,
+  link,
   separator,
 }: Props) => {
   const layout = useLayout()
@@ -49,20 +49,11 @@ export const SectionHeader = ({
           <h2 className="text-lg font-semibold text-f1-foreground">{title}</h2>
           <p className="text-f1-foreground-secondary">{description}</p>
         </div>
-        {supportButton && (
+        {link && (
           <div className="w-fit">
-            <a
-              href={supportButton.href}
-              target="_blank"
-              rel="noreferrer"
-              className={cn(
-                "flex items-center gap-1 rounded-sm bg-f1-background-secondary px-2 py-0.5 text-base font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary-hover [&>svg]:text-f1-foreground-secondary",
-                focusRing()
-              )}
-            >
-              {supportButton.label}
-              <Icon icon={ExternalLink} size="sm" />
-            </a>
+            <Link href={link.href} target="_blank">
+              {link.label}
+            </Link>
           </div>
         )}
       </div>

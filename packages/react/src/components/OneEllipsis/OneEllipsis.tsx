@@ -30,6 +30,7 @@ type EllipsisWrapperProps = {
   children: string
   className?: string
   lines: number
+  noTooltip?: boolean
   onHasEllipsisChange: (hasEllipsis: boolean) => void
   tag?: AsAllowedList
 }
@@ -42,9 +43,17 @@ type EllipsisWrapperProps = {
  * @param {React.HTMLAttributes<HTMLSpanElement>} props - The props to apply to the text.
  * @returns {React.ReactElement} The rendered text.
  */
-const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
+const EllipsisWrapper = forwardRef<HTMLSpanElement, EllipsisWrapperProps>(
   (
-    { children, className, lines, onHasEllipsisChange, tag = "span", ...props },
+    {
+      children,
+      className,
+      lines,
+      onHasEllipsisChange,
+      noTooltip,
+      tag = "span",
+      ...props
+    },
     ref
   ) => {
     useEffect(() => {
@@ -73,7 +82,7 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       {
         ref,
         className: cn(
-          "min-w-0 max-w-full flex-1 overflow-hidden text-ellipsis",
+          `${noTooltip ? "pointer-events-none" : "pointer-events-auto"} min-w-0 max-w-full overflow-hidden text-ellipsis`,
           lines > 1
             ? `not-supports-[(-webkit-line-clamp:${lines})]:whitespace-nowrap display-[-webkit-box] whitespace-normal line-clamp-${lines}`
             : "block whitespace-nowrap",
@@ -122,6 +131,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
           onHasEllipsisChange={setHasEllipsis}
           {...props}
           data-testid="one-ellipsis"
+          noTooltip={noTooltip}
         >
           {children}
         </EllipsisWrapper>

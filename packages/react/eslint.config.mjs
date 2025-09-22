@@ -117,4 +117,83 @@ export default [
       ],
     },
   },
+  // Restrict barrel imports for all files except exports.ts and f0.ts
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    ignores: ["**/exports.ts", "**/f0.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/f0",
+              message:
+                "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+          ],
+          patterns: [
+            {
+              group: [
+                // F0 patterns (all variations)
+                "*f0",
+                "*f0.ts",
+                "*/f0",
+                "**/f0",
+                "**/f0.ts",
+                // exports patterns (all variations)
+                "*exports",
+                "*exports.ts",
+                "*/exports",
+                "**/exports",
+                "**/exports.ts",
+                "@/*/exports",
+                "@/**/exports",
+              ],
+              message:
+                "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Restrict barrel imports for exports.ts and f0.ts files (allow exports.ts imports)
+  {
+    files: [
+      "**/exports.ts",
+      "**/exports.tsx",
+      "**/f0.ts",
+      "**/experimental.ts",
+    ],
+    ignores: [],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/f0",
+              message:
+                "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+          ],
+          patterns: [
+            {
+              group: [
+                // F0 patterns (all variations)
+                "*f0",
+                "*f0.ts",
+                "*/f0",
+                "**/f0",
+                "**/f0.ts",
+              ],
+              message:
+                "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]

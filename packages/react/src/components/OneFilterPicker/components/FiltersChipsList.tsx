@@ -62,6 +62,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
             if (
               typedFilterType.isEmpty(currentValue, {
                 schema: filterSchema as unknown as FilterTypeSchema,
+                i18n,
               })
             ) {
               return null

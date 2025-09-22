@@ -70,6 +70,7 @@ export const defaultTranslations = {
       table: "Table view",
       card: "Card view",
       list: "List view",
+      kanban: "Kanban view",
       pagination: {
         of: "of",
       },
@@ -132,6 +133,7 @@ export const defaultTranslations = {
       week: {
         currentDate: "This week",
         label: "Week",
+        long: "Week of %{day} %{month} %{year}",
       },
       month: {
         currentDate: "This month",
@@ -175,8 +177,11 @@ export const defaultTranslations = {
   },
   notifications: "Notifications",
   ai: {
-    openChat: "Open Chat",
-    description: "Chat with AI",
+    openChat: "Open Chat with One AI",
+    closeChat: "Close Chat with One AI",
+    scrollToBottom: "Scroll to bottom",
+    welcome: "I'm One. Ask or make anything.",
+    initialMessage: "How can I help you today?",
   },
 } as const
 

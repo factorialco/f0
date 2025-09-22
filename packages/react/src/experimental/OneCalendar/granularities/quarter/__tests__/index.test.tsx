@@ -6,10 +6,11 @@ describe("quarterGranularity", () => {
   const baseDate = new Date(2024, 0, 15) // January 15, 2024 (Q1)
   const nextQuarterDate = new Date(2024, 3, 15) // April 15, 2024 (Q2)
   const invalidDate = new Date("Invalid Date")
+  const i18n = {}
 
   describe("toRangeString", () => {
     it("formats a single date correctly", () => {
-      const result = quarterGranularity.toRangeString(baseDate)
+      const result = quarterGranularity.toRangeString(baseDate, i18n)
       expect(result).toEqual({
         from: "Q1 2024",
         to: undefined,
@@ -17,10 +18,13 @@ describe("quarterGranularity", () => {
     })
 
     it("formats a date range correctly", () => {
-      const result = quarterGranularity.toRangeString({
-        from: baseDate,
-        to: nextQuarterDate,
-      })
+      const result = quarterGranularity.toRangeString(
+        {
+          from: baseDate,
+          to: nextQuarterDate,
+        },
+        i18n
+      )
       expect(result).toEqual({
         from: "Q1 2024",
         to: "Q2 2024",
@@ -28,7 +32,7 @@ describe("quarterGranularity", () => {
     })
 
     it("handles undefined input", () => {
-      const result = quarterGranularity.toRangeString(undefined)
+      const result = quarterGranularity.toRangeString(undefined, i18n)
       expect(result).toEqual({
         from: "",
         to: undefined,
@@ -59,22 +63,25 @@ describe("quarterGranularity", () => {
 
   describe("toString", () => {
     it("formats a single date correctly", () => {
-      const result = quarterGranularity.toString(baseDate)
+      const result = quarterGranularity.toString(baseDate, i18n)
       expect(result).toBe("Q1 2024")
     })
 
     it("formats a date range correctly", () => {
-      const result = quarterGranularity.toString({
-        from: baseDate,
-        to: nextQuarterDate,
-      })
+      const result = quarterGranularity.toString(
+        {
+          from: baseDate,
+          to: nextQuarterDate,
+        },
+        i18n
+      )
       expect(result).toBe("Q1 2024 → Q2 2024")
     })
   })
 
   describe("fromString", () => {
     it("parses a single quarter string correctly", () => {
-      const result = quarterGranularity.fromString("Q1 2024")
+      const result = quarterGranularity.fromString("Q1 2024", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2024, 2, 31, 23, 59, 59, 999),
@@ -82,7 +89,7 @@ describe("quarterGranularity", () => {
     })
 
     it("parses a quarter range string correctly", () => {
-      const result = quarterGranularity.fromString("Q1 2024 - Q2 2024")
+      const result = quarterGranularity.fromString("Q1 2024 - Q2 2024", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2024, 5, 30, 23, 59, 59, 999),
@@ -90,7 +97,7 @@ describe("quarterGranularity", () => {
     })
 
     it("handles different quarter formats", () => {
-      const result = quarterGranularity.fromString("q1 2024")
+      const result = quarterGranularity.fromString("q1 2024", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2024, 2, 31, 23, 59, 59, 999),
@@ -98,7 +105,7 @@ describe("quarterGranularity", () => {
     })
 
     it("handles invalid input", () => {
-      const result = quarterGranularity.fromString("invalid")
+      const result = quarterGranularity.fromString("invalid", i18n)
       expect(result).toEqual({
         from: invalidDate,
         to: invalidDate,
@@ -187,7 +194,7 @@ describe("quarterGranularity", () => {
 
   describe("label", () => {
     it("formats the label correctly", () => {
-      const result = quarterGranularity.label(baseDate)
+      const result = quarterGranularity.label(baseDate, i18n)
       expect(result).toBe("2020 → 2024")
     })
   })

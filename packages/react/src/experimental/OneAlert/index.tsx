@@ -1,9 +1,9 @@
 import { Button } from "@/components/Actions/Button"
-import { Icon } from "@/components/Utilities/Icon"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Icon } from "@/components/F0Icon"
 import { ExternalLink } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
-import { AlertAvatar } from "../Information/Avatars/AlertAvatar"
 
 type AlertVariant = "info" | "warning" | "critical"
 
@@ -68,7 +68,7 @@ export const OneAlert = ({
       <div className="flex flex-grow items-center justify-between gap-16">
         <div className="flex flex-row gap-4">
           <div className="h-6 w-6 flex-shrink-0">
-            <AlertAvatar type={variant} />
+            <F0AvatarAlert type={variant} />
           </div>
           <div className="flex flex-col gap-0.5">
             <h3 className={titleVariants({ variant })}>{title}</h3>
@@ -89,7 +89,7 @@ export const OneAlert = ({
               )}
             >
               {link.label}
-              <Icon icon={ExternalLink} size="sm" />
+              <F0Icon icon={ExternalLink} size="sm" />
             </a>
           )}
           <Button

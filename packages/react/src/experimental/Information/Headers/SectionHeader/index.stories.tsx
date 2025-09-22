@@ -1,5 +1,7 @@
 import { StandardLayout } from "@/components/layouts/StandardLayout"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ComponentProps } from "react"
 import { fn } from "storybook/test"
 import * as Icon from "../../../../icons/app"
 import { SectionHeader } from "./index"
@@ -35,7 +37,7 @@ export const Default: Story = {
       icon: Icon.Add,
       onClick: fn(),
     },
-    supportButton: {
+    link: {
       label: "Help Center link",
       href: "https://help.factorialhr.com/",
     },
@@ -47,7 +49,7 @@ export const NoAction: Story = {
   args: {
     title: "Course catalog",
     description: "Select any course you would like to request.",
-    supportButton: {
+    link: {
       label: "Help Center link",
       href: "https://help.factorialhr.com/",
     },
@@ -76,4 +78,18 @@ export const InLayout: Story = {
       </StandardLayout>
     ),
   ],
+}
+
+type SectionHeaderProps = ComponentProps<typeof SectionHeader>
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    return (
+      <div>
+        <SectionHeader title="Title" description="Description" />
+        <SectionHeader {...(Default.args as SectionHeaderProps)} />
+        <SectionHeader {...(NoAction.args as SectionHeaderProps)} />
+      </div>
+    )
+  },
 }

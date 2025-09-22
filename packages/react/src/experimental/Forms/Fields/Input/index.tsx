@@ -18,9 +18,11 @@ export type InputProps<T extends string> = Pick<
     | "label"
     | "labelIcon"
     | "icon"
-    | "error"
     | "hideLabel"
     | "name"
+    | "error"
+    | "status"
+    | "hint"
   > & {
     type?: Exclude<HTMLInputTypeAttribute, "number">
   }

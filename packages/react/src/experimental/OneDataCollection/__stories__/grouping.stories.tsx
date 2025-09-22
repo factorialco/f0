@@ -1,10 +1,9 @@
 import { Delete, Download, Pencil, Star } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
-import {
-  GroupingDefinition,
-  OneDataCollection,
-  useDataSource,
-} from "../exports"
+
+import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import { GroupingDefinition } from "@/hooks/datasource"
+import { OneDataCollection } from ".."
 import {
   createDataAdapter,
   ExampleComponent,
@@ -185,7 +184,7 @@ export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
       },
     }
 
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       selectable: (item) => item.id,
       filters,
       presets: filterPresets,
@@ -312,7 +311,13 @@ export const WithPaginationAndGrouping: Story = {
       },
     }
 
-    const source = useDataSource({
+    const dataAdapter = createDataAdapter({
+      data: paginatedMockUsers,
+      delay: 500,
+      paginationType: "pages",
+    })
+
+    const source = useDataCollectionSource({
       selectable: (item) => item.id,
       filters,
       presets: filterPresets,
@@ -333,11 +338,7 @@ export const WithPaginationAndGrouping: Story = {
           ],
         }
       },
-      dataAdapter: createDataAdapter({
-        data: paginatedMockUsers,
-        delay: 500,
-        paginationType: "pages",
-      }),
+      dataAdapter,
     })
 
     return (
@@ -432,7 +433,7 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
       },
     }
 
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       selectable: (item) => item.id,
       filters,
       presets: filterPresets,

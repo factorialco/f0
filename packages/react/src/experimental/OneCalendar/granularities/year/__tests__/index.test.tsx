@@ -6,10 +6,11 @@ describe("yearGranularity", () => {
   const baseDate = new Date(2024, 0, 15) // January 15, 2024
   const nextYearDate = new Date(2025, 0, 15) // January 15, 2025
   const invalidDate = new Date("Invalid Date")
+  const i18n = {}
 
   describe("toRangeString", () => {
     it("formats a single date correctly", () => {
-      const result = yearGranularity.toRangeString(baseDate)
+      const result = yearGranularity.toRangeString(baseDate, i18n)
       expect(result).toEqual({
         from: "2024",
         to: undefined,
@@ -17,10 +18,13 @@ describe("yearGranularity", () => {
     })
 
     it("formats a date range correctly", () => {
-      const result = yearGranularity.toRangeString({
-        from: baseDate,
-        to: nextYearDate,
-      })
+      const result = yearGranularity.toRangeString(
+        {
+          from: baseDate,
+          to: nextYearDate,
+        },
+        i18n
+      )
       expect(result).toEqual({
         from: "2024",
         to: "2025",
@@ -28,7 +32,7 @@ describe("yearGranularity", () => {
     })
 
     it("handles undefined input", () => {
-      const result = yearGranularity.toRangeString(undefined)
+      const result = yearGranularity.toRangeString(undefined, i18n)
       expect(result).toEqual({
         from: "",
         to: undefined,
@@ -59,22 +63,25 @@ describe("yearGranularity", () => {
 
   describe("toString", () => {
     it("formats a single date correctly", () => {
-      const result = yearGranularity.toString(baseDate)
+      const result = yearGranularity.toString(baseDate, i18n)
       expect(result).toBe("2024")
     })
 
     it("formats a date range correctly", () => {
-      const result = yearGranularity.toString({
-        from: baseDate,
-        to: nextYearDate,
-      })
+      const result = yearGranularity.toString(
+        {
+          from: baseDate,
+          to: nextYearDate,
+        },
+        i18n
+      )
       expect(result).toBe("2024 → 2025")
     })
   })
 
   describe("fromString", () => {
     it("parses a single year string correctly", () => {
-      const result = yearGranularity.fromString("2024")
+      const result = yearGranularity.fromString("2024", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2024, 11, 31, 23, 59, 59, 999),
@@ -82,7 +89,7 @@ describe("yearGranularity", () => {
     })
 
     it("parses a year range string correctly", () => {
-      const result = yearGranularity.fromString("2024 - 2025")
+      const result = yearGranularity.fromString("2024 - 2025", i18n)
       expect(result).toEqual({
         from: new Date(2024, 0, 1),
         to: new Date(2025, 11, 31, 23, 59, 59, 999),
@@ -90,7 +97,7 @@ describe("yearGranularity", () => {
     })
 
     it("handles invalid input", () => {
-      const result = yearGranularity.fromString("invalid")
+      const result = yearGranularity.fromString("invalid", i18n)
       expect(result?.from).toStrictEqual(invalidDate)
       expect(result?.to).toStrictEqual(invalidDate)
     })
@@ -180,7 +187,7 @@ describe("yearGranularity", () => {
 
   describe("label", () => {
     it("formats the label correctly", () => {
-      const result = yearGranularity.label(baseDate)
+      const result = yearGranularity.label(baseDate, i18n)
       expect(result).toBe("2020 → 2029")
     })
   })

@@ -43,7 +43,7 @@ export const Await = <T,>({
   if (error) {
     return errorFallback ?? null
   }
-  if (resolvedValue) {
+  if (resolvedValue !== null) {
     return children(resolvedValue)
   }
   return null

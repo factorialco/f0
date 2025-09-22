@@ -1,5 +1,5 @@
 import { composeStory } from "@storybook/react-vite"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "storybook/test"
 import { describe, expect, test, vi } from "vitest"
 import { NumberInput } from "./index"
@@ -43,11 +43,11 @@ describe("NumberInput", () => {
 
       const incrementButton = await screen.getAllByRole("button")[0]
       await userEvent.click(incrementButton)
-      expect(input).toHaveValue("2")
+      await waitFor(() => expect(input).toHaveValue("2"))
 
       const decrementButton = await screen.getAllByRole("button")[1]
       await userEvent.click(decrementButton)
-      expect(input).toHaveValue("1")
+      await waitFor(() => expect(input).toHaveValue("1"))
     })
 
     test("does not increase the value above the max", async () => {

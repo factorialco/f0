@@ -44,13 +44,38 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   }
 
   return (
-    <form
+    <motion.form
+      layout
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-2 flex flex-col gap-3 rounded-xl border border-solid border-f1-border",
-        "has-[textarea:focus]:shadow has-[textarea:focus]:outline-none has-[textarea:focus]:ring-1 has-[textarea:focus]:ring-f1-special-ring has-[textarea:focus]:ring-offset-0"
+        "relative isolate m-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border hover:cursor-text",
+        "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
+        "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
+        "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
+        "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']"
       )}
+      animate={{
+        "--gradient-angle": ["0deg", "360deg"],
+      }}
+      transition={{
+        default: {
+          duration: 6,
+          ease: "linear",
+          repeat: Infinity,
+        },
+        layout: {
+          duration: 0.3,
+        },
+      }}
+      style={
+        {
+          "--gradient-angle": "180deg",
+        } as React.CSSProperties
+      }
+      onClick={() => {
+        textareaRef.current?.focus()
+      }}
       onSubmit={handleSubmit}
     >
       <div className="grid grid-cols-1 grid-rows-1">
@@ -115,6 +140,6 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           />
         )}
       </div>
-    </form>
+    </motion.form>
   )
 }

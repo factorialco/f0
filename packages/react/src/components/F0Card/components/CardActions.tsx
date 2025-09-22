@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { Link, type LinkProps } from "@/components/Actions/Link"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { CardFooter } from "@/ui/Card"
 import { useMediaQuery } from "usehooks-ts"
@@ -34,7 +34,7 @@ export function CardActions({
   compact = false,
 }: CardActionsProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)")
-  const hasActions = primaryAction || secondaryActions
+  const hasActions = primaryAction || hasSecondaryActions()
 
   if (!hasActions) {
     return null
@@ -49,7 +49,7 @@ export function CardActions({
       )}
     >
       {secondaryActions && (
-        <div className="flex w-full flex-col gap-2 sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
+        <div className="flex w-full flex-col gap-md sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
           {Array.isArray(secondaryActions) ? (
             secondaryActions.map((action, index) => (
               <Button
@@ -89,4 +89,12 @@ export function CardActions({
       )}
     </CardFooter>
   )
+
+  function hasSecondaryActions(): boolean {
+    if (!secondaryActions) return false
+    if ("href" in secondaryActions) return true
+    if ("length" in secondaryActions) return secondaryActions.length > 0
+
+    return false
+  }
 }

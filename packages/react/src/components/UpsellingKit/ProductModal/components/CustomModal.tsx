@@ -1,6 +1,5 @@
 import { ButtonInternal } from "@/components/Actions/Button/internal"
-import { IconType } from "@/components/Utilities/Icon"
-import { ModuleAvatar } from "@/experimental/Information/ModuleAvatar"
+import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import CrossIcon from "@/icons/app/Cross"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/dialog"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
@@ -11,7 +10,7 @@ type CustomModalProps = {
   onClose: () => void
   title: string
   children: React.ReactNode
-  icon?: IconType
+  module?: ModuleId
   portalContainer?: HTMLElement | null
 }
 
@@ -20,7 +19,7 @@ export function CustomModal({
   onClose,
   title,
   children,
-  icon,
+  module,
   portalContainer,
 }: CustomModalProps) {
   const [open, setOpen] = useState(isOpen)
@@ -44,7 +43,7 @@ export function CustomModal({
       >
         <div className="flex flex-row items-center justify-between px-4 py-4">
           <DialogTitle className="flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground">
-            {icon && <ModuleAvatar icon={icon} size="lg" />}
+            {module && <F0AvatarModule module={module} size="lg" />}
             {title}
           </DialogTitle>
           <ButtonInternal

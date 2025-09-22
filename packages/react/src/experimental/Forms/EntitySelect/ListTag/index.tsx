@@ -1,9 +1,9 @@
-import { Icon } from "../../../../components/Utilities/Icon"
-import { Cross } from "../../../../icons/app"
-import { cn } from "../../../../lib/utils"
-import { BaseAvatar } from "../../../Information/Avatars/BaseAvatar"
-import { BaseTag } from "../../../Information/Tags/BaseTag"
-import { EntitySelectSubEntity } from "../types"
+import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
+import { F0Icon } from "@/components/F0Icon"
+import { BaseTag } from "@/components/tags/BaseTag"
+import { EntitySelectSubEntity } from "@/experimental/Forms/EntitySelect/types"
+import { Cross } from "@/icons/app"
+import { cn } from "@/lib/utils"
 
 export const ListTag = ({
   entity,
@@ -29,14 +29,14 @@ export const ListTag = ({
             <BaseAvatar
               src={entity.subAvatar}
               name={entity.subName}
-              size="xsmall"
+              size="xs"
               type="rounded"
             />
           )
         }
         right={
           !disabled && (
-            <Icon
+            <F0Icon
               icon={Cross}
               size="sm"
               className="cursor-pointer text-f1-icon-secondary"

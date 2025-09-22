@@ -1,4 +1,5 @@
 import { Button } from "@/components/Actions/Button"
+import Check from "@/icons/app/Check"
 
 export type HILActionConfirmationProps = {
   text?: string
@@ -23,6 +24,7 @@ export const HILActionConfirmation = ({
           type="button"
           variant="outline"
           size="sm"
+          icon={Check}
           onClick={onConfirm}
           label={confirmationText}
         />

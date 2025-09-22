@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/exports"
+import { Button } from "@/components/Actions/Button"
 import {
   Toolbar,
   ToolbarDivider,

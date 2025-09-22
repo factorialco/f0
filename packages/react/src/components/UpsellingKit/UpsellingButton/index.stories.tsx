@@ -116,9 +116,6 @@ export const OutlinePromote: Story = {
     variant: "outlinePromote",
     label: "Request Information",
   },
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
 }
 
 export const Sizes: Story = {

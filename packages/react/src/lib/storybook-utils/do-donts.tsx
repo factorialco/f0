@@ -1,5 +1,5 @@
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { FC, ReactNode } from "react"
-import { StatusTag } from "../../experimental/Information/Tags/exports"
 
 interface DoDontsProps {
   do: {
@@ -21,7 +21,7 @@ export const DoDonts: FC<DoDontsProps> = ({
   <div className="grid gap-4 md:grid-cols-2">
     <div className="flex flex-col gap-4 rounded-lg bg-f1-background-tertiary p-5">
       <div className="w-fit">
-        <StatusTag text="Do" variant="positive" />
+        <F0TagStatus text="Do" variant="positive" />
       </div>
       {doExample.children && (
         <div className="[&>div]:m-0">{doExample.children}</div>
@@ -42,7 +42,7 @@ export const DoDonts: FC<DoDontsProps> = ({
 
     <div className="flex flex-col gap-4 rounded-lg bg-f1-background-tertiary p-5">
       <div className="w-fit">
-        <StatusTag text="Don't" variant="critical" />
+        <F0TagStatus text="Don't" variant="critical" />
       </div>
       {dontExample.children && (
         <div className="[&>div]:m-0">{dontExample.children}</div>

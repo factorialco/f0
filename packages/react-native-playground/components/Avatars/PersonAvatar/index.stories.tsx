@@ -1,11 +1,8 @@
 import React from "react";
 import { View } from "react-native";
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-  PersonAvatar,
-  PersonAvatarProps,
-} from "@factorialco/factorial-one-react-native";
-import { Check } from "@factorialco/factorial-one-react-native/src/icons/app";
+import { PersonAvatar, PersonAvatarProps } from "@factorialco/f0-react-native";
+import { Check } from "@factorialco/f0-react-native/src/icons/app";
 
 export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const;
 
@@ -62,6 +59,16 @@ export const WithBadge: Story = {
     badge: {
       type: "positive",
       icon: Check,
+    },
+    size: "medium",
+  },
+};
+
+export const WithBadgeModuleAvatar: Story = {
+  args: {
+    badge: {
+      type: "module",
+      module: "benefits",
     },
     size: "medium",
   },

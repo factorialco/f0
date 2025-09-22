@@ -6,11 +6,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+coverage
 
 node_modules
 *.local
 storybook-static
+.husky
 
 # Editor directories and files
 .vscode/*
@@ -22,6 +23,7 @@ storybook-static
 *.njsproj
 *.sln
 *.sw?
+.husky
 
 *storybook.log
 

@@ -9,7 +9,7 @@ import {
   useEffect,
   useState,
 } from "react"
-import { Icon } from "../../Utilities/Icon"
+import { F0Icon } from "../../F0Icon"
 import { iconOnlyVariants } from "./internal"
 
 export type CopyButtonProps = Omit<
@@ -99,7 +99,7 @@ export const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
               height: "1em",
             }}
           >
-            <Icon
+            <F0Icon
               size={size === "sm" ? "sm" : "md"}
               icon={isCopying ? Check : LayersFront}
               className={iconOnlyVariants({ variant })}

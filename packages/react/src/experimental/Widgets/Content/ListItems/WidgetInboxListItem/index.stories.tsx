@@ -31,9 +31,6 @@ export const Default: Story = {
 }
 
 export const DefaultModule: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     id: "1",
     title: "Title",

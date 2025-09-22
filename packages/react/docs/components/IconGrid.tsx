@@ -1,10 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useMemo, useState } from "react"
+import { F0Icon as IconComponent, IconType } from "../../src/components/F0Icon"
 import { OneEllipsis } from "../../src/components/OneEllipsis"
-import {
-  Icon as IconComponent,
-  IconType,
-} from "../../src/components/Utilities/Icon"
 import * as Icons from "../../src/icons/app"
 import { cn, focusRing } from "../../src/lib/utils.ts"
 
@@ -104,6 +101,7 @@ export function IconGrid() {
           )}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          autoFocus
         />
         <div className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 select-none">
           <IconComponent icon={Icons.Search} color="secondary" />

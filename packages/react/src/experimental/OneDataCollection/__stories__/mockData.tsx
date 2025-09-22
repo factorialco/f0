@@ -1,37 +1,36 @@
-import {
-  BaseFetchOptions,
-  BaseResponse,
-  BulkActionDefinition,
-  DataAdapter,
-  GroupingDefinition,
-  GroupingState,
-  InfiniteScrollPaginatedResponse,
-  ItemActionsDefinition,
-  OnBulkActionCallback,
-  OneDataCollection,
-  OnSelectItemsCallback,
-  PaginatedResponse,
-  PaginationType,
-  PrimaryActionsDefinition,
-  RecordType,
-  SecondaryActionsDefinition,
-  SecondaryActionsItemDefinition,
-  SelectedItemsState,
-  SortingsStateMultiple,
-  useDataSource,
-} from "@/experimental/OneDataCollection/exports"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { Observable } from "zen-observable-ts"
 
-import { NewColor } from "@/experimental/Information/Tags/DotTag"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { cn } from "@/lib/utils"
+import { generateMockUsers, MockUser } from "@/mocks"
+export { generateMockUsers, type MockUser }
 
 import {
   FilterDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/components/OneFilterPicker"
+import {
+  BulkActionsDefinition,
+  DataCollectionBaseFetchOptions,
+  DataCollectionDataAdapter,
+  useDataCollectionSource,
+} from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import {
+  GroupingDefinition,
+  GroupingState,
+  SortingsStateMultiple,
+} from "@/hooks/datasource"
+import {
+  BaseResponse,
+  InfiniteScrollPaginatedResponse,
+  OnSelectItemsCallback,
+  PaginatedResponse,
+  PaginationType,
+  RecordType,
+  SelectedItemsState,
+} from "@/hooks/datasource/types"
 import {
   Ai,
   Briefcase,
@@ -44,26 +43,21 @@ import {
   Person,
   Star,
   Upload,
-} from "../../../icons/app"
+} from "@/icons/app"
+import { DEPARTMENTS_MOCK } from "@/mocks"
+import { OneDataCollection } from ".."
+import {
+  PrimaryActionsDefinition,
+  SecondaryActionsDefinition,
+  SecondaryActionsItemDefinition,
+} from "../actions"
+import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
 } from "../navigationFilters/types"
+import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
-
-export const DEPARTMENTS_MOCK = [
-  "Engineering",
-  "Product",
-  "Design",
-  "Marketing",
-] as const
-
-export const MANAGERS_MOCK = [
-  "Eliseo Juan",
-  "Arnau Smith",
-  "Daniel Johnson",
-  "Lilian Williams",
-] as const
 
 // Example filter definition
 export const filters = {
@@ -79,36 +73,6 @@ export const filters = {
     },
   },
 } as const
-
-export const YEARS_OF_EXPERIENCIE_MOCK = [
-  8, 12, 4, 15, 7, 3, 11, 6, 13, 2, 9, 14, 5, 10, 1, 8, 13, 4, 11, 6,
-]
-export const START_DATE_MOCK = Array.from(
-  { length: 20 },
-  (_, i) => new Date(2025, 6, 30 + i)
-)
-
-export const PROJECTS_MOCK = [
-  "Project A",
-  "Project B",
-  "Project C",
-  "Project D",
-]
-export const PERFORMANCE_SCORE_MOCK = [
-  85, 92, 78, 95, 88, 73, 91, 82, 94, 77, 89, 96, 81, 87, 93, 76, 90, 84, 97,
-  80,
-]
-
-export const DOT_TAG_COLORS_MOCK: NewColor[] = [
-  "yellow",
-  "purple",
-  "lilac",
-  "barbie",
-  "smoke",
-  "army",
-  "flubber",
-  "indigo",
-]
 
 // Define presets for the filters
 export const filterPresets: PresetsDefinition<typeof filters> = [
@@ -137,138 +101,6 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
     },
   },
 ]
-
-export type MockUser = {
-  index: number
-  id: string
-  name: string
-  email: string
-  role: string
-  department: (typeof DEPARTMENTS_MOCK)[number]
-  manager: (typeof MANAGERS_MOCK)[number]
-  status: string
-  isStarred: boolean
-  salary: number | undefined
-  joinedAt: Date
-  permissions: {
-    read?: boolean
-    write?: boolean
-    delete: boolean
-  }
-}
-
-export const FIRST_NAMES_MOCK = [
-  "Dani",
-  "Desirée",
-  "Eliseo",
-  "Arnau",
-  "Carlos",
-  "Lilian",
-  "Andrea",
-  "Mario",
-  "Nik",
-  "René",
-  "Sergio",
-  "Saúl",
-]
-
-export const SURNAMES_MOCK = [
-  "Smith",
-  "Johnson",
-  "Williams",
-  "Brown",
-  "Jones",
-  "Garcia",
-  "Miller",
-  "Davis",
-  "Rodriguez",
-  "Martinez",
-  "Hernandez",
-  "Lopez",
-  "Gonzalez",
-  "Wilson",
-  "Anderson",
-  "Thomas",
-  "Taylor",
-  "Moore",
-  "Jackson",
-  "Martin",
-  "Lee",
-  "Perez",
-  "Thompson",
-  "White",
-  "Harris",
-  "Sanchez",
-  "Clark",
-  "Ramirez",
-  "Lewis",
-  "Robinson",
-]
-
-export const ROLES_MOCK = [
-  "Senior Engineer",
-  "Product Manager",
-  "Designer",
-  "Marketing Lead",
-  "Software Engineer",
-]
-
-export const STATUS_MOCK = ["active", "inactive", "active", "active", "active"]
-
-export const SALARY_MOCK = [
-  100000,
-  80000,
-  90000,
-  undefined,
-  120000,
-  95000,
-  85000,
-  110000,
-  undefined,
-  75000,
-  130000,
-  92000,
-  88000,
-  undefined,
-  115000,
-  105000,
-  82000,
-  98000,
-  undefined,
-  125000,
-  78000,
-  108000,
-  94000,
-  undefined,
-  135000,
-]
-
-export const generateMockUsers = (count: number): MockUser[] => {
-  return Array.from({ length: count }).map((_, index) => {
-    const department = DEPARTMENTS_MOCK[index % DEPARTMENTS_MOCK.length]
-    const name = `${FIRST_NAMES_MOCK[index % FIRST_NAMES_MOCK.length]} ${SURNAMES_MOCK[index % SURNAMES_MOCK.length]}`
-    const email = `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`
-    return {
-      index,
-      id: `user-${index + 1}`,
-      name,
-      email,
-      role: ROLES_MOCK[index % ROLES_MOCK.length],
-      department,
-      status: STATUS_MOCK[index % STATUS_MOCK.length],
-      manager: MANAGERS_MOCK[index % MANAGERS_MOCK.length],
-      isStarred: index % 3 === 0,
-      href: `/users/user-${index + 1}`,
-      salary: SALARY_MOCK[index % SALARY_MOCK.length],
-      joinedAt: START_DATE_MOCK[index % START_DATE_MOCK.length],
-      permissions: {
-        read: index % 2 === 0,
-        write: index % 3 === 0,
-        delete: index % 4 === 0,
-      },
-    }
-  })
-}
 
 // Mock data
 export const mockUsers = generateMockUsers(10)
@@ -389,6 +221,7 @@ export const getMockVisualizations = (options?: {
         firstName: item.name.split(" ")[0],
         lastName: item.name.split(" ")[1],
       }),
+      image: (item) => item.image,
       cardProperties: [
         {
           label: "Email",
@@ -404,6 +237,18 @@ export const getMockVisualizations = (options?: {
           label: "Department",
           icon: Building,
           render: (item) => item.department,
+        },
+        {
+          label: "Manager",
+          icon: Person,
+          render: (item) => ({
+            type: "person",
+            value: {
+              firstName: item.manager.split(" ")[0],
+              lastName: item.manager.split(" ")[1],
+            },
+          }),
+          hide: (item) => item.name.startsWith("D"),
         },
         {
           label: "Teammates",
@@ -487,6 +332,17 @@ export const getMockVisualizations = (options?: {
           sorting: "role",
         },
         {
+          label: "Manager",
+          render: (item) => ({
+            type: "person",
+            value: {
+              firstName: item.manager.split(" ")[0],
+              lastName: item.manager.split(" ")[1],
+            },
+          }),
+          hide: (item) => item.name.startsWith("D"),
+        },
+        {
           label: "Department",
           render: (item) => ({
             type: "dotTag",
@@ -497,6 +353,56 @@ export const getMockVisualizations = (options?: {
           }),
         },
       ],
+    },
+  },
+  kanban: {
+    type: "kanban",
+    options: {
+      lanes: [
+        {
+          id: "eng",
+          title: "Engineering",
+          variant: "info",
+        },
+        {
+          id: "prod",
+          title: "Product",
+          variant: "neutral",
+        },
+        {
+          id: "design",
+          title: "Design",
+          variant: "positive",
+        },
+        {
+          id: "other",
+          title: "Other",
+          variant: "warning",
+        },
+      ],
+      title: (u) => u.name,
+      description: (u) => u.role,
+      avatar: (u) => ({
+        type: "person",
+        firstName: u.name.split(" ")[0] ?? "",
+        lastName: u.name.split(" ")[1] ?? "",
+      }),
+      metadata: (u) => [
+        { icon: Envelope, property: { type: "text", value: u.email } },
+        { icon: Building, property: { type: "text", value: u.department } },
+        { icon: Briefcase, property: { type: "text", value: u.role } },
+        { icon: Star, property: { type: "text", value: u.id } },
+      ],
+      onMove: async (): Promise<MockUser> => {
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // Simulate success/error randomly for testing
+        if (Math.random() > 0.7) {
+          throw new Error("Simulated move error")
+        }
+        return mockUsers[0]
+      },
     },
   },
 })
@@ -592,10 +498,7 @@ export const filterUsers = (
 
   // Handle department filter
   const departmentFilterValues = filterValues.department
-  if (
-    Array.isArray(departmentFilterValues) &&
-    departmentFilterValues.length > 0
-  ) {
+  if (Array.isArray(departmentFilterValues)) {
     filteredUsers = filteredUsers.filter((user) =>
       departmentFilterValues.some((d) => d === user.department)
     )
@@ -627,7 +530,10 @@ export const createObservableDataFetch = (delay = 0) => {
     filters,
     sortings: sortingsState,
     navigationFilters,
-  }: BaseFetchOptions<FiltersType, NavigationFiltersDefinition>) =>
+  }: DataCollectionBaseFetchOptions<
+    FiltersType,
+    NavigationFiltersDefinition
+  >) =>
     new Observable<PromiseState<BaseResponse<MockUser>>>((observer) => {
       observer.next({
         loading: true,
@@ -675,13 +581,20 @@ export const createObservableDataFetch = (delay = 0) => {
 }
 
 export const createPromiseDataFetch = (delay = 500) => {
-  return ({
-    filters,
-    sortings: sortingsState,
-    search,
-    navigationFilters,
-  }: BaseFetchOptions<FiltersType, NavigationFiltersDefinition>) =>
-    new Promise<BaseResponse<MockUser>>((resolve) => {
+  return (
+    options: DataCollectionBaseFetchOptions<
+      FiltersType,
+      NavigationFiltersDefinition
+    >
+  ) => {
+    const {
+      filters,
+      sortings: sortingsState,
+      search,
+      navigationFilters,
+    } = options
+
+    return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
         const filteredData = filterUsers(
           mockUsers,
@@ -714,12 +627,13 @@ export const createPromiseDataFetch = (delay = 500) => {
         })
       }, delay)
     })
+  }
 }
 
 // Utility functions for data fetching
 export type FiltersType = typeof filters
 
-// Example component using useDataSource
+// Example component using useDataCollectionSource
 export const ExampleComponent = ({
   useObservable = false,
   usePresets = false,
@@ -736,6 +650,7 @@ export const ExampleComponent = ({
   dataAdapter,
   primaryActions,
   secondaryActions,
+  searchBar = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -752,17 +667,14 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
-  dataAdapter?: DataAdapter<MockUser, FiltersType, NavigationFiltersDefinition>
+  dataAdapter?: DataCollectionDataAdapter<
+    MockUser,
+    FiltersType,
+    NavigationFiltersDefinition
+  >
   defaultSelectedItems?: SelectedItemsState
   selectable?: (item: MockUser) => string | number | undefined
-  bulkActions?: (
-    selectedItems: Parameters<OnBulkActionCallback<MockUser, FiltersType>>[1]
-  ) =>
-    | {
-        primary?: BulkActionDefinition[]
-        secondary?: BulkActionDefinition[]
-      }
-    | { warningMessage: string }
+  bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
@@ -772,12 +684,13 @@ export const ExampleComponent = ({
   paginationType?: PaginationType
   primaryActions?: PrimaryActionsDefinition
   secondaryActions?: SecondaryActionsDefinition
+  searchBar?: boolean
 }) => {
   const mockVisualizations = getMockVisualizations({
     frozenColumns,
   })
 
-  const dataSource = useDataSource({
+  const dataSource = useDataCollectionSource({
     filters,
     navigationFilters,
     presets: usePresets ? filterPresets : undefined,
@@ -821,11 +734,24 @@ export const ExampleComponent = ({
     defaultSelectedItems,
     bulkActions,
     totalItemSummary,
+    search: searchBar
+      ? {
+          enabled: true,
+          sync: true,
+          debounceTime: 300,
+        }
+      : undefined,
     dataAdapter: dataAdapter ?? {
       fetchData: useObservable
         ? createObservableDataFetch()
         : createPromiseDataFetch(),
     },
+    lanes: [
+      { id: "eng", filters: { department: ["Engineering"] } },
+      { id: "prod", filters: { department: ["Product"] } },
+      { id: "design", filters: { department: ["Design"] } },
+      { id: "other", filters: { department: ["Marketing"] } },
+    ],
   })
 
   return (
@@ -849,6 +775,7 @@ export const ExampleComponent = ({
             mockVisualizations.table,
             mockVisualizations.card,
             mockVisualizations.list,
+            mockVisualizations.kanban,
           ]
         }
       />
@@ -862,6 +789,7 @@ interface DataAdapterOptions<TRecord> {
   useObservable?: boolean
   paginationType?: PaginationType
   perPage?: number
+  search?: string
 }
 
 export function createDataAdapter<
@@ -879,7 +807,8 @@ export function createDataAdapter<
   useObservable = false,
   paginationType,
   perPage = 20,
-}: DataAdapterOptions<TRecord>): DataAdapter<
+  search = "",
+}: DataAdapterOptions<TRecord>): DataCollectionDataAdapter<
   TRecord,
   TFilters,
   TNavigationFilters
@@ -920,16 +849,23 @@ export function createDataAdapter<
       filteredRecords = filteredRecords.filter(
         (record) =>
           record.name.toLowerCase().includes(searchTerm) ||
-          record.email.toLowerCase().includes(searchTerm)
+          record.email.toLowerCase().includes(searchTerm) ||
+          record.department.toLowerCase().includes(searchTerm)
+      )
+    }
+
+    if (search) {
+      const searchTerm = search.toLowerCase()
+      filteredRecords = filteredRecords.filter(
+        (record) =>
+          record.name.toLowerCase().includes(searchTerm) ||
+          record.email.toLowerCase().includes(searchTerm) ||
+          record.department.toLowerCase().includes(searchTerm)
       )
     }
 
     // Apply department filter if provided
-    if (
-      "department" in filters &&
-      Array.isArray(filters.department) &&
-      filters.department.length > 0
-    ) {
+    if ("department" in filters && Array.isArray(filters.department)) {
       filteredRecords = filteredRecords.filter((record) =>
         (filters.department as string[]).includes(record.department)
       )
@@ -1029,7 +965,11 @@ export function createDataAdapter<
   }
 
   if (paginationType === "pages") {
-    const adapter: DataAdapter<TRecord, TFilters, TNavigationFilters> = {
+    const adapter: DataCollectionDataAdapter<
+      TRecord,
+      TFilters,
+      TNavigationFilters
+    > = {
       paginationType: "pages",
       perPage,
       fetchData: ({ filters, sortings, pagination }) => {
@@ -1093,7 +1033,11 @@ export function createDataAdapter<
 
     return adapter
   } else if (paginationType === "infinite-scroll") {
-    const adapter: DataAdapter<TRecord, TFilters, TNavigationFilters> = {
+    const adapter: DataCollectionDataAdapter<
+      TRecord,
+      TFilters,
+      TNavigationFilters
+    > = {
       paginationType: "infinite-scroll",
       perPage,
       fetchData: ({ filters, sortings, pagination }) => {
@@ -1164,7 +1108,11 @@ export function createDataAdapter<
   }
 
   // Not paginated
-  const adapter: DataAdapter<TRecord, TFilters, TNavigationFilters> = {
+  const adapter: DataCollectionDataAdapter<
+    TRecord,
+    TFilters,
+    TNavigationFilters
+  > = {
     fetchData: ({ filters, sortings }) => {
       if (useObservable) {
         return new Observable<PromiseState<BaseResponse<TRecord>>>(

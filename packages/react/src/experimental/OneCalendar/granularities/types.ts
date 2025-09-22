@@ -1,3 +1,4 @@
+import { TranslationsType } from "@/lib/providers/i18n"
 import { ReactNode } from "react"
 import {
   CalendarMode,
@@ -17,23 +18,36 @@ export type PrevNextDateNavigation = {
   next: DateRange | false
 }
 
+export type DateStringFormat = "default" | "long"
+
 export interface GranularityDefinition {
   // The mode of the calendar that this granularity is used in (single by default)
   calendarMode?: CalendarMode
   // The view of the calendar that this granularity is used in
   calendarView: CalendarView
   // Label for the granularity in the calendar view
-  label: (viewDate: Date) => ReactNode
+  label: (viewDate: Date, i18n: TranslationsType) => ReactNode
   // Format the date to a date range with dates as string
-  toRangeString: (date: Date | DateRange | undefined | null) => DateRangeString
+  toRangeString: (
+    date: Date | DateRange | undefined | null,
+    i18n: TranslationsType,
+    format?: DateStringFormat
+  ) => DateRangeString
   // Convert the date to a date range (e.g for day granularity, this will be the start and end of the day)
   toRange: <T extends Date | DateRange | undefined | null>(
     date: T
   ) => T extends Date | DateRange ? DateRangeComplete : T
   // Format the date to a string (e.g W12 2025 -> W13 2025)
-  toString: (date: Date | DateRange | undefined | null) => string
+  toString: (
+    date: Date | DateRange | undefined | null,
+    i18n: TranslationsType,
+    format?: DateStringFormat
+  ) => string
   // Parse the date range string to a date range
-  fromString: (dateStr: string | DateRangeString) => DateRange | null
+  fromString: (
+    dateStr: string | DateRangeString,
+    i18n: TranslationsType
+  ) => DateRange | null
   // Calculate the next date form the UI View (e.g for day granularity, this will be the next month)
   navigateUIView: (viewDate: Date, direction: -1 | 1) => Date
   // Calculate the next date form the selected date (e.g for day granularity, this will be the next day)

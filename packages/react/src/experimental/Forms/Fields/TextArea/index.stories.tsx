@@ -31,18 +31,12 @@ export const Disabled: Story = {
 }
 
 export const WithLabel: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     label: "Label text here",
   },
 }
 
 export const WithHiddenLabel: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     label: "Label text here",
     hideLabel: true,
@@ -50,9 +44,6 @@ export const WithHiddenLabel: Story = {
 }
 
 export const WithLabelIcon: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     label: "Label text here",
     labelIcon: Placeholder,
@@ -60,9 +51,6 @@ export const WithLabelIcon: Story = {
 }
 
 export const WithIcon: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     label: "Label text here",
     icon: Placeholder,
@@ -70,19 +58,40 @@ export const WithIcon: Story = {
 }
 
 export const WithError: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     label: "Label text here",
     error: "Error message here",
   },
 }
 
-export const WithMaxLength: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
+export const WithWarning: Story = {
+  args: {
+    label: "Label text here",
+    status: {
+      type: "warning",
+      message: "Warning message",
+    },
   },
+}
+
+export const WithInfo: Story = {
+  args: {
+    label: "Label text here",
+    status: {
+      type: "info",
+      message: "Info message",
+    },
+  },
+}
+
+export const WithHint: Story = {
+  args: {
+    label: "Label text here",
+    hint: "Hint message",
+  },
+}
+
+export const WithMaxLength: Story = {
   args: {
     label: "Label text here",
     maxLength: 10,
@@ -90,9 +99,6 @@ export const WithMaxLength: Story = {
 }
 
 export const Clearable: Story = {
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     label: "Label text here",
     clearable: true,

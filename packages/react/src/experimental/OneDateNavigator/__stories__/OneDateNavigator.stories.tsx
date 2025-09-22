@@ -236,7 +236,11 @@ export const WithCompareTo: Story = {
       ],
     },
   },
-  parameters: {
-    chromatic: { disableSnapshot: true },
+}
+
+export const WithDefaultCompareTo: Story = {
+  args: {
+    ...WithCompareTo.args,
+    defaultCompareTo: "1",
   },
 }

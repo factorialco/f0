@@ -22,8 +22,12 @@ type Story = StoryObj<typeof meta>
 
 export const PlainText: Story = {
   args: {
-    message:
-      "This is a simple plain text message from the assistant. It doesn't contain any markdown formatting and should display as regular text.",
+    message: {
+      id: "plain-text-message",
+      role: "assistant",
+      content:
+        "This is a simple plain text message from the assistant. It doesn't contain any markdown formatting and should display as regular text.",
+    },
     isLoading: false,
     isGenerating: false,
     rawData: {},
@@ -32,7 +36,10 @@ export const PlainText: Story = {
 
 export const MarkdownContent: Story = {
   args: {
-    message: `# Welcome to the AI Assistant
+    message: {
+      id: "markdown-message",
+      role: "assistant",
+      content: `# Welcome to the AI Assistant
 
 This is a **markdown-formatted** message that demonstrates various markdown features:
 
@@ -70,6 +77,7 @@ Here's an example image embedded in the response:
 ![Test Image](/avatars/person01.jpg)
 
 The assistant can format responses using markdown to provide better readability and structure.`,
+    },
     isLoading: false,
     isGenerating: false,
     rawData: {},
@@ -78,7 +86,11 @@ The assistant can format responses using markdown to provide better readability 
 
 export const Loading: Story = {
   args: {
-    message: "",
+    message: {
+      id: "loading-message",
+      role: "assistant",
+      content: "",
+    },
     isLoading: true,
     isGenerating: false,
     rawData: {},
@@ -87,7 +99,11 @@ export const Loading: Story = {
 
 export const LoadingWithPartialContent: Story = {
   args: {
-    message: "The assistant is currently generating a response...",
+    message: {
+      id: "loading-partial-message",
+      role: "assistant",
+      content: "The assistant is currently generating a response...",
+    },
     isLoading: true,
     isGenerating: false,
     rawData: {},

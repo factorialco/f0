@@ -11,7 +11,7 @@ import { TwoColumnLayout } from "./index"
 const meta = {
   title: "Layout/TwoColumnLayout",
   component: TwoColumnLayout,
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs", "internal"],
   decorators: [PageDecorator],
   args: {
     children: (

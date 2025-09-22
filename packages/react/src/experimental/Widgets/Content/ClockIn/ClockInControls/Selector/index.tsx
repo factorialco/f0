@@ -1,4 +1,4 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { DropdownDefault } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
@@ -18,7 +18,7 @@ function Selector({
       className="flex cursor-default flex-row items-center gap-1 rounded-xs px-1 py-0.5 hover:bg-f1-background-hover"
       onClick={onClick}
     >
-      {icon && <Icon icon={icon} className="text-f1-icon" />}
+      {icon && <F0Icon icon={icon} className="text-f1-icon" />}
       <span
         className={cn(
           "font-medium",
@@ -27,7 +27,7 @@ function Selector({
       >
         {text ?? placeholder}
       </span>
-      <Icon icon={DropdownDefault} />
+      <F0Icon icon={DropdownDefault} />
     </div>
   )
 }

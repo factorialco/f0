@@ -1,7 +1,7 @@
 import { Button } from "@/components/Actions/Button"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Select } from "@/experimental/Forms/Fields/Select"
-import { RawTag } from "@/experimental/Information/Tags/RawTag"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { motion } from "motion/react"
 import { Dispatch, useState } from "react"
@@ -296,12 +296,12 @@ export function ClockInControls({
             <>
               {canShowLocation && location && (
                 <>
-                  <RawTag text={location.name} icon={location.icon} />
+                  <F0TagRaw text={location.name} icon={location.icon} />
                 </>
               )}
               {canShowProject && projectSelectorElement}
               {canShowBreakTypeName && breakTypeName && (
-                <RawTag text={breakTypeName} />
+                <F0TagRaw text={breakTypeName} />
               )}
             </>
           )}

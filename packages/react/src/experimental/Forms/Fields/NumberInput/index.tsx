@@ -1,6 +1,6 @@
 import { Input } from "@/ui/input"
 import { forwardRef, useEffect, useState } from "react"
-import { Icon } from "../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../components/F0Icon"
 import { ChevronDown, ChevronUp } from "../../../../icons/app"
 import { InputProps } from "../Input"
 import { extractNumber } from "./extractNumber"
@@ -11,7 +11,7 @@ const formatValue = (value: number, locale: string, maxDecimals?: number) =>
     useGrouping: false,
   }).format(value)
 
-type NumberInputProps = Omit<
+export type NumberInputProps = Omit<
   InputProps<string>,
   "value" | "type" | "onChange"
 > & {
@@ -22,11 +22,12 @@ type NumberInputProps = Omit<
   max?: number
   maxDecimals?: number
   onChange?: (value: number | null) => void
+  units?: string
 }
 
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
   function NumberInput(
-    { locale, value, maxDecimals, step, min, max, onChange, ...props },
+    { locale, value, maxDecimals, step, min, max, onChange, units, ...props },
     ref
   ) {
     const [fieldValue, setFieldValue] = useState<string>(() =>
@@ -71,14 +72,14 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
             className="h-3 cursor-pointer"
             role="button"
           >
-            <Icon size="sm" icon={ChevronUp} />
+            <F0Icon size="sm" icon={ChevronUp} />
           </div>
           <div
             onClick={handleStep("decrease")}
             className="h-3 cursor-pointer"
             role="button"
           >
-            <Icon size="sm" icon={ChevronDown} />
+            <F0Icon size="sm" icon={ChevronDown} />
           </div>
         </div>
       )
@@ -102,6 +103,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           inputMode="decimal"
           onChange={handleChange}
           {...props}
+          appendTag={units}
           append={<Arrows />}
         />
       </div>
