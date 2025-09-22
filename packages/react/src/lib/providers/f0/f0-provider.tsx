@@ -68,7 +68,7 @@ const MotionProvider: React.FC<{ children: React.ReactNode }> = ({
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>
 }
 
-export const FactorialOneProvider: React.FC<{
+export const F0Provider: React.FC<{
   children: React.ReactNode
   link?: LinkContextValue
   privacyModeInitiallyEnabled?: boolean

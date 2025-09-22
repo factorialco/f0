@@ -11,13 +11,14 @@ export const useDataCollectionStorage = (
   settings: DataCollectionSettings
 ) => {
   const { settings: settingsProvider } = useDataCollectionStorageProvider()
+
   if (!key) {
-    return null
+    key = "default"
   }
 
   /* Validate the storage key */
   if (!validateStorageKey(key)) {
-    throw new Error(
+    console.error(
       `Invalid storage key format: "${key}". ` +
         `Key must follow the format "name/version" where name can be a path ` +
         `(e.g., "employees/list/") and version must start with "v" (e.g., "v1", "v2.1").`
@@ -27,10 +28,14 @@ export const useDataCollectionStorage = (
   const storageFeatures = getFeatures(featuresDef)
 
   useEffect(() => {
-    settingsProvider.set(key, {
-      visualization: storageFeatures,
+    settingsProvider.get(key).then((settings) => {
+      console.log("settings", settings)
     })
-  }, [key, storageFeatures, settings])
+  }, [key, storageFeatures, settingsProvider])
+
+  useEffect(() => {
+    settingsProvider.set(key, settings)
+  }, [key, storageFeatures, settingsProvider, JSON.stringify(settings)])
 
   return {
     settings: settingsProvider.get(key),

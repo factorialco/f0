@@ -1,1 +1,2 @@
-export * from "./DataCollectionSettingsStorageProvider"
+export * from "./dataCollectionLocalStorageProvider"
+export * from "./DataCollectionStorageProvider"
