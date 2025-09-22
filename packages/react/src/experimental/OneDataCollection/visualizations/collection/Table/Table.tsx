@@ -86,10 +86,6 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
-  useEffect(() => {
-    console.log("settings in table", settings.visualization.table.hidden)
-  }, [settings.visualization.table.hidden])
-
   // Sorted and hidden columns
   const { columns } = useColumns(
     originalColumns,
