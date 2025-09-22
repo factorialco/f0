@@ -13,7 +13,7 @@ type VisualizationSettings = {
   >
 }
 
-type DataCollectionSettings = {
+export type DataCollectionSettings = {
   // Dynamically generated from visualization definitions
   visualization: VisualizationSettings
 }

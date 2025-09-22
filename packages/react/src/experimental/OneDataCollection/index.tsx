@@ -42,6 +42,8 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import React from "react"
+import { DataCollectionStorageFeaturesDef } from "./hooks/useDataColectionStorage/types"
+import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { DataCollectionSettingsProvider } from "./Settings/SettingsProvider"
 
@@ -108,6 +110,23 @@ const OneDataCollectionComp = <
   emptyStates?: CustomEmptyStates
   onTotalItemsChange?: (totalItems: number) => void
   fullHeight?: boolean
+
+  /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
+   */
+
+  storageKey?: string
+  /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
+   * You can use "*" for all features and ! to disable a feature
+   *
+   * For example:
+   * - "*" - will use all storage features (empty "" means all)
+   * - "filters" - will use only the storage for the data collection filters state
+   * - "filters, sortings" - will use the storage for the data collection filters and sortings state
+   * - "*, !filters" - will not use the storage for the data collection filters state
+   * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
+   *
+   */
+  storageFeatures?: DataCollectionStorageFeaturesDef
 }): JSX.Element => {
   const {
     // Filters
@@ -327,6 +346,8 @@ const OneDataCollectionComp = <
     currentNavigationFilters,
     source.dataAdapter,
   ])
+
+  useDataCollectionStorage(storageKey, storageFeatures)
 
   return (
     <DataCollectionSettingsProvider>
