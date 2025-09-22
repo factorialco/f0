@@ -335,7 +335,7 @@ const OneDataCollectionComp = <
         fullHeight && "h-full"
       )}
       style={{
-        width: "calc(100% - 48px)", // To counteract the -mx-6 from the layout
+        width: layout === "standard" ? "calc(100% - 48px)" : "100%", // To counteract the -mx-6 from the layout
       }}
     >
       {((totalItems !== undefined && totalItemSummary(totalItems)) ||
