@@ -114,6 +114,7 @@ const OneDataCollectionComp = <
     currentFilters,
     setCurrentFilters,
     presets,
+    presetsLoading,
     // Navigation filter
     currentNavigationFilters,
     navigationFilters,
@@ -380,6 +381,7 @@ const OneDataCollectionComp = <
           filters={filters}
           value={currentFilters}
           presets={presets}
+          presetsLoading={presetsLoading}
           onChange={(value) => setCurrentFilters(value)}
         >
           {isLoading && (
