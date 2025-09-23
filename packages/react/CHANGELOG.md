@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.201.0](https://github.com/factorialco/f0/compare/f0-react-v1.200.5...f0-react-v1.201.0) (2025-09-23)
+
+
+### Features
+
+* **One:** add tooltip to One trigger ([#2629](https://github.com/factorialco/f0/issues/2629)) ([7ad795b](https://github.com/factorialco/f0/commit/7ad795be46288182960a3f219094aace81468365))
+
 ## [1.200.5](https://github.com/factorialco/f0/compare/f0-react-v1.200.4...f0-react-v1.200.5) (2025-09-23)
 
 
