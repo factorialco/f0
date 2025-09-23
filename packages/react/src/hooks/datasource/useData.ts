@@ -533,7 +533,7 @@ export function useData<
             ? [
                 {
                   field: currentGrouping.field as string,
-                  order: currentGrouping.order,
+                  order: currentGrouping.order ?? "asc",
                 },
               ]
             : []),
