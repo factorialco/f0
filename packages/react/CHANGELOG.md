@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.200.5](https://github.com/factorialco/f0/compare/f0-react-v1.200.4...f0-react-v1.200.5) (2025-09-23)
+
+
+### Bug Fixes
+
+* **One:** fix misaligned chat window with frame ([#2626](https://github.com/factorialco/f0/issues/2626)) ([8b158b8](https://github.com/factorialco/f0/commit/8b158b8d50cddfc692631a06eaebef4c344a6033))
+
 ## [1.200.4](https://github.com/factorialco/f0/compare/f0-react-v1.200.3...f0-react-v1.200.4) (2025-09-23)
 
 
