@@ -235,7 +235,7 @@ const NotesTextEditorComponent = forwardRef<
         {(onTitleChange || title) && (
           <div
             className={cn(
-              "flex flex-col pb-5 pt-5",
+              "flex flex-col pb-5 pt-5 transition-all duration-300",
               withPadding ? "px-32" : "px-14"
             )}
           >
@@ -283,7 +283,7 @@ const NotesTextEditorComponent = forwardRef<
           <EditorContent
             editor={editor}
             className={cn(
-              "pb-28 [&>div]:w-full",
+              "pb-28 [&>div]:w-full [&>div]:transition-all [&>div]:duration-300",
               withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
             )}
           />
