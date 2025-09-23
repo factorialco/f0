@@ -269,50 +269,8 @@ export const Skeleton: SkeletonStory = {
     </div>
   ),
   args: {
-    withHeader: false,
-    withTitle: true,
-    withPadding: false,
-  },
-}
-
-export const SkeletonWithHeader: SkeletonStory = {
-  name: "Skeleton - With Header",
-  render: (args) => (
-    <div className="h-96 w-full">
-      <NotesTextEditorSkeleton {...args} />
-    </div>
-  ),
-  args: {
     withHeader: true,
     withTitle: true,
-    withPadding: false,
-  },
-}
-
-export const SkeletonWithPadding: SkeletonStory = {
-  name: "Skeleton - With Padding",
-  render: (args) => (
-    <div className="h-96 w-full">
-      <NotesTextEditorSkeleton {...args} />
-    </div>
-  ),
-  args: {
-    withHeader: false,
-    withTitle: true,
     withPadding: true,
-  },
-}
-
-export const SkeletonMinimal: SkeletonStory = {
-  name: "Skeleton - Minimal",
-  render: (args) => (
-    <div className="h-96 w-full">
-      <NotesTextEditorSkeleton {...args} />
-    </div>
-  ),
-  args: {
-    withHeader: false,
-    withTitle: false,
-    withPadding: false,
   },
 }
