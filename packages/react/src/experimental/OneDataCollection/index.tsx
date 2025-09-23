@@ -265,6 +265,7 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -305,6 +306,7 @@ const OneDataCollectionComp = <
       return
     }
 
+    setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
@@ -343,7 +345,7 @@ const OneDataCollectionComp = <
       {(totalItemSummary !== undefined || navigationFilters) && (
         <div className="border-f1-border-primary flex gap-4 px-4">
           <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isLoading ? (
+            {isInitialLoading ? (
               <Skeleton className="h-5 w-24" />
             ) : (
               <div className="flex h-5 items-center">
