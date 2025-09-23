@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.200.3](https://github.com/factorialco/f0/compare/f0-react-v1.200.2...f0-react-v1.200.3) (2025-09-23)
+
+
+### Bug Fixes
+
+* item click on Kanban View ([#2638](https://github.com/factorialco/f0/issues/2638)) ([769dae2](https://github.com/factorialco/f0/commit/769dae229417c1af2b900eb7a2112dbc2f695fcb))
+
 ## [1.200.2](https://github.com/factorialco/f0/compare/f0-react-v1.200.1...f0-react-v1.200.2) (2025-09-22)
 
 
