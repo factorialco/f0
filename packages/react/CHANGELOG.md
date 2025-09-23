@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.201.1](https://github.com/factorialco/f0/compare/f0-react-v1.201.0...f0-react-v1.201.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* **datacollection:** warranty group order ([#2654](https://github.com/factorialco/f0/issues/2654)) ([c7110f2](https://github.com/factorialco/f0/commit/c7110f2d7c09d1bcf8ff7c667804945d02c8f976))
+
 ## [1.201.0](https://github.com/factorialco/f0/compare/f0-react-v1.200.5...f0-react-v1.201.0) (2025-09-23)
 
 
