@@ -36,13 +36,14 @@ export interface DataCollectionSettingsContextType {
   settings: DataCollectionSettings
 }
 
-const DataCollectionSettingsContext = createContext({
-  setSettings: () => {},
-  settings: {
-    // To avoid circular dependency initializating the settings (the value is provided in the provider)
-    visualization: {} as VisualizationSettings,
-  },
-})
+const DataCollectionSettingsContext =
+  createContext<DataCollectionSettingsContextType>({
+    setSettings: () => {},
+    settings: {
+      // To avoid circular dependency initializating the settings (the value is provided in the provider)
+      visualization: {} as VisualizationSettings,
+    },
+  })
 
 export const useDataCollectionSettings = () => {
   const context = useContext(DataCollectionSettingsContext)
