@@ -296,8 +296,6 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
     config
   )
 
-  console.log("config", config)
-
   // Ensure selectedTitle and selectedEmoji are persisted for copy/paste
   useEffect(() => {
     if (
