@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.201.4](https://github.com/factorialco/f0/compare/f0-react-v1.201.3...f0-react-v1.201.4) (2025-09-23)
+
+
+### Bug Fixes
+
+* select options change and scroll trigger ([#2660](https://github.com/factorialco/f0/issues/2660)) ([f02ac14](https://github.com/factorialco/f0/commit/f02ac14055e7debda791b2d7036fbdcfd9525a3a))
+
 ## [1.201.3](https://github.com/factorialco/f0/compare/f0-react-v1.201.2...f0-react-v1.201.3) (2025-09-23)
 
 
