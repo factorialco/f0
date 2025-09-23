@@ -1,23 +1,58 @@
 import { useDataCollectionStorage as useDataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
-import { useEffect } from "react"
-import { DataCollectionSettings } from "../../Settings/SettingsProvider"
+import { useEffect, useMemo, useState } from "react"
+import { useDebounceCallback } from "usehooks-ts"
 import { getFeatures } from "./getFeatures"
-import { DataCollectionStorageFeaturesDefinition } from "./types"
+import {
+  DataCollectionStatus,
+  DataCollectionStorageFeature,
+  DataCollectionStorageFeaturesDefinition,
+  FeatureProviders,
+} from "./types"
+
+import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
+import {
+  FiltersDefinition,
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { validateStorageKey } from "./validateStorageKey"
 
-export const useDataCollectionStorage = (
+type UseDataCollectionStorage = {
+  storageReady: boolean
+}
+
+/**
+ * Gets and sets the data collection settings in storage
+ * @param key - The storage key
+ * @param featuresDef - The features definition
+ * @param settings - The settings
+ * @returns The settings in storage and the settings storage ready
+ */
+
+export const useDataCollectionStorage = <
+  R extends RecordType,
+  Grouping extends GroupingDefinition<R>,
+  Sortings extends SortingsDefinition,
+  Filters extends FiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition,
+>(
   key: string | undefined,
   featuresDef: DataCollectionStorageFeaturesDefinition,
-  settings: DataCollectionSettings
-) => {
-  const { settings: settingsProvider } = useDataCollectionStorageProvider()
+  featureProviders: FeatureProviders<
+    R,
+    Grouping,
+    Sortings,
+    Filters,
+    NavigationFilters
+  >
+): UseDataCollectionStorage => {
+  const [storageReady, setStorageReady] = useState(false)
 
-  if (!key) {
-    key = "default"
-  }
+  const storageProvider = useDataCollectionStorageProvider()
 
   /* Validate the storage key */
-  if (!validateStorageKey(key)) {
+  if (key && !validateStorageKey(key)) {
     console.error(
       `Invalid storage key format: "${key}". ` +
         `Key must follow the format "name/version" where name can be a path ` +
@@ -25,20 +60,91 @@ export const useDataCollectionStorage = (
     )
   }
 
-  const storageFeatures = getFeatures(featuresDef)
+  const storageFeatures = useMemo(
+    // Settings is always included
+    () => [...getFeatures(featuresDef), "settings"],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
+    [JSON.stringify(featuresDef)]
+  )
 
+  /** Gets the settings in storage when the key and features change */
   useEffect(() => {
-    settingsProvider.get(key).then((settings) => {
-      console.log("settings", settings)
+    if (!key) {
+      // If no key, we consider the storage ready
+      setStorageReady(true)
+      return
+    }
+
+    storageProvider.get(key).then((status) => {
+      Object.entries(featureProviders).forEach(([key, featureProvider]) => {
+        if (storageFeatures.includes(key as DataCollectionStorageFeature)) {
+          const featureValue = status[key as keyof DataCollectionStatus]
+          if (featureValue) {
+            featureProvider.setValue(featureValue as any)
+          }
+        }
+      })
     })
-  }, [key, storageFeatures, settingsProvider])
 
+    setStorageReady(true)
+  }, [key])
+
+  const serializedFeatureValues = useMemo(
+    () =>
+      JSON.stringify(
+        Object.entries(featureProviders).map(
+          ([providerName, featureProvider]) => [
+            providerName,
+            featureProvider.value,
+          ]
+        )
+      ),
+    [featureProviders]
+  )
+
+  const debouncedSetFeatures = useDebounceCallback(
+    (
+      featureProviders: FeatureProviders<
+        R,
+        Grouping,
+        Sortings,
+        Filters,
+        NavigationFilters
+      >
+    ) => {
+      if (!key || !storageReady) {
+        return
+      }
+
+      // Status
+      const featuresToSave = Object.fromEntries(
+        Object.entries(featureProviders)
+          .map(([featureName, featureProvider]) => {
+            if (storageFeatures.includes(featureName)) {
+              return [featureName, featureProvider.value]
+            }
+            return [featureName, undefined]
+          })
+          .filter(([_, value]) => value !== undefined)
+      )
+      storageProvider.set(key, featuresToSave)
+    },
+    200
+  )
+
+  /** Saves the settings in storage when the settings change */
   useEffect(() => {
-    console.log("settings set", settings)
-    settingsProvider.set(key, settings ?? {})
-  }, [key, storageFeatures, settingsProvider, JSON.stringify(settings)])
+    debouncedSetFeatures(featureProviders)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
+  }, [
+    key,
+    storageFeatures,
+    storageProvider,
+    storageReady,
+    serializedFeatureValues,
+  ])
 
   return {
-    settings: settingsProvider.get(key),
+    storageReady,
   }
 }

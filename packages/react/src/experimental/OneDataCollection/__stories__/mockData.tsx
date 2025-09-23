@@ -51,6 +51,7 @@ import {
   SecondaryActionsDefinition,
   SecondaryActionsItemDefinition,
 } from "../actions"
+import { DataCollectionStorageFeaturesDefinition } from "../hooks/useDataColectionStorage/types"
 import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
@@ -681,6 +682,8 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  storageKey,
+  storageFeatures,
   /**
    * mocks the table column ordering and hidding
    */
@@ -702,6 +705,8 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
+  storageKey?: string
+  storageFeatures?: DataCollectionStorageFeaturesDefinition
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,
@@ -803,6 +808,8 @@ export const ExampleComponent = ({
       )}
     >
       <OneDataCollection
+        storageKey={storageKey}
+        storageFeatures={storageFeatures}
         fullHeight={fullHeight}
         source={dataSource}
         onSelectItems={(selectedItems) =>

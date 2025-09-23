@@ -90,7 +90,10 @@ export const TableCollection = <
   const { columns } = useColumns(
     originalColumns,
     frozenColumns,
-    settings.visualization.table,
+    settings.visualization?.table ?? {
+      order: [],
+      hidden: [],
+    },
     allowColumnReordering,
     allowColumnHiding
   )

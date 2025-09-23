@@ -34,6 +34,7 @@ export const TableColumnOrderingAndHidden: Story = {
       frozenColumns={2}
       tableAllowColumnReordering
       tableAllowColumnHiding
+      storageKey="employees/v1"
     />
   ),
 }

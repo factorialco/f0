@@ -1,18 +1,19 @@
+import { DataCollectionStatus } from "@/experimental/OneDataCollection/hooks/useDataColectionStorage/types"
 import { DataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import { createContext, useContext } from "react"
 
+export type DataCollectionStorage = {
+  settings?: DataCollectionSettings
+} & DataCollectionStatus
+
 export type DataCollectionStorageProvider = {
-  settings: {
-    get: (key: string) => Promise<DataCollectionSettings>
-    set: (key: string, settings: DataCollectionSettings) => Promise<void>
-  }
+  get: (key: string) => Promise<DataCollectionStorage>
+  set: (key: string, storage: DataCollectionStorage) => Promise<void>
 }
 
-const noopProvider: DataCollectionStorageProvider = {
-  settings: {
-    get: () => ({}) as Promise<DataCollectionSettings>,
-    set: () => Promise.resolve(),
-  },
+const noopProvider = {
+  get: () => ({}) as Promise<DataCollectionStorage>,
+  set: () => Promise.resolve(),
 }
 
 const DataCollectionStorageContext =
@@ -37,5 +38,6 @@ export const useDataCollectionStorage = () => {
       "useDataCollectionStorage must be used within a DataCollectionStorageProvider"
     )
   }
+
   return context
 }

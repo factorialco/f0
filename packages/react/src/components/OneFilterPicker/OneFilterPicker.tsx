@@ -105,7 +105,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   useEffect(() => {
     setLocalFiltersValue(value)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
-  }, [JSON.stringify(filters)])
+  }, [JSON.stringify(filters), JSON.stringify(value)])
 
   const removeFilterValue = (key: keyof Definition) => {
     const newFilters = { ...localFiltersValue }
