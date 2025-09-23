@@ -42,7 +42,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import React from "react"
-import { DataCollectionStorageFeaturesDef } from "./hooks/useDataColectionStorage/types"
+import { DataCollectionStorageFeaturesDefinition } from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { DataCollectionSettingsProvider } from "./Settings/SettingsProvider"
@@ -84,6 +84,8 @@ const OneDataCollectionComp = <
   onBulkAction,
   emptyStates,
   fullHeight,
+  storageFeatures,
+  storageKey,
 }: {
   source: DataCollectionSource<
     R,
@@ -126,7 +128,7 @@ const OneDataCollectionComp = <
    * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
    *
    */
-  storageFeatures?: DataCollectionStorageFeaturesDef
+  storageFeatures?: DataCollectionStorageFeaturesDefinition
 }): JSX.Element => {
   const {
     // Filters
@@ -347,7 +349,7 @@ const OneDataCollectionComp = <
     source.dataAdapter,
   ])
 
-  useDataCollectionStorage(storageKey, storageFeatures)
+  useDataCollectionStorage(storageKey, storageFeatures, source.settings)
 
   return (
     <DataCollectionSettingsProvider>

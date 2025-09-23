@@ -6,7 +6,7 @@ import { DataCollectionStorageFeaturesDefinition } from "./types"
 import { validateStorageKey } from "./validateStorageKey"
 
 export const useDataCollectionStorage = (
-  key: string,
+  key: string | undefined,
   featuresDef: DataCollectionStorageFeaturesDefinition,
   settings: DataCollectionSettings
 ) => {
@@ -34,7 +34,8 @@ export const useDataCollectionStorage = (
   }, [key, storageFeatures, settingsProvider])
 
   useEffect(() => {
-    settingsProvider.set(key, settings)
+    console.log("settings set", settings)
+    settingsProvider.set(key, settings ?? {})
   }, [key, storageFeatures, settingsProvider, JSON.stringify(settings)])
 
   return {
