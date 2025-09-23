@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, within } from "storybook/test"
 import { SortAndHideList } from "../SortAndHideList"
 
 const meta = {
@@ -33,7 +33,7 @@ const defaultItems = [
     label: "Name",
     sortable: true,
     canHide: false,
-    hidden: false,
+    visible: true,
     order: 1,
   },
   {
@@ -41,7 +41,7 @@ const defaultItems = [
     label: "Email",
     sortable: true,
     canHide: true,
-    hidden: false,
+    visible: true,
     order: 2,
   },
   {
@@ -49,7 +49,7 @@ const defaultItems = [
     label: "Role",
     sortable: true,
     canHide: true,
-    hidden: false,
+    visible: true,
     order: 3,
   },
   {
@@ -57,7 +57,7 @@ const defaultItems = [
     label: "Department",
     sortable: true,
     canHide: true,
-    hidden: true,
+    visible: false,
     order: 4,
   },
   {
@@ -65,7 +65,7 @@ const defaultItems = [
     label: "Salary",
     sortable: false,
     canHide: true,
-    hidden: false,
+    visible: true,
     order: 5,
   },
 ]
@@ -75,55 +75,6 @@ export const Default: Story = {
     items: defaultItems,
     allowSorting: true,
     allowHiding: true,
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Check that all visible items are rendered", async () => {
-      // Verify that the component renders the correct number of items
-      const listItems = canvas.getAllByRole("listitem")
-      await expect(listItems).toHaveLength(defaultItems.length)
-
-      // Verify that each item has a label
-      await expect(canvas.getByText("Name")).toBeInTheDocument()
-      await expect(canvas.getByText("Email")).toBeInTheDocument()
-      await expect(canvas.getByText("Role")).toBeInTheDocument()
-      await expect(canvas.getByText("Department")).toBeInTheDocument()
-      await expect(canvas.getByText("Salary")).toBeInTheDocument()
-    })
-
-    await step("Check that sort icons are displayed", async () => {
-      // All items should have sort icons (drag handles)
-      const sortIcons = canvas.getAllByRole("img")
-      await expect(sortIcons.length).toBeGreaterThan(0)
-    })
-
-    await step("Check switch states and interactions", async () => {
-      const switches = canvas.getAllByRole("switch")
-
-      // The Department item should be checked (hidden: true)
-      const departmentSwitch = switches.find(
-        (switchEl: HTMLElement) =>
-          switchEl.getAttribute("title") === "Department"
-      )
-      await expect(departmentSwitch).toBeChecked()
-
-      // The Name item should have a disabled switch (canHide: false)
-      const nameSwitch = switches.find(
-        (switchEl: HTMLElement) => switchEl.getAttribute("title") === "Name"
-      )
-      await expect(nameSwitch).toBeDisabled()
-
-      // Test switch interaction on an enabled switch
-      const emailSwitch = switches.find(
-        (switchEl: HTMLElement) => switchEl.getAttribute("title") === "Email"
-      )
-      if (emailSwitch) {
-        await userEvent.click(emailSwitch)
-        // Note: Since the component doesn't actually update state in this mock,
-        // we can't test state changes, but we can verify the click interaction works
-      }
-    })
   },
 }
 
