@@ -130,7 +130,7 @@ const OneDataCollectionComp = <
     secondaryActions,
     // Summary
     totalItemSummary = (totalItems: number | undefined) =>
-      totalItems === undefined
+      totalItems !== undefined
         ? `${totalItems} ${i18n.collections.itemsCount}`
         : null,
     currentGrouping,
@@ -265,7 +265,6 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
-  const [isInitialLoading, setIsInitialLoading] = useState(false)
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -306,7 +305,6 @@ const OneDataCollectionComp = <
       return
     }
 
-    setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
@@ -328,6 +326,9 @@ const OneDataCollectionComp = <
     source.dataAdapter,
   ])
 
+  const totalItemSummaryResult =
+    totalItems !== undefined ? totalItemSummary?.(totalItems) : null
+
   return (
     <div
       className={cn(
@@ -339,16 +340,14 @@ const OneDataCollectionComp = <
         width: layout === "standard" ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout
       }}
     >
-      {((totalItems !== undefined && totalItemSummary(totalItems)) ||
-        navigationFilters) && (
+      {(totalItemSummary !== undefined || navigationFilters) && (
         <div className="border-f1-border-primary flex gap-4 px-4">
           <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isInitialLoading &&
-              totalItems !== undefined &&
-              totalItemSummary(totalItems) && <Skeleton className="h-5 w-24" />}
-            {!isInitialLoading && totalItems !== undefined && (
+            {isLoading ? (
+              <Skeleton className="h-5 w-24" />
+            ) : (
               <div className="flex h-5 items-center">
-                {totalItemSummary(totalItems)}
+                {totalItemSummaryResult}
               </div>
             )}
           </div>
