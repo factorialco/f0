@@ -6,7 +6,6 @@ import { MoodTrackerLabels } from "@/experimental/RichText/CoreEditor/Extensions
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { TranscriptLabels } from "@/experimental/RichText/CoreEditor/Extensions/Transcript"
 import { ToolbarLabels } from "@/experimental/RichText/CoreEditor/Toolbar/types"
-import { cn } from "@/lib/utils"
 import { JSONContent, Node } from "@tiptap/core"
 import {
   Editor,
@@ -248,19 +247,23 @@ const AIButtonsSection: React.FC<AIButtonsSectionProps> = ({
   isLoading,
   onButtonClick,
 }) => (
-  <div className="relative flex flex-row flex-wrap items-center gap-2">
-    {config.buttons?.map((button: AIButton, index: number) => (
-      <div key={index}>
-        <Button
-          onClick={() => onButtonClick(button.type)}
-          variant="outline"
-          size="md"
-          emoji={button.emoji}
-          label={button.label}
-          disabled={isLoading}
-        />
-      </div>
-    ))}
+  <div className="flex flex-col gap-2">
+    {config.title && (
+      <div className="text-f1-foreground-secondary">{config.title}</div>
+    )}
+    <div className="relative flex flex-row flex-wrap items-center gap-2">
+      {config.buttons?.map((button: AIButton, index: number) => (
+        <div key={index}>
+          <Button
+            onClick={() => onButtonClick(button.type)}
+            variant="outline"
+            icon={button.icon}
+            label={button.label}
+            disabled={isLoading}
+          />
+        </div>
+      ))}
+    </div>
   </div>
 )
 
@@ -292,6 +295,8 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
     updateAttributes,
     config
   )
+
+  console.log("config", config)
 
   // Ensure selectedTitle and selectedEmoji are persisted for copy/paste
   useEffect(() => {
@@ -371,7 +376,7 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
       <div className="mb-3">
         {isLoading ? (
           <F0AiBanner.Skeleton compact />
-        ) : hasSelectedAction ? (
+        ) : hasSelectedAction && hasContent ? (
           <F0AiBanner
             title={
               displayEmoji ? `${displayEmoji} ${displayTitle}` : displayTitle
@@ -381,12 +386,7 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
           />
         ) : (
           <div
-            className={cn(
-              "editor-ai-block mb-3 flex w-full flex-col gap-4 rounded-lg p-3",
-              !hasContent &&
-                !isLoading &&
-                "bg-gradient-to-l from-[#A1ADE51F] via-[#E519431F] to-[#E556191F]"
-            )}
+            className="editor-ai-block mb-3 flex w-full flex-col gap-4 rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <AIButtonsSection
