@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.201.3](https://github.com/factorialco/f0/compare/f0-react-v1.201.2...f0-react-v1.201.3) (2025-09-23)
+
+
+### Bug Fixes
+
+* prevent total item summary to show skeleton when loading more pages ([#2664](https://github.com/factorialco/f0/issues/2664)) ([c6fe1b6](https://github.com/factorialco/f0/commit/c6fe1b6e0689cd7cfd9b0216b3ad364d4968a756))
+
 ## [1.201.2](https://github.com/factorialco/f0/compare/f0-react-v1.201.1...f0-react-v1.201.2) (2025-09-23)
 
 
