@@ -32,6 +32,7 @@ import {
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { useEffect, useState } from "react"
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
@@ -1062,6 +1063,14 @@ export const WithInfiniteScrollPagination: Story = {
 // This is a test to see if the table visualization works with one column
 export const WithInfiniteScrollPaginationOneCol: Story = {
   render: () => {
+    const [presetsLoading, setPresetsLoading] = useState(true)
+
+    useEffect(() => {
+      setTimeout(() => {
+        setPresetsLoading(false)
+      }, 2000)
+    }, [])
+
     // Create a fixed set of paginated users so we're not regenerating them on every render
     const paginatedMockUsers = generateMockUsers(50)
 
@@ -1072,6 +1081,7 @@ export const WithInfiniteScrollPaginationOneCol: Story = {
     const source = useDataCollectionSource({
       filters,
       presets: filterPresets,
+      presetsLoading,
       sortings,
       selectable: (item) => (item.id !== "user-1a" ? item.id : undefined),
       bulkActions: (allSelected) => {
