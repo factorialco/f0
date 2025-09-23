@@ -11,6 +11,7 @@ import {
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { type ReactNode, forwardRef } from "react"
+import { OneEllipsis } from "../OneEllipsis/OneEllipsis"
 import {
   CardActions,
   type CardPrimaryAction,
@@ -208,28 +209,22 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   compact={compact}
                 />
               )}
-              <div
-                className={cn(
-                  "flex flex-col gap-0",
-                  compact && "flex-row items-center gap-2"
-                )}
-              >
+              <div className={cn("flex flex-col gap-0")}>
                 <CardTitle
                   className={cn(
-                    "flex flex-row justify-between gap-1 text-lg font-semibold text-f1-foreground",
-                    compact && "shrink-0 text-base"
+                    "text-lg font-semibold text-f1-foreground",
+                    compact && "line-clamp-1 text-base"
                   )}
                 >
                   {title}
                 </CardTitle>
                 {description && (
                   <CardSubtitle
-                    className={cn(
-                      "line-clamp-3 text-base text-f1-foreground-secondary",
-                      compact && "line-clamp-1"
-                    )}
+                    className={cn("text-base text-f1-foreground-secondary")}
                   >
-                    {description}
+                    <OneEllipsis lines={compact ? 2 : 3}>
+                      {description}
+                    </OneEllipsis>
                   </CardSubtitle>
                 )}
               </div>
