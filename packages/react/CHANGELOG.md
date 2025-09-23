@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.201.2](https://github.com/factorialco/f0/compare/f0-react-v1.201.1...f0-react-v1.201.2) (2025-09-23)
+
+
+### Bug Fixes
+
+* add skeletons for presets and title in data collection ([#2662](https://github.com/factorialco/f0/issues/2662)) ([0e595ff](https://github.com/factorialco/f0/commit/0e595ff98091a26a1f146b9129cd70cc06d43b30))
+
 ## [1.201.1](https://github.com/factorialco/f0/compare/f0-react-v1.201.0...f0-react-v1.201.1) (2025-09-23)
 
 
