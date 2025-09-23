@@ -1,32 +1,35 @@
 import type { RecordType } from "@/hooks/datasource"
 import { useDndEvents, useDroppableList } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
-import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge"
-import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index"
+import { DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
 import { Lane } from "../../Lane"
 import type { LaneProps } from "../../Lane/types"
+import { KanbanOnMoveParam } from "../types"
+import {
+  findTypeOfDropForLane,
+  optimisticDifferentLaneInsertOverCard,
+  optimisticDifferentLaneInsertOverEmpty,
+  optimisticSameLaneOverCard,
+  optimisticSameLaneOverEmpty,
+} from "./kanbanLane.handlers"
 
 export function KanbanLane<TRecord extends RecordType>({
   id,
-  getIndexById,
+  getLaneResourceIndexById,
   onMove,
   ...laneProps
 }: {
   id?: string
-  getIndexById?: (id: string) => number
-  onMove?: (
-    fromLaneId: string,
-    toLaneId: string,
-    sourceId: string,
-    toIndex: number | null
-  ) => void
+  getLaneResourceIndexById?: (id: string) => number
+  onMove?: (param: KanbanOnMoveParam) => Promise<TRecord>
   allowReorder?: boolean
 } & LaneProps<TRecord>) {
   const laneRef = useRef<HTMLDivElement | null>(null)
+  // const coordinator = useMoveCoordinator()
   const [isOver, setIsOver] = useState(false)
-  const hasFullDnD = Boolean(id && getIndexById)
+  const hasFullDnD = Boolean(id && getLaneResourceIndexById)
 
   // Autoscroll state
   const overlayRef = useRef<HTMLDivElement | null>(null)
@@ -114,6 +117,9 @@ export function KanbanLane<TRecord extends RecordType>({
       }
     }
 
+    const findTypeOfDrop = (dropTargets: DropTargetRecord[]) =>
+      findTypeOfDropForLane(id, dropTargets)
+
     return monitorForElements({
       onDropTargetChange: ({ location }) => {
         const overThisLane = location.current.dropTargets.some((t) => {
@@ -159,16 +165,12 @@ export function KanbanLane<TRecord extends RecordType>({
           speedPxPerSecRef.current = 0
         }
       },
-      onDrop: ({ location, source }) => {
-        if (!location.current.dropTargets.length) return
-        const inThisLane = location.current.dropTargets.some(
-          (t) =>
-            (t.data as { type?: string; id?: string }).type ===
-              "list-droppable" &&
-            (t.data as { type?: string; id?: string }).id === id
-        )
-        if (!inThisLane) return
+      onDrop: async ({ location, source }) => {
         const sourceId = String((source.data as { id?: string }).id)
+        const sourceItem = source.data.data as TRecord
+        const resourceIndexOnLane = laneProps.items.findIndex(
+          (item) => (item as unknown as { id?: string }).id === sourceId
+        )
         const sourceLaneIdFromPayload = String(
           (source.data as unknown as { data?: { laneId?: string } }).data
             ?.laneId ?? ""
@@ -182,55 +184,81 @@ export function KanbanLane<TRecord extends RecordType>({
               )?.data as { id?: string }
             )?.id ?? ""
           )
-        const isSameLane = Boolean(initialLaneId && id && initialLaneId === id)
 
-        if (!isSameLane && onMove && initialLaneId) {
-          const cardTarget = location.current.dropTargets.find(
-            (t) => (t.data as { type?: string }).type === "list-card-target"
-          ) as { data?: { index?: number } } | undefined
-          const indexOfTarget: number | null = cardTarget
-            ? Number(cardTarget.data?.index)
-            : null
-          const edge = cardTarget?.data
-            ? extractClosestEdge(cardTarget.data as Record<string, unknown>)
-            : null
-          const toIndex =
-            indexOfTarget === null
-              ? null
-              : edge === "bottom"
-                ? indexOfTarget + 1
-                : indexOfTarget
-          onMove(initialLaneId, id, sourceId, toIndex)
-          setIsOver(false)
+        const isCrossLane = String(initialLaneId) !== String(id)
+
+        // Only the lane actually under the pointer should handle the drop
+        const overThisLane = location.current.dropTargets.some((t) => {
+          const data = t.data as { type?: string; id?: string }
+          return data.type === "list-droppable" && data.id === id
+        })
+        if (!overThisLane) {
           return
         }
 
-        if (!isSameLane || !getIndexById) return
-        const cardTarget = location.current.dropTargets.find(
-          (t) => (t.data as { type?: string }).type === "list-card-target"
-        ) as { data?: { index?: number } } | undefined
-        const indexOfTarget: number = cardTarget
-          ? Number(cardTarget.data?.index)
-          : 0
-        const closestEdge =
-          cardTarget && cardTarget.data
-            ? extractClosestEdge(cardTarget.data as Record<string, unknown>)
-            : null
-        const startIndex = getIndexById(sourceId)
-        if (startIndex === -1) return
-        const finishIndex = getReorderDestinationIndex({
-          startIndex,
-          indexOfTarget,
-          closestEdgeOfTarget: closestEdge,
-          axis: "vertical",
-        })
-        if (onMove && initialLaneId) {
-          onMove(initialLaneId, id as string, sourceId, finishIndex)
+        let onMoveParams: KanbanOnMoveParam | null = null
+        const { type: typeOfDrop, cardTarget } = findTypeOfDrop(
+          location.current.dropTargets
+        )
+
+        // Only compute params; do not mutate items locally. Parent will update lanes.
+        if (!isCrossLane) {
+          // Same-lane reorder
+          if (
+            typeOfDrop === "sameLaneOverCard" &&
+            cardTarget &&
+            cardTarget.data
+          ) {
+            onMoveParams = optimisticSameLaneOverCard<TRecord>({
+              resourceIndexOnLane,
+              cardTarget,
+              sourceItem,
+              fromLaneId: initialLaneId,
+              toLaneId: id as string,
+              sourceId,
+              setItems: () => {},
+            })
+          } else {
+            onMoveParams = optimisticSameLaneOverEmpty<TRecord>({
+              resourceIndexOnLane,
+              sourceItem,
+              fromLaneId: initialLaneId,
+              toLaneId: id as string,
+              sourceId,
+              setItems: () => {},
+            })
+          }
+        } else {
+          // Cross-lane destination insert. Ignore typeOfDrop label; rely on cardTarget presence
+          if (cardTarget && cardTarget.data) {
+            onMoveParams = optimisticDifferentLaneInsertOverCard<TRecord>({
+              cardTarget,
+              sourceItem,
+              fromLaneId: initialLaneId,
+              toLaneId: id as string,
+              sourceId,
+              setItems: () => {},
+            })
+          } else {
+            onMoveParams = optimisticDifferentLaneInsertOverEmpty<TRecord>({
+              sourceItem,
+              fromLaneId: initialLaneId,
+              toLaneId: id as string,
+              sourceId,
+              setItems: () => {},
+            })
+          }
         }
-        setIsOver(false)
+
+        if (!onMoveParams) {
+          return
+        }
+
+        // Single upward call. Parent/Story updates state; coordinator not needed here.
+        await onMove?.(onMoveParams)
       },
     })
-  }, [id, getIndexById, onMove, isDragging])
+  }, [id, getLaneResourceIndexById, onMove, isDragging, laneProps.items])
 
   // Resolve viewport and observe DOM changes to re-resolve
   useEffect(() => {
@@ -258,6 +286,37 @@ export function KanbanLane<TRecord extends RecordType>({
     if (phase === "start") setIsDragging(true)
     if (phase === "drop" || phase === "cancel") setIsDragging(false)
   })
+
+  // Test hook: allow stories to trigger onMove without real DnD
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if (!id) return
+      const detail = (
+        e as CustomEvent<
+          | {
+              fromLaneId: string
+              toLaneId: string
+              sourceId: string
+              indexOfTarget: number
+              position: "above" | "below"
+            }
+          | {
+              fromLaneId: string
+              toLaneId: string
+              sourceId: string
+              indexOfTarget: null
+              position: null
+            }
+        >
+      ).detail
+      if (!detail) return
+      if (detail.toLaneId !== id) return
+      void onMove?.(detail).catch(() => {})
+    }
+    window.addEventListener("kanban-test-move", handler as EventListener)
+    return () =>
+      window.removeEventListener("kanban-test-move", handler as EventListener)
+  }, [id, onMove])
 
   return (
     <div className="h-full rounded">

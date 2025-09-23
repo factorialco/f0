@@ -393,6 +393,16 @@ export const getMockVisualizations = (options?: {
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },
       ],
+      onMove: async (): Promise<MockUser> => {
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // Simulate success/error randomly for testing
+        if (Math.random() > 0.7) {
+          throw new Error("Simulated move error")
+        }
+        return mockUsers[0]
+      },
     },
   },
 })
@@ -689,6 +699,7 @@ export const ExampleComponent = ({
     currentGrouping: currentGrouping,
     primaryActions,
     secondaryActions,
+    itemUrl: (item) => `/users/${item.id}`,
     itemActions: (item) => [
       {
         label: "Edit",

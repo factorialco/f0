@@ -31,6 +31,12 @@ export interface KanbanProps<TRecord extends RecordType> {
    */
   lanes: ReadonlyArray<KanbanLaneAttributes<TRecord>>
 
+  /** The maximum height of the kanban in pixels */
+  maxHeight?: number
+
+  /** Whether the kanban is in loading state */
+  loading?: boolean
+
   /** Render a card for a given record */
   renderCard: (
     item: TRecord,
@@ -49,13 +55,33 @@ export interface KanbanProps<TRecord extends RecordType> {
   dnd?: {
     instanceId: symbol
     getIndexById: (laneId: string, id: string) => number
-    onMove?: (
-      fromLaneId: string,
-      toLaneId: string,
-      sourceId: string,
-      toIndex: number | null
-    ) => Promise<void>
+    onMove?: KanbanOnMove<TRecord>
   }
 }
+
+export type KanbanOnMove<TRecord extends RecordType> = (
+  fromLaneId: string,
+  toLaneId: string,
+  sourceRecord: TRecord,
+  destinyRecord: { record: TRecord; position: "above" | "below" } | null
+) => Promise<TRecord>
+
+export type KanbanOnMoveParam =
+  | {
+      fromLaneId: string
+      toLaneId: string
+      sourceId: string
+      indexOfTarget: null
+      position: null
+    }
+  | {
+      fromLaneId: string
+      toLaneId: string
+      sourceId: string
+      indexOfTarget: number
+      position: "above" | "below"
+    }
+
+// (Removed) Leave/Insert split: we simplified to a single onMove orchestrated by Kanban
 
 export type { RecordType }

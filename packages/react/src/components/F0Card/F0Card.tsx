@@ -2,7 +2,7 @@ import { withSkeleton } from "@/lib/skeleton"
 import { forwardRef } from "react"
 import { CardInternal, CardInternalProps, CardSkeleton } from "./CardInternal"
 
-const privateProps = ["forceVerticalMetadata"] as const
+const privateProps = ["forceVerticalMetadata", "disableOverlayLink"] as const
 
 export type F0CardProps = Omit<CardInternalProps, (typeof privateProps)[number]>
 
