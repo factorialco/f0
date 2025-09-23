@@ -1,7 +1,6 @@
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
 import {
   EntitySelectEntity,
@@ -15,13 +14,40 @@ export const Trigger = ({
   selectedEntities,
   disabled = false,
   hiddenAvatar = false,
+  label,
+  labelIcon,
+  icon,
+  error,
+  status,
+  hint,
+  hideLabel = false,
+  maxLength,
+  loading = false,
+  required = false,
+  readonly = false,
+  append,
 }: {
-  placeholder: string
   selected: string
-  disabled?: boolean
   selectedEntities: EntitySelectEntity[]
   hiddenAvatar?: boolean
-}) => {
+} & Pick<
+  InputFieldProps<string>,
+  | "label"
+  | "labelIcon"
+  | "icon"
+  | "error"
+  | "status"
+  | "hint"
+  | "hideLabel"
+  | "maxLength"
+  | "value"
+  | "disabled"
+  | "placeholder"
+  | "loading"
+  | "required"
+  | "readonly"
+  | "append"
+>) => {
   const groupView = useMemo(
     () =>
       selectedEntities.some(
@@ -47,43 +73,57 @@ export const Trigger = ({
         )
   }, [groupView, selectedEntities])
 
+  const value =
+    flattenedList.length === 0
+      ? undefined
+      : flattenedList.length === 1
+        ? flattenedList[0].subItem.subName
+        : flattenedList.length + " " + selected
+
+  const avatar =
+    flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
+
   return (
-    <div
-      className={cn(
-        "flex cursor-pointer justify-between rounded border border-solid border-f1-border p-2",
-        disabled ? "to-f1-background-secondary" : ""
-      )}
+    <InputField
+      label={label}
+      labelIcon={labelIcon}
+      icon={!!icon && !value ? icon : undefined}
+      error={error}
+      status={status}
+      hint={hint}
+      hideLabel={hideLabel}
+      maxLength={maxLength}
+      clearable={false}
+      value={value}
+      placeholder={placeholder}
+      disabled={disabled}
+      loading={loading}
+      required={required}
+      readonly={readonly}
+      avatar={
+        hiddenAvatar || !avatar
+          ? undefined
+          : {
+              type: "person",
+              firstName: avatar,
+              lastName: "",
+              src: flattenedList[0].subItem.subAvatar,
+            }
+      }
+      append={
+        append ?? (
+          <div className="h-[16px] w-[16px]">
+            <F0Icon
+              icon={ChevronDown}
+              size="sm"
+              color="default"
+              className="rounded-2xs p-0.5"
+            />
+          </div>
+        )
+      }
     >
-      <span className="my-auto pl-1 pr-1 text-f1-foreground-secondary">
-        {flattenedList.length === 0 ? (
-          placeholder
-        ) : flattenedList.length === 1 ? (
-          !hiddenAvatar ? (
-            <div className="flex flex-row gap-2 p-0">
-              <F0AvatarPerson
-                firstName={flattenedList[0].subItem.subName}
-                lastName={""}
-                src={flattenedList[0].subItem.subAvatar}
-                size="xs"
-              />
-              <span>{flattenedList[0].subItem.subName}</span>
-            </div>
-          ) : (
-            flattenedList[0].subItem.subName
-          )
-        ) : (
-          flattenedList.length + " " + selected
-        )}
-      </span>
-      <div className="p-0.5">
-        <div className="h-[16px] w-[16px]">
-          <F0Icon
-            icon={ChevronDown}
-            size="sm"
-            className="rounded-2xs bg-f1-background-secondary p-0.5"
-          />
-        </div>
-      </div>
-    </div>
+      <input />
+    </InputField>
   )
 }

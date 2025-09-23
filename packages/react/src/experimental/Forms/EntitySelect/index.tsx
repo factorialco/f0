@@ -457,11 +457,24 @@ export const EntitySelect = (
           props.children
         ) : (
           <Trigger
-            placeholder={props.triggerPlaceholder}
-            selected={props.triggerSelected}
+            selected={props.selectedItemsCopy}
             selectedEntities={props.selectedEntities ?? []}
-            disabled={props.disabled}
             hiddenAvatar={props.hiddenAvatar}
+            label={props.label}
+            labelIcon={props.labelIcon}
+            icon={props.icon}
+            error={props.error}
+            status={props.status}
+            hint={props.hint}
+            hideLabel={props.hideLabel}
+            maxLength={props.maxLength}
+            value={props.value}
+            disabled={props.disabled}
+            placeholder={props.placeholder}
+            loading={props.alwaysOpen ? props.loading : false}
+            required={props.required}
+            readonly={props.readonly}
+            append={props.append}
           />
         )}
       </PopoverTrigger>
