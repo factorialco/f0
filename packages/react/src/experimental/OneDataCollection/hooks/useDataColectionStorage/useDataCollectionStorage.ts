@@ -76,17 +76,27 @@ export const useDataCollectionStorage = <
     }
 
     storageProvider.get(key).then((status) => {
-      Object.entries(featureProviders).forEach(([key, featureProvider]) => {
-        if (storageFeatures.includes(key as DataCollectionStorageFeature)) {
-          const featureValue = status[key as keyof DataCollectionStatus]
-          if (featureValue) {
-            featureProvider.setValue(featureValue as any)
+      Object.entries(featureProviders).forEach(
+        ([featureName, featureProvider]) => {
+          if (
+            storageFeatures.includes(
+              featureName as DataCollectionStorageFeature
+            )
+          ) {
+            const featureValue =
+              status[featureName as keyof DataCollectionStatus]
+            if (featureValue) {
+              ;(featureProvider.setValue as (value: unknown) => void)(
+                featureValue
+              )
+            }
           }
         }
-      })
+      )
     })
 
     setStorageReady(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run when key changes
   }, [key])
 
   const serializedFeatureValues = useMemo(

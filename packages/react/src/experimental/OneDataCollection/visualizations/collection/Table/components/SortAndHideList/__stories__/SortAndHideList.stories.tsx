@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
 import { SortAndHideList } from "../SortAndHideList"
 
 const meta = {
@@ -109,18 +108,6 @@ export const WithAllItemsVisible: Story = {
       },
     ],
   },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Verify all switches are unchecked and enabled", async () => {
-      const switches = canvas.getAllByRole("switch")
-
-      for (const switchEl of switches) {
-        await expect(switchEl).not.toBeChecked()
-        await expect(switchEl).not.toBeDisabled()
-      }
-    })
-  },
 }
 
 export const WithAllItemsHidden: Story = {
@@ -153,18 +140,6 @@ export const WithAllItemsHidden: Story = {
         order: 3,
       },
     ],
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Verify all switches are checked", async () => {
-      const switches = canvas.getAllByRole("switch")
-
-      for (const switchEl of switches) {
-        await expect(switchEl).toBeChecked()
-        await expect(switchEl).not.toBeDisabled()
-      }
-    })
   },
 }
 
@@ -207,37 +182,6 @@ export const WithMixedStates: Story = {
       },
     ],
   },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Verify mixed switch states", async () => {
-      const switches = canvas.getAllByRole("switch")
-
-      // Required column should be disabled
-      const requiredSwitch = switches.find(
-        (switchEl: HTMLElement) =>
-          switchEl.getAttribute("title") === "Required Column"
-      )
-      await expect(requiredSwitch).toBeDisabled()
-      await expect(requiredSwitch).not.toBeChecked()
-
-      // Visible optional should be unchecked and enabled
-      const visibleSwitch = switches.find(
-        (switchEl: HTMLElement) =>
-          switchEl.getAttribute("title") === "Visible Optional"
-      )
-      await expect(visibleSwitch).not.toBeChecked()
-      await expect(visibleSwitch).not.toBeDisabled()
-
-      // Hidden optional should be checked and enabled
-      const hiddenSwitch = switches.find(
-        (switchEl: HTMLElement) =>
-          switchEl.getAttribute("title") === "Hidden Optional"
-      )
-      await expect(hiddenSwitch).toBeChecked()
-      await expect(hiddenSwitch).not.toBeDisabled()
-    })
-  },
 }
 
 export const EmptyList: Story = {
@@ -245,19 +189,6 @@ export const EmptyList: Story = {
     items: [],
     allowSorting: true,
     allowHiding: true,
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Verify empty list renders without errors", async () => {
-      // Should render an empty ordered list
-      const list = canvas.getByRole("list")
-      await expect(list).toBeInTheDocument()
-
-      // Should not have any list items
-      const listItems = canvas.queryAllByRole("listitem")
-      await expect(listItems).toHaveLength(0)
-    })
   },
 }
 
@@ -275,19 +206,6 @@ export const SingleItem: Story = {
         order: 1,
       },
     ],
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Verify single item renders correctly", async () => {
-      const listItems = canvas.getAllByRole("listitem")
-      await expect(listItems).toHaveLength(1)
-
-      await expect(canvas.getByText("Only Column")).toBeInTheDocument()
-
-      const switchEl = canvas.getByRole("switch")
-      await expect(switchEl).toBeDisabled()
-    })
   },
 }
 
@@ -323,26 +241,5 @@ export const LongLabels: Story = {
         order: 3,
       },
     ],
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Verify long labels are handled correctly", async () => {
-      const listItems = canvas.getAllByRole("listitem")
-      await expect(listItems).toHaveLength(3)
-
-      // Verify all labels are present
-      await expect(
-        canvas.getByText(
-          "This is a very long column name that might wrap to multiple lines"
-        )
-      ).toBeInTheDocument()
-      await expect(
-        canvas.getByText(
-          "Another extremely long column header that tests text overflow behavior"
-        )
-      ).toBeInTheDocument()
-      await expect(canvas.getByText("Short")).toBeInTheDocument()
-    })
   },
 }

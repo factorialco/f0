@@ -22,6 +22,11 @@ export type DataCollectionStatus = {
   filters?: FiltersState<FiltersDefinition>
   search?: string | undefined
   navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
+  visualization?: number
+}
+
+export type DataCollectionStatusComplete = DataCollectionStatus & {
+  settings?: DataCollectionSettings
 }
 
 /**

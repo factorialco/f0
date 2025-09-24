@@ -51,7 +51,10 @@ import {
   SecondaryActionsDefinition,
   SecondaryActionsItemDefinition,
 } from "../actions"
-import { DataCollectionStorageFeaturesDefinition } from "../hooks/useDataColectionStorage/types"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "../hooks/useDataColectionStorage/types"
 import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
@@ -690,6 +693,7 @@ export const ExampleComponent = ({
    */
   tableAllowColumnReordering = false,
   tableAllowColumnHiding = false,
+  onStateChange,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -730,6 +734,7 @@ export const ExampleComponent = ({
   searchBar?: boolean
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
+  onStateChange?: (state: DataCollectionStatusComplete) => void
 }) => {
   const mockVisualizations = getMockVisualizations({
     table: {
@@ -816,6 +821,10 @@ export const ExampleComponent = ({
         storage={storage}
         fullHeight={fullHeight}
         source={dataSource}
+        onStateChange={(state) => {
+          console.log("State changed", "->", state)
+          onStateChange?.(state)
+        }}
         onSelectItems={(selectedItems) =>
           console.log("Selected items", "->", selectedItems)
         }

@@ -25,8 +25,10 @@ import { Settings } from "./Settings"
 import { SummariesDefinition } from "./summary"
 import type {
   BulkActionDefinition,
+  GroupingState,
   OnBulkActionCallback,
   OnLoadDataCallback,
+  SortingsState,
 } from "./types"
 
 import { Spinner } from "@/experimental/Information/Spinner"
@@ -40,7 +42,10 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import React from "react"
-import { DataCollectionStorageFeaturesDefinition } from "./hooks/useDataColectionStorage/types"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { useDataCollectionSettings } from "./Settings/SettingsProvider"
@@ -102,6 +107,9 @@ export type OneDataCollectionProps<
   onTotalItemsChange?: (totalItems: number) => void
   fullHeight?: boolean
 
+  /** Function to handle state change */
+  onStateChange?: (state: DataCollectionStatusComplete) => void
+
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
   id?: string
@@ -136,6 +144,7 @@ const OneDataCollectionComp = <
   visualizations,
   onSelectItems,
   onBulkAction,
+  onStateChange,
   emptyStates,
   fullHeight,
   storage,
@@ -420,6 +429,27 @@ const OneDataCollectionComp = <
     return isInitialLoading && storageReady
   }, [isInitialLoading, storageReady])
 
+  /** State */
+  useEffect(() => {
+    onStateChange?.({
+      filters: currentFilters,
+      sortings: currentSortings as SortingsState<SortingsDefinition>,
+      visualization: currentVisualization,
+      grouping: currentGrouping as GroupingState<R, GroupingDefinition<R>>,
+      search: currentSearch,
+      navigationFilters: currentNavigationFilters,
+      settings: settings,
+    })
+  }, [
+    onStateChange,
+    currentFilters,
+    currentSearch,
+    currentNavigationFilters,
+    currentSortings,
+    currentVisualization,
+    currentGrouping,
+    settings,
+  ])
   /************************/
 
   return (

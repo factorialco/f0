@@ -84,6 +84,11 @@ const meta = {
       description:
         "<p>Callback triggered when a bulk action is performed. It gets the action name, and the same args as `inSelectItems`. ‼️ Please check the `onSelectItems` docs for more information.</p>",
     },
+    onStateChange: {
+      action: "onStateChange",
+      description:
+        "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
+    },
   },
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof ExampleComponent>
