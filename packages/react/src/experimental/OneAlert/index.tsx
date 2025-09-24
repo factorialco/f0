@@ -2,7 +2,8 @@ import { Button } from "@/components/Actions/Button"
 import { Link } from "@/components/Actions/Link/OneLink"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { InfoCircle } from "@/icons/app"
+import type { IconType } from "@/components/F0Icon"
+import { Placeholder } from "@/icons/app"
 import { cva, type VariantProps } from "cva"
 
 type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive"
@@ -50,7 +51,7 @@ interface AlertProps extends VariantProps<typeof alertVariants> {
     label: string
     href: string
   }
-
+  icon?: IconType
   variant: AlertVariant
 }
 
@@ -59,6 +60,7 @@ export const OneAlert = ({
   description,
   action,
   link,
+  icon,
   variant = "neutral",
 }: AlertProps) => {
   return (
@@ -67,7 +69,7 @@ export const OneAlert = ({
         <div className="flex flex-row gap-2">
           <div className="h-6 w-6 flex-shrink-0">
             {variant === "neutral" ? (
-              <F0AvatarIcon icon={InfoCircle} size="sm" />
+              <F0AvatarIcon icon={icon || Placeholder} size="sm" />
             ) : (
               <F0AvatarAlert type={variant} size="sm" />
             )}
