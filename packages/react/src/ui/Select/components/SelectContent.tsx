@@ -208,41 +208,44 @@ const SelectContent = forwardRef<
       >
         <>
           {props.top}
-          {showLoadingIndicator && loadingNewContent && (
-            <div
-              className="absolute inset-0 flex cursor-progress items-center justify-center"
-              style={{ border: "1px solid red" }}
-            >
-              <Spinner />
-            </div>
-          )}
-          <ScrollArea
-            viewportRef={parentRef}
-            className={cn(
-              "flex flex-col overflow-y-auto",
-              asList ? "max-h-full" : "max-h-[300px]",
-              loadingNewContent && "select-none opacity-10 transition-opacity"
-            )}
-            onScrollBottom={onScrollBottom}
-            onScrollTop={onScrollTop}
-            scrollMargin={scrollMargin}
-          >
-            {asList ? (
-              viewportContent
-            ) : (
-              <SelectPrimitive.Viewport
-                asChild
-                className={cn(
-                  "p-1",
-                  !asList &&
-                    position === "popper" &&
-                    "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
-                )}
+          <div className="relative">
+            {showLoadingIndicator && loadingNewContent && (
+              <div
+                className="absolute inset-0 flex cursor-progress items-center justify-center"
+                aria-live="polite"
+                aria-busy="true"
               >
-                {viewportContent}
-              </SelectPrimitive.Viewport>
+                <Spinner />
+              </div>
             )}
-          </ScrollArea>
+            <ScrollArea
+              viewportRef={parentRef}
+              className={cn(
+                "flex flex-col overflow-y-auto",
+                asList ? "max-h-full" : "max-h-[300px]",
+                loadingNewContent && "select-none opacity-10 transition-opacity"
+              )}
+              onScrollBottom={onScrollBottom}
+              onScrollTop={onScrollTop}
+              scrollMargin={scrollMargin}
+            >
+              {asList ? (
+                viewportContent
+              ) : (
+                <SelectPrimitive.Viewport
+                  asChild
+                  className={cn(
+                    "p-1",
+                    !asList &&
+                      position === "popper" &&
+                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                  )}
+                >
+                  {viewportContent}
+                </SelectPrimitive.Viewport>
+              )}
+            </ScrollArea>
+          </div>
           {props.bottom}
         </>
       </SelectPrimitive.Content>
