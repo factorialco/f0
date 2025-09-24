@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { IconType } from "@/components/F0Icon"
-import { ModuleId } from "@/experimental"
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonVariant } from "@/ui/button"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"

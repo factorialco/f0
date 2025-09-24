@@ -38,5 +38,6 @@ export const useDataCollectionStorage = () => {
       "useDataCollectionStorage must be used within a DataCollectionStorageProvider"
     )
   }
+
   return context
 }

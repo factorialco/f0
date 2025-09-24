@@ -1,4 +1,4 @@
-import type { L10nContextValue } from "./l10n-provider"
+import type { L10nContextValue } from "./types"
 
 export const defaults: L10nContextValue = {
   locale: "en",

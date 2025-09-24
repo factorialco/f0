@@ -1,4 +1,4 @@
-import { Component } from "../../lib/component"
+import { Component } from "../../lib/component/component"
 export * from "./F0Icon"
 
 import { F0Icon as IconComponent } from "./F0Icon"

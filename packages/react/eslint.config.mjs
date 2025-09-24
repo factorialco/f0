@@ -131,6 +131,11 @@ export default [
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
             },
+            {
+              name: "@/experimental",
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead.",
+            },
           ],
           patterns: [
             {
@@ -176,6 +181,11 @@ export default [
               name: "@/f0",
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+            {
+              name: "@/experimental",
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead.",
             },
           ],
           patterns: [

@@ -1,4 +1,4 @@
-import { Component } from "../../lib/component"
+import { Component } from "../../lib/component/component"
 import { Link as LinkComponent } from "./Link"
 
 export * from "./Button"

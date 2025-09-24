@@ -2,7 +2,7 @@ import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { useCallback } from "react"
-import { TableColumnDefinition } from "."
+import { TableColumnDefinition } from "./types"
 
 export const useSticky = <
   R extends RecordType,
