@@ -92,6 +92,10 @@ export type SelectProps<T extends string, R = unknown> = {
   | {
       source?: never
       mapOptions?: never
+      searchFn?: (
+        option: SelectItemProps<T, unknown>,
+        search?: string
+      ) => boolean | undefined
       options: SelectItemProps<T, unknown>[]
     }
 ) &
@@ -159,6 +163,14 @@ const SelectValue = forwardRef<
     </div>
   )
 })
+
+const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
+  return (
+    option.type === "separator" ||
+    !search ||
+    option.label.toLowerCase().includes(search.toLowerCase())
+  )
+}
 
 const SelectComponent = forwardRef(function Select<
   T extends string,
@@ -231,18 +243,22 @@ const SelectComponent = forwardRef(function Select<
             }: BaseFetchOptions<FiltersDefinition>): PromiseOrObservable<
               BaseResponse<ActualRecordType>
             > => {
+              // Apply the search function to the options
+              const searchFn =
+                "searchFn" in props && props.searchFn
+                  ? props.searchFn
+                  : defaultSearchFn
+
               return {
                 records: options.filter(
-                  (option) =>
-                    option.type === "separator" ||
-                    !search ||
-                    option.label.toLowerCase().includes(search.toLowerCase())
+                  (option) => searchFn(option, search) ?? true
                 ) as unknown as ActualRecordType[],
               }
             },
           },
     }
-  }, [options, source])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options, source, "searchFn" in props && props.searchFn])
 
   const localSource = useDataSource(
     {
@@ -525,6 +541,7 @@ const SelectComponent = forwardRef(function Select<
               />
             }
             onScrollBottom={handleScrollBottom}
+            scrollMargin={10}
             isLoadingMore={isLoadingMore}
           ></SelectContent>
         )}

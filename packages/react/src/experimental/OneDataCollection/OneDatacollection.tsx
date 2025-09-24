@@ -155,6 +155,7 @@ const OneDataCollectionComp = <
     currentFilters,
     setCurrentFilters,
     presets,
+    presetsLoading,
     // Navigation filter
     currentNavigationFilters,
     navigationFilters,
@@ -170,7 +171,7 @@ const OneDataCollectionComp = <
     secondaryActions,
     // Summary
     totalItemSummary = (totalItems: number | undefined) =>
-      totalItems === undefined
+      totalItems !== undefined
         ? `${totalItems} ${i18n.collections.itemsCount}`
         : null,
     currentGrouping,
@@ -314,7 +315,7 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
-  const [isInitialLoading, setIsInitialLoading] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -380,6 +381,9 @@ const OneDataCollectionComp = <
     source.dataAdapter,
   ])
 
+  const totalItemSummaryResult =
+    totalItems !== undefined ? totalItemSummary?.(totalItems) : null
+
   /**
    * Settings
    */
@@ -429,16 +433,14 @@ const OneDataCollectionComp = <
         width: layout === "standard" ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout
       }}
     >
-      {((totalItems !== undefined && totalItemSummary(totalItems)) ||
-        navigationFilters) && (
+      {(totalItemSummary !== undefined || navigationFilters) && (
         <div className="border-f1-border-primary flex gap-4 px-4">
           <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isReady &&
-              totalItems !== undefined &&
-              totalItemSummary(totalItems) && <Skeleton className="h-5 w-24" />}
-            {!isReady && totalItems !== undefined && (
+            {isReady ? (
+              <Skeleton className="h-5 w-24" />
+            ) : (
               <div className="flex h-5 items-center">
-                {totalItemSummary(totalItems)}
+                {totalItemSummaryResult}
               </div>
             )}
           </div>
@@ -471,6 +473,7 @@ const OneDataCollectionComp = <
           filters={filters}
           value={currentFilters}
           presets={presets}
+          presetsLoading={presetsLoading}
           onChange={(value) => setCurrentFilters(value)}
         >
           {isLoading && (
