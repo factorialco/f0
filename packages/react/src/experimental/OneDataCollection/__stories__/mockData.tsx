@@ -131,7 +131,8 @@ export const getMockVisualizations = (options?: {
     options: {
       allowColumnHiding: options?.table?.allowColumnHiding,
       allowColumnReordering: options?.table?.allowColumnReordering,
-      frozenColumns: options?.frozenColumns,
+      frozenColumns:
+        options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
       columns: [
         {
           label: "Name",
@@ -682,8 +683,8 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
-  storageKey,
-  storageFeatures,
+  id,
+  storage,
   /**
    * mocks the table column ordering and hidding
    */
@@ -705,8 +706,10 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
-  storageKey?: string
-  storageFeatures?: DataCollectionStorageFeaturesDefinition
+  id?: string
+  storage?: {
+    features?: DataCollectionStorageFeaturesDefinition
+  }
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,
@@ -808,8 +811,8 @@ export const ExampleComponent = ({
       )}
     >
       <OneDataCollection
-        storageKey={storageKey}
-        storageFeatures={storageFeatures}
+        id={id}
+        storage={storage}
         fullHeight={fullHeight}
         source={dataSource}
         onSelectItems={(selectedItems) =>

@@ -15,7 +15,7 @@ import { F0Provider } from "@/lib/providers/f0"
 import { DocsContainer } from "./DocsContainer.tsx"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { defaults as l10nDefaults } from "@/lib/providers/l10n"
-import { dataCollectionLocalStorageProvider } from "@/lib/providers/datacollection"
+import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
@@ -67,7 +67,7 @@ export const FactorialOne = (Story, { parameters }) => {
         }),
       }}
       isDev={parameters.isDev ?? false}
-      dataCollectionStorageProvider={dataCollectionLocalStorageProvider}
+      dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
     >
       <Story />
     </F0Provider>

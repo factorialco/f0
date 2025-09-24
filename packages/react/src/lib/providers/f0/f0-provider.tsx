@@ -16,7 +16,10 @@ import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
 import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
-import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
+import {
+  DataCollectionStorageHandler,
+  DataCollectionStorageProvider,
+} from "../datacollection/DataCollectionStorageProvider"
 
 interface LayoutProps {
   fullScreen?: boolean
@@ -78,7 +81,7 @@ export const F0Provider: React.FC<{
   l10n: Omit<L10nProviderProps, "children">
   isDev?: boolean
   showExperimentalWarnings?: boolean
-  dataCollectionStorageProvider?: DataCollectionStorageProvider
+  dataCollectionStorageHandler?: DataCollectionStorageHandler
 }> = ({
   children,
   layout,
@@ -88,7 +91,7 @@ export const F0Provider: React.FC<{
   i18n,
   l10n,
   isDev = false,
-  dataCollectionStorageProvider,
+  dataCollectionStorageHandler,
   showExperimentalWarnings = false,
 }) => {
   return (
@@ -107,7 +110,7 @@ export const F0Provider: React.FC<{
                   >
                     <ImageProvider {...image}>
                       <DataCollectionStorageProvider
-                        provider={dataCollectionStorageProvider}
+                        handler={dataCollectionStorageHandler}
                       >
                         {children}
                       </DataCollectionStorageProvider>

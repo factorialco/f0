@@ -1,2 +1,2 @@
-export * from "./dataCollectionLocalStorageProvider"
+export * from "./dataCollectionLocalStorageHandler"
 export * from "./DataCollectionStorageProvider"

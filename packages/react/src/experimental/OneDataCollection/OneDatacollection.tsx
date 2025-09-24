@@ -104,20 +104,23 @@ export type OneDataCollectionProps<
 
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
+  id?: string
 
-  storageKey?: string
-  /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
-   * You can use "*" for all features and ! to disable a feature
-   *
-   * For example:
-   * - "*" - will use all storage features (empty "" means all)
-   * - "filters" - will use only the storage for the data collection filters state
-   * - "filters, sortings" - will use the storage for the data collection filters and sortings state
-   * - "*, !filters" - will not use the storage for the data collection filters state
-   * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
-   *
-   */
-  storageFeatures?: DataCollectionStorageFeaturesDefinition
+  /** Storage for the data collection settings and state */
+  storage?: {
+    /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
+     * You can use "*" for all features and ! to disable a feature
+     *
+     * For example:
+     * - "*" - will use all storage features (empty "" means all)
+     * - "filters" - will use only the storage for the data collection filters state
+     * - "filters, sortings" - will use the storage for the data collection filters and sortings state
+     * - "*, !filters" - will not use the storage for the data collection filters state
+     * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
+     *
+     */
+    features?: DataCollectionStorageFeaturesDefinition
+  }
 }
 
 const OneDataCollectionComp = <
@@ -135,8 +138,8 @@ const OneDataCollectionComp = <
   onBulkAction,
   emptyStates,
   fullHeight,
-  storageFeatures,
-  storageKey,
+  storage,
+  id,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -383,8 +386,8 @@ const OneDataCollectionComp = <
   const { settings, setSettings } = useDataCollectionSettings()
 
   const { storageReady } = useDataCollectionStorage(
-    storageKey,
-    storageFeatures ?? ["*"],
+    id,
+    storage?.features ?? ["*"],
     {
       settings: {
         value: settings,
