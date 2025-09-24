@@ -149,9 +149,16 @@ export default [
                 "**/exports.ts",
                 "@/*/exports",
                 "@/**/exports",
+                // experimental patterns
+                "@/experimental",
               ],
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+            {
+              group: ["@/experimental"],
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead.",
             },
           ],
         },
@@ -190,6 +197,15 @@ export default [
               ],
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+            {
+              group: [
+                "@/experimental",
+                "@/experimental/*",
+                "@/experimental/**",
+              ],
+              message:
+                "Imports from @/experimental are not allowed. Experimental components should not be used in production code.",
             },
           ],
         },

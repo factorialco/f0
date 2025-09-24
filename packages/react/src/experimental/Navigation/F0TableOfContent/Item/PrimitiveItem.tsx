@@ -1,6 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
-import { Counter } from "@/experimental"
+import { Counter } from "@/experimental/Information/Counter"
 import { ChevronDown, ChevronRight, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"

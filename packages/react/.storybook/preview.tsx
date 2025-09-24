@@ -30,7 +30,7 @@ export const withTheme = () => {
   }
 }
 
-export const FactorialOne = (Story, { parameters }) => {
+export const F0 = (Story, { parameters }) => {
   const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
 
   return (
@@ -75,7 +75,7 @@ export const FactorialOne = (Story, { parameters }) => {
 }
 
 const preview: Preview = {
-  decorators: [FactorialOne, withTheme()],
+  decorators: [F0, withTheme()],
 
   parameters: {
     throwPlayFunctionExceptions: true,

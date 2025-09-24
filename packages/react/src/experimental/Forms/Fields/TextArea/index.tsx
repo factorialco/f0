@@ -1,7 +1,7 @@
 export * from "@/ui/textarea"
 import { Textarea as ShadcnTextarea } from "@/ui/textarea"
 import { ComponentProps } from "react"
-import { Component } from "../../../../lib/component"
+import { Component } from "../../../../lib/component/component"
 
 export type TextareaProps = Pick<
   ComponentProps<typeof ShadcnTextarea>,
