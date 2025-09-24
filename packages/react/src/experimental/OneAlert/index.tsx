@@ -1,8 +1,6 @@
 import { Button } from "@/components/Actions/Button"
+import { Link } from "@/components/Actions/Link/OneLink"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0Icon } from "@/components/F0Icon"
-import { ExternalLink } from "@/icons/app"
-import { cn, focusRing } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
 
 type AlertVariant = "info" | "warning" | "critical"
@@ -80,18 +78,9 @@ export const OneAlert = ({
         {(action || link) && (
           <div className="flex flex-row items-center justify-end gap-3">
             {link && (
-              <a
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                className={cn(
-                  "flex items-center gap-1 rounded-sm px-2 py-0.5 text-base font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary-hover [&>svg]:text-f1-foreground-secondary",
-                  focusRing()
-                )}
-              >
+              <Link href={link.href} target="_blank" variant="link">
                 {link.label}
-                <F0Icon icon={ExternalLink} size="sm" />
-              </a>
+              </Link>
             )}
             {action && (
               <Button
