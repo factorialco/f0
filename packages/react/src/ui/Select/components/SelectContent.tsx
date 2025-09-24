@@ -209,7 +209,10 @@ const SelectContent = forwardRef<
         <>
           {props.top}
           {showLoadingIndicator && loadingNewContent && (
-            <div className="absolute inset-0 flex cursor-progress items-center justify-center">
+            <div
+              className="absolute inset-0 flex cursor-progress items-center justify-center"
+              style={{ border: "1px solid red" }}
+            >
               <Spinner />
             </div>
           )}
