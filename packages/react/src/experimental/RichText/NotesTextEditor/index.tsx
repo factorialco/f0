@@ -166,6 +166,14 @@ const NotesTextEditorComponent = forwardRef<
         ])
         .run()
     },
+    pushContent: (content: string) => {
+      if (!editor) return
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(editor.state.doc.content.size, content)
+        .run()
+    },
   }))
 
   const tippyOptions = useMemo(
