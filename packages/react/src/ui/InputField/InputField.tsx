@@ -193,6 +193,16 @@ export type InputFieldProps<T> = {
   appendTag?: string
   lengthProvider?: (value: T | undefined) => number
   loading?: boolean
+  loadingIndicator?: {
+    /**
+     * If true, the loading spinner will be displayed over the content without affecting the layout
+     */
+    asOverlay?: boolean
+    /**
+     * The offset of the loading spinner from the content
+     */
+    offset?: number
+  }
 }
 
 const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -214,6 +224,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       canGrow = false,
       value,
       loading = false,
+      loadingIndicator,
       placeholder,
       clearable = false,
       isEmpty = defaultIsEmpty,
@@ -265,11 +276,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     useEffect(
       () => {
-        if (
-          localValue === value ||
-          value === emptyValue ||
-          value === undefined
-        ) {
+        if (localValue === value) {
           return
         }
         setLocalValue(value)
@@ -444,7 +451,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5 pt-1.5"
+                  size === "md" && "pr-1.5 pt-1.5",
+                  "relative"
                 )}
               >
                 {clearable && !noEdit && (
@@ -463,6 +471,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                     )}
                   </AnimatePresence>
                 )}
+
                 {(append || appendTag) && (
                   <div
                     className={cn(
@@ -476,16 +485,29 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   </div>
                 )}
 
-                {loading && (
-                  <div
-                    className={cn(
-                      "pointer-events-none flex h-6 w-6 items-center justify-center",
-                      inputElementVariants({ size })
-                    )}
-                  >
-                    <Spinner size="small" className="mt-[1px]" />
-                  </div>
-                )}
+                <AnimatePresence>
+                  {loading && (
+                    <div
+                      className={cn(
+                        "pointer-events-none flex h-6 w-6 items-center justify-center",
+                        loadingIndicator?.asOverlay &&
+                          cn(
+                            "absolute bottom-0 right-2 top-0",
+                            "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
+                            "via-[#FFFFFF] via-60% dark:via-[#192231]",
+                            "to-transparent to-100%",
+                            size === "md" && "right-3 top-2.5"
+                          ),
+                        inputElementVariants({ size })
+                      )}
+                      style={{
+                        right: loadingIndicator?.offset,
+                      }}
+                    >
+                      <Spinner size="small" className="mt-[1px]" />
+                    </div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
