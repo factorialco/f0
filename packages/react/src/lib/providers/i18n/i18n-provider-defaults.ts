@@ -183,6 +183,10 @@ export const defaultTranslations = {
     welcome: "Ask or create with One",
     initialMessage: "How can I help you today?",
   },
+  select: {
+    noResults: "No results found",
+    loadingMore: "Loading...",
+  },
 } as const
 
 type TranslationShape<T> = {

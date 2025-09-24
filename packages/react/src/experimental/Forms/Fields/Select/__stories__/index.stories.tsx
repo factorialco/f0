@@ -467,7 +467,10 @@ export const WithDataSourcePaginated: Story = {
                 const results = mockItems.filter(
                   (item) =>
                     !search ||
-                    item.label.toLowerCase().includes(search.toLowerCase())
+                    item.label.toLowerCase().includes(search.toLowerCase()) ||
+                    item.description
+                      .toLowerCase()
+                      .includes(search.toLowerCase())
                 )
 
                 const paginatedResults = results.slice(
@@ -485,7 +488,7 @@ export const WithDataSourcePaginated: Story = {
                 }
                 resolve(res)
               },
-              100 + Math.random() * 100
+              1000 + Math.random() * 500
             )
           })
         },

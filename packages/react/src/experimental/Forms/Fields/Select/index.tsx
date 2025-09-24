@@ -21,6 +21,7 @@ import {
   WithGroupId,
 } from "@/hooks/datasource"
 import { ChevronDown } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
@@ -290,7 +291,7 @@ const SelectComponent = forwardRef(function Select<
     [mapOptions, source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore } =
+  const { data, isInitialLoading, loadMore, isLoadingMore, isLoading } =
     useData<ActualRecordType>(localSource)
 
   const { currentSearch, setCurrentSearch } = localSource
@@ -439,6 +440,8 @@ const SelectComponent = forwardRef(function Select<
     }, 0)
   }, [data])
 
+  const i18n = useI18n()
+
   return (
     <>
       <SelectPrimitive
@@ -476,7 +479,11 @@ const SelectComponent = forwardRef(function Select<
               disabled={disabled}
               clearable={clearable}
               size={size}
-              loading={isInitialLoading || loading}
+              loadingIndicator={{
+                asOverlay: true,
+                offset: 26,
+              }}
+              loading={isInitialLoading || loading || isLoading}
               name={name}
               onClickContent={() => {
                 handleChangeOpenLocal(!openLocal)
@@ -526,7 +533,7 @@ const SelectComponent = forwardRef(function Select<
           <SelectContent
             items={items}
             className={selectContentClassName}
-            emptyMessage={searchEmptyMessage}
+            emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
             top={
               <SelectTopActions
@@ -543,6 +550,7 @@ const SelectComponent = forwardRef(function Select<
             onScrollBottom={handleScrollBottom}
             scrollMargin={10}
             isLoadingMore={isLoadingMore}
+            isLoading={isLoading}
           ></SelectContent>
         )}
       </SelectPrimitive>

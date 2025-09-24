@@ -1,4 +1,5 @@
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import * as SelectPrimitive from "@radix-ui/react-select"
@@ -52,6 +53,7 @@ type SelectContentProps = (
   onScrollBottom?: () => void
   onScrollTop?: () => void
   isLoadingMore?: boolean
+  isLoading?: boolean
   scrollMargin?: number
 }
 
@@ -69,6 +71,7 @@ const SelectContent = forwardRef<
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
+      isLoading,
       scrollMargin,
       ...props
     },
@@ -78,6 +81,8 @@ const SelectContent = forwardRef<
     // The scrollable element for your list
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
+
+    const i18n = useI18n()
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
@@ -125,7 +130,9 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <p className="p-2 text-center">{emptyMessage || "-"}</p>
+      <p className={cn("flex items-center justify-center p-2", "min-h-[80px]")}>
+        {emptyMessage || "-"}
+      </p>
     ) : isVirtual ? (
       <div
         className={cn(
@@ -154,7 +161,9 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">Loading....</div>
+                <div className="h-10 w-full py-2 text-center">
+                  {i18n.select.loadingMore}
+                </div>
               ) : (
                 items[virtualItem.index].item
               )}
@@ -165,6 +174,8 @@ const SelectContent = forwardRef<
     ) : (
       <>{children}</>
     )
+
+    const loadingNewContent = isLoading && !isLoadingMore
 
     const content = (
       <SelectPrimitive.Content
@@ -198,7 +209,8 @@ const SelectContent = forwardRef<
             viewportRef={parentRef}
             className={cn(
               "flex flex-col overflow-y-auto",
-              asList ? "max-h-full" : "max-h-[300px]"
+              asList ? "max-h-full" : "max-h-[300px]",
+              loadingNewContent && "select-none opacity-10 transition-opacity"
             )}
             onScrollBottom={onScrollBottom}
             onScrollTop={onScrollTop}
