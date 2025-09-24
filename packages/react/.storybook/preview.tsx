@@ -11,10 +11,11 @@ import isChromatic from "chromatic/isChromatic"
 import "../src/styles.css"
 
 import { ThemeProvider } from "@/lib/providers/theme"
-import { FactorialOneProvider } from "@/lib/providers/one"
+import { F0Provider } from "@/lib/providers/f0"
 import { DocsContainer } from "./DocsContainer.tsx"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { defaults as l10nDefaults } from "@/lib/providers/l10n"
+import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
@@ -33,7 +34,7 @@ export const FactorialOne = (Story, { parameters }) => {
   const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
 
   return (
-    <FactorialOneProvider
+    <F0Provider
       layout={{
         fullScreen: parameters.layout === "fullscreen",
       }}
@@ -66,9 +67,10 @@ export const FactorialOne = (Story, { parameters }) => {
         }),
       }}
       isDev={parameters.isDev ?? false}
+      dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
     >
       <Story />
-    </FactorialOneProvider>
+    </F0Provider>
   )
 }
 

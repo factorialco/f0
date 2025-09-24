@@ -92,13 +92,15 @@ export const useColumns = <
     if (settings?.hidden) {
       setColsHidden(settings.hidden)
     }
-  }, [settings?.hidden])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
+  }, [JSON.stringify(settings?.hidden)])
 
   useEffect(() => {
     if (settings?.order) {
       setColsOrder(settings.order)
     }
-  }, [settings?.order])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
+  }, [JSON.stringify(settings?.order)])
 
   const columnsWithStatus = useMemo(() => {
     const cols = [...originalColumns]

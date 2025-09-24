@@ -51,6 +51,10 @@ import {
   SecondaryActionsDefinition,
   SecondaryActionsItemDefinition,
 } from "../actions"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "../hooks/useDataColectionStorage/types"
 import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
@@ -130,7 +134,8 @@ export const getMockVisualizations = (options?: {
     options: {
       allowColumnHiding: options?.table?.allowColumnHiding,
       allowColumnReordering: options?.table?.allowColumnReordering,
-      frozenColumns: options?.frozenColumns,
+      frozenColumns:
+        options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
       columns: [
         {
           label: "Name",
@@ -681,11 +686,14 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  id,
+  storage,
   /**
    * mocks the table column ordering and hidding
    */
   tableAllowColumnReordering = false,
   tableAllowColumnHiding = false,
+  onStateChange,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -702,6 +710,10 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
+  id?: string
+  storage?: {
+    features?: DataCollectionStorageFeaturesDefinition
+  }
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,
@@ -722,6 +734,7 @@ export const ExampleComponent = ({
   searchBar?: boolean
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
+  onStateChange?: (state: DataCollectionStatusComplete) => void
 }) => {
   const mockVisualizations = getMockVisualizations({
     table: {
@@ -740,6 +753,7 @@ export const ExampleComponent = ({
     currentGrouping: currentGrouping,
     primaryActions,
     secondaryActions,
+    itemUrl: (item) => `/users/${item.id}`,
     itemActions: (item) => [
       {
         label: "Edit",
@@ -803,8 +817,14 @@ export const ExampleComponent = ({
       )}
     >
       <OneDataCollection
+        id={id}
+        storage={storage}
         fullHeight={fullHeight}
         source={dataSource}
+        onStateChange={(state) => {
+          console.log("State changed", "->", state)
+          onStateChange?.(state)
+        }}
         onSelectItems={(selectedItems) =>
           console.log("Selected items", "->", selectedItems)
         }

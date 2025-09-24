@@ -83,7 +83,7 @@ const Item = ({
       {content}
     </Reorder.Item>
   ) : (
-    content
+    <li>{content}</li>
   )
 }
 

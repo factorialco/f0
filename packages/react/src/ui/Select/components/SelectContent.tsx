@@ -52,6 +52,7 @@ type SelectContentProps = (
   onScrollBottom?: () => void
   onScrollTop?: () => void
   isLoadingMore?: boolean
+  scrollMargin?: number
 }
 
 const SelectContent = forwardRef<
@@ -68,6 +69,7 @@ const SelectContent = forwardRef<
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
+      scrollMargin,
       ...props
     },
     ref
@@ -200,6 +202,7 @@ const SelectContent = forwardRef<
             )}
             onScrollBottom={onScrollBottom}
             onScrollTop={onScrollTop}
+            scrollMargin={scrollMargin}
           >
             {asList ? (
               viewportContent
