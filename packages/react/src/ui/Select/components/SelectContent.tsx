@@ -1,3 +1,4 @@
+import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -31,6 +32,7 @@ type SelectItemProps = ComponentPropsWithoutRef<
   bottom?: ReactNode
   emptyMessage?: string
   value?: string
+  showLoadingIndicator?: boolean
 }
 
 type BaseSelectContentProps = Omit<SelectItemProps, "children">
@@ -73,6 +75,7 @@ const SelectContent = forwardRef<
       isLoadingMore,
       isLoading,
       scrollMargin,
+      showLoadingIndicator,
       ...props
     },
     ref
@@ -205,6 +208,11 @@ const SelectContent = forwardRef<
       >
         <>
           {props.top}
+          {showLoadingIndicator && loadingNewContent && (
+            <div className="absolute inset-0 flex cursor-progress items-center justify-center">
+              <Spinner />
+            </div>
+          )}
           <ScrollArea
             viewportRef={parentRef}
             className={cn(

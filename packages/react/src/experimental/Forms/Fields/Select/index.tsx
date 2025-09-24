@@ -550,7 +550,8 @@ const SelectComponent = forwardRef(function Select<
             onScrollBottom={handleScrollBottom}
             scrollMargin={10}
             isLoadingMore={isLoadingMore}
-            isLoading={isLoading}
+            isLoading={isLoading || loading}
+            showLoadingIndicator={!!children}
           ></SelectContent>
         )}
       </SelectPrimitive>
