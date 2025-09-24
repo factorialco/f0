@@ -17,16 +17,16 @@ describe("validateStorageKey", () => {
       expect(validateStorageKey("employees/list/v1")).toBe(true)
     })
 
-    it("should accept semantic versions", () => {
-      expect(validateStorageKey("employees/v1.0")).toBe(true)
-      expect(validateStorageKey("employees/v1.2.3")).toBe(true)
-      expect(validateStorageKey("employees/v2.0.0")).toBe(true)
+    it("should not accept semantic versions", () => {
+      expect(validateStorageKey("employees/v1.0")).toBe(false)
+      expect(validateStorageKey("employees/v1.2.3")).toBe(false)
+      expect(validateStorageKey("employees/v2.0.0")).toBe(false)
     })
 
-    it("should accept alphanumeric versions", () => {
+    it("should not accept alphanumeric versions", () => {
       expect(validateStorageKey("employees/v1")).toBe(true)
-      expect(validateStorageKey("employees/v2alpha")).toBe(true)
-      expect(validateStorageKey("employees/v1beta2")).toBe(true)
+      expect(validateStorageKey("employees/v2alpha")).toBe(false)
+      expect(validateStorageKey("employees/v1beta2")).toBe(false)
     })
   })
 
@@ -104,10 +104,10 @@ describe("parseStorageKey", () => {
     })
 
     it("should parse complex paths correctly", () => {
-      const result = parseStorageKey("admin/users/settings/v1.2.3")
+      const result = parseStorageKey("admin/users/settings/v123")
       expect(result).toEqual({
         name: "admin/users/settings",
-        version: "v1.2.3",
+        version: "v123",
       })
     })
 

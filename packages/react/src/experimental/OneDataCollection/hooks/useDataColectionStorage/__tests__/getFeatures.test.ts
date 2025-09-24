@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { getFeatures } from "../getFeatures"
 import { dataCollectionStorageFeatures } from "../types"
+
+vi.mock("../types", () => ({
+  dataCollectionStorageFeatures: ["filters", "sortings", "grouping", "search"],
+}))
 
 describe("calculateFeatures", () => {
   describe("when features is undefined", () => {

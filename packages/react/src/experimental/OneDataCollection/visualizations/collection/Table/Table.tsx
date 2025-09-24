@@ -90,7 +90,10 @@ export const TableCollection = <
   const { columns } = useColumns(
     originalColumns,
     frozenColumns,
-    settings.visualization.table,
+    settings.visualization?.table ?? {
+      order: [],
+      hidden: [],
+    },
     allowColumnReordering,
     allowColumnHiding
   )
@@ -283,6 +286,8 @@ export const TableCollection = <
                 align={column.align}
                 sticky={getStickyPosition(index)}
                 {...column}
+                // Needs to force hidden column includes hidden prop, that is the definition not the final state
+                hidden={false}
                 onSortClick={
                   sorting
                     ? () => {

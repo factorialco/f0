@@ -20,6 +20,8 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   value: FiltersState<Definition>
   /** Optional preset configurations that users can select */
   presets?: PresetsDefinition<Definition>
+  /** Whether presets are currently loading */
+  presetsLoading?: boolean
   /** Callback fired when filters are changed */
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
@@ -90,6 +92,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   filters,
   value,
   children,
+  presetsLoading = false,
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
   const defaultFilters = useRef(value)
@@ -105,7 +108,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   useEffect(() => {
     setLocalFiltersValue(value)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
-  }, [JSON.stringify(filters)])
+  }, [JSON.stringify(filters), JSON.stringify(value)])
 
   const removeFilterValue = (key: keyof Definition) => {
     const newFilters = { ...localFiltersValue }
@@ -124,6 +127,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
       value={{
         ...props,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
+        presetsLoading,
         value: localFiltersValue,
         filters: filters,
         removeFilterValue,
@@ -192,7 +196,7 @@ FiltersControls.displayName = "OneFilterPicker.Controls"
  * Filter presets
  */
 const FiltersPresets = () => {
-  const { presets, value, setFiltersValue, emitPresetClick } =
+  const { presets, presetsLoading, value, setFiltersValue, emitPresetClick } =
     useContext(FiltersContext)
 
   const handlePresetClick = (presetFilter: FiltersState<FiltersDefinition>) => {
@@ -204,6 +208,7 @@ const FiltersPresets = () => {
     presets && (
       <FiltersPresetsComponent
         presets={presets}
+        presetsLoading={presetsLoading}
         value={value}
         onPresetsChange={handlePresetClick}
       />

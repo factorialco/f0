@@ -447,15 +447,17 @@ export function useData<
       return {
         type: "grouped" as const,
         records: data,
-        groups: Object.entries(groupedData).map(([groupKey, groupRecords]) => ({
-          key: groupKey,
-          label: groupConfig.label(groupKey as unknown, mergedFilters),
-          itemCount: groupConfig.itemCount?.(
-            groupKey as unknown,
-            mergedFilters
-          ),
-          records: groupRecords,
-        })),
+        groups: Array.from(groupedData.entries()).map(
+          ([groupKey, groupRecords]) => ({
+            key: groupKey,
+            label: groupConfig.label(groupKey as unknown, mergedFilters),
+            itemCount: groupConfig.itemCount?.(
+              groupKey as unknown,
+              mergedFilters
+            ),
+            records: groupRecords,
+          })
+        ),
       }
     }
 

@@ -1,31 +1,32 @@
+import { DataCollectionStatus } from "@/experimental/OneDataCollection/hooks/useDataColectionStorage/types"
 import { DataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import { createContext, useContext } from "react"
 
-export type DataCollectionStorageProvider = {
-  settings: {
-    get: (key: string) => Promise<DataCollectionSettings>
-    set: (key: string, settings: DataCollectionSettings) => Promise<void>
-  }
+export type DataCollectionStorage = {
+  settings?: DataCollectionSettings
+} & DataCollectionStatus
+
+export type DataCollectionStorageHandler = {
+  get: (key: string) => Promise<DataCollectionStorage>
+  set: (key: string, storage: DataCollectionStorage) => Promise<void>
 }
 
-const noopProvider: DataCollectionStorageProvider = {
-  settings: {
-    get: () => ({}) as Promise<DataCollectionSettings>,
-    set: () => Promise.resolve(),
-  },
+const noopHandler = {
+  get: () => ({}) as Promise<DataCollectionStorage>,
+  set: () => Promise.resolve(),
 }
 
 const DataCollectionStorageContext =
-  createContext<DataCollectionStorageProvider>(noopProvider)
+  createContext<DataCollectionStorageHandler>(noopHandler)
 
 export const DataCollectionStorageProvider = ({
   children,
-  provider,
+  handler,
 }: {
   children: React.ReactNode
-  provider?: DataCollectionStorageProvider
+  handler?: DataCollectionStorageHandler
 }) => (
-  <DataCollectionStorageContext.Provider value={provider ?? noopProvider}>
+  <DataCollectionStorageContext.Provider value={handler ?? noopHandler}>
     {children}
   </DataCollectionStorageContext.Provider>
 )
