@@ -154,6 +154,8 @@ export default [
                 "**/exports.ts",
                 "@/*/exports",
                 "@/**/exports",
+                // exceptions
+                "!@/lib/providers/f0",
               ],
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
@@ -192,7 +194,7 @@ export default [
             {
               group: [
                 // F0 patterns (all variations)
-                "*f0",
+                "f0",
                 "*f0.ts",
                 "*/f0",
                 "**/f0",
