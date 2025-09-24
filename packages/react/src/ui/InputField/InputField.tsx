@@ -15,6 +15,7 @@ import {
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
+import { InputFieldStatus } from "./types"
 export const INPUTFIELD_SIZES = ["sm", "md"] as const
 export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
 
@@ -131,19 +132,6 @@ const inputFieldStatusVariants = cva({
     },
   ],
 })
-
-export const inputFieldStatus = ["default", "warning", "info", "error"] as const
-export type InputFieldStatusType = (typeof inputFieldStatus)[number]
-
-export type InputFieldStatus =
-  | {
-      type: Exclude<InputFieldStatusType, "error">
-      message: string
-    }
-  | {
-      type: "error"
-      message?: string
-    }
 
 export type InputFieldProps<T> = {
   label: string
