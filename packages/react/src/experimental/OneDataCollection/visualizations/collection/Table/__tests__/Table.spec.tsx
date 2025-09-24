@@ -14,9 +14,9 @@ import { act, screen, waitFor, within } from "@testing-library/react"
 import { zeroRender as render, zeroRenderHook } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { ItemActionsDefinition } from "../../../item-actions"
-import { SummariesDefinition } from "../../../summary"
-import { TableCollection } from "./index"
+import { ItemActionsDefinition } from "../../../../item-actions"
+import { SummariesDefinition } from "../../../../summary"
+import { TableCollection } from "../index"
 
 vi.mock("../../property", () => ({
   propertyRenderers: {
