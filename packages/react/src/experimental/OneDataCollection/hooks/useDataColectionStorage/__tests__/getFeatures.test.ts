@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { getFeatures } from "../getFeatures"
 import { dataCollectionStorageFeatures } from "../types"
+
+vi.mock("../types", () => ({
+  dataCollectionStorageFeatures: ["filters", "sortings", "grouping", "search"],
+}))
 
 describe("calculateFeatures", () => {
   describe("when features is undefined", () => {
@@ -56,6 +60,7 @@ describe("calculateFeatures", () => {
   describe("when features includes negated features", () => {
     it("should exclude negated features from all features", () => {
       const result = getFeatures(["*", "!filters"])
+
       expect(result).toEqual(["sortings", "grouping", "search"])
     })
 

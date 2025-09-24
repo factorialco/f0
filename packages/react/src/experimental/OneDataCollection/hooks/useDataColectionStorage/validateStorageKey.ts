@@ -40,8 +40,8 @@ export const validateStorageKey = (key: string): boolean => {
     return false
   }
 
-  // Version must start with 'v' and have at least one character after it
-  if (!version || !version.startsWith("v") || version.length < 2) {
+  // Version must match 'v' followed by one or more digits (e.g., v1, v2, v123 v.1.2)
+  if (!version || !/^v[0-9]+$/.test(version)) {
     return false
   }
 
