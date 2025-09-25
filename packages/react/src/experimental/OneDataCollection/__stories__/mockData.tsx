@@ -357,6 +357,36 @@ export const getMockVisualizations = (options?: {
           sorting: "role",
         },
         {
+          label: "Teammates",
+          render: (item) => ({
+            type: "avatarList",
+            value: {
+              max: 1,
+              avatarList: [
+                {
+                  type: "person",
+                  firstName: item.name,
+                  lastName: "Doe",
+                  src: "/avatars/person01.jpg",
+                },
+                {
+                  type: "person",
+                  firstName: "Dani",
+                  lastName: "Moreno",
+                  src: "/avatars/person04.jpg",
+                },
+                {
+                  type: "person",
+                  firstName: "Sergio",
+                  lastName: "Carracedo",
+                  src: "/avatars/person05.jpg",
+                },
+              ],
+            },
+          }),
+          sorting: "role",
+        },
+        {
           label: "Email 2",
           render: (item) => item.email,
           sorting: "email",
@@ -377,6 +407,7 @@ export const getMockVisualizations = (options?: {
           }),
           hide: (item) => item.name.startsWith("D"),
         },
+
         {
           label: "Department",
           render: (item) => ({
