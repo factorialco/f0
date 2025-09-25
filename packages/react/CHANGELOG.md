@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.203.1](https://github.com/factorialco/f0/compare/f0-react-v1.203.0...f0-react-v1.203.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* **datacollection:** list click area ([#2672](https://github.com/factorialco/f0/issues/2672)) ([c4ce8ed](https://github.com/factorialco/f0/commit/c4ce8ed312080660a0a0e6270f11ab09193f6287))
+
 ## [1.203.0](https://github.com/factorialco/f0/compare/f0-react-v1.202.0...f0-react-v1.203.0) (2025-09-25)
 
 
