@@ -48,14 +48,6 @@ export function Kanban<TRecord extends RecordType>(
     if (phase === "drop" || phase === "cancel") setIsDragging(false)
   })
 
-  // Resolve ScrollArea viewport
-  useEffect(() => {
-    const root = document.querySelector(
-      "[data-scroll-container]"
-    ) as HTMLDivElement | null
-    viewportRef.current = root
-  }, [])
-
   useEffect(() => {
     const step = () => {
       const now = performance.now()
@@ -258,7 +250,7 @@ export function Kanban<TRecord extends RecordType>(
 
   return (
     <div className={cn("relative w-full px-4", className)}>
-      <ScrollArea className={"w-full"}>
+      <ScrollArea className={"w-full"} viewportRef={viewportRef}>
         <div className="mb-2 flex gap-2">
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
