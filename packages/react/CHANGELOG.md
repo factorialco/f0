@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.203.4](https://github.com/factorialco/f0/compare/f0-react-v1.203.3...f0-react-v1.203.4) (2025-09-25)
+
+
+### Bug Fixes
+
+* add role to entityselector trigger ([#2684](https://github.com/factorialco/f0/issues/2684)) ([06a654e](https://github.com/factorialco/f0/commit/06a654ec6c6fe339b3bdc944f041101500c20518))
+
 ## [1.203.3](https://github.com/factorialco/f0/compare/f0-react-v1.203.2...f0-react-v1.203.3) (2025-09-25)
 
 
