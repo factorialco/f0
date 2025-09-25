@@ -388,14 +388,10 @@ importers:
         version: 11.2.0(size-limit@11.2.0)
       '@storybook/addon-a11y':
         specifier: ^9.1.3
-<<<<<<< HEAD
-        version: 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+        version: 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
       '@storybook/addon-designs':
         specifier: ^10.0.2
-        version: 10.0.2(@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
-=======
-        version: 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
->>>>>>> c4ce8ed312080660a0a0e6270f11ab09193f6287
+        version: 10.0.2(@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
       '@storybook/addon-docs':
         specifier: ^9.1.3
         version: 9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
@@ -2351,7 +2347,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {node: '>=0.10.0'}
+    engines: {'0': node >=0.10.0}
 
   '@expo/cli@0.22.24':
     resolution: {integrity: sha512-lhdenxBC8/x/vL39j79eXE09mOaqNNLmiSDdY/PblnI+UNzGgsQ48hBTYa/MQhd0ioXXVKurZL2941dLKwcxJw==}
@@ -17684,20 +17680,16 @@ snapshots:
       storybook: 8.6.14(prettier@2.8.8)
       ts-dedent: 2.2.0
 
-<<<<<<< HEAD
-  '@storybook/addon-designs@10.0.2(@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))':
+  '@storybook/addon-designs@10.0.2(@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))':
     dependencies:
       '@figspec/react': 1.0.4(react@18.3.1)
-      storybook: 9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))
+      storybook: 9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))
     optionalDependencies:
-      '@storybook/addon-docs': 9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+      '@storybook/addon-docs': 9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.0)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))':
-=======
   '@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))':
->>>>>>> c4ce8ed312080660a0a0e6270f11ab09193f6287
     dependencies:
       '@mdx-js/react': 3.1.0(@types/react@18.3.18)(react@18.3.1)
       '@storybook/csf-plugin': 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
@@ -19462,14 +19454,6 @@ snapshots:
       junit-report-builder: 5.1.1
       picocolors: 1.1.1
       playwright: 1.52.0
-
-  axios@1.8.4:
-    dependencies:
-      follow-redirects: 1.15.9
-      form-data: 4.0.2
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
 
   axios@1.8.4(debug@4.4.1):
     dependencies:
@@ -21386,8 +21370,6 @@ snapshots:
 
   flow-parser@0.263.0: {}
 
-  follow-redirects@1.15.9: {}
-
   follow-redirects@1.15.9(debug@4.4.1):
     optionalDependencies:
       debug: 4.4.1
@@ -21942,7 +21924,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.9
+      follow-redirects: 1.15.9(debug@4.4.1)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -27322,7 +27304,7 @@ snapshots:
 
   wait-on@7.2.0:
     dependencies:
-      axios: 1.8.4
+      axios: 1.8.4(debug@4.4.1)
       joi: 17.13.3
       lodash: 4.17.21
       minimist: 1.2.8
