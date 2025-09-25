@@ -73,12 +73,9 @@ describe("validateStorageKey", () => {
 
     it("should reject non-string types", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
       expect(validateStorageKey(123 as any)).toBe(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
       expect(validateStorageKey({} as any)).toBe(false)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
       expect(validateStorageKey([] as any)).toBe(false)
     })
