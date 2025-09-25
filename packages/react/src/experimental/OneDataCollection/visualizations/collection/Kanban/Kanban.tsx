@@ -17,7 +17,7 @@ import { useIsDev } from "@/lib/providers/user-platafform"
 import { Kanban } from "@/ui/Kanban"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
 import type { KanbanProps } from "@/ui/Kanban/types"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../../../item-actions"
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import type {
@@ -45,6 +45,7 @@ export const KanbanCollection = <
   source,
   onSelectItems,
   onLoadError,
+  onLoadData,
 }: KanbanCollectionProps<
   R,
   Filters,
@@ -179,6 +180,35 @@ export const KanbanCollection = <
       )
     },
   }
+
+  // Report aggregated totals/loading so header total updates
+  const totalItemsAggregated = useMemo(() => {
+    const hooks = Object.values(lanesHooks)
+    if (hooks.length === 0) return undefined
+    // Sum totals from lanes that expose paginationInfo.total; fallback to records length
+    return hooks.reduce((acc, lane) => {
+      const laneTotal = lane.paginationInfo?.total ?? lane.data.records.length
+      return acc + (typeof laneTotal === "number" ? laneTotal : 0)
+    }, 0)
+  }, [lanesHooks])
+
+  const isInitialLoadingAggregated = useMemo(() => {
+    const hooks = Object.values(lanesHooks)
+    if (hooks.length === 0) return true
+    // Consider initial loading if any lane is still in initial loading
+    return hooks.some((lane) => lane.isInitialLoading)
+  }, [lanesHooks])
+
+  useEffect(() => {
+    onLoadData({
+      totalItems: totalItemsAggregated,
+      filters: source.currentFilters,
+      search: source.currentSearch,
+      isInitialLoading: isInitialLoadingAggregated,
+      data: Object.values(lanesHooks).flatMap((l) => l.data.records),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- follow Table/List behavior: rerun when totals or loading change
+  }, [totalItemsAggregated, isInitialLoadingAggregated])
 
   // Fine-grained reorder only when no sort order is applied
   const allowReorder = source.currentSortings === null
