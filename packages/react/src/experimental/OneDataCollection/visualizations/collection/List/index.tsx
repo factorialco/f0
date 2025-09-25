@@ -174,18 +174,7 @@ export const ListCollection = <
         aria-busy={showFullscreenLoading ? "true" : undefined}
       >
         <div className="min-h-0 flex-1 overflow-auto pb-3">
-          <AnimatePresence>
-            {isInitialLoading && (
-              <motion.div
-                className="absolute inset-0 flex cursor-progress items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <Spinner />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <AnimatePresence>{isInitialLoading && <Spinner />}</AnimatePresence>
           {data.type === "grouped" &&
             data.groups.map((group, index) => {
               const itemCount = group.itemCount

@@ -116,4 +116,40 @@ describe("FiltersPresets", () => {
     // Should deselect the preset
     expect(mockOnPresetsChange).toHaveBeenCalledWith({})
   })
+
+  it("should show skeleton when presetsLoading is true", () => {
+    const mockOnPresetsChange = vi.fn()
+    const initialFilters: FiltersState<FiltersDefinition> = {}
+
+    const { getAllByTestId } = zeroRender(
+      <FiltersPresets
+        presets={mockPresets}
+        value={initialFilters}
+        onPresetsChange={mockOnPresetsChange}
+        presetsLoading={true}
+      />
+    )
+
+    // Should show skeleton items
+    const skeletonItems = getAllByTestId("skeleton")
+    expect(skeletonItems).toHaveLength(4) // 3 skeleton items as defined in the component
+  })
+
+  it("should not show skeleton when presetsLoading is false", () => {
+    const mockOnPresetsChange = vi.fn()
+    const initialFilters: FiltersState<FiltersDefinition> = {}
+
+    const { queryByTestId } = zeroRender(
+      <FiltersPresets
+        presets={mockPresets}
+        value={initialFilters}
+        onPresetsChange={mockOnPresetsChange}
+        presetsLoading={false}
+      />
+    )
+
+    // Should not show skeleton items
+    const skeletonItems = queryByTestId("skeleton")
+    expect(skeletonItems).toBeNull()
+  })
 })

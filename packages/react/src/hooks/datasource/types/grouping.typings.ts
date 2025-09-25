@@ -23,6 +23,7 @@ export type GroupingDefinition<R extends RecordType> = {
         groupId: RecordPathValue<R, K>,
         filters: FiltersState<FiltersDefinition>
       ) => string | Promise<string>
+      defaultDirection?: SortOrder
       itemCount?: (
         groupId: RecordPathValue<R, K>,
         filters: FiltersState<FiltersDefinition>
@@ -52,6 +53,6 @@ export type GroupingState<
 > =
   | {
       field: keyof Grouping["groupBy"]
-      order: SortOrder
+      order?: SortOrder
     }
   | undefined

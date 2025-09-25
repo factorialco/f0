@@ -1,3 +1,4 @@
+import { InputFieldProps } from "@/ui/InputField"
 import { PopoverProps } from "@radix-ui/react-popover"
 import { Action } from "../Fields/Select/SelectBottomActions"
 
@@ -24,12 +25,29 @@ export type EntitySelectNamedGroup = {
 }
 
 interface EntitySelectCommonProps
-  extends Omit<PopoverProps, "children" | "modal"> {
+  extends Omit<PopoverProps, "children" | "modal">,
+    Pick<
+      InputFieldProps<string>,
+      | "label"
+      | "labelIcon"
+      | "icon"
+      | "error"
+      | "status"
+      | "hint"
+      | "hideLabel"
+      | "maxLength"
+      | "value"
+      | "disabled"
+      | "placeholder"
+      | "loading"
+      | "required"
+      | "readonly"
+      | "append"
+    > {
   entities: EntitySelectEntity[]
   groups: EntitySelectNamedGroup[]
   selectedGroup: string
-  triggerPlaceholder: string
-  triggerSelected: string
+  selectedItemsCopy: string
   notFoundTitle: string
   notFoundSubtitle: string
   onItemExpandedChange: (id: EntityId, expanded: boolean) => void

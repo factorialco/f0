@@ -1,12 +1,12 @@
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"
 import { useState } from "react"
-import { Dropdown } from "../../Navigation/Dropdown"
 import {
   PrimaryActionsDefinition,
   SecondaryActionsItemDefinition,
-} from "../actions"
+} from "../../actions"
 
 type CollectionActionProps = {
   primaryActions?: ReturnType<PrimaryActionsDefinition>

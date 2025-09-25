@@ -4,7 +4,6 @@ import type {
 } from "@/components/OneFilterPicker/types"
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-import { groupBy } from "lodash"
 import {
   useCallback,
   useDeferredValue,
@@ -28,6 +27,7 @@ import {
   SortingsStateMultiple,
 } from "./types"
 import { DataSource } from "./types/datasource.typings"
+import { groupBy } from "./utils"
 
 /**
  * Represents an error that occurred during data fetching
@@ -447,12 +447,17 @@ export function useData<
       return {
         type: "grouped" as const,
         records: data,
-        groups: Object.entries(groupedData).map(([key, value]) => ({
-          key,
-          label: groupConfig.label(key as unknown, mergedFilters),
-          itemCount: groupConfig.itemCount?.(key as unknown, mergedFilters),
-          records: value,
-        })),
+        groups: Array.from(groupedData.entries()).map(
+          ([groupKey, groupRecords]) => ({
+            key: groupKey,
+            label: groupConfig.label(groupKey as unknown, mergedFilters),
+            itemCount: groupConfig.itemCount?.(
+              groupKey as unknown,
+              mergedFilters
+            ),
+            records: groupRecords,
+          })
+        ),
       }
     }
 
@@ -533,7 +538,7 @@ export function useData<
             ? [
                 {
                   field: currentGrouping.field as string,
-                  order: currentGrouping.order,
+                  order: currentGrouping.order ?? "asc",
                 },
               ]
             : []),

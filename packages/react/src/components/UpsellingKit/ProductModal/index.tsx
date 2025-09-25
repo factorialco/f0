@@ -1,6 +1,6 @@
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { ModuleId } from "@/experimental"
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"

@@ -26,8 +26,10 @@ const GROUP_DATA = {
 
 const defaultArgs: EntitySelectProps = {
   entities: [],
-  triggerPlaceholder: "Select employees...",
-  triggerSelected: "employees selected",
+  label: "Role",
+  hideLabel: true,
+  placeholder: "Select employees...",
+  selectedItemsCopy: "employees selected",
   searchPlaceholder: "Search...",
   selectAllLabel: "Select all",
   clearLabel: "Clear",

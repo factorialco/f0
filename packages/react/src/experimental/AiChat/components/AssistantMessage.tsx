@@ -1,5 +1,7 @@
 import { F0Button } from "@/components/F0Button"
-import { Spinner } from "@/experimental"
+import { ButtonCopy } from "@/ui/ButtonCopy"
+
+import { Spinner } from "@/experimental/Information/Spinner"
 import {
   ThumbsDown,
   ThumbsDownFilled,
@@ -8,7 +10,6 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ButtonCopy } from "@/ui/ButtonCopy"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"

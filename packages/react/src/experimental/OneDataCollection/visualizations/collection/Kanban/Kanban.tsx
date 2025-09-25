@@ -4,12 +4,10 @@ import type {
 } from "@/components/F0Card/types"
 import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import { DataCollectionDataAdapter } from "@/experimental"
 import { useDataCollectionLanesData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
 import { useSelectableLanes } from "@/experimental/OneDataCollection/hooks/useSelectableLanes"
 import {
   InfiniteScrollPaginatedResponse,
-  PaginatedDataAdapter,
   PaginationInfo,
   type RecordType,
 } from "@/hooks/datasource"
@@ -73,16 +71,6 @@ export const KanbanCollection = <
     throw new Error("Grouping is not supported in Kanban yet")
   }
 
-  const isInfiniteScrollPagination = (
-    dataAdapter: DataCollectionDataAdapter<R, Filters>
-  ): dataAdapter is PaginatedDataAdapter<R, Filters> => {
-    return dataAdapter.paginationType === "infinite-scroll"
-  }
-
-  if (!isInfiniteScrollPagination(source.dataAdapter)) {
-    throw new Error("Infinite scroll pagination is required in Kanban")
-  }
-
   const [instanceId] = useState(() => Symbol("kanban-visualization"))
 
   const idProvider = source.idProvider
@@ -134,6 +122,9 @@ export const KanbanCollection = <
         fetchMore: hasMore ? () => laneData.loadMore() : undefined,
       }
     }),
+    loading: Object.values(lanesHooks).some(
+      (laneHook) => laneHook.isInitialLoading
+    ),
     getKey: (item, index) =>
       idProvider ? String(idProvider(item, index)) : index,
     renderCard: (item, index, total, laneId) => {
@@ -151,10 +142,15 @@ export const KanbanCollection = <
         useSelectable &&
         useSelectable?.selectedItems.has(itemId)
 
+      const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
+      const itemOnClick = source.itemOnClick
+        ? source.itemOnClick(item)
+        : undefined
+
       return (
-        <KanbanCard
+        <KanbanCard<R>
           key={dragId}
-          drag={{ id: dragId, type: "list-card", data: { laneId } }}
+          drag={{ id: dragId, type: "list-card", data: { ...item, laneId } }}
           id={String(item.id)}
           index={index}
           total={total}
@@ -168,13 +164,17 @@ export const KanbanCollection = <
             optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined
           }
           compact
+          forceVerticalMetadata
           selectable={source.selectable !== undefined}
           selected={isSelected}
+          data-testid={`kanban-card-${String(item.id)}`}
           onSelect={(selected) => {
             if (useSelectable) {
               useSelectable.handleSelectItemChange(item, selected)
             }
           }}
+          onClick={itemOnClick}
+          link={itemHref}
         />
       )
     },
@@ -203,16 +203,7 @@ export const KanbanCollection = <
       const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
       return allowReorder ? idx : -1
     },
-    onMove: onMove
-      ? async (
-          fromLaneId: string,
-          toLaneId: string,
-          sourceId: string,
-          toIndex: number | null
-        ) => {
-          await onMove(fromLaneId, toLaneId, sourceId, toIndex)
-        }
-      : undefined,
+    onMove: onMove,
   }
 
   /**
