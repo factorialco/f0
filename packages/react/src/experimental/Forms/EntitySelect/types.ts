@@ -1,3 +1,4 @@
+import { InputFieldProps } from "@/ui/InputField"
 import { PopoverProps } from "@radix-ui/react-popover"
 import { Action } from "../Fields/Select/SelectBottomActions"
 
@@ -23,13 +24,29 @@ export type EntitySelectNamedGroup = {
   groupType?: "avatar" | "team"
 }
 
-interface EntitySelectCommonProps
-  extends Omit<PopoverProps, "children" | "modal"> {
+interface EntitySelectCommonProps<T>
+  extends Omit<PopoverProps, "children" | "modal">,
+    Pick<
+      InputFieldProps<string>,
+      | "label"
+      | "labelIcon"
+      | "icon"
+      | "error"
+      | "status"
+      | "hint"
+      | "hideLabel"
+      | "maxLength"
+      | "disabled"
+      | "placeholder"
+      | "loading"
+      | "required"
+      | "readonly"
+      | "append"
+    > {
   entities: EntitySelectEntity[]
   groups: EntitySelectNamedGroup[]
   selectedGroup: string
-  triggerPlaceholder: string
-  triggerSelected: string
+  selectedItemsCopy: string
   notFoundTitle: string
   notFoundSubtitle: string
   onItemExpandedChange: (id: EntityId, expanded: boolean) => void
@@ -50,6 +67,7 @@ interface EntitySelectCommonProps
   onCreate?: (partialName: string) => void
   onCreateLabel?: string
   actions?: Action[]
+  value?: T
 }
 
 export type FlattenedItem = {
@@ -59,18 +77,20 @@ export type FlattenedItem = {
     subItems?: EntitySelectSubEntity[]
   }
 }
-export interface EntitySelectSingleProps extends EntitySelectCommonProps {
+
+export interface EntitySelectSingleProps<T> extends EntitySelectCommonProps<T> {
   onSelect: (entity: EntitySelectEntity | null) => void
   singleSelector: true
 }
 
-export interface EntitySelectMultipleProps extends EntitySelectCommonProps {
+export interface EntitySelectMultipleProps<T>
+  extends EntitySelectCommonProps<T> {
   onSelect: (entities: EntitySelectEntity[]) => void
   singleSelector: false | undefined
 }
 
-export type EntitySelectProps =
-  | EntitySelectSingleProps
-  | EntitySelectMultipleProps
+export type EntitySelectProps<T> =
+  | EntitySelectSingleProps<T>
+  | EntitySelectMultipleProps<T>
 
 export type EntityId = number | string

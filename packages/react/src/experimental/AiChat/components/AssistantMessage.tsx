@@ -1,5 +1,5 @@
 import { Button, CopyButton } from "@/components/Actions/Button"
-import { Spinner } from "@/experimental"
+import { Spinner } from "@/experimental/Information/Spinner"
 import {
   ThumbsDown,
   ThumbsDownFilled,

@@ -24,7 +24,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
         <motion.div
           key="chat-window"
           aria-hidden={!open}
-          className="relative flex h-full max-w-[360px] flex-col overflow-hidden bg-f1-special-page shadow xs:rounded-xl"
+          className="relative flex h-full max-w-[360px] flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
