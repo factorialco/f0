@@ -434,11 +434,12 @@ const SelectComponent = forwardRef(function Select<
     loadMore()
   }
 
+  // Focus the search input when the data is loaded or loading
   useEffect(() => {
     setTimeout(() => {
       searchInputRef.current?.focus()
-    }, 0)
-  }, [data])
+    }, 10)
+  }, [data, loading, isLoading, isLoadingMore])
 
   const i18n = useI18n()
 
