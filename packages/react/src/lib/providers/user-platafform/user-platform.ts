@@ -1,4 +1,4 @@
-import { Platform } from "./UserPlatformProvider"
+import { Platform } from "./types"
 
 export const detectPlatform = async (): Promise<Platform> => {
   // In Chromium-based browsers we can use high accuracy User-Agent Client Hints API (https://developer.mozilla.org/en-US/docs/Web/API/User-Agent_Client_Hints_API)

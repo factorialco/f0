@@ -21,6 +21,7 @@ import {
   WithGroupId,
 } from "@/hooks/datasource"
 import { ChevronDown } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
@@ -92,6 +93,10 @@ export type SelectProps<T extends string, R = unknown> = {
   | {
       source?: never
       mapOptions?: never
+      searchFn?: (
+        option: SelectItemProps<T, unknown>,
+        search?: string
+      ) => boolean | undefined
       options: SelectItemProps<T, unknown>[]
     }
 ) &
@@ -159,6 +164,14 @@ const SelectValue = forwardRef<
     </div>
   )
 })
+
+const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
+  return (
+    option.type === "separator" ||
+    !search ||
+    option.label.toLowerCase().includes(search.toLowerCase())
+  )
+}
 
 const SelectComponent = forwardRef(function Select<
   T extends string,
@@ -231,18 +244,22 @@ const SelectComponent = forwardRef(function Select<
             }: BaseFetchOptions<FiltersDefinition>): PromiseOrObservable<
               BaseResponse<ActualRecordType>
             > => {
+              // Apply the search function to the options
+              const searchFn =
+                "searchFn" in props && props.searchFn
+                  ? props.searchFn
+                  : defaultSearchFn
+
               return {
                 records: options.filter(
-                  (option) =>
-                    option.type === "separator" ||
-                    !search ||
-                    option.label.toLowerCase().includes(search.toLowerCase())
+                  (option) => searchFn(option, search) ?? true
                 ) as unknown as ActualRecordType[],
               }
             },
           },
     }
-  }, [options, source])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options, source, "searchFn" in props && props.searchFn])
 
   const localSource = useDataSource(
     {
@@ -274,7 +291,7 @@ const SelectComponent = forwardRef(function Select<
     [mapOptions, source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore } =
+  const { data, isInitialLoading, loadMore, isLoadingMore, isLoading } =
     useData<ActualRecordType>(localSource)
 
   const { currentSearch, setCurrentSearch } = localSource
@@ -423,6 +440,8 @@ const SelectComponent = forwardRef(function Select<
     }, 0)
   }, [data])
 
+  const i18n = useI18n()
+
   return (
     <>
       <SelectPrimitive
@@ -460,7 +479,11 @@ const SelectComponent = forwardRef(function Select<
               disabled={disabled}
               clearable={clearable}
               size={size}
-              loading={isInitialLoading || loading}
+              loadingIndicator={{
+                asOverlay: true,
+                offset: 26,
+              }}
+              loading={isInitialLoading || loading || isLoading}
               name={name}
               onClickContent={() => {
                 handleChangeOpenLocal(!openLocal)
@@ -510,7 +533,7 @@ const SelectComponent = forwardRef(function Select<
           <SelectContent
             items={items}
             className={selectContentClassName}
-            emptyMessage={searchEmptyMessage}
+            emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
             top={
               <SelectTopActions
@@ -525,7 +548,10 @@ const SelectComponent = forwardRef(function Select<
               />
             }
             onScrollBottom={handleScrollBottom}
+            scrollMargin={10}
             isLoadingMore={isLoadingMore}
+            isLoading={isLoading || loading}
+            showLoadingIndicator={!!children}
           ></SelectContent>
         )}
       </SelectPrimitive>

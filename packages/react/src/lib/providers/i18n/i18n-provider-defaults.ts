@@ -74,6 +74,7 @@ export const defaultTranslations = {
       pagination: {
         of: "of",
       },
+      settings: "{%visualizationName} settings",
     },
     itemsCount: "items",
     emptyStates: {
@@ -180,8 +181,12 @@ export const defaultTranslations = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
-    welcome: "I'm One. Ask or make anything.",
+    welcome: "Ask or create with One",
     initialMessage: "How can I help you today?",
+  },
+  select: {
+    noResults: "No results found",
+    loadingMore: "Loading...",
   },
 } as const
 

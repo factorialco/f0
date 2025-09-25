@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.201.8](https://github.com/factorialco/f0/compare/f0-react-v1.201.7...f0-react-v1.201.8) (2025-09-25)
+
+
+### Bug Fixes
+
+* **OneAlert:** Action prop conditional  ([#2652](https://github.com/factorialco/f0/issues/2652)) ([58962f7](https://github.com/factorialco/f0/commit/58962f72be2e172517eaa150797d5f3006f02409))
+
+## [1.201.7](https://github.com/factorialco/f0/compare/f0-react-v1.201.6...f0-react-v1.201.7) (2025-09-25)
+
+
+### Bug Fixes
+
+* final width ([0815066](https://github.com/factorialco/f0/commit/0815066a8ce419c26c0a6c779e8047c1cb1c1c4c))
+
+## [1.201.6](https://github.com/factorialco/f0/compare/f0-react-v1.201.5...f0-react-v1.201.6) (2025-09-24)
+
+
+### Bug Fixes
+
+* multiple select fixes - loading state - search delete last chart - empty message ([#2668](https://github.com/factorialco/f0/issues/2668)) ([9612163](https://github.com/factorialco/f0/commit/9612163d168eb1f7aa266f5106be754db6760349))
+
+## [1.201.5](https://github.com/factorialco/f0/compare/f0-react-v1.201.4...f0-react-v1.201.5) (2025-09-24)
+
+
+### Bug Fixes
+
+* **NotesTextEditor:** delete animations and add skeleton ([#2633](https://github.com/factorialco/f0/issues/2633)) ([9a8015f](https://github.com/factorialco/f0/commit/9a8015fd7abd2e34a608017eaf58bf94b621715a))
+
+## [1.201.4](https://github.com/factorialco/f0/compare/f0-react-v1.201.3...f0-react-v1.201.4) (2025-09-23)
+
+
+### Bug Fixes
+
+* select options change and scroll trigger ([#2660](https://github.com/factorialco/f0/issues/2660)) ([f02ac14](https://github.com/factorialco/f0/commit/f02ac14055e7debda791b2d7036fbdcfd9525a3a))
+
+## [1.201.3](https://github.com/factorialco/f0/compare/f0-react-v1.201.2...f0-react-v1.201.3) (2025-09-23)
+
+
+### Bug Fixes
+
+* prevent total item summary to show skeleton when loading more pages ([#2664](https://github.com/factorialco/f0/issues/2664)) ([c6fe1b6](https://github.com/factorialco/f0/commit/c6fe1b6e0689cd7cfd9b0216b3ad364d4968a756))
+
+## [1.201.2](https://github.com/factorialco/f0/compare/f0-react-v1.201.1...f0-react-v1.201.2) (2025-09-23)
+
+
+### Bug Fixes
+
+* add skeletons for presets and title in data collection ([#2662](https://github.com/factorialco/f0/issues/2662)) ([0e595ff](https://github.com/factorialco/f0/commit/0e595ff98091a26a1f146b9129cd70cc06d43b30))
+
+## [1.201.1](https://github.com/factorialco/f0/compare/f0-react-v1.201.0...f0-react-v1.201.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* **datacollection:** warranty group order ([#2654](https://github.com/factorialco/f0/issues/2654)) ([c7110f2](https://github.com/factorialco/f0/commit/c7110f2d7c09d1bcf8ff7c667804945d02c8f976))
+
+## [1.201.0](https://github.com/factorialco/f0/compare/f0-react-v1.200.5...f0-react-v1.201.0) (2025-09-23)
+
+
+### Features
+
+* **One:** add tooltip to One trigger ([#2629](https://github.com/factorialco/f0/issues/2629)) ([7ad795b](https://github.com/factorialco/f0/commit/7ad795be46288182960a3f219094aace81468365))
+
+## [1.200.5](https://github.com/factorialco/f0/compare/f0-react-v1.200.4...f0-react-v1.200.5) (2025-09-23)
+
+
+### Bug Fixes
+
+* **One:** fix misaligned chat window with frame ([#2626](https://github.com/factorialco/f0/issues/2626)) ([8b158b8](https://github.com/factorialco/f0/commit/8b158b8d50cddfc692631a06eaebef4c344a6033))
+
 ## [1.200.4](https://github.com/factorialco/f0/compare/f0-react-v1.200.3...f0-react-v1.200.4) (2025-09-23)
 
 

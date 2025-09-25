@@ -2,18 +2,23 @@ import { Counter } from "@/experimental/Information/Counter"
 import { Preset } from "@/experimental/OnePreset"
 import { cn, focusRing } from "@/lib/utils"
 import { OverflowList } from "@/ui/OverflowList"
+import { Skeleton } from "@/ui/skeleton"
 import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
   value: FiltersState<Filters>
   onPresetsChange: (filter: FiltersState<Filters>) => void
   presets: PresetsDefinition<Filters>
+  presetsLoading?: boolean
 }
+
+const NUMBER_OF_SKELETON_ITEMS = 4
 
 export const FiltersPresets = <Filters extends FiltersDefinition>({
   presets,
   value,
   onPresetsChange,
+  presetsLoading = false,
 }: FilterPresetsProps<Filters>) => {
   const renderListPresetItem = (
     preset: NonNullable<typeof presets>[number],
@@ -65,6 +70,41 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
           type={isSelected ? "selected" : "default"}
         />
       </button>
+    )
+  }
+
+  const renderSkeletonItem = (_: number, index: number, isVisible = true) => (
+    <Skeleton
+      key={index}
+      className="h-8 w-32 rounded-md"
+      data-visible={isVisible}
+    />
+  )
+
+  const renderDropdownSkeletonItem = (_: number, index: number) => (
+    <div
+      key={index}
+      className="flex w-full items-center justify-between rounded-sm p-2"
+      data-visible={true}
+    >
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-4 w-6" />
+    </div>
+  )
+
+  // Show skeleton when loading
+  if (presetsLoading) {
+    const skeletonItems = Array.from(
+      { length: NUMBER_OF_SKELETON_ITEMS },
+      (_, index) => index
+    )
+    return (
+      <OverflowList
+        items={skeletonItems}
+        renderListItem={renderSkeletonItem}
+        renderDropdownItem={renderDropdownSkeletonItem}
+        className="min-w-0 flex-1"
+      />
     )
   }
 
