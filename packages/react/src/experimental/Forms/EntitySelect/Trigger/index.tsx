@@ -130,6 +130,7 @@ export const Trigger = ({
       }
     >
       <span
+        role="button"
         className={cn(
           "my-auto flex items-center pr-1",
           placeholder && "text-f1-foreground-secondary",
