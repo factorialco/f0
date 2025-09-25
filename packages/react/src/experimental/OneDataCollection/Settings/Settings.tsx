@@ -1,4 +1,5 @@
-import { Button } from "@/components/Actions/Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
   GroupingDefinition,
   GroupingState,
@@ -10,7 +11,6 @@ import { Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useMemo, useState } from "react"
-import { FiltersDefinition } from "../../../components/OneFilterPicker/types"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
@@ -155,13 +155,13 @@ export const Settings = <
     <div className="flex gap-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild onClick={() => setOpen(!open)}>
-          <Button
+          <ButtonInternal
             variant="outline"
             label="Settings"
             icon={Sliders}
             onClick={() => {}}
             hideLabel
-            round
+            compact
             pressed={open}
             aria-controls={open ? "settings" : undefined}
           />

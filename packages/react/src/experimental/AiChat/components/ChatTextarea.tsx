@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
@@ -126,7 +126,6 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             label="Stop generating"
             icon={SolidStop}
             hideLabel
-            round
           />
         ) : (
           <ButtonInternal
@@ -136,7 +135,6 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             label="Send message"
             icon={ArrowUp}
             hideLabel
-            round
           />
         )}
       </div>

@@ -262,6 +262,7 @@ export const getMockVisualizations = (options?: {
           label: "Email",
           icon: Envelope,
           render: (item) => item.email,
+          hide: (item) => !item.email,
         },
         {
           label: "Role",

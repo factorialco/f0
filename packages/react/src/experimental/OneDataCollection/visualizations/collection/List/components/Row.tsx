@@ -1,6 +1,7 @@
-import { Link } from "@/components/Actions/Link"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Link } from "@/components/F0Link"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRow } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
@@ -12,7 +13,6 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
@@ -121,7 +121,7 @@ export const Row = <
           </div>
         )}
         {itemHref && (
-          <Link
+          <F0Link
             href={itemHref}
             className="pointer-events-auto absolute inset-0 block"
             tabIndex={0}
@@ -129,7 +129,7 @@ export const Row = <
             onClick={itemOnClick}
           >
             <span className="sr-only">{actions.view}</span>
-          </Link>
+          </F0Link>
         )}
         <ItemTeaser
           title={itemDef.title}

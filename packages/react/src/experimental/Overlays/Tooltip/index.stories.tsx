@@ -1,5 +1,5 @@
+import { F0Button } from "@/components/F0Button"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Button } from "../../../components/Actions/Button"
 import { Tooltip } from "./index"
 
 const meta: Meta<typeof Tooltip> = {
@@ -21,14 +21,14 @@ export const Basic: Story = {
   args: {
     label: "View planmed hours",
     description: "View a breakdown of planned working hours.",
-    children: <Button variant="outline" label="Planned hours" />,
+    children: <F0Button variant="outline" label="Planned hours" />,
   },
 }
 
 export const WithShortcut: Story = {
   args: {
     label: "Collapse sidebar",
-    children: <Button variant="outline" label="Hover me" />,
+    children: <F0Button variant="outline" label="Hover me" />,
     shortcut: ["cmd", "."],
   },
 }

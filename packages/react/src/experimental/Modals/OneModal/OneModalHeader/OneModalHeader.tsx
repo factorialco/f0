@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import {
   DropdownInternal,

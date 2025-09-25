@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import {
   DropdownItem,
   DropdownItemSeparator,
@@ -23,7 +23,7 @@ export const ItemActionsRow = ({
   return (
     <aside className={cn("items-center justify-end gap-2 md:flex", className)}>
       {primaryItemActions.map((action) => (
-        <Button
+        <F0Button
           key={action.label}
           label={action.label}
           variant="outline"

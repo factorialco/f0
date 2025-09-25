@@ -55,7 +55,9 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()
-              if (props.href) setCurrentPath(props.href)
+              if (props.href) {
+                setCurrentPath(props.href)
+              }
             }}
           />
         ),

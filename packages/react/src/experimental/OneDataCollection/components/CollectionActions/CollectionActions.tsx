@@ -1,7 +1,8 @@
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"
 import { useState } from "react"
-import { Button } from "../../../../components/Actions/Button"
-import { Dropdown } from "../../../Navigation/Dropdown"
 import {
   PrimaryActionsDefinition,
   SecondaryActionsItemDefinition,
@@ -36,7 +37,7 @@ export const CollectionActions = ({
   return (
     <div className="flex flex-row-reverse items-center gap-2">
       {primaryActionsButton.map((action) => (
-        <Button
+        <F0Button
           size="md"
           key={action.label}
           onClick={action.onClick}
@@ -47,7 +48,7 @@ export const CollectionActions = ({
       ))}
 
       {secondaryActionsButtons?.map((action) => (
-        <Button
+        <F0Button
           size="md"
           key={action.label}
           onClick={action.onClick}
@@ -65,7 +66,7 @@ export const CollectionActions = ({
           open={open}
           onOpenChange={onOpenChange}
         >
-          <Button
+          <ButtonInternal
             variant="outline"
             icon={Ellipsis}
             label="Actions"

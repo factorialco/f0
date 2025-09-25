@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0AiBanner } from "@/experimental/Banners/F0AiBanner"
 import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
@@ -254,7 +254,7 @@ const AIButtonsSection: React.FC<AIButtonsSectionProps> = ({
     <div className="relative flex flex-row flex-wrap items-center gap-2">
       {config.buttons?.map((button: AIButton, index: number) => (
         <div key={index}>
-          <Button
+          <F0Button
             onClick={() => onButtonClick(button.type)}
             variant="outline"
             icon={button.icon}

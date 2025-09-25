@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
@@ -164,13 +164,12 @@ export const VisualizationSelector = <
     <div className="flex gap-2">
       <Popover open={open}>
         <PopoverTrigger asChild onClick={() => setOpen(!open)}>
-          <Button
+          <F0Button
             variant="outline"
             label="Filters"
             icon={Sliders}
             onClick={() => {}}
             hideLabel
-            round
           />
         </PopoverTrigger>
         <PopoverContent
