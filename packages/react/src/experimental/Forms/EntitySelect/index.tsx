@@ -452,7 +452,11 @@ export const EntitySelect = (
 
   return (
     <Popover {...props} onOpenChange={onOpenChange} open={open}>
-      <PopoverTrigger className="w-full" disabled={props.disabled}>
+      <PopoverTrigger
+        className="w-full"
+        disabled={props.disabled}
+        aria-label={props.label || props.placeholder}
+      >
         {props.children ? (
           props.children
         ) : (

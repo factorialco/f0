@@ -411,7 +411,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-expanded": ariaExpanded,
                 id,
                 value: localValue ?? "",
-                "aria-label": label || placeholder,
+                "aria-label": label || placeholder || "no-label",
                 "aria-busy": loading,
                 "aria-disabled": noEdit,
                 name,

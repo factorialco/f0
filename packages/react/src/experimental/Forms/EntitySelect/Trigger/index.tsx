@@ -1,5 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
 import {
@@ -20,6 +21,7 @@ export const Trigger = ({
   error,
   status,
   hint,
+  onClickContent,
   hideLabel = false,
   maxLength,
   loading = false,
@@ -32,6 +34,7 @@ export const Trigger = ({
   hiddenAvatar?: boolean
 } & Pick<
   InputFieldProps<string>,
+  | "onClickContent"
   | "label"
   | "labelIcon"
   | "icon"
@@ -85,8 +88,12 @@ export const Trigger = ({
 
   return (
     <InputField
+      onClickContent={onClickContent}
+      role="combobox"
       label={label}
       labelIcon={labelIcon}
+      aria-expanded={false}
+      aria-controls="listbox"
       icon={!!icon && !value ? icon : undefined}
       error={error}
       status={status}
@@ -95,7 +102,6 @@ export const Trigger = ({
       maxLength={maxLength}
       clearable={false}
       value={value}
-      placeholder={placeholder}
       disabled={disabled}
       loading={loading}
       required={required}
@@ -123,7 +129,20 @@ export const Trigger = ({
         )
       }
     >
-      <input />
+      <span
+        className={cn(
+          "my-auto flex items-center pr-1",
+          placeholder && "text-f1-foreground-secondary",
+          value && "text-f1-foreground",
+          flattenedList.length === 1 && !hiddenAvatar ? "pl-8" : "pl-2"
+        )}
+      >
+        {flattenedList.length === 0
+          ? placeholder
+          : flattenedList.length === 1
+            ? flattenedList[0].subItem.subName
+            : flattenedList.length + " " + selected}
+      </span>
     </InputField>
   )
 }
