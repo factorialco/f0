@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.201.6](https://github.com/factorialco/f0/compare/f0-react-v1.201.5...f0-react-v1.201.6) (2025-09-24)
+
+
+### Bug Fixes
+
+* multiple select fixes - loading state - search delete last chart - empty message ([#2668](https://github.com/factorialco/f0/issues/2668)) ([9612163](https://github.com/factorialco/f0/commit/9612163d168eb1f7aa266f5106be754db6760349))
+
+## [1.201.5](https://github.com/factorialco/f0/compare/f0-react-v1.201.4...f0-react-v1.201.5) (2025-09-24)
+
+
+### Bug Fixes
+
+* **NotesTextEditor:** delete animations and add skeleton ([#2633](https://github.com/factorialco/f0/issues/2633)) ([9a8015f](https://github.com/factorialco/f0/commit/9a8015fd7abd2e34a608017eaf58bf94b621715a))
+
 ## [1.201.4](https://github.com/factorialco/f0/compare/f0-react-v1.201.3...f0-react-v1.201.4) (2025-09-23)
 
 
