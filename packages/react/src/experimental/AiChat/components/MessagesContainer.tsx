@@ -345,47 +345,6 @@ export function useScrollToBottom() {
   }
 }
 
-// Helper functions for better code organization
-function isThinkingMessage(message: Message): boolean {
-  return (
-    message.role === "assistant" &&
-    message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
-    ) === true
-  )
-}
-
-function isAgentStateMessage(message: Message): boolean {
-  return message.role === "assistant" && message.agentName !== undefined
-}
-
-function finalizeTurn(turn: Turn, pendingAgentState: Message | null) {
-  ungroupSingleThinkingMessage(turn)
-  addPendingAgentState(turn, pendingAgentState)
-}
-
-function isCurrentlyGroupingThinking(turn: Turn): boolean {
-  const lastMessage = turn.at(-1)
-  return Array.isArray(lastMessage)
-}
-
-function ungroupSingleThinkingMessage(turn: Turn): void {
-  const lastMessage = turn.at(-1)
-  if (Array.isArray(lastMessage) && lastMessage.length === 1) {
-    turn.pop()
-    turn.push(...lastMessage)
-  }
-}
-
-function addPendingAgentState(
-  turn: Turn,
-  pendingAgentState: Message | null
-): void {
-  if (pendingAgentState !== null) {
-    turn.push(pendingAgentState)
-  }
-}
-
 export function convertMessagesToTurns(messages: Message[]): Turn[] {
   if (messages.length === 0) {
     return []
@@ -451,4 +410,44 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
   }
 
   return turns
+}
+
+function isThinkingMessage(message: Message): boolean {
+  return (
+    message.role === "assistant" &&
+    message.toolCalls?.some(
+      (call) => call.function.name === "orchestratorThinking"
+    ) === true
+  )
+}
+
+function isAgentStateMessage(message: Message): boolean {
+  return message.role === "assistant" && message.agentName !== undefined
+}
+
+function finalizeTurn(turn: Turn, pendingAgentState: Message | null) {
+  ungroupSingleThinkingMessage(turn)
+  addPendingAgentState(turn, pendingAgentState)
+}
+
+function isCurrentlyGroupingThinking(turn: Turn): boolean {
+  const lastMessage = turn.at(-1)
+  return Array.isArray(lastMessage)
+}
+
+function ungroupSingleThinkingMessage(turn: Turn): void {
+  const lastMessage = turn.at(-1)
+  if (Array.isArray(lastMessage) && lastMessage.length === 1) {
+    turn.pop()
+    turn.push(...lastMessage)
+  }
+}
+
+function addPendingAgentState(
+  turn: Turn,
+  pendingAgentState: Message | null
+): void {
+  if (pendingAgentState !== null) {
+    turn.push(pendingAgentState)
+  }
 }
