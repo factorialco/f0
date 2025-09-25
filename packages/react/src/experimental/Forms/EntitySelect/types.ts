@@ -24,7 +24,7 @@ export type EntitySelectNamedGroup = {
   groupType?: "avatar" | "team"
 }
 
-interface EntitySelectCommonProps
+interface EntitySelectCommonProps<T>
   extends Omit<PopoverProps, "children" | "modal">,
     Pick<
       InputFieldProps<string>,
@@ -43,6 +43,7 @@ interface EntitySelectCommonProps
       | "readonly"
       | "append"
     > {
+  value?: T
   entities: EntitySelectEntity[]
   groups: EntitySelectNamedGroup[]
   selectedGroup: string
@@ -76,13 +77,15 @@ export type FlattenedItem = {
     subItems?: EntitySelectSubEntity[]
   }
 }
+
 export interface EntitySelectSingleProps<T> extends EntitySelectCommonProps {
   onSelect: (entity: EntitySelectEntity | null) => void
   singleSelector: true
   value?: T
 }
 
-export interface EntitySelectMultipleProps<T> extends EntitySelectCommonProps {
+export interface EntitySelectMultipleProps<T>
+  extends EntitySelectCommonProps<T> {
   onSelect: (entities: EntitySelectEntity[]) => void
   singleSelector: false | undefined
   value?: T[]
