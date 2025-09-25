@@ -182,6 +182,9 @@ export const defaultTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "I'm One. Ask or make anything.",
     initialMessage: "How can I help you today?",
+    inputPlaceholder: "Write something here...",
+    stopAnswerGeneration: "Stop generating",
+    sendMessage: "Send message",
   },
 } as const
 
