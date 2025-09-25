@@ -11,8 +11,8 @@ import {
   EntitySelectSubEntity,
 } from "./types"
 
-export const EntitySelect = (
-  props: EntitySelectProps & { children?: React.ReactNode }
+export const EntitySelect = <T,>(
+  props: EntitySelectProps<T> & { children?: React.ReactNode }
 ) => {
   const [open, setOpen] = useState(
     (props.alwaysOpen || props.defaultOpen) ?? false
@@ -472,7 +472,7 @@ export const EntitySelect = (
             hint={props.hint}
             hideLabel={props.hideLabel}
             maxLength={props.maxLength}
-            value={props.value}
+            value={props.value?.toString() ?? undefined}
             disabled={props.disabled}
             placeholder={props.placeholder}
             loading={props.alwaysOpen ? props.loading : false}

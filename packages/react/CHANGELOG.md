@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.203.3](https://github.com/factorialco/f0/compare/f0-react-v1.203.2...f0-react-v1.203.3) (2025-09-25)
+
+
+### Bug Fixes
+
+* add total in kanban view + fix move problem ([#2679](https://github.com/factorialco/f0/issues/2679)) ([c8b72b7](https://github.com/factorialco/f0/commit/c8b72b779f9f936591255b9c25a9848a43203a21))
+
+## [1.203.2](https://github.com/factorialco/f0/compare/f0-react-v1.203.1...f0-react-v1.203.2) (2025-09-25)
+
+
+### Bug Fixes
+
+* entityselect value type ([#2680](https://github.com/factorialco/f0/issues/2680)) ([bb8e047](https://github.com/factorialco/f0/commit/bb8e0474ce72fe97d05ae8c4cd4dec3c6e981367))
+
 ## [1.203.1](https://github.com/factorialco/f0/compare/f0-react-v1.203.0...f0-react-v1.203.1) (2025-09-25)
 
 
