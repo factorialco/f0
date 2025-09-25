@@ -7279,6 +7279,7 @@ const D0 = ({
       children: /* @__PURE__ */ d(
         "span",
         {
+          role: "button",
           className: N(
             "my-auto flex items-center pr-1",
             t && "text-f1-foreground-secondary",
