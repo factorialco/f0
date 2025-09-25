@@ -1,7 +1,4 @@
-import {
-  DataCollectionStorage,
-  DataCollectionStorageHandler,
-} from "./DataCollectionStorageProvider"
+import { DataCollectionStorage, DataCollectionStorageHandler } from "./types"
 
 const getKey = (keyName: string) => `datacollection-${keyName}`
 export const dataCollectionLocalStorageHandler: DataCollectionStorageHandler = {
