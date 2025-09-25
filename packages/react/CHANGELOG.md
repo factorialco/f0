@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.203.0](https://github.com/factorialco/f0/compare/f0-react-v1.202.0...f0-react-v1.203.0) (2025-09-25)
+
+
+### Features
+
+* export datacollection local storae ([#2675](https://github.com/factorialco/f0/issues/2675)) ([a99e84d](https://github.com/factorialco/f0/commit/a99e84dfd86cf0edaace30bcc77f19d58d1e4164))
+
 ## [1.202.0](https://github.com/factorialco/f0/compare/f0-react-v1.201.8...f0-react-v1.202.0) (2025-09-25)
 
 
