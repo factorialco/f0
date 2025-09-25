@@ -10,7 +10,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { useChatWindowContext } from "./ChatWindow"
 import { Thinking } from "./Thinking"
 
 export const MessagesContainer = ({
@@ -301,7 +300,6 @@ export function useScrollToBottom() {
   const isProgrammaticScrollRef = useRef(false)
   const isUserScrollUpRef = useRef(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
-  const { setMessageContainerScrollTop } = useChatWindowContext()
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesContainerRef.current && messagesEndRef.current) {
@@ -338,8 +336,6 @@ export function useScrollToBottom() {
   }
 
   const handleScroll = useCallback(() => {
-    setMessageContainerScrollTop(messagesContainerRef.current?.scrollTop ?? 0)
-
     if (isProgrammaticScrollRef.current) {
       isProgrammaticScrollRef.current = false
       return
@@ -347,7 +343,7 @@ export function useScrollToBottom() {
 
     checkIsScrollingUp()
     checkScrollToBottomButtonVisibility()
-  }, [setMessageContainerScrollTop])
+  }, [])
 
   useEventListener("scroll", handleScroll, messagesContainerRef)
 
