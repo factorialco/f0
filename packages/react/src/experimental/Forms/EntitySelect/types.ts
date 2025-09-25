@@ -43,7 +43,6 @@ interface EntitySelectCommonProps<T>
       | "readonly"
       | "append"
     > {
-  value?: T
   entities: EntitySelectEntity[]
   groups: EntitySelectNamedGroup[]
   selectedGroup: string
@@ -68,6 +67,7 @@ interface EntitySelectCommonProps<T>
   onCreate?: (partialName: string) => void
   onCreateLabel?: string
   actions?: Action[]
+  value?: T
 }
 
 export type FlattenedItem = {
@@ -78,17 +78,15 @@ export type FlattenedItem = {
   }
 }
 
-export interface EntitySelectSingleProps<T> extends EntitySelectCommonProps {
+export interface EntitySelectSingleProps<T> extends EntitySelectCommonProps<T> {
   onSelect: (entity: EntitySelectEntity | null) => void
   singleSelector: true
-  value?: T
 }
 
 export interface EntitySelectMultipleProps<T>
   extends EntitySelectCommonProps<T> {
   onSelect: (entities: EntitySelectEntity[]) => void
   singleSelector: false | undefined
-  value?: T[]
 }
 
 export type EntitySelectProps<T> =
