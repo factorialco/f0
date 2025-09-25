@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.201.7](https://github.com/factorialco/f0/compare/f0-react-v1.201.6...f0-react-v1.201.7) (2025-09-25)
+
+
+### Bug Fixes
+
+* final width ([0815066](https://github.com/factorialco/f0/commit/0815066a8ce419c26c0a6c779e8047c1cb1c1c4c))
+
 ## [1.201.6](https://github.com/factorialco/f0/compare/f0-react-v1.201.5...f0-react-v1.201.6) (2025-09-24)
 
 
