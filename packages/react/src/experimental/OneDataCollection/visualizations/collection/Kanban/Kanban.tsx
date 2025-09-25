@@ -126,10 +126,19 @@ export const KanbanCollection = <
     loading: Object.values(lanesHooks).some(
       (laneHook) => laneHook.isInitialLoading
     ),
-    getKey: (item, index) =>
-      idProvider ? String(idProvider(item, index)) : index,
+    getKey: (item, index) => {
+      if (idProvider) return String(idProvider(item, index))
+      const fallbackId = (item as unknown as { id?: string | number })?.id
+      return fallbackId !== undefined && fallbackId !== null
+        ? String(fallbackId)
+        : String(index)
+    },
     renderCard: (item, index, total, laneId) => {
-      const dragId = String(idProvider ? idProvider(item, index) : index)
+      const dragId = String(
+        idProvider
+          ? idProvider(item, index)
+          : ((item as unknown as { id?: string | number })?.id ?? index)
+      )
       const itemId = source.selectable ? source.selectable(item) : item.id
 
       // Gets the lane useSelectable hook
@@ -219,7 +228,10 @@ export const KanbanCollection = <
     laneItems.forEach((lane) => {
       const map = new Map<string, number>()
       lane.items.forEach((item, index) => {
-        const itemId = String(idProvider ? idProvider(item as R, index) : index)
+        const rawId = idProvider
+          ? idProvider(item as R, index)
+          : ((item as unknown as { id?: string | number })?.id ?? index)
+        const itemId = String(rawId)
         map.set(itemId, index)
       })
       maps.set(lane.id, map)
