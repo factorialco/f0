@@ -26,8 +26,6 @@ export const MessagesContainer = ({
   onThumbsUp,
   onThumbsDown,
   markdownTagRenderers,
-  chatError,
-  ErrorMessage,
 }: MessagesProps) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
@@ -211,9 +209,6 @@ export const MessagesContainer = ({
             </div>
           )
         })}
-        {chatError && ErrorMessage && (
-          <ErrorMessage error={chatError} isCurrentMessage />
-        )}
         {interrupt}
       </motion.div>
       <footer className="copilotKitMessagesFooter" ref={messagesEndRef}>
