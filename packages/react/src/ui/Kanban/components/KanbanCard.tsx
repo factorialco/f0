@@ -1,5 +1,5 @@
-import { Link } from "@/components/Actions/Link"
 import { CardInternal } from "@/components/F0Card/CardInternal"
+import { F0Link } from "@/components/F0Link"
 import { useDraggable } from "@/lib/dnd/hooks"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -104,7 +104,7 @@ export function KanbanCard<T = unknown>({
     >
       <CardInternal {...props} disableOverlayLink={draggable} />
       {props.link && (
-        <Link
+        <F0Link
           ref={linkRef}
           href={props.link}
           style={{
