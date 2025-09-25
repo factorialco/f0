@@ -16,10 +16,8 @@ import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
 import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
-import {
-  DataCollectionStorageHandler,
-  DataCollectionStorageProvider,
-} from "../datacollection/DataCollectionStorageProvider"
+import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
+import { DataCollectionStorageHandler } from "../datacollection/types"
 
 interface LayoutProps {
   fullScreen?: boolean

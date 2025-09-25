@@ -1,15 +1,5 @@
-import { DataCollectionStatus } from "@/experimental/OneDataCollection/hooks/useDataColectionStorage/types"
-import { DataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import { createContext, useContext } from "react"
-
-export type DataCollectionStorage = {
-  settings?: DataCollectionSettings
-} & DataCollectionStatus
-
-export type DataCollectionStorageHandler = {
-  get: (key: string) => Promise<DataCollectionStorage>
-  set: (key: string, storage: DataCollectionStorage) => Promise<void>
-}
+import { DataCollectionStorage, DataCollectionStorageHandler } from "./types"
 
 const noopHandler = {
   get: () => ({}) as Promise<DataCollectionStorage>,
