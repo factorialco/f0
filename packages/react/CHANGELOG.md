@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.204.0](https://github.com/factorialco/f0/compare/f0-react-v1.203.4...f0-react-v1.204.0) (2025-09-25)
+
+
+### Features
+
+* **NotesTextEditor:** add pushContent method ([#2671](https://github.com/factorialco/f0/issues/2671)) ([728c560](https://github.com/factorialco/f0/commit/728c5602a9c2b774c6e88e1380c767df688d1a18))
+
 ## [1.203.4](https://github.com/factorialco/f0/compare/f0-react-v1.203.3...f0-react-v1.203.4) (2025-09-25)
 
 
