@@ -22,7 +22,18 @@ export const AssistantMessage = ({
   onThumbsUp,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
-  const subComponent = message?.generativeUI?.()
+  const isThinkingTool =
+    message?.role === "assistant" &&
+    message.toolCalls?.find(
+      (tool) => tool.function.name === "orchestratorThinking"
+    )
+  const subComponent = message?.generativeUI?.(
+    isThinkingTool
+      ? {
+          status: isLoading ? "executing" : "completed",
+        }
+      : undefined
+  )
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
@@ -56,7 +67,7 @@ export const AssistantMessage = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {isLoading && (
+      {isLoading && !subComponent && (
         <div className="min-h-[20px]">
           <Spinner size="small" className="text-f1-foreground" />
         </div>

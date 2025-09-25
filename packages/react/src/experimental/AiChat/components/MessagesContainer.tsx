@@ -11,9 +11,7 @@ import { useEventListener, useResizeObserver } from "usehooks-ts"
 import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { useChatWindowContext } from "./ChatWindow"
-
-// corresponds to padding pt-16 applied for the header
-const HEADER_HEIGHT_PX = 64
+import { Thinking } from "./Thinking"
 
 export const MessagesContainer = ({
   inProgress,
@@ -65,16 +63,47 @@ export const MessagesContainer = ({
     setLongestTurnHeight((prev) => (prev >= height ? prev : height))
   }, [messages.length, initialMessages.length])
   const turns = useMemo(() => {
-    return messages.reduce<Array<Array<Message>>>((turns, message) => {
-      if (message && message.role === "user") {
-        turns.push([message])
-      } else {
-        if (turns.length > 0) {
-          turns[turns.length - 1].push(message)
+    let agentStateMessage: Message | null = null
+    return messages.reduce<Array<Array<Message | Array<Message>>>>(
+      (turns, message) => {
+        if ((message && message.role === "user") || turns.length === 0) {
+          turns.push([message])
+        } else {
+          const isAgentStateMessage =
+            message.role === "assistant" && message.agentName
+          if (
+            isAgentStateMessage &&
+            Array.isArray(turns[turns.length - 1].at(-1))
+          ) {
+            agentStateMessage = message
+            return turns
+          }
+
+          if (
+            message.role === "assistant" &&
+            message.toolCalls?.some(
+              (call) => call.function.name === "orchestratorThinking"
+            )
+          ) {
+            const lastMessage = turns[turns.length - 1].at(-1)
+            if (!Array.isArray(lastMessage)) {
+              turns[turns.length - 1].push([])
+            }
+            const messages = turns[turns.length - 1]
+            messages[messages.length - 1].push(message)
+          } else {
+            if (agentStateMessage !== null) {
+              turns[turns.length - 1].push(agentStateMessage)
+              agentStateMessage = null
+            }
+            turns[turns.length - 1].push(message)
+          }
         }
-      }
-      return turns
-    }, [])
+
+        return turns
+      },
+      []
+    )
   }, [messages])
 
   // the scroll container's height is manually controlled by the size of the biggest turn (see `motion.div` below)
@@ -85,7 +114,7 @@ export const MessagesContainer = ({
     <motion.div
       layout
       className={cn(
-        "scrollbar-macos relative isolate flex-1 scroll-pt-14 px-4 pt-14",
+        "scrollbar-macos relative isolate flex-1 px-4 pt-3",
         "overflow-y-scroll"
       )}
       ref={messagesContainerRef}
@@ -171,8 +200,8 @@ export const MessagesContainer = ({
               style={{
                 minHeight: isCurrentTurn
                   ? // "scroll" the current turn up in the view to make space for the assistant response,
-                    // but leave 1/5 of the container height on the top to show part of the previous dialog
-                    containerHeight - HEADER_HEIGHT_PX - containerHeight / 5
+                    // but leave 20% of the container height on the top to show part of the previous dialog
+                    containerHeight * 0.8
                   : undefined,
               }}
             >
@@ -181,10 +210,27 @@ export const MessagesContainer = ({
                   turnIndex === turns.length - 1 &&
                   index === turnMessages.length - 1
 
+                if (Array.isArray(message) && !isCurrentMessage) {
+                  return (
+                    <Thinking
+                      key={`${turnIndex}-${index}`}
+                      messages={message}
+                      isActive={false}
+                      inProgress={inProgress}
+                      RenderMessage={RenderMessage}
+                      AssistantMessage={AssistantMessage}
+                    />
+                  )
+                }
+
                 return (
                   <RenderMessage
                     key={`${turnIndex}-${index}`}
-                    message={message}
+                    message={
+                      Array.isArray(message)
+                        ? message[message.length - 1] // show last thought when the thinking is ongoing
+                        : message
+                    }
                     inProgress={inProgress}
                     index={index}
                     isCurrentMessage={isCurrentMessage}
@@ -314,9 +360,6 @@ export function useScrollToBottom() {
     scrollToBottom("instant")
 
     const mutationObserver = new MutationObserver(() => {
-      if (!isUserScrollUpRef.current) {
-        scrollToBottom()
-      }
       checkScrollToBottomButtonVisibility()
     })
 
