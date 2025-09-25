@@ -48,14 +48,6 @@ export function Kanban<TRecord extends RecordType>(
     if (phase === "drop" || phase === "cancel") setIsDragging(false)
   })
 
-  // Resolve ScrollArea viewport
-  useEffect(() => {
-    const root = document.querySelector(
-      "[data-scroll-container]"
-    ) as HTMLDivElement | null
-    viewportRef.current = root
-  }, [])
-
   useEffect(() => {
     const step = () => {
       const now = performance.now()
@@ -177,9 +169,10 @@ export function Kanban<TRecord extends RecordType>(
       insertIndex = indexOfTarget + (position === "below" ? 1 : 0)
     }
 
-    // Build next lanes state
+    // Build next lanes state (also adjust totals if provided by lanes)
+    const isSameLane = fromLaneId === toLaneId
     const next = prev.map((lane, idx) => {
-      if (idx === fromLaneIdx && fromLaneId === toLaneId) {
+      if (idx === fromLaneIdx && isSameLane) {
         // Same lane reorder
         const items = [...lane.items]
         items.splice(sourceIndex, 1)
@@ -192,13 +185,21 @@ export function Kanban<TRecord extends RecordType>(
       if (idx === fromLaneIdx) {
         const items = [...lane.items]
         items.splice(sourceIndex, 1)
-        return { ...lane, items }
+        const nextTotal =
+          typeof lane.total === "number" && !isSameLane
+            ? Math.max(0, lane.total - 1)
+            : lane.total
+        return { ...lane, items, total: nextTotal }
       }
       if (idx === toLaneIdx) {
         const items = [...lane.items]
         const boundedIndex = Math.max(0, Math.min(insertIndex, items.length))
         items.splice(boundedIndex, 0, sourceRecord)
-        return { ...lane, items }
+        const nextTotal =
+          typeof lane.total === "number" && !isSameLane
+            ? lane.total + 1
+            : lane.total
+        return { ...lane, items, total: nextTotal }
       }
       return lane
     })
@@ -249,7 +250,7 @@ export function Kanban<TRecord extends RecordType>(
 
   return (
     <div className={cn("relative w-full px-4", className)}>
-      <ScrollArea className={"w-full"}>
+      <ScrollArea className={"w-full"} viewportRef={viewportRef}>
         <div className="mb-2 flex gap-2">
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {

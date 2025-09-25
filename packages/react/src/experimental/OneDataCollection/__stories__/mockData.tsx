@@ -459,15 +459,20 @@ export const getMockVisualizations = (options?: {
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },
       ],
-      onMove: async (): Promise<MockUser> => {
+      onMove: async (
+        _fromLaneId: string,
+        _toLaneId: string,
+        sourceRecord: MockUser,
+        _destinyRecord: { record: MockUser; position: "above" | "below" } | null
+      ): Promise<MockUser> => {
         // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        await new Promise((resolve) => setTimeout(resolve, 10))
 
         // Simulate success/error randomly for testing
-        if (Math.random() > 0.7) {
-          throw new Error("Simulated move error")
-        }
-        return mockUsers[0]
+        // if (Math.random() > 0.7) {
+        //   throw new Error("Simulated move error")
+        // }
+        return await sourceRecord
       },
     },
   },
