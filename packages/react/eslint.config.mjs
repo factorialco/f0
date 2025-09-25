@@ -158,7 +158,7 @@ export default [
                 "!@/lib/providers/f0",
               ],
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead. [Rule: 1]",
             },
           ],
         },
@@ -182,12 +182,12 @@ export default [
             {
               name: "@/f0",
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead.  [Rule: 2]",
             },
             {
               name: "@/experimental",
               message:
-                "Imports from @/experimental root are not allowed. Import the component directly instead.",
+                "Imports from @/experimental root are not allowed. Import the component directly instead. [Rule: 3]",
             },
           ],
           patterns: [
@@ -199,9 +199,11 @@ export default [
                 "*/f0",
                 "**/f0",
                 "**/f0.ts",
+                // exceptions
+                "!@/lib/providers/f0",
               ],
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead. [Rule: 4]",
             },
           ],
         },
