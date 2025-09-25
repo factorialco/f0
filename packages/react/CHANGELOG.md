@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.202.0](https://github.com/factorialco/f0/compare/f0-react-v1.201.8...f0-react-v1.202.0) (2025-09-25)
+
+
+### Features
+
+* improve InputLabel and used in EntitySelector ([#2558](https://github.com/factorialco/f0/issues/2558)) ([bd8d974](https://github.com/factorialco/f0/commit/bd8d974c8904df72dc38fda7fd85a3d891c6f4e4))
+
 ## [1.201.8](https://github.com/factorialco/f0/compare/f0-react-v1.201.7...f0-react-v1.201.8) (2025-09-25)
 
 
