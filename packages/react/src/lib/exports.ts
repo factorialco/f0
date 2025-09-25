@@ -1,3 +1,4 @@
+export { F0Provider } from "@/lib/providers/f0"
 export { Await } from "../components/Utilities/Await/Await"
 export * from "./a11y"
 export { createAtlaskitDriver } from "./dnd/atlaskitDriver"
@@ -11,6 +12,4 @@ export { F0EventCatcherProvider } from "./providers/events"
 export { buildTranslations } from "./providers/i18n"
 export type { TranslationsType } from "./providers/i18n"
 export { defaultTranslations } from "./providers/i18n/i18n-provider-defaults"
-export { FactorialOneProvider } from "./providers/one/one-provider"
 export { useXRay } from "./xray"
-// 11

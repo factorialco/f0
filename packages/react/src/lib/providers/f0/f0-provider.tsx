@@ -16,6 +16,10 @@ import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
 import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
+import {
+  DataCollectionStorageHandler,
+  DataCollectionStorageProvider,
+} from "../datacollection/DataCollectionStorageProvider"
 
 interface LayoutProps {
   fullScreen?: boolean
@@ -67,7 +71,7 @@ const MotionProvider: React.FC<{ children: React.ReactNode }> = ({
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>
 }
 
-export const FactorialOneProvider: React.FC<{
+export const F0Provider: React.FC<{
   children: React.ReactNode
   link?: LinkContextValue
   privacyModeInitiallyEnabled?: boolean
@@ -77,6 +81,7 @@ export const FactorialOneProvider: React.FC<{
   l10n: Omit<L10nProviderProps, "children">
   isDev?: boolean
   showExperimentalWarnings?: boolean
+  dataCollectionStorageHandler?: DataCollectionStorageHandler
 }> = ({
   children,
   layout,
@@ -86,6 +91,7 @@ export const FactorialOneProvider: React.FC<{
   i18n,
   l10n,
   isDev = false,
+  dataCollectionStorageHandler,
   showExperimentalWarnings = false,
 }) => {
   return (
@@ -102,7 +108,13 @@ export const FactorialOneProvider: React.FC<{
                   <PrivacyModeProvider
                     initiallyEnabled={privacyModeInitiallyEnabled}
                   >
-                    <ImageProvider {...image}>{children}</ImageProvider>
+                    <ImageProvider {...image}>
+                      <DataCollectionStorageProvider
+                        handler={dataCollectionStorageHandler}
+                      >
+                        {children}
+                      </DataCollectionStorageProvider>
+                    </ImageProvider>
                   </PrivacyModeProvider>
                 </XRayProvider>
               </LayoutProvider>

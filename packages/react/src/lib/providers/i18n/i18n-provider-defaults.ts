@@ -74,6 +74,7 @@ export const defaultTranslations = {
       pagination: {
         of: "of",
       },
+      settings: "{%visualizationName} settings",
     },
     itemsCount: "items",
     emptyStates: {

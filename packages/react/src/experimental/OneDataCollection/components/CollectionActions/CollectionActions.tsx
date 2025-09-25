@@ -1,11 +1,11 @@
 import { Ellipsis } from "@/icons/app"
 import { useState } from "react"
-import { Button } from "../../../components/Actions/Button"
-import { Dropdown } from "../../Navigation/Dropdown"
+import { Button } from "../../../../components/Actions/Button"
+import { Dropdown } from "../../../Navigation/Dropdown"
 import {
   PrimaryActionsDefinition,
   SecondaryActionsItemDefinition,
-} from "../actions"
+} from "../../actions"
 
 type CollectionActionProps = {
   primaryActions?: ReturnType<PrimaryActionsDefinition>
