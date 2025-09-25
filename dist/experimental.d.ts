@@ -1989,11 +1989,11 @@ export declare type enhanceTextParams = {
 
 export declare type EntityId = number | string;
 
-export declare const EntitySelect: (props: EntitySelectProps & {
+export declare const EntitySelect: <T>(props: EntitySelectProps<T> & {
     children?: React.ReactNode;
 }) => JSX_2.Element;
 
-declare interface EntitySelectCommonProps extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "value" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
+declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
     entities: EntitySelectEntity[];
     groups: EntitySelectNamedGroup[];
     selectedGroup: string;
@@ -2018,6 +2018,7 @@ declare interface EntitySelectCommonProps extends Omit<PopoverProps, "children" 
     onCreate?: (partialName: string) => void;
     onCreateLabel?: string;
     actions?: Action[];
+    value?: T;
 }
 
 export declare type EntitySelectEntity = {
@@ -2029,7 +2030,7 @@ export declare type EntitySelectEntity = {
     subItems?: EntitySelectSubEntity[];
 };
 
-export declare interface EntitySelectMultipleProps extends EntitySelectCommonProps {
+export declare interface EntitySelectMultipleProps<T> extends EntitySelectCommonProps<T> {
     onSelect: (entities: EntitySelectEntity[]) => void;
     singleSelector: false | undefined;
 }
@@ -2040,9 +2041,9 @@ export declare type EntitySelectNamedGroup = {
     groupType?: "avatar" | "team";
 };
 
-export declare type EntitySelectProps = EntitySelectSingleProps | EntitySelectMultipleProps;
+export declare type EntitySelectProps<T> = EntitySelectSingleProps<T> | EntitySelectMultipleProps<T>;
 
-export declare interface EntitySelectSingleProps extends EntitySelectCommonProps {
+export declare interface EntitySelectSingleProps<T> extends EntitySelectCommonProps<T> {
     onSelect: (entity: EntitySelectEntity | null) => void;
     singleSelector: true;
 }
@@ -5112,15 +5113,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
