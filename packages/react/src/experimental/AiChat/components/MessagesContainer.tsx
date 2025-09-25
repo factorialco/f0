@@ -12,6 +12,8 @@ import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { Thinking } from "./Thinking"
 
+type Turn = Array<Message | Array<Message>>
+
 export const MessagesContainer = ({
   inProgress,
   children,
@@ -24,6 +26,8 @@ export const MessagesContainer = ({
   onThumbsUp,
   onThumbsDown,
   markdownTagRenderers,
+  chatError,
+  ErrorMessage,
 }: MessagesProps) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
@@ -62,47 +66,7 @@ export const MessagesContainer = ({
     setLongestTurnHeight((prev) => (prev >= height ? prev : height))
   }, [messages.length, initialMessages.length])
   const turns = useMemo(() => {
-    let agentStateMessage: Message | null = null
-    return messages.reduce<Array<Array<Message | Array<Message>>>>(
-      (turns, message) => {
-        if ((message && message.role === "user") || turns.length === 0) {
-          turns.push([message])
-        } else {
-          const isAgentStateMessage =
-            message.role === "assistant" && message.agentName
-          if (
-            isAgentStateMessage &&
-            Array.isArray(turns[turns.length - 1].at(-1))
-          ) {
-            agentStateMessage = message
-            return turns
-          }
-
-          if (
-            message.role === "assistant" &&
-            message.toolCalls?.some(
-              (call) => call.function.name === "orchestratorThinking"
-            )
-          ) {
-            const lastMessage = turns[turns.length - 1].at(-1)
-            if (!Array.isArray(lastMessage)) {
-              turns[turns.length - 1].push([])
-            }
-            const messages = turns[turns.length - 1]
-            messages[messages.length - 1].push(message)
-          } else {
-            if (agentStateMessage !== null) {
-              turns[turns.length - 1].push(agentStateMessage)
-              agentStateMessage = null
-            }
-            turns[turns.length - 1].push(message)
-          }
-        }
-
-        return turns
-      },
-      []
-    )
+    return convertMessagesToTurns(messages)
   }, [messages])
 
   // the scroll container's height is manually controlled by the size of the biggest turn (see `motion.div` below)
@@ -247,6 +211,9 @@ export const MessagesContainer = ({
             </div>
           )
         })}
+        {chatError && ErrorMessage && (
+          <ErrorMessage error={chatError} isCurrentMessage />
+        )}
         {interrupt}
       </motion.div>
       <footer className="copilotKitMessagesFooter" ref={messagesEndRef}>
@@ -376,4 +343,112 @@ export function useScrollToBottom() {
     showScrollToBottom,
     scrollToBottom,
   }
+}
+
+// Helper functions for better code organization
+function isThinkingMessage(message: Message): boolean {
+  return (
+    message.role === "assistant" &&
+    message.toolCalls?.some(
+      (call) => call.function.name === "orchestratorThinking"
+    ) === true
+  )
+}
+
+function isAgentStateMessage(message: Message): boolean {
+  return message.role === "assistant" && message.agentName !== undefined
+}
+
+function finalizeTurn(turn: Turn, pendingAgentState: Message | null) {
+  ungroupSingleThinkingMessage(turn)
+  addPendingAgentState(turn, pendingAgentState)
+}
+
+function isCurrentlyGroupingThinking(turn: Turn): boolean {
+  const lastMessage = turn.at(-1)
+  return Array.isArray(lastMessage)
+}
+
+function ungroupSingleThinkingMessage(turn: Turn): void {
+  const lastMessage = turn.at(-1)
+  if (Array.isArray(lastMessage) && lastMessage.length === 1) {
+    turn.pop()
+    turn.push(...lastMessage)
+  }
+}
+
+function addPendingAgentState(
+  turn: Turn,
+  pendingAgentState: Message | null
+): void {
+  if (pendingAgentState !== null) {
+    turn.push(pendingAgentState)
+  }
+}
+
+export function convertMessagesToTurns(messages: Message[]): Turn[] {
+  if (messages.length === 0) {
+    return []
+  }
+
+  console.assert(
+    messages[0].role === "user",
+    "Invariant violation! Assistant message received before user message"
+  )
+
+  const turns: Turn[] = []
+  let pendingAgentStateMessage: Message | null = null
+
+  for (const message of messages) {
+    if (message.role === "user") {
+      // Finalize the previous turn if it exists
+      if (turns.length > 0) {
+        const lastTurn = turns[turns.length - 1]
+        finalizeTurn(lastTurn, pendingAgentStateMessage)
+        pendingAgentStateMessage = null
+      }
+
+      // create new turn
+      turns.push([message])
+      continue
+    }
+
+    const currentTurn = turns[turns.length - 1]
+
+    // Handle agent state messages that arrive during thinking message grouping
+    if (
+      isAgentStateMessage(message) &&
+      isCurrentlyGroupingThinking(currentTurn)
+    ) {
+      pendingAgentStateMessage = message
+      continue
+    }
+
+    // Handle thinking messages
+    if (isThinkingMessage(message)) {
+      if (isCurrentlyGroupingThinking(currentTurn)) {
+        // Continue grouping: add to existing thinking group
+        const thinkingGroup = currentTurn.at(-1) as Message[]
+        thinkingGroup.push(message)
+      } else {
+        // Start grouping: create new thinking group
+        currentTurn.push([message])
+      }
+      continue
+    }
+
+    // Handle non-thinking messages
+    // First, finalize any thinking group and add pending agent state
+    finalizeTurn(currentTurn, pendingAgentStateMessage)
+    pendingAgentStateMessage = null
+
+    currentTurn.push(message)
+  }
+
+  if (turns.length > 0) {
+    const lastTurn = turns[turns.length - 1]
+    finalizeTurn(lastTurn, pendingAgentStateMessage)
+  }
+
+  return turns
 }
