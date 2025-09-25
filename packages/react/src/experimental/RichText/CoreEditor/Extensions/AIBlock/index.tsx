@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { IconType } from "@/components/F0Icon"
-import { F0AiBanner } from "@/experimental"
+import { F0AiBanner } from "@/experimental/Banners/F0AiBanner"
 import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "@/experimental/RichText/CoreEditor/Extensions/MoodTracker"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
