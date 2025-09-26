@@ -30,7 +30,7 @@ export function ApplicationFrame({
   return (
     <FrameProvider>
       <AiProvider {...ai}>
-        <ApplicationFrameContent sidebar={sidebar} banner={banner}>
+        <ApplicationFrameContent ai={ai} sidebar={sidebar} banner={banner}>
           {children}
         </ApplicationFrameContent>
       </AiProvider>
@@ -53,6 +53,7 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
 }
 
 function ApplicationFrameContent({
+  ai,
   children,
   sidebar,
   banner,
@@ -129,7 +130,7 @@ function ApplicationFrameContent({
                   {children}
                 </motion.div>
               </motion.main>
-              <AiChat />
+              {ai && ai.enabled && <AiChat />}
             </div>
           </LayoutGroup>
         </div>
