@@ -81,7 +81,7 @@ This component supports **GitHub Flavored Markdown content**. You can use it by 
 
 \`\`\`html
 <div>
-  <p>Hello</p>
+  <p>Hello world!</p>
 </div>
 \`\`\`
 
