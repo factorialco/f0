@@ -410,6 +410,10 @@ const OneDataCollectionComp = <
         value: currentSortings,
         setValue: setCurrentSortings,
       },
+      grouping: {
+        value: currentGrouping,
+        setValue: setCurrentGrouping,
+      },
       visualization: {
         value: currentVisualization,
         setValue: setCurrentVisualization,
