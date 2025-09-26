@@ -79,7 +79,7 @@ export function SidebarIcon() {
       variant="ghost"
       size="md"
       round
-      onClick={toggleSidebar}
+      onClick={() => toggleSidebar()}
       className="group hover:bg-f1-background-hover"
       title="Close Sidebar"
       ref={buttonRef}

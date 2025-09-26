@@ -1,3 +1,4 @@
+import { breakpoints } from "@factorialco/f0-core"
 import React, {
   createContext,
   PointerEvent,
@@ -12,13 +13,15 @@ import { useNavigation } from "../../../lib/linkHandler"
 
 const PREFERRED_INITIAL_STATE_KEY = "one_sidebar_locked"
 
-type SidebarState = "locked" | "unlocked" | "hidden"
+export type SidebarState = "locked" | "unlocked" | "hidden"
 
 interface FrameContextType {
   isSmallScreen: boolean
+  isLastToggleInvokedByUser: boolean
   sidebarState: SidebarState
   prevSidebarState: SidebarState | null
-  toggleSidebar: () => void
+  toggleSidebar: (callData?: { isInvokedByUser: boolean }) => void
+  setForceFloat: (force: boolean) => void
 }
 
 const FrameContext = createContext<FrameContextType | undefined>(undefined)
@@ -28,9 +31,11 @@ export function useSidebar(): FrameContextType {
   if (context === undefined) {
     return {
       isSmallScreen: false,
+      isLastToggleInvokedByUser: true,
       prevSidebarState: null,
       sidebarState: "locked",
       toggleSidebar: () => {},
+      setForceFloat: () => {},
     }
   }
   return context
@@ -42,8 +47,12 @@ interface FrameProviderProps {
 
 export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
+  const [forceFloat, setForceFloat] = useState(false)
+  const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
+    useState(false)
 
-  const isSmallScreen = useMediaQuery("(max-width: 900px)", {
+  const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
     initializeWithValue: true,
   })
 
@@ -57,10 +66,18 @@ export function FrameProvider({ children }: FrameProviderProps) {
     null
   )
 
-  const toggleSidebar = useCallback(() => {
-    if (isSmallScreen) setVisible(!visible)
-    setLocked(!locked)
-  }, [isSmallScreen, visible, locked, setLocked, setVisible])
+  const toggleSidebar = useCallback(
+    (
+      { isInvokedByUser }: { isInvokedByUser: boolean } = {
+        isInvokedByUser: true,
+      }
+    ) => {
+      setIsLastToggleInvokedByUser(isInvokedByUser ?? true)
+      if (isSmallScreen) setVisible(!visible)
+      setLocked(!locked)
+    },
+    [isSmallScreen, visible, locked, setLocked, setVisible]
+  )
 
   const handlePointerMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
@@ -92,8 +109,10 @@ export function FrameProvider({ children }: FrameProviderProps) {
   }, [currentPath])
 
   useEffect(() => {
-    localStorage.setItem(PREFERRED_INITIAL_STATE_KEY, locked ? "1" : "")
-  }, [locked])
+    if (isLastToggleInvokedByUser) {
+      localStorage.setItem(PREFERRED_INITIAL_STATE_KEY, locked ? "1" : "")
+    }
+  }, [locked, isLastToggleInvokedByUser])
 
   useEffect(() => {
     return () => {
@@ -105,9 +124,11 @@ export function FrameProvider({ children }: FrameProviderProps) {
     <FrameContext.Provider
       value={{
         isSmallScreen,
+        isLastToggleInvokedByUser,
         sidebarState,
         toggleSidebar,
         prevSidebarState,
+        setForceFloat,
       }}
     >
       <div onPointerMove={handlePointerMove} className="h-screen w-screen">

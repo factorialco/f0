@@ -61,7 +61,7 @@ export function DaytimePage({
             {(isSmallScreen || sidebarState === "hidden") && (
               <Button
                 variant="ghost"
-                onClick={toggleSidebar}
+                onClick={() => toggleSidebar()}
                 label="Open main menu"
                 icon={Menu}
                 hideLabel
