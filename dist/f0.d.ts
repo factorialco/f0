@@ -839,6 +839,8 @@ declare type DataCollectionExtendFetchOptions<NavigationFilters extends Navigati
     navigationFilters: NavigationFiltersState<NavigationFilters>;
 };
 
+export declare const dataCollectionLocalStorageHandler: DataCollectionStorageHandler;
+
 /**
  * Extended base fetch options for data collection
  */
@@ -905,11 +907,11 @@ declare type DataCollectionStatus = {
     visualization?: number;
 };
 
-declare type DataCollectionStorage = {
+export declare type DataCollectionStorage = {
     settings?: DataCollectionSettings;
 } & DataCollectionStatus;
 
-declare type DataCollectionStorageHandler = {
+export declare type DataCollectionStorageHandler = {
     get: (key: string) => Promise<DataCollectionStorage>;
     set: (key: string, storage: DataCollectionStorage) => Promise<void>;
 };
@@ -3327,6 +3329,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         liveCompanion: {
             insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
@@ -3336,8 +3347,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
 }
@@ -3345,13 +3356,4 @@ declare module "@tiptap/core" {
 
 declare namespace Calendar {
     var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
-        };
-    }
 }
