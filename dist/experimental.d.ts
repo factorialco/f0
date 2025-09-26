@@ -246,6 +246,7 @@ declare type AIButton = {
     emoji: string;
     label: string;
     icon: IconType;
+    editable?: boolean;
 };
 
 /**
@@ -319,23 +320,24 @@ export declare const AlertDescription: React_2.ForwardRefExoticComponent<React_2
 declare interface AlertProps extends VariantProps<typeof alertVariants> {
     title: string;
     description: string;
-    action: {
+    action?: {
         label: string;
-        onClick?: () => void;
+        onClick: () => void;
     };
     link?: {
         label: string;
         href: string;
     };
+    icon?: IconType;
     variant: AlertVariant;
 }
 
 export declare const AlertTitle: React_2.ForwardRefExoticComponent<React_2.HTMLAttributes<HTMLHeadingElement> & React_2.RefAttributes<HTMLParagraphElement>>;
 
-declare type AlertVariant = "info" | "warning" | "critical";
+declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 declare const alertVariants: (props?: ({
-    variant?: "info" | "critical" | "warning" | undefined;
+    variant?: "info" | "critical" | "warning" | "positive" | "neutral" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -1881,16 +1883,15 @@ export declare type enhanceTextParams = {
 
 export declare type EntityId = number | string;
 
-export declare const EntitySelect: (props: EntitySelectProps & {
+export declare const EntitySelect: <T>(props: EntitySelectProps<T> & {
     children?: React.ReactNode;
 }) => JSX_2.Element;
 
-declare interface EntitySelectCommonProps extends Omit<PopoverProps, "children" | "modal"> {
+declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
     entities: EntitySelectEntity[];
     groups: EntitySelectNamedGroup[];
     selectedGroup: string;
-    triggerPlaceholder: string;
-    triggerSelected: string;
+    selectedItemsCopy: string;
     notFoundTitle: string;
     notFoundSubtitle: string;
     onItemExpandedChange: (id: EntityId, expanded: boolean) => void;
@@ -1911,6 +1912,7 @@ declare interface EntitySelectCommonProps extends Omit<PopoverProps, "children" 
     onCreate?: (partialName: string) => void;
     onCreateLabel?: string;
     actions?: Action[];
+    value?: T;
 }
 
 export declare type EntitySelectEntity = {
@@ -1922,7 +1924,7 @@ export declare type EntitySelectEntity = {
     subItems?: EntitySelectSubEntity[];
 };
 
-export declare interface EntitySelectMultipleProps extends EntitySelectCommonProps {
+export declare interface EntitySelectMultipleProps<T> extends EntitySelectCommonProps<T> {
     onSelect: (entities: EntitySelectEntity[]) => void;
     singleSelector: false | undefined;
 }
@@ -1933,9 +1935,9 @@ export declare type EntitySelectNamedGroup = {
     groupType?: "avatar" | "team";
 };
 
-export declare type EntitySelectProps = EntitySelectSingleProps | EntitySelectMultipleProps;
+export declare type EntitySelectProps<T> = EntitySelectSingleProps<T> | EntitySelectMultipleProps<T>;
 
-export declare interface EntitySelectSingleProps extends EntitySelectCommonProps {
+export declare interface EntitySelectSingleProps<T> extends EntitySelectCommonProps<T> {
     onSelect: (entity: EntitySelectEntity | null) => void;
     singleSelector: true;
 }
@@ -2566,6 +2568,7 @@ declare type InputFieldProps<T> = {
     appendTag?: string;
     lengthProvider?: (value: T | undefined) => number;
     loading?: boolean;
+    avatar?: AvatarVariant;
     loadingIndicator?: {
         /**
          * If true, the loading spinner will be displayed over the content without affecting the layout
@@ -3051,6 +3054,7 @@ export declare type NotesTextEditorHandle = {
     setContent: (content: string) => void;
     insertAIBlock: () => void;
     insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
 };
 
 export declare interface NotesTextEditorProps {
@@ -3114,7 +3118,7 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
-export declare const OneAlert: ({ title, description, action, link, variant, }: AlertProps) => JSX_2.Element;
+export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
 
@@ -3915,6 +3919,7 @@ export declare type RichTextDisplayHandle = HTMLDivElement;
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
     content: string;
     className?: string;
+    format?: "html" | "markdown";
 }
 
 export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
@@ -5040,15 +5045,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

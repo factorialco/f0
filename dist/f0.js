@@ -1,9 +1,9 @@
-import { C as v, L as pe, c as ve, P as H, a as b, f as ge, b as be, A as xe, B as Ce, d as ye, e as we, g as Ne, V as Le, h as U, i as G, j as Pe, k as W, S as Y, l as M, m as J, n as Se, O as Fe, o as X, p as ke, q as De, F as K, r as Me, s as Te, t as Be, D as Ie, u as Re, v as Oe, w as $e, x as Q, y as w, U as Z, z as Ee, E as _e, G as z, H as je, I as ee, J as ze, K as Ve, M as qe, N as Ae, Q as He, R as Ue, X as Ge, T as We, W as Ye, Y as Je, Z as Xe, _ as Ke } from "./hooks-DFEMWFtZ.js";
-import { az as Ua, $ as Ga, aB as Wa, aK as Ya, a0 as Ja, a1 as Xa, a2 as Ka, a3 as Qa, a4 as Za, a5 as es, a6 as as, a7 as ss, a9 as rs, aa as ts, ab as ls, ac as os, aG as ns, ae as is, af as ds, ag as cs, ah as us, ak as fs, al as hs, am as ms, an as ps, ap as vs, ad as gs, ao as bs, aj as xs, aH as Cs, aA as ys, au as ws, ax as Ns, at as Ls, aL as Ps, as as Ss, ar as Fs, a8 as ks, ai as Ds, aq as Ms, av as Ts, aC as Bs, aD as Is, aE as Rs, aM as Os, aw as $s, aF as Es, aJ as _s, ay as js, aI as zs } from "./hooks-DFEMWFtZ.js";
-import { jsx as e, jsxs as c, Fragment as $ } from "react/jsx-runtime";
+import { C as g, L as ge, c as ve, P as U, a as b, f as be, b as xe, A as Ce, B as ye, d as we, e as Ne, g as Le, V as Pe, h as G, i as W, j as Se, k as J, S as Y, l as M, m as X, n as Fe, O as ke, o as K, p as De, q as Me, F as Q, r as Te, s as Ie, t as Be, D as Re, u as Oe, v as $e, w as Ee, x as Z, y as w, U as ee, z as _e, E as je, G as z, H as ze, I as ae, J as Ve, K as qe, M as Ae, N as He, Q as Ue, R as Ge, X as We, T as Je, W as Ye, Y as Xe, Z as Ke, _ as Qe } from "./hooks-BW4SBd9V.js";
+import { az as Wa, $ as Ja, aB as Ya, aK as Xa, a0 as Ka, a1 as Qa, a2 as Za, a3 as es, a4 as as, a5 as ss, a6 as rs, a7 as ts, a9 as ls, aa as os, ab as ns, ac as is, aG as cs, ae as ds, af as us, ag as fs, ah as hs, ak as ms, al as ps, am as gs, an as vs, ap as bs, ad as xs, ao as Cs, aj as ys, aH as ws, aA as Ns, au as Ls, ax as Ps, at as Ss, aL as Fs, as as ks, ar as Ds, a8 as Ms, ai as Ts, aq as Is, av as Bs, aC as Rs, aD as Os, aE as $s, aM as Es, aw as _s, aF as js, aJ as zs, ay as Vs, aI as qs } from "./hooks-BW4SBd9V.js";
+import { jsx as e, jsxs as d, Fragment as $ } from "react/jsx-runtime";
 import * as E from "react";
-import Qe, { useState as g, forwardRef as B, useRef as ae, useImperativeHandle as Ze, Children as ea, useEffect as se, createContext as aa } from "react";
-const Sa = {
+import Ze, { useState as v, forwardRef as I, useRef as se, useImperativeHandle as ea, Children as aa, useEffect as re, createContext as sa } from "react";
+const Fa = {
   approvals: {
     history: "Approval history",
     statuses: {
@@ -193,35 +193,35 @@ const Sa = {
     noResults: "No results found",
     loadingMore: "Loading..."
   }
-}, Fa = v(
+}, ka = g(
   {
     name: "Link",
     type: "info"
   },
-  pe
-), ka = ["person", "team", "company", "file"];
-var _ = "Progress", j = 100, [sa] = ve(_), [ra, ta] = sa(_), re = E.forwardRef(
+  ge
+), Da = ["person", "team", "company", "file"];
+var _ = "Progress", j = 100, [ra] = ve(_), [ta, la] = ra(_), te = E.forwardRef(
   (a, s) => {
     const {
       __scopeProgress: r,
       value: t = null,
       max: l,
-      getValueLabel: d = la,
+      getValueLabel: c = oa,
       ...n
     } = a;
-    (l || l === 0) && !V(l) && console.error(oa(`${l}`, "Progress"));
+    (l || l === 0) && !V(l) && console.error(na(`${l}`, "Progress"));
     const i = V(l) ? l : j;
-    t !== null && !q(t, i) && console.error(na(`${t}`, "Progress"));
-    const o = q(t, i) ? t : null, f = T(o) ? d(o, i) : void 0;
-    return /* @__PURE__ */ e(ra, { scope: r, value: o, max: i, children: /* @__PURE__ */ e(
-      H.div,
+    t !== null && !q(t, i) && console.error(ia(`${t}`, "Progress"));
+    const o = q(t, i) ? t : null, f = T(o) ? c(o, i) : void 0;
+    return /* @__PURE__ */ e(ta, { scope: r, value: o, max: i, children: /* @__PURE__ */ e(
+      U.div,
       {
         "aria-valuemax": i,
         "aria-valuemin": 0,
         "aria-valuenow": T(o) ? o : void 0,
         "aria-valuetext": f,
         role: "progressbar",
-        "data-state": oe(o, i),
+        "data-state": ne(o, i),
         "data-value": o ?? void 0,
         "data-max": i,
         ...n,
@@ -230,14 +230,14 @@ var _ = "Progress", j = 100, [sa] = ve(_), [ra, ta] = sa(_), re = E.forwardRef(
     ) });
   }
 );
-re.displayName = _;
-var te = "ProgressIndicator", le = E.forwardRef(
+te.displayName = _;
+var le = "ProgressIndicator", oe = E.forwardRef(
   (a, s) => {
-    const { __scopeProgress: r, ...t } = a, l = ta(te, r);
+    const { __scopeProgress: r, ...t } = a, l = la(le, r);
     return /* @__PURE__ */ e(
-      H.div,
+      U.div,
       {
-        "data-state": oe(l.value, l.max),
+        "data-state": ne(l.value, l.max),
         "data-value": l.value ?? void 0,
         "data-max": l.max,
         ...t,
@@ -246,11 +246,11 @@ var te = "ProgressIndicator", le = E.forwardRef(
     );
   }
 );
-le.displayName = te;
-function la(a, s) {
+oe.displayName = le;
+function oa(a, s) {
   return `${Math.round(a / s * 100)}%`;
 }
-function oe(a, s) {
+function ne(a, s) {
   return a == null ? "indeterminate" : a === s ? "complete" : "loading";
 }
 function T(a) {
@@ -262,10 +262,10 @@ function V(a) {
 function q(a, s) {
   return T(a) && !isNaN(a) && a <= s && a >= 0;
 }
-function oa(a, s) {
+function na(a, s) {
   return `Invalid prop \`max\` of value \`${a}\` supplied to \`${s}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${j}\`.`;
 }
-function na(a, s) {
+function ia(a, s) {
   return `Invalid prop \`value\` of value \`${a}\` supplied to \`${s}\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${j} if no \`max\` prop is set)
@@ -273,9 +273,9 @@ function na(a, s) {
 
 Defaulting to \`null\`.`;
 }
-var ne = re, ia = le;
-const ie = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */ e(
-  ne,
+var ie = te, ca = oe;
+const ce = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */ e(
+  ie,
   {
     ref: t,
     className: b(
@@ -284,7 +284,7 @@ const ie = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */
     ),
     ...r,
     children: /* @__PURE__ */ e(
-      ia,
+      ca,
       {
         className: "h-full w-full flex-1 transition-all",
         style: {
@@ -295,14 +295,14 @@ const ie = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */
     )
   }
 ));
-ie.displayName = ne.displayName;
+ce.displayName = ie.displayName;
 const da = ({ value: a, max: s = 100, label: r, color: t }, l) => {
-  const d = t || be(0), n = a / s * 100;
-  return /* @__PURE__ */ c("div", { className: "flex items-center space-x-2", "aria-live": "polite", children: [
+  const c = t || xe(0), n = a / s * 100;
+  return /* @__PURE__ */ d("div", { className: "flex items-center space-x-2", "aria-live": "polite", children: [
     /* @__PURE__ */ e("div", { className: "flex-grow", children: /* @__PURE__ */ e(
-      ie,
+      ce,
       {
-        color: d,
+        color: c,
         value: n,
         className: "w-full",
         "aria-valuemin": 0,
@@ -313,68 +313,68 @@ const da = ({ value: a, max: s = 100, label: r, color: t }, l) => {
     ) }),
     r && /* @__PURE__ */ e("div", { className: "flex-shrink-0 text-sm font-medium", children: r })
   ] });
-}, ca = ge(da), Da = v(
+}, ua = be(da), Ma = g(
   {
     name: "AreaChart",
     type: "info"
   },
-  xe
-), Ma = v(
+  Ce
+), Ta = g(
   {
     name: "BarChart",
     type: "info"
   },
-  Ce
-), Ta = v(
+  ye
+), Ia = g(
   {
     name: "CategoryBarChart",
     type: "info"
   },
-  ye
-), Ba = v(
+  we
+), Ba = g(
   {
     name: "LineChart",
     type: "info"
   },
-  we
-), Ia = v(
+  Ne
+), Ra = g(
   {
     name: "PieChart",
     type: "info"
   },
-  Ne
-), Ra = v(
+  Le
+), Oa = g(
   {
     name: "VerticalBarChart",
     type: "info"
   },
-  Le
-), Oa = v(
+  Pe
+), $a = g(
   {
     name: "ProgressBarChart",
     type: "info"
   },
-  ca
+  ua
 ), O = ({ count: a, list: s }) => {
-  const [r, t] = g(!1), l = /* @__PURE__ */ e(M, { label: `+${a}` });
-  return s != null && s.length ? /* @__PURE__ */ c(U, { open: r, onOpenChange: t, children: [
-    /* @__PURE__ */ e(G, { asChild: !0, children: /* @__PURE__ */ e("button", { className: Pe("inline-flex flex-shrink-0 items-center"), children: l }) }),
+  const [r, t] = v(!1), l = /* @__PURE__ */ e(M, { label: `+${a}` });
+  return s != null && s.length ? /* @__PURE__ */ d(G, { open: r, onOpenChange: t, children: [
+    /* @__PURE__ */ e(W, { asChild: !0, children: /* @__PURE__ */ e("button", { className: Se("inline-flex flex-shrink-0 items-center"), children: l }) }),
     /* @__PURE__ */ e(
-      W,
+      J,
       {
         className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
         align: "end",
-        children: /* @__PURE__ */ c(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col", children: [
-          s.map((d, n) => /* @__PURE__ */ e(
+        children: /* @__PURE__ */ d(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col", children: [
+          s.map((c, n) => /* @__PURE__ */ e(
             "div",
             {
               className: "flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
-              children: /* @__PURE__ */ e(M, { ...d })
+              children: /* @__PURE__ */ e(M, { ...c })
             },
             n
           )),
           /* @__PURE__ */ e(
-            J,
+            X,
             {
               orientation: "vertical",
               className: "[&_div]:bg-f1-background"
@@ -394,7 +394,7 @@ const de = ({
 }) => {
   if (t === "fill")
     return /* @__PURE__ */ e(
-      Fe,
+      ke,
       {
         items: a,
         renderListItem: (o) => /* @__PURE__ */ e(M, { ...o }),
@@ -411,45 +411,45 @@ const de = ({
         className: "flex-1"
       }
     );
-  const l = a.slice(0, s), d = a.slice(s), n = r ?? a.length - s, i = n > 0;
-  return /* @__PURE__ */ c("div", { className: "flex items-center gap-2", children: [
+  const l = a.slice(0, s), c = a.slice(s), n = r ?? a.length - s, i = n > 0;
+  return /* @__PURE__ */ d("div", { className: "flex items-center gap-2", children: [
     l.map((o, f) => /* @__PURE__ */ e(M, { ...o }, f)),
     i && /* @__PURE__ */ e(
       O,
       {
         count: n,
-        list: r ? void 0 : d
+        list: r ? void 0 : c
       }
     )
   ] });
 };
 de.displayName = "F0ChipList";
-const $a = Se(
+const Ea = Fe(
   "F0ChipList",
   de
-), ua = {
+), fa = {
   xs: 1,
   sm: 2,
   md: 2,
   lg: 2
-}, fa = B(function({ widgets: s, children: r }, t) {
-  const l = ae(null);
-  Ze(t, () => l.current);
-  const d = ea.toArray(s).filter((n) => !!n).map((n, i) => /* @__PURE__ */ e("div", { className: "h-full @5xl:h-auto [&>div]:h-full", children: n }, i));
-  return /* @__PURE__ */ e(X, { layout: "home", children: /* @__PURE__ */ c("div", { ref: l, className: "@container", children: [
-    /* @__PURE__ */ c("div", { className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden", children: [
-      /* @__PURE__ */ e(ke, { columns: ua, showArrows: !1, children: d }),
+}, ha = I(function({ widgets: s, children: r }, t) {
+  const l = se(null);
+  ea(t, () => l.current);
+  const c = aa.toArray(s).filter((n) => !!n).map((n, i) => /* @__PURE__ */ e("div", { className: "h-full @5xl:h-auto [&>div]:h-full", children: n }, i));
+  return /* @__PURE__ */ e(K, { layout: "home", children: /* @__PURE__ */ d("div", { ref: l, className: "@container", children: [
+    /* @__PURE__ */ d("div", { className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden", children: [
+      /* @__PURE__ */ e(De, { columns: fa, showArrows: !1, children: c }),
       /* @__PURE__ */ e("main", { children: r })
     ] }),
-    /* @__PURE__ */ c("div", { className: "hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid", children: [
-      /* @__PURE__ */ e("div", { className: "col-span-3 flex flex-row gap-5 *:flex-1", children: d.slice(0, 3) }),
+    /* @__PURE__ */ d("div", { className: "hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid", children: [
+      /* @__PURE__ */ e("div", { className: "col-span-3 flex flex-row gap-5 *:flex-1", children: c.slice(0, 3) }),
       /* @__PURE__ */ e("main", { className: "col-span-2", children: r }),
-      /* @__PURE__ */ e("div", { className: "flex flex-1 flex-col gap-5", children: d.slice(3) })
+      /* @__PURE__ */ e("div", { className: "flex flex-1 flex-col gap-5", children: c.slice(3) })
     ] })
   ] }) });
-}), ha = B(
+}), ma = I(
   function({ children: s, sideContent: r, mainColumnPosition: t = "left" }, l) {
-    return /* @__PURE__ */ e("div", { ref: l, className: "h-full overflow-auto", children: /* @__PURE__ */ c(
+    return /* @__PURE__ */ e("div", { ref: l, className: "h-full overflow-auto", children: /* @__PURE__ */ d(
       "div",
       {
         className: b(
@@ -473,55 +473,55 @@ const $a = Se(
       }
     ) });
   }
-), A = ({ children: a }) => /* @__PURE__ */ e("aside", { className: "py-5 pl-2 pr-4 sm:basis-1/4 sm:pb-6", children: a }), ma = De({
+), A = ({ children: a }) => /* @__PURE__ */ e("aside", { className: "py-5 pl-2 pr-4 sm:basis-1/4 sm:pb-6", children: a }), pa = Me({
   base: "relative flex min-h-full w-full flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
       narrow: "max-w-screen-lg"
     }
   }
-}), ce = Qe.forwardRef(({ children: a, variant: s, className: r, ...t }, l) => /* @__PURE__ */ e(X, { layout: "standard", children: /* @__PURE__ */ e(
+}), ue = Ze.forwardRef(({ children: a, variant: s, className: r, ...t }, l) => /* @__PURE__ */ e(K, { layout: "standard", children: /* @__PURE__ */ e(
   "section",
   {
     ref: l,
     className: b("relative flex-1 overflow-auto", r),
     ...t,
-    children: /* @__PURE__ */ e("div", { className: b(ma({ variant: s })), children: a })
+    children: /* @__PURE__ */ e("div", { className: b(pa({ variant: s })), children: a })
   }
 ) }));
-ce.displayName = "StandardLayout";
-const Ea = v(
+ue.displayName = "StandardLayout";
+const _a = g(
   {
     name: "StandardLayout",
     type: "layout"
   },
-  ce
-), _a = v(
+  ue
+), ja = g(
   {
     name: "TwoColumnLayout",
     type: "layout"
   },
-  ha
-), ja = v(
+  ma
+), za = g(
   {
     name: "HomeLayout",
     type: "layout"
   },
-  fa
-), pa = ({ benefits: a }) => /* @__PURE__ */ e("div", { className: "flex flex-col gap-2", children: a.map((s, r) => /* @__PURE__ */ e(va, { text: s }, r)) }), va = ({ text: a }) => /* @__PURE__ */ c("div", { className: "flex flex-row items-start gap-2", children: [
-  /* @__PURE__ */ e(Te, { icon: Be, size: "md", className: "text-f1-icon-positive" }),
+  ha
+), ga = ({ benefits: a }) => /* @__PURE__ */ e("div", { className: "flex flex-col gap-2", children: a.map((s, r) => /* @__PURE__ */ e(va, { text: s }, r)) }), va = ({ text: a }) => /* @__PURE__ */ d("div", { className: "flex flex-row items-start gap-2", children: [
+  /* @__PURE__ */ e(Ie, { icon: Be, size: "md", className: "text-f1-icon-positive" }),
   /* @__PURE__ */ e("span", { children: a })
-] }), ue = B(
+] }), fe = I(
   ({
     title: a,
     image: s,
     benefits: r,
     actions: t,
     withShadow: l = !0,
-    module: d,
+    module: c,
     moduleName: n,
     tag: i
-  }, o) => /* @__PURE__ */ c(
+  }, o) => /* @__PURE__ */ d(
     "div",
     {
       ref: o,
@@ -538,17 +538,17 @@ const Ea = v(
             className: "h-full w-full rounded-lg object-cover"
           }
         ) }),
-        /* @__PURE__ */ c("div", { className: "flex flex-col justify-center gap-8 px-8 py-5", children: [
-          /* @__PURE__ */ c("div", { className: "flex flex-col gap-5", children: [
-            /* @__PURE__ */ c("div", { className: "flex flex-col gap-2", children: [
-              /* @__PURE__ */ c("div", { className: "flex flex-row items-center gap-2", children: [
-                d && /* @__PURE__ */ e(K, { module: d }),
+        /* @__PURE__ */ d("div", { className: "flex flex-col justify-center gap-8 px-8 py-5", children: [
+          /* @__PURE__ */ d("div", { className: "flex flex-col gap-5", children: [
+            /* @__PURE__ */ d("div", { className: "flex flex-col gap-2", children: [
+              /* @__PURE__ */ d("div", { className: "flex flex-row items-center gap-2", children: [
+                c && /* @__PURE__ */ e(Q, { module: c }),
                 n && /* @__PURE__ */ e("p", { className: "text-base font-medium text-f1-foreground", children: n })
               ] }),
-              i && /* @__PURE__ */ e("div", { className: "flex justify-start", children: /* @__PURE__ */ e(Me, { icon: i.icon, text: i.label }) }),
+              i && /* @__PURE__ */ e("div", { className: "flex justify-start", children: /* @__PURE__ */ e(Te, { icon: i.icon, text: i.label }) }),
               /* @__PURE__ */ e("h2", { className: "font-bold text-xl text-f1-foreground", children: a })
             ] }),
-            /* @__PURE__ */ e(pa, { benefits: r })
+            /* @__PURE__ */ e(ga, { benefits: r })
           ] }),
           t && /* @__PURE__ */ e("div", { className: "flex gap-3", children: t })
         ] })
@@ -556,46 +556,46 @@ const Ea = v(
     }
   )
 );
-ue.displayName = "ProductBlankslate";
-function ga({
+fe.displayName = "ProductBlankslate";
+function ba({
   isOpen: a,
   onClose: s,
   title: r,
   children: t,
   module: l,
-  portalContainer: d
+  portalContainer: c
 }) {
-  const [n, i] = g(a);
-  return se(() => {
+  const [n, i] = v(a);
+  return re(() => {
     i(a);
-  }, [a]), /* @__PURE__ */ e(Ie, { open: n, onOpenChange: (f) => {
+  }, [a]), /* @__PURE__ */ e(Re, { open: n, onOpenChange: (f) => {
     i(f), f || s();
-  }, modal: !0, children: /* @__PURE__ */ c(
-    Re,
+  }, modal: !0, children: /* @__PURE__ */ d(
+    Oe,
     {
       className: "max-h-[620px] w-[760px] overflow-y-auto overflow-x-hidden bg-f1-background",
-      container: d,
+      container: c,
       children: [
-        /* @__PURE__ */ c("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
-          /* @__PURE__ */ c(Oe, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
-            l && /* @__PURE__ */ e(K, { module: l, size: "lg" }),
+        /* @__PURE__ */ d("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
+          /* @__PURE__ */ d($e, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
+            l && /* @__PURE__ */ e(Q, { module: l, size: "lg" }),
             r
           ] }),
           /* @__PURE__ */ e(
-            $e,
+            Ee,
             {
               variant: "outline",
-              icon: Q,
+              icon: Z,
               onClick: s,
               label: "Close modal",
               hideLabel: !0
             }
           )
         ] }),
-        /* @__PURE__ */ c(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col", children: [
+        /* @__PURE__ */ d(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col", children: [
           t,
           /* @__PURE__ */ e(
-            J,
+            X,
             {
               orientation: "vertical",
               className: "[&_div]:bg-f1-background"
@@ -606,13 +606,13 @@ function ga({
     }
   ) });
 }
-function za({
+function Va({
   isOpen: a,
   onClose: s,
   title: r,
   image: t,
   benefits: l,
-  errorMessage: d,
+  errorMessage: c,
   successMessage: n,
   loadingState: i,
   nextSteps: o,
@@ -624,7 +624,7 @@ function za({
   portalContainer: x,
   tag: S
 }) {
-  const [I, F] = g(a), [C, y] = g(null), [P, m] = g(!1), k = async () => {
+  const [B, F] = v(a), [C, y] = v(null), [P, m] = v(!1), k = async () => {
     if (h != null && h.onClick) {
       m(!0);
       try {
@@ -638,24 +638,24 @@ function za({
   }, D = () => {
     F(!1), s == null || s();
   }, R = P;
-  return /* @__PURE__ */ c($, { children: [
+  return /* @__PURE__ */ d($, { children: [
     /* @__PURE__ */ e(
-      ga,
+      ba,
       {
-        isOpen: I,
+        isOpen: B,
         onClose: D,
         title: N,
         module: L,
         portalContainer: x,
         children: /* @__PURE__ */ e("div", { className: "pb-4 pl-4", children: /* @__PURE__ */ e(
-          ue,
+          fe,
           {
             title: r,
             image: t,
             benefits: l,
             withShadow: !1,
             tag: S,
-            actions: /* @__PURE__ */ c("div", { className: "flex gap-3", children: [
+            actions: /* @__PURE__ */ d("div", { className: "flex gap-3", children: [
               h && /* @__PURE__ */ e(
                 w,
                 {
@@ -683,14 +683,14 @@ function za({
       }
     ),
     C && /* @__PURE__ */ e(
-      Z,
+      ee,
       {
         open: !0,
         onClose: () => {
           D(), y(null);
         },
         success: C === "success",
-        errorMessage: d,
+        errorMessage: c,
         successMessage: n,
         nextSteps: o,
         closeLabel: f,
@@ -699,38 +699,38 @@ function za({
     )
   ] });
 }
-function ba({
+function xa({
   mediaUrl: a,
   title: s,
   description: r,
   onClose: t,
   dismissible: l,
-  width: d,
+  width: c,
   trackVisibility: n,
   actions: i,
   showConfirmation: o = !0
 }) {
-  const [f, h] = g(!1), N = () => {
+  const [f, h] = v(!1), N = () => {
     h(!0), t && t();
   };
-  se(() => {
+  re(() => {
     n && n(!f);
   }, [n, f]);
   const L = a == null ? void 0 : a.includes(".mp4");
-  return /* @__PURE__ */ e($, { children: f ? null : /* @__PURE__ */ c(Ee, { style: { width: d }, className: "relative bg-f1-background p-1", children: [
-    /* @__PURE__ */ c(_e, { children: [
+  return /* @__PURE__ */ e($, { children: f ? null : /* @__PURE__ */ d(_e, { style: { width: c }, className: "relative bg-f1-background p-1", children: [
+    /* @__PURE__ */ d(je, { children: [
       l && /* @__PURE__ */ e("div", { className: "absolute right-2 top-2 z-10", children: /* @__PURE__ */ e(
         w,
         {
           variant: "ghost",
-          icon: Q,
+          icon: Z,
           size: "sm",
           hideLabel: !0,
           onClick: N,
           label: "Close"
         }
       ) }),
-      /* @__PURE__ */ c("div", { children: [
+      /* @__PURE__ */ d("div", { children: [
         /* @__PURE__ */ e("div", { children: a && (L ? /* @__PURE__ */ e(
           "video",
           {
@@ -749,15 +749,15 @@ function ba({
             className: "h-full w-full rounded-md"
           }
         )) }),
-        /* @__PURE__ */ c("div", { className: "flex flex-col gap-[2px] p-3", children: [
+        /* @__PURE__ */ d("div", { className: "flex flex-col gap-[2px] p-3", children: [
           /* @__PURE__ */ e(z, { className: "text-lg font-medium", children: s }),
           /* @__PURE__ */ e(z, { className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary", children: r })
         ] })
       ] })
     ] }),
-    i && /* @__PURE__ */ e(je, { className: "p-3", children: i.map(
+    i && /* @__PURE__ */ e(ze, { className: "p-3", children: i.map(
       (u) => u.type === "upsell" ? /* @__PURE__ */ e(
-        ee,
+        ae,
         {
           label: u.label,
           onRequest: u.onClick,
@@ -782,10 +782,10 @@ function ba({
     ) })
   ] }) });
 }
-const xa = B(
+const Ca = I(
   function({ primaryAction: s, secondaryAction: r, ...t }, l) {
-    const d = (o) => o.variant === "promote" ? /* @__PURE__ */ e(
-      ee,
+    const c = (o) => o.variant === "promote" ? /* @__PURE__ */ e(
+      ae,
       {
         label: o.label,
         onRequest: async () => {
@@ -810,32 +810,32 @@ const xa = B(
         icon: o.icon
       }
     ), n = (s == null ? void 0 : s.variant) !== "promote" ? s : void 0, i = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0;
-    return /* @__PURE__ */ c(
-      ze,
+    return /* @__PURE__ */ d(
+      Ve,
       {
         ref: l,
         ...t,
         primaryAction: n,
         secondaryAction: i,
         children: [
-          (s == null ? void 0 : s.variant) === "promote" && d(s),
-          (r == null ? void 0 : r.variant) === "promote" && d(r)
+          (s == null ? void 0 : s.variant) === "promote" && c(s),
+          (r == null ? void 0 : r.variant) === "promote" && c(r)
         ]
       }
     );
   }
 );
-xa.displayName = "UpsellingBanner";
-function Va({
+Ca.displayName = "UpsellingBanner";
+function qa({
   isOpen: a,
   setIsOpen: s,
   label: r,
   variant: t = "promote",
   size: l = "md",
-  showIcon: d = !0,
+  showIcon: c = !0,
   side: n = "right",
   align: i = "center",
-  icon: o = Ve,
+  icon: o = qe,
   mediaUrl: f,
   title: h,
   description: N,
@@ -843,9 +843,9 @@ function Va({
   trackVisibility: u,
   actions: x,
   onClick: S,
-  hideLabel: I = !1
+  hideLabel: B = !1
 }) {
-  const [F, C] = g(!1), [y, P] = g(null), [m, k] = g(null), D = (p) => {
+  const [F, C] = v(!1), [y, P] = v(null), [m, k] = v(null), D = (p) => {
     s(p), S && S();
   }, R = async (p) => {
     if (p.type === "upsell") {
@@ -856,33 +856,33 @@ function Va({
         C(!0), P("error");
       }
     }
-  }, fe = () => {
+  }, he = () => {
     P(null), C(!1), k(null), s(!1);
-  }, he = a && !F, me = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
+  }, me = a && !F, pe = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
     ...p,
     onClick: () => R(p)
   } : p);
-  return /* @__PURE__ */ c($, { children: [
-    /* @__PURE__ */ c(U, { open: he, onOpenChange: D, children: [
-      /* @__PURE__ */ e(G, { asChild: !0, children: /* @__PURE__ */ e(
+  return /* @__PURE__ */ d($, { children: [
+    /* @__PURE__ */ d(G, { open: me, onOpenChange: D, children: [
+      /* @__PURE__ */ e(W, { asChild: !0, children: /* @__PURE__ */ e(
         w,
         {
           variant: t,
           label: r,
           size: l,
-          icon: d ? o : void 0,
+          icon: c ? o : void 0,
           onClick: () => s(a),
-          hideLabel: I
+          hideLabel: B
         }
       ) }),
       /* @__PURE__ */ e(
-        W,
+        J,
         {
           side: n,
           align: i,
           className: "w-fit border-none bg-transparent p-2 shadow-none",
           children: /* @__PURE__ */ e(
-            ba,
+            xa,
             {
               mediaUrl: f,
               title: h,
@@ -891,7 +891,7 @@ function Va({
               dismissible: !1,
               width: L,
               trackVisibility: u,
-              actions: me,
+              actions: pe,
               showConfirmation: !1
             }
           )
@@ -899,10 +899,10 @@ function Va({
       )
     ] }),
     (m == null ? void 0 : m.type) === "upsell" && m.showConfirmation && y && /* @__PURE__ */ e(
-      Z,
+      ee,
       {
         open: !0,
-        onClose: fe,
+        onClose: he,
         success: y === "success",
         errorMessage: m.errorMessage,
         successMessage: m.successMessage,
@@ -913,13 +913,13 @@ function Va({
     )
   ] });
 }
-const Ca = aa(
+const ya = sa(
   null
-), ya = ({ children: a, fullScreen: s = !0 }) => {
-  const r = ae(null), [t, l] = g(r.current);
-  return Ke(() => {
+), wa = ({ children: a, fullScreen: s = !0 }) => {
+  const r = se(null), [t, l] = v(r.current);
+  return Qe(() => {
     l(r.current);
-  }, []), /* @__PURE__ */ e(Ca.Provider, { value: { element: t }, children: /* @__PURE__ */ e(
+  }, []), /* @__PURE__ */ e(ya.Provider, { value: { element: t }, children: /* @__PURE__ */ e(
     "div",
     {
       ref: r,
@@ -930,30 +930,30 @@ const Ca = aa(
       children: a
     }
   ) });
-}, wa = ({
+}, Na = ({
   children: a
-}) => /* @__PURE__ */ e(Xe, { reducedMotion: "user", children: a }), qa = ({
+}) => /* @__PURE__ */ e(Ke, { reducedMotion: "user", children: a }), Aa = ({
   children: a,
   layout: s,
   link: r,
   privacyModeInitiallyEnabled: t,
   image: l,
-  i18n: d,
+  i18n: c,
   l10n: n,
   isDev: i = !1,
   dataCollectionStorageHandler: o,
   showExperimentalWarnings: f = !1
-}) => /* @__PURE__ */ e(wa, { children: /* @__PURE__ */ e(
-  qe,
+}) => /* @__PURE__ */ e(Na, { children: /* @__PURE__ */ e(
+  Ae,
   {
     isDev: i,
     showExperimentalWarnings: f,
-    children: /* @__PURE__ */ e(Ae, { ...n, children: /* @__PURE__ */ e(He, { ...d, children: /* @__PURE__ */ e(Ue, { ...r, children: /* @__PURE__ */ e(ya, { ...s, children: /* @__PURE__ */ e(Ge, { children: /* @__PURE__ */ e(
-      We,
+    children: /* @__PURE__ */ e(He, { ...n, children: /* @__PURE__ */ e(Ue, { ...c, children: /* @__PURE__ */ e(Ge, { ...r, children: /* @__PURE__ */ e(wa, { ...s, children: /* @__PURE__ */ e(We, { children: /* @__PURE__ */ e(
+      Je,
       {
         initiallyEnabled: t,
         children: /* @__PURE__ */ e(Ye, { ...l, children: /* @__PURE__ */ e(
-          Je,
+          Xe,
           {
             handler: o,
             children: a
@@ -962,84 +962,92 @@ const Ca = aa(
       }
     ) }) }) }) }) })
   }
-) });
+) }), H = (a) => `datacollection-${a}`, Ha = {
+  get: async (a) => JSON.parse(
+    localStorage.getItem(H(a)) ?? "{}"
+  ),
+  set: async (a, s) => {
+    localStorage.setItem(H(a), JSON.stringify(s));
+  }
+};
 export {
-  Da as AreaChart,
-  Ua as Await,
-  Ma as BarChart,
+  Ma as AreaChart,
+  Wa as Await,
+  Ta as BarChart,
   w as Button,
-  Ta as CategoryBarChart,
-  Ga as CopyButton,
-  Wa as DndProvider,
-  Ya as EmojiImage,
-  Ja as F0Avatar,
-  Xa as F0AvatarAlert,
-  Ka as F0AvatarCompany,
-  Qa as F0AvatarDate,
-  Za as F0AvatarEmoji,
-  es as F0AvatarFile,
-  as as F0AvatarIcon,
-  ss as F0AvatarList,
-  K as F0AvatarModule,
-  rs as F0AvatarPerson,
-  ts as F0AvatarTeam,
-  ls as F0Card,
-  os as F0Checkbox,
-  $a as F0ChipList,
-  ns as F0EventCatcherProvider,
-  Te as F0Icon,
-  qa as F0Provider,
-  is as F0TagAlert,
-  ds as F0TagBalance,
-  cs as F0TagCompany,
-  us as F0TagDot,
-  fs as F0TagList,
-  hs as F0TagPerson,
-  Me as F0TagRaw,
-  ms as F0TagStatus,
-  ps as F0TagTeam,
-  vs as GROUP_ID_SYMBOL,
-  ja as HomeLayout,
+  Ia as CategoryBarChart,
+  Ja as CopyButton,
+  Ya as DndProvider,
+  Xa as EmojiImage,
+  Ka as F0Avatar,
+  Qa as F0AvatarAlert,
+  Za as F0AvatarCompany,
+  es as F0AvatarDate,
+  as as F0AvatarEmoji,
+  ss as F0AvatarFile,
+  rs as F0AvatarIcon,
+  ts as F0AvatarList,
+  Q as F0AvatarModule,
+  ls as F0AvatarPerson,
+  os as F0AvatarTeam,
+  ns as F0Card,
+  is as F0Checkbox,
+  Ea as F0ChipList,
+  cs as F0EventCatcherProvider,
+  Ie as F0Icon,
+  Aa as F0Provider,
+  ds as F0TagAlert,
+  us as F0TagBalance,
+  fs as F0TagCompany,
+  hs as F0TagDot,
+  ms as F0TagList,
+  ps as F0TagPerson,
+  Te as F0TagRaw,
+  gs as F0TagStatus,
+  vs as F0TagTeam,
+  bs as GROUP_ID_SYMBOL,
+  za as HomeLayout,
   Ba as LineChart,
-  Fa as Link,
-  gs as OneFilterPicker,
-  Ia as PieChart,
-  We as PrivacyModeProvider,
-  ue as ProductBlankslate,
-  bs as ProductCard,
-  za as ProductModal,
-  ba as ProductWidget,
-  Oa as ProgressBarChart,
-  Ea as StandardLayout,
-  xs as TagCounter,
-  _a as TwoColumnLayout,
-  Z as UpsellRequestResponseDialog,
-  xa as UpsellingBanner,
-  ee as UpsellingButton,
-  Va as UpsellingPopover,
-  Ra as VerticalBarChart,
-  ka as avatarVariants,
-  Cs as buildTranslations,
-  ys as createAtlaskitDriver,
-  ws as createDataSourceDefinition,
-  Sa as defaultTranslations,
-  Se as experimental,
-  Ns as getAnimationVariants,
-  Ls as getDataSourcePaginationType,
-  Ps as getEmojiLabel,
-  Ss as isInfiniteScrollPagination,
-  Fs as isPageBasedPagination,
-  ks as modules,
-  Ds as tagDotColors,
-  Ms as useData,
-  Ts as useDataSource,
-  Bs as useDndEvents,
-  Is as useDraggable,
-  Rs as useDroppableList,
-  Os as useEmojiConfetti,
-  $s as useGroups,
-  Es as usePrivacyMode,
-  _s as useReducedMotion,
-  js as useSelectable,
-  zs as useXRay
+  ka as Link,
+  xs as OneFilterPicker,
+  Ra as PieChart,
+  Je as PrivacyModeProvider,
+  fe as ProductBlankslate,
+  Cs as ProductCard,
+  Va as ProductModal,
+  xa as ProductWidget,
+  $a as ProgressBarChart,
+  _a as StandardLayout,
+  ys as TagCounter,
+  ja as TwoColumnLayout,
+  ee as UpsellRequestResponseDialog,
+  Ca as UpsellingBanner,
+  ae as UpsellingButton,
+  qa as UpsellingPopover,
+  Oa as VerticalBarChart,
+  Da as avatarVariants,
+  ws as buildTranslations,
+  Ns as createAtlaskitDriver,
+  Ls as createDataSourceDefinition,
+  Ha as dataCollectionLocalStorageHandler,
+  Fa as defaultTranslations,
+  Fe as experimental,
+  Ps as getAnimationVariants,
+  Ss as getDataSourcePaginationType,
+  Fs as getEmojiLabel,
+  ks as isInfiniteScrollPagination,
+  Ds as isPageBasedPagination,
+  Ms as modules,
+  Ts as tagDotColors,
+  Is as useData,
+  Bs as useDataSource,
+  Rs as useDndEvents,
+  Os as useDraggable,
+  $s as useDroppableList,
+  Es as useEmojiConfetti,
+  _s as useGroups,
+  js as usePrivacyMode,
+  zs as useReducedMotion,
+  Vs as useSelectable,
+  qs as useXRay
 };
