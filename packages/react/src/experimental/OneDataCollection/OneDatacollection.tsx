@@ -410,6 +410,14 @@ const OneDataCollectionComp = <
         value: currentSortings,
         setValue: setCurrentSortings,
       },
+      grouping: {
+        value: currentGrouping,
+        setValue: setCurrentGrouping,
+      },
+      navigationFilters: {
+        value: currentNavigationFilters,
+        setValue: setCurrentNavigationFilters,
+      },
       visualization: {
         value: currentVisualization,
         setValue: setCurrentVisualization,
