@@ -64,7 +64,7 @@ export default [
             "**/__tests__/**",
           ],
           rules: {
-            "no-console": ["error", { allow: ["warn", "error"] }],
+            "no-console": ["error", { allow: ["warn", "error", "assert"] }],
           },
         },
       ]
