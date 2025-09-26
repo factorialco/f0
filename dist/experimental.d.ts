@@ -2214,9 +2214,12 @@ declare type FormType<T extends SchemaType, FormType extends InferSchema<T>> = U
 
 declare interface FrameContextType {
     isSmallScreen: boolean;
+    isLastToggleInvokedByUser: boolean;
     sidebarState: SidebarState;
     prevSidebarState: SidebarState | null;
-    toggleSidebar: () => void;
+    toggleSidebar: (callData?: {
+        isInvokedByUser: boolean;
+    }) => void;
     setForceFloat: (force: boolean) => void;
 }
 
@@ -4811,6 +4814,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
@@ -4820,8 +4832,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
 }
@@ -4829,13 +4841,4 @@ declare module "@tiptap/core" {
 
 declare namespace Calendar {
     var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
-        };
-    }
 }
