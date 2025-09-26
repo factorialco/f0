@@ -5,12 +5,8 @@ export const handleTableResetSettings = (
 ) => {
   console.log("reset settings table")
 
-  settings.setSettings({
-    visualization: {
-      table: {
-        order: [],
-        hidden: [],
-      },
-    },
+  settings.setVisualizationSettings("table", {
+    order: [],
+    hidden: [],
   })
 }

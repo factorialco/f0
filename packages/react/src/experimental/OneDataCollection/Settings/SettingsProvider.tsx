@@ -2,7 +2,11 @@ import React, { createContext, useContext, useState } from "react"
 import { collectionVisualizations } from "../visualizations/collection/collectionViewRegistry"
 
 // Utility type to extract settings from visualization definitions
-type ExtractVisualizationSettings<T> = T extends { settings: infer S }
+type ExtractVisualizationSettings<T> = T extends {
+  settings: {
+    default: infer S
+  }
+}
   ? S
   : never
 
@@ -34,6 +38,14 @@ const generateInitialVisualizationSettings = (): VisualizationSettings => {
 export interface DataCollectionSettingsContextType {
   setSettings: React.Dispatch<React.SetStateAction<DataCollectionSettings>>
   settings: DataCollectionSettings
+  setVisualizationSettings: (
+    key: keyof VisualizationSettings,
+    settings:
+      | VisualizationSettings[keyof VisualizationSettings]
+      | ((
+          prev: VisualizationSettings[keyof VisualizationSettings]
+        ) => VisualizationSettings[keyof VisualizationSettings])
+  ) => void
 }
 
 const DataCollectionSettingsContext =
@@ -43,6 +55,7 @@ const DataCollectionSettingsContext =
       // To avoid circular dependency initializating the settings (the value is provided in the provider)
       visualization: {} as VisualizationSettings,
     },
+    setVisualizationSettings: () => {},
   })
 
 export const useDataCollectionSettings = () => {
@@ -64,8 +77,34 @@ export const DataCollectionSettingsProvider = ({
     visualization: generateInitialVisualizationSettings(),
   })
 
+  const setVisualizationSettings = (
+    key: keyof VisualizationSettings,
+    settings:
+      | VisualizationSettings[keyof VisualizationSettings]
+      | ((
+          prevVisualiztionSettings: VisualizationSettings[keyof VisualizationSettings]
+        ) => VisualizationSettings[keyof VisualizationSettings])
+  ) => {
+    if (typeof settings === "function") {
+      setSettings((prev) => ({
+        ...prev,
+        visualization: {
+          ...prev.visualization,
+          [key]: settings(prev.visualization[key]),
+        },
+      }))
+    } else {
+      setSettings((prev) => ({
+        ...prev,
+        visualization: { ...prev.visualization, [key]: settings },
+      }))
+    }
+  }
+
   return (
-    <DataCollectionSettingsContext.Provider value={{ settings, setSettings }}>
+    <DataCollectionSettingsContext.Provider
+      value={{ settings, setSettings, setVisualizationSettings }}
+    >
       {children}
     </DataCollectionSettingsContext.Provider>
   )
