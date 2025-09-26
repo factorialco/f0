@@ -90601,6 +90601,8 @@ function x3t({
   } = s;
   return dt(
     () => ({
+      // Unknown passthrough (e.g., extensions from higher-level sources)
+      ...s,
       // Definition passthrough
       sortings: V,
       presets: j,
@@ -90631,6 +90633,8 @@ function x3t({
       grouping: o
     }),
     [
+      // Unknown passthrough
+      s,
       // Definition
       V,
       j,
