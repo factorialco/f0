@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.206.0](https://github.com/factorialco/f0/compare/f0-react-v1.205.1...f0-react-v1.206.0) (2025-09-26)
+
+
+### Features
+
+* AiChat improvements ([#2687](https://github.com/factorialco/f0/issues/2687)) ([5a70bb4](https://github.com/factorialco/f0/commit/5a70bb49356d701615836b931c4e33bab7cc4b33))
+
+## [1.205.1](https://github.com/factorialco/f0/compare/f0-react-v1.205.0...f0-react-v1.205.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* trigger a release ([3885d07](https://github.com/factorialco/f0/commit/3885d07a29cb4fed4588b746440bb95dcd9f86ac))
+
+## [1.205.0](https://github.com/factorialco/f0/compare/f0-react-v1.204.2...f0-react-v1.205.0) (2025-09-26)
+
+
+### Features
+
+* add markdown support to rich text component ([f5ee522](https://github.com/factorialco/f0/commit/f5ee5221199fdd2f6e7c7bd4c484d6d4427b32ad))
+
 ## [1.204.2](https://github.com/factorialco/f0/compare/f0-react-v1.204.1...f0-react-v1.204.2) (2025-09-26)
 
 

@@ -183,6 +183,9 @@ export const defaultTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     initialMessage: "How can I help you today?",
+    inputPlaceholder: "Write something here...",
+    stopAnswerGeneration: "Stop generating",
+    sendMessage: "Send message",
   },
   select: {
     noResults: "No results found",

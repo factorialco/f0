@@ -95,7 +95,6 @@ export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
 
   if (context === null) {
-    console.error("useAiChatLabels must be used within an AiChatLabelsProvider")
     return {
       enabled: false,
       setEnabled: () => {},
