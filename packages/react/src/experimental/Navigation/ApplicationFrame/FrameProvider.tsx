@@ -13,7 +13,7 @@ import { useNavigation } from "../../../lib/linkHandler"
 
 const PREFERRED_INITIAL_STATE_KEY = "one_sidebar_locked"
 
-type SidebarState = "locked" | "unlocked" | "hidden"
+export type SidebarState = "locked" | "unlocked" | "hidden"
 
 interface FrameContextType {
   isSmallScreen: boolean
