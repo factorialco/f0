@@ -156,7 +156,7 @@ export function OneCalendar({
     inputValue: DateRangeString
   ) => {
     const newDate = granularity.fromString(inputValue, i18n)
-    const error = isSelectableDate(newDate?.[input])
+    const error = !isSelectableDate(newDate?.[input])
 
     setInputError((prev) => ({
       ...prev,
