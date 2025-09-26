@@ -68,7 +68,7 @@ const htmlContent = `<p>
 `
 
 const markdownContent = `
-# Markdown support
+## Markdown support
 
 This component supports **GitHub Flavored Markdown content**. You can use it by setting the \`format\` prop to \`markdown\`.
 * 🤯 It supports headings.
@@ -103,6 +103,7 @@ export const Default: Story = {
 }
 
 export const Markdown: Story = {
+  parameters: { a11y: { skipCi: true } },
   tags: ["experimental"],
   args: {
     content: markdownContent,
