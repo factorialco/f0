@@ -28,17 +28,9 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
             sticky && "md:sticky md:top-0 md:max-h-full"
           )}
         >
-          <Aside
-            sticky={sticky}
-            className={cn(
-              mainColumnPosition === "right" ? "md:order-1" : "md:order-3"
-            )}
-          >
-            {sideContent}
-          </Aside>
           <main
             className={cn(
-              "sm:min-h-xs h-fit border-0 px-6 py-5 sm:flex-1 sm:border-solid md:order-1",
+              "sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6",
               sticky
                 ? "md:h-full md:max-h-full md:overflow-y-auto"
                 : "min-h-full",
@@ -50,6 +42,15 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
           >
             {mainContent}
           </main>
+          <Aside
+            sticky={sticky}
+            className={cn(
+              "order-1",
+              mainColumnPosition === "right" ? "md:order-1" : "md:order-3"
+            )}
+          >
+            {sideContent}
+          </Aside>
         </div>
       </div>
     )

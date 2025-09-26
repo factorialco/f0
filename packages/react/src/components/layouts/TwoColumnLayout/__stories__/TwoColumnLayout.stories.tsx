@@ -8,6 +8,20 @@ import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { ComponentProps } from "react"
 import { TwoColumnLayout } from "../index"
 
+const FocusableElement = () => {
+  return (
+    <div className="p-4">
+      <label htmlFor="focusable-element">Focusable Element</label>
+      <div>
+        <input
+          type="text"
+          className="border-0 bg-[#fff] px-2"
+          id="focusable-element"
+        />
+      </div>
+    </div>
+  )
+}
 const meta = {
   title: "Layout/TwoColumnLayout",
   component: TwoColumnLayout,
@@ -15,13 +29,18 @@ const meta = {
   decorators: [PageDecorator],
   args: {
     children: (
-      <div className="flex h-64 items-center justify-center bg-f1-foreground-info text-f1-foreground-inverse">
+      <div className="flex h-64 flex-col items-center justify-center bg-f1-foreground-info text-f1-foreground-inverse">
         Main
+        <FocusableElement />
+        <p>
+          Should the the first focusable element even if main is on right side
+        </p>
       </div>
     ),
     sideContent: (
-      <div className="flex h-48 items-center justify-center bg-f1-foreground-secondary text-f1-foreground-inverse">
+      <div className="flex h-48 flex-col items-center justify-center bg-f1-foreground-secondary text-f1-foreground-inverse">
         Side
+        <FocusableElement />
       </div>
     ),
   },
