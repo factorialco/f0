@@ -3119,6 +3119,7 @@ export declare interface UseDataReturn<R extends RecordType> {
     loadMore: () => void;
     totalItems: number | undefined;
     mergedFilters: FiltersState<FiltersDefinition>;
+    updateRecords: (updater: (prev: R[]) => R[]) => void;
 }
 
 /**

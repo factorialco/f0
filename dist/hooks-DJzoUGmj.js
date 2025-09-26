@@ -90549,7 +90549,10 @@ function b3t(e, {
     setPage: ae,
     loadMore: me,
     mergedFilters: q,
-    totalItems: V
+    totalItems: V,
+    updateRecords: (re) => {
+      C((he) => re(he));
+    }
   };
 }
 function h2t(e) {
