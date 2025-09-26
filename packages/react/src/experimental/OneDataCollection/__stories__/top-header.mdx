@@ -1,0 +1,36 @@
+import {
+  Canvas,
+  Meta,
+  Controls,
+  Unstyled,
+  Story,
+} from "@storybook/addon-docs/blocks"
+import * as EmptyState from "./empty-states.stories"
+
+<Meta title="Data collection/Top Header" />
+
+# Data collection Top Header
+
+## Introduction
+
+The top header is the header that is displayed at the top of the data
+collection. It is used to display total items summary, actions, etc.
+
+## Total items summary
+
+The total items summary is the summary of the total number of items in the data
+collection. It is displayed in the top header.
+
+You can customize the total items summary by providing a function that takes the
+total number of items as a parameter and returns a string to be displayed. By
+default, if no `totalItemSummary` is provided, it will display "{count} items".
+
+```tsx
+<OneDataCollection
+  source={useDataCollectionSource({
+    ...
+    totalItemSummary={(totalItems) => `Total items: ${totalItems}`}
+    ...
+  })}
+/>
+```

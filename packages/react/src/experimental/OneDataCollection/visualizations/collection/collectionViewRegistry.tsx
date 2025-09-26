@@ -8,11 +8,13 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { Kanban, List, Table } from "@/icons/app"
+import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
 import {
+  handleTableResetSettings,
   TableCollection,
   TableCollectionProps,
   SettingsRenderer as tableSettingsRenderer,
@@ -24,10 +26,13 @@ export type VisualizacionTypeDefinition<
   Settings = Record<string, never>,
 > = {
   render: (props: Props) => JSX.Element
-  renderSettings?: (props: Props) => JSX.Element | null
   name: string
   icon: IconType
-  settings: Settings
+  settings: {
+    default: Settings
+    renderer?: (props: Props) => JSX.Element | null
+    resetHandler?: (settings: DataCollectionSettingsContextType) => void
+  }
 }
 
 type CollectionVisualizations<
@@ -131,16 +136,21 @@ export const collectionVisualizations: CollectionVisualizations<
         />
       )
     },
-    renderSettings: tableSettingsRenderer,
     settings: {
-      order: [],
-      hidden: [],
+      renderer: tableSettingsRenderer,
+      resetHandler: handleTableResetSettings,
+      default: {
+        order: [],
+        hidden: [],
+      },
     },
   },
   list: {
     name: "List",
     icon: List,
-    settings: {},
+    settings: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -178,7 +188,9 @@ export const collectionVisualizations: CollectionVisualizations<
   card: {
     name: "Card",
     icon: Kanban,
-    settings: {},
+    settings: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -216,7 +228,9 @@ export const collectionVisualizations: CollectionVisualizations<
   kanban: {
     name: "Kanban",
     icon: Kanban,
-    settings: {},
+    settings: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,

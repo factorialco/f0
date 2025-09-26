@@ -20,7 +20,7 @@ export const TableSettings = ({
   allowSorting,
   allowHiding,
 }: TableSettingsProps) => {
-  const { settings, setSettings } = useDataCollectionSettings()
+  const { settings, setVisualizationSettings } = useDataCollectionSettings()
 
   const { columnsWithStatus } = useColumns(
     originalColumns,
@@ -47,18 +47,10 @@ export const TableSettings = ({
   )
 
   const onChangeSettings = (newOrder: SortAndHideListItem[]) => {
-    setSettings((prev) => ({
-      ...prev,
-      visualization: {
-        ...prev.visualization,
-        table: {
-          order: newOrder.map((item) => item.id),
-          hidden: newOrder
-            .filter((item) => !item.visible)
-            .map((item) => item.id),
-        },
-      },
-    }))
+    setVisualizationSettings("table", {
+      order: newOrder.map((item) => item.id),
+      hidden: newOrder.filter((item) => !item.visible).map((item) => item.id),
+    })
   }
 
   return (
