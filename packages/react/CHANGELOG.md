@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.204.1](https://github.com/factorialco/f0/compare/f0-react-v1.204.0...f0-react-v1.204.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* searchbox in select focus on load ([#2686](https://github.com/factorialco/f0/issues/2686)) ([495c493](https://github.com/factorialco/f0/commit/495c493c11cdfc1a1bed44fd13c15eec96f2184a))
+
 ## [1.204.0](https://github.com/factorialco/f0/compare/f0-react-v1.203.4...f0-react-v1.204.0) (2025-09-25)
 
 
