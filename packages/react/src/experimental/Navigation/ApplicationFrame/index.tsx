@@ -73,7 +73,7 @@ function useAutoCloseSidebar(
       isAiChatOpening && shouldAutoCloseSidebar && sidebarState !== "hidden"
 
     if (shouldCloseSidebar) {
-      toggleSidebar()
+      toggleSidebar({ isInvokedByUser: false })
     }
 
     previousAiChatOpenRef.current = isAiChatOpen
@@ -128,7 +128,7 @@ function ApplicationFrameContent({
                     animate={{ opacity: 0.1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                    onClick={toggleSidebar}
+                    onClick={() => toggleSidebar()}
                   />
                 )}
               </AnimatePresence>

@@ -17,9 +17,10 @@ type SidebarState = "locked" | "unlocked" | "hidden"
 
 interface FrameContextType {
   isSmallScreen: boolean
+  isLastToggleInvokedByUser: boolean
   sidebarState: SidebarState
   prevSidebarState: SidebarState | null
-  toggleSidebar: () => void
+  toggleSidebar: (callData?: { isInvokedByUser: boolean }) => void
   setForceFloat: (force: boolean) => void
 }
 
@@ -30,6 +31,7 @@ export function useSidebar(): FrameContextType {
   if (context === undefined) {
     return {
       isSmallScreen: false,
+      isLastToggleInvokedByUser: true,
       prevSidebarState: null,
       sidebarState: "locked",
       toggleSidebar: () => {},
@@ -46,6 +48,8 @@ interface FrameProviderProps {
 export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
   const [forceFloat, setForceFloat] = useState(false)
+  const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
+    useState(false)
 
   const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
@@ -62,10 +66,18 @@ export function FrameProvider({ children }: FrameProviderProps) {
     null
   )
 
-  const toggleSidebar = useCallback(() => {
-    if (isSmallScreen) setVisible(!visible)
-    setLocked(!locked)
-  }, [isSmallScreen, visible, locked, setLocked, setVisible])
+  const toggleSidebar = useCallback(
+    (
+      { isInvokedByUser }: { isInvokedByUser: boolean } = {
+        isInvokedByUser: true,
+      }
+    ) => {
+      setIsLastToggleInvokedByUser(isInvokedByUser ?? true)
+      if (isSmallScreen) setVisible(!visible)
+      setLocked(!locked)
+    },
+    [isSmallScreen, visible, locked, setLocked, setVisible]
+  )
 
   const handlePointerMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
@@ -97,8 +109,10 @@ export function FrameProvider({ children }: FrameProviderProps) {
   }, [currentPath])
 
   useEffect(() => {
-    localStorage.setItem(PREFERRED_INITIAL_STATE_KEY, locked ? "1" : "")
-  }, [locked])
+    if (isLastToggleInvokedByUser) {
+      localStorage.setItem(PREFERRED_INITIAL_STATE_KEY, locked ? "1" : "")
+    }
+  }, [locked, isLastToggleInvokedByUser])
 
   useEffect(() => {
     return () => {
@@ -110,6 +124,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
     <FrameContext.Provider
       value={{
         isSmallScreen,
+        isLastToggleInvokedByUser,
         sidebarState,
         toggleSidebar,
         prevSidebarState,
