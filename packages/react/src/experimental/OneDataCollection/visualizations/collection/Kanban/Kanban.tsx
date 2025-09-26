@@ -221,7 +221,7 @@ export const KanbanCollection = <
       return (
         <KanbanCard<R>
           key={dragId}
-          drag={{ id: dragId, type: "list-card", data: { ...item, laneId } }}
+          drag={{ id: dragId, type: "list-card", data: { ...item } }}
           id={dragId}
           index={index}
           total={total}
