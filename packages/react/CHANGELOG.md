@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.205.1](https://github.com/factorialco/f0/compare/f0-react-v1.205.0...f0-react-v1.205.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* trigger a release ([3885d07](https://github.com/factorialco/f0/commit/3885d07a29cb4fed4588b746440bb95dcd9f86ac))
+
 ## [1.205.0](https://github.com/factorialco/f0/compare/f0-react-v1.204.2...f0-react-v1.205.0) (2025-09-26)
 
 
