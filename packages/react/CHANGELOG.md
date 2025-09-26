@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.204.2](https://github.com/factorialco/f0/compare/f0-react-v1.204.1...f0-react-v1.204.2) (2025-09-26)
+
+
+### Bug Fixes
+
+* add missing grouping and navigationFilters storage for data collection ([#2691](https://github.com/factorialco/f0/issues/2691)) ([c66232a](https://github.com/factorialco/f0/commit/c66232ac5c1df0f691cc8a7b00fead9f376fd8de))
+
 ## [1.204.1](https://github.com/factorialco/f0/compare/f0-react-v1.204.0...f0-react-v1.204.1) (2025-09-26)
 
 
