@@ -264,6 +264,9 @@ importers:
       echarts:
         specifier: '6'
         version: 6.0.0
+      echarts-for-react:
+        specifier: 3.0.4
+        version: 3.0.4(echarts@6.0.0)(react@18.3.1)
       embla-carousel-autoplay:
         specifier: ^8.5.2
         version: 8.5.2(embla-carousel@8.6.0)
@@ -7084,6 +7087,12 @@ packages:
   ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
 
+  echarts-for-react@3.0.4:
+    resolution: {integrity: sha512-rc7SNdr0JoMTkMJspp9ejlZAoipv2mMwbI30ggIgxSZMELdX36C2aJREvJ9OSkyetC/RoO1s7VrefXUrUAMClg==}
+    peerDependencies:
+      echarts: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+      react: ^15.0.0 || >=16.0.0
+
   echarts@6.0.0:
     resolution: {integrity: sha512-Tte/grDQRiETQP4xz3iZWSvoHrkCQtwqd6hs+mifXcjrCuo2iKWbajFObuLJVBlDIJlOzgQPd1hsaKt/3+OMkQ==}
 
@@ -11362,6 +11371,9 @@ packages:
     resolution: {integrity: sha512-2kpQq2DD/pRpx3Tal/qRW1SYwcIeQ0iq8li5CJHQgOC+FtPn2BVmuDtzUCgNnpCrbgtfEHqh+iWzxK+Tq6C+RQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
+
+  size-sensor@1.0.2:
+    resolution: {integrity: sha512-2NCmWxY7A9pYKGXNBfteo4hy14gWu47rg5692peVMst6lQLPKrVjhY+UTEsPI5ceFRJSl3gVgMYaUi/hKuaiKw==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -20483,6 +20495,13 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
+  echarts-for-react@3.0.4(echarts@6.0.0)(react@18.3.1):
+    dependencies:
+      echarts: 6.0.0
+      fast-deep-equal: 3.1.3
+      react: 18.3.1
+      size-sensor: 1.0.2
+
   echarts@6.0.0:
     dependencies:
       tslib: 2.3.0
@@ -26020,6 +26039,8 @@ snapshots:
       nanospinner: 1.2.2
       picocolors: 1.1.1
       tinyglobby: 0.2.13
+
+  size-sensor@1.0.2: {}
 
   slash@3.0.0: {}
 
