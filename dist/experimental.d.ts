@@ -107,11 +107,12 @@ export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status }: ActionItemProps) => JSX_2.Element;
+export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
-    status: "inProgress" | "executing" | "completed";
+    status?: "inProgress" | "executing" | "completed";
+    inGroup?: boolean;
 }
 
 declare type ActionProps = {
@@ -1717,6 +1718,9 @@ declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly initialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -3919,6 +3923,7 @@ export declare type RichTextDisplayHandle = HTMLDivElement;
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
     content: string;
     className?: string;
+    format?: "html" | "markdown";
 }
 
 export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
@@ -5019,8 +5024,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -5028,8 +5033,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
