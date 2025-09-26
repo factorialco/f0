@@ -103,6 +103,75 @@ export const KanbanCollection = <
     return Boolean(paginationInfo && paginationInfo.type === "infinite-scroll")
   }
 
+  const getStableId = (item: R, index?: number) => {
+    const explicitId = (item as unknown as { id?: string | number })?.id
+    if (explicitId !== undefined && explicitId !== null)
+      return String(explicitId)
+    if (idProvider) return String(idProvider(item, index ?? 0))
+    return String(index ?? 0)
+  }
+
+  const optimisticMoveIntoData = async (
+    fromLaneId: string,
+    toLaneId: string,
+    sourceRecord: R,
+    destiny: { record: R; position: "above" | "below" } | null
+  ) => {
+    if (fromLaneId === toLaneId) {
+      const laneHook = lanesHooks[fromLaneId]
+      if (!laneHook) return
+      const srcKey = getStableId(sourceRecord)
+      laneHook.updateRecords((prev) => {
+        const items = [...prev]
+        const fromIdx = items.findIndex(
+          (item, index) => getStableId(item, index) === srcKey
+        )
+        if (fromIdx === -1) return prev
+        const [moved] = items.splice(fromIdx, 1)
+        let insertIndex = 0
+        if (destiny && destiny.record) {
+          const destKey = getStableId(destiny.record)
+          const targetIdx = items.findIndex(
+            (item, index) => getStableId(item, index) === destKey
+          )
+          if (targetIdx !== -1) {
+            insertIndex = targetIdx + (destiny.position === "below" ? 1 : 0)
+          }
+        }
+        const adjustedIndex =
+          fromIdx < insertIndex ? insertIndex - 1 : insertIndex
+        if (fromIdx === adjustedIndex) return prev
+        const bounded = Math.max(0, Math.min(adjustedIndex, items.length))
+        items.splice(bounded, 0, moved)
+        return items
+      })
+      return
+    }
+
+    const fromHook = lanesHooks[fromLaneId]
+    const toHook = lanesHooks[toLaneId]
+    if (!fromHook || !toHook) return
+    const srcKey = getStableId(sourceRecord)
+    fromHook.updateRecords((prev) =>
+      prev.filter((item, index) => getStableId(item, index) !== srcKey)
+    )
+    toHook.updateRecords((prev) => {
+      const items = [...prev]
+      let insertIndex = 0
+      if (destiny && destiny.record) {
+        const destKey = getStableId(destiny.record)
+        const targetIdx = items.findIndex(
+          (item, index) => getStableId(item, index) === destKey
+        )
+        if (targetIdx !== -1)
+          insertIndex = targetIdx + (destiny.position === "below" ? 1 : 0)
+      }
+      const bounded = Math.max(0, Math.min(insertIndex, items.length))
+      items.splice(bounded, 0, sourceRecord)
+      return items
+    })
+  }
+
   const kanbanProps: KanbanProps<R> = {
     lanes: laneItems.map((l) => {
       const laneData = lanesHooks[l.id]
@@ -126,20 +195,12 @@ export const KanbanCollection = <
     loading: Object.values(lanesHooks).some(
       (laneHook) => laneHook.isInitialLoading
     ),
-    getKey: (item, index) => {
-      if (idProvider) return String(idProvider(item, index))
-      const fallbackId = (item as unknown as { id?: string | number })?.id
-      return fallbackId !== undefined && fallbackId !== null
-        ? String(fallbackId)
-        : String(index)
-    },
+    getKey: (item, index) => getStableId(item, index),
     renderCard: (item, index, total, laneId) => {
-      const dragId = String(
-        idProvider
-          ? idProvider(item, index)
-          : ((item as unknown as { id?: string | number })?.id ?? index)
-      )
-      const itemId = source.selectable ? source.selectable(item) : item.id
+      const dragId = getStableId(item, index)
+      const itemId = source.selectable
+        ? source.selectable(item)
+        : (item as unknown as { id?: string | number })?.id
 
       // Gets the lane useSelectable hook
       const useSelectable =
@@ -161,7 +222,7 @@ export const KanbanCollection = <
         <KanbanCard<R>
           key={dragId}
           drag={{ id: dragId, type: "list-card", data: { ...item, laneId } }}
-          id={String(item.id)}
+          id={dragId}
           index={index}
           total={total}
           laneId={laneId}
@@ -245,7 +306,36 @@ export const KanbanCollection = <
       const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
       return allowReorder ? idx : -1
     },
-    onMove: onMove,
+    onMove: async (fromLaneId, toLaneId, sourceRecord, destiny) => {
+      // Optimistic into useData
+      await optimisticMoveIntoData(fromLaneId, toLaneId, sourceRecord, destiny)
+      // Delegate to external onMove, then replace if backend returned updated record
+      if (onMove) {
+        const result = await onMove(fromLaneId, toLaneId, sourceRecord, destiny)
+        if (result) {
+          const destHook = lanesHooks[toLaneId]
+          const srcHook = lanesHooks[fromLaneId]
+          const srcKey = getStableId(sourceRecord)
+          // Replace in destination (same-lane: this is the only operation needed)
+          destHook?.updateRecords((prev) => {
+            const items = [...prev]
+            const idx = items.findIndex(
+              (item, index) => getStableId(item, index) === srcKey
+            )
+            if (idx !== -1) items.splice(idx, 1, result)
+            return items
+          })
+          // Cross-lane: ensure cleanup in origin in case of race
+          if (fromLaneId !== toLaneId) {
+            srcHook?.updateRecords((prev) =>
+              prev.filter((item, index) => getStableId(item, index) !== srcKey)
+            )
+          }
+        }
+        return result
+      }
+      return sourceRecord
+    },
   }
 
   /**

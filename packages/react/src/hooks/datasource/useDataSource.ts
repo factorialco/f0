@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
 import {
   DataSource,
@@ -107,23 +107,25 @@ export function useDataSource<
 
   const setCurrentFilters: Dispatch<
     SetStateAction<FiltersState<FiltersSchema>>
-  > = (value) => {
-    if (typeof value === "function") {
-      _setCurrentFilters((prev) => {
-        const next = (
-          value as (
-            prevState: FiltersState<FiltersSchema>
-          ) => FiltersState<FiltersSchema>
-        )(prev)
-        return JSON.stringify(next) === JSON.stringify(prev) ? prev : next
-      })
-    } else {
-      if (JSON.stringify(currentFilters) === JSON.stringify(value)) {
-        return
+  > = useCallback(
+    (value) => {
+      if (typeof value === "function") {
+        _setCurrentFilters((prev) => {
+          const next = (
+            value as (
+              prevState: FiltersState<FiltersSchema>
+            ) => FiltersState<FiltersSchema>
+          )(prev)
+          return JSON.stringify(next) === JSON.stringify(prev) ? prev : next
+        })
+      } else {
+        _setCurrentFilters((prev) =>
+          JSON.stringify(prev) === JSON.stringify(value) ? prev : value
+        )
       }
-      _setCurrentFilters(value)
-    }
-  }
+    },
+    [_setCurrentFilters]
+  )
 
   const [currentSortings, setCurrentSortings] =
     useState<SortingsState<Sortings> | null>(defaultSorting || null)
@@ -171,33 +173,90 @@ export function useDataSource<
     throw new Error("Grouping is mandatory but no grouping state is set")
   }
 
-  return {
-    ...rest,
-    // Filters
-    filters: memoizedFilters,
-    currentFilters,
-    setCurrentFilters,
+  const {
+    sortings,
+    presets,
+    presetsLoading,
+    selectable,
+    defaultSelectedItems,
+  } = rest
 
-    // Sortings
-    currentSortings,
-    setCurrentSortings,
+  const stableDataSource = useMemo(
+    () => ({
+      // Unknown passthrough (e.g., extensions from higher-level sources)
+      ...rest,
+      // Definition passthrough
+      sortings,
+      presets,
+      presetsLoading,
+      selectable,
+      defaultSelectedItems,
+      defaultSorting,
 
-    // Search
-    search,
-    currentSearch,
-    setCurrentSearch,
-    debouncedCurrentSearch,
+      // Filters
+      filters: memoizedFilters,
+      currentFilters,
+      setCurrentFilters,
 
-    // Loading
-    isLoading,
-    setIsLoading,
+      // Sortings
+      currentSortings,
+      setCurrentSortings,
 
-    // Data adapter
-    dataAdapter: memoizedDataAdapter,
+      // Search
+      search,
+      currentSearch,
+      setCurrentSearch,
+      debouncedCurrentSearch,
 
-    // Grouping
-    setCurrentGrouping,
-    currentGrouping,
-    grouping,
-  }
+      // Loading
+      isLoading,
+      setIsLoading,
+
+      // Data adapter
+      dataAdapter: memoizedDataAdapter,
+
+      // Grouping
+      setCurrentGrouping,
+      currentGrouping,
+      grouping,
+    }),
+    [
+      // Definition
+      sortings,
+      presets,
+      presetsLoading,
+      selectable,
+      defaultSelectedItems,
+      defaultSorting,
+
+      // Filters
+      memoizedFilters,
+      currentFilters,
+      setCurrentFilters,
+
+      // Sortings
+      currentSortings,
+      setCurrentSortings,
+
+      // Search
+      search,
+      currentSearch,
+      setCurrentSearch,
+      debouncedCurrentSearch,
+
+      // Loading
+      isLoading,
+      setIsLoading,
+
+      // Data adapter
+      memoizedDataAdapter,
+
+      // Grouping
+      setCurrentGrouping,
+      currentGrouping,
+      grouping,
+    ]
+  )
+
+  return stableDataSource
 }

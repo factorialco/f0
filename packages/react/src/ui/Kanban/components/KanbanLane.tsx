@@ -27,17 +27,11 @@ export function KanbanLane<TRecord extends RecordType>({
   allowReorder?: boolean
 } & LaneProps<TRecord>) {
   const laneRef = useRef<HTMLDivElement | null>(null)
-  // const coordinator = useMoveCoordinator()
   const [isOver, setIsOver] = useState(false)
   const hasFullDnD = Boolean(id && getLaneResourceIndexById)
 
   // Autoscroll state
-  const overlayRef = useRef<HTMLDivElement | null>(null)
   const viewportRef = useRef<HTMLDivElement | null>(null)
-  const rafRef = useRef<number | null>(null)
-  const speedPxPerSecRef = useRef<number>(0)
-  const lastTimeRef = useRef<number | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
 
   useDroppableList(
     hasFullDnD
@@ -49,7 +43,13 @@ export function KanbanLane<TRecord extends RecordType>({
       : undefined
   )
 
-  // Time-based scroll loop
+  // Minimal DnD wiring: only compute params and forward to parent; no local state mutation
+  const rafRef = useRef<number | null>(null)
+  const speedPxPerSecRef = useRef<number>(0)
+  const lastTimeRef = useRef<number | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Time-based vertical scroll during drag
   useEffect(() => {
     const step = () => {
       const now = performance.now()
@@ -254,11 +254,17 @@ export function KanbanLane<TRecord extends RecordType>({
           return
         }
 
-        // Single upward call. Parent/Story updates state; coordinator not needed here.
+        // Forward to parent
         await onMove?.(onMoveParams)
       },
     })
   }, [id, getLaneResourceIndexById, onMove, isDragging, laneProps.items])
+
+  // Track drag lifecycle via DnD driver
+  useDndEvents(({ phase }) => {
+    if (phase === "start") setIsDragging(true)
+    if (phase === "drop" || phase === "cancel") setIsDragging(false)
+  })
 
   // Resolve viewport and observe DOM changes to re-resolve
   useEffect(() => {
@@ -281,11 +287,7 @@ export function KanbanLane<TRecord extends RecordType>({
     return () => observer.disconnect()
   }, [id])
 
-  // Track drag lifecycle via DnD driver
-  useDndEvents(({ phase }) => {
-    if (phase === "start") setIsDragging(true)
-    if (phase === "drop" || phase === "cancel") setIsDragging(false)
-  })
+  // Drag lifecycle handled by parent Kanban
 
   // Test hook: allow stories to trigger onMove without real DnD
   useEffect(() => {
@@ -333,10 +335,9 @@ export function KanbanLane<TRecord extends RecordType>({
       >
         {/* Debug overlay (non-interactive) */}
         <div
-          ref={overlayRef}
           className={cn(
             "pointer-events-none absolute inset-0 z-[1]",
-            isDragging ? "bg-transparent" : "bg-transparent"
+            isOver ? "bg-transparent" : "bg-transparent"
           )}
           aria-hidden
         />

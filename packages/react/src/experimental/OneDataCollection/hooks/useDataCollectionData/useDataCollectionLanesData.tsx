@@ -6,7 +6,7 @@ import {
   SortingsDefinition,
   UseDataOptions,
 } from "@/hooks/datasource"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
@@ -79,10 +79,28 @@ const LaneProvider = <
     onError,
   })
 
+  const signature = useMemo(() => {
+    return JSON.stringify({
+      dataRef: hook.data,
+      isInitialLoading: hook.isInitialLoading,
+      isLoading: hook.isLoading,
+      isLoadingMore: hook.isLoadingMore,
+      pagination: hook.paginationInfo,
+      error: hook.error?.message ?? null,
+    })
+  }, [
+    hook.data,
+    hook.isInitialLoading,
+    hook.isLoading,
+    hook.isLoadingMore,
+    hook.paginationInfo,
+    hook.error?.message,
+  ])
+
   useEffect(() => {
     onHookUpdate?.(hook)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hook])
+  }, [signature])
 
   return null
 }
@@ -120,69 +138,80 @@ export function useDataCollectionLanesData<
 
   const handleHookUpdate = useCallback(
     (laneId: string | symbol, value: UseDataCollectionData<R>) => {
-      setLanesHooks((prev) => ({ ...prev, [laneId]: value }))
+      setLanesHooks((prev) => {
+        const curr = prev[laneId]
+        if (
+          curr &&
+          curr.data === value.data &&
+          curr.paginationInfo === value.paginationInfo &&
+          curr.isInitialLoading === value.isInitialLoading &&
+          curr.isLoading === value.isLoading &&
+          curr.isLoadingMore === value.isLoadingMore &&
+          curr.error?.message === value.error?.message
+        ) {
+          return prev
+        }
+        if (curr === value) return prev
+        return { ...prev, [laneId]: value }
+      })
     },
     []
   )
 
   const lanesSignature = useMemo(() => JSON.stringify(lanes), [lanes])
-  const currentFiltersSignature = useMemo(
-    () => JSON.stringify(source.currentFilters),
-    [source.currentFilters]
-  )
-  const currentNavigationFiltersSignature = useMemo(
-    () => JSON.stringify(source.currentNavigationFilters),
-    [source.currentNavigationFilters]
-  )
-  const currentSortingsSignature = useMemo(
-    () => JSON.stringify(source.currentSortings),
-    [source.currentSortings]
-  )
-  const currentGroupingSignature = useMemo(
-    () => JSON.stringify(source.currentGrouping),
-    [source.currentGrouping]
-  )
-  const currentSearchSignature = useMemo(
-    () => JSON.stringify(source.currentSearch),
-    [source.currentSearch]
-  )
-  const groupingSignature = useMemo(
-    () => JSON.stringify(source.grouping),
-    [source.grouping]
-  )
-
-  const lanesProvider = useMemo(
-    () => {
-      return (lanes || []).map((lane) => (
-        <LaneProvider<
-          R,
-          Filters,
-          Sortings,
-          Summaries,
-          NavigationFilters,
-          Grouping
-        >
-          key={lane.id}
-          lane={lane}
-          onError={options.onError}
-          source={source}
-          onHookUpdate={(value) => handleHookUpdate(lane.id, value)}
-        ></LaneProvider>
-      ))
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sourceDepsSignature = useMemo(
+    () =>
+      JSON.stringify({
+        f: source.currentFilters,
+        nf: source.currentNavigationFilters,
+        s: source.currentSortings,
+        g: source.currentGrouping,
+        q: source.currentSearch,
+        grp: source.grouping,
+      }),
     [
-      // TODO check why source ref is updated always
-      lanesSignature,
-      handleHookUpdate,
-      currentFiltersSignature,
-      currentNavigationFiltersSignature,
-      currentSortingsSignature,
-      currentGroupingSignature,
-      currentSearchSignature,
-      groupingSignature,
+      source.currentFilters,
+      source.currentNavigationFilters,
+      source.currentSortings,
+      source.currentGrouping,
+      source.currentSearch,
+      source.grouping,
     ]
   )
+
+  const stableSourceRef = useRef(source)
+  useEffect(() => {
+    stableSourceRef.current = source
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceDepsSignature])
+
+  const stableLanesRef = useRef(lanes)
+  useEffect(() => {
+    stableLanesRef.current = lanes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lanesSignature])
+
+  const lanesProvider = useMemo(() => {
+    const currentLanes = stableLanesRef.current || []
+    const currentSource = stableSourceRef.current
+    return currentLanes.map((lane) => (
+      <LaneProvider<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        NavigationFilters,
+        Grouping
+      >
+        key={lane.id}
+        lane={lane}
+        onError={options.onError}
+        source={currentSource}
+        onHookUpdate={(value) => handleHookUpdate(lane.id, value)}
+      ></LaneProvider>
+    ))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lanesSignature, sourceDepsSignature, handleHookUpdate, options.onError])
 
   return {
     lanesProvider,
