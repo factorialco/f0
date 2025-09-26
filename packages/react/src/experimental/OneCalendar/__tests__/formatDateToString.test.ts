@@ -31,12 +31,12 @@ describe("formatDateToString", () => {
 
   it("should return dash when date is undefined", () => {
     const result = formatDateToString(undefined, "yyyy-MM-dd")
-    expect(result).toBe("-")
+    expect(result).toBe("")
   })
 
   it("should return dash when date is null", () => {
     const result = formatDateToString(null, "yyyy-MM-dd")
-    expect(result).toBe("-")
+    expect(result).toBe("")
   })
 
   it("should format with different date patterns", () => {

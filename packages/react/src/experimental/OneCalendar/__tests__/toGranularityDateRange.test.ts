@@ -1,3 +1,4 @@
+import { endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it } from "vitest"
 import { DateRange } from "../types"
 import { toGranularityDateRange } from "../utils"
@@ -5,17 +6,12 @@ import { toGranularityDateRange } from "../utils"
 describe("toGranularityDateRange", () => {
   // Mock granularity functions
   const mockFromFn = (date: Date): Date => {
-    // Mock: start of day
-    const newDate = new Date(date)
-    newDate.setHours(0, 0, 0, 0)
-    return newDate
+    return startOfDay(date)
   }
 
   const mockToFn = (date: Date): Date => {
     // Mock: end of day
-    const newDate = new Date(date)
-    newDate.setHours(23, 59, 59, 999)
-    return newDate
+    return endOfDay(date)
   }
 
   it("should convert single date to DateRangeComplete using granularity functions", () => {
@@ -23,8 +19,8 @@ describe("toGranularityDateRange", () => {
     const result = toGranularityDateRange(inputDate, mockFromFn, mockToFn)
 
     expect(result).toEqual({
-      from: new Date("2024-01-15T00:00:00.000Z"),
-      to: new Date("2024-01-15T23:59:59.999Z"),
+      from: new Date("2024-01-15T00:00:00.000"),
+      to: new Date("2024-01-15T23:59:59.999"),
     })
   })
 
@@ -36,8 +32,8 @@ describe("toGranularityDateRange", () => {
     const result = toGranularityDateRange(inputRange, mockFromFn, mockToFn)
 
     expect(result).toEqual({
-      from: new Date("2024-01-15T00:00:00.000Z"),
-      to: new Date("2024-01-20T23:59:59.999Z"),
+      from: new Date("2024-01-15T00:00:00.000"),
+      to: new Date("2024-01-20T23:59:59.999"),
     })
   })
 
@@ -48,8 +44,8 @@ describe("toGranularityDateRange", () => {
     const result = toGranularityDateRange(inputRange, mockFromFn, mockToFn)
 
     expect(result).toEqual({
-      from: new Date("2024-01-15T00:00:00.000Z"),
-      to: new Date("2024-01-15T23:59:59.999Z"),
+      from: new Date("2024-01-15T00:00:00.000"),
+      to: new Date("2024-01-15T23:59:59.999"),
     })
   })
 
@@ -92,8 +88,8 @@ describe("toGranularityDateRange", () => {
     const result = toGranularityDateRange(leapYearDate, mockFromFn, mockToFn)
 
     expect(result).toEqual({
-      from: new Date("2024-02-29T00:00:00.000Z"),
-      to: new Date("2024-02-29T23:59:59.999Z"),
+      from: new Date("2024-02-29T00:00:00.000"),
+      to: new Date("2024-02-29T23:59:59.999"),
     })
   })
 

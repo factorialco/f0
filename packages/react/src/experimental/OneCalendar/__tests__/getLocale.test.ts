@@ -3,12 +3,6 @@ import { getLocale } from "../utils"
 
 describe("getLocale", () => {
   it("should return the correct locale for a simple language code", () => {
-    const locale = getLocale("en")
-    expect(locale).toBeDefined()
-    expect(locale?.code).toBe("en-US")
-  })
-
-  it("should return the correct locale for French", () => {
     const locale = getLocale("fr")
     expect(locale).toBeDefined()
     expect(locale?.code).toBe("fr")

@@ -195,7 +195,7 @@ export const isActiveDate = (
   const maxDateWithGranularity = granularity.toRange(maxDate)
   return (
     !date ||
-    (dateWithGranularity &&
+    (!!dateWithGranularity?.from &&
       isValidDate(dateWithGranularity.from) &&
       (!minDateWithGranularity?.from ||
         isAfterOrEqual(
