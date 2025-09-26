@@ -14,7 +14,7 @@ import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
 import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
 import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
-import { FrameProvider, useSidebar } from "./FrameProvider"
+import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
@@ -55,6 +55,24 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   )
 }
 
+function shouldToggleSidebar(
+  isChatOpen: boolean,
+  previousIsChatOpen: boolean,
+  sidebarState: SidebarState
+): boolean {
+  const isChatOpening = !previousIsChatOpen && isChatOpen
+  if (isChatOpening) {
+    return sidebarState === "hidden"
+  }
+
+  const isChatClosing = previousIsChatOpen && !isChatOpen
+  if (isChatClosing) {
+    return sidebarState !== "hidden"
+  }
+
+  return false
+}
+
 /**
  * Custom hook to automatically close sidebar when AI chat opens on smaller screens
  */
@@ -66,13 +84,14 @@ function useAutoCloseSidebar(
   const previousAiChatOpenRef = useRef(isAiChatOpen)
 
   useEffect(() => {
-    const wasAiChatClosed = !previousAiChatOpenRef.current
-    const isAiChatOpening = wasAiChatClosed && isAiChatOpen
-
-    const shouldCloseSidebar =
-      isAiChatOpening && shouldAutoCloseSidebar && sidebarState !== "hidden"
-
-    if (shouldCloseSidebar) {
+    if (
+      shouldAutoCloseSidebar &&
+      shouldToggleSidebar(
+        isAiChatOpen,
+        previousAiChatOpenRef.current,
+        sidebarState
+      )
+    ) {
       toggleSidebar({ isInvokedByUser: false })
     }
 
