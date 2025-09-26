@@ -3,6 +3,7 @@ import * as locales from "date-fns/locale"
 import { Matcher } from "react-day-picker"
 import { rangeSeparator } from "./granularities/consts"
 
+import { GranularityDefinition } from "./granularities"
 import { DateRange, DateRangeComplete, DateRangeString } from "./types"
 // Get the locale object from date-fns/locale
 
@@ -174,4 +175,34 @@ export const toCalendarPickerMatcher = ({
     res.push({ after: maxDate })
   }
   return res
+}
+
+/**
+ * Check if the date is active
+ * @param date
+ * @param granularity
+ * @param contraints
+ * @returns
+ */
+export const isActiveDate = (
+  date: Date | undefined | null,
+  granularity: GranularityDefinition,
+  { minDate, maxDate }: { minDate?: Date; maxDate?: Date }
+) => {
+  const dateWithGranularity = granularity.toRange(date)
+
+  const minDateWithGranularity = granularity.toRange(minDate)
+  const maxDateWithGranularity = granularity.toRange(maxDate)
+  return (
+    !date ||
+    (!!dateWithGranularity?.from &&
+      isValidDate(dateWithGranularity.from) &&
+      (!minDateWithGranularity?.from ||
+        isAfterOrEqual(
+          dateWithGranularity.from,
+          minDateWithGranularity.from
+        )) &&
+      (!maxDateWithGranularity?.to ||
+        isBeforeOrEqual(dateWithGranularity.to, maxDateWithGranularity.to)))
+  )
 }
