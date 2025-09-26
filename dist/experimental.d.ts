@@ -107,11 +107,12 @@ export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status }: ActionItemProps) => JSX_2.Element;
+export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
-    status: "inProgress" | "executing" | "completed";
+    status?: "inProgress" | "executing" | "completed";
+    inGroup?: boolean;
 }
 
 declare type ActionProps = {
@@ -209,6 +210,24 @@ declare type ActivityItemProps = {
     onVisible?: (id: string) => void;
 };
 
+declare type AiBannerAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+};
+
+declare interface AiBannerInternalProps {
+    title: string;
+    onClose?: () => void;
+    content: string;
+    primaryAction?: AiBannerAction;
+    secondaryAction?: AiBannerAction;
+}
+
+declare interface AiBannerSkeletonProps {
+    compact?: boolean;
+}
+
 declare interface AIBlockConfig {
     buttons?: AIButton[];
     onClick: (type: string) => Promise<JSONContent_2 | null>;
@@ -228,6 +247,7 @@ declare type AIButton = {
     emoji: string;
     label: string;
     icon: IconType;
+    editable?: boolean;
 };
 
 /**
@@ -301,23 +321,24 @@ export declare const AlertDescription: React_2.ForwardRefExoticComponent<React_2
 declare interface AlertProps extends VariantProps<typeof alertVariants> {
     title: string;
     description: string;
-    action: {
+    action?: {
         label: string;
-        onClick?: () => void;
+        onClick: () => void;
     };
     link?: {
         label: string;
         href: string;
     };
+    icon?: IconType;
     variant: AlertVariant;
 }
 
 export declare const AlertTitle: React_2.ForwardRefExoticComponent<React_2.HTMLAttributes<HTMLHeadingElement> & React_2.RefAttributes<HTMLParagraphElement>>;
 
-declare type AlertVariant = "info" | "warning" | "critical";
+declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 declare const alertVariants: (props?: ({
-    variant?: "info" | "critical" | "warning" | undefined;
+    variant?: "info" | "critical" | "warning" | "positive" | "neutral" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -824,6 +845,11 @@ declare type CardAvatarVariant = AvatarVariant | {
 };
 
 /**
+ * Group Cards: Renders
+ */
+declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
+
+/**
  * Card metadata property renderers.
  * Each metadata item consists of an icon and a property with its data.
  */
@@ -1028,6 +1054,8 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
+declare type ColId = string;
+
 /**
  * Props for the Collection component.
  * @template Record - The type of records in the collection
@@ -1044,6 +1072,15 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     onLoadData: OnLoadDataCallback<Record, Filters>;
     onLoadError: OnLoadErrorCallback;
 } & VisualizationOptions;
+
+declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
+    table: VisualizacionTypeDefinition<TableCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, TableVisualizationSettings>;
+    list: VisualizacionTypeDefinition<ListCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    card: VisualizacionTypeDefinition<CardCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    kanban: VisualizacionTypeDefinition<KanbanCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+};
+
+declare const collectionVisualizations: CollectionVisualizations<RecordType, FiltersDefinition, SortingsDefinition, SummariesDefinition, ItemActionsDefinition<RecordType>, NavigationFiltersDefinition, GroupingDefinition<RecordType>>;
 
 declare type ColumnNumber = 1 | 2 | 3 | 4 | 6;
 
@@ -1233,6 +1270,10 @@ declare type DataCollectionExtendFetchOptions<NavigationFilters extends Navigati
  */
 export declare type DataCollectionPaginatedFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = PaginatedFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
+declare type DataCollectionSettings = {
+    visualization: VisualizationSettings;
+};
+
 /**
  * Data collection source
  * Extends the base data source with data collection specific elements / features
@@ -1279,6 +1320,31 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
 };
 
 /**
+ * The status of the data collection
+ */
+declare type DataCollectionStatus = {
+    grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
+    sortings?: SortingsState<SortingsDefinition>;
+    filters?: FiltersState<FiltersDefinition>;
+    search?: string | undefined;
+    navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
+    visualization?: number;
+};
+
+declare type DataCollectionStatusComplete = DataCollectionStatus & {
+    settings?: DataCollectionSettings;
+};
+
+declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeatures)[number];
+
+/**
+ * The available features of the data collection status storage
+ */
+declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search"];
+
+declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | `${DataCollectionStorageFeature}`)[];
+
+/**
  * Represents an error that occurred during data fetching
  */
 declare interface DataError {
@@ -1312,6 +1378,8 @@ export declare type DataSource<R extends RecordType, Filters extends FiltersDefi
     currentFilters: FiltersState<Filters>;
     /** Function to update the current filters state */
     setCurrentFilters: React.Dispatch<React.SetStateAction<FiltersState<Filters>>>;
+    /** Whether presets are currently loading */
+    presetsLoading?: boolean;
     /** Current state of applied sortings */
     currentSortings: SortingsState<Sortings>;
     /** Function to update the current sortings state */
@@ -1349,6 +1417,8 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
     currentFilters?: FiltersState<Filters>;
     /** Predefined filter configurations that can be applied */
     presets?: PresetsDefinition<Filters>;
+    /** Whether presets are currently loading */
+    presetsLoading?: boolean;
     /** Search configuration */
     search?: SearchOptions;
     /** Available sorting fields. If not provided, sorting is not allowed. */
@@ -1539,6 +1609,7 @@ declare const defaultTranslations: {
             readonly pagination: {
                 readonly of: "of";
             };
+            readonly settings: "{%visualizationName} settings";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1645,8 +1716,15 @@ declare const defaultTranslations: {
         readonly openChat: "Open Chat with One AI";
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
-        readonly welcome: "I'm One. Ask or make anything.";
+        readonly welcome: "Ask or create with One";
         readonly initialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
+    };
+    readonly select: {
+        readonly noResults: "No results found";
+        readonly loadingMore: "Loading...";
     };
 };
 
@@ -1809,16 +1887,15 @@ export declare type enhanceTextParams = {
 
 export declare type EntityId = number | string;
 
-export declare const EntitySelect: (props: EntitySelectProps & {
+export declare const EntitySelect: <T>(props: EntitySelectProps<T> & {
     children?: React.ReactNode;
 }) => JSX_2.Element;
 
-declare interface EntitySelectCommonProps extends Omit<PopoverProps, "children" | "modal"> {
+declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
     entities: EntitySelectEntity[];
     groups: EntitySelectNamedGroup[];
     selectedGroup: string;
-    triggerPlaceholder: string;
-    triggerSelected: string;
+    selectedItemsCopy: string;
     notFoundTitle: string;
     notFoundSubtitle: string;
     onItemExpandedChange: (id: EntityId, expanded: boolean) => void;
@@ -1839,6 +1916,7 @@ declare interface EntitySelectCommonProps extends Omit<PopoverProps, "children" 
     onCreate?: (partialName: string) => void;
     onCreateLabel?: string;
     actions?: Action[];
+    value?: T;
 }
 
 export declare type EntitySelectEntity = {
@@ -1850,7 +1928,7 @@ export declare type EntitySelectEntity = {
     subItems?: EntitySelectSubEntity[];
 };
 
-export declare interface EntitySelectMultipleProps extends EntitySelectCommonProps {
+export declare interface EntitySelectMultipleProps<T> extends EntitySelectCommonProps<T> {
     onSelect: (entities: EntitySelectEntity[]) => void;
     singleSelector: false | undefined;
 }
@@ -1861,9 +1939,9 @@ export declare type EntitySelectNamedGroup = {
     groupType?: "avatar" | "team";
 };
 
-export declare type EntitySelectProps = EntitySelectSingleProps | EntitySelectMultipleProps;
+export declare type EntitySelectProps<T> = EntitySelectSingleProps<T> | EntitySelectMultipleProps<T>;
 
-export declare interface EntitySelectSingleProps extends EntitySelectCommonProps {
+export declare interface EntitySelectSingleProps<T> extends EntitySelectCommonProps<T> {
     onSelect: (entity: EntitySelectEntity | null) => void;
     singleSelector: true;
 }
@@ -1892,6 +1970,16 @@ declare interface ErrorMessageProps {
  * @template RecordType - The type containing the properties to extract
  */
 export declare type ExtractPropertyKeys<RecordType> = keyof RecordType;
+
+declare type ExtractVisualizationSettings<T> = T extends {
+    settings: infer S;
+} ? S : never;
+
+export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
+    Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0AiBannerProps = AiBannerInternalProps;
 
 declare const F0AvatarAlert: ({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps) => JSX_2.Element;
 
@@ -2279,6 +2367,7 @@ export declare type GroupingDefinition<R extends RecordType> = {
             name: string;
             /** The item count for the grouping */
             label: (groupId: RecordPathValue<R, K>, filters: FiltersState<FiltersDefinition>) => string | Promise<string>;
+            defaultDirection?: SortOrder;
             itemCount?: (groupId: RecordPathValue<R, K>, filters: FiltersState<FiltersDefinition>) => number | undefined | Promise<number | undefined>;
         };
     };
@@ -2298,7 +2387,7 @@ export declare type GroupingDefinition<R extends RecordType> = {
  */
 export declare type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
     field: keyof Grouping["groupBy"];
-    order: SortOrder;
+    order?: SortOrder;
 } | undefined;
 
 declare type HeaderProps = {
@@ -2487,6 +2576,17 @@ declare type InputFieldProps<T> = {
     appendTag?: string;
     lengthProvider?: (value: T | undefined) => number;
     loading?: boolean;
+    avatar?: AvatarVariant;
+    loadingIndicator?: {
+        /**
+         * If true, the loading spinner will be displayed over the content without affecting the layout
+         */
+        asOverlay?: boolean;
+        /**
+         * The offset of the loading spinner from the content
+         */
+        offset?: number;
+    };
 };
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
@@ -2541,11 +2641,18 @@ declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | ty
 
 export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, }: TOCItemSectionHeaderProps): JSX_2.Element;
 
+declare type KanbanCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, KanbanVisualizationOptions<Record, Filters, Sortings>>;
+
 declare type KanbanLaneDefinition = {
     id: string;
     title: string;
     variant?: Variant;
 };
+
+declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toLaneId: string, sourceRecord: TRecord, destinyRecord: {
+    record: TRecord;
+    position: "above" | "below";
+} | null) => Promise<TRecord>;
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     lanes: ReadonlyArray<KanbanLaneDefinition>;
@@ -2556,7 +2663,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
         icon: IconType;
         property: CardMetadataProperty;
     }>;
-    onMove?: (fromLaneId: string, toLaneId: string, sourceId: string, toIndex: number | null) => Promise<void>;
+    onMove?: KanbanOnMove<Record>;
 };
 
 /**
@@ -2583,6 +2690,11 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     exactMatch?: boolean;
     disabled?: boolean;
 };
+
+/**
+ * Group List: Renders the list for a group
+ */
+declare type ListCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, ListVisualizationOptions<Record, Filters, Sortings>>;
 
 declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting_2<R, Sortings> & PropertyDefinition_2<R>;
 
@@ -2750,6 +2862,10 @@ declare type MetadataItemValue_2 = {
     type: "dot-tag";
     label: string;
     color: NewColor;
+} | {
+    type: "tag";
+    label: string;
+    icon?: IconType;
 };
 
 declare interface MetadataProps {
@@ -2946,6 +3062,7 @@ export declare type NotesTextEditorHandle = {
     setContent: (content: string) => void;
     insertAIBlock: () => void;
     insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
 };
 
 export declare interface NotesTextEditorProps {
@@ -2975,6 +3092,14 @@ export declare interface NotesTextEditorProps {
     withPadding?: boolean;
 }
 
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+
+export declare interface NotesTextEditorSkeletonProps {
+    withHeader?: boolean;
+    withTitle?: boolean;
+    withPadding?: boolean;
+}
+
 export declare const NumberInput: ForwardRefExoticComponent<Omit<NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 export declare type NumberInputProps = Omit<InputProps<string>, "value" | "type" | "onChange"> & {
@@ -3001,7 +3126,7 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
-export declare const OneAlert: ({ title, description, action, link, variant, }: AlertProps) => JSX_2.Element;
+export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
 
@@ -3026,7 +3151,31 @@ export declare interface OneCalendarProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OneDataCollection: <R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, visualizations, onSelectItems, onBulkAction, emptyStates, fullHeight, }: {
+export declare const OneDataCollection: <R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(props: OneDataCollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>) => JSX_2.Element;
+
+/**
+ * A component that renders a collection of data with filtering and visualization capabilities.
+ * It consumes a data source (created by useDataCollectionSource) and displays it through one or more visualizations.
+ *
+ * DataCollection is separated from useDataCollectionSource to:
+ * 1. Support the composition pattern - data sources can be created and managed independently
+ * 2. Allow a single data source to be visualized in multiple ways simultaneously
+ * 3. Enable reuse of the same data source in different parts of the application
+ * 4. Provide a clean separation of concerns between data management and UI rendering
+ *
+ * @template Record - The type of records in the collection
+ * @template Filters - The definition of available filters for the collection
+ * @template ItemActions - The definition of available item actions
+ *
+ * @param source - The data source containing filters, data, and state management
+ * @param visualizations - Array of available visualization options (e.g., table, card view)
+ *
+ * @returns A JSX element containing:
+ * - Filter controls (if filters are defined)
+ * - Visualization selector (if multiple visualizations are available)
+ * - The selected visualization of the data
+ */
+declare type OneDataCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
     source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
@@ -3034,7 +3183,27 @@ export declare const OneDataCollection: <R extends RecordType, Filters extends F
     emptyStates?: CustomEmptyStates;
     onTotalItemsChange?: (totalItems: number) => void;
     fullHeight?: boolean;
-}) => JSX.Element;
+    /** Function to handle state change */
+    onStateChange?: (state: DataCollectionStatusComplete) => void;
+    /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
+     */
+    id?: string;
+    /** Storage for the data collection settings and state */
+    storage?: {
+        /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
+         * You can use "*" for all features and ! to disable a feature
+         *
+         * For example:
+         * - "*" - will use all storage features (empty "" means all)
+         * - "filters" - will use only the storage for the data collection filters state
+         * - "filters, sortings" - will use the storage for the data collection filters and sortings state
+         * - "*, !filters" - will not use the storage for the data collection filters state
+         * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
+         *
+         */
+        features?: DataCollectionStorageFeaturesDefinition;
+    };
+};
 
 export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, ...props }: OneDatePickerProps): JSX_2.Element;
 
@@ -3146,6 +3315,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     value: FiltersState<Definition>;
     /** Optional preset configurations that users can select */
     presets?: PresetsDefinition<Definition>;
+    /** Whether presets are currently loading */
+    presetsLoading?: boolean;
     /** Callback fired when filters are changed */
     onChange: (value: FiltersState<Definition>) => void;
     /** The children of the component */
@@ -3756,6 +3927,7 @@ export declare type RichTextDisplayHandle = HTMLDivElement;
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
     content: string;
     className?: string;
+    format?: "html" | "markdown";
 }
 
 export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
@@ -3801,6 +3973,7 @@ showBar?: boolean;
 viewportRef?: React.RefObject<HTMLDivElement>;
 onScrollTop?: () => void;
 onScrollBottom?: () => void;
+scrollMargin?: number;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 export declare function SearchBar({ onClick, placeholder, shortcut, ...props }: SearchBarProps): JSX_2.Element;
@@ -3935,6 +4108,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
+    searchFn?: (option: SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
     options: SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
@@ -4201,12 +4375,30 @@ export declare type TabItem = {
     id: string;
 });
 
+declare type TableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, TableVisualizationOptions<R, Filters, Sortings, Summaries>>;
+
 declare type TableColumnDefinition<R extends RecordType, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = WithOptionalSorting<R, Sortings> & Pick<ComponentProps<typeof TableHead>, "hidden" | "info" | "infoIcon" | "sticky" | "width"> & {
     /**
      * Optional summary configuration for this column
      * References a key in the Summaries definition, similar to how sorting works
      */
     summary?: SummaryKey<Summaries>;
+    /**
+     * The id of the column (if not provided, the id will be the label of the column)
+     */
+    id?: ColId;
+    /**
+     * The initial order of the column
+     */
+    order?: number;
+    /**
+     * The initial state of the hidden (only applies if allowColumnHiding is true)
+     */
+    hidden?: boolean;
+    /**
+     * Avoid hiding the column by the user
+     */
+    noHiding?: boolean;
 };
 
 declare function TableHead({ children, width, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, }: TableHeadProps): JSX_2.Element;
@@ -4267,8 +4459,27 @@ declare interface TableHeadProps {
 }
 
 declare type TableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = {
+    /**
+     * The columns to display
+     */
     columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    /**
+     * The number of columns to freeze on the left
+     */
     frozenColumns?: 0 | 1 | 2;
+    /**
+     * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
+     */
+    allowColumnReordering?: boolean;
+    /**
+     * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
+     */
+    allowColumnHiding?: boolean;
+};
+
+declare type TableVisualizationSettings = {
+    order: ColId[];
+    hidden: ColId[];
 };
 
 export declare const Tabs: FC<TabsProps> & {
@@ -4612,6 +4823,14 @@ declare const VerticalOverflowList: {
     displayName: string;
 };
 
+declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
+    render: (props: Props) => JSX.Element;
+    renderSettings?: (props: Props) => JSX.Element | null;
+    name: string;
+    icon: IconType;
+    settings: Settings;
+};
+
 /**
  * Represents a visualization configuration for displaying collection data.
  * Supports different visualization types (card, table, or custom) with their respective options.
@@ -4654,6 +4873,10 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
         onLoadError: OnLoadErrorCallback;
         source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     }) => JSX.Element;
+};
+
+declare type VisualizationSettings = {
+    [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<(typeof collectionVisualizations)[K]>;
 };
 
 export declare const Weekdays: ForwardRefExoticComponent<WeekdaysProps & RefAttributes<HTMLDivElement>>;
@@ -4830,15 +5053,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
