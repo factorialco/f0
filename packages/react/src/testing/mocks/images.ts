@@ -23,6 +23,13 @@ const images = {
     "/avatars/team04.jpg",
     "/avatars/team05.jpg",
   ],
+  flag: [
+    "/avatars/team01.jpg",
+    "/avatars/team02.jpg",
+    "/avatars/team03.jpg",
+    "/avatars/team04.jpg",
+    "/avatars/team05.jpg",
+  ],
 }
 
 export const mockImage = (type: keyof typeof images, index: number) => {
