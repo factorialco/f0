@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { Plus } from "@/icons/app"
+import { Placeholder, Plus } from "@/icons/app"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { ComponentProps, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
@@ -704,5 +704,52 @@ export const WithActions = {
         />
       </form>
     )
+  },
+}
+
+export const WithSizeMd = {
+  args: {
+    ...defaultArgs,
+    size: "md",
+  },
+}
+
+export const WithLabel = {
+  args: {
+    ...defaultArgs,
+    label: "Select an employee",
+    hideLabel: false,
+  },
+}
+
+export const WithLabelIcon = {
+  args: {
+    ...defaultArgs,
+    label: "Select an employee",
+    labelIcon: Placeholder,
+    hideLabel: false,
+  },
+}
+
+export const Error = {
+  args: {
+    ...defaultArgs,
+    error: "This is an error",
+    hideLabel: false,
+  },
+}
+
+export const Hint = {
+  args: {
+    ...defaultArgs,
+    hint: "This is a hint",
+    hideLabel: false,
+  },
+}
+
+export const Disabled = {
+  args: {
+    ...defaultArgs,
+    disabled: true,
   },
 }
