@@ -23,8 +23,8 @@ const generateInitialVisualizationSettings = (): VisualizationSettings => {
   const settings = {} as Record<string, unknown>
 
   for (const [key, visualization] of Object.entries(collectionVisualizations)) {
-    if (visualization.settings) {
-      settings[key] = { ...visualization.settings }
+    if (visualization.settings.default) {
+      settings[key] = { ...visualization.settings.default }
     }
   }
 
