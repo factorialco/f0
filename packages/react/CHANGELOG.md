@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.207.0](https://github.com/factorialco/f0/compare/f0-react-v1.206.0...f0-react-v1.207.0) (2025-09-26)
+
+
+### Features
+
+* responsive twocols layout and sticky ([#2700](https://github.com/factorialco/f0/issues/2700)) ([c027d19](https://github.com/factorialco/f0/commit/c027d1979b97aa921dcb721e8c396afedc91578b))
+
 ## [1.206.0](https://github.com/factorialco/f0/compare/f0-react-v1.205.1...f0-react-v1.206.0) (2025-09-26)
 
 
