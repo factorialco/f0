@@ -6,7 +6,7 @@ import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { ComponentProps } from "react"
-import { TwoColumnLayout } from "./index"
+import { TwoColumnLayout } from "../index"
 
 const meta = {
   title: "Layout/TwoColumnLayout",
@@ -31,6 +31,16 @@ const meta = {
         rules: [{ id: "svg-img-alt", enabled: false }],
       },
     },
+    docs: {
+      description: {
+        component: [
+          "A two column layout component that is used to display a main content and a side content.",
+          "The order of the content and the aside can be modified",
+        ]
+          .map((item) => <p key={item}>{item}</p>)
+          .join(""),
+      },
+    },
   },
 } satisfies Meta<typeof TwoColumnLayout>
 
@@ -41,6 +51,7 @@ export const Default: Story = {}
 
 export const Profile: Story = {
   args: {
+    mainColumnPosition: "left",
     children: <Dashboard {...DashboardStories.default.args} />,
     sideContent: (
       <DetailsItemsList
@@ -49,6 +60,13 @@ export const Profile: Story = {
         >)}
       />
     ),
+  },
+}
+
+export const ProfileWithSticky: Story = {
+  args: {
+    ...Profile.args,
+    sticky: true,
   },
 }
 
