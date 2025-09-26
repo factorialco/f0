@@ -3,7 +3,7 @@ import { SortAndHideList } from "../SortAndHideList"
 
 const meta = {
   component: SortAndHideList,
-  title: "DataCollection/SortAndHideList",
+  title: "Data Collection/Internal/SortAndHideList",
   parameters: {
     layout: "centered",
     docs: {
@@ -13,7 +13,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental", "internal"],
+  tags: ["autodocs", "internal"],
   argTypes: {
     items: {
       description: "Array of items that can be sorted and hidden",
