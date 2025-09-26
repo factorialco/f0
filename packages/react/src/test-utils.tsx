@@ -1,6 +1,10 @@
-import { render, type RenderOptions } from "@testing-library/react"
+import {
+  render,
+  RenderResult,
+  type RenderOptions,
+} from "@testing-library/react"
 import type { ReactElement } from "react"
-import { I18nProvider, defaultTranslations } from "./lib/providers/i18n"
+import { defaultTranslations, I18nProvider } from "./lib/providers/i18n"
 
 // Test provider for i18n - can be used in individual tests
 export const TestI18nProvider = ({
@@ -15,7 +19,7 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper">
-) => render(ui, { wrapper: AllTheProviders, ...options })
+): RenderResult => render(ui, { wrapper: AllTheProviders, ...options })
 
 // re-export everything
 export * from "@testing-library/react"

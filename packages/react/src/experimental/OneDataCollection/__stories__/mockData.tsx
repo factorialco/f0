@@ -51,6 +51,10 @@ import {
   SecondaryActionsDefinition,
   SecondaryActionsItemDefinition,
 } from "../actions"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "../hooks/useDataColectionStorage/types"
 import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
@@ -106,7 +110,13 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
 export const mockUsers = generateMockUsers(10)
 
 export const getMockVisualizations = (options?: {
+  // @deprecated
   frozenColumns?: 0 | 1 | 2
+  table?: {
+    frozenColumns?: 0 | 1 | 2
+    allowColumnHiding?: boolean
+    allowColumnReordering?: boolean
+  }
 }): Record<
   Exclude<VisualizationType, "custom">,
   Visualization<
@@ -122,7 +132,10 @@ export const getMockVisualizations = (options?: {
   table: {
     type: "table",
     options: {
-      frozenColumns: options?.frozenColumns,
+      allowColumnHiding: options?.table?.allowColumnHiding,
+      allowColumnReordering: options?.table?.allowColumnReordering,
+      frozenColumns:
+        options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
       columns: [
         {
           label: "Name",
@@ -134,44 +147,60 @@ export const getMockVisualizations = (options?: {
               lastName: item.name.split(" ")[1],
             },
           }),
+          id: "name",
           sorting: "name",
+          hidden: options?.table?.allowColumnHiding ? true : undefined,
+          order: options?.table?.allowColumnReordering ? 3 : undefined,
         },
         {
           label: "Email",
           render: (item) => item.email,
           sorting: "email",
+          id: "email",
         },
         {
           label: "Role",
           render: (item) => item.role,
           sorting: "role",
+          id: "role",
+          order: options?.table?.allowColumnReordering ? 2 : undefined,
+          noHiding: options?.table?.allowColumnHiding,
         },
         {
+          id: "department",
           label: "Department",
           render: (item) => item.department,
           sorting: "department",
+          order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
         {
+          id: "email2",
           label: "Email 2",
           render: (item) => item.email,
           sorting: "email",
+          order: options?.table?.allowColumnReordering ? 1 : undefined,
         },
         {
+          id: "role2",
           label: "Role 2",
           render: (item) => item.role,
           sorting: "role",
         },
         {
+          id: "department2",
           label: "Department 2",
           render: (item) => item.department,
           sorting: "department",
+          order: options?.table?.allowColumnReordering ? 10 : undefined,
         },
         {
+          id: "email3",
           label: "Email 3",
           render: (item) => item.email,
           sorting: "email",
         },
         {
+          id: "role3",
           label: "Role 3",
           render: (item) => item.role,
           sorting: "role",
@@ -180,21 +209,25 @@ export const getMockVisualizations = (options?: {
           label: "Department 3",
           render: (item) => item.department,
           sorting: "department",
+          id: "department3",
         },
         {
           label: "Email 4",
           render: (item) => item.email,
           sorting: "email",
+          id: "email4",
         },
         {
           label: "Role 4",
           render: (item) => item.role,
           sorting: "role",
+          id: "role4",
         },
         {
           label: "Department 4",
           render: (item) => item.department,
           sorting: "department",
+          id: "department4",
         },
         {
           label: "Permissions",
@@ -207,6 +240,8 @@ export const getMockVisualizations = (options?: {
               .filter(Boolean)
               .join(", "),
           sorting: "permissions.read",
+          id: "permissions",
+          order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
       ],
     },
@@ -322,6 +357,36 @@ export const getMockVisualizations = (options?: {
           sorting: "role",
         },
         {
+          label: "Teammates",
+          render: (item) => ({
+            type: "avatarList",
+            value: {
+              max: 1,
+              avatarList: [
+                {
+                  type: "person",
+                  firstName: item.name,
+                  lastName: "Doe",
+                  src: "/avatars/person01.jpg",
+                },
+                {
+                  type: "person",
+                  firstName: "Dani",
+                  lastName: "Moreno",
+                  src: "/avatars/person04.jpg",
+                },
+                {
+                  type: "person",
+                  firstName: "Sergio",
+                  lastName: "Carracedo",
+                  src: "/avatars/person05.jpg",
+                },
+              ],
+            },
+          }),
+          sorting: "role",
+        },
+        {
           label: "Email 2",
           render: (item) => item.email,
           sorting: "email",
@@ -342,6 +407,7 @@ export const getMockVisualizations = (options?: {
           }),
           hide: (item) => item.name.startsWith("D"),
         },
+
         {
           label: "Department",
           render: (item) => ({
@@ -393,6 +459,21 @@ export const getMockVisualizations = (options?: {
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },
       ],
+      onMove: async (
+        _fromLaneId: string,
+        _toLaneId: string,
+        sourceRecord: MockUser,
+        _destinyRecord: { record: MockUser; position: "above" | "below" } | null
+      ): Promise<MockUser> => {
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 10))
+
+        // Simulate success/error randomly for testing
+        // if (Math.random() > 0.7) {
+        //   throw new Error("Simulated move error")
+        // }
+        return await sourceRecord
+      },
     },
   },
 })
@@ -641,6 +722,14 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  id,
+  storage,
+  /**
+   * mocks the table column ordering and hidding
+   */
+  tableAllowColumnReordering = false,
+  tableAllowColumnHiding = false,
+  onStateChange,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -657,6 +746,10 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
+  id?: string
+  storage?: {
+    features?: DataCollectionStorageFeaturesDefinition
+  }
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,
@@ -675,9 +768,16 @@ export const ExampleComponent = ({
   primaryActions?: PrimaryActionsDefinition
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean
+  tableAllowColumnReordering?: boolean
+  tableAllowColumnHiding?: boolean
+  onStateChange?: (state: DataCollectionStatusComplete) => void
 }) => {
   const mockVisualizations = getMockVisualizations({
-    frozenColumns,
+    table: {
+      frozenColumns,
+      allowColumnHiding: tableAllowColumnHiding,
+      allowColumnReordering: tableAllowColumnReordering,
+    },
   })
 
   const dataSource = useDataCollectionSource({
@@ -689,6 +789,7 @@ export const ExampleComponent = ({
     currentGrouping: currentGrouping,
     primaryActions,
     secondaryActions,
+    itemUrl: (item) => `/users/${item.id}`,
     itemActions: (item) => [
       {
         label: "Edit",
@@ -752,8 +853,14 @@ export const ExampleComponent = ({
       )}
     >
       <OneDataCollection
+        id={id}
+        storage={storage}
         fullHeight={fullHeight}
         source={dataSource}
+        onStateChange={(state) => {
+          console.log("State changed", "->", state)
+          onStateChange?.(state)
+        }}
         onSelectItems={(selectedItems) =>
           console.log("Selected items", "->", selectedItems)
         }

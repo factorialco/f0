@@ -17,8 +17,8 @@ import {
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-import { TableColumnDefinition } from ".."
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { TableColumnDefinition } from "../types"
 import { useSticky } from "../useSticky"
 
 export type RowProps<

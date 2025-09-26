@@ -1,23 +1,8 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
-import { createContext, useContext, useMemo, useState } from "react"
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
-
-interface ChatWindowContextType {
-  reachedMaxHeight: boolean
-  messageContainerScrollTop: number
-  setMessageContainerScrollTop: (scrollTop: number) => void
-}
-
-const ChatWindowContext = createContext<ChatWindowContextType>({
-  reachedMaxHeight: false,
-  messageContainerScrollTop: 0,
-  setMessageContainerScrollTop: () => {},
-})
-
-export const useChatWindowContext = () => useContext(ChatWindowContext)
 
 export const SidebarWindow = ({ children }: WindowProps) => {
   const {
@@ -32,15 +17,6 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     isOpen: open,
     autoClearMinutes,
   })
-  const [messageContainerScrollTop, setMessageContainerScrollTop] = useState(0)
-  const chatWindowContext = useMemo(
-    () => ({
-      reachedMaxHeight: true,
-      messageContainerScrollTop,
-      setMessageContainerScrollTop,
-    }),
-    [messageContainerScrollTop]
-  )
 
   return (
     <AnimatePresence>
@@ -48,7 +24,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
         <motion.div
           key="chat-window"
           aria-hidden={!open}
-          className="relative flex h-full max-w-[360px] flex-col overflow-hidden bg-f1-special-page shadow xs:rounded-xl"
+          className="relative flex h-full max-w-[360px] flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
@@ -75,9 +51,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               delay: shouldPlayEntranceAnimation ? 0.2 : 0,
             }}
           >
-            <ChatWindowContext.Provider value={chatWindowContext}>
-              {children}
-            </ChatWindowContext.Provider>
+            {children}
           </motion.div>
         </motion.div>
       )}

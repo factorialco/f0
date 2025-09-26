@@ -5,6 +5,7 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   filters: Definition | undefined
   value: FiltersState<Definition>
   presets?: PresetsDefinition<Definition>
+  presetsLoading?: boolean
   removeFilterValue: (key: keyof Definition) => void
   setFiltersValue: (filters: FiltersState<Definition>) => void
   isFiltersOpen: boolean
@@ -19,6 +20,7 @@ export const FiltersContext = createContext<
   filters: {},
   value: {},
   presets: [],
+  presetsLoading: false,
   removeFilterValue: () => {},
   setFiltersValue: () => {},
   isFiltersOpen: false,

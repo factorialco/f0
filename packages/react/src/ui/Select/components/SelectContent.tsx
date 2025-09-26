@@ -1,4 +1,6 @@
+import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import * as SelectPrimitive from "@radix-ui/react-select"
@@ -30,6 +32,7 @@ type SelectItemProps = ComponentPropsWithoutRef<
   bottom?: ReactNode
   emptyMessage?: string
   value?: string
+  showLoadingIndicator?: boolean
 }
 
 type BaseSelectContentProps = Omit<SelectItemProps, "children">
@@ -52,6 +55,8 @@ type SelectContentProps = (
   onScrollBottom?: () => void
   onScrollTop?: () => void
   isLoadingMore?: boolean
+  isLoading?: boolean
+  scrollMargin?: number
 }
 
 const SelectContent = forwardRef<
@@ -68,6 +73,9 @@ const SelectContent = forwardRef<
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
+      isLoading,
+      scrollMargin,
+      showLoadingIndicator,
       ...props
     },
     ref
@@ -76,6 +84,8 @@ const SelectContent = forwardRef<
     // The scrollable element for your list
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
+
+    const i18n = useI18n()
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
@@ -123,7 +133,9 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <p className="p-2 text-center">{emptyMessage || "-"}</p>
+      <p className={cn("flex items-center justify-center p-2", "min-h-[80px]")}>
+        {emptyMessage || "-"}
+      </p>
     ) : isVirtual ? (
       <div
         className={cn(
@@ -152,7 +164,9 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">Loading....</div>
+                <div className="h-10 w-full py-2 text-center">
+                  {i18n.select.loadingMore}
+                </div>
               ) : (
                 items[virtualItem.index].item
               )}
@@ -163,6 +177,8 @@ const SelectContent = forwardRef<
     ) : (
       <>{children}</>
     )
+
+    const loadingNewContent = isLoading && !isLoadingMore
 
     const content = (
       <SelectPrimitive.Content
@@ -192,31 +208,44 @@ const SelectContent = forwardRef<
       >
         <>
           {props.top}
-          <ScrollArea
-            viewportRef={parentRef}
-            className={cn(
-              "flex flex-col overflow-y-auto",
-              asList ? "max-h-full" : "max-h-[300px]"
-            )}
-            onScrollBottom={onScrollBottom}
-            onScrollTop={onScrollTop}
-          >
-            {asList ? (
-              viewportContent
-            ) : (
-              <SelectPrimitive.Viewport
-                asChild
-                className={cn(
-                  "p-1",
-                  !asList &&
-                    position === "popper" &&
-                    "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
-                )}
+          <div className="relative">
+            {showLoadingIndicator && loadingNewContent && (
+              <div
+                className="absolute inset-0 flex cursor-progress items-center justify-center"
+                aria-live="polite"
+                aria-busy="true"
               >
-                {viewportContent}
-              </SelectPrimitive.Viewport>
+                <Spinner />
+              </div>
             )}
-          </ScrollArea>
+            <ScrollArea
+              viewportRef={parentRef}
+              className={cn(
+                "flex flex-col overflow-y-auto",
+                asList ? "max-h-full" : "max-h-[300px]",
+                loadingNewContent && "select-none opacity-10 transition-opacity"
+              )}
+              onScrollBottom={onScrollBottom}
+              onScrollTop={onScrollTop}
+              scrollMargin={scrollMargin}
+            >
+              {asList ? (
+                viewportContent
+              ) : (
+                <SelectPrimitive.Viewport
+                  asChild
+                  className={cn(
+                    "p-1",
+                    !asList &&
+                      position === "popper" &&
+                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                  )}
+                >
+                  {viewportContent}
+                </SelectPrimitive.Viewport>
+              )}
+            </ScrollArea>
+          </div>
           {props.bottom}
         </>
       </SelectPrimitive.Content>

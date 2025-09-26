@@ -1,7 +1,7 @@
 import { NewColor } from "@/components/tags/F0TagDot"
-import { AcademicCap, List, Placeholder } from "@/icons/app"
+import { AcademicCap, List, Placeholder, Settings } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { NotesTextEditor } from "./index"
+import { NotesTextEditor, NotesTextEditorSkeleton } from "./index"
 
 const meta: Meta<typeof NotesTextEditor> = {
   title: "Rich text/NotesTextEditor",
@@ -106,93 +106,6 @@ const initialContent = {
         },
         config: null,
         isOpen: true,
-      },
-    },
-    {
-      type: "liveCompanion",
-      attrs: {
-        data: {
-          title: "Meeting live companion topics",
-          topics: [
-            {
-              title: "Project Timeline",
-              comments: [
-                {
-                  user: "Ana",
-                  comment: "We should extend the deadline by two weeks.",
-                },
-                {
-                  user: "Carlos",
-                  comment: "I agree, we need more time for testing.",
-                },
-              ],
-            },
-            {
-              title: "Project Timeline 2",
-              comments: [
-                {
-                  user: "Ana",
-                  comment: "We should extend the deadline by two weeks.",
-                },
-                {
-                  user: "Carlos",
-                  comment: "I agree, we need more time for testing.",
-                },
-              ],
-            },
-          ],
-        },
-        config: null,
-        isOpen: false,
-      },
-    },
-    {
-      type: "transcript",
-      attrs: {
-        data: {
-          title: "Meeting Transcript",
-          messages: [
-            {
-              userId: "user1",
-              text: "Hello everyone, let's start our weekly planning meeting.",
-              dateTime: "2023-11-15T09:00:00Z",
-            },
-            {
-              userId: "user2",
-              text: "I've completed the design mockups for the new feature.",
-              dateTime: "2023-11-15T09:02:30Z",
-            },
-            {
-              userId: "user3",
-              text: "Great! I can start implementing it tomorrow.",
-              dateTime: "2023-11-15T09:04:15Z",
-            },
-            {
-              userId: "user1",
-              text: "Perfect. Let's aim to have a prototype by Friday.",
-              dateTime: "2023-11-15T09:05:45Z",
-            },
-          ],
-          users: [
-            {
-              id: "user1",
-              fullname: "Maria Rodriguez",
-              imageUrl: "https://i.pravatar.cc/150?u=maria",
-            },
-            {
-              id: "user2",
-              fullname: "Alex Chen",
-              imageUrl: "https://i.pravatar.cc/150?u=alex",
-            },
-            {
-              id: "user3",
-              fullname: "David Kim",
-              imageUrl: "https://i.pravatar.cc/150?u=david",
-            },
-          ],
-        },
-        config: null,
-        isOpen: false,
       },
     },
     {
@@ -301,6 +214,7 @@ export const Default: Story = {
           emoji: "📝",
           label: "Task list (custom)",
           icon: List,
+          editable: true,
         },
       ],
     },
@@ -333,10 +247,30 @@ export const Default: Story = {
         color: "malibu" as NewColor,
       },
       {
+        type: "tag",
+        label: "Tag",
+        icon: Settings,
+      },
+      {
         type: "text",
-        label: "Text",
         content: "Metadata",
       },
     ],
+  },
+}
+
+type SkeletonStory = StoryObj<typeof NotesTextEditorSkeleton>
+
+export const Skeleton: SkeletonStory = {
+  name: "Skeleton - Basic",
+  render: (args) => (
+    <div className="h-96 w-full">
+      <NotesTextEditorSkeleton {...args} />
+    </div>
+  ),
+  args: {
+    withHeader: true,
+    withTitle: true,
+    withPadding: true,
   },
 }

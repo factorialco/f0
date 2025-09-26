@@ -7,8 +7,9 @@ import {
   SortingsState,
 } from "@/hooks/datasource"
 import { Sliders } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { FiltersDefinition } from "../../../components/OneFilterPicker/types"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
@@ -17,6 +18,10 @@ import { Visualization } from "../visualizations/collection"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { VisualizationSelector } from "./components/VisualizationSelector"
+import {
+  VisualizationSettingsRenderer,
+  hasVisualizacionSettings as hasVisualizacionSettingsHelper,
+} from "./VisualizationSettingsRenderer"
 
 type SettingsProps<
   R extends RecordType,
@@ -77,6 +82,8 @@ export const Settings = <
   NavigationFilters,
   Grouping
 >) => {
+  const i18n = useI18n()
+
   const groupByOptions = grouping
     ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
     : 0
@@ -103,6 +110,45 @@ export const Settings = <
   const hasGrouping = grouping && groupByOptions > 0
   const hasSortings = sortings && Object.keys(sortings).length > 0
 
+  const currentVisualizationDef = useMemo(
+    () => visualizations[currentVisualization],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we are not memoizing the visualization as is a constant
+    [currentVisualization]
+  )
+  const visualizacionSettings = useMemo(
+    () => (
+      <VisualizationSettingsRenderer
+        key="visualization-settings"
+        visualization={currentVisualizationDef}
+      />
+    ),
+    [currentVisualizationDef]
+  )
+
+  const hasVisualizacionSettings = useMemo(
+    () => hasVisualizacionSettingsHelper(currentVisualizationDef),
+    [currentVisualizationDef]
+  )
+
+  const settingsTitle = useMemo(
+    () => {
+      const visualizationType = visualizations[currentVisualization]?.type
+      if (!visualizationType) return "-"
+
+      const visualizationName =
+        i18n.collections.visualizations[
+          visualizationType as keyof typeof i18n.collections.visualizations
+        ] ?? "-"
+
+      return i18n.collections.visualizations.settings.replace(
+        "{%visualizationName}",
+        visualizationName as string
+      )
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we are not memoizing the visualization as is a constant
+    [currentVisualization]
+  )
+
   if (!shouldShowSettings) return null
 
   return (
@@ -111,12 +157,13 @@ export const Settings = <
         <PopoverTrigger asChild onClick={() => setOpen(!open)}>
           <Button
             variant="outline"
-            label="Filters"
+            label="Settings"
             icon={Sliders}
             onClick={() => {}}
             hideLabel
             round
             pressed={open}
+            aria-controls={open ? "settings" : undefined}
           />
         </PopoverTrigger>
         <PopoverContent
@@ -133,14 +180,19 @@ export const Settings = <
                 onVisualizationChange={handleVisualizationChange}
               />
             ),
-            hasGrouping && !grouping?.hideSelector && (
-              <GroupingSelector
-                key="grouping"
-                grouping={grouping}
-                currentGrouping={currentGrouping}
-                onGroupingChange={handleGroupingChange}
-              />
-            ),
+            hasGrouping &&
+              !grouping?.hideSelector &&
+              !(
+                !!grouping.mandatory &&
+                Object.entries(grouping.groupBy).length < 2
+              ) && (
+                <GroupingSelector
+                  key="grouping"
+                  grouping={grouping}
+                  currentGrouping={currentGrouping}
+                  onGroupingChange={handleGroupingChange}
+                />
+              ),
             hasSortings && (
               <SortingSelector
                 key="sorting"
@@ -148,6 +200,14 @@ export const Settings = <
                 onChange={onSortingsChange}
                 sortings={sortings}
               />
+            ),
+            hasVisualizacionSettings && (
+              <section key="visualization-settings" className="p-3">
+                <h3 className="mb-2 text-sm font-medium text-f1-foreground-secondary">
+                  {settingsTitle}
+                </h3>
+                {visualizacionSettings}
+              </section>
             ),
           ]
             .filter(Boolean)

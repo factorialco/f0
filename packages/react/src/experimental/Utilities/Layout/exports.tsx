@@ -1,4 +1,4 @@
-import { Component } from "../../../lib/component"
+import { Component } from "../../../lib/component/component"
 import { AutoGrid as AutoGridComponent } from "./AutoGrid"
 import { Split as SplitComponent } from "./Split"
 import { Stack as StackComponent } from "./Stack"

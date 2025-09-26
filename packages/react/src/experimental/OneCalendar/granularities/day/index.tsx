@@ -5,7 +5,6 @@ import {
   startOfDay,
   startOfMonth,
 } from "date-fns"
-import { GranularityDefinition } from ".."
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
@@ -15,6 +14,7 @@ import {
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
+import { GranularityDefinition } from "../types"
 import { DayView } from "./DayView"
 
 export function toDayGranularityDateRange<

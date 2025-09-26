@@ -9,7 +9,7 @@ import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
 
-const DEFAULT_MAX_LANE_HEIGHT = 700
+const DEFAULT_MAX_LANE_HEIGHT = 600
 
 export function Lane<Record extends RecordType>({
   title,
@@ -44,7 +44,7 @@ export function Lane<Record extends RecordType>({
 
   return (
     <div
-      className={`shadow-sm flex min-w-80 max-w-72 flex-col`}
+      className={`shadow-sm flex w-[323.2px] flex-col`}
       style={{
         maxHeight: `${maxHeight}px`,
       }}

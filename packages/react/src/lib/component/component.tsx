@@ -1,14 +1,6 @@
 import { forwardRef, PropsWithoutRef } from "react"
-import { useComponentXRay } from "./xray"
-
-export const componentTypes = ["layout", "info", "action", "form"] as const
-export type ComponentTypes = (typeof componentTypes)[number]
-
-export interface ComponentMetadata {
-  name: string
-  type: ComponentTypes
-  internal?: boolean
-}
+import { useComponentXRay } from "../xray"
+import { ComponentMetadata } from "./types"
 
 export const Component = <
   R extends HTMLElement | SVGElement,

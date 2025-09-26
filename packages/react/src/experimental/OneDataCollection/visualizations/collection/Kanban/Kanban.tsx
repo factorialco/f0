@@ -4,12 +4,10 @@ import type {
 } from "@/components/F0Card/types"
 import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import { DataCollectionDataAdapter } from "@/experimental"
 import { useDataCollectionLanesData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
 import { useSelectableLanes } from "@/experimental/OneDataCollection/hooks/useSelectableLanes"
 import {
   InfiniteScrollPaginatedResponse,
-  PaginatedDataAdapter,
   PaginationInfo,
   type RecordType,
 } from "@/hooks/datasource"
@@ -19,7 +17,7 @@ import { useIsDev } from "@/lib/providers/user-platafform"
 import { Kanban } from "@/ui/Kanban"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
 import type { KanbanProps } from "@/ui/Kanban/types"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../../../item-actions"
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import type {
@@ -47,6 +45,7 @@ export const KanbanCollection = <
   source,
   onSelectItems,
   onLoadError,
+  onLoadData,
 }: KanbanCollectionProps<
   R,
   Filters,
@@ -71,16 +70,6 @@ export const KanbanCollection = <
 
   if (source.currentGrouping && isDev) {
     throw new Error("Grouping is not supported in Kanban yet")
-  }
-
-  const isInfiniteScrollPagination = (
-    dataAdapter: DataCollectionDataAdapter<R, Filters>
-  ): dataAdapter is PaginatedDataAdapter<R, Filters> => {
-    return dataAdapter.paginationType === "infinite-scroll"
-  }
-
-  if (!isInfiniteScrollPagination(source.dataAdapter)) {
-    throw new Error("Infinite scroll pagination is required in Kanban")
   }
 
   const [instanceId] = useState(() => Symbol("kanban-visualization"))
@@ -134,10 +123,22 @@ export const KanbanCollection = <
         fetchMore: hasMore ? () => laneData.loadMore() : undefined,
       }
     }),
-    getKey: (item, index) =>
-      idProvider ? String(idProvider(item, index)) : index,
+    loading: Object.values(lanesHooks).some(
+      (laneHook) => laneHook.isInitialLoading
+    ),
+    getKey: (item, index) => {
+      if (idProvider) return String(idProvider(item, index))
+      const fallbackId = (item as unknown as { id?: string | number })?.id
+      return fallbackId !== undefined && fallbackId !== null
+        ? String(fallbackId)
+        : String(index)
+    },
     renderCard: (item, index, total, laneId) => {
-      const dragId = String(idProvider ? idProvider(item, index) : index)
+      const dragId = String(
+        idProvider
+          ? idProvider(item, index)
+          : ((item as unknown as { id?: string | number })?.id ?? index)
+      )
       const itemId = source.selectable ? source.selectable(item) : item.id
 
       // Gets the lane useSelectable hook
@@ -151,10 +152,15 @@ export const KanbanCollection = <
         useSelectable &&
         useSelectable?.selectedItems.has(itemId)
 
+      const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
+      const itemOnClick = source.itemOnClick
+        ? source.itemOnClick(item)
+        : undefined
+
       return (
-        <KanbanCard
+        <KanbanCard<R>
           key={dragId}
-          drag={{ id: dragId, type: "list-card", data: { laneId } }}
+          drag={{ id: dragId, type: "list-card", data: { ...item, laneId } }}
           id={String(item.id)}
           index={index}
           total={total}
@@ -168,17 +174,50 @@ export const KanbanCollection = <
             optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined
           }
           compact
+          forceVerticalMetadata
           selectable={source.selectable !== undefined}
           selected={isSelected}
+          data-testid={`kanban-card-${String(item.id)}`}
           onSelect={(selected) => {
             if (useSelectable) {
               useSelectable.handleSelectItemChange(item, selected)
             }
           }}
+          onClick={itemOnClick}
+          link={itemHref}
         />
       )
     },
   }
+
+  // Report aggregated totals/loading so header total updates
+  const totalItemsAggregated = useMemo(() => {
+    const hooks = Object.values(lanesHooks)
+    if (hooks.length === 0) return undefined
+    // Sum totals from lanes that expose paginationInfo.total; fallback to records length
+    return hooks.reduce((acc, lane) => {
+      const laneTotal = lane.paginationInfo?.total ?? lane.data.records.length
+      return acc + (typeof laneTotal === "number" ? laneTotal : 0)
+    }, 0)
+  }, [lanesHooks])
+
+  const isInitialLoadingAggregated = useMemo(() => {
+    const hooks = Object.values(lanesHooks)
+    if (hooks.length === 0) return true
+    // Consider initial loading if any lane is still in initial loading
+    return hooks.some((lane) => lane.isInitialLoading)
+  }, [lanesHooks])
+
+  useEffect(() => {
+    onLoadData({
+      totalItems: totalItemsAggregated,
+      filters: source.currentFilters,
+      search: source.currentSearch,
+      isInitialLoading: isInitialLoadingAggregated,
+      data: Object.values(lanesHooks).flatMap((l) => l.data.records),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- follow Table/List behavior: rerun when totals or loading change
+  }, [totalItemsAggregated, isInitialLoadingAggregated])
 
   // Fine-grained reorder only when no sort order is applied
   const allowReorder = source.currentSortings === null
@@ -189,7 +228,10 @@ export const KanbanCollection = <
     laneItems.forEach((lane) => {
       const map = new Map<string, number>()
       lane.items.forEach((item, index) => {
-        const itemId = String(idProvider ? idProvider(item as R, index) : index)
+        const rawId = idProvider
+          ? idProvider(item as R, index)
+          : ((item as unknown as { id?: string | number })?.id ?? index)
+        const itemId = String(rawId)
         map.set(itemId, index)
       })
       maps.set(lane.id, map)
@@ -203,16 +245,7 @@ export const KanbanCollection = <
       const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
       return allowReorder ? idx : -1
     },
-    onMove: onMove
-      ? async (
-          fromLaneId: string,
-          toLaneId: string,
-          sourceId: string,
-          toIndex: number | null
-        ) => {
-          await onMove(fromLaneId, toLaneId, sourceId, toIndex)
-        }
-      : undefined,
+    onMove: onMove,
   }
 
   /**

@@ -12,12 +12,22 @@ import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
-import { TableCollection, TableCollectionProps } from "./Table"
+import {
+  TableCollection,
+  TableCollectionProps,
+  SettingsRenderer as tableSettingsRenderer,
+  TableVisualizationSettings,
+} from "./Table"
 
-export type VisualizacionTypeDefinition<Props> = {
+export type VisualizacionTypeDefinition<
+  Props,
+  Settings = Record<string, never>,
+> = {
   render: (props: Props) => JSX.Element
+  renderSettings?: (props: Props) => JSX.Element | null
   name: string
   icon: IconType
+  settings: Settings
 }
 
 type CollectionVisualizations<
@@ -38,7 +48,8 @@ type CollectionVisualizations<
       ItemActions,
       NavigationFilters,
       Grouping
-    >
+    >,
+    TableVisualizationSettings
   >
   list: VisualizacionTypeDefinition<
     ListCollectionProps<
@@ -88,16 +99,16 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Table",
     icon: Table,
     render: <
-      Record extends RecordType,
+      R extends RecordType,
       Filters extends FiltersDefinition,
       Sortings extends SortingsDefinition,
       Summaries extends SummariesDefinition,
-      ItemActions extends ItemActionsDefinition<Record>,
+      ItemActions extends ItemActionsDefinition<R>,
       NavigationFilters extends NavigationFiltersDefinition,
-      Grouping extends GroupingDefinition<Record>,
+      Grouping extends GroupingDefinition<R>,
     >(
       props: TableCollectionProps<
-        Record,
+        R,
         Filters,
         Sortings,
         Summaries,
@@ -108,7 +119,7 @@ export const collectionVisualizations: CollectionVisualizations<
     ) => {
       return (
         <TableCollection<
-          Record,
+          R,
           Filters,
           Sortings,
           Summaries,
@@ -120,10 +131,16 @@ export const collectionVisualizations: CollectionVisualizations<
         />
       )
     },
+    renderSettings: tableSettingsRenderer,
+    settings: {
+      order: [],
+      hidden: [],
+    },
   },
   list: {
     name: "List",
     icon: List,
+    settings: {},
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -161,6 +178,7 @@ export const collectionVisualizations: CollectionVisualizations<
   card: {
     name: "Card",
     icon: Kanban,
+    settings: {},
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -198,6 +216,7 @@ export const collectionVisualizations: CollectionVisualizations<
   kanban: {
     name: "Kanban",
     icon: Kanban,
+    settings: {},
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,

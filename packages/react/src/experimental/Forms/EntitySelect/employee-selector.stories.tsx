@@ -1,3 +1,4 @@
+import { Search } from "@/icons/app"
 import avatar from "@storybook-static/avatars/person02.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
@@ -239,6 +240,8 @@ export const Default: Story = {
       <div className="w-60">
         <EntitySelect
           // Groups (hard-coded as an example)
+          label="Role"
+          hideLabel={true}
           groups={[{ label: "None", value: "all", groupType: "avatar" }]}
           selectedGroup={selectedGroup}
           onGroupChange={(value) => setSelectedGroup(value ?? "all")}
@@ -251,11 +254,12 @@ export const Default: Story = {
           }))}
           // Loading animation
           loading={loading}
+          icon={Search}
           onOpenChange={onOpenChange}
           onItemExpandedChange={onItemExpandedChange}
           // Basic placeholders and labels
-          triggerPlaceholder="Select employees..."
-          triggerSelected="employees selected"
+          placeholder="Select employees..."
+          selectedItemsCopy="employees selected"
           searchPlaceholder="Search..."
           selectAllLabel="Select all"
           clearLabel="Clear"

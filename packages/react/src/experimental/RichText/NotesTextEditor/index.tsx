@@ -5,6 +5,7 @@ import { Handle, Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Button } from "@/ui/button"
 import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -165,6 +166,14 @@ const NotesTextEditorComponent = forwardRef<
         ])
         .run()
     },
+    pushContent: (content: string) => {
+      if (!editor) return
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(editor.state.doc.content.size, content)
+        .run()
+    },
   }))
 
   const tippyOptions = useMemo(
@@ -234,7 +243,7 @@ const NotesTextEditorComponent = forwardRef<
         {(onTitleChange || title) && (
           <div
             className={cn(
-              "flex flex-col pb-5 pt-5",
+              "flex flex-col pb-5 pt-5 transition-all duration-300",
               withPadding ? "px-32" : "px-14"
             )}
           >
@@ -282,7 +291,7 @@ const NotesTextEditorComponent = forwardRef<
           <EditorContent
             editor={editor}
             className={cn(
-              "pb-28 [&>div]:w-full",
+              "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
               withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
             )}
           />
@@ -292,6 +301,98 @@ const NotesTextEditorComponent = forwardRef<
   )
 })
 
+interface NotesTextEditorSkeletonProps {
+  withHeader?: boolean
+  withTitle?: boolean
+  withPadding?: boolean
+}
+
+export const NotesTextEditorSkeleton = ({
+  withHeader = false,
+  withTitle = true,
+  withPadding = false,
+}: NotesTextEditorSkeletonProps) => {
+  return (
+    <div
+      className="relative flex h-full w-full flex-col"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      {withHeader && (
+        <div className="flex items-center justify-between border-b border-f1-border px-6 py-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-6 w-20 rounded-md" />
+            <Skeleton className="h-6 w-24 rounded-md" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-16 rounded-md" />
+            <Skeleton className="h-8 w-12 rounded-md" />
+          </div>
+        </div>
+      )}
+
+      {/* Toolbar skeleton */}
+      <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
+        <Skeleton className="h-8 w-8 rounded" />
+        <div className="flex items-center gap-0.5">
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+        </div>
+        <div className="flex items-center gap-0.5">
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+        </div>
+        <div className="flex items-center gap-0.5">
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+          <Skeleton className="h-8 w-8 rounded" />
+        </div>
+      </div>
+
+      <ScrollArea className="h-full gap-6">
+        {withTitle && (
+          <div
+            className={cn(
+              "flex flex-col pb-5 pt-5",
+              withPadding ? "px-32" : "px-14"
+            )}
+          >
+            <Skeleton className="h-8 w-80 rounded-md" />
+          </div>
+        )}
+
+        <div className="h-full">
+          <div
+            className={cn(
+              "pb-28 [&>div]:w-full",
+              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
+            )}
+          >
+            {/* Content skeleton */}
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-5 w-full rounded-md" />
+              <Skeleton className="h-5 w-4/5 rounded-md" />
+              <Skeleton className="h-5 w-3/5 rounded-md" />
+              <Skeleton className="h-5 w-full rounded-md" />
+              <Skeleton className="h-5 w-1/2 rounded-md" />
+            </div>
+          </div>
+        </div>
+      </ScrollArea>
+    </div>
+  )
+}
+
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
 export { NotesTextEditorComponent as NotesTextEditor }
-export type { NotesTextEditorHandle, NotesTextEditorProps }
+export type {
+  NotesTextEditorHandle,
+  NotesTextEditorProps,
+  NotesTextEditorSkeletonProps,
+}

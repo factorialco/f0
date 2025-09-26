@@ -1,3 +1,5 @@
+import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
+import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { CrossedCircle } from "@/icons/app"
@@ -15,6 +17,7 @@ import {
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
+import { InputFieldStatus } from "./types"
 export const INPUTFIELD_SIZES = ["sm", "md"] as const
 export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
 
@@ -132,19 +135,6 @@ const inputFieldStatusVariants = cva({
   ],
 })
 
-export const inputFieldStatus = ["default", "warning", "info", "error"] as const
-export type InputFieldStatusType = (typeof inputFieldStatus)[number]
-
-export type InputFieldStatus =
-  | {
-      type: Exclude<InputFieldStatusType, "error">
-      message: string
-    }
-  | {
-      type: "error"
-      message?: string
-    }
-
 export type InputFieldProps<T> = {
   label: string
   placeholder?: string
@@ -193,6 +183,17 @@ export type InputFieldProps<T> = {
   appendTag?: string
   lengthProvider?: (value: T | undefined) => number
   loading?: boolean
+  avatar?: AvatarVariant
+  loadingIndicator?: {
+    /**
+     * If true, the loading spinner will be displayed over the content without affecting the layout
+     */
+    asOverlay?: boolean
+    /**
+     * The offset of the loading spinner from the content
+     */
+    offset?: number
+  }
 }
 
 const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -214,6 +215,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       canGrow = false,
       value,
       loading = false,
+      loadingIndicator,
       placeholder,
       clearable = false,
       isEmpty = defaultIsEmpty,
@@ -229,6 +231,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       name,
       role,
       appendTag,
+      avatar,
       "aria-controls": ariaControls,
       "aria-expanded": ariaExpanded,
       ...props
@@ -265,11 +268,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     useEffect(
       () => {
-        if (
-          localValue === value ||
-          value === emptyValue ||
-          value === undefined
-        ) {
+        if (localValue === value) {
           return
         }
         setLocalValue(value)
@@ -379,18 +378,21 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             className="pointer-events-auto relative flex h-full w-full min-w-0 flex-1"
             onClick={handleClickContent}
           >
-            {icon && (
+            {(icon || avatar) && (
               <div
                 className={cn(
-                  "pointer-events-none absolute left-2 top-1.5 my-auto h-5 w-5 shrink-0",
+                  "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
                   size === "md" && "left-3 top-2.5"
                 )}
               >
-                <F0Icon
-                  onClick={handleClickContent}
-                  icon={icon}
-                  color="default"
-                />
+                {icon && (
+                  <F0Icon
+                    onClick={handleClickContent}
+                    icon={icon}
+                    color="default"
+                  />
+                )}
+                {avatar && <F0Avatar avatar={avatar} size="xs" />}
               </div>
             )}
             <div
@@ -407,16 +409,16 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-controls": ariaControls,
                 "aria-expanded": ariaExpanded,
                 id,
-                value: localValue,
-                "aria-label": label || placeholder,
+                value: localValue ?? "",
+                "aria-label": label || placeholder || "no-label",
                 "aria-busy": loading,
                 "aria-disabled": noEdit,
                 name,
                 className: cn(
                   "h-full w-full min-w-0 px-3",
                   "[&::-webkit-search-cancel-button]:hidden",
-                  icon && "pl-8",
-                  icon && size === "md" && "pl-9",
+                  (icon || avatar) && "pl-8",
+                  (icon || avatar) && size === "md" && "pl-9",
                   disabled && "cursor-not-allowed",
                   (children as React.ReactElement).props.className,
                   inputElementVariants({ size })
@@ -427,8 +429,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity",
-                  icon && "pl-8",
-                  icon && size === "md" && "pl-9",
+                  (icon || avatar) && "pl-8",
+                  (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),
                   placeholder && !hidePlaceholder && isEmpty(localValue)
                     ? "opacity-1"
@@ -444,7 +446,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5 pt-1.5"
+                  size === "md" && "pr-1.5 pt-1.5",
+                  "relative"
                 )}
               >
                 {clearable && !noEdit && (
@@ -463,6 +466,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                     )}
                   </AnimatePresence>
                 )}
+
                 {(append || appendTag) && (
                   <div
                     className={cn(
@@ -476,16 +480,29 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   </div>
                 )}
 
-                {loading && (
-                  <div
-                    className={cn(
-                      "pointer-events-none flex h-6 w-6 items-center justify-center",
-                      inputElementVariants({ size })
-                    )}
-                  >
-                    <Spinner size="small" className="mt-[1px]" />
-                  </div>
-                )}
+                <AnimatePresence>
+                  {loading && (
+                    <div
+                      className={cn(
+                        "pointer-events-none flex h-6 w-6 items-center justify-center",
+                        loadingIndicator?.asOverlay &&
+                          cn(
+                            "absolute bottom-0 right-2 top-0",
+                            "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
+                            "via-[#FFFFFF] via-60% dark:via-[#192231]",
+                            "to-transparent to-100%",
+                            size === "md" && "right-3 top-2.5"
+                          ),
+                        inputElementVariants({ size })
+                      )}
+                      style={{
+                        right: loadingIndicator?.offset,
+                      }}
+                    >
+                      <Spinner size="small" className="mt-[1px]" />
+                    </div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>

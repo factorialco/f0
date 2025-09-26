@@ -8,7 +8,6 @@ import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
 } from "@tiptap/react"
-import { AnimatePresence, motion } from "motion/react"
 import React, { useState } from "react"
 
 interface UserComment {
@@ -82,18 +81,11 @@ export const LiveCompanionView: React.FC<NodeViewProps> = ({
 
   return (
     <NodeViewWrapper contentEditable={false}>
-      <motion.div
-        className="editor-live-companion my-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3"
+      <div
+        className="editor-live-companion mb-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3"
         onClick={(e) => e.stopPropagation()}
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <motion.div
-          className="flex flex-row items-center justify-between gap-2"
-          layout
-        >
+        <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-3">
@@ -126,104 +118,37 @@ export const LiveCompanionView: React.FC<NodeViewProps> = ({
             />
             <Dropdown items={getDropdownItems} size="sm" />
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <motion.div
-              key="content"
-              initial={{
-                height: 0,
-                opacity: 0,
-                scaleY: 0,
-              }}
-              animate={{
-                height: "auto",
-                opacity: 1,
-                scaleY: 1,
-              }}
-              exit={{
-                height: 0,
-                opacity: 0,
-                scaleY: 0,
-              }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-                opacity: { duration: 0.2 },
-              }}
-              style={{
-                transformOrigin: "top",
-                overflow: "hidden",
-              }}
-            >
-              <motion.div
-                className="text-f1-text-primary"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-              >
-                <div className="flex flex-col gap-4">
-                  {data.topics.map((topic, topicIndex) => (
-                    <motion.div
-                      key={topicIndex}
-                      initial={{
-                        opacity: 0,
-                        y: -10,
-                        scale: 0.95,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                      }}
-                      transition={{
-                        delay: topicIndex * 0.05,
-                        duration: 0.2,
-                        ease: "easeOut",
-                      }}
-                      className="flex flex-col"
+        {isOpen && (
+          <div className="text-f1-text-primary flex flex-col gap-4">
+            {data.topics.map((topic, topicIndex) => (
+              <div key={topicIndex} className="flex flex-col">
+                <h3 className="text-f1-text-primary text-md font-semibold">
+                  {topic.title}
+                </h3>
+                <div className="ml-4 flex flex-col gap-2">
+                  {topic.comments.map((comment, commentIndex) => (
+                    <div
+                      key={commentIndex}
+                      className="flex flex-row items-start gap-2"
                     >
-                      <h3 className="text-f1-text-primary text-md font-semibold">
-                        {topic.title}
-                      </h3>
-                      <div className="ml-4 flex flex-col gap-2">
-                        {topic.comments.map((comment, commentIndex) => (
-                          <motion.div
-                            key={commentIndex}
-                            initial={{
-                              opacity: 0,
-                              x: -5,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              x: 0,
-                            }}
-                            transition={{
-                              delay: topicIndex * 0.05 + commentIndex * 0.03,
-                              duration: 0.2,
-                            }}
-                            className="flex flex-row items-start gap-2"
-                          >
-                            <p className="text-f1-text-primary text-md">
-                              <span className="text-f1-text-secondary font-medium">
-                                {comment.user}:
-                              </span>{" "}
-                              <span className="text-f1-text-secondary font-normal italic">
-                                {comment.comment}
-                              </span>
-                            </p>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
+                      <p className="text-f1-text-primary text-md">
+                        <span className="text-f1-text-secondary font-medium">
+                          {comment.user}:
+                        </span>{" "}
+                        <span className="text-f1-text-secondary font-normal italic">
+                          {comment.comment}
+                        </span>
+                      </p>
+                    </div>
                   ))}
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>
   )

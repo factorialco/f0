@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { useMemo } from "react"
 import {
   createDataSourceDefinition,
   PaginatedDataAdapter,
@@ -96,12 +97,18 @@ const createMockDataAdapter = () =>
     },
   }) satisfies PaginatedDataAdapter<MockUser, typeof userFilters>
 
+const mockDataAdapter = createMockDataAdapter()
+
 // Basic example
 const BasicExample = () => {
-  const datasourceDefinition = createDataSourceDefinition({
-    filters: userFilters,
-    dataAdapter: createMockDataAdapter(),
-  })
+  const datasourceDefinition = useMemo(
+    () =>
+      createDataSourceDefinition({
+        filters: userFilters,
+        dataAdapter: mockDataAdapter,
+      }),
+    []
+  )
 
   const dataSource = useDataSource(datasourceDefinition)
 
@@ -161,19 +168,25 @@ const BasicExample = () => {
 
 // Grouped example
 const GroupedExample = () => {
-  const dataSource = useDataSource({
-    filters: userFilters,
-    grouping: {
-      groupBy: {
-        department: {
-          name: "Department",
-          label: (groupId) => groupId,
-        },
-      },
-    },
-    currentGrouping: { field: "department", order: "asc" },
-    dataAdapter: createMockDataAdapter(),
-  })
+  const dataSource = useDataSource(
+    useMemo(
+      () =>
+        createDataSourceDefinition({
+          filters: userFilters,
+          grouping: {
+            groupBy: {
+              department: {
+                name: "Department",
+                label: (groupId: string) => groupId,
+              },
+            },
+          },
+          currentGrouping: { field: "department", order: "asc" },
+          dataAdapter: mockDataAdapter,
+        }),
+      []
+    )
+  )
 
   const { data, isLoading, error } = useData(dataSource)
   const { openGroups, setGroupOpen } = useGroups(data.groups, ["Engineering"])
@@ -296,11 +309,17 @@ const GroupedExample = () => {
 
 // Selectable example
 const SelectableExample = () => {
-  const dataSource = useDataSource({
-    filters: userFilters,
-    selectable: (user) => (user.canBeSelected ? user.id : undefined),
-    dataAdapter: createMockDataAdapter(),
-  })
+  const dataSource = useDataSource(
+    useMemo(
+      () =>
+        createDataSourceDefinition({
+          filters: userFilters,
+          selectable: (user) => (user.canBeSelected ? user.id : undefined),
+          dataAdapter: mockDataAdapter,
+        }),
+      []
+    )
+  )
 
   const { data, isLoading, error, paginationInfo } = useData(dataSource)
 
@@ -445,20 +464,26 @@ const SelectableExample = () => {
 
 // Complete example with all hooks
 const CompleteExample = () => {
-  const dataSource = useDataSource({
-    filters: userFilters,
-    selectable: (user) => (user.canBeSelected ? user.id : undefined),
-    grouping: {
-      groupBy: {
-        department: {
-          name: "Department",
-          label: (groupId) => groupId,
-        },
-      },
-    },
-    currentGrouping: { field: "department", order: "asc" },
-    dataAdapter: createMockDataAdapter(),
-  })
+  const dataSource = useDataSource(
+    useMemo(
+      () =>
+        createDataSourceDefinition({
+          filters: userFilters,
+          selectable: (user) => (user.canBeSelected ? user.id : undefined),
+          grouping: {
+            groupBy: {
+              department: {
+                name: "Department",
+                label: (groupId: string) => groupId,
+              },
+            },
+          },
+          currentGrouping: { field: "department", order: "asc" },
+          dataAdapter: mockDataAdapter,
+        }),
+      []
+    )
+  )
 
   const { data, isLoading, error, paginationInfo } = useData(dataSource)
   const { openGroups, setGroupOpen } = useGroups(data.groups, ["Engineering"])
@@ -742,11 +767,21 @@ const CompleteExample = () => {
 
 // Filter example
 const FilterExample = () => {
-  const dataSource = useDataSource({
-    filters: userFilters,
-    currentFilters: { department: ["Engineering"] },
-    dataAdapter: createMockDataAdapter(),
-  })
+  const dataSource = useDataSource(
+    useMemo(
+      () =>
+        createDataSourceDefinition({
+          filters: userFilters,
+          currentFilters: {
+            department: [
+              "Engineering" as (typeof userFilters)["department"]["options"]["options"][number]["value"],
+            ],
+          },
+          dataAdapter: mockDataAdapter,
+        }),
+      []
+    )
+  )
 
   const { data, isLoading, error } = useData(dataSource)
 

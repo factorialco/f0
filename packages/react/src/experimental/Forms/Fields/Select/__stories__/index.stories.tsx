@@ -19,6 +19,7 @@ import { useState } from "react"
 
 // Wraps the Select component with a hook to show the selected value
 const SelectWithHooks = (props: SelectProps<string>) => {
+  const { label, ...restProps } = props
   const [localValue, setLocalValue] = useState(props.value)
   const [, setSearchValue] = useState("")
   // Sets a click handler to change the label's value
@@ -46,7 +47,8 @@ const SelectWithHooks = (props: SelectProps<string>) => {
   return (
     <div className="w-48">
       <Select
-        {...props}
+        label={label ?? "The label"}
+        {...restProps}
         value={localValue}
         onChange={handleOnChange}
         onSearchChange={handleOnSearchChange}
@@ -170,6 +172,16 @@ const meta: Meta = {
     },
     searchBoxPlaceholder: {
       description: "Placeholder for the search box",
+    },
+    searchFn: {
+      description:
+        "Function to filter the options. If not provided, the component will filter the options by label. Only applies when options are passed in the options prop, not when a data source is used (use fetchData options for this)",
+      table: {
+        type: {
+          summary:
+            "(option: SelectItemObject<string>, search?: string) => boolean | undefined",
+        },
+      },
     },
     onSearchChange: {
       description: "Function called when the search input value changes",
@@ -331,9 +343,31 @@ export const Clearable: Story = {
 
 export const WithSearchBox: Story = {
   args: {
-    showSearchBox: true,
     searchEmptyMessage: "No results found",
     searchBoxPlaceholder: "Search for a theme",
+  },
+  render: (args) => {
+    return (
+      <>
+        <Select
+          showSearchBox
+          label="Select a theme"
+          onChange={fn()}
+          searchFn={(option, searchValue) => {
+            console.log("searchFn", option, searchValue)
+            return (
+              option.type === "separator" ||
+              !searchValue ||
+              option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+              option.description
+                ?.toLowerCase()
+                .includes(searchValue.toLowerCase())
+            )
+          }}
+          options={args.options}
+        />
+      </>
+    )
   },
 }
 
@@ -433,7 +467,10 @@ export const WithDataSourcePaginated: Story = {
                 const results = mockItems.filter(
                   (item) =>
                     !search ||
-                    item.label.toLowerCase().includes(search.toLowerCase())
+                    item.label.toLowerCase().includes(search.toLowerCase()) ||
+                    item.description
+                      .toLowerCase()
+                      .includes(search.toLowerCase())
                 )
 
                 const paginatedResults = results.slice(
@@ -451,7 +488,7 @@ export const WithDataSourcePaginated: Story = {
                 }
                 resolve(res)
               },
-              100 + Math.random() * 100
+              1000 + Math.random() * 500
             )
           })
         },

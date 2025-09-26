@@ -121,7 +121,7 @@ export const ListItemSingleContent = ({
             src={entity.avatar}
             firstName={firstName}
             lastName={lastName}
-            size="xsmall"
+            size="xs"
           />
         )}
 

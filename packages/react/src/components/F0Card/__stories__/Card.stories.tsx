@@ -66,6 +66,7 @@ export const Default: Story = {
       firstName: "Daniel",
       lastName: "Moreno",
     },
+    compact: false,
     title: "Daniel Moreno",
     description: "This is a cool description",
     metadata: [

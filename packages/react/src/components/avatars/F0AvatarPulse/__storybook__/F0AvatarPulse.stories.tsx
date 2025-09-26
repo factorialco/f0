@@ -66,9 +66,9 @@ export const Snapshot: Story = {
       <section className="mb-8">
         <h4 className="mb-4 text-lg font-semibold">No image</h4>
         <div className="flex h-full w-full items-center justify-center gap-4">
-          {[...pulses, undefined].map((pulse) => (
+          {[...pulses, undefined].map((pulse, index) => (
             <F0AvatarPulse
-              key={pulse}
+              key={`${pulse ?? "none"}-${index}`}
               firstName="Dani"
               lastName="Moreno"
               pulse={pulse}
@@ -83,7 +83,7 @@ export const Snapshot: Story = {
         <div className="flex h-full w-full items-center justify-center gap-4">
           {[...pulses, undefined].map((pulse, index) => (
             <F0AvatarPulse
-              key={pulse}
+              key={`${pulse ?? "none"}-${index}`}
               firstName="Dani"
               lastName="Moreno"
               src={mockImage("person", index)}

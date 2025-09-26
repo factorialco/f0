@@ -8,6 +8,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { KanbanOnMove } from "@/ui/Kanban/types"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { CollectionProps, SummariesDefinition } from "../../../types"
@@ -30,12 +31,7 @@ export type KanbanVisualizationOptions<
   metadata?: (
     record: Record
   ) => ReadonlyArray<{ icon: IconType; property: CardMetadataProperty }>
-  onMove?: (
-    fromLaneId: string,
-    toLaneId: string,
-    sourceId: string,
-    toIndex: number | null
-  ) => Promise<void>
+  onMove?: KanbanOnMove<Record>
 }
 
 export type KanbanCollectionProps<

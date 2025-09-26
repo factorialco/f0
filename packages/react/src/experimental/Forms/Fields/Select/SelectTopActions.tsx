@@ -37,16 +37,18 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   if (!showSearchBox) return null
   return (
     <div className="flex gap-2 px-2 pt-2">
-      <F1SearchBox
-        placeholder={searchBoxPlaceholder}
-        onChange={onSearchChange}
-        clearable
-        value={searchValue}
-        key="search-input"
-        ref={searchInputRef}
-        onBlur={onBlur}
-        onFocus={onFocus}
-      />
+      <div className="flex-1">
+        <F1SearchBox
+          placeholder={searchBoxPlaceholder}
+          onChange={onSearchChange}
+          clearable
+          value={searchValue}
+          key="search-input"
+          ref={searchInputRef}
+          onBlur={onBlur}
+          onFocus={onFocus}
+        />
+      </div>
       <GroupingSelector
         hideLabel={true}
         grouping={grouping}

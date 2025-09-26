@@ -1,5 +1,258 @@
 # Changelog
 
+## [1.206.0](https://github.com/factorialco/f0/compare/f0-react-v1.205.1...f0-react-v1.206.0) (2025-09-26)
+
+
+### Features
+
+* AiChat improvements ([#2687](https://github.com/factorialco/f0/issues/2687)) ([5a70bb4](https://github.com/factorialco/f0/commit/5a70bb49356d701615836b931c4e33bab7cc4b33))
+
+## [1.205.1](https://github.com/factorialco/f0/compare/f0-react-v1.205.0...f0-react-v1.205.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* trigger a release ([3885d07](https://github.com/factorialco/f0/commit/3885d07a29cb4fed4588b746440bb95dcd9f86ac))
+
+## [1.205.0](https://github.com/factorialco/f0/compare/f0-react-v1.204.2...f0-react-v1.205.0) (2025-09-26)
+
+
+### Features
+
+* add markdown support to rich text component ([f5ee522](https://github.com/factorialco/f0/commit/f5ee5221199fdd2f6e7c7bd4c484d6d4427b32ad))
+
+## [1.204.2](https://github.com/factorialco/f0/compare/f0-react-v1.204.1...f0-react-v1.204.2) (2025-09-26)
+
+
+### Bug Fixes
+
+* add missing grouping and navigationFilters storage for data collection ([#2691](https://github.com/factorialco/f0/issues/2691)) ([c66232a](https://github.com/factorialco/f0/commit/c66232ac5c1df0f691cc8a7b00fead9f376fd8de))
+
+## [1.204.1](https://github.com/factorialco/f0/compare/f0-react-v1.204.0...f0-react-v1.204.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* searchbox in select focus on load ([#2686](https://github.com/factorialco/f0/issues/2686)) ([495c493](https://github.com/factorialco/f0/commit/495c493c11cdfc1a1bed44fd13c15eec96f2184a))
+
+## [1.204.0](https://github.com/factorialco/f0/compare/f0-react-v1.203.4...f0-react-v1.204.0) (2025-09-25)
+
+
+### Features
+
+* **NotesTextEditor:** add pushContent method ([#2671](https://github.com/factorialco/f0/issues/2671)) ([728c560](https://github.com/factorialco/f0/commit/728c5602a9c2b774c6e88e1380c767df688d1a18))
+
+## [1.203.4](https://github.com/factorialco/f0/compare/f0-react-v1.203.3...f0-react-v1.203.4) (2025-09-25)
+
+
+### Bug Fixes
+
+* add role to entityselector trigger ([#2684](https://github.com/factorialco/f0/issues/2684)) ([06a654e](https://github.com/factorialco/f0/commit/06a654ec6c6fe339b3bdc944f041101500c20518))
+
+## [1.203.3](https://github.com/factorialco/f0/compare/f0-react-v1.203.2...f0-react-v1.203.3) (2025-09-25)
+
+
+### Bug Fixes
+
+* add total in kanban view + fix move problem ([#2679](https://github.com/factorialco/f0/issues/2679)) ([c8b72b7](https://github.com/factorialco/f0/commit/c8b72b779f9f936591255b9c25a9848a43203a21))
+
+## [1.203.2](https://github.com/factorialco/f0/compare/f0-react-v1.203.1...f0-react-v1.203.2) (2025-09-25)
+
+
+### Bug Fixes
+
+* entityselect value type ([#2680](https://github.com/factorialco/f0/issues/2680)) ([bb8e047](https://github.com/factorialco/f0/commit/bb8e0474ce72fe97d05ae8c4cd4dec3c6e981367))
+
+## [1.203.1](https://github.com/factorialco/f0/compare/f0-react-v1.203.0...f0-react-v1.203.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* **datacollection:** list click area ([#2672](https://github.com/factorialco/f0/issues/2672)) ([c4ce8ed](https://github.com/factorialco/f0/commit/c4ce8ed312080660a0a0e6270f11ab09193f6287))
+
+## [1.203.0](https://github.com/factorialco/f0/compare/f0-react-v1.202.0...f0-react-v1.203.0) (2025-09-25)
+
+
+### Features
+
+* export datacollection local storae ([#2675](https://github.com/factorialco/f0/issues/2675)) ([a99e84d](https://github.com/factorialco/f0/commit/a99e84dfd86cf0edaace30bcc77f19d58d1e4164))
+
+## [1.202.0](https://github.com/factorialco/f0/compare/f0-react-v1.201.8...f0-react-v1.202.0) (2025-09-25)
+
+
+### Features
+
+* improve InputLabel and used in EntitySelector ([#2558](https://github.com/factorialco/f0/issues/2558)) ([bd8d974](https://github.com/factorialco/f0/commit/bd8d974c8904df72dc38fda7fd85a3d891c6f4e4))
+
+## [1.201.8](https://github.com/factorialco/f0/compare/f0-react-v1.201.7...f0-react-v1.201.8) (2025-09-25)
+
+
+### Bug Fixes
+
+* **OneAlert:** Action prop conditional  ([#2652](https://github.com/factorialco/f0/issues/2652)) ([58962f7](https://github.com/factorialco/f0/commit/58962f72be2e172517eaa150797d5f3006f02409))
+
+## [1.201.7](https://github.com/factorialco/f0/compare/f0-react-v1.201.6...f0-react-v1.201.7) (2025-09-25)
+
+
+### Bug Fixes
+
+* final width ([0815066](https://github.com/factorialco/f0/commit/0815066a8ce419c26c0a6c779e8047c1cb1c1c4c))
+
+## [1.201.6](https://github.com/factorialco/f0/compare/f0-react-v1.201.5...f0-react-v1.201.6) (2025-09-24)
+
+
+### Bug Fixes
+
+* multiple select fixes - loading state - search delete last chart - empty message ([#2668](https://github.com/factorialco/f0/issues/2668)) ([9612163](https://github.com/factorialco/f0/commit/9612163d168eb1f7aa266f5106be754db6760349))
+
+## [1.201.5](https://github.com/factorialco/f0/compare/f0-react-v1.201.4...f0-react-v1.201.5) (2025-09-24)
+
+
+### Bug Fixes
+
+* **NotesTextEditor:** delete animations and add skeleton ([#2633](https://github.com/factorialco/f0/issues/2633)) ([9a8015f](https://github.com/factorialco/f0/commit/9a8015fd7abd2e34a608017eaf58bf94b621715a))
+
+## [1.201.4](https://github.com/factorialco/f0/compare/f0-react-v1.201.3...f0-react-v1.201.4) (2025-09-23)
+
+
+### Bug Fixes
+
+* select options change and scroll trigger ([#2660](https://github.com/factorialco/f0/issues/2660)) ([f02ac14](https://github.com/factorialco/f0/commit/f02ac14055e7debda791b2d7036fbdcfd9525a3a))
+
+## [1.201.3](https://github.com/factorialco/f0/compare/f0-react-v1.201.2...f0-react-v1.201.3) (2025-09-23)
+
+
+### Bug Fixes
+
+* prevent total item summary to show skeleton when loading more pages ([#2664](https://github.com/factorialco/f0/issues/2664)) ([c6fe1b6](https://github.com/factorialco/f0/commit/c6fe1b6e0689cd7cfd9b0216b3ad364d4968a756))
+
+## [1.201.2](https://github.com/factorialco/f0/compare/f0-react-v1.201.1...f0-react-v1.201.2) (2025-09-23)
+
+
+### Bug Fixes
+
+* add skeletons for presets and title in data collection ([#2662](https://github.com/factorialco/f0/issues/2662)) ([0e595ff](https://github.com/factorialco/f0/commit/0e595ff98091a26a1f146b9129cd70cc06d43b30))
+
+## [1.201.1](https://github.com/factorialco/f0/compare/f0-react-v1.201.0...f0-react-v1.201.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* **datacollection:** warranty group order ([#2654](https://github.com/factorialco/f0/issues/2654)) ([c7110f2](https://github.com/factorialco/f0/commit/c7110f2d7c09d1bcf8ff7c667804945d02c8f976))
+
+## [1.201.0](https://github.com/factorialco/f0/compare/f0-react-v1.200.5...f0-react-v1.201.0) (2025-09-23)
+
+
+### Features
+
+* **One:** add tooltip to One trigger ([#2629](https://github.com/factorialco/f0/issues/2629)) ([7ad795b](https://github.com/factorialco/f0/commit/7ad795be46288182960a3f219094aace81468365))
+
+## [1.200.5](https://github.com/factorialco/f0/compare/f0-react-v1.200.4...f0-react-v1.200.5) (2025-09-23)
+
+
+### Bug Fixes
+
+* **One:** fix misaligned chat window with frame ([#2626](https://github.com/factorialco/f0/issues/2626)) ([8b158b8](https://github.com/factorialco/f0/commit/8b158b8d50cddfc692631a06eaebef4c344a6033))
+
+## [1.200.4](https://github.com/factorialco/f0/compare/f0-react-v1.200.3...f0-react-v1.200.4) (2025-09-23)
+
+
+### Bug Fixes
+
+* final width ([176d5da](https://github.com/factorialco/f0/commit/176d5da92ea7d1b009fe755bc0d50100e05ce37b))
+
+## [1.200.3](https://github.com/factorialco/f0/compare/f0-react-v1.200.2...f0-react-v1.200.3) (2025-09-23)
+
+
+### Bug Fixes
+
+* item click on Kanban View ([#2638](https://github.com/factorialco/f0/issues/2638)) ([769dae2](https://github.com/factorialco/f0/commit/769dae229417c1af2b900eb7a2112dbc2f695fcb))
+
+## [1.200.2](https://github.com/factorialco/f0/compare/f0-react-v1.200.1...f0-react-v1.200.2) (2025-09-22)
+
+
+### Bug Fixes
+
+* **datacollection:** table oveflow iwth item actions ([#2651](https://github.com/factorialco/f0/issues/2651)) ([0706a20](https://github.com/factorialco/f0/commit/0706a20f80414edbb4570eddde507205ae419cdb))
+
+## [1.200.1](https://github.com/factorialco/f0/compare/f0-react-v1.200.0...f0-react-v1.200.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* change sign ([#2649](https://github.com/factorialco/f0/issues/2649)) ([a69d863](https://github.com/factorialco/f0/commit/a69d86353b81d53bd2d139b12db5368d88a13998))
+
+## [1.200.0](https://github.com/factorialco/f0/compare/f0-react-v1.199.2...f0-react-v1.200.0) (2025-09-22)
+
+
+### Features
+
+* add support to define default direction for groups in data collection ([#2642](https://github.com/factorialco/f0/issues/2642)) ([ced3a67](https://github.com/factorialco/f0/commit/ced3a6774b5f72ef0f41fc069a92d1fe57067956))
+
+## [1.199.2](https://github.com/factorialco/f0/compare/f0-react-v1.199.1...f0-react-v1.199.2) (2025-09-22)
+
+
+### Bug Fixes
+
+* **DateNavigator:** improve alignment ([#2643](https://github.com/factorialco/f0/issues/2643)) ([4cd00dc](https://github.com/factorialco/f0/commit/4cd00dcee56eb4ae352772dee168169d9d35498f))
+
+## [1.199.1](https://github.com/factorialco/f0/compare/f0-react-v1.199.0...f0-react-v1.199.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* adjust width of datacollection to cover 100% of the width ([#2639](https://github.com/factorialco/f0/issues/2639)) ([583cc82](https://github.com/factorialco/f0/commit/583cc8205a3f04ae22b57aa4477d58bad9895753))
+
+## [1.199.0](https://github.com/factorialco/f0/compare/f0-react-v1.198.1...f0-react-v1.199.0) (2025-09-22)
+
+
+### Features
+
+* **dataCollection-table:** align dataCollection table cells to top ([#2627](https://github.com/factorialco/f0/issues/2627)) ([e9b9e3a](https://github.com/factorialco/f0/commit/e9b9e3a96601e326999645394dff14be44c27d19))
+
+## [1.198.1](https://github.com/factorialco/f0/compare/f0-react-v1.198.0...f0-react-v1.198.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* use Spinner in data collection ([#2628](https://github.com/factorialco/f0/issues/2628)) ([ca0427e](https://github.com/factorialco/f0/commit/ca0427e8079dff93b4419b9e37c94200786fea5e))
+
+## [1.198.0](https://github.com/factorialco/f0/compare/f0-react-v1.197.1...f0-react-v1.198.0) (2025-09-19)
+
+
+### Features
+
+* 2 small fixes in kanban view ([#2576](https://github.com/factorialco/f0/issues/2576)) ([607bb09](https://github.com/factorialco/f0/commit/607bb09095db61d703e6aefec6642510f221fbf5))
+* enhance Kanban onMove functionality ([607bb09](https://github.com/factorialco/f0/commit/607bb09095db61d703e6aefec6642510f221fbf5))
+
+## [1.197.1](https://github.com/factorialco/f0/compare/f0-react-v1.197.0...f0-react-v1.197.1) (2025-09-19)
+
+
+### Bug Fixes
+
+* spacings and alignment in grouping selector ([#2630](https://github.com/factorialco/f0/issues/2630)) ([1f45de1](https://github.com/factorialco/f0/commit/1f45de13cf24105270d1180f6f7c2c0eae83f283))
+
+## [1.197.0](https://github.com/factorialco/f0/compare/f0-react-v1.196.0...f0-react-v1.197.0) (2025-09-18)
+
+
+### Features
+
+* **F0AiBanner:** new component for AI banner ([#2574](https://github.com/factorialco/f0/issues/2574)) ([d8653fb](https://github.com/factorialco/f0/commit/d8653fb02cf5f824014e2232b93cde44b77c4758))
+
+## [1.196.0](https://github.com/factorialco/f0/compare/f0-react-v1.195.1...f0-react-v1.196.0) (2025-09-18)
+
+
+### Features
+
+* **RichText:** enhance NotesTextEditor with new tag type and icon support ([#2571](https://github.com/factorialco/f0/issues/2571)) ([0a5f316](https://github.com/factorialco/f0/commit/0a5f316feeff12b57fb3c7a18362884abc21aebe))
+
+## [1.195.1](https://github.com/factorialco/f0/compare/f0-react-v1.195.0...f0-react-v1.195.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* **avatar:** use short size values for ([#2621](https://github.com/factorialco/f0/issues/2621)) ([fb4acee](https://github.com/factorialco/f0/commit/fb4acee493f94edc8ad36c042619fe3af8648ced))
+
 ## [1.195.0](https://github.com/factorialco/f0/compare/f0-react-v1.194.0...f0-react-v1.195.0) (2025-09-18)
 
 

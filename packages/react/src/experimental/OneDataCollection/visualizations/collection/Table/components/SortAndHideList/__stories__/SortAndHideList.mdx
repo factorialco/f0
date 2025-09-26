@@ -1,0 +1,118 @@
+import {
+  Meta,
+  Primary,
+  Controls,
+  Story,
+  Canvas,
+} from "@storybook/addon-docs/blocks"
+import * as SortAndHideListStories from "./SortAndHideList.stories.tsx"
+
+<Meta of={SortAndHideListStories} />
+
+## SortAndHideList
+
+The SortAndHideList component provides an interface for managing the sorting
+order and visibility of table columns. It allows users to:
+
+- Reorder items by dragging (visual indication with sort icons)
+- Toggle column visibility using switches
+- Manage required vs optional columns (some columns cannot be hidden)
+
+## Introduction
+
+This component is designed to be used within table settings to give users
+control over which columns are displayed and in what order. It integrates with
+the Switch component from the Forms library to provide consistent toggle
+functionality.
+
+### Key Features
+
+- **Drag to Reorder**: Visual sort icons indicate that items can be reordered
+- **Toggle Visibility**: Switches control whether columns are shown or hidden
+- **Required Columns**: Some columns can be marked as non-hideable (disabled
+  switches)
+- **Accessible**: Full keyboard and screen reader support through proper ARIA
+  attributes
+
+## Default Usage
+
+<Canvas of={SortAndHideListStories.Default} />
+<Controls of={SortAndHideListStories.Default} />
+
+## Examples
+
+### All Items Visible
+
+Shows the component when all optional columns are currently visible.
+
+<Canvas of={SortAndHideListStories.WithAllItemsVisible} />
+
+### All Items Hidden
+
+Demonstrates the state when all optional columns are hidden. Note that required
+columns would still be visible in the actual table.
+
+<Canvas of={SortAndHideListStories.WithAllItemsHidden} />
+
+### Mixed States
+
+A realistic example showing a combination of required columns (that cannot be
+hidden), visible optional columns, and hidden optional columns.
+
+<Canvas of={SortAndHideListStories.WithMixedStates} />
+
+### Edge Cases
+
+#### Empty List
+
+<Canvas of={SortAndHideListStories.EmptyList} />
+
+#### Single Item
+
+<Canvas of={SortAndHideListStories.SingleItem} />
+
+#### Long Labels
+
+Shows how the component handles long column names that might wrap or need
+truncation.
+
+<Canvas of={SortAndHideListStories.LongLabels} />
+
+## Props
+
+The component accepts a single `items` prop which is an array of objects with
+the following structure:
+
+```typescript
+{
+  id: string          // Unique identifier for the column
+  label: string       // Display name for the column
+  sortable?: boolean  // Whether the column supports sorting (affects drag handle display)
+  canHide?: boolean   // Whether the column can be hidden (affects switch disabled state)
+  hidden?: boolean    // Current visibility state of the column
+  order?: number      // Sort order (used for initial ordering)
+}
+```
+
+## Implementation Notes
+
+- The component currently logs switch changes to the console
+- Integration with actual state management would require passing appropriate
+  callbacks
+- The drag and drop functionality for reordering is indicated visually but not
+  implemented
+- Switch states are controlled by the `hidden` and `canHide` properties
+
+## Accessibility
+
+- Uses semantic HTML with proper `<ol>` and `<li>` elements
+- Switch components include appropriate `title` attributes for screen readers
+- Maintains proper focus management for keyboard navigation
+- Visual sort icons provide context for drag-and-drop capability
+
+## Related Components
+
+- [Switch](/?path=/docs/switch--docs) - Used for toggling column visibility
+- [F0Icon](/?path=/docs/f0icon--docs) - Used for sort handle icons
+- [OneDataCollection](/?path=/docs/experimental-onedatacollection--docs) -
+  Parent component that uses this for table settings
