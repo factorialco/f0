@@ -351,15 +351,13 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
   )
 
   const turns: Turn[] = []
-  let pendingAgentStateMessage: Message | null = null
 
   for (const message of messages) {
     if (message.role === "user") {
       // Finalize the previous turn if it exists
       if (turns.length > 0) {
         const lastTurn = turns[turns.length - 1]
-        finalizeTurn(lastTurn, pendingAgentStateMessage)
-        pendingAgentStateMessage = null
+        finalizeTurn(lastTurn)
       }
 
       // create new turn
@@ -374,7 +372,8 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       isAgentStateMessage(message) &&
       isCurrentlyGroupingThinking(currentTurn)
     ) {
-      pendingAgentStateMessage = message
+      const thinkingGroup = currentTurn.pop() as Message[]
+      currentTurn.push(message, thinkingGroup)
       continue
     }
 
@@ -392,16 +391,15 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     }
 
     // Handle non-thinking messages
-    // First, finalize any thinking group and add pending agent state
-    finalizeTurn(currentTurn, pendingAgentStateMessage)
-    pendingAgentStateMessage = null
+    // First, finalize any thinking group
+    finalizeTurn(currentTurn)
 
     currentTurn.push(message)
   }
 
   if (turns.length > 0) {
     const lastTurn = turns[turns.length - 1]
-    finalizeTurn(lastTurn, pendingAgentStateMessage)
+    finalizeTurn(lastTurn)
   }
 
   return turns
@@ -420,9 +418,8 @@ function isAgentStateMessage(message: Message): boolean {
   return message.role === "assistant" && message.agentName !== undefined
 }
 
-function finalizeTurn(turn: Turn, pendingAgentState: Message | null) {
+function finalizeTurn(turn: Turn) {
   ungroupSingleThinkingMessage(turn)
-  addPendingAgentState(turn, pendingAgentState)
 }
 
 function isCurrentlyGroupingThinking(turn: Turn): boolean {
@@ -435,14 +432,5 @@ function ungroupSingleThinkingMessage(turn: Turn): void {
   if (Array.isArray(lastMessage) && lastMessage.length === 1) {
     turn.pop()
     turn.push(...lastMessage)
-  }
-}
-
-function addPendingAgentState(
-  turn: Turn,
-  pendingAgentState: Message | null
-): void {
-  if (pendingAgentState !== null) {
-    turn.push(pendingAgentState)
   }
 }
