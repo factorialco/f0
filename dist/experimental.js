@@ -21331,7 +21331,7 @@ const kA = ({
       return /* @__PURE__ */ d(
         dA,
         {
-          drag: { id: U, type: "list-card", data: { ...M, laneId: B } },
+          drag: { id: U, type: "list-card", data: { ...M } },
           id: U,
           index: O,
           total: P,
