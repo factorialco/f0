@@ -369,9 +369,6 @@ const SelectComponent = forwardRef(function Select<
   const handleChangeOpenLocal = (open: boolean) => {
     onOpenChange?.(open)
     setOpenLocal(open)
-    setTimeout(() => {
-      searchInputRef.current?.focus()
-    }, 0)
   }
 
   // const collapsible = localSource.grouping?.collapsible
@@ -434,11 +431,43 @@ const SelectComponent = forwardRef(function Select<
     loadMore()
   }
 
+  const isLoadingOrLoadingMore = loading || isLoading || isLoadingMore
+
+  const loadingFocusInterval = useRef<NodeJS.Timeout | null>(null)
+  const clearLoadingFocusInterval = useCallback(() => {
+    if (loadingFocusInterval.current) {
+      clearInterval(loadingFocusInterval.current)
+      loadingFocusInterval.current = null
+    }
+  }, [loadingFocusInterval])
+
+  // Focus the search input when the data is loaded or loading
+
   useEffect(() => {
-    setTimeout(() => {
+    if (!openLocal) {
+      clearLoadingFocusInterval()
+      return
+    }
+
+    requestAnimationFrame(() => {
       searchInputRef.current?.focus()
-    }, 0)
-  }, [data])
+    })
+
+    // When is loading we need to focus the search repeatedly until the data is loaded
+    if (isLoadingOrLoadingMore && !loadingFocusInterval.current) {
+      loadingFocusInterval.current = setInterval(() => {
+        searchInputRef.current?.focus()
+      }, 100)
+    } else if (!isLoadingOrLoadingMore && loadingFocusInterval.current) {
+      clearLoadingFocusInterval()
+    }
+  }, [data, isLoadingOrLoadingMore, openLocal, clearLoadingFocusInterval])
+
+  useEffect(() => {
+    setInterval(() => {
+      searchInputRef.current?.focus()
+    }, 100)
+  }, [openLocal])
 
   const i18n = useI18n()
 
