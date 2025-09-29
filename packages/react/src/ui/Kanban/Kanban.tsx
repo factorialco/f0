@@ -26,13 +26,7 @@ export function Kanban<TRecord extends RecordType>(
     maxHeight = KANBAN_LANE_HEIGHT,
   } = props
 
-  // Local source-of-truth for lanes to orchestrate moves centrally
-  const [localLanes, setLocalLanes] = useState(
-    () => lanes as KanbanProps<TRecord>["lanes"]
-  )
-  useEffect(() => {
-    setLocalLanes(lanes)
-  }, [lanes])
+  // No local lanes state. Parent owns the data; this component is pure/derivative.
 
   // Horizontal edge zones for board autoscroll (debug visibility + logs)
   const [isDragging, setIsDragging] = useState(false)
@@ -117,7 +111,7 @@ export function Kanban<TRecord extends RecordType>(
   }, [isDragging])
 
   const getIndexById = (laneId: string, id: string): number => {
-    const lane = localLanes.find((l) => l.id === laneId)
+    const lane = lanes.find((l) => l.id === laneId)
     if (!lane) return -1
     return lane.items.findIndex((item, index) => {
       const key = String(getKey(item as TRecord, index, laneId))
@@ -127,132 +121,43 @@ export function Kanban<TRecord extends RecordType>(
 
   const onMove = async (params: KanbanOnMoveParam) => {
     const { fromLaneId, toLaneId, sourceId, indexOfTarget, position } = params
-
-    // Snapshot
-    const prev = localLanes
-
-    // Find source record and indices in snapshot (robust to mis-reported fromLaneId)
-    let fromLaneIdx = prev.findIndex((l) => l.id === fromLaneId)
-    const toLaneIdx = prev.findIndex((l) => l.id === toLaneId)
-    if (toLaneIdx === -1) return Promise.reject(new Error("Lane not found"))
-    let sourceIndex = -1
-    if (fromLaneIdx !== -1) {
-      sourceIndex = prev[fromLaneIdx].items.findIndex((item, index) => {
-        const key = String(getKey(item as TRecord, index, fromLaneId))
-        return key === String(sourceId)
-      })
-    }
-    if (sourceIndex === -1) {
-      for (let i = 0; i < prev.length; i++) {
-        const laneId = prev[i].id as string
-        const idx = prev[i].items.findIndex((item, index) => {
-          const key = String(getKey(item as TRecord, index, laneId))
-          return key === String(sourceId)
-        })
-        if (idx !== -1) {
-          fromLaneIdx = i
-          sourceIndex = idx
-          break
-        }
-      }
-    }
-    if (fromLaneIdx === -1 || sourceIndex === -1) {
+    // Resolve source record from current props
+    const allLanes = lanes
+    const fromLane = allLanes.find((l) => l.id === fromLaneId)
+    const toLane = allLanes.find((l) => l.id === toLaneId)
+    if (!fromLane || !toLane) return Promise.reject(new Error("Lane not found"))
+    const sourceIndex = fromLane.items.findIndex(
+      (item, idx) =>
+        String(getKey(item as TRecord, idx, fromLaneId)) === String(sourceId)
+    )
+    if (sourceIndex === -1)
       return Promise.resolve(undefined as unknown as TRecord)
-    }
-    const sourceRecord = prev[fromLaneIdx].items[sourceIndex] as TRecord
+    const sourceRecord = fromLane.items[sourceIndex] as TRecord
 
-    // Compute insertion index
-    let insertIndex = 0
-    if (indexOfTarget == null) {
-      insertIndex = 0
-    } else {
-      insertIndex = indexOfTarget + (position === "below" ? 1 : 0)
-    }
+    const destinyRecord =
+      indexOfTarget == null
+        ? null
+        : (toLane.items[indexOfTarget] as TRecord | undefined)
 
-    // Build next lanes state (also adjust totals if provided by lanes)
-    const isSameLane = fromLaneId === toLaneId
-    const next = prev.map((lane, idx) => {
-      if (idx === fromLaneIdx && isSameLane) {
-        // Same lane reorder
-        const items = [...lane.items]
-        items.splice(sourceIndex, 1)
-        // Adjust index after removal
-        const adjustedIndex =
-          sourceIndex < insertIndex ? insertIndex - 1 : insertIndex
-        items.splice(adjustedIndex, 0, sourceRecord)
-        return { ...lane, items }
-      }
-      if (idx === fromLaneIdx) {
-        const items = [...lane.items]
-        items.splice(sourceIndex, 1)
-        const nextTotal =
-          typeof lane.total === "number" && !isSameLane
-            ? Math.max(0, lane.total - 1)
-            : lane.total
-        return { ...lane, items, total: nextTotal }
-      }
-      if (idx === toLaneIdx) {
-        const items = [...lane.items]
-        const boundedIndex = Math.max(0, Math.min(insertIndex, items.length))
-        items.splice(boundedIndex, 0, sourceRecord)
-        const nextTotal =
-          typeof lane.total === "number" && !isSameLane
-            ? lane.total + 1
-            : lane.total
-        return { ...lane, items, total: nextTotal }
-      }
-      return lane
-    })
-
-    // Optimistic apply
-    setLocalLanes(next)
-
-    try {
-      // Call external move if provided
-      const destinyRecord =
-        indexOfTarget == null
-          ? null
-          : (prev[toLaneIdx].items[indexOfTarget] as TRecord | undefined)
-      const result = await dnd?.onMove?.(
-        fromLaneId,
-        toLaneId,
-        sourceRecord,
-        destinyRecord
-          ? {
-              record: destinyRecord,
-              position: (position as "above" | "below") ?? "above",
-            }
-          : null
-      )
-
-      if (result) {
-        // Replace record by id with backend version
-        setLocalLanes((curr) =>
-          curr.map((lane) => {
-            if (lane.id !== toLaneId) return lane
-            const items = [...lane.items]
-            const idx = items.findIndex((item, index) => {
-              const key = String(getKey(item as TRecord, index, toLaneId))
-              return key === String(sourceId)
-            })
-            if (idx !== -1) items.splice(idx, 1, result)
-            return { ...lane, items }
-          })
-        )
-      }
-      return result as TRecord
-    } catch (e) {
-      // Rollback
-      setLocalLanes(prev)
-      throw e
-    }
+    const result = await dnd?.onMove?.(
+      fromLaneId,
+      toLaneId,
+      sourceRecord,
+      destinyRecord
+        ? {
+            record: destinyRecord,
+            position: (position as "above" | "below") ?? "above",
+          }
+        : null
+    )
+    return result as TRecord
   }
 
   return (
     <div className={cn("relative w-full px-4", className)}>
       <ScrollArea className={"w-full"} viewportRef={viewportRef}>
         <div className="mb-2 flex gap-2">
-          {localLanes.map(
+          {lanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
               const total = lane.total ?? lane.items.length
               return (

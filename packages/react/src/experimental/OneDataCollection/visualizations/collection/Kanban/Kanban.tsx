@@ -128,20 +128,18 @@ export const KanbanCollection = <
         )
         if (fromIdx === -1) return prev
         const [moved] = items.splice(fromIdx, 1)
-        let insertIndex = 0
+        // Recompute target relative to post-removal array
+        let targetIdx = 0
         if (destiny && destiny.record) {
           const destKey = getStableId(destiny.record)
-          const targetIdx = items.findIndex(
+          const idx = items.findIndex(
             (item, index) => getStableId(item, index) === destKey
           )
-          if (targetIdx !== -1) {
-            insertIndex = targetIdx + (destiny.position === "below" ? 1 : 0)
-          }
+          targetIdx = Math.max(0, idx)
         }
-        const adjustedIndex =
-          fromIdx < insertIndex ? insertIndex - 1 : insertIndex
-        if (fromIdx === adjustedIndex) return prev
-        const bounded = Math.max(0, Math.min(adjustedIndex, items.length))
+        const insertAt =
+          destiny?.position === "below" ? targetIdx + 1 : targetIdx
+        const bounded = Math.max(0, Math.min(insertAt, items.length))
         items.splice(bounded, 0, moved)
         return items
       })
