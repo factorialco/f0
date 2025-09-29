@@ -14,8 +14,10 @@ import { filterTree, findExpandedPath } from "./utils"
 function renderTOCItem(
   item: TOCItem,
   sortable: boolean,
+  depth: number,
   activeItem?: string,
   collapsible?: boolean,
+  hideChildrenCounter?: boolean,
   expandedItems?: Set<string>,
   onToggleExpanded?: (id: string) => void,
   onUpdateItem?: (itemId: string, updatedItem: TOCItem) => void
@@ -39,6 +41,7 @@ function renderTOCItem(
       isExpanded={isExpanded}
       onToggleExpanded={onToggleExpanded}
       sortable={sortable}
+      hideChildrenCounter={hideChildrenCounter}
     >
       {item.children &&
         (Component === ItemSectionHeader || isExpanded) &&
@@ -54,8 +57,10 @@ function renderTOCItem(
               renderTOCItem(
                 child,
                 sortable,
+                depth + 1,
                 activeItem,
                 collapsible,
+                hideChildrenCounter,
                 expandedItems,
                 onToggleExpanded,
                 onUpdateItem
@@ -67,8 +72,10 @@ function renderTOCItem(
             renderTOCItem(
               child,
               sortable,
+              depth + 1,
               activeItem,
               collapsible,
+              hideChildrenCounter,
               expandedItems,
               onToggleExpanded,
               onUpdateItem
@@ -89,6 +96,7 @@ function TOCContent({
   showSearchBox = false,
   searchPlaceholder,
   onReorder,
+  hideChildrenCounter = false,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -215,8 +223,10 @@ function TOCContent({
                 renderTOCItem(
                   item,
                   sortable,
+                  0,
                   activeItem,
                   collapsible,
+                  hideChildrenCounter,
                   expandedItems,
                   handleToggleExpanded,
                   handleUpdateItem
@@ -228,8 +238,10 @@ function TOCContent({
               renderTOCItem(
                 item,
                 sortable,
+                0,
                 activeItem,
                 collapsible,
+                hideChildrenCounter,
                 expandedItems,
                 handleToggleExpanded,
                 handleUpdateItem
