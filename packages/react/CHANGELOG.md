@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.210.2](https://github.com/factorialco/f0/compare/f0-react-v1.210.1...f0-react-v1.210.2) (2025-09-29)
+
+
+### Bug Fixes
+
+* rich text missing ul, ol, h4 styles ([#2715](https://github.com/factorialco/f0/issues/2715)) ([d38edd6](https://github.com/factorialco/f0/commit/d38edd6f8ac5fe5b0c95c59503d2182e08324c86))
+
 ## [1.210.1](https://github.com/factorialco/f0/compare/f0-react-v1.210.0...f0-react-v1.210.1) (2025-09-29)
 
 
