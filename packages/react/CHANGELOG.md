@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.210.1](https://github.com/factorialco/f0/compare/f0-react-v1.210.0...f0-react-v1.210.1) (2025-09-29)
+
+
+### Features
+
+* TOC hide children counter prop ([#2710](https://github.com/factorialco/f0/issues/2710)) ([7ab9138](https://github.com/factorialco/f0/commit/7ab9138a4b6f686a632105e55ef369d935865816))
+
 ## [1.210.0](https://github.com/factorialco/f0/compare/f0-react-v1.209.1...f0-react-v1.210.0) (2025-09-29)
 
 
