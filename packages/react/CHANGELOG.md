@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.208.0](https://github.com/factorialco/f0/compare/f0-react-v1.207.0...f0-react-v1.208.0) (2025-09-29)
+
+
+### Features
+
+* datacollection reset to default settings ([#2699](https://github.com/factorialco/f0/issues/2699)) ([06b4c69](https://github.com/factorialco/f0/commit/06b4c69875caf1c2e1662372e7f84e97f73c7c59))
+
+## [1.207.0](https://github.com/factorialco/f0/compare/f0-react-v1.206.0...f0-react-v1.207.0) (2025-09-26)
+
+
+### Features
+
+* responsive twocols layout and sticky ([#2700](https://github.com/factorialco/f0/issues/2700)) ([c027d19](https://github.com/factorialco/f0/commit/c027d1979b97aa921dcb721e8c396afedc91578b))
+
+## [1.206.0](https://github.com/factorialco/f0/compare/f0-react-v1.205.1...f0-react-v1.206.0) (2025-09-26)
+
+
+### Features
+
+* AiChat improvements ([#2687](https://github.com/factorialco/f0/issues/2687)) ([5a70bb4](https://github.com/factorialco/f0/commit/5a70bb49356d701615836b931c4e33bab7cc4b33))
+
+## [1.205.1](https://github.com/factorialco/f0/compare/f0-react-v1.205.0...f0-react-v1.205.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* trigger a release ([3885d07](https://github.com/factorialco/f0/commit/3885d07a29cb4fed4588b746440bb95dcd9f86ac))
+
+## [1.205.0](https://github.com/factorialco/f0/compare/f0-react-v1.204.2...f0-react-v1.205.0) (2025-09-26)
+
+
+### Features
+
+* add markdown support to rich text component ([f5ee522](https://github.com/factorialco/f0/commit/f5ee5221199fdd2f6e7c7bd4c484d6d4427b32ad))
+
+## [1.204.2](https://github.com/factorialco/f0/compare/f0-react-v1.204.1...f0-react-v1.204.2) (2025-09-26)
+
+
+### Bug Fixes
+
+* add missing grouping and navigationFilters storage for data collection ([#2691](https://github.com/factorialco/f0/issues/2691)) ([c66232a](https://github.com/factorialco/f0/commit/c66232ac5c1df0f691cc8a7b00fead9f376fd8de))
+
+## [1.204.1](https://github.com/factorialco/f0/compare/f0-react-v1.204.0...f0-react-v1.204.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* searchbox in select focus on load ([#2686](https://github.com/factorialco/f0/issues/2686)) ([495c493](https://github.com/factorialco/f0/commit/495c493c11cdfc1a1bed44fd13c15eec96f2184a))
+
+## [1.204.0](https://github.com/factorialco/f0/compare/f0-react-v1.203.4...f0-react-v1.204.0) (2025-09-25)
+
+
+### Features
+
+* **NotesTextEditor:** add pushContent method ([#2671](https://github.com/factorialco/f0/issues/2671)) ([728c560](https://github.com/factorialco/f0/commit/728c5602a9c2b774c6e88e1380c767df688d1a18))
+
 ## [1.203.4](https://github.com/factorialco/f0/compare/f0-react-v1.203.3...f0-react-v1.203.4) (2025-09-25)
 
 

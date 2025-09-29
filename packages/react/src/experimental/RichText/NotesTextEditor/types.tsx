@@ -9,6 +9,7 @@ type NotesTextEditorHandle = {
   setContent: (content: string) => void
   insertAIBlock: () => void
   insertTranscript: (title: string, users: User[], messages: Message[]) => void
+  pushContent: (content: string) => void
 }
 
 type actionType = {

@@ -12,6 +12,67 @@ import {
 } from "../visualizations/collection/collectionViewRegistry"
 import { Visualization } from "../visualizations/collection/types"
 
+export const getVisualizationTypeRegistry = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  type: keyof typeof collectionVisualizations | "custom"
+) => {
+  if (type === "custom") {
+    return null
+  }
+
+  const visualizationType = collectionVisualizations[
+    type
+  ] as VisualizacionTypeDefinition<
+    CollectionProps<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping,
+      object
+    >
+  >
+
+  if (!visualizationType) {
+    throw new Error(`Visualization type ${type} not found`)
+  }
+
+  return visualizationType
+}
+
+export const getSettingsResetHandler = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  visualization: Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+) => {
+  const visualizationType = getVisualizationTypeRegistry(visualization.type)
+
+  return visualizationType?.settings.resetHandler ?? null
+}
+
 const getSettingsRenderer = <
   R extends RecordType,
   Filters extends FiltersDefinition,
@@ -31,30 +92,8 @@ const getSettingsRenderer = <
     Grouping
   >
 ) => {
-  if (visualization.type === "custom") {
-    return null
-  }
-
-  const visualizationType = collectionVisualizations[
-    visualization.type
-  ] as VisualizacionTypeDefinition<
-    CollectionProps<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping,
-      object
-    >
-  >
-
-  if (!visualizationType) {
-    throw new Error(`Visualization type ${visualization.type} not found`)
-  }
-
-  return visualizationType.renderSettings ?? null
+  const visualizationType = getVisualizationTypeRegistry(visualization.type)
+  return visualizationType?.settings.renderer ?? null
 }
 
 export const hasVisualizacionSettings = <

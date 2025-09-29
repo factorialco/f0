@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
@@ -7,20 +8,24 @@ import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource"
-import { Sliders } from "@/icons/app"
+import { Reset, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
-import { Visualization } from "../visualizations/collection"
+import {
+  collectionVisualizations,
+  Visualization,
+} from "../visualizations/collection"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { VisualizationSelector } from "./components/VisualizationSelector"
+import { useDataCollectionSettings } from "./SettingsProvider"
 import {
-  VisualizationSettingsRenderer,
   hasVisualizacionSettings as hasVisualizacionSettingsHelper,
+  VisualizationSettingsRenderer,
 } from "./VisualizationSettingsRenderer"
 
 type SettingsProps<
@@ -149,6 +154,15 @@ export const Settings = <
     [currentVisualization]
   )
 
+  const settingsContext = useDataCollectionSettings()
+
+  const onResetSettings = () => {
+    // Call to the all visualizations reset handler
+    Object.values(collectionVisualizations).forEach((visualization) => {
+      visualization.settings.resetHandler?.(settingsContext)
+    })
+  }
+
   if (!shouldShowSettings) return null
 
   return (
@@ -209,6 +223,14 @@ export const Settings = <
                 {visualizacionSettings}
               </section>
             ),
+            <section key="reset" className="p-3">
+              <F0Button
+                variant="ghost"
+                icon={Reset}
+                label={i18n.collections.visualizations.reset}
+                onClick={onResetSettings}
+              />
+            </section>,
           ]
             .filter(Boolean)
             .map((block, index, array) => (

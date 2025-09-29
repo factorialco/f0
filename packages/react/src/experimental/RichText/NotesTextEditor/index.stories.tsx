@@ -214,6 +214,7 @@ export const Default: Story = {
           emoji: "📝",
           label: "Task list (custom)",
           icon: List,
+          editable: true,
         },
       ],
     },
