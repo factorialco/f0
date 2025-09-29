@@ -75,6 +75,7 @@ export const defaultTranslations = {
         of: "of",
       },
       settings: "{%visualizationName} settings",
+      reset: "Reset to default",
     },
     itemsCount: "items",
     emptyStates: {
