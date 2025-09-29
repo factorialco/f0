@@ -16,6 +16,7 @@ function renderTOCItem(
   sortable: boolean,
   activeItem?: string,
   collapsible?: boolean,
+  hideChildrenCounter?: boolean,
   expandedItems?: Set<string>,
   onToggleExpanded?: (id: string) => void,
   onUpdateItem?: (itemId: string, updatedItem: TOCItem) => void
@@ -39,6 +40,7 @@ function renderTOCItem(
       isExpanded={isExpanded}
       onToggleExpanded={onToggleExpanded}
       sortable={sortable}
+      hideChildrenCounter={hideChildrenCounter}
     >
       {item.children &&
         (Component === ItemSectionHeader || isExpanded) &&
@@ -56,6 +58,7 @@ function renderTOCItem(
                 sortable,
                 activeItem,
                 collapsible,
+                hideChildrenCounter,
                 expandedItems,
                 onToggleExpanded,
                 onUpdateItem
@@ -69,6 +72,7 @@ function renderTOCItem(
               sortable,
               activeItem,
               collapsible,
+              hideChildrenCounter,
               expandedItems,
               onToggleExpanded,
               onUpdateItem
@@ -89,6 +93,7 @@ function TOCContent({
   showSearchBox = false,
   searchPlaceholder,
   onReorder,
+  hideChildrenCounter = false,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -217,6 +222,7 @@ function TOCContent({
                   sortable,
                   activeItem,
                   collapsible,
+                  hideChildrenCounter,
                   expandedItems,
                   handleToggleExpanded,
                   handleUpdateItem
@@ -230,6 +236,7 @@ function TOCContent({
                 sortable,
                 activeItem,
                 collapsible,
+                hideChildrenCounter,
                 expandedItems,
                 handleToggleExpanded,
                 handleUpdateItem

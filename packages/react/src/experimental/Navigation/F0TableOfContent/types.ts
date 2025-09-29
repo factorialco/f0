@@ -45,4 +45,5 @@ export interface TOCProps {
   onReorder?: (reorderedIds: IdStructure[]) => void
   showSearchBox?: boolean
   searchPlaceholder?: string
+  hideChildrenCounter?: boolean
 }
