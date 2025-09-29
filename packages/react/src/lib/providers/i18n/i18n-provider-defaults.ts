@@ -52,6 +52,9 @@ export const defaultTranslations = {
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
   },
+  toc: {
+    search: "Search",
+  },
   collections: {
     sorting: {
       noSorting: "No sorting",
