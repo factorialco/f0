@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.210.0](https://github.com/factorialco/f0/compare/f0-react-v1.209.1...f0-react-v1.210.0) (2025-09-29)
+
+
+### Features
+
+* **icons:** add swap icon ([#2713](https://github.com/factorialco/f0/issues/2713)) ([3b06890](https://github.com/factorialco/f0/commit/3b068907fc171d4018144b755bbe5ba6999474b6))
+
 ## [1.209.1](https://github.com/factorialco/f0/compare/f0-react-v1.209.0...f0-react-v1.209.1) (2025-09-29)
 
 
