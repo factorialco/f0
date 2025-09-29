@@ -65,9 +65,9 @@ export const weekGranularity: GranularityDefinition = {
     const formats: Record<DateStringFormat, string> = {
       default: formatDateToString(date, "'W'I yyyy"),
       long: i18n.date.granularities.week.long
-        .replace("%{month}", formatDateToString(date, "MMM"))
-        .replace("%{year}", formatDateToString(date, "yyyy"))
-        .replace("%{day}", formatDateToString(date, "d")),
+        .replace("{{month}}", formatDateToString(date, "MMM"))
+        .replace("{{year}}", formatDateToString(date, "yyyy"))
+        .replace("{{day}}", formatDateToString(date, "d")),
     }
     return formats[format] ?? formats.default
   },

@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.209.1](https://github.com/factorialco/f0/compare/f0-react-v1.209.0...f0-react-v1.209.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* i18n interpolation ([#2711](https://github.com/factorialco/f0/issues/2711)) ([c043f67](https://github.com/factorialco/f0/commit/c043f67e6880f56c63649a8466dc9f51b29b4dcb))
+
+## [1.209.0](https://github.com/factorialco/f0/compare/f0-react-v1.208.0...f0-react-v1.209.0) (2025-09-29)
+
+
+### Features
+
+* searchbox and allow to hide children counter in tableofcontent ([#2708](https://github.com/factorialco/f0/issues/2708)) ([5fa52f6](https://github.com/factorialco/f0/commit/5fa52f6e18749e392f0ae6bb272292b15b14d5ac))
+
+## [1.208.0](https://github.com/factorialco/f0/compare/f0-react-v1.207.0...f0-react-v1.208.0) (2025-09-29)
+
+
+### Features
+
+* datacollection reset to default settings ([#2699](https://github.com/factorialco/f0/issues/2699)) ([06b4c69](https://github.com/factorialco/f0/commit/06b4c69875caf1c2e1662372e7f84e97f73c7c59))
+
+## [1.207.0](https://github.com/factorialco/f0/compare/f0-react-v1.206.0...f0-react-v1.207.0) (2025-09-26)
+
+
+### Features
+
+* responsive twocols layout and sticky ([#2700](https://github.com/factorialco/f0/issues/2700)) ([c027d19](https://github.com/factorialco/f0/commit/c027d1979b97aa921dcb721e8c396afedc91578b))
+
 ## [1.206.0](https://github.com/factorialco/f0/compare/f0-react-v1.205.1...f0-react-v1.206.0) (2025-09-26)
 
 

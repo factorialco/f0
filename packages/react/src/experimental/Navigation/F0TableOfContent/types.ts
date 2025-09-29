@@ -43,4 +43,6 @@ export interface TOCProps {
   collapsible?: boolean
   sortable?: boolean
   onReorder?: (reorderedIds: IdStructure[]) => void
+  showSearchBox?: boolean
+  searchPlaceholder?: string
 }
