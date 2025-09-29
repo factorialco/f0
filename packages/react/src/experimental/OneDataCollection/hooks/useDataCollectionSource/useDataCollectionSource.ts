@@ -85,19 +85,31 @@ export const useDataCollectionSource = <
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedSummaries = useMemo(() => summaries, deps)
 
-  return {
-    ...datasource,
-    summaries: memoizedSummaries,
-    navigationFilters,
-    currentNavigationFilters,
-    setCurrentNavigationFilters,
-  } as DataCollectionSource<
-    R,
-    FiltersSchema,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  >
+  const stableSource = useMemo(
+    () =>
+      ({
+        ...datasource,
+        summaries: memoizedSummaries,
+        navigationFilters,
+        currentNavigationFilters,
+        setCurrentNavigationFilters,
+      }) as DataCollectionSource<
+        R,
+        FiltersSchema,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >,
+    [
+      datasource,
+      memoizedSummaries,
+      navigationFilters,
+      currentNavigationFilters,
+      setCurrentNavigationFilters,
+    ]
+  )
+
+  return stableSource
 }

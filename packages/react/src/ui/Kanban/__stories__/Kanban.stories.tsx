@@ -460,3 +460,137 @@ export const SimpleOnMoveTest: Story = {
     })
   },
 }
+
+export const SameLaneReorderDebug: Story = {
+  args: {
+    lanes: [],
+    renderCard: () => null,
+    getKey: () => "",
+  },
+  render: function Render() {
+    const [instanceId] = useState(() => Symbol("kanban-instance"))
+
+    type T = { id: string; title: string }
+    const laneId = "A"
+    const [lanes, setLanes] = useState<KanbanProps<T>["lanes"]>([
+      {
+        id: laneId,
+        title: "Lane A",
+        items: [
+          { id: "1", title: "One" },
+          { id: "2", title: "Two" },
+          { id: "3", title: "Three" },
+        ],
+        variant: "neutral",
+      },
+    ])
+
+    const getIndexById = (lid: string, id: string): number => {
+      const lane = lanes.find((l) => l.id === lid)
+      return lane?.items.findIndex((it) => it.id === id) ?? -1
+    }
+
+    const onMove: KanbanProps<T>["dnd"]["onMove"] = async (
+      _from,
+      _to,
+      source,
+      _dest
+    ) => {
+      // Simulate backend OK
+      await new Promise((r) => setTimeout(r, 10))
+      return { ...source }
+    }
+
+    const dispatchMove = (detail: {
+      fromLaneId: string
+      toLaneId: string
+      sourceId: string
+      indexOfTarget: number | null
+      position: "above" | "below" | null
+    }) => {
+      window.dispatchEvent(new CustomEvent("kanban-test-move", { detail }))
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const lane = lanes.find((l) => l.id === laneId)
+              const idxTarget =
+                lane?.items.findIndex((it) => it.id === "1") ?? -1
+              if (idxTarget < 0) return
+              dispatchMove({
+                fromLaneId: laneId,
+                toLaneId: laneId,
+                sourceId: "2",
+                indexOfTarget: idxTarget,
+                position: "above",
+              })
+            }}
+            className="bg-blue-600 text-white rounded px-3 py-1"
+            data-testid="btn-move-2-above-1"
+          >
+            Move 2 above 1
+          </button>
+          <button
+            onClick={() => {
+              const lane = lanes.find((l) => l.id === laneId)
+              const idxTarget =
+                lane?.items.findIndex((it) => it.id === "2") ?? -1
+              if (idxTarget < 0) return
+              dispatchMove({
+                fromLaneId: laneId,
+                toLaneId: laneId,
+                sourceId: "3",
+                indexOfTarget: idxTarget,
+                position: "below",
+              })
+            }}
+            className="bg-green-600 text-white rounded px-3 py-1"
+            data-testid="btn-move-3-below-2"
+          >
+            Move 3 below 2
+          </button>
+          <button
+            onClick={() =>
+              setLanes([
+                {
+                  id: laneId,
+                  title: "Lane A",
+                  items: [
+                    { id: "11", title: "Eleven" },
+                    { id: "12", title: "Twelve" },
+                    { id: "13", title: "Thirteen" },
+                  ],
+                  variant: "neutral",
+                },
+              ])
+            }
+            className="bg-purple-600 text-white rounded px-3 py-1"
+            data-testid="btn-update-source-11-12-13"
+          >
+            Update source to 11,12,13
+          </button>
+        </div>
+
+        <DndProvider driver={createAtlaskitDriver(instanceId)}>
+          <Kanban<T>
+            lanes={lanes}
+            getKey={(i) => i.id}
+            dnd={{ instanceId, getIndexById, onMove }}
+            renderCard={(item: T, index: number, total: number) => (
+              <KanbanCard<T>
+                drag={{ id: item.id, type: "list-card", data: { ...item } }}
+                id={item.id}
+                index={index}
+                total={total}
+                title={`${item.id} - ${item.title}`}
+              />
+            )}
+          />
+        </DndProvider>
+      </div>
+    )
+  },
+}

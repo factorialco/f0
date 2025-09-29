@@ -99,6 +99,8 @@ export interface UseDataReturn<R extends RecordType> {
 
   // Merged filters (default values and current values)
   mergedFilters: FiltersState<FiltersDefinition>
+  // Optimistic update API
+  updateRecords: (updater: (prev: R[]) => R[]) => void
 }
 
 type DataType<T> = PromiseState<T>
@@ -746,6 +748,9 @@ export function useData<
     loadMore,
     mergedFilters,
     totalItems,
+    updateRecords: (updater: (prev: R[]) => R[]) => {
+      setRawData((prev) => updater(prev))
+    },
   }
 }
 
