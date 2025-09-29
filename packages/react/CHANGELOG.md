@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.208.0](https://github.com/factorialco/f0/compare/f0-react-v1.207.0...f0-react-v1.208.0) (2025-09-29)
+
+
+### Features
+
+* datacollection reset to default settings ([#2699](https://github.com/factorialco/f0/issues/2699)) ([06b4c69](https://github.com/factorialco/f0/commit/06b4c69875caf1c2e1662372e7f84e97f73c7c59))
+
 ## [1.207.0](https://github.com/factorialco/f0/compare/f0-react-v1.206.0...f0-react-v1.207.0) (2025-09-26)
 
 
