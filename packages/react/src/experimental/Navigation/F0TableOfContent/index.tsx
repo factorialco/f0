@@ -60,7 +60,7 @@ function renderTOCItem(
                 depth + 1,
                 activeItem,
                 collapsible,
-                true,
+                hideChildrenCounter,
                 expandedItems,
                 onToggleExpanded,
                 onUpdateItem
@@ -75,7 +75,7 @@ function renderTOCItem(
               depth + 1,
               activeItem,
               collapsible,
-              true,
+              hideChildrenCounter,
               expandedItems,
               onToggleExpanded,
               onUpdateItem
@@ -96,6 +96,7 @@ function TOCContent({
   showSearchBox = false,
   searchPlaceholder,
   onReorder,
+  hideChildrenCounter = false,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -225,7 +226,7 @@ function TOCContent({
                   0,
                   activeItem,
                   collapsible,
-                  false,
+                  hideChildrenCounter,
                   expandedItems,
                   handleToggleExpanded,
                   handleUpdateItem
@@ -240,7 +241,7 @@ function TOCContent({
                 0,
                 activeItem,
                 collapsible,
-                false,
+                hideChildrenCounter,
                 expandedItems,
                 handleToggleExpanded,
                 handleUpdateItem
