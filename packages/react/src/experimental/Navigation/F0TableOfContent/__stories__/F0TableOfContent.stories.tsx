@@ -224,17 +224,3 @@ export const SortableWithSearchBox: Story = {
     },
   },
 }
-
-export const HideChildrenCounter: Story = {
-  args: {
-    ...Default.args,
-    hideChildrenCounter: true,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: "Shows how to hide the children counter.",
-      },
-    },
-  },
-}

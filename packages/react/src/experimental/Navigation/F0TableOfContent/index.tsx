@@ -14,6 +14,7 @@ import { filterTree, findExpandedPath } from "./utils"
 function renderTOCItem(
   item: TOCItem,
   sortable: boolean,
+  depth: number,
   activeItem?: string,
   collapsible?: boolean,
   hideChildrenCounter?: boolean,
@@ -56,9 +57,10 @@ function renderTOCItem(
               renderTOCItem(
                 child,
                 sortable,
+                depth + 1,
                 activeItem,
                 collapsible,
-                hideChildrenCounter,
+                true,
                 expandedItems,
                 onToggleExpanded,
                 onUpdateItem
@@ -70,9 +72,10 @@ function renderTOCItem(
             renderTOCItem(
               child,
               sortable,
+              depth + 1,
               activeItem,
               collapsible,
-              hideChildrenCounter,
+              true,
               expandedItems,
               onToggleExpanded,
               onUpdateItem
@@ -93,7 +96,6 @@ function TOCContent({
   showSearchBox = false,
   searchPlaceholder,
   onReorder,
-  hideChildrenCounter = false,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -220,9 +222,10 @@ function TOCContent({
                 renderTOCItem(
                   item,
                   sortable,
+                  0,
                   activeItem,
                   collapsible,
-                  hideChildrenCounter,
+                  false,
                   expandedItems,
                   handleToggleExpanded,
                   handleUpdateItem
@@ -234,9 +237,10 @@ function TOCContent({
               renderTOCItem(
                 item,
                 sortable,
+                0,
                 activeItem,
                 collapsible,
-                hideChildrenCounter,
+                false,
                 expandedItems,
                 handleToggleExpanded,
                 handleUpdateItem
