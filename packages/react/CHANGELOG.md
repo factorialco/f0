@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.209.0](https://github.com/factorialco/f0/compare/f0-react-v1.208.0...f0-react-v1.209.0) (2025-09-29)
+
+
+### Features
+
+* searchbox and allow to hide children counter in tableofcontent ([#2708](https://github.com/factorialco/f0/issues/2708)) ([5fa52f6](https://github.com/factorialco/f0/commit/5fa52f6e18749e392f0ae6bb272292b15b14d5ac))
+
 ## [1.208.0](https://github.com/factorialco/f0/compare/f0-react-v1.207.0...f0-react-v1.208.0) (2025-09-29)
 
 
