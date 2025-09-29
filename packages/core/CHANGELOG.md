@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.27.0](https://github.com/factorialco/f0/compare/f0-core-v1.26.0...f0-core-v1.27.0) (2025-09-29)
+
+
+### Features
+
+* **icons:** add swap icon ([#2713](https://github.com/factorialco/f0/issues/2713)) ([3b06890](https://github.com/factorialco/f0/commit/3b068907fc171d4018144b755bbe5ba6999474b6))
+
 ## [1.26.0](https://github.com/factorialco/factorial-one/compare/f0-core-v1.25.1...f0-core-v1.26.0) (2025-09-11)
 
 
