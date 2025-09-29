@@ -74,7 +74,7 @@ export const defaultTranslations = {
       pagination: {
         of: "of",
       },
-      settings: "{%visualizationName} settings",
+      settings: "{{visualizationName}} settings",
       reset: "Reset to default",
     },
     itemsCount: "items",
@@ -135,7 +135,7 @@ export const defaultTranslations = {
       week: {
         currentDate: "This week",
         label: "Week",
-        long: "Week of %{day} %{month} %{year}",
+        long: "Week of {{day}} {{month}} {{year}}",
       },
       month: {
         currentDate: "This month",

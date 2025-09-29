@@ -145,7 +145,7 @@ export const Settings = <
         ] ?? "-"
 
       return i18n.collections.visualizations.settings.replace(
-        "{%visualizationName}",
+        "{{visualizationName}}",
         visualizationName as string
       )
     },
