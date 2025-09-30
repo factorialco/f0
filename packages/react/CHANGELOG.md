@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.213.0](https://github.com/factorialco/f0/compare/f0-react-v1.212.0...f0-react-v1.213.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** add chat spinner ([#2722](https://github.com/factorialco/f0/issues/2722)) ([8d369e0](https://github.com/factorialco/f0/commit/8d369e0348ce4198bb316b49a1d9bdcb4c42cd4a))
+
 ## [1.212.0](https://github.com/factorialco/f0/compare/f0-react-v1.211.0...f0-react-v1.212.0) (2025-09-30)
 
 
