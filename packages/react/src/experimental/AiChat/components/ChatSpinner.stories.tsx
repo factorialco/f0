@@ -12,8 +12,4 @@ const meta: Meta<typeof ChatSpinner> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  args: {
-    className: "w-5 h-5",
-  },
-}
+export const Default: Story = {}
