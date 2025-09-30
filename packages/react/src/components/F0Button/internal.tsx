@@ -62,6 +62,7 @@ const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
       size = "md",
       append,
       className,
+      "aria-label": ariaLabel,
       ...props
     },
     ref
@@ -100,7 +101,7 @@ const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
         loading={isLoading}
         className={className}
         mode={hideLabel ? "only" : "default"}
-        aria-label={props.title || label}
+        aria-label={ariaLabel || props.title || label}
         title={props.title || (hideLabel ? label : undefined)}
       >
         <div

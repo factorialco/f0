@@ -61,6 +61,7 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
           focusRing("focus-visible:rounded-xs focus-visible:ring-offset-2"),
         className
       )}
+      aria-label={props["aria-label"] ?? props.title}
     >
       <span>{children}</span>
       {external && <F0Icon icon={ExternalLink} size="sm" />}
