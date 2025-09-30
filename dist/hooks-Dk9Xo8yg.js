@@ -45390,6 +45390,7 @@ const e3t = ({ orientation: e = "vertical", limit: t = 600, children: n }) => /*
         !i.disabled && tr("focus-visible:rounded-xs focus-visible:ring-offset-2"),
         t
       ),
+      role: "link",
       "aria-label": i["aria-label"] ?? i.title,
       children: [
         /* @__PURE__ */ b("span", { children: n }),
