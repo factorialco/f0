@@ -123,6 +123,11 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                       e.stopPropagation()
                       handleClear()
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        handleClear()
+                      }
+                    }}
                     role="button"
                     aria-label={i18n.actions.clear}
                   >
@@ -173,6 +178,11 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                         onClick={(e) => {
                           e.stopPropagation()
                           handleClear()
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleClear()
+                          }
                         }}
                         role="button"
                         aria-label={i18n.actions.clear}
