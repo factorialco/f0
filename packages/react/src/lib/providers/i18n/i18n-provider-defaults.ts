@@ -190,6 +190,7 @@ export const defaultTranslations = {
     inputPlaceholder: "Write something here...",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
+    thoughtsGroupTitle: "Reflection",
   },
   select: {
     noResults: "No results found",
