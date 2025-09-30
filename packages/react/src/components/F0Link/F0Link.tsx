@@ -1,11 +1,8 @@
+import ExternalLink from "@/icons/app/ExternalLink"
+import { Link as BaseLink, LinkProps as BaseLinkProps } from "@/lib/linkHandler"
+import { cn, focusRing } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
 import { forwardRef } from "react"
-import ExternalLink from "../../icons/app/ExternalLink"
-import {
-  Link as BaseLink,
-  LinkProps as BaseLinkProps,
-} from "../../lib/linkHandler"
-import { cn, focusRing } from "../../lib/utils"
 import { F0Icon } from "../F0Icon"
 
 const linkVariants = cva({
@@ -61,6 +58,7 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
           focusRing("focus-visible:rounded-xs focus-visible:ring-offset-2"),
         className
       )}
+      role="link"
       aria-label={props["aria-label"] ?? props.title}
     >
       <span>{children}</span>
