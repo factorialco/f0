@@ -45159,12 +45159,12 @@ const XH = E.forwardRef(({ className: e, indeterminate: t, disabled: n, hideLabe
         name: a.name || s,
         "aria-label": a.title,
         className: le(
-          "relative h-6 w-6 shrink-0 text-f1-foreground-selected data-[state=checked]:text-f1-foreground-inverse",
+          "relative h-6 w-6 shrink-0 rounded-sm text-f1-foreground-selected data-[state=checked]:text-f1-foreground-inverse",
           "after:absolute after:left-0.5 after:top-0.5 after:z-[1] after:h-5 after:w-5 after:rounded-xs after:border after:border-solid after:border-f1-border after:transition-[background-color,border-color] after:content-[''] hover:after:border-f1-border-hover data-[state=checked]:after:bg-f1-background-selected-bold hover:data-[state=checked]:after:border-transparent",
           n && "cursor-not-allowed opacity-50 hover:border-f1-border",
           t && "data-[state=checked]:text-f1-foreground-inverse",
           a.checked && n && "data-[state=checked]:bg-f1-background-secondary data-[state=checked]:text-f1-foreground-secondary",
-          Lr(),
+          Lr("focus-visible:ring-offset-0"),
           e
         ),
         checked: a.checked,
