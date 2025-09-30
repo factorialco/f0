@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.0](https://github.com/factorialco/f0/compare/f0-core-v1.28.0...f0-core-v1.29.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** Autoclose sidebar when AiChat is open ([#2620](https://github.com/factorialco/f0/issues/2620)) ([1111b34](https://github.com/factorialco/f0/commit/1111b345d4fa98bd5f541d63a03dbfb0e79fe50b))
+
 ## [1.28.0](https://github.com/factorialco/f0/compare/f0-core-v1.27.0...f0-core-v1.28.0) (2025-09-30)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.212.0](https://github.com/factorialco/f0/compare/f0-react-v1.211.0...f0-react-v1.212.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** Autoclose sidebar when AiChat is open ([#2620](https://github.com/factorialco/f0/issues/2620)) ([1111b34](https://github.com/factorialco/f0/commit/1111b345d4fa98bd5f541d63a03dbfb0e79fe50b))
+
 ## [1.211.0](https://github.com/factorialco/f0/compare/f0-react-v1.210.2...f0-react-v1.211.0) (2025-09-30)
 
 
