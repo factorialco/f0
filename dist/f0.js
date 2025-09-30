@@ -1,8 +1,8 @@
-import { c as be, P as U, a as b, f as xe, b as Ce, C as v, B as ye, d as we, L as Ne, e as Le, V as Pe, A as Se, g as G, h as W, i as Fe, j as J, S as Y, k as M, l as X, m as De, O as ke, n as K, o as Me, p as Te, F as Q, q as Be, r as Ie, s as Re, D as Oe, t as $e, u as Ee, v as _e, w as Z, x as w, U as ee, y as je, z as ze, E as z, G as Ve, H as ae, I as qe, J as Ae, K as He, M as Ue, N as Ge, Q as We, X as Je, R as Ye, T as Xe, W as Ke, Y as Qe, Z as Ze } from "./hooks-BDkmC3tr.js";
-import { aA as es, aC as as, aL as ss, _ as rs, $ as ts, a0 as os, a1 as ls, a2 as ns, a3 as is, a4 as cs, a5 as ds, a7 as us, a8 as fs, a9 as hs, aa as ms, ab as ps, ac as gs, aH as vs, ad as bs, af as xs, ag as Cs, ah as ys, ai as ws, al as Ns, am as Ls, an as Ps, ao as Ss, aq as Fs, ae as Ds, ap as ks, ak as Ms, aI as Ts, aB as Bs, av as Is, ay as Rs, au as Os, aM as $s, at as Es, as as _s, a6 as js, aj as zs, ar as Vs, aw as qs, aD as As, aE as Hs, aF as Us, aN as Gs, ax as Ws, aG as Js, aK as Ys, az as Xs, aJ as Ks } from "./hooks-BDkmC3tr.js";
-import { jsx as e, jsxs as d, Fragment as $ } from "react/jsx-runtime";
+import { c as ve, P as H, a as b, f as be, b as xe, C as v, B as Ce, d as ye, L as we, e as Ne, V as Pe, A as Le, g as G, h as U, i as Se, j as W, S as J, k as M, l as Y, m as Fe, O as De, n as X, o as ke, p as Me, F as K, q as Te, r as Be, s as Ie, D as Re, t as Oe, u as $e, v as Ee, w as Q, x as w, U as Z, y as _e, z as je, E as z, G as ze, H as ee, I as Ve, J as Ae, K as qe, M as He, N as Ge, Q as Ue, X as We, R as Je, T as Ye, W as Xe, Y as Ke, Z as Qe } from "./hooks-CEL9hREy.js";
+import { aA as es, aC as as, aL as ss, _ as rs, $ as ts, a0 as os, a1 as ls, a2 as ns, a3 as is, a4 as ds, a5 as cs, a7 as us, a8 as fs, a9 as ms, aa as hs, ab as ps, ac as gs, aH as vs, ad as bs, af as xs, ag as Cs, ah as ys, ai as ws, al as Ns, am as Ps, an as Ls, ao as Ss, aq as Fs, ae as Ds, ap as ks, ak as Ms, aI as Ts, aB as Bs, av as Is, ay as Rs, au as Os, aM as $s, at as Es, as as _s, a6 as js, aj as zs, ar as Vs, aw as As, aD as qs, aE as Hs, aF as Gs, aN as Us, ax as Ws, aG as Js, aK as Ys, az as Xs, aJ as Ks } from "./hooks-CEL9hREy.js";
+import { jsx as e, jsxs as c, Fragment as $ } from "react/jsx-runtime";
 import * as E from "react";
-import ea, { useState as g, forwardRef as B, useRef as se, useImperativeHandle as aa, Children as sa, useEffect as re, createContext as ra } from "react";
+import Ze, { useState as g, forwardRef as B, useRef as ae, useImperativeHandle as ea, Children as aa, useEffect as se, createContext as sa } from "react";
 const ka = {
   approvals: {
     history: "Approval history",
@@ -57,6 +57,9 @@ const ka = {
     failedToLoadOptions: "Failed to load options",
     retry: "Retry"
   },
+  toc: {
+    search: "Search"
+  },
   collections: {
     sorting: {
       noSorting: "No sorting",
@@ -79,7 +82,8 @@ const ka = {
       pagination: {
         of: "of"
       },
-      settings: "{%visualizationName} settings"
+      settings: "{{visualizationName}} settings",
+      reset: "Reset to default"
     },
     itemsCount: "items",
     emptyStates: {
@@ -139,7 +143,7 @@ const ka = {
       week: {
         currentDate: "This week",
         label: "Week",
-        long: "Week of %{day} %{month} %{year}"
+        long: "Week of {{day}} {{month}} {{year}}"
       },
       month: {
         currentDate: "This month",
@@ -187,64 +191,67 @@ const ka = {
     closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
-    initialMessage: "How can I help you today?"
+    initialMessage: "How can I help you today?",
+    inputPlaceholder: "Write something here...",
+    stopAnswerGeneration: "Stop generating",
+    sendMessage: "Send message"
   },
   select: {
     noResults: "No results found",
     loadingMore: "Loading..."
   }
 }, Ma = ["person", "team", "company", "file"];
-var _ = "Progress", j = 100, [ta, Ta] = be(_), [oa, la] = ta(_), te = E.forwardRef(
+var _ = "Progress", j = 100, [ra, Ta] = ve(_), [ta, oa] = ra(_), re = E.forwardRef(
   (a, s) => {
     const {
       __scopeProgress: r,
-      value: t = null,
-      max: o,
-      getValueLabel: c = na,
+      value: l = null,
+      max: t,
+      getValueLabel: i = la,
       ...n
     } = a;
-    (o || o === 0) && !V(o) && console.error(ia(`${o}`, "Progress"));
-    const i = V(o) ? o : j;
-    t !== null && !q(t, i) && console.error(ca(`${t}`, "Progress"));
-    const l = q(t, i) ? t : null, f = T(l) ? c(l, i) : void 0;
-    return /* @__PURE__ */ e(oa, { scope: r, value: l, max: i, children: /* @__PURE__ */ e(
-      U.div,
+    (t || t === 0) && !V(t) && console.error(na(`${t}`, "Progress"));
+    const d = V(t) ? t : j;
+    l !== null && !A(l, d) && console.error(ia(`${l}`, "Progress"));
+    const o = A(l, d) ? l : null, f = T(o) ? i(o, d) : void 0;
+    return /* @__PURE__ */ e(ta, { scope: r, value: o, max: d, children: /* @__PURE__ */ e(
+      H.div,
       {
-        "aria-valuemax": i,
+        "aria-valuemax": d,
         "aria-valuemin": 0,
-        "aria-valuenow": T(l) ? l : void 0,
+        "aria-valuenow": T(o) ? o : void 0,
         "aria-valuetext": f,
         role: "progressbar",
-        "data-state": ne(l, i),
-        "data-value": l ?? void 0,
-        "data-max": i,
+        "data-state": le(o, d),
+        "data-value": o ?? void 0,
+        "data-max": d,
         ...n,
         ref: s
       }
     ) });
   }
 );
-te.displayName = _;
-var oe = "ProgressIndicator", le = E.forwardRef(
+re.displayName = _;
+var te = "ProgressIndicator", oe = E.forwardRef(
   (a, s) => {
-    const { __scopeProgress: r, ...t } = a, o = la(oe, r);
+    const { __scopeProgress: r, ...l } = a, t = oa(te, r);
     return /* @__PURE__ */ e(
-      U.div,
+      H.div,
       {
-        "data-state": ne(o.value, o.max),
-        "data-value": o.value ?? void 0,
-        "data-max": o.max,
-        ...t,
+        "data-state": le(t.value, t.max),
+        "data-value": t.value ?? void 0,
+        "data-max": t.max,
+        ...l,
         ref: s
       }
     );
   }
 );
-le.displayName = oe;
-function na(a, s) {
+oe.displayName = te;
+function la(a, s) {
   return `${Math.round(a / s * 100)}%`;
 }
-function ne(a, s) {
+function le(a, s) {
   return a == null ? "indeterminate" : a === s ? "complete" : "loading";
 }
 function T(a) {
@@ -253,13 +260,13 @@ function T(a) {
 function V(a) {
   return T(a) && !isNaN(a) && a > 0;
 }
-function q(a, s) {
+function A(a, s) {
   return T(a) && !isNaN(a) && a <= s && a >= 0;
 }
-function ia(a, s) {
+function na(a, s) {
   return `Invalid prop \`max\` of value \`${a}\` supplied to \`${s}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${j}\`.`;
 }
-function ca(a, s) {
+function ia(a, s) {
   return `Invalid prop \`value\` of value \`${a}\` supplied to \`${s}\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${j} if no \`max\` prop is set)
@@ -267,11 +274,11 @@ function ca(a, s) {
 
 Defaulting to \`null\`.`;
 }
-var ie = te, da = le;
-const ce = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */ e(
-  ie,
+var ne = re, da = oe;
+const ie = E.forwardRef(({ className: a, value: s, ...r }, l) => /* @__PURE__ */ e(
+  ne,
   {
-    ref: t,
+    ref: l,
     className: b(
       "relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary",
       a
@@ -289,14 +296,14 @@ const ce = E.forwardRef(({ className: a, value: s, ...r }, t) => /* @__PURE__ */
     )
   }
 ));
-ce.displayName = ie.displayName;
-const ua = ({ value: a, max: s = 100, label: r, color: t }, o) => {
-  const c = t || Ce(0), n = a / s * 100;
-  return /* @__PURE__ */ d("div", { className: "flex items-center space-x-2", "aria-live": "polite", children: [
+ie.displayName = ne.displayName;
+const ca = ({ value: a, max: s = 100, label: r, color: l }, t) => {
+  const i = l || xe(0), n = a / s * 100;
+  return /* @__PURE__ */ c("div", { className: "flex items-center space-x-2", "aria-live": "polite", children: [
     /* @__PURE__ */ e("div", { className: "flex-grow", children: /* @__PURE__ */ e(
-      ce,
+      ie,
       {
-        color: c,
+        color: i,
         value: n,
         className: "w-full",
         "aria-valuemin": 0,
@@ -307,36 +314,36 @@ const ua = ({ value: a, max: s = 100, label: r, color: t }, o) => {
     ) }),
     r && /* @__PURE__ */ e("div", { className: "flex-shrink-0 text-sm font-medium", children: r })
   ] });
-}, fa = xe(ua), Ba = v(
+}, ua = be(ca), Ba = v(
   {
     name: "AreaChart",
     type: "info"
   },
-  Se
+  Le
 ), Ia = v(
   {
     name: "BarChart",
     type: "info"
   },
-  ye
+  Ce
 ), Ra = v(
   {
     name: "CategoryBarChart",
     type: "info"
   },
-  we
+  ye
 ), Oa = v(
   {
     name: "LineChart",
     type: "info"
   },
-  Ne
+  we
 ), $a = v(
   {
     name: "PieChart",
     type: "info"
   },
-  Le
+  Ne
 ), Ea = v(
   {
     name: "VerticalBarChart",
@@ -348,7 +355,7 @@ const ua = ({ value: a, max: s = 100, label: r, color: t }, o) => {
     name: "ProgressBarChart",
     type: "info"
   },
-  fa
+  ua
 ), de = [
   "default",
   "outline",
@@ -357,31 +364,31 @@ const ua = ({ value: a, max: s = 100, label: r, color: t }, o) => {
   "ghost",
   "promote",
   "outlinePromote"
-], ha = ["link"];
+], fa = ["link"];
 [
   ...de,
-  ...ha
+  ...fa
 ];
-const ue = ["sm", "md", "lg"], ja = de, za = ue, Va = ["default", "outline", "neutral"], qa = ue, Aa = ["sm", "md", "lg"], O = ({ count: a, list: s }) => {
-  const [r, t] = g(!1), o = /* @__PURE__ */ e(M, { label: `+${a}` });
-  return s != null && s.length ? /* @__PURE__ */ d(G, { open: r, onOpenChange: t, children: [
-    /* @__PURE__ */ e(W, { asChild: !0, children: /* @__PURE__ */ e("button", { className: Fe("inline-flex flex-shrink-0 items-center"), children: o }) }),
+const ce = ["sm", "md", "lg"], ja = de, za = ce, Va = ["default", "outline", "neutral"], Aa = ce, qa = ["sm", "md", "lg"], O = ({ count: a, list: s }) => {
+  const [r, l] = g(!1), t = /* @__PURE__ */ e(M, { label: `+${a}` });
+  return s != null && s.length ? /* @__PURE__ */ c(G, { open: r, onOpenChange: l, children: [
+    /* @__PURE__ */ e(U, { asChild: !0, children: /* @__PURE__ */ e("button", { className: Se("inline-flex flex-shrink-0 items-center"), children: t }) }),
     /* @__PURE__ */ e(
-      J,
+      W,
       {
         className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
         align: "end",
-        children: /* @__PURE__ */ d(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col", children: [
-          s.map((c, n) => /* @__PURE__ */ e(
+        children: /* @__PURE__ */ c(J, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col", children: [
+          s.map((i, n) => /* @__PURE__ */ e(
             "div",
             {
               className: "flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
-              children: /* @__PURE__ */ e(M, { ...c })
+              children: /* @__PURE__ */ e(M, { ...i })
             },
             n
           )),
           /* @__PURE__ */ e(
-            X,
+            Y,
             {
               orientation: "vertical",
               className: "[&_div]:bg-f1-background"
@@ -390,151 +397,181 @@ const ue = ["sm", "md", "lg"], ja = de, za = ue, Va = ["default", "outline", "ne
         ] })
       }
     )
-  ] }) : o;
+  ] }) : t;
 };
 O.displayName = "ChipCounter";
-const fe = ({
+const ue = ({
   chips: a,
   max: s = 4,
   remainingCount: r,
-  layout: t = "compact"
+  layout: l = "compact"
 }) => {
-  if (t === "fill")
+  if (l === "fill")
     return /* @__PURE__ */ e(
-      ke,
+      De,
       {
         items: a,
-        renderListItem: (l) => /* @__PURE__ */ e(M, { ...l }),
+        renderListItem: (o) => /* @__PURE__ */ e(M, { ...o }),
         renderDropdownItem: () => null,
         forceShowingOverflowIndicator: r !== void 0,
-        renderOverflowIndicator: (l) => /* @__PURE__ */ e(
+        renderOverflowIndicator: (o) => /* @__PURE__ */ e(
           O,
           {
-            count: (r ?? 0) + l,
-            list: r ? void 0 : a.slice(a.length - l)
+            count: (r ?? 0) + o,
+            list: r ? void 0 : a.slice(a.length - o)
           }
         ),
         overflowIndicatorWithPopover: !1,
         className: "flex-1"
       }
     );
-  const o = a.slice(0, s), c = a.slice(s), n = r ?? a.length - s, i = n > 0;
-  return /* @__PURE__ */ d("div", { className: "flex items-center gap-2", children: [
-    o.map((l, f) => /* @__PURE__ */ e(M, { ...l }, f)),
-    i && /* @__PURE__ */ e(
+  const t = a.slice(0, s), i = a.slice(s), n = r ?? a.length - s, d = n > 0;
+  return /* @__PURE__ */ c("div", { className: "flex items-center gap-2", children: [
+    t.map((o, f) => /* @__PURE__ */ e(M, { ...o }, f)),
+    d && /* @__PURE__ */ e(
       O,
       {
         count: n,
-        list: r ? void 0 : c
+        list: r ? void 0 : i
       }
     )
   ] });
 };
-fe.displayName = "F0ChipList";
-const Ha = De(
+ue.displayName = "F0ChipList";
+const Ha = Fe(
   "F0ChipList",
-  fe
+  ue
 ), ma = {
   xs: 1,
   sm: 2,
   md: 2,
   lg: 2
-}, pa = B(function({ widgets: s, children: r }, t) {
-  const o = se(null);
-  aa(t, () => o.current);
-  const c = sa.toArray(s).filter((n) => !!n).map((n, i) => /* @__PURE__ */ e("div", { className: "h-full @5xl:h-auto [&>div]:h-full", children: n }, i));
-  return /* @__PURE__ */ e(K, { layout: "home", children: /* @__PURE__ */ d("div", { ref: o, className: "@container", children: [
-    /* @__PURE__ */ d("div", { className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden", children: [
-      /* @__PURE__ */ e(Me, { columns: ma, showArrows: !1, children: c }),
+}, ha = B(function({ widgets: s, children: r }, l) {
+  const t = ae(null);
+  ea(l, () => t.current);
+  const i = aa.toArray(s).filter((n) => !!n).map((n, d) => /* @__PURE__ */ e("div", { className: "h-full @5xl:h-auto [&>div]:h-full", children: n }, d));
+  return /* @__PURE__ */ e(X, { layout: "home", children: /* @__PURE__ */ c("div", { ref: t, className: "@container", children: [
+    /* @__PURE__ */ c("div", { className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden", children: [
+      /* @__PURE__ */ e(ke, { columns: ma, showArrows: !1, children: i }),
       /* @__PURE__ */ e("main", { children: r })
     ] }),
-    /* @__PURE__ */ d("div", { className: "hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid", children: [
-      /* @__PURE__ */ e("div", { className: "col-span-3 flex flex-row gap-5 *:flex-1", children: c.slice(0, 3) }),
+    /* @__PURE__ */ c("div", { className: "hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid", children: [
+      /* @__PURE__ */ e("div", { className: "col-span-3 flex flex-row gap-5 *:flex-1", children: i.slice(0, 3) }),
       /* @__PURE__ */ e("main", { className: "col-span-2", children: r }),
-      /* @__PURE__ */ e("div", { className: "flex flex-1 flex-col gap-5", children: c.slice(3) })
+      /* @__PURE__ */ e("div", { className: "flex flex-1 flex-col gap-5", children: i.slice(3) })
     ] })
   ] }) });
-}), ga = B(
-  function({ children: s, sideContent: r, mainColumnPosition: t = "left" }, o) {
-    return /* @__PURE__ */ e("div", { ref: o, className: "h-full overflow-auto", children: /* @__PURE__ */ d(
+}), pa = B(
+  function({
+    children: s,
+    sideContent: r,
+    mainColumnPosition: l = "left",
+    sticky: t = !1
+  }, i) {
+    return /* @__PURE__ */ e("div", { ref: i, className: "h-full", children: /* @__PURE__ */ c(
       "div",
       {
         className: b(
-          "flex h-full overflow-auto text-f1-foreground sm:flex-row",
-          t === "right" ? "flex-col" : "flex-col-reverse"
+          "flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row",
+          "flex-col",
+          "overflow-y-auto",
+          t && "md:sticky md:top-0 md:max-h-full"
         ),
         children: [
-          t === "right" && /* @__PURE__ */ e(A, { children: r }),
           /* @__PURE__ */ e(
             "main",
             {
               className: b(
-                "h-fit min-h-full border-0 px-6 py-5 sm:basis-3/4 sm:border-solid",
-                t === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary"
+                "sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6",
+                t ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full",
+                l === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary",
+                "border-t border-solid border-t-f1-border-secondary sm:border-t-0"
               ),
               children: s
             }
           ),
-          t === "left" && /* @__PURE__ */ e(A, { children: r })
+          /* @__PURE__ */ e(
+            ga,
+            {
+              sticky: t,
+              className: b(
+                "order-1",
+                l === "right" ? "md:order-1" : "md:order-3"
+              ),
+              children: r
+            }
+          )
         ]
       }
     ) });
   }
-), A = ({ children: a }) => /* @__PURE__ */ e("aside", { className: "py-5 pl-2 pr-4 sm:basis-1/4 sm:pb-6", children: a }), va = Te({
-  base: "relative flex min-h-full w-full flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
+), ga = ({
+  children: a,
+  className: s
+}) => /* @__PURE__ */ e(
+  "aside",
+  {
+    className: b(
+      "min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
+      s
+    ),
+    children: a
+  }
+), va = Me({
+  base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
       narrow: "max-w-screen-lg"
     }
   }
-}), he = ea.forwardRef(({ children: a, variant: s, className: r, ...t }, o) => /* @__PURE__ */ e(K, { layout: "standard", children: /* @__PURE__ */ e(
+}), fe = Ze.forwardRef(({ children: a, variant: s, className: r, ...l }, t) => /* @__PURE__ */ e(X, { layout: "standard", children: /* @__PURE__ */ e(
   "section",
   {
-    ref: o,
+    ref: t,
     className: b("relative flex-1 overflow-auto", r),
-    ...t,
+    ...l,
     children: /* @__PURE__ */ e("div", { className: b(va({ variant: s })), children: a })
   }
 ) }));
-he.displayName = "StandardLayout";
-const Ua = v(
+fe.displayName = "StandardLayout";
+const Ga = v(
   {
     name: "StandardLayout",
     type: "layout"
   },
-  he
-), Ga = v(
+  fe
+), Ua = v(
   {
     name: "TwoColumnLayout",
     type: "layout"
   },
-  ga
+  pa
 ), Wa = v(
   {
     name: "HomeLayout",
     type: "layout"
   },
-  pa
-), ba = ({ benefits: a }) => /* @__PURE__ */ e("div", { className: "flex flex-col gap-2", children: a.map((s, r) => /* @__PURE__ */ e(xa, { text: s }, r)) }), xa = ({ text: a }) => /* @__PURE__ */ d("div", { className: "flex flex-row items-start gap-2", children: [
-  /* @__PURE__ */ e(Ie, { icon: Re, size: "md", className: "text-f1-icon-positive" }),
+  ha
+), ba = ({ benefits: a }) => /* @__PURE__ */ e("div", { className: "flex flex-col gap-2", children: a.map((s, r) => /* @__PURE__ */ e(xa, { text: s }, r)) }), xa = ({ text: a }) => /* @__PURE__ */ c("div", { className: "flex flex-row items-start gap-2", children: [
+  /* @__PURE__ */ e(Be, { icon: Ie, size: "md", className: "text-f1-icon-positive" }),
   /* @__PURE__ */ e("span", { children: a })
 ] }), me = B(
   ({
     title: a,
     image: s,
     benefits: r,
-    actions: t,
-    withShadow: o = !0,
-    module: c,
+    actions: l,
+    withShadow: t = !0,
+    module: i,
     moduleName: n,
-    tag: i
-  }, l) => /* @__PURE__ */ d(
+    tag: d
+  }, o) => /* @__PURE__ */ c(
     "div",
     {
-      ref: l,
+      ref: o,
       className: b(
         "bg-white flex flex-row rounded-xl border border-f1-border-secondary",
-        o && "shadow-md"
+        t && "shadow-md"
       ),
       children: [
         /* @__PURE__ */ e("div", { className: "aspect-auto flex-shrink-0 overflow-hidden rounded-xl py-1 pl-1", children: /* @__PURE__ */ e(
@@ -545,19 +582,19 @@ const Ua = v(
             className: "h-full w-full rounded-lg object-cover"
           }
         ) }),
-        /* @__PURE__ */ d("div", { className: "flex flex-col justify-center gap-8 px-8 py-5", children: [
-          /* @__PURE__ */ d("div", { className: "flex flex-col gap-5", children: [
-            /* @__PURE__ */ d("div", { className: "flex flex-col gap-2", children: [
-              /* @__PURE__ */ d("div", { className: "flex flex-row items-center gap-2", children: [
-                c && /* @__PURE__ */ e(Q, { module: c }),
+        /* @__PURE__ */ c("div", { className: "flex flex-col justify-center gap-8 px-8 py-5", children: [
+          /* @__PURE__ */ c("div", { className: "flex flex-col gap-5", children: [
+            /* @__PURE__ */ c("div", { className: "flex flex-col gap-2", children: [
+              /* @__PURE__ */ c("div", { className: "flex flex-row items-center gap-2", children: [
+                i && /* @__PURE__ */ e(K, { module: i }),
                 n && /* @__PURE__ */ e("p", { className: "text-base font-medium text-f1-foreground", children: n })
               ] }),
-              i && /* @__PURE__ */ e("div", { className: "flex justify-start", children: /* @__PURE__ */ e(Be, { icon: i.icon, text: i.label }) }),
+              d && /* @__PURE__ */ e("div", { className: "flex justify-start", children: /* @__PURE__ */ e(Te, { icon: d.icon, text: d.label }) }),
               /* @__PURE__ */ e("h2", { className: "font-bold text-xl text-f1-foreground", children: a })
             ] }),
             /* @__PURE__ */ e(ba, { benefits: r })
           ] }),
-          t && /* @__PURE__ */ e("div", { className: "flex gap-3", children: t })
+          l && /* @__PURE__ */ e("div", { className: "flex gap-3", children: l })
         ] })
       ]
     }
@@ -568,41 +605,41 @@ function Ca({
   isOpen: a,
   onClose: s,
   title: r,
-  children: t,
-  module: o,
-  portalContainer: c
+  children: l,
+  module: t,
+  portalContainer: i
 }) {
-  const [n, i] = g(a);
-  return re(() => {
-    i(a);
-  }, [a]), /* @__PURE__ */ e(Oe, { open: n, onOpenChange: (f) => {
-    i(f), f || s();
-  }, modal: !0, children: /* @__PURE__ */ d(
-    $e,
+  const [n, d] = g(a);
+  return se(() => {
+    d(a);
+  }, [a]), /* @__PURE__ */ e(Re, { open: n, onOpenChange: (f) => {
+    d(f), f || s();
+  }, modal: !0, children: /* @__PURE__ */ c(
+    Oe,
     {
       className: "max-h-[620px] w-[760px] overflow-y-auto overflow-x-hidden bg-f1-background",
-      container: c,
+      container: i,
       children: [
-        /* @__PURE__ */ d("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
-          /* @__PURE__ */ d(Ee, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
-            o && /* @__PURE__ */ e(Q, { module: o, size: "lg" }),
+        /* @__PURE__ */ c("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
+          /* @__PURE__ */ c($e, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
+            t && /* @__PURE__ */ e(K, { module: t, size: "lg" }),
             r
           ] }),
           /* @__PURE__ */ e(
-            _e,
+            Ee,
             {
               variant: "outline",
-              icon: Z,
+              icon: Q,
               onClick: s,
               label: "Close modal",
               hideLabel: !0
             }
           )
         ] }),
-        /* @__PURE__ */ d(Y, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col", children: [
-          t,
+        /* @__PURE__ */ c(J, { className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col", children: [
+          l,
           /* @__PURE__ */ e(
-            X,
+            Y,
             {
               orientation: "vertical",
               className: "[&_div]:bg-f1-background"
@@ -617,61 +654,61 @@ function Ja({
   isOpen: a,
   onClose: s,
   title: r,
-  image: t,
-  benefits: o,
-  errorMessage: c,
+  image: l,
+  benefits: t,
+  errorMessage: i,
   successMessage: n,
-  loadingState: i,
-  nextSteps: l,
+  loadingState: d,
+  nextSteps: o,
   closeLabel: f,
-  primaryAction: h,
+  primaryAction: m,
   modalTitle: N,
-  modalModule: L,
+  modalModule: P,
   secondaryAction: u,
   portalContainer: x,
   tag: S
 }) {
-  const [I, F] = g(a), [C, y] = g(null), [P, m] = g(!1), D = async () => {
-    if (h != null && h.onClick) {
-      m(!0);
+  const [I, F] = g(a), [C, y] = g(null), [L, h] = g(!1), D = async () => {
+    if (m != null && m.onClick) {
+      h(!0);
       try {
-        await h.onClick(), F(!1), y("success");
+        await m.onClick(), F(!1), y("success");
       } catch {
         y("error");
       } finally {
-        m(!1);
+        h(!1);
       }
     }
   }, k = () => {
     F(!1), s == null || s();
-  }, R = P;
-  return /* @__PURE__ */ d($, { children: [
+  }, R = L;
+  return /* @__PURE__ */ c($, { children: [
     /* @__PURE__ */ e(
       Ca,
       {
         isOpen: I,
         onClose: k,
         title: N,
-        module: L,
+        module: P,
         portalContainer: x,
         children: /* @__PURE__ */ e("div", { className: "pb-4 pl-4", children: /* @__PURE__ */ e(
           me,
           {
             title: r,
-            image: t,
-            benefits: o,
+            image: l,
+            benefits: t,
             withShadow: !1,
             tag: S,
-            actions: /* @__PURE__ */ d("div", { className: "flex gap-3", children: [
-              h && /* @__PURE__ */ e(
+            actions: /* @__PURE__ */ c("div", { className: "flex gap-3", children: [
+              m && /* @__PURE__ */ e(
                 w,
                 {
-                  variant: h.variant,
-                  label: R ? i.label : h.label,
-                  icon: h.icon || void 0,
+                  variant: m.variant,
+                  label: R ? d.label : m.label,
+                  icon: m.icon || void 0,
                   onClick: D,
-                  loading: h.loading,
-                  size: h.size
+                  loading: m.loading,
+                  size: m.size
                 }
               ),
               u && /* @__PURE__ */ e(
@@ -690,16 +727,16 @@ function Ja({
       }
     ),
     C && /* @__PURE__ */ e(
-      ee,
+      Z,
       {
         open: !0,
         onClose: () => {
           k(), y(null);
         },
         success: C === "success",
-        errorMessage: c,
+        errorMessage: i,
         successMessage: n,
-        nextSteps: l,
+        nextSteps: o,
         closeLabel: f,
         portalContainer: x
       }
@@ -710,35 +747,35 @@ function ya({
   mediaUrl: a,
   title: s,
   description: r,
-  onClose: t,
-  dismissible: o,
-  width: c,
+  onClose: l,
+  dismissible: t,
+  width: i,
   trackVisibility: n,
-  actions: i,
-  showConfirmation: l = !0
+  actions: d,
+  showConfirmation: o = !0
 }) {
-  const [f, h] = g(!1), N = () => {
-    h(!0), t && t();
+  const [f, m] = g(!1), N = () => {
+    m(!0), l && l();
   };
-  re(() => {
+  se(() => {
     n && n(!f);
   }, [n, f]);
-  const L = a == null ? void 0 : a.includes(".mp4");
-  return /* @__PURE__ */ e($, { children: f ? null : /* @__PURE__ */ d(je, { style: { width: c }, className: "relative bg-f1-background p-1", children: [
-    /* @__PURE__ */ d(ze, { children: [
-      o && /* @__PURE__ */ e("div", { className: "absolute right-2 top-2 z-10", children: /* @__PURE__ */ e(
+  const P = a == null ? void 0 : a.includes(".mp4");
+  return /* @__PURE__ */ e($, { children: f ? null : /* @__PURE__ */ c(_e, { style: { width: i }, className: "relative bg-f1-background p-1", children: [
+    /* @__PURE__ */ c(je, { children: [
+      t && /* @__PURE__ */ e("div", { className: "absolute right-2 top-2 z-10", children: /* @__PURE__ */ e(
         w,
         {
           variant: "ghost",
-          icon: Z,
+          icon: Q,
           size: "sm",
           hideLabel: !0,
           onClick: N,
           label: "Close"
         }
       ) }),
-      /* @__PURE__ */ d("div", { children: [
-        /* @__PURE__ */ e("div", { children: a && (L ? /* @__PURE__ */ e(
+      /* @__PURE__ */ c("div", { children: [
+        /* @__PURE__ */ e("div", { children: a && (P ? /* @__PURE__ */ e(
           "video",
           {
             src: a,
@@ -756,15 +793,15 @@ function ya({
             className: "h-full w-full rounded-md"
           }
         )) }),
-        /* @__PURE__ */ d("div", { className: "flex flex-col gap-[2px] p-3", children: [
+        /* @__PURE__ */ c("div", { className: "flex flex-col gap-[2px] p-3", children: [
           /* @__PURE__ */ e(z, { className: "text-lg font-medium", children: s }),
           /* @__PURE__ */ e(z, { className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary", children: r })
         ] })
       ] })
     ] }),
-    i && /* @__PURE__ */ e(Ve, { className: "p-3", children: i.map(
+    d && /* @__PURE__ */ e(ze, { className: "p-3", children: d.map(
       (u) => u.type === "upsell" ? /* @__PURE__ */ e(
-        ae,
+        ee,
         {
           label: u.label,
           onRequest: u.onClick,
@@ -773,7 +810,7 @@ function ya({
           loadingState: u.loadingState,
           nextSteps: u.nextSteps,
           closeLabel: u.closeLabel,
-          showConfirmation: l && u.showConfirmation,
+          showConfirmation: o && u.showConfirmation,
           variant: u.variant
         },
         u.label
@@ -790,43 +827,43 @@ function ya({
   ] }) });
 }
 const wa = B(
-  function({ primaryAction: s, secondaryAction: r, ...t }, o) {
-    const c = (l) => l.variant === "promote" ? /* @__PURE__ */ e(
-      ae,
+  function({ primaryAction: s, secondaryAction: r, ...l }, t) {
+    const i = (o) => o.variant === "promote" ? /* @__PURE__ */ e(
+      ee,
       {
-        label: l.label,
+        label: o.label,
         onRequest: async () => {
-          await l.onClick();
+          await o.onClick();
         },
-        errorMessage: l.errorMessage,
-        successMessage: l.successMessage,
-        loadingState: l.loadingState,
-        nextSteps: l.nextSteps,
-        closeLabel: l.closeLabel,
-        showIcon: l.showIcon,
-        showConfirmation: l.showConfirmation,
-        variant: l.variant
+        errorMessage: o.errorMessage,
+        successMessage: o.successMessage,
+        loadingState: o.loadingState,
+        nextSteps: o.nextSteps,
+        closeLabel: o.closeLabel,
+        showIcon: o.showIcon,
+        showConfirmation: o.showConfirmation,
+        variant: o.variant
       }
     ) : /* @__PURE__ */ e(
       w,
       {
-        onClick: l.onClick,
-        label: l.label,
-        variant: l.variant || "default",
+        onClick: o.onClick,
+        label: o.label,
+        variant: o.variant || "default",
         size: "md",
-        icon: l.icon
+        icon: o.icon
       }
-    ), n = (s == null ? void 0 : s.variant) !== "promote" ? s : void 0, i = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0;
-    return /* @__PURE__ */ d(
-      qe,
+    ), n = (s == null ? void 0 : s.variant) !== "promote" ? s : void 0, d = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0;
+    return /* @__PURE__ */ c(
+      Ve,
       {
-        ref: o,
-        ...t,
+        ref: t,
+        ...l,
         primaryAction: n,
-        secondaryAction: i,
+        secondaryAction: d,
         children: [
-          (s == null ? void 0 : s.variant) === "promote" && c(s),
-          (r == null ? void 0 : r.variant) === "promote" && c(r)
+          (s == null ? void 0 : s.variant) === "promote" && i(s),
+          (r == null ? void 0 : r.variant) === "promote" && i(r)
         ]
       }
     );
@@ -837,96 +874,96 @@ function Ya({
   isOpen: a,
   setIsOpen: s,
   label: r,
-  variant: t = "promote",
-  size: o = "md",
-  showIcon: c = !0,
+  variant: l = "promote",
+  size: t = "md",
+  showIcon: i = !0,
   side: n = "right",
-  align: i = "center",
-  icon: l = Ae,
+  align: d = "center",
+  icon: o = Ae,
   mediaUrl: f,
-  title: h,
+  title: m,
   description: N,
-  width: L = "300px",
+  width: P = "300px",
   trackVisibility: u,
   actions: x,
   onClick: S,
   hideLabel: I = !1
 }) {
-  const [F, C] = g(!1), [y, P] = g(null), [m, D] = g(null), k = (p) => {
+  const [F, C] = g(!1), [y, L] = g(null), [h, D] = g(null), k = (p) => {
     s(p), S && S();
   }, R = async (p) => {
     if (p.type === "upsell") {
       D(p);
       try {
-        await p.onClick(), p.showConfirmation && (C(!0), P("success"));
+        await p.onClick(), p.showConfirmation && (C(!0), L("success"));
       } catch {
-        C(!0), P("error");
+        C(!0), L("error");
       }
     }
-  }, pe = () => {
-    P(null), C(!1), D(null), s(!1);
-  }, ge = a && !F, ve = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
+  }, he = () => {
+    L(null), C(!1), D(null), s(!1);
+  }, pe = a && !F, ge = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
     ...p,
     onClick: () => R(p)
   } : p);
-  return /* @__PURE__ */ d($, { children: [
-    /* @__PURE__ */ d(G, { open: ge, onOpenChange: k, children: [
-      /* @__PURE__ */ e(W, { asChild: !0, children: /* @__PURE__ */ e(
+  return /* @__PURE__ */ c($, { children: [
+    /* @__PURE__ */ c(G, { open: pe, onOpenChange: k, children: [
+      /* @__PURE__ */ e(U, { asChild: !0, children: /* @__PURE__ */ e(
         w,
         {
-          variant: t,
+          variant: l,
           label: r,
-          size: o,
-          icon: c ? l : void 0,
+          size: t,
+          icon: i ? o : void 0,
           onClick: () => s(a),
           hideLabel: I
         }
       ) }),
       /* @__PURE__ */ e(
-        J,
+        W,
         {
           side: n,
-          align: i,
+          align: d,
           className: "w-fit border-none bg-transparent p-2 shadow-none",
           children: /* @__PURE__ */ e(
             ya,
             {
               mediaUrl: f,
-              title: h,
+              title: m,
               description: N,
               onClose: () => s(!1),
               dismissible: !1,
-              width: L,
+              width: P,
               trackVisibility: u,
-              actions: ve,
+              actions: ge,
               showConfirmation: !1
             }
           )
         }
       )
     ] }),
-    (m == null ? void 0 : m.type) === "upsell" && m.showConfirmation && y && /* @__PURE__ */ e(
-      ee,
+    (h == null ? void 0 : h.type) === "upsell" && h.showConfirmation && y && /* @__PURE__ */ e(
+      Z,
       {
         open: !0,
-        onClose: pe,
+        onClose: he,
         success: y === "success",
-        errorMessage: m.errorMessage,
-        successMessage: m.successMessage,
-        nextSteps: m.nextSteps,
-        closeLabel: m.closeLabel,
+        errorMessage: h.errorMessage,
+        successMessage: h.successMessage,
+        nextSteps: h.nextSteps,
+        closeLabel: h.closeLabel,
         portalContainer: null
       }
     )
   ] });
 }
-const Na = ra(
+const Na = sa(
   null
-), La = ({ children: a, fullScreen: s = !0 }) => {
-  const r = se(null), [t, o] = g(r.current);
-  return Ze(() => {
-    o(r.current);
-  }, []), /* @__PURE__ */ e(Na.Provider, { value: { element: t }, children: /* @__PURE__ */ e(
+), Pa = ({ children: a, fullScreen: s = !0 }) => {
+  const r = ae(null), [l, t] = g(r.current);
+  return Qe(() => {
+    t(r.current);
+  }, []), /* @__PURE__ */ e(Na.Provider, { value: { element: l }, children: /* @__PURE__ */ e(
     "div",
     {
       ref: r,
@@ -937,44 +974,44 @@ const Na = ra(
       children: a
     }
   ) });
-}, Pa = ({
+}, La = ({
   children: a
-}) => /* @__PURE__ */ e(Qe, { reducedMotion: "user", children: a }), Xa = ({
+}) => /* @__PURE__ */ e(Ke, { reducedMotion: "user", children: a }), Xa = ({
   children: a,
   layout: s,
   link: r,
-  privacyModeInitiallyEnabled: t,
-  image: o,
-  i18n: c,
+  privacyModeInitiallyEnabled: l,
+  image: t,
+  i18n: i,
   l10n: n,
-  isDev: i = !1,
-  dataCollectionStorageHandler: l,
+  isDev: d = !1,
+  dataCollectionStorageHandler: o,
   showExperimentalWarnings: f = !1
-}) => /* @__PURE__ */ e(Pa, { children: /* @__PURE__ */ e(
-  He,
+}) => /* @__PURE__ */ e(La, { children: /* @__PURE__ */ e(
+  qe,
   {
-    isDev: i,
+    isDev: d,
     showExperimentalWarnings: f,
-    children: /* @__PURE__ */ e(Ue, { ...n, children: /* @__PURE__ */ e(Ge, { ...c, children: /* @__PURE__ */ e(We, { ...r, children: /* @__PURE__ */ e(La, { ...s, children: /* @__PURE__ */ e(Je, { children: /* @__PURE__ */ e(
-      Ye,
+    children: /* @__PURE__ */ e(He, { ...n, children: /* @__PURE__ */ e(Ge, { ...i, children: /* @__PURE__ */ e(Ue, { ...r, children: /* @__PURE__ */ e(Pa, { ...s, children: /* @__PURE__ */ e(We, { children: /* @__PURE__ */ e(
+      Je,
       {
-        initiallyEnabled: t,
-        children: /* @__PURE__ */ e(Xe, { ...o, children: /* @__PURE__ */ e(
-          Ke,
+        initiallyEnabled: l,
+        children: /* @__PURE__ */ e(Ye, { ...t, children: /* @__PURE__ */ e(
+          Xe,
           {
-            handler: l,
+            handler: o,
             children: a
           }
         ) })
       }
     ) }) }) }) }) })
   }
-) }), H = (a) => `datacollection-${a}`, Ka = {
+) }), q = (a) => `datacollection-${a}`, Ka = {
   get: async (a) => JSON.parse(
-    localStorage.getItem(H(a)) ?? "{}"
+    localStorage.getItem(q(a)) ?? "{}"
   ),
   set: async (a, s) => {
-    localStorage.setItem(H(a), JSON.stringify(s));
+    localStorage.setItem(q(a), JSON.stringify(s));
   }
 };
 export {
@@ -990,19 +1027,19 @@ export {
   ls as F0AvatarDate,
   ns as F0AvatarEmoji,
   is as F0AvatarFile,
-  cs as F0AvatarIcon,
-  ds as F0AvatarList,
-  Q as F0AvatarModule,
+  ds as F0AvatarIcon,
+  cs as F0AvatarList,
+  K as F0AvatarModule,
   us as F0AvatarPerson,
   fs as F0AvatarTeam,
   w as F0Button,
-  hs as F0ButtonDropdown,
-  ms as F0ButtonToggle,
+  ms as F0ButtonDropdown,
+  hs as F0ButtonToggle,
   ps as F0Card,
   gs as F0Checkbox,
   Ha as F0ChipList,
   vs as F0EventCatcherProvider,
-  Ie as F0Icon,
+  Be as F0Icon,
   bs as F0Link,
   Xa as F0Provider,
   xs as F0TagAlert,
@@ -1010,41 +1047,41 @@ export {
   ys as F0TagCompany,
   ws as F0TagDot,
   Ns as F0TagList,
-  Ls as F0TagPerson,
-  Be as F0TagRaw,
-  Ps as F0TagStatus,
+  Ps as F0TagPerson,
+  Te as F0TagRaw,
+  Ls as F0TagStatus,
   Ss as F0TagTeam,
   Fs as GROUP_ID_SYMBOL,
   Wa as HomeLayout,
   Oa as LineChart,
   Ds as OneFilterPicker,
   $a as PieChart,
-  Ye as PrivacyModeProvider,
+  Je as PrivacyModeProvider,
   me as ProductBlankslate,
   ks as ProductCard,
   Ja as ProductModal,
   ya as ProductWidget,
   _a as ProgressBarChart,
-  Ua as StandardLayout,
+  Ga as StandardLayout,
   Ms as TagCounter,
-  Ga as TwoColumnLayout,
-  ee as UpsellRequestResponseDialog,
+  Ua as TwoColumnLayout,
+  Z as UpsellRequestResponseDialog,
   wa as UpsellingBanner,
-  ae as UpsellingButton,
+  ee as UpsellingButton,
   Ya as UpsellingPopover,
   Ea as VerticalBarChart,
   Ma as avatarVariants,
   Ts as buildTranslations,
-  qa as buttonDropdownSizes,
+  Aa as buttonDropdownSizes,
   Va as buttonDropdownVariants,
   za as buttonSizes,
-  Aa as buttonToggleSizes,
+  qa as buttonToggleSizes,
   ja as buttonVariants,
   Bs as createAtlaskitDriver,
   Is as createDataSourceDefinition,
   Ka as dataCollectionLocalStorageHandler,
   ka as defaultTranslations,
-  De as experimental,
+  Fe as experimental,
   Rs as getAnimationVariants,
   Os as getDataSourcePaginationType,
   $s as getEmojiLabel,
@@ -1053,11 +1090,11 @@ export {
   js as modules,
   zs as tagDotColors,
   Vs as useData,
-  qs as useDataSource,
-  As as useDndEvents,
+  As as useDataSource,
+  qs as useDndEvents,
   Hs as useDraggable,
-  Us as useDroppableList,
-  Gs as useEmojiConfetti,
+  Gs as useDroppableList,
+  Us as useEmojiConfetti,
   Ws as useGroups,
   Js as usePrivacyMode,
   Ys as useReducedMotion,

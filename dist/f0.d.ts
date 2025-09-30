@@ -958,6 +958,12 @@ declare type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
 
+declare interface DataCollectionSettingsContextType {
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
+    settings: DataCollectionSettings;
+    setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
+}
+
 /**
  * Data collection source
  * Extends the base data source with data collection specific elements / features
@@ -1213,6 +1219,9 @@ export declare const defaultTranslations: {
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
+    readonly toc: {
+        readonly search: "Search";
+    };
     readonly collections: {
         readonly sorting: {
             readonly noSorting: "No sorting";
@@ -1235,7 +1244,8 @@ export declare const defaultTranslations: {
             readonly pagination: {
                 readonly of: "of";
             };
-            readonly settings: "{%visualizationName} settings";
+            readonly settings: "{{visualizationName}} settings";
+            readonly reset: "Reset to default";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1295,7 +1305,7 @@ export declare const defaultTranslations: {
             readonly week: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
-                readonly long: "Week of %{day} %{month} %{year}";
+                readonly long: "Week of {{day}} {{month}} {{year}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1344,6 +1354,9 @@ export declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly initialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1470,7 +1483,9 @@ declare type EventScalar = string | number | boolean | undefined | null;
 export declare const experimental: <T extends (...args: any[]) => any>(name: string, component: T) => T;
 
 declare type ExtractVisualizationSettings<T> = T extends {
-    settings: infer S;
+    settings: {
+        default: infer S;
+    };
 } ? S : never;
 
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
@@ -3092,6 +3107,7 @@ export declare interface TwoColumnLayoutProps {
     children: ReactNode;
     sideContent: ReactNode;
     mainColumnPosition?: "left" | "right";
+    sticky?: boolean;
 }
 
 declare type UpsellAction = BaseAction & {
@@ -3446,10 +3462,13 @@ valueFormatter?: (value: string | number | undefined) => string | number;
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
-    renderSettings?: (props: Props) => JSX.Element | null;
     name: string;
     icon: IconType;
-    settings: Settings;
+    settings: {
+        default: Settings;
+        renderer?: (props: Props) => JSX.Element | null;
+        resetHandler?: (settings: DataCollectionSettingsContextType) => void;
+    };
 };
 
 declare type VisualizationSettings = {

@@ -170,11 +170,12 @@ export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status }: ActionItemProps) => JSX_2.Element;
+export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
-    status: "inProgress" | "executing" | "completed";
+    status?: "inProgress" | "executing" | "completed";
+    inGroup?: boolean;
 }
 
 declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
@@ -335,6 +336,7 @@ declare type AIButton = {
     emoji: string;
     label: string;
     icon: IconType;
+    editable?: boolean;
 };
 
 /**
@@ -1381,6 +1383,12 @@ declare type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
 
+declare interface DataCollectionSettingsContextType {
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
+    settings: DataCollectionSettings;
+    setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
+}
+
 /**
  * Data collection source
  * Extends the base data source with data collection specific elements / features
@@ -1694,6 +1702,9 @@ declare const defaultTranslations: {
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
+    readonly toc: {
+        readonly search: "Search";
+    };
     readonly collections: {
         readonly sorting: {
             readonly noSorting: "No sorting";
@@ -1716,7 +1727,8 @@ declare const defaultTranslations: {
             readonly pagination: {
                 readonly of: "of";
             };
-            readonly settings: "{%visualizationName} settings";
+            readonly settings: "{{visualizationName}} settings";
+            readonly reset: "Reset to default";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1776,7 +1788,7 @@ declare const defaultTranslations: {
             readonly week: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
-                readonly long: "Week of %{day} %{month} %{year}";
+                readonly long: "Week of {{day}} {{month}} {{year}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1825,6 +1837,9 @@ declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly initialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2074,7 +2089,9 @@ declare interface ErrorMessageProps {
 export declare type ExtractPropertyKeys<RecordType> = keyof RecordType;
 
 declare type ExtractVisualizationSettings<T> = T extends {
-    settings: infer S;
+    settings: {
+        default: infer S;
+    };
 } ? S : never;
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -2728,7 +2745,7 @@ declare type ItemProps = {
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
 
-export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, }: TOCItemSectionHeaderProps): JSX_2.Element;
+export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, }: TOCItemSectionHeaderProps): JSX_2.Element;
 
 declare type KanbanCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, KanbanVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -3155,6 +3172,7 @@ export declare type NotesTextEditorHandle = {
     setContent: (content: string) => void;
     insertAIBlock: () => void;
     insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
 };
 
 export declare interface NotesTextEditorProps {
@@ -3992,6 +4010,7 @@ export declare type RichTextDisplayHandle = HTMLDivElement;
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
     content: string;
     className?: string;
+    format?: "html" | "markdown";
 }
 
 export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
@@ -4646,6 +4665,7 @@ declare interface TOCItemSectionHeaderProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     sortable: boolean;
+    hideChildrenCounter?: boolean;
 }
 
 export declare interface TOCProps {
@@ -4656,6 +4676,9 @@ export declare interface TOCProps {
     collapsible?: boolean;
     sortable?: boolean;
     onReorder?: (reorderedIds: IdStructure[]) => void;
+    showSearchBox?: boolean;
+    searchPlaceholder?: string;
+    hideChildrenCounter?: boolean;
 }
 
 declare type toggleActionType = {
@@ -4885,10 +4908,13 @@ declare const VerticalOverflowList: {
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
-    renderSettings?: (props: Props) => JSX.Element | null;
     name: string;
     icon: IconType;
-    settings: Settings;
+    settings: {
+        default: Settings;
+        renderer?: (props: Props) => JSX.Element | null;
+        resetHandler?: (settings: DataCollectionSettingsContextType) => void;
+    };
 };
 
 /**
