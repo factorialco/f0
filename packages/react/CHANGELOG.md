@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.211.0](https://github.com/factorialco/f0/compare/f0-react-v1.210.2...f0-react-v1.211.0) (2025-09-30)
+
+
+### Features
+
+* add Flask icon ([f5a05f6](https://github.com/factorialco/f0/commit/f5a05f67184c790074ce40aaf1343251893b966f))
+* add new `Experimental` icon ([a7984e8](https://github.com/factorialco/f0/commit/a7984e8df32702c2c110bf313d49d314d7a386a1))
+
+## [1.210.2](https://github.com/factorialco/f0/compare/f0-react-v1.210.1...f0-react-v1.210.2) (2025-09-29)
+
+
+### Bug Fixes
+
+* rich text missing ul, ol, h4 styles ([#2715](https://github.com/factorialco/f0/issues/2715)) ([d38edd6](https://github.com/factorialco/f0/commit/d38edd6f8ac5fe5b0c95c59503d2182e08324c86))
+
+## [1.210.1](https://github.com/factorialco/f0/compare/f0-react-v1.210.0...f0-react-v1.210.1) (2025-09-29)
+
+
+### Features
+
+* TOC hide children counter prop ([#2710](https://github.com/factorialco/f0/issues/2710)) ([7ab9138](https://github.com/factorialco/f0/commit/7ab9138a4b6f686a632105e55ef369d935865816))
+
+## [1.210.0](https://github.com/factorialco/f0/compare/f0-react-v1.209.1...f0-react-v1.210.0) (2025-09-29)
+
+
+### Features
+
+* **icons:** add swap icon ([#2713](https://github.com/factorialco/f0/issues/2713)) ([3b06890](https://github.com/factorialco/f0/commit/3b068907fc171d4018144b755bbe5ba6999474b6))
+
+## [1.209.1](https://github.com/factorialco/f0/compare/f0-react-v1.209.0...f0-react-v1.209.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* i18n interpolation ([#2711](https://github.com/factorialco/f0/issues/2711)) ([c043f67](https://github.com/factorialco/f0/commit/c043f67e6880f56c63649a8466dc9f51b29b4dcb))
+
+## [1.209.0](https://github.com/factorialco/f0/compare/f0-react-v1.208.0...f0-react-v1.209.0) (2025-09-29)
+
+
+### Features
+
+* searchbox and allow to hide children counter in tableofcontent ([#2708](https://github.com/factorialco/f0/issues/2708)) ([5fa52f6](https://github.com/factorialco/f0/commit/5fa52f6e18749e392f0ae6bb272292b15b14d5ac))
+
 ## [1.208.0](https://github.com/factorialco/f0/compare/f0-react-v1.207.0...f0-react-v1.208.0) (2025-09-29)
 
 

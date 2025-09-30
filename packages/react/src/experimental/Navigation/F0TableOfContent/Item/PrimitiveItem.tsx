@@ -2,7 +2,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { Counter } from "@/experimental/Information/Counter"
-import { ChevronDown, ChevronRight, Handle } from "@/icons/app"
+import { ChevronDown, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { AnimatePresence, DragControls, motion } from "motion/react"
@@ -64,11 +64,13 @@ export function PrimitiveItem({
             e.stopPropagation()
             onToggleExpanded?.(item.id)
           }}
-          aria-label={translations.actions.toggle}
-          className="text-f1-icon"
-          icon={isExpanded ? ChevronDown : ChevronRight}
           label={translations.actions.toggle}
           hideLabel
+          className={cn(
+            "text-f1-icon transition-all",
+            !isExpanded && "-rotate-90"
+          )}
+          icon={ChevronDown}
         ></ButtonInternal>
       )}
       <div

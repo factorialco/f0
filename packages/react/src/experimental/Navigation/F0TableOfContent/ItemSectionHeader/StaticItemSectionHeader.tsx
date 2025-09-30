@@ -7,6 +7,7 @@ interface StaticItemSectionHeaderProps {
   children?: ReactNode
   isActive?: boolean
   sortable: boolean
+  hideChildrenCounter?: boolean
 }
 
 export function StaticItemSectionHeader({
@@ -14,12 +15,13 @@ export function StaticItemSectionHeader({
   children,
   isActive,
   sortable,
+  hideChildrenCounter,
 }: StaticItemSectionHeaderProps) {
   return (
     <>
       <Item
         item={item}
-        counter={item.children?.length ?? 0}
+        counter={hideChildrenCounter ? undefined : (item.children?.length ?? 0)}
         isActive={isActive}
         collapsible={false}
         isExpanded={undefined}
