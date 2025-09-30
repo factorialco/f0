@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.28.0](https://github.com/factorialco/f0/compare/f0-core-v1.27.0...f0-core-v1.28.0) (2025-09-30)
+
+
+### Features
+
+* add Flask icon ([f5a05f6](https://github.com/factorialco/f0/commit/f5a05f67184c790074ce40aaf1343251893b966f))
+
 ## [1.27.0](https://github.com/factorialco/f0/compare/f0-core-v1.26.0...f0-core-v1.27.0) (2025-09-29)
 
 

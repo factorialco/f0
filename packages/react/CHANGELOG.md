@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.211.0](https://github.com/factorialco/f0/compare/f0-react-v1.210.2...f0-react-v1.211.0) (2025-09-30)
+
+
+### Features
+
+* add Flask icon ([f5a05f6](https://github.com/factorialco/f0/commit/f5a05f67184c790074ce40aaf1343251893b966f))
+* add new `Experimental` icon ([a7984e8](https://github.com/factorialco/f0/commit/a7984e8df32702c2c110bf313d49d314d7a386a1))
+
 ## [1.210.2](https://github.com/factorialco/f0/compare/f0-react-v1.210.1...f0-react-v1.210.2) (2025-09-29)
 
 
