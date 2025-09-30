@@ -352,7 +352,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
 
   const turns: Turn[] = []
 
-  for (const message of messages) {
+  for (const [i, message] of messages.entries()) {
     if (message.role === "user") {
       // create new turn
       turns.push([message])
@@ -366,8 +366,12 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       isAgentStateMessage(message) &&
       isCurrentlyGroupingThinking(currentTurn)
     ) {
-      const thinkingGroup = currentTurn.pop() as Message[]
-      currentTurn.push(message, thinkingGroup)
+      // we want to ignore the last agent state message
+      // to avoid rerenders of thinking components and play extra animations
+      if (i !== messages.length - 1) {
+        const thinkingGroup = currentTurn.pop() as Message[]
+        currentTurn.push(message, thinkingGroup)
+      }
       continue
     }
 
