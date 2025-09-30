@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.214.0](https://github.com/factorialco/f0/compare/f0-react-v1.213.0...f0-react-v1.214.0) (2025-09-30)
+
+
+### Features
+
+* fix find closest cards + fix click issue + fix full-h skeleton ([#2719](https://github.com/factorialco/f0/issues/2719)) ([34c60cd](https://github.com/factorialco/f0/commit/34c60cdb7aca696cb7401a312c24a402c4304cd2))
+
 ## [1.213.0](https://github.com/factorialco/f0/compare/f0-react-v1.212.0...f0-react-v1.213.0) (2025-09-30)
 
 
