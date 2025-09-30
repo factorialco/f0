@@ -1,5 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
-import CheckCircle from "@/icons/animated/CheckCircle"
+import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
@@ -32,9 +32,10 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
         )}
         {status === "completed" && (
           <F0Icon
+            color="secondary"
             state="animate"
             size={inGroup ? "md" : "lg"}
-            icon={CheckCircle}
+            icon={OutlineCircle}
           />
         )}
       </div>
