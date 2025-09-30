@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.214.1](https://github.com/factorialco/f0/compare/f0-react-v1.214.0...f0-react-v1.214.1) (2025-09-30)
+
+
+### Bug Fixes
+
+* **Checkbox:** set rounded focus ring ([#2726](https://github.com/factorialco/f0/issues/2726)) ([78dfede](https://github.com/factorialco/f0/commit/78dfedeb8a6b58cca528200f0d1ca015b63becc3))
+
 ## [1.214.0](https://github.com/factorialco/f0/compare/f0-react-v1.213.0...f0-react-v1.214.0) (2025-09-30)
 
 
