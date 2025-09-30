@@ -43097,7 +43097,7 @@ const vV = pV.extend({
 }), l7 = (t) => kV.configure({
   includeChildren: !0,
   placeholder: t
-}), xV = 10, wV = (t) => {
+}), xV = (t) => {
   if (!(t != null && t.content)) return "";
   try {
     return sF(t.content, [
@@ -43118,16 +43118,18 @@ const vV = pV.extend({
   } catch {
     return "";
   }
-}, _V = (t, e) => se(() => {
+}, wV = (t, e) => se(() => {
   var i;
   if (e != null && e.selectedTitle || e != null && e.selectedEmoji)
     return {
       title: e.selectedTitle || t.title,
       emoji: e.selectedEmoji
     };
-  const n = e != null && e.selectedAction ? (i = t.buttons) == null ? void 0 : i.find((r) => r.type === e.selectedAction) : null;
+  const n = (i = t.buttons) == null ? void 0 : i.find(
+    (r) => r.type === (e == null ? void 0 : e.selectedAction)
+  );
   return n ? { title: n.label, emoji: n.emoji } : { title: t.title };
-}, [e == null ? void 0 : e.selectedTitle, e == null ? void 0 : e.selectedEmoji, e == null ? void 0 : e.selectedAction, t]), CV = (t, e) => {
+}, [e, t]), _V = (t, e) => {
   const [n, i] = $(!1), r = Se(
     async (s) => {
       var l;
@@ -43152,7 +43154,7 @@ const vV = pV.extend({
     [t, e]
   );
   return { isLoading: n, handleClick: r };
-}, SV = (t, e, n) => {
+}, CV = (t, e, n) => {
   te(() => {
     if (!(n != null && n.selectedAction) || !(t != null && t.buttons)) return;
     if (!(n != null && n.selectedTitle) || !(n != null && n.selectedEmoji) || (n == null ? void 0 : n.isEditable) === void 0) {
@@ -43169,14 +43171,16 @@ const vV = pV.extend({
       });
     }
   }, [n, t, e]);
+}, SV = (t, e, n) => {
+  te(() => {
+    t != null && t.shouldExecute && (t != null && t.selectedAction) && e && n && (n({ data: { ...t, shouldExecute: !1 } }), e(t.selectedAction));
+  }, [e, n, t]);
 }, NV = (t, e, n, i) => {
   te(() => {
     if (!(i != null && i.content) || !(i != null && i.isEditable) || !t || !n) return;
     const r = n();
-    r !== void 0 && (e(), setTimeout(() => {
-      i.content && t.chain().focus().setTextSelection(r).insertContent(i.content).run();
-    }, xV));
-  }, [i == null ? void 0 : i.content, i == null ? void 0 : i.isEditable, t, n, e]);
+    r !== void 0 && (e(), i.content && t.chain().focus().setTextSelection(r).insertContent(i.content).run());
+  }, [i, t, n, e]);
 }, LV = ({
   config: t,
   isLoading: e,
@@ -43210,31 +43214,31 @@ const vV = pV.extend({
   editor: r,
   getPos: s
 }) => {
-  var y;
-  const o = t.attrs.data, a = i.options.currentConfig || t.attrs.config, { title: l } = _V(a, o), { isLoading: f, handleClick: c } = CV(
+  var x;
+  const o = t.attrs.data, a = i.options.currentConfig || t.attrs.config, { title: l } = wV(a, o), { isLoading: f, handleClick: c } = _V(
     a,
     e
-  ), u = wV(o);
-  if (NV(r, n, s, o), SV(a, e, o), !o || !a || !((y = a.buttons) != null && y.length)) return null;
-  const h = !!(o != null && o.content), m = !!(o != null && o.selectedTitle || o != null && o.selectedAction) && h && !(o != null && o.isEditable);
+  ), u = !!(o != null && o.selectedAction && !(o != null && o.content)), h = f || u, p = xV(o);
+  if (NV(r, n, s, o), CV(a, e, o), SV(o, c, e), !o || !a || !((x = a.buttons) != null && x.length)) return null;
+  const m = !!(o != null && o.content), y = !!(o != null && o.selectedTitle || o != null && o.selectedAction) && m && !(o != null && o.isEditable);
   return /* @__PURE__ */ d(Sc, { contentEditable: !1, children: /* @__PURE__ */ b("div", { className: "mb-3", children: [
-    f ? /* @__PURE__ */ d(EV, { isEditable: o == null ? void 0 : o.isEditable }) : m ? /* @__PURE__ */ d(
+    h ? /* @__PURE__ */ d(EV, { isEditable: o == null ? void 0 : o.isEditable }) : y ? /* @__PURE__ */ d(
       r4,
       {
         title: l,
-        content: u,
+        content: p,
         onClose: () => n()
       }
     ) : /* @__PURE__ */ d(
       "div",
       {
         className: "editor-ai-block mb-3 flex w-full flex-col gap-4 rounded-lg",
-        onClick: (v) => v.stopPropagation(),
+        onClick: (w) => w.stopPropagation(),
         children: /* @__PURE__ */ d(
           LV,
           {
             config: a,
-            isLoading: f,
+            isLoading: h,
             onButtonClick: c
           }
         )
@@ -43300,7 +43304,30 @@ const vV = pV.extend({
       insertAIBlock: (t, e) => ({ commands: n }) => n.insertContent({
         type: this.name,
         attrs: { data: t, config: e }
-      })
+      }),
+      executeAIAction: (t, e) => ({ commands: n }) => {
+        var r;
+        const i = (r = e.buttons) == null ? void 0 : r.find((s) => s.type === t);
+        return i ? n.insertContent([
+          {
+            type: this.name,
+            attrs: {
+              data: {
+                content: null,
+                selectedAction: t,
+                selectedTitle: i.label,
+                selectedEmoji: i.emoji,
+                isEditable: i.editable ?? !1,
+                shouldExecute: !0
+              },
+              config: e
+            }
+          },
+          {
+            type: "paragraph"
+          }
+        ]) : !1;
+      }
     };
   }
 }), OV = TV, AV = ({
@@ -43490,80 +43517,12 @@ const vV = pV.extend({
     {
       title: n.title,
       commands: [
-        // Add individual commands for each AI button using emoji
         ...n.buttons.map((i) => ({
           title: i.label,
-          command: async (r) => {
-            r.chain().focus().insertContent([
-              {
-                type: "aiBlock",
-                attrs: {
-                  data: {
-                    content: null,
-                    selectedAction: i.type
-                  },
-                  config: n
-                }
-              },
-              {
-                type: "paragraph"
-              }
-            ]).run(), setTimeout(async () => {
-              try {
-                const s = await n.onClick(i.type);
-                setTimeout(() => {
-                  const { state: o } = r, { doc: a } = o;
-                  let l = null;
-                  if (a.descendants((f, c) => {
-                    var u, h;
-                    f.type.name === "aiBlock" && ((u = f.attrs.data) == null ? void 0 : u.selectedAction) === i.type && !((h = f.attrs.data) != null && h.content) && (l = c);
-                  }), l !== null) {
-                    const f = o.tr.setNodeMarkup(
-                      l,
-                      void 0,
-                      {
-                        data: {
-                          selectedAction: i.type,
-                          content: s
-                        },
-                        config: n
-                      }
-                    );
-                    r.view.dispatch(f);
-                    const c = a.nodeAt(l);
-                    if (c) {
-                      const u = l + c.nodeSize + 1;
-                      r.chain().focus().setTextSelection(u).run();
-                    }
-                  }
-                }, 50);
-              } catch (s) {
-                console.error("AI action error:", s), setTimeout(() => {
-                  const { state: o } = r, { doc: a } = o;
-                  let l = null;
-                  if (a.descendants((f, c) => {
-                    var u, h;
-                    f.type.name === "aiBlock" && ((u = f.attrs.data) == null ? void 0 : u.selectedAction) === i.type && !((h = f.attrs.data) != null && h.content) && (l = c);
-                  }), l !== null) {
-                    const f = o.tr.setNodeMarkup(
-                      l,
-                      void 0,
-                      {
-                        data: {
-                          selectedAction: i.type,
-                          content: null
-                        },
-                        config: n
-                      }
-                    );
-                    r.view.dispatch(f);
-                  }
-                }, 50);
-              }
-            }, 100);
+          command: (r) => {
+            r.chain().focus().executeAIAction(i.type, n).run();
           },
-          emoji: i.emoji
-          // Use emoji instead of icon
+          icon: i.icon
         }))
       ]
     }
