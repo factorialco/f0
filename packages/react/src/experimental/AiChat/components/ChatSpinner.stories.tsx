@@ -7,6 +7,7 @@ const meta: Meta<typeof ChatSpinner> = {
   parameters: {
     layout: "centered",
   },
+  tags: ["autodocs", "no-sidebar"],
 }
 
 export default meta
