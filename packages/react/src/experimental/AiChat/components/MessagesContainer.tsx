@@ -354,12 +354,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
 
   for (const message of messages) {
     if (message.role === "user") {
-      // Finalize the previous turn if it exists
-      if (turns.length > 0) {
-        const lastTurn = turns[turns.length - 1]
-        finalizeTurn(lastTurn)
-      }
-
       // create new turn
       turns.push([message])
       continue
@@ -390,16 +384,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       continue
     }
 
-    // Handle non-thinking messages
-    // First, finalize any thinking group
-    finalizeTurn(currentTurn)
-
     currentTurn.push(message)
-  }
-
-  if (turns.length > 0) {
-    const lastTurn = turns[turns.length - 1]
-    finalizeTurn(lastTurn)
   }
 
   return turns
@@ -418,19 +403,7 @@ function isAgentStateMessage(message: Message): boolean {
   return message.role === "assistant" && message.agentName !== undefined
 }
 
-function finalizeTurn(turn: Turn) {
-  ungroupSingleThinkingMessage(turn)
-}
-
 function isCurrentlyGroupingThinking(turn: Turn): boolean {
   const lastMessage = turn.at(-1)
   return Array.isArray(lastMessage)
-}
-
-function ungroupSingleThinkingMessage(turn: Turn): void {
-  const lastMessage = turn.at(-1)
-  if (Array.isArray(lastMessage) && lastMessage.length === 1) {
-    turn.pop()
-    turn.push(...lastMessage)
-  }
 }
