@@ -26,10 +26,6 @@ import {
 } from "@tiptap/react"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
 
-// Constants
-const FOCUS_DELAY_MS = 10
-
-// Type definitions
 export type AIButton = {
   type: string
   emoji: string
@@ -59,9 +55,9 @@ interface AIBlockData {
   selectedTitle?: string
   selectedEmoji?: string
   isEditable?: boolean
+  shouldExecute?: boolean
 }
 
-// Internal types for better type safety
 type DisplayInfo = {
   title: string
   emoji?: string
@@ -78,11 +74,11 @@ declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     aiBlock: {
       insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType
+      executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType
     }
   }
 }
 
-// Custom hook for converting JSONContent to HTML
 const useJSONToHTML = (data: AIBlockData | undefined): string => {
   if (!data?.content) return ""
   try {
@@ -111,7 +107,6 @@ const useDisplayInfo = (
   data?: AIBlockData
 ): DisplayInfo => {
   return useMemo(() => {
-    // Use saved data if available
     if (data?.selectedTitle || data?.selectedEmoji) {
       return {
         title: data.selectedTitle || config.title,
@@ -119,15 +114,14 @@ const useDisplayInfo = (
       }
     }
 
-    // Find button info from selected action
-    const selectedButton = data?.selectedAction
-      ? config.buttons?.find((button) => button.type === data.selectedAction)
-      : null
+    const selectedButton = config.buttons?.find(
+      (button) => button.type === data?.selectedAction
+    )
 
     return selectedButton
       ? { title: selectedButton.label, emoji: selectedButton.emoji }
       : { title: config.title }
-  }, [data?.selectedTitle, data?.selectedEmoji, data?.selectedAction, config])
+  }, [data, config])
 }
 
 const useAIActionHandler = (
@@ -199,7 +193,24 @@ const useButtonMetadataPersistence = (
   }, [data, config, updateAttributes])
 }
 
-// Custom hook for handling editable content integration with main editor
+const useAutoExecuteAction = (
+  data?: AIBlockData,
+  handleClick?: (type: string) => Promise<void>,
+  updateAttributes?: UpdateAttributesFunction
+) => {
+  useEffect(() => {
+    if (
+      data?.shouldExecute &&
+      data?.selectedAction &&
+      handleClick &&
+      updateAttributes
+    ) {
+      updateAttributes({ data: { ...data, shouldExecute: false } })
+      handleClick(data.selectedAction)
+    }
+  }, [handleClick, updateAttributes, data])
+}
+
 const useEditableContentIntegration = (
   editor: NodeViewProps["editor"],
   deleteNode: () => void,
@@ -210,23 +221,21 @@ const useEditableContentIntegration = (
     if (!data?.content || !data?.isEditable || !editor || !getPos) return
 
     const pos = getPos()
+
     if (pos === undefined) return
 
     deleteNode()
-    setTimeout(() => {
-      if (data.content) {
-        editor
-          .chain()
-          .focus()
-          .setTextSelection(pos)
-          .insertContent(data.content)
-          .run()
-      }
-    }, FOCUS_DELAY_MS)
-  }, [data?.content, data?.isEditable, editor, getPos, deleteNode])
+    if (data.content) {
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(pos)
+        .insertContent(data.content)
+        .run()
+    }
+  }, [data, editor, getPos, deleteNode])
 }
 
-// Component for rendering AI action buttons
 const AIButtonsSection = ({
   config,
   isLoading,
@@ -284,15 +293,18 @@ export const AIBlockView: FC<NodeViewProps> = ({
     (node.attrs.config as AIBlockConfig)
 
   const { title: displayTitle } = useDisplayInfo(config, data)
-  const { isLoading, handleClick } = useAIActionHandler(
+  const { isLoading: actionLoading, handleClick } = useAIActionHandler(
     config,
     updateAttributes
   )
+  const autoDetectedLoading = Boolean(data?.selectedAction && !data?.content)
+  const isLoading = actionLoading || autoDetectedLoading
   const htmlContent = useJSONToHTML(data)
 
   // Handle side effects
   useEditableContentIntegration(editor, deleteNode, getPos, data)
   useButtonMetadataPersistence(config, updateAttributes, data)
+  useAutoExecuteAction(data, handleClick, updateAttributes)
 
   // Early return for invalid states (after hooks)
   if (!data || !config || !config.buttons?.length) return null
@@ -415,6 +427,31 @@ export const AIBlock = Node.create({
             type: this.name,
             attrs: { data, config },
           })
+        },
+      executeAIAction:
+        (actionType: string, config: AIBlockConfig) =>
+        ({ commands }) => {
+          const button = config.buttons?.find((btn) => btn.type === actionType)
+          if (!button) return false
+          return commands.insertContent([
+            {
+              type: this.name,
+              attrs: {
+                data: {
+                  content: null,
+                  selectedAction: actionType,
+                  selectedTitle: button.label,
+                  selectedEmoji: button.emoji,
+                  isEditable: button.editable ?? false,
+                  shouldExecute: true,
+                },
+                config,
+              },
+            },
+            {
+              type: "paragraph",
+            },
+          ])
         },
     }
   },
