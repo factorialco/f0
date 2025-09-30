@@ -18,7 +18,10 @@ type CalculateVisibleItemCountParams = {
 export function useOverflowCalculation<T>(
   items: T[],
   gap: number,
-  max?: number
+  options?: {
+    max?: number
+    itemsWidth?: number | number[]
+  }
 ) {
   const containerRef = useRef<HTMLDivElement>(null)
   const overflowButtonRef = useRef<HTMLButtonElement>(null)
@@ -47,7 +50,15 @@ export function useOverflowCalculation<T>(
 
   // Measure all items in a hidden container
   const measureItemWidths = useCallback(() => {
-    if (!measurementContainerRef.current) return []
+    if (options?.itemsWidth) {
+      return Array.isArray(options.itemsWidth)
+        ? options.itemsWidth
+        : Array(items.length).fill(options.itemsWidth)
+    }
+
+    if (!measurementContainerRef.current) {
+      return []
+    }
 
     const itemElements = measurementContainerRef.current.children
     const widths: number[] = []
@@ -58,7 +69,7 @@ export function useOverflowCalculation<T>(
     }
 
     return widths
-  }, [])
+  }, [options?.itemsWidth, items.length])
 
   // Calculate how many items can fit in the available width
   const calculateVisibleItemCount = useCallback(
@@ -76,9 +87,9 @@ export function useOverflowCalculation<T>(
       }
 
       // Return the actual count without enforcing a minimum of 1
-      return Math.min(visibleCount, max ?? items.length)
+      return Math.min(visibleCount, options?.max ?? items.length)
     },
-    [max, items.length]
+    [options?.max, items.length]
   )
 
   // Calculate which items should be visible and which should overflow

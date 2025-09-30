@@ -71,16 +71,16 @@ F0 is crafted using leading technologies:
 
 To integrate F0, install it as a dependency:
 
-$ pnpm install @factorialco/factorial-one-react
+$ pnpm install @factorialco/f0-react
 
 Import its styles in your application (typically in main.tsx or similar):
 
 ```tsx
-import "@factorialco/factorial-one-react/dist/styles.css"
+import "@factorialco/f0-react/dist/styles.css"
 ```
 
 You can then utilize any of its components:
 
 ```
-import { Button } from "@factorialco/factorial-one-react"
+import { Button } from "@factorialco/f0-react"
 ```

@@ -28,10 +28,10 @@ There 2 types of collection actions:
 
 - **Primary actions**: Are displayed in the top right button. (only one per data
   collection). Primary actions are defined in the `primaryActions` property of
-  the useDataSource hook.
+  the useDataCollectionSource hook.
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   primaryActions: () => ({
     // The label of the action
     label: "Action 1",
@@ -50,7 +50,7 @@ const dataSource = useDataSource({
   action definition.
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   secondaryActions: {
     expanded: 1,
     actions: () => [
@@ -75,7 +75,7 @@ const dataSource = useDataSource({
 Or as array of actions
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   secondaryActions: () => [
     {
       label: "Action 1",
@@ -111,12 +111,13 @@ const dataSource = useDataSource({
 
 It's also possible to define actions at item level.
 
-The actions are defined in the `itemActions` prop of the `useDataSource` hook
-via a function that get the item and returns an array of actions, that allows
-you to define diffrent actions for each item, or for specific items.
+The actions are defined in the `itemActions` prop of the
+`useDataCollectionSource` hook via a function that get the item and returns an
+array of actions, that allows you to define diffrent actions for each item, or
+for specific items.
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   itemActions: (item) => [
     {
       label: "Action 1",
@@ -128,7 +129,7 @@ const dataSource = useDataSource({
 It can also return undefined to not display any action for the item.
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   itemActions: (item) => {
     if (item.id === "1") {
       return undefined
@@ -151,10 +152,10 @@ const dataSource = useDataSource({
 
 Navigate to the item detail page, is a common pattern in data collections. You
 can also the target url for each item using the `itemUrl` property of the
-`useDataSource` hook.
+`useDataCollectionSource` hook.
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   itemUrl: (item) => `/users/${item.id}`,
 })
 ```

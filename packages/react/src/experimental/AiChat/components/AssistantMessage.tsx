@@ -1,5 +1,5 @@
 import { Button, CopyButton } from "@/components/Actions/Button"
-import { Spinner } from "@/experimental"
+import { Spinner } from "@/experimental/Information/Spinner"
 import {
   ThumbsDown,
   ThumbsDownFilled,
@@ -22,7 +22,18 @@ export const AssistantMessage = ({
   onThumbsUp,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
-  const subComponent = message?.generativeUI?.()
+  const isThinkingTool =
+    message?.role === "assistant" &&
+    message.toolCalls?.find(
+      (tool) => tool.function.name === "orchestratorThinking"
+    )
+  const subComponent = message?.generativeUI?.(
+    isThinkingTool
+      ? {
+          status: isLoading ? "executing" : "completed",
+        }
+      : undefined
+  )
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
@@ -56,14 +67,14 @@ export const AssistantMessage = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {isLoading && (
+      {isLoading && !subComponent && (
         <div className="min-h-[20px]">
           <Spinner size="small" className="text-f1-foreground" />
         </div>
       )}
       {message && (
         <>
-          <div className="w-fit max-w-[330px] [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
+          <div className="w-fit max-w-[min(90%,330px)] [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
             <Markdown
               content={content}
               components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}

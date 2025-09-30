@@ -1,15 +1,15 @@
 # Icon Component
 
-The Icon component is used to render SVG icons from the Factorial One Design System in React Native applications.
+The Icon component is used to render SVG icons from the F0 Design System in React Native applications.
 
 ## Import Pattern
 
 ```tsx
 // Import the Icon component
-import { Icon } from "@factorialco/factorial-one-react-native";
+import { Icon } from "@factorialco/f0-react-native";
 
 // Import specific icons from app or modules directories
-import { AppIcons, ModuleIcons } from "@factorialco/factorial-one-react-native";
+import { AppIcons, ModuleIcons } from "@factorialco/f0-react-native";
 
 // Use the Icon component with the icon as a prop
 <Icon icon={AppIcons.Archive} size="md" />
@@ -45,8 +45,8 @@ The library includes two sets of icons:
 ## Examples
 
 ```tsx
-import { Icon } from "@factorialco/factorial-one-react-native";
-import { AppIcons, ModuleIcons } from "@factorialco/factorial-one-react-native";
+import { Icon } from "@factorialco/f0-react-native";
+import { AppIcons, ModuleIcons } from "@factorialco/f0-react-native";
 
 // Basic usage
 <Icon icon={AppIcons.Calendar} />

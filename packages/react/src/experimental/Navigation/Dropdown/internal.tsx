@@ -113,7 +113,18 @@ export function DropdownInternal({
           item.type === "separator" ? (
             <DropdownMenuSeparator key={index} />
           ) : (
-            <DropdownItem key={index} item={item} />
+            <DropdownItem
+              key={index}
+              item={{
+                ...item,
+                onClick: () => {
+                  // Seems to be a bug on radi-ui that mix the animation events, and if the dropdown triggers a dialog, the dialog will be closed before the dropdown is closed
+                  setTimeout(() => {
+                    item.onClick?.()
+                  }, 200)
+                },
+              }}
+            />
           )
         )}
       </DropdownMenuContent>

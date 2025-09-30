@@ -6,6 +6,7 @@ import { useState } from "react"
 
 export type ItemActionsDropdownProps = {
   items: DropdownItem[]
+  label?: string
   onOpenChange?: (open: boolean) => void
   align?: "start" | "end"
   className?: string
@@ -15,6 +16,7 @@ export const ItemActionsDropdown = ({
   items,
   onOpenChange,
   align = "end",
+  label = "Actions",
   className,
 }: ItemActionsDropdownProps) => {
   const [open, setOpen] = useState(false)
@@ -44,7 +46,7 @@ export const ItemActionsDropdown = ({
       >
         <Button
           icon={Ellipsis}
-          label="Actions"
+          label={label}
           hideLabel
           round
           variant="ghost"

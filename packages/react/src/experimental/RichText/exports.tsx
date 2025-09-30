@@ -1,5 +1,5 @@
-export * from "./BasicTextEditor"
 export * from "./CoreEditor/types"
 export * from "./FileItem"
+export * from "./NotesTextEditor"
 export * from "./RichTextDisplay"
 export * from "./RichTextEditor"

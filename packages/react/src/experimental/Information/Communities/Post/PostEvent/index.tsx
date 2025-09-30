@@ -1,5 +1,5 @@
 import { Skeleton } from "@/ui/skeleton"
-import { f1Colors } from "@factorialco/factorial-one-core"
+import { f1Colors } from "@factorialco/f0-core"
 import { formatTime } from "../../../../../lib/date"
 import { withSkeleton } from "../../../../../lib/skeleton"
 import { CalendarEvent } from "../../../../Widgets/Content/CalendarEvent"

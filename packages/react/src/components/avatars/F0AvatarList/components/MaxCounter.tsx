@@ -58,9 +58,8 @@ export const MaxCounter = ({
   const counter = (
     <div
       className={cn(
-        "font-medium",
-        sizeVariants({ size, type }),
-        (list || []).length > 1 ? "cursor-pointer" : "cursor-default"
+        "cursor-default font-medium transition hover:bg-f1-background-secondary-hover",
+        sizeVariants({ size, type })
       )}
     >
       {size === "xs" ? (

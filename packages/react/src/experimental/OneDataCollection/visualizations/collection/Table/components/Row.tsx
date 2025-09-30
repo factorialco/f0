@@ -4,21 +4,22 @@ import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
-import { SortingsDefinition } from "@/experimental/OneDataCollection/sortings"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
-  DataSource,
   GroupingDefinition,
   RecordType,
-} from "@/experimental/OneDataCollection/types"
-import { TableCell, TableRow } from "@/experimental/OneTable"
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-import { TableColumnDefinition } from ".."
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { TableColumnDefinition } from "../types"
+import { useSticky } from "../useSticky"
 
 export type RowProps<
   R extends RecordType,
@@ -29,7 +30,7 @@ export type RowProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     R,
     Filters,
     Sortings,
@@ -91,6 +92,12 @@ const RowComponentInner = <
 
   const key = `table-row-${groupIndex}-${index}`
 
+  const { getStickyPosition } = useSticky(
+    frozenColumnsLeft,
+    columns,
+    !!source.selectable
+  )
+
   const {
     primaryItemActions,
     dropdownItemActions,
@@ -129,18 +136,7 @@ const RowComponentInner = <
           href={itemHref}
           onClick={itemOnClick}
           width={column.width}
-          sticky={
-            cellIndex < frozenColumnsLeft
-              ? {
-                  left: columns
-                    .slice(0, Math.max(0, cellIndex))
-                    .reduce(
-                      (acc, column) => acc + (column.width ?? 0),
-                      checkColumnWidth
-                    ),
-                }
-              : undefined
-          }
+          sticky={getStickyPosition(cellIndex)}
         >
           <div
             className={cn(

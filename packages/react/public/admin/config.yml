@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: factorialco/factorial-one
+  repo: factorialco/f0
   branch: main
 
 media_folder: "public/images"

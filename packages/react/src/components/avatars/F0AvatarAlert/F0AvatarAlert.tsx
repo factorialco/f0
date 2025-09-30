@@ -1,7 +1,7 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { AlertCircle, CheckCircle, InfoCircle, Warning } from "@/icons/app"
 import { cva, type VariantProps } from "cva"
-import { BaseAvatarProps } from "../BaseAvatar"
+import { BaseAvatarProps } from "../internal/BaseAvatar"
 
 const alertAvatarVariants = cva({
   base: "flex items-center justify-center border border-solid",

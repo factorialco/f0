@@ -15,6 +15,14 @@ const meta: Meta<typeof ApplicationFrame> = {
     layout: "fullscreen",
   },
   args: {
+    ai: {
+      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
+      agent: "one-workflow",
+      credentials: "include",
+      showDevConsole: false,
+      enabled: true,
+      greeting: "Hello, John",
+    },
     sidebar: <Sidebar {...SidebarStories.default.args} />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
@@ -24,7 +32,21 @@ export default meta
 
 type Story = StoryObj<typeof ApplicationFrame>
 
+const DefaultStoryComponent = (
+  args: ComponentProps<typeof ApplicationFrame>
+) => {
+  return (
+    <ApplicationFrame
+      ai={args.ai}
+      sidebar={<Sidebar {...SidebarStories.default.args} />}
+    >
+      <Page {...PageStories.Default.args} />
+    </ApplicationFrame>
+  )
+}
+
 export const Default: Story = {
+  render: (args) => <DefaultStoryComponent {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 

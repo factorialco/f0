@@ -1,9 +1,16 @@
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 
 import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader/GroupHeader"
-import { useGroups } from "@/experimental/OneDataCollection/useGroups"
+import { useGroups } from "@/hooks/datasource/useGroups"
 
-import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/useInfiniteScrollPagination"
+import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
+import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
+import {
+  isInfiniteScrollPagination,
+  RecordType,
+  SortingsDefinition,
+  useSelectable,
+} from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect } from "react"
@@ -11,11 +18,8 @@ import type { FiltersDefinition } from "../../../../../components/OneFilterPicke
 import { Spinner } from "../../../../Information/Spinner"
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
-import { SortingsDefinition } from "../../../sortings"
 import { SummariesDefinition } from "../../../summary"
-import { CollectionProps, GroupingDefinition, RecordType } from "../../../types"
-import { isInfiniteScrollPagination, useData } from "../../../useData"
-import { useSelectable } from "../../../useSelectable"
+import { CollectionProps, GroupingDefinition } from "../../../types"
 import { ListGroup } from "./components/ListGroup"
 import { ListSkeleton } from "./components/ListSkeleton"
 import { ListVisualizationOptions } from "./types"
@@ -73,7 +77,7 @@ export const ListCollection = <
     isInitialLoading,
     isLoadingMore,
     loadMore,
-  } = useData<
+  } = useDataCollectionData<
     Record,
     Filters,
     Sortings,
@@ -138,7 +142,7 @@ export const ListCollection = <
       <ListSkeleton
         source={source}
         fields={fields}
-        count={10}
+        count={30}
         isInitialLoading
       />
     )
@@ -169,19 +173,8 @@ export const ListCollection = <
         aria-live={showFullscreenLoading ? "polite" : undefined}
         aria-busy={showFullscreenLoading ? "true" : undefined}
       >
-        <div className="min-h-0 flex-1 overflow-auto">
-          <AnimatePresence>
-            {isInitialLoading && (
-              <motion.div
-                className="absolute inset-0 flex cursor-progress items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <Spinner />
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="min-h-0 flex-1 overflow-auto pb-3">
+          <AnimatePresence>{isInitialLoading && <Spinner />}</AnimatePresence>
           {data.type === "grouped" &&
             data.groups.map((group, index) => {
               const itemCount = group.itemCount
@@ -256,7 +249,7 @@ export const ListCollection = <
             paginationInfo.hasMore && (
               <div
                 ref={loadingIndicatorRef}
-                className="h-10 w-full"
+                className="w-full"
                 aria-hidden="true"
               />
             )}

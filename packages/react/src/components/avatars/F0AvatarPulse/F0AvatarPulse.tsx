@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Button } from "@/ui/button"
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
-import { BaseAvatar } from "../BaseAvatar"
+import { BaseAvatar } from "../internal/BaseAvatar"
 
 export const pulses = [
   "superNegative",

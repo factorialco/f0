@@ -52,6 +52,9 @@ export const defaultTranslations = {
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
   },
+  toc: {
+    search: "Search",
+  },
   collections: {
     sorting: {
       noSorting: "No sorting",
@@ -70,9 +73,12 @@ export const defaultTranslations = {
       table: "Table view",
       card: "Card view",
       list: "List view",
+      kanban: "Kanban view",
       pagination: {
         of: "of",
       },
+      settings: "{{visualizationName}} settings",
+      reset: "Reset to default",
     },
     itemsCount: "items",
     emptyStates: {
@@ -132,7 +138,7 @@ export const defaultTranslations = {
       week: {
         currentDate: "This week",
         label: "Week",
-        long: "Week of %{day} %{month} %{year}",
+        long: "Week of {{day}} {{month}} {{year}}",
       },
       month: {
         currentDate: "This month",
@@ -176,11 +182,18 @@ export const defaultTranslations = {
   },
   notifications: "Notifications",
   ai: {
-    description: "Chat with AI",
-    newChat: "New Chat",
-    openChat: "Open Chat",
+    openChat: "Open Chat with One AI",
+    closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
-    welcome: "I'm One. Ask or make anything.",
+    welcome: "Ask or create with One",
+    initialMessage: "How can I help you today?",
+    inputPlaceholder: "Write something here...",
+    stopAnswerGeneration: "Stop generating",
+    sendMessage: "Send message",
+  },
+  select: {
+    noResults: "No results found",
+    loadingMore: "Loading...",
   },
 } as const
 

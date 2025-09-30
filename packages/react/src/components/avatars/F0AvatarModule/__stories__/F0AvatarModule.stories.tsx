@@ -1,6 +1,6 @@
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { getBaseAvatarArgTypes } from "../../BaseAvatar/__stories__/utils"
+import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarModule } from "../index"
 import { ModuleId, modules } from "../modules"
 

@@ -1,16 +1,13 @@
 import { Spinner } from "@/experimental/Information/Spinner"
-import type { RecordType } from "@/experimental/OneDataCollection/types"
-import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/useInfiniteScrollPagination"
+import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
+import type { RecordType } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
 import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
-import { OneLaneProps } from "./types"
-
-const DEFAULT_MAX_LANE_HEIGHT = 700
-const HEADER_HEIGHT = 40
+import { LaneProps } from "./types"
 
 export function Lane<Record extends RecordType>({
   title,
@@ -19,20 +16,19 @@ export function Lane<Record extends RecordType>({
   getKey,
   emptyState,
   fetchMore,
-  maxHeight = DEFAULT_MAX_LANE_HEIGHT,
+  variant = "neutral",
   loading = false,
   hasMore = false,
   loadingMore = false,
-}: OneLaneProps<Record>) {
-  const scrollAreaHeight = maxHeight - HEADER_HEIGHT - 4 // 4px for ScrollArea mb-1
-
+  total,
+}: LaneProps<Record>) {
   // Create pagination info for infinite scroll
   const paginationInfo = {
     type: "infinite-scroll" as const,
     cursor: null,
     hasMore,
     total: items.length + (hasMore ? 1 : 0),
-    perPage: 2,
+    perPage: 3,
   }
 
   // Use the infinite scroll hook
@@ -44,27 +40,20 @@ export function Lane<Record extends RecordType>({
   )
 
   return (
-    <div
-      className={`shadow-sm flex min-w-80 max-w-72 flex-col rounded-xl border border-f1-border-secondary px-1`}
-      style={{
-        maxHeight: `${maxHeight}px`,
-        backgroundColor: "hsla(210, 91%, 22%, 0.02)",
-      }}
-    >
+    <div className={`shadow-sm relative flex h-full w-[323.2px] flex-col`}>
       <LaneHeader
         label={title || "Lane"}
-        variant="neutral"
-        count={items.length}
+        variant={variant}
+        count={total ?? items.length}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1">
         {loading ? (
           <ScrollArea
             className={cn(
-              "relative mb-1 flex-1 rounded-lg",
+              "relative h-full flex-1 rounded-lg",
               loading && "select-none opacity-50 transition-opacity"
             )}
-            style={{ maxHeight: `${scrollAreaHeight}px` }}
           >
             <LoadingSkeleton />
             <AnimatePresence>
@@ -81,14 +70,11 @@ export function Lane<Record extends RecordType>({
         ) : items.length === 0 ? (
           emptyState
         ) : (
-          <div className="relative">
-            <ScrollArea
-              className="mb-1 flex-1 rounded-lg"
-              style={{ maxHeight: `${scrollAreaHeight}px` }}
-            >
+          <>
+            <ScrollArea className="test12 relative h-full flex-1">
               <div
                 className={cn(
-                  "space-y-1",
+                  "relative h-full",
                   loadingMore && "select-none opacity-50 transition-opacity"
                 )}
                 aria-live={loadingMore ? "polite" : undefined}
@@ -119,7 +105,7 @@ export function Lane<Record extends RecordType>({
                 </motion.div>
               </AnimatePresence>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { getAbbreviateMonth, getDayOfMonth } from "@/lib/date"
-import { BaseAvatarProps } from "../BaseAvatar"
+import { BaseAvatarProps } from "../internal/BaseAvatar"
 
 export type F0AvatarDateProps = {
   date: Date

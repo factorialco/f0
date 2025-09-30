@@ -7,7 +7,8 @@ import {
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { getBaseAvatarArgTypes } from "../../BaseAvatar/__stories__/utils"
+import React from "react"
+import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarList } from "../F0AvatarList"
 import { avatarListSizes } from "../types"
 
@@ -25,6 +26,16 @@ const dummyPeople = [
   {
     firstName: "Saúl",
     lastName: "Domínguez",
+  },
+  {
+    firstName: "Dani",
+    lastName: "Moreno",
+    src: "/avatars/person03.jpg",
+  },
+  {
+    firstName: "Hellen",
+    lastName: "Fernández",
+    src: "/avatars/person04.jpg",
   },
 ]
 
@@ -53,6 +64,46 @@ const dummyFiles = [
   { file: { name: "image.jpg", type: "image/jpeg" } },
 ]
 
+function getDummyAvatar<
+  T extends "person" | "company" | "team" | "file" = "person",
+>(
+  type: T,
+  index: number
+): T extends "person"
+  ? PersonAvatarVariant
+  : T extends "company"
+    ? CompanyAvatarVariant
+    : T extends "team"
+      ? TeamAvatarVariant
+      : T extends "file"
+        ? FileAvatarVariant
+        : never {
+  const sourceData = {
+    person: dummyPeople,
+    company: dummyCompanies,
+    team: dummyTeams,
+    file: dummyFiles,
+  }
+
+  const mockItem = sourceData[type][index % sourceData[type].length]
+
+  return {
+    ...mockItem,
+    src:
+      "src" in mockItem && mockItem.src
+        ? mockItem.src + "?t=" + index
+        : undefined,
+  } as T extends "person"
+    ? PersonAvatarVariant
+    : T extends "company"
+      ? CompanyAvatarVariant
+      : T extends "team"
+        ? TeamAvatarVariant
+        : T extends "file"
+          ? FileAvatarVariant
+          : never
+}
+
 function getDummyAvatars<
   T extends "person" | "company" | "team" | "file" = "person",
 >(
@@ -67,16 +118,11 @@ function getDummyAvatars<
       : T extends "file"
         ? FileAvatarVariant[]
         : never {
-  const sourceData = {
-    person: dummyPeople,
-    company: dummyCompanies,
-    team: dummyTeams,
-    file: dummyFiles,
-  }[type]
+  const mockList = Array.from({ length: count }, (_, index) =>
+    getDummyAvatar(type, index)
+  )
 
-  return Array.from({ length: count }, (_, index) => ({
-    ...sourceData[index % sourceData.length],
-  })) as T extends "person"
+  return mockList as unknown as T extends "person"
     ? PersonAvatarVariant[]
     : T extends "company"
       ? CompanyAvatarVariant[]
@@ -195,11 +241,11 @@ export const Snapshot: Story = {
         <h4 className="mb-4 text-lg font-semibold">All avatars visible</h4>
 
         {avatarVariants.map((type) => (
-          <>
+          <React.Fragment key={`${type}-3`}>
             <h5 className="mb-2 text-lg font-semibold">{type}</h5>
             <div key={`${type}-3`} className="flex w-fit flex-col gap-2">
-              {avatarListSizes.map((size) => (
-                <div key={`${type}-${size}-3`} className="mb-3">
+              {avatarListSizes.map((size, idx) => (
+                <div key={`${type}-${size}-3-${idx}`} className="mb-3">
                   <F0AvatarList
                     size={size}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -209,16 +255,19 @@ export const Snapshot: Story = {
                 </div>
               ))}
             </div>
-          </>
+          </React.Fragment>
         ))}
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Overflow</h4>
         {avatarVariants.map((type) => (
-          <div key={`${type}-10`} className="flex w-fit flex-col gap-2">
-            {avatarListSizes.map((size) => (
-              <div key={`${type}-${size}-10`} className="mb-3 max-w-[270px]">
+          <div key={`overflow-${type}`} className="flex w-fit flex-col gap-2">
+            {avatarListSizes.map((size, idx) => (
+              <div
+                key={`${type}-${size}-10-${idx}`}
+                className="mb-3 max-w-[270px]"
+              >
                 <F0AvatarList
                   size={size}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any

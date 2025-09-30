@@ -1,17 +1,22 @@
 import { Button } from "@/components/Actions/Button"
 import { Select } from "@/experimental/Forms/Fields/Select"
-import { Ascending, Descending } from "@/icons/app"
+import {
+  GroupingDefinition,
+  GroupingState,
+  RecordType,
+} from "@/hooks/datasource"
+import { SortOrder } from "@/hooks/datasource/types/sortings.typings"
+import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { GroupingDefinition, GroupingState } from "../../grouping"
-import { RecordType } from "../../types"
 
 type GroupingSelectorProps<
   R extends RecordType,
   Grouping extends GroupingDefinition<R>,
 > = {
-  grouping: Grouping
-  currentGrouping: GroupingState<R, Grouping> | undefined
-  onGroupingChange: (groupingState: GroupingState<R, Grouping>) => void
+  grouping?: Grouping
+  currentGrouping?: GroupingState<R, Grouping>
+  onGroupingChange?: (groupingState: GroupingState<R, Grouping>) => void
+  hideLabel?: boolean
 }
 
 const EmptyGroupingValue = "__no-grouping__"
@@ -23,8 +28,16 @@ export const GroupingSelector = <
   grouping,
   currentGrouping,
   onGroupingChange,
+  hideLabel = false,
 }: GroupingSelectorProps<R, Grouping>) => {
   const i18n = useI18n()
+  if (
+    !grouping ||
+    (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2)
+  ) {
+    return null
+  }
+
   const groupingOptions = [
     ...(!grouping.mandatory
       ? [
@@ -56,13 +69,21 @@ export const GroupingSelector = <
           <Select
             label={i18n.collections.grouping.groupBy}
             options={groupingOptions}
+            hideLabel={hideLabel}
             value={currentGrouping?.field.toString() ?? EmptyGroupingValue}
             onChange={(value: string) =>
-              onGroupingChange(
+              onGroupingChange?.(
                 value !== EmptyGroupingValue
                   ? {
                       field: value as keyof Grouping["groupBy"],
-                      order: currentGrouping?.order ?? "asc",
+                      order:
+                        (
+                          grouping.groupBy[
+                            value as keyof Grouping["groupBy"]
+                          ] as { defaultDirection?: SortOrder }
+                        )?.defaultDirection ??
+                        currentGrouping?.order ??
+                        "asc",
                     }
                   : undefined
               )
@@ -74,9 +95,9 @@ export const GroupingSelector = <
             hideLabel
             label={i18n.collections.grouping.toggleDirection}
             variant="outline"
-            icon={currentGrouping?.order === "asc" ? Ascending : Descending}
+            icon={currentGrouping?.order === "asc" ? ArrowUp : ArrowDown}
             onClick={() =>
-              onGroupingChange({
+              onGroupingChange?.({
                 field: currentGrouping.field,
                 order: currentGrouping.order === "asc" ? "desc" : "asc",
               })

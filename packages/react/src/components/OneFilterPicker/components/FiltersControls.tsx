@@ -70,7 +70,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     }
 
     if (isOpen) {
-      setSelectedFilterKey(getFirstFilterNotEmpty()?.[0] as keyof Filters)
+      const firstFilterWithValue = getFirstFilterNotEmpty()
+      if (firstFilterWithValue) {
+        setSelectedFilterKey(firstFilterWithValue[0] as keyof Filters)
+      } else {
+        const firstFilterKey = Object.keys(filters)[0] as keyof Filters
+        setSelectedFilterKey(firstFilterKey)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the popover is opened
   }, [isOpen])

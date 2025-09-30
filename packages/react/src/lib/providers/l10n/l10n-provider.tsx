@@ -2,10 +2,7 @@
 
 import { createContext, ReactNode, useContext } from "react"
 import { defaults } from "./l10n-provider-defaults"
-
-export type L10nContextValue = {
-  locale: string
-}
+import { L10nContextValue } from "./types"
 
 const L10nContext = createContext<L10nContextValue>(defaults)
 

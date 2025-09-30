@@ -1,6 +1,6 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-import { BaseAvatarProps } from "../BaseAvatar"
+import { BaseAvatarProps } from "../internal/BaseAvatar"
 
 export const avatarIconSizes = ["sm", "md", "lg"] as const
 
@@ -24,7 +24,7 @@ export const F0AvatarIcon = ({
   return (
     <div
       className={cn(
-        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary",
+        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background dark:bg-f1-background-inverse-secondary",
         sizes[size]
       )}
       aria-label={ariaLabel}

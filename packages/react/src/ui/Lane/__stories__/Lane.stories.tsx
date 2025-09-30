@@ -1,6 +1,6 @@
 import { F0Card } from "@/components/F0Card"
 import { DraggableF0Card } from "@/components/F0Card/__stories__/DraggableF0Card"
-import type { RecordType } from "@/experimental/OneDataCollection/types"
+import type { RecordType } from "@/hooks/datasource"
 import { ArrowUp, Clock, Delete, Pencil, Person, Search } from "@/icons/app"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
@@ -8,8 +8,9 @@ import { useDroppableList } from "@/lib/dnd/hooks"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef, useState } from "react"
+import { fn } from "storybook/internal/test"
 import { Lane } from "../Lane"
-import type { OneLaneProps } from "../types"
+import type { LaneProps } from "../types"
 import {
   additionalMockTasks,
   allMockTasks,
@@ -55,7 +56,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    maxHeight: 600,
     title: "In Progress",
     items: mockTasks,
     getKey: (task: RecordType) => (task as MockTask).id,
@@ -82,25 +82,25 @@ export const Default: Story = {
           ]}
           primaryAction={{
             label: "View Details",
-            onClick: () => console.log("View task:", mockTask.id),
+            onClick: fn(),
           }}
           secondaryActions={[
             {
               label: "Edit",
               icon: Pencil,
-              onClick: () => console.log("Edit task:", mockTask.id),
+              onClick: fn(),
             },
           ]}
           otherActions={[
             {
               label: "Quick View",
               icon: Search,
-              onClick: () => console.log("Quick view:", mockTask.id),
+              onClick: fn(),
             },
             {
               label: "Delete",
               icon: Delete,
-              onClick: () => console.log("Delete task:", mockTask.id),
+              onClick: fn(),
             },
           ]}
         />
@@ -119,7 +119,6 @@ export const WithFetchMore: Story = {
     },
   },
   args: {
-    maxHeight: 600,
     title: "Tasks - Infinite Scroll",
     items: mockTasks,
     getKey: (task: RecordType) => (task as MockTask).id,
@@ -128,26 +127,28 @@ export const WithFetchMore: Story = {
     renderCard: (task: RecordType, _index: number) => {
       const mockTask = task as MockTask
       return (
-        <F0Card
-          metadata={[
-            {
-              icon: Person,
-              property: { type: "text", value: mockTask.assignee },
-            },
-            {
-              icon: ArrowUp,
-              property: { type: "text", value: mockTask.priority },
-            },
-            {
-              icon: Clock,
-              property: { type: "text", value: mockTask.dueDate },
-            },
-          ]}
-        />
+        <div className="my-1">
+          <F0Card
+            metadata={[
+              {
+                icon: Person,
+                property: { type: "text", value: mockTask.assignee },
+              },
+              {
+                icon: ArrowUp,
+                property: { type: "text", value: mockTask.priority },
+              },
+              {
+                icon: Clock,
+                property: { type: "text", value: mockTask.dueDate },
+              },
+            ]}
+          />
+        </div>
       )
     },
   },
-  render: function Render(args: OneLaneProps<RecordType>) {
+  render: function Render(args: LaneProps<RecordType>) {
     const [items, setItems] = useState<MockTask[]>(mockTasks)
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
@@ -160,8 +161,6 @@ export const WithFetchMore: Story = {
     }, [])
 
     const handleFetchMore = () => {
-      console.log("Fetching more tasks...")
-
       // Simulate loading
       setLoadingMore(true)
 
@@ -174,28 +173,10 @@ export const WithFetchMore: Story = {
         const startIndex = additionalItemsLoaded
         const endIndex = startIndex + 2
 
-        console.log("Loading items:", {
-          currentCount,
-          alreadyLoadedCount,
-          additionalItemsLoaded,
-          startIndex,
-          endIndex,
-          availableItems: additionalMockTasks.length,
-        })
-
         const itemsToAdd = additionalMockTasks.slice(startIndex, endIndex)
 
         const newItems = [...items, ...itemsToAdd]
         const hasMoreItems = newItems.length < allMockTasks.length
-
-        console.log(
-          "New items added:",
-          itemsToAdd.length,
-          "Total items:",
-          newItems.length,
-          "Has more:",
-          hasMoreItems
-        )
 
         setItems(newItems)
         setHasMore(hasMoreItems)
@@ -204,14 +185,24 @@ export const WithFetchMore: Story = {
     }
 
     return (
-      <Lane
-        {...args}
-        items={items}
-        loading={loading}
-        hasMore={hasMore}
-        loadingMore={loadingMore}
-        fetchMore={handleFetchMore}
-      />
+      <div
+        className={
+          "relative flex h-full w-fit flex-col gap-0 rounded-xl border transition-colors"
+        }
+        style={{
+          backgroundColor: "hsla(210, 91%, 22%, 0.02)",
+          height: "600px",
+        }}
+      >
+        <Lane
+          {...args}
+          items={items}
+          loading={loading}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          fetchMore={handleFetchMore}
+        />
+      </div>
     )
   },
 }
@@ -224,7 +215,9 @@ export const EmptyState: Story = {
     renderCard: (task) => {
       const mockTask = task as MockTask
       return (
-        <F0Card title={mockTask.title} description={mockTask.description} />
+        <div className="my-1">
+          <F0Card title={mockTask.title} description={mockTask.description} />
+        </div>
       )
     },
   },
@@ -275,17 +268,19 @@ export const CompactCards: Story = {
     renderCard: (task) => {
       const mockTask = task as MockTask
       return (
-        <F0Card
-          compact
-          title={mockTask.title}
-          description={mockTask.description}
-          metadata={[
-            {
-              icon: ArrowUp,
-              property: { type: "text", value: mockTask.priority },
-            },
-          ]}
-        />
+        <div className="my-1">
+          <F0Card
+            compact
+            title={mockTask.title}
+            description={mockTask.description}
+            metadata={[
+              {
+                icon: ArrowUp,
+                property: { type: "text", value: mockTask.priority },
+              },
+            ]}
+          />
+        </div>
       )
     },
   },

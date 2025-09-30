@@ -1,5 +1,5 @@
-import { BaseAvatar, BaseAvatarProps } from "../BaseAvatar"
 import { AvatarBadge } from "../F0Avatar/types"
+import { BaseAvatar, BaseAvatarProps } from "../internal/BaseAvatar"
 
 export type F0AvatarTeamProps = {
   /**

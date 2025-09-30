@@ -2,6 +2,7 @@ import { Button } from "@/components/Actions/Button"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
 import type {
   DateRange,
+  DateRangeComplete,
   GranularityDefinition,
 } from "@/experimental/OneCalendar"
 import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
@@ -18,6 +19,7 @@ import { DatePickerValue } from "../types"
 
 type DateNavigatorTriggerProps = {
   value: DatePickerValue | undefined
+  compareToValue?: DateRangeComplete | DateRangeComplete[]
   disabled?: boolean
   error?: boolean
   className?: string
@@ -38,6 +40,7 @@ const DateNavigatorTrigger = forwardRef<
   (
     {
       value,
+      compareToValue,
       onDateChange,
       disabled,
       error,
@@ -53,15 +56,26 @@ const DateNavigatorTrigger = forwardRef<
   ) => {
     const i18n = useI18n()
 
-    const current = useMemo(() => {
+    const currentLabel = useMemo(() => {
       if (!value || !value.value) {
-        return i18n.date.selectDate
+        return [i18n.date.selectDate]
       }
+
       const granularity = granularityDefinitions[value.granularity]
-      return (
-        granularity.toString(value.value, i18n, "long") ?? i18n.date.selectDate
-      )
-    }, [value, i18n])
+
+      const values = [
+        value.value,
+        Array.isArray(compareToValue) ? compareToValue[0] : compareToValue,
+      ]
+        .filter((v) => v !== undefined)
+        .sort((a, b) => a?.from.getTime() - b?.from.getTime())
+
+      return values.map((v) => granularity.toString(v, i18n, "long"))
+    }, [value, i18n, compareToValue])
+
+    const label = useMemo(() => {
+      return Object.values(currentLabel).join(" ⸱ ")
+    }, [currentLabel])
 
     const handleNavigation = (date: DateRange | false) => {
       if (!date) {
@@ -144,38 +158,45 @@ const DateNavigatorTrigger = forwardRef<
         // Prevent the date picker from being triggered when the user clicks on the input
         onClick={(e) => e.stopPropagation()}
       >
-        {navigation && (
-          <Button
+        <div
+          className={cn(
+            "flex flex-1 gap-1",
+            navigation ? "justify-between" : "justify-center"
+          )}
+        >
+          {navigation && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={ChevronLeft}
+              label="Previous"
+              hideLabel
+              disabled={!nextPrev?.prev}
+              onClick={() => handleNavigation(nextPrev?.prev ?? false)}
+            />
+          )}
+          <ButtonInternal
             size="sm"
             variant="ghost"
-            icon={ChevronLeft}
-            label="Previous"
-            hideLabel
-            disabled={!nextPrev?.prev}
-            onClick={() => handleNavigation(nextPrev?.prev ?? false)}
+            label={label}
+            onClick={onClick}
+            disabled={disabled}
+            className={cn(highlighted && "bg-f1-background-secondary-hover")}
           />
-        )}
-        <ButtonInternal
-          size="sm"
-          variant="ghost"
-          label={current}
-          onClick={onClick}
-          disabled={disabled}
-          className={cn(highlighted && "bg-f1-background-secondary-hover")}
-        />
-        {navigation && (
-          <Button
-            variant="ghost"
-            icon={ChevronRight}
-            label="Next"
-            hideLabel
-            size="sm"
-            disabled={!nextPrev?.next}
-            onClick={() => handleNavigation(nextPrev?.next ?? false)}
-          />
-        )}
+          {navigation && (
+            <Button
+              variant="ghost"
+              icon={ChevronRight}
+              label="Next"
+              hideLabel
+              size="sm"
+              disabled={!nextPrev?.next}
+              onClick={() => handleNavigation(nextPrev?.next ?? false)}
+            />
+          )}
+        </div>
         {!hideGoToCurrent && currentDate && (
-          <div className="border-l-solid flex-1 border-[#f00]">
+          <div className="border-l-solid flex-shrink-0 border-[#f00]">
             <Button
               size="sm"
               variant="ghost"

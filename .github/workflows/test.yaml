@@ -42,11 +42,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Build core package
-        run: pnpm --filter @factorialco/factorial-one-core build
+        run: pnpm --filter @factorialco/f0-core build
       - name: Run type checking
-        run: pnpm --filter @factorialco/factorial-one-react run tsc
+        run: pnpm --filter @factorialco/f0-react run tsc
       - name: Run tests
-        run: pnpm --filter @factorialco/factorial-one-react run vitest:ci --coverage.enabled true
+        run: pnpm --filter @factorialco/f0-react run vitest:ci --coverage.enabled true
       - name: "Report Coverage"
         if: always()
         uses: davelosert/vitest-coverage-report-action@v2
@@ -73,6 +73,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Build core package
-        run: pnpm --filter @factorialco/factorial-one-core build
+        run: pnpm --filter @factorialco/f0-core build
       - name: Run tests
-        run: pnpm --filter @factorialco/factorial-one-react-native run test
+        run: pnpm --filter @factorialco/f0-react-native run test

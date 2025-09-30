@@ -102,7 +102,7 @@ export const Default: Story = {
                 <F0AvatarPerson
                   firstName={row.name.split(" ")[0]}
                   lastName={row.name.split(" ")[1]}
-                  size="small"
+                  size="sm"
                 />
                 <span className="font-medium">{row.name}</span>
               </div>
@@ -489,7 +489,7 @@ export const Footer: Story = {
                   <F0AvatarPerson
                     firstName={row.name.split(" ")[0]}
                     lastName={row.name.split(" ")[1]}
-                    size="small"
+                    size="sm"
                   />
                   <span className="font-medium">{row.name}</span>
                 </div>
@@ -546,7 +546,7 @@ export const Actions: Story = {
                 <F0AvatarPerson
                   firstName={row.name.split(" ")[0]}
                   lastName={row.name.split(" ")[1]}
-                  size="small"
+                  size="sm"
                 />
                 <span className="font-medium">{row.name}</span>
               </div>
@@ -626,7 +626,7 @@ export const WithLinks: Story = {
                 <F0AvatarPerson
                   firstName={row.name.split(" ")[0]}
                   lastName={row.name.split(" ")[1]}
-                  size="small"
+                  size="sm"
                 />
                 <span className="font-medium">{row.name}</span>
               </div>
@@ -713,7 +713,7 @@ export const Loading: Story = {
                     <F0AvatarPerson
                       firstName={row.name.split(" ")[0]}
                       lastName={row.name.split(" ")[1]}
-                      size="small"
+                      size="sm"
                     />
                     <span className="font-medium">{row.name}</span>
                   </div>
@@ -774,7 +774,7 @@ export const WithOnClick: Story = {
                   <F0AvatarPerson
                     firstName={row.name.split(" ")[0]}
                     lastName={row.name.split(" ")[1]}
-                    size="small"
+                    size="sm"
                   />
                   <span className="font-medium">{row.name}</span>
                 </div>

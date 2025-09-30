@@ -3,19 +3,19 @@ import {
   DropdownItem,
   DropdownItemSeparator,
 } from "@/experimental/Navigation/Dropdown/internal"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   ActionDefinition,
   filterItemActions,
   ItemActionsDefinition,
 } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import { SortingsDefinition } from "@/experimental/OneDataCollection/sortings"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
 import {
-  DataSource,
   GroupingDefinition,
   RecordType,
-} from "@/experimental/OneDataCollection/types"
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { useState } from "react"
 import { actionsToDropdownItems } from "../../visualizations/collection/utils"
 
@@ -28,7 +28,7 @@ type UseItemActionProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     R,
     Filters,
     Sortings,

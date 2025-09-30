@@ -1,6 +1,7 @@
 import { Button } from "@/components/Actions/Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
+import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"
 import { cn } from "@/lib/utils"
@@ -55,12 +56,12 @@ export function DaytimePage({
     >
       <div className={daytimePageVariants({ period })} />
       {header && (
-        <div className="@container">
+        <div className="flex flex-row items-center justify-between pr-6 @container">
           <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-6">
             {(isSmallScreen || sidebarState === "hidden") && (
               <Button
                 variant="ghost"
-                onClick={toggleSidebar}
+                onClick={() => toggleSidebar()}
                 label="Open main menu"
                 icon={Menu}
                 hideLabel
@@ -117,6 +118,9 @@ export function DaytimePage({
                 )}
               </div>
             </div>
+          </div>
+          <div>
+            <OneSwitch />
           </div>
         </div>
       )}

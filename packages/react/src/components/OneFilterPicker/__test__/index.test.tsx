@@ -143,6 +143,56 @@ describe("Filters", () => {
   })
 
   describe("Filter Operations", () => {
+    it("auto-selects the first filter when opening the popover with no active filters", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
+        <TestWrapper>
+          <OneFilterPicker
+            filters={definition}
+            value={{}}
+            onChange={onChange}
+          />
+        </TestWrapper>
+      )
+
+      // Open filter popover
+      await user.click(screen.getByRole("button", { name: /filters/i }))
+
+      // Wait for the popover to open and check that the first filter (Department) is selected
+      await waitFor(() => {
+        const departmentButton = screen
+          .getByText("Department")
+          .closest("button")
+        expect(departmentButton).toHaveClass("bg-f1-background-secondary")
+      })
+    })
+
+    it("auto-selects the first filter with a value when opening the popover with active filters", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
+        <TestWrapper>
+          <OneFilterPicker
+            filters={definition}
+            value={{ search: "test query" }}
+            onChange={onChange}
+          />
+        </TestWrapper>
+      )
+
+      // Open filter popover
+      await user.click(screen.getByRole("button", { name: /filters/i }))
+
+      // Wait for the popover to open and check that the first filter with a value (Search) is selected
+      await waitFor(() => {
+        const searchButton = screen.getByText("Search").closest("button")
+        expect(searchButton).toHaveClass("bg-f1-background-secondary")
+      })
+    })
+
     it("correctly removes a filter when handleRemoveFilter is called", () => {
       const onChange = vi.fn()
 

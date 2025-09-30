@@ -16,6 +16,7 @@ export const ItemActionsMobile = ({
   return (
     <div className={cn(className)}>
       <ItemActionsDropdown
+        label="Mobile Actions"
         align="end"
         items={items}
         onOpenChange={onOpenChange}

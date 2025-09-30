@@ -1,5 +1,6 @@
 import { ButtonInternal } from "@/components/Actions/Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
@@ -10,6 +11,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const translation = useI18n()
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -45,10 +47,11 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
 
   return (
     <motion.form
+      layout
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border",
+        "relative isolate m-3 mt-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border hover:cursor-text",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
@@ -58,15 +61,23 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
         "--gradient-angle": ["0deg", "360deg"],
       }}
       transition={{
-        duration: 6,
-        ease: "linear",
-        repeat: Infinity,
+        default: {
+          duration: 6,
+          ease: "linear",
+          repeat: Infinity,
+        },
+        layout: {
+          duration: 0.3,
+        },
       }}
       style={
         {
           "--gradient-angle": "180deg",
         } as React.CSSProperties
       }
+      onClick={() => {
+        textareaRef.current?.focus()
+      }}
       onSubmit={handleSubmit}
     >
       <div className="grid grid-cols-1 grid-rows-1">
@@ -99,7 +110,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Write something here.."
+          placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
             "mx-3 mb-0 max-h-36 flex-1 resize-none overflow-y-scroll outline-none transition-all",
@@ -114,7 +125,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           <ButtonInternal
             type="submit"
             variant="neutral"
-            label="Stop generating"
+            label={translation.ai.stopAnswerGeneration}
             icon={SolidStop}
             hideLabel
             round
@@ -124,7 +135,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             type="submit"
             disabled={!hasDataToSend}
             variant={hasDataToSend ? "default" : "neutral"}
-            label="Send message"
+            label={translation.ai.sendMessage}
             icon={ArrowUp}
             hideLabel
             round

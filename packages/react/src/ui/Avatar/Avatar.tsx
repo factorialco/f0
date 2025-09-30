@@ -3,7 +3,7 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 import { cva } from "cva"
 import * as React from "react"
-import { Image } from "../../lib/imageHandler"
+import { useImageContext } from "../../lib/imageHandler"
 import { cn } from "../../lib/utils"
 import {
   internalAvatarColors,
@@ -71,16 +71,22 @@ Avatar.displayName = AvatarPrimitive.Root.displayName
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full object-cover", className)}
-    {...props}
-    asChild
-  >
-    <Image />
-  </AvatarPrimitive.Image>
-))
+>(({ className, ...props }, ref) => {
+  const { src: imageSrcContext } = useImageContext()
+
+  const extraProps =
+    props.src && imageSrcContext ? imageSrcContext(props) : props
+
+  return (
+    <AvatarPrimitive.Image
+      ref={ref}
+      className={cn("aspect-square h-full w-full object-cover", className)}
+      {...props}
+      {...extraProps}
+      loading="lazy"
+    ></AvatarPrimitive.Image>
+  )
+})
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
 const AvatarFallback = React.forwardRef<

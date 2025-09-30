@@ -1,9 +1,9 @@
 import { ComponentProps, ReactNode } from "react"
-import { AvatarSize } from "../BaseAvatar"
 import { F0AvatarCompany, F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarFile, F0AvatarFileProps } from "../F0AvatarFile"
 import { F0AvatarPerson, F0AvatarPersonProps } from "../F0AvatarPerson"
 import { F0AvatarTeam, F0AvatarTeamProps } from "../F0AvatarTeam"
+import { AvatarSize } from "../internal/BaseAvatar"
 
 export type AvatarProps = {
   avatar: AvatarVariant

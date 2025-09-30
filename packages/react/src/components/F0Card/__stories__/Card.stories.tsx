@@ -12,6 +12,7 @@ import {
 } from "@/icons/app"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import image from "@storybook-static/avatars/person04.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
@@ -22,7 +23,6 @@ import { DropLaneCancel } from "./DropLaneCancel"
 import { DropLaneEnter } from "./DropLaneEnter"
 import { DropLaneReorder } from "./DropLaneReorder"
 
-//
 const SlotComponent = () => {
   return (
     <div className="w-full rounded border-2 border-dashed border-f1-border-info bg-f1-background-info p-5 text-center font-medium text-f1-foreground-info">
@@ -66,6 +66,7 @@ export const Default: Story = {
       firstName: "Daniel",
       lastName: "Moreno",
     },
+    compact: false,
     title: "Daniel Moreno",
     description: "This is a cool description",
     metadata: [
@@ -200,13 +201,14 @@ export const WithEmoji: Story = {
   },
 }
 
-export const WithIcon: Story = {
+export const WithIconAndImage: Story = {
   args: {
     ...Default.args,
     avatar: {
       type: "icon",
       icon: Lightbulb,
     },
+    image: image,
   },
 }
 
@@ -343,4 +345,19 @@ export const IntentsShowcase: Story = {
       </DndProvider>
     )
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex w-full flex-wrap gap-2 overflow-auto">
+      <F0Card.Skeleton />
+      <F0Card.Skeleton compact />
+      <F0Card {...Default.args} />
+      <F0Card {...WithActions.args} />
+      <F0Card {...Compact.args} />
+      <F0Card {...WithActionsAndLink.args} />
+      <F0Card {...WithImage.args} />
+    </div>
+  ),
 }

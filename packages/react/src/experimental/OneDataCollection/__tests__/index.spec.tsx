@@ -1,3 +1,16 @@
+import type { FiltersDefinition } from "@/components/OneFilterPicker"
+import {
+  BaseFetchOptions,
+  BaseResponse,
+  GROUP_ID_SYMBOL,
+  GroupingDefinition,
+  PaginatedFetchOptions,
+  SortingsDefinition,
+  SortingsState,
+  WithGroupId,
+} from "@/hooks/datasource"
+import { PromiseState } from "@/lib/promise-to-observable"
+import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
   act,
   render,
@@ -10,23 +23,16 @@ import { userEvent } from "@testing-library/user-event"
 import { LayoutGrid } from "lucide-react"
 import { describe, expect, test, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-import type { FiltersDefinition } from "../../../components/OneFilterPicker/types"
-import { PromiseState } from "../../../lib/promise-to-observable"
-import { defaultTranslations, I18nProvider } from "../../../lib/providers/i18n"
-import { OneDataCollection, useDataSource } from "../index"
+import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
+import {
+  DataCollectionSource,
+  useDataCollectionSource,
+} from "../hooks/useDataCollectionSource"
+
+import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
-import { SortingsDefinition } from "../sortings"
 import { SummariesDefinition } from "../summary"
-import type {
-  BaseResponse,
-  DataSource,
-  GroupingDefinition,
-  PaginatedFetchOptions,
-  PaginatedResponse,
-  SortingsState,
-} from "../types"
-import { GROUP_ID_SYMBOL, useData, WithGroupId } from "../useData"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
@@ -41,7 +47,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () =>
-        useDataSource({
+        useDataCollectionSource({
           filters: {
             name: { type: "search", label: "Name" },
           },
@@ -92,7 +98,7 @@ describe("Collections", () => {
   test("renders with multiple visualizations", async () => {
     const { result } = renderHook(
       () =>
-        useDataSource({
+        useDataCollectionSource({
           dataAdapter: {
             fetchData: async () => ({
               records: [
@@ -143,7 +149,7 @@ describe("Collections", () => {
   test("handles observable data source", async () => {
     const { result } = renderHook(
       () =>
-        useDataSource({
+        useDataCollectionSource({
           dataAdapter: {
             fetchData: () =>
               new Observable<
@@ -217,7 +223,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () =>
-        useDataSource({
+        useDataCollectionSource({
           filters: {
             search: {
               type: "search",
@@ -288,7 +294,7 @@ describe("Collections", () => {
   test("it allows data to be passed in with the right properties", () => {
     const { result } = renderHook(
       () =>
-        useDataSource({
+        useDataCollectionSource({
           dataAdapter: {
             fetchData: async () => ({ records: [{ name: "John" }] }),
           },
@@ -310,7 +316,7 @@ describe("Collections", () => {
     const CustomComponent = ({
       source,
     }: {
-      source: DataSource<
+      source: DataCollectionSource<
         Item,
         FiltersDefinition,
         SortingsDefinition,
@@ -320,7 +326,7 @@ describe("Collections", () => {
         GroupingDefinition<Item>
       >
     }) => {
-      const { data } = useData<
+      const { data } = useDataCollectionData<
         Item,
         FiltersDefinition,
         SortingsDefinition,
@@ -345,7 +351,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () =>
-        useDataSource({
+        useDataCollectionSource({
           dataAdapter: {
             fetchData: () =>
               new Observable<PromiseState<BaseResponse<Item>>>((observer) => {
@@ -434,7 +440,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () => {
-        const source = useDataSource<
+        const source = useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -566,7 +572,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () =>
-        useDataSource<
+        useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -656,7 +662,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () =>
-        useDataSource<
+        useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -703,7 +709,7 @@ describe("Collections", () => {
     // Create a data source with actual sorting logic
     const { result } = renderHook(
       () =>
-        useDataSource<
+        useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -830,7 +836,7 @@ describe("Collections", () => {
 
     const { result } = renderHook(
       () => {
-        const source = useDataSource({
+        const source = useDataCollectionSource({
           filters: {
             department: {
               type: "in",
@@ -952,7 +958,7 @@ describe("Collections", () => {
     // Create a data source with actions
     const { result } = renderHook(
       () =>
-        useDataSource<
+        useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -1044,12 +1050,14 @@ describe("Collections", () => {
     await userEvent.click(editButton)
 
     // Verify our handler was called with the correct item
-    expect(handleEdit).toHaveBeenCalledTimes(1)
-    expect(handleEdit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ...mockData[0],
-        [GROUP_ID_SYMBOL]: undefined,
-      })
+    await waitFor(() => expect(handleEdit).toHaveBeenCalledTimes(1))
+    await waitFor(() =>
+      expect(handleEdit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...mockData[0],
+          [GROUP_ID_SYMBOL]: undefined,
+        })
+      )
     )
   })
 
@@ -1084,7 +1092,7 @@ describe("Collections", () => {
     // Create a data source with search enabled
     const { result } = renderHook(
       () => {
-        const source = useDataSource<
+        const source = useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -1178,7 +1186,7 @@ describe("Collections", () => {
     // Create a simple data source with pagination
     const { result } = renderHook(
       () =>
-        useDataSource<
+        useDataCollectionSource<
           Person,
           FiltersDefinition,
           SortingsDefinition,
@@ -1190,8 +1198,13 @@ describe("Collections", () => {
           dataAdapter: {
             paginationType: "pages",
             perPage: 10,
-            fetchData: (async (options) => {
-              const { pagination } = options
+            fetchData: async (
+              options:
+                | BaseFetchOptions<FiltersDefinition>
+                | PaginatedFetchOptions<FiltersDefinition>
+            ) => {
+              const pagination =
+                "pagination" in options ? options.pagination : undefined
               const { currentPage = 1 } = pagination || {}
               const itemsPerPage = 10
               const totalItems = 45
@@ -1215,15 +1228,9 @@ describe("Collections", () => {
                 currentPage,
                 perPage: itemsPerPage,
                 pagesCount: Math.ceil(totalItems / itemsPerPage),
+                type: "pages" as const,
               }
-            }) as (
-              options: PaginatedFetchOptions<
-                FiltersDefinition,
-                NavigationFiltersDefinition
-              >
-            ) => Promise<
-              PaginatedResponse<{ id: number; name: string; email: string }>
-            >,
+            },
           },
         }),
       { wrapper: TestWrapper }

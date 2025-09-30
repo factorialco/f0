@@ -1,4 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
+import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
 import { Badge } from "@/experimental/Information/Badge"
 import {
   Alert,
@@ -14,7 +15,6 @@ import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-import { ToolbarButton } from "../ToolbarButton"
 import { ToolbarLabels } from "../types"
 
 interface LinkPopupProps {
@@ -84,12 +84,12 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
       }}
     >
       <Popover.Trigger asChild>
-        <ToolbarButton
-          active={editor.isActive("link") || openLinkPopover}
+        <F0ButtonToggle
+          selected={editor.isActive("link") || openLinkPopover}
           label={labels.linkLabel}
           icon={LinkIcon}
           disabled={disabled}
-          onClick={handleLinkButtonClick}
+          onSelectedChange={() => handleLinkButtonClick()}
         />
       </Popover.Trigger>
 

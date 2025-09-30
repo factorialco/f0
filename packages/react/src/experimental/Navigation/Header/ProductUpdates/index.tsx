@@ -61,6 +61,7 @@ type ProductUpdatesProp = {
   crossSelling?: {
     isVisible: boolean
     sectionTitle: string
+
     onClose?: () => void
     products: Array<{
       title: string
@@ -70,6 +71,7 @@ type ProductUpdatesProp = {
       dismissable: boolean
       onClose?: () => void
       trackVisibility?: (open: boolean) => void
+      type?: "one-campaign" | undefined
     }>
   }
 }
@@ -464,16 +466,18 @@ const DiscoverMoreProducts = ({
               {crossSelling?.sectionTitle}
             </p>
 
-            <div className="relative z-10 h-6 w-6">
-              <Button
-                variant="ghost"
-                icon={CrossIcon}
-                size="sm"
-                hideLabel
-                onClick={handleClose}
-                label="Close"
-              />
-            </div>
+            {onClose && (
+              <div className="relative z-10 h-6 w-6">
+                <Button
+                  variant="ghost"
+                  icon={CrossIcon}
+                  size="sm"
+                  hideLabel
+                  onClick={handleClose}
+                  label="Close"
+                />
+              </div>
+            )}
           </div>
 
           <Carousel
@@ -490,6 +494,7 @@ const DiscoverMoreProducts = ({
                 isVisible={true}
                 trackVisibility={product.trackVisibility}
                 onClick={() => handleProductClick(product.onClick)}
+                type={product.type}
               />
             ))}
           </Carousel>

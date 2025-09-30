@@ -95,6 +95,87 @@ render: (item) => ({
   }}
 />
 
+### longText
+
+Renders long text with ellipsis truncation and tooltip support. Uses the
+OneEllipsis component for better cross-browser support and automatic tooltip
+functionality.
+
+#### Value type
+
+```
+type value = string | number | undefined
+// or
+type value = {
+    text: string | number | undefined
+    lines?: number
+    tooltip?: boolean
+    placeholder?: string
+}
+```
+
+#### LongTextType
+
+<Canvas
+  of={ValueDisplayStories.LongTextType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: 'This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.'
+})`,
+  }}
+/>
+
+#### LongTextWithLines
+
+<Canvas
+  of={ValueDisplayStories.LongTextWithLines}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: {
+        text: 'This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.',
+        lines: 2
+    }
+})`,
+  }}
+/>
+
+#### LongTextWithLinesAndTooltip
+
+<Canvas
+  of={ValueDisplayStories.LongTextWithLinesAndTooltip}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: {
+        text: 'This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.',
+        lines: 2,
+        tooltip: true
+    }
+})`,
+  }}
+/>
+
+#### LongTextWithPlaceholder
+
+<Canvas
+  of={ValueDisplayStories.LongTextWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: {
+        text: undefined,
+        placeholder: 'No description available'
+    }
+})`,
+  }}
+/>
+
 ### number
 
 Renders a number (right align on table visualizacion)

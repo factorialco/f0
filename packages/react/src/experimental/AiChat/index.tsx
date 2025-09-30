@@ -1,9 +1,14 @@
-import { CopilotKit } from "@copilotkit/react-core"
-import { CopilotPopup } from "@copilotkit/react-ui"
+import {
+  CopilotKit,
+  CopilotKitProps,
+  useCopilotAction,
+} from "@copilotkit/react-core"
+import { CopilotSidebar } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
-import { type ComponentProps } from "react"
 
+import { cn } from "@/lib/utils"
+import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
   ChatButton,
@@ -13,39 +18,98 @@ import {
   MessagesContainer,
   UserMessage,
 } from "./components"
-import {
-  AiChatLabelsProvider,
-  type AiChatLabels,
-} from "./providers/AiChatLabelsProvider"
+import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
-type AiChatProviderProps = ComponentProps<typeof CopilotKit>
+export type AiChatProviderProps = {
+  enabled?: boolean
+  greeting?: string
+} & Pick<
+  CopilotKitProps,
+  | "agent"
+  | "credentials"
+  | "children"
+  | "runtimeUrl"
+  | "showDevConsole"
+  | "threadId"
+  | "headers"
+>
 
-const AiChatProviderCmp = (props: AiChatProviderProps) => {
-  return <CopilotKit {...props} />
+const AiChatProviderCmp = ({
+  enabled = false,
+  greeting,
+  children,
+  agent,
+  ...copilotKitProps
+}: AiChatProviderProps) => {
+  // todo: implement error handling
+  // temporary set runtime url until error handling is done
+  return (
+    <AiChatStateProvider enabled={enabled} greeting={greeting} agent={agent}>
+      <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
+    </AiChatStateProvider>
+  )
 }
-type CopilotPopupProps = ComponentProps<typeof CopilotPopup>
 
-type AiChatProps = Omit<CopilotPopupProps, "labels"> & {
-  labels?: ComponentProps<typeof CopilotPopup>["labels"] & AiChatLabels
-}
-
-const AiChatCmp = ({ labels, ...props }: AiChatProps) => {
-  const { greeting, ...copilotLabels } = labels || {}
+const AiChatKitWrapper = ({
+  children,
+  ...copilotKitProps
+}: Omit<CopilotKitProps, "agent">) => {
+  const { agent } = useAiChat()
 
   return (
-    <AiChatLabelsProvider greeting={greeting}>
-      <CopilotPopup
-        Window={ChatWindow}
-        Header={ChatHeader}
-        Messages={MessagesContainer}
-        Button={ChatButton}
-        Input={ChatTextarea}
-        UserMessage={UserMessage}
-        AssistantMessage={AssistantMessage}
-        {...props}
-        labels={copilotLabels}
-      />
-    </AiChatLabelsProvider>
+    <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
+      {children}
+    </CopilotKit>
+  )
+}
+
+const AiChatCmp = () => {
+  const { enabled, open, setOpen } = useAiChat()
+
+  useCopilotAction({
+    name: "orchestratorThinking",
+    description: "Display orchestrator thinking process (non-blocking)",
+    parameters: [
+      {
+        name: "message",
+        description: "User-friendly progress message",
+        required: true,
+      },
+    ],
+    // render only when backend wants to display the thinking
+    available: "disabled",
+    render: (props) => {
+      return (
+        <div className={props.status ? "-ml-1" : undefined}>
+          <ActionItem
+            title={props.args.message ?? "thinking"}
+            status={props.status === "complete" ? "completed" : props.status}
+            inGroup={props.result?.inGroup}
+          />
+        </div>
+      )
+    },
+  })
+
+  if (!enabled) {
+    return null
+  }
+
+  return (
+    <CopilotSidebar
+      className={cn("h-full", open && "py-1 xs:pr-1")}
+      defaultOpen={open}
+      onSetOpen={(isOpen) => {
+        setOpen(isOpen)
+      }}
+      Window={ChatWindow}
+      Header={ChatHeader}
+      Messages={MessagesContainer}
+      Button={ChatButton}
+      Input={ChatTextarea}
+      UserMessage={UserMessage}
+      AssistantMessage={AssistantMessage}
+    />
   )
 }
 
@@ -59,4 +123,4 @@ const AiChatProvider = experimentalComponent(
   AiChatProviderCmp
 )
 
-export { AiChat, AiChatProvider, type AiChatProps, type AiChatProviderProps }
+export { AiChat, AiChatProvider }

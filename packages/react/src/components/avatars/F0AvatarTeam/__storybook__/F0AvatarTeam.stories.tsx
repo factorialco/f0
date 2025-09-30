@@ -3,8 +3,8 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 import { mockModuleId } from "@/testing/mocks/modules"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { avatarSizes } from "../../BaseAvatar"
-import { getBaseAvatarArgTypes } from "../../BaseAvatar/__stories__/utils"
+import { avatarSizes } from "../../internal/BaseAvatar"
+import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarTeam } from "../F0AvatarTeam"
 
 const meta: Meta<typeof F0AvatarTeam> = {

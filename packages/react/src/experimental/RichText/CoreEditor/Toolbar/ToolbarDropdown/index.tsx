@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
 import { cn } from "@/lib/utils"
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
@@ -46,11 +47,12 @@ export const ToolbarDropdown = ({
   return (
     <Popover.Root open={open} modal={false} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
-        <ToolbarButton
+        <F0ButtonToggle
           label={activator.label}
           icon={activator.icon}
+          selected={open}
           disabled={disabled}
-          onClick={handleButtonClick}
+          onSelectedChange={handleButtonClick}
         />
       </Popover.Trigger>
       <Popover.Portal container={document.body}>
@@ -70,7 +72,7 @@ export const ToolbarDropdown = ({
                 exit={{ opacity: 0, scale: 0.95, y: 5 }}
                 transition={{ duration: 0.15 }}
                 className={cn(
-                  "flex w-40 flex-col gap-0.5 overflow-hidden rounded-md border border-solid border-f1-border bg-f1-background p-0.5 drop-shadow-sm",
+                  "flex w-40 flex-col gap-0.5 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background p-0.5 drop-shadow-sm",
                   darkMode && "dark"
                 )}
               >

@@ -3,6 +3,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as DataCollectionStories from "./index.stories"
 import * as ActionDataCollectionStories from "./collection-actions.stories"
+import * as DataCollectionTableViewStories from "./visualizations/table/table.stories"
 
 <Meta title="Data collection" />
 
@@ -27,6 +28,8 @@ primarily through table, card, and list formats.
   filtering, sorting, contextual visualization, and bulk actions.
 - **Scale with data:** Maintain performance and usability with both small
   datasets and large volumes of information.
+
+<Controls of={DataCollectionStories.BasicTableView} />
 
 ### View modes
 
@@ -169,7 +172,7 @@ recommended not to fix very long columns or several consecutive columns, as this
 significantly reduces the available space for viewing the table content.
 
 <Canvas
-  of={DataCollectionStories.TableFrozenCols}
+  of={DataCollectionTableViewStories.TableFrozenCols}
   meta={DataCollectionStories}
 />
 

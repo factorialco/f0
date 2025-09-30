@@ -1,4 +1,4 @@
-const baseConfig = require("@factorialco/factorial-one-react-native/tailwind.config");
+const baseConfig = require("@factorialco/f0-react-native/tailwind.config");
 
 /** @type {import("tailwindcss").Config} */
 module.exports = {
@@ -6,6 +6,6 @@ module.exports = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
-    "./node_modules/@factorialco/factorial-one-react-native/**/*.{ts,tsx}",
+    "./node_modules/@factorialco/f0-react-native/**/*.{ts,tsx}",
   ],
 };

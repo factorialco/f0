@@ -70,6 +70,16 @@ const compareTo: DatePickerCompareTo = {
 <OneDateNavigator compareTo={compareTo} onCompareToChange={handleCompareToChange} ..../>
 ````
 
+## Default Compare To
+
+The `defaultCompareTo` prop is used to set the default compare to value or to
+change the default compare from outside the component.
+
+```tsx
+const defaultCompareTo: CompareToDefKey = "1"
+<OneDateNavigator compareTo={compareTo} onCompareToChange={handleCompareToChange} defaultCompareTo={defaultCompareTo} .../>
+```
+
 ## Example
 
 <Canvas of={DateNavigatorStories.WithCompareTo} />

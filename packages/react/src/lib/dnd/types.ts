@@ -16,11 +16,11 @@ export type DropIntent =
   | { type: "enter-container"; toContainerId: string }
   | { type: "cancel" }
 
-export interface DndDriver {
+export interface DndDriver<T = unknown> {
   registerDraggable: (
     el: HTMLElement,
     options: {
-      payload: DragPayload
+      payload: DragPayload<T>
       disabled?: boolean
       handle?: HTMLElement | null
     }
@@ -37,7 +37,7 @@ export interface DndDriver {
   subscribe: (
     cb: (e: {
       phase: "start" | "over" | "drop" | "cancel"
-      source: DragPayload
+      source: DragPayload<T>
       intent?: DropIntent
     }) => void
   ) => () => void

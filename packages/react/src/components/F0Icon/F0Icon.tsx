@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { f1Colors } from "@factorialco/factorial-one-core"
+import { f1Colors } from "@factorialco/f0-core"
 import { cva, type VariantProps } from "cva"
 import {
   forwardRef,

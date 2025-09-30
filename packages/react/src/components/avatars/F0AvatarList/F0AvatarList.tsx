@@ -3,6 +3,7 @@ import { OverflowList } from "@/ui/OverflowList"
 import { AvatarVariant, F0Avatar } from "../F0Avatar"
 import { MaxCounter } from "./components/MaxCounter"
 
+import { useMemo } from "react"
 import { AvatarListSize, avatarListSizes, F0AvatarListProps } from "./types"
 import { getAvatarDisplayName } from "./utils"
 
@@ -41,17 +42,27 @@ export const F0AvatarList = ({
   }
 
   const gaps = {
-    xs: -0.5,
+    xs: -2,
     sm: -3,
-    md: -10,
+    md: -4,
   } satisfies Record<AvatarListSize, number>
   const gap = gaps[size] ?? 0
+
+  const itemWidth = useMemo(() => {
+    const sizeWidth = {
+      xs: 20,
+      sm: 24,
+      md: 32,
+    } satisfies Record<AvatarListSize, number>
+    return sizeWidth[size]
+  }, [size])
 
   return (
     <OverflowList
       max={max}
       items={avatars.map((avatar) => ({ type, ...avatar }) as AvatarVariant)}
       gap={gap}
+      itemsWidth={itemWidth}
       className="flex items-center"
       renderListItem={(avatar, index) => {
         const displayName = getAvatarDisplayName(type, avatar)
@@ -88,17 +99,22 @@ export const F0AvatarList = ({
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}
       renderOverflowIndicator={(count) => (
-        <MaxCounter
-          count={(initialRemainingCount ?? 0) + count}
-          size={size}
-          type={type === "person" ? "rounded" : "base"}
-          avatarType={type}
-          list={
-            initialRemainingCount
-              ? undefined
-              : avatars.slice(avatars.length - count)
-          }
-        />
+        <div
+          className="flex h-fit w-fit items-center"
+          style={{ marginLeft: gap }}
+        >
+          <MaxCounter
+            count={(initialRemainingCount ?? 0) + count}
+            size={size}
+            type={type === "person" ? "rounded" : "base"}
+            avatarType={type}
+            list={
+              initialRemainingCount
+                ? undefined
+                : avatars.slice(avatars.length - count)
+            }
+          />
+        </div>
       )}
       overflowIndicatorWithPopover={false}
     />

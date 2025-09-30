@@ -1,7 +1,7 @@
 import {
   DropdownItem,
   DropdownItemObject,
-} from "@/experimental/Navigation/Dropdown"
+} from "@/experimental/Navigation/Dropdown/internal.tsx"
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.

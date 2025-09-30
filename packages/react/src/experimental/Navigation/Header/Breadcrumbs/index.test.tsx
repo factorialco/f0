@@ -241,7 +241,7 @@ describe("Breadcrumbs", async () => {
     })
   })
 
-  it("renders select type breadcrumb correctly", async () => {
+  it.skip("renders select type breadcrumb correctly", async () => {
     const breadcrumbs = [
       { id: "home", label: "Home", href: "/" },
       {

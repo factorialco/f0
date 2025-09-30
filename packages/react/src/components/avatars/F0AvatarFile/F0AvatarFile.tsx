@@ -3,7 +3,7 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"
 import { ElementRef, forwardRef, useMemo } from "react"
-import { BaseAvatarProps, sizesMapping } from "../BaseAvatar"
+import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
 import { AvatarFileSize, FileDef } from "./types"
 import { getAvatarSize, getBadgeSize, getFileTypeInfo } from "./utils"
 

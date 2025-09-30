@@ -37,7 +37,7 @@ jobs:
       - uses: ./.github/actions/publish-to-npmjs
         id: publish
         with:
-          workspace: "@factorialco/factorial-one-react"
+          workspace: "@factorialco/f0-react"
           registry_token: ${{ secrets.NPMJS_TOKEN }}
       - name: Notify Slack
         if: ${{ steps.publish.outputs.published == 'true' }}
@@ -45,8 +45,8 @@ jobs:
           RELEASE_BODY_RAW: ${{ github.event.release.body }}
           RELEASE_URL: ${{ github.event.release.html_url }}
           RELEASE_NAME: ${{ github.event.release.name }}
-          PACKAGE: "@factorialco/factorial-one-react"
-          NPM_URL: "https://www.npmjs.com/package/@factorialco/factorial-one-react?activeTab=versions"
+          PACKAGE: "@factorialco/f0-react"
+          NPM_URL: "https://www.npmjs.com/package/@factorialco/f0-react?activeTab=versions"
         run: |
           # 1️⃣  Convert GitHub-style markdown ➜ Slack mrkdwn
           RELEASE_BODY=$(echo "$RELEASE_BODY_RAW" | perl -pe '
@@ -105,7 +105,7 @@ jobs:
       - uses: ./.github/actions/publish-to-npmjs
         id: publish
         with:
-          workspace: "@factorialco/factorial-one-react-native"
+          workspace: "@factorialco/f0-react-native"
           registry_token: ${{ secrets.NPMJS_TOKEN }}
       - name: Notify Slack
         if: ${{ steps.publish.outputs.published == 'true' }}
@@ -113,8 +113,8 @@ jobs:
           RELEASE_BODY_RAW: ${{ github.event.release.body }}
           RELEASE_URL: ${{ github.event.release.html_url }}
           RELEASE_NAME: ${{ github.event.release.name }}
-          PACKAGE: "@factorialco/factorial-one-react-native"
-          NPM_URL: "https://www.npmjs.com/package/@factorialco/factorial-one-react-native?activeTab=versions"
+          PACKAGE: "@factorialco/f0-react-native"
+          NPM_URL: "https://www.npmjs.com/package/@factorialco/f0-react-native?activeTab=versions"
         run: |
           # 1️⃣  Convert GitHub-style markdown ➜ Slack mrkdwn
           RELEASE_BODY=$(echo "$RELEASE_BODY_RAW" | perl -pe '
@@ -173,7 +173,7 @@ jobs:
       - uses: ./.github/actions/publish-to-npmjs
         id: publish
         with:
-          workspace: "@factorialco/factorial-one-core"
+          workspace: "@factorialco/f0-core"
           registry_token: ${{ secrets.NPMJS_TOKEN }}
       - name: Notify Slack
         if: ${{ steps.publish.outputs.published == 'true' }}
@@ -181,8 +181,8 @@ jobs:
           RELEASE_BODY_RAW: ${{ github.event.release.body }}
           RELEASE_URL: ${{ github.event.release.html_url }}
           RELEASE_NAME: ${{ github.event.release.name }}
-          PACKAGE: "@factorialco/factorial-one-core"
-          NPM_URL: "https://www.npmjs.com/package/@factorialco/factorial-one-core?activeTab=versions"
+          PACKAGE: "@factorialco/f0-core"
+          NPM_URL: "https://www.npmjs.com/package/@factorialco/f0-core?activeTab=versions"
         run: |
           # 1️⃣  Convert GitHub-style markdown ➜ Slack mrkdwn
           RELEASE_BODY=$(echo "$RELEASE_BODY_RAW" | perl -pe '

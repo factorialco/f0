@@ -1,4 +1,4 @@
-import { baseColors } from "@factorialco/factorial-one-core"
+import { baseColors } from "@factorialco/f0-core"
 
 type BaseColor = keyof typeof baseColors
 
