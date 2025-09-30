@@ -78,7 +78,7 @@ export function SidebarIcon() {
     <Action
       variant="ghost"
       size="md"
-      onClick={toggleSidebar}
+      onClick={() => toggleSidebar()}
       className="group hover:bg-f1-background-hover"
       title="Close Sidebar"
       ref={buttonRef}

@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.214.2](https://github.com/factorialco/f0/compare/f0-react-v1.214.1...f0-react-v1.214.2) (2025-09-30)
+
+
+### Bug Fixes
+
+* **DataCollection:** search clear icon color & keyboard navigation ([#2725](https://github.com/factorialco/f0/issues/2725)) ([5befda5](https://github.com/factorialco/f0/commit/5befda54498bc5e8eb56a4d4af1bf30a867e5a64))
+
+## [1.214.1](https://github.com/factorialco/f0/compare/f0-react-v1.214.0...f0-react-v1.214.1) (2025-09-30)
+
+
+### Bug Fixes
+
+* **Checkbox:** set rounded focus ring ([#2726](https://github.com/factorialco/f0/issues/2726)) ([78dfede](https://github.com/factorialco/f0/commit/78dfedeb8a6b58cca528200f0d1ca015b63becc3))
+
+## [1.214.0](https://github.com/factorialco/f0/compare/f0-react-v1.213.0...f0-react-v1.214.0) (2025-09-30)
+
+
+### Features
+
+* fix find closest cards + fix click issue + fix full-h skeleton ([#2719](https://github.com/factorialco/f0/issues/2719)) ([34c60cd](https://github.com/factorialco/f0/commit/34c60cdb7aca696cb7401a312c24a402c4304cd2))
+
+## [1.213.0](https://github.com/factorialco/f0/compare/f0-react-v1.212.0...f0-react-v1.213.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** add chat spinner ([#2722](https://github.com/factorialco/f0/issues/2722)) ([8d369e0](https://github.com/factorialco/f0/commit/8d369e0348ce4198bb316b49a1d9bdcb4c42cd4a))
+
+## [1.212.0](https://github.com/factorialco/f0/compare/f0-react-v1.211.0...f0-react-v1.212.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** Autoclose sidebar when AiChat is open ([#2620](https://github.com/factorialco/f0/issues/2620)) ([1111b34](https://github.com/factorialco/f0/commit/1111b345d4fa98bd5f541d63a03dbfb0e79fe50b))
+
 ## [1.211.0](https://github.com/factorialco/f0/compare/f0-react-v1.210.2...f0-react-v1.211.0) (2025-09-30)
 
 

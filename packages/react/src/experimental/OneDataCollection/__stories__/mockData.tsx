@@ -848,10 +848,7 @@ export const ExampleComponent = ({
 
   return (
     <div
-      className={cn(
-        "space-y-4",
-        fullHeight && "max-h-full max-w-full bg-[#fff]"
-      )}
+      className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
         id={id}

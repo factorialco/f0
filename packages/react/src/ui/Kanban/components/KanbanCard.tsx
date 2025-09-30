@@ -12,6 +12,14 @@ import { useEffect, useRef, useState } from "react"
 
 export type DragConfig<T = unknown> = { id: string; type?: string; data?: T }
 
+const INTERACTIVE_SELECTOR =
+  'button, a[href], input, select, textarea, [role="button"], [role="checkbox"], [role="menuitem"], [role="option"], [role="radio"], [role="switch"]'
+
+const isInteractiveElement = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(target.closest(INTERACTIVE_SELECTOR))
+}
+
 export function KanbanCard<T = unknown>({
   drag,
   id,
@@ -20,6 +28,7 @@ export function KanbanCard<T = unknown>({
   laneId,
   draggable = false,
   showIndicator = true,
+  forcedEdge = null,
   ...props
 }: {
   drag: DragConfig<T>
@@ -29,6 +38,7 @@ export function KanbanCard<T = unknown>({
   laneId?: string
   draggable?: boolean
   showIndicator?: boolean
+  forcedEdge?: "top" | "bottom" | null
 } & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
   const linkRef = useRef<HTMLAnchorElement | null>(null)
@@ -78,6 +88,10 @@ export function KanbanCard<T = unknown>({
 
   const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     if (!draggable) return
+    // Don't intercept clicks on interactive elements (checkboxes, buttons, etc.)
+    if (isInteractiveElement(e.target)) {
+      return
+    }
     if (props.onClick) {
       props.onClick()
       e.preventDefault()
@@ -100,6 +114,9 @@ export function KanbanCard<T = unknown>({
         isFirst && "mt-1.5",
         isLast && "mb-1.5"
       )}
+      data-kanban-card="true"
+      data-index={index}
+      data-lane-id={laneId}
       onClick={handleClick}
     >
       <CardInternal {...props} disableOverlayLink={draggable} />
@@ -117,8 +134,12 @@ export function KanbanCard<T = unknown>({
           aria-label={props.title}
         />
       )}
-      {showIndicator && overEdge && (
-        <DropIndicator edge={overEdge} type="terminal-no-bleed" gap="4px" />
+      {showIndicator && (forcedEdge ?? overEdge) && (
+        <DropIndicator
+          edge={(forcedEdge ?? overEdge) as "top" | "bottom"}
+          type="terminal-no-bleed"
+          gap="4px"
+        />
       )}
     </div>
   )

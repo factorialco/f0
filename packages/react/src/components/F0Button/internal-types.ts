@@ -6,15 +6,13 @@ export type { ButtonType }
 
 export type ButtonInternalProps = Pick<
   ActionProps,
-  | "size"
-  | "disabled"
-  | "className"
-  | "pressed"
-  | "compact"
-  | "variant"
-  | "aria-label"
+  "size" | "disabled" | "className" | "pressed" | "compact" | "variant"
 > &
   DataAttributes & {
+    /**
+     * The aria-label of the button if not provided title or label will be used.
+     */
+    "aria-label"?: string
     /**
      * The variant of the button.
      */

@@ -123,14 +123,15 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                       e.stopPropagation()
                       handleClear()
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        handleClear()
+                      }
+                    }}
                     role="button"
                     aria-label={i18n.actions.clear}
                   >
-                    <F0Icon
-                      icon={CrossedCircle}
-                      className="text-f1-icon-secondary transition-colors hover:text-f1-icon"
-                      size="md"
-                    />
+                    <F0Icon icon={CrossedCircle} size="md" color="secondary" />
                   </motion.div>
                 </motion.div>
               </motion.div>
@@ -178,13 +179,18 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                           e.stopPropagation()
                           handleClear()
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleClear()
+                          }
+                        }}
                         role="button"
                         aria-label={i18n.actions.clear}
                       >
                         <F0Icon
                           icon={CrossedCircle}
-                          className="text-f1-icon-secondary transition-colors hover:text-f1-icon"
                           size="md"
+                          color="secondary"
                         />
                       </motion.div>
                     </div>

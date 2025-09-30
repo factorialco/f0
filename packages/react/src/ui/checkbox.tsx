@@ -26,14 +26,14 @@ const Checkbox = React.forwardRef<
         name={props.name || checkboxId}
         aria-label={props.title}
         className={cn(
-          "relative h-6 w-6 shrink-0 text-f1-foreground-selected data-[state=checked]:text-f1-foreground-inverse",
+          "relative h-6 w-6 shrink-0 rounded-sm text-f1-foreground-selected data-[state=checked]:text-f1-foreground-inverse",
           "after:absolute after:left-0.5 after:top-0.5 after:z-[1] after:h-5 after:w-5 after:rounded-xs after:border after:border-solid after:border-f1-border after:transition-[background-color,border-color] after:content-[''] hover:after:border-f1-border-hover data-[state=checked]:after:bg-f1-background-selected-bold hover:data-[state=checked]:after:border-transparent",
           disabled && "cursor-not-allowed opacity-50 hover:border-f1-border",
           indeterminate && "data-[state=checked]:text-f1-foreground-inverse",
           props.checked &&
             disabled &&
             "data-[state=checked]:bg-f1-background-secondary data-[state=checked]:text-f1-foreground-secondary",
-          focusRing(),
+          focusRing("focus-visible:ring-offset-0"),
           className
         )}
         checked={props.checked}
