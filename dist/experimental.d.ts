@@ -832,6 +832,10 @@ declare type ButtonDropdownItem<T = string> = {
 
 declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant"> & DataAttributes & {
     /**
+     * The aria-label of the button if not provided title or label will be used.
+     */
+    "aria-label"?: string;
+    /**
      * The variant of the button.
      */
     variant?: ButtonVariant;
@@ -2412,9 +2416,13 @@ declare type FormType<T extends SchemaType, FormType extends InferSchema<T>> = U
 
 declare interface FrameContextType {
     isSmallScreen: boolean;
+    isLastToggleInvokedByUser: boolean;
     sidebarState: SidebarState;
     prevSidebarState: SidebarState | null;
-    toggleSidebar: () => void;
+    toggleSidebar: (callData?: {
+        isInvokedByUser: boolean;
+    }) => void;
+    setForceFloat: (force: boolean) => void;
 }
 
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
@@ -5139,15 +5147,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
