@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.214.2](https://github.com/factorialco/f0/compare/f0-react-v1.214.1...f0-react-v1.214.2) (2025-09-30)
+
+
+### Bug Fixes
+
+* **DataCollection:** search clear icon color & keyboard navigation ([#2725](https://github.com/factorialco/f0/issues/2725)) ([5befda5](https://github.com/factorialco/f0/commit/5befda54498bc5e8eb56a4d4af1bf30a867e5a64))
+
 ## [1.214.1](https://github.com/factorialco/f0/compare/f0-react-v1.214.0...f0-react-v1.214.1) (2025-09-30)
 
 
