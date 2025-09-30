@@ -9,8 +9,6 @@ import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
 
-const DEFAULT_MAX_LANE_HEIGHT = 600
-
 export function Lane<Record extends RecordType>({
   title,
   items,
@@ -18,7 +16,6 @@ export function Lane<Record extends RecordType>({
   getKey,
   emptyState,
   fetchMore,
-  maxHeight = DEFAULT_MAX_LANE_HEIGHT,
   variant = "neutral",
   loading = false,
   hasMore = false,
@@ -43,23 +40,18 @@ export function Lane<Record extends RecordType>({
   )
 
   return (
-    <div
-      className={`shadow-sm flex w-[323.2px] flex-col`}
-      style={{
-        maxHeight: `${maxHeight}px`,
-      }}
-    >
+    <div className={`shadow-sm relative flex h-full w-[323.2px] flex-col`}>
       <LaneHeader
         label={title || "Lane"}
         variant={variant}
         count={total ?? items.length}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-1 pb-1">
+      <div className="relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1">
         {loading ? (
           <ScrollArea
             className={cn(
-              "relative h-auto flex-1 rounded-lg",
+              "relative h-full flex-1 rounded-lg",
               loading && "select-none opacity-50 transition-opacity"
             )}
           >
@@ -79,9 +71,10 @@ export function Lane<Record extends RecordType>({
           emptyState
         ) : (
           <>
-            <ScrollArea className="h-auto flex-1">
+            <ScrollArea className="test12 relative h-full flex-1">
               <div
                 className={cn(
+                  "relative h-full",
                   loadingMore && "select-none opacity-50 transition-opacity"
                 )}
                 aria-live={loadingMore ? "polite" : undefined}
