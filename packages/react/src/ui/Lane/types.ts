@@ -34,11 +34,6 @@ export interface LaneProps<Record extends RecordType> {
   loading?: boolean
 
   /**
-   * The maximum height of the lane in pixels
-   */
-  maxHeight?: number
-
-  /**
    * Whether the lane has more items to load
    */
   hasMore?: boolean
