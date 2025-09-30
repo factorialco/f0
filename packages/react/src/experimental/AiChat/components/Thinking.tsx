@@ -32,7 +32,7 @@ export const Thinking = ({ messages }: ThinkingProps) => {
         onOpenChange={setIsExpanded}
       >
         <CollapsibleTrigger className="flex w-full items-center text-base text-f1-foreground-secondary transition-colors duration-150 hover:text-f1-foreground [&[data-state=open]>svg]:rotate-90">
-          <span className="mr-2">
+          <span className="mr-2 *:block">
             <F0Icon icon={Lightbulb} className="block" />
           </span>
           <span className="mr-[2px]">Reflection</span>
