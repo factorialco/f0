@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.217.0](https://github.com/factorialco/f0/compare/f0-react-v1.216.0...f0-react-v1.217.0) (2025-10-01)
+
+
+### Features
+
+* **Chart:** tooltip UI/UX improvements ([#2738](https://github.com/factorialco/f0/issues/2738)) ([d8a12df](https://github.com/factorialco/f0/commit/d8a12dfa553dbc957de85b58c63c5dfe8a997223))
+
 ## [1.216.0](https://github.com/factorialco/f0/compare/f0-react-v1.215.0...f0-react-v1.216.0) (2025-10-01)
 
 
