@@ -1,5 +1,4 @@
 import { Button, CopyButton } from "@/components/Actions/Button"
-import { Spinner } from "@/experimental/Information/Spinner"
 import {
   ThumbsDown,
   ThumbsDownFilled,
@@ -11,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
+import { ChatSpinner } from "./ChatSpinner"
 
 export const AssistantMessage = ({
   isGenerating,
@@ -69,7 +69,7 @@ export const AssistantMessage = ({
     >
       {isLoading && !subComponent && (
         <div className="min-h-[20px]">
-          <Spinner size="small" className="text-f1-foreground" />
+          <ChatSpinner />
         </div>
       )}
       {message && (
