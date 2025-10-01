@@ -8,6 +8,7 @@ import { CopilotSidebar } from "@copilotkit/react-ui"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
+import { type AIMessage } from "@copilotkit/shared"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -18,12 +19,15 @@ import {
   MessagesContainer,
   UserMessage,
 } from "./components"
+import { isAiMessage } from "./messageTypes"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
 export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
   initialMessage?: string | string[]
+  onThumbsUp?: (message: AIMessage) => void
+  onThumbsDown?: (message: AIMessage) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -39,6 +43,8 @@ const AiChatProviderCmp = ({
   enabled = false,
   greeting,
   initialMessage,
+  onThumbsUp,
+  onThumbsDown,
   children,
   agent,
   ...copilotKitProps
@@ -50,6 +56,8 @@ const AiChatProviderCmp = ({
       enabled={enabled}
       greeting={greeting}
       initialMessage={initialMessage}
+      onThumbsUp={onThumbsUp}
+      onThumbsDown={onThumbsDown}
       agent={agent}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
@@ -71,7 +79,7 @@ const AiChatKitWrapper = ({
 }
 
 const AiChatCmp = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen, onThumbsUp, onThumbsDown } = useAiChat()
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -108,6 +116,16 @@ const AiChatCmp = () => {
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
+      }}
+      onThumbsUp={(message) => {
+        if (isAiMessage(message)) {
+          onThumbsUp?.(message)
+        }
+      }}
+      onThumbsDown={(message) => {
+        if (isAiMessage(message)) {
+          onThumbsDown?.(message)
+        }
       }}
       Window={ChatWindow}
       Header={ChatHeader}

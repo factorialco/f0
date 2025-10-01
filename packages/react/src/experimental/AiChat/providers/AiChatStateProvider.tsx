@@ -1,5 +1,6 @@
 "use client"
 
+import { type AIMessage } from "@copilotkit/shared"
 import {
   createContext,
   FC,
@@ -16,6 +17,8 @@ export interface AiChatState {
   enabled: boolean
   agent?: string
   initialMessage?: string | string[]
+  onThumbsUp?: (message: AIMessage) => void
+  onThumbsDown?: (message: AIMessage) => void
 }
 
 type AiChatProviderReturnValue = {
@@ -38,6 +41,8 @@ type AiChatProviderReturnValue = {
   setInitialMessage: React.Dispatch<
     React.SetStateAction<string | string[] | undefined>
   >
+  onThumbsUp?: (message: AIMessage) => void
+  onThumbsDown?: (message: AIMessage) => void
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -47,6 +52,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   enabled,
   agent: initialAgent,
   initialMessage: initialInitialMessage,
+  onThumbsDown,
+  onThumbsUp,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
@@ -95,6 +102,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         autoClearMinutes: enabledInternal ? autoClearMinutes : null,
         initialMessage,
         setInitialMessage,
+        onThumbsUp,
+        onThumbsDown,
       }}
     >
       {children}
@@ -102,23 +111,26 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
 }
 
+const noopFn = () => {}
+
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
-
   if (context === null) {
     return {
       enabled: false,
-      setEnabled: () => {},
+      setEnabled: noopFn,
       open: false,
-      setOpen: () => {},
+      setOpen: noopFn,
       shouldPlayEntranceAnimation: true,
-      setShouldPlayEntranceAnimation: () => {},
+      setShouldPlayEntranceAnimation: noopFn,
       agent: undefined,
-      tmp_setAgent: () => {},
-      setAutoClearMinutes: () => {},
+      tmp_setAgent: noopFn,
+      setAutoClearMinutes: noopFn,
       autoClearMinutes: null,
       initialMessage: undefined,
-      setInitialMessage: () => {},
+      setInitialMessage: noopFn,
+      onThumbsUp: noopFn,
+      onThumbsDown: noopFn,
     }
   }
 

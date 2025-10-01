@@ -8,6 +8,7 @@ import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
+import { isAgentStateMessage } from "../messageTypes"
 import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { Thinking } from "./Thinking"
@@ -404,10 +405,6 @@ function isThinkingMessage(message: Message): boolean {
       (call) => call.function.name === "orchestratorThinking"
     ) === true
   )
-}
-
-function isAgentStateMessage(message: Message): boolean {
-  return message.role === "assistant" && message.agentName !== undefined
 }
 
 function isCurrentlyGroupingThinking(turn: Turn): boolean {
