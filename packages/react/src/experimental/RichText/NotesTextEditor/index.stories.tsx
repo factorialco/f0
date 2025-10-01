@@ -253,6 +253,7 @@ export const Default: Story = {
       },
       {
         type: "text",
+        label: "some text",
         content: "Metadata",
       },
     ],
