@@ -45,7 +45,7 @@ export const Default: Story = {
   },
 }
 
-export const WithImage: Story = {
+export const WithFlag: Story = {
   args: {
     flag: "es",
   },
@@ -68,7 +68,7 @@ export const Snapshot: Story = {
       <h3 className="text-lg font-semibold">All Flag Avatars</h3>
 
       <section>
-        <h4 className="text-lg font-semibold">With Image</h4>
+        <h4 className="text-lg font-semibold">With Flag</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size) => (
             <F0AvatarFlag key={size} size={size} flag="es" />
