@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.215.0](https://github.com/factorialco/f0/compare/f0-react-v1.214.3...f0-react-v1.215.0) (2025-10-01)
+
+
+### Features
+
+* **ai-chat:** visual adjustments and api extention ([#2721](https://github.com/factorialco/f0/issues/2721)) ([992fb89](https://github.com/factorialco/f0/commit/992fb899cd4e79e1c9c13f16be848b735ddf9b49))
+
 ## [1.214.3](https://github.com/factorialco/f0/compare/f0-react-v1.214.2...f0-react-v1.214.3) (2025-10-01)
 
 
