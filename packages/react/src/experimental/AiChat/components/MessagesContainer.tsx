@@ -8,6 +8,7 @@ import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
+import { isAgentStateMessage } from "../messageTypes"
 import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { Thinking } from "./Thinking"
@@ -30,12 +31,15 @@ export const MessagesContainer = ({
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
 
-  const { greeting } = useAiChat()
   const translations = useI18n()
+  const { greeting, initialMessage } = useAiChat()
   const [longestTurnHeight, setLongestTurnHeight] = useState<number>(0)
   const initialMessages = useMemo(
-    () => makeInitialMessages(translations.ai.initialMessage),
-    [translations.ai.initialMessage]
+    () =>
+      makeInitialMessages(
+        initialMessage || translations.ai.defaultInitialMessage
+      ),
+    [initialMessage, translations.ai.defaultInitialMessage]
   )
   const showWelcomeBlock =
     messages.length == 0 && (greeting || initialMessages.length > 0)
@@ -352,14 +356,8 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
 
   const turns: Turn[] = []
 
-  for (const message of messages) {
+  for (const [i, message] of messages.entries()) {
     if (message.role === "user") {
-      // Finalize the previous turn if it exists
-      if (turns.length > 0) {
-        const lastTurn = turns[turns.length - 1]
-        finalizeTurn(lastTurn)
-      }
-
       // create new turn
       turns.push([message])
       continue
@@ -372,8 +370,12 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       isAgentStateMessage(message) &&
       isCurrentlyGroupingThinking(currentTurn)
     ) {
-      const thinkingGroup = currentTurn.pop() as Message[]
-      currentTurn.push(message, thinkingGroup)
+      // we want to ignore the last agent state message
+      // to avoid rerenders of thinking components and play extra animations
+      if (i !== messages.length - 1) {
+        const thinkingGroup = currentTurn.pop() as Message[]
+        currentTurn.push(message, thinkingGroup)
+      }
       continue
     }
 
@@ -390,16 +392,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       continue
     }
 
-    // Handle non-thinking messages
-    // First, finalize any thinking group
-    finalizeTurn(currentTurn)
-
     currentTurn.push(message)
-  }
-
-  if (turns.length > 0) {
-    const lastTurn = turns[turns.length - 1]
-    finalizeTurn(lastTurn)
   }
 
   return turns
@@ -414,23 +407,7 @@ function isThinkingMessage(message: Message): boolean {
   )
 }
 
-function isAgentStateMessage(message: Message): boolean {
-  return message.role === "assistant" && message.agentName !== undefined
-}
-
-function finalizeTurn(turn: Turn) {
-  ungroupSingleThinkingMessage(turn)
-}
-
 function isCurrentlyGroupingThinking(turn: Turn): boolean {
   const lastMessage = turn.at(-1)
   return Array.isArray(lastMessage)
-}
-
-function ungroupSingleThinkingMessage(turn: Turn): void {
-  const lastMessage = turn.at(-1)
-  if (Array.isArray(lastMessage) && lastMessage.length === 1) {
-    turn.pop()
-    turn.push(...lastMessage)
-  }
 }
