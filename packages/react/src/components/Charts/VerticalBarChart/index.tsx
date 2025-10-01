@@ -17,6 +17,7 @@ import { prepareData } from "../utils/bar"
 import { autoColor } from "../utils/colors"
 import {
   cartesianGridProps,
+  chartTooltipProps,
   measureTextWidth,
   xAxisProps as xAxisConfigureProps,
   yAxisProps as yAxisConfigureProps,
@@ -113,7 +114,7 @@ const _VBarChart = <K extends ChartConfig>(
       >
         {!hideTooltip && (
           <ChartTooltip
-            cursor
+            {...chartTooltipProps(true)}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }

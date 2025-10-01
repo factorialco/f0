@@ -20,7 +20,11 @@ import {
 } from "recharts"
 import { usePrivacyMode } from "../../../lib/privacyMode"
 import { autoColor } from "../utils/colors"
-import { cartesianGridProps, measureTextWidth } from "../utils/elements"
+import {
+  cartesianGridProps,
+  chartTooltipProps,
+  measureTextWidth,
+} from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { prepareData } from "../utils/muncher"
 import { LineChartPropsBase } from "../utils/types"
@@ -210,7 +214,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
         )}
         {showTooltip && (
           <ChartTooltip
-            cursor
+            {...chartTooltipProps()}
             content={
               <ChartTooltipContent
                 indicator="dot"
