@@ -2,6 +2,7 @@ import { F0Icon } from "@/components/F0Icon/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import Lightbulb from "@/icons/app/Lightbulb"
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { motion } from "motion/react"
@@ -23,6 +24,7 @@ type ThinkingProps = {
 export const Thinking = ({ messages }: ThinkingProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
+  const translations = useI18n()
 
   return (
     <div className="mb-1">
@@ -32,10 +34,10 @@ export const Thinking = ({ messages }: ThinkingProps) => {
         onOpenChange={setIsExpanded}
       >
         <CollapsibleTrigger className="flex w-full items-center text-base text-f1-foreground-secondary transition-colors duration-150 hover:text-f1-foreground [&[data-state=open]>svg]:rotate-90">
-          <span className="mr-2">
+          <span className="mr-2 *:block">
             <F0Icon icon={Lightbulb} className="block" />
           </span>
-          <span className="mr-[2px]">Reflection</span>
+          <span className="mr-[2px]">{translations.ai.thoughtsGroupTitle}</span>
           <F0Icon
             icon={ChevronRight}
             className="h-4 w-4 transition-transform duration-200"

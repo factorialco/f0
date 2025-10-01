@@ -34,7 +34,7 @@ const pieces = [
 ]
 
 const OneIcon = (
-  { ...svgProps }: SVGProps<SVGSVGElement>,
+  svgProps: SVGProps<SVGSVGElement>,
   ref: Ref<SVGSVGElement>
 ) => {
   const clipPathId = useId()
@@ -48,113 +48,112 @@ const OneIcon = (
   } = svgProps
 
   return (
-    <div className="flex h-5 w-5 items-center justify-center">
-      <div className="h4 w-4">
-        <motion.svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 32 32"
-          xmlns="http://www.w3.org/2000/svg"
-          ref={ref}
-          initial={{
-            rotate: "0deg",
-            opacity: 0,
-            scale: 0.8,
-            filter: "blur(4px)",
-          }}
-          animate={{
-            "--gradient-angle": ["0deg", "360deg"],
-            rotate: "360deg",
-            opacity: 1,
-            scale: 1,
-            filter: "blur(0px)",
-          }}
-          transition={{
-            "--gradient-angle": {
-              duration: 3,
-              ease: "linear",
-              repeat: Infinity,
-            },
-            rotate: {
-              duration: 2,
-              ease: [0.76, 0, 0.24, 1],
-              repeat: Infinity,
-            },
-            opacity: {
-              duration: 0.5,
-              ease: [0.33, 1, 0.68, 1],
-            },
-            scale: {
-              duration: 0.5,
-              ease: [0.25, 0.46, 0.45, 1.94],
-            },
-            filter: {
-              duration: 0.5,
-              ease: [0.33, 1, 0.68, 1],
-            },
-          }}
-          style={
-            {
-              "--gradient-angle": "0deg",
-              ...safeSvgProps.style,
-            } as React.CSSProperties
-          }
-          {...(({ style: _style, ...rest }) => rest)(safeSvgProps)}
-        >
-          <defs>
-            <clipPath id={`${clipPathId}-circle`}>
-              <circle cx="16" cy="16" r="16" />
+    <div className="h-4 w-4 shrink-0">
+      <motion.svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 32 32"
+        xmlns="http://www.w3.org/2000/svg"
+        ref={ref}
+        initial={{
+          rotate: "0deg",
+          opacity: 0,
+          scale: 0.8,
+          filter: "blur(4px)",
+        }}
+        animate={{
+          "--gradient-angle": ["0deg", "360deg"],
+          rotate: "360deg",
+          opacity: 1,
+          scale: 1,
+          filter: "blur(0px)",
+        }}
+        transition={{
+          "--gradient-angle": {
+            duration: 3,
+            ease: "linear",
+            repeat: Infinity,
+          },
+          rotate: {
+            duration: 2,
+            ease: [0.76, 0, 0.24, 1],
+            repeat: Infinity,
+          },
+          opacity: {
+            duration: 0.5,
+            ease: [0.33, 1, 0.68, 1],
+          },
+          scale: {
+            duration: 0.5,
+            ease: [0.25, 0.46, 0.45, 1.94],
+          },
+          filter: {
+            duration: 0.5,
+            ease: [0.33, 1, 0.68, 1],
+          },
+        }}
+        style={
+          {
+            "--gradient-angle": "0deg",
+            ...safeSvgProps.style,
+          } as React.CSSProperties
+        }
+        {...(({ style: _style, ...rest }) => rest)(safeSvgProps)}
+      >
+        <defs>
+          <clipPath id={`${clipPathId}-circle`}>
+            <circle cx="16" cy="16" r="16" />
+          </clipPath>
+          {pieces.map((piece) => (
+            <clipPath key={piece.id} id={`${clipPathId}-${piece.id}`}>
+              <path d={piece.path} />
             </clipPath>
-            {pieces.map((piece) => (
-              <clipPath key={piece.id} id={`${clipPathId}-${piece.id}`}>
-                <path d={piece.path} />
-              </clipPath>
-            ))}
-          </defs>
+          ))}
+        </defs>
 
-          <g clipPath={`url(#${clipPathId}-circle)`}>
-            {pieces.map((piece) => (
-              <motion.foreignObject
-                key={piece.id}
-                x="0"
-                y="0"
-                width="32"
-                height="32"
-                clipPath={`url(#${clipPathId}-${piece.id})`}
-                animate={{
-                  "--scale": [1, 8, 1],
+        <g clipPath={`url(#${clipPathId}-circle)`}>
+          {pieces.map((piece) => (
+            <motion.foreignObject
+              key={piece.id}
+              x="0"
+              y="0"
+              width="32"
+              height="32"
+              clipPath={`url(#${clipPathId}-${piece.id})`}
+              animate={{
+                "--scale": [1, 8, 1],
+              }}
+              transition={{
+                "--scale": {
+                  duration: 2,
+                  ease: [0.85, 0, 0.15, 1],
+                  repeat: Infinity,
+                  delay: 1,
+                },
+              }}
+              style={
+                {
+                  "--scale": 1,
+                  transform: `scale(var(--scale))`,
+                  transformOrigin: piece.transformOrigin,
+                  willChange: "transform",
+                } as React.CSSProperties
+              }
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background: `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
                 }}
-                transition={{
-                  "--scale": {
-                    duration: 2,
-                    ease: [0.85, 0, 0.15, 1],
-                    repeat: Infinity,
-                    delay: 1,
-                  },
-                }}
-                style={
-                  {
-                    "--scale": 1,
-                    transform: `scale(var(--scale))`,
-                    transformOrigin: piece.transformOrigin,
-                    willChange: "transform",
-                  } as React.CSSProperties
-                }
-              >
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    background: `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
-                  }}
-                />
-              </motion.foreignObject>
-            ))}
-          </g>
-        </motion.svg>
-      </div>
+              />
+            </motion.foreignObject>
+          ))}
+        </g>
+      </motion.svg>
     </div>
   )
 }
-const ForwardRef = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(OneIcon)
-export default ForwardRef
+export const ChatSpinner = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(
+  OneIcon
+)
