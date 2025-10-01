@@ -1,5 +1,4 @@
-import { ReactNode } from "react"
-import { ActionVariantProps } from "./internal-types"
+import { HTMLAttributeAnchorTarget, ReactNode } from "react"
 
 export const actionButtonVariants = [
   "default",
@@ -12,7 +11,7 @@ export const actionButtonVariants = [
 ] as const
 export type ActionButtonVariant = (typeof actionButtonVariants)[number]
 
-export const actionLinkVariants = ["link"] as const
+export const actionLinkVariants = ["link", "unstyled", "mention"] as const
 export type ActionLinkVariant = (typeof actionLinkVariants)[number]
 
 export const actionVariants = [
@@ -25,6 +24,10 @@ export const actionSizes = ["sm", "md", "lg"] as const
 export type ActionSize = (typeof actionSizes)[number]
 
 export interface ActionCommonProps {
+  /**
+   * The variant of the action.
+   */
+  variant?: ActionVariant
   /**
    * The children of the action.
    */
@@ -46,10 +49,6 @@ export interface ActionCommonProps {
    * The append outside of the action.
    */
   appendOutside?: ReactNode
-
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void
-  onFocus?: (event: React.FocusEvent<HTMLElement>) => void
-  onBlur?: (event: React.FocusEvent<HTMLElement>) => void
 
   /**
    * The disabled state of the action.
@@ -91,27 +90,42 @@ export interface ActionCommonProps {
   /**
    * The aria label of the action.
    */
-  "aria-label": string
+  "aria-label"?: string
+
+  /**
+   * The tab index of the action.
+   */
+  tabIndex?: number
 }
 
 export const buttonTypes = ["button", "submit", "reset"] as const
 export type ButtonType = (typeof buttonTypes)[number]
 
 export const navTargets = ["_blank", "_self", "_parent", "_top"] as const
-export type NavTarget = (typeof navTargets)[number]
 
-export type ActionProps = ActionCommonProps &
-  ActionVariantProps &
-  DataAttributes &
-  // as link
-  (| {
-        href: string
-        target?: NavTarget
-      }
-    // as button
-    | {
-        type?: ButtonType
-        href?: never
-        target?: never
-      }
-  )
+export type NavTarget = HTMLAttributeAnchorTarget
+
+export type ActionBaseProps = ActionCommonProps & DataAttributes
+
+export type ActionLinkProps = ActionBaseProps & {
+  href: string | undefined
+  target?: NavTarget
+  rel?: string
+  onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  className?: string
+}
+
+export type ActionButtonProps = ActionBaseProps & {
+  type?: ButtonType
+  href?: never
+  target?: never
+  onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
+}
+
+export type ActionProps =
+  | ActionLinkProps // as link
+  | ActionButtonProps // as button

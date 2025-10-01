@@ -1,13 +1,13 @@
 import { F0Icon } from "@/components/F0Icon"
 import { Check, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Action, ActionButtonVariant, ActionProps } from "@/ui/Action"
+import { Action, ActionButtonProps, ActionButtonVariant } from "@/ui/Action"
 import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, MouseEventHandler, useEffect, useState } from "react"
 import { iconOnlyVariants } from "../../components/F0Button/internal"
 
 export type ButtonCopyProps = Omit<
-  ActionProps,
+  ActionButtonProps,
   | "onClick"
   | "children"
   | "title"

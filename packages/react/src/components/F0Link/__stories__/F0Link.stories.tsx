@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 import { F0Link } from ".."
+import { linkVariants } from "../types"
 
 const meta = {
   title: "Link",
@@ -16,6 +17,10 @@ const meta = {
     target: {
       control: "select",
       options: [undefined, "_blank", "_self", "_parent", "_top"],
+    },
+    variant: {
+      control: "select",
+      options: linkVariants,
     },
   },
   args: {
@@ -39,22 +44,6 @@ export const Default: Story = {
     <p>
       Do not click this <F0Link {...args} /> because it goes nowhere.
     </p>
-  ),
-}
-
-export const Variants: Story = {
-  parameters: withSnapshot({}),
-  render: (args) => (
-    <div className="[&>h3]:mt-5 [&>h3]:pb-2">
-      <h3 className="!m-0">Basic usage</h3>
-      <F0Link {...args} variant="link" />
-      <h3>External link</h3>
-      <F0Link {...args} variant="link" target="_blank" />
-      <h3>Unstyled</h3>
-      <F0Link {...args} variant="unstyled" />
-      <h3>Disabled</h3>
-      <F0Link {...args} variant="link" disabled />
-    </div>
   ),
 }
 
@@ -86,6 +75,22 @@ export const InteractiveExamples: Story = {
       >
         External link
       </F0Link>
+    </div>
+  ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: (args) => (
+    <div className="[&>h3]:mt-5 [&>h3]:pb-2">
+      <h3 className="!m-0">Basic usage</h3>
+      <F0Link {...args} variant="link" />
+      <h3>External link</h3>
+      <F0Link {...args} variant="link" target="_blank" />
+      <h3>Unstyled</h3>
+      <F0Link {...args} variant="unstyled" />
+      <h3>Disabled</h3>
+      <F0Link {...args} variant="link" disabled />
     </div>
   ),
 }

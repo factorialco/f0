@@ -57,6 +57,7 @@ export const actionVariants = cva({
         baseLink,
         "text-f1-foreground underline decoration-f1-border-hover decoration-1 underline-offset-[5px] visited:text-f1-foreground hover:text-f1-foreground hover:decoration-f1-border-bold active:text-f1-foreground"
       ),
+      unstyled: cn(baseLink, "text-inherit no-underline"),
       mention: cn(
         baseLink,
         "bg-f1-background-accent !px-1.5 font-medium text-f1-foreground-accent"
@@ -116,6 +117,7 @@ export const iconVariants = cva({
       link: "",
       mention: "",
       selected: "",
+      unstyled: "",
     },
     mode: {
       default: "",
@@ -170,6 +172,11 @@ export const iconVariants = cva({
       class: "[&>svg]:text-f1-icon-accent",
     },
     {
+      variant: "unstyled",
+      mode: "default",
+      class: "[&>svg]:text-f1-icon-accent",
+    },
+    {
       variant: "default",
       mode: "only",
       class: "[&>svg]:text-f1-icon-inverse dark:[&>svg]:text-f1-icon-bold",
@@ -207,6 +214,11 @@ export const iconVariants = cva({
     },
     {
       variant: "link",
+      mode: "only",
+      class: "[&>svg]:text-f1-icon",
+    },
+    {
+      variant: "unstyled",
       mode: "only",
       class: "[&>svg]:text-f1-icon",
     },

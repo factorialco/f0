@@ -124,15 +124,14 @@ export function KanbanCard<T = unknown>({
         <F0Link
           ref={linkRef}
           href={props.link}
-          style={{
-            zIndex: 1,
-          }}
           className={cn(
-            "z-1 pointer-events-none absolute inset-0 block rounded-xl",
+            "!z-1 pointer-events-none absolute inset-0 block rounded-xl",
             focusRing()
           )}
           aria-label={props.title}
-        />
+        >
+          &nbsp;
+        </F0Link>
       )}
       {showIndicator && (forcedEdge ?? overEdge) && (
         <DropIndicator

@@ -48,7 +48,7 @@ export function Reaction({
       variant="outline"
       size="md"
       compact
-      onClick={(event) => {
+      onClick={(event: React.MouseEvent<HTMLElement>) => {
         handleClick(event, emoji)
       }}
       className={cn(

@@ -162,12 +162,11 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {link && !disableOverlayLink && (
           <F0Link
             href={link}
-            style={{
-              zIndex: 1,
-            }}
             className={cn("z-1 absolute inset-0 block rounded-xl", focusRing())}
             aria-label={title}
-          />
+          >
+            &nbsp;
+          </F0Link>
         )}
 
         {image && (

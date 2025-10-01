@@ -78,11 +78,11 @@ export const F0AvatarPulse = ({
   const [showWave, setShowWave] = useState(!pulse)
 
   return (
-    <div className="relative h-14 w-14">
+    <div className="relative h-10 w-10">
       <AnimatePresence mode="popLayout" initial={showWave ? true : false}>
         {showWave ? (
           <motion.div
-            className="relative h-14 w-14 rounded-full bg-f1-background-warning"
+            className="relative h-10 w-10 rounded-full bg-f1-background-warning"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
@@ -128,7 +128,7 @@ export const F0AvatarPulse = ({
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            className="relative"
+            className="relative h-10 w-10"
             transition={{
               scale: {
                 type: "spring",
@@ -146,13 +146,13 @@ export const F0AvatarPulse = ({
               type="rounded"
               name={[firstName, lastName]}
               src={src}
-              size="xl"
+              size="lg"
               color="random"
               aria-label={ariaLabel}
               aria-labelledby={ariaLabelledby}
             />
             {pulse ? (
-              <div className="absolute -bottom-1 -right-1 inline-flex rounded-sm bg-f1-background">
+              <div className="absolute -bottom-1.5 -right-1.5 inline-flex rounded-sm bg-f1-background">
                 <Action
                   variant="neutral"
                   size="sm"
@@ -181,7 +181,7 @@ export const F0AvatarPulse = ({
                   opacity: { delay: 0.25 },
                   scale: { delay: 0.25 },
                 }}
-                className="absolute -bottom-1 -right-1 rounded-sm bg-f1-background"
+                className="absolute -bottom-1.5 -right-1.5 rounded-sm bg-f1-background"
               >
                 <ButtonInternal
                   compact

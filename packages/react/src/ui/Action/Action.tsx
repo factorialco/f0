@@ -4,7 +4,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
-import { ActionProps } from "./types"
+import { ActionLinkProps, ActionProps } from "./types"
 import { isLinkStyled } from "./utils"
 import {
   actionVariants,
@@ -15,16 +15,17 @@ import {
 } from "./variants"
 
 export const Action = React.forwardRef<HTMLElement, ActionProps>(
-  (
-    {
+  (props, ref) => {
+    const isLink = (props: ActionProps): props is ActionLinkProps => {
+      return "href" in props
+    }
+
+    const {
       children,
       prepend,
       append,
       prependOutside,
       appendOutside,
-      onClick,
-      onFocus,
-      onBlur,
       disabled,
       loading,
       pressed,
@@ -37,12 +38,12 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
       title,
       compact = false,
       "aria-label": ariaLabel,
-      ...props
-    },
-    ref
-  ) => {
-    const isLink = !!href
-    const localVariant = isLink ? variant || "link" : variant || "default"
+      ...restProps
+    } = props
+
+    const defaultVariant = isLink(props) ? "link" : "default"
+    const localVariant = variant ?? defaultVariant
+
     const variantClasses = actionVariants({
       variant: localVariant,
       pressed,
@@ -83,13 +84,16 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
         <AnimatePresence>
           {loading && (
             <>
-              {!isLinkStyled(localVariant) ? (
+              {isLinkStyled(localVariant) ? (
                 <Skeleton className="absolute inset-0 my-auto h-full w-full" />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div
                     className={cn(
-                      loadingVariants({ size, variant: localVariant })
+                      loadingVariants({
+                        size,
+                        variant: localVariant,
+                      })
                     )}
                     animate={{ rotate: 360 }}
                     transition={{
@@ -108,20 +112,21 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
     )
 
     const CommonProps = {
-      onClick,
-      onFocus,
-      onBlur,
       disabled,
       className: cn(variantClasses, sizeClasses, focusRing(), className),
       "aria-busy": loading,
       "aria-label": ariaLabel,
       title,
-      ...props,
+      ...restProps,
     }
 
-    const mainElement = isLink ? (
+    const mainElement = isLink(props) ? (
       <Link
         {...CommonProps}
+        //We need to pass the onClick, onFocus, and onBlur props as here the type narrows to ActionLinkProps
+        onClick={props.onClick}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
         ref={ref as React.Ref<HTMLAnchorElement>}
         href={href}
         target={target}
@@ -133,6 +138,9 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
     ) : (
       <button
         {...CommonProps}
+        onClick={props.onClick}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
         ref={ref as React.Ref<HTMLButtonElement>}
         data-pressed={pressed}
       >

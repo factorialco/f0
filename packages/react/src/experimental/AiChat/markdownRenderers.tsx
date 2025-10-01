@@ -49,7 +49,7 @@ export const markdownRenderers: NonNullable<
     children,
     ...props
   }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <F0Link {...props} variant="link">
+    <F0Link {...props} variant="link" href={props.href}>
       {children}
     </F0Link>
   ),

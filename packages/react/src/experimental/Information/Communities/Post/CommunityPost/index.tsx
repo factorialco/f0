@@ -101,7 +101,11 @@ export const BaseCommunityPost = ({
     >
       <div className="hidden md:block">
         {author ? (
-          <F0Link href={author.url} title={authorFullName} stopPropagation>
+          <F0Link
+            href={author.url || "#"}
+            title={authorFullName}
+            stopPropagation
+          >
             <F0AvatarPerson
               firstName={author.firstName}
               lastName={author.lastName}
@@ -160,6 +164,7 @@ export const BaseCommunityPost = ({
                 title={group.title}
                 className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
                 stopPropagation
+                href="#"
               >
                 {group.title}
               </F0Link>

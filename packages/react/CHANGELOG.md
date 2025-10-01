@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.214.3](https://github.com/factorialco/f0/compare/f0-react-v1.214.2...f0-react-v1.214.3) (2025-10-01)
+
+
+### Bug Fixes
+
+* **Home:** pulse avatar size ([#2729](https://github.com/factorialco/f0/issues/2729)) ([248f590](https://github.com/factorialco/f0/commit/248f590605bf57a8316d8d3b6a153e3480bc22b0))
+
 ## [1.214.2](https://github.com/factorialco/f0/compare/f0-react-v1.214.1...f0-react-v1.214.2) (2025-09-30)
 
 
