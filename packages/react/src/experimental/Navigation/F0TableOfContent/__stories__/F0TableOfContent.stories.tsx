@@ -2,8 +2,8 @@ import { Placeholder } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { fn } from "storybook/test"
-import { F0TableOfContent } from "./index"
-import { TOCItem, TOCItemAction } from "./types"
+import { F0TableOfContent } from "../index"
+import { TOCItem, TOCItemAction } from "../types"
 
 const mockOtherActions: TOCItemAction[] = [
   {
@@ -192,6 +192,48 @@ export const Sortable: Story = {
     docs: {
       description: {
         story: "Shows drag & drop reordering",
+      },
+    },
+  },
+}
+
+export const WithSearchBox: Story = {
+  args: {
+    ...Collapsible.args,
+    showSearchBox: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Shows collapsible functionality with a search box.",
+      },
+    },
+  },
+}
+
+export const SortableWithSearchBox: Story = {
+  args: {
+    ...Sortable.args,
+    showSearchBox: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Shows drag & drop reordering with a search box.",
+      },
+    },
+  },
+}
+
+export const HideChildrenCounter: Story = {
+  args: {
+    ...Default.args,
+    hideChildrenCounter: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Shows how to hide the children counter.",
       },
     },
   },

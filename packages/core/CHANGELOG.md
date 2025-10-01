@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.29.0](https://github.com/factorialco/f0/compare/f0-core-v1.28.0...f0-core-v1.29.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** Autoclose sidebar when AiChat is open ([#2620](https://github.com/factorialco/f0/issues/2620)) ([1111b34](https://github.com/factorialco/f0/commit/1111b345d4fa98bd5f541d63a03dbfb0e79fe50b))
+
+## [1.28.0](https://github.com/factorialco/f0/compare/f0-core-v1.27.0...f0-core-v1.28.0) (2025-09-30)
+
+
+### Features
+
+* add Flask icon ([f5a05f6](https://github.com/factorialco/f0/commit/f5a05f67184c790074ce40aaf1343251893b966f))
+
+## [1.27.0](https://github.com/factorialco/f0/compare/f0-core-v1.26.0...f0-core-v1.27.0) (2025-09-29)
+
+
+### Features
+
+* **icons:** add swap icon ([#2713](https://github.com/factorialco/f0/issues/2713)) ([3b06890](https://github.com/factorialco/f0/commit/3b068907fc171d4018144b755bbe5ba6999474b6))
+
 ## [1.26.0](https://github.com/factorialco/factorial-one/compare/f0-core-v1.25.1...f0-core-v1.26.0) (2025-09-11)
 
 

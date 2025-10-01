@@ -11,7 +11,7 @@ describe("weekGranularity", () => {
     date: {
       granularities: {
         week: {
-          long: "Week of %{day} %{month} %{year}",
+          long: "Week of {{day}} {{month}} {{year}}",
         },
       },
     },

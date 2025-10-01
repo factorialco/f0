@@ -11,6 +11,7 @@ interface TOCItemSectionHeaderProps {
   isExpanded?: boolean
   onToggleExpanded?: (id: string) => void
   sortable: boolean
+  hideChildrenCounter?: boolean
 }
 
 export function ItemSectionHeader({
@@ -21,6 +22,7 @@ export function ItemSectionHeader({
   isExpanded,
   onToggleExpanded,
   sortable,
+  hideChildrenCounter,
 }: TOCItemSectionHeaderProps) {
   if (collapsible) {
     return (
@@ -30,6 +32,7 @@ export function ItemSectionHeader({
         isExpanded={isExpanded}
         onToggleExpanded={onToggleExpanded}
         sortable={sortable}
+        hideChildrenCounter={hideChildrenCounter}
       >
         {children}
       </CollapsibleItemSectionHeader>
@@ -41,6 +44,7 @@ export function ItemSectionHeader({
       item={item}
       isActive={isActive}
       sortable={sortable}
+      hideChildrenCounter={hideChildrenCounter}
     >
       {children}
     </StaticItemSectionHeader>
