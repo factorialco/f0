@@ -1,5 +1,4 @@
-export interface Props {
-  companyName: string
-  companyImageUrl: string
-  onClick?: () => void
+export interface F0TagCompanyProps {
+  name: string
+  src?: string
 }

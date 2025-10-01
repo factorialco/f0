@@ -1,10 +1,10 @@
-import { BaseTag } from "@/components/tags/BaseTag"
+import { BaseTag } from "@/components/tags/internal/BaseTag"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
-import type { Props } from "./types"
+import type { F0TagStatusProps } from "./types"
 
-export const F0TagStatus = forwardRef<HTMLDivElement, Props>(
+export const F0TagStatus = forwardRef<HTMLDivElement, F0TagStatusProps>(
   ({ text, additionalAccesibleText, variant }, ref) => {
     useTextFormatEnforcer(text, { disallowEmpty: true })
 
