@@ -1,14 +1,18 @@
+import { rangeSeparator } from "@/experimental/exports"
 import {
   addDays,
   addMonths,
   endOfDay,
+  isSameDay,
+  isSameMonth,
+  isSameYear,
   startOfDay,
   startOfMonth,
 } from "date-fns"
 import { DateRange, DateRangeComplete } from "../../types"
 import {
+  formatDate,
   formatDateRange,
-  formatDateToString,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
@@ -61,7 +65,29 @@ export const dayGranularity: GranularityDefinition = {
   },
   toRange: (date) => toDayGranularityDateRange(date),
   toRangeString: (date) => formatDateRange(date, "dd/MM/yyyy"),
-  toString: (date) => formatDateToString(date, "dd/MM/yyyy"),
+  toString: (date) => {
+    const dateRange = toDayGranularityDateRange(date)
+    if (!dateRange) {
+      return ""
+    }
+    // Single date
+    if (!dateRange.to || isSameDay(dateRange.from, dateRange.to)) {
+      return formatDate(dateRange.from, "dd MMM yyyy")
+    }
+
+    // Range
+    // Same month
+    if (isSameMonth(dateRange.from, dateRange.to)) {
+      return `${formatDate(dateRange.from, "dd")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
+    }
+
+    // Same year
+    if (isSameYear(dateRange.from, dateRange.to)) {
+      return `${formatDate(dateRange.from, "dd MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
+    }
+
+    return `${formatDate(dateRange.from, "dd MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
