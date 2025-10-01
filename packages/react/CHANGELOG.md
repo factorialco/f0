@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.216.0](https://github.com/factorialco/f0/compare/f0-react-v1.215.0...f0-react-v1.216.0) (2025-10-01)
+
+
+### Features
+
+* create sdm callout from the AiBanner component ([#2730](https://github.com/factorialco/f0/issues/2730)) ([5b96625](https://github.com/factorialco/f0/commit/5b96625cb7a849aa267535c26b8fc9b6a40fecfa))
+
 ## [1.215.0](https://github.com/factorialco/f0/compare/f0-react-v1.214.3...f0-react-v1.215.0) (2025-10-01)
 
 
