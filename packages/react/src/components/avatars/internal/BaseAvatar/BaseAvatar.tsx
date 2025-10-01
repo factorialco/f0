@@ -30,6 +30,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       "aria-label": ariaLabel,
       "aria-labelledby": ariaLabelledby,
       badge,
+      flag,
     },
     ref
   ) => {
@@ -116,12 +117,16 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
               translate="no"
               data-a11y-color-contrast-ignore
               className={
-                src
+                src || flag
                   ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
                   : ""
               }
             >
-              <AvatarImage src={src} alt={initials} />
+              {!flag ? (
+                <AvatarImage src={src} alt={initials} />
+              ) : (
+                <span className="absolute inset-0">{flag}</span>
+              )}
               <AvatarFallback
                 data-a11y-color-contrast-ignore
                 className="select-none"
