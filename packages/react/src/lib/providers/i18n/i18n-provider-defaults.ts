@@ -186,7 +186,7 @@ export const defaultTranslations = {
     closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
-    initialMessage: "How can I help you today?",
+    defaultInitialMessage: "How can I help you today?",
     inputPlaceholder: "Write something here...",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",

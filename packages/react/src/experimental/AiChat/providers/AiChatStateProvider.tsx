@@ -15,6 +15,7 @@ export interface AiChatState {
   greeting?: string
   enabled: boolean
   agent?: string
+  initialMessage?: string | string[]
 }
 
 type AiChatProviderReturnValue = {
@@ -33,6 +34,10 @@ type AiChatProviderReturnValue = {
    */
   setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
   autoClearMinutes: number | null
+  initialMessage?: string | string[]
+  setInitialMessage: React.Dispatch<
+    React.SetStateAction<string | string[] | undefined>
+  >
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -41,6 +46,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
   agent: initialAgent,
+  initialMessage: initialInitialMessage,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
@@ -52,6 +58,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
     DEFAULT_MINUTES_TO_RESET
   )
+  const [initialMessage, setInitialMessage] = useState<
+    string | string[] | undefined
+  >(initialInitialMessage)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -84,6 +93,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tmp_setAgent,
         setAutoClearMinutes,
         autoClearMinutes: enabledInternal ? autoClearMinutes : null,
+        initialMessage,
+        setInitialMessage,
       }}
     >
       {children}
@@ -106,6 +117,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       tmp_setAgent: () => {},
       setAutoClearMinutes: () => {},
       autoClearMinutes: null,
+      initialMessage: undefined,
+      setInitialMessage: () => {},
     }
   }
 

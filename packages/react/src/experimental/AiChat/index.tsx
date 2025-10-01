@@ -23,6 +23,7 @@ import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
+  initialMessage?: string | string[]
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -37,6 +38,7 @@ export type AiChatProviderProps = {
 const AiChatProviderCmp = ({
   enabled = false,
   greeting,
+  initialMessage,
   children,
   agent,
   ...copilotKitProps
@@ -44,7 +46,12 @@ const AiChatProviderCmp = ({
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
-    <AiChatStateProvider enabled={enabled} greeting={greeting} agent={agent}>
+    <AiChatStateProvider
+      enabled={enabled}
+      greeting={greeting}
+      initialMessage={initialMessage}
+      agent={agent}
+    >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
   )

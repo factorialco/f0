@@ -30,12 +30,15 @@ export const MessagesContainer = ({
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
 
-  const { greeting } = useAiChat()
   const translations = useI18n()
+  const { greeting, initialMessage } = useAiChat()
   const [longestTurnHeight, setLongestTurnHeight] = useState<number>(0)
   const initialMessages = useMemo(
-    () => makeInitialMessages(translations.ai.initialMessage),
-    [translations.ai.initialMessage]
+    () =>
+      makeInitialMessages(
+        initialMessage || translations.ai.defaultInitialMessage
+      ),
+    [initialMessage, translations.ai.defaultInitialMessage]
   )
   const showWelcomeBlock =
     messages.length == 0 && (greeting || initialMessages.length > 0)
