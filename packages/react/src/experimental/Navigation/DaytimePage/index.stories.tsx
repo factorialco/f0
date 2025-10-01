@@ -131,7 +131,6 @@ export const DaytimeHomeLayoutWithMoodNotSet: Story = {
         employeeFirstName: "Saul",
         employeeLastName: "Goodman",
         title: "Good morning, Saul!",
-        description: "How are you feeling today?",
         pulse: undefined,
         onPulseClick: () => {},
         employeeAvatar: "/avatars/person05.jpg",

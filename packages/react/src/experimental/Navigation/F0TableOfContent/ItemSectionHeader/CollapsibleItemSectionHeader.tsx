@@ -12,6 +12,7 @@ interface CollapsibleItemSectionHeaderProps {
   isExpanded?: boolean
   onToggleExpanded?: (id: string) => void
   sortable: boolean
+  hideChildrenCounter?: boolean
 }
 
 export function CollapsibleItemSectionHeader({
@@ -21,6 +22,7 @@ export function CollapsibleItemSectionHeader({
   isExpanded,
   onToggleExpanded,
   sortable,
+  hideChildrenCounter,
 }: CollapsibleItemSectionHeaderProps) {
   const shouldReduceMotion = useReducedMotion()
 
@@ -35,7 +37,7 @@ export function CollapsibleItemSectionHeader({
     >
       <Item
         item={item}
-        counter={item.children?.length ?? 0}
+        counter={hideChildrenCounter ? undefined : (item.children?.length ?? 0)}
         isActive={isActive}
         collapsible={true}
         isExpanded={isExpanded}

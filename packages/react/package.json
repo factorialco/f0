@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.204.2",
+  "version": "1.214.3",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -212,6 +212,10 @@
     "embla-carousel-wheel-gestures": "^8.0.1",
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5",
     "vaul": "^1.1.2",
     "y-prosemirror": "^1.3.6",
     "y-protocols": "^1.0.6",

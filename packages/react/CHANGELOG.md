@@ -1,5 +1,125 @@
 # Changelog
 
+## [1.214.3](https://github.com/factorialco/f0/compare/f0-react-v1.214.2...f0-react-v1.214.3) (2025-10-01)
+
+
+### Bug Fixes
+
+* **Home:** pulse avatar size ([#2729](https://github.com/factorialco/f0/issues/2729)) ([248f590](https://github.com/factorialco/f0/commit/248f590605bf57a8316d8d3b6a153e3480bc22b0))
+
+## [1.214.2](https://github.com/factorialco/f0/compare/f0-react-v1.214.1...f0-react-v1.214.2) (2025-09-30)
+
+
+### Bug Fixes
+
+* **DataCollection:** search clear icon color & keyboard navigation ([#2725](https://github.com/factorialco/f0/issues/2725)) ([5befda5](https://github.com/factorialco/f0/commit/5befda54498bc5e8eb56a4d4af1bf30a867e5a64))
+
+## [1.214.1](https://github.com/factorialco/f0/compare/f0-react-v1.214.0...f0-react-v1.214.1) (2025-09-30)
+
+
+### Bug Fixes
+
+* **Checkbox:** set rounded focus ring ([#2726](https://github.com/factorialco/f0/issues/2726)) ([78dfede](https://github.com/factorialco/f0/commit/78dfedeb8a6b58cca528200f0d1ca015b63becc3))
+
+## [1.214.0](https://github.com/factorialco/f0/compare/f0-react-v1.213.0...f0-react-v1.214.0) (2025-09-30)
+
+
+### Features
+
+* fix find closest cards + fix click issue + fix full-h skeleton ([#2719](https://github.com/factorialco/f0/issues/2719)) ([34c60cd](https://github.com/factorialco/f0/commit/34c60cdb7aca696cb7401a312c24a402c4304cd2))
+
+## [1.213.0](https://github.com/factorialco/f0/compare/f0-react-v1.212.0...f0-react-v1.213.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** add chat spinner ([#2722](https://github.com/factorialco/f0/issues/2722)) ([8d369e0](https://github.com/factorialco/f0/commit/8d369e0348ce4198bb316b49a1d9bdcb4c42cd4a))
+
+## [1.212.0](https://github.com/factorialco/f0/compare/f0-react-v1.211.0...f0-react-v1.212.0) (2025-09-30)
+
+
+### Features
+
+* **ai-chat:** Autoclose sidebar when AiChat is open ([#2620](https://github.com/factorialco/f0/issues/2620)) ([1111b34](https://github.com/factorialco/f0/commit/1111b345d4fa98bd5f541d63a03dbfb0e79fe50b))
+
+## [1.211.0](https://github.com/factorialco/f0/compare/f0-react-v1.210.2...f0-react-v1.211.0) (2025-09-30)
+
+
+### Features
+
+* add Flask icon ([f5a05f6](https://github.com/factorialco/f0/commit/f5a05f67184c790074ce40aaf1343251893b966f))
+* add new `Experimental` icon ([a7984e8](https://github.com/factorialco/f0/commit/a7984e8df32702c2c110bf313d49d314d7a386a1))
+
+## [1.210.2](https://github.com/factorialco/f0/compare/f0-react-v1.210.1...f0-react-v1.210.2) (2025-09-29)
+
+
+### Bug Fixes
+
+* rich text missing ul, ol, h4 styles ([#2715](https://github.com/factorialco/f0/issues/2715)) ([d38edd6](https://github.com/factorialco/f0/commit/d38edd6f8ac5fe5b0c95c59503d2182e08324c86))
+
+## [1.210.1](https://github.com/factorialco/f0/compare/f0-react-v1.210.0...f0-react-v1.210.1) (2025-09-29)
+
+
+### Features
+
+* TOC hide children counter prop ([#2710](https://github.com/factorialco/f0/issues/2710)) ([7ab9138](https://github.com/factorialco/f0/commit/7ab9138a4b6f686a632105e55ef369d935865816))
+
+## [1.210.0](https://github.com/factorialco/f0/compare/f0-react-v1.209.1...f0-react-v1.210.0) (2025-09-29)
+
+
+### Features
+
+* **icons:** add swap icon ([#2713](https://github.com/factorialco/f0/issues/2713)) ([3b06890](https://github.com/factorialco/f0/commit/3b068907fc171d4018144b755bbe5ba6999474b6))
+
+## [1.209.1](https://github.com/factorialco/f0/compare/f0-react-v1.209.0...f0-react-v1.209.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* i18n interpolation ([#2711](https://github.com/factorialco/f0/issues/2711)) ([c043f67](https://github.com/factorialco/f0/commit/c043f67e6880f56c63649a8466dc9f51b29b4dcb))
+
+## [1.209.0](https://github.com/factorialco/f0/compare/f0-react-v1.208.0...f0-react-v1.209.0) (2025-09-29)
+
+
+### Features
+
+* searchbox and allow to hide children counter in tableofcontent ([#2708](https://github.com/factorialco/f0/issues/2708)) ([5fa52f6](https://github.com/factorialco/f0/commit/5fa52f6e18749e392f0ae6bb272292b15b14d5ac))
+
+## [1.208.0](https://github.com/factorialco/f0/compare/f0-react-v1.207.0...f0-react-v1.208.0) (2025-09-29)
+
+
+### Features
+
+* datacollection reset to default settings ([#2699](https://github.com/factorialco/f0/issues/2699)) ([06b4c69](https://github.com/factorialco/f0/commit/06b4c69875caf1c2e1662372e7f84e97f73c7c59))
+
+## [1.207.0](https://github.com/factorialco/f0/compare/f0-react-v1.206.0...f0-react-v1.207.0) (2025-09-26)
+
+
+### Features
+
+* responsive twocols layout and sticky ([#2700](https://github.com/factorialco/f0/issues/2700)) ([c027d19](https://github.com/factorialco/f0/commit/c027d1979b97aa921dcb721e8c396afedc91578b))
+
+## [1.206.0](https://github.com/factorialco/f0/compare/f0-react-v1.205.1...f0-react-v1.206.0) (2025-09-26)
+
+
+### Features
+
+* AiChat improvements ([#2687](https://github.com/factorialco/f0/issues/2687)) ([5a70bb4](https://github.com/factorialco/f0/commit/5a70bb49356d701615836b931c4e33bab7cc4b33))
+
+## [1.205.1](https://github.com/factorialco/f0/compare/f0-react-v1.205.0...f0-react-v1.205.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* trigger a release ([3885d07](https://github.com/factorialco/f0/commit/3885d07a29cb4fed4588b746440bb95dcd9f86ac))
+
+## [1.205.0](https://github.com/factorialco/f0/compare/f0-react-v1.204.2...f0-react-v1.205.0) (2025-09-26)
+
+
+### Features
+
+* add markdown support to rich text component ([f5ee522](https://github.com/factorialco/f0/commit/f5ee5221199fdd2f6e7c7bd4c484d6d4427b32ad))
+
 ## [1.204.2](https://github.com/factorialco/f0/compare/f0-react-v1.204.1...f0-react-v1.204.2) (2025-09-26)
 
 

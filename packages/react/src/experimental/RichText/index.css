@@ -51,6 +51,22 @@
   @apply m-0 mb-2.5 p-0 text-lg font-medium;
 }
 
+.ProseMirror h4,
+.rich-text-display-container h4 {
+  @apply m-0 mb-2.5 p-0 text-lg font-medium;
+}
+
+.ProseMirror ul,
+.rich-text-display-container ul {
+  @apply m-0 mb-2.5;
+  list-style: disc;
+}
+
+.ProseMirror ol,
+.rich-text-display-container ol {
+  @apply m-0 mb-2.5 list-decimal;
+}
+
 .ProseMirror a,
 .rich-text-display-container a {
   @apply cursor-pointer font-medium text-f1-foreground-accent no-underline;

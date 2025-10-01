@@ -3,7 +3,13 @@ import { useDndEvents, useDroppableList } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
 import { DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
-import { useEffect, useRef, useState } from "react"
+import {
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { Lane } from "../../Lane"
 import type { LaneProps } from "../../Lane/types"
 import { KanbanOnMoveParam } from "../types"
@@ -38,6 +44,8 @@ export function KanbanLane<TRecord extends RecordType>({
   const speedPxPerSecRef = useRef<number>(0)
   const lastTimeRef = useRef<number | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [forcedIndex, setForcedIndex] = useState<number | null>(null)
+  const [forcedEdge, setForcedEdge] = useState<"top" | "bottom" | null>(null)
 
   useDroppableList(
     hasFullDnD
@@ -159,10 +167,56 @@ export function KanbanLane<TRecord extends RecordType>({
               }
               speedPxPerSecRef.current = speed
               ensureLoop()
+
+              // If not directly over a card target, find nearest card and force indicator
+              const hasCardTarget = location.current.dropTargets.some((t) => {
+                const data = t.data as { type?: string }
+                return data.type === "list-card-target"
+              })
+              if (!hasCardTarget) {
+                const root = laneRef.current
+                if (root) {
+                  const cards = Array.from(
+                    root.querySelectorAll(
+                      `[data-kanban-card="true"][data-lane-id="${id}"]`
+                    )
+                  ) as HTMLDivElement[]
+                  if (cards.length > 0) {
+                    let nearestIdx = -1
+                    let nearestDist = Number.POSITIVE_INFINITY
+                    let nearestEdge: "top" | "bottom" = "top"
+                    for (const el of cards) {
+                      const idxAttr = el.getAttribute("data-index")
+                      const idx = idxAttr ? Number(idxAttr) : -1
+                      const r = el.getBoundingClientRect()
+                      const midY = r.top + r.height / 2
+                      const dist = Math.abs(clientY - midY)
+                      if (dist < nearestDist) {
+                        nearestDist = dist
+                        nearestIdx = idx
+                        nearestEdge = clientY < midY ? "top" : "bottom"
+                      }
+                    }
+                    setForcedIndex(nearestIdx >= 0 ? nearestIdx : null)
+                    setForcedEdge(nearestIdx >= 0 ? nearestEdge : null)
+                  } else {
+                    setForcedIndex(null)
+                    setForcedEdge(null)
+                  }
+                }
+              } else if (forcedIndex !== null || forcedEdge !== null) {
+                // Clear forced indicator when a real card target is active
+                setForcedIndex(null)
+                setForcedEdge(null)
+              }
             }
           }
         } else {
           speedPxPerSecRef.current = 0
+          if (!overThisLane) {
+            setForcedIndex(null)
+            setForcedEdge(null)
+          }
         }
       },
       onDrop: async ({ location, source }) => {
@@ -218,6 +272,14 @@ export function KanbanLane<TRecord extends RecordType>({
               sourceId,
               setItems: () => {},
             })
+          } else if (forcedIndex !== null && forcedEdge) {
+            onMoveParams = {
+              fromLaneId: initialLaneId,
+              toLaneId: id as string,
+              sourceId,
+              indexOfTarget: forcedIndex,
+              position: forcedEdge === "bottom" ? "below" : "above",
+            }
           } else {
             onMoveParams = optimisticSameLaneOverEmpty<TRecord>({
               resourceIndexOnLane,
@@ -239,6 +301,14 @@ export function KanbanLane<TRecord extends RecordType>({
               sourceId,
               setItems: () => {},
             })
+          } else if (forcedIndex !== null && forcedEdge) {
+            onMoveParams = {
+              fromLaneId: initialLaneId,
+              toLaneId: id as string,
+              sourceId,
+              indexOfTarget: forcedIndex,
+              position: forcedEdge === "bottom" ? "below" : "above",
+            }
           } else {
             onMoveParams = optimisticDifferentLaneInsertOverEmpty<TRecord>({
               sourceItem,
@@ -256,9 +326,19 @@ export function KanbanLane<TRecord extends RecordType>({
 
         // Single upward call. Parent/Story updates state; coordinator not needed here.
         await onMove?.(onMoveParams)
+        setForcedIndex(null)
+        setForcedEdge(null)
       },
     })
-  }, [id, getLaneResourceIndexById, onMove, isDragging, laneProps.items])
+  }, [
+    id,
+    getLaneResourceIndexById,
+    onMove,
+    isDragging,
+    laneProps.items,
+    forcedIndex,
+    forcedEdge,
+  ])
 
   // Resolve viewport and observe DOM changes to re-resolve
   useEffect(() => {
@@ -319,11 +399,11 @@ export function KanbanLane<TRecord extends RecordType>({
   }, [id, onMove])
 
   return (
-    <div className="h-full rounded">
+    <div className="relative h-full rounded">
       <div
         ref={laneRef}
         className={
-          "relative flex h-full min-h-56 w-full flex-col gap-0 rounded-xl border transition-colors"
+          "relative flex h-full w-full flex-col gap-0 rounded-xl border transition-colors"
         }
         style={{
           backgroundColor: isOver
@@ -340,7 +420,22 @@ export function KanbanLane<TRecord extends RecordType>({
           )}
           aria-hidden
         />
-        <Lane<TRecord> {...laneProps} />
+        <Lane<TRecord>
+          {...laneProps}
+          renderCard={(item, index) => {
+            const node = laneProps.renderCard(item, index)
+            if (isValidElement(node)) {
+              const edge = index === forcedIndex ? forcedEdge : null
+              return cloneElement(
+                node as React.ReactElement<Record<string, unknown>>,
+                {
+                  forcedEdge: edge,
+                }
+              )
+            }
+            return node
+          }}
+        />
       </div>
     </div>
   )

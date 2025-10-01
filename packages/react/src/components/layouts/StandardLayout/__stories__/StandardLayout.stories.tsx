@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
-import { StandardLayout } from "./index"
+import { StandardLayout } from "../index"
 
 const meta = {
   title: "Layout/StandardLayout",
   component: StandardLayout,
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   decorators: [PageDecorator],
   args: {
     children: (
@@ -25,6 +25,13 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 export const Narrow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        component: "Limits the max width of the content.",
+      },
+    },
+  },
   args: {
     variant: "narrow",
   },

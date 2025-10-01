@@ -11,20 +11,10 @@ import type {
   KanbanProps,
 } from "./types.ts"
 
-const KANBAN_LANE_HEIGHT = 600
-
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
 ): JSX.Element {
-  const {
-    lanes,
-    renderCard,
-    getKey,
-    className,
-    dnd,
-    loading,
-    maxHeight = KANBAN_LANE_HEIGHT,
-  } = props
+  const { lanes, renderCard, getKey, className, dnd, loading } = props
 
   // Local source-of-truth for lanes to orchestrate moves centrally
   const [localLanes, setLocalLanes] = useState(
@@ -249,16 +239,19 @@ export function Kanban<TRecord extends RecordType>(
   }
 
   return (
-    <div className={cn("relative w-full px-4", className)}>
-      <ScrollArea className={"w-full"} viewportRef={viewportRef}>
-        <div className="mb-2 flex gap-2">
+    <div className={cn("relative h-full w-full px-4", className)}>
+      <ScrollArea
+        className={"relative h-full w-full [&>div>div]:h-full"}
+        viewportRef={viewportRef}
+      >
+        <div className="relative mb-2 flex h-full gap-2">
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
               const total = lane.total ?? lane.items.length
               return (
                 <div
                   key={lane.id ?? String(laneIndex)}
-                  className="shrink-0"
+                  className="relative h-full shrink-0"
                   data-testid={`lane-${lane.id ?? String(laneIndex)}`}
                 >
                   <KanbanLane<TRecord>
@@ -278,7 +271,6 @@ export function Kanban<TRecord extends RecordType>(
                     }}
                     emptyState={lane.emptyState}
                     loading={loading || lane.loading}
-                    maxHeight={maxHeight}
                     variant={lane.variant}
                     total={total}
                     hasMore={lane.hasMore}

@@ -1,9 +1,14 @@
-import { CopilotKit, CopilotKitProps } from "@copilotkit/react-core"
+import {
+  CopilotKit,
+  CopilotKitProps,
+  useCopilotAction,
+} from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
+import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
   ChatButton,
@@ -60,6 +65,31 @@ const AiChatKitWrapper = ({
 
 const AiChatCmp = () => {
   const { enabled, open, setOpen } = useAiChat()
+
+  useCopilotAction({
+    name: "orchestratorThinking",
+    description: "Display orchestrator thinking process (non-blocking)",
+    parameters: [
+      {
+        name: "message",
+        description: "User-friendly progress message",
+        required: true,
+      },
+    ],
+    // render only when backend wants to display the thinking
+    available: "disabled",
+    render: (props) => {
+      return (
+        <div className={props.status ? "-ml-1" : undefined}>
+          <ActionItem
+            title={props.args.message ?? "thinking"}
+            status={props.status === "complete" ? "completed" : props.status}
+            inGroup={props.result?.inGroup}
+          />
+        </div>
+      )
+    },
+  })
 
   if (!enabled) {
     return null
