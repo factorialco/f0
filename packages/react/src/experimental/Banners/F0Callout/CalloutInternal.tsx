@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { CheckDouble, Cross, InfoCircle, Warning } from "@/icons/app"
@@ -72,7 +72,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
             </OneEllipsis>
           </div>
           {onClose && (
-            <Button
+            <F0Button
               variant="ghost"
               icon={Cross}
               size="sm"
@@ -96,7 +96,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
             <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
               {actions.map((action, index) => (
                 <div key={index}>
-                  <Button
+                  <F0Button
                     label={action.label}
                     onClick={action.onClick}
                     variant="outline"

@@ -170,7 +170,9 @@ function ActionOverload(
   props: ActionButtonProps & { ref?: React.Ref<HTMLButtonElement> }
 ): React.ReactElement
 function ActionOverload(
-  props: ActionProps & { ref?: React.Ref<HTMLElement> }
+  props: ActionProps & {
+    ref?: React.Ref<HTMLButtonElement> | React.Ref<HTMLAnchorElement>
+  }
 ): React.ReactElement {
   return React.createElement(ActionImpl, props)
 }

@@ -105,6 +105,7 @@ export function DropdownInternal({
             label="..."
             variant="outline"
             pressed={open}
+            compact
           />
         )}
       </DropdownMenuTrigger>

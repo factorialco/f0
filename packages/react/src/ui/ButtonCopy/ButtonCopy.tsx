@@ -14,7 +14,6 @@ export type ButtonCopyProps = Omit<
   | "label"
   | "hideLabel"
   | "icon"
-  | "href"
   | "target"
   | "aria-label"
 > & {
