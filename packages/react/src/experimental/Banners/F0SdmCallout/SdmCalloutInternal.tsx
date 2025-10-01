@@ -32,12 +32,6 @@ const variantIcons: Record<string, IconType> = {
   info: InfoCircle,
 }
 
-const variantIconColors: Record<string, string> = {
-  positive: "hsl(var(--positive-70))",
-  warning: "hsl(var(--warning-70))",
-  info: "hsl(var(--info-70))",
-}
-
 const variantTitleColors: Record<string, string> = {
   positive: "text-f1-foreground-positive font-medium",
   warning: "text-f1-foreground-warning font-medium",
@@ -48,16 +42,13 @@ export const SdmCalloutInternal = forwardRef<
   HTMLDivElement,
   SdmCalloutInternalProps
 >(function SdmCalloutInternal(
-  {
-    title,
-    onClose,
-    content,
-    primaryAction,
-    secondaryAction,
-    variant = "default",
-  },
+  { title, onClose, content, calloutActions = [], variant = "default" },
   ref
 ) {
+  // Limit actions to maximum 2
+  const limitedActions = calloutActions.slice(0, 2)
+  const hasActions = limitedActions.length > 0
+  const hasTooManyActions = calloutActions.length > 2
   return (
     <div
       ref={ref}
@@ -94,32 +85,38 @@ export const SdmCalloutInternal = forwardRef<
         <div
           className={cn(
             "bg-f1-background px-4 py-3",
-            secondaryAction || primaryAction
-              ? "rounded-t-[13.25px]"
-              : "rounded-[13.25px]"
+            hasActions ? "rounded-t-[13.25px]" : "rounded-[13.25px]"
           )}
         >
           <RichTextDisplay content={content} />
+          {hasTooManyActions && (
+            <div className="mt-2 rounded-md border border-f1-border-warning bg-f1-background-warning/10 px-3 py-2">
+              <p className="text-sm text-f1-foreground-warning">
+                ⚠️ The limit of callout actions is 2. Only the first 2 actions
+                will be displayed.
+              </p>
+            </div>
+          )}
         </div>
-        {(secondaryAction || primaryAction) && (
+        {hasActions && (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
             <div>
-              {secondaryAction && (
+              {limitedActions[0] && (
                 <Button
-                  label={secondaryAction.label}
-                  onClick={secondaryAction.onClick}
+                  label={limitedActions[0].label}
+                  onClick={limitedActions[0].onClick}
                   variant="outline"
-                  icon={secondaryAction.icon}
+                  icon={limitedActions[0].icon}
                 />
               )}
             </div>
             <div>
-              {primaryAction && (
+              {limitedActions[1] && (
                 <Button
-                  label={primaryAction.label}
-                  onClick={primaryAction.onClick}
+                  label={limitedActions[1].label}
+                  onClick={limitedActions[1].onClick}
                   variant="outline"
-                  icon={primaryAction.icon}
+                  icon={limitedActions[1].icon}
                 />
               )}
             </div>

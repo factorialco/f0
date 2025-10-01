@@ -19,8 +19,7 @@ export interface SdmCalloutInternalProps {
   title: string
   onClose?: () => void
   content: string
-  primaryAction?: SdmCalloutAction
-  secondaryAction?: SdmCalloutAction
+  calloutActions?: SdmCalloutAction[]
   variant?: SdmCalloutVariant
 }
 export interface SdmCalloutSkeletonProps {

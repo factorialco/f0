@@ -18,13 +18,9 @@ const meta = {
       control: false,
       description: "Callback when the close button is clicked",
     },
-    primaryAction: {
+    calloutActions: {
       control: "object",
-      description: "Primary action button configuration",
-    },
-    secondaryAction: {
-      control: "object",
-      description: "Secondary action button configuration",
+      description: "Array of callout action buttons (max 2)",
     },
     content: {
       control: "text",
@@ -49,16 +45,18 @@ export const Default: StoryObj<F0SdmCalloutProps> = {
   args: {
     title: "SDM Callout",
     onClose: () => alert("Callout closed"),
-    primaryAction: {
-      label: "Primary action",
-      onClick: () => alert("Primary action clicked"),
-      icon: CheckDouble,
-    },
-    secondaryAction: {
-      label: "Secondary action",
-      onClick: () => alert("Secondary action clicked"),
-      icon: ExternalLink,
-    },
+    calloutActions: [
+      {
+        label: "Primary action",
+        onClick: () => alert("Primary action clicked"),
+        icon: CheckDouble,
+      },
+      {
+        label: "Secondary action",
+        onClick: () => alert("Secondary action clicked"),
+        icon: ExternalLink,
+      },
+    ],
     content: `<div>
         <p>
           This is a sample SDM callout with <u>rich text</u> content
@@ -94,6 +92,36 @@ export const Skeleton: StoryObj = {
 
 export const SkeletonCompact: StoryObj = {
   render: () => <SdmCalloutSkeleton compact />,
+}
+
+export const TooManyActions: StoryObj<F0SdmCalloutProps> = {
+  args: {
+    title: "SDM Callout with Too Many Actions",
+    content:
+      "<p>This callout has more than 2 actions to demonstrate the validation message.</p>",
+    calloutActions: [
+      {
+        label: "First Action",
+        onClick: () => alert("First action clicked"),
+        icon: CheckDouble,
+      },
+      {
+        label: "Second Action",
+        onClick: () => alert("Second action clicked"),
+        icon: ExternalLink,
+      },
+      {
+        label: "Third Action (Will be hidden)",
+        onClick: () => alert("This won't be called"),
+        icon: CheckDouble,
+      },
+      {
+        label: "Fourth Action (Will be hidden)",
+        onClick: () => alert("This won't be called either"),
+        icon: ExternalLink,
+      },
+    ],
+  },
 }
 
 export const Variants: StoryObj = {
@@ -161,11 +189,13 @@ export const VariantsWithActions: StoryObj = {
           title="Critical Callout"
           content="<p>This is a critical callout with action buttons.</p>"
           variant="critical"
-          primaryAction={{
-            label: "Acknowledge",
-            onClick: () => alert("Acknowledged"),
-            icon: CheckDouble,
-          }}
+          calloutActions={[
+            {
+              label: "Acknowledge",
+              onClick: () => alert("Acknowledged"),
+              icon: CheckDouble,
+            },
+          ]}
           onClose={() => alert("Dismissed")}
         />
       </div>
@@ -177,16 +207,18 @@ export const VariantsWithActions: StoryObj = {
           title="Success Message"
           content="<p>This is a positive callout for success messages with action buttons and CheckDouble icon.</p>"
           variant="positive"
-          primaryAction={{
-            label: "Continue",
-            onClick: () => alert("Continue clicked"),
-            icon: CheckDouble,
-          }}
-          secondaryAction={{
-            label: "View Details",
-            onClick: () => alert("View details clicked"),
-            icon: ExternalLink,
-          }}
+          calloutActions={[
+            {
+              label: "Continue",
+              onClick: () => alert("Continue clicked"),
+              icon: CheckDouble,
+            },
+            {
+              label: "View Details",
+              onClick: () => alert("View details clicked"),
+              icon: ExternalLink,
+            },
+          ]}
         />
       </div>
       <div>
@@ -197,16 +229,18 @@ export const VariantsWithActions: StoryObj = {
           title="Information"
           content="<p>This is an info callout for informational messages with action buttons and InfoCircle icon.</p>"
           variant="info"
-          primaryAction={{
-            label: "Learn More",
-            onClick: () => alert("Learn more clicked"),
-            icon: CheckDouble,
-          }}
-          secondaryAction={{
-            label: "Dismiss",
-            onClick: () => alert("Dismiss clicked"),
-            icon: ExternalLink,
-          }}
+          calloutActions={[
+            {
+              label: "Learn More",
+              onClick: () => alert("Learn more clicked"),
+              icon: CheckDouble,
+            },
+            {
+              label: "Dismiss",
+              onClick: () => alert("Dismiss clicked"),
+              icon: ExternalLink,
+            },
+          ]}
         />
       </div>
       <div>
@@ -217,11 +251,13 @@ export const VariantsWithActions: StoryObj = {
           title="Caution Required"
           content="<p>This is a warning callout for cautionary messages with action buttons and Warning icon.</p>"
           variant="warning"
-          primaryAction={{
-            label: "Acknowledge",
-            onClick: () => alert("Acknowledged"),
-            icon: CheckDouble,
-          }}
+          calloutActions={[
+            {
+              label: "Acknowledge",
+              onClick: () => alert("Acknowledged"),
+              icon: CheckDouble,
+            },
+          ]}
           onClose={() => alert("Dismissed")}
         />
       </div>
