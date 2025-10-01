@@ -108,7 +108,7 @@ const ChartContainerComponent = (
         data-chart={chartId}
         ref={ref || anotherRef}
         className={cn(
-          "flex w-full justify-center overflow-visible text-sm [&_.recharts-cartesian-axis-tick_text]:fill-f1-foreground-secondary [&_.recharts-cartesian-grid_line]:stroke-f1-border [&_.recharts-curve.recharts-tooltip-cursor]:stroke-f1-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-f1-border [&_.recharts-radial-bar-background-sector]:fill-f1-background-secondary [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-f1-background-secondary [&_.recharts-reference-line-line]:stroke-f1-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex w-full justify-center overflow-visible text-sm [&_.recharts-cartesian-axis-tick_text]:fill-f1-foreground-secondary [&_.recharts-cartesian-axis]:font-medium [&_.recharts-cartesian-grid_line]:stroke-f1-border-secondary [&_.recharts-curve.recharts-tooltip-cursor]:stroke-f1-border-secondary [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-f1-border-secondary [&_.recharts-radial-bar-background-sector]:fill-f1-background-tertiary [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-f1-background-tertiary [&_.recharts-reference-line-line]:stroke-f1-border-secondary [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           aspect ? variants({ aspect }) : "aspect-auto h-full",
           className
         )}

@@ -89,8 +89,25 @@ export const _LineChart = <K extends LineChartConfig>(
             strokeWidth={1.5}
             strokeDasharray={dataConfig[line].dashed ? "4 4" : undefined}
             dot={false}
+            filter="url(#line-glow)"
           />
         ))}
+        <defs>
+          <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feColorMatrix
+              in="blur"
+              type="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.5 0"
+              result="blurHalfOpacity"
+            />
+            <feComposite
+              in="SourceGraphic"
+              in2="blurHalfOpacity"
+              operator="over"
+            />
+          </filter>
+        </defs>
       </LineChartPrimitive>
     </ChartContainer>
   )
