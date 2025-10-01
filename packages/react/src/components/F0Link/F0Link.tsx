@@ -3,9 +3,10 @@ import { Action, ActionLinkProps, ActionLinkVariant } from "@/ui/Action"
 import { forwardRef } from "react"
 import { F0Icon } from "../F0Icon"
 
-export type F0LinkProps = Omit<ActionLinkProps, "variant"> & {
+export type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
   variant?: ActionLinkVariant
   stopPropagation?: boolean
+  href?: string
 }
 
 export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
@@ -14,6 +15,7 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
     children,
     stopPropagation = false,
     "aria-label": ariaLabel,
+    href,
     ...props
   },
   ref
@@ -32,6 +34,7 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
     <Action
       ref={ref}
       {...props}
+      href={href || "#"}
       onClick={handleClick}
       rel={external ? "noopener noreferrer" : undefined}
       aria-label={ariaLabel || props.title}

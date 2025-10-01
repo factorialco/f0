@@ -13,7 +13,10 @@ export type F0ButtonProps = Omit<
   (typeof privateProps)[number]
 >
 
-const F0Button = forwardRef<HTMLElement, F0ButtonProps>((props, ref) => {
+const F0Button = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  F0ButtonProps
+>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest

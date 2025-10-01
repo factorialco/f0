@@ -211,40 +211,41 @@ const CarouselItem = React.forwardRef<
 })
 CarouselItem.displayName = "CarouselItem"
 
-const CarouselPrevious = React.forwardRef<HTMLElement, ButtonInternalProps>(
-  ({ className, variant = "outline", ...props }, ref) => {
-    const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+const CarouselPrevious = React.forwardRef<
+  HTMLButtonElement,
+  ButtonInternalProps
+>(({ className, variant = "outline", ...props }, ref) => {
+  const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
-    return (
-      <div
-        className={cn(
-          "absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100",
-          !canScrollPrev && "opacity-0 group-hover/carousel:opacity-0",
-          orientation === "horizontal"
-            ? "-left-3 top-1/2 -translate-y-1/2"
-            : "-top-3 left-1/2 -translate-x-1/2 rotate-90"
-        )}
-      >
-        <ButtonInternal
-          compact
-          ref={ref}
-          size="sm"
-          variant={variant}
-          className={cn("absolute opacity-100 transition-all", className)}
-          disabled={!canScrollPrev}
-          onClick={scrollPrev}
-          {...props}
-          label="Previous"
-          icon={ArrowLeft}
-          hideLabel
-        ></ButtonInternal>
-      </div>
-    )
-  }
-)
+  return (
+    <div
+      className={cn(
+        "absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100",
+        !canScrollPrev && "opacity-0 group-hover/carousel:opacity-0",
+        orientation === "horizontal"
+          ? "-left-3 top-1/2 -translate-y-1/2"
+          : "-top-3 left-1/2 -translate-x-1/2 rotate-90"
+      )}
+    >
+      <ButtonInternal
+        compact
+        ref={ref}
+        size="sm"
+        variant={variant}
+        className={cn("absolute opacity-100 transition-all", className)}
+        disabled={!canScrollPrev}
+        onClick={scrollPrev}
+        {...props}
+        label="Previous"
+        icon={ArrowLeft}
+        hideLabel
+      ></ButtonInternal>
+    </div>
+  )
+})
 CarouselPrevious.displayName = "CarouselPrevious"
 
-const CarouselNext = React.forwardRef<HTMLElement, ButtonInternalProps>(
+const CarouselNext = React.forwardRef<HTMLButtonElement, ButtonInternalProps>(
   ({ className, variant = "outline", ...props }, ref) => {
     const { orientation, scrollNext, canScrollNext } = useCarousel()
 

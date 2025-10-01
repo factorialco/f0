@@ -4,7 +4,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
-import { ActionButtonProps, ActionLinkProps, ActionProps } from "./types"
+import { ActionLinkProps, ActionProps } from "./types"
 import { isLinkStyled } from "./utils"
 import {
   actionVariants,
@@ -14,8 +14,11 @@ import {
   loadingVariants,
 } from "./variants"
 
-const ActionImpl = React.forwardRef<HTMLElement, ActionProps>((props, ref) => {
-  const isLink = (props: ActionProps): props is ActionLinkProps => {
+export const Action = React.forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ActionProps
+>((props, ref) => {
+  const isAnchor = (props: ActionProps): props is ActionLinkProps => {
     return "href" in props
   }
 
@@ -40,7 +43,7 @@ const ActionImpl = React.forwardRef<HTMLElement, ActionProps>((props, ref) => {
     ...restProps
   } = props
 
-  const defaultVariant = isLink(props) ? "link" : "default"
+  const defaultVariant = isAnchor(props) ? "link" : "default"
   const localVariant = variant ?? defaultVariant
 
   const variantClasses = actionVariants({
@@ -119,7 +122,7 @@ const ActionImpl = React.forwardRef<HTMLElement, ActionProps>((props, ref) => {
     ...restProps,
   }
 
-  const mainElement = isLink(props) ? (
+  const mainElement = isAnchor(props) ? (
     <Link
       {...CommonProps}
       //We need to pass the onClick, onFocus, and onBlur props as here the type narrows to ActionLinkProps
@@ -159,32 +162,5 @@ const ActionImpl = React.forwardRef<HTMLElement, ActionProps>((props, ref) => {
 
   return mainElement
 })
-
-ActionImpl.displayName = "Action"
-
-// Overloaded Action component for better type inference
-function ActionOverload(
-  props: ActionLinkProps & { ref?: React.Ref<HTMLAnchorElement> }
-): React.ReactElement
-function ActionOverload(
-  props: ActionButtonProps & { ref?: React.Ref<HTMLButtonElement> }
-): React.ReactElement
-function ActionOverload(
-  props: ActionProps & {
-    ref?: React.Ref<HTMLButtonElement> | React.Ref<HTMLAnchorElement>
-  }
-): React.ReactElement {
-  return React.createElement(ActionImpl, props)
-}
-
-export const Action = ActionOverload as {
-  (
-    props: ActionLinkProps & { ref?: React.Ref<HTMLAnchorElement> }
-  ): React.ReactElement
-  (
-    props: ActionButtonProps & { ref?: React.Ref<HTMLButtonElement> }
-  ): React.ReactElement
-  displayName?: string
-}
 
 Action.displayName = "Action"

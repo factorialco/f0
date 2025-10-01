@@ -48,89 +48,88 @@ export const iconOnlyVariants = cva({
 /**
  * A button component internal that includes the private slots and props
  */
-const ButtonInternal = forwardRef<HTMLElement, ButtonInternalProps>(
-  function Button(
-    {
-      label,
-      hideLabel,
-      onClick,
-      disabled,
-      loading: forceLoading,
-      icon,
-      emoji,
-      variant = "default",
-      size = "md",
-      append,
-      className,
-      "aria-label": ariaLabel,
-      ...props
-    },
-    ref
-  ) {
-    useTextFormatEnforcer(label, { disallowEmpty: true, disallowEmojis: true })
+const ButtonInternal = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ButtonInternalProps
+>(function Button(
+  {
+    label,
+    hideLabel,
+    onClick,
+    disabled,
+    loading: forceLoading,
+    icon,
+    emoji,
+    variant = "default",
+    size = "md",
+    append,
+    className,
+    "aria-label": ariaLabel,
+    ...props
+  },
+  ref
+) {
+  useTextFormatEnforcer(label, { disallowEmpty: true, disallowEmojis: true })
 
-    const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-    const handleClick = async (
-      event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-      const result = onClick?.(event)
+  const handleClick = async (
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
+  ) => {
+    const result = onClick?.(event)
 
-      if (result instanceof Promise) {
-        setLoading(true)
+    if (result instanceof Promise) {
+      setLoading(true)
 
-        try {
-          await result
-        } finally {
-          setLoading(false)
-        }
+      try {
+        await result
+      } finally {
+        setLoading(false)
       }
     }
-
-    const isLoading = forceLoading || loading
-    const shouldHideLabel = hideLabel || emoji
-
-    return (
-      <Action
-        variant={variant}
-        size={size}
-        disabled={disabled || isLoading}
-        ref={ref}
-        onClick={handleClick}
-        {...props}
-        loading={isLoading}
-        className={className}
-        mode={hideLabel ? "only" : "default"}
-        aria-label={ariaLabel || props.title || label}
-        title={props.title || (hideLabel ? label : undefined)}
-      >
-        <div
-          className={cn(isLoading && "invisible", "flex items-center gap-1")}
-        >
-          {icon && (
-            <F0Icon
-              size={size === "sm" ? "sm" : "md"}
-              icon={icon}
-              className={
-                hideLabel
-                  ? iconOnlyVariants({ variant })
-                  : iconVariants({ variant })
-              }
-            />
-          )}
-          {emoji && (
-            <EmojiImage
-              emoji={emoji}
-              size={size === "sm" ? "sm" : "md"}
-              alt={""}
-            />
-          )}
-          <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
-          {append}
-        </div>
-      </Action>
-    )
   }
-)
+
+  const isLoading = forceLoading || loading
+  const shouldHideLabel = hideLabel || emoji
+
+  return (
+    <Action
+      variant={variant}
+      size={size}
+      disabled={disabled || isLoading}
+      ref={ref}
+      {...props}
+      onClick={handleClick}
+      loading={isLoading}
+      className={className}
+      mode={hideLabel ? "only" : "default"}
+      aria-label={ariaLabel || props.title || label}
+      title={props.title || (hideLabel ? label : undefined)}
+    >
+      <div className={cn(isLoading && "invisible", "flex items-center gap-1")}>
+        {icon && (
+          <F0Icon
+            size={size === "sm" ? "sm" : "md"}
+            icon={icon}
+            className={
+              hideLabel
+                ? iconOnlyVariants({ variant })
+                : iconVariants({ variant })
+            }
+          />
+        )}
+        {emoji && (
+          <EmojiImage
+            emoji={emoji}
+            size={size === "sm" ? "sm" : "md"}
+            alt={""}
+          />
+        )}
+        <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
+        {append}
+      </div>
+    </Action>
+  )
+})
 
 export { ButtonInternal }

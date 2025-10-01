@@ -108,7 +108,7 @@ export type NavTarget = HTMLAttributeAnchorTarget
 export type ActionBaseProps = ActionCommonProps & DataAttributes
 
 export type ActionLinkProps = ActionBaseProps & {
-  href: string | undefined
+  href: string
   target?: NavTarget
   rel?: string
   onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void

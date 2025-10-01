@@ -26,10 +26,13 @@ export function Reaction({
 }: ReactionProps) {
   const [isActive, setIsActive] = useState(hasReacted)
   const [count, setCount] = useState(initialCount)
-  const buttonRef = useRef<HTMLElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const { fireEmojiConfetti } = useEmojiConfetti()
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>, emoji: string) => {
+  const handleClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    emoji: string
+  ) => {
     event.stopPropagation()
     setCount(count + (isActive ? -1 : 1))
     setIsActive(!isActive)
@@ -48,7 +51,7 @@ export function Reaction({
       variant="outline"
       size="md"
       compact
-      onClick={(event: React.MouseEvent<HTMLElement>) => {
+      onClick={(event) => {
         handleClick(event, emoji)
       }}
       className={cn(
