@@ -19,6 +19,7 @@ import {
 import { autoColor } from "../utils/colors"
 import {
   cartesianGridProps,
+  chartTooltipProps,
   measureTextWidth,
   xAxisProps,
   yAxisProps,
@@ -124,7 +125,7 @@ const _BarChart = <K extends ChartConfig>(
       >
         {!hideTooltip && (
           <ChartTooltip
-            cursor
+            {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
             }
