@@ -1,4 +1,7 @@
 import { forwardRef, ReactNode } from "react"
+import { F0Icon } from "../../../../components/F0Icon"
+import { InfoCircleLine } from "../../../../icons/app"
+import { Tooltip } from "../../../Overlays/Tooltip"
 
 interface TwoColumnsItemType {
   title: string
@@ -8,6 +11,10 @@ interface TwoColumnsItemType {
 interface TwoColumnsListType {
   title?: string
   titleValue?: string
+  titleTooltip?: {
+    label?: string
+    description: string
+  }
   list: TwoColumnsItemType[]
 }
 
@@ -21,12 +28,24 @@ const Item = ({ title, info }: TwoColumnsItemType) => (
 )
 
 export const TwoColumnsList = forwardRef<HTMLDivElement, TwoColumnsListType>(
-  function TwoColumnsList({ title, titleValue, list }, ref) {
+  function TwoColumnsList({ title, titleValue, titleTooltip, list }, ref) {
     return (
       <div ref={ref} className="flex flex-col gap-2">
         {title && (
           <div className="flex items-center justify-between gap-2 font-medium">
-            <div>{title}</div>
+            <div className="flex items-center gap-1">
+              <div>{title}</div>
+              {titleTooltip && (
+                <Tooltip
+                  label={titleTooltip.label}
+                  description={titleTooltip.description}
+                >
+                  <div className="flex h-4 w-4 cursor-help items-center justify-center rounded bg-f1-background-tertiary">
+                    <F0Icon icon={InfoCircleLine} size="sm" color="secondary" />
+                  </div>
+                </Tooltip>
+              )}
+            </div>
             {titleValue && <div>{titleValue}</div>}
           </div>
         )}
