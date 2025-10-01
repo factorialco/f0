@@ -1,3 +1,4 @@
+import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
 import { AlertTagCellValue } from './types/alertTag.tsx';
 import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
@@ -107,11 +108,12 @@ export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status }: ActionItemProps) => JSX_2.Element;
+export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
-    status: "inProgress" | "executing" | "completed";
+    status?: "inProgress" | "executing" | "completed";
+    inGroup?: boolean;
 }
 
 declare type ActionProps = {
@@ -255,11 +257,14 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
-export declare const AiChatProvider: ({ enabled, greeting, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const AiChatProvider: ({ enabled, greeting, initialMessage, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
+    initialMessage?: string | string[];
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -278,12 +283,19 @@ declare type AiChatProviderReturnValue = {
      */
     setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
     autoClearMinutes: number | null;
+    initialMessage?: string | string[];
+    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
     greeting?: string;
     enabled: boolean;
     agent?: string;
+    initialMessage?: string | string[];
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -1274,6 +1286,12 @@ declare type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
 
+declare interface DataCollectionSettingsContextType {
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
+    settings: DataCollectionSettings;
+    setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
+}
+
 /**
  * Data collection source
  * Extends the base data source with data collection specific elements / features
@@ -1587,6 +1605,9 @@ declare const defaultTranslations: {
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
+    readonly toc: {
+        readonly search: "Search";
+    };
     readonly collections: {
         readonly sorting: {
             readonly noSorting: "No sorting";
@@ -1609,7 +1630,8 @@ declare const defaultTranslations: {
             readonly pagination: {
                 readonly of: "of";
             };
-            readonly settings: "{%visualizationName} settings";
+            readonly settings: "{{visualizationName}} settings";
+            readonly reset: "Reset to default";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1669,7 +1691,7 @@ declare const defaultTranslations: {
             readonly week: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
-                readonly long: "Week of %{day} %{month} %{year}";
+                readonly long: "Week of {{day}} {{month}} {{year}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1717,7 +1739,11 @@ declare const defaultTranslations: {
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
-        readonly initialMessage: "How can I help you today?";
+        readonly defaultInitialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1969,7 +1995,9 @@ declare interface ErrorMessageProps {
 export declare type ExtractPropertyKeys<RecordType> = keyof RecordType;
 
 declare type ExtractVisualizationSettings<T> = T extends {
-    settings: infer S;
+    settings: {
+        default: infer S;
+    };
 } ? S : never;
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -2299,9 +2327,13 @@ declare type FormType<T extends SchemaType, FormType extends InferSchema<T>> = U
 
 declare interface FrameContextType {
     isSmallScreen: boolean;
+    isLastToggleInvokedByUser: boolean;
     sidebarState: SidebarState;
     prevSidebarState: SidebarState | null;
-    toggleSidebar: () => void;
+    toggleSidebar: (callData?: {
+        isInvokedByUser: boolean;
+    }) => void;
+    setForceFloat: (force: boolean) => void;
 }
 
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
@@ -2632,7 +2664,7 @@ declare type ItemProps = {
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
 
-export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, }: TOCItemSectionHeaderProps): JSX_2.Element;
+export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, }: TOCItemSectionHeaderProps): JSX_2.Element;
 
 declare type KanbanCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, KanbanVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -3920,6 +3952,7 @@ export declare type RichTextDisplayHandle = HTMLDivElement;
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
     content: string;
     className?: string;
+    format?: "html" | "markdown";
 }
 
 export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
@@ -4576,6 +4609,7 @@ declare interface TOCItemSectionHeaderProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     sortable: boolean;
+    hideChildrenCounter?: boolean;
 }
 
 export declare interface TOCProps {
@@ -4586,6 +4620,9 @@ export declare interface TOCProps {
     collapsible?: boolean;
     sortable?: boolean;
     onReorder?: (reorderedIds: IdStructure[]) => void;
+    showSearchBox?: boolean;
+    searchPlaceholder?: string;
+    hideChildrenCounter?: boolean;
 }
 
 declare type toggleActionType = {
@@ -4817,10 +4854,13 @@ declare const VerticalOverflowList: {
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
-    renderSettings?: (props: Props) => JSX.Element | null;
     name: string;
     icon: IconType;
-    settings: Settings;
+    settings: {
+        default: Settings;
+        renderer?: (props: Props) => JSX.Element | null;
+        resetHandler?: (settings: DataCollectionSettingsContextType) => void;
+    };
 };
 
 /**
