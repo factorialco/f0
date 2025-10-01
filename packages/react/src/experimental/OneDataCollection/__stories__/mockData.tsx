@@ -1296,3 +1296,23 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
     },
   ]
 }
+
+export const getMockVisualizationsWithCreate = (
+  params: { onCreate: (laneId: string) => void } & Parameters<
+    typeof getMockVisualizations
+  >[0]
+) => {
+  const { onCreate, ...rest } = params
+  const base = getMockVisualizations(rest)
+
+  return {
+    ...base,
+    kanban: {
+      type: "kanban" as const,
+      options: {
+        ...(base.kanban.type === "kanban" ? base.kanban.options : {}),
+        onCreate,
+      },
+    },
+  }
+}

@@ -14,7 +14,7 @@ import type {
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
 ): JSX.Element {
-  const { lanes, renderCard, getKey, className, dnd, loading } = props
+  const { lanes, renderCard, getKey, className, dnd, loading, onCreate } = props
 
   // Local source-of-truth for lanes to orchestrate moves centrally
   const [localLanes, setLocalLanes] = useState(
@@ -276,6 +276,12 @@ export function Kanban<TRecord extends RecordType>(
                     hasMore={lane.hasMore}
                     loadingMore={lane.loadingMore}
                     fetchMore={lane.fetchMore}
+                    onPrimaryAction={
+                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
+                    }
+                    onFooterAction={
+                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
+                    }
                   />
                 </div>
               )

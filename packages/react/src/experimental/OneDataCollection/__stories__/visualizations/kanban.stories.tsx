@@ -2,6 +2,7 @@ import { granularityDefinitions } from "@/experimental/OneCalendar/granularities
 import { Delete, Pencil, Plus } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useRef, useState } from "react"
+import { fn } from "storybook/internal/test"
 import {
   createDataAdapter,
   ExampleComponent,
@@ -137,6 +138,63 @@ export const BasicKanbanVisualization: Story = {
         paginationType="infinite-scroll"
         selectable={(el) => el.id}
         totalItemSummary={(total) => `Total items: ${total}`}
+        searchBar
+      />
+    )
+  },
+}
+
+export const KanbanWithCreateActions: Story = {
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
+  render: () => {
+    const [items] = useState<MockUser[]>(() => generateMockUsers(24))
+    const mockVisualizations = getMockVisualizations({})
+
+    const handleCreate = (laneId: string) => {
+      console.log("Creating item on lane", laneId)
+      fn()
+    }
+
+    const dataAdapter = useMemo(() => {
+      const adapter = createDataAdapter({
+        data: items,
+        paginationType: "infinite-scroll",
+        perPage: 10,
+      })
+
+      adapter.fetchData = (options: unknown) => {
+        const currentAdapter = createDataAdapter({
+          data: items,
+          paginationType: "infinite-scroll",
+          perPage: 10,
+        })
+
+        return currentAdapter.fetchData(options as never)
+      }
+
+      return adapter
+    }, [items])
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "kanban" as const,
+            options: {
+              ...(
+                mockVisualizations.kanban as Extract<
+                  typeof mockVisualizations.kanban,
+                  { type: "kanban" }
+                >
+              ).options,
+              onCreate: handleCreate,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        fullHeight
         searchBar
       />
     )
