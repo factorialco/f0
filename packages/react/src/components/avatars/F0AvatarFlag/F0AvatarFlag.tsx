@@ -1,37 +1,21 @@
-import { parse } from "twemoji-parser"
+import { getFlag } from "@/flags/flagsMap.tsx"
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarFlagProps } from "./types"
 
-interface ParseObject {
-  url: string
-  indices: [number, number]
-  text: string
-}
-
-const parseEmoji = (emoji: string): ParseObject | null => {
-  const [entity] = parse(emoji, {
-    buildUrl: (codePoints) =>
-      `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${codePoints}.svg`,
-  })
-
-  return entity || null
-}
-
-const fallbackFlag = `🏴‍☠️️`
-
 export const F0AvatarFlag = ({
-  flag = fallbackFlag,
+  flag,
   size,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
 }: F0AvatarFlagProps) => {
-  const emojiEntity = parseEmoji(flag)
+  const FlagComponent = getFlag(flag) as React.ComponentType | undefined
+
   return (
     <BaseAvatar
       type="base"
       name="flag"
-      src={emojiEntity?.url}
+      flag={FlagComponent ? <FlagComponent /> : undefined}
       size={size}
       color="viridian"
       aria-label={ariaLabel}

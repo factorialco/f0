@@ -39,17 +39,21 @@ export default meta
 
 type Story = StoryObj<typeof F0AvatarFlag>
 
-export const Default: Story = {}
+export const Default: Story = {
+  args: {
+    flag: "es",
+  },
+}
 
 export const WithImage: Story = {
   args: {
-    flag: "🇪🇸",
+    flag: "es",
   },
 }
 
 export const WithModuleBadge: Story = {
   args: {
-    flag: "🇪🇸",
+    flag: "es",
     badge: {
       type: "module",
       module: "inbox",
@@ -64,18 +68,10 @@ export const Snapshot: Story = {
       <h3 className="text-lg font-semibold">All Flag Avatars</h3>
 
       <section>
-        <h4 className="text-lg font-semibold">Without Image</h4>
-        <div className="flex flex-row gap-2">
-          {avatarSizes.map((size) => (
-            <F0AvatarFlag key={size} size={size} />
-          ))}
-        </div>
-      </section>
-      <section>
         <h4 className="text-lg font-semibold">With Image</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size) => (
-            <F0AvatarFlag key={size} size={size} flag={`🇪🇸`} />
+            <F0AvatarFlag key={size} size={size} flag="es" />
           ))}
         </div>
       </section>
@@ -86,7 +82,7 @@ export const Snapshot: Story = {
             <F0AvatarFlag
               key={size}
               size={size}
-              flag={`🇪🇸`}
+              flag={"es"}
               badge={{ type: "module", module: "inbox" }}
             />
           ))}
