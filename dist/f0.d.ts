@@ -30,6 +30,7 @@ import { FolderCellValue } from '../../value-display/types/folder';
 import { FolderCellValue as FolderCellValue_2 } from './types/folder.tsx';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon.tsx';
 import { ImgHTMLAttributes } from 'react';
@@ -78,7 +79,22 @@ declare type Action_2 = {
     loading?: boolean;
 };
 
+declare type ActionBaseProps = ActionCommonProps & DataAttributes;
+
+declare type ActionButtonProps = ActionBaseProps & {
+    type?: ButtonType;
+    href?: never;
+    target?: never;
+    onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
 declare interface ActionCommonProps {
+    /**
+     * The variant of the action.
+     */
+    variant?: ActionVariant;
     /**
      * The children of the action.
      */
@@ -99,9 +115,6 @@ declare interface ActionCommonProps {
      * The append outside of the action.
      */
     appendOutside?: ReactNode;
-    onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-    onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
-    onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
     /**
      * The disabled state of the action.
      */
@@ -138,7 +151,11 @@ declare interface ActionCommonProps {
     /**
      * The aria label of the action.
      */
-    "aria-label": string;
+    "aria-label"?: string;
+    /**
+     * The tab index of the action.
+     */
+    tabIndex?: number;
 }
 
 declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {
@@ -147,31 +164,29 @@ declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject
     type?: "primary" | "secondary" | "other";
 });
 
-declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
+declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
-} | {
-    type?: ButtonType;
-    href?: never;
-    target?: never;
-});
+    rel?: string;
+    onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+    className?: string;
+};
+
+declare type ActionLinkVariant = (typeof actionLinkVariants)[number];
+
+declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
+
+declare type ActionProps = ActionLinkProps | ActionButtonProps;
 
 declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
-declare type ActionVariantProps = VariantProps<typeof actionVariants>;
+declare type ActionVariant = (typeof actionVariants)[number];
 
-declare const actionVariants: (props?: ({
-    variant?: "link" | "default" | "critical" | "promote" | "selected" | "neutral" | "outline" | "ghost" | "outlinePromote" | "mention" | undefined;
-    pressed?: boolean | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "link", "unstyled", "mention"];
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -1357,10 +1372,11 @@ export declare const defaultTranslations: {
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
-        readonly initialMessage: "How can I help you today?";
+        readonly defaultInitialMessage: "How can I help you today?";
         readonly inputPlaceholder: "Write something here...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1662,7 +1678,7 @@ export declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0Button: ForwardRefExoticComponent<F0ButtonProps & RefAttributes<HTMLElement>>;
+export declare const F0Button: ForwardRefExoticComponent<F0ButtonProps & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>;
 
 export declare const F0ButtonDropdown: ({ items, onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined;
 
@@ -1769,11 +1785,17 @@ export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantPro
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
-export declare const F0Link: ForwardRefExoticComponent<F0LinkProps & RefAttributes<HTMLAnchorElement>>;
+export declare const F0Link: ForwardRefExoticComponent<Omit<ActionLinkProps, "href" | "variant"> & {
+variant?: ActionLinkVariant;
+stopPropagation?: boolean;
+href?: string;
+} & RefAttributes<HTMLAnchorElement>>;
 
-export declare interface F0LinkProps extends LinkProps, VariantProps<typeof linkVariants>, DataAttributes {
+export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
+    variant?: ActionLinkVariant;
     stopPropagation?: boolean;
-}
+    href?: string;
+};
 
 export declare const F0Provider: React.FC<{
     children: React.ReactNode;
@@ -2211,16 +2233,7 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     disabled?: boolean;
 };
 
-declare const linkVariants: (props?: ({
-    variant?: "link" | "unstyled" | undefined;
-    disabled?: boolean | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+export declare const linkVariants: readonly ["link", "unstyled", "mention"];
 
 /**
  * Group List: Renders the list for a group
@@ -2352,9 +2365,7 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
     label: string;
 } & DataAttributes;
 
-declare type NavTarget = (typeof navTargets)[number];
-
-declare const navTargets: readonly ["_blank", "_self", "_parent", "_top"];
+declare type NavTarget = HTMLAttributeAnchorTarget;
 
 /**
  * Utility type to extract all possible paths from nested object.

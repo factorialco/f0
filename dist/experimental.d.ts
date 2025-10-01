@@ -1,3 +1,4 @@
+import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
 import { AlertTagCellValue } from './types/alertTag.tsx';
 import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
@@ -37,6 +38,7 @@ import { FolderCellValue } from './types/folder.tsx';
 import { FolderCellValue as FolderCellValue_2 } from '../../value-display/types/folder';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon.tsx';
@@ -101,7 +103,22 @@ declare type Action_2 = {
     variant?: "default" | "outline" | "promote";
 };
 
+declare type ActionBaseProps = ActionCommonProps & DataAttributes;
+
+declare type ActionButtonProps = ActionBaseProps & {
+    type?: ButtonType;
+    href?: never;
+    target?: never;
+    onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
 declare interface ActionCommonProps {
+    /**
+     * The variant of the action.
+     */
+    variant?: ActionVariant;
     /**
      * The children of the action.
      */
@@ -122,9 +139,6 @@ declare interface ActionCommonProps {
      * The append outside of the action.
      */
     appendOutside?: ReactNode;
-    onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-    onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
-    onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
     /**
      * The disabled state of the action.
      */
@@ -161,7 +175,11 @@ declare interface ActionCommonProps {
     /**
      * The aria label of the action.
      */
-    "aria-label": string;
+    "aria-label"?: string;
+    /**
+     * The tab index of the action.
+     */
+    tabIndex?: number;
 }
 
 export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {
@@ -178,14 +196,17 @@ export declare interface ActionItemProps {
     inGroup?: boolean;
 }
 
-declare type ActionProps = ActionCommonProps & ActionVariantProps & DataAttributes & ({
+declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
-} | {
-    type?: ButtonType;
-    href?: never;
-    target?: never;
-});
+    rel?: string;
+    onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+    className?: string;
+};
+
+declare type ActionProps = ActionLinkProps | ActionButtonProps;
 
 declare type ActionProps_2 = {
     /**
@@ -262,18 +283,9 @@ declare type actionType_2 = {
     variant?: "default" | "outline" | "neutral";
 };
 
-declare type ActionVariantProps = VariantProps<typeof actionVariants>;
+declare type ActionVariant = (typeof actionVariants)[number];
 
-declare const actionVariants: (props?: ({
-    variant?: "link" | "default" | "critical" | "promote" | "selected" | "neutral" | "outline" | "ghost" | "outlinePromote" | "mention" | undefined;
-    pressed?: boolean | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "link", "unstyled", "mention"];
 
 export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element) & {
     Skeleton: () => default_2.JSX.Element;
@@ -344,11 +356,14 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
-export declare const AiChatProvider: ({ enabled, greeting, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const AiChatProvider: ({ enabled, greeting, initialMessage, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
+    initialMessage?: string | string[];
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -367,12 +382,19 @@ declare type AiChatProviderReturnValue = {
      */
     setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
     autoClearMinutes: number | null;
+    initialMessage?: string | string[];
+    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
     greeting?: string;
     enabled: boolean;
     agent?: string;
+    initialMessage?: string | string[];
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -946,6 +968,27 @@ export declare type CalendarMode = "single" | "range";
 
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
 
+declare type CalloutAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+};
+
+declare interface CalloutInternalProps {
+    title: string;
+    onClose?: () => void;
+    children: React.ReactNode;
+    actions?: CalloutAction[];
+    variant: CalloutVariant;
+}
+
+declare interface CalloutSkeletonProps {
+    compact?: boolean;
+    variant?: CalloutVariant;
+}
+
+declare type CalloutVariant = (typeof variants)[number];
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -1089,7 +1132,7 @@ declare type ChartConfig_2 = {
 
 declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
 
-declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants> {
+declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_2> {
     config: ChartConfig_2;
     children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
 }
@@ -1840,10 +1883,11 @@ declare const defaultTranslations: {
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
-        readonly initialMessage: "How can I help you today?";
+        readonly defaultInitialMessage: "How can I help you today?";
         readonly inputPlaceholder: "Write something here...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2202,6 +2246,12 @@ declare type F0AvatarTeamProps = {
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
+
+export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>> & {
+    Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0CalloutProps = CalloutInternalProps;
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 
@@ -3159,9 +3209,7 @@ declare type NavigationProps = {
     };
 };
 
-declare type NavTarget = (typeof navTargets)[number];
-
-declare const navTargets: readonly ["_blank", "_self", "_parent", "_top"];
+declare type NavTarget = HTMLAttributeAnchorTarget;
 
 declare type NewColor = Extract<BaseColor, "viridian" | "malibu" | "yellow" | "purple" | "lilac" | "barbie" | "smoke" | "army" | "flubber" | "indigo" | "camel">;
 
@@ -4895,7 +4943,9 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
 
-declare const variants: (props?: ({
+declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
+
+declare const variants_2: (props?: ({
     aspect?: "small" | "square" | "wide" | undefined;
 } & ({
     class?: ClassValue;
