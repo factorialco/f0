@@ -1,3 +1,3 @@
 export * from "./BaseBanner"
 export * from "./F0AiBanner"
-export * from "./F0SdmCallout"
+export * from "./F0Callout"

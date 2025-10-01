@@ -1,11 +1,11 @@
 import { CheckDouble, ExternalLink } from "@/icons/app"
 import { StoryFn, StoryObj } from "@storybook/react-vite"
-import { F0SdmCallout, F0SdmCalloutProps } from "."
-import { SdmCalloutSkeleton } from "./SdmCalloutInternal"
+import { F0Callout, F0CalloutProps } from "."
+import { CalloutSkeleton } from "./CalloutInternal"
 
 const meta = {
-  title: "Banners/SdmCallout",
-  component: F0SdmCallout,
+  title: "Banners/Callout",
+  component: F0Callout,
   parameters: {
     layout: "centered",
   },
@@ -18,13 +18,15 @@ const meta = {
       control: false,
       description: "Callback when the close button is clicked",
     },
-    calloutActions: {
+    actions: {
       control: "object",
-      description: "Array of callout action buttons (max 2)",
+      description: "Array of action buttons (max 2)",
     },
-    content: {
-      control: "text",
-      description: "Html or plain text content displayed in the callout body",
+    children: {
+      control: false,
+      table: {
+        disable: true,
+      },
     },
     variant: {
       control: "select",
@@ -41,11 +43,11 @@ const meta = {
   ],
 }
 
-export const Default: StoryObj<F0SdmCalloutProps> = {
+export const Default: StoryObj<F0CalloutProps> = {
   args: {
     title: "SDM Callout",
     onClose: () => alert("Callout closed"),
-    calloutActions: [
+    actions: [
       {
         label: "Primary action",
         onClick: () => alert("Primary action clicked"),
@@ -57,71 +59,47 @@ export const Default: StoryObj<F0SdmCalloutProps> = {
         icon: ExternalLink,
       },
     ],
-    content: `<div>
+    children: (
+      <div>
         <p>
-          This is a sample SDM callout with <u>rich text</u> content
-          and <u>action buttons</u>.
+          This is a sample SDM callout with <u>rich text</u> content and{" "}
+          <u>action buttons</u>.
         </p>
         <p>You can customize the title, content, and actions as needed.</p>
-      </div>`,
+      </div>
+    ),
   },
 }
 
-export const WithoutActions: StoryObj<F0SdmCalloutProps> = {
+export const WithoutActions: StoryObj<F0CalloutProps> = {
   args: {
     title: "Simple SDM Callout",
-    content: `<div>
+    children: (
+      <div>
         <p>This is a simple callout without any action buttons.</p>
-      </div>`,
+      </div>
+    ),
   },
 }
 
-export const WithCloseOnly: StoryObj<F0SdmCalloutProps> = {
+export const WithCloseOnly: StoryObj<F0CalloutProps> = {
   args: {
     title: "Dismissible Callout",
     onClose: () => alert("Callout closed"),
-    content: `<div>
+    children: (
+      <div>
         <p>This callout can be dismissed using the close button.</p>
-      </div>`,
+      </div>
+    ),
   },
 }
 
 export const Skeleton: StoryObj = {
-  render: () => <SdmCalloutSkeleton />,
+  render: () => <CalloutSkeleton />,
 }
 
 export const SkeletonCompact: StoryObj = {
-  render: () => <SdmCalloutSkeleton compact />,
-}
-
-export const TooManyActions: StoryObj<F0SdmCalloutProps> = {
-  args: {
-    title: "SDM Callout with Too Many Actions",
-    content:
-      "<p>This callout has more than 2 actions to demonstrate the validation message.</p>",
-    calloutActions: [
-      {
-        label: "First Action",
-        onClick: () => alert("First action clicked"),
-        icon: CheckDouble,
-      },
-      {
-        label: "Second Action",
-        onClick: () => alert("Second action clicked"),
-        icon: ExternalLink,
-      },
-      {
-        label: "Third Action (Will be hidden)",
-        onClick: () => alert("This won't be called"),
-        icon: CheckDouble,
-      },
-      {
-        label: "Fourth Action (Will be hidden)",
-        onClick: () => alert("This won't be called either"),
-        icon: ExternalLink,
-      },
-    ],
-  },
+  render: () => <CalloutSkeleton compact />,
 }
 
 export const Variants: StoryObj = {
@@ -129,49 +107,48 @@ export const Variants: StoryObj = {
     <div className="space-y-4">
       <div>
         <h3 className="mb-2 text-sm font-medium">Default (Gradient)</h3>
-        <F0SdmCallout
-          title="Default Callout"
-          content="<p>This is the default callout with gradient background.</p>"
-          variant="default"
-        />
+        <F0Callout title="Default Callout" variant="default">
+          <p>This is the default callout with gradient background.</p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">Critical</h3>
-        <F0SdmCallout
-          title="Critical Callout"
-          content="<p>This is a critical callout for important messages.</p>"
-          variant="critical"
-        />
+        <F0Callout title="Critical Callout" variant="critical">
+          <p>This is a critical callout for important messages.</p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">
           Positive (with CheckDouble icon)
         </h3>
-        <F0SdmCallout
-          title="Success Message"
-          content="<p>This is a positive callout for success messages with a CheckDouble icon.</p>"
-          variant="positive"
-        />
+        <F0Callout title="Success Message" variant="positive">
+          <p>
+            This is a positive callout for success messages with a CheckDouble
+            icon.
+          </p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">
           Info (with InfoCircle icon)
         </h3>
-        <F0SdmCallout
-          title="Information"
-          content="<p>This is an info callout for informational messages with an InfoCircle icon.</p>"
-          variant="info"
-        />
+        <F0Callout title="Information" variant="info">
+          <p>
+            This is an info callout for informational messages with an
+            InfoCircle icon.
+          </p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">
           Warning (with Warning icon)
         </h3>
-        <F0SdmCallout
-          title="Caution Required"
-          content="<p>This is a warning callout for cautionary messages with a Warning icon.</p>"
-          variant="warning"
-        />
+        <F0Callout title="Caution Required" variant="warning">
+          <p>
+            This is a warning callout for cautionary messages with a Warning
+            icon.
+          </p>
+        </F0Callout>
       </div>
     </div>
   ),
@@ -185,11 +162,10 @@ export const VariantsWithActions: StoryObj = {
     <div className="space-y-4">
       <div>
         <h3 className="mb-2 text-sm font-medium">Critical with Actions</h3>
-        <F0SdmCallout
+        <F0Callout
           title="Critical Callout"
-          content="<p>This is a critical callout with action buttons.</p>"
           variant="critical"
-          calloutActions={[
+          actions={[
             {
               label: "Acknowledge",
               onClick: () => alert("Acknowledged"),
@@ -197,17 +173,18 @@ export const VariantsWithActions: StoryObj = {
             },
           ]}
           onClose={() => alert("Dismissed")}
-        />
+        >
+          <p>This is a critical callout with action buttons.</p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">
           Positive with Actions (CheckDouble icon)
         </h3>
-        <F0SdmCallout
+        <F0Callout
           title="Success Message"
-          content="<p>This is a positive callout for success messages with action buttons and CheckDouble icon.</p>"
           variant="positive"
-          calloutActions={[
+          actions={[
             {
               label: "Continue",
               onClick: () => alert("Continue clicked"),
@@ -219,17 +196,21 @@ export const VariantsWithActions: StoryObj = {
               icon: ExternalLink,
             },
           ]}
-        />
+        >
+          <p>
+            This is a positive callout for success messages with action buttons
+            and CheckDouble icon.
+          </p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">
           Info with Actions (InfoCircle icon)
         </h3>
-        <F0SdmCallout
+        <F0Callout
           title="Information"
-          content="<p>This is an info callout for informational messages with action buttons and InfoCircle icon.</p>"
           variant="info"
-          calloutActions={[
+          actions={[
             {
               label: "Learn More",
               onClick: () => alert("Learn more clicked"),
@@ -241,17 +222,21 @@ export const VariantsWithActions: StoryObj = {
               icon: ExternalLink,
             },
           ]}
-        />
+        >
+          <p>
+            This is an info callout for informational messages with action
+            buttons and InfoCircle icon.
+          </p>
+        </F0Callout>
       </div>
       <div>
         <h3 className="mb-2 text-sm font-medium">
           Warning with Actions (Warning icon)
         </h3>
-        <F0SdmCallout
+        <F0Callout
           title="Caution Required"
-          content="<p>This is a warning callout for cautionary messages with action buttons and Warning icon.</p>"
           variant="warning"
-          calloutActions={[
+          actions={[
             {
               label: "Acknowledge",
               onClick: () => alert("Acknowledged"),
@@ -259,7 +244,12 @@ export const VariantsWithActions: StoryObj = {
             },
           ]}
           onClose={() => alert("Dismissed")}
-        />
+        >
+          <p>
+            This is a warning callout for cautionary messages with action
+            buttons and Warning icon.
+          </p>
+        </F0Callout>
       </div>
     </div>
   ),
