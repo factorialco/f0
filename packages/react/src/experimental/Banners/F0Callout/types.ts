@@ -7,7 +7,7 @@ export type CalloutAction = {
 }
 
 export const variants = [
-  "default",
+  "ai",
   "critical",
   "positive",
   "info",
@@ -20,7 +20,7 @@ export interface CalloutInternalProps {
   onClose?: () => void
   children: React.ReactNode
   actions?: CalloutAction[]
-  variant?: CalloutVariant
+  variant: CalloutVariant
 }
 export interface CalloutSkeletonProps {
   compact?: boolean

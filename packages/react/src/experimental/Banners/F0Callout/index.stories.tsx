@@ -30,7 +30,7 @@ const meta = {
     },
     variant: {
       control: "select",
-      options: ["default", "critical", "positive", "info", "warning"],
+      options: ["ai", "critical", "positive", "info", "warning"],
       description: "The visual variant of the callout",
     },
   },
@@ -46,6 +46,7 @@ const meta = {
 export const Default: StoryObj<F0CalloutProps> = {
   args: {
     title: "SDM Callout",
+    variant: "ai",
     onClose: () => alert("Callout closed"),
     actions: [
       {
@@ -74,6 +75,7 @@ export const Default: StoryObj<F0CalloutProps> = {
 export const WithoutActions: StoryObj<F0CalloutProps> = {
   args: {
     title: "Simple SDM Callout",
+    variant: "ai",
     children: (
       <div>
         <p>This is a simple callout without any action buttons.</p>
@@ -85,6 +87,7 @@ export const WithoutActions: StoryObj<F0CalloutProps> = {
 export const WithCloseOnly: StoryObj<F0CalloutProps> = {
   args: {
     title: "Dismissible Callout",
+    variant: "ai",
     onClose: () => alert("Callout closed"),
     children: (
       <div>
@@ -95,20 +98,20 @@ export const WithCloseOnly: StoryObj<F0CalloutProps> = {
 }
 
 export const Skeleton: StoryObj = {
-  render: () => <CalloutSkeleton />,
+  render: () => <CalloutSkeleton variant="ai" />,
 }
 
 export const SkeletonCompact: StoryObj = {
-  render: () => <CalloutSkeleton compact />,
+  render: () => <CalloutSkeleton compact variant="ai" />,
 }
 
 export const Variants: StoryObj = {
   render: () => (
     <div className="space-y-4">
       <div>
-        <h3 className="mb-2 text-sm font-medium">Default (Gradient)</h3>
-        <F0Callout title="Default Callout" variant="default">
-          <p>This is the default callout with gradient background.</p>
+        <h3 className="mb-2 text-sm font-medium">AI (Gradient)</h3>
+        <F0Callout title="AI Callout" variant="ai">
+          <p>This is the AI callout with gradient background.</p>
         </F0Callout>
       </div>
       <div>

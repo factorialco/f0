@@ -12,8 +12,7 @@ const calloutVariants = cva({
   base: "flex w-full flex-col rounded-lg p-[1px]",
   variants: {
     variant: {
-      default:
-        "bg-gradient-to-l from-[#A1ADE51F] via-[#E519431F] to-[#E556191F]",
+      ai: "bg-gradient-to-l from-[#A1ADE51F] via-[#E519431F] to-[#E556191F]",
       critical: "bg-f1-background-critical",
       positive: "bg-f1-background-positive",
       info: "bg-f1-background-info",
@@ -21,7 +20,7 @@ const calloutVariants = cva({
     },
   },
   defaultVariants: {
-    variant: "default",
+    variant: "ai",
   },
 })
 
@@ -39,7 +38,7 @@ const variantTitleColors: Record<string, string> = {
 
 export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
   function CalloutInternal(
-    { title, onClose, children, actions = [], variant = "default" },
+    { title, onClose, children, actions = [], variant },
     ref
   ) {
     // Validate actions limit
@@ -115,7 +114,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
 
 export const CalloutSkeleton = ({
   compact,
-  variant = "default",
+  variant = "ai",
 }: CalloutSkeletonProps) => {
   return (
     <div
