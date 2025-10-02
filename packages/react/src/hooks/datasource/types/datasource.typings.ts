@@ -103,4 +103,6 @@ export type DataSource<
     item: Item,
     index?: number
   ) => string | number | symbol
+
+  excludedItems?: (string | number | symbol)[]
 }

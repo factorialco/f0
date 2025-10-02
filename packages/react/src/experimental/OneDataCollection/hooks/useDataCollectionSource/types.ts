@@ -135,6 +135,8 @@ export type DataCollectionSourceDefinition<
   bulkActions?: BulkActionsDefinition<R, Filters>
   totalItemSummary?: (totalItems: number) => string
 
+  excludedItems?: (string | number | symbol)[]
+
   /** Lanes configuration */
   lanes?: ReadonlyArray<Lane<Filters>>
 }
