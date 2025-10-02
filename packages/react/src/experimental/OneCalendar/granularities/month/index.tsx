@@ -12,13 +12,14 @@ import {
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
+  formatDateToString,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
 import { rangeSeparator } from "../consts"
-import { GranularityDefinition } from "../types"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { MonthView } from "./MonthView"
 
 export function toMonthGranularityDateRange<
@@ -32,6 +33,29 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
     from: startOfMonth(addMonths(date.from, delta)),
     to: endOfMonth(addMonths(date.to, delta)),
   }
+}
+
+const formatMonthShort = (date: Date | DateRange | undefined | null) => {
+  return formatDateToString(date, "MM/yyyy")
+}
+
+const formatMonthLong = (date: Date | DateRange | undefined | null) => {
+  const dateRange = toMonthGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+  // Single date
+  if (!dateRange.to || isSameMonth(dateRange.from, dateRange.to)) {
+    return formatDate(dateRange.from, "MMM yyyy")
+  }
+
+  // Range
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${formatDate(dateRange.from, "MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+  }
+
+  // Different month and year
+  return `${formatDate(dateRange.from, "MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
 }
 
 export const monthGranularity: GranularityDefinition = {
@@ -61,23 +85,12 @@ export const monthGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => formatDateRange(date, "MM/yyyy"),
   toRange: (date) => toMonthGranularityDateRange(date),
-  toString: (date) => {
-    const dateRange = toMonthGranularityDateRange(date)
-    if (!dateRange) {
-      return ""
+  toString: (date, _, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatMonthShort(date),
+      long: formatMonthLong(date),
     }
-    // Single date
-    if (!dateRange.to || isSameMonth(dateRange.from, dateRange.to)) {
-      return formatDate(dateRange.from, "MMM yyyy")
-    }
-
-    // Range
-    if (isSameYear(dateRange.from, dateRange.to)) {
-      return `${formatDate(dateRange.from, "MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
-    }
-
-    // Different month and year
-    return `${formatDate(dateRange.from, "MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+    return formats[format] ?? formats.default
   },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
