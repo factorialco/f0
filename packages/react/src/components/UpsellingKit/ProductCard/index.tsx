@@ -1,11 +1,8 @@
 import { Button } from "@/components/Actions/Button"
-import {
-  F0AvatarModule,
-  ModuleId,
-  modules,
-} from "@/components/avatars/F0AvatarModule"
-import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
+import { F0Icon } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
+import { One } from "@/icons/special"
 import { useEffect, useState } from "react"
 
 export type ProductCardProps = {
@@ -16,9 +13,16 @@ export type ProductCardProps = {
   isVisible: boolean
   dismissable?: boolean
   trackVisibility?: (open: boolean) => void
-  module: ModuleId | IconType
-  type?: "one-campaign" | undefined
-}
+} & (
+  | {
+      module?: never
+      type: "one-campaign"
+    }
+  | {
+      module: ModuleId
+      type?: never
+    }
+)
 
 export function ProductCard({
   title,
@@ -87,17 +91,19 @@ export function ProductCard({
               onClick={onClick}
             >
               <>
-                {typeof props.module === "string" && props.module in modules ? (
-                  <F0AvatarModule module={props.module as ModuleId} size="lg" />
+                {type === "one-campaign" ? (
+                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+                    <F0Icon icon={One} size="lg" className="!h-8 !w-8" />
+                  </div>
                 ) : (
                   <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                    <F0Icon
-                      icon={props.module as IconType}
+                    <F0AvatarModule
+                      module={props.module as ModuleId}
                       size="lg"
-                      className="!h-8 !w-8"
                     />
                   </div>
                 )}
+
                 <div className="flex flex-1 flex-col">
                   <div>
                     <h3 className="text-lg font-medium">{title}</h3>

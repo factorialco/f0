@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
-import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ProductCard } from "@/components/UpsellingKit/ProductCard"
 import AlertCircle from "@/icons/app/AlertCircle"
 import ChevronRight from "@/icons/app/ChevronRight"
@@ -63,16 +63,25 @@ type ProductUpdatesProp = {
     sectionTitle: string
 
     onClose?: () => void
-    products: Array<{
-      title: string
-      description: string
-      onClick: () => void
-      module: ModuleId | IconType
-      dismissable: boolean
-      onClose?: () => void
-      trackVisibility?: (open: boolean) => void
-      type?: "one-campaign" | undefined
-    }>
+    products: Array<
+      {
+        title: string
+        description: string
+        onClick: () => void
+        dismissable: boolean
+        onClose?: () => void
+        trackVisibility?: (open: boolean) => void
+      } & (
+        | {
+            module?: never
+            type: "one-campaign"
+          }
+        | {
+            module: ModuleId
+            type?: never
+          }
+      )
+    >
   }
 }
 
@@ -494,7 +503,6 @@ const DiscoverMoreProducts = ({
                 isVisible={true}
                 trackVisibility={product.trackVisibility}
                 onClick={() => handleProductClick(product.onClick)}
-                type={product.type}
               />
             ))}
           </Carousel>

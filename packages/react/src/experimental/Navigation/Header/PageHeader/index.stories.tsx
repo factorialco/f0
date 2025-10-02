@@ -1,4 +1,3 @@
-import One from "@/icons/special/One"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
@@ -281,7 +280,6 @@ export const WithProductUpdate: Story = {
             onClose: () => {
               alert("onClose")
             },
-            module: One,
             dismissable: false,
             trackVisibility: (open) => {
               console.log("trackOpenChange", open)
