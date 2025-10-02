@@ -36,14 +36,14 @@ export const TwoColumnsList = forwardRef<HTMLDivElement, TwoColumnsListType>(
             <div className="flex items-center gap-1">
               <div>{title}</div>
               {titleTooltip && (
-                <Tooltip
-                  label={titleTooltip.label}
-                  description={titleTooltip.description}
-                >
-                  <div className="flex h-4 w-4 cursor-help items-center justify-center rounded bg-f1-background-tertiary">
-                    <F0Icon icon={InfoCircleLine} size="sm" color="secondary" />
-                  </div>
-                </Tooltip>
+                <div className="flex h-4 w-4 items-center text-f1-foreground-tertiary hover:cursor-help">
+                  <Tooltip
+                    label={titleTooltip.label}
+                    description={titleTooltip.description}
+                  >
+                    <F0Icon icon={InfoCircleLine} size="sm" />
+                  </Tooltip>
+                </div>
               )}
             </div>
             {titleValue && <div>{titleValue}</div>}
