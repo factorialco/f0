@@ -432,8 +432,20 @@ export function KanbanLane<TRecord extends RecordType>({
       // Restore constraint
       outer.style.height = originalHeight
 
-      // Use the minimum: if content is smaller, use content height; otherwise cap at maxHeight
-      const finalHeight = Math.min(contentHeight, maxHeight)
+      // Calculate final height based on parent constraints
+      let finalHeight: number
+      const MIN_HEIGHT = 400 // Minimum height when no parent constraint
+
+      // If parent height is very small (< 100px), it means no real constraint
+      // Parent likely has no defined height and is collapsing
+      if (maxHeight < 100) {
+        // No real height constraint from parent
+        // Use content height but ensure a minimum
+        finalHeight = Math.max(contentHeight, MIN_HEIGHT)
+      } else {
+        // Parent has meaningful height constraint - cap at parent height
+        finalHeight = Math.min(contentHeight, maxHeight)
+      }
 
       // Only update if height changed by more than 1px (avoid unnecessary re-renders)
       if (
