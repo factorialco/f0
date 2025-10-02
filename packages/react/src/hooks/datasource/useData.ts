@@ -250,6 +250,7 @@ export function useData<
     currentGrouping,
     grouping,
     idProvider = defaultIdProvider,
+    itemFilter,
   } = source
 
   const cleanup = useRef<(() => void) | undefined>()
@@ -263,7 +264,30 @@ export function useData<
     setError,
   } = useDataFetchState<R>()
 
+  const [filteredItemsCount, setFilteredItemsCount] = useState<number>(0)
+
   const { paginationInfo, setPaginationInfo } = usePaginationState()
+
+  useEffect(() => {
+    if (itemFilter) {
+      setRawData((currentData) => {
+        const originalItemsCount = currentData.length
+        const filteredData = currentData.filter(itemFilter)
+        const newItemsCount = filteredData.length
+        const filteredItemsCount = originalItemsCount - newItemsCount
+        setFilteredItemsCount(filteredItemsCount)
+        setPaginationInfo((info) =>
+          info
+            ? {
+                ...info,
+                total: info.total - filteredItemsCount,
+              }
+            : null
+        )
+        return filteredData
+      })
+    }
+  }, [itemFilter, setRawData, setPaginationInfo])
 
   // We need to use a ref to get the latest paginationInfo value
   // because the paginationInfo is updated asynchronously
@@ -735,6 +759,8 @@ export function useData<
     }
   }, [])
 
+  const total = totalItems ? totalItems - filteredItemsCount : 0
+
   return {
     data,
     isInitialLoading,
@@ -745,7 +771,7 @@ export function useData<
     setPage,
     loadMore,
     mergedFilters,
-    totalItems,
+    totalItems: total,
   }
 }
 

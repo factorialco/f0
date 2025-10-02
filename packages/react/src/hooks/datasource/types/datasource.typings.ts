@@ -103,4 +103,7 @@ export type DataSource<
     item: Item,
     index?: number
   ) => string | number | symbol
+
+  /** Item filter that can be used to filter the items before they are displayed */
+  itemFilter?: (item: R) => boolean
 }
