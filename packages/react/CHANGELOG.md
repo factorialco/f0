@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.222.0](https://github.com/factorialco/f0/compare/f0-react-v1.221.0...f0-react-v1.222.0) (2025-10-02)
+
+
+### Features
+
+* accept special icons in product updates modules ([#2745](https://github.com/factorialco/f0/issues/2745)) ([03f23a9](https://github.com/factorialco/f0/commit/03f23a95f98a8eb22cc50f68858069eb8405a554))
+
 ## [1.221.0](https://github.com/factorialco/f0/compare/f0-react-v1.220.0...f0-react-v1.221.0) (2025-10-02)
 
 
