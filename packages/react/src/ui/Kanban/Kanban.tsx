@@ -20,9 +20,36 @@ export function Kanban<TRecord extends RecordType>(
   const [localLanes, setLocalLanes] = useState(
     () => lanes as KanbanProps<TRecord>["lanes"]
   )
+
+  const lastLanesRef = useRef<string>("")
+  const optimisticSignatureRef = useRef<string | null>(null)
+
   useEffect(() => {
-    setLocalLanes(lanes)
-  }, [lanes])
+    const newSignature = lanes
+      .map(
+        (l) =>
+          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+      )
+      .join("|")
+
+    // If we're in optimistic mode, only accept updates that match our optimistic state
+    if (optimisticSignatureRef.current !== null) {
+      if (newSignature === optimisticSignatureRef.current) {
+        // Props match optimistic update - accept and clear optimistic mode
+        optimisticSignatureRef.current = null
+        lastLanesRef.current = newSignature
+        setLocalLanes(lanes)
+      } else {
+        // Ignore stale props that don't match optimistic state
+        return
+      }
+    } else if (newSignature !== lastLanesRef.current) {
+      // Normal update: props have changed
+      lastLanesRef.current = newSignature
+      setLocalLanes(lanes)
+    }
+    // else: skip - already have these lanes
+  }, [lanes, getKey, localLanes])
 
   // Horizontal edge zones for board autoscroll (debug visibility + logs)
   const [isDragging, setIsDragging] = useState(false)
@@ -197,6 +224,17 @@ export function Kanban<TRecord extends RecordType>(
     // Optimistic apply
     setLocalLanes(next)
 
+    const optimisticSignature = next
+      .map(
+        (l) =>
+          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+      )
+      .join("|")
+
+    // Enter optimistic mode - ignore external updates until server confirms
+    optimisticSignatureRef.current = optimisticSignature
+    lastLanesRef.current = optimisticSignature
+
     try {
       // Call external move if provided
       const destinyRecord =
@@ -217,8 +255,8 @@ export function Kanban<TRecord extends RecordType>(
 
       if (result) {
         // Replace record by id with backend version
-        setLocalLanes((curr) =>
-          curr.map((lane) => {
+        setLocalLanes((curr) => {
+          const updated = curr.map((lane) => {
             if (lane.id !== toLaneId) return lane
             const items = [...lane.items]
             const idx = items.findIndex((item, index) => {
@@ -228,12 +266,23 @@ export function Kanban<TRecord extends RecordType>(
             if (idx !== -1) items.splice(idx, 1, result)
             return { ...lane, items }
           })
-        )
+
+          const serverSignature = updated
+            .map(
+              (l) =>
+                `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+            )
+            .join("|")
+          lastLanesRef.current = serverSignature
+
+          return updated
+        })
       }
       return result as TRecord
     } catch (e) {
-      // Rollback
+      // Rollback and exit optimistic mode
       setLocalLanes(prev)
+      optimisticSignatureRef.current = null
       throw e
     }
   }
