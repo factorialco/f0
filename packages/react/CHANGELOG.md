@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.223.0](https://github.com/factorialco/f0/compare/f0-react-v1.222.0...f0-react-v1.223.0) (2025-10-02)
+
+
+### Features
+
+* add onCreate in kanbanView ([#2733](https://github.com/factorialco/f0/issues/2733)) ([44ca1d6](https://github.com/factorialco/f0/commit/44ca1d66a9a45152bd06c8e1cb2d15cc146e6990))
+
 ## [1.222.0](https://github.com/factorialco/f0/compare/f0-react-v1.221.0...f0-react-v1.222.0) (2025-10-02)
 
 
