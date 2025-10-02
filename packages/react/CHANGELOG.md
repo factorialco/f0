@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.218.0](https://github.com/factorialco/f0/compare/f0-react-v1.217.0...f0-react-v1.218.0) (2025-10-02)
+
+
+### Features
+
+* **Icons:** add One special icon ([#2741](https://github.com/factorialco/f0/issues/2741)) ([19b8a1a](https://github.com/factorialco/f0/commit/19b8a1ae9ec32d6cb9cc40189e0bc7a0fa84ddf0))
+
 ## [1.217.0](https://github.com/factorialco/f0/compare/f0-react-v1.216.0...f0-react-v1.217.0) (2025-10-01)
 
 

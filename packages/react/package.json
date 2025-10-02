@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.217.0",
+  "version": "1.218.0",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
