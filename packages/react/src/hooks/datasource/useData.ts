@@ -267,8 +267,11 @@ export function useData<
   useEffect(() => {
     if (itemFilter) {
       setRawData((currentData) => {
+        const originalItemsCount = currentData.length
         const filteredData = currentData.filter(itemFilter)
-        const filteredItemsCount = currentData.length - filteredData.length
+        const newItemsCount = filteredData.length
+        const filteredItemsCount = originalItemsCount - newItemsCount
+        console.log({ originalItemsCount, newItemsCount, filteredItemsCount })
         setTotalItems((total) => (total ?? 0) - filteredItemsCount)
         return filteredData
       })
