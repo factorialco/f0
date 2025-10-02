@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.221.0](https://github.com/factorialco/f0/compare/f0-react-v1.220.0...f0-react-v1.221.0) (2025-10-02)
+
+
+### Features
+
+* add tooltip to two columns list ([#2736](https://github.com/factorialco/f0/issues/2736)) ([0378069](https://github.com/factorialco/f0/commit/03780693ca58bdfb6b17a6b2eefec52b44472420))
+
 ## [1.220.0](https://github.com/factorialco/f0/compare/f0-react-v1.219.0...f0-react-v1.220.0) (2025-10-02)
 
 
