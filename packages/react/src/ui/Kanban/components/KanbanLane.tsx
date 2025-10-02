@@ -7,6 +7,7 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react"
@@ -33,8 +34,11 @@ export function KanbanLane<TRecord extends RecordType>({
   allowReorder?: boolean
 } & LaneProps<TRecord>) {
   const laneRef = useRef<HTMLDivElement | null>(null)
+  const outerRef = useRef<HTMLDivElement | null>(null)
+  const measureRef = useRef<HTMLDivElement | null>(null)
   // const coordinator = useMoveCoordinator()
   const [isOver, setIsOver] = useState(false)
+  const [calculatedHeight, setCalculatedHeight] = useState<number | null>(null)
   const hasFullDnD = Boolean(id && getLaneResourceIndexById)
 
   // Autoscroll state
@@ -398,8 +402,90 @@ export function KanbanLane<TRecord extends RecordType>({
       window.removeEventListener("kanban-test-move", handler as EventListener)
   }, [id, onMove])
 
+  // Calculate dynamic height based on content and container
+  useLayoutEffect(() => {
+    const measure = measureRef.current
+    const outer = outerRef.current
+    if (!measure || !outer) return
+
+    let rafId: number | null = null
+    let lastCalculatedHeight: number | null = null
+
+    const calculateHeight = () => {
+      // Get parent flex container (the one with items-start)
+      const flexContainer = outer.parentElement?.parentElement
+      if (!flexContainer) return
+
+      // Get max available height from the flex container
+      const maxHeight = flexContainer.offsetHeight
+
+      // Temporarily remove height constraint to measure natural content height
+      const originalHeight = outer.style.height
+      outer.style.height = "auto"
+
+      // Force reflow to ensure accurate measurement
+      void measure.offsetHeight
+
+      // Get natural content height by looking at the Lane component inside
+      const contentHeight = measure.scrollHeight
+
+      // Restore constraint
+      outer.style.height = originalHeight
+
+      // Use the minimum: if content is smaller, use content height; otherwise cap at maxHeight
+      const finalHeight = Math.min(contentHeight, maxHeight)
+
+      // Only update if height changed by more than 1px (avoid unnecessary re-renders)
+      if (
+        lastCalculatedHeight === null ||
+        Math.abs(finalHeight - lastCalculatedHeight) > 1
+      ) {
+        lastCalculatedHeight = finalHeight
+        setCalculatedHeight(finalHeight)
+      }
+    }
+
+    // Calculate immediately in layout effect
+    calculateHeight()
+
+    // Debounced recalculation using requestAnimationFrame
+    const scheduleCalculation = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(() => {
+        calculateHeight()
+        rafId = null
+      })
+    }
+
+    // Observe changes in content
+    const resizeObserver = new ResizeObserver(scheduleCalculation)
+
+    resizeObserver.observe(measure)
+
+    // Also observe the flex container for viewport changes
+    const flexContainer = outer.parentElement?.parentElement
+    if (flexContainer) {
+      resizeObserver.observe(flexContainer)
+    }
+
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+      resizeObserver.disconnect()
+    }
+  }, [laneProps.items.length, laneProps.loading])
+
   return (
-    <div className="relative h-full rounded">
+    <div
+      ref={outerRef}
+      className="relative rounded"
+      style={{
+        height: calculatedHeight ? `${calculatedHeight}px` : undefined,
+      }}
+    >
       <div
         ref={laneRef}
         className={
@@ -420,22 +506,24 @@ export function KanbanLane<TRecord extends RecordType>({
           )}
           aria-hidden
         />
-        <Lane<TRecord>
-          {...laneProps}
-          renderCard={(item, index) => {
-            const node = laneProps.renderCard(item, index)
-            if (isValidElement(node)) {
-              const edge = index === forcedIndex ? forcedEdge : null
-              return cloneElement(
-                node as React.ReactElement<Record<string, unknown>>,
-                {
-                  forcedEdge: edge,
-                }
-              )
-            }
-            return node
-          }}
-        />
+        <div ref={measureRef} className="flex h-full flex-col">
+          <Lane<TRecord>
+            {...laneProps}
+            renderCard={(item, index) => {
+              const node = laneProps.renderCard(item, index)
+              if (isValidElement(node)) {
+                const edge = index === forcedIndex ? forcedEdge : null
+                return cloneElement(
+                  node as React.ReactElement<Record<string, unknown>>,
+                  {
+                    forcedEdge: edge,
+                  }
+                )
+              }
+              return node
+            }}
+          />
+        </div>
       </div>
     </div>
   )

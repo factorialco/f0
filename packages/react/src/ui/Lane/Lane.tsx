@@ -57,7 +57,7 @@ export function Lane<Record extends RecordType>({
       <div
         className={cn(
           "relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1",
-          showFooterAction && "pb-9"
+          showFooterAction && "pb-11"
         )}
       >
         {loading ? (

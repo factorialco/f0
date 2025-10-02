@@ -2,7 +2,6 @@ import { PromiseState } from "@/lib/promise-to-observable"
 import { Observable } from "zen-observable-ts"
 
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
-import { cn } from "@/lib/utils"
 import { generateMockUsers, MockUser } from "@/mocks"
 export { generateMockUsers, type MockUser }
 
@@ -847,7 +846,10 @@ export const ExampleComponent = ({
 
   return (
     <div
-      className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
+      className={"space-y-4"}
+      style={{
+        height: fullHeight ? "calc(100vh - 32px)" : "auto",
+      }}
     >
       <OneDataCollection
         id={id}

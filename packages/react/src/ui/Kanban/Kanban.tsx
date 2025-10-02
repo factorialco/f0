@@ -244,14 +244,14 @@ export function Kanban<TRecord extends RecordType>(
         className={"relative h-full w-full [&>div>div]:h-full"}
         viewportRef={viewportRef}
       >
-        <div className="relative mb-2 flex h-full gap-2">
+        <div className="relative mb-2 flex h-full items-start gap-2">
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
               const total = lane.total ?? lane.items.length
               return (
                 <div
                   key={lane.id ?? String(laneIndex)}
-                  className="relative h-full shrink-0"
+                  className="relative shrink-0"
                   data-testid={`lane-${lane.id ?? String(laneIndex)}`}
                 >
                   <KanbanLane<TRecord>
