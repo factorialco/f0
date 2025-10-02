@@ -751,11 +751,14 @@ export function useData<
     }
   }, [])
 
-  const finalTotalItems = totalItems
-    ? totalItems - filteredItemsCount
-    : undefined
+  const total = totalItems ? totalItems - filteredItemsCount : 0
 
-  console.log({ finalTotalItems })
+  const finalPaginationInfo = paginationInfo
+    ? {
+        ...paginationInfo,
+        total,
+      }
+    : null
 
   return {
     data,
@@ -763,11 +766,11 @@ export function useData<
     isLoading,
     isLoadingMore,
     error,
-    paginationInfo,
+    paginationInfo: finalPaginationInfo,
     setPage,
     loadMore,
     mergedFilters,
-    totalItems: finalTotalItems,
+    totalItems: total,
   }
 }
 
