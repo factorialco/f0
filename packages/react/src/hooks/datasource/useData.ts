@@ -84,6 +84,8 @@ export type WithGroupId<RecordType> = RecordType & {
  */
 export interface UseDataReturn<R extends RecordType> {
   data: Data<R>
+  rawData: R[]
+  setRawData: (data: R[]) => void
   isInitialLoading: boolean
   isLoading: boolean
   isLoadingMore: boolean
@@ -96,6 +98,7 @@ export interface UseDataReturn<R extends RecordType> {
   // For infinite-scroll pagination:
   loadMore: () => void
   totalItems: number | undefined
+  setTotalItems: (totalItems: number | undefined) => void
 
   // Merged filters (default values and current values)
   mergedFilters: FiltersState<FiltersDefinition>
@@ -737,6 +740,8 @@ export function useData<
 
   return {
     data,
+    rawData,
+    setRawData,
     isInitialLoading,
     isLoading,
     isLoadingMore,
@@ -746,6 +751,7 @@ export function useData<
     loadMore,
     mergedFilters,
     totalItems,
+    setTotalItems,
   }
 }
 
