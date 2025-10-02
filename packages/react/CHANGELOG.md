@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.220.0](https://github.com/factorialco/f0/compare/f0-react-v1.219.0...f0-react-v1.220.0) (2025-10-02)
+
+
+### Features
+
+* add itemFilter in useData ([#2748](https://github.com/factorialco/f0/issues/2748)) ([f949e4d](https://github.com/factorialco/f0/commit/f949e4d490a556d6604c86a14269b67d10b577db))
+
 ## [1.219.0](https://github.com/factorialco/f0/compare/f0-react-v1.218.0...f0-react-v1.219.0) (2025-10-02)
 
 
