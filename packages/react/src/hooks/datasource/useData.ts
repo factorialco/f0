@@ -264,6 +264,8 @@ export function useData<
     setError,
   } = useDataFetchState<R>()
 
+  const [filteredItemsCount, setFilteredItemsCount] = useState<number>(0)
+
   useEffect(() => {
     if (itemFilter) {
       setRawData((currentData) => {
@@ -271,8 +273,7 @@ export function useData<
         const filteredData = currentData.filter(itemFilter)
         const newItemsCount = filteredData.length
         const filteredItemsCount = originalItemsCount - newItemsCount
-        console.log({ originalItemsCount, newItemsCount, filteredItemsCount })
-        setTotalItems((total) => (total ?? 0) - filteredItemsCount)
+        setFilteredItemsCount(filteredItemsCount)
         return filteredData
       })
     }
@@ -750,6 +751,12 @@ export function useData<
     }
   }, [])
 
+  const finalTotalItems = totalItems
+    ? totalItems - filteredItemsCount
+    : undefined
+
+  console.log({ finalTotalItems })
+
   return {
     data,
     isInitialLoading,
@@ -760,7 +767,7 @@ export function useData<
     setPage,
     loadMore,
     mergedFilters,
-    totalItems,
+    totalItems: finalTotalItems,
   }
 }
 
