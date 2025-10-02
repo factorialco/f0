@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.219.0](https://github.com/factorialco/f0/compare/f0-react-v1.218.0...f0-react-v1.219.0) (2025-10-02)
+
+
+### Features
+
+* add positive variant to TagAlert component ([#2744](https://github.com/factorialco/f0/issues/2744)) ([af1c2bc](https://github.com/factorialco/f0/commit/af1c2bca476d5741071df5e5f633955cdc8813f1))
+
 ## [1.218.0](https://github.com/factorialco/f0/compare/f0-react-v1.217.0...f0-react-v1.218.0) (2025-10-02)
 
 
