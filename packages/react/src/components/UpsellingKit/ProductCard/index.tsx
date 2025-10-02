@@ -1,5 +1,10 @@
 import { Button } from "@/components/Actions/Button"
-import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
+import {
+  F0AvatarModule,
+  ModuleId,
+  modules,
+} from "@/components/avatars/F0AvatarModule"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { useEffect, useState } from "react"
 
@@ -11,7 +16,7 @@ export type ProductCardProps = {
   isVisible: boolean
   dismissable?: boolean
   trackVisibility?: (open: boolean) => void
-  module: ModuleId
+  module: ModuleId | IconType
   type?: "one-campaign" | undefined
 }
 
@@ -81,13 +86,28 @@ export function ProductCard({
               style={getCardStyles()}
               onClick={onClick}
             >
-              <F0AvatarModule module={props.module} size="lg" />
-              <div className="flex flex-1 flex-col">
-                <div>
-                  <h3 className="text-lg font-medium">{title}</h3>
-                  <p className="text-f1-foreground-secondary">{description}</p>
+              <>
+                {typeof props.module === "string" && props.module in modules ? (
+                  <F0AvatarModule module={props.module as ModuleId} size="lg" />
+                ) : (
+                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+                    <F0Icon
+                      icon={props.module as IconType}
+                      size="lg"
+                      className="!h-8 !w-8"
+                    />
+                  </div>
+                )}
+                <div className="flex flex-1 flex-col">
+                  <div>
+                    <h3 className="text-lg font-medium">{title}</h3>
+                    <p className="text-f1-foreground-secondary">
+                      {description}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </>
+
               {dismissable && (
                 <div className="h-6 w-6">
                   <Button

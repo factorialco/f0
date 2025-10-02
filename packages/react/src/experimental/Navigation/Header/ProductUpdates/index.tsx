@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { ProductCard } from "@/components/UpsellingKit/ProductCard"
 import AlertCircle from "@/icons/app/AlertCircle"
 import ChevronRight from "@/icons/app/ChevronRight"
@@ -67,7 +67,7 @@ type ProductUpdatesProp = {
       title: string
       description: string
       onClick: () => void
-      module: ModuleId
+      module: ModuleId | IconType
       dismissable: boolean
       onClose?: () => void
       trackVisibility?: (open: boolean) => void
