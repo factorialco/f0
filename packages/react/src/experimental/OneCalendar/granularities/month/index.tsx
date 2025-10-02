@@ -1,14 +1,23 @@
 import NumberFlow from "@number-flow/react"
-import { addMonths, addYears, endOfMonth, parse, startOfMonth } from "date-fns"
+import {
+  addMonths,
+  addYears,
+  endOfMonth,
+  formatDate,
+  isSameMonth,
+  isSameYear,
+  parse,
+  startOfMonth,
+} from "date-fns"
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
-  formatDateToString,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
+import { rangeSeparator } from "../consts"
 import { GranularityDefinition } from "../types"
 import { MonthView } from "./MonthView"
 
@@ -52,7 +61,24 @@ export const monthGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => formatDateRange(date, "MM/yyyy"),
   toRange: (date) => toMonthGranularityDateRange(date),
-  toString: (date) => formatDateToString(date, "MM/yyyy"),
+  toString: (date) => {
+    const dateRange = toMonthGranularityDateRange(date)
+    if (!dateRange) {
+      return ""
+    }
+    // Single date
+    if (!dateRange.to || isSameMonth(dateRange.from, dateRange.to)) {
+      return formatDate(dateRange.from, "MMM yyyy")
+    }
+
+    // Range
+    if (isSameYear(dateRange.from, dateRange.to)) {
+      return `${formatDate(dateRange.from, "MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+    }
+
+    // Different month and year
+    return `${formatDate(dateRange.from, "MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

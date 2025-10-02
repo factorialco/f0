@@ -1,4 +1,3 @@
-import { rangeSeparator } from "@/experimental/exports"
 import {
   addDays,
   addMonths,
@@ -18,6 +17,7 @@ import {
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
+import { rangeSeparator } from "../consts"
 import { GranularityDefinition } from "../types"
 import { DayView } from "./DayView"
 
@@ -86,6 +86,7 @@ export const dayGranularity: GranularityDefinition = {
       return `${formatDate(dateRange.from, "dd MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
     }
 
+    // Different month and year
     return `${formatDate(dateRange.from, "dd MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
   },
   fromString: (dateStr) => {

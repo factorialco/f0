@@ -1,8 +1,15 @@
-import { addMonths, addYears, endOfQuarter, startOfQuarter } from "date-fns"
+import {
+  addMonths,
+  addYears,
+  endOfQuarter,
+  formatDate,
+  isSameQuarter,
+  isSameYear,
+  startOfQuarter,
+} from "date-fns"
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
-  formatDateToString,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
@@ -52,7 +59,25 @@ export const quarterGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => formatDateRange(date, "'Q'Q yyyy"),
   toRange: (date) => toQuarterGranularityDateRange(date),
-  toString: (date) => formatDateToString(date, "'Q'Q yyyy"),
+  toString: (date) => {
+    const dateRange = toQuarterGranularityDateRange(date)
+    if (!dateRange) {
+      return ""
+    }
+    // Single date
+    if (!dateRange.to || isSameQuarter(dateRange.from, dateRange.to)) {
+      return formatDate(dateRange.from, "'Q'Q yyyy")
+    }
+
+    // Range
+    // Same year
+    if (isSameYear(dateRange.from, dateRange.to)) {
+      return `${formatDate(dateRange.from, "'Q'Q")} ${rangeSeparator} ${formatDate(dateRange.to, "'Q'Q yyyy")}`
+    }
+
+    // Different year
+    return `${formatDate(dateRange.from, "'Q'Q yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "'Q'Q yyyy")}`
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
