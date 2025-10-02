@@ -266,6 +266,8 @@ export function useData<
 
   const [filteredItemsCount, setFilteredItemsCount] = useState<number>(0)
 
+  const { paginationInfo, setPaginationInfo } = usePaginationState()
+
   useEffect(() => {
     if (itemFilter) {
       setRawData((currentData) => {
@@ -274,12 +276,18 @@ export function useData<
         const newItemsCount = filteredData.length
         const filteredItemsCount = originalItemsCount - newItemsCount
         setFilteredItemsCount(filteredItemsCount)
+        setPaginationInfo((info) =>
+          info
+            ? {
+                ...info,
+                total: info.total - filteredItemsCount,
+              }
+            : null
+        )
         return filteredData
       })
     }
-  }, [itemFilter, setRawData])
-
-  const { paginationInfo, setPaginationInfo } = usePaginationState()
+  }, [itemFilter, setRawData, setPaginationInfo])
 
   // We need to use a ref to get the latest paginationInfo value
   // because the paginationInfo is updated asynchronously
@@ -753,20 +761,13 @@ export function useData<
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 
-  const finalPaginationInfo = paginationInfo
-    ? {
-        ...paginationInfo,
-        total,
-      }
-    : null
-
   return {
     data,
     isInitialLoading,
     isLoading,
     isLoadingMore,
     error,
-    paginationInfo: finalPaginationInfo,
+    paginationInfo,
     setPage,
     loadMore,
     mergedFilters,
