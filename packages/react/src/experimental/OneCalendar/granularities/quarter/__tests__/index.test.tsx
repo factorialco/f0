@@ -67,6 +67,11 @@ describe("quarterGranularity", () => {
       expect(result).toBe("Q1 2024")
     })
 
+    it("formats a single date correctly with long format", () => {
+      const result = quarterGranularity.toString(baseDate, i18n, "long")
+      expect(result).toBe("Q1 2024")
+    })
+
     it("formats a date range correctly", () => {
       const result = quarterGranularity.toString(
         {
@@ -76,6 +81,81 @@ describe("quarterGranularity", () => {
         i18n
       )
       expect(result).toBe("Q1 2024 → Q2 2024")
+    })
+
+    it("formats a date range correctly with long format", () => {
+      const result = quarterGranularity.toString(
+        {
+          from: baseDate,
+          to: nextQuarterDate,
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Q1 → Q2 2024")
+    })
+
+    it("formats a quarter range across years correctly with long format", () => {
+      const result = quarterGranularity.toString(
+        {
+          from: new Date(2023, 9, 15), // Q4 2023 (October)
+          to: new Date(2024, 2, 15), // Q1 2024 (March)
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Q4 2023 → Q1 2024")
+    })
+
+    it("formats a long quarter range in same year correctly with long format", () => {
+      const result = quarterGranularity.toString(
+        {
+          from: new Date(2024, 0, 15), // Q1 2024
+          to: new Date(2024, 8, 15), // Q3 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Q1 → Q3 2024")
+    })
+
+    it("formats all quarters correctly with long format", () => {
+      expect(
+        quarterGranularity.toString(new Date(2024, 0, 15), i18n, "long")
+      ).toBe("Q1 2024") // January - Q1
+      expect(
+        quarterGranularity.toString(new Date(2024, 3, 15), i18n, "long")
+      ).toBe("Q2 2024") // April - Q2
+      expect(
+        quarterGranularity.toString(new Date(2024, 6, 15), i18n, "long")
+      ).toBe("Q3 2024") // July - Q3
+      expect(
+        quarterGranularity.toString(new Date(2024, 9, 15), i18n, "long")
+      ).toBe("Q4 2024") // October - Q4
+    })
+
+    it("formats quarter boundaries correctly with long format", () => {
+      const result = quarterGranularity.toString(
+        {
+          from: new Date(2024, 2, 31), // March 31, 2024 (end of Q1)
+          to: new Date(2024, 3, 1), // April 1, 2024 (start of Q2)
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Q1 → Q2 2024")
+    })
+
+    it("formats full year quarter range correctly with long format", () => {
+      const result = quarterGranularity.toString(
+        {
+          from: new Date(2024, 0, 1), // Q1 2024
+          to: new Date(2024, 9, 31), // Q4 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Q1 → Q4 2024")
     })
   })
 

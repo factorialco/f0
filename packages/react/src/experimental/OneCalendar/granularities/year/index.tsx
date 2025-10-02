@@ -9,7 +9,7 @@ import {
   toGranularityDateRange,
 } from "../../utils"
 import { rangeSeparator } from "../consts"
-import { GranularityDefinition } from "../types"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { YearView } from "./YearView"
 
 export function toYearGranularityDateRange<
@@ -56,7 +56,13 @@ export const yearGranularity: GranularityDefinition = {
   },
   toRange: (date) => toYearGranularityDateRange(date),
   toRangeString: (date) => formatDateRange(date, "yyyy"),
-  toString: (date) => formatDateToString(date, "yyyy"),
+  toString: (date, _, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatDateToString(date, "yyyy"),
+      long: formatDateToString(date, "yyyy"), // For years, long format is the same as default
+    }
+    return formats[format] ?? formats.default
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

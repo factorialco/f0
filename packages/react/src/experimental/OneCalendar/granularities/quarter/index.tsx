@@ -1,4 +1,12 @@
-import { addMonths, addYears, endOfQuarter, startOfQuarter } from "date-fns"
+import {
+  addMonths,
+  addYears,
+  endOfQuarter,
+  formatDate,
+  isSameQuarter,
+  isSameYear,
+  startOfQuarter,
+} from "date-fns"
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
@@ -9,7 +17,7 @@ import {
   toGranularityDateRange,
 } from "../../utils"
 import { rangeSeparator } from "../consts"
-import { GranularityDefinition } from "../types"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { QuarterView } from "./QuarterView"
 
 export function toQuarterGranularityDateRange<
@@ -23,6 +31,30 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
     from: startOfQuarter(addMonths(date.from, delta * 3)),
     to: endOfQuarter(addMonths(date.to, delta * 3)),
   }
+}
+
+const formatQuarterShort = (date: Date | DateRange | undefined | null) => {
+  return formatDateToString(date, "'Q'Q yyyy")
+}
+
+const formatQuarterLong = (date: Date | DateRange | undefined | null) => {
+  const dateRange = toQuarterGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+  // Single date
+  if (!dateRange.to || isSameQuarter(dateRange.from, dateRange.to)) {
+    return formatDate(dateRange.from, "'Q'Q yyyy")
+  }
+
+  // Range
+  // Same year
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${formatDate(dateRange.from, "'Q'Q")} ${rangeSeparator} ${formatDate(dateRange.to, "'Q'Q yyyy")}`
+  }
+
+  // Different year
+  return `${formatDate(dateRange.from, "'Q'Q yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "'Q'Q yyyy")}`
 }
 
 export const quarterGranularity: GranularityDefinition = {
@@ -52,7 +84,13 @@ export const quarterGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => formatDateRange(date, "'Q'Q yyyy"),
   toRange: (date) => toQuarterGranularityDateRange(date),
-  toString: (date) => formatDateToString(date, "'Q'Q yyyy"),
+  toString: (date, _, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatQuarterShort(date),
+      long: formatQuarterLong(date),
+    }
+    return formats[format] ?? formats.default
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

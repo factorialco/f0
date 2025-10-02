@@ -167,6 +167,21 @@ export function OneCalendar({
       handleSelect(newDate)
     }
   }
+
+  // When the granularity changes, the range to the correct granularity
+  useEffect(
+    () => {
+      const range = toDateRange(selected)
+      if (!range) return
+
+      const newRange = granularity.toRange(range.from)
+
+      handleSelect(newRange)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the granularity changes
+    [granularity]
+  )
+
   useEffect(() => {
     const range = toDateRange(selected)
 

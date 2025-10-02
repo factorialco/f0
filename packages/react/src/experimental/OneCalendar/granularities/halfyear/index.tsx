@@ -4,6 +4,8 @@ import {
   endOfMonth,
   endOfYear,
   getMonth,
+  getYear,
+  isSameYear,
   setMonth,
   startOfMonth,
   startOfYear,
@@ -16,13 +18,17 @@ import {
   toGranularityDateRange,
 } from "../../utils"
 import { rangeSeparator } from "../consts"
-import { GranularityDefinition } from "../types"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { HalfYearView } from "./HalfyearView"
+
+const formatHalfYearFull = (date: Date) => {
+  return `${formatHalfYear(date)} ${date.getFullYear()}`
+}
 
 const formatHalfYear = (date: Date) => {
   const month = date.getMonth()
   const halfYear = Math.floor(month / 6)
-  return `H${halfYear + 1} ${date.getFullYear()}`
+  return `H${halfYear + 1}`
 }
 
 const toRangeString = (date: Date | DateRange | undefined | null) => {
@@ -34,8 +40,8 @@ const toRangeString = (date: Date | DateRange | undefined | null) => {
     }
   }
 
-  const from = formatHalfYear(dateRange.from)
-  const to = dateRange.to ? formatHalfYear(dateRange.to) : undefined
+  const from = formatHalfYearFull(dateRange.from)
+  const to = dateRange.to ? formatHalfYearFull(dateRange.to) : undefined
 
   return {
     from,
@@ -56,7 +62,7 @@ export function toHalfYearGranularityDateRange<
   return toGranularityDateRange(
     date,
     (date) => {
-      if (getMonth(date) < 5) {
+      if (getMonth(date) < 6) {
         return startOfYear(date)
       }
       return startOfMonth(setMonth(date, 6))
@@ -64,6 +70,42 @@ export function toHalfYearGranularityDateRange<
     (date) =>
       getMonth(date) < 6 ? endOfMonth(setMonth(date, 5)) : endOfYear(date)
   )
+}
+
+const isSameHalfYear = (date1: Date, date2: Date) => {
+  const start = toHalfYearGranularityDateRange(date1)
+  const end = toHalfYearGranularityDateRange(date2)
+  return formatHalfYearFull(start.from) === formatHalfYearFull(end.from)
+}
+
+const formatHalfYearShort = (date: Date | DateRange | undefined | null) => {
+  const dateRange = toRangeString(date)
+  if (!dateRange) {
+    return "-"
+  }
+  const { from, to } = dateRange
+
+  return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
+}
+
+const formatHalfYearLong = (date: Date | DateRange | undefined | null) => {
+  const dateRange = toHalfYearGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+  // Single date
+  if (!dateRange.to || isSameHalfYear(dateRange.from, dateRange.to)) {
+    return formatHalfYearFull(dateRange.from)
+  }
+
+  // Range
+  // Same Year
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${formatHalfYear(dateRange.from)} ${rangeSeparator} ${formatHalfYear(dateRange.to)} ${getYear(dateRange.to)}`
+  }
+
+  // Different year
+  return `${formatHalfYearFull(dateRange.from)} ${rangeSeparator} ${formatHalfYearFull(dateRange.to)}`
 }
 
 export const halfyearGranularity: GranularityDefinition = {
@@ -93,14 +135,12 @@ export const halfyearGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => toRangeString(date),
   toRange: (date) => toHalfYearGranularityDateRange(date),
-  toString: (date) => {
-    const dateRange = toRangeString(date)
-    if (!dateRange) {
-      return "-"
+  toString: (date, _, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatHalfYearShort(date),
+      long: formatHalfYearLong(date),
     }
-    const { from, to } = dateRange
-
-    return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
+    return formats[format] ?? formats.default
   },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)

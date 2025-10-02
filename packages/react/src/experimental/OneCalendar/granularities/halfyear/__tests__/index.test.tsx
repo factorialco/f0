@@ -65,6 +65,11 @@ describe("halfyearGranularity", () => {
       expect(result).toBe("H1 2024")
     })
 
+    it("formats a single date correctly with long format", () => {
+      const result = halfyearGranularity.toString(baseDate, i18n, "long")
+      expect(result).toBe("H1 2024")
+    })
+
     it("formats a date range correctly", () => {
       const result = halfyearGranularity.toString(
         {
@@ -74,6 +79,87 @@ describe("halfyearGranularity", () => {
         i18n
       )
       expect(result).toBe("H1 2024 → H2 2024")
+    })
+
+    it("formats a date range correctly with long format", () => {
+      const result = halfyearGranularity.toString(
+        {
+          from: baseDate,
+          to: secondHalfDate,
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("H1 → H2 2024")
+    })
+
+    it("formats a half-year range across years correctly with long format", () => {
+      const result = halfyearGranularity.toString(
+        {
+          from: new Date(2023, 6, 1), // H2 2023 (July)
+          to: new Date(2024, 2, 1), // H1 2024 (March)
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("H2 2023 → H1 2024")
+    })
+
+    it("formats both half-years correctly with long format", () => {
+      expect(
+        halfyearGranularity.toString(new Date(2024, 0, 15), i18n, "long")
+      ).toBe("H1 2024") // January - H1
+      expect(
+        halfyearGranularity.toString(new Date(2024, 3, 15), i18n, "long")
+      ).toBe("H1 2024") // April - H1
+      expect(
+        halfyearGranularity.toString(new Date(2024, 5, 15), i18n, "long")
+      ).toBe("H1 2024") // June - H1
+      expect(
+        halfyearGranularity.toString(new Date(2024, 6, 15), i18n, "long")
+      ).toBe("H2 2024") // July - H2
+      expect(
+        halfyearGranularity.toString(new Date(2024, 9, 15), i18n, "long")
+      ).toBe("H2 2024") // October - H2
+      expect(
+        halfyearGranularity.toString(new Date(2024, 11, 15), i18n, "long")
+      ).toBe("H2 2024") // December - H2
+    })
+
+    it("formats half-year boundaries correctly with long format 2", () => {
+      const result = halfyearGranularity.toString(
+        {
+          from: new Date(2024, 5, 30), // June 30, 2024 (end of H1)
+          to: new Date(2024, 6, 1), // July 1, 2024 (start of H2)
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("H1 → H2 2024")
+    })
+
+    it("formats multi-year half-year range correctly with long format", () => {
+      const result = halfyearGranularity.toString(
+        {
+          from: new Date(2023, 0, 1), // H1 2023
+          to: new Date(2025, 6, 1), // H2 2025
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("H1 2023 → H2 2025")
+    })
+
+    it("formats same half-year range correctly with long format", () => {
+      const result = halfyearGranularity.toString(
+        {
+          from: new Date(2024, 0, 1), // H1 2024 (January)
+          to: new Date(2024, 2, 31), // H1 2024 (March)
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("H1 2024")
     })
   })
 
