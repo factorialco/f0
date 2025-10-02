@@ -250,7 +250,7 @@ export function useData<
     currentGrouping,
     grouping,
     idProvider = defaultIdProvider,
-    excludedItems,
+    itemFilter,
   } = source
 
   const cleanup = useRef<(() => void) | undefined>()
@@ -265,16 +265,15 @@ export function useData<
   } = useDataFetchState<R>()
 
   useEffect(() => {
-    if (excludedItems) {
-      setRawData((currentData) =>
-        currentData.filter((item) => {
-          const itemId = idProvider(item)
-          return !excludedItems.includes(itemId)
-        })
-      )
-      setTotalItems((total) => (total ?? 0) - excludedItems.length)
+    if (itemFilter) {
+      setRawData((currentData) => {
+        const filteredData = currentData.filter(itemFilter)
+        const filteredItemsCount = currentData.length - filteredData.length
+        setTotalItems((total) => (total ?? 0) - filteredItemsCount)
+        return filteredData
+      })
     }
-  }, [idProvider, excludedItems, setRawData])
+  }, [itemFilter, setRawData])
 
   const { paginationInfo, setPaginationInfo } = usePaginationState()
 
