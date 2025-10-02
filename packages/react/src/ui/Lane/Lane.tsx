@@ -1,7 +1,9 @@
+import { ButtonInternal } from "@/components/Actions/Button/internal"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
 import type { RecordType } from "@/hooks/datasource"
+import { Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
@@ -21,6 +23,8 @@ export function Lane<Record extends RecordType>({
   hasMore = false,
   loadingMore = false,
   total,
+  onPrimaryAction,
+  onFooterAction,
 }: LaneProps<Record>) {
   // Create pagination info for infinite scroll
   const paginationInfo = {
@@ -39,15 +43,23 @@ export function Lane<Record extends RecordType>({
     fetchMore ?? (() => {})
   )
 
+  const showFooterAction = Boolean(onFooterAction)
+
   return (
-    <div className={`shadow-sm relative flex h-full w-[323.2px] flex-col`}>
+    <div className="shadow-sm group relative flex h-full w-[323.2px] flex-col">
       <LaneHeader
         label={title || "Lane"}
         variant={variant}
         count={total ?? items.length}
+        onPrimaryAction={onPrimaryAction}
       />
 
-      <div className="relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1">
+      <div
+        className={cn(
+          "relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1",
+          showFooterAction && "pb-11"
+        )}
+      >
         {loading ? (
           <ScrollArea
             className={cn(
@@ -108,6 +120,19 @@ export function Lane<Record extends RecordType>({
           </>
         )}
       </div>
+      {showFooterAction && (
+        <div className="pointer-events-none absolute inset-x-1 bottom-1.5 z-20 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+          <ButtonInternal
+            variant="ghost"
+            size="md"
+            className="w-full justify-center"
+            icon={Plus}
+            label="Add"
+            hideLabel
+            onClick={onFooterAction}
+          />
+        </div>
+      )}
     </div>
   )
 }
