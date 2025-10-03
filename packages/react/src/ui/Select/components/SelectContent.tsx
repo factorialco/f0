@@ -251,6 +251,8 @@ const SelectContent = forwardRef<
       </SelectPrimitive.Content>
     )
 
+    return content
+
     return asList ? (
       content
     ) : (
