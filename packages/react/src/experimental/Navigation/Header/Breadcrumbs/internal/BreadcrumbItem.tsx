@@ -92,6 +92,7 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
               defaultItem={item.defaultItem}
               onChange={item.onChange}
               value={item.value}
+              clearable={false}
               showSearchBox={item.searchbox}
             />
           </>

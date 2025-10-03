@@ -45,6 +45,7 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
   return (
     <Select<T, R>
       {...props}
+      clearable={false}
       onOpenChange={onOpenChangeLocal}
       onChange={handleChange}
       onChangeSelectedOption={handleChangeSelectedOption}

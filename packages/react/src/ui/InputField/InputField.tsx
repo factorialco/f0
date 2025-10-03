@@ -446,7 +446,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5 pt-1.5",
+                  size === "md" && "pr-2.5",
                   "relative"
                 )}
               >

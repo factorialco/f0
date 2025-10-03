@@ -24,7 +24,7 @@ const SelectWithHooks = (props: SelectProps<string>) => {
   const [, setSearchValue] = useState("")
   // Sets a click handler to change the label's value
   const handleOnChange = (
-    value: string,
+    value: string | undefined,
     item?: unknown,
     option?: SelectItemObject<string>
   ) => {
@@ -338,6 +338,7 @@ export const Clearable: Story = {
   args: {
     label: "Select a theme",
     clearable: true,
+    size: "md",
   },
 }
 
