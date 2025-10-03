@@ -479,6 +479,8 @@ export const EntitySelect = <T,>(
             required={props.required}
             readonly={props.readonly}
             append={props.append}
+            size={props.size}
+            open={open}
           />
         )}
       </PopoverTrigger>
