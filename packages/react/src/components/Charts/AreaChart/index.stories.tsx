@@ -84,7 +84,6 @@ export const DashedArea: Meta<
     ],
   },
 }
-
 const teamHeadcountDataConfig = {
   design: {
     label: "Design",
