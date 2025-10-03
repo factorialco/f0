@@ -18,3 +18,38 @@ export const autoColor = (index: number, withHSL = true) => {
 }
 
 export const chartColor = (color: ChartColor) => availableColors[color]
+
+export type ColorScheme = "one-color" | "categorical"
+
+const colorPalettes = {
+  default: {
+    colors: ["var(--chart-1)"],
+  },
+  categorical: {
+    colors: [
+      "var(--chart-1)",
+      "var(--chart-2)",
+      "var(--chart-3)",
+      "var(--chart-4)",
+      "var(--chart-5)",
+      "var(--chart-6)",
+      "var(--chart-7)",
+      "var(--chart-8)",
+    ],
+  },
+}
+
+export const getColorScheme = (category: ColorScheme, index: number) => {
+  switch (category) {
+    case "one-color":
+      return `hsl(${colorPalettes.default.colors[0]})`
+
+    case "categorical": {
+      const categoricalColors = colorPalettes.categorical.colors
+      return `hsl(${categoricalColors[index % categoricalColors.length]})`
+    }
+
+    default:
+      return `hsl(${colorPalettes.default.colors[0]})`
+  }
+}

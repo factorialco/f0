@@ -1,13 +1,7 @@
 import { Meta } from "@storybook/react-vite"
 import { BarChart } from "./index"
 
-const dataConfig = {
-  desktop: {
-    label: "Desktop",
-  },
-}
-
-const meta: Meta<typeof BarChart<typeof dataConfig>> = {
+const meta: Meta = {
   title: "Charts/BarChart",
   component: BarChart,
   tags: ["autodocs"],
@@ -18,61 +12,113 @@ const meta: Meta<typeof BarChart<typeof dataConfig>> = {
       </div>
     ),
   ],
-  args: {
-    dataConfig,
-    xAxis: {
-      hide: false,
-      tickFormatter: (value: string) => value.slice(0, 3),
-    },
-    data: [
-      { label: "January", values: { desktop: 4000 } },
-      { label: "February", values: { desktop: 3000 } },
-      { label: "March", values: { desktop: 2000 } },
-      { label: "April", values: { desktop: 1500 } },
-      { label: "May", values: { desktop: 2000 } },
-    ],
-    onClick: (data) => {
-      console.log("Bar clicked", data)
+  argTypes: {
+    colorScheme: {
+      control: "select",
+      options: ["one-color", "categorical"],
     },
   },
 }
 
 export default meta
 
-export const Default: Meta<typeof BarChart> = {}
-
-const dataMultiConfig = {
-  desktop: {
-    label: "Desktop",
-  },
-  mobile: {
-    label: "Mobile",
-  },
-  tablet: {
-    label: "Tablet",
+const teamsDataConfig = {
+  headcount: {
+    label: "Headcount",
   },
 }
 
-export const MultipleValues: Meta<typeof BarChart<typeof dataMultiConfig>> = {
+export const Default: Meta<typeof BarChart<typeof teamsDataConfig>> = {
   args: {
-    dataConfig: dataMultiConfig,
+    dataConfig: teamsDataConfig,
     data: [
-      {
-        label: "January",
-        values: { desktop: 2400, mobile: 4000, tablet: 3000 },
-      },
-      {
-        label: "February",
-        values: { desktop: 1398, mobile: 3000, tablet: 2500 },
-      },
-      { label: "March", values: { desktop: 4000, mobile: 2000, tablet: 3500 } },
-      { label: "April", values: { desktop: 8000, mobile: 1500, tablet: 4500 } },
-      { label: "May", values: { desktop: 6000, mobile: 2000, tablet: 5000 } },
+      { label: "Marketing", values: { headcount: 8 } },
+      { label: "Sales", values: { headcount: 100 } },
+      { label: "Engineering", values: { headcount: 56 } },
+      { label: "Product", values: { headcount: 32 } },
+      { label: "Design", values: { headcount: 16 } },
+      { label: "Finance", values: { headcount: 12 } },
+      { label: "Legal", values: { headcount: 5 } },
     ],
     xAxis: {
       hide: false,
-      tickFormatter: (value: string) => value.slice(0, 3),
+      tickFormatter: (value: string) => value,
     },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+  },
+}
+
+const teamsByOfficeDataConfig = {
+  headcount: {
+    label: "Headcount",
+  },
+  openPositions: {
+    label: "Open positions",
+  },
+  turnovers: {
+    label: "Turnovers",
+  },
+}
+
+export const MultipleBars: Meta<
+  typeof BarChart<typeof teamsByOfficeDataConfig>
+> = {
+  args: {
+    dataConfig: teamsByOfficeDataConfig,
+    data: [
+      {
+        label: "New York",
+        values: {
+          headcount: 145,
+          openPositions: 12,
+          turnovers: 8,
+        },
+      },
+      {
+        label: "London",
+        values: {
+          headcount: 89,
+          openPositions: 8,
+          turnovers: 19,
+        },
+      },
+      {
+        label: "Barcelona",
+        values: {
+          headcount: 67,
+          openPositions: 40,
+          turnovers: 4,
+        },
+      },
+      {
+        label: "Berlin",
+        values: {
+          headcount: 90,
+          openPositions: 30,
+          turnovers: 3,
+        },
+      },
+      {
+        label: "Remote",
+        values: {
+          headcount: 96,
+          openPositions: 22,
+          turnovers: 2,
+        },
+      },
+    ],
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    colorScheme: "categorical",
   },
 }
 

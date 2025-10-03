@@ -16,7 +16,7 @@ import {
   YAxis,
 } from "recharts"
 
-import { autoColor } from "../utils/colors"
+import { ColorScheme, getColorScheme } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -48,6 +48,7 @@ export type BarChartProps<K extends ChartConfig = ChartConfig> =
     showValueUnderLabel?: boolean
     highlightLastBar?: boolean
     onClick?: (data: ChartDataPoint<K>) => void
+    colorScheme?: ColorScheme
   }
 
 const _BarChart = <K extends ChartConfig>(
@@ -65,18 +66,21 @@ const _BarChart = <K extends ChartConfig>(
     showValueUnderLabel = false,
     highlightLastBar = false,
     onClick,
+    colorScheme,
   }: BarChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const bars = Object.keys(dataConfig) as (keyof ChartConfig)[]
+  const scheme =
+    colorScheme ?? (bars.length === 1 ? "one-color" : "categorical")
   const preparedData = prepareData(data).map((item, index, array) => {
     if (highlightLastBar && bars.length === 1 && !dataConfig[bars[0]]?.color) {
       return {
         ...item,
         fill:
           index === array.length - 1
-            ? autoColor(0)
-            : `hsl(${autoColor(0, false)} / 0.5)`,
+            ? getColorScheme(scheme, index)
+            : `${getColorScheme(scheme, index)} / 0.5`,
       }
     }
 
@@ -200,7 +204,7 @@ const _BarChart = <K extends ChartConfig>(
             fill={
               highlightLastBar
                 ? (((data: { fill: string }) => data.fill) as unknown as string)
-                : (dataConfig[key].color ?? autoColor(index))
+                : (dataConfig[key].color ?? getColorScheme(scheme, index))
             }
             radius={type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
             maxBarSize={32}

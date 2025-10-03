@@ -7,7 +7,7 @@ import {
 } from "@/ui/chart"
 import { ComponentProps, ForwardedRef } from "react"
 import { Cell, Label, Pie, PieChart as PieChartPrimitive } from "recharts"
-import { autoColor } from "../utils/colors"
+import { ColorScheme, getColorScheme } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig } from "../utils/types"
 
@@ -23,17 +23,28 @@ export type PieChartProps = {
   tickFormatter?: (value: string) => string
   overview?: { number: number; label: string }
   aspect?: ComponentProps<typeof ChartContainer>["aspect"]
+  colorScheme?: ColorScheme
 }
 
 export const _PieChart = (
-  { data, dataConfig, overview, aspect, tickFormatter }: PieChartProps,
+  {
+    data,
+    dataConfig,
+    overview,
+    aspect,
+    tickFormatter,
+    colorScheme,
+  }: PieChartProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
+  const scheme =
+    colorScheme ?? (data.length === 1 ? "one-color" : "categorical")
+
   const preparedData = data.map((item, index) => ({
     ...item,
     fill:
       dataConfig[item.label as keyof typeof dataConfig]?.color ||
-      autoColor(index),
+      getColorScheme(scheme, index),
   }))
   const values = data.map((item) => item.value)
   const sum = values.reduce((acc, value) => {

@@ -14,7 +14,7 @@ import {
 import type { Props as LabelProps } from "recharts/types/component/Label"
 import type { CartesianViewBox } from "recharts/types/util/types"
 import { prepareData } from "../utils/bar"
-import { autoColor } from "../utils/colors"
+import { ColorScheme, getColorScheme } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -56,6 +56,7 @@ export type VerticalBarChartProps<K extends ChartConfig = ChartConfig> =
     label?: boolean
     showRatio?: boolean
     valueFormatter?: ValueFormatter
+    colorScheme?: ColorScheme
   }
 
 const _VBarChart = <K extends ChartConfig>(
@@ -70,10 +71,13 @@ const _VBarChart = <K extends ChartConfig>(
     hideGrid = false,
     showRatio = false,
     valueFormatter,
+    colorScheme,
   }: VerticalBarChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const bars = Object.keys(dataConfig) as (keyof ChartConfig)[]
+  const scheme =
+    colorScheme ?? (bars.length === 1 ? "one-color" : "categorical")
   const preparedData = prepareData<K>(data)
   const maxLabelWidth = Math.max(
     ...preparedData.map((el) => measureTextWidth(`${el.x}`))
@@ -142,7 +146,7 @@ const _VBarChart = <K extends ChartConfig>(
                 layout="vertical"
                 key={`bar-${key}`}
                 dataKey={key}
-                fill={dataConfig[key].color || autoColor(index)}
+                fill={dataConfig[key].color || getColorScheme(scheme, index)}
                 radius={4}
                 maxBarSize={24}
               >

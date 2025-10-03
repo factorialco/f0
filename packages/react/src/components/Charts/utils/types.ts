@@ -4,6 +4,7 @@ import type {
   ChartConfig as OriginalChartConfig,
 } from "@/ui/chart"
 import { ComponentProps } from "react"
+import { ColorScheme } from "./colors"
 
 export type ChartItem<K extends ChartConfig> = {
   label: string
@@ -36,6 +37,7 @@ export type ChartPropsBase<
   aspect?: ComponentProps<typeof ChartContainer>["aspect"]
   hideGrid?: boolean
   hideTooltip?: boolean
+  colorScheme?: ColorScheme
 }
 
 export type LineChartPropsBase<K extends LineChartConfig = LineChartConfig> = {
@@ -46,4 +48,5 @@ export type LineChartPropsBase<K extends LineChartConfig = LineChartConfig> = {
   aspect?: ComponentProps<typeof ChartContainer>["aspect"]
   hideGrid?: boolean
   hideTooltip?: boolean
+  colorScheme?: ColorScheme
 }

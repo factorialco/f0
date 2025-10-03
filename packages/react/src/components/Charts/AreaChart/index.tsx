@@ -19,7 +19,7 @@ import {
   YAxis,
 } from "recharts"
 import { usePrivacyMode } from "../../../lib/privacyMode"
-import { autoColor } from "../utils/colors"
+import { getColorScheme } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -78,12 +78,15 @@ export const BaseAreaChart = <K extends LineChartConfig>(
     lineType = "monotoneX",
     aspect,
     marginTop = 0,
+    colorScheme,
   }: AreaChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const { enabled: privacyModeEnabled } = usePrivacyMode()
 
   const areas = Object.keys(dataConfig) as (keyof LineChartConfig)[]
+  const scheme =
+    colorScheme ?? (areas.length === 1 ? "one-color" : "categorical")
   const chartId = nanoid(12)
 
   const preparedData = prepareData(data)
@@ -168,12 +171,16 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             >
               <stop
                 offset="5%"
-                stopColor={dataConfig[area].color || autoColor(index)}
+                stopColor={
+                  dataConfig[area].color || getColorScheme(scheme, index)
+                }
                 stopOpacity={0.8}
               />
               <stop
                 offset="95%"
-                stopColor={dataConfig[area].color || autoColor(index)}
+                stopColor={
+                  dataConfig[area].color || getColorScheme(scheme, index)
+                }
                 stopOpacity={0.1}
               />
             </linearGradient>
@@ -232,7 +239,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             mask={`url(#${chartId}-transparent-edges)`}
             fill={`url(#fill${area}-${chartId})`}
             fillOpacity={dataConfig[area].dashed ? 0 : 0.4}
-            stroke={dataConfig[area].color || autoColor(index)}
+            stroke={dataConfig[area].color || getColorScheme(scheme, index)}
             strokeWidth={1.5}
             strokeDasharray={dataConfig[area].dashed ? "4 4" : undefined}
           />
