@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.224.0](https://github.com/factorialco/f0/compare/f0-react-v1.223.0...f0-react-v1.224.0) (2025-10-03)
+
+
+### Features
+
+* change positive callout icon ([#2747](https://github.com/factorialco/f0/issues/2747)) ([671e3d9](https://github.com/factorialco/f0/commit/671e3d94deadacbeb2062b3275669f83dbf98ed5))
+
 ## [1.223.0](https://github.com/factorialco/f0/compare/f0-react-v1.222.0...f0-react-v1.223.0) (2025-10-02)
 
 
