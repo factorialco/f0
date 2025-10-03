@@ -4,6 +4,7 @@ import { consola } from "consola"
 import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import path, { resolve } from "path"
+import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
@@ -77,7 +78,19 @@ const alias = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), libInjectCss(), ...extraPlugins],
+  plugins: [
+    react(),
+    libInjectCss(),
+    removeTestIdAttribute({
+      include: [/\.[tj]sx$/],
+      exclude: ["**/node_modules/**"],
+      attributes: ["data-testid"],
+      environments: ["production"],
+      debug: false,
+      usage: "vite",
+    }),
+    ...extraPlugins,
+  ],
   resolve: {
     alias: {
       ...alias,
