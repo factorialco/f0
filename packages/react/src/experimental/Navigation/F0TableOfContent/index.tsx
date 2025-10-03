@@ -1,19 +1,23 @@
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { LayoutGroup, Reorder } from "motion/react"
-import { ReactElement, useCallback, useRef, useState } from "react"
+import { ReactElement, useCallback, useMemo, useRef, useState } from "react"
 import { DragProvider } from "./DragContext"
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
 import { IdStructure, TOCItem, TOCItemAction, TOCProps } from "./types"
-import { findExpandedPath } from "./utils"
+import { filterTree, findExpandedPath } from "./utils"
 
 function renderTOCItem(
   item: TOCItem,
   sortable: boolean,
+  depth: number,
   activeItem?: string,
   collapsible?: boolean,
+  hideChildrenCounter?: boolean,
   expandedItems?: Set<string>,
   onToggleExpanded?: (id: string) => void,
   onUpdateItem?: (itemId: string, updatedItem: TOCItem) => void
@@ -37,6 +41,7 @@ function renderTOCItem(
       isExpanded={isExpanded}
       onToggleExpanded={onToggleExpanded}
       sortable={sortable}
+      hideChildrenCounter={hideChildrenCounter}
     >
       {item.children &&
         (Component === ItemSectionHeader || isExpanded) &&
@@ -52,8 +57,10 @@ function renderTOCItem(
               renderTOCItem(
                 child,
                 sortable,
+                depth + 1,
                 activeItem,
                 collapsible,
+                hideChildrenCounter,
                 expandedItems,
                 onToggleExpanded,
                 onUpdateItem
@@ -65,8 +72,10 @@ function renderTOCItem(
             renderTOCItem(
               child,
               sortable,
+              depth + 1,
               activeItem,
               collapsible,
+              hideChildrenCounter,
               expandedItems,
               onToggleExpanded,
               onUpdateItem
@@ -84,12 +93,28 @@ function TOCContent({
   activeItem,
   collapsible = false,
   sortable = false,
+  showSearchBox = false,
+  searchPlaceholder,
   onReorder,
+  hideChildrenCounter = false,
 }: TOCProps) {
+  const i18n = useI18n()
+
+  const [searchValue, setSearchValue] = useState("")
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value)
+  }
+
+  const filteredItems = useMemo(() => {
+    return filterTree(items, searchValue)
+  }, [items, searchValue])
+
   const [expandedItems, setExpandedItems] = useState<Set<string>>(
     findExpandedPath(items, activeItem)
   )
   const [sortableItems, setSortableItems] = useState<TOCItem[]>(items)
+
   const containerRef = useRef<HTMLDivElement>(null)
 
   const convertToIds = useCallback((items: TOCItem[]): IdStructure[] => {
@@ -149,6 +174,10 @@ function TOCContent({
     [sortableItems, onReorder, convertToIds]
   )
 
+  const filteredSortableItems = useMemo(() => {
+    return filterTree(sortableItems, searchValue)
+  }, [sortableItems, searchValue])
+
   return (
     <nav
       className={cn(
@@ -159,6 +188,17 @@ function TOCContent({
       ref={containerRef}
     >
       <div className="flex-shrink-0 pb-2 pl-5 pr-4 pt-5">
+        {showSearchBox && (
+          <div className="mb-4">
+            <F1SearchBox
+              placeholder={searchPlaceholder ?? i18n.toc.search}
+              onChange={handleSearchChange}
+              value={searchValue}
+              clearable
+            />
+          </div>
+        )}
+
         <OneEllipsis
           lines={1}
           tag="h2"
@@ -167,6 +207,7 @@ function TOCContent({
           {title}
         </OneEllipsis>
       </div>
+
       <ScrollArea className="h-full min-h-0">
         <div className="px-3 pb-2">
           {sortable ? (
@@ -178,12 +219,14 @@ function TOCContent({
               className="flex flex-col gap-0.5"
               dragConstraints={containerRef}
             >
-              {sortableItems.map((item) =>
+              {filteredSortableItems.map((item) =>
                 renderTOCItem(
                   item,
                   sortable,
+                  0,
                   activeItem,
                   collapsible,
+                  hideChildrenCounter,
                   expandedItems,
                   handleToggleExpanded,
                   handleUpdateItem
@@ -191,12 +234,14 @@ function TOCContent({
               )}
             </Reorder.Group>
           ) : (
-            items.map((item) =>
+            filteredItems.map((item) =>
               renderTOCItem(
                 item,
                 sortable,
+                0,
                 activeItem,
                 collapsible,
+                hideChildrenCounter,
                 expandedItems,
                 handleToggleExpanded,
                 handleUpdateItem

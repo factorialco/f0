@@ -465,7 +465,7 @@ const OneDataCollectionComp = <
       className={cn(
         "flex flex-col gap-4",
         layout === "standard" && "-mx-6",
-        fullHeight && "h-full"
+        fullHeight && "h-full flex-1"
       )}
       style={{
         width: layout === "standard" ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout

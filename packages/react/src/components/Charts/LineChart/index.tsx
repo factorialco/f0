@@ -15,6 +15,7 @@ import {
 import { autoColor } from "../utils/colors"
 import {
   cartesianGridProps,
+  chartTooltipProps,
   measureTextWidth,
   xAxisProps,
   yAxisProps,
@@ -72,7 +73,7 @@ export const _LineChart = <K extends LineChartConfig>(
         )}
         {!hideTooltip && (
           <ChartTooltip
-            cursor
+            {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }

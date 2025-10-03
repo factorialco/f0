@@ -135,6 +135,9 @@ export type DataCollectionSourceDefinition<
   bulkActions?: BulkActionsDefinition<R, Filters>
   totalItemSummary?: (totalItems: number) => string
 
+  /** Item filter that can be used to filter the items before they are displayed */
+  itemPreFilter?: (item: R) => boolean
+
   /** Lanes configuration */
   lanes?: ReadonlyArray<Lane<Filters>>
 }

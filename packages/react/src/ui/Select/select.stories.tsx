@@ -49,7 +49,6 @@ const meta = {
     a11y: {
       skipCi: true, // Todo add aria labels
     },
-    //layout: "centered",
     docs: {
       description: {
         component:

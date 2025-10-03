@@ -93,7 +93,7 @@ describe("convertMessagesToTurn", () => {
     ).toStrictEqual(["user"])
   })
 
-  it("does not group individual thinking tool calls", () => {
+  it("groups individual thinking tool calls", () => {
     const messages: Message[] = [
       {
         id: "1",
@@ -121,13 +121,7 @@ describe("convertMessagesToTurn", () => {
 
     expect(
       turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual([
-      "user",
-      "assistant",
-      "assistant",
-      "assistant",
-      "assistant",
-    ])
+    ).toStrictEqual(["user", "assistant", "array", "assistant", "array"])
 
     expect(
       turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))

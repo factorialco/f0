@@ -46,6 +46,8 @@ export const _RadarChart = <K extends ChartConfig>(
       <RadarChartPrimitive accessibilityLayer data={preparedData}>
         <ChartTooltip
           cursor
+          animationDuration={100}
+          offset={20}
           content={<ChartTooltipContent indicator="dot" />}
         />
 

@@ -1,9 +1,8 @@
 import { F0Icon } from "@/components/F0Icon"
-import CheckCircle from "@/icons/animated/CheckCircle"
+import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
-import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { Spinner } from "../Information/Spinner"
+import { ChatSpinner } from "./components/ChatSpinner"
 
 export interface ActionItemProps {
   title: string
@@ -13,31 +12,31 @@ export interface ActionItemProps {
 
 export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
   return (
-    <div
-      className={cn(
-        "flex w-full gap-1 text-f1-foreground-secondary",
-        inGroup ? "items-start" : "items-center"
-      )}
-    >
-      <div className="*:block">
-        {status === "inProgress" && (
+    <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
+      {status === "inProgress" && (
+        <div className="-mt-[2px] *:block">
           <F0Icon
             state="animate"
             size={inGroup ? "md" : "lg"}
             icon={DottedCircle}
           />
-        )}
-        {status === "executing" && (
-          <Spinner className={inGroup ? "h-4 w-4" : "h-6 w-6"} />
-        )}
-        {status === "completed" && (
+        </div>
+      )}
+      {status === "executing" && (
+        <div className="-mt-[2px] grid h-6 w-6 shrink-0 items-center justify-items-center">
+          <ChatSpinner />
+        </div>
+      )}
+      {status === "completed" && (
+        <div className="-mt-[2px] *:block">
           <F0Icon
+            color="secondary"
             state="animate"
             size={inGroup ? "md" : "lg"}
-            icon={CheckCircle}
+            icon={OutlineCircle}
           />
-        )}
-      </div>
+        </div>
+      )}
       <motion.p
         key={title}
         initial={{ opacity: 0, x: 100 }}

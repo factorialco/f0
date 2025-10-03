@@ -1,15 +1,16 @@
+import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { F0Card } from "@/components/F0Card"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
 import type { RecordType } from "@/hooks/datasource"
+import { Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
 import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
-
-const DEFAULT_MAX_LANE_HEIGHT = 600
 
 export function Lane<Record extends RecordType>({
   title,
@@ -18,12 +19,14 @@ export function Lane<Record extends RecordType>({
   getKey,
   emptyState,
   fetchMore,
-  maxHeight = DEFAULT_MAX_LANE_HEIGHT,
   variant = "neutral",
   loading = false,
   hasMore = false,
   loadingMore = false,
   total,
+  onPrimaryAction,
+  onFooterAction,
+  dropPlaceholderIndex,
 }: LaneProps<Record>) {
   // Create pagination info for infinite scroll
   const paginationInfo = {
@@ -42,24 +45,31 @@ export function Lane<Record extends RecordType>({
     fetchMore ?? (() => {})
   )
 
+  const showFooterAction = Boolean(onFooterAction)
+
   return (
-    <div
-      className={`shadow-sm flex w-[323.2px] flex-col`}
-      style={{
-        maxHeight: `${maxHeight}px`,
-      }}
-    >
+    <div className="shadow-sm group relative flex h-full w-[323.2px] flex-col">
       <LaneHeader
         label={title || "Lane"}
         variant={variant}
         count={total ?? items.length}
+        onPrimaryAction={onPrimaryAction}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-1 pb-1">
+      <div
+        className={cn(
+          "relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1",
+          (showFooterAction || items.length === 0) && "pb-11",
+          !showFooterAction &&
+            items.length === 0 &&
+            dropPlaceholderIndex !== undefined &&
+            "pb-1"
+        )}
+      >
         {loading ? (
           <ScrollArea
             className={cn(
-              "relative h-auto flex-1 rounded-lg",
+              "relative h-full flex-1 rounded-lg",
               loading && "select-none opacity-50 transition-opacity"
             )}
           >
@@ -75,26 +85,33 @@ export function Lane<Record extends RecordType>({
               </motion.div>
             </AnimatePresence>
           </ScrollArea>
-        ) : items.length === 0 ? (
+        ) : items.length === 0 && dropPlaceholderIndex === undefined ? (
           emptyState
         ) : (
           <>
-            <ScrollArea className="h-auto flex-1">
+            <ScrollArea className="relative h-full flex-1">
               <div
                 className={cn(
+                  "relative",
                   loadingMore && "select-none opacity-50 transition-opacity"
                 )}
                 aria-live={loadingMore ? "polite" : undefined}
                 aria-busy={loadingMore ? "true" : undefined}
               >
-                {items.map((record, index) => {
-                  const key = getKey(record, index)
-                  return (
-                    <React.Fragment key={key}>
-                      {renderCard(record, index)}
-                    </React.Fragment>
-                  )
-                })}
+                {items.length === 0 && dropPlaceholderIndex !== undefined ? (
+                  <div className="relative my-1 mt-1.5">
+                    <F0Card.Skeleton compact />
+                  </div>
+                ) : (
+                  items.map((record, index) => {
+                    const key = getKey(record, index)
+                    return (
+                      <React.Fragment key={key}>
+                        {renderCard(record, index)}
+                      </React.Fragment>
+                    )
+                  })
+                )}
                 {(loadingMore || hasMore) && (
                   <LoadingSkeleton ref={loadingIndicatorRef} />
                 )}
@@ -115,6 +132,19 @@ export function Lane<Record extends RecordType>({
           </>
         )}
       </div>
+      {showFooterAction && (
+        <div className="pointer-events-none absolute inset-x-1 bottom-1.5 z-20 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+          <ButtonInternal
+            variant="ghost"
+            size="md"
+            className="w-full justify-center"
+            icon={Plus}
+            label="Add"
+            hideLabel
+            onClick={onFooterAction}
+          />
+        </div>
+      )}
     </div>
   )
 }

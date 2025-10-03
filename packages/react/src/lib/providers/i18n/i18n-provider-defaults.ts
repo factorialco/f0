@@ -52,6 +52,9 @@ export const defaultTranslations = {
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
   },
+  toc: {
+    search: "Search",
+  },
   collections: {
     sorting: {
       noSorting: "No sorting",
@@ -74,7 +77,8 @@ export const defaultTranslations = {
       pagination: {
         of: "of",
       },
-      settings: "{%visualizationName} settings",
+      settings: "{{visualizationName}} settings",
+      reset: "Reset to default",
     },
     itemsCount: "items",
     emptyStates: {
@@ -134,7 +138,7 @@ export const defaultTranslations = {
       week: {
         currentDate: "This week",
         label: "Week",
-        long: "Week of %{day} %{month} %{year}",
+        long: "Week of {{day}} {{month}} {{year}}",
       },
       month: {
         currentDate: "This month",
@@ -182,10 +186,11 @@ export const defaultTranslations = {
     closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
-    initialMessage: "How can I help you today?",
+    defaultInitialMessage: "How can I help you today?",
     inputPlaceholder: "Write something here...",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
+    thoughtsGroupTitle: "Reflection",
   },
   select: {
     noResults: "No results found",

@@ -59,7 +59,7 @@ export const _PieChart = (
       <PieChartPrimitive accessibilityLayer margin={{ left: 0, right: 0 }}>
         {sum !== 0 && (
           <ChartTooltip
-            cursor
+            isAnimationActive={false}
             content={<ChartTooltipContent yAxisFormatter={tickFormatter} />}
           />
         )}
