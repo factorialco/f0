@@ -251,12 +251,22 @@ const SelectContent = forwardRef<
       </SelectPrimitive.Content>
     )
 
-    return content
-
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>
+      <SelectPrimitive.Portal>
+        <>
+          <div
+            className="fixed inset-0 bg-[#ff000060]"
+            onClick={(e) => {
+              console.log("clicked bg")
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          ></div>
+          <div className="z-50">{content}</div>
+        </>
+      </SelectPrimitive.Portal>
     )
   }
 )
