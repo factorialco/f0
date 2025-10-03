@@ -39,17 +39,23 @@ const colorPalettes = {
   },
 }
 
-export const getColorScheme = (category: ColorScheme, index: number) => {
+export const getColorScheme = (
+  category: ColorScheme,
+  index: number,
+  opacity?: number
+) => {
+  const opacityString = opacity !== undefined ? ` / ${opacity}` : ""
+
   switch (category) {
     case "one-color":
-      return `hsl(${colorPalettes.default.colors[0]})`
+      return `hsl(${colorPalettes.default.colors[0]}${opacityString})`
 
     case "categorical": {
       const categoricalColors = colorPalettes.categorical.colors
-      return `hsl(${categoricalColors[index % categoricalColors.length]})`
+      return `hsl(${categoricalColors[index % categoricalColors.length]}${opacityString})`
     }
 
     default:
-      return `hsl(${colorPalettes.default.colors[0]})`
+      return `hsl(${colorPalettes.default.colors[0]}${opacityString})`
   }
 }

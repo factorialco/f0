@@ -80,7 +80,7 @@ const _BarChart = <K extends ChartConfig>(
         fill:
           index === array.length - 1
             ? getColorScheme(scheme, index)
-            : `${getColorScheme(scheme, index)} / 0.5`,
+            : getColorScheme(scheme, index, 0.5),
       }
     }
 
