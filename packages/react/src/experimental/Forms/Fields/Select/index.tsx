@@ -521,7 +521,7 @@ const SelectComponent = forwardRef(function Select<
                   open={openLocal}
                   disabled={disabled}
                   size={size}
-                  className={cn(size === "sm" ? "" : "-mt-[8px]")}
+                  className={cn(size === "sm" ? "-mt-0.5" : "-mt-2")}
                 />
               }
             >

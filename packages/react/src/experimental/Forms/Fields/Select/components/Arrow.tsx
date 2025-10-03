@@ -21,7 +21,7 @@ export const Arrow = ({
         "rounded-2xs bg-f1-background-secondary p-0.5",
         "flex h-fit items-center justify-center",
         !disabled && "cursor-pointer",
-        size === "sm" ? "h-[16px] w-[16px]" : "h-[24px] w-[24px]",
+        size === "sm" ? "h-5 w-5" : "h-6 w-6",
         className
       )}
       onClick={() => {
