@@ -1,9 +1,8 @@
 import { useState } from "react"
 
+import { F0Button } from "@/components/F0Button"
+import { cn } from "@/lib/utils"
 import { CopyIcon } from "lucide-react"
-import { Button } from "../../src/components/Actions/Button"
-import { cn } from "../../src/lib/utils"
-
 type Props = {
   name: string
   description?: string
@@ -29,7 +28,7 @@ export function ColorToken({ name, description }: Props) {
         <p className="text-sm text-f1-foreground-secondary">{description}</p>
       </div>
       <div className="invert-0 filter dark:invert">
-        <Button
+        <F0Button
           onClick={copyToClipboard}
           variant="ghost"
           disabled={copied}

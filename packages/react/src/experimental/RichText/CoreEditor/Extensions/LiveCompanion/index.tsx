@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
 import { Node } from "@tiptap/core"
@@ -104,7 +104,7 @@ export const LiveCompanionView: React.FC<NodeViewProps> = ({
 
           <div className="flex flex-row items-center gap-1">
             {/* Toggle button */}
-            <Button
+            <F0Button
               onClick={handleToggleCollapse}
               variant="outline"
               hideLabel

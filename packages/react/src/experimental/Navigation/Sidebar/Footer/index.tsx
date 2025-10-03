@@ -1,5 +1,5 @@
-import { Button } from "@/components/Actions/Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Badge } from "@/experimental/Information/Badge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
@@ -57,7 +57,7 @@ export function SidebarFooter({
       {showActivityButton && (
         <Tooltip label={i18n.notifications} shortcut={activityButtonShortcut}>
           <div className="relative">
-            <Button
+            <F0Button
               icon={BellIcon}
               label={i18n.notifications}
               onClick={onActivityButtonClick}

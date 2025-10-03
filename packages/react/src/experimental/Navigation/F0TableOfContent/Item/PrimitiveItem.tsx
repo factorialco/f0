@@ -1,10 +1,10 @@
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { Counter } from "@/experimental/Information/Counter"
 import { ChevronDown, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { Button } from "@/ui/button"
 import { AnimatePresence, DragControls, motion } from "motion/react"
 import { ReactNode } from "react"
 import { TOCItem } from "../types"
@@ -56,22 +56,22 @@ export function PrimitiveItem({
   return (
     <div className="flex w-full min-w-0 items-center">
       {collapsible && (
-        <Button
-          round
+        <ButtonInternal
+          compact
           size="sm"
           variant="ghost"
           onClick={(e) => {
             e.stopPropagation()
             onToggleExpanded?.(item.id)
           }}
-          aria-label={translations.actions.toggle}
+          label={translations.actions.toggle}
+          hideLabel
           className={cn(
             "text-f1-icon transition-all",
             !isExpanded && "-rotate-90"
           )}
-        >
-          <F0Icon icon={ChevronDown} size="sm" />
-        </Button>
+          icon={ChevronDown}
+        ></ButtonInternal>
       )}
       <div
         className={cn(
@@ -100,11 +100,8 @@ export function PrimitiveItem({
                   }}
                   className="flex flex-shrink-0 items-center justify-center"
                 >
-                  <Button
-                    round
-                    size="sm"
-                    variant="ghost"
-                    className="flex-shrink-0 cursor-grab text-f1-icon active:cursor-grabbing"
+                  <div
+                    className="flex flex-shrink-0 cursor-grab items-center justify-center text-f1-icon active:cursor-grabbing"
                     onPointerDown={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
@@ -113,7 +110,7 @@ export function PrimitiveItem({
                     aria-label="Drag to reorder"
                   >
                     <F0Icon icon={Handle} size="xs" />
-                  </Button>
+                  </div>
                 </motion.div>
               ) : (
                 icon && (

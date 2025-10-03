@@ -1,5 +1,5 @@
-import { Button } from "@/components/Actions/Button"
-import { Link } from "@/components/Actions/Link/OneLink"
+import { F0Button } from "@/components/F0Button"
+import { F0Link } from "@/components/F0Link/F0Link"
 import DownloadIcon from "@/icons/app/Download"
 import { cn } from "@/lib/utils"
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
@@ -49,9 +49,9 @@ export const markdownRenderers: NonNullable<
     children,
     ...props
   }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <Link {...props} variant="link">
+    <F0Link {...props} variant="link" href={props.href}>
       {children}
-    </Link>
+    </F0Link>
   ),
   strong: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) => (
     <strong {...props} className={cn("font-semibold", props.className)}>
@@ -181,7 +181,7 @@ export const markdownRenderers: NonNullable<
           className={cn("max-w-full rounded-md", props.className)}
         />
         <div className="absolute right-2 top-2 rounded bg-f1-background-inverse-secondary">
-          <Button
+          <F0Button
             variant="neutral"
             label={"t.actions.save"}
             hideLabel

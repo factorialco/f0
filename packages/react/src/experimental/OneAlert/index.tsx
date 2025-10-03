@@ -1,8 +1,8 @@
-import { Button } from "@/components/Actions/Button"
-import { Link } from "@/components/Actions/Link/OneLink"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { F0Button } from "@/components/F0Button"
 import type { IconType } from "@/components/F0Icon"
+import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
 import { cva, type VariantProps } from "cva"
 
@@ -84,12 +84,12 @@ export const OneAlert = ({
         {(action || link) && (
           <div className="flex flex-row items-center gap-3">
             {link && (
-              <Link href={link.href} target="_blank" variant="link">
+              <F0Link href={link.href} target="_blank" variant="link">
                 {link.label}
-              </Link>
+              </F0Link>
             )}
             {action && (
-              <Button
+              <F0Button
                 label={action.label}
                 variant="outline"
                 onClick={action.onClick}

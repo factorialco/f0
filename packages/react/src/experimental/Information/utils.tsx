@@ -1,5 +1,5 @@
-import { OneDropdownButtonItem } from "../../components/Actions/OneDropdownButton"
-import { IconType } from "../../components/F0Icon"
+import { ButtonDropdownItem } from "@/components/F0ButtonDropdown"
+import { IconType } from "@/components/F0Icon"
 
 export interface PrimaryAction {
   disabled?: boolean
@@ -13,9 +13,9 @@ export interface PrimaryActionButton extends PrimaryAction {
 }
 
 export interface PrimaryDropdownAction<T> extends PrimaryAction {
-  items: OneDropdownButtonItem<T>[]
+  items: ButtonDropdownItem<T>[]
   value?: T
-  onClick: (value: T, item: OneDropdownButtonItem<T>) => void
+  onClick: (value: T, item: ButtonDropdownItem<T>) => void
 }
 
 export interface SecondaryAction extends PrimaryActionButton {

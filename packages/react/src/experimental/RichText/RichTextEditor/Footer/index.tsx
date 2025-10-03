@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import {
   Toolbar,
   ToolbarDivider,
@@ -122,22 +122,20 @@ const Footer = ({
             ease: "easeInOut",
           }}
         >
-          <Button
+          <F0Button
             onClick={(e) => {
-              e.preventDefault()
+              e?.preventDefault()
               setIsToolbarOpen(true)
             }}
             variant="outline"
             size="md"
             label="Toolbar"
             disabled={disableButtons}
-            type="button"
             hideLabel
-            round
             icon={TextSize}
           />
           {canUseFiles && (
-            <Button
+            <F0Button
               icon={Paperclip}
               onClick={(e) => {
                 e.preventDefault()
@@ -151,10 +149,8 @@ const Footer = ({
                 }
               }}
               hideLabel
-              round
               label="Add Attachment"
               variant="outline"
-              type="button"
               disabled={disableButtons}
             />
           )}

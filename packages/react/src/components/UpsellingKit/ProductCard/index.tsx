@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Icon } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
@@ -116,7 +116,7 @@ export function ProductCard({
 
               {dismissable && (
                 <div className="h-6 w-6">
-                  <Button
+                  <F0Button
                     variant="ghost"
                     icon={CrossIcon}
                     size="sm"
