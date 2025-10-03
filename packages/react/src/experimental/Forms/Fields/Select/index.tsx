@@ -56,11 +56,6 @@ export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
  *
  */
 export type SelectProps<T extends string, R = unknown> = {
-  onChange: (
-    value: T | undefined,
-    originalItem?: ResolvedRecordType<R>,
-    option?: SelectItemObject<T, ResolvedRecordType<R>>
-  ) => void
   onChangeSelectedOption?: (
     option: SelectItemObject<T, ResolvedRecordType<R>>
   ) => void
@@ -79,32 +74,49 @@ export type SelectProps<T extends string, R = unknown> = {
   actions?: Action[]
 } & (
   | {
-      source: DataSourceDefinition<
-        ResolvedRecordType<R>,
-        FiltersDefinition,
-        SortingsDefinition,
-        GroupingDefinition<ResolvedRecordType<R>>
-      >
-      mapOptions: (
-        item: ResolvedRecordType<R>
-      ) => SelectItemProps<T, ResolvedRecordType<R>>
-      options?: never
+      clearable: true
+      onChange: (
+        value: T | undefined,
+        originalItem?: ResolvedRecordType<R>,
+        option?: SelectItemObject<T, ResolvedRecordType<R>>
+      ) => void
     }
   | {
-      source?: never
-      mapOptions?: never
-      searchFn?: (
-        option: SelectItemProps<T, unknown>,
-        search?: string
-      ) => boolean | undefined
-      options: SelectItemProps<T, unknown>[]
+      clearable?: false
+      onChange: (
+        value: T,
+        originalItem?: ResolvedRecordType<R>,
+        option?: SelectItemObject<T, ResolvedRecordType<R>>
+      ) => void
     }
 ) &
+  (
+    | {
+        source: DataSourceDefinition<
+          ResolvedRecordType<R>,
+          FiltersDefinition,
+          SortingsDefinition,
+          GroupingDefinition<ResolvedRecordType<R>>
+        >
+        mapOptions: (
+          item: ResolvedRecordType<R>
+        ) => SelectItemProps<T, ResolvedRecordType<R>>
+        options?: never
+      }
+    | {
+        source?: never
+        mapOptions?: never
+        searchFn?: (
+          option: SelectItemProps<T, unknown>,
+          search?: string
+        ) => boolean | undefined
+        options: SelectItemProps<T, unknown>[]
+      }
+  ) &
   Pick<
     InputFieldProps<T>,
     | "loading"
     | "hideLabel"
-    | "clearable"
     | "labelIcon"
     | "size"
     | "label"
@@ -363,7 +375,7 @@ const SelectComponent = forwardRef(function Select<
 
     if (foundOption) {
       onChange?.(foundOption.value, foundOption.item, foundOption)
-    } else {
+    } else if (clearable) {
       onChange?.(undefined)
     }
   }
