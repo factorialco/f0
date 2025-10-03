@@ -4,7 +4,14 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { LayoutGroup, Reorder } from "motion/react"
-import { ReactElement, useCallback, useMemo, useRef, useState } from "react"
+import {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { DragProvider } from "./DragContext"
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
@@ -114,6 +121,10 @@ function TOCContent({
     findExpandedPath(items, activeItem)
   )
   const [sortableItems, setSortableItems] = useState<TOCItem[]>(items)
+
+  useEffect(() => {
+    setSortableItems(items)
+  }, [items])
 
   const containerRef = useRef<HTMLDivElement>(null)
 
