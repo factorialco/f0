@@ -1,3 +1,4 @@
+import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
 import { AlertTagCellValue } from './types/alertTag.tsx';
 import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
@@ -107,11 +108,12 @@ export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status }: ActionItemProps) => JSX_2.Element;
+export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
-    status: "inProgress" | "executing" | "completed";
+    status?: "inProgress" | "executing" | "completed";
+    inGroup?: boolean;
 }
 
 declare type ActionProps = {
@@ -254,11 +256,14 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
-export declare const AiChatProvider: ({ enabled, greeting, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const AiChatProvider: ({ enabled, greeting, initialMessage, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
+    initialMessage?: string | string[];
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -277,12 +282,19 @@ declare type AiChatProviderReturnValue = {
      */
     setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
     autoClearMinutes: number | null;
+    initialMessage?: string | string[];
+    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
     greeting?: string;
     enabled: boolean;
     agent?: string;
+    initialMessage?: string | string[];
+    onThumbsUp?: (message: AIMessage) => void;
+    onThumbsDown?: (message: AIMessage) => void;
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -416,7 +428,9 @@ declare type AvatarVariant = DistributiveOmit<({
     type: "company";
 } & F0AvatarCompanyProps) | ({
     type: "file";
-} & F0AvatarFileProps), "size">;
+} & F0AvatarFileProps) | ({
+    type: "flag";
+} & F0AvatarFlagProps), "size">;
 
 export declare const Badge: ({ type, size, icon }: BadgeProps) => JSX_2.Element;
 
@@ -465,6 +479,10 @@ declare type BaseAvatarProps = {
      * The source of the avatar's image.
      */
     src?: string;
+    /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
     /**
      * The color of the avatar.
      * @default "random"
@@ -782,7 +800,7 @@ declare interface ButtonProps_2 extends React_2.ButtonHTMLAttributes<HTMLButtonE
 
 declare type ButtonSize = (typeof sizes)[number];
 
-declare type ButtonVariant = (typeof variants_2)[number];
+declare type ButtonVariant = (typeof variants_3)[number];
 
 declare const buttonVariants: (props?: ({
     disabled?: boolean | undefined;
@@ -831,6 +849,27 @@ export declare interface CalendarEventProps {
 export declare type CalendarMode = "single" | "range";
 
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
+
+declare type CalloutAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+};
+
+declare interface CalloutInternalProps {
+    title: string;
+    onClose?: () => void;
+    children: React.ReactNode;
+    actions?: CalloutAction[];
+    variant: CalloutVariant;
+}
+
+declare interface CalloutSkeletonProps {
+    compact?: boolean;
+    variant?: CalloutVariant;
+}
+
+declare type CalloutVariant = (typeof variants)[number];
 
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
@@ -975,7 +1014,7 @@ declare type ChartConfig_2 = {
 
 declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
 
-declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants> {
+declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_2> {
     config: ChartConfig_2;
     children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
 }
@@ -1273,6 +1312,12 @@ declare type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
 
+declare interface DataCollectionSettingsContextType {
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
+    settings: DataCollectionSettings;
+    setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
+}
+
 /**
  * Data collection source
  * Extends the base data source with data collection specific elements / features
@@ -1314,6 +1359,8 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /** Bulk actions that can be performed on the collection */
     bulkActions?: BulkActionsDefinition<R, Filters>;
     totalItemSummary?: (totalItems: number) => string;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
 };
@@ -1394,6 +1441,8 @@ export declare type DataSource<R extends RecordType, Filters extends FiltersDefi
     setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>;
     /** Function to provide an id for a record, necessary for append mode */
     idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
 };
 
 /**
@@ -1586,6 +1635,9 @@ declare const defaultTranslations: {
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
+    readonly toc: {
+        readonly search: "Search";
+    };
     readonly collections: {
         readonly sorting: {
             readonly noSorting: "No sorting";
@@ -1608,7 +1660,8 @@ declare const defaultTranslations: {
             readonly pagination: {
                 readonly of: "of";
             };
-            readonly settings: "{%visualizationName} settings";
+            readonly settings: "{{visualizationName}} settings";
+            readonly reset: "Reset to default";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1668,7 +1721,7 @@ declare const defaultTranslations: {
             readonly week: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
-                readonly long: "Week of %{day} %{month} %{year}";
+                readonly long: "Week of {{day}} {{month}} {{year}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1716,7 +1769,11 @@ declare const defaultTranslations: {
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
-        readonly initialMessage: "How can I help you today?";
+        readonly defaultInitialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1968,7 +2025,9 @@ declare interface ErrorMessageProps {
 export declare type ExtractPropertyKeys<RecordType> = keyof RecordType;
 
 declare type ExtractVisualizationSettings<T> = T extends {
-    settings: infer S;
+    settings: {
+        default: infer S;
+    };
 } ? S : never;
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -1989,6 +2048,12 @@ declare type F0AvatarCompanyProps = {
 declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
     size?: AvatarFileSize;
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarFlagProps = {
+    flag: string;
+    size?: BaseAvatarProps["size"];
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
@@ -2084,6 +2149,12 @@ declare interface F0ButtonToggleProps {
     icon: IconType;
     size?: "sm" | "md" | "lg";
 }
+
+export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>> & {
+    Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0CalloutProps = CalloutInternalProps;
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 
@@ -2298,9 +2369,13 @@ declare type FormType<T extends SchemaType, FormType extends InferSchema<T>> = U
 
 declare interface FrameContextType {
     isSmallScreen: boolean;
+    isLastToggleInvokedByUser: boolean;
     sidebarState: SidebarState;
     prevSidebarState: SidebarState | null;
-    toggleSidebar: () => void;
+    toggleSidebar: (callData?: {
+        isInvokedByUser: boolean;
+    }) => void;
+    setForceFloat: (force: boolean) => void;
 }
 
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
@@ -2631,7 +2706,7 @@ declare type ItemProps = {
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
 
-export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, }: TOCItemSectionHeaderProps): JSX_2.Element;
+export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, }: TOCItemSectionHeaderProps): JSX_2.Element;
 
 declare type KanbanCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, KanbanVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -2640,6 +2715,8 @@ declare type KanbanLaneDefinition = {
     title: string;
     variant?: Variant;
 };
+
+declare type KanbanOnCreate = (laneId: string) => void | Promise<void>;
 
 declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toLaneId: string, sourceRecord: TRecord, destinyRecord: {
     record: TRecord;
@@ -2656,6 +2733,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
         property: CardMetadataProperty;
     }>;
     onMove?: KanbanOnMove<Record>;
+    onCreate?: KanbanOnCreate;
 };
 
 /**
@@ -2672,7 +2750,7 @@ export declare type lastIntentType = {
     customIntent?: string;
 } | null;
 
-declare type Level = "info" | "warning" | "critical";
+declare type Level = "info" | "warning" | "critical" | "positive";
 
 export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: LineChartProps;
@@ -3706,12 +3784,16 @@ declare type ProductUpdatesProp = {
             title: string;
             description: string;
             onClick: () => void;
-            module: ModuleId;
             dismissable: boolean;
             onClose?: () => void;
             trackVisibility?: (open: boolean) => void;
-            type?: "one-campaign" | undefined;
-        }>;
+        } & ({
+            module?: never;
+            type: "one-campaign";
+        } | {
+            module: ModuleId;
+            type?: never;
+        })>;
     };
 };
 
@@ -4079,7 +4161,7 @@ export declare type SelectItemProps<T, R = unknown> = SelectItemObject<T, R> | {
  */
 export declare type SelectProps<T extends string, R = unknown> = {
     onChange: (value: T, originalItem?: ResolvedRecordType<R>, option?: SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>> | undefined) => void;
     value?: T;
     defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>;
     children?: React.ReactNode;
@@ -4576,6 +4658,7 @@ declare interface TOCItemSectionHeaderProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     sortable: boolean;
+    hideChildrenCounter?: boolean;
 }
 
 export declare interface TOCProps {
@@ -4586,6 +4669,9 @@ export declare interface TOCProps {
     collapsible?: boolean;
     sortable?: boolean;
     onReorder?: (reorderedIds: IdStructure[]) => void;
+    showSearchBox?: boolean;
+    searchPlaceholder?: string;
+    hideChildrenCounter?: boolean;
 }
 
 declare type toggleActionType = {
@@ -4720,6 +4806,10 @@ export declare const TwoColumnsList: ForwardRefExoticComponent<TwoColumnsListTyp
 declare interface TwoColumnsListType {
     title?: string;
     titleValue?: string;
+    titleTooltip?: {
+        label?: string;
+        description: string;
+    };
     list: TwoColumnsItemType[];
 }
 
@@ -4794,7 +4884,9 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
 
-declare const variants: (props?: ({
+declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
+
+declare const variants_2: (props?: ({
     aspect?: "small" | "square" | "wide" | undefined;
 } & ({
     class?: ClassValue;
@@ -4804,7 +4896,7 @@ declare const variants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-declare const variants_2: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
+declare const variants_3: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
 export declare const VerticalBarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: VerticalBarChartProps;
@@ -4817,10 +4909,13 @@ declare const VerticalOverflowList: {
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
-    renderSettings?: (props: Props) => JSX.Element | null;
     name: string;
     icon: IconType;
-    settings: Settings;
+    settings: {
+        default: Settings;
+        renderer?: (props: Props) => JSX.Element | null;
+        resetHandler?: (settings: DataCollectionSettingsContextType) => void;
+    };
 };
 
 /**
@@ -5020,8 +5115,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -5029,8 +5124,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
@@ -5045,15 +5140,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

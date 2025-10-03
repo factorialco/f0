@@ -52,6 +52,7 @@ import { PersonCellValue as PersonCellValue_2 } from './types/person.tsx';
 import { PieChartProps } from './PieChart';
 import { PopoverContentProps } from '@radix-ui/react-popover';
 import * as React_2 from 'react';
+import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
@@ -173,7 +174,9 @@ export declare type AvatarVariant = DistributiveOmit<({
     type: "company";
 } & F0AvatarCompanyProps) | ({
     type: "file";
-} & F0AvatarFileProps), "size">;
+} & F0AvatarFileProps) | ({
+    type: "flag";
+} & F0AvatarFlagProps), "size">;
 
 declare type AvatarVariant_2 = ({
     type: "person";
@@ -183,11 +186,13 @@ declare type AvatarVariant_2 = ({
     type: "company";
 } & Omit<F0AvatarCompanyProps, "size">) | ({
     type: "file";
-} & Omit<F0AvatarFileProps, "size">);
+} & Omit<F0AvatarFileProps, "size">) | ({
+    type: "flag";
+} & Omit<F0AvatarFlagProps, "size">);
 
 export declare type AvatarVariants = (typeof avatarVariants)[number];
 
-export declare const avatarVariants: readonly ["person", "team", "company", "file"];
+export declare const avatarVariants: readonly ["person", "team", "company", "file", "flag"];
 
 export declare const Await: <T>({ resolve, fallback, error: errorFallback, children, }: AwaitProps<T>) => ReactNode;
 
@@ -257,6 +262,10 @@ declare type BaseAvatarProps = {
      * The source of the avatar's image.
      */
     src?: string;
+    /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
     /**
      * The color of the avatar.
      * @default "random"
@@ -850,6 +859,12 @@ declare type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
 
+declare interface DataCollectionSettingsContextType {
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
+    settings: DataCollectionSettings;
+    setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
+}
+
 /**
  * Data collection source
  * Extends the base data source with data collection specific elements / features
@@ -891,6 +906,8 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     /** Bulk actions that can be performed on the collection */
     bulkActions?: BulkActionsDefinition<R, Filters>;
     totalItemSummary?: (totalItems: number) => string;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
 };
@@ -953,6 +970,8 @@ export declare type DataSource<R extends RecordType, Filters extends FiltersDefi
     setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>;
     /** Function to provide an id for a record, necessary for append mode */
     idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
 };
 
 /**
@@ -1105,6 +1124,9 @@ export declare const defaultTranslations: {
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
+    readonly toc: {
+        readonly search: "Search";
+    };
     readonly collections: {
         readonly sorting: {
             readonly noSorting: "No sorting";
@@ -1127,7 +1149,8 @@ export declare const defaultTranslations: {
             readonly pagination: {
                 readonly of: "of";
             };
-            readonly settings: "{%visualizationName} settings";
+            readonly settings: "{{visualizationName}} settings";
+            readonly reset: "Reset to default";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1187,7 +1210,7 @@ export declare const defaultTranslations: {
             readonly week: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
-                readonly long: "Week of %{day} %{month} %{year}";
+                readonly long: "Week of {{day}} {{month}} {{year}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1235,7 +1258,11 @@ export declare const defaultTranslations: {
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
-        readonly initialMessage: "How can I help you today?";
+        readonly defaultInitialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Write something here...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1361,7 +1388,9 @@ declare type EventScalar = string | number | boolean | undefined | null;
 export declare const experimental: <T extends (...args: any[]) => any>(name: string, component: T) => T;
 
 declare type ExtractVisualizationSettings<T> = T extends {
-    settings: infer S;
+    settings: {
+        default: infer S;
+    };
 } ? S : never;
 
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
@@ -1409,6 +1438,12 @@ badge?: AvatarBadge;
 export declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
     size?: AvatarFileSize;
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarFlagProps = {
+    flag: string;
+    size?: BaseAvatarProps["size"];
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
@@ -1465,6 +1500,9 @@ declare type F0AvatarListPropsAvatars = {
 } | {
     type: "company";
     avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[];
+} | {
+    type: "flag";
+    avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[];
 } | {
     type: "file";
     avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
@@ -1704,6 +1742,10 @@ declare type FilterTypeSchema<Options extends object = never> = {
  */
 export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : never;
 
+export declare type FlagAvatarVariant = Extract<AvatarVariant, {
+    type: "flag";
+}>;
+
 export declare const getAnimationVariants: (options?: AnimationVariantsOptions) => {
     hidden: {
         opacity: number;
@@ -1934,6 +1976,8 @@ declare type KanbanLaneDefinition = {
     variant?: Variant;
 };
 
+declare type KanbanOnCreate = (laneId: string) => void | Promise<void>;
+
 declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toLaneId: string, sourceRecord: TRecord, destinyRecord: {
     record: TRecord;
     position: "above" | "below";
@@ -1949,6 +1993,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
         property: CardMetadataProperty;
     }>;
     onMove?: KanbanOnMove<Record>;
+    onCreate?: KanbanOnCreate;
 };
 
 declare type L10nContextValue = {
@@ -1988,7 +2033,7 @@ declare const layoutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare type Level = "info" | "warning" | "critical";
+export declare type Level = "info" | "warning" | "critical" | "positive";
 
 export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
@@ -2357,9 +2402,13 @@ export declare type ProductCardProps = {
     isVisible: boolean;
     dismissable?: boolean;
     trackVisibility?: (open: boolean) => void;
+} & ({
+    module?: never;
+    type: "one-campaign";
+} | {
     module: ModuleId;
-    type?: "one-campaign" | undefined;
-};
+    type?: never;
+});
 
 export declare function ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, }: ProductModalProps): JSX_2.Element;
 
@@ -2908,6 +2957,7 @@ export declare interface TwoColumnLayoutProps {
     children: ReactNode;
     sideContent: ReactNode;
     mainColumnPosition?: "left" | "right";
+    sticky?: boolean;
 }
 
 declare type UpsellAction = BaseAction & {
@@ -3264,10 +3314,13 @@ valueFormatter?: (value: string | number | undefined) => string | number;
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
-    renderSettings?: (props: Props) => JSX.Element | null;
     name: string;
     icon: IconType;
-    settings: Settings;
+    settings: {
+        default: Settings;
+        renderer?: (props: Props) => JSX.Element | null;
+        resetHandler?: (settings: DataCollectionSettingsContextType) => void;
+    };
 };
 
 declare type VisualizationSettings = {
@@ -3320,8 +3373,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -3329,8 +3382,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
@@ -3345,15 +3398,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
