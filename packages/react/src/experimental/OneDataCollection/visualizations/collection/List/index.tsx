@@ -13,7 +13,7 @@ import {
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
 import { Spinner } from "../../../../Information/Spinner"
 import { PagesPagination } from "../../../components/PagesPagination"
@@ -137,7 +137,29 @@ export const ListCollection = <
     defaultOpenGroups
   )
 
-  if (isInitialLoading) {
+  const [showInitialLoading, setShowInitialLoading] = useState(false)
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>
+
+    if (isInitialLoading) {
+      timeout = setTimeout(() => {
+        setShowInitialLoading(isInitialLoading)
+      }, 100)
+    } else {
+      setShowInitialLoading(false)
+    }
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+    }
+  }, [isInitialLoading])
+
+  console.log({ isInitialLoading, showInitialLoading })
+
+  if (showInitialLoading) {
     return (
       <ListSkeleton
         source={source}

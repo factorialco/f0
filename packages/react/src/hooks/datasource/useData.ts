@@ -761,6 +761,8 @@ export function useData<
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 
+  console.log({ isInitialLoading, isLoading, isLoadingMore })
+
   return {
     data,
     isInitialLoading,
