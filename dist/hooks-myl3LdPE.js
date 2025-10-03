@@ -50999,16 +50999,17 @@ const HZ = Lt({
       "var(--chart-8)"
     ]
   }
-}, ui = (e, t) => {
+}, ui = (e, t, n) => {
+  const r = n !== void 0 ? ` / ${n}` : "";
   switch (e) {
     case "one-color":
-      return `hsl(${$m.default.colors[0]})`;
+      return `hsl(${$m.default.colors[0]}${r})`;
     case "categorical": {
-      const n = $m.categorical.colors;
-      return `hsl(${n[t % n.length]})`;
+      const a = $m.categorical.colors;
+      return `hsl(${a[t % a.length]}${r})`;
     }
     default:
-      return `hsl(${$m.default.colors[0]})`;
+      return `hsl(${$m.default.colors[0]}${r})`;
   }
 };
 function V0(e, t = "12px Inter, sans-serif") {
@@ -51256,7 +51257,7 @@ const Xke = ({
     var k;
     return h && C.length === 1 && !((k = e[C[0]]) != null && k.color) ? {
       ...x,
-      fill: L === b.length - 1 ? ui(y, L) : `${ui(y, L)} / 0.5`
+      fill: L === b.length - 1 ? ui(y, L) : ui(y, L, 0.5)
     } : x;
   }), P = Math.max(
     ...w.flatMap(
