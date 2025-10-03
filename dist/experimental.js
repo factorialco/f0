@@ -15454,7 +15454,7 @@ const oz = 8, ru = U(
       /* @__PURE__ */ f(
         "div",
         {
-          className: "fixed inset-0 bg-[#ff000060]",
+          className: "fixed inset-0 z-40 bg-[#ff000060]",
           onClick: (B) => {
             console.log("clicked bg"), B.preventDefault(), B.stopPropagation();
           }
