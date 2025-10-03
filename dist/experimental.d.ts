@@ -1944,7 +1944,7 @@ export declare const EntitySelect: <T>(props: EntitySelectProps<T> & {
     children?: React.ReactNode;
 }) => JSX_2.Element;
 
-declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
+declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append" | "size"> {
     entities: EntitySelectEntity[];
     groups: EntitySelectNamedGroup[];
     selectedGroup: string;
@@ -5140,15 +5140,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
