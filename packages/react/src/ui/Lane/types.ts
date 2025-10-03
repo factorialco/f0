@@ -71,4 +71,9 @@ export interface LaneProps<Record extends RecordType> {
   onFooterAction?: () => void
   footerActionLabel?: string
   footerActionIcon?: IconType
+  /**
+   * Index at which to show a drop placeholder/skeleton during drag operations.
+   * If undefined, no placeholder is shown.
+   */
+  dropPlaceholderIndex?: number
 }

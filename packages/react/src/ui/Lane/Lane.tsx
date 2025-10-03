@@ -1,4 +1,5 @@
 import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { F0Card } from "@/components/F0Card"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
@@ -25,6 +26,7 @@ export function Lane<Record extends RecordType>({
   total,
   onPrimaryAction,
   onFooterAction,
+  dropPlaceholderIndex,
 }: LaneProps<Record>) {
   // Create pagination info for infinite scroll
   const paginationInfo = {
@@ -57,7 +59,11 @@ export function Lane<Record extends RecordType>({
       <div
         className={cn(
           "relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1",
-          showFooterAction && "pb-11"
+          (showFooterAction || items.length === 0) && "pb-11",
+          !showFooterAction &&
+            items.length === 0 &&
+            dropPlaceholderIndex !== undefined &&
+            "pb-1"
         )}
       >
         {loading ? (
@@ -79,27 +85,33 @@ export function Lane<Record extends RecordType>({
               </motion.div>
             </AnimatePresence>
           </ScrollArea>
-        ) : items.length === 0 ? (
+        ) : items.length === 0 && dropPlaceholderIndex === undefined ? (
           emptyState
         ) : (
           <>
-            <ScrollArea className="test12 relative h-full flex-1">
+            <ScrollArea className="relative h-full flex-1">
               <div
                 className={cn(
-                  "relative h-full",
+                  "relative",
                   loadingMore && "select-none opacity-50 transition-opacity"
                 )}
                 aria-live={loadingMore ? "polite" : undefined}
                 aria-busy={loadingMore ? "true" : undefined}
               >
-                {items.map((record, index) => {
-                  const key = getKey(record, index)
-                  return (
-                    <React.Fragment key={key}>
-                      {renderCard(record, index)}
-                    </React.Fragment>
-                  )
-                })}
+                {items.length === 0 && dropPlaceholderIndex !== undefined ? (
+                  <div className="relative my-1 mt-1.5">
+                    <F0Card.Skeleton compact />
+                  </div>
+                ) : (
+                  items.map((record, index) => {
+                    const key = getKey(record, index)
+                    return (
+                      <React.Fragment key={key}>
+                        {renderCard(record, index)}
+                      </React.Fragment>
+                    )
+                  })
+                )}
                 {(loadingMore || hasMore) && (
                   <LoadingSkeleton ref={loadingIndicatorRef} />
                 )}

@@ -42,6 +42,7 @@ interface EntitySelectCommonProps<T>
       | "required"
       | "readonly"
       | "append"
+      | "size"
     > {
   entities: EntitySelectEntity[]
   groups: EntitySelectNamedGroup[]

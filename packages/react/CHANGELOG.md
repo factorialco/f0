@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.226.0](https://github.com/factorialco/f0/compare/f0-react-v1.225.1...f0-react-v1.226.0) (2025-10-03)
+
+
+### Features
+
+* entitySelector size and error, hint props ([#2701](https://github.com/factorialco/f0/issues/2701)) ([bc77a64](https://github.com/factorialco/f0/commit/bc77a64b1c32cf98f4038e1e9da3e81edc0869d0))
+
+## [1.225.1](https://github.com/factorialco/f0/compare/f0-react-v1.225.0...f0-react-v1.225.1) (2025-10-03)
+
+
+### Bug Fixes
+
+* select remove option on clear ([#2755](https://github.com/factorialco/f0/issues/2755)) ([d89bd08](https://github.com/factorialco/f0/commit/d89bd08bdb4d998e13847f62fbdfb62cea0301f6))
+
+## [1.225.0](https://github.com/factorialco/f0/compare/f0-react-v1.224.0...f0-react-v1.225.0) (2025-10-03)
+
+
+### Features
+
+* add placeholder on empty lanes + remove blue lines when no real  move ([10e1e32](https://github.com/factorialco/f0/commit/10e1e32616c872310d6aed471754458dbf29456d))
+
+
+### Bug Fixes
+
+* refresh lanesprovider to avoid having old data ([#2754](https://github.com/factorialco/f0/issues/2754)) ([10e1e32](https://github.com/factorialco/f0/commit/10e1e32616c872310d6aed471754458dbf29456d))
+
+## [1.224.0](https://github.com/factorialco/f0/compare/f0-react-v1.223.0...f0-react-v1.224.0) (2025-10-03)
+
+
+### Features
+
+* change positive callout icon ([#2747](https://github.com/factorialco/f0/issues/2747)) ([671e3d9](https://github.com/factorialco/f0/commit/671e3d94deadacbeb2062b3275669f83dbf98ed5))
+
 ## [1.223.0](https://github.com/factorialco/f0/compare/f0-react-v1.222.0...f0-react-v1.223.0) (2025-10-02)
 
 
