@@ -4,9 +4,9 @@ import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Search } from "../../../../icons/app"
-import { Select } from "./index"
-import type { SelectItemProps } from "./types"
+import { Search } from "../../../../../icons/app"
+import { Select } from "../index"
+import type { SelectItemProps } from "../types"
 
 const mockOptions: SelectItemProps<string, RecordType>[] = [
   {
@@ -327,5 +327,67 @@ describe("Select", () => {
         value: "option1",
       })
     )
+  })
+
+  it("clears value and selectedOption when clearable and clear button is clicked", async () => {
+    const handleChange = vi.fn()
+    const handleChangeSelectedOption = vi.fn()
+    const user = userEvent.setup()
+
+    const { container } = render(
+      <Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={handleChange}
+        onChangeSelectedOption={handleChangeSelectedOption}
+        clearable
+      />
+    )
+
+    // First select an option
+    await openSelect(user)
+    await user.click(screen.getByText("Option 1"))
+
+    // Verify option was selected
+    expect(handleChange).toHaveBeenCalledWith(
+      "option1",
+      expect.objectContaining({
+        id: "option1",
+        name: "Option 1",
+        description: "Description 1",
+      }),
+      expect.objectContaining({
+        label: "Option 1",
+        value: "option1",
+        description: "Description 1",
+      })
+    )
+
+    // Reset mocks to track the clear action
+    handleChange.mockClear()
+    handleChangeSelectedOption.mockClear()
+
+    // Wait for the component to settle with the selected value
+    await waitFor(() => {
+      expect(screen.getByText("Option 1")).toBeInTheDocument()
+    })
+
+    // Find the clear button using the same approach as InputField tests
+    // The clear button should be visible when there's a value
+    const clearButton = container.querySelector(
+      "button[data-testid='clear-button']"
+    )
+    expect(clearButton).toBeInTheDocument()
+
+    // Click the clear button using fireEvent directly
+    await fireEvent.click(clearButton)
+
+    // Verify that onChange is called with empty string and onChangeSelectedOption with undefined
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledWith("", undefined, undefined)
+    })
+    await waitFor(() => {
+      expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined)
+    })
   })
 })

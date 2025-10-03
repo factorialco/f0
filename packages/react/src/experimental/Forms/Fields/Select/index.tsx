@@ -62,7 +62,7 @@ export type SelectProps<T extends string, R = unknown> = {
     option?: SelectItemObject<T, ResolvedRecordType<R>>
   ) => void
   onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>>
+    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => void
   value?: T
   defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
@@ -329,10 +329,8 @@ const SelectComponent = forwardRef(function Select<
   useEffect(() => {
     const foundOption = findOption(localValue)
 
-    if (foundOption) {
-      onChangeSelectedOption?.(foundOption)
-      setSelectedOption(foundOption)
-    }
+    onChangeSelectedOption?.(foundOption)
+    setSelectedOption(foundOption)
   }, [
     data.records,
     localValue,
@@ -359,11 +357,10 @@ const SelectComponent = forwardRef(function Select<
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
     setLocalValue(changedValue as T)
+
     const foundOption = findOption(changedValue)
 
-    if (foundOption) {
-      onChange?.(foundOption.value, foundOption.item, foundOption)
-    }
+    onChange?.(changedValue as T, foundOption?.item, foundOption)
   }
 
   const handleChangeOpenLocal = (open: boolean) => {
