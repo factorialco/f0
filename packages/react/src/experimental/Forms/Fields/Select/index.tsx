@@ -57,7 +57,7 @@ export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
  */
 export type SelectProps<T extends string, R = unknown> = {
   onChange: (
-    value: T,
+    value: T | undefined,
     originalItem?: ResolvedRecordType<R>,
     option?: SelectItemObject<T, ResolvedRecordType<R>>
   ) => void
@@ -363,6 +363,8 @@ const SelectComponent = forwardRef(function Select<
 
     if (foundOption) {
       onChange?.(foundOption.value, foundOption.item, foundOption)
+    } else {
+      onChange?.(undefined)
     }
   }
 
