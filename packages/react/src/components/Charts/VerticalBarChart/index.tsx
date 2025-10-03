@@ -143,8 +143,9 @@ const _VBarChart = <K extends ChartConfig>(
                 key={`bar-${key}`}
                 dataKey={key}
                 fill={dataConfig[key].color || autoColor(index)}
-                radius={4}
-                maxBarSize={24}
+                radius={8}
+                maxBarSize={48}
+                shape={<CustomBar dataKey={key} />}
               >
                 {(label || showRatio) && (
                   <LabelList
@@ -219,5 +220,37 @@ const CustomLabel = ({
         </text>
       }
     </g>
+  )
+}
+
+const CustomBar = (
+  props: React.SVGProps<SVGRectElement> & { dataKey?: string }
+) => {
+  const { fill, x, y, width, height, radius, dataKey } = props
+
+  return (
+    <>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        stroke="none"
+        rx={radius}
+        fill={`url(#bar-pattern-${dataKey})`}
+      />
+      <defs>
+        <linearGradient
+          id={`bar-pattern-${dataKey}`}
+          x1="0"
+          y1="0"
+          x2="1"
+          y2="0"
+        >
+          <stop offset="0%" stopColor={fill} stopOpacity={0.8} />
+          <stop offset="50%" stopColor={fill} stopOpacity={1} />
+        </linearGradient>
+      </defs>
+    </>
   )
 }

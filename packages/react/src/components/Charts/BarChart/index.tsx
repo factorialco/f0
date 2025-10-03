@@ -202,8 +202,13 @@ const _BarChart = <K extends ChartConfig>(
                 ? (((data: { fill: string }) => data.fill) as unknown as string)
                 : (dataConfig[key].color ?? autoColor(index))
             }
-            radius={type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
-            maxBarSize={32}
+            radius={type === "stacked-by-sign" ? [10, 10, 0, 0] : 10}
+            maxBarSize={48}
+            shape={
+              type === "stacked-by-sign" ? undefined : (
+                <CustomBar dataKey={key} />
+              )
+            }
           >
             {label && (
               <LabelList
@@ -227,6 +232,38 @@ const _BarChart = <K extends ChartConfig>(
         )}
       </BarChartPrimitive>
     </ChartContainer>
+  )
+}
+
+const CustomBar = (
+  props: React.SVGProps<SVGRectElement> & { dataKey?: string }
+) => {
+  const { fill, x, y, width, height, radius, dataKey } = props
+
+  return (
+    <>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        stroke="none"
+        rx={radius}
+        fill={`url(#bar-pattern-${dataKey})`}
+      />
+      <defs>
+        <linearGradient
+          id={`bar-pattern-${dataKey}`}
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="1"
+        >
+          <stop offset="0%" stopColor={fill} stopOpacity={0.8} />
+          <stop offset="50%" stopColor={fill} stopOpacity={1} />
+        </linearGradient>
+      </defs>
+    </>
   )
 }
 
