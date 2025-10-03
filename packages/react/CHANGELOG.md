@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.225.1](https://github.com/factorialco/f0/compare/f0-react-v1.225.0...f0-react-v1.225.1) (2025-10-03)
+
+
+### Bug Fixes
+
+* select remove option on clear ([#2755](https://github.com/factorialco/f0/issues/2755)) ([d89bd08](https://github.com/factorialco/f0/commit/d89bd08bdb4d998e13847f62fbdfb62cea0301f6))
+
 ## [1.225.0](https://github.com/factorialco/f0/compare/f0-react-v1.224.0...f0-react-v1.225.0) (2025-10-03)
 
 
