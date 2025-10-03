@@ -14354,7 +14354,7 @@ const aB = 8, su = K(({ items: t = void 0, className: e, children: n, position: 
   return L ? D : f(iB, {
     children: b(Te, {
       children: [f("div", {
-        className: "fixed inset-0 z-50 bg-[#ff000060]",
+        className: "fixed inset-0 z-50 bg-[#00ff0060]",
         onClick: ($) => {
           console.log("clicked bg"), $.preventDefault(), $.stopPropagation();
         }
