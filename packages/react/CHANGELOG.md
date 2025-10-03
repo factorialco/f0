@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.225.0](https://github.com/factorialco/f0/compare/f0-react-v1.224.0...f0-react-v1.225.0) (2025-10-03)
+
+
+### Features
+
+* add placeholder on empty lanes + remove blue lines when no real  move ([10e1e32](https://github.com/factorialco/f0/commit/10e1e32616c872310d6aed471754458dbf29456d))
+
+
+### Bug Fixes
+
+* refresh lanesprovider to avoid having old data ([#2754](https://github.com/factorialco/f0/issues/2754)) ([10e1e32](https://github.com/factorialco/f0/commit/10e1e32616c872310d6aed471754458dbf29456d))
+
 ## [1.224.0](https://github.com/factorialco/f0/compare/f0-react-v1.223.0...f0-react-v1.224.0) (2025-10-03)
 
 
