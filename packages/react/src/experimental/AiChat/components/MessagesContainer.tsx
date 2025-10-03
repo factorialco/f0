@@ -83,14 +83,12 @@ export const MessagesContainer = ({
         "overflow-y-scroll"
       )}
       ref={messagesContainerRef}
-      style={{
-        height: containerHeight
-          ? Math.max(containerHeight, longestTurnHeight)
-          : undefined,
-        flex: containerHeight ? "initial" : undefined,
-      }}
     >
-      <motion.div layout="position" ref={turnsContainerRef}>
+      <motion.div
+        layout="position"
+        ref={turnsContainerRef}
+        className={!showWelcomeBlock ? "flex flex-col gap-8" : undefined}
+      >
         <AnimatePresence mode="popLayout">
           {showWelcomeBlock && (
             <motion.div
