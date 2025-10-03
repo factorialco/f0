@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.226.0](https://github.com/factorialco/f0/compare/f0-react-v1.225.1...f0-react-v1.226.0) (2025-10-03)
+
+
+### Features
+
+* entitySelector size and error, hint props ([#2701](https://github.com/factorialco/f0/issues/2701)) ([bc77a64](https://github.com/factorialco/f0/commit/bc77a64b1c32cf98f4038e1e9da3e81edc0869d0))
+
 ## [1.225.1](https://github.com/factorialco/f0/compare/f0-react-v1.225.0...f0-react-v1.225.1) (2025-10-03)
 
 
