@@ -39,6 +39,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
@@ -363,9 +364,16 @@ const SelectComponent = forwardRef(function Select<
     onChange?.(changedValue as T, foundOption?.item, foundOption)
   }
 
+  const debouncedHandleChangeOpenLocal = useDebounceCallback(
+    (open: boolean) => {
+      onOpenChange?.(open)
+      setOpenLocal(open)
+    },
+    100
+  )
+
   const handleChangeOpenLocal = (open: boolean) => {
-    onOpenChange?.(open)
-    setOpenLocal(open)
+    debouncedHandleChangeOpenLocal(open)
   }
 
   // const collapsible = localSource.grouping?.collapsible
@@ -479,6 +487,7 @@ const SelectComponent = forwardRef(function Select<
         }
         disabled={disabled}
         open={openLocal}
+        onOpenChange={handleChangeOpenLocal}
         {...props}
       >
         <SelectTrigger ref={ref} asChild>
