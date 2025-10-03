@@ -122,7 +122,7 @@ export const Trigger = ({
       }
       append={
         append ?? (
-          <div className={cn(size === "sm" ? "" : "-mt-[8px]")}>
+          <div className={cn(size === "sm" ? "" : "-mt-2")}>
             {/* This is a temporary solution (to use Select component arrow) */}
             <Arrow open={open} disabled={disabled} size={size} />
           </div>
