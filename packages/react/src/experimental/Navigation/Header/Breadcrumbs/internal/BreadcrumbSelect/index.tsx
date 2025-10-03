@@ -37,9 +37,9 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
   }
 
   const handleChangeSelectedOption = (
-    option: SelectItemObject<T, ResolvedRecordType<R>>
+    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => {
-    setSelectedLabel(option.label)
+    setSelectedLabel(option?.label || "")
   }
 
   return (
