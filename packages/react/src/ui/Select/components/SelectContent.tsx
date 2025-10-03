@@ -257,14 +257,14 @@ const SelectContent = forwardRef<
       <SelectPrimitive.Portal>
         <>
           <div
-            className="fixed inset-0 bg-[#ff000060]"
+            className="fixed inset-0 z-50 bg-[#ff000060]"
             onClick={(e) => {
               console.log("clicked bg")
               e.preventDefault()
               e.stopPropagation()
             }}
           ></div>
-          <div className="z-50">{content}</div>
+          {content}
         </>
       </SelectPrimitive.Portal>
     )
