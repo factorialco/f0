@@ -254,7 +254,19 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>
+      <SelectPrimitive.Portal>
+        <>
+          {/* Overlay to prevent clicks on the content */}
+          <div
+            className="pointer-events-auto fixed inset-0 z-40"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          ></div>
+          {content}
+        </>
+      </SelectPrimitive.Portal>
     )
   }
 )
