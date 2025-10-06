@@ -9,7 +9,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as ActionsStories from "./collection-actions.stories"
 import * as ItemActionsStories from "./item-actions.stories"
-import * as IndexStories from "./index.stories"
+import * as IndexStories from "../index.stories"
 
 <Meta title="Data collection/Actions" />
 
@@ -43,6 +43,31 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
+You can also pass an array of actions and they will be rendered as a
+F0ButtonDropdown, with the first action as main action.
+
+````tsx
+const dataSource = useDataCollectionSource({
+  primaryActions: () => [
+    {
+      label: "Action 1",
+      icon: <Icon />,
+      onClick: () => console.log("Action 1"),
+    },
+    {
+      label: "Action 2",
+      icon: <Icon />,
+      onClick: () => console.log("Action 2"),
+    },
+    {
+      label: "Action 3",
+      icon: <Icon />,
+      onClick: () => console.log("Action 3"),
+    },
+  ],
+})
+
+
 - **Secondary actions**: Are an array of actions and by defualt are displayed a
   dropdown. But you can define the number of actions to display as a secondary
   button using the `expanded` property. You can also hide the label of the
@@ -70,7 +95,7 @@ const dataSource = useDataCollectionSource({
     ],
   },
 })
-```
+````
 
 Or as array of actions
 
@@ -98,6 +123,10 @@ const dataSource = useDataCollectionSource({
 #### Basic example
 
 <Canvas of={ActionsStories.BasicActionsExample} />
+
+#### Multiple primary actions
+
+<Canvas of={ActionsStories.MultiplePrimaryActionsExample} />
 
 #### With expanded actions
 
