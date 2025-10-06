@@ -640,6 +640,11 @@ export function useData<
                 state.cached
               )
 
+              console.log({
+                shouldFetchMore,
+                paginationInfoRef: paginationInfoRef.current,
+              })
+
               // If data was cached and there's more to fetch, automatically load more
               if (shouldFetchMore && paginationInfoRef.current) {
                 const currentPaginationInfo = paginationInfoRef.current
