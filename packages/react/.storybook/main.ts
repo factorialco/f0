@@ -76,6 +76,16 @@ const config: StorybookConfig = {
       "@": resolve(__dirname, "../src"),
       "~": resolve(__dirname, "../"),
     }
+    // Remove the removeTestIdAttribute plugin for Storybook builds
+    // to preserve data-testid attributes needed for tests
+    if (config.plugins) {
+      config.plugins = config.plugins.filter((plugin) => {
+        if (plugin && typeof plugin === "object" && "name" in plugin) {
+          return plugin.name !== "rollup-plugin-jsx-remove-attributes"
+        }
+        return true
+      })
+    }
     return config
   },
 }
