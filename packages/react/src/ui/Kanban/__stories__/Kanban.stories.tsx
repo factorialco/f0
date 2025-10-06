@@ -2,7 +2,7 @@ import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, waitFor, within } from "storybook/test"
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
 import type { KanbanProps } from "../types"
@@ -434,8 +434,13 @@ export const SimpleOnMoveTest: Story = {
 
       canvas.getByTestId("trigger-move-empty").click()
 
-      // Wait a bit for state update
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      // Wait for the callback to be called
+      await waitFor(
+        () => {
+          expect(canvas.getByTestId("call-0")).toBeInTheDocument()
+        },
+        { timeout: 2000 }
+      )
 
       // Verify the callback was called
       const firstCall = canvas.getByTestId("call-0")
@@ -453,8 +458,13 @@ export const SimpleOnMoveTest: Story = {
       // Now try to move the item that's currently in Target Empty to Target With Items
       canvas.getByTestId("trigger-move-with-items").click()
 
-      // Wait a bit for state update
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      // Wait for the second callback to be called
+      await waitFor(
+        () => {
+          expect(canvas.getByTestId("call-1")).toBeInTheDocument()
+        },
+        { timeout: 2000 }
+      )
 
       // Verify the second callback was called
       const secondCall = canvas.getByTestId("call-1")
