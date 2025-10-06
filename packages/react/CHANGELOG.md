@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.228.0](https://github.com/factorialco/f0/compare/f0-react-v1.227.0...f0-react-v1.228.0) (2025-10-06)
+
+
+### Features
+
+* ellipsis in text and person display-values ([#2767](https://github.com/factorialco/f0/issues/2767)) ([c11a86b](https://github.com/factorialco/f0/commit/c11a86b749b905798e06059cbf4db318e6fa1fe9))
+
 ## [1.227.0](https://github.com/factorialco/f0/compare/f0-react-v1.226.0...f0-react-v1.227.0) (2025-10-06)
 
 
