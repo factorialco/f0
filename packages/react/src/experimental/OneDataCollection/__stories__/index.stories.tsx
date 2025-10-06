@@ -449,6 +449,9 @@ export const RendererTypes: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
+      search: {
+        enabled: true,
+      },
     })
 
     return (
