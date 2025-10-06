@@ -7,7 +7,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { Skeleton } from "@/ui/skeleton"
 import { OneFilterPicker } from "../../components/OneFilterPicker"
 import type {
   FiltersDefinition,
@@ -16,11 +15,11 @@ import type {
 import { OneActionBar } from "../OneActionBar"
 import { getSecondaryActions, MAX_EXPANDED_ACTIONS } from "./actions"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
+import { Search } from "./components/Search"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { ItemActionsDefinition } from "./item-actions"
 import { navigationFilterTypes } from "./navigationFilters"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
-import { Search } from "./search"
 import { Settings } from "./Settings"
 import { SummariesDefinition } from "./summary"
 import type {
@@ -42,6 +41,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import React from "react"
+import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
   DataCollectionStatusComplete,
   DataCollectionStorageFeaturesDefinition,
@@ -179,10 +179,7 @@ const OneDataCollectionComp = <
     primaryActions,
     secondaryActions,
     // Summary
-    totalItemSummary = (totalItems: number | undefined) =>
-      totalItems !== undefined
-        ? `${totalItems} ${i18n.collections.itemsCount}`
-        : null,
+    totalItemSummary,
     currentGrouping,
     setCurrentGrouping,
     grouping,
@@ -190,6 +187,7 @@ const OneDataCollectionComp = <
     setCurrentSortings,
     sortings,
   } = source
+
   const [currentVisualization, setCurrentVisualization] = useState(0)
 
   const defaultSortings = useRef(currentSortings)
@@ -205,8 +203,14 @@ const OneDataCollectionComp = <
   /**
    * Data collection actions
    */
-  const primaryActionItem = useMemo(
-    () => primaryActions && primaryActions(),
+  const primaryActionItems = useMemo(
+    () =>
+      primaryActions
+        ? (Array.isArray(primaryActions)
+            ? primaryActions
+            : [primaryActions]
+          ).filter(Boolean)
+        : [],
     [primaryActions]
   )
 
@@ -238,7 +242,7 @@ const OneDataCollectionComp = <
   )
 
   const hasCollectionsActions =
-    !!primaryActionItem || allSecondaryActions?.length > 0
+    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
 
   /**
    * Clear selected items function
@@ -269,6 +273,16 @@ const OneDataCollectionComp = <
   const [selectedItemsCount, setSelectedItemsCount] = useState(0)
 
   const i18n = useI18n()
+
+  const totalItemSummaryFn = useMemo(() => {
+    if (totalItemSummary === true) {
+      return (totalItems: number | undefined) =>
+        totalItems !== undefined
+          ? `${totalItems} ${i18n.collections.itemsCount}`
+          : null
+    }
+    return totalItemSummary || undefined
+  }, [totalItemSummary, i18n])
 
   const onSelectItemsLocal: OnSelectItemsCallback<R, Filters> = (
     selectedItems,
@@ -390,9 +404,20 @@ const OneDataCollectionComp = <
     source.dataAdapter,
   ])
 
-  const totalItemSummaryResult =
-    totalItems !== undefined ? totalItemSummary?.(totalItems) : null
+  const showTotalItemSummary = useMemo(() => {
+    return totalItemSummaryFn !== undefined
+  }, [totalItemSummaryFn])
 
+  const totalItemSummaryResult =
+    totalItemSummaryFn === undefined
+      ? null
+      : totalItems !== undefined
+        ? totalItemSummaryFn(totalItems)
+        : null
+
+  const totalItemSummaryPosition = useMemo(() => {
+    return filters ? "top" : "bottom"
+  }, [filters])
   /**
    * Settings
    */
@@ -434,7 +459,7 @@ const OneDataCollectionComp = <
   )
 
   const isReady = useMemo(() => {
-    return isInitialLoading && storageReady
+    return !isInitialLoading && storageReady
   }, [isInitialLoading, storageReady])
 
   /** State */
@@ -473,15 +498,12 @@ const OneDataCollectionComp = <
     >
       {(totalItemSummary !== undefined || navigationFilters) && (
         <div className="border-f1-border-primary flex gap-4 px-4">
-          <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isReady ? (
-              <Skeleton className="h-5 w-24" />
-            ) : (
-              <div className="flex h-5 items-center">
-                {totalItemSummaryResult}
-              </div>
-            )}
-          </div>
+          {showTotalItemSummary && totalItemSummaryPosition === "top" && (
+            <TotalItemsSummary
+              isReady={isReady}
+              totalItemSummaryResult={totalItemSummaryResult}
+            />
+          )}
           <div className="flex flex-1 flex-shrink justify-end">
             {navigationFilters &&
               Object.entries(navigationFilters).map(([key, filter]) => {
@@ -505,8 +527,14 @@ const OneDataCollectionComp = <
         </div>
       )}
       <div
-        className={cn("flex flex-col gap-4 px-4", fullHeight && "max-h-full")}
+        className={cn("flex flex-row gap-4 px-4", fullHeight && "max-h-full")}
       >
+        {totalItemSummaryPosition === "bottom" && showTotalItemSummary && (
+          <TotalItemsSummary
+            isReady={isReady}
+            totalItemSummaryResult={totalItemSummaryResult}
+          />
+        )}
         <OneFilterPicker
           filters={filters}
           value={currentFilters}
@@ -546,7 +574,7 @@ const OneDataCollectionComp = <
                 <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
               )}
               <CollectionActions
-                primaryActions={primaryActionItem}
+                primaryActions={primaryActionItems}
                 secondaryActions={secondaryActionsItems}
                 otherActions={otherActionsItems}
               />

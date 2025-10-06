@@ -864,6 +864,7 @@ export const ExampleComponent = ({
    * Enable Apollo-like cache behavior for testing optimistic updates
    */
   enableCache = true,
+  hideFilters,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -895,7 +896,7 @@ export const ExampleComponent = ({
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
-  totalItemSummary?: (totalItems: number) => string
+  totalItemSummary?: true | ((totalItems: number) => string)
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
   paginationType?: PaginationType
@@ -906,6 +907,7 @@ export const ExampleComponent = ({
   tableAllowColumnHiding?: boolean
   onStateChange?: (state: DataCollectionStatusComplete) => void
   enableCache?: boolean
+  hideFilters?: boolean
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -959,7 +961,7 @@ export const ExampleComponent = ({
 
   const dataSource = useDataCollectionSource(
     {
-      filters,
+      filters: hideFilters ? undefined : filters,
       navigationFilters,
       presets: usePresets ? filterPresets : undefined,
       sortings,

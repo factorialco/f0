@@ -9,6 +9,7 @@ import {
  */
 export type PrimaryActionsDefinition = () =>
   | Pick<DropdownItemObject, "onClick" | "label" | "icon">
+  | Pick<DropdownItemObject, "onClick" | "label" | "icon">[]
   | undefined
 
 /**
