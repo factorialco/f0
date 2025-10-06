@@ -27,7 +27,7 @@ export const useDebounceBoolean = <T extends boolean>({
         clearTimeout(timeout)
       }
     }
-  }, [value])
+  }, [value, delay])
 
   return debouncedValue
 }

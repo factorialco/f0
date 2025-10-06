@@ -444,8 +444,6 @@ const OneDataCollectionComp = <
     delay: 100,
   })
 
-  console.log({ showTotalItemSummarySkeleton })
-
   /** State */
   useEffect(() => {
     onStateChange?.({

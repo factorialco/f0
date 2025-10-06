@@ -616,12 +616,12 @@ export function useData<
 
         const subscription = observable.subscribe({
           next: (state) => {
-            if (state.loading) {
+            if (state.data) {
+              handleFetchSuccess(state.data, appendMode)
+            } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
               handleFetchError(state.error)
-            } else if (state.data) {
-              handleFetchSuccess(state.data, appendMode)
             }
           },
           error: handleFetchError,

@@ -179,6 +179,10 @@ export type PaginatedDataAdapter<
    * @param options - The filter and pagination options to apply when fetching data
    * @returns Paginated response with records and pagination info
    */
+  /**
+   * Indicates if the data is cached
+   */
+  cached?: boolean
   fetchData: (
     options: Options
   ) =>
