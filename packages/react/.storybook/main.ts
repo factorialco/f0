@@ -8,6 +8,9 @@ if (process.env.PUBLIC_BUILD) {
   process.env.STORYBOOK_PUBLIC_BUILD = process.env.PUBLIC_BUILD
 }
 
+// Mark that we're building for Storybook to preserve data-testid attributes
+process.env.STORYBOOK_BUILD = "true"
+
 const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",
@@ -75,16 +78,6 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       "@": resolve(__dirname, "../src"),
       "~": resolve(__dirname, "../"),
-    }
-    // Remove the removeTestIdAttribute plugin for Storybook builds
-    // to preserve data-testid attributes needed for tests
-    if (config.plugins) {
-      config.plugins = config.plugins.filter((plugin) => {
-        if (plugin && typeof plugin === "object" && "name" in plugin) {
-          return plugin.name !== "rollup-plugin-jsx-remove-attributes"
-        }
-        return true
-      })
     }
     return config
   },
