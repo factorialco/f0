@@ -4,8 +4,14 @@ import type {
 } from "@/components/OneFilterPicker/types"
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useDebounceValue } from "usehooks-ts"
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { Observable } from "zen-observable-ts"
 import {
   BaseFetchOptions,
@@ -301,9 +307,7 @@ export function useData<
     return { ...currentFilters, ...filters }
   }, [currentFilters, filters])
 
-  // Use useDebounceValue for non-sync search to reduce unnecessary fetches
-  // Debounce delay of 300ms provides a good balance between responsiveness and performance
-  const [debouncedSearch] = useDebounceValue(currentSearch, 300)
+  const deferredSearch = useDeferredValue(currentSearch)
 
   // We need to use a ref to get the latest search value
   // because the search value is updated asynchronously
@@ -315,8 +319,8 @@ export function useData<
       ? undefined
       : search?.sync
         ? currentSearch
-        : debouncedSearch
-  }, [currentSearch, debouncedSearch, search?.enabled, search?.sync])
+        : deferredSearch
+  }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items
@@ -343,13 +347,19 @@ export function useData<
   }
 
   const handleFetchSuccess = useCallback(
-    (result: PaginatedResponse<R> | SimpleResult<R>, appendMode: boolean) => {
+    (
+      result: PaginatedResponse<R> | SimpleResult<R>,
+      appendMode: boolean,
+      cached = false
+    ) => {
       /**
        * Call to the onResponse callback
        */
       onResponse?.(result)
 
       let records: R[] = []
+      let shouldFetchMore = false
+
       if ("records" in result) {
         records = result.records
         // Use a default value of "pages" when paginationType is undefined
@@ -378,6 +388,11 @@ export function useData<
                   : Math.ceil(result.total / result.perPage),
             })
           } else if (paginationType === "infinite-scroll") {
+            const hasMore =
+              "hasMore" in result
+                ? result.hasMore
+                : rawData.length + result.records.length < result.total
+
             setPaginationInfo({
               ...common,
               type: "infinite-scroll" as const,
@@ -387,11 +402,11 @@ export function useData<
                   : appendMode
                     ? String(result.perPage)
                     : "0",
-              hasMore:
-                "hasMore" in result
-                  ? result.hasMore
-                  : rawData.length + result.records.length < result.total,
+              hasMore,
             })
+
+            // If data is cached and there's more to fetch, trigger another fetch
+            shouldFetchMore = cached && hasMore
           }
 
           setTotalItems(result.total)
@@ -412,6 +427,8 @@ export function useData<
       setIsLoading(false)
       setIsLoadingMore(false)
       isLoadingMoreRef.current = false
+
+      return shouldFetchMore
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -617,7 +634,34 @@ export function useData<
         const subscription = observable.subscribe({
           next: (state) => {
             if (state.data) {
-              handleFetchSuccess(state.data, appendMode)
+              const shouldFetchMore = handleFetchSuccess(
+                state.data,
+                appendMode,
+                state.cached
+              )
+
+              // If data was cached and there's more to fetch, automatically load more
+              if (shouldFetchMore && paginationInfoRef.current) {
+                const currentPaginationInfo = paginationInfoRef.current
+                if (
+                  isInfiniteScrollPagination(currentPaginationInfo) &&
+                  currentPaginationInfo.hasMore
+                ) {
+                  // Schedule loadMore on next tick to avoid state update conflicts
+                  setTimeout(() => {
+                    setIsLoadingMore(true)
+                    setIsLoading(true)
+                    isLoadingMoreRef.current = true
+
+                    fetchDataAndUpdate({
+                      filters: mergedFilters,
+                      appendMode: true,
+                      cursor: currentPaginationInfo.cursor,
+                      search: searchValue.current,
+                    })
+                  }, 0)
+                }
+              }
             } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {

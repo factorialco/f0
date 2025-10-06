@@ -4,6 +4,7 @@ export interface PromiseState<T> {
   loading: boolean
   error?: Error | null
   data?: T | null
+  cached?: boolean
 }
 
 export function promiseToObservable<T>(
