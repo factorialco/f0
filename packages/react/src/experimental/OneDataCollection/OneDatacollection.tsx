@@ -439,12 +439,12 @@ const OneDataCollectionComp = <
     }
   )
 
-  const isNotReady = isInitialLoading && storageReady
-
   const showTotalItemSummarySkeleton = useDebounceBoolean({
-    value: isNotReady,
+    value: isInitialLoading && storageReady,
     delay: 100,
   })
+
+  console.log({ showTotalItemSummarySkeleton })
 
   /** State */
   useEffect(() => {
@@ -483,12 +483,8 @@ const OneDataCollectionComp = <
       {(totalItemSummary !== undefined || navigationFilters) && (
         <div className="border-f1-border-primary flex gap-4 px-4">
           <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isNotReady ? (
-              showTotalItemSummarySkeleton ? (
-                <Skeleton className="h-5 w-24" />
-              ) : (
-                <div className="flex h-5 items-center" />
-              )
+            {showTotalItemSummarySkeleton ? (
+              <Skeleton className="h-5 w-24" />
             ) : (
               <div className="flex h-5 items-center">
                 {totalItemSummaryResult}
