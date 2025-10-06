@@ -135,7 +135,9 @@ export const Trigger = ({
           "my-auto flex items-center pr-1",
           placeholder && "text-f1-foreground-secondary",
           value && "text-f1-foreground",
-          flattenedList.length === 1 && !hiddenAvatar ? "pl-8" : "pl-2"
+          (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
+            ? "pl-8"
+            : "pl-2"
         )}
       >
         {flattenedList.length === 0
