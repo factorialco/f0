@@ -3,13 +3,36 @@ import {
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
 
+export type PrimaryActionsDefinition = Pick<
+  DropdownItemObject,
+  "onClick" | "label" | "icon"
+>
+
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */
-export type PrimaryActionsDefinition = () =>
-  | Pick<DropdownItemObject, "onClick" | "label" | "icon">
+export type PrimaryActionsDefinitionFn = () =>
+  | PrimaryActionsDefinition
+  | PrimaryActionsDefinition[]
   | undefined
+
+/**
+ * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
+ */
+export const getPrimaryActions = (
+  primaryActions: PrimaryActionsDefinitionFn | undefined
+): PrimaryActionsDefinition[] => {
+  if (!primaryActions) {
+    return []
+  }
+
+  const items = primaryActions()
+
+  return (Array.isArray(items) ? items : [items]).filter(
+    (item): item is PrimaryActionsDefinition => item !== undefined
+  )
+}
 
 /**
  * Defines the structure and configuration of secondary actions that can be performed on a collection.

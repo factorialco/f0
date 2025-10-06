@@ -12,13 +12,10 @@ import {
 import { PromiseState } from "@/lib/promise-to-observable"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
-  act,
-  render,
-  renderHook,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react"
+  zeroRender as render,
+  zeroRenderHook as renderHook,
+} from "@/testing/test-utils"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { LayoutGrid } from "lucide-react"
 import { describe, expect, test, vi } from "vitest"
@@ -1012,8 +1009,7 @@ describe("Collections", () => {
             },
           },
         ]}
-      />,
-      { wrapper: TestWrapper }
+      />
     )
 
     // Check that our data is rendered
@@ -1146,8 +1142,7 @@ describe("Collections", () => {
             },
           },
         ]}
-      />,
-      { wrapper: TestWrapper }
+      />
     )
 
     // Verify that all four initial users are displayed
