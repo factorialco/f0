@@ -7,6 +7,7 @@ import {
   Envelope,
   ExternalLink,
   Lightbulb,
+  Link,
   Office,
   Star,
 } from "@/icons/app"
@@ -92,6 +93,14 @@ export const Default: Story = {
             status: "positive",
             label: "Active",
           },
+        },
+      },
+      {
+        icon: Link,
+        property: {
+          type: "text",
+          value:
+            "https://docs.google.com/spreadsheets/d/1jO1tPWhNe1y_ciSmNVYHugIPaOIEWOqrHR50Du2wvbc/edit",
         },
       },
     ],
