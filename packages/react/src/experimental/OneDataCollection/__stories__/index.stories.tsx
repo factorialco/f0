@@ -449,6 +449,9 @@ export const RendererTypes: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
+      search: {
+        enabled: true,
+      },
     })
 
     return (
@@ -541,6 +544,7 @@ export const RendererTypes: Story = {
                   render: (item) => ({
                     type: "avatarList",
                     value: {
+                      max: 1,
                       avatarList: [
                         {
                           type: "person",
