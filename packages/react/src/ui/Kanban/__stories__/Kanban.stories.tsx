@@ -2,7 +2,7 @@ import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
 import type { KanbanProps } from "../types"
@@ -415,58 +415,57 @@ export const SimpleOnMoveTest: Story = {
       </div>
     )
   },
-  // TODO: Disabled until it works in CI
-  // It seems no item with trigger-move-empty
-  // play: async ({ canvasElement, step }) => {
-  //   const canvas = within(canvasElement)
-  //   await step("Verify initial state", async () => {
-  //     const emptyButton = canvas.getByTestId("trigger-move-empty")
-  //     const withItemsButton = canvas.getByTestId("trigger-move-with-items")
-  //     expect(emptyButton).toBeInTheDocument()
-  //     expect(withItemsButton).toBeInTheDocument()
-  //     expect(canvas.getByTestId("no-calls")).toBeInTheDocument()
-  //   })
 
-  //   await step("Test move to empty lane callback", async () => {
-  //     // Verify initial state - "Design spec" should be in Source Lane
-  //     expect(canvas.getByText("Design spec")).toBeInTheDocument()
-  //     expect(canvas.getByText("Source Lane")).toBeInTheDocument()
-  //     expect(canvas.getByText("Target Empty")).toBeInTheDocument()
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("Verify initial state", async () => {
+      const emptyButton = canvas.getByTestId("trigger-move-empty")
+      const withItemsButton = canvas.getByTestId("trigger-move-with-items")
+      expect(emptyButton).toBeInTheDocument()
+      expect(withItemsButton).toBeInTheDocument()
+      expect(canvas.getByTestId("no-calls")).toBeInTheDocument()
+    })
 
-  //     canvas.getByTestId("trigger-move-empty").click()
+    await step("Test move to empty lane callback", async () => {
+      // Verify initial state - "Design spec" should be in Source Lane
+      expect(canvas.getByText("Design spec")).toBeInTheDocument()
+      expect(canvas.getByText("Source Lane")).toBeInTheDocument()
+      expect(canvas.getByText("Target Empty")).toBeInTheDocument()
 
-  //     // Wait a bit for state update
-  //     await new Promise((resolve) => setTimeout(resolve, 100))
+      canvas.getByTestId("trigger-move-empty").click()
 
-  //     // Verify the callback was called
-  //     const firstCall = canvas.getByTestId("call-0")
-  //     expect(firstCall).toBeInTheDocument()
+      // Wait a bit for state update
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
-  //     // Verify the parameters (updated rendering shows JSON blobs)
-  //     expect(firstCall).toHaveTextContent("From: source-lane")
-  //     expect(firstCall).toHaveTextContent("To: target-empty")
-  //     expect(firstCall).toHaveTextContent('"id":"t1"')
-  //     expect(firstCall).toHaveTextContent('"title":"Design spec"')
-  //     expect(firstCall).toHaveTextContent("Destiny:null")
-  //   })
+      // Verify the callback was called
+      const firstCall = canvas.getByTestId("call-0")
+      expect(firstCall).toBeInTheDocument()
 
-  //   await step("Test move to lane with items callback", async () => {
-  //     // Now try to move the item that's currently in Target Empty to Target With Items
-  //     canvas.getByTestId("trigger-move-with-items").click()
+      // Verify the parameters (updated rendering shows JSON blobs)
+      expect(firstCall).toHaveTextContent("From: source-lane")
+      expect(firstCall).toHaveTextContent("To: target-empty")
+      expect(firstCall).toHaveTextContent('"id":"t1"')
+      expect(firstCall).toHaveTextContent('"title":"Design spec"')
+      expect(firstCall).toHaveTextContent("Destiny:null")
+    })
 
-  //     // Wait a bit for state update
-  //     await new Promise((resolve) => setTimeout(resolve, 100))
+    await step("Test move to lane with items callback", async () => {
+      // Now try to move the item that's currently in Target Empty to Target With Items
+      canvas.getByTestId("trigger-move-with-items").click()
 
-  //     // Verify the second callback was called
-  //     const secondCall = canvas.getByTestId("call-1")
-  //     expect(secondCall).toBeInTheDocument()
+      // Wait a bit for state update
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
-  //     // ✅ Verify the parameters match the ACTUAL call (item should now be coming from target-empty)
-  //     expect(secondCall).toHaveTextContent("From: target-empty")
-  //     expect(secondCall).toHaveTextContent("To: target-with-items")
-  //     expect(secondCall).toHaveTextContent(/"id":"t1"/)
-  //     expect(secondCall).toHaveTextContent(/"title":"Design spec"/)
-  //     expect(secondCall).toHaveTextContent(/"position":"above"/)
-  //   })
-  // },
+      // Verify the second callback was called
+      const secondCall = canvas.getByTestId("call-1")
+      expect(secondCall).toBeInTheDocument()
+
+      // ✅ Verify the parameters match the ACTUAL call (item should now be coming from target-empty)
+      expect(secondCall).toHaveTextContent("From: target-empty")
+      expect(secondCall).toHaveTextContent("To: target-with-items")
+      expect(secondCall).toHaveTextContent(/"id":"t1"/)
+      expect(secondCall).toHaveTextContent(/"title":"Design spec"/)
+      expect(secondCall).toHaveTextContent(/"position":"above"/)
+    })
+  },
 }
