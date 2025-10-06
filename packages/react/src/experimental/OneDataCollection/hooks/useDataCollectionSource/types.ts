@@ -14,7 +14,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource/types"
 import {
-  PrimaryActionsDefinition,
+  PrimaryActionsDefinitionFn,
   SecondaryActionsDefinition,
 } from "../../actions"
 import { ItemActionsDefinition } from "../../item-actions"
@@ -122,7 +122,7 @@ export type DataCollectionSourceDefinition<
   /** Available actions that can be performed on records */
   itemActions?: ItemActions
   /** Available primary actions that can be performed on the collection */
-  primaryActions?: PrimaryActionsDefinition
+  primaryActions?: PrimaryActionsDefinitionFn
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
   /** Available summaries fields. If not provided, summaries is not allowed. */

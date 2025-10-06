@@ -9,7 +9,7 @@ import {
 } from "../../actions"
 
 type CollectionActionProps = {
-  primaryActions?: ReturnType<PrimaryActionsDefinition>
+  primaryActions?: PrimaryActionsDefinition[]
   secondaryActions?: SecondaryActionsItemDefinition[]
   otherActions?: SecondaryActionsItemDefinition[]
 }
@@ -48,17 +48,19 @@ export const CollectionActions = ({
           label={primaryActionsButtons[0].label}
         />
       ) : (
-        <OneDropdownButton
-          size="md"
-          items={primaryActionsButtons.map((action, index) => ({
-            label: action.label,
-            icon: action.icon,
-            value: index.toString(),
-          }))}
-          onClick={(value) => {
-            primaryActionsButtons[Number(value)]?.onClick?.()
-          }}
-        />
+        primaryActionsButtons.length > 1 && (
+          <OneDropdownButton
+            size="md"
+            items={primaryActionsButtons.map((action, index) => ({
+              label: action.label,
+              icon: action.icon,
+              value: index.toString(),
+            }))}
+            onClick={(value) => {
+              primaryActionsButtons[Number(value)]?.onClick?.()
+            }}
+          />
+        )
       )}
 
       {secondaryActionsButtons?.map((action) => (

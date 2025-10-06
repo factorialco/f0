@@ -13,7 +13,11 @@ import type {
   FiltersState,
 } from "../../components/OneFilterPicker/types"
 import { OneActionBar } from "../OneActionBar"
-import { getSecondaryActions, MAX_EXPANDED_ACTIONS } from "./actions"
+import {
+  getPrimaryActions,
+  getSecondaryActions,
+  MAX_EXPANDED_ACTIONS,
+} from "./actions"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
 import { Search } from "./components/Search"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
@@ -204,13 +208,7 @@ const OneDataCollectionComp = <
    * Data collection actions
    */
   const primaryActionItems = useMemo(
-    () =>
-      primaryActions
-        ? (Array.isArray(primaryActions)
-            ? primaryActions
-            : [primaryActions]
-          ).filter(Boolean)
-        : [],
+    () => getPrimaryActions(primaryActions),
     [primaryActions]
   )
 
@@ -535,52 +533,54 @@ const OneDataCollectionComp = <
             totalItemSummaryResult={totalItemSummaryResult}
           />
         )}
-        <OneFilterPicker
-          filters={filters}
-          value={currentFilters}
-          presets={presets}
-          presetsLoading={presetsLoading}
-          onChange={(value) => setCurrentFilters(value)}
-        >
-          {isLoading && (
-            <motion.div
-              className="flex h-8 w-8 items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{
-                opacity: 0,
-              }}
-            >
-              <Spinner size="small" />
-            </motion.div>
-          )}
-          {search && (
-            <Search onChange={setCurrentSearch} value={currentSearch} />
-          )}
-          <Settings
-            visualizations={visualizations}
-            currentVisualization={currentVisualization}
-            onVisualizationChange={setCurrentVisualization}
-            grouping={grouping}
-            currentGrouping={currentGrouping}
-            onGroupingChange={setCurrentGrouping}
-            sortings={sortings}
-            currentSortings={currentSortings}
-            onSortingsChange={setCurrentSortings}
-          />
-          {hasCollectionsActions && (
-            <>
-              {elementsRightActions && (
-                <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-              )}
-              <CollectionActions
-                primaryActions={primaryActionItems}
-                secondaryActions={secondaryActionsItems}
-                otherActions={otherActionsItems}
-              />
-            </>
-          )}
-        </OneFilterPicker>
+        <div className="flex-1">
+          <OneFilterPicker
+            filters={filters}
+            value={currentFilters}
+            presets={presets}
+            presetsLoading={presetsLoading}
+            onChange={(value) => setCurrentFilters(value)}
+          >
+            {isLoading && (
+              <motion.div
+                className="flex h-8 w-8 items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{
+                  opacity: 0,
+                }}
+              >
+                <Spinner size="small" />
+              </motion.div>
+            )}
+            {search && (
+              <Search onChange={setCurrentSearch} value={currentSearch} />
+            )}
+            <Settings
+              visualizations={visualizations}
+              currentVisualization={currentVisualization}
+              onVisualizationChange={setCurrentVisualization}
+              grouping={grouping}
+              currentGrouping={currentGrouping}
+              onGroupingChange={setCurrentGrouping}
+              sortings={sortings}
+              currentSortings={currentSortings}
+              onSortingsChange={setCurrentSortings}
+            />
+            {hasCollectionsActions && (
+              <>
+                {elementsRightActions && (
+                  <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+                )}
+                <CollectionActions
+                  primaryActions={primaryActionItems}
+                  secondaryActions={secondaryActionsItems}
+                  otherActions={otherActionsItems}
+                />
+              </>
+            )}
+          </OneFilterPicker>
+        </div>
       </div>
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
       <div

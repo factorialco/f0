@@ -48,7 +48,7 @@ import {
 import { DEPARTMENTS_MOCK } from "@/mocks"
 import { OneDataCollection } from ".."
 import {
-  PrimaryActionsDefinition,
+  PrimaryActionsDefinitionFn,
   SecondaryActionsDefinition,
   SecondaryActionsItemDefinition,
 } from "../actions"
@@ -900,7 +900,7 @@ export const ExampleComponent = ({
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
   paginationType?: PaginationType
-  primaryActions?: PrimaryActionsDefinition
+  primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean
   tableAllowColumnReordering?: boolean
