@@ -93,7 +93,7 @@ export const ProjectStatuses: Story = {
   },
   render: function Render() {
     const [instanceId] = useState(() => Symbol("kanban-instance"))
-    const lanes: KanbanProps<Task>["lanes"] = [
+    const [lanes, setLanes] = useState<KanbanProps<Task>["lanes"]>([
       { id: "backlog", title: "Backlog", items: mockLeft, variant: "neutral" },
       {
         id: "in-progress",
@@ -103,7 +103,7 @@ export const ProjectStatuses: Story = {
       },
       { id: "review", title: "In Review", items: [], variant: "warning" },
       { id: "done", title: "Done", items: [], variant: "positive" },
-    ]
+    ])
     return (
       <DndProvider driver={createAtlaskitDriver(instanceId)}>
         <Kanban<Task>
@@ -111,11 +111,14 @@ export const ProjectStatuses: Story = {
           getKey={(item: Task) => item.id}
           dnd={{
             instanceId,
-            getIndexById: () => -1,
-            onMove: async (_fromLaneId, toLaneId, source, destiny) => {
+            getIndexById: (laneId: string, id: string) => {
+              const lane = lanes.find((l) => l.id === laneId)
+              return lane?.items.findIndex((item) => item.id === id) ?? -1
+            },
+            onMove: async (fromLaneId, toLaneId, source, destiny) => {
               await console.log(
                 "DND onMove",
-                _fromLaneId,
+                fromLaneId,
                 toLaneId,
                 source,
                 destiny
@@ -128,13 +131,66 @@ export const ProjectStatuses: Story = {
               // Simulate backend-enriched record when moving to 'done'
               if (toLaneId === "done") {
                 await new Promise((r) => setTimeout(r, 50))
-                return { ...source, title: `${source.title} (done)` }
+                const enrichedRecord = {
+                  ...source,
+                  title: `${source.title} (done)`,
+                }
+                // Update lanes state with enriched record
+                setLanes((prevLanes) => {
+                  return prevLanes.map((lane) => {
+                    if (lane.id === fromLaneId) {
+                      return {
+                        ...lane,
+                        items: lane.items.filter(
+                          (item) => item.id !== source.id
+                        ),
+                      }
+                    }
+                    if (lane.id === toLaneId) {
+                      return {
+                        ...lane,
+                        items: [...lane.items, enrichedRecord],
+                      }
+                    }
+                    return lane
+                  })
+                })
+                return enrichedRecord
               }
               // Normal pass-through
               await new Promise((r) => setTimeout(r, 50))
-              if (destiny && destiny.record && destiny.position) {
-                return { ...source }
-              }
+              // Update lanes state for normal moves
+              setLanes((prevLanes) => {
+                return prevLanes.map((lane) => {
+                  if (lane.id === fromLaneId) {
+                    return {
+                      ...lane,
+                      items: lane.items.filter((item) => item.id !== source.id),
+                    }
+                  }
+                  if (lane.id === toLaneId) {
+                    const newItems = [...lane.items]
+                    if (destiny && destiny.record && destiny.position) {
+                      const targetIndex = newItems.findIndex(
+                        (item) => item.id === destiny.record.id
+                      )
+                      if (targetIndex >= 0) {
+                        const insertIndex =
+                          destiny.position === "above"
+                            ? targetIndex
+                            : targetIndex + 1
+                        newItems.splice(insertIndex, 0, source)
+                      } else {
+                        newItems.push(source)
+                      }
+                    } else {
+                      newItems.push(source)
+                    }
+                    return { ...lane, items: newItems }
+                  }
+                  return lane
+                })
+              })
               return { ...source }
             },
           }}
