@@ -359,7 +359,7 @@ export const IntentsShowcase: Story = {
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
-    <div className="flex w-full flex-wrap gap-2 overflow-auto">
+    <div className="flex max-w-xl flex-col gap-2">
       <F0Card.Skeleton />
       <F0Card.Skeleton compact />
       <F0Card {...Default.args} />
