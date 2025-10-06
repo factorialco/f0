@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.227.0](https://github.com/factorialco/f0/compare/f0-react-v1.226.0...f0-react-v1.227.0) (2025-10-06)
+
+
+### Features
+
+* datacollection buttondropdown ([#2768](https://github.com/factorialco/f0/issues/2768)) ([0b14bf8](https://github.com/factorialco/f0/commit/0b14bf85f1f2e1cce82bc7ffe5fb769dce5c2079))
+
 ## [1.226.0](https://github.com/factorialco/f0/compare/f0-react-v1.225.1...f0-react-v1.226.0) (2025-10-03)
 
 
