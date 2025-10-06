@@ -2,7 +2,7 @@ import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, waitFor, within } from "storybook/test"
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
 import type { KanbanProps } from "../types"
@@ -93,7 +93,7 @@ export const ProjectStatuses: Story = {
   },
   render: function Render() {
     const [instanceId] = useState(() => Symbol("kanban-instance"))
-    const lanes: KanbanProps<Task>["lanes"] = [
+    const [lanes, setLanes] = useState<KanbanProps<Task>["lanes"]>([
       { id: "backlog", title: "Backlog", items: mockLeft, variant: "neutral" },
       {
         id: "in-progress",
@@ -103,7 +103,7 @@ export const ProjectStatuses: Story = {
       },
       { id: "review", title: "In Review", items: [], variant: "warning" },
       { id: "done", title: "Done", items: [], variant: "positive" },
-    ]
+    ])
     return (
       <DndProvider driver={createAtlaskitDriver(instanceId)}>
         <Kanban<Task>
@@ -111,11 +111,14 @@ export const ProjectStatuses: Story = {
           getKey={(item: Task) => item.id}
           dnd={{
             instanceId,
-            getIndexById: () => -1,
-            onMove: async (_fromLaneId, toLaneId, source, destiny) => {
+            getIndexById: (laneId: string, id: string) => {
+              const lane = lanes.find((l) => l.id === laneId)
+              return lane?.items.findIndex((item) => item.id === id) ?? -1
+            },
+            onMove: async (fromLaneId, toLaneId, source, destiny) => {
               await console.log(
                 "DND onMove",
-                _fromLaneId,
+                fromLaneId,
                 toLaneId,
                 source,
                 destiny
@@ -128,13 +131,66 @@ export const ProjectStatuses: Story = {
               // Simulate backend-enriched record when moving to 'done'
               if (toLaneId === "done") {
                 await new Promise((r) => setTimeout(r, 50))
-                return { ...source, title: `${source.title} (done)` }
+                const enrichedRecord = {
+                  ...source,
+                  title: `${source.title} (done)`,
+                }
+                // Update lanes state with enriched record
+                setLanes((prevLanes) => {
+                  return prevLanes.map((lane) => {
+                    if (lane.id === fromLaneId) {
+                      return {
+                        ...lane,
+                        items: lane.items.filter(
+                          (item) => item.id !== source.id
+                        ),
+                      }
+                    }
+                    if (lane.id === toLaneId) {
+                      return {
+                        ...lane,
+                        items: [...lane.items, enrichedRecord],
+                      }
+                    }
+                    return lane
+                  })
+                })
+                return enrichedRecord
               }
               // Normal pass-through
               await new Promise((r) => setTimeout(r, 50))
-              if (destiny && destiny.record && destiny.position) {
-                return { ...source }
-              }
+              // Update lanes state for normal moves
+              setLanes((prevLanes) => {
+                return prevLanes.map((lane) => {
+                  if (lane.id === fromLaneId) {
+                    return {
+                      ...lane,
+                      items: lane.items.filter((item) => item.id !== source.id),
+                    }
+                  }
+                  if (lane.id === toLaneId) {
+                    const newItems = [...lane.items]
+                    if (destiny && destiny.record && destiny.position) {
+                      const targetIndex = newItems.findIndex(
+                        (item) => item.id === destiny.record.id
+                      )
+                      if (targetIndex >= 0) {
+                        const insertIndex =
+                          destiny.position === "above"
+                            ? targetIndex
+                            : targetIndex + 1
+                        newItems.splice(insertIndex, 0, source)
+                      } else {
+                        newItems.push(source)
+                      }
+                    } else {
+                      newItems.push(source)
+                    }
+                    return { ...lane, items: newItems }
+                  }
+                  return lane
+                })
+              })
               return { ...source }
             },
           }}
@@ -415,58 +471,67 @@ export const SimpleOnMoveTest: Story = {
       </div>
     )
   },
-  // TODO: Disabled until it works in CI
-  // It seems no item with trigger-move-empty
-  // play: async ({ canvasElement, step }) => {
-  //   const canvas = within(canvasElement)
-  //   await step("Verify initial state", async () => {
-  //     const emptyButton = canvas.getByTestId("trigger-move-empty")
-  //     const withItemsButton = canvas.getByTestId("trigger-move-with-items")
-  //     expect(emptyButton).toBeInTheDocument()
-  //     expect(withItemsButton).toBeInTheDocument()
-  //     expect(canvas.getByTestId("no-calls")).toBeInTheDocument()
-  //   })
 
-  //   await step("Test move to empty lane callback", async () => {
-  //     // Verify initial state - "Design spec" should be in Source Lane
-  //     expect(canvas.getByText("Design spec")).toBeInTheDocument()
-  //     expect(canvas.getByText("Source Lane")).toBeInTheDocument()
-  //     expect(canvas.getByText("Target Empty")).toBeInTheDocument()
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("Verify initial state", async () => {
+      const emptyButton = canvas.getByTestId("trigger-move-empty")
+      const withItemsButton = canvas.getByTestId("trigger-move-with-items")
+      expect(emptyButton).toBeInTheDocument()
+      expect(withItemsButton).toBeInTheDocument()
+      expect(canvas.getByTestId("no-calls")).toBeInTheDocument()
+    })
 
-  //     canvas.getByTestId("trigger-move-empty").click()
+    await step("Test move to empty lane callback", async () => {
+      // Verify initial state - "Design spec" should be in Source Lane
+      expect(canvas.getByText("Design spec")).toBeInTheDocument()
+      expect(canvas.getByText("Source Lane")).toBeInTheDocument()
+      expect(canvas.getByText("Target Empty")).toBeInTheDocument()
 
-  //     // Wait a bit for state update
-  //     await new Promise((resolve) => setTimeout(resolve, 100))
+      canvas.getByTestId("trigger-move-empty").click()
 
-  //     // Verify the callback was called
-  //     const firstCall = canvas.getByTestId("call-0")
-  //     expect(firstCall).toBeInTheDocument()
+      // Wait for the callback to be called
+      await waitFor(
+        () => {
+          expect(canvas.getByTestId("call-0")).toBeInTheDocument()
+        },
+        { timeout: 2000 }
+      )
 
-  //     // Verify the parameters (updated rendering shows JSON blobs)
-  //     expect(firstCall).toHaveTextContent("From: source-lane")
-  //     expect(firstCall).toHaveTextContent("To: target-empty")
-  //     expect(firstCall).toHaveTextContent('"id":"t1"')
-  //     expect(firstCall).toHaveTextContent('"title":"Design spec"')
-  //     expect(firstCall).toHaveTextContent("Destiny:null")
-  //   })
+      // Verify the callback was called
+      const firstCall = canvas.getByTestId("call-0")
+      expect(firstCall).toBeInTheDocument()
 
-  //   await step("Test move to lane with items callback", async () => {
-  //     // Now try to move the item that's currently in Target Empty to Target With Items
-  //     canvas.getByTestId("trigger-move-with-items").click()
+      // Verify the parameters (updated rendering shows JSON blobs)
+      expect(firstCall).toHaveTextContent("From: source-lane")
+      expect(firstCall).toHaveTextContent("To: target-empty")
+      expect(firstCall).toHaveTextContent('"id":"t1"')
+      expect(firstCall).toHaveTextContent('"title":"Design spec"')
+      expect(firstCall).toHaveTextContent("Destiny:null")
+    })
 
-  //     // Wait a bit for state update
-  //     await new Promise((resolve) => setTimeout(resolve, 100))
+    await step("Test move to lane with items callback", async () => {
+      // Now try to move the item that's currently in Target Empty to Target With Items
+      canvas.getByTestId("trigger-move-with-items").click()
 
-  //     // Verify the second callback was called
-  //     const secondCall = canvas.getByTestId("call-1")
-  //     expect(secondCall).toBeInTheDocument()
+      // Wait for the second callback to be called
+      await waitFor(
+        () => {
+          expect(canvas.getByTestId("call-1")).toBeInTheDocument()
+        },
+        { timeout: 2000 }
+      )
 
-  //     // ✅ Verify the parameters match the ACTUAL call (item should now be coming from target-empty)
-  //     expect(secondCall).toHaveTextContent("From: target-empty")
-  //     expect(secondCall).toHaveTextContent("To: target-with-items")
-  //     expect(secondCall).toHaveTextContent(/"id":"t1"/)
-  //     expect(secondCall).toHaveTextContent(/"title":"Design spec"/)
-  //     expect(secondCall).toHaveTextContent(/"position":"above"/)
-  //   })
-  // },
+      // Verify the second callback was called
+      const secondCall = canvas.getByTestId("call-1")
+      expect(secondCall).toBeInTheDocument()
+
+      // ✅ Verify the parameters match the ACTUAL call (item should now be coming from target-empty)
+      expect(secondCall).toHaveTextContent("From: target-empty")
+      expect(secondCall).toHaveTextContent("To: target-with-items")
+      expect(secondCall).toHaveTextContent(/"id":"t1"/)
+      expect(secondCall).toHaveTextContent(/"title":"Design spec"/)
+      expect(secondCall).toHaveTextContent(/"position":"above"/)
+    })
+  },
 }
