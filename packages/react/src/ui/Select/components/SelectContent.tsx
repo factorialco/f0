@@ -256,10 +256,10 @@ const SelectContent = forwardRef<
     ) : (
       <SelectPrimitive.Portal>
         <>
+          {/* Overlay to prevent clicks on the content */}
           <div
-            className="fixed inset-0 z-50 bg-[#00ff0060]"
+            className="pointer-events-auto fixed inset-0 z-40"
             onClick={(e) => {
-              console.log("clicked bg")
               e.preventDefault()
               e.stopPropagation()
             }}
