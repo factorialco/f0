@@ -4,14 +4,8 @@ import type {
 } from "@/components/OneFilterPicker/types"
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useDebounceValue } from "usehooks-ts"
 import { Observable } from "zen-observable-ts"
 import {
   BaseFetchOptions,
@@ -307,7 +301,9 @@ export function useData<
     return { ...currentFilters, ...filters }
   }, [currentFilters, filters])
 
-  const deferredSearch = useDeferredValue(currentSearch)
+  // Use useDebounceValue for non-sync search to reduce unnecessary fetches
+  // Debounce delay of 300ms provides a good balance between responsiveness and performance
+  const [debouncedSearch] = useDebounceValue(currentSearch, 300)
 
   // We need to use a ref to get the latest search value
   // because the search value is updated asynchronously
@@ -319,8 +315,8 @@ export function useData<
       ? undefined
       : search?.sync
         ? currentSearch
-        : deferredSearch
-  }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
+        : debouncedSearch
+  }, [currentSearch, debouncedSearch, search?.enabled, search?.sync])
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items
@@ -760,8 +756,6 @@ export function useData<
   }, [])
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
-
-  console.log({ isInitialLoading, isLoading, isLoadingMore })
 
   return {
     data,

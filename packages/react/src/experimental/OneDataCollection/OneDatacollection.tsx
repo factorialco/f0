@@ -41,6 +41,7 @@ import {
   OnSelectItemsCallback,
   RecordType,
 } from "@/hooks/datasource"
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import React from "react"
 import {
   DataCollectionStatusComplete,
@@ -380,6 +381,11 @@ const OneDataCollectionComp = <
     )
   }
 
+  const showPresetsLoading = useDebounceBoolean({
+    value: !!presetsLoading,
+    delay: 100,
+  })
+
   useEffect(() => {
     setEmptyStateType(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional we should remove the empty state when the filters, search, navigation filters change
@@ -433,9 +439,12 @@ const OneDataCollectionComp = <
     }
   )
 
-  const isReady = useMemo(() => {
-    return isInitialLoading && storageReady
-  }, [isInitialLoading, storageReady])
+  const isReady = isInitialLoading && storageReady
+
+  const showTotalItemSummarySkeleton = useDebounceBoolean({
+    value: !isReady,
+    delay: 100,
+  })
 
   /** State */
   useEffect(() => {
@@ -475,7 +484,11 @@ const OneDataCollectionComp = <
         <div className="border-f1-border-primary flex gap-4 px-4">
           <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
             {isReady ? (
-              <Skeleton className="h-5 w-24" />
+              showTotalItemSummarySkeleton ? (
+                <Skeleton className="h-5 w-24" />
+              ) : (
+                <div className="flex h-5 items-center" />
+              )
             ) : (
               <div className="flex h-5 items-center">
                 {totalItemSummaryResult}
@@ -511,7 +524,7 @@ const OneDataCollectionComp = <
           filters={filters}
           value={currentFilters}
           presets={presets}
-          presetsLoading={presetsLoading}
+          presetsLoading={showPresetsLoading}
           onChange={(value) => setCurrentFilters(value)}
         >
           {isLoading && (

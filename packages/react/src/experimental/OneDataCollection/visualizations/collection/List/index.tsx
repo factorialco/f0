@@ -11,11 +11,11 @@ import {
   SortingsDefinition,
   useSelectable,
 } from "@/hooks/datasource"
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
-import { Spinner } from "../../../../Information/Spinner"
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { SummariesDefinition } from "../../../summary"
@@ -137,27 +137,10 @@ export const ListCollection = <
     defaultOpenGroups
   )
 
-  const [showInitialLoading, setShowInitialLoading] = useState(false)
-
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>
-
-    if (isInitialLoading) {
-      timeout = setTimeout(() => {
-        setShowInitialLoading(isInitialLoading)
-      }, 100)
-    } else {
-      setShowInitialLoading(false)
-    }
-
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout)
-      }
-    }
-  }, [isInitialLoading])
-
-  console.log({ isInitialLoading, showInitialLoading })
+  const showInitialLoading = useDebounceBoolean({
+    value: isInitialLoading,
+    delay: 100,
+  })
 
   if (showInitialLoading) {
     return (
@@ -196,7 +179,6 @@ export const ListCollection = <
         aria-busy={showFullscreenLoading ? "true" : undefined}
       >
         <div className="min-h-0 flex-1 overflow-auto pb-3">
-          <AnimatePresence>{isInitialLoading && <Spinner />}</AnimatePresence>
           {data.type === "grouped" &&
             data.groups.map((group, index) => {
               const itemCount = group.itemCount
