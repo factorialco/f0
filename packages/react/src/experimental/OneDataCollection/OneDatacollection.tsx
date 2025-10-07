@@ -44,6 +44,7 @@ import {
   OnSelectItemsCallback,
   RecordType,
 } from "@/hooks/datasource"
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import React from "react"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
@@ -392,6 +393,11 @@ const OneDataCollectionComp = <
     )
   }
 
+  const showPresetsLoading = useDebounceBoolean({
+    value: !!presetsLoading,
+    delay: 100,
+  })
+
   useEffect(() => {
     setEmptyStateType(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional we should remove the empty state when the filters, search, navigation filters change
@@ -456,9 +462,10 @@ const OneDataCollectionComp = <
     }
   )
 
-  const isReady = useMemo(() => {
-    return !isInitialLoading && storageReady
-  }, [isInitialLoading, storageReady])
+  const showTotalItemSummarySkeleton = useDebounceBoolean({
+    value: isInitialLoading && storageReady,
+    delay: 100,
+  })
 
   /** State */
   useEffect(() => {
@@ -498,7 +505,7 @@ const OneDataCollectionComp = <
         <div className="border-f1-border-primary flex gap-4 px-4">
           {showTotalItemSummary && totalItemSummaryPosition === "top" && (
             <TotalItemsSummary
-              isReady={isReady}
+              isReady={!showTotalItemSummarySkeleton}
               totalItemSummaryResult={totalItemSummaryResult}
             />
           )}
@@ -529,7 +536,7 @@ const OneDataCollectionComp = <
       >
         {totalItemSummaryPosition === "bottom" && showTotalItemSummary && (
           <TotalItemsSummary
-            isReady={isReady}
+            isReady={!showTotalItemSummarySkeleton}
             totalItemSummaryResult={totalItemSummaryResult}
           />
         )}
@@ -538,7 +545,7 @@ const OneDataCollectionComp = <
             filters={filters}
             value={currentFilters}
             presets={presets}
-            presetsLoading={presetsLoading}
+            presetsLoading={showPresetsLoading}
             onChange={(value) => setCurrentFilters(value)}
           >
             {isLoading && (
