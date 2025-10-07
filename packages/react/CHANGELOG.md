@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.228.2](https://github.com/factorialco/f0/compare/f0-react-v1.228.1...f0-react-v1.228.2) (2025-10-07)
+
+
+### Bug Fixes
+
+* polish loading states for data collection when using cache ([#2761](https://github.com/factorialco/f0/issues/2761)) ([a762840](https://github.com/factorialco/f0/commit/a762840f4f048c8504ba5ccb266fca2fd9268d5b))
+
 ## [1.228.1](https://github.com/factorialco/f0/compare/f0-react-v1.228.0...f0-react-v1.228.1) (2025-10-07)
 
 
