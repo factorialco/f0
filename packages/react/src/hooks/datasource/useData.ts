@@ -347,7 +347,11 @@ export function useData<
   }
 
   const handleFetchSuccess = useCallback(
-    (result: PaginatedResponse<R> | SimpleResult<R>, appendMode: boolean) => {
+    (
+      result: PaginatedResponse<R> | SimpleResult<R>,
+      appendMode: boolean,
+      isLoadingYet?: boolean
+    ) => {
       /**
        * Call to the onResponse callback
        */
@@ -413,7 +417,7 @@ export function useData<
       )
       setError(null)
       setIsInitialLoading(false)
-      setIsLoading(false)
+      setIsLoading(!!isLoadingYet)
       setIsLoadingMore(false)
       isLoadingMoreRef.current = false
     },
@@ -621,7 +625,7 @@ export function useData<
         const subscription = observable.subscribe({
           next: (state) => {
             if (state.data) {
-              handleFetchSuccess(state.data, appendMode)
+              handleFetchSuccess(state.data, appendMode, state.loading)
             } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
