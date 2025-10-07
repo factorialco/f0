@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { GroupHeader } from "../GroupHeader/GroupHeader"
+import { GroupHeader } from "../GroupHeader"
 
 describe("GroupHeader", () => {
   it("renders with basic props", () => {

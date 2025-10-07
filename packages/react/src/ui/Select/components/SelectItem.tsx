@@ -18,7 +18,10 @@ const SelectItem = React.forwardRef<
   const { multiple } = context
 
   const selected = useMemo(() => {
-    return context.value.includes(props.value as string)
+    if (Array.isArray(context.value)) {
+      return context.value.includes(props.value as string)
+    }
+    return context.value === props.value
   }, [context.value, props.value])
 
   return (

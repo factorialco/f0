@@ -14,21 +14,54 @@ const SelectWithHooks = ({
   options,
   placeholder,
   asList,
-  multiple = false,
-  value: defaultValue,
   ...props
 }: SelectProps) => {
-  type T = typeof multiple extends true ? string[] : string | undefined
-  const [value, setValue] = useState(defaultValue as T)
+  const RenderSelect = (
+    props: Omit<SelectProps, "value"> & {
+      children: React.ReactNode
+      value: string | string[] | undefined
+    }
+  ) => {
+    const { value: initialValue, defaultValue: _, multiple, ...rest } = props
 
-  const handleChange = (value: T) => {
-    console.log("value", value)
-    setValue(value as T)
+    if (multiple) {
+      const [value, setValue] = useState<string[] | undefined>(
+        initialValue as string[] | undefined
+      )
+      const handleChange = (value: string[]) => {
+        console.log("value", value)
+        setValue(value)
+      }
+      return (
+        <Select {...rest} value={value} onValueChange={handleChange} multiple>
+          {props.children}
+        </Select>
+      )
+    } else {
+      const [value, setValue] = useState<string | undefined>(
+        props.value as string | undefined
+      )
+      const handleChange = (value: string) => {
+        console.log("value", value)
+        setValue(value)
+      }
+
+      return (
+        <Select
+          {...rest}
+          value={value}
+          onValueChange={handleChange}
+          multiple={false}
+        />
+      )
+    }
   }
+
+  const { value, multiple } = props
 
   const items = useMemo(
     () =>
-      options?.map((option) => ({
+      (options || []).map((option) => ({
         value: option.value,
         height: 40,
         item: <SelectItem value={option.value}>{option.label}</SelectItem>,
@@ -38,9 +71,8 @@ const SelectWithHooks = ({
 
   return (
     <>
-      <Select
+      <RenderSelect
         value={value}
-        onValueChange={handleChange}
         multiple={multiple}
         {...props}
         asList={asList}
@@ -50,7 +82,7 @@ const SelectWithHooks = ({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent items={items} />
-      </Select>
+      </RenderSelect>
       <div className="mt-20">Selected: {JSON.stringify(value)}</div>
     </>
   )

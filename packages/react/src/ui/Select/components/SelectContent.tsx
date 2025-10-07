@@ -1,4 +1,6 @@
+import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useVirtualizer } from "@tanstack/react-virtual"
@@ -29,17 +31,24 @@ type SelectItemProps = ComponentPropsWithoutRef<
   top?: ReactNode
   bottom?: ReactNode
   emptyMessage?: string
-  value?: string
-}
+  showLoadingIndicator?: boolean
+} & (
+    | {
+        value?: string[]
+        multiple: true
+      }
+    | {
+        value?: string
+        multiple?: false
+      }
+  )
 
-type BaseSelectContentProps = Omit<SelectItemProps, "children">
-
-type SelectContentWithItemsProps = BaseSelectContentProps & {
+type SelectContentWithItemsProps = Omit<SelectItemProps, "children"> & {
   items: VirtualItem[]
   children?: never
 }
 
-type SelectContentWithChildrenProps = SelectItemProps & {
+type SelectContentWithChildrenProps = Omit<SelectItemProps, "children"> & {
   items?: never
   children: ReactNode
 }
@@ -52,8 +61,9 @@ type SelectContentProps = (
   onScrollBottom?: () => void
   onScrollTop?: () => void
   isLoadingMore?: boolean
+  isLoading?: boolean
+  scrollMargin?: number
 }
-
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
   SelectContentProps
@@ -68,6 +78,9 @@ const SelectContent = forwardRef<
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
+      isLoading,
+      scrollMargin,
+      showLoadingIndicator,
       ...props
     },
     ref
@@ -76,6 +89,8 @@ const SelectContent = forwardRef<
     // The scrollable element for your list
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
+
+    const i18n = useI18n()
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
@@ -93,16 +108,25 @@ const SelectContent = forwardRef<
     // Get the value and the open status from the select context
     const { value, open, asList } = useContext(SelectContext)
 
+    const valueArray = useMemo(
+      () =>
+        (Array.isArray(value) ? value : [value]).filter(
+          (item) => item !== undefined
+        ),
+      [value]
+    )
+
     const positionIndex = useMemo(() => {
       return (
         (items &&
           items.findIndex(
             (item) =>
-              item.value !== undefined && (value ?? []).includes(item.value)
+              item.value !== undefined &&
+              (valueArray ?? []).includes(item.value)
           )) ||
         0
       )
-    }, [items, value])
+    }, [items, valueArray])
 
     const virtualizer = useVirtualizer({
       count: items?.length || 0,
@@ -130,7 +154,9 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <p className="p-2 text-center">{emptyMessage || "-"}</p>
+      <p className={cn("flex items-center justify-center p-2", "min-h-[80px]")}>
+        {emptyMessage || "-"}
+      </p>
     ) : isVirtual ? (
       <div
         className={cn(
@@ -159,7 +185,9 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">Loading....</div>
+                <div className="h-10 w-full py-2 text-center">
+                  {i18n.select.loadingMore}
+                </div>
               ) : (
                 items[virtualItem.index].item
               )}
@@ -170,6 +198,8 @@ const SelectContent = forwardRef<
     ) : (
       <>{children}</>
     )
+
+    const loadingNewContent = isLoading && !isLoadingMore
 
     const content = (
       <SelectPrimitive.Content
@@ -199,31 +229,44 @@ const SelectContent = forwardRef<
       >
         <>
           {props.top}
-          <ScrollArea
-            viewportRef={parentRef}
-            className={cn(
-              "flex flex-col overflow-y-auto",
-              asList ? "max-h-full" : "max-h-[300px]"
-            )}
-            onScrollBottom={onScrollBottom}
-            onScrollTop={onScrollTop}
-          >
-            {asList ? (
-              viewportContent
-            ) : (
-              <SelectPrimitive.Viewport
-                asChild
-                className={cn(
-                  "p-1",
-                  !asList &&
-                    position === "popper" &&
-                    "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
-                )}
+          <div className="relative">
+            {showLoadingIndicator && loadingNewContent && (
+              <div
+                className="absolute inset-0 flex cursor-progress items-center justify-center"
+                aria-live="polite"
+                aria-busy="true"
               >
-                {viewportContent}
-              </SelectPrimitive.Viewport>
+                <Spinner />
+              </div>
             )}
-          </ScrollArea>
+            <ScrollArea
+              viewportRef={parentRef}
+              className={cn(
+                "flex flex-col overflow-y-auto",
+                asList ? "max-h-full" : "max-h-[300px]",
+                loadingNewContent && "select-none opacity-10 transition-opacity"
+              )}
+              onScrollBottom={onScrollBottom}
+              onScrollTop={onScrollTop}
+              scrollMargin={scrollMargin}
+            >
+              {asList ? (
+                viewportContent
+              ) : (
+                <SelectPrimitive.Viewport
+                  asChild
+                  className={cn(
+                    "p-1",
+                    !asList &&
+                      position === "popper" &&
+                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                  )}
+                >
+                  {viewportContent}
+                </SelectPrimitive.Viewport>
+              )}
+            </ScrollArea>
+          </div>
           {props.bottom}
         </>
       </SelectPrimitive.Content>
@@ -232,7 +275,21 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>
+      <SelectPrimitive.Portal>
+        <>
+          {/* Overlay to prevent clicks on the content */}
+          {open && (
+            <div
+              className="pointer-events-auto fixed inset-0 z-40"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            ></div>
+          )}
+          {content}
+        </>
+      </SelectPrimitive.Portal>
     )
   }
 )

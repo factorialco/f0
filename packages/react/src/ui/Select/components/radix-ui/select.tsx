@@ -49,7 +49,7 @@ const [createSelectContext, createSelectScope] = createContextScope(
 )
 const usePopperScope = createPopperScope()
 
-type SelectContextValue = {
+type SelectContextValue<T extends string = string> = {
   trigger: SelectTriggerElement | null
   onTriggerChange(node: SelectTriggerElement | null): void
   valueNode: SelectValueElement | null
@@ -57,9 +57,9 @@ type SelectContextValue = {
   valueNodeHasChildren: boolean
   onValueNodeHasChildrenChange(hasChildren: boolean): void
   contentId: string
-  value: string[] | string | undefined
-  onValueChange(value: string[] | string): void
-  onItemCheckChange?: (value: string, checked: boolean) => void
+  value: T[] | T | undefined
+  onValueChange(value: T[] | T): void
+  onItemCheckChange?: (value: T, checked: boolean) => void
   open: boolean
   required?: boolean
   multiple?: boolean
@@ -98,25 +98,27 @@ interface SelectSharedProps {
   onItemCheckChange?: (value: string, checked: boolean) => void
 }
 
-type SelectProps = SelectSharedProps &
+type SelectProps<T extends string = string> = SelectSharedProps &
   (
     | {
-        value?: string
-        defaultValue?: string
-        onValueChange?(value: string): void
+        value?: T
+        defaultValue?: T
+        onValueChange?(value: T): void
         multiple?: false | never
       }
     | {
-        value?: string[]
-        defaultValue?: string[]
-        onValueChange?(value: string[]): void
+        value?: T[]
+        defaultValue?: T[]
+        onValueChange?(value: T[]): void
         multiple: true
       }
   )
 
 export type { SelectProps as SelectPrimitiveProps }
 
-const Select: React.FC<SelectProps> = (props: ScopedProps<SelectProps>) => {
+const Select = <T extends string = string>(
+  props: ScopedProps<SelectProps<T>>
+) => {
   const {
     __scopeSelect,
     children,
@@ -190,7 +192,7 @@ const Select: React.FC<SelectProps> = (props: ScopedProps<SelectProps>) => {
         onValueNodeHasChildrenChange={setValueNodeHasChildren}
         contentId={useId()}
         value={value}
-        onValueChange={setValue}
+        onValueChange={(value: T[] | T) => setValue(value)}
         onItemCheckChange={onItemCheckChange}
         open={open}
         onOpenChange={setOpen}
@@ -231,11 +233,11 @@ const Select: React.FC<SelectProps> = (props: ScopedProps<SelectProps>) => {
               if (multiple) {
                 setValue(
                   Array.from(event.currentTarget.selectedOptions).map(
-                    (option) => option.value
+                    (option) => option.value as T
                   )
                 )
               } else {
-                setValue(event.target.value)
+                setValue(event.target.value as T)
               }
             }}
             disabled={disabled}
@@ -750,9 +752,13 @@ const SelectContentImpl = React.forwardRef<
 
   const itemRefCallback = React.useCallback(
     (node: SelectItemElement | null, value: string, disabled: boolean) => {
+      const contextValueArray = (
+        Array.isArray(context.value) ? context.value : [context.value]
+      ).filter((item) => item !== undefined)
+
       const isFirstValidItem = !firstValidItemFoundRef.current && !disabled
       const isSelectedItem =
-        context.value !== undefined && context.value === value
+        context.value !== undefined && contextValueArray.includes(value)
       if (isSelectedItem || isFirstValidItem) {
         setSelectedItem(node)
         if (isFirstValidItem) firstValidItemFoundRef.current = true
@@ -1362,8 +1368,8 @@ SelectLabel.displayName = LABEL_NAME
 
 const ITEM_NAME = "SelectItem"
 
-type SelectItemContextValue = {
-  value: string
+type SelectItemContextValue<T extends string = string> = {
+  value: T
   disabled: boolean
   textId: string
   isSelected: boolean

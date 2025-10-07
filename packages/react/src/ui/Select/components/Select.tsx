@@ -8,7 +8,7 @@ type SelectOption = {
   label: string
 }
 
-export type SelectProps = SelectPrimitiveProps & {
+export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
   asList?: boolean
   placeholder?: string
   options?: SelectOption[]
@@ -18,7 +18,7 @@ export type SelectProps = SelectPrimitiveProps & {
  * Select Root component
  */
 
-const Select = <T extends string = string>(props: SelectProps) => {
+const Select = <T extends string = string>(props: SelectProps<T>) => {
   type Value = Exclude<typeof props.value, undefined>
   const [internalOpen, setInternalOpen] = useState(props.asList ? true : false)
 
@@ -38,7 +38,7 @@ const Select = <T extends string = string>(props: SelectProps) => {
     props.onOpenChange?.(open)
   }
 
-  const toArray = (value: string | string[] | undefined) => {
+  const toArray = (value: T | T[] | undefined) => {
     if (value === undefined) {
       return []
     }
@@ -64,7 +64,7 @@ const Select = <T extends string = string>(props: SelectProps) => {
     open: isOpen,
     asList: props.asList,
     multiple: props.multiple || false,
-  } as SelectContextType
+  }
 
   const commonProps = {
     ...props,
@@ -104,7 +104,7 @@ const Select = <T extends string = string>(props: SelectProps) => {
 
   return (
     <div className="[&>div]:!relative">
-      <SelectPrimitive.Root {...primitiveProps} />
+      <SelectPrimitive.Root<T> {...primitiveProps} />
     </div>
   )
 }
