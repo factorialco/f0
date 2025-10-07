@@ -1,29 +1,34 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
-import { Circle, Desktop } from "../../icons/app"
+import { Circle, Desktop } from "../../../icons/app"
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectProps,
   SelectTrigger,
   SelectValue,
-} from "./index"
+} from "../index"
 
 const SelectWithHooks = ({
   options,
   placeholder,
   asList,
+  multiple = false,
+  value: defaultValue,
   ...props
-}: {
-  options: { value: string; label: string }[]
-  placeholder?: string
-  asList?: boolean
-}) => {
-  const [value, setValue] = useState("")
+}: SelectProps) => {
+  type T = typeof multiple extends true ? string[] : string | undefined
+  const [value, setValue] = useState(defaultValue as T)
+
+  const handleChange = (value: T) => {
+    console.log("value", value)
+    setValue(value as T)
+  }
 
   const items = useMemo(
     () =>
-      options.map((option) => ({
+      options?.map((option) => ({
         value: option.value,
         height: 40,
         item: <SelectItem value={option.value}>{option.label}</SelectItem>,
@@ -32,13 +37,22 @@ const SelectWithHooks = ({
   )
 
   return (
-    <Select value={value} onValueChange={setValue} {...props} asList={asList}>
-      <SelectTrigger>
-        {value}
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent items={items}></SelectContent>
-    </Select>
+    <>
+      <Select
+        value={value}
+        onValueChange={handleChange}
+        multiple={multiple}
+        {...props}
+        asList={asList}
+      >
+        <SelectTrigger>
+          {value}
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent items={items} />
+      </Select>
+      <div className="mt-20">Selected: {JSON.stringify(value)}</div>
+    </>
   )
 }
 
@@ -49,6 +63,7 @@ const meta = {
     a11y: {
       skipCi: true, // Todo add aria labels
     },
+    //layout: "centered",
     docs: {
       description: {
         component:
@@ -63,6 +78,7 @@ const meta = {
   },
   args: {
     placeholder: "Select an option",
+    multiple: false,
     options: [
       { value: "light", label: "Light" },
       { value: "dark", label: "Dark" },
@@ -95,6 +111,31 @@ export const AsList: Story = {
   },
 }
 
+export const Multiple: Story = {
+  args: {
+    value: ["light", "system"],
+    multiple: true,
+  },
+  render: ({ options, placeholder }) => {
+    const [value, setValue] = useState<string[]>([])
+
+    return (
+      <Select value={value} onValueChange={setValue} multiple>
+        <SelectTrigger>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options?.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )
+  },
+}
+
 export const WithTopContent: Story = {
   render: ({ options, placeholder }) => {
     const [value, setValue] = useState("")
@@ -107,7 +148,7 @@ export const WithTopContent: Story = {
         <SelectContent
           top={<div className="border-b border-f1-border p-3">Top Content</div>}
         >
-          {options.map((option) => (
+          {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
@@ -132,7 +173,7 @@ export const WithBottomContent: Story = {
             <div className="border-t border-f1-border p-3">Bottom Content</div>
           }
         >
-          {options.map((option) => (
+          {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
@@ -166,7 +207,7 @@ export const WithBothTopAndBottom: Story = {
             </div>
           }
         >
-          {options.map((option) => (
+          {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
@@ -204,7 +245,7 @@ export const WithCustomTrigger: Story = {
           </button>
         </SelectTrigger>
         <SelectContent>
-          {options.map((option) => (
+          {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               <div className="flex items-center gap-2">
                 <Desktop className="h-4 w-4" />

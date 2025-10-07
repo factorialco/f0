@@ -1,9 +1,6 @@
-import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-import * as SelectPrimitive from "@radix-ui/react-select"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import {
   ComponentPropsWithoutRef,
@@ -18,6 +15,7 @@ import {
 } from "react"
 import { VirtualItem } from "../index"
 import { SelectContext } from "../SelectContext"
+import * as SelectPrimitive from "./radix-ui"
 
 const VIEWBOX_VERTICAL_PADDING = 8
 
@@ -32,7 +30,6 @@ type SelectItemProps = ComponentPropsWithoutRef<
   bottom?: ReactNode
   emptyMessage?: string
   value?: string
-  showLoadingIndicator?: boolean
 }
 
 type BaseSelectContentProps = Omit<SelectItemProps, "children">
@@ -55,8 +52,6 @@ type SelectContentProps = (
   onScrollBottom?: () => void
   onScrollTop?: () => void
   isLoadingMore?: boolean
-  isLoading?: boolean
-  scrollMargin?: number
 }
 
 const SelectContent = forwardRef<
@@ -73,9 +68,6 @@ const SelectContent = forwardRef<
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
-      isLoading,
-      scrollMargin,
-      showLoadingIndicator,
       ...props
     },
     ref
@@ -84,8 +76,6 @@ const SelectContent = forwardRef<
     // The scrollable element for your list
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
-
-    const i18n = useI18n()
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
@@ -104,7 +94,14 @@ const SelectContent = forwardRef<
     const { value, open, asList } = useContext(SelectContext)
 
     const positionIndex = useMemo(() => {
-      return (items && items.findIndex((item) => item.value === value)) || 0
+      return (
+        (items &&
+          items.findIndex(
+            (item) =>
+              item.value !== undefined && (value ?? []).includes(item.value)
+          )) ||
+        0
+      )
     }, [items, value])
 
     const virtualizer = useVirtualizer({
@@ -133,9 +130,7 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <p className={cn("flex items-center justify-center p-2", "min-h-[80px]")}>
-        {emptyMessage || "-"}
-      </p>
+      <p className="p-2 text-center">{emptyMessage || "-"}</p>
     ) : isVirtual ? (
       <div
         className={cn(
@@ -164,9 +159,7 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">
-                  {i18n.select.loadingMore}
-                </div>
+                <div className="h-10 w-full py-2 text-center">Loading....</div>
               ) : (
                 items[virtualItem.index].item
               )}
@@ -177,8 +170,6 @@ const SelectContent = forwardRef<
     ) : (
       <>{children}</>
     )
-
-    const loadingNewContent = isLoading && !isLoadingMore
 
     const content = (
       <SelectPrimitive.Content
@@ -208,44 +199,31 @@ const SelectContent = forwardRef<
       >
         <>
           {props.top}
-          <div className="relative">
-            {showLoadingIndicator && loadingNewContent && (
-              <div
-                className="absolute inset-0 flex cursor-progress items-center justify-center"
-                aria-live="polite"
-                aria-busy="true"
-              >
-                <Spinner />
-              </div>
+          <ScrollArea
+            viewportRef={parentRef}
+            className={cn(
+              "flex flex-col overflow-y-auto",
+              asList ? "max-h-full" : "max-h-[300px]"
             )}
-            <ScrollArea
-              viewportRef={parentRef}
-              className={cn(
-                "flex flex-col overflow-y-auto",
-                asList ? "max-h-full" : "max-h-[300px]",
-                loadingNewContent && "select-none opacity-10 transition-opacity"
-              )}
-              onScrollBottom={onScrollBottom}
-              onScrollTop={onScrollTop}
-              scrollMargin={scrollMargin}
-            >
-              {asList ? (
-                viewportContent
-              ) : (
-                <SelectPrimitive.Viewport
-                  asChild
-                  className={cn(
-                    "p-1",
-                    !asList &&
-                      position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
-                  )}
-                >
-                  {viewportContent}
-                </SelectPrimitive.Viewport>
-              )}
-            </ScrollArea>
-          </div>
+            onScrollBottom={onScrollBottom}
+            onScrollTop={onScrollTop}
+          >
+            {asList ? (
+              viewportContent
+            ) : (
+              <SelectPrimitive.Viewport
+                asChild
+                className={cn(
+                  "p-1",
+                  !asList &&
+                    position === "popper" &&
+                    "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                )}
+              >
+                {viewportContent}
+              </SelectPrimitive.Viewport>
+            )}
+          </ScrollArea>
           {props.bottom}
         </>
       </SelectPrimitive.Content>
@@ -254,19 +232,7 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>
-        <>
-          {/* Overlay to prevent clicks on the content */}
-          <div
-            className="pointer-events-auto fixed inset-0 z-40"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-          ></div>
-          {content}
-        </>
-      </SelectPrimitive.Portal>
+      <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>
     )
   }
 )
