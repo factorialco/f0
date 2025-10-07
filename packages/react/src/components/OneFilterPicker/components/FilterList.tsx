@@ -21,6 +21,8 @@ interface FilterListProps<Definition extends FiltersDefinition> {
   selectedFilterKey: keyof Definition | null
   /** Callback fired when a filter is selected from the list */
   onFilterSelect: (key: keyof Definition) => void
+  /** Whether to hide a border around the list */
+  hideBorder?: boolean
 }
 
 /**
@@ -41,10 +43,17 @@ export function FilterList<Definition extends FiltersDefinition>({
   tempFilters,
   selectedFilterKey,
   onFilterSelect,
+  hideBorder,
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
   return (
-    <div className="w-[224px] shrink-0 border border-solid border-transparent border-r-f1-border-secondary">
+    <div
+      className={cn(
+        "w-full min-w-[224px] shrink-0",
+        !hideBorder &&
+          "border border-solid border-transparent border-r-f1-border-secondary"
+      )}
+    >
       <div className="flex h-full w-full flex-col gap-1 overflow-y-auto p-2">
         {Object.entries(definition).map(([key, filter]) => {
           const filterType = getFilterType(filter.type)

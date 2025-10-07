@@ -1,5 +1,8 @@
+import { OneFilterPicker } from "@/components/OneFilterPicker"
 import { GroupingSelector } from "@/experimental/OneDataCollection/Settings/components/GroupingSelector"
 import {
+  FiltersDefinition,
+  FiltersState,
   GroupingDefinition,
   GroupingState,
   RecordType,
@@ -9,8 +12,12 @@ import { F1SearchBox } from "../F1SearchBox"
 interface SelectTopActionsProps<
   R extends RecordType = RecordType,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
+  Filters extends FiltersDefinition = FiltersDefinition,
 > {
   showSearchBox?: boolean
+  filters?: Filters
+  currentFilters: FiltersState<Filters>
+  onFiltersChange: (filters: FiltersState<Filters>) => void
   searchBoxPlaceholder?: string
   onSearchChange: (value: string) => void
   searchValue?: string
@@ -33,11 +40,14 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   grouping,
   currentGrouping,
   onGroupingChange,
+  filters,
+  currentFilters,
+  onFiltersChange,
 }: SelectTopActionsProps<R>) => {
   if (!showSearchBox) return null
   return (
     <div className="flex gap-2 px-2 pt-2">
-      <div className="flex-1">
+      <div className="flex flex-1 flex-row gap-2">
         <F1SearchBox
           placeholder={searchBoxPlaceholder}
           onChange={onSearchChange}
@@ -48,6 +58,14 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
           onBlur={onBlur}
           onFocus={onFocus}
         />
+        {filters && (
+          <OneFilterPicker
+            filters={filters}
+            value={currentFilters}
+            onChange={onFiltersChange}
+            mode="compact"
+          />
+        )}
       </div>
       <GroupingSelector
         hideLabel={true}

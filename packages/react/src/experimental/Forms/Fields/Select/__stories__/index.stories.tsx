@@ -453,6 +453,18 @@ export const WithDataSourcePaginated: Story = {
     onChange: fn(),
     value: "option-2",
     source: createDataSourceDefinition<MockItem>({
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ],
+          },
+        },
+      },
       dataAdapter: {
         paginationType: "infinite-scroll",
         fetchData: (options) => {

@@ -486,7 +486,7 @@ const SelectComponent = forwardRef(function Select<
             : undefined
         }
         disabled={disabled}
-        open={openLocal}
+        open={true}
         onOpenChange={handleChangeOpenLocal}
         {...props}
       >
@@ -556,6 +556,9 @@ const SelectComponent = forwardRef(function Select<
                 grouping={localSource.grouping}
                 currentGrouping={localSource.currentGrouping}
                 onGroupingChange={localSource.setCurrentGrouping}
+                filters={localSource.filters}
+                currentFilters={localSource.currentFilters}
+                onFiltersChange={localSource.setCurrentFilters}
               />
             }
             onScrollBottom={handleScrollBottom}
@@ -563,7 +566,7 @@ const SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-          ></SelectContent>
+          />
         )}
       </SelectPrimitive>
     </>

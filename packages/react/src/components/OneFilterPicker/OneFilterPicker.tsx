@@ -7,7 +7,7 @@ import { PresetsDefinition } from "./types"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
 import { cn } from "@/lib/utils"
-import type { FiltersDefinition, FiltersState } from "./types"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 
 /**
  * Props for the Filters component.
@@ -26,6 +26,8 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
   children?: React.ReactNode
+  /** The mode of the component */
+  mode?: FiltersMode
 }
 
 /**
@@ -157,6 +159,7 @@ const FiltersControls = () => {
     setFiltersValue,
     presets,
     emitFilterChange,
+    mode,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -181,6 +184,7 @@ const FiltersControls = () => {
         onOpenChange={setIsFiltersOpen}
         isOpen={isFiltersOpen}
         hideLabel={!!presets}
+        mode={mode}
       />
       {!!presets?.length && (
         <div className="flex items-center">
