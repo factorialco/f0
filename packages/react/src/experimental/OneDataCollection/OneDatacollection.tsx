@@ -534,52 +534,18 @@ const OneDataCollectionComp = <
       <div
         className={cn("flex flex-row gap-4 px-4", fullHeight && "max-h-full")}
       >
-        <OneFilterPicker
-          filters={filters}
-          value={currentFilters}
-          presets={presets}
-          presetsLoading={showPresetsLoading}
-          onChange={(value) => setCurrentFilters(value)}
-        >
-          {isLoading && (
-            <motion.div
-              className="flex h-8 w-8 items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{
-                opacity: 0,
-              }}
-            >
-              <Spinner size="small" />
-            </motion.div>
-          )}
-          {search && (
-            <Search onChange={setCurrentSearch} value={currentSearch} />
-          )}
-          <Settings
-            visualizations={visualizations}
-            currentVisualization={currentVisualization}
-            onVisualizationChange={setCurrentVisualization}
-            grouping={grouping}
-            currentGrouping={currentGrouping}
-            onGroupingChange={setCurrentGrouping}
-            sortings={sortings}
-            currentSortings={currentSortings}
-            onSortingsChange={setCurrentSortings}
+        {totalItemSummaryPosition === "bottom" && showTotalItemSummary && (
+          <TotalItemsSummary
+            isReady={!showTotalItemSummarySkeleton}
+            totalItemSummaryResult={totalItemSummaryResult}
           />
-          {totalItemSummaryPosition === "bottom" && showTotalItemSummary && (
-            <TotalItemsSummary
-              isReady={!showTotalItemSummarySkeleton}
-              totalItemSummaryResult={totalItemSummaryResult}
-            />
-          )}
-        </OneFilterPicker>
+        )}
         <div className="flex-1">
           <OneFilterPicker
             filters={filters}
             value={currentFilters}
             presets={presets}
-            presetsLoading={presetsLoading}
+            presetsLoading={showPresetsLoading}
             onChange={(value) => setCurrentFilters(value)}
           >
             {isLoading && (
