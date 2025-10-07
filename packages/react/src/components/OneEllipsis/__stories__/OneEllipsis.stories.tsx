@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useId, useState } from "react"
-import { OneEllipsis } from "../OneEllipsis"
+import { OneEllipsis, tags } from "../OneEllipsis"
 
 const meta = {
   title: "Ellipsis",
@@ -18,6 +18,14 @@ const meta = {
       },
     },
   },
+  argTypes: {
+    tag: {
+      control: {
+        type: "select",
+        options: tags,
+      },
+    },
+  },
 } satisfies Meta<typeof OneEllipsis>
 
 export default meta
@@ -26,9 +34,17 @@ type Story = StoryObj<typeof meta>
 const WrapperStory = ({
   lines = 1,
   text,
+  tag = "span",
+  className = "",
+  disabled = false,
+  noTooltip = false,
 }: {
   lines?: number
   text: string
+  tag?: Tag
+  className?: string
+  disabled?: boolean
+  noTooltip?: boolean
 }) => {
   const [width, setWidth] = useState<"narrow" | "medium" | "wide">("medium")
 
@@ -85,10 +101,27 @@ const WrapperStory = ({
       </div>
 
       <div className={`border border-f1-border p-4 ${widthClasses[width]}`}>
-        <OneEllipsis lines={lines}>{text}</OneEllipsis>
+        <OneEllipsis
+          lines={lines}
+          tag={tag}
+          className={className}
+          disabled={disabled}
+          noTooltip={noTooltip}
+        >
+          {text}
+        </OneEllipsis>
       </div>
     </div>
   )
+}
+
+export const Default: Story = {
+  args: {
+    lines: 1,
+    children:
+      "This is a long text that will be truncated with an ellipsis if it doesn't fit in the container width. Hover over it to see the full text in a tooltip.",
+  },
+  render: (args) => <WrapperStory {...args} text={args.children} />,
 }
 
 export const SingleLine: Story = {
@@ -97,7 +130,7 @@ export const SingleLine: Story = {
     children:
       "This is a long text that will be truncated with an ellipsis if it doesn't fit in the container width. Hover over it to see the full text in a tooltip.",
   },
-  render: () => (
+  render: (args) => (
     <WrapperStory
       lines={1}
       text="This is a long text that will be truncated with an ellipsis if it doesn't fit in the container width. Hover over it to see the full text in a tooltip."

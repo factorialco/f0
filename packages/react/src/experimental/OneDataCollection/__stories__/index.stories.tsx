@@ -53,7 +53,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Data Collection",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -90,7 +90,7 @@ const meta = {
         "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "experimental", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta
