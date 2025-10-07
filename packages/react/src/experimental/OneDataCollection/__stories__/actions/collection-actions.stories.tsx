@@ -1,18 +1,18 @@
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { Ai } from "@/icons/app"
+import { Ai, Person } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import {
   DataCollectionSource,
   useDataCollectionSource,
-} from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
-import { ItemActionsDefinition } from "../item-actions"
-import { NavigationFiltersDefinition } from "../navigationFilters/types"
-import { GroupingDefinition } from "../types"
-import { Visualization } from "../visualizations/collection/types"
-import { buildSecondaryActions } from "./mockData"
+} from "../../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../../index"
+import { ItemActionsDefinition } from "../../item-actions"
+import { NavigationFiltersDefinition } from "../../navigationFilters/types"
+import { GroupingDefinition } from "../../types"
+import { Visualization } from "../../visualizations/collection/types"
+import { buildSecondaryActions } from "../mockData"
 
 const meta = {
   title: "Data Collection/Collection Actions",
@@ -163,6 +163,35 @@ export const BasicActionsExample: Story = {
         icon: Ai,
         onClick: () => console.log(`Creating a user`),
       }),
+      secondaryActions: {
+        expanded: 0,
+        actions: buildSecondaryActions,
+      },
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
+// Basic story showing all action types
+export const MultiplePrimaryActionsExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      primaryActions: () => [
+        {
+          label: "Create user",
+          icon: Ai,
+          onClick: () => console.log(`Creating a user`),
+        },
+        {
+          label: "Create admin",
+          icon: Person,
+          onClick: () => console.log(`Creating a admin`),
+        },
+      ],
       secondaryActions: {
         expanded: 0,
         actions: buildSecondaryActions,

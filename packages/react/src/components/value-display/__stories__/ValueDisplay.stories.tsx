@@ -16,7 +16,7 @@ function Cell({
   return renderProperty(item, property, "table")
 }
 const meta = {
-  title: "Data Collection/Cell Types",
+  title: "Value Display",
   component: Cell,
   parameters: {
     layout: "padded",

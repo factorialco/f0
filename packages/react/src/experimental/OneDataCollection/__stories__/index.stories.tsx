@@ -449,6 +449,9 @@ export const RendererTypes: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
+      search: {
+        enabled: true,
+      },
     })
 
     return (
@@ -541,6 +544,7 @@ export const RendererTypes: Story = {
                   render: (item) => ({
                     type: "avatarList",
                     value: {
+                      max: 1,
                       avatarList: [
                         {
                           type: "person",
@@ -2101,20 +2105,4 @@ export const TableWithSecondaryActions: Story = {
       />
     )
   },
-}
-
-export const TotalItemsSummary: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'The `totalItemSummary` useDataCollectionSource prop allows you to customize how the total number of items is displayed in the collection header. It receives a function that takes the total count as a parameter and returns a string to be displayed. By default, if no `totalItemSummary` is provided, it will display "{count} items".',
-      },
-    },
-  },
-  render: () => (
-    <ExampleComponent
-      totalItemSummary={(totalItems) => `Total items: ${totalItems}`}
-    />
-  ),
 }
