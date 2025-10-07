@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.228.1](https://github.com/factorialco/f0/compare/f0-react-v1.228.0...f0-react-v1.228.1) (2025-10-07)
+
+
+### Bug Fixes
+
+* **Navigation:** add useEffect to sync sortableItems with items prop in F0TableOfContent ([#2764](https://github.com/factorialco/f0/issues/2764)) ([11c649c](https://github.com/factorialco/f0/commit/11c649c3dca559d5a6f4de750f6e28efa4947418))
+
 ## [1.228.0](https://github.com/factorialco/f0/compare/f0-react-v1.227.0...f0-react-v1.228.0) (2025-10-06)
 
 
