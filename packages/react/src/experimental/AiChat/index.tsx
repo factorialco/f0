@@ -50,6 +50,7 @@ const AiChatProviderWrapper = ({
   agent,
 }: AiChatProviderProps) => {
   const { reset } = useCopilotChatInternal()
+  console.log("reset", reset)
   return (
     <AiChatStateProvider
       enabled={enabled}
