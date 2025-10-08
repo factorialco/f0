@@ -110,21 +110,19 @@ const SelectContent = forwardRef<
 
     const valueArray = useMemo(
       () =>
-        (Array.isArray(value) ? value : [value]).filter(
-          (item) => item !== undefined
+        new Set(
+          (Array.isArray(value) ? value : [value]).filter(
+            (item) => item !== undefined
+          )
         ),
       [value]
     )
 
     const positionIndex = useMemo(() => {
       return (
-        (items &&
-          items.findIndex(
-            (item) =>
-              item.value !== undefined &&
-              (valueArray ?? []).includes(item.value)
-          )) ||
-        0
+        items?.findIndex(
+          (item) => item.value !== undefined && valueArray.has(item.value)
+        ) || 0
       )
     }, [items, valueArray])
 

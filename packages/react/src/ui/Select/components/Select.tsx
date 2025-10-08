@@ -19,7 +19,7 @@ export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
  */
 
 const Select = <T extends string = string>(props: SelectProps<T>) => {
-  type Value = Exclude<typeof props.value, undefined>
+  type Value = NonNullable<typeof props.value>
   const [internalOpen, setInternalOpen] = useState(props.asList ? true : false)
 
   const isOpen = props.asList
