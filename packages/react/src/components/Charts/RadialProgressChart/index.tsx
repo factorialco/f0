@@ -1,4 +1,4 @@
-import { autoColor } from "../utils/colors"
+import { getColor } from "../utils/colors"
 
 export interface RadialProgressProps {
   value: number
@@ -10,7 +10,7 @@ export interface RadialProgressProps {
 export function RadialProgressChart({
   value,
   max = 100,
-  color = autoColor(0),
+  color,
   overview,
 }: RadialProgressProps) {
   const strokeWidth = 12
@@ -19,6 +19,7 @@ export function RadialProgressChart({
   const radius = center - strokeWidth / 2
   const circumference = 2 * Math.PI * radius
   const progressOffset = ((max - Math.min(value, max)) / max) * circumference
+  const strokeColor = color ? getColor(color) : getColor("default")
 
   return (
     <div className="relative inline-flex aspect-auto h-full w-full items-center justify-center overflow-hidden">
@@ -39,7 +40,7 @@ export function RadialProgressChart({
           cy={center}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke={strokeColor}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={progressOffset}

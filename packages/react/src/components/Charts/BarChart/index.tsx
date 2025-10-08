@@ -16,7 +16,7 @@ import {
   YAxis,
 } from "recharts"
 
-import { ColorScheme, getColorScheme } from "../utils/colors"
+import { ColorScheme, getColor, getColorScheme } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -204,7 +204,9 @@ const _BarChart = <K extends ChartConfig>(
             fill={
               highlightLastBar
                 ? (((data: { fill: string }) => data.fill) as unknown as string)
-                : (dataConfig[key].color ?? getColorScheme(scheme, index))
+                : dataConfig[key].color
+                  ? getColor(dataConfig[key].color)
+                  : getColorScheme(scheme, index)
             }
             radius={type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
             maxBarSize={32}

@@ -125,9 +125,11 @@ export const MultipleBars: Meta<
 const financialDataConfig = {
   profit: {
     label: "Profit",
+    color: "feedback-positive",
   },
   losses: {
     label: "Losses",
+    color: "feedback-negative",
   },
 }
 
@@ -167,5 +169,6 @@ export const FinancialValues: Meta<
       hide: false,
       tickFormatter: (value: string) => value + " €",
     },
+    colorScheme: "feedback",
   },
 }

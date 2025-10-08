@@ -13,7 +13,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "../../../ui/chart"
-import { ColorScheme, getColorScheme } from "../utils/colors"
+import { ColorScheme, getColor, getColorScheme } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartItem } from "../utils/types"
 
@@ -70,8 +70,16 @@ export const _RadarChart = <K extends ChartConfig>(
           <Radar
             key={key}
             dataKey={key}
-            fill={dataConfig[key].color || getColorScheme(scheme, index)}
-            stroke={dataConfig[key].color || getColorScheme(scheme, index)}
+            fill={
+              dataConfig[key].color
+                ? getColor(dataConfig[key].color)
+                : getColorScheme(scheme, index)
+            }
+            stroke={
+              dataConfig[key].color
+                ? getColor(dataConfig[key].color)
+                : getColorScheme(scheme, index)
+            }
             strokeWidth={1.5}
             fillOpacity={0.3}
             label={dataConfig[key].label}

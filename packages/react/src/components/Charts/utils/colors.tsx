@@ -1,61 +1,48 @@
-const availableColors = {
-  "chart-1": "var(--chart-1)",
-  "chart-2": "var(--chart-2)",
-  "chart-3": "var(--chart-3)",
-  "chart-4": "var(--chart-4)",
-  "chart-5": "var(--chart-5)",
-  "chart-6": "var(--chart-6)",
-  "chart-7": "var(--chart-7)",
-  "chart-8": "var(--chart-8)",
-}
-
-export type ChartColor = keyof typeof availableColors
-
-export const autoColor = (index: number, withHSL = true) => {
-  const colors = Object.values(availableColors)
-  const color = colors[index % colors.length]
-  return withHSL ? `hsl(${color})` : color
-}
-
-export const chartColor = (color: ChartColor) => availableColors[color]
-
-export type ColorScheme = "one-color" | "categorical"
-
-const colorPalettes = {
-  default: {
-    colors: ["var(--chart-1)"],
-  },
-  categorical: {
-    colors: [
-      "var(--chart-1)",
-      "var(--chart-2)",
-      "var(--chart-3)",
-      "var(--chart-4)",
-      "var(--chart-5)",
-      "var(--chart-6)",
-      "var(--chart-7)",
-      "var(--chart-8)",
-    ],
-  },
-}
+export type ColorScheme = "one-color" | "categorical" | "feedback"
 
 export const getColorScheme = (
   category: ColorScheme,
   index: number,
   opacity?: number
 ) => {
-  const opacityString = opacity !== undefined ? ` / ${opacity}` : ""
-
   switch (category) {
     case "one-color":
-      return `hsl(${colorPalettes.default.colors[0]}${opacityString})`
+      return getColor("default", opacity)
 
     case "categorical": {
-      const categoricalColors = colorPalettes.categorical.colors
-      return `hsl(${categoricalColors[index % categoricalColors.length]}${opacityString})`
+      const categoricalColors = [
+        "categorical-1",
+        "categorical-2",
+        "categorical-3",
+        "categorical-4",
+        "categorical-5",
+        "categorical-6",
+        "categorical-7",
+        "categorical-8",
+      ]
+      return getColor(
+        categoricalColors[index % categoricalColors.length],
+        opacity
+      )
+    }
+
+    case "feedback": {
+      const feedbackColors = [
+        "feedback-negative",
+        "feedback-neutral",
+        "feedback-positive",
+      ]
+      return getColor(feedbackColors[index % feedbackColors.length], opacity)
     }
 
     default:
-      return `hsl(${colorPalettes.default.colors[0]}${opacityString})`
+      return getColor("default", opacity)
   }
+}
+
+export const getColor = (color: string, opacity?: number) => {
+  const opacityString = opacity !== undefined ? ` / ${opacity}` : ""
+  const chartColorName = color.startsWith("chart-") ? color : `chart-${color}`
+
+  return `hsl(var(--${chartColorName})${opacityString})`
 }

@@ -14,7 +14,7 @@ import {
 import type { Props as LabelProps } from "recharts/types/component/Label"
 import type { CartesianViewBox } from "recharts/types/util/types"
 import { prepareData } from "../utils/bar"
-import { ColorScheme, getColorScheme } from "../utils/colors"
+import { ColorScheme, getColor, getColorScheme } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -146,7 +146,11 @@ const _VBarChart = <K extends ChartConfig>(
                 layout="vertical"
                 key={`bar-${key}`}
                 dataKey={key}
-                fill={dataConfig[key].color || getColorScheme(scheme, index)}
+                fill={
+                  dataConfig[key].color
+                    ? getColor(dataConfig[key].color)
+                    : getColorScheme(scheme, index)
+                }
                 radius={4}
                 maxBarSize={24}
               >

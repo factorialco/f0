@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { getColorScheme } from "../utils/colors"
+import { getColor, getColorScheme } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -88,7 +88,11 @@ export const _LineChart = <K extends LineChartConfig>(
             dataKey={line}
             isAnimationActive={false}
             type={lineType}
-            stroke={dataConfig[line].color || getColorScheme(scheme, index)}
+            stroke={
+              dataConfig[line].color
+                ? getColor(dataConfig[line].color)
+                : getColorScheme(scheme, index)
+            }
             strokeWidth={1.5}
             strokeDasharray={dataConfig[line].dashed ? "4 4" : undefined}
             dot={false}
