@@ -20,7 +20,6 @@ import {
   useGroups,
   WithGroupId,
 } from "@/hooks/datasource"
-import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
@@ -40,6 +39,8 @@ import {
   useRef,
   useState,
 } from "react"
+import { useDebounceCallback } from "usehooks-ts"
+import { Arrow } from "./components/Arrow"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
 import type { SelectItemObject, SelectItemProps } from "./types"
@@ -363,9 +364,16 @@ const SelectComponent = forwardRef(function Select<
     onChange?.(changedValue as T, foundOption?.item, foundOption)
   }
 
+  const debouncedHandleChangeOpenLocal = useDebounceCallback(
+    (open: boolean) => {
+      onOpenChange?.(open)
+      setOpenLocal(open)
+    },
+    100
+  )
+
   const handleChangeOpenLocal = (open: boolean) => {
-    onOpenChange?.(open)
-    setOpenLocal(open)
+    debouncedHandleChangeOpenLocal(open)
   }
 
   // const collapsible = localSource.grouping?.collapsible
@@ -515,35 +523,12 @@ const SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <div
-                  className={cn(
-                    "rounded-2xs bg-f1-background-secondary p-0.5",
-                    "flex items-center justify-center",
-                    !disabled && "cursor-pointer"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "origin-center transition-transform duration-200",
-                      "flex items-center justify-center",
-                      openLocal && "rotate-180"
-                    )}
-                  >
-                    <F0Icon
-                      onClick={() => {
-                        if (disabled) return
-                        handleChangeOpenLocal(!openLocal)
-                      }}
-                      icon={ChevronDown}
-                      size="sm"
-                      className={cn(
-                        "rounded-2xs bg-f1-background-secondary p-0.5 transition-transform duration-200",
-                        openLocal && "rotate-180",
-                        !disabled && "cursor-pointer"
-                      )}
-                    />
-                  </div>
-                </div>
+                <Arrow
+                  open={openLocal}
+                  disabled={disabled}
+                  size={size}
+                  className={cn(size === "sm" ? "-mt-0.5" : "-mt-2")}
+                />
               }
             >
               <button

@@ -139,9 +139,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
           {badge && (
             <div className="absolute -bottom-0.5 -right-0.5">
               {badge.tooltip ? (
-                <Tooltip description={badge.tooltip}>
-                  <div className="cursor-help">{badgeContent}</div>
-                </Tooltip>
+                <Tooltip description={badge.tooltip}>{badgeContent}</Tooltip>
               ) : (
                 badgeContent
               )}
