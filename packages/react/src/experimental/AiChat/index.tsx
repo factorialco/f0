@@ -10,6 +10,7 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
+import { useEffect } from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -41,33 +42,19 @@ export type AiChatProviderProps = {
 >
 
 const AiChatProviderCmp = ({
-  children,
-  ...copilotKitProps
-}: AiChatProviderProps) => {
-  // todo: implement error handling
-  // temporary set runtime url until error handling is done
-  return (
-    <AiChatKitWrapper {...copilotKitProps}>
-      <AiChatProviderWrapper {...copilotKitProps}>
-        {children}
-      </AiChatProviderWrapper>
-    </AiChatKitWrapper>
-  )
-}
-
-const AiChatProviderWrapper = ({
-  children,
   enabled = false,
   greeting,
   initialMessage,
   onThumbsUp,
   onThumbsDown,
+  children,
   agent,
+  ...copilotKitProps
 }: AiChatProviderProps) => {
-  const { reset } = useCopilotChatInternal()
+  // todo: implement error handling
+  // temporary set runtime url until error handling is done
   return (
     <AiChatStateProvider
-      clearFn={reset}
       enabled={enabled}
       greeting={greeting}
       initialMessage={initialMessage}
@@ -75,7 +62,7 @@ const AiChatProviderWrapper = ({
       onThumbsDown={onThumbsDown}
       agent={agent}
     >
-      {children}
+      <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
   )
 }
@@ -88,9 +75,24 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
+      <ResetFunctionInjector />
       {children}
     </CopilotKit>
   )
+}
+
+const ResetFunctionInjector = () => {
+  const { setClearFunction } = useAiChat()
+  const { reset } = useCopilotChatInternal()
+
+  useEffect(() => {
+    setClearFunction(reset)
+    return () => {
+      setClearFunction(null)
+    }
+  }, [setClearFunction, reset])
+
+  return null
 }
 
 const AiChatCmp = () => {
