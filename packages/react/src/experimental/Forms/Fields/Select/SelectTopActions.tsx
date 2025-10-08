@@ -22,8 +22,6 @@ interface SelectTopActionsProps<
   onSearchChange: (value: string) => void
   searchValue?: string
   searchInputRef: React.RefObject<HTMLInputElement>
-  onFocus?: () => void
-  onBlur?: () => void
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (grouping: GroupingState<R, Grouping>) => void
@@ -35,8 +33,6 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   onSearchChange,
   searchValue,
   searchInputRef,
-  onFocus,
-  onBlur,
   grouping,
   currentGrouping,
   onGroupingChange,
@@ -55,8 +51,6 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
           value={searchValue}
           key="search-input"
           ref={searchInputRef}
-          onBlur={onBlur}
-          onFocus={onFocus}
         />
         {filters && (
           <OneFilterPicker

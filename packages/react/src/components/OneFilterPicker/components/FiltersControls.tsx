@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { ArrowLeft, Filter } from "../../../icons/app"
 import { useI18n } from "../../../lib/providers/i18n"
@@ -56,6 +57,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     onOpenChange(false)
   }
 
+  const handleGoBack = () => {
+    if (selectedFilterKey) {
+      setSelectedFilterKey(null)
+    } else {
+      onChange(localFiltersValue)
+      onOpenChange(false)
+    }
+  }
+
+  const handleApplyFiltersSelection = () => {
+    handleGoBack()
+  }
+
   useEffect(() => {
     const getFirstFilterNotEmpty = () => {
       return Object.entries(localFiltersValue).find(([key, value]) => {
@@ -71,7 +85,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       })
     }
 
-    if (isOpen) {
+    if (isOpen && mode === "default") {
       const firstFilterWithValue = getFirstFilterNotEmpty()
       if (firstFilterWithValue) {
         setSelectedFilterKey(firstFilterWithValue[0] as keyof Filters)
@@ -107,58 +121,76 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           hideLabel
           round
         />
-        {isOpen && (
-          <div className="absolute bottom-0 left-0 right-0 top-0 z-50 bg-f1-background">
-            <div
-              className="flex flex-col transition-all"
-              style={{
-                height: formHeight || DEFAULT_FORM_HEIGHT,
-              }}
+        <AnimatePresence mode="popLayout" propagate={false}>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
-              <div className="pl-2 pt-2">
-                <Button
-                  label="Back"
-                  icon={ArrowLeft}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (selectedFilterKey) {
-                      setSelectedFilterKey(null)
-                    } else {
-                      onOpenChange(false)
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex min-h-0 flex-1">
-                {selectedFilterKey ? (
-                  <FilterContent
-                    selectedFilterKey={selectedFilterKey}
-                    definition={filters}
-                    tempFilters={localFiltersValue}
-                    onFilterChange={updateFilterValue}
+              <div className="flex h-full flex-col transition-all">
+                <div className="pl-1.5 pt-1.5">
+                  <Button
+                    label="Back"
+                    icon={ArrowLeft}
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleGoBack}
                   />
-                ) : (
-                  <FilterList
-                    definition={filters}
-                    tempFilters={localFiltersValue}
-                    selectedFilterKey={selectedFilterKey}
-                    onFilterSelect={(key: keyof Filters) =>
-                      setSelectedFilterKey(key)
-                    }
-                    hideBorder
-                  />
+                </div>
+                <div className="flex flex-1">
+                  {selectedFilterKey ? (
+                    <motion.div
+                      key="filter-content"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="h-full w-full bg-f1-background"
+                    >
+                      <FilterContent
+                        selectedFilterKey={selectedFilterKey}
+                        definition={filters}
+                        tempFilters={localFiltersValue}
+                        onFilterChange={updateFilterValue}
+                        isCompactMode
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="filter-list"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="h-full w-full bg-f1-background"
+                    >
+                      <FilterList
+                        definition={filters}
+                        tempFilters={localFiltersValue}
+                        selectedFilterKey={selectedFilterKey}
+                        onFilterSelect={(key: keyof Filters) =>
+                          setSelectedFilterKey(key)
+                        }
+                        isCompactMode
+                      />
+                    </motion.div>
+                  )}
+                </div>
+                {selectedFilterKey && (
+                  <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
+                    <Button
+                      onClick={handleApplyFiltersSelection}
+                      label={i18n.filters.applySelection}
+                    />
+                  </div>
                 )}
               </div>
-              <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
-                <Button
-                  onClick={handleApplyFilters}
-                  label={i18n.filters.applyFilters}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     )
   }

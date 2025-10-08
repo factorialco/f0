@@ -281,7 +281,7 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
           </div>
         )}
       </div>
-      <FiltersChipsList />
+      {props.mode === "default" && <FiltersChipsList />}
     </FiltersRoot>
   )
 }

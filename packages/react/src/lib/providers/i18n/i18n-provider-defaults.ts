@@ -48,6 +48,7 @@ export const defaultTranslations = {
   filters: {
     label: "Filters",
     applyFilters: "Apply filters",
+    applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",

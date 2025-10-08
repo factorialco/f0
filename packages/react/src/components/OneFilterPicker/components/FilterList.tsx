@@ -1,5 +1,9 @@
+import { F0Icon } from "@/components/F0Icon/F0Icon"
+import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 import { cn, focusRing } from "../../../lib/utils"
 import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 import type {
@@ -22,7 +26,7 @@ interface FilterListProps<Definition extends FiltersDefinition> {
   /** Callback fired when a filter is selected from the list */
   onFilterSelect: (key: keyof Definition) => void
   /** Whether to hide a border around the list */
-  hideBorder?: boolean
+  isCompactMode?: boolean
 }
 
 /**
@@ -43,19 +47,46 @@ export function FilterList<Definition extends FiltersDefinition>({
   tempFilters,
   selectedFilterKey,
   onFilterSelect,
-  hideBorder,
+  isCompactMode,
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
+
+  const [searchValue, setSearchValue] = useState("")
+
   return (
     <div
       className={cn(
-        "w-full min-w-[224px] shrink-0",
-        !hideBorder &&
+        "z-30 h-full w-full min-w-[224px] shrink-0 bg-f1-background",
+        !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
       )}
     >
-      <div className="flex h-full w-full flex-col gap-1 overflow-y-auto p-2">
+      <div className={cn("flex flex-col p-2")}>
+        <F1SearchBox
+          key="filter-list-search"
+          name="filter-list-search"
+          placeholder="Search..."
+          value={searchValue}
+          onChange={setSearchValue}
+          clearable
+        />
+      </div>
+      <div
+        className={cn(
+          "flex h-full w-full flex-col gap-1 overflow-y-auto p-2 pt-0",
+          isCompactMode && "px-1"
+        )}
+      >
+        {isCompactMode && (
+          <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
+        )}
         {Object.entries(definition).map(([key, filter]) => {
+          const matchesWithSearch =
+            !searchValue ||
+            filter.label.toLowerCase().includes(searchValue.toLowerCase())
+
+          if (!matchesWithSearch) return null
+
           const filterType = getFilterType(filter.type)
 
           type FilterType = FilterDefinitionsByType[typeof filter.type]
@@ -75,8 +106,8 @@ export function FilterList<Definition extends FiltersDefinition>({
               )}
               onClick={() => onFilterSelect(key as keyof Definition)}
             >
-              <div className="flex items-center justify-start gap-2.5">
-                <span className="line-clamp-1 w-fit text-left">
+              <div className="flex w-full items-center justify-start gap-2.5">
+                <span className="line-clamp-1 w-fit flex-1 text-left">
                   {filter.label}
                 </span>
                 <AnimatePresence>
@@ -92,6 +123,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                     />
                   )}
                 </AnimatePresence>
+                {isCompactMode && <F0Icon icon={ChevronRight} />}
               </div>
             </button>
           )

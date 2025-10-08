@@ -73,6 +73,7 @@ export function InFilter<T extends string>({
   schema,
   value,
   onChange,
+  isCompactMode,
 }: InFilterComponentProps<T>) {
   const i18n = useI18n()
 
@@ -147,9 +148,23 @@ export function InFilter<T extends string>({
     onChange(newValues)
   }
 
+  const handleCheckSelectAll = (checked: boolean) => {
+    if (checked) {
+      handleSelectAll()
+    } else {
+      onChange([])
+    }
+  }
+
   const handleClear = () => {
     onChange([])
   }
+
+  const selectedText = `${value.length} ${
+    value.length === 1
+      ? i18n.status.selected.singular
+      : i18n.status.selected.plural
+  }`.toLowerCase()
 
   return (
     <div
@@ -167,7 +182,33 @@ export function InFilter<T extends string>({
           />
         </div>
       )}
-      <div className="flex-1 overflow-y-auto px-2">
+      {isCompactMode && (
+        <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
+      )}
+      <div
+        className={cn("flex-1 overflow-y-auto px-2", isCompactMode && "px-1")}
+      >
+        {isCompactMode && (
+          <div
+            className={cn(
+              "flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1"
+            )}
+          >
+            <span className="max-w-[250px] flex-1 whitespace-nowrap">
+              <OneEllipsis className="text-f1-foreground-secondary">
+                {selectedText}
+              </OneEllipsis>
+            </span>
+            <F0Checkbox
+              id="select-all"
+              title="Select all"
+              checked={value.length === filteredOptions.length}
+              onCheckedChange={handleCheckSelectAll}
+              presentational
+              hideLabel
+            />
+          </div>
+        )}
         {filteredOptions.map((option) => {
           const isSelected = value.includes(option.value)
           const optionId = `option-${String(option.value)}`
@@ -177,6 +218,7 @@ export function InFilter<T extends string>({
               key={String(option.value)}
               className={cn(
                 "flex w-full flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded p-2 font-medium transition-colors hover:bg-f1-background-secondary",
+                isCompactMode && "py-1 pr-1",
                 focusRing()
               )}
               onClick={() => {
@@ -201,25 +243,27 @@ export function InFilter<T extends string>({
           )
         })}
       </div>
-      <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-        <Button
-          variant="outline"
-          label="Select all"
-          onClick={handleSelectAll}
-          disabled={
-            filteredOptions.length === 0 ||
-            (Array.isArray(value) && value.length === filteredOptions.length)
-          }
-          size="sm"
-        />
-        <Button
-          variant="ghost"
-          label="Clear"
-          onClick={handleClear}
-          disabled={!Array.isArray(value) || value.length === 0}
-          size="sm"
-        />
-      </div>
+      {!isCompactMode && (
+        <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+          <Button
+            variant="outline"
+            label="Select all"
+            onClick={handleSelectAll}
+            disabled={
+              filteredOptions.length === 0 ||
+              (Array.isArray(value) && value.length === filteredOptions.length)
+            }
+            size="sm"
+          />
+          <Button
+            variant="ghost"
+            label="Clear"
+            onClick={handleClear}
+            disabled={!Array.isArray(value) || value.length === 0}
+            size="sm"
+          />
+        </div>
+      )}
     </div>
   )
 }
