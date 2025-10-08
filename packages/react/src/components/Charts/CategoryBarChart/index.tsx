@@ -6,7 +6,7 @@ import {
 } from "@/ui/tooltip"
 import { ForwardedRef } from "react"
 
-import { getColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 
 export interface CategoryBarProps {
@@ -33,7 +33,7 @@ const _CategoryBarChart = (
             const percentage = (category.value / total) * 100
             const color = category.color
               ? getColor(category.color)
-              : getColor(`categorical-${(index % 8) + 1}`)
+              : getCategoricalColor(index)
 
             const formatPercentage = (value: number): string => {
               const percentage = (value / total) * 100
@@ -89,7 +89,7 @@ const _CategoryBarChart = (
           {data.map((category, index) => {
             const color = category.color
               ? getColor(category.color)
-              : getColor(`categorical-${(index % 8) + 1}`)
+              : getCategoricalColor(index)
 
             return (
               <div

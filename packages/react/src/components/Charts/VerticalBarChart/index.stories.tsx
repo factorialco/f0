@@ -90,7 +90,6 @@ export const MultipleBars: Meta<
       hide: false,
       tickFormatter: (value: string) => `${value} hires`,
     },
-    colorScheme: "categorical",
   },
 }
 

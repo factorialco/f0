@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { getColor, getColorScheme } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -39,13 +39,10 @@ export const _LineChart = <K extends LineChartConfig>(
     aspect,
     hideTooltip = false,
     hideGrid = false,
-    colorScheme,
   }: LineChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const lines = Object.keys(dataConfig) as (keyof LineChartConfig)[]
-  const scheme =
-    colorScheme ?? (lines.length === 1 ? "one-color" : "categorical")
   const preparedData = prepareData(data)
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
@@ -91,7 +88,7 @@ export const _LineChart = <K extends LineChartConfig>(
             stroke={
               dataConfig[line].color
                 ? getColor(dataConfig[line].color)
-                : getColorScheme(scheme, index)
+                : getCategoricalColor(index)
             }
             strokeWidth={1.5}
             strokeDasharray={dataConfig[line].dashed ? "4 4" : undefined}

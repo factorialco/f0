@@ -12,12 +12,6 @@ const meta: Meta = {
       </div>
     ),
   ],
-  argTypes: {
-    colorScheme: {
-      control: "select",
-      options: ["one-color", "categorical"],
-    },
-  },
 }
 
 export default meta
@@ -118,7 +112,6 @@ export const MultipleBars: Meta<
       hide: false,
       tickFormatter: (value: string) => value,
     },
-    colorScheme: "categorical",
   },
 }
 
@@ -169,6 +162,5 @@ export const FinancialValues: Meta<
       hide: false,
       tickFormatter: (value: string) => value + " €",
     },
-    colorScheme: "feedback",
   },
 }
