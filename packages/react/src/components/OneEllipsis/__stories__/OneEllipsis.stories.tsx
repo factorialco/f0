@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useId, useState } from "react"
-import { OneEllipsis, tags } from "../OneEllipsis"
+import { OneEllipsis, Tag, tags } from "../OneEllipsis"
 
 const meta = {
   title: "Ellipsis",
@@ -130,7 +130,7 @@ export const SingleLine: Story = {
     children:
       "This is a long text that will be truncated with an ellipsis if it doesn't fit in the container width. Hover over it to see the full text in a tooltip.",
   },
-  render: (args) => (
+  render: () => (
     <WrapperStory
       lines={1}
       text="This is a long text that will be truncated with an ellipsis if it doesn't fit in the container width. Hover over it to see the full text in a tooltip."
