@@ -21,7 +21,9 @@ export type DateFilterOptions = {
 export type DateFilterComponentProps = FilterTypeComponentProps<
   Date | DateRange | undefined,
   DateFilterOptions
->
+> & {
+  isCompactMode?: boolean
+}
 
 /**
  * A date filter component that provides date picker.
@@ -30,6 +32,7 @@ export function DateFilter({
   value,
   onChange,
   schema,
+  isCompactMode,
 }: DateFilterComponentProps) {
   const options = {
     mode: "single" as const,
@@ -49,18 +52,21 @@ export function DateFilter({
           onSelect={(date) => onChange(date ?? undefined)}
           view={options.view}
           mode={options.mode}
+          compact={isCompactMode}
           showInput
         />
       </div>
-      <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-        <Button
-          variant="ghost"
-          label="Clear"
-          onClick={() => clear()}
-          disabled={!value}
-          size="sm"
-        />
-      </div>
+      {!isCompactMode && (
+        <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+          <Button
+            variant="ghost"
+            label="Clear"
+            onClick={() => clear()}
+            disabled={!value}
+            size="sm"
+          />
+        </div>
+      )}
     </>
   )
 }

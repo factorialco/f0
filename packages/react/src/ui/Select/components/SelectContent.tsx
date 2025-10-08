@@ -185,7 +185,7 @@ const SelectContent = forwardRef<
         asChild={asList}
         ref={ref}
         className={cn(
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden text-f1-foreground",
+          "relative z-50 max-h-[460px] min-w-[8rem] overflow-hidden text-f1-foreground",
           !asList &&
             "rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-md data-[state=closed]:fade-out-0 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:zoom-out-95 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[side=bottom]:slide-in-from-top-2",
           !asList &&
@@ -222,7 +222,7 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList ? "max-h-full" : "max-h-[300px]",
+                asList ? "max-h-full" : "max-h-[460px]",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}

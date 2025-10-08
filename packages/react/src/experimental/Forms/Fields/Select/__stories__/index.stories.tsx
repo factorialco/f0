@@ -464,6 +464,16 @@ export const WithDataSourcePaginated: Story = {
             ],
           },
         },
+        date: {
+          type: "date",
+          label: "Date",
+          options: {
+            minDate: new Date("2021-01-01"),
+            maxDate: new Date("2021-12-31"),
+            mode: "range",
+            view: "day",
+          },
+        },
       },
       dataAdapter: {
         paginationType: "infinite-scroll",

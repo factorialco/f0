@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -23,6 +24,7 @@ export interface OneCalendarProps {
   showInput?: boolean
   minDate?: Date
   maxDate?: Date
+  compact?: boolean
 }
 
 export const getGranularitySimpleDefinition = (
@@ -60,6 +62,7 @@ export function OneCalendar({
   showInput = false,
   minDate,
   maxDate,
+  compact = false,
 }: OneCalendarProps) {
   const i18n = useI18n()
 
@@ -244,8 +247,18 @@ export function OneCalendar({
         </div>
       )}
       {showNavigation && (
-        <div className="flex items-center justify-between pb-3">
-          <div className="text-lg font-medium text-f1-foreground">
+        <div
+          className={cn(
+            "flex items-center justify-between",
+            compact ? "mx-2 pb-2" : "pb-3"
+          )}
+        >
+          <div
+            className={cn(
+              "font-medium text-f1-foreground",
+              compact ? "text-md" : "text-lg"
+            )}
+          >
             {getHeaderLabel()}
           </div>
           <div className="flex items-center gap-2">
@@ -282,6 +295,7 @@ export function OneCalendar({
           viewDate,
           minDate,
           maxDate,
+          compact,
         })}
       </div>
     </div>
