@@ -35,7 +35,7 @@ function Calendar({
           "text-f1-foreground-secondary rounded-xs font-medium flex justify-center items-center",
           props.showWeekNumber
             ? compact
-              ? "w-8 flex-shrink-0"
+              ? "w-[30px] flex-shrink-0"
               : "w-7 flex-shrink-0"
             : "w-full",
           compact ? "h-6 text-sm" : "h-7 text-sm"
@@ -49,7 +49,7 @@ function Calendar({
           "text-center font-medium p-0 relative text-f1-foreground transition-all duration-100",
           props.showWeekNumber
             ? compact
-              ? "w-8 flex-shrink-0"
+              ? "w-[30px] flex-shrink-0"
               : "w-7 flex-shrink-0"
             : "w-full",
           compact ? "rounded-sm h-7 text-sm" : "rounded-md h-9 text-sm",
@@ -74,7 +74,7 @@ function Calendar({
           "rounded-[inherit] p-0 aria-selected:opacity-100 z-20 relative",
           compact
             ? props.showWeekNumber
-              ? "h-7 w-8 text-sm"
+              ? "h-7 w-[30px] text-sm"
               : "h-7 w-7 text-sm"
             : "h-9 w-9 text-sm"
         ),

@@ -530,7 +530,7 @@ const SelectComponent = forwardRef(function Select<
             </InputField>
           )}
         </SelectTrigger>
-        {true && (
+        {openLocal && (
           <SelectContent
             items={items}
             className={selectContentClassName}
