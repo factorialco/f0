@@ -155,17 +155,6 @@
     --page: theme("colors.white.3");
     --shadow: theme("colors.grey.100");
 
-    --chart-default: 184 92% 35%;
-
-    --chart-categorical-1: 184 92% 35%;
-    --chart-categorical-2: 216 90% 65%;
-    --chart-categorical-3: 84 55% 53%;
-    --chart-categorical-4: 340 49% 60%;
-    --chart-categorical-5: 24 98% 59%;
-    --chart-categorical-6: 239 91% 64%;
-    --chart-categorical-7: 162 44% 33%;
-    --chart-categorical-8: 25 46% 53%;
-
     --scrollbar-track: transparent;
     --scrollbar-thumb: rgba(255, 255, 255, 0.4);
     --scrollbar-thumb-hover: rgba(255, 255, 255, 0.6);
