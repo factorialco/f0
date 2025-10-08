@@ -33,7 +33,11 @@ function Calendar({
         ),
         head_cell: cn(
           "text-f1-foreground-secondary rounded-xs font-medium flex justify-center items-center",
-          props.showWeekNumber ? "w-7 flex-shrink-0" : "w-full",
+          props.showWeekNumber
+            ? compact
+              ? "w-8 flex-shrink-0"
+              : "w-7 flex-shrink-0"
+            : "w-full",
           compact ? "h-6 text-sm" : "h-7 text-sm"
         ),
         row: cn(
@@ -43,7 +47,11 @@ function Calendar({
         ),
         cell: cn(
           "text-center font-medium p-0 relative text-f1-foreground transition-all duration-100",
-          props.showWeekNumber ? "w-7 flex-shrink-0" : "w-full",
+          props.showWeekNumber
+            ? compact
+              ? "w-8 flex-shrink-0"
+              : "w-7 flex-shrink-0"
+            : "w-full",
           compact ? "rounded-sm h-7 text-sm" : "rounded-md h-9 text-sm",
           "before:absolute before:inset-0 before:z-0 before:bg-f1-background-selected-bold before:opacity-0 before:transition-all before:duration-100 before:content-[''] hover:before:bg-f1-background-selected-bold-hover before:pointer-events-none",
           compact ? "before:rounded-sm" : "before:rounded-md",
@@ -64,7 +72,11 @@ function Calendar({
         ),
         day: cn(
           "rounded-[inherit] p-0 aria-selected:opacity-100 z-20 relative",
-          compact ? "h-7 w-7 text-sm" : "h-9 w-9 text-sm"
+          compact
+            ? props.showWeekNumber
+              ? "h-7 w-8 text-sm"
+              : "h-7 w-7 text-sm"
+            : "h-9 w-9 text-sm"
         ),
         day_range_start:
           "day-range-start aria-selected:text-f1-foreground-inverse",
