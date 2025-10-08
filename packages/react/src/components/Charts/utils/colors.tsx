@@ -14,7 +14,7 @@ export const getCategoricalColor = (index: number, opacity?: number) => {
 
 export const getColor = (color: string, opacity?: number) => {
   const opacityString = opacity !== undefined ? ` / ${opacity}` : ""
-  const chartColorName = color.startsWith("chart-") ? color : `chart-${color}`
+  const chartColorName = `chart-${color}`
 
   return `hsl(var(--${chartColorName})${opacityString})`
 }
