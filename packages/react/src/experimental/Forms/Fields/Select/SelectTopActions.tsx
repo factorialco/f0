@@ -42,7 +42,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
 }: SelectTopActionsProps<R>) => {
   if (!showSearchBox) return null
   return (
-    <div className="flex gap-2 px-2 pt-2">
+    <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
       <div className="flex flex-1 flex-row gap-2">
         <F1SearchBox
           placeholder={searchBoxPlaceholder}
