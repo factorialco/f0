@@ -19,6 +19,7 @@ export interface AiChatState {
   initialMessage?: string | string[]
   onThumbsUp?: (message: AIMessage) => void
   onThumbsDown?: (message: AIMessage) => void
+  clearFn: () => void
 }
 
 type AiChatProviderReturnValue = {
@@ -37,6 +38,14 @@ type AiChatProviderReturnValue = {
    */
   setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
   autoClearMinutes: number | null
+  /**
+   * Clear the chat
+   */
+  clear: () => void
+
+  /**
+   * The initial message to display in the chat
+   */
   initialMessage?: string | string[]
   setInitialMessage: React.Dispatch<
     React.SetStateAction<string | string[] | undefined>
@@ -54,6 +63,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   initialMessage: initialInitialMessage,
   onThumbsDown,
   onThumbsUp,
+  clearFn,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
@@ -104,6 +114,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setInitialMessage,
         onThumbsUp,
         onThumbsDown,
+        clear: clearFn,
       }}
     >
       {children}
@@ -126,6 +137,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       agent: undefined,
       tmp_setAgent: noopFn,
       setAutoClearMinutes: noopFn,
+      clear: noopFn,
       autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,

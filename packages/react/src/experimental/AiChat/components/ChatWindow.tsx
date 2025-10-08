@@ -5,13 +5,15 @@ import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
+  const { reset } = useCopilotChatInternal()
+
   const {
     open,
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
     autoClearMinutes,
   } = useAiChat()
-  const { reset } = useCopilotChatInternal()
+
   useAutoClear({
     reset,
     isOpen: open,
