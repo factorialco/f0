@@ -2,7 +2,7 @@ import {
   CopilotKit,
   CopilotKitProps,
   useCopilotAction,
-  useCopilotChatInternal,
+  useCopilotChat,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -49,7 +49,7 @@ const AiChatProviderWrapper = ({
   onThumbsDown,
   agent,
 }: AiChatProviderProps) => {
-  const { reset } = useCopilotChatInternal()
+  const { reset } = useCopilotChat()
   return (
     <AiChatStateProvider
       enabled={enabled}
