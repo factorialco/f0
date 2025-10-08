@@ -2,6 +2,7 @@ import {
   CopilotKit,
   CopilotKitProps,
   useCopilotAction,
+  useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -39,8 +40,33 @@ export type AiChatProviderProps = {
   | "headers"
 >
 
-const AiChatProviderCmp = ({
+const AiChatProviderWrapper = ({
+  children,
   enabled = false,
+  greeting,
+  initialMessage,
+  onThumbsUp,
+  onThumbsDown,
+  agent,
+}: AiChatProviderProps) => {
+  const { reset } = useCopilotChatInternal()
+  return (
+    <AiChatStateProvider
+      enabled={enabled}
+      greeting={greeting}
+      initialMessage={initialMessage}
+      onThumbsUp={onThumbsUp}
+      onThumbsDown={onThumbsDown}
+      agent={agent}
+      clearFn={reset}
+    >
+      {children}
+    </AiChatStateProvider>
+  )
+}
+
+const AiChatProviderCmp = ({
+  enabled,
   greeting,
   initialMessage,
   onThumbsUp,
@@ -52,16 +78,18 @@ const AiChatProviderCmp = ({
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
-    <AiChatStateProvider
-      enabled={enabled}
-      greeting={greeting}
-      initialMessage={initialMessage}
-      onThumbsUp={onThumbsUp}
-      onThumbsDown={onThumbsDown}
-      agent={agent}
-    >
-      <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
-    </AiChatStateProvider>
+    <AiChatKitWrapper {...copilotKitProps}>
+      <AiChatProviderWrapper
+        enabled={enabled}
+        greeting={greeting}
+        initialMessage={initialMessage}
+        onThumbsUp={onThumbsUp}
+        onThumbsDown={onThumbsDown}
+        agent={agent}
+      >
+        {children}
+      </AiChatProviderWrapper>
+    </AiChatKitWrapper>
   )
 }
 
