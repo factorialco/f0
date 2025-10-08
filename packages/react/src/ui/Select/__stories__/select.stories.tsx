@@ -16,10 +16,16 @@ const SelectWithHooks = ({
   asList,
   ...props
 }: SelectProps) => {
+  const { value, multiple } = props
+  const [localValue, setLocalValue] = useState<string | string[] | undefined>(
+    value
+  )
+
   const RenderSelect = (
     props: Omit<SelectProps, "value"> & {
       children: React.ReactNode
       value: string | string[] | undefined
+      onValueChange: (value: string | string[]) => void
     }
   ) => {
     const { value: initialValue, defaultValue: _, multiple, ...rest } = props
@@ -31,6 +37,7 @@ const SelectWithHooks = ({
       const handleChange = (value: string[]) => {
         console.log("value", value)
         setValue(value)
+        props.onValueChange(value)
       }
       return (
         <Select {...rest} value={value} onValueChange={handleChange} multiple>
@@ -44,6 +51,7 @@ const SelectWithHooks = ({
       const handleChange = (value: string) => {
         console.log("value", value)
         setValue(value)
+        props.onValueChange(value)
       }
 
       return (
@@ -57,8 +65,6 @@ const SelectWithHooks = ({
     }
   }
 
-  const { value, multiple } = props
-
   const items = useMemo(
     () =>
       (options || []).map((option) => ({
@@ -69,21 +75,26 @@ const SelectWithHooks = ({
     [options]
   )
 
+  const handleValueChange = (value: string | string[]) => {
+    setLocalValue(value)
+  }
+
   return (
     <>
       <RenderSelect
-        value={value}
+        value={localValue}
         multiple={multiple}
         {...props}
         asList={asList}
+        onValueChange={handleValueChange}
       >
         <SelectTrigger>
-          {value}
+          {localValue}
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent items={items} />
       </RenderSelect>
-      <div className="mt-20">Selected: {JSON.stringify(value)}</div>
+      <div className="mt-20">Selected: {JSON.stringify(localValue)}</div>
     </>
   )
 }
