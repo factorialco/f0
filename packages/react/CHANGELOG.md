@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.228.3](https://github.com/factorialco/f0/compare/f0-react-v1.228.2...f0-react-v1.228.3) (2025-10-08)
+
+
+### Bug Fixes
+
+* **Card:** hide empty content ([#2776](https://github.com/factorialco/f0/issues/2776)) ([54dd3cb](https://github.com/factorialco/f0/commit/54dd3cb94bc47d668d05b0fd42cb2c8c85d15beb))
+
 ## [1.228.2](https://github.com/factorialco/f0/compare/f0-react-v1.228.1...f0-react-v1.228.2) (2025-10-07)
 
 
