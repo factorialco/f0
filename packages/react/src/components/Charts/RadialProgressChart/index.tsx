@@ -19,7 +19,7 @@ export function RadialProgressChart({
   const radius = center - strokeWidth / 2
   const circumference = 2 * Math.PI * radius
   const progressOffset = ((max - Math.min(value, max)) / max) * circumference
-  const strokeColor = color ? getColor(color) : getColor("default")
+  const strokeColor = color ? getColor(color) : getColor("categorical-1")
 
   return (
     <div className="relative inline-flex aspect-auto h-full w-full items-center justify-center overflow-hidden">

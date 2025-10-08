@@ -16,7 +16,7 @@ const _ProgressBar = <K extends ChartConfig>(
   { value, max = 100, label, color }: ProgressBarProps<K>,
   _ref: ForwardedRef<HTMLDivElement>
 ) => {
-  const barColor = color ? getColor(color) : getColor("default")
+  const barColor = color ? getColor(color) : getColor("categorical-1")
   const percentage = (value / max) * 100
 
   return (

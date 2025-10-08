@@ -16,7 +16,7 @@ export const ProgressBarDuo = forwardRef<HTMLDivElement, DualProgressBarProps>(
           className="rounded transition-all duration-300 ease-in-out"
           style={{
             width: `${percentage}%`,
-            backgroundColor: getColor("default"),
+            backgroundColor: getColor("categorical-1"),
           }}
         />
         <div
