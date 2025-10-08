@@ -2,6 +2,7 @@ import {
   CopilotKit,
   CopilotKitProps,
   useCopilotAction,
+  useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -40,30 +41,41 @@ export type AiChatProviderProps = {
 >
 
 const AiChatProviderCmp = ({
-  enabled = false,
-  greeting,
-  initialMessage,
-  onThumbsUp,
-  onThumbsDown,
   children,
-  agent,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
+    <AiChatKitWrapper {...copilotKitProps}>
+      <AiChatProviderWrapper {...copilotKitProps}>
+        {children}
+      </AiChatProviderWrapper>
+    </AiChatKitWrapper>
+  )
+}
+
+const AiChatProviderWrapper = ({
+  children,
+  enabled = false,
+  greeting,
+  initialMessage,
+  onThumbsUp,
+  onThumbsDown,
+  agent,
+}: AiChatProviderProps) => {
+  const { reset } = useCopilotChatInternal()
+  return (
     <AiChatStateProvider
+      clearFn={reset}
       enabled={enabled}
       greeting={greeting}
       initialMessage={initialMessage}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
-      clearFn={() => {
-        console.log("clearFn here")
-      }}
     >
-      <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
+      {children}
     </AiChatStateProvider>
   )
 }
