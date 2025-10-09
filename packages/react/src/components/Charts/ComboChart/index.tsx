@@ -46,8 +46,13 @@ export type ComboChartProps<K extends ChartConfig = ChartConfig> =
     label?: boolean
     legend?: boolean
     showValueUnderLabel?: boolean
-    bar?: keyof K
-    line?: keyof K
+    bar?: {
+      categories: keyof K | (keyof K)[]
+    }
+    line?: {
+      categories: keyof K | (keyof K)[]
+      dot?: boolean
+    }
     onClick?: (data: ChartDataPoint<K>) => void
   }
 
@@ -71,11 +76,23 @@ const _ComboChart = <K extends ChartConfig>(
 ) => {
   const preparedData = prepareData(data)
 
-  // Calculate max label width for bar and line data
-  const chartKeys = [bar, line].filter(Boolean) as (keyof K)[]
+  // Extract categories from bar/line objects
+  const barCategories = bar?.categories
+    ? Array.isArray(bar.categories)
+      ? bar.categories
+      : [bar.categories]
+    : []
+  const lineCategories = line?.categories
+    ? Array.isArray(line.categories)
+      ? line.categories
+      : [line.categories]
+    : []
+
+  // Calculate max label width for all chart data
+  const allChartKeys = [...barCategories, ...lineCategories]
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
-      chartKeys.map((key) =>
+      allChartKeys.map((key) =>
         measureTextWidth(
           yAxis?.tickFormatter
             ? yAxis.tickFormatter(`${el[key]}`)
@@ -178,22 +195,23 @@ const _ComboChart = <K extends ChartConfig>(
           }
         />
 
-        {bar && (
+        {/* Render Bars */}
+        {barCategories.map((category, index) => (
           <Bar
-            key={`bar-${String(bar)}`}
+            key={`bar-${String(category)}`}
             isAnimationActive={false}
-            dataKey={String(bar)}
+            dataKey={String(category)}
             fill={
-              dataConfig[bar].color
-                ? getColor(dataConfig[bar].color)
-                : getCategoricalColor(0)
+              dataConfig[category].color
+                ? getColor(dataConfig[category].color)
+                : getCategoricalColor(index)
             }
             radius={4}
             maxBarSize={32}
           >
             {label && (
               <LabelList
-                key={`label-${String(bar)}`}
+                key={`label-${String(category)}`}
                 position="top"
                 offset={10}
                 className="fill-f1-foreground"
@@ -201,22 +219,24 @@ const _ComboChart = <K extends ChartConfig>(
               />
             )}
           </Bar>
-        )}
+        ))}
 
-        {line && (
+        {/* Render Lines */}
+        {lineCategories.map((category, index) => (
           <Line
+            key={`line-${String(category)}`}
             type="monotone"
-            dataKey={String(line)}
+            dataKey={String(category)}
             stroke={
-              dataConfig[line].color
-                ? getColor(dataConfig[line].color)
-                : getCategoricalColor(1)
+              dataConfig[category].color
+                ? getColor(dataConfig[category].color)
+                : getCategoricalColor(barCategories.length + index)
             }
             strokeWidth={2}
-            dot={true}
+            dot={line?.dot ?? false}
             isAnimationActive={false}
           />
-        )}
+        ))}
         {legend && (
           <ChartLegend
             content={<ChartLegendContent nameKey="label" />}

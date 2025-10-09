@@ -23,22 +23,54 @@ const teamsDataConfig = {
   pv: {
     label: "Page Views",
   },
+  revenue: {
+    label: "Revenue",
+  },
+  customers: {
+    label: "Customers",
+  },
 }
 
 export const Default: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
   args: {
     dataConfig: teamsDataConfig,
     data: [
-      { label: "Marketing", values: { headcount: 8, pv: 24 } },
-      { label: "Sales", values: { headcount: 100, pv: 14 } },
-      { label: "Engineering", values: { headcount: 56, pv: 98 } },
-      { label: "Product", values: { headcount: 32, pv: 39 } },
-      { label: "Design", values: { headcount: 16, pv: 48 } },
-      { label: "Finance", values: { headcount: 12, pv: 38 } },
-      { label: "Legal", values: { headcount: 5, pv: 43 } },
+      {
+        label: "Marketing",
+        values: { headcount: 8, pv: 24, revenue: 45, customers: 12 },
+      },
+      {
+        label: "Sales",
+        values: { headcount: 100, pv: 14, revenue: 78, customers: 89 },
+      },
+      {
+        label: "Engineering",
+        values: { headcount: 56, pv: 98, revenue: 23, customers: 34 },
+      },
+      {
+        label: "Product",
+        values: { headcount: 32, pv: 39, revenue: 67, customers: 45 },
+      },
+      {
+        label: "Design",
+        values: { headcount: 16, pv: 48, revenue: 34, customers: 23 },
+      },
+      {
+        label: "Finance",
+        values: { headcount: 12, pv: 38, revenue: 56, customers: 67 },
+      },
+      {
+        label: "Legal",
+        values: { headcount: 5, pv: 43, revenue: 12, customers: 8 },
+      },
     ],
-    bar: "headcount",
-    line: "pv",
+    bar: {
+      categories: ["headcount", "revenue"],
+    },
+    line: {
+      categories: ["pv", "customers"],
+      dot: true,
+    },
     xAxis: {
       hide: false,
       tickFormatter: (value: string) => value,
@@ -50,43 +82,95 @@ export const Default: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
   },
 }
 
-export const BarOnly: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
-  args: {
-    dataConfig: teamsDataConfig,
-    data: [
-      { label: "Marketing", values: { headcount: 8, pv: 24 } },
-      { label: "Sales", values: { headcount: 100, pv: 14 } },
-      { label: "Engineering", values: { headcount: 56, pv: 98 } },
-      { label: "Product", values: { headcount: 32, pv: 39 } },
-      { label: "Design", values: { headcount: 16, pv: 48 } },
-      { label: "Finance", values: { headcount: 12, pv: 38 } },
-      { label: "Legal", values: { headcount: 5, pv: 43 } },
-    ],
-    bar: "headcount",
-    xAxis: {
-      hide: false,
-      tickFormatter: (value: string) => value,
+export const SingleCategories: Meta<typeof ComboChart<typeof teamsDataConfig>> =
+  {
+    args: {
+      dataConfig: teamsDataConfig,
+      data: [
+        {
+          label: "Marketing",
+          values: { headcount: 8, pv: 24, revenue: 45, customers: 12 },
+        },
+        {
+          label: "Sales",
+          values: { headcount: 100, pv: 14, revenue: 78, customers: 89 },
+        },
+        {
+          label: "Engineering",
+          values: { headcount: 56, pv: 98, revenue: 23, customers: 34 },
+        },
+        {
+          label: "Product",
+          values: { headcount: 32, pv: 39, revenue: 67, customers: 45 },
+        },
+        {
+          label: "Design",
+          values: { headcount: 16, pv: 48, revenue: 34, customers: 23 },
+        },
+        {
+          label: "Finance",
+          values: { headcount: 12, pv: 38, revenue: 56, customers: 67 },
+        },
+        {
+          label: "Legal",
+          values: { headcount: 5, pv: 43, revenue: 12, customers: 8 },
+        },
+      ],
+      bar: {
+        categories: "headcount",
+      },
+      line: {
+        categories: "pv",
+        dot: false,
+      },
+      xAxis: {
+        hide: false,
+        tickFormatter: (value: string) => value,
+      },
+      yAxis: {
+        hide: false,
+        tickFormatter: (value: string) => `${value}`,
+      },
     },
-    yAxis: {
-      hide: false,
-      tickFormatter: (value: string) => `${value}`,
-    },
-  },
-}
+  }
 
 export const LineOnly: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
   args: {
     dataConfig: teamsDataConfig,
     data: [
-      { label: "Marketing", values: { headcount: 8, pv: 24 } },
-      { label: "Sales", values: { headcount: 100, pv: 14 } },
-      { label: "Engineering", values: { headcount: 56, pv: 98 } },
-      { label: "Product", values: { headcount: 32, pv: 39 } },
-      { label: "Design", values: { headcount: 16, pv: 48 } },
-      { label: "Finance", values: { headcount: 12, pv: 38 } },
-      { label: "Legal", values: { headcount: 5, pv: 43 } },
+      {
+        label: "Marketing",
+        values: { headcount: 8, pv: 24, revenue: 45, customers: 12 },
+      },
+      {
+        label: "Sales",
+        values: { headcount: 100, pv: 14, revenue: 78, customers: 89 },
+      },
+      {
+        label: "Engineering",
+        values: { headcount: 56, pv: 98, revenue: 23, customers: 34 },
+      },
+      {
+        label: "Product",
+        values: { headcount: 32, pv: 39, revenue: 67, customers: 45 },
+      },
+      {
+        label: "Design",
+        values: { headcount: 16, pv: 48, revenue: 34, customers: 23 },
+      },
+      {
+        label: "Finance",
+        values: { headcount: 12, pv: 38, revenue: 56, customers: 67 },
+      },
+      {
+        label: "Legal",
+        values: { headcount: 5, pv: 43, revenue: 12, customers: 8 },
+      },
     ],
-    line: "pv",
+    line: {
+      categories: "pv",
+      dot: true,
+    },
     xAxis: {
       hide: false,
       tickFormatter: (value: string) => value,
