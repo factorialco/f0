@@ -199,20 +199,24 @@ export const Settings = <
                 !!grouping.mandatory &&
                 Object.entries(grouping.groupBy).length < 2
               ) && (
-                <GroupingSelector
-                  key="grouping"
-                  grouping={grouping}
-                  currentGrouping={currentGrouping}
-                  onGroupingChange={handleGroupingChange}
-                />
+                <div className="p-3">
+                  <GroupingSelector
+                    key="grouping"
+                    grouping={grouping}
+                    currentGrouping={currentGrouping}
+                    onGroupingChange={handleGroupingChange}
+                  />
+                </div>
               ),
             hasSortings && (
-              <SortingSelector
-                key="sorting"
-                currentSortings={currentSortings}
-                onChange={onSortingsChange}
-                sortings={sortings}
-              />
+              <div className="p-3">
+                <SortingSelector
+                  key="sorting"
+                  currentSortings={currentSortings}
+                  onChange={onSortingsChange}
+                  sortings={sortings}
+                />
+              </div>
             ),
             hasVisualizacionSettings && (
               <section key="visualization-settings" className="p-3">
