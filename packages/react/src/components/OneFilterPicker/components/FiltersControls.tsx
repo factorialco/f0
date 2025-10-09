@@ -58,7 +58,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   }
 
   const handleGoBack = () => {
-    console.log("handleGoBack", { selectedFilterKey })
     if (selectedFilterKey) {
       setSelectedFilterKey(null)
     } else {
