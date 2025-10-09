@@ -42,21 +42,25 @@ type ActivePayload<K> = Array<{
   value: number
 }>
 
+type ChartTypeConfig<K extends ChartConfig> = {
+  categories: keyof K | (keyof K)[]
+  axisLabel?: string
+  hideAxis?: boolean
+  axisPosition?: "left" | "right"
+}
+
+type LineChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
+  dot?: boolean
+}
+
 export type ComboChartProps<K extends ChartConfig = ChartConfig> =
   ChartPropsBase<K> & {
     label?: boolean
     legend?: boolean
     showValueUnderLabel?: boolean
-    bar?: {
-      categories: keyof K | (keyof K)[]
-    }
-    line?: {
-      categories: keyof K | (keyof K)[]
-      dot?: boolean
-    }
-    scatter?: {
-      categories: keyof K | (keyof K)[]
-    }
+    bar?: ChartTypeConfig<K>
+    line?: LineChartTypeConfig<K>
+    scatter?: ChartTypeConfig<K>
     onClick?: (data: ChartDataPoint<K>) => void
   }
 
@@ -81,7 +85,6 @@ const _ComboChart = <K extends ChartConfig>(
 ) => {
   const preparedData = prepareData(data)
 
-  // Extract categories from bar/line/scatter objects
   const barCategories = bar?.categories
     ? Array.isArray(bar.categories)
       ? bar.categories
@@ -98,7 +101,6 @@ const _ComboChart = <K extends ChartConfig>(
       : [scatter.categories]
     : []
 
-  // Calculate max label width for all chart data
   const allChartKeys = [
     ...barCategories,
     ...lineCategories,
@@ -114,6 +116,13 @@ const _ComboChart = <K extends ChartConfig>(
         )
       )
     )
+  )
+
+  const leftAxisCharts = [bar, line, scatter].filter(
+    (chart) => chart?.axisPosition === "left"
+  )
+  const rightAxisCharts = [bar, line, scatter].filter(
+    (chart) => chart?.axisPosition === "right"
   )
 
   return (
@@ -154,12 +163,60 @@ const _ComboChart = <K extends ChartConfig>(
           />
         )}
         {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
-        <YAxis
-          {...yAxisProps(yAxis)}
-          tick
-          width={yAxis.width ?? maxLabelWidth + 20}
-          hide={yAxis.hide}
-        />
+
+        {leftAxisCharts.length > 0 && (
+          <YAxis
+            {...yAxisProps(yAxis)}
+            tick
+            width={
+              yAxis.width ??
+              maxLabelWidth +
+                20 +
+                (rightAxisCharts.length > 0 && leftAxisCharts[0]?.axisLabel
+                  ? 20
+                  : 0)
+            }
+            hide={yAxis.hide || leftAxisCharts.some((chart) => chart?.hideAxis)}
+            label={
+              leftAxisCharts[0]?.axisLabel
+                ? {
+                    value: leftAxisCharts[0].axisLabel,
+                    angle: -90,
+                    position: "insideLeft",
+                  }
+                : undefined
+            }
+          />
+        )}
+
+        {rightAxisCharts.length > 0 && (
+          <YAxis
+            {...yAxisProps(yAxis)}
+            yAxisId="right"
+            orientation="right"
+            tick
+            width={
+              yAxis.width ??
+              maxLabelWidth +
+                20 +
+                (leftAxisCharts.length > 0 && rightAxisCharts[0]?.axisLabel
+                  ? 20
+                  : 0)
+            }
+            hide={
+              yAxis.hide || rightAxisCharts.some((chart) => chart?.hideAxis)
+            }
+            label={
+              rightAxisCharts[0]?.axisLabel
+                ? {
+                    value: rightAxisCharts[0].axisLabel,
+                    angle: 90,
+                    position: "insideRight",
+                  }
+                : undefined
+            }
+          />
+        )}
         <XAxis
           {...xAxisProps(xAxis)}
           hide={xAxis?.hide}
@@ -209,7 +266,6 @@ const _ComboChart = <K extends ChartConfig>(
           }
         />
 
-        {/* Render Bars */}
         {barCategories.map((category, index) => (
           <Bar
             key={`bar-${String(category)}`}
@@ -235,7 +291,6 @@ const _ComboChart = <K extends ChartConfig>(
           </Bar>
         ))}
 
-        {/* Render Lines */}
         {lineCategories.map((category, index) => (
           <Line
             key={`line-${String(category)}`}
@@ -249,10 +304,10 @@ const _ComboChart = <K extends ChartConfig>(
             strokeWidth={2}
             dot={line?.dot ?? false}
             isAnimationActive={false}
+            yAxisId={line?.axisPosition === "right" ? "right" : undefined}
           />
         ))}
 
-        {/* Render Scatter */}
         {scatterCategories.map((category, index) => (
           <Scatter
             key={`scatter-${String(category)}`}
@@ -266,6 +321,7 @@ const _ComboChart = <K extends ChartConfig>(
             }
             r={4}
             isAnimationActive={false}
+            yAxisId={scatter?.axisPosition === "right" ? "right" : undefined}
           />
         ))}
         {legend && (

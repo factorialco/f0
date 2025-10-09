@@ -122,3 +122,175 @@ export const BarAndLine: Meta<typeof ComboChart<typeof trainingsConfig>> = {
     legend: true,
   },
 }
+
+const salesConfig = {
+  revenue: {
+    label: "Revenue (M$)",
+  },
+  customers: {
+    label: "Customers (K)",
+  },
+}
+
+export const Biaxial: Meta<typeof ComboChart<typeof salesConfig>> = {
+  args: {
+    dataConfig: salesConfig,
+    data: [
+      {
+        label: "Q1",
+        values: { revenue: 120, customers: 45 },
+      },
+      {
+        label: "Q2",
+        values: { revenue: 150, customers: 52 },
+      },
+      {
+        label: "Q3",
+        values: { revenue: 180, customers: 48 },
+      },
+      {
+        label: "Q4",
+        values: { revenue: 200, customers: 55 },
+      },
+    ],
+    bar: {
+      categories: ["revenue"],
+      axisLabel: "Revenue (M$)",
+      hideAxis: false,
+      axisPosition: "left",
+    },
+    line: {
+      categories: ["customers"],
+      dot: true,
+      axisLabel: "Customers (K)",
+      hideAxis: false,
+      axisPosition: "right",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${value}`,
+    },
+    legend: true,
+  },
+}
+
+const performanceConfig = {
+  sales: {
+    label: "Sales (K$)",
+  },
+  leads: {
+    label: "Leads",
+  },
+  conversion: {
+    label: "Conversion (%)",
+  },
+}
+
+export const FlexibleAxes: Meta<typeof ComboChart<typeof performanceConfig>> = {
+  args: {
+    dataConfig: performanceConfig,
+    data: [
+      {
+        label: "Week 1",
+        values: { sales: 45, leads: 120, conversion: 2.5 },
+      },
+      {
+        label: "Week 2",
+        values: { sales: 52, leads: 135, conversion: 3.1 },
+      },
+      {
+        label: "Week 3",
+        values: { sales: 38, leads: 98, conversion: 2.8 },
+      },
+      {
+        label: "Week 4",
+        values: { sales: 61, leads: 150, conversion: 3.4 },
+      },
+    ],
+    bar: {
+      categories: ["sales"],
+      axisLabel: "Sales (K$)",
+      hideAxis: false,
+      axisPosition: "right", // Sales on right axis
+    },
+    line: {
+      categories: ["leads"],
+      dot: true,
+      axisLabel: "Leads",
+      hideAxis: false,
+      axisPosition: "left", // Leads on left axis
+    },
+    scatter: {
+      categories: ["conversion"],
+      axisLabel: "Conversion (%)",
+      hideAxis: false,
+      axisPosition: "right", // Conversion on right axis (same as sales)
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${value}`,
+    },
+    legend: true,
+  },
+}
+
+export const GlobalOverride: Meta<typeof ComboChart<typeof performanceConfig>> =
+  {
+    args: {
+      dataConfig: performanceConfig,
+      data: [
+        {
+          label: "Week 1",
+          values: { sales: 45, leads: 120, conversion: 2.5 },
+        },
+        {
+          label: "Week 2",
+          values: { sales: 52, leads: 135, conversion: 3.1 },
+        },
+        {
+          label: "Week 3",
+          values: { sales: 38, leads: 98, conversion: 2.8 },
+        },
+        {
+          label: "Week 4",
+          values: { sales: 61, leads: 150, conversion: 3.4 },
+        },
+      ],
+      bar: {
+        categories: ["sales"],
+        axisLabel: "Sales (K$)",
+        hideAxis: false, // Per-chart: show axis
+        axisPosition: "left",
+      },
+      line: {
+        categories: ["leads"],
+        dot: true,
+        axisLabel: "Leads",
+        hideAxis: false, // Per-chart: show axis
+        axisPosition: "right",
+      },
+      scatter: {
+        categories: ["conversion"],
+        axisLabel: "Conversion (%)",
+        hideAxis: false, // Per-chart: show axis
+        axisPosition: "right",
+      },
+      xAxis: {
+        hide: false,
+        tickFormatter: (value: string) => value,
+      },
+      yAxis: {
+        hide: true, // Global: hide ALL axes (overrides per-chart settings)
+        tickFormatter: (value: string) => `${value}`,
+      },
+      legend: true,
+    },
+  }
