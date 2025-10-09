@@ -175,7 +175,7 @@ export function InFilter<T extends string>({
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
-            placeholder="Search..."
+            placeholder={`${i18n.toc.search}...`}
             value={searchTerm}
             onChange={setSearchTerm}
             clearable

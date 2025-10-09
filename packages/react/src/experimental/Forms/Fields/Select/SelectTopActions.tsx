@@ -7,6 +7,7 @@ import {
   GroupingState,
   RecordType,
 } from "@/hooks/datasource"
+import { useI18n } from "@/lib/providers/i18n"
 import { F1SearchBox } from "../F1SearchBox"
 
 interface SelectTopActionsProps<
@@ -40,13 +41,15 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   currentFilters,
   onFiltersChange,
 }: SelectTopActionsProps<R>) => {
+  const i18n = useI18n()
+
   if (!showSearchBox) return null
   return (
     <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
       <div className="flex flex-1 flex-row gap-2">
         <div className="flex-1">
           <F1SearchBox
-            placeholder={searchBoxPlaceholder}
+            placeholder={searchBoxPlaceholder ?? `${i18n.toc.search}...`}
             onChange={onSearchChange}
             value={searchValue}
             key="search-input"

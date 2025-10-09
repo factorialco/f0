@@ -202,7 +202,7 @@ function TOCContent({
         {showSearchBox && (
           <div className="mb-4">
             <F1SearchBox
-              placeholder={searchPlaceholder ?? i18n.toc.search}
+              placeholder={searchPlaceholder ?? `${i18n.toc.search}...`}
               onChange={handleSearchChange}
               value={searchValue}
               clearable

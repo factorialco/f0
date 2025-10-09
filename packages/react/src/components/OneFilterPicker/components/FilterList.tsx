@@ -70,7 +70,7 @@ export function FilterList<Definition extends FiltersDefinition>({
         <F1SearchBox
           key="filter-list-search"
           name="filter-list-search"
-          placeholder="Search..."
+          placeholder={`${i18n.toc.search}...`}
           value={searchValue}
           onChange={setSearchValue}
           clearable
