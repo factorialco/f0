@@ -16,60 +16,46 @@ const meta: Meta = {
 
 export default meta
 
-const teamsDataConfig = {
-  headcount: {
-    label: "Headcount",
+const hiresConfig = {
+  hires: {
+    label: "Number of hires",
   },
-  pv: {
-    label: "Page Views",
-  },
-  revenue: {
-    label: "Revenue",
-  },
-  customers: {
-    label: "Customers",
+  critical: {
+    label: "Critical hires",
+    color: "categorical-3",
   },
 }
 
-export const Default: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
+export const Default: Meta<typeof ComboChart<typeof hiresConfig>> = {
   args: {
-    dataConfig: teamsDataConfig,
+    dataConfig: hiresConfig,
     data: [
       {
-        label: "Marketing",
-        values: { headcount: 8, pv: 24, revenue: 45, customers: 12 },
+        label: "January",
+        values: { hires: 24, critical: 4 },
       },
       {
-        label: "Sales",
-        values: { headcount: 100, pv: 14, revenue: 78, customers: 89 },
+        label: "February",
+        values: { hires: 32, critical: 12 },
       },
       {
-        label: "Engineering",
-        values: { headcount: 56, pv: 98, revenue: 23, customers: 34 },
+        label: "March",
+        values: { hires: 28, critical: 3 },
       },
       {
-        label: "Product",
-        values: { headcount: 32, pv: 39, revenue: 67, customers: 45 },
+        label: "April",
+        values: { hires: 36, critical: 9 },
       },
       {
-        label: "Design",
-        values: { headcount: 16, pv: 48, revenue: 34, customers: 23 },
-      },
-      {
-        label: "Finance",
-        values: { headcount: 12, pv: 38, revenue: 56, customers: 67 },
-      },
-      {
-        label: "Legal",
-        values: { headcount: 5, pv: 43, revenue: 12, customers: 8 },
+        label: "May",
+        values: { hires: 22, critical: 4 },
       },
     ],
     bar: {
-      categories: ["headcount", "revenue"],
+      categories: ["hires"],
     },
-    line: {
-      categories: ["pv", "customers"],
-      dot: true,
+    scatter: {
+      categories: ["critical"],
     },
     xAxis: {
       hide: false,
@@ -77,98 +63,52 @@ export const Default: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
     },
     yAxis: {
       hide: false,
-      tickFormatter: (value: string) => value,
+      tickFormatter: (value: string) => value + " hires",
     },
+    legend: true,
   },
 }
 
-export const SingleCategories: Meta<typeof ComboChart<typeof teamsDataConfig>> =
-  {
-    args: {
-      dataConfig: teamsDataConfig,
-      data: [
-        {
-          label: "Marketing",
-          values: { headcount: 8, pv: 24, revenue: 45, customers: 12 },
-        },
-        {
-          label: "Sales",
-          values: { headcount: 100, pv: 14, revenue: 78, customers: 89 },
-        },
-        {
-          label: "Engineering",
-          values: { headcount: 56, pv: 98, revenue: 23, customers: 34 },
-        },
-        {
-          label: "Product",
-          values: { headcount: 32, pv: 39, revenue: 67, customers: 45 },
-        },
-        {
-          label: "Design",
-          values: { headcount: 16, pv: 48, revenue: 34, customers: 23 },
-        },
-        {
-          label: "Finance",
-          values: { headcount: 12, pv: 38, revenue: 56, customers: 67 },
-        },
-        {
-          label: "Legal",
-          values: { headcount: 5, pv: 43, revenue: 12, customers: 8 },
-        },
-      ],
-      bar: {
-        categories: "headcount",
-      },
-      line: {
-        categories: "pv",
-        dot: false,
-      },
-      xAxis: {
-        hide: false,
-        tickFormatter: (value: string) => value,
-      },
-      yAxis: {
-        hide: false,
-        tickFormatter: (value: string) => `${value}`,
-      },
-    },
-  }
+const trainingsConfig = {
+  trainings: {
+    label: "Number of trainings",
+  },
+  completion: {
+    label: "Completion rate",
+    color: "categorical-5",
+  },
+}
 
-export const LineOnly: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
+export const BarAndLine: Meta<typeof ComboChart<typeof trainingsConfig>> = {
   args: {
-    dataConfig: teamsDataConfig,
+    dataConfig: trainingsConfig,
     data: [
       {
-        label: "Marketing",
-        values: { headcount: 8, pv: 24, revenue: 45, customers: 12 },
+        label: "January",
+        values: { trainings: 100, completion: 80 },
       },
       {
-        label: "Sales",
-        values: { headcount: 100, pv: 14, revenue: 78, customers: 89 },
+        label: "February",
+        values: { trainings: 120, completion: 90 },
       },
       {
-        label: "Engineering",
-        values: { headcount: 56, pv: 98, revenue: 23, customers: 34 },
+        label: "March",
+        values: { trainings: 110, completion: 85 },
       },
       {
-        label: "Product",
-        values: { headcount: 32, pv: 39, revenue: 67, customers: 45 },
+        label: "April",
+        values: { trainings: 130, completion: 95 },
       },
       {
-        label: "Design",
-        values: { headcount: 16, pv: 48, revenue: 34, customers: 23 },
-      },
-      {
-        label: "Finance",
-        values: { headcount: 12, pv: 38, revenue: 56, customers: 67 },
-      },
-      {
-        label: "Legal",
-        values: { headcount: 5, pv: 43, revenue: 12, customers: 8 },
+        label: "May",
+        values: { trainings: 140, completion: 100 },
       },
     ],
+    bar: {
+      categories: ["trainings"],
+    },
     line: {
-      categories: "pv",
+      categories: ["completion"],
       dot: true,
     },
     xAxis: {
@@ -177,7 +117,8 @@ export const LineOnly: Meta<typeof ComboChart<typeof teamsDataConfig>> = {
     },
     yAxis: {
       hide: false,
-      tickFormatter: (value: string) => `${value}`,
+      tickFormatter: (value: string) => value,
     },
+    legend: true,
   },
 }

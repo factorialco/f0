@@ -13,6 +13,7 @@ import {
   ComposedChart,
   LabelList,
   Line,
+  Scatter,
   XAxis,
   YAxis,
 } from "recharts"
@@ -53,6 +54,9 @@ export type ComboChartProps<K extends ChartConfig = ChartConfig> =
       categories: keyof K | (keyof K)[]
       dot?: boolean
     }
+    scatter?: {
+      categories: keyof K | (keyof K)[]
+    }
     onClick?: (data: ChartDataPoint<K>) => void
   }
 
@@ -70,13 +74,14 @@ const _ComboChart = <K extends ChartConfig>(
     showValueUnderLabel = false,
     bar,
     line,
+    scatter,
     onClick,
   }: ComboChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const preparedData = prepareData(data)
 
-  // Extract categories from bar/line objects
+  // Extract categories from bar/line/scatter objects
   const barCategories = bar?.categories
     ? Array.isArray(bar.categories)
       ? bar.categories
@@ -87,9 +92,18 @@ const _ComboChart = <K extends ChartConfig>(
       ? line.categories
       : [line.categories]
     : []
+  const scatterCategories = scatter?.categories
+    ? Array.isArray(scatter.categories)
+      ? scatter.categories
+      : [scatter.categories]
+    : []
 
   // Calculate max label width for all chart data
-  const allChartKeys = [...barCategories, ...lineCategories]
+  const allChartKeys = [
+    ...barCategories,
+    ...lineCategories,
+    ...scatterCategories,
+  ]
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       allChartKeys.map((key) =>
@@ -234,6 +248,23 @@ const _ComboChart = <K extends ChartConfig>(
             }
             strokeWidth={2}
             dot={line?.dot ?? false}
+            isAnimationActive={false}
+          />
+        ))}
+
+        {/* Render Scatter */}
+        {scatterCategories.map((category, index) => (
+          <Scatter
+            key={`scatter-${String(category)}`}
+            dataKey={String(category)}
+            fill={
+              dataConfig[category].color
+                ? getColor(dataConfig[category].color)
+                : getCategoricalColor(
+                    barCategories.length + lineCategories.length + index
+                  )
+            }
+            r={4}
             isAnimationActive={false}
           />
         ))}
