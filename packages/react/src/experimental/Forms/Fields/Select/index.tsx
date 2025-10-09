@@ -220,6 +220,13 @@ const SelectComponent = forwardRef(function Select<
     value || props.defaultItem?.value
   )
 
+  useEffect(() => {
+    if (value !== localValue) {
+      setLocalValue(value || props.defaultItem?.value)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, props.defaultItem])
+
   const dataSource = useMemo(() => {
     if (
       source &&

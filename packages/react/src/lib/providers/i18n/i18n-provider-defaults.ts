@@ -139,6 +139,8 @@ export const defaultTranslations = {
         currentDate: "This week",
         label: "Week",
         long: "Week of {{day}} {{month}} {{year}}",
+        longSingular: "Week of {{date}}",
+        longPlural: "Weeks of {{date}}",
       },
       month: {
         currentDate: "This month",
