@@ -56,7 +56,8 @@ export function FilterList<Definition extends FiltersDefinition>({
   return (
     <div
       className={cn(
-        "z-30 h-full w-full min-w-[224px] shrink-0 bg-f1-background",
+        "z-30 h-full w-full shrink-0 bg-f1-background",
+        isCompactMode ? "min-w-[224px]" : "w-[224px]",
         !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
       )}
@@ -106,8 +107,8 @@ export function FilterList<Definition extends FiltersDefinition>({
               )}
               onClick={() => onFilterSelect(key as keyof Definition)}
             >
-              <div className="flex w-full items-center justify-start gap-2.5">
-                <span className="line-clamp-1 w-fit flex-1 text-left">
+              <div className="flex items-center justify-start gap-2.5">
+                <span className="line-clamp-1 w-fit text-left">
                   {filter.label}
                 </span>
                 <AnimatePresence>

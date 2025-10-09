@@ -95,6 +95,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   value,
   children,
   presetsLoading = false,
+  mode = "default",
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
   const defaultFilters = useRef(value)
@@ -128,6 +129,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     <FiltersContext.Provider
       value={{
         ...props,
+        mode,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
         presetsLoading,
         value: localFiltersValue,
@@ -281,7 +283,7 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
           </div>
         )}
       </div>
-      {props.mode === "default" && <FiltersChipsList />}
+      {(!props.mode || props.mode === "default") && <FiltersChipsList />}
     </FiltersRoot>
   )
 }

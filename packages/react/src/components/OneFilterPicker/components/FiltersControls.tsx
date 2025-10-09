@@ -240,7 +240,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                 />
               )}
             </div>
-            <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
+            <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
               <Button
                 onClick={handleApplyFilters}
                 label={i18n.filters.applyFilters}
