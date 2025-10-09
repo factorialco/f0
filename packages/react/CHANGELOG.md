@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.229.0](https://github.com/factorialco/f0/compare/f0-react-v1.228.3...f0-react-v1.229.0) (2025-10-09)
+
+
+### Features
+
+* ai chat clear ([#2782](https://github.com/factorialco/f0/issues/2782)) ([478eb91](https://github.com/factorialco/f0/commit/478eb91c79c74dae57d08a993598ce34a19d410a))
+
 ## [1.228.3](https://github.com/factorialco/f0/compare/f0-react-v1.228.2...f0-react-v1.228.3) (2025-10-08)
 
 
