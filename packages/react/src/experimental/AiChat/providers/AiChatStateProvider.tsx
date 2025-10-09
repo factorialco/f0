@@ -7,6 +7,7 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react"
 
@@ -19,7 +20,6 @@ export interface AiChatState {
   initialMessage?: string | string[]
   onThumbsUp?: (message: AIMessage) => void
   onThumbsDown?: (message: AIMessage) => void
-  clearFn: () => void
 }
 
 type AiChatProviderReturnValue = {
@@ -38,10 +38,6 @@ type AiChatProviderReturnValue = {
    */
   setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
   autoClearMinutes: number | null
-  /**
-   * Clear the chat
-   */
-  clear: () => void
 
   /**
    * The initial message to display in the chat
@@ -52,6 +48,15 @@ type AiChatProviderReturnValue = {
   >
   onThumbsUp?: (message: AIMessage) => void
   onThumbsDown?: (message: AIMessage) => void
+  /**
+   * Clear/reset the chat conversation
+   */
+  clear: () => void
+  /**
+   * Internal function to set the clear function from CopilotKit
+   * @internal
+   */
+  setClearFunction: (clearFn: (() => void) | null) => void
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -63,7 +68,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   initialMessage: initialInitialMessage,
   onThumbsDown,
   onThumbsUp,
-  clearFn,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
@@ -79,8 +83,21 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     string | string[] | undefined
   >(initialInitialMessage)
 
+  // Store the reset function from CopilotKit
+  const clearFunctionRef = useRef<(() => void) | null>(null)
+
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
+  }
+
+  const setClearFunction = (clearFn: (() => void) | null) => {
+    clearFunctionRef.current = clearFn
+  }
+
+  const clear = () => {
+    if (clearFunctionRef.current) {
+      clearFunctionRef.current()
+    }
   }
 
   useEffect(() => {
@@ -114,7 +131,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setInitialMessage,
         onThumbsUp,
         onThumbsDown,
-        clear: clearFn,
+        clear,
+        setClearFunction,
       }}
     >
       {children}
@@ -126,6 +144,7 @@ const noopFn = () => {}
 
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
+
   if (context === null) {
     return {
       enabled: false,
@@ -138,6 +157,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       tmp_setAgent: noopFn,
       setAutoClearMinutes: noopFn,
       clear: noopFn,
+      setClearFunction: noopFn,
       autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,
