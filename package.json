@@ -7,16 +7,28 @@
   "module": "src/index.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts"
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "react-native": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./icons": {
-      "import": "./src/icons/index.ts"
+      "import": "./src/icons/index.ts",
+      "require": "./src/icons/index.ts",
+      "react-native": "./src/icons/index.ts",
+      "default": "./src/icons/index.ts"
     },
     "./icons/app": {
-      "import": "./src/icons/app/index.ts"
+      "import": "./src/icons/app/index.ts",
+      "require": "./src/icons/app/index.ts",
+      "react-native": "./src/icons/app/index.ts",
+      "default": "./src/icons/app/index.ts"
     },
     "./icons/modules": {
-      "import": "./src/icons/modules/index.ts"
+      "import": "./src/icons/modules/index.ts",
+      "require": "./src/icons/modules/index.ts",
+      "react-native": "./src/icons/modules/index.ts",
+      "default": "./src/icons/modules/index.ts"
     },
     "./tailwind.config": "./tailwind.config.ts"
   },
