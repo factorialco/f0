@@ -487,15 +487,30 @@ const OneDataCollectionComp = <
   /************************/
 
   /** Toolbars */
+  const shouldShowSettings = useMemo(() => {
+    const groupByOptions = grouping
+      ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
+      : 0
+    return (
+      (visualizations && visualizations.length > 1) ||
+      (groupByOptions > 0 && !grouping?.hideSelector) ||
+      (sortings && Object.keys(sortings).length > 0)
+    )
+  }, [visualizations, grouping, sortings])
+
   const bottomRightHasItems = useMemo(() => {
-    return elementsRightActions && hasCollectionsActions
-  }, [elementsRightActions, hasCollectionsActions])
+    return (
+      elementsRightActions ||
+      hasCollectionsActions ||
+      shouldShowSettings ||
+      (search && search.enabled)
+    )
+  }, [elementsRightActions, hasCollectionsActions, shouldShowSettings, search])
 
   const totalItemSummaryPosition = useMemo(() => {
     if (!showTotalItemSummary) {
       return false
     }
-
     return filters ? "top" : "bottom"
   }, [filters, showTotalItemSummary])
 
@@ -503,21 +518,28 @@ const OneDataCollectionComp = <
     if (!navigationFilters) {
       return false
     }
-
     return bottomRightHasItems ? "top" : "bottom"
   }, [navigationFilters, bottomRightHasItems])
 
   const showTopToolbar = useMemo(() => {
-    return totalItemSummary !== undefined || navigationFilters
-  }, [totalItemSummary, navigationFilters])
+    return (
+      totalItemSummaryPosition === "top" || navigationFiltersPosition === "top"
+    )
+  }, [totalItemSummaryPosition, navigationFiltersPosition])
 
   const showBottomToolbar = useMemo(() => {
     return (
-      totalItemSummary !== undefined ||
-      navigationFilters ||
-      navigationFiltersPosition === "bottom"
+      filters ||
+      bottomRightHasItems ||
+      navigationFiltersPosition === "bottom" ||
+      totalItemSummaryPosition === "bottom"
     )
-  }, [totalItemSummary, navigationFilters, navigationFiltersPosition])
+  }, [
+    filters,
+    bottomRightHasItems,
+    navigationFiltersPosition,
+    totalItemSummaryPosition,
+  ])
 
   return (
     <div
@@ -582,17 +604,19 @@ const OneDataCollectionComp = <
               {search && (
                 <Search onChange={setCurrentSearch} value={currentSearch} />
               )}
-              <Settings
-                visualizations={visualizations}
-                currentVisualization={currentVisualization}
-                onVisualizationChange={setCurrentVisualization}
-                grouping={grouping}
-                currentGrouping={currentGrouping}
-                onGroupingChange={setCurrentGrouping}
-                sortings={sortings}
-                currentSortings={currentSortings}
-                onSortingsChange={setCurrentSortings}
-              />
+              {shouldShowSettings && (
+                <Settings
+                  visualizations={visualizations}
+                  currentVisualization={currentVisualization}
+                  onVisualizationChange={setCurrentVisualization}
+                  grouping={grouping}
+                  currentGrouping={currentGrouping}
+                  onGroupingChange={setCurrentGrouping}
+                  sortings={sortings}
+                  currentSortings={currentSortings}
+                  onSortingsChange={setCurrentSortings}
+                />
+              )}
               {hasCollectionsActions && (
                 <>
                   {elementsRightActions && (
