@@ -51,6 +51,7 @@ type ChartTypeConfig<K extends ChartConfig> = {
 
 type LineChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
   dot?: boolean
+  lineType?: "natural" | "linear"
 }
 
 export type ComboChartProps<K extends ChartConfig = ChartConfig> =
@@ -294,7 +295,7 @@ const _ComboChart = <K extends ChartConfig>(
         {lineCategories.map((category, index) => (
           <Line
             key={`line-${String(category)}`}
-            type="monotone"
+            type={line?.lineType ?? "natural"}
             dataKey={String(category)}
             stroke={
               dataConfig[category].color
