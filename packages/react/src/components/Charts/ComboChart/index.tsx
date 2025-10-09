@@ -9,9 +9,10 @@ import {
 import { ForwardedRef } from "react"
 import {
   Bar,
-  BarChart as BarChartPrimitive,
   CartesianGrid,
+  ComposedChart,
   LabelList,
+  Line,
   XAxis,
   YAxis,
 } from "recharts"
@@ -45,6 +46,8 @@ export type ComboChartProps<K extends ChartConfig = ChartConfig> =
     label?: boolean
     legend?: boolean
     showValueUnderLabel?: boolean
+    bar?: keyof K
+    line?: keyof K
     onClick?: (data: ChartDataPoint<K>) => void
   }
 
@@ -60,15 +63,19 @@ const _ComboChart = <K extends ChartConfig>(
     aspect,
     legend,
     showValueUnderLabel = false,
+    bar,
+    line,
     onClick,
   }: ComboChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
-  const bars = Object.keys(dataConfig) as (keyof ChartConfig)[]
   const preparedData = prepareData(data)
+
+  // Calculate max label width for bar and line data
+  const chartKeys = [bar, line].filter(Boolean) as (keyof K)[]
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
-      bars.map((key) =>
+      chartKeys.map((key) =>
         measureTextWidth(
           yAxis?.tickFormatter
             ? yAxis.tickFormatter(`${el[key]}`)
@@ -80,7 +87,7 @@ const _ComboChart = <K extends ChartConfig>(
 
   return (
     <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
-      <BarChartPrimitive
+      <ComposedChart
         accessibilityLayer
         data={preparedData}
         margin={{
@@ -171,22 +178,22 @@ const _ComboChart = <K extends ChartConfig>(
           }
         />
 
-        {bars.map((key, index) => (
+        {bar && (
           <Bar
-            key={`bar-${key}`}
+            key={`bar-${String(bar)}`}
             isAnimationActive={false}
-            dataKey={key}
+            dataKey={String(bar)}
             fill={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
+              dataConfig[bar].color
+                ? getColor(dataConfig[bar].color)
+                : getCategoricalColor(0)
             }
             radius={4}
             maxBarSize={32}
           >
             {label && (
               <LabelList
-                key={`label-${key}`}
+                key={`label-${String(bar)}`}
                 position="top"
                 offset={10}
                 className="fill-f1-foreground"
@@ -194,7 +201,22 @@ const _ComboChart = <K extends ChartConfig>(
               />
             )}
           </Bar>
-        ))}
+        )}
+
+        {line && (
+          <Line
+            type="monotone"
+            dataKey={String(line)}
+            stroke={
+              dataConfig[line].color
+                ? getColor(dataConfig[line].color)
+                : getCategoricalColor(1)
+            }
+            strokeWidth={2}
+            dot={true}
+            isAnimationActive={false}
+          />
+        )}
         {legend && (
           <ChartLegend
             content={<ChartLegendContent nameKey="label" />}
@@ -204,7 +226,7 @@ const _ComboChart = <K extends ChartConfig>(
             className={"flex-row items-start gap-4 pr-3 pt-2"}
           />
         )}
-      </BarChartPrimitive>
+      </ComposedChart>
     </ChartContainer>
   )
 }
