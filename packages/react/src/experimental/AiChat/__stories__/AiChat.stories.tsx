@@ -42,8 +42,6 @@ export const Default: Story = {
     const ClearButtonDemo = () => {
       const { clear } = useAiChat()
 
-      console.log("clear2", clear)
-
       const handleClear = () => {
         console.log("handleClear")
         console.log("clear===>>>", clear)
