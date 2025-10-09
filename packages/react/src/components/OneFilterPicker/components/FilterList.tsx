@@ -1,3 +1,4 @@
+import { Button } from "@/components/Actions/Button"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { ChevronRight } from "@/icons/app"
@@ -27,6 +28,8 @@ interface FilterListProps<Definition extends FiltersDefinition> {
   onFilterSelect: (key: keyof Definition) => void
   /** Whether to hide a border around the list */
   isCompactMode?: boolean
+  /** Callback fired when the apply filters button is clicked */
+  onClickApplyFilters: () => void
 }
 
 /**
@@ -48,6 +51,7 @@ export function FilterList<Definition extends FiltersDefinition>({
   selectedFilterKey,
   onFilterSelect,
   isCompactMode,
+  onClickApplyFilters,
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
 
@@ -56,13 +60,13 @@ export function FilterList<Definition extends FiltersDefinition>({
   return (
     <div
       className={cn(
-        "z-30 h-full w-full shrink-0 bg-f1-background",
+        "z-30 flex h-full w-full shrink-0 flex-col bg-f1-background",
         isCompactMode ? "min-w-[224px]" : "w-[224px]",
         !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
       )}
     >
-      <div className={cn("flex flex-col p-2")}>
+      <div className="flex flex-col p-2">
         <F1SearchBox
           key="filter-list-search"
           name="filter-list-search"
@@ -75,60 +79,70 @@ export function FilterList<Definition extends FiltersDefinition>({
       <div
         className={cn(
           "flex h-full w-full flex-col gap-1 overflow-y-auto p-2 pt-0",
-          isCompactMode && "px-1"
+          isCompactMode && "px-1 py-0"
         )}
       >
         {isCompactMode && (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
         )}
-        {Object.entries(definition).map(([key, filter]) => {
-          const matchesWithSearch =
-            !searchValue ||
-            filter.label.toLowerCase().includes(searchValue.toLowerCase())
+        <div className="flex flex-1 flex-col gap-1">
+          {Object.entries(definition).map(([key, filter]) => {
+            const matchesWithSearch =
+              !searchValue ||
+              filter.label.toLowerCase().includes(searchValue.toLowerCase())
 
-          if (!matchesWithSearch) return null
+            if (!matchesWithSearch) return null
 
-          const filterType = getFilterType(filter.type)
+            const filterType = getFilterType(filter.type)
 
-          type FilterType = FilterDefinitionsByType[typeof filter.type]
-          const currentValue = tempFilters[key] as FilterValue<FilterType>
-          const typedFilterType = filterType as FilterTypeDefinition<
-            FilterValue<FilterType>
-          >
-
-          return (
-            <button
-              key={key}
-              className={cn(
-                "group relative flex w-full appearance-none items-center justify-between rounded px-2 py-1.5 font-medium transition-colors",
-                "hover:bg-f1-background-secondary",
-                selectedFilterKey === key && "bg-f1-background-secondary",
-                focusRing()
-              )}
-              onClick={() => onFilterSelect(key as keyof Definition)}
+            type FilterType = FilterDefinitionsByType[typeof filter.type]
+            const currentValue = tempFilters[key] as FilterValue<FilterType>
+            const typedFilterType = filterType as FilterTypeDefinition<
+              FilterValue<FilterType>
             >
-              <div className="flex items-center justify-start gap-2.5">
-                <span className="line-clamp-1 w-fit text-left">
-                  {filter.label}
-                </span>
-                <AnimatePresence>
-                  {!typedFilterType.isEmpty(currentValue, {
-                    schema: filter as unknown as FilterTypeSchema,
-                    i18n,
-                  }) && (
-                    <motion.div
-                      className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
-                      initial={{ opacity: 0, scale: 0.7 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.7 }}
-                    />
-                  )}
-                </AnimatePresence>
-                {isCompactMode && <F0Icon icon={ChevronRight} />}
-              </div>
-            </button>
-          )
-        })}
+
+            return (
+              <button
+                key={key}
+                className={cn(
+                  "group relative flex w-full appearance-none items-center justify-between rounded px-2 py-1.5 font-medium transition-colors",
+                  "hover:bg-f1-background-secondary",
+                  selectedFilterKey === key && "bg-f1-background-secondary",
+                  focusRing()
+                )}
+                onClick={() => onFilterSelect(key as keyof Definition)}
+              >
+                <div className="flex w-full items-center justify-start gap-2.5">
+                  <span className="line-clamp-1 w-fit flex-1 text-left">
+                    {filter.label}
+                  </span>
+                  <AnimatePresence>
+                    {!typedFilterType.isEmpty(currentValue, {
+                      schema: filter as unknown as FilterTypeSchema,
+                      i18n,
+                    }) && (
+                      <motion.div
+                        className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.7 }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  {isCompactMode && <F0Icon icon={ChevronRight} />}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+        {isCompactMode && (
+          <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
+            <Button
+              onClick={onClickApplyFilters}
+              label={i18n.filters.applyFilters}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

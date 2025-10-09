@@ -476,7 +476,7 @@ const SelectComponent = forwardRef(function Select<
             : undefined
         }
         disabled={disabled}
-        open={openLocal}
+        open={true}
         onOpenChange={handleChangeOpenLocal}
         {...props}
       >

@@ -58,6 +58,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   }
 
   const handleGoBack = () => {
+    console.log("handleGoBack", { selectedFilterKey })
     if (selectedFilterKey) {
       setSelectedFilterKey(null)
     } else {
@@ -174,6 +175,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                         onFilterSelect={(key: keyof Filters) =>
                           setSelectedFilterKey(key)
                         }
+                        onClickApplyFilters={handleApplyFilters}
                         isCompactMode
                       />
                     </motion.div>
@@ -230,6 +232,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                 onFilterSelect={(key: keyof Filters) =>
                   setSelectedFilterKey(key)
                 }
+                onClickApplyFilters={handleApplyFilters}
               />
               {selectedFilterKey && (
                 <FilterContent
