@@ -44,14 +44,16 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   return (
     <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
       <div className="flex flex-1 flex-row gap-2">
-        <F1SearchBox
-          placeholder={searchBoxPlaceholder}
-          onChange={onSearchChange}
-          clearable
-          value={searchValue}
-          key="search-input"
-          ref={searchInputRef}
-        />
+        <div className="flex-1">
+          <F1SearchBox
+            placeholder={searchBoxPlaceholder}
+            onChange={onSearchChange}
+            value={searchValue}
+            key="search-input"
+            ref={searchInputRef}
+            clearable
+          />
+        </div>
         {filters && (
           <OneFilterPicker
             filters={filters}
