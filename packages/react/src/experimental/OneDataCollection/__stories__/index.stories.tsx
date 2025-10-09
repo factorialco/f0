@@ -96,7 +96,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Simpliest: Story = {
+export const Simplest: Story = {
   render: () => {
     const dataSource = useDataCollectionSource({
       dataAdapter: {
