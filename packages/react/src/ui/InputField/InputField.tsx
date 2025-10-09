@@ -12,6 +12,7 @@ import {
   forwardRef,
   useEffect,
   useId,
+  useRef,
   useState,
 } from "react"
 import { AppendTag } from "./AppendTag"
@@ -273,8 +274,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         }
         setLocalValue(value)
       },
-      // localValue is a dep because we want to recociliate both values, in some cases the value will not change for example when the parent limits the chars the user can input
-      [value, localValue, emptyValue]
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when localValue changes
+      [value]
     )
 
     const handleChange = (
@@ -316,6 +317,49 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         onClickPlaceholder?.()
       }
     }
+
+    /**
+     * Detect if the input is being autofilled
+     */
+    const [isAutofilled, setIsAutofilled] = useState(false)
+    const handleAnimationStart = (
+      e: React.AnimationEvent<HTMLInputElement>
+    ) => {
+      if (e.animationName === "autofill") {
+        setIsAutofilled(true)
+      }
+    }
+
+    const intervalRef = useRef<NodeJS.Timeout | null>(null)
+    const inputRef = useRef<HTMLElement>(null)
+
+    useEffect(() => {
+      if (isAutofilled && !intervalRef.current) {
+        intervalRef.current = setInterval(() => {
+          if (inputRef.current) {
+            const stillAutofilled =
+              inputRef.current.matches(":-webkit-autofill") ||
+              inputRef.current.matches(":autofill")
+            if (!stillAutofilled) {
+              setIsAutofilled(false)
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+                intervalRef.current = null
+              }
+            }
+          }
+        }, 100)
+      }
+
+      // Cleanup function to clear interval on unmount or dependency change
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
+          intervalRef.current = null
+        }
+      }
+    }, [isAutofilled])
+    /**********************/
 
     return (
       <div
@@ -403,9 +447,11 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 onChange: handleChange,
                 onBlur: props.onBlur,
                 onFocus: props.onFocus,
+                onAnimationStart: handleAnimationStart,
                 disabled: noEdit,
                 readOnly: readonly,
                 role,
+                ref: inputRef,
                 "aria-controls": ariaControls,
                 "aria-expanded": ariaExpanded,
                 id,
@@ -432,7 +478,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),
-                  placeholder && !hidePlaceholder && isEmpty(localValue)
+                  placeholder &&
+                    !hidePlaceholder &&
+                    isEmpty(localValue) &&
+                    !isAutofilled
                     ? "opacity-1"
                     : "opacity-0"
                 )}

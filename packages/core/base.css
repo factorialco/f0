@@ -167,3 +167,16 @@
 body {
   @apply !text-f1-foreground font-sans text-base antialiased;
 }
+
+/* For autofill detection */
+@keyframes autofill {
+  from {
+  }
+  to {
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: autofill;
+  animation-fill-mode: both;
+}
