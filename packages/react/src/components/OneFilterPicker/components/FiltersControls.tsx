@@ -181,7 +181,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                   )}
                 </div>
                 {selectedFilterKey && (
-                  <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
+                  <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
                     <Button
                       onClick={handleApplyFiltersSelection}
                       label={i18n.filters.applySelection}

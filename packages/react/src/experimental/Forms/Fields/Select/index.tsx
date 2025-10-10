@@ -461,6 +461,10 @@ const SelectComponent = forwardRef(function Select<
       return
     }
 
+    requestAnimationFrame(() => {
+      searchInputRef.current?.focus()
+    })
+
     // When is loading we need to focus the search repeatedly until the data is loaded
     if (isLoadingOrLoadingMore && !loadingFocusInterval.current) {
       loadingFocusInterval.current = setInterval(() => {
@@ -470,6 +474,12 @@ const SelectComponent = forwardRef(function Select<
       clearLoadingFocusInterval()
     }
   }, [data, isLoadingOrLoadingMore, openLocal, clearLoadingFocusInterval])
+
+  useEffect(() => {
+    setInterval(() => {
+      searchInputRef.current?.focus()
+    }, 100)
+  }, [openLocal])
 
   const i18n = useI18n()
 
