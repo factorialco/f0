@@ -269,9 +269,6 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     useEffect(
       () => {
-        if (localValue === value) {
-          return
-        }
         setLocalValue(value)
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when localValue changes
