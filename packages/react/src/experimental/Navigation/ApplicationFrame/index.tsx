@@ -9,6 +9,7 @@ import { cn, focusRing } from "../../../lib/utils"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 
+import { AiPromotionChat } from "@/experimental/AiPromotionChat"
 import { breakpoints } from "@factorialco/f0-core"
 import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
@@ -18,6 +19,7 @@ import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
+  aiPromotion?: boolean
   banner?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
@@ -28,12 +30,19 @@ export function ApplicationFrame({
   sidebar,
   banner,
   ai,
+  aiPromotion,
 }: ApplicationFrameProps) {
-  const AiProvider = ai ? AiChatProvider : Fragment
+  const AiProvider = ai?.enabled ? AiChatProvider : Fragment
+  const providerProps = ai?.enabled ? { ...ai } : undefined
   return (
     <FrameProvider>
-      <AiProvider {...ai}>
-        <ApplicationFrameContent ai={ai} sidebar={sidebar} banner={banner}>
+      <AiProvider {...providerProps}>
+        <ApplicationFrameContent
+          ai={ai}
+          aiPromotion={aiPromotion}
+          sidebar={sidebar}
+          banner={banner}
+        >
           {children}
         </ApplicationFrameContent>
       </AiProvider>
@@ -101,6 +110,7 @@ function useAutoCloseSidebar(
 
 function ApplicationFrameContent({
   ai,
+  aiPromotion,
   children,
   sidebar,
   banner,
@@ -192,6 +202,7 @@ function ApplicationFrameContent({
                 </motion.div>
               </motion.main>
               {ai && ai.enabled && <AiChat />}
+              {aiPromotion && <AiPromotionChat />}
             </div>
           </LayoutGroup>
         </div>
