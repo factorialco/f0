@@ -1,7 +1,7 @@
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader/GroupHeader"
 import { useGroups } from "@/hooks/datasource/useGroups"
+import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
 import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"

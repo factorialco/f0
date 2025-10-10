@@ -3,7 +3,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -22,6 +21,7 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
   SelectContent,
@@ -219,6 +219,13 @@ const SelectComponent = forwardRef(function Select<
   const [localValue, setLocalValue] = useState(
     value || props.defaultItem?.value
   )
+
+  useEffect(() => {
+    if (value !== localValue) {
+      setLocalValue(value || props.defaultItem?.value)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, props.defaultItem])
 
   const dataSource = useMemo(() => {
     if (

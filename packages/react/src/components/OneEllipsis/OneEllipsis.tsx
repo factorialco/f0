@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react"
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
 
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   if (!element) return false
@@ -18,12 +18,17 @@ const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   return element.scrollWidth > element.clientWidth
 }
 
+export const tags = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"] as const
+export type Tag = (typeof tags)[number]
+
 type EllipsisWrapperProps = {
   children: string
   className?: string
   lines: number
   noTooltip?: boolean
   onHasEllipsisChange: (hasEllipsis: boolean) => void
+  disabled?: boolean
+  tag: Tag
 }
 
 /**
@@ -34,13 +39,21 @@ type EllipsisWrapperProps = {
  * @param {React.HTMLAttributes<HTMLSpanElement>} props - The props to apply to the text.
  * @returns {React.ReactElement} The rendered text.
  */
-const EllipsisWrapper = forwardRef<HTMLSpanElement, EllipsisWrapperProps>(
+const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
   (
-    { children, className, lines, onHasEllipsisChange, noTooltip, ...props },
+    {
+      children,
+      className,
+      lines,
+      onHasEllipsisChange,
+      noTooltip,
+      disabled,
+      ...props
+    },
     ref
   ) => {
     useEffect(() => {
-      if (!ref || typeof ref !== "object") return
+      if (!ref || typeof ref !== "object" || disabled) return
 
       const element = ref.current
       if (!element) return
@@ -58,38 +71,72 @@ const EllipsisWrapper = forwardRef<HTMLSpanElement, EllipsisWrapperProps>(
       return () => {
         resizeObserver.disconnect()
       }
-    }, [ref, onHasEllipsisChange, lines])
+    }, [ref, onHasEllipsisChange, lines, disabled])
 
-    return (
-      <span
-        ref={ref}
-        className={cn(
-          `${noTooltip ? "pointer-events-none" : "pointer-events-auto"} min-w-0 max-w-full overflow-hidden text-ellipsis`,
-          lines > 1
-            ? `not-supports-[(-webkit-line-clamp:${lines})]:whitespace-nowrap display-[-webkit-box] whitespace-normal line-clamp-${lines}`
-            : "block whitespace-nowrap",
+    return React.createElement(
+      props.tag,
+      {
+        ref,
+        className: cn(
+          noTooltip ? "pointer-events-none" : "pointer-events-auto",
+          "min-w-0 max-w-full overflow-hidden",
+          !disabled && [
+            lines === 1 ? "text-ellipsis" : "",
+            lines > 1
+              ? `not-supports-[(-webkit-line-clamp:${lines})]:whitespace-nowrap line-clamp-1 whitespace-normal`
+              : "block whitespace-nowrap",
+          ],
           className
-        )}
-        {...props}
-      >
-        {children}
-      </span>
+        ),
+        style: {
+          WebkitLineClamp: lines > 1 ? lines : undefined,
+          lineClamp: lines > 1 ? lines : undefined,
+        },
+        ...props,
+      },
+      children
     )
   }
 )
 EllipsisWrapper.displayName = "EllipsisWrapper"
 
 type OneEllipsisProps = {
+  /**
+   * The className to apply to the text.
+   */
   className?: string
+  /**
+   * The number of lines to display.
+   */
   lines?: number
+  /**
+   * Whether the ellipsis is disabled.
+   */
+  disabled?: boolean
+  /**
+   * The children to display. (only string is supported)
+   */
   children: string
+  /**
+   * Whether the tooltip is disabled.
+   */
   noTooltip?: boolean
-  tag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span"
+  /**
+   * The tag to use for the text.
+   */
+  tag?: Tag
 }
 
 const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
   (
-    { className, lines = 1, children, noTooltip = false, ...props },
+    {
+      className,
+      lines = 1,
+      children,
+      noTooltip = false,
+      disabled = false,
+      ...props
+    },
     forwardedRef
   ) => {
     const [hasEllipsis, setHasEllipsis] = useState(false)
@@ -104,7 +151,9 @@ const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
           className={className}
           lines={lines}
           onHasEllipsisChange={setHasEllipsis}
+          disabled={disabled}
           {...props}
+          tag={props.tag ?? "span"}
           data-testid="one-ellipsis"
           noTooltip={noTooltip}
         >
@@ -112,7 +161,7 @@ const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
         </EllipsisWrapper>
       )
       // eslint-disable-next-line react-hooks/exhaustive-deps -- We dont want to track props as dependencies
-    }, [className, lines, children, ref])
+    }, [className, lines, ref, children, disabled])
 
     return hasEllipsis && !noTooltip ? (
       <TooltipProvider>
