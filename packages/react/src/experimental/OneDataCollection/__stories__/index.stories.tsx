@@ -399,6 +399,7 @@ export const WithLinkedItems: Story = {
                         },
                       },
                     }),
+                    width: 100,
                     sorting: "name",
                   },
                   {
