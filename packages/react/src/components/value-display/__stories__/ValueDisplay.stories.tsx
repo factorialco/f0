@@ -1,10 +1,10 @@
 import { NewColor } from "@/components/tags/F0TagDot"
-import { Placeholder } from "@/icons/app"
-import { Meta, StoryObj } from "@storybook/react-vite"
 import {
   PropertyDefinition,
   renderProperty,
-} from "../../../experimental/OneDataCollection/property-render"
+} from "@/experimental/OneDataCollection/property-render"
+import { Placeholder } from "@/icons/app"
+import { Meta, StoryObj } from "@storybook/react-vite"
 
 function Cell({
   item,
@@ -16,7 +16,7 @@ function Cell({
   return renderProperty(item, property, "table")
 }
 const meta = {
-  title: "Data Collection/Cell Types",
+  title: "Value Display",
   component: Cell,
   parameters: {
     layout: "padded",
@@ -160,6 +160,22 @@ export const LongTextType: Story = {
         type: "longText",
         value:
           "This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.",
+      }),
+    },
+  },
+}
+
+export const LongTextWithLines: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: "This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.",
+          lines: 5,
+        },
       }),
     },
   },
