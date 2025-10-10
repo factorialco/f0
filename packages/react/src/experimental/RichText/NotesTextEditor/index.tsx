@@ -166,6 +166,14 @@ const NotesTextEditorComponent = forwardRef<
         ])
         .run()
     },
+    pushContent: (content: string) => {
+      if (!editor) return
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(editor.state.doc.content.size, content)
+        .run()
+    },
   }))
 
   const tippyOptions = useMemo(
@@ -283,7 +291,7 @@ const NotesTextEditorComponent = forwardRef<
           <EditorContent
             editor={editor}
             className={cn(
-              "pb-28 [&>div]:w-full [&>div]:transition-all [&>div]:duration-300",
+              "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
               withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
             )}
           />

@@ -11,7 +11,7 @@ import {
   GranularityDefinitionSimple,
 } from "./granularities/index"
 import { CalendarMode, CalendarView, DateRange, DateRangeString } from "./types"
-import { isValidDate, toDateRange } from "./utils"
+import { isActiveDate, toDateRange } from "./utils"
 
 export interface OneCalendarProps {
   mode: CalendarMode
@@ -137,21 +137,51 @@ export function OneCalendar({
     setSelectFromInput(input, inputValue)
   }
 
+  const isSelectableDate = useCallback(
+    (date: Date | undefined | null) => {
+      if (!date) {
+        return false
+      }
+
+      return isActiveDate(date, granularity, {
+        minDate,
+        maxDate,
+      })
+    },
+    [granularity, minDate, maxDate]
+  )
+
   const setSelectFromInput = (
     input: "from" | "to",
     inputValue: DateRangeString
   ) => {
     const newDate = granularity.fromString(inputValue, i18n)
-    const error = newDate && newDate[input] && !isValidDate(newDate[input])
+    const error = !isSelectableDate(newDate?.[input])
+
     setInputError((prev) => ({
       ...prev,
       [input]: error,
     }))
 
     if (!error) {
-      setSelected(newDate)
+      handleSelect(newDate)
     }
   }
+
+  // When the granularity changes, the range to the correct granularity
+  useEffect(
+    () => {
+      const range = toDateRange(selected)
+      if (!range) return
+
+      const newRange = granularity.toRange(range.from)
+
+      handleSelect(newRange)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the granularity changes
+    [granularity]
+  )
+
   useEffect(() => {
     const range = toDateRange(selected)
 
@@ -174,13 +204,13 @@ export function OneCalendar({
       ? granularity.navigate(currentDate.from, direction)
       : undefined
 
-    if (isValidDate(newDate)) {
+    if (isSelectableDate(newDate)) {
       const newInputValue = {
         ...inputValue,
         [input]: granularity.toRangeString(newDate, i18n).from,
       }
-      setInputValue(newInputValue)
       setSelectFromInput(input, newInputValue)
+      setInputValue(newInputValue)
     }
   }
 

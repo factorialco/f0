@@ -3,6 +3,7 @@ import { BadgeProps } from "@/experimental/Information/Badge"
 import { DistributiveOmit } from "@/lib/typescript-utils/distributive-omit"
 import { F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarFileProps } from "../F0AvatarFile"
+import { F0AvatarFlagProps } from "../F0AvatarFlag"
 import { F0AvatarPersonProps } from "../F0AvatarPerson"
 import { F0AvatarTeamProps } from "../F0AvatarTeam"
 
@@ -19,7 +20,13 @@ export type AvatarBadge = (
   tooltip?: string
 }
 
-export const avatarVariants = ["person", "team", "company", "file"] as const
+export const avatarVariants = [
+  "person",
+  "team",
+  "company",
+  "file",
+  "flag",
+] as const
 
 export type AvatarVariants = (typeof avatarVariants)[number]
 
@@ -27,7 +34,8 @@ export type AvatarVariant = DistributiveOmit<
   | ({ type: "person" } & F0AvatarPersonProps)
   | ({ type: "team" } & F0AvatarTeamProps)
   | ({ type: "company" } & F0AvatarCompanyProps)
-  | ({ type: "file" } & F0AvatarFileProps),
+  | ({ type: "file" } & F0AvatarFileProps)
+  | ({ type: "flag" } & F0AvatarFlagProps),
   "size"
 >
 
@@ -36,3 +44,4 @@ export type PersonAvatarVariant = Extract<AvatarVariant, { type: "person" }>
 export type TeamAvatarVariant = Extract<AvatarVariant, { type: "team" }>
 export type CompanyAvatarVariant = Extract<AvatarVariant, { type: "company" }>
 export type FileAvatarVariant = Extract<AvatarVariant, { type: "file" }>
+export type FlagAvatarVariant = Extract<AvatarVariant, { type: "flag" }>

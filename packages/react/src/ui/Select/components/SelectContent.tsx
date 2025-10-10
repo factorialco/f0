@@ -3,7 +3,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-import * as SelectPrimitive from "@radix-ui/react-select"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import {
   ComponentPropsWithoutRef,
@@ -18,6 +17,7 @@ import {
 } from "react"
 import { VirtualItem } from "../index"
 import { SelectContext } from "../SelectContext"
+import * as SelectPrimitive from "./radix-ui"
 
 const VIEWBOX_VERTICAL_PADDING = 8
 
@@ -31,18 +31,24 @@ type SelectItemProps = ComponentPropsWithoutRef<
   top?: ReactNode
   bottom?: ReactNode
   emptyMessage?: string
-  value?: string
   showLoadingIndicator?: boolean
-}
+} & (
+    | {
+        value?: string[]
+        multiple: true
+      }
+    | {
+        value?: string
+        multiple?: false
+      }
+  )
 
-type BaseSelectContentProps = Omit<SelectItemProps, "children">
-
-type SelectContentWithItemsProps = BaseSelectContentProps & {
+type SelectContentWithItemsProps = Omit<SelectItemProps, "children"> & {
   items: VirtualItem[]
   children?: never
 }
 
-type SelectContentWithChildrenProps = SelectItemProps & {
+type SelectContentWithChildrenProps = Omit<SelectItemProps, "children"> & {
   items?: never
   children: ReactNode
 }
@@ -58,7 +64,6 @@ type SelectContentProps = (
   isLoading?: boolean
   scrollMargin?: number
 }
-
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
   SelectContentProps
@@ -103,9 +108,23 @@ const SelectContent = forwardRef<
     // Get the value and the open status from the select context
     const { value, open, asList } = useContext(SelectContext)
 
+    const valueArray = useMemo(
+      () =>
+        new Set(
+          (Array.isArray(value) ? value : [value]).filter(
+            (item) => item !== undefined
+          )
+        ),
+      [value]
+    )
+
     const positionIndex = useMemo(() => {
-      return (items && items.findIndex((item) => item.value === value)) || 0
-    }, [items, value])
+      return (
+        items?.findIndex(
+          (item) => item.value !== undefined && valueArray.has(item.value)
+        ) || 0
+      )
+    }, [items, valueArray])
 
     const virtualizer = useVirtualizer({
       count: items?.length || 0,
@@ -254,7 +273,21 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>
+      <SelectPrimitive.Portal>
+        <>
+          {/* Overlay to prevent clicks on the content */}
+          {open && (
+            <div
+              className="pointer-events-auto fixed inset-0 z-40"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            ></div>
+          )}
+          {content}
+        </>
+      </SelectPrimitive.Portal>
     )
   }
 )

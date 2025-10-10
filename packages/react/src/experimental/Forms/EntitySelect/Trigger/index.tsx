@@ -1,5 +1,4 @@
-import { F0Icon } from "@/components/F0Icon"
-import { ChevronDown } from "@/icons/app"
+import { Arrow } from "@/experimental/Forms/Fields/Select/components/Arrow"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
@@ -28,10 +27,13 @@ export const Trigger = ({
   required = false,
   readonly = false,
   append,
+  size = "sm",
+  open,
 }: {
   selected: string
   selectedEntities: EntitySelectEntity[]
   hiddenAvatar?: boolean
+  open?: boolean
 } & Pick<
   InputFieldProps<string>,
   | "onClickContent"
@@ -50,6 +52,7 @@ export const Trigger = ({
   | "required"
   | "readonly"
   | "append"
+  | "size"
 >) => {
   const groupView = useMemo(
     () =>
@@ -106,6 +109,7 @@ export const Trigger = ({
       loading={loading}
       required={required}
       readonly={readonly}
+      size={size}
       avatar={
         hiddenAvatar || !avatar
           ? undefined
@@ -118,23 +122,22 @@ export const Trigger = ({
       }
       append={
         append ?? (
-          <div className="h-[16px] w-[16px]">
-            <F0Icon
-              icon={ChevronDown}
-              size="sm"
-              color="default"
-              className="rounded-2xs p-0.5"
-            />
+          <div className={cn(size === "sm" ? "" : "-mt-2")}>
+            {/* This is a temporary solution (to use Select component arrow) */}
+            <Arrow open={open} disabled={disabled} size={size} />
           </div>
         )
       }
     >
       <span
+        role="button"
         className={cn(
           "my-auto flex items-center pr-1",
           placeholder && "text-f1-foreground-secondary",
           value && "text-f1-foreground",
-          flattenedList.length === 1 && !hiddenAvatar ? "pl-8" : "pl-2"
+          (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
+            ? "pl-8"
+            : "pl-2"
         )}
       >
         {flattenedList.length === 0

@@ -8,12 +8,12 @@ import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
+import { isAgentStateMessage } from "../messageTypes"
 import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { useChatWindowContext } from "./ChatWindow"
+import { Thinking } from "./Thinking"
 
-// corresponds to padding pt-14 applied for the header
-const HEADER_HEIGHT_PX = 56
+type Turn = Array<Message | Array<Message>>
 
 export const MessagesContainer = ({
   inProgress,
@@ -31,12 +31,15 @@ export const MessagesContainer = ({
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
 
-  const { greeting } = useAiChat()
   const translations = useI18n()
+  const { greeting, initialMessage } = useAiChat()
   const [longestTurnHeight, setLongestTurnHeight] = useState<number>(0)
   const initialMessages = useMemo(
-    () => makeInitialMessages(translations.ai.initialMessage),
-    [translations.ai.initialMessage]
+    () =>
+      makeInitialMessages(
+        initialMessage || translations.ai.defaultInitialMessage
+      ),
+    [initialMessage, translations.ai.defaultInitialMessage]
   )
   const showWelcomeBlock =
     messages.length == 0 && (greeting || initialMessages.length > 0)
@@ -65,16 +68,7 @@ export const MessagesContainer = ({
     setLongestTurnHeight((prev) => (prev >= height ? prev : height))
   }, [messages.length, initialMessages.length])
   const turns = useMemo(() => {
-    return messages.reduce<Array<Array<Message>>>((turns, message) => {
-      if (message && message.role === "user") {
-        turns.push([message])
-      } else {
-        if (turns.length > 0) {
-          turns[turns.length - 1].push(message)
-        }
-      }
-      return turns
-    }, [])
+    return convertMessagesToTurns(messages)
   }, [messages])
 
   // the scroll container's height is manually controlled by the size of the biggest turn (see `motion.div` below)
@@ -85,7 +79,7 @@ export const MessagesContainer = ({
     <motion.div
       layout
       className={cn(
-        "scrollbar-macos relative isolate flex-1 scroll-pt-14 px-4 pt-14",
+        "scrollbar-macos relative isolate flex-1 px-4 pt-3",
         "overflow-y-scroll"
       )}
       ref={messagesContainerRef}
@@ -170,7 +164,9 @@ export const MessagesContainer = ({
               key={`turn-${turnIndex}`}
               style={{
                 minHeight: isCurrentTurn
-                  ? containerHeight - HEADER_HEIGHT_PX
+                  ? // "scroll" the current turn up in the view to make space for the assistant response,
+                    // but leave 20% of the container height on the top to show part of the previous dialog
+                    containerHeight * 0.8
                   : undefined,
               }}
             >
@@ -179,10 +175,27 @@ export const MessagesContainer = ({
                   turnIndex === turns.length - 1 &&
                   index === turnMessages.length - 1
 
+                if (Array.isArray(message) && !isCurrentMessage) {
+                  return (
+                    <Thinking
+                      key={`${turnIndex}-${index}`}
+                      messages={message}
+                      isActive={false}
+                      inProgress={inProgress}
+                      RenderMessage={RenderMessage}
+                      AssistantMessage={AssistantMessage}
+                    />
+                  )
+                }
+
                 return (
                   <RenderMessage
                     key={`${turnIndex}-${index}`}
-                    message={message}
+                    message={
+                      Array.isArray(message)
+                        ? message[message.length - 1] // show last thought when the thinking is ongoing
+                        : message
+                    }
                     inProgress={inProgress}
                     index={index}
                     isCurrentMessage={isCurrentMessage}
@@ -253,7 +266,6 @@ export function useScrollToBottom() {
   const isProgrammaticScrollRef = useRef(false)
   const isUserScrollUpRef = useRef(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
-  const { setMessageContainerScrollTop } = useChatWindowContext()
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesContainerRef.current && messagesEndRef.current) {
@@ -290,8 +302,6 @@ export function useScrollToBottom() {
   }
 
   const handleScroll = useCallback(() => {
-    setMessageContainerScrollTop(messagesContainerRef.current?.scrollTop ?? 0)
-
     if (isProgrammaticScrollRef.current) {
       isProgrammaticScrollRef.current = false
       return
@@ -299,7 +309,7 @@ export function useScrollToBottom() {
 
     checkIsScrollingUp()
     checkScrollToBottomButtonVisibility()
-  }, [setMessageContainerScrollTop])
+  }, [])
 
   useEventListener("scroll", handleScroll, messagesContainerRef)
 
@@ -312,9 +322,6 @@ export function useScrollToBottom() {
     scrollToBottom("instant")
 
     const mutationObserver = new MutationObserver(() => {
-      if (!isUserScrollUpRef.current) {
-        scrollToBottom()
-      }
       checkScrollToBottomButtonVisibility()
     })
 
@@ -335,4 +342,72 @@ export function useScrollToBottom() {
     showScrollToBottom,
     scrollToBottom,
   }
+}
+
+export function convertMessagesToTurns(messages: Message[]): Turn[] {
+  if (messages.length === 0) {
+    return []
+  }
+
+  console.assert(
+    messages[0].role === "user",
+    "Invariant violation! Assistant message received before user message"
+  )
+
+  const turns: Turn[] = []
+
+  for (const [i, message] of messages.entries()) {
+    if (message.role === "user") {
+      // create new turn
+      turns.push([message])
+      continue
+    }
+
+    const currentTurn = turns[turns.length - 1]
+
+    // Handle agent state messages that arrive during thinking message grouping
+    if (
+      isAgentStateMessage(message) &&
+      isCurrentlyGroupingThinking(currentTurn)
+    ) {
+      // we want to ignore the last agent state message
+      // to avoid rerenders of thinking components and play extra animations
+      if (i !== messages.length - 1) {
+        const thinkingGroup = currentTurn.pop() as Message[]
+        currentTurn.push(message, thinkingGroup)
+      }
+      continue
+    }
+
+    // Handle thinking messages
+    if (isThinkingMessage(message)) {
+      if (isCurrentlyGroupingThinking(currentTurn)) {
+        // Continue grouping: add to existing thinking group
+        const thinkingGroup = currentTurn.at(-1) as Message[]
+        thinkingGroup.push(message)
+      } else {
+        // Start grouping: create new thinking group
+        currentTurn.push([message])
+      }
+      continue
+    }
+
+    currentTurn.push(message)
+  }
+
+  return turns
+}
+
+function isThinkingMessage(message: Message): boolean {
+  return (
+    message.role === "assistant" &&
+    message.toolCalls?.some(
+      (call) => call.function.name === "orchestratorThinking"
+    ) === true
+  )
+}
+
+function isCurrentlyGroupingThinking(turn: Turn): boolean {
+  const lastMessage = turn.at(-1)
+  return Array.isArray(lastMessage)
 }

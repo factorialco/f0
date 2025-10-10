@@ -1,6 +1,6 @@
 "use client"
 
-import * as SelectPrimitive from "@radix-ui/react-select"
+import * as SelectPrimitive from "./components/radix-ui"
 
 /**
  * Select Group component

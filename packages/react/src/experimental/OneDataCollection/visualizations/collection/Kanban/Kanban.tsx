@@ -42,6 +42,7 @@ export const KanbanCollection = <
   avatar,
   metadata: optionsMetadata,
   onMove,
+  onCreate,
   source,
   onSelectItems,
   onLoadError,
@@ -188,6 +189,7 @@ export const KanbanCollection = <
         />
       )
     },
+    onCreate: onCreate,
   }
 
   // Report aggregated totals/loading so header total updates

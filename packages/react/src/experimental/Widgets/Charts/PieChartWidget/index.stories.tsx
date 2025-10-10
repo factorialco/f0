@@ -1,5 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
+import { PieChartProps } from "../../../../components/Charts/PieChart"
+import { Default as PieChartDefault } from "../../../../components/Charts/PieChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
 import { PieChartWidget } from "./index"
 
@@ -21,32 +23,7 @@ const meta = {
       ...containerStoryArgs.header,
       title: "A pie chart",
     },
-    chart: {
-      dataConfig: {
-        january: {
-          label: "January",
-        },
-        february: {
-          label: "February",
-        },
-        march: {
-          label: "March",
-        },
-        april: {
-          label: "April",
-        },
-        may: {
-          label: "May",
-        },
-      },
-      data: [
-        { label: "january", value: 186 },
-        { label: "february", value: 305 },
-        { label: "march", value: 237 },
-        { label: "april", value: 73 },
-        { label: "may", value: 209 },
-      ],
-    },
+    chart: PieChartDefault.args as PieChartProps,
   },
   decorators: [WidgetDecorator],
 } satisfies Meta<typeof PieChartWidget>

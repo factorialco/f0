@@ -1,8 +1,8 @@
-import * as SelectPrimitive from "@radix-ui/react-select"
+import { cn } from "@/lib/utils.ts"
 import * as React from "react"
 import { useContext } from "react"
-import { cn } from "../../../lib/utils.ts"
 import { SelectContext } from "../SelectContext.tsx"
+import * as SelectPrimitive from "./radix-ui"
 
 /**
  * Select Trigger component

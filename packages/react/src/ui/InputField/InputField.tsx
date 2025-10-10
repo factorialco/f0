@@ -3,7 +3,7 @@ import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { CrossedCircle } from "@/icons/app"
-import { cn } from "@/lib/utils.ts"
+import { cn, focusRing } from "@/lib/utils.ts"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import {
@@ -453,16 +453,24 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 {clearable && !noEdit && (
                   <AnimatePresence initial={!isEmpty(localValue)}>
                     {!isEmpty(localValue) && (
-                      <motion.div
+                      <motion.button
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="mr-px mt-px flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
-                        onClick={handleClear}
+                        className={cn(
+                          "mt-pxflex mr-px h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
+                          focusRing()
+                        )}
+                        tabIndex={0}
+                        data-testid="clear-button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleClear()
+                        }}
                       >
                         <F0Icon icon={CrossedCircle} color="bold" size="md" />
-                      </motion.div>
+                      </motion.button>
                     )}
                   </AnimatePresence>
                 )}

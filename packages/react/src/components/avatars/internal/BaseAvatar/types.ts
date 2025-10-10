@@ -1,4 +1,5 @@
 import { InternalAvatarProps } from "@/ui/Avatar"
+import { ReactElement } from "react"
 import { AvatarBadge } from "../../F0Avatar/types"
 
 export const avatarSizes = ["xs", "sm", "md", "lg", "xl", "2xl"] as const
@@ -30,6 +31,10 @@ export type BaseAvatarProps = {
    * The source of the avatar's image.
    */
   src?: string
+  /**
+   * This is a workaround until we implement the ability to deal with images
+   */
+  flag?: ReactElement
   /**
    * The color of the avatar.
    * @default "random"

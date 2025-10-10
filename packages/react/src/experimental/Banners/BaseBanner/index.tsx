@@ -2,6 +2,7 @@ import { Button } from "@/components/Actions/Button"
 import { IconType } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { withSkeleton } from "@/lib/skeleton"
+import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { forwardRef, useState } from "react"
 
@@ -21,6 +22,7 @@ export type BaseBannerProps = {
   onClose?: () => void
   isLoading?: boolean
   children?: React.ReactNode
+  variant?: "default" | "full-width"
 }
 
 const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
@@ -34,6 +36,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
       onClose,
       isLoading = false,
       children,
+      variant = "default",
     },
     ref
   ) {
@@ -77,7 +80,12 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
 
         {/* Content */}
         <div className="flex flex-col justify-center gap-5 px-3 pb-3 sm:py-3 sm:pl-0 sm:pr-3">
-          <div className="flex w-full flex-col gap-1 sm:max-w-lg">
+          <div
+            className={cn(
+              "flex w-full flex-col gap-1",
+              variant === "default" ? "sm:max-w-lg" : undefined
+            )}
+          >
             <h3 className="font-bold text-xl text-f1-foreground">{title}</h3>
             {subtitle && (
               <p className="text-base text-f1-foreground-secondary">
