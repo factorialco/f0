@@ -68,7 +68,7 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
         const ellipsis = checkForEllipsis(element, lines)
         setHasEllipsis(ellipsis)
         onHasEllipsisChange(ellipsis)
-        return checkForEllipsis(element, lines)
+        return ellipsis
       }
 
       // Initial check
