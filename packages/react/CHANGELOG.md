@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.230.0](https://github.com/factorialco/f0/compare/f0-react-v1.229.0...f0-react-v1.230.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** toolbars improvements ([#2788](https://github.com/factorialco/f0/issues/2788)) ([eb55fad](https://github.com/factorialco/f0/commit/eb55fad83da41656316efc4b1c3cfaa922a9d8fc))
+
 ## [1.229.0](https://github.com/factorialco/f0/compare/f0-react-v1.228.3...f0-react-v1.229.0) (2025-10-09)
 
 
