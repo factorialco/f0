@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { autoColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -85,7 +85,11 @@ export const _LineChart = <K extends LineChartConfig>(
             dataKey={line}
             isAnimationActive={false}
             type={lineType}
-            stroke={dataConfig[line].color || autoColor(index)}
+            stroke={
+              dataConfig[line].color
+                ? getColor(dataConfig[line].color)
+                : getCategoricalColor(index)
+            }
             strokeWidth={1.5}
             strokeDasharray={dataConfig[line].dashed ? "4 4" : undefined}
             dot={false}

@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.233.2](https://github.com/factorialco/f0/compare/f0-react-v1.233.1...f0-react-v1.233.2) (2025-10-10)
+
+
+### Bug Fixes
+
+* add full width variant to BaseBanner ([#2795](https://github.com/factorialco/f0/issues/2795)) ([e2c9dc9](https://github.com/factorialco/f0/commit/e2c9dc921c3b915b298f838c3e4e29424225b1dc))
+
+## [1.233.1](https://github.com/factorialco/f0/compare/f0-react-v1.233.0...f0-react-v1.233.1) (2025-10-10)
+
+
+### Bug Fixes
+
+* **datacollection:** fix click propagation when celltypes has ellipsis ([#2797](https://github.com/factorialco/f0/issues/2797)) ([f791286](https://github.com/factorialco/f0/commit/f7912869e33e1c8378f164b52da3cf9c8eaea004))
+
+## [1.233.0](https://github.com/factorialco/f0/compare/f0-react-v1.232.0...f0-react-v1.233.0) (2025-10-10)
+
+
+### Features
+
+* **Charts:** color system ([#2765](https://github.com/factorialco/f0/issues/2765)) ([191d8bb](https://github.com/factorialco/f0/commit/191d8bb2d1cb01975446759700764ccef7a25575))
+
+## [1.232.0](https://github.com/factorialco/f0/compare/f0-react-v1.231.0...f0-react-v1.232.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** longText defaults. Datacollection docs index. Fix oneEllipsis line-clamp-4 ([#2777](https://github.com/factorialco/f0/issues/2777)) ([fa8657e](https://github.com/factorialco/f0/commit/fa8657e6b85f57cc93c45e5597ea8abcba923b3d))
+
+## [1.231.0](https://github.com/factorialco/f0/compare/f0-react-v1.230.0...f0-react-v1.231.0) (2025-10-10)
+
+
+### Features
+
+* **select:** primitive multiselect ([#2775](https://github.com/factorialco/f0/issues/2775)) ([98ca803](https://github.com/factorialco/f0/commit/98ca8035ea0d340b7654689218c2f0de53577905))
+
+## [1.230.0](https://github.com/factorialco/f0/compare/f0-react-v1.229.0...f0-react-v1.230.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** toolbars improvements ([#2788](https://github.com/factorialco/f0/issues/2788)) ([eb55fad](https://github.com/factorialco/f0/commit/eb55fad83da41656316efc4b1c3cfaa922a9d8fc))
+
 ## [1.229.0](https://github.com/factorialco/f0/compare/f0-react-v1.228.3...f0-react-v1.229.0) (2025-10-09)
 
 

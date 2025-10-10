@@ -1,0 +1,32 @@
+import {
+  Canvas,
+  Meta,
+  Controls,
+  Unstyled,
+  Story,
+} from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as DataCollectionStories from "../index.stories"
+
+<Meta title="Data collection/Sorting" />
+
+# Data collection / Sorting
+
+Sorting in a data table allows users to organize the information in ascending or
+descending order. By clicking on a column header, the data is sorted in
+ascending order (A-Z or smallest to largest). A second click reverses the order
+(Z-A or largest to smallest), and a third click restores the original order.
+
+If a different column is selected, the sorting of the previous column is
+canceled, and the new cycle starts from ascending order. Only one column can be
+sorted at a time.
+
+The sorting behavior depends on the data type: for text, it is sorted
+alphabetically; for numbers, it is sorted from smallest to largest or vice
+versa; and for dates, it is sorted chronologically.
+
+<Canvas
+  of={DataCollectionStories.WithTableVisualization}
+  meta={DataCollectionStories}
+/>
