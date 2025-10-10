@@ -11,7 +11,7 @@ import {
 } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { OneCalendar } from "./OneCalendar"
+import { OneCalendar, OneCalendarInternal } from "./OneCalendar"
 import { DateRange } from "./types"
 
 const mockDate = new Date(2025, 6, 30)
@@ -32,6 +32,8 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+type OneCalendarInternalStory = StoryObj<Meta<typeof OneCalendarInternal>>
 
 function SelectedDateDisplay({ range }: { range: DateRange }) {
   const formatDate = (date: Date) =>
@@ -584,7 +586,7 @@ export const WithMinAndMaxYear: Story = {
 }
 
 // Compact versions
-export const CompactMonthSingle: Story = {
+export const CompactMonthSingle: OneCalendarInternalStory = {
   args: {
     mode: "single",
     view: "month",
@@ -608,7 +610,7 @@ export const CompactMonthSingle: Story = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendar
+        <OneCalendarInternal
           {...args}
           defaultSelected={selectedRange}
           onSelect={handleSelect}
@@ -619,7 +621,7 @@ export const CompactMonthSingle: Story = {
   },
 }
 
-export const CompactMonthRange: Story = {
+export const CompactMonthRange: OneCalendarInternalStory = {
   args: {
     mode: "range",
     view: "month",
@@ -644,7 +646,7 @@ export const CompactMonthRange: Story = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendar
+        <OneCalendarInternal
           {...args}
           defaultSelected={selectedRange}
           onSelect={handleSelect}
@@ -655,7 +657,7 @@ export const CompactMonthRange: Story = {
   },
 }
 
-export const CompactWeek: Story = {
+export const CompactWeek: OneCalendarInternalStory = {
   args: {
     mode: "single",
     view: "week",
@@ -689,7 +691,7 @@ export const CompactWeek: Story = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendar
+        <OneCalendarInternal
           {...args}
           defaultSelected={selectedRange}
           onSelect={handleSelect}
@@ -700,7 +702,7 @@ export const CompactWeek: Story = {
   },
 }
 
-export const CompactDayRange: Story = {
+export const CompactDayRange: OneCalendarInternalStory = {
   args: {
     mode: "range",
     view: "day",
@@ -728,7 +730,7 @@ export const CompactDayRange: Story = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendar
+        <OneCalendarInternal
           {...args}
           defaultSelected={selectedRange}
           onSelect={handleSelect}
@@ -774,7 +776,7 @@ export const RegularVsCompact: Story = {
         </div>
         <div className="flex-1">
           <h3 className="mb-4 text-lg font-medium">Compact</h3>
-          <OneCalendar
+          <OneCalendarInternal
             mode="single"
             view="month"
             compact={true}
