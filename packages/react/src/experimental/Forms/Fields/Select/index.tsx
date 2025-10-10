@@ -550,6 +550,7 @@ const SelectComponent = forwardRef(function Select<
         {openLocal && (
           <SelectContent
             items={items}
+            taller={!!source?.filters}
             className={selectContentClassName}
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
