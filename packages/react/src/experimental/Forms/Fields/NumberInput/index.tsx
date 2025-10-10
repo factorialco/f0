@@ -36,7 +36,10 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 
     const handleChange = (value: string) => {
       const extractedData = extractNumber(value, { maxDecimals })
-      if (!extractedData) return
+      if (!extractedData) {
+        setFieldValue("")
+        return
+      }
 
       const { formattedValue, value: parsedValue } = extractedData
 
