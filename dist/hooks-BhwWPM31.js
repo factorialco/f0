@@ -93007,7 +93007,7 @@ const PCt = ({ text: e }) => l("div", {
     type: "error",
     message: typeof c == "string" ? c : void 0
   }), r || console.error("InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."), De(() => {
-    ie !== v && he(v);
+    he(v);
   }, [v]);
   const ue = (Le) => {
     var Ae;
