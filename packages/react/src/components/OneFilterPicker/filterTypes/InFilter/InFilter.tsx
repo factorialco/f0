@@ -175,7 +175,7 @@ export function InFilter<T extends string>({
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
-            placeholder={`${i18n.toc.search}...`}
+            placeholder={i18n.toc.search}
             value={searchTerm}
             onChange={setSearchTerm}
             clearable
@@ -186,7 +186,10 @@ export function InFilter<T extends string>({
         <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
       )}
       <div
-        className={cn("flex-1 overflow-y-auto px-2", isCompactMode && "px-1")}
+        className={cn(
+          "max-h-[350px] overflow-y-scroll px-2",
+          isCompactMode && "px-1"
+        )}
       >
         {isCompactMode && (
           <div

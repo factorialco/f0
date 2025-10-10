@@ -49,7 +49,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
       <div className="flex flex-1 flex-row gap-2">
         <div className="flex-1">
           <F1SearchBox
-            placeholder={searchBoxPlaceholder ?? `${i18n.toc.search}...`}
+            placeholder={searchBoxPlaceholder ?? i18n.toc.search}
             onChange={onSearchChange}
             value={searchValue}
             key="search-input"

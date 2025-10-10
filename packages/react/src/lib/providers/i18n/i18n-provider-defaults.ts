@@ -54,7 +54,7 @@ export const defaultTranslations = {
     retry: "Retry",
   },
   toc: {
-    search: "Search",
+    search: "Search...",
   },
   collections: {
     sorting: {

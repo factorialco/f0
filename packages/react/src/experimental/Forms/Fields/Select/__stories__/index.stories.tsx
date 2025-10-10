@@ -490,7 +490,7 @@ export const WithDataSourcePaginated: Story = {
             minDate: new Date("2021-01-01"),
             maxDate: new Date("2021-12-31"),
             mode: "range",
-            view: "year",
+            view: "quarter",
           },
         },
       },
