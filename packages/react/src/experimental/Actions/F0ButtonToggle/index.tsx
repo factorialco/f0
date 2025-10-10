@@ -1,4 +1,4 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 import * as TogglePrimitive from "@radix-ui/react-toggle"
@@ -49,7 +49,7 @@ export const F0ButtonToggle = forwardRef<
         )}
         {...props}
       >
-        <Icon icon={icon} size={size} />
+        <F0Icon icon={icon} size={size} />
       </TogglePrimitive.Root>
     )
   }

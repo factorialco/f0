@@ -1,13 +1,10 @@
 import { type VariantProps, cva } from "cva"
 
-import { Icon, IconProps } from "../../../components/Utilities/Icon"
-import { Windows } from "../../../icons/app"
-import { useI18n } from "../../../lib/providers/i18n"
-import {
-  Platform,
-  useUserPlatform,
-} from "../../../lib/providers/user-platafform/UserPlatformProvider"
-import { cn } from "../../../lib/utils"
+import { F0Icon, F0IconProps } from "@/components/F0Icon"
+import { Windows } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { type Platform, useUserPlatform } from "@/lib/providers/user-platafform"
+import { cn } from "@/lib/utils"
 
 const shortcutVariants = cva({
   base: "flex h-5 min-w-[1ch] items-center justify-center rounded-xs border border-solid py-0.5 font-sans text-sm font-semibold leading-none",
@@ -36,7 +33,7 @@ const platformDependentKeys = new Set<PlatformDependentKey>([
 ])
 const platformKeyMap: Record<
   Extract<Platform, "mac" | "windows" | "linux">,
-  Record<PlatformDependentKey, string | IconProps["icon"]>
+  Record<PlatformDependentKey, string | F0IconProps["icon"]>
 > = {
   mac: {
     cmd: "⌘",
@@ -86,7 +83,7 @@ function Shortcut({ keys, variant }: ShortcutProps) {
               isIcon ? "w-5 px-0.5" : "min-w-5 px-1"
             )}
           >
-            {isIcon ? <Icon icon={userKey} size="sm" /> : userKey}
+            {isIcon ? <F0Icon icon={userKey} size="sm" /> : userKey}
           </kbd>
         )
       })}

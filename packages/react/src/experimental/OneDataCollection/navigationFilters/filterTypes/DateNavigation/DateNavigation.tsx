@@ -1,6 +1,7 @@
 import { getGranularityDefinition } from "@/experimental/OneCalendar/OneCalendar"
 import { OneDateNavigator } from "@/experimental/OneDateNavigator"
 import { type DatePickerValue } from "@/experimental/OneDatePicker"
+import { useI18n } from "@/lib/providers/i18n"
 import { DateNavigationProps } from "./types"
 
 export function DateNavigation({
@@ -8,6 +9,7 @@ export function DateNavigation({
   value,
   onChange,
 }: DateNavigationProps) {
+  const i18n = useI18n()
   const options = {
     granularity: "day" as const,
     ...filter,
@@ -29,7 +31,7 @@ export function DateNavigation({
     onChange({
       value: newDateRange.value,
       granularity: newDateRange.granularity,
-      valueString: granularityDefinition.toString(newDateRange.value),
+      valueString: granularityDefinition.toString(newDateRange.value, i18n),
     })
   }
 

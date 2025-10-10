@@ -1,11 +1,15 @@
+import { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
+import {
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import { FiltersDefinition } from "../../../../../../components/OneFilterPicker/types"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
-import { SortingsDefinition } from "../../../../sortings"
 import { SummariesDefinition } from "../../../../summary"
-import { DataSource, GroupingDefinition, RecordType } from "../../../../types"
 import { ListPropertyDefinition } from "../types"
 
 type ListSkeletonProps<
@@ -17,7 +21,7 @@ type ListSkeletonProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     R,
     Filters,
     Sortings,
@@ -61,7 +65,7 @@ export const ListSkeleton = <
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-b-xl border border-solid border-f1-border-secondary [&>div:last-child]:border-b-transparent [&>div]:border [&>div]:border-solid [&>div]:border-transparent [&>div]:border-b-f1-border-secondary",
+        "relative flex h-full flex-col overflow-hidden rounded-b-xl border border-solid border-f1-border-secondary [&>div:last-child]:border-b-transparent [&>div]:border [&>div]:border-solid [&>div]:border-transparent [&>div]:border-b-f1-border-secondary",
         isInitialLoading ? "mx-4 mt-2 rounded-t-xl" : "border-t-0",
         className
       )}

@@ -1,11 +1,19 @@
+import type { IconType } from "@/components/F0Icon"
+import type { Variant } from "@/components/tags/F0TagStatus"
+import type { RecordType } from "@/hooks/datasource"
 import { ReactNode } from "react"
-import { RecordType } from "../../experimental/OneDataCollection/types"
 
-export interface OneLaneProps<Record extends RecordType> {
+export interface LaneProps<Record extends RecordType> {
   /**
    * The title of the card
    */
   title?: string
+  /**
+   * Primary action triggered from the lane header (top-right).
+   */
+  onPrimaryAction?: () => void
+  primaryActionIcon?: IconType
+  primaryActionLabel?: string
 
   /**
    * The items to display in the lane
@@ -33,11 +41,6 @@ export interface OneLaneProps<Record extends RecordType> {
   loading?: boolean
 
   /**
-   * The maximum height of the lane in pixels
-   */
-  maxHeight?: number
-
-  /**
    * Whether the lane has more items to load
    */
   hasMore?: boolean
@@ -51,4 +54,26 @@ export interface OneLaneProps<Record extends RecordType> {
    * Function to fetch more items. This is used to fetch more items when the lane is at the bottom of the viewport.
    */
   fetchMore?: () => void
+
+  /**
+   * The variant of the lane
+   */
+  variant?: Variant
+
+  /**
+   * The total number of items in the lane (for display in header)
+   * If not provided, defaults to items.length
+   */
+  total?: number
+  /**
+   * Action triggered from the lane footer button, usually to create new items.
+   */
+  onFooterAction?: () => void
+  footerActionLabel?: string
+  footerActionIcon?: IconType
+  /**
+   * Index at which to show a drop placeholder/skeleton during drag operations.
+   * If undefined, no placeholder is shown.
+   */
+  dropPlaceholderIndex?: number
 }

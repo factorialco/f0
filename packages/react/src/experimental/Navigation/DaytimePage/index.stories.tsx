@@ -15,7 +15,17 @@ const meta: Meta<typeof DaytimePage> = {
   },
   decorators: [
     (Story) => (
-      <ApplicationFrame sidebar={null}>
+      <ApplicationFrame
+        sidebar={null}
+        ai={{
+          runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
+          agent: "one-workflow",
+          credentials: "include",
+          showDevConsole: false,
+          enabled: true,
+          greeting: "Hello, John",
+        }}
+      >
         <Story />
       </ApplicationFrame>
     ),
@@ -121,7 +131,6 @@ export const DaytimeHomeLayoutWithMoodNotSet: Story = {
         employeeFirstName: "Saul",
         employeeLastName: "Goodman",
         title: "Good morning, Saul!",
-        description: "How are you feeling today?",
         pulse: undefined,
         onPulseClick: () => {},
         employeeAvatar: "/avatars/person05.jpg",

@@ -1,4 +1,4 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
@@ -27,7 +27,7 @@ export const F0TagBalance = forwardRef<HTMLDivElement, Props>(
         )}
         left={
           status === "neutral" ? null : (
-            <Icon
+            <F0Icon
               icon={iconMap[status]}
               size="sm"
               className={cn(

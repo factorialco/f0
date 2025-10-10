@@ -1,7 +1,7 @@
 import { Meta, Title, Unstyled } from "@storybook/addon-docs/blocks"
 
 import { ComponentProps } from "react"
-import { Icon } from "../../src/components/Utilities/Icon"
+import { F0Icon } from "../../src/components/F0Icon"
 import { Check, Cross, ExternalLink } from "../../src/icons/app"
 
 type OneMetaProps = {
@@ -40,7 +40,7 @@ type OneMetaProps = {
 
 const Status = ({ value }: { value: boolean }) => (
   <div>
-    <Icon
+    <F0Icon
       icon={value ? Check : Cross}
       className={value ? "translate-y-[1px]" : "translate-y-0.5"}
     />
@@ -61,7 +61,7 @@ export const OneMeta = ({ title, maturity, ...rest }: OneMetaProps) => {
               rel="noreferrer"
               className="no-underline"
             >
-              Figma <Icon icon={ExternalLink} />
+              Figma <F0Icon icon={ExternalLink} />
             </a>
           )}
           {maturity.figmaComponent === null && (

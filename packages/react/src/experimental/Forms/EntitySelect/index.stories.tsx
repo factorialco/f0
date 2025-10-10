@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { Plus } from "@/icons/app"
+import { Placeholder, Plus } from "@/icons/app"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { ComponentProps, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
@@ -24,10 +24,12 @@ const GROUP_DATA = {
   workplaces: workplaceWithEmployees,
 }
 
-const defaultArgs: EntitySelectProps = {
+const defaultArgs: EntitySelectProps<string> = {
   entities: [],
-  triggerPlaceholder: "Select employees...",
-  triggerSelected: "employees selected",
+  label: "Role",
+  hideLabel: true,
+  placeholder: "Select employees...",
+  selectedItemsCopy: "employees selected",
   searchPlaceholder: "Search...",
   selectAllLabel: "Select all",
   clearLabel: "Clear",
@@ -66,7 +68,7 @@ const meta: Meta<typeof EntitySelect> = {
   ],
   args: {
     ...defaultArgs,
-  } satisfies EntitySelectProps,
+  } satisfies EntitySelectProps<string>,
   render: (props) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [selectedGroup, setSelectedGroup] = useState<string>(
@@ -218,7 +220,7 @@ export const WithSelectedGroup = {
   args: {
     ...defaultArgs,
     selectedGroup: "teams",
-  } as EntitySelectProps,
+  } as EntitySelectProps<string>,
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
@@ -275,7 +277,7 @@ export const SingleSelector = {
     ...defaultArgs,
     onSelect: fn(),
     singleSelector: true,
-  } as EntitySelectProps,
+  } as EntitySelectProps<string>,
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [selected, setSelected] = useState<EntitySelectEntity | undefined>()
@@ -336,7 +338,7 @@ export const AlwaysOpen = {
     singleSelector: false,
     loading: false,
     alwaysOpen: true,
-  } as EntitySelectProps,
+  } as EntitySelectProps<string>,
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
@@ -398,7 +400,7 @@ export const AlwaysOpenInForm = {
     singleSelector: false,
     loading: false,
     alwaysOpen: true,
-  } as EntitySelectProps,
+  } as EntitySelectProps<string>,
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
     const [selected, setSelected] = useState<EntitySelectEntity[]>([
@@ -451,7 +453,7 @@ export const WithCustomTrigger = {
   args: {
     ...defaultArgs,
     onSelect: fn(),
-  } as EntitySelectProps,
+  } as EntitySelectProps<string>,
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
@@ -702,5 +704,52 @@ export const WithActions = {
         />
       </form>
     )
+  },
+}
+
+export const WithSizeMd = {
+  args: {
+    ...defaultArgs,
+    size: "md",
+  },
+}
+
+export const WithLabel = {
+  args: {
+    ...defaultArgs,
+    label: "Select an employee",
+    hideLabel: false,
+  },
+}
+
+export const WithLabelIcon = {
+  args: {
+    ...defaultArgs,
+    label: "Select an employee",
+    labelIcon: Placeholder,
+    hideLabel: false,
+  },
+}
+
+export const Error = {
+  args: {
+    ...defaultArgs,
+    error: "This is an error",
+    hideLabel: false,
+  },
+}
+
+export const Hint = {
+  args: {
+    ...defaultArgs,
+    hint: "This is a hint",
+    hideLabel: false,
+  },
+}
+
+export const Disabled = {
+  args: {
+    ...defaultArgs,
+    disabled: true,
   },
 }

@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Button } from "@/ui/button"
@@ -127,7 +127,7 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
           )}
           onClick={scrollPrev}
         >
-          <Icon icon={ChevronLeft} />
+          <F0Icon icon={ChevronLeft} />
           <span className="sr-only">Previous</span>
         </Button>
       )}
@@ -143,7 +143,7 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
           )}
           onClick={scrollNext}
         >
-          <Icon icon={ChevronRight} />
+          <F0Icon icon={ChevronRight} />
           <span className="sr-only">Next</span>
         </Button>
       )}

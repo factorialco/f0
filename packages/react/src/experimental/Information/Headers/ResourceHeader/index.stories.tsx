@@ -1,4 +1,6 @@
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ComponentProps } from "react"
 import { fn } from "storybook/test"
 import * as Icon from "../../../../icons/app"
 import {
@@ -500,5 +502,24 @@ export const NoDescription: Story = {
         value: { type: "text", content: "22" },
       },
     ],
+  },
+}
+
+type ResourceHeaderProps = ComponentProps<typeof ResourceHeader>
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    return (
+      <div>
+        <ResourceHeader {...(NoDescription.args as ResourceHeaderProps)} />
+        <ResourceHeader {...(Default.args as ResourceHeaderProps)} />
+        <ResourceHeader
+          {...(WithLongDescription.args as ResourceHeaderProps)}
+        />
+        <ResourceHeader {...(WithDropdownAction.args as ResourceHeaderProps)} />
+        <ResourceHeader {...(PersonHeader.args as ResourceHeaderProps)} />
+      </div>
+    )
   },
 }

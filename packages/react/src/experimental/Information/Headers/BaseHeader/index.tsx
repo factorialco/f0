@@ -152,7 +152,7 @@ export function BaseHeader({
                     ? { ...avatar, type: "company" }
                     : avatar),
                 }}
-                size="xlarge"
+                size="xl"
               />
             </div>
           )}

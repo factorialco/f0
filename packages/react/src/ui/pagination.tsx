@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Icon } from "../components/Utilities/Icon"
+import { F0Icon } from "../components/F0Icon"
 import { ChevronLeft, ChevronRight, EllipsisHorizontal } from "../icons/app"
 import { cn, focusRing } from "../lib/utils"
 
@@ -69,7 +69,7 @@ const PaginationPrevious = ({
     )}
     {...props}
   >
-    <Icon icon={ChevronLeft} />
+    <F0Icon icon={ChevronLeft} />
   </PaginationLink>
 )
 PaginationPrevious.displayName = "PaginationPrevious"
@@ -87,7 +87,7 @@ const PaginationNext = ({
     )}
     {...props}
   >
-    <Icon icon={ChevronRight} />
+    <F0Icon icon={ChevronRight} />
   </PaginationLink>
 )
 PaginationNext.displayName = "PaginationNext"
@@ -102,7 +102,7 @@ const PaginationEllipsis = ({
     className={cn("flex h-9 w-9 items-center justify-center", className)}
     {...props}
   >
-    <Icon icon={EllipsisHorizontal} />
+    <F0Icon icon={EllipsisHorizontal} />
   </span>
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"

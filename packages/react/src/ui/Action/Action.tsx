@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { Spinner } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
@@ -103,7 +103,7 @@ export const Action = React.forwardRef<HTMLElement, ActionProps>(
                 iconVariants({ variant: defaultVariant, mode: "only" })
               )}
             >
-              <Icon icon={Spinner} className="animate-spin" />
+              <F0Icon icon={Spinner} className="animate-spin" />
             </motion.div>
           )}
           {loading && isLinkStyled && (

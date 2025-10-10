@@ -1,4 +1,4 @@
-import { BaseAvatar } from "../BaseAvatar"
+import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarPersonProps } from "./types"
 
 export const F0AvatarPerson = ({

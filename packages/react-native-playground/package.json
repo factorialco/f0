@@ -16,8 +16,8 @@
     "storybook-generate": "sb-rn-get-stories"
   },
   "dependencies": {
-    "@factorialco/factorial-one-core": "workspace:*",
-    "@factorialco/factorial-one-react-native": "workspace:*",
+    "@factorialco/f0-core": "workspace:*",
+    "@factorialco/f0-react-native": "workspace:*",
     "@react-navigation/native": "^7.0.0",
     "@rn-primitives/avatar": "~1.1.0",
     "@rn-primitives/portal": "~1.1.0",

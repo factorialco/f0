@@ -6,7 +6,7 @@ import {
   LinkProps as BaseLinkProps,
 } from "../../../lib/linkHandler"
 import { cn, focusRing } from "../../../lib/utils"
-import { Icon } from "../../Utilities/Icon"
+import { F0Icon } from "../../F0Icon"
 
 const linkVariants = cva({
   base: "inline-flex flex-row items-center gap-1 text-base",
@@ -63,7 +63,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       )}
     >
       <span>{children}</span>
-      {external && <Icon icon={ExternalLink} size="sm" />}
+      {external && <F0Icon icon={ExternalLink} size="sm" />}
     </BaseLink>
   )
 })

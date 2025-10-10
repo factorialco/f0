@@ -4,6 +4,7 @@ import { consola } from "consola"
 import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import path, { resolve } from "path"
+import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
@@ -28,7 +29,7 @@ if (buildTailwind) {
 
 /* Build sync */
 const defaultCoderWorkspaceFolder =
-  "/home/factorial/workspace/factorial/frontend/node_modules/@factorialco/factorial-one-react"
+  "/home/factorial/workspace/factorial/frontend/node_modules/@factorialco/f0-react"
 
 const buildSyncArg = process.argv.find((arg) => arg.startsWith("--buildSync"))
 const buildSync = !!buildSyncArg
@@ -70,20 +71,44 @@ if (process.env.BUILD_TYPES) {
   )
 }
 
+const alias = {
+  "@": path.resolve(__dirname, "./src"),
+  "~": path.resolve(__dirname, "./"),
+}
+
+// Check if we're building for Storybook to preserve data-testid attributes
+const isStorybookBuild = process.env.STORYBOOK_BUILD === "true"
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), libInjectCss(), ...extraPlugins],
+  plugins: [
+    react(),
+    libInjectCss(),
+    // Only remove test IDs in production builds that are NOT for Storybook
+    ...(isStorybookBuild
+      ? []
+      : [
+          removeTestIdAttribute({
+            include: [/\.[tj]sx$/],
+            exclude: ["**/node_modules/**"],
+            attributes: ["data-testid"],
+            environments: ["production"],
+            debug: false,
+            usage: "vite",
+          }),
+        ]),
+    ...extraPlugins,
+  ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "~": path.resolve(__dirname, "./"),
+      ...alias,
       "@storybook-static": path.resolve(__dirname, "./.storybook/static"),
     },
   },
   build: {
     lib: {
       entry: {
-        ["factorial-one"]: resolve(__dirname, "src/factorial-one.ts"),
+        ["f0"]: resolve(__dirname, "src/f0.ts"),
         ["experimental"]: resolve(__dirname, "src/experimental.ts"),
       },
       fileName: (_, entryName) => {
@@ -106,9 +131,15 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vite/vitest.setup.ts"],
+    alias: {
+      ...alias,
+    },
+    typecheck: {
+      tsconfig: "./tsconfig.test.json",
+    },
     coverage: {
       // you can include other reporters, but 'json-summary' is required, json is recommended
-      reporter: ["text", "json-summary", "json"],
+      reporter: ["text", "json-summary", "json", "html"],
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
     },

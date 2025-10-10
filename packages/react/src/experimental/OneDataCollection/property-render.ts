@@ -2,8 +2,8 @@ import {
   metadataRenderer,
   ValueDisplayRendererDefinition,
 } from "@/components/value-display"
+import { RecordType } from "@/hooks/datasource"
 import { ReactNode } from "react"
-import { RecordType } from "./types"
 import { VisualizationType } from "./visualizations/collection/types"
 
 export type RendererDefinition = ValueDisplayRendererDefinition
@@ -34,6 +34,12 @@ export type PropertyDefinition<T> = {
    * }
    */
   render: (item: T) => RendererDefinition | string | number | undefined
+
+  /**
+   * Function that determines if the property should be hidden for a given item.
+   * Should return true if the property should be hidden, false otherwise.
+   */
+  hide?: (item: T) => boolean
 }
 
 export const renderProperty = <R extends RecordType>(

@@ -1,10 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useMemo, useState } from "react"
+import { F0Icon as IconComponent, IconType } from "../../src/components/F0Icon"
 import { OneEllipsis } from "../../src/components/OneEllipsis"
-import {
-  Icon as IconComponent,
-  IconType,
-} from "../../src/components/Utilities/Icon"
 import * as Icons from "../../src/icons/app"
 import { cn, focusRing } from "../../src/lib/utils.ts"
 
@@ -93,7 +90,7 @@ export function IconGrid() {
   }, [searchTerm])
 
   return (
-    <div className="flex flex-col gap-4 pt-4">
+    <div className="flex flex-col gap-4">
       <div className="relative w-full">
         <input
           type="text"

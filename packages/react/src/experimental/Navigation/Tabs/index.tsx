@@ -1,6 +1,6 @@
 import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 import { Dispatch, useEffect, useState } from "react"
-import { Icon } from "../../../components/Utilities/Icon"
+import { F0Icon } from "../../../components/F0Icon"
 import { Upsell } from "../../../icons/app"
 import { Link, useNavigation } from "../../../lib/linkHandler"
 import { withSkeleton } from "../../../lib/skeleton"
@@ -81,7 +81,7 @@ export const BaseTabs: React.FC<TabsProps> = ({
             >
               <Link role="link" {...props}>
                 {props.variant === "upsell" && (
-                  <Icon
+                  <F0Icon
                     icon={Upsell}
                     size="md"
                     className="mr-1 text-[hsl(var(--promote-50))]"

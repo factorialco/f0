@@ -2,12 +2,15 @@ import {
   addDays,
   addMonths,
   endOfDay,
+  isSameDay,
+  isSameMonth,
+  isSameYear,
   startOfDay,
   startOfMonth,
 } from "date-fns"
-import { GranularityDefinition } from ".."
 import { DateRange, DateRangeComplete } from "../../types"
 import {
+  formatDate,
   formatDateRange,
   formatDateToString,
   isAfterOrEqual,
@@ -15,6 +18,8 @@ import {
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
+import { rangeSeparator } from "../consts"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { DayView } from "./DayView"
 
 export function toDayGranularityDateRange<
@@ -28,6 +33,31 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
     from: startOfDay(addDays(date.from, delta)),
     to: endOfDay(addDays(date.to, delta)),
   }
+}
+
+const formatLong = (date: DateRange | Date | undefined | null) => {
+  const dateRange = toDayGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+  // Single date
+  if (!dateRange.to || isSameDay(dateRange.from, dateRange.to)) {
+    return formatDate(dateRange.from, "dd MMM yyyy")
+  }
+
+  // Range
+  // Same month
+  if (isSameMonth(dateRange.from, dateRange.to)) {
+    return `${formatDate(dateRange.from, "dd")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
+  }
+
+  // Same year
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${formatDate(dateRange.from, "dd MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
+  }
+
+  // Different month and year
+  return `${formatDate(dateRange.from, "dd MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "dd MMM yyyy")}`
 }
 
 export const dayGranularity: GranularityDefinition = {
@@ -61,7 +91,13 @@ export const dayGranularity: GranularityDefinition = {
   },
   toRange: (date) => toDayGranularityDateRange(date),
   toRangeString: (date) => formatDateRange(date, "dd/MM/yyyy"),
-  toString: (date) => formatDateToString(date, "dd/MM/yyyy"),
+  toString: (date, _, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatDateToString(date, "dd/MM/yyyy"),
+      long: formatLong(date),
+    }
+    return formats[format] ?? formats.default
+  },
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

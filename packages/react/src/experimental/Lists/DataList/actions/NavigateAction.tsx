@@ -1,5 +1,5 @@
 import { memo, ReactNode } from "react"
-import { Icon } from "../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../components/F0Icon"
 import ChevronRight from "../../../../icons/app/ChevronRight"
 import { Link } from "../../../../lib/linkHandler"
 import { cn } from "../../../../lib/utils"
@@ -23,7 +23,7 @@ export const NavigateAction = memo(
       >
         {children}
         <div className="grid">
-          <Icon
+          <F0Icon
             aria-hidden={true}
             icon={ChevronRight}
             size="md"

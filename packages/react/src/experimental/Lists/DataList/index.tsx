@@ -3,8 +3,8 @@ import { forwardRef, ReactElement } from "react"
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
+import { IconType } from "@/components/F0Icon"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
-import { IconType } from "@/components/Utilities/Icon"
 import { cn } from "@/lib/utils"
 import { InternalActionType, ItemContainer } from "./ItemContainer"
 
@@ -27,7 +27,7 @@ const _DataList = forwardRef<HTMLUListElement, DataListProps>(
         className={cn(
           isHorizontal
             ? "flex min-h-12 flex-1 flex-col py-1.5 pl-3 pr-1.5 xs:flex-row"
-            : "min-w-32 max-w-72"
+            : "min-w-32 md:max-w-80"
         )}
       >
         {label && (
@@ -100,7 +100,7 @@ const PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
         ref={ref}
         leftIcon={() => (
           <F0AvatarPerson
-            size="xsmall"
+            size="xs"
             src={avatarUrl}
             firstName={firstName}
             lastName={lastName}
@@ -126,7 +126,7 @@ const CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
       <ItemContainer
         ref={ref}
         leftIcon={() => (
-          <F0AvatarCompany name={name} size="xsmall" src={avatarUrl} />
+          <F0AvatarCompany name={name} size="xs" src={avatarUrl} />
         )}
         text={name}
         action={getInternalAction(action, name)}
@@ -147,7 +147,7 @@ const TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
     return (
       <ItemContainer
         ref={ref}
-        leftIcon={() => <F0AvatarTeam name={name} size="xsmall" />}
+        leftIcon={() => <F0AvatarTeam name={name} size="xs" />}
         text={name}
         action={getInternalAction(action, name)}
       />

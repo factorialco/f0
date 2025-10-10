@@ -9,7 +9,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as SummaryStories from "./summary.stories"
 
-<Meta title="Data collection/Summary" />
+<Meta of={SummaryStories} />
 
 # Data collection / Summary
 
@@ -36,7 +36,7 @@ To enable the Summary feature in your data collection component, provide the
 `summary` attribute in the source prop:
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   summaries: {
     amount: {
       // Type can be 'sum', 'avg', or 'count'
@@ -77,7 +77,7 @@ at the bottom of the table while users scroll through the data.
 To implement a data collection with infinite scroll and sticky summary:
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   // Define your summaries as usual
   summaries: {
     salary: {
@@ -124,7 +124,7 @@ const dataSource = useDataSource({
 To implement a data collection with infinite scroll and sticky summary:
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   // Define your summaries as usual
   summaries: {
     salary: {

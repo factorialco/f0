@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
@@ -30,7 +30,7 @@ export const ChevronToggle = ({
       )}
       onClick={onClick}
     >
-      <Icon icon={ChevronDown} size={size} role="button" />
+      <F0Icon icon={ChevronDown} size={size} role="button" />
     </motion.div>
   )
 }

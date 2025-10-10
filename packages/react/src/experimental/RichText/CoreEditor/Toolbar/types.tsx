@@ -1,4 +1,4 @@
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import { Shortcut } from "@/experimental/Information/Shortcut"
 import { Editor } from "@tiptap/react"
 import { ComponentProps } from "react"

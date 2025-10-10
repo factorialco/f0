@@ -1,23 +1,22 @@
-import { Button } from "@/components/Actions/Button"
 import { Link } from "@/components/Actions/Link"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { DropdownItemSeparator } from "@/experimental/Navigation/Dropdown/internal"
+import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
+import {
+  FiltersDefinition,
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
-import { FiltersDefinition } from "../../../../../../components/OneFilterPicker/types"
-import {
-  ActionDefinition,
-  filterItemActions,
-  ItemActionsDefinition,
-} from "../../../../item-actions"
-import { ItemActionsDropdown } from "../../../../ItemActions/ItemActionsDropdown"
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
-import { SortingsDefinition } from "../../../../sortings"
 import { SummariesDefinition } from "../../../../summary"
-import { DataSource, GroupingDefinition, RecordType } from "../../../../types"
-import { actionsToDropdownItems } from "../../utils"
 import { ItemDefinition, ListPropertyDefinition } from "../types"
 import { ItemTeaser } from "./ItemTeaser"
 
@@ -30,7 +29,7 @@ type RowProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     R,
     Filters,
     Sortings,
@@ -87,67 +86,30 @@ export const Row = <
   const id = source.selectable ? source.selectable(item) : undefined
   const itemDef = itemDefinition(item)
 
-  const itemActions = filterItemActions(source.itemActions, item)
-
-  // gets the primary item actions (max 2)
-  const primaryItemActions = itemActions
-    .filter(
-      (action): action is Exclude<ActionDefinition, DropdownItemSeparator> =>
-        action.type === "primary"
-    )
-    .slice(0, 2)
-
-  // the rest of the actions go to the dropdown
-  const dropdownItemActions = actionsToDropdownItems(
-    itemActions.filter(
-      (action) =>
-        action.type === "separator" || !primaryItemActions.includes(action)
-    )
-  )
-
-  // mobile dropdown includes primary actions
-  const mobileDropdownItemActions = actionsToDropdownItems([
-    ...primaryItemActions,
-    ...itemActions.filter(
-      (action) =>
-        action.type === "separator" || !primaryItemActions.includes(action)
-    ),
-  ])
-
-  const [dropDownOpen, setDropDownOpen] = useState(false)
-
-  const [dropDownOpenTimeout, setDropDownOpenTimeout] =
-    useState<NodeJS.Timeout | null>(null)
-  const handleDropDownOpenChange = (open: boolean) => {
-    // When the dropdown is closed, we wait 100ms before closing it to avoid losing the reference element to position the dropdown
-    if (!open) {
-      setDropDownOpenTimeout(
-        setTimeout(() => {
-          setDropDownOpen(false)
-        }, 100)
-      )
-      return
-    }
-
-    if (dropDownOpenTimeout) {
-      clearTimeout(dropDownOpenTimeout)
-      setDropDownOpenTimeout(null)
-    }
-    setDropDownOpen(true)
-  }
+  const {
+    primaryItemActions,
+    dropdownItemActions,
+    mobileDropdownItemActions,
+    handleDropDownOpenChange,
+    dropDownOpen,
+  } = useItemActions({ source, item })
 
   return (
     <div
       className={cn(
         "relative flex w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:p-2 md:pl-3 md:pr-4",
-        "group after:absolute after:inset-y-0 after:-right-px after:z-10 after:hidden after:h-full after:w-10 after:bg-gradient-to-r after:from-transparent after:via-f1-background after:via-75% after:to-f1-background after:transition-all after:content-[''] hover:after:via-[#F5F6F8] hover:after:to-[#F5F6F8] dark:hover:after:via-[#192231] dark:hover:after:to-[#192231] md:after:block hover:md:bg-f1-background-hover",
-        dropDownOpen && "md:bg-f1-background-hover"
+        "group after:absolute after:inset-y-0 after:-right-px after:z-10 after:hidden after:h-full after:w-10 after:bg-gradient-to-r after:from-transparent after:via-f1-background after:via-75% after:to-f1-background after:transition-all after:content-[''] hover:after:via-[#F5F6F8] hover:after:to-[#F5F6F8] dark:hover:after:via-[#192231] dark:hover:after:to-[#192231] md:after:block hover:md:bg-f1-background-hover"
       )}
     >
-      <div className="flex flex-1 flex-row items-center gap-2">
+      {/* This div is a click capture layer get the clicks in the row */}
+      <div
+        onClick={itemOnClick}
+        className="pointer-events-auto absolute inset-0"
+      ></div>
+      <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
         {source.selectable && id !== undefined && (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
-          <div className="z-10 hidden items-center justify-end md:flex">
+          <div className="pointer-events-auto z-10 hidden items-center justify-end md:flex">
             <F0Checkbox
               checked={selectedItems.has(id)}
               onCheckedChange={(checked) =>
@@ -159,7 +121,13 @@ export const Row = <
           </div>
         )}
         {itemHref && (
-          <Link href={itemHref} className="absolute inset-0 block" tabIndex={0}>
+          <Link
+            href={itemHref}
+            className="pointer-events-auto absolute inset-0 block"
+            tabIndex={0}
+            // onClick is needed here as the click event is not propagate to the fake click layer
+            onClick={itemOnClick}
+          >
             <span className="sr-only">{actions.view}</span>
           </Link>
         )}
@@ -170,54 +138,40 @@ export const Row = <
         />
       </div>
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
-        {(fields || []).map((field) => (
-          <div key={String(field.label)} onClick={itemOnClick}>
-            <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
-              {renderCell(item, field)}
+        {(fields || [])
+          .filter((field) => !field.hide?.(item))
+          .map((field) => (
+            <div key={String(field.label)}>
+              <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
+                {renderCell(item, field)}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
       {source.itemActions && (
         <>
-          <aside
-            className={cn(
-              "absolute -right-px bottom-0 top-0 z-20 hidden items-center justify-end gap-2 py-2 pl-20 pr-3 opacity-0 transition-all group-hover:opacity-100 md:flex",
-              "bg-gradient-to-l from-[#F5F6F8] from-0% dark:from-[#192231]",
-              "via-[#F5F6F8] via-60% dark:via-[#192231]",
-              "to-transparent to-100%",
-              dropDownOpen ? "opacity-100" : "opacity-0"
-            )}
+          <ItemActionsRowContainer
+            dropDownOpen={dropDownOpen}
+            className="pointer-events-auto hidden md:flex"
           >
-            {primaryItemActions.map((action) => (
-              <Button
-                key={action.label}
-                label={action.label}
-                variant="outline"
-                onClick={action.onClick}
-                icon={action.icon}
-              />
-            ))}
+            <ItemActionsRow
+              primaryItemActions={primaryItemActions}
+              dropdownItemActions={dropdownItemActions}
+              handleDropDownOpenChange={handleDropDownOpenChange}
+            />
+          </ItemActionsRowContainer>
 
-            <ItemActionsDropdown
-              align="end"
-              items={dropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          </aside>
-          <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden">
-            <ItemActionsDropdown
-              align="end"
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          </div>
+          <ItemActionsMobile
+            className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
+            items={mobileDropdownItemActions}
+            onOpenChange={handleDropDownOpenChange}
+          />
         </>
       )}
       {source.selectable && id !== undefined && (
         <div
           className={cn(
-            "absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
+            "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
             source.itemActions && "right-12"
           )}
         >

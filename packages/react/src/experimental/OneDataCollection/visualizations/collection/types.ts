@@ -1,55 +1,61 @@
-import type { FiltersDefinition } from "../../../../components/OneFilterPicker/types"
-import { IconType } from "../../../../components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
+import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
-import { SortingsDefinition } from "../../sortings"
 import { SummariesDefinition } from "../../summary"
 import type {
-  DataSource,
   GroupingDefinition,
   OnLoadDataCallback,
   OnLoadErrorCallback,
-  OnSelectItemsCallback,
-  RecordType,
 } from "../../types"
-import type { CardVisualizationOptions } from "../../visualizations/collection/Card"
-import type { TableVisualizationOptions } from "../../visualizations/collection/Table"
+import type { CardVisualizationOptions } from "./Card"
+import type { KanbanVisualizationOptions } from "./Kanban"
 import { ListVisualizationOptions } from "./List/types"
+import type { TableVisualizationOptions } from "./Table"
 
 /**
  * Represents a visualization configuration for displaying collection data.
  * Supports different visualization types (card, table, or custom) with their respective options.
  *
- * @template Record - The type of records in the collection
+ * @template R - The type of records in the collection
  * @template Filters - The filters type extending FiltersDefinition
  * @template ItemActions - The actions type extending Item ActionsDefinition
  */
 export type Visualization<
-  Record extends RecordType,
+  R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
-  ItemActions extends ItemActionsDefinition<Record>,
+  ItemActions extends ItemActionsDefinition<R>,
   NavigationFilters extends NavigationFiltersDefinition,
-  Grouping extends GroupingDefinition<Record>,
+  Grouping extends GroupingDefinition<R>,
 > =
   | {
       /** Card-based visualization type */
       type: "card"
       /** Configuration options for card visualization */
-      options: CardVisualizationOptions<Record, Filters, Sortings>
+      options: CardVisualizationOptions<R, Filters, Sortings>
+    }
+  | {
+      /** Kanban-based visualization type */
+      type: "kanban"
+      /** Configuration options for kanban visualization */
+      options: KanbanVisualizationOptions<R, Filters, Sortings>
     }
   | {
       /** Table-based visualization type */
       type: "table"
       /** Configuration options for table visualization */
-      options: TableVisualizationOptions<Record, Filters, Sortings, Summaries>
+      options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
     }
   | {
       /** List-based visualization type */
       type: "list"
       /** Configuration options for list visualization */
-      options: ListVisualizationOptions<Record, Filters, Sortings>
+      options: ListVisualizationOptions<R, Filters, Sortings>
     }
   | {
       /** Human-readable label for the visualization */
@@ -60,11 +66,11 @@ export type Visualization<
       type: "custom"
       /** Custom component to render the visualization */
       component: (props: {
-        onSelectItems: OnSelectItemsCallback<Record, Filters>
-        onLoadData: OnLoadDataCallback<Record, Filters>
+        onSelectItems: OnSelectItemsCallback<R, Filters>
+        onLoadData: OnLoadDataCallback<R, Filters>
         onLoadError: OnLoadErrorCallback
-        source: DataSource<
-          Record,
+        source: DataCollectionSource<
+          R,
           Filters,
           Sortings,
           Summaries,

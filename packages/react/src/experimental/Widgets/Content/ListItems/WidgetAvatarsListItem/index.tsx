@@ -1,8 +1,7 @@
-import { AvatarVariant } from "@/components/avatars/F0Avatar"
+import { PersonAvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
-import { IconType } from "@/components/Utilities/Icon"
 import { cn } from "@/lib/utils"
 import { ComponentProps } from "react"
 
@@ -10,7 +9,7 @@ export type WidgetAvatarsListItemProps = {
   id: string | number
   title: string
   subtitle: string
-  avatars: AvatarVariant[]
+  avatars: Omit<PersonAvatarVariant, "type">[] & Record<string, unknown>[]
   remainingCount?: number
   withPointerCursor?: boolean
   onClick?: (id: string | number) => void
@@ -18,7 +17,6 @@ export type WidgetAvatarsListItemProps = {
   | { emoji: string }
   | {
       alert: ComponentProps<typeof F0AvatarAlert>["type"]
-      alertIcon?: IconType
     }
 )
 
@@ -74,20 +72,20 @@ export function WidgetAvatarsListItem({
       withEmoji={"emoji" in props && !!props.emoji}
       withPointerCursor={withPointerCursor}
     >
-      {"alert" in props && (
-        <F0AvatarAlert type={props.alert} icon={props.alertIcon} />
-      )}
+      {"alert" in props && props.alert && <F0AvatarAlert type={props.alert} />}
       {"emoji" in props && props.emoji && <F0AvatarEmoji emoji={props.emoji} />}
       <div className="flex-1">
         <p className="line-clamp-1 font-medium">{title}</p>
         <p className="line-clamp-1 text-f1-foreground-secondary">{subtitle}</p>
       </div>
-      <F0AvatarList
-        avatars={avatars}
-        remainingCount={remainingCount}
-        size={"emoji" in props && props.emoji ? "medium" : "small"}
-        type="person"
-      />
+      <div className="min-w-0 flex-1">
+        <F0AvatarList
+          avatars={avatars}
+          remainingCount={remainingCount}
+          size={"emoji" in props && props.emoji ? "md" : "sm"}
+          type="person"
+        />
+      </div>
     </Wrapper>
   )
 }

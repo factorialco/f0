@@ -9,7 +9,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as ValueDisplayStories from "./ValueDisplay.stories"
 
-<Meta title="ValueDisplay" />
+<Meta of={ValueDisplayStories} />
 
 # ValueDisplay
 
@@ -90,6 +90,81 @@ render: (item) => ({
     value: {
       text: undefined
       placeholder: 'Some placeholder'
+    }
+})`,
+  }}
+/>
+
+### longText
+
+Renders long text with ellipsis truncation with tooltip support. Uses the
+OneEllipsis component for better cross-browser support and automatic tooltip
+functionality. By default, the text will be truncated after 3 lines and show an
+ellipsis. When you hover over the text, a tooltip will display the full content.
+
+You can disable the truncation and show the full text by setting the `full`
+property to `true`.
+
+#### Value type
+
+```
+type value = string | number | undefined
+// or
+type value = {
+    text: string | number | undefined
+    placeholder?: string
+} & (
+    | {
+        lines?: number
+        full?: never
+      }
+    | {
+        lines?: never
+        full: true
+      }
+  )
+```
+
+#### LongTextType
+
+<Canvas
+  of={ValueDisplayStories.LongTextType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: 'This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.'
+})`,
+  }}
+/>
+
+#### LongText With custom lines number
+
+<Canvas
+  of={ValueDisplayStories.LongTextWithLines}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: {
+        text: 'This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.',
+        lines: 5
+    }
+})`,
+  }}
+/>
+
+#### LongTextWithPlaceholder
+
+<Canvas
+  of={ValueDisplayStories.LongTextWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'longText',
+    value: {
+        text: undefined,
+        placeholder: 'No description available'
     }
 })`,
   }}
@@ -734,5 +809,83 @@ render: (item) => ({
   }
 })
 `,
+  }}
+/>
+
+### percentage
+
+Renders a percentage with a chart
+
+#### Value type
+
+```
+type value = number | undefined
+// or
+type value = {
+    percentage: number | undefined
+    label?: string
+    placeholder?: string
+}
+```
+
+#### PercentageInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.PercentageInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage',
+    value: 42
+})
+`,
+  }}
+/>
+
+#### PercentageValueInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.PercentageValueInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage'
+    value: {
+      percentage: 42
+    }
+})
+`,
+  }}
+/>
+
+#### With label
+
+<Canvas
+  of={ValueDisplayStories.PercentageWithLabel}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage'
+    value: {
+      percentage: 75,
+      label: '324 out of 432'
+    }
+})`,
+  }}
+/>
+
+#### With placeholder
+
+<Canvas
+  of={ValueDisplayStories.PercentageWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage'
+    value: {
+      percentage: undefined,
+      placeholder: 'There is no data yet'
+    }
+})`,
   }}
 />

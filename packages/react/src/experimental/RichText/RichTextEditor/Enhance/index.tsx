@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { Ai } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Button } from "@/ui/button"
@@ -73,7 +73,7 @@ const EnhanceActivator = ({
             hideLabel && "[&>button]:aspect-square [&>button]:px-0"
           )}
         >
-          <Icon icon={Ai} />
+          <F0Icon icon={Ai} />
           {!hideLabel &&
             (enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic")}
         </Button>

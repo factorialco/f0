@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
@@ -18,7 +18,12 @@ export const F0TagRaw = forwardRef<HTMLDivElement, Props>(
         )}
         left={
           icon ? (
-            <Icon icon={icon} size="sm" className="text-f1-icon" aria-hidden />
+            <F0Icon
+              icon={icon}
+              size="sm"
+              className="text-f1-icon"
+              aria-hidden
+            />
           ) : null
         }
         text={text}

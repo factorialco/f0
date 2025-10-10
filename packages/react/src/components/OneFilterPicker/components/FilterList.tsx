@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/providers/i18n"
 import { AnimatePresence, motion } from "motion/react"
 import { cn, focusRing } from "../../../lib/utils"
 import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
@@ -41,6 +42,7 @@ export function FilterList<Definition extends FiltersDefinition>({
   selectedFilterKey,
   onFilterSelect,
 }: FilterListProps<Definition>) {
+  const i18n = useI18n()
   return (
     <div className="w-[224px] shrink-0 border border-solid border-transparent border-r-f1-border-secondary">
       <div className="flex h-full w-full flex-col gap-1 overflow-y-auto p-2">
@@ -71,6 +73,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                 <AnimatePresence>
                   {!typedFilterType.isEmpty(currentValue, {
                     schema: filter as unknown as FilterTypeSchema,
+                    i18n,
                   }) && (
                     <motion.div
                       className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"

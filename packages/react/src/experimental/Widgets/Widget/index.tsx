@@ -1,7 +1,7 @@
 import { Button, type ButtonProps } from "@/components/Actions/Button"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
-import { Icon, IconType } from "@/components/Utilities/Icon"
 import { Counter } from "@/experimental/Information/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/experimental/Utilities/PrivateBox"
@@ -120,7 +120,7 @@ const Container = forwardRef<
                 )}
                 {header.info && (
                   <Tooltip label={header.info}>
-                    <Icon
+                    <F0Icon
                       icon={InfoCircleLine}
                       size="sm"
                       className="text-f1-foreground-secondary"

@@ -1,5 +1,5 @@
 import { Button } from "@/components/Actions/Button"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"

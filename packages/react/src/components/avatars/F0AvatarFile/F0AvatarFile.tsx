@@ -1,59 +1,39 @@
-import { Badge, BadgeProps } from "@/experimental/Information/Badge"
-import {
-  ModuleAvatar,
-  ModuleAvatarProps,
-} from "@/experimental/Information/ModuleAvatar"
+import { Badge } from "@/experimental/Information/Badge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, sizes } from "@/ui/avatar"
+import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"
 import { ElementRef, forwardRef, useMemo } from "react"
+import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
+import { AvatarFileSize, FileDef } from "./types"
+import { getAvatarSize, getBadgeSize, getFileTypeInfo } from "./utils"
+
 import { AvatarBadge } from "../F0Avatar/types"
-import { FileDef } from "./types"
-import { getFileTypeInfo } from "./utils"
-
-type F0AvatarFileSize = Extract<
-  (typeof sizes)[number],
-  "small" | "medium" | "large"
->
-
-const getBadgeSize = (
-  size?: F0AvatarFileSize
-): BadgeProps["size"] | undefined => {
-  const sizeMap: Partial<
-    Record<Exclude<F0AvatarFileSize, undefined>, BadgeProps["size"]>
-  > = {
-    large: "sm",
-    small: "sm",
-  } as const
-
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small
-}
-
-const getAvatarSize = (
-  size?: F0AvatarFileSize
-): ModuleAvatarProps["size"] | undefined => {
-  const sizeMap: Partial<
-    Record<Exclude<F0AvatarFileSize, undefined>, ModuleAvatarProps["size"]>
-  > = {
-    large: "xs",
-    small: "xs",
-  } as const
-
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small
-}
+import { F0AvatarModule } from "../F0AvatarModule"
 
 export type F0AvatarFileProps = Omit<
   React.ComponentPropsWithoutRef<typeof Avatar>,
-  "type"
+  "type" | "size"
 > & {
   file: FileDef
-  size?: F0AvatarFileSize
+  size?: AvatarFileSize
   badge?: AvatarBadge
-}
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
 
 const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
-  ({ file, badge, className, ...props }, ref) => {
+  ({ file, badge, ...props }, ref) => {
     const { type: fileType, color: fileColor } = getFileTypeInfo(file)
+
+    const reversedSizesMapping = useMemo(
+      () =>
+        Object.fromEntries(
+          Object.entries(sizesMapping).map(([key, value]) => [value, key])
+        ),
+      []
+    )
+
+    const mappedSize: InternalAvatarProps["size"] = (reversedSizesMapping[
+      props.size as string
+    ] ?? "small") as InternalAvatarProps["size"]
 
     const badgeSize = getBadgeSize(props.size)
     const moduleAvatarSize = getAvatarSize(props.size)
@@ -63,7 +43,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
         badge ? (
           <>
             {badge.type === "module" && (
-              <ModuleAvatar module={badge.module} size={moduleAvatarSize} />
+              <F0AvatarModule module={badge.module} size={moduleAvatarSize} />
             )}
             {badge.type !== "module" && (
               <Badge type={badge.type} icon={badge.icon} size={badgeSize} />
@@ -73,13 +53,26 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
       [badge, badgeSize, moduleAvatarSize]
     )
 
+    const textSize = useMemo(() => {
+      const textSizeMap: Record<AvatarFileSize, string> = {
+        xs: "text-[7px]",
+        sm: "text-[8px]",
+        md: "text-sm",
+        lg: "text-sm",
+      }
+      return textSizeMap[props.size || "sm"] ?? textSizeMap.sm
+    }, [props])
+
     return (
       <Avatar
         ref={ref}
-        className={cn("overflow-visible bg-f1-background", className)}
+        className={cn("bg-f1-background", "overflow-visible")}
         {...props}
+        size={mappedSize}
       >
-        <AvatarFallback className={cn("text-xs font-semibold", fileColor)}>
+        <AvatarFallback
+          className={cn("select-none font-semibold", textSize, fileColor)}
+        >
           {fileType}
         </AvatarFallback>
         {badge && (

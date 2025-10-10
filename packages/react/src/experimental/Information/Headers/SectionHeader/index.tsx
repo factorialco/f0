@@ -1,7 +1,7 @@
 import { useLayout } from "@/components/layouts/LayoutProvider"
 import { Button, type ButtonProps } from "../../../../components/Actions/Button"
 import { Link } from "../../../../components/Actions/Link"
-import type { IconType } from "../../../../components/Utilities/Icon"
+import type { IconType } from "../../../../components/F0Icon"
 import { cn } from "../../../../lib/utils"
 
 type Props = {

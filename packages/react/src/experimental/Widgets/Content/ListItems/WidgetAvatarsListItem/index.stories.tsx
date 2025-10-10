@@ -28,25 +28,21 @@ export const Default: Story = {
     subtitle: "4 people",
     avatars: [
       {
-        type: "person",
         firstName: "Miguel",
         lastName: "Pousa",
         src: "/avatars/person01.jpg",
       },
       {
-        type: "person",
         firstName: "Nik",
         lastName: "Lopin",
         src: "/avatars/person02.jpg",
       },
       {
-        type: "person",
         firstName: "Josep Jaume",
         lastName: "Rey",
         src: "/avatars/person03.jpg",
       },
       {
-        type: "person",
         firstName: "Saúl",
         lastName: "Domínguez",
       },
@@ -63,25 +59,21 @@ export const WithLongTitle: Story = {
     subtitle: "4 people",
     avatars: [
       {
-        type: "person",
         firstName: "Miguel",
         lastName: "Pousa",
         src: "/avatars/person01.jpg",
       },
       {
-        type: "person",
         firstName: "Nik",
         lastName: "Lopin",
         src: "/avatars/person02.jpg",
       },
       {
-        type: "person",
         firstName: "Josep Jaume",
         lastName: "Rey",
         src: "/avatars/person03.jpg",
       },
       {
-        type: "person",
         firstName: "Saúl",
         lastName: "Domínguez",
       },

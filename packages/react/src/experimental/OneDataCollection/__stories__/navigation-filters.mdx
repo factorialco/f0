@@ -24,12 +24,12 @@ arrow keys you can navigate through the dates.
 ### Usage
 
 Navigation filters are defined on the `navigationFilters` prop of the
-`useDataSource` hook.
+`useDataCollectionSource` hook.
 
 #### Example
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   navigationFilters: {
     date: {
       type: "date-navigator",
@@ -46,10 +46,10 @@ As the navigation filters are not nullable the initial value is mandatory. The
 `options` property depends on the type of the navigation filter.
 
 The current value of the filter is passed to the `dataAdapter.fetchData`
-function on the `useDataSource` hook as `filterValues` parameter.
+function on the `useDataCollectionSource` hook as `filterValues` parameter.
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   dataAdapter: {
     fetchData: ({ filters, navigationFilters }) =>
       fetchData(filters, navigationFilters),
@@ -90,7 +90,7 @@ on the last day of the month at 23:59:59), etc.
 ### Example
 
 ```tsx
-const dataSource = useDataSource({
+const dataSource = useDataCollectionSource({
   navigationFilters: {
     date: {
       type: "date-navigator",

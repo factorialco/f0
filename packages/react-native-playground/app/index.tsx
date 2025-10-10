@@ -23,7 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { ExampleComponent } from "@factorialco/factorial-one-react-native";
+import { ExampleComponent } from "@factorialco/f0-react-native";
 
 const GITHUB_AVATAR_URI =
   "https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg";

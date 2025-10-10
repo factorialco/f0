@@ -67,9 +67,46 @@ const htmlContent = `<p>
 </pre>
 `
 
+const markdownContent = `
+## Markdown support
+
+This component supports **GitHub Flavored Markdown content**. You can use it by setting the \`format\` prop to \`markdown\`.
+* 🤯 It supports headings.
+* 🖼️ It supports images.
+* 🔗 It supports links.
+* ✏️ Many ~text~ _formatting_ **options**.
+* 💐 And [lots of other features!](https://github.github.com/gfm/)
+
+### Code blocks
+
+\`\`\`html
+<div>
+  <p>Hello world!</p>
+</div>
+\`\`\`
+
+### Lists
+* [ ] todo
+* [x] done
+
+### Tables
+| Header 1 | Header 2 |
+| - | - |
+| c | d |
+`
+
 export const Default: Story = {
   tags: ["experimental"],
   args: {
     content: htmlContent,
+  },
+}
+
+export const Markdown: Story = {
+  parameters: { a11y: { skipCi: true } },
+  tags: ["experimental"],
+  args: {
+    content: markdownContent,
+    format: "markdown",
   },
 }

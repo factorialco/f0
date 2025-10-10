@@ -1,11 +1,13 @@
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
+import { BaseAvatarProps } from "../internal/BaseAvatar"
 
-type Props = {
+export const avatarIconSizes = ["sm", "md", "lg"] as const
+
+export type F0AvatarIconProps = {
   icon: IconType
-  size?: "sm" | "md" | "lg"
-  className?: string
-}
+  size?: (typeof avatarIconSizes)[number]
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
 
 const sizes = {
   sm: "size-6 rounded-sm",
@@ -13,16 +15,26 @@ const sizes = {
   lg: "size-10 rounded-lg",
 }
 
-export const F0AvatarIcon = ({ icon, size = "md", className }: Props) => {
+export const F0AvatarIcon = ({
+  icon,
+  size = "md",
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+}: F0AvatarIconProps) => {
   return (
     <div
       className={cn(
-        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary",
-        sizes[size],
-        className
+        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background dark:bg-f1-background-inverse-secondary",
+        sizes[size]
       )}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
     >
-      <Icon icon={icon} size={size} className="text-f1-foreground-secondary" />
+      <F0Icon
+        icon={icon}
+        size={size}
+        className="text-f1-foreground-secondary"
+      />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactNode, useEffect, useState } from "react"
-import { Icon } from "../../../../components/Utilities/Icon"
+import { F0Icon } from "../../../../components/F0Icon"
 import { CheckCircle, LayersFront } from "../../../../icons/app"
 import { cn } from "../../../../lib/utils"
 import { InternalCopyActionType } from "../ItemContainer"
@@ -56,7 +56,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
               transition={{ duration: 0.1 }}
               className="absolute inset-0"
             >
-              <Icon
+              <F0Icon
                 icon={LayersFront}
                 size="md"
                 aria-hidden={true}
@@ -78,7 +78,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
               transition={{ duration: 0.1 }}
               className="absolute inset-0"
             >
-              <Icon
+              <F0Icon
                 icon={CheckCircle}
                 size="md"
                 aria-hidden={true}

@@ -1,10 +1,10 @@
 import { NewColor } from "@/components/tags/F0TagDot"
-import { Placeholder } from "@/icons/app"
-import { Meta, StoryObj } from "@storybook/react-vite"
 import {
   PropertyDefinition,
   renderProperty,
-} from "../../../experimental/OneDataCollection/property-render"
+} from "@/experimental/OneDataCollection/property-render"
+import { Placeholder } from "@/icons/app"
+import { Meta, StoryObj } from "@storybook/react-vite"
 
 function Cell({
   item,
@@ -16,7 +16,7 @@ function Cell({
   return renderProperty(item, property, "table")
 }
 const meta = {
-  title: "Data Collection/Cell Types",
+  title: "Value Display",
   component: Cell,
   parameters: {
     layout: "padded",
@@ -145,6 +145,68 @@ export const TextWithPlaceholder: Story = {
         value: {
           text: undefined,
           placeholder: "Some placeholder",
+        },
+      }),
+    },
+  },
+}
+
+export const LongTextType: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description",
+      render: () => ({
+        type: "longText",
+        value:
+          "This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.",
+      }),
+    },
+  },
+}
+
+export const LongTextWithLines: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: "This is a very long description that demonstrates the longText cell type functionality. The text will be truncated with ellipsis when it exceeds the specified number of lines, and a tooltip will show the full content when hovering over the truncated text.",
+          lines: 5,
+        },
+      }),
+    },
+  },
+}
+
+export const LongTextFullText: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description (full text)",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: "This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.",
+          full: true,
+        },
+      }),
+    },
+  },
+}
+
+export const LongTextWithPlaceholder: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Description",
+      render: () => ({
+        type: "longText",
+        value: {
+          text: undefined,
+          placeholder: "No description available",
         },
       }),
     },
@@ -563,6 +625,64 @@ export const FolderType: Story = {
         type: "folder",
         value: {
           name: "My folder",
+        },
+      }),
+    },
+  },
+}
+
+export const PercentageInputAsObject: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: 42,
+      }),
+    },
+  },
+}
+
+export const PercentageValueInputAsObject: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: { percentage: 50 },
+      }),
+    },
+  },
+}
+
+export const PercentageWithLabel: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: {
+          percentage: 75,
+          label: "324 out of 432",
+        },
+      }),
+    },
+  },
+}
+
+export const PercentageWithPlaceholder: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Percentage",
+      render: () => ({
+        type: "percentage",
+        value: {
+          percentage: undefined,
+          placeholder: "There is no data yet",
         },
       }),
     },

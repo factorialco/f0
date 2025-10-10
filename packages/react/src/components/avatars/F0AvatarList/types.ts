@@ -1,17 +1,45 @@
-import { sizes } from "@/ui/avatar"
-import { AvatarVariant } from "../F0Avatar/types"
+import {
+  CompanyAvatarVariant,
+  FileAvatarVariant,
+  FlagAvatarVariant,
+  PersonAvatarVariant,
+  TeamAvatarVariant,
+} from "../F0Avatar/types"
 
-type AvatarType = AvatarVariant["type"]
+export const avatarListSizes = ["xs", "sm", "md"] as const
 
-export type AvatarListSize = Extract<
-  (typeof sizes)[number],
-  "xsmall" | "small" | "medium"
->
+export type AvatarListSize = (typeof avatarListSizes)[number]
 
+export type F0AvatarListPropsAvatars =
+  | {
+      type: "person"
+      avatars: // Allow to have more properties in the avatar variant
+      (Omit<PersonAvatarVariant, "type"> & Record<string, unknown>)[]
+    }
+  | {
+      type: "team"
+      avatars: (Omit<TeamAvatarVariant, "type"> & Record<string, unknown>)[]
+    }
+  | {
+      type: "company"
+      avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[]
+    }
+  | {
+      type: "flag"
+      avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[]
+    }
+  | {
+      type: "file"
+      avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[]
+    }
+
+// Discriminated union that enforces type consistency
 export type F0AvatarListProps = {
-  avatars: AvatarVariant[]
+  /**
+   * The size of the avatars in the list.
+   * @default "md"
+   */
   size?: AvatarListSize
-  type?: AvatarType
 
   /**
    * Whether to hide tooltips in each avatar.
@@ -37,4 +65,4 @@ export type F0AvatarListProps = {
    * @default "compact"
    */
   layout?: "fill" | "compact"
-}
+} & F0AvatarListPropsAvatars

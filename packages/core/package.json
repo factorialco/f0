@@ -1,7 +1,7 @@
 {
-  "name": "@factorialco/factorial-one-core",
-  "version": "1.25.1",
-  "description": "Core tokens and utilities for Factorial One Design System",
+  "name": "@factorialco/f0-core",
+  "version": "1.30.0",
+  "description": "Core tokens and utilities for F0 Design System",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

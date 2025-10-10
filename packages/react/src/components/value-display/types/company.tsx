@@ -19,7 +19,7 @@ export const CompanyCell = (args: CompanyCellValue) => (
         name: args.name,
         src: args.src,
       }}
-      size="xsmall"
+      size="xs"
     />
     <span className="text-f1-foreground">{args.name.toString()}</span>
   </div>

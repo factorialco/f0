@@ -11,6 +11,7 @@ import {
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { type ReactNode, forwardRef } from "react"
+import { OneEllipsis } from "../OneEllipsis/OneEllipsis"
 import {
   CardActions,
   type CardPrimaryAction,
@@ -103,6 +104,17 @@ export interface CardInternalProps {
    * Private prop
    */
   forceVerticalMetadata?: boolean
+
+  /**
+   * Whether the card should have a full height
+   */
+  fullHeight?: boolean
+
+  /**
+   * When true, disables the full-card overlay link so parent components
+   * can manage drag-and-drop while still allowing click navigation via onClick
+   */
+  disableOverlayLink?: boolean
 }
 
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
@@ -124,6 +136,8 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       onSelect,
       onClick,
       forceVerticalMetadata = false,
+      fullHeight = false,
+      disableOverlayLink = false,
     },
     ref
   ) {
@@ -132,6 +146,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         className={cn(
           "group relative bg-f1-background shadow-none transition-all",
           compact && "p-3",
+          fullHeight && "h-full",
           (selectable || (otherActions && otherActions.length > 0)) &&
             !selected &&
             "hover:border-f1-border",
@@ -144,7 +159,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         data-testid="card"
         ref={ref}
       >
-        {link && (
+        {link && !disableOverlayLink && (
           <Link
             href={link}
             style={{
@@ -178,7 +193,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex grow flex-col gap-2">
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
               className={cn(
@@ -194,28 +209,22 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   compact={compact}
                 />
               )}
-              <div
-                className={cn(
-                  "flex flex-col gap-0",
-                  compact && "flex-row items-center gap-2"
-                )}
-              >
+              <div className={cn("flex flex-col gap-0")}>
                 <CardTitle
                   className={cn(
-                    "flex flex-row justify-between gap-1 text-lg font-semibold text-f1-foreground",
-                    compact && "shrink-0 text-base"
+                    "text-lg font-semibold text-f1-foreground",
+                    compact && "line-clamp-1 text-base"
                   )}
                 >
                   {title}
                 </CardTitle>
                 {description && (
                   <CardSubtitle
-                    className={cn(
-                      "line-clamp-3 text-base text-f1-foreground-secondary",
-                      compact && "line-clamp-1"
-                    )}
+                    className={cn("text-base text-f1-foreground-secondary")}
                   >
-                    {description}
+                    <OneEllipsis lines={compact ? 2 : 3}>
+                      {description}
+                    </OneEllipsis>
                   </CardSubtitle>
                 )}
               </div>
@@ -230,22 +239,24 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               />
             )}
           </div>
-          <CardContent>
-            {metadata && (
-              <div
-                className={cn(
-                  "flex flex-col gap-0.5",
-                  compact && "flex-row flex-wrap gap-x-3 gap-y-0",
-                  forceVerticalMetadata && "flex-col gap-y-0.5"
-                )}
-              >
-                {metadata.map((item, index) => (
-                  <CardMetadata key={index} metadata={item} />
-                ))}
-              </div>
-            )}
-            {children}
-          </CardContent>
+          {(metadata || children) && (
+            <CardContent>
+              {metadata && (
+                <div
+                  className={cn(
+                    "flex flex-col gap-0.5",
+                    compact && "flex-row flex-wrap gap-x-3 gap-y-0",
+                    forceVerticalMetadata && "flex-col gap-y-0.5"
+                  )}
+                >
+                  {metadata.map((item, index) => (
+                    <CardMetadata key={index} metadata={item} />
+                  ))}
+                </div>
+              )}
+              {children}
+            </CardContent>
+          )}
         </div>
         <CardActions
           primaryAction={primaryAction}

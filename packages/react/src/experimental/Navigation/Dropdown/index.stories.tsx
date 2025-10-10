@@ -123,7 +123,7 @@ export const WithCustomTrigger: Story = {
           src="/avatars/person04.jpg"
           firstName="Dani"
           lastName="Moreno"
-          size="large"
+          size="lg"
         />
       </button>
     </Dropdown>

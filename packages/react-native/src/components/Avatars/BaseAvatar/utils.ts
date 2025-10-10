@@ -11,15 +11,17 @@ type ShadAvatarProps = ComponentProps<typeof AvatarComponent>;
 export function getInitials(
   name: string | string[],
   size?: ShadAvatarProps["size"],
+  isFile?: boolean,
 ): string {
   const nameArray = Array.isArray(name) ? name : [name];
   const isSmall = size === "xsmall" || size === "small";
+  const minChar = isFile ? 3 : 2;
 
   if (isSmall) return (nameArray[0][0] ?? "").toUpperCase();
-  if (!Array.isArray(name)) return name.slice(0, 2).toUpperCase();
+  if (!Array.isArray(name)) return name.slice(0, minChar).toUpperCase();
 
   return nameArray
-    .slice(0, 2)
+    .slice(0, minChar)
     .map((name) => name[0])
     .join("")
     .toUpperCase();

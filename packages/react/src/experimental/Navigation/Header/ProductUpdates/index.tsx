@@ -1,7 +1,7 @@
 import { Button } from "@/components/Actions/Button"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { F0Icon } from "@/components/F0Icon"
 import { ProductCard } from "@/components/UpsellingKit/ProductCard"
-import { Icon, IconType } from "@/components/Utilities/Icon"
 import AlertCircle from "@/icons/app/AlertCircle"
 import ChevronRight from "@/icons/app/ChevronRight"
 import CrossIcon from "@/icons/app/Cross"
@@ -10,6 +10,7 @@ import { Image } from "@/lib/imageHandler"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { Carousel } from "@/experimental/Navigation/Carousel"
 import {
   DropdownMenu,
@@ -60,16 +61,27 @@ type ProductUpdatesProp = {
   crossSelling?: {
     isVisible: boolean
     sectionTitle: string
+
     onClose?: () => void
-    products: Array<{
-      title: string
-      description: string
-      onClick: () => void
-      icon: IconType
-      dismissable: boolean
-      onClose?: () => void
-      trackVisibility?: (open: boolean) => void
-    }>
+    products: Array<
+      {
+        title: string
+        description: string
+        onClick: () => void
+        dismissable: boolean
+        onClose?: () => void
+        trackVisibility?: (open: boolean) => void
+      } & (
+        | {
+            module?: never
+            type: "one-campaign"
+          }
+        | {
+            module: ModuleId
+            type?: never
+          }
+      )
+    >
   }
 }
 
@@ -365,7 +377,7 @@ const NoUpdates = ({
   <BaseScreen
     title={title}
     description={description}
-    icon={<Icon icon={Megaphone} size="lg" className="block" />}
+    icon={<F0Icon icon={Megaphone} size="lg" className="block" />}
     button={
       <Link href={buttonUrl}>
         <Button label={buttonText} />
@@ -384,7 +396,7 @@ const ErrorScreen = ({
     title={title}
     description={description}
     iconWrapperClassName="text-f1-icon-critical bg-f1-background-critical border-f1-critical"
-    icon={<Icon icon={AlertCircle} size="lg" />}
+    icon={<F0Icon icon={AlertCircle} size="lg" />}
     button={<Button variant="outline" label={buttonText} onClick={onClick} />}
   />
 )
@@ -463,16 +475,18 @@ const DiscoverMoreProducts = ({
               {crossSelling?.sectionTitle}
             </p>
 
-            <div className="relative z-10 h-6 w-6">
-              <Button
-                variant="ghost"
-                icon={CrossIcon}
-                size="sm"
-                hideLabel
-                onClick={handleClose}
-                label="Close"
-              />
-            </div>
+            {onClose && (
+              <div className="relative z-10 h-6 w-6">
+                <Button
+                  variant="ghost"
+                  icon={CrossIcon}
+                  size="sm"
+                  hideLabel
+                  onClick={handleClose}
+                  label="Close"
+                />
+              </div>
+            )}
           </div>
 
           <Carousel

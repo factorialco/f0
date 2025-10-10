@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
 import { PresetsDefinition } from "./types"
 
+import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
 import { cn } from "@/lib/utils"
 import type { FiltersDefinition, FiltersState } from "./types"
 
@@ -12,15 +13,15 @@ import type { FiltersDefinition, FiltersState } from "./types"
  * Props for the Filters component.
  * @template Definition - The type defining the structure of available filters
  */
-export interface OneFilterPickerRootProps<
-  Definition extends FiltersDefinition,
-> {
+export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   /** The definition of available filters and their configurations */
   filters?: Definition
   /** Current state of applied filters */
   value: FiltersState<Definition>
   /** Optional preset configurations that users can select */
   presets?: PresetsDefinition<Definition>
+  /** Whether presets are currently loading */
+  presetsLoading?: boolean
   /** Callback fired when filters are changed */
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
@@ -91,8 +92,15 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   filters,
   value,
   children,
+  presetsLoading = false,
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
+  const defaultFilters = useRef(value)
+
+  const { emitFilterChange, emitPresetClick } = useEventEmitter({
+    defaultFilters: defaultFilters.current,
+  })
+
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   const [localFiltersValue, setLocalFiltersValue] = useState(value)
@@ -100,7 +108,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   useEffect(() => {
     setLocalFiltersValue(value)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
-  }, [JSON.stringify(filters)])
+  }, [JSON.stringify(filters), JSON.stringify(value)])
 
   const removeFilterValue = (key: keyof Definition) => {
     const newFilters = { ...localFiltersValue }
@@ -119,6 +127,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
       value={{
         ...props,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
+        presetsLoading,
         value: localFiltersValue,
         filters: filters,
         removeFilterValue,
@@ -126,6 +135,8 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
           setFiltersValue(value as FiltersState<Definition>),
         isFiltersOpen,
         setIsFiltersOpen,
+        emitFilterChange,
+        emitPresetClick,
       }}
     >
       {children}
@@ -145,6 +156,7 @@ const FiltersControls = () => {
     setIsFiltersOpen,
     setFiltersValue,
     presets,
+    emitFilterChange,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -153,6 +165,11 @@ const FiltersControls = () => {
       )
     : undefined
 
+  const handleFilterChange = (filters: FiltersState<FiltersDefinition>) => {
+    emitFilterChange(filters)
+    setFiltersValue(filters)
+  }
+
   if (!shownFilters || Object.keys(shownFilters).length === 0) return null
 
   return (
@@ -160,7 +177,7 @@ const FiltersControls = () => {
       <FiltersControlsComponent
         filters={shownFilters}
         value={value}
-        onChange={setFiltersValue}
+        onChange={handleFilterChange}
         onOpenChange={setIsFiltersOpen}
         isOpen={isFiltersOpen}
         hideLabel={!!presets}
@@ -179,14 +196,21 @@ FiltersControls.displayName = "OneFilterPicker.Controls"
  * Filter presets
  */
 const FiltersPresets = () => {
-  const { presets, value, setFiltersValue } = useContext(FiltersContext)
+  const { presets, presetsLoading, value, setFiltersValue, emitPresetClick } =
+    useContext(FiltersContext)
+
+  const handlePresetClick = (presetFilter: FiltersState<FiltersDefinition>) => {
+    emitPresetClick(presetFilter)
+    setFiltersValue(presetFilter)
+  }
 
   return (
     presets && (
       <FiltersPresetsComponent
         presets={presets}
+        presetsLoading={presetsLoading}
         value={value}
-        onPresetsChange={setFiltersValue}
+        onPresetsChange={handlePresetClick}
       />
     )
   )
@@ -201,12 +225,20 @@ const FiltersChipsList = () => {
     value,
     filters,
     setIsFiltersOpen,
+    presets,
     removeFilterValue,
     setFiltersValue,
   } = useContext(FiltersContext)
 
+  const isPresetFilter = useMemo(() => {
+    return (presets || []).some((preset) => {
+      return JSON.stringify(value) === JSON.stringify(preset.filter)
+    })
+  }, [presets, value])
+
   return (
-    filters && (
+    filters &&
+    !isPresetFilter && (
       <FiltersChipsListComponent
         filters={filters}
         value={value}

@@ -1,8 +1,8 @@
 import { Button } from "@/components/Actions/Button"
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { IconType } from "@/components/F0Icon"
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { IconType } from "@/components/Utilities/Icon"
-import { ModuleId } from "@/experimental/Information/ModuleAvatar"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
@@ -13,6 +13,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
+import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -117,7 +118,8 @@ export function PageHeader({
   productUpdates,
   favorites,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar } = useSidebar()
+  const { sidebarState, toggleSidebar, isLastToggleInvokedByUser } =
+    useSidebar()
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -155,12 +157,15 @@ export function PageHeader({
               <div className="mr-3">
                 <Button
                   ref={(buttonEl) => {
-                    buttonEl?.focus()
+                    // if action was triggered by user, focus the close button
+                    if (isLastToggleInvokedByUser) {
+                      buttonEl?.focus()
+                    }
                   }}
                   variant="ghost"
                   hideLabel
                   round
-                  onClick={toggleSidebar}
+                  onClick={() => toggleSidebar()}
                   label="Open main menu"
                   icon={Menu}
                 />
@@ -284,6 +289,9 @@ export function PageHeader({
             )}
           </div>
         )}
+        <div>
+          <OneSwitch />
+        </div>
       </div>
     </div>
   )

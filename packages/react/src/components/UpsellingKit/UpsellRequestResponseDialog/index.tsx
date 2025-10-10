@@ -1,7 +1,7 @@
 import { Button } from "@/components/Actions/Button"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { Icon } from "@/components/Utilities/Icon"
-import { AlertCircle, CheckCircle, DottedCircle } from "@/icons/app"
+import { F0Icon } from "@/components/F0Icon"
+import { CheckCircle, DottedCircle } from "@/icons/app"
 import {
   Dialog,
   DialogContent,
@@ -48,7 +48,7 @@ export interface NextStepsProps {
 
 const StepItem = ({ text, isCompleted }: StepItemProps) => (
   <div className="flex flex-row items-center gap-2">
-    <Icon
+    <F0Icon
       className={
         isCompleted ? "text-f1-icon-positive" : "text-f1-icon-secondary"
       }
@@ -172,11 +172,7 @@ const UpsellRequestResponseDialog = forwardRef<
           <DialogHeader
             className={`flex flex-col items-start gap-4 px-4 ${success ? "pt-5" : "py-5"}`}
           >
-            <F0AvatarAlert
-              type={success ? "positive" : "critical"}
-              size="lg"
-              icon={success ? CheckCircle : AlertCircle}
-            />
+            <F0AvatarAlert type={success ? "positive" : "critical"} size="lg" />
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-xl font-semibold sm:text-lg">
                 {success ? successMessage?.title : errorMessage?.title}

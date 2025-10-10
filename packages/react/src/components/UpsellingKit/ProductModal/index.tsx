@@ -1,5 +1,6 @@
 import { Button } from "@/components/Actions/Button"
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonVariant } from "@/ui/button"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"
@@ -10,7 +11,7 @@ type ProductModalProps = {
   isOpen: boolean
   onClose: () => void
   modalTitle: string
-  modalIcon: IconType
+  modalModule: ModuleId
   title: string
   image: string
   benefits: string[]
@@ -67,7 +68,7 @@ export function ProductModal({
   closeLabel,
   primaryAction,
   modalTitle,
-  modalIcon,
+  modalModule,
   secondaryAction,
   portalContainer,
   tag,
@@ -104,7 +105,7 @@ export function ProductModal({
         isOpen={isModalOpen}
         onClose={handleClose}
         title={modalTitle}
-        icon={modalIcon}
+        module={modalModule}
         portalContainer={portalContainer}
       >
         <div className="pb-4 pl-4">

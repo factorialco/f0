@@ -1,116 +1,60 @@
-import { cn } from "@/lib/utils"
-import { useChatContext, type WindowProps } from "@copilotkit/react-ui"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { useCopilotChatInternal } from "@copilotkit/react-core"
+import { type WindowProps } from "@copilotkit/react-ui"
+import { AnimatePresence, motion } from "motion/react"
+import { useAutoClear } from "../hooks/useAutoClear"
+import { useAiChat } from "../providers/AiChatStateProvider"
 
-interface ChatWindowContextType {
-  reachedMaxHeight: boolean
-  messageContainerScrollTop: number
-  setMessageContainerScrollTop: (scrollTop: number) => void
-}
-
-const ChatWindowContext = createContext<ChatWindowContextType>({
-  reachedMaxHeight: false,
-  messageContainerScrollTop: 0,
-  setMessageContainerScrollTop: () => {},
-})
-
-export const useChatWindowContext = () => useContext(ChatWindowContext)
-
-// also hardcoded in Tailwind classes in DialogPrimitive.Content
-const MIN_HEIGHT = 416
-const MAX_HEIGHT = 680
-const FULL_HEIGHT_MARGIN = 20
-
-export const ChatWindow = ({ children, ...rest }: WindowProps) => {
-  const { setOpen, open } = useChatContext()
-  const windowRef = useRef<HTMLDivElement>(null)
-  const [windowHeight, setWindowHeight] = useState(MIN_HEIGHT)
-  const [messageContainerScrollTop, setMessageContainerScrollTop] = useState(0)
-
-  useEffect(() => {
-    if (!open) return
-
-    const measureHeight = () => {
-      if (windowRef.current) {
-        const height = windowRef.current.offsetHeight
-        setWindowHeight(height)
-      }
-    }
-
-    let resizeObserver: ResizeObserver | null = null
-    let browserResizeObserver: ResizeObserver | null = null
-    let animationFrameId: number | null = null
-
-    const setupObservers = () => {
-      if (windowRef.current && open) {
-        resizeObserver = new ResizeObserver(measureHeight)
-        browserResizeObserver = new ResizeObserver(measureHeight)
-
-        resizeObserver.observe(windowRef.current)
-        browserResizeObserver.observe(document.documentElement)
-
-        // Initial measurement
-        measureHeight()
-      }
-    }
-
-    animationFrameId = requestAnimationFrame(setupObservers)
-
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-      if (browserResizeObserver) {
-        browserResizeObserver.disconnect()
-      }
-    }
-  }, [open])
-
-  const chatWindowContext = useMemo(
-    () => ({
-      reachedMaxHeight:
-        windowHeight >= MAX_HEIGHT ||
-        windowHeight >=
-          document.documentElement.clientHeight - FULL_HEIGHT_MARGIN,
-      messageContainerScrollTop,
-      setMessageContainerScrollTop,
-    }),
-    [messageContainerScrollTop, windowHeight]
-  )
+export const SidebarWindow = ({ children }: WindowProps) => {
+  const {
+    open,
+    shouldPlayEntranceAnimation,
+    setShouldPlayEntranceAnimation,
+    autoClearMinutes,
+  } = useAiChat()
+  const { reset } = useCopilotChatInternal()
+  useAutoClear({
+    reset,
+    isOpen: open,
+    autoClearMinutes,
+  })
 
   return (
-    <DialogPrimitive.Root
-      open={open}
-      onOpenChange={setOpen}
-      modal={false}
-      {...rest}
-    >
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Content
-          onPointerDownOutside={(e) => e.preventDefault()}
-          className={cn(
-            "fixed bottom-4 right-4 isolate z-50 w-[90%] rounded-xl border bg-f1-background shadow-lg",
-            "duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-            "flex max-h-[min(680px,calc(100%-16px))] min-h-[416px] max-w-[464px] flex-col overflow-hidden rounded-xl border-solid border-f1-border shadow"
-          )}
-          ref={windowRef}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="chat-window"
+          aria-hidden={!open}
+          className="relative flex h-full max-w-[360px] flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
+          initial={
+            shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
+          }
+          animate={{ opacity: 1, width: 360 }}
+          exit={{ opacity: 0, width: 0 }}
+          transition={{
+            duration: 0.3,
+            ease: [0, 0, 0.1, 1],
+          }}
+          onAnimationComplete={() => {
+            if (shouldPlayEntranceAnimation) {
+              setShouldPlayEntranceAnimation(false)
+            }
+          }}
         >
-          <ChatWindowContext.Provider value={chatWindowContext}>
+          <motion.div
+            className="relative flex h-full w-[360px] flex-col overflow-x-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+              ease: "easeOut",
+              delay: shouldPlayEntranceAnimation ? 0.2 : 0,
+            }}
+          >
             {children}
-          </ChatWindowContext.Provider>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

@@ -1,7 +1,6 @@
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { Icon } from "@/components/Utilities/Icon"
-import { ChevronDown } from "@/icons/app"
+import { Arrow } from "@/experimental/Forms/Fields/Select/components/Arrow"
 import { cn } from "@/lib/utils"
+import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
 import {
   EntitySelectEntity,
@@ -15,13 +14,46 @@ export const Trigger = ({
   selectedEntities,
   disabled = false,
   hiddenAvatar = false,
+  label,
+  labelIcon,
+  icon,
+  error,
+  status,
+  hint,
+  onClickContent,
+  hideLabel = false,
+  maxLength,
+  loading = false,
+  required = false,
+  readonly = false,
+  append,
+  size = "sm",
+  open,
 }: {
-  placeholder: string
   selected: string
-  disabled?: boolean
   selectedEntities: EntitySelectEntity[]
   hiddenAvatar?: boolean
-}) => {
+  open?: boolean
+} & Pick<
+  InputFieldProps<string>,
+  | "onClickContent"
+  | "label"
+  | "labelIcon"
+  | "icon"
+  | "error"
+  | "status"
+  | "hint"
+  | "hideLabel"
+  | "maxLength"
+  | "value"
+  | "disabled"
+  | "placeholder"
+  | "loading"
+  | "required"
+  | "readonly"
+  | "append"
+  | "size"
+>) => {
   const groupView = useMemo(
     () =>
       selectedEntities.some(
@@ -47,43 +79,73 @@ export const Trigger = ({
         )
   }, [groupView, selectedEntities])
 
+  const value =
+    flattenedList.length === 0
+      ? undefined
+      : flattenedList.length === 1
+        ? flattenedList[0].subItem.subName
+        : flattenedList.length + " " + selected
+
+  const avatar =
+    flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
+
   return (
-    <div
-      className={cn(
-        "flex cursor-pointer justify-between rounded border border-solid border-f1-border p-2",
-        disabled ? "to-f1-background-secondary" : ""
-      )}
+    <InputField
+      onClickContent={onClickContent}
+      role="combobox"
+      label={label}
+      labelIcon={labelIcon}
+      aria-expanded={false}
+      aria-controls="listbox"
+      icon={!!icon && !value ? icon : undefined}
+      error={error}
+      status={status}
+      hint={hint}
+      hideLabel={hideLabel}
+      maxLength={maxLength}
+      clearable={false}
+      value={value}
+      disabled={disabled}
+      loading={loading}
+      required={required}
+      readonly={readonly}
+      size={size}
+      avatar={
+        hiddenAvatar || !avatar
+          ? undefined
+          : {
+              type: "person",
+              firstName: avatar,
+              lastName: "",
+              src: flattenedList[0].subItem.subAvatar,
+            }
+      }
+      append={
+        append ?? (
+          <div className={cn(size === "sm" ? "" : "-mt-2")}>
+            {/* This is a temporary solution (to use Select component arrow) */}
+            <Arrow open={open} disabled={disabled} size={size} />
+          </div>
+        )
+      }
     >
-      <span className="my-auto pl-1 pr-1 text-f1-foreground-secondary">
-        {flattenedList.length === 0 ? (
-          placeholder
-        ) : flattenedList.length === 1 ? (
-          !hiddenAvatar ? (
-            <div className="flex flex-row gap-2 p-0">
-              <F0AvatarPerson
-                firstName={flattenedList[0].subItem.subName}
-                lastName={""}
-                src={flattenedList[0].subItem.subAvatar}
-                size="xsmall"
-              />
-              <span>{flattenedList[0].subItem.subName}</span>
-            </div>
-          ) : (
-            flattenedList[0].subItem.subName
-          )
-        ) : (
-          flattenedList.length + " " + selected
+      <span
+        role="button"
+        className={cn(
+          "my-auto flex items-center pr-1",
+          placeholder && "text-f1-foreground-secondary",
+          value && "text-f1-foreground",
+          (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
+            ? "pl-8"
+            : "pl-2"
         )}
+      >
+        {flattenedList.length === 0
+          ? placeholder
+          : flattenedList.length === 1
+            ? flattenedList[0].subItem.subName
+            : flattenedList.length + " " + selected}
       </span>
-      <div className="p-0.5">
-        <div className="h-[16px] w-[16px]">
-          <Icon
-            icon={ChevronDown}
-            size="sm"
-            className="rounded-2xs bg-f1-background-secondary p-0.5"
-          />
-        </div>
-      </div>
-    </div>
+    </InputField>
   )
 }

@@ -15,6 +15,7 @@ import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
 import { DatePickerValue, DatePreset } from "./types"
 
+export type CompareToDefKey = string
 export type CompareToDef = {
   label: string
   value:
@@ -41,6 +42,7 @@ export interface OneDatePickerPopupProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   compareTo?: DatePickerCompareTo
+  defaultCompareTo?: CompareToDefKey
   onCompareToChange?: (
     compareTo: DateRangeComplete | DateRangeComplete[] | undefined
   ) => void
@@ -55,6 +57,7 @@ export function OneDatePickerPopup({
   granularities = ["day"],
   children,
   compareTo,
+  defaultCompareTo,
   onCompareToChange,
   value,
   ...props
@@ -63,6 +66,10 @@ export function OneDatePickerPopup({
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
     value || defaultValue
   )
+
+  useEffect(() => {
+    setLocalValue(value || defaultValue)
+  }, [value, defaultValue])
 
   const localGranularity = useMemo(
     () => localValue?.granularity ?? "day",
@@ -134,7 +141,8 @@ export function OneDatePickerPopup({
   // Compare to
   const [selectedCompareTo, setSelectedCompareTo] = useState<
     string | undefined
-  >(undefined)
+  >(defaultCompareTo || undefined)
+
   const compareToOptions = useMemo(() => {
     const granularityCompareTo = (compareTo ?? {})[localGranularity] || []
 
@@ -155,8 +163,8 @@ export function OneDatePickerPopup({
             )
 
       const description = Array.isArray(value)
-        ? value.map((v) => granularityDefinition.toString(v)).join(", ")
-        : granularityDefinition.toString(value)
+        ? value.map((v) => granularityDefinition.toString(v, i18n)).join(", ")
+        : granularityDefinition.toString(value, i18n)
 
       return {
         label: compare.label,
@@ -183,13 +191,22 @@ export function OneDatePickerPopup({
   }, [compareTo, localValue, granularityDefinition, localGranularity])
 
   useEffect(() => {
-    setSelectedCompareTo("0")
-  }, [localValue])
+    setSelectedCompareTo(defaultCompareTo || "0")
+  }, [localGranularity, defaultCompareTo])
 
   const handleCompareToChange = (value: string) => {
     setSelectedCompareTo(value)
-    onCompareToChange?.(compareToOptions[+value].dateValue)
   }
+
+  // Update the compare to value when the selected compare to changes
+  // Also when the local value changes to emit the new compare to date
+  useEffect(() => {
+    onCompareToChange?.(
+      selectedCompareTo
+        ? compareToOptions[+selectedCompareTo]?.dateValue
+        : undefined
+    )
+  }, [selectedCompareTo, onCompareToChange, compareToOptions])
 
   return (
     <Popover open={props.open} onOpenChange={props.onOpenChange}>

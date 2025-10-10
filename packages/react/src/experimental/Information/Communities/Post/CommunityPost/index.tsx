@@ -1,4 +1,3 @@
-import { Button } from "@/components/Actions/Button"
 import { Link } from "@/components/Actions/Link"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
@@ -110,7 +109,7 @@ export const BaseCommunityPost = ({
             />
           </Link>
         ) : (
-          <F0AvatarIcon icon={PersonIcon} className="rounded-full" />
+          <F0AvatarIcon icon={PersonIcon} />
         )}
       </div>
       <div className="flex flex-1 flex-col gap-3">
@@ -130,7 +129,7 @@ export const BaseCommunityPost = ({
                         firstName={author.firstName}
                         lastName={author.lastName}
                         src={author.avatarUrl}
-                        size="xsmall"
+                        size="xs"
                       />
                     </span>
                   </Link>
@@ -145,11 +144,7 @@ export const BaseCommunityPost = ({
                 </>
               ) : (
                 <div className="block md:hidden">
-                  <F0AvatarIcon
-                    icon={PersonIcon}
-                    size="sm"
-                    className="size-5 rounded-full"
-                  />
+                  <F0AvatarIcon icon={PersonIcon} size="sm" />
                 </div>
               )}
               <span
@@ -232,22 +227,19 @@ export const BaseCommunityPost = ({
           </div>
         )}
         <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        <div className="flex flex-row gap-2.5">
-          {!noReactionsButton && (
-            <Button
-              label={comment.label}
-              onClick={comment.onClick}
-              variant="outline"
-              icon={CommentIcon}
-              round
-              hideLabel
-            />
-          )}
-          <Reactions
-            items={reactions?.items ?? []}
-            onInteraction={reactions?.onInteraction}
-          />
-        </div>
+        <Reactions
+          items={reactions?.items ?? []}
+          onInteraction={reactions?.onInteraction}
+          action={
+            !noReactionsButton
+              ? {
+                  label: comment.label,
+                  onClick: comment.onClick,
+                  icon: CommentIcon,
+                }
+              : undefined
+          }
+        />
       </div>
     </div>
   )

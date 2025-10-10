@@ -1,5 +1,5 @@
 import { ButtonInternal } from "@/components/Actions/Button/internal"
-import { ModuleId } from "@/experimental/Information/ModuleAvatar"
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import {
   DropdownInternal,
   DropdownInternalProps,

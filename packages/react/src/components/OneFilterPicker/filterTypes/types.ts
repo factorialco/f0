@@ -1,3 +1,5 @@
+import { TranslationsType } from "@/lib/providers/i18n"
+
 export type FilterTypeSchema<Options extends object = never> = {
   options: Options extends never ? never : Options
   label: string
@@ -14,6 +16,7 @@ export type FilterTypeComponentProps<
 
 export type FilterTypeContext<Options extends object = never> = {
   schema: FilterTypeSchema<Options>
+  i18n: TranslationsType
 }
 
 export type FilterTypeDefinition<

@@ -1,4 +1,4 @@
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 
 // Base TOC item interface without children
 interface BaseTOCItem {
@@ -43,4 +43,7 @@ export interface TOCProps {
   collapsible?: boolean
   sortable?: boolean
   onReorder?: (reorderedIds: IdStructure[]) => void
+  showSearchBox?: boolean
+  searchPlaceholder?: string
+  hideChildrenCounter?: boolean
 }

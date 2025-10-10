@@ -32,10 +32,10 @@ jobs:
           pnpx playwright@$PLAYWRIGHT_VERSION install --with-deps
       - name: Build Storybook
         run: |
-          pnpm --filter @factorialco/factorial-one-core build
-          pnpm --filter @factorialco/factorial-one-react run build-storybook --quiet
+          pnpm --filter @factorialco/f0-core build
+          pnpm --filter @factorialco/f0-react run build-storybook --quiet
       - name: Serve Storybook and run tests
         run: |
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
             "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
-            "pnpx wait-on tcp:6006 && pnpm --filter @factorialco/factorial-one-react test-storybook"
+            "pnpx wait-on tcp:6006 && pnpm --filter @factorialco/f0-react test-storybook"

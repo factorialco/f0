@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "cva"
-import { Icon, IconType } from "../../../components/Utilities/Icon"
+import { F0Icon, IconType } from "../../../components/F0Icon"
 
 const badgeVariants = cva({
   base: "flex shrink-0 items-center justify-center rounded-full",
@@ -33,13 +33,14 @@ const iconSizes = {
 
 export interface BadgeProps extends VariantProps<typeof badgeVariants> {
   icon: IconType
+  type?: VariantProps<typeof badgeVariants>["type"]
   size?: keyof typeof iconSizes
 }
 
 export const Badge = ({ type, size = "md", icon }: BadgeProps) => {
   return (
     <div className={badgeVariants({ type, size })}>
-      <Icon icon={icon} size={iconSizes[size]} />
+      <F0Icon icon={icon} size={iconSizes[size]} />
     </div>
   )
 }

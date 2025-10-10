@@ -96,7 +96,6 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
           lastName: approver.lastName,
           src: approver.avatar,
           badge,
-          type: "person" as const,
         }
       })
       .sort(
@@ -117,12 +116,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
         <F0TagStatus text={displayStatus} variant={statusTagVariants[status]} />
       </div>
       <div className="w-full">
-        <F0AvatarList
-          avatars={avatars}
-          layout="fill"
-          type="person"
-          size="medium"
-        />
+        <F0AvatarList avatars={avatars} layout="fill" type="person" size="md" />
       </div>
     </div>
   )

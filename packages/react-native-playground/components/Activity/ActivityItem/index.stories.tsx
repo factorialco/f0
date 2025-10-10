@@ -4,8 +4,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import {
   ActivityItem,
   ActivityItemSkeleton,
-} from "@factorialco/factorial-one-react-native";
-import { AppIcons } from "@factorialco/factorial-one-react-native";
+} from "@factorialco/f0-react-native";
+import { AppIcons } from "@factorialco/f0-react-native";
 
 const meta = {
   title: "Components/ActivityItem",

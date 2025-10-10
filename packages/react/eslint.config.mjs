@@ -64,7 +64,7 @@ export default [
             "**/__tests__/**",
           ],
           rules: {
-            "no-console": ["error", { allow: ["warn", "error"] }],
+            "no-console": ["error", { allow: ["warn", "error", "assert"] }],
           },
         },
       ]
@@ -117,30 +117,35 @@ export default [
       ],
     },
   },
-  // Restrict barrel imports for all files except exports.ts and factorial-one.ts
+  // Restrict barrel imports for all files except exports.ts and f0.ts
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
-    ignores: ["**/exports.ts", "**/factorial-one.ts"],
+    ignores: ["**/exports.ts", "**/f0.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: [
             {
-              name: "@/factorial-one",
+              name: "@/f0",
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
+            },
+            {
+              name: "@/experimental",
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead.",
             },
           ],
           patterns: [
             {
               group: [
-                // factorial-one patterns (all variations)
-                "*factorial-one",
-                "*factorial-one.ts",
-                "*/factorial-one",
-                "**/factorial-one",
-                "**/factorial-one.ts",
+                // F0 patterns (all variations)
+                "*f0",
+                "*f0.ts",
+                "*/f0",
+                "**/f0",
+                "**/f0.ts",
                 // exports patterns (all variations)
                 "*exports",
                 "*exports.ts",
@@ -149,21 +154,23 @@ export default [
                 "**/exports.ts",
                 "@/*/exports",
                 "@/**/exports",
+                // exceptions
+                "!@/lib/providers/f0",
               ],
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead. [Rule: 1]",
             },
           ],
         },
       ],
     },
   },
-  // Restrict barrel imports for exports.ts and factorial-one.ts files (allow exports.ts imports)
+  // Restrict barrel imports for exports.ts and f0.ts files (allow exports.ts imports)
   {
     files: [
       "**/exports.ts",
       "**/exports.tsx",
-      "**/factorial-one.ts",
+      "**/f0.ts",
       "**/experimental.ts",
     ],
     ignores: [],
@@ -173,23 +180,30 @@ export default [
         {
           paths: [
             {
-              name: "@/factorial-one",
+              name: "@/f0",
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead.  [Rule: 2]",
+            },
+            {
+              name: "@/experimental",
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead. [Rule: 3]",
             },
           ],
           patterns: [
             {
               group: [
-                // factorial-one patterns (all variations)
-                "*factorial-one",
-                "*factorial-one.ts",
-                "*/factorial-one",
-                "**/factorial-one",
-                "**/factorial-one.ts",
+                // F0 patterns (all variations)
+                "f0",
+                "*f0.ts",
+                "*/f0",
+                "**/f0",
+                "**/f0.ts",
+                // exceptions
+                "!@/lib/providers/f0",
               ],
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead. [Rule: 4]",
             },
           ],
         },

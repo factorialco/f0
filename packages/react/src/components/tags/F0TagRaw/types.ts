@@ -1,4 +1,4 @@
-import { IconType } from "@/components/Utilities/Icon"
+import { IconType } from "@/components/F0Icon"
 
 export interface Props {
   text?: string

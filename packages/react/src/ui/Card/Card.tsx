@@ -5,7 +5,7 @@ import { cn } from "../../lib/utils"
 import ChevronRight from "../../icons/app/ChevronRight"
 import InfoCircleLine from "../../icons/app/InfoCircleLine"
 
-import { Icon, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
 import {
@@ -124,7 +124,7 @@ const CardInfo = React.forwardRef<
           className="h-5 w-5 cursor-help text-f1-foreground-secondary"
           aria-label={content}
         >
-          <Icon icon={InfoCircleLine} size="md" />
+          <F0Icon icon={InfoCircleLine} size="md" />
         </TooltipTrigger>
         <TooltipContent>
           <p>{content}</p>
@@ -156,7 +156,7 @@ const CardLink = React.forwardRef<
       aria-label={title}
       {...props}
     >
-      <Icon size="sm" icon={icon} className="text-f1-icon-bold" />
+      <F0Icon size="sm" icon={icon} className="text-f1-icon-bold" />
     </Link>
   )
 })

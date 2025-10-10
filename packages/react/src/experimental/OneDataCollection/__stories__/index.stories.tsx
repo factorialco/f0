@@ -1,4 +1,5 @@
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
+import { GroupingDefinition } from "@/hooks/datasource"
 import {
   Add,
   Ai,
@@ -17,17 +18,29 @@ import {
   Target,
   Upload,
 } from "@/icons/app"
+import {
+  CERTIFICATIONS_MOCK,
+  DEPARTMENTS_MOCK,
+  DOT_TAG_COLORS_MOCK,
+  EDUCATION_MOCK,
+  getMockValue,
+  LANGUAGES_MOCK,
+  PERFORMANCE_LITERAL_MOCK,
+  PROJECTS_MOCK,
+  START_DATE_MOCK,
+  TEAMS_MOCK,
+  YEARS_OF_EXPERIENCIE_MOCK,
+} from "@/mocks"
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { GroupingDefinition } from "../grouping"
-import { OneDataCollection, useDataSource } from "../index"
+import { useEffect, useState } from "react"
+import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
+import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
-import { useData } from "../useData"
 import {
   createDataAdapter,
   createPromiseDataFetch,
-  DEPARTMENTS_MOCK,
-  DOT_TAG_COLORS_MOCK,
   ExampleComponent,
   filterPresets,
   filters,
@@ -36,15 +49,11 @@ import {
   getMockVisualizations,
   MockUser,
   mockUsers,
-  PERFORMANCE_SCORE_MOCK,
-  PROJECTS_MOCK,
   sortings,
-  START_DATE_MOCK,
-  YEARS_OF_EXPERIENCIE_MOCK,
 } from "./mockData"
 
 const meta = {
-  title: "Data Collection",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -75,17 +84,92 @@ const meta = {
       description:
         "<p>Callback triggered when a bulk action is performed. It gets the action name, and the same args as `inSelectItems`. ‼️ Please check the `onSelectItems` docs for more information.</p>",
     },
+    onStateChange: {
+      action: "onStateChange",
+      description:
+        "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
+    },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "experimental", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Simplest: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: ({ filters, sortings, search }) => {
+          return createPromiseDataFetch()({
+            filters,
+            sortings,
+            search,
+            navigationFilters: {},
+          })
+        },
+      },
+    })
+
+    return (
+      <div className="space-y-4">
+        <OneDataCollection
+          source={dataSource}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Name",
+                    render: (item) => ({
+                      type: "person",
+                      value: {
+                        firstName: item.name.split(" ")[0],
+                        lastName: item.name.split(" ")[1],
+                      },
+                    }),
+                    sorting: "name",
+                  },
+                  {
+                    label: "Email",
+                    render: (item) => item.email,
+                    sorting: "email",
+                  },
+                  {
+                    label: "Role",
+                    render: (item) => item.role,
+                    sorting: "role",
+                  },
+                  {
+                    label: "Department",
+                    render: (item) => item.department,
+                    sorting: "department",
+                    info: "Team that the employee belongs to",
+                  },
+                  {
+                    label: "Salary",
+                    render: (item) => ({
+                      type: "amount",
+                      value: item.salary,
+                    }),
+                    align: "right",
+                    sorting: "salary",
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
 // Basic examples with single visualization
 export const BasicTableView: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings: {
@@ -109,15 +193,17 @@ export const BasicTableView: Story = {
         enabled: true,
       },
       dataAdapter: {
-        fetchData: ({ filters, sortings }) => {
-          console.log("fetchData", filters, sortings)
-
+        fetchData: ({ filters, sortings, search }) => {
           filters.department?.map((department) => {
             console.log("department", department)
           })
-          return createPromiseDataFetch()({ filters, sortings })
+          return createPromiseDataFetch()({
+            filters,
+            sortings,
+            search,
+            navigationFilters: {},
+          })
         },
-        //createPromiseDataFetch(),
       },
       itemActions: (item) => [
         {
@@ -224,15 +310,10 @@ export const BasicTableView: Story = {
   },
 }
 
-// Examples with multiple visualizations
-export const TableFrozenCols: Story = {
-  render: () => <ExampleComponent frozenColumns={2} />,
-}
-
 // Basic examples with single visualization
 export const WithLinkedItems: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       filters,
       presets: filterPresets,
       itemUrl: (item) => {
@@ -318,6 +399,7 @@ export const WithLinkedItems: Story = {
                         },
                       },
                     }),
+                    width: 100,
                     sorting: "name",
                   },
                   {
@@ -385,7 +467,7 @@ export const BasicCardView: Story = {
       frozenColumns: 0,
     })
 
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       filters,
       sortings,
       presets: filterPresets,
@@ -431,12 +513,15 @@ export const BasicCardView: Story = {
 // Examples with different property renderers
 export const RendererTypes: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       filters,
       sortings,
       presets: filterPresets,
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
+      },
+      search: {
+        enabled: true,
       },
     })
 
@@ -477,6 +562,22 @@ export const RendererTypes: Story = {
                   sorting: "email",
                 },
                 {
+                  label: "Company",
+                  render: () => ({
+                    type: "avatarList",
+                    value: {
+                      type: "company",
+                      avatarList: [
+                        {
+                          type: "company",
+                          name: "Test company",
+                          src: "https://cdn.join-staging.com/products/controlling_portal_de_icon.jpeg",
+                        },
+                      ],
+                    },
+                  }),
+                },
+                {
                   label: "Role",
                   render: (item) => ({
                     type: "status",
@@ -493,10 +594,7 @@ export const RendererTypes: Story = {
                     type: "dotTag",
                     value: {
                       label: item.email,
-                      color:
-                        DOT_TAG_COLORS_MOCK[
-                          item.index % DOT_TAG_COLORS_MOCK.length
-                        ],
+                      color: getMockValue(DOT_TAG_COLORS_MOCK, item.index),
                     },
                   }),
                   sorting: "email",
@@ -517,6 +615,7 @@ export const RendererTypes: Story = {
                   render: (item) => ({
                     type: "avatarList",
                     value: {
+                      max: 1,
                       avatarList: [
                         {
                           type: "person",
@@ -557,7 +656,7 @@ export const CustomCardProperties: Story = {
     },
   },
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       filters,
       sortings,
       presets: filterPresets,
@@ -750,7 +849,7 @@ const JsonVisualization = ({
   source,
 }: {
   source: ReturnType<
-    typeof useDataSource<
+    typeof useDataCollectionSource<
       (typeof mockUsers)[number],
       typeof filters,
       typeof sortings,
@@ -761,7 +860,7 @@ const JsonVisualization = ({
     >
   >
 }) => {
-  const { data, isLoading } = useData(source)
+  const { data, isLoading } = useDataCollectionData(source)
 
   if (isLoading) {
     return (
@@ -787,7 +886,7 @@ export const WithCustomJsonView: Story = {
       frozenColumns: 0,
     })
 
-    const dataSource = useDataSource<
+    const dataSource = useDataCollectionSource<
       MockUser,
       typeof filters,
       typeof sortings,
@@ -826,7 +925,7 @@ export const WithCustomJsonView: Story = {
 // Example usage with table visualization
 export const WithTableVisualization: Story = {
   render: () => {
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       sortings,
       defaultSorting: {
@@ -883,7 +982,7 @@ export const WithCardVisualization: Story = {
       frozenColumns: 0,
     })
 
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings,
@@ -906,13 +1005,19 @@ export const WithCardVisualization: Story = {
 // Example usage with multiple visualizations
 export const WithMultipleVisualizations: Story = {
   render: () => {
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       sortings,
       dataAdapter: createDataAdapter({
         data: mockUsers,
         delay: 500,
       }),
+      lanes: [
+        { id: "eng", filters: { department: ["Engineering"] } },
+        { id: "prod", filters: { department: ["Product"] } },
+        { id: "design", filters: { department: ["Design"] } },
+        { id: "other", filters: { department: ["Marketing"] } },
+      ],
     })
 
     const visualizations = Object.values(
@@ -934,7 +1039,7 @@ export const WithPagesPagination: Story = {
       frozenColumns: 0,
     })
 
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings,
@@ -985,7 +1090,7 @@ export const WithInfiniteScrollPagination: Story = {
       frozenColumns: 0,
     })
 
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings,
@@ -1030,13 +1135,82 @@ export const WithInfiniteScrollPagination: Story = {
   },
 }
 
+// This is a test to see if the table visualization works with one column
+export const WithInfiniteScrollPaginationOneCol: Story = {
+  render: () => {
+    const [presetsLoading, setPresetsLoading] = useState(true)
+
+    useEffect(() => {
+      setTimeout(() => {
+        setPresetsLoading(false)
+      }, 2000)
+    }, [])
+
+    // Create a fixed set of paginated users so we're not regenerating them on every render
+    const paginatedMockUsers = generateMockUsers(50)
+
+    const mockVisualizations = getMockVisualizations({
+      frozenColumns: 0,
+    })
+
+    const source = useDataCollectionSource({
+      filters,
+      presets: filterPresets,
+      presetsLoading,
+      sortings,
+      selectable: (item) => (item.id !== "user-1a" ? item.id : undefined),
+      bulkActions: (allSelected) => {
+        return {
+          primary: [
+            {
+              label: allSelected ? "Delete All" : "Delete",
+              icon: Delete,
+              id: "delete-all",
+            },
+          ],
+        }
+      },
+      dataAdapter: createDataAdapter({
+        data: paginatedMockUsers,
+        delay: 500,
+        paginationType: "infinite-scroll",
+        perPage: 10,
+      }),
+    })
+
+    return (
+      <div className="space-y-4" style={{ height: "500px", overflow: "auto" }}>
+        <OneDataCollection
+          source={source}
+          onSelectItems={(selectedItems) => {
+            console.log("Selected items", "->", selectedItems)
+          }}
+          onBulkAction={(action, selectedItems) => {
+            console.log(`Bulk action: ${action}`, "->", selectedItems)
+          }}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [{ label: "Name", render: (item) => item.name }],
+              },
+            },
+            mockVisualizations.card,
+            mockVisualizations.list,
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
 export const WithSynchronousData: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
     })
 
-    const source = useDataSource<
+    const source = useDataCollectionSource<
       MockUser,
       typeof filters,
       typeof sortings,
@@ -1078,7 +1252,7 @@ export const WithSynchronousData: Story = {
 
 export const WithAdvancedActions: Story = {
   render: () => {
-    const source = useDataSource({
+    const source = useDataCollectionSource({
       filters,
       sortings,
       presets: filterPresets,
@@ -1203,7 +1377,7 @@ export const WithSyncSearch: Story = {
         name: "John Doe",
         email: "john@example.com",
         role: "Senior Engineer",
-        department: DEPARTMENTS_MOCK[0],
+        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 0),
         status: "active",
         isStarred: true,
       },
@@ -1212,7 +1386,7 @@ export const WithSyncSearch: Story = {
         name: "Jane Smith",
         email: "jane@example.com",
         role: "Product Manager",
-        department: DEPARTMENTS_MOCK[1],
+        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 1),
         status: "active",
         isStarred: false,
       },
@@ -1221,7 +1395,7 @@ export const WithSyncSearch: Story = {
         name: "Alice Johnson",
         email: "alice@example.com",
         role: "UX Designer",
-        department: DEPARTMENTS_MOCK[2],
+        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 2),
         status: "active",
         isStarred: false,
       },
@@ -1230,7 +1404,7 @@ export const WithSyncSearch: Story = {
         name: "Bob Brown",
         email: "bob@example.com",
         role: "Developer",
-        department: DEPARTMENTS_MOCK[0],
+        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 0),
         status: "inactive",
         isStarred: true,
       },
@@ -1239,14 +1413,14 @@ export const WithSyncSearch: Story = {
         name: "Emma Wilson",
         email: "emma@example.com",
         role: "Marketing Lead",
-        department: DEPARTMENTS_MOCK[3],
+        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 3),
         status: "active",
         isStarred: false,
       },
     ]
 
     // TODO allow to infer the type of the data source
-    const source = useDataSource<
+    const source = useDataCollectionSource<
       (typeof mockUserData)[number],
       typeof filters,
       typeof sortings,
@@ -1427,7 +1601,7 @@ export const WithAsyncSearch: Story = {
     type MockUser = (typeof mockUsers)[number]
     type MockActions = ItemActionsDefinition<MockUser>
 
-    const source = useDataSource<
+    const source = useDataCollectionSource<
       MockUser,
       typeof filters,
       typeof sortings,
@@ -1546,70 +1720,31 @@ export const WithAsyncSearch: Story = {
 export const TableColumnProperties: Story = {
   render: () => {
     // Generate more mock users for this example to better demonstrate scrolling with sticky columns
-    const extendedMockUsers = Array(50)
-      .fill(null)
-      .map((_, index) => ({
-        id: `user-ex-${index}`,
-        name: `User ${index + 1}`,
-        email: `user${index + 1}@example.com`,
-        role:
-          index % 3 === 0
-            ? "Engineer"
-            : index % 3 === 1
-              ? "Designer"
-              : "Manager",
-        department: DEPARTMENTS_MOCK[index % DEPARTMENTS_MOCK.length],
-        status: index % 4 === 0 ? "inactive" : "active",
-        isStarred: index % 5 === 0,
-        salary: 50000 + index * 1000,
-        location:
-          index % 3 === 0 ? "Remote" : index % 3 === 1 ? "Office" : "Hybrid",
-        startDate: START_DATE_MOCK[index % START_DATE_MOCK.length]
-          .toISOString()
-          .split("T")[0],
-        performance:
-          index % 5 === 0
-            ? "Exceptional"
-            : index % 5 === 1
-              ? "Above Average"
-              : index % 5 === 2
-                ? "Average"
-                : index % 5 === 3
-                  ? "Below Average"
-                  : "Needs Improvement",
-        yearsExperience:
-          YEARS_OF_EXPERIENCIE_MOCK[index % YEARS_OF_EXPERIENCIE_MOCK.length],
-        team: ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"][index % 5],
-        certifications:
-          index % 3 === 0
-            ? "AWS, Google Cloud"
-            : index % 3 === 1
-              ? "Azure, MongoDB"
-              : "Kubernetes, Docker",
-        education:
-          index % 4 === 0
-            ? "Ph.D."
-            : index % 4 === 1
-              ? "Master's"
-              : index % 4 === 2
-                ? "Bachelor's"
-                : "Associate's",
-        languages:
-          index % 3 === 0
-            ? "English, Spanish"
-            : index % 3 === 1
-              ? "English, French, German"
-              : "English, Mandarin",
-        projects: PROJECTS_MOCK[index % PROJECTS_MOCK.length],
-        performanceScore:
-          PERFORMANCE_SCORE_MOCK[index % PERFORMANCE_SCORE_MOCK.length],
-        lastReview: new Date(2023, index % 12, 1 + (index % 28))
-          .toISOString()
-          .split("T")[0],
-        nextReview: new Date(2024, index % 12, 1 + (index % 28))
-          .toISOString()
-          .split("T")[0],
-      }))
+    const extendedMockUsers = generateMockUsers(50).map((mockUser, index) => ({
+      ...mockUser,
+      status: index % 4 === 0 ? "inactive" : "active",
+      isStarred: index % 5 === 0,
+      salary: 50000 + index * 1000,
+      location:
+        index % 3 === 0 ? "Remote" : index % 3 === 1 ? "Office" : "Hybrid",
+      startDate: getMockValue(START_DATE_MOCK, index)
+        .toISOString()
+        .split("T")[0],
+      performance: getMockValue(PERFORMANCE_LITERAL_MOCK, index),
+      yearsExperience: getMockValue(YEARS_OF_EXPERIENCIE_MOCK, index),
+      team: getMockValue(TEAMS_MOCK, index),
+      certifications: getMockValue(CERTIFICATIONS_MOCK, index),
+      education: getMockValue(EDUCATION_MOCK, index),
+      languages: getMockValue(LANGUAGES_MOCK, index),
+      projects: getMockValue(PROJECTS_MOCK, index),
+      performanceScore: getMockValue(PERFORMANCE_LITERAL_MOCK, index),
+      lastReview: new Date(2023, index % 12, 1 + (index % 28))
+        .toISOString()
+        .split("T")[0],
+      nextReview: new Date(2024, index % 12, 1 + (index % 28))
+        .toISOString()
+        .split("T")[0],
+    }))
 
     // Define extended sortings for the example
     const extendedSortings = {
@@ -1633,12 +1768,16 @@ export const TableColumnProperties: Story = {
     } as const
 
     // Create a custom data adapter for the extended data structure
-    const dataAdapter = createDataAdapter({
+    const dataAdapter = createDataAdapter<
+      (typeof extendedMockUsers)[number],
+      typeof filters,
+      NavigationFiltersDefinition
+    >({
       data: extendedMockUsers,
       delay: 300,
     })
 
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings: extendedSortings,
@@ -1770,7 +1909,7 @@ export const TableColumnProperties: Story = {
 
 export const TableWithNoFiltersAndSearch: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       sortings: {
         name: { label: "Name" },
         email: { label: "Email" },
@@ -1856,7 +1995,7 @@ export const TableWithNoFiltersAndSearch: Story = {
 
 export const TableWithNoFilters: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       sortings: {
         name: { label: "Name" },
         email: { label: "Email" },
@@ -1962,7 +2101,7 @@ export const TableWithNoFilters: Story = {
 
 export const TableWithSecondaryActions: Story = {
   render: () => {
-    const dataSource = useDataSource({
+    const dataSource = useDataCollectionSource({
       sortings: {
         name: { label: "Name" },
         email: { label: "Email" },
@@ -2037,20 +2176,4 @@ export const TableWithSecondaryActions: Story = {
       />
     )
   },
-}
-
-export const TotalItemsSummary: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'The `totalItemSummary` useDataSource prop allows you to customize how the total number of items is displayed in the collection header. It receives a function that takes the total count as a parameter and returns a string to be displayed. By default, if no `totalItemSummary` is provided, it will display "{count} items".',
-      },
-    },
-  },
-  render: () => (
-    <ExampleComponent
-      totalItemSummary={(totalItems) => `Total items: ${totalItems}`}
-    />
-  ),
 }

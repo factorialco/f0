@@ -1,4 +1,4 @@
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { Ai, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
@@ -25,7 +25,7 @@ const Option = ({ option, onClick, selectedOption = null }: OptionProps) => {
         {option.label}
       </p>
       {option.subOptions && option.subOptions.length > 0 && (
-        <Icon icon={ChevronRight} size="md" className="text-f1-icon" />
+        <F0Icon icon={ChevronRight} size="md" className="text-f1-icon" />
       )}
     </div>
   )

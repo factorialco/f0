@@ -1,4 +1,4 @@
-import { ModuleAvatar, ModuleId } from "@/experimental/Information/ModuleAvatar"
+import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { cn } from "@/lib/utils"
 
 type Props<Id extends string | number = string | number> = {
@@ -51,7 +51,7 @@ export function WidgetInboxListItem({
 
   return (
     <Wrapper onClick={handleOnClick} className={className}>
-      <ModuleAvatar module={module ?? "inbox"} size="md" />
+      <F0AvatarModule module={module ?? "inbox"} size="md" />
       <div className="flex-1">
         <p className="line-clamp-1 font-medium">{title}</p>
         <p className="line-clamp-1 text-f1-foreground-secondary">{subtitle}</p>

@@ -1,7 +1,7 @@
-import { Icon, IconProps, IconType } from "@/components/Utilities/Icon"
+import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import { AlertCircle, InfoCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { InputFieldStatus, InputFieldStatusType } from "../InputField"
+import { InputFieldStatus, InputFieldStatusType } from "../types"
 
 type InputMessagesProps = {
   status?: InputFieldStatus
@@ -9,7 +9,7 @@ type InputMessagesProps = {
 
 const statuses: Record<
   InputFieldStatusType,
-  { color: string; iconColor: IconProps["color"]; icon?: IconType }
+  { color: string; iconColor: F0IconProps["color"]; icon?: IconType }
 > = {
   default: {
     color: "text-f1-foreground-secondary",
@@ -46,7 +46,7 @@ const InputMessages = ({ status }: InputMessagesProps) => {
       <div className="flex gap-1">
         {icon && (
           <div className="-translate-y-[2px]">
-            <Icon
+            <F0Icon
               icon={icon}
               color={statuses[status.type].iconColor || "currentColor"}
             />

@@ -1,11 +1,14 @@
 import { useI18n } from "@/lib/providers/i18n"
 import { useMemo, useState } from "react"
-import { DropdownInternal } from "../../../experimental/Navigation/Dropdown/internal"
-import { ChevronDown } from "../../../icons/app"
-import { cn, focusRing } from "../../../lib/utils"
-import { Action } from "../../../ui/Action"
-import { actionVariants, buttonSizeVariants } from "../../../ui/Action/variants"
-import { Icon, IconType } from "../../Utilities/Icon"
+import { DropdownInternal } from "../../../experimental/Navigation/Dropdown/internal.tsx"
+import { ChevronDown } from "../../../icons/app/index.ts"
+import { cn, focusRing } from "../../../lib/utils.ts"
+import { Action } from "../../../ui/Action/index.tsx"
+import {
+  actionVariants,
+  buttonSizeVariants,
+} from "../../../ui/Action/variants.ts"
+import { F0Icon, IconType } from "../../F0Icon/index.tsx"
 import { OneDropdownButtonSize, OneDropdownButtonVariant } from "./types.ts"
 
 export type OneDropdownButtonItem<T = string> = {
@@ -75,7 +78,7 @@ const OneDropdownButton = ({
         disabled={props.disabled}
         loading={props.loading}
         data-testid="button-main"
-        prepend={selectedItem.icon && <Icon icon={selectedItem.icon} />}
+        prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
         appendOutside={true}
         className="rounded-r-none after:rounded-r-none"
         append={
@@ -105,7 +108,7 @@ const OneDropdownButton = ({
             >
               <div className="main flex items-center justify-center gap-1">
                 <span className="sr-only">{t.actions.more}</span>
-                <Icon
+                <F0Icon
                   icon={ChevronDown}
                   size={props.size === "sm" ? "sm" : "md"}
                 />

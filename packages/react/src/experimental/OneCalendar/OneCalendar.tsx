@@ -11,7 +11,7 @@ import {
   GranularityDefinitionSimple,
 } from "./granularities/index"
 import { CalendarMode, CalendarView, DateRange, DateRangeString } from "./types"
-import { isValidDate, toDateRange } from "./utils"
+import { isActiveDate, toDateRange } from "./utils"
 
 export interface OneCalendarProps {
   mode: CalendarMode
@@ -78,7 +78,7 @@ export function OneCalendar({
       setSelectedInternal(date)
 
       // Set the input value
-      setInputValue(granularity.toRangeString(date))
+      setInputValue(granularity.toRangeString(date, i18n))
 
       const newViewDate = granularity.getViewDateFromDate(
         date instanceof Date ? date : date?.from || date?.to || new Date()
@@ -108,7 +108,7 @@ export function OneCalendar({
   }
 
   // Get header label
-  const getHeaderLabel = () => granularity.label(viewDate)
+  const getHeaderLabel = () => granularity.label(viewDate, i18n)
 
   // Handle selection of a date
   const handleSelect = (date: Date | DateRange | null) => {
@@ -137,48 +137,80 @@ export function OneCalendar({
     setSelectFromInput(input, inputValue)
   }
 
+  const isSelectableDate = useCallback(
+    (date: Date | undefined | null) => {
+      if (!date) {
+        return false
+      }
+
+      return isActiveDate(date, granularity, {
+        minDate,
+        maxDate,
+      })
+    },
+    [granularity, minDate, maxDate]
+  )
+
   const setSelectFromInput = (
     input: "from" | "to",
     inputValue: DateRangeString
   ) => {
-    const newDate = granularity.fromString(inputValue)
-    const error = newDate && newDate[input] && !isValidDate(newDate[input])
+    const newDate = granularity.fromString(inputValue, i18n)
+    const error = !isSelectableDate(newDate?.[input])
+
     setInputError((prev) => ({
       ...prev,
       [input]: error,
     }))
 
     if (!error) {
-      setSelected(newDate)
+      handleSelect(newDate)
     }
   }
+
+  // When the granularity changes, the range to the correct granularity
+  useEffect(
+    () => {
+      const range = toDateRange(selected)
+      if (!range) return
+
+      const newRange = granularity.toRange(range.from)
+
+      handleSelect(newRange)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the granularity changes
+    [granularity]
+  )
+
   useEffect(() => {
     const range = toDateRange(selected)
 
     const { from, to } = granularity.toRangeString(
-      range ? range : { from: new Date(), to: undefined }
+      range ? range : { from: new Date(), to: undefined },
+      i18n
     )
     setInputValue({
       from: from || "",
       to: to || "",
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the i18n changes
   }, [granularity, selected])
 
   const handleInputNavigate = (input: "from" | "to", direction: -1 | 1) => {
     const currentDate = inputValue[input]
-      ? granularity.fromString(inputValue[input])
+      ? granularity.fromString(inputValue[input], i18n)
       : undefined
     const newDate = currentDate
       ? granularity.navigate(currentDate.from, direction)
       : undefined
 
-    if (isValidDate(newDate)) {
+    if (isSelectableDate(newDate)) {
       const newInputValue = {
         ...inputValue,
-        [input]: granularity.toRangeString(newDate).from,
+        [input]: granularity.toRangeString(newDate, i18n).from,
       }
-      setInputValue(newInputValue)
       setSelectFromInput(input, newInputValue)
+      setInputValue(newInputValue)
     }
   }
 

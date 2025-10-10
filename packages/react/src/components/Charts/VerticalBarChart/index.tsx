@@ -14,9 +14,10 @@ import {
 import type { Props as LabelProps } from "recharts/types/component/Label"
 import type { CartesianViewBox } from "recharts/types/util/types"
 import { prepareData } from "../utils/bar"
-import { autoColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
+  chartTooltipProps,
   measureTextWidth,
   xAxisProps as xAxisConfigureProps,
   yAxisProps as yAxisConfigureProps,
@@ -113,7 +114,7 @@ const _VBarChart = <K extends ChartConfig>(
       >
         {!hideTooltip && (
           <ChartTooltip
-            cursor
+            {...chartTooltipProps(true)}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }
@@ -141,7 +142,11 @@ const _VBarChart = <K extends ChartConfig>(
                 layout="vertical"
                 key={`bar-${key}`}
                 dataKey={key}
-                fill={dataConfig[key].color || autoColor(index)}
+                fill={
+                  dataConfig[key].color
+                    ? getColor(dataConfig[key].color)
+                    : getCategoricalColor(index)
+                }
                 radius={4}
                 maxBarSize={24}
               >

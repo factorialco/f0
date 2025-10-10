@@ -1,8 +1,8 @@
 import { addDays, differenceInDays, endOfDay, startOfDay } from "date-fns"
-import { GranularityDefinition } from ".."
 import { DateRangeComplete } from "../../types"
 import { isAfterOrEqual, isBeforeOrEqual } from "../../utils"
 import { dayGranularity, toDayGranularityDateRange } from "../day"
+import { GranularityDefinition } from "../types"
 /**
  * This is a special case of the day granularity.
  * It is used to render a range of dates.

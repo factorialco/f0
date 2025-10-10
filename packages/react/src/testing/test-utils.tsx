@@ -1,24 +1,63 @@
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
-import { render, type RenderOptions } from "@testing-library/react"
+import {
+  Queries,
+  render,
+  renderHook,
+  RenderHookOptions,
+  RenderHookResult,
+  type RenderOptions,
+  type RenderResult,
+} from "@testing-library/react"
+import * as ReactDOMClient from "react-dom/client"
+
+import { queries } from "@testing-library/dom"
+
 import { userEvent } from "@testing-library/user-event"
 import React, { type ReactElement } from "react"
-import { I18nProvider, defaultTranslations } from "../lib/providers/i18n"
+import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
+export * from "@testing-library/react"
 
+import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { MotionGlobalConfig } from "motion"
 MotionGlobalConfig.skipAnimations = true
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
-    <UserPlatformProvider showExperimentalWarnings={false}>
-      <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
-    </UserPlatformProvider>
+    <DataCollectionStorageProvider
+      handler={{
+        get: () => Promise.resolve({}),
+        set: () => Promise.resolve(),
+      }}
+    >
+      <UserPlatformProvider showExperimentalWarnings={false}>
+        <I18nProvider translations={defaultTranslations}>
+          {children}
+        </I18nProvider>
+      </UserPlatformProvider>
+    </DataCollectionStorageProvider>
   )
 }
 
 const zeroRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper">
-) => render(ui, { wrapper: AllTheProviders, ...options })
+): RenderResult => render(ui, { wrapper: AllTheProviders, ...options })
 
-export * from "@testing-library/react"
-export { userEvent, zeroRender }
+type RendererableContainer = ReactDOMClient.Container
+type HydrateableContainer = Parameters<
+  (typeof ReactDOMClient)["hydrateRoot"]
+>[0]
+
+const zeroRenderHook = <
+  Result,
+  Props,
+  Q extends Queries = typeof queries,
+  Container extends RendererableContainer | HydrateableContainer = HTMLElement,
+  BaseElement extends RendererableContainer | HydrateableContainer = Container,
+>(
+  render: (initialProps: Props) => Result,
+  options?: RenderHookOptions<Props, Q, Container, BaseElement> | undefined
+): RenderHookResult<Result, Props> =>
+  renderHook(render, { wrapper: AllTheProviders, ...options })
+
+export { userEvent, zeroRender, zeroRenderHook }

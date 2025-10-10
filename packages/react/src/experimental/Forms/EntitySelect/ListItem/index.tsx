@@ -1,6 +1,6 @@
 import { Button } from "@/components/Actions/Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { Icon } from "@/components/Utilities/Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { Counter } from "@/experimental/Information/Counter"
 import { CheckCircle } from "@/icons/app"
 import LogoAvatar from "@/icons/app/LogoAvatar"
@@ -109,7 +109,7 @@ export const ListItemSingleContent = ({
         aria-label={entity.name}
         className={cn(
           marginLeft,
-          "flex flex-row flex-wrap items-center gap-2 rounded-[10px] border p-2 hover:cursor-pointer",
+          "flex flex-row flex-wrap items-center gap-2 rounded-[10px] border px-2 py-1.5 hover:cursor-pointer",
           "focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:bg-f1-background-hover",
           selected && singleSelector
             ? "bg-f1-background-selected-bold/10 transition-colors dark:bg-f1-background-selected-bold/20"
@@ -121,7 +121,7 @@ export const ListItemSingleContent = ({
             src={entity.avatar}
             firstName={firstName}
             lastName={lastName}
-            size="xsmall"
+            size="xs"
           />
         )}
 
@@ -148,7 +148,7 @@ export const ListItemSingleContent = ({
         />
 
         {singleSelector && selected && (
-          <Icon
+          <F0Icon
             className="text-f1-icon-selected"
             icon={CheckCircle}
             size="md"
@@ -252,7 +252,7 @@ const EntitySelectListItem = ({
   const checked = selected || partialSelected
   return (
     <>
-      <div className="flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-1 pr-1">
+      <div className="flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1">
         <Button
           round
           hideLabel
@@ -268,10 +268,10 @@ const EntitySelectListItem = ({
           onPointerDown={() => {
             setPressingLabel(true)
           }}
-          className="flex flex-1 flex-row items-center gap-2 rounded-[10px] border p-2 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:cursor-pointer hover:bg-f1-background-hover"
+          className="flex flex-1 flex-row items-center gap-2 rounded-[10px] border px-2 py-1.5 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:cursor-pointer hover:bg-f1-background-hover"
         >
           {showGroupIcon && (
-            <Icon
+            <F0Icon
               icon={LogoAvatar}
               className="rounded-xs bg-f1-foreground-secondary text-f1-foreground-inverse"
             />

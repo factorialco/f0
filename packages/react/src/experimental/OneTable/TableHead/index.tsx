@@ -1,6 +1,6 @@
 import { TableHead as TableHeadRoot } from "@/ui/table"
 import { AnimatePresence, motion } from "motion/react"
-import { Icon, IconType } from "../../../components/Utilities/Icon"
+import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
 import { cn, focusRing } from "../../../lib/utils"
 import { Tooltip } from "../../Overlays/Tooltip"
@@ -59,6 +59,11 @@ interface TableHeadProps {
    * @default "left"
    */
   align?: "left" | "right"
+
+  /**
+   * The class name of the header cell
+   */
+  className?: string
 }
 
 export function TableHead({
@@ -71,6 +76,7 @@ export function TableHead({
   sticky,
   hidden = false,
   align = "left",
+  className,
 }: TableHeadProps) {
   const { isScrolled, isScrolledRight } = useTable()
 
@@ -106,7 +112,7 @@ export function TableHead({
                     )}
                     tabIndex={0}
                   >
-                    <Icon icon={infoIcon} size="sm" />
+                    <F0Icon icon={infoIcon} size="sm" />
                   </div>
                 </Tooltip>
               </div>
@@ -137,7 +143,7 @@ export function TableHead({
                       ease: [0.175, 0.885, 0.32, 1.275],
                     }}
                   >
-                    <Icon icon={ArrowDown} size="xs" />
+                    <F0Icon icon={ArrowDown} size="xs" />
                   </motion.div>
                   {sortState === "none" && (
                     <motion.div
@@ -151,7 +157,7 @@ export function TableHead({
                         ease: [0.175, 0.885, 0.32, 1.275],
                       }}
                     >
-                      <Icon icon={ArrowDown} size="xs" />
+                      <F0Icon icon={ArrowDown} size="xs" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -174,7 +180,8 @@ export function TableHead({
           (isScrolled || isScrolledRight) &&
           "relative bg-f1-background before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
         isSticky && "sticky z-10",
-        hidden && "after:hidden"
+        hidden && "after:hidden",
+        className
       )}
       tabIndex={sticky ? 0 : undefined}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled

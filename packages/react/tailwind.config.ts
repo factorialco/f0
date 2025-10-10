@@ -1,4 +1,4 @@
-import { baseConfig } from "@factorialco/factorial-one-core/tailwind"
+import { baseConfig } from "@factorialco/f0-core/tailwind"
 import type { Config } from "tailwindcss"
 
 export default {
@@ -10,5 +10,5 @@ export default {
     "./src/**/*.{ts,tsx}",
     "./docs/**/*.{mdx,ts,tsx}",
     "./storybook/**/*.{mdx,ts,tsx}",
-  ]
+  ],
 } satisfies Config

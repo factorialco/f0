@@ -47,9 +47,23 @@ interface OverflowListProps<T> {
 
   /**
    * The gap between items in pixels
+   * Can be negative
    * @default 8
    */
   gap?: number
+
+  /**
+   * The maximum number of items to display
+   * @default undefined (means auto)
+   */
+  max?: number
+
+  /**
+   * The widths of the items in pixels
+   * This value is used to avoid calculating the width of the items in runtime
+   * @default undefined (means auto)
+   **/
+  itemsWidth?: number | number[]
 }
 
 const OverflowList = function OverflowList<T>({
@@ -61,6 +75,8 @@ const OverflowList = function OverflowList<T>({
   forceShowingOverflowIndicator = false,
   className = "",
   gap = 8,
+  max,
+  itemsWidth,
 }: OverflowListProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -76,7 +92,10 @@ const OverflowList = function OverflowList<T>({
     visibleItems,
     overflowItems,
     isInitialized,
-  } = useOverflowCalculation(items, gap)
+  } = useOverflowCalculation(items, gap, {
+    max,
+    itemsWidth,
+  })
 
   const DefaultOverflowIndicator = useMemo(
     () => (
@@ -104,25 +123,34 @@ const OverflowList = function OverflowList<T>({
     <div
       ref={containerRef}
       className={cn("relative flex items-center", className)}
-      style={{ gap: `${gap}px` }}
+      style={{
+        gap: gap > 0 ? `${gap}px` : undefined,
+        marginLeft: gap < 0 ? `${-gap}px` : undefined,
+      }}
     >
-      <div
-        ref={measurementContainerRef}
-        aria-hidden="true"
-        className="pointer-events-none invisible absolute left-0 top-0 flex opacity-0"
-        style={{ gap: `${gap}px` }}
-        data-testid="overflow-measurement-container"
-      >
-        {items.map((item, index) => (
-          <div key={`measure-${index}`} data-testid="overflow-measurement-item">
-            {renderListItem(item, index, false)}
-          </div>
-        ))}
-      </div>
+      {!itemsWidth && (
+        <div
+          ref={measurementContainerRef}
+          aria-hidden="true"
+          className="pointer-events-none invisible absolute left-0 top-0 flex opacity-0"
+          style={{ gap: gap > 0 ? `${gap}px` : undefined }}
+          data-testid="overflow-measurement-container"
+        >
+          {items.map((item, index) => (
+            <div
+              key={`measure-${index}`}
+              data-testid="overflow-measurement-item"
+              style={{ marginLeft: gap < 0 ? `${gap}px` : undefined }}
+            >
+              {renderListItem(item, index, false)}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div
         className="flex items-center whitespace-nowrap"
-        style={{ gap: `${gap}px` }}
+        style={{ gap: gap > 0 ? `${gap}px` : undefined }}
         data-testid="overflow-visible-container"
       >
         {isInitialized &&
@@ -131,6 +159,7 @@ const OverflowList = function OverflowList<T>({
               key={`item-${index}`}
               className="transition-all duration-150"
               data-testid="overflow-visible-item"
+              style={{ marginLeft: gap < 0 ? `${gap}px` : undefined }}
             >
               {renderListItem(item, index, true)}
             </div>

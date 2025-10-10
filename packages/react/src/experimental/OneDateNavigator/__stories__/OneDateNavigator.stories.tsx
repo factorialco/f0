@@ -186,7 +186,7 @@ export const WithCompareTo: Story = {
     } as DatePickerValue,
     granularities: ["day", "week", "month"],
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
-    maxDate: today, // Can't select dates after today
+    //maxDate: today, // Can't select dates after today
     onCompareToChange(compareTo) {
       console.log("compareTo:", compareTo)
     },
@@ -235,5 +235,12 @@ export const WithCompareTo: Story = {
         },
       ],
     },
+  },
+}
+
+export const WithDefaultCompareTo: Story = {
+  args: {
+    ...WithCompareTo.args,
+    defaultCompareTo: "1",
   },
 }

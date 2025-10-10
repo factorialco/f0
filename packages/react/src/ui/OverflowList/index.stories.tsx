@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { motion } from "motion/react"
 import { useState } from "react"
-import { Icon } from "../../components/Utilities/Icon"
+import { F0Icon } from "../../components/F0Icon"
 import { Counter } from "../../experimental/Information/Counter"
 import { Preset } from "../../experimental/OnePreset"
 import { ChevronDown } from "../../icons/app"
@@ -31,7 +31,11 @@ const meta = {
       description: "Additional styling for the container.",
     },
     gap: {
-      description: "The gap between items in pixels.",
+      description: "The gap between items in pixels. Can be negative.",
+    },
+    max: {
+      description:
+        "The maximum number of items to display. If not provided, the maximum number of items will be auto-calculated. ",
     },
   },
   decorators: [
@@ -236,7 +240,7 @@ export const WithCustomOverflowIndicator: Story = {
           className="flex h-4 w-4 items-center justify-center rounded-xs bg-f1-background-selected text-f1-icon-selected"
           animate={{ rotate: isOpen ? 360 : 90 }}
         >
-          <Icon icon={ChevronDown} size="xs" />
+          <F0Icon icon={ChevronDown} size="xs" />
         </motion.div>
       </div>
     ),

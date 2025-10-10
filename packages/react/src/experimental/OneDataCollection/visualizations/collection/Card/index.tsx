@@ -2,16 +2,17 @@ import { F0Card } from "@/components/F0Card"
 import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetadata"
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
-import { IconType } from "@/components/Utilities/Icon"
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader/GroupHeader"
+import { IconType } from "@/components/F0Icon"
+import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
+import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import {
-  getAnimationVariants,
-  useGroups,
-} from "@/experimental/OneDataCollection/useGroups"
-import { useSelectable } from "@/experimental/OneDataCollection/useSelectable"
+import { GroupingDefinition, RecordType } from "@/hooks/datasource"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
+import { useSelectable } from "@/hooks/datasource/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
+import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
@@ -19,15 +20,8 @@ import type { FiltersDefinition } from "../../../../../components/OneFilterPicke
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { PropertyDefinition } from "../../../property-render"
-import { SortingsDefinition } from "../../../sortings"
 import { SummariesDefinition } from "../../../summary"
-import {
-  CollectionProps,
-  DataSource,
-  GroupingDefinition,
-  RecordType,
-} from "../../../types"
-import { useData } from "../../../useData"
+import { CollectionProps } from "../../../types"
 
 export type CardPropertyDefinition<T> = PropertyDefinition<T> & {
   icon?: IconType
@@ -97,7 +91,7 @@ type GroupCardsProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<Record>,
 > = {
-  source: DataSource<
+  source: DataCollectionSource<
     Record,
     Filters,
     Sortings,
@@ -151,8 +145,14 @@ const GroupCards = <
   ): Array<CardMetadata> {
     return properties
       .map((property) => {
+        if (property.hide?.(item)) {
+          return null
+        }
+
         const result = property.render(item)
-        if (result === undefined) return null
+        if (result === undefined) {
+          return null
+        }
 
         const cardProperty = convertToCardMetadataProperty(result)
         if (!cardProperty) return null
@@ -259,6 +259,7 @@ const GroupCards = <
               link={itemHref}
               compact={compact ? compact : false}
               metadata={metadata}
+              fullHeight={true}
             />
           </motion.div>
         )
@@ -311,24 +312,25 @@ export const CardCollection = <
     return source.dataAdapter
   }, [source.dataAdapter])
 
-  const { data, paginationInfo, setPage, isInitialLoading } = useData<
-    Record,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(
-    {
-      ...source,
-      dataAdapter: overridenDataAdapter,
-    },
-    {
-      onError: (error) => {
-        onLoadError(error)
+  const { data, paginationInfo, setPage, isInitialLoading } =
+    useDataCollectionData<
+      Record,
+      Filters,
+      Sortings,
+      Summaries,
+      NavigationFilters,
+      Grouping
+    >(
+      {
+        ...source,
+        dataAdapter: overridenDataAdapter,
       },
-    }
-  )
+      {
+        onError: (error) => {
+          onLoadError(error)
+        },
+      }
+    )
 
   useEffect(() => {
     onLoadData({
@@ -368,7 +370,7 @@ export const CardCollection = <
   )
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-4">
       <div className="overflow-auto">
         {isInitialLoading ? (
           <CardGrid>

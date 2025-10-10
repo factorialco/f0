@@ -1,14 +1,14 @@
-# Factorial One Design System
+# F0 Design System
 
-Factorial One is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
+F0 is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
 
 ## Packages
 
 This monorepo contains the following packages:
 
-- `@factorialco/factorial-one-core`: Core tokens and utilities shared across platforms (located in `packages/core`)
-- `@factorialco/factorial-one-react-native`: React Native implementation of the design system (located in `packages/react-native`)
-- `@factorialco/factorial-one-react`: React implementation of the design system (existing)
+- `@factorialco/f0-core`: Core tokens and utilities shared across platforms (located in `packages/core`)
+- `@factorialco/f0-react-native`: React Native implementation of the design system (located in `packages/react-native`)
+- `@factorialco/f0-react`: React implementation of the design system (existing)
 
 ## Development
 
@@ -31,8 +31,8 @@ pnpm install
 pnpm build
 
 # Build a specific package
-pnpm --filter @factorialco/factorial-one-core build
-pnpm --filter @factorialco/factorial-one-react-native build
+pnpm --filter @factorialco/f0-core build
+pnpm --filter @factorialco/f0-react-native build
 ```
 
 ### Testing
@@ -42,8 +42,8 @@ pnpm --filter @factorialco/factorial-one-react-native build
 pnpm test
 
 # Run tests for a specific package
-pnpm --filter @factorialco/factorial-one-core test
-pnpm --filter @factorialco/factorial-one-react-native test
+pnpm --filter @factorialco/f0-core test
+pnpm --filter @factorialco/f0-react-native test
 ```
 
 ## License
