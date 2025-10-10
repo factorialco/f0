@@ -14,10 +14,13 @@ const meta: Meta<typeof LineChart<typeof singleDataConfig>> = {
   title: "Charts/LineChart",
   argTypes: {
     lineType: {
-      control: { type: "select", options: ["natural", "linear"] },
+      control: { type: "select" },
+      options: ["natural", "linear"],
       description: "Determines the type of line curve",
-      defaultValue: "natural",
     },
+  },
+  args: {
+    lineType: "natural",
   },
   decorators: [
     (Story) => (

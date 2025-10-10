@@ -97,7 +97,7 @@ export const _PieChart = (
                   >
                     <tspan
                       x={viewBox.cx}
-                      y={(viewBox.cy || 0) + 8}
+                      y={(viewBox.cy || 0) + 10}
                       className="fill-f1-foreground text-4xl font-semibold"
                     >
                       {overview?.number
@@ -108,7 +108,7 @@ export const _PieChart = (
                     </tspan>
                     <tspan
                       x={viewBox.cx}
-                      y={(viewBox.cy || 0) - 16}
+                      y={(viewBox.cy || 0) - 20}
                       className="fill-f1-foreground-secondary"
                     >
                       {overview?.label}
