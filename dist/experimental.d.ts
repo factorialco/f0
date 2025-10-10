@@ -282,10 +282,18 @@ declare type AiChatProviderReturnValue = {
      */
     setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
     autoClearMinutes: number | null;
+    /**
+     * The initial message to display in the chat
+     */
     initialMessage?: string | string[];
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
     onThumbsUp?: (message: AIMessage) => void;
     onThumbsDown?: (message: AIMessage) => void;
+    /**
+     * Clear/reset the chat conversation
+     */
+    clear: () => void;
+    /* Excluded from this release type: setClearFunction */
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
@@ -1726,6 +1734,8 @@ declare const defaultTranslations: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
                 readonly long: "Week of {{day}} {{month}} {{year}}";
+                readonly longSingular: "Week of {{date}}";
+                readonly longPlural: "Weeks of {{date}}";
             };
             readonly month: {
                 readonly currentDate: "This month";

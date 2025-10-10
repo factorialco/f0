@@ -1,5 +1,5 @@
-import { C as g, L as ge, c as ve, P as H, a as b, f as be, g as z, A as xe, B as Ce, b as ye, d as we, e as Ne, V as Le, h as M, i as U, j as W, k as Pe, l as J, S as Y, m as X, n as Se, O as Fe, o as K, p as De, q as ke, F as Q, r as Me, s as Te, t as Ie, D as Re, u as Be, v as Oe, w as $e, x as Z, y as w, U as ee, z as Ee, E as _e, G as V, H as je, I as ae, J as ze, K as Ve, M as Ae, N as qe, Q as Ge, R as He, X as Ue, T as We, W as Je, Y as Ye, Z as Xe, _ as Ke } from "./hooks-3A0qKZ7o.js";
-import { az as Ja, $ as Ya, aB as Xa, aK as Ka, a0 as Qa, a1 as Za, a2 as er, a3 as ar, a4 as rr, a5 as sr, a6 as tr, a7 as lr, a9 as or, aa as nr, ab as ir, ac as dr, aG as cr, ae as ur, af as fr, ag as mr, ah as hr, ak as pr, al as gr, am as vr, an as br, ap as xr, ad as Cr, ao as yr, aj as wr, aH as Nr, aA as Lr, au as Pr, ax as Sr, at as Fr, aL as Dr, as as kr, ar as Mr, a8 as Tr, ai as Ir, aq as Rr, av as Br, aC as Or, aD as $r, aE as Er, aM as _r, aw as jr, aF as zr, aJ as Vr, ay as Ar, aI as qr } from "./hooks-3A0qKZ7o.js";
+import { C as g, L as ge, c as ve, P as G, a as b, f as be, g as z, A as xe, B as Ce, b as ye, d as we, e as Ne, V as Pe, h as M, i as H, j as U, k as Le, l as J, S as Y, m as X, n as Se, O as Fe, o as K, p as ke, q as De, F as Q, r as Me, s as Te, t as Ie, D as Re, u as Be, v as Oe, w as $e, x as Z, y as w, U as ee, z as Ee, E as _e, G as V, H as je, I as ae, J as ze, K as Ve, M as Ae, N as qe, Q as We, R as Ge, X as He, T as Ue, W as Je, Y as Ye, Z as Xe, _ as Ke } from "./hooks-DQfZZiUS.js";
+import { az as Ja, $ as Ya, aB as Xa, aK as Ka, a0 as Qa, a1 as Za, a2 as er, a3 as ar, a4 as rr, a5 as sr, a6 as tr, a7 as lr, a9 as or, aa as nr, ab as ir, ac as dr, aG as cr, ae as ur, af as fr, ag as mr, ah as hr, ak as pr, al as gr, am as vr, an as br, ap as xr, ad as Cr, ao as yr, aj as wr, aH as Nr, aA as Pr, au as Lr, ax as Sr, at as Fr, aL as kr, as as Dr, ar as Mr, a8 as Tr, ai as Ir, aq as Rr, av as Br, aC as Or, aD as $r, aE as Er, aM as _r, aw as jr, aF as zr, aJ as Vr, ay as Ar, aI as qr } from "./hooks-DQfZZiUS.js";
 import { jsx as e, jsxs as c, Fragment as $ } from "react/jsx-runtime";
 import * as E from "react";
 import Qe, { useState as v, forwardRef as I, useRef as re, useImperativeHandle as Ze, Children as ea, useEffect as se, createContext as aa } from "react";
@@ -143,7 +143,9 @@ const Fa = {
       week: {
         currentDate: "This week",
         label: "Week",
-        long: "Week of {{day}} {{month}} {{year}}"
+        long: "Week of {{day}} {{month}} {{year}}",
+        longSingular: "Week of {{date}}",
+        longPlural: "Weeks of {{date}}"
       },
       month: {
         currentDate: "This month",
@@ -201,10 +203,10 @@ const Fa = {
     noResults: "No results found",
     loadingMore: "Loading..."
   }
-}, Da = g({
+}, ka = g({
   name: "Link",
   type: "info"
-}, ge), ka = [
+}, ge), Da = [
   "person",
   "team",
   "company",
@@ -225,7 +227,7 @@ var _ = "Progress", j = 100, [ra, Ma] = ve(_), [sa, ta] = ra(_), te = E.forwardR
     l !== null && !q(l, d) && console.error(na(`${l}`, "Progress"));
     const o = q(l, d) ? l : null, f = T(o) ? i(o, d) : void 0;
     return /* @__PURE__ */ e(sa, { scope: s, value: o, max: d, children: /* @__PURE__ */ e(
-      H.div,
+      G.div,
       {
         "aria-valuemax": d,
         "aria-valuemin": 0,
@@ -246,7 +248,7 @@ var le = "ProgressIndicator", oe = E.forwardRef(
   (a, r) => {
     const { __scopeProgress: s, ...l } = a, t = ta(le, s);
     return /* @__PURE__ */ e(
-      H.div,
+      G.div,
       {
         "data-state": ne(t.value, t.max),
         "data-value": t.value ?? void 0,
@@ -354,7 +356,7 @@ const da = ({ value: a, max: r = 100, label: s, color: l }, t) => {
     name: "VerticalBarChart",
     type: "info"
   },
-  Le
+  Pe
 ), Ea = g(
   {
     name: "ProgressBarChart",
@@ -365,13 +367,13 @@ const da = ({ value: a, max: r = 100, label: s, color: l }, t) => {
   const [s, l] = v(!1), t = e(M, {
     label: `+${a}`
   });
-  return r != null && r.length ? c(U, {
+  return r != null && r.length ? c(H, {
     open: s,
     onOpenChange: l,
-    children: [e(W, {
+    children: [e(U, {
       asChild: !0,
       children: e("button", {
-        className: Pe("inline-flex flex-shrink-0 items-center"),
+        className: Le("inline-flex flex-shrink-0 items-center"),
         children: t
       })
     }), e(J, {
@@ -440,7 +442,7 @@ const _a = Se("F0ChipList", ce), ua = {
       className: "@container",
       children: [c("div", {
         className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden",
-        children: [e(De, {
+        children: [e(ke, {
           columns: ua,
           showArrows: !1,
           children: i
@@ -481,7 +483,7 @@ const _a = Se("F0ChipList", ce), ua = {
 }), ha = ({ children: a, className: r }) => e("aside", {
   className: b("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", r),
   children: a
-}), pa = ke({
+}), pa = De({
   base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
@@ -608,8 +610,8 @@ function ba({ isOpen: a, onClose: r, title: s, children: l, module: t, portalCon
     })
   });
 }
-function Aa({ isOpen: a, onClose: r, title: s, image: l, benefits: t, errorMessage: i, successMessage: n, loadingState: d, nextSteps: o, closeLabel: f, primaryAction: m, modalTitle: N, modalModule: L, secondaryAction: u, portalContainer: x, tag: S }) {
-  const [R, F] = v(a), [C, y] = v(null), [P, h] = v(!1), D = async () => {
+function Aa({ isOpen: a, onClose: r, title: s, image: l, benefits: t, errorMessage: i, successMessage: n, loadingState: d, nextSteps: o, closeLabel: f, primaryAction: m, modalTitle: N, modalModule: P, secondaryAction: u, portalContainer: x, tag: S }) {
+  const [R, F] = v(a), [C, y] = v(null), [L, h] = v(!1), k = async () => {
     if (m != null && m.onClick) {
       h(!0);
       try {
@@ -620,15 +622,15 @@ function Aa({ isOpen: a, onClose: r, title: s, image: l, benefits: t, errorMessa
         h(!1);
       }
     }
-  }, k = () => {
+  }, D = () => {
     F(!1), r == null || r();
-  }, B = P;
+  }, B = L;
   return c($, {
     children: [e(ba, {
       isOpen: R,
-      onClose: k,
+      onClose: D,
       title: N,
-      module: L,
+      module: P,
       portalContainer: x,
       children: e("div", {
         className: "pb-4 pl-4",
@@ -644,7 +646,7 @@ function Aa({ isOpen: a, onClose: r, title: s, image: l, benefits: t, errorMessa
               variant: m.variant,
               label: B ? d.label : m.label,
               icon: m.icon || void 0,
-              onClick: D,
+              onClick: k,
               loading: m.loading,
               size: m.size
             }), u && e(w, {
@@ -660,7 +662,7 @@ function Aa({ isOpen: a, onClose: r, title: s, image: l, benefits: t, errorMessa
     }), C && e(ee, {
       open: !0,
       onClose: () => {
-        k(), y(null);
+        D(), y(null);
       },
       success: C === "success",
       errorMessage: i,
@@ -678,7 +680,7 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: l, dismissible: t,
   se(() => {
     n && n(!f);
   }, [n, f]);
-  const L = a == null ? void 0 : a.includes(".mp4");
+  const P = a == null ? void 0 : a.includes(".mp4");
   return e($, {
     children: f ? null : c(Ee, {
       style: {
@@ -698,7 +700,7 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: l, dismissible: t,
           })
         }), c("div", {
           children: [e("div", {
-            children: a && (L ? e("video", {
+            children: a && (P ? e("video", {
               src: a,
               autoPlay: !0,
               muted: !0,
@@ -772,29 +774,29 @@ const Ca = I(function({ primaryAction: r, secondaryAction: s, ...l }, t) {
   });
 });
 Ca.displayName = "UpsellingBanner";
-function qa({ isOpen: a, setIsOpen: r, label: s, variant: l = "promote", size: t = "md", showIcon: i = !0, side: n = "right", align: d = "center", icon: o = Ve, mediaUrl: f, title: m, description: N, width: L = "300px", trackVisibility: u, actions: x, onClick: S, hideLabel: R = !1 }) {
-  const [F, C] = v(!1), [y, P] = v(null), [h, D] = v(null), k = (p) => {
+function qa({ isOpen: a, setIsOpen: r, label: s, variant: l = "promote", size: t = "md", showIcon: i = !0, side: n = "right", align: d = "center", icon: o = Ve, mediaUrl: f, title: m, description: N, width: P = "300px", trackVisibility: u, actions: x, onClick: S, hideLabel: R = !1 }) {
+  const [F, C] = v(!1), [y, L] = v(null), [h, k] = v(null), D = (p) => {
     r(p), S && S();
   }, B = async (p) => {
     if (p.type === "upsell") {
-      D(p);
+      k(p);
       try {
-        await p.onClick(), p.showConfirmation && (C(!0), P("success"));
+        await p.onClick(), p.showConfirmation && (C(!0), L("success"));
       } catch {
-        C(!0), P("error");
+        C(!0), L("error");
       }
     }
   }, me = () => {
-    P(null), C(!1), D(null), r(!1);
+    L(null), C(!1), k(null), r(!1);
   }, he = a && !F, pe = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
     ...p,
     onClick: () => B(p)
   } : p);
   return c($, {
-    children: [c(U, {
+    children: [c(H, {
       open: he,
-      onOpenChange: k,
-      children: [e(W, {
+      onOpenChange: D,
+      children: [e(U, {
         asChild: !0,
         children: e(w, {
           variant: l,
@@ -814,7 +816,7 @@ function qa({ isOpen: a, setIsOpen: r, label: s, variant: l = "promote", size: t
           description: N,
           onClose: () => r(!1),
           dismissible: !1,
-          width: L,
+          width: P,
           trackVisibility: u,
           actions: pe,
           showConfirmation: !1
@@ -852,20 +854,20 @@ const ya = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
 }, Na = ({ children: a }) => e(Xe, {
   reducedMotion: "user",
   children: a
-}), Ga = ({ children: a, layout: r, link: s, privacyModeInitiallyEnabled: l, image: t, i18n: i, l10n: n, isDev: d = !1, dataCollectionStorageHandler: o, showExperimentalWarnings: f = !1 }) => e(Na, {
+}), Wa = ({ children: a, layout: r, link: s, privacyModeInitiallyEnabled: l, image: t, i18n: i, l10n: n, isDev: d = !1, dataCollectionStorageHandler: o, showExperimentalWarnings: f = !1 }) => e(Na, {
   children: e(Ae, {
     isDev: d,
     showExperimentalWarnings: f,
     children: e(qe, {
       ...n,
-      children: e(Ge, {
+      children: e(We, {
         ...i,
-        children: e(He, {
+        children: e(Ge, {
           ...s,
           children: e(wa, {
             ...r,
-            children: e(Ue, {
-              children: e(We, {
+            children: e(He, {
+              children: e(Ue, {
                 initiallyEnabled: l,
                 children: e(Je, {
                   ...t,
@@ -881,12 +883,12 @@ const ya = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
       })
     })
   })
-}), G = (a) => `datacollection-${a}`, Ha = {
+}), W = (a) => `datacollection-${a}`, Ga = {
   get: async (a) => JSON.parse(
-    localStorage.getItem(G(a)) ?? "{}"
+    localStorage.getItem(W(a)) ?? "{}"
   ),
   set: async (a, r) => {
-    localStorage.setItem(G(a), JSON.stringify(r));
+    localStorage.setItem(W(a), JSON.stringify(r));
   }
 };
 export {
@@ -914,7 +916,7 @@ export {
   _a as F0ChipList,
   cr as F0EventCatcherProvider,
   Te as F0Icon,
-  Ga as F0Provider,
+  Wa as F0Provider,
   ur as F0TagAlert,
   fr as F0TagBalance,
   mr as F0TagCompany,
@@ -927,10 +929,10 @@ export {
   xr as GROUP_ID_SYMBOL,
   Va as HomeLayout,
   Ba as LineChart,
-  Da as Link,
+  ka as Link,
   Cr as OneFilterPicker,
   Oa as PieChart,
-  We as PrivacyModeProvider,
+  Ue as PrivacyModeProvider,
   fe as ProductBlankslate,
   yr as ProductCard,
   Aa as ProductModal,
@@ -944,17 +946,17 @@ export {
   ae as UpsellingButton,
   qa as UpsellingPopover,
   $a as VerticalBarChart,
-  ka as avatarVariants,
+  Da as avatarVariants,
   Nr as buildTranslations,
-  Lr as createAtlaskitDriver,
-  Pr as createDataSourceDefinition,
-  Ha as dataCollectionLocalStorageHandler,
+  Pr as createAtlaskitDriver,
+  Lr as createDataSourceDefinition,
+  Ga as dataCollectionLocalStorageHandler,
   Fa as defaultTranslations,
   Se as experimental,
   Sr as getAnimationVariants,
   Fr as getDataSourcePaginationType,
-  Dr as getEmojiLabel,
-  kr as isInfiniteScrollPagination,
+  kr as getEmojiLabel,
+  Dr as isInfiniteScrollPagination,
   Mr as isPageBasedPagination,
   Tr as modules,
   Ir as tagDotColors,

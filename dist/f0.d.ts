@@ -1215,6 +1215,8 @@ export declare const defaultTranslations: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
                 readonly long: "Week of {{day}} {{month}} {{year}}";
+                readonly longSingular: "Week of {{date}}";
+                readonly longPlural: "Weeks of {{date}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
