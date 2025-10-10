@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.231.0](https://github.com/factorialco/f0/compare/f0-react-v1.230.0...f0-react-v1.231.0) (2025-10-10)
+
+
+### Features
+
+* **select:** primitive multiselect ([#2775](https://github.com/factorialco/f0/issues/2775)) ([98ca803](https://github.com/factorialco/f0/commit/98ca8035ea0d340b7654689218c2f0de53577905))
+
 ## [1.230.0](https://github.com/factorialco/f0/compare/f0-react-v1.229.0...f0-react-v1.230.0) (2025-10-10)
 
 
