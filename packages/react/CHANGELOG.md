@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.232.0](https://github.com/factorialco/f0/compare/f0-react-v1.231.0...f0-react-v1.232.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** longText defaults. Datacollection docs index. Fix oneEllipsis line-clamp-4 ([#2777](https://github.com/factorialco/f0/issues/2777)) ([fa8657e](https://github.com/factorialco/f0/commit/fa8657e6b85f57cc93c45e5597ea8abcba923b3d))
+
 ## [1.231.0](https://github.com/factorialco/f0/compare/f0-react-v1.230.0...f0-react-v1.231.0) (2025-10-10)
 
 
