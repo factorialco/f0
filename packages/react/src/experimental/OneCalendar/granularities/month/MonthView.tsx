@@ -19,6 +19,7 @@ interface MonthViewProps {
   motionDirection?: number
   minDate?: Date
   maxDate?: Date
+  compact?: boolean
 }
 
 export function MonthView({
@@ -29,6 +30,7 @@ export function MonthView({
   motionDirection = 1,
   minDate,
   maxDate,
+  compact = false,
 }: MonthViewProps) {
   const i18n = useI18n()
 
@@ -161,12 +163,12 @@ export function MonthView({
   const motionVariants = {
     hidden: (direction: number) => ({
       opacity: 0,
-      x: direction === 1 ? 40 : -40,
+      x: direction === 1 ? (compact ? 20 : 40) : compact ? -20 : -40,
     }),
     visible: { opacity: 1, x: 0 },
     exit: (direction: number) => ({
       opacity: 0,
-      x: direction === 1 ? -40 : 40,
+      x: direction === 1 ? (compact ? -20 : -40) : compact ? 20 : 40,
     }),
   }
 
@@ -174,13 +176,19 @@ export function MonthView({
     <AnimatePresence mode="popLayout" initial={false} custom={motionDirection}>
       <motion.div
         key={year}
-        className="grid grid-cols-3 gap-y-3"
+        className={cn(
+          "grid gap-y-3",
+          compact ? "grid-cols-2 gap-y-2" : "grid-cols-3"
+        )}
         custom={motionDirection}
         variants={motionVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        transition={{ duration: 0.15, ease: [0.455, 0.03, 0.515, 0.955] }}
+        transition={{
+          duration: compact ? 0.1 : 0.15,
+          ease: [0.455, 0.03, 0.515, 0.955],
+        }}
       >
         {months.map((month) => {
           const isCurrent = isCurrentMonth(month.index)
@@ -203,7 +211,10 @@ export function MonthView({
               onClick={() => handleMonthClick(month.index)}
               disabled={disabled}
               className={cn(
-                "relative isolate flex h-10 items-center justify-center rounded-md font-medium text-f1-foreground transition-colors duration-100 after:absolute after:inset-0 after:z-0 after:rounded-md after:bg-f1-background-selected-bold after:opacity-0 after:transition-all after:duration-100 after:content-['']",
+                "relative isolate flex items-center justify-center font-medium text-f1-foreground transition-colors duration-100 after:absolute after:inset-0 after:z-0 after:bg-f1-background-selected-bold after:opacity-0 after:transition-all after:duration-100 after:content-['']",
+                compact
+                  ? "h-8 rounded-sm after:rounded-sm"
+                  : "h-10 rounded-md after:rounded-md",
                 !disabled &&
                   "hover:bg-f1-background-hover hover:after:bg-f1-background-selected-bold-hover",
                 disabled && "cursor-not-allowed text-f1-foreground-secondary",
@@ -213,19 +224,30 @@ export function MonthView({
                   "bg-f1-background-selected-bold after:opacity-100 hover:bg-f1-background-selected-bold-hover [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
                 isSelected &&
                   mode === "range" &&
-                  "rounded-none bg-f1-background-selected hover:bg-f1-background-selected [&:nth-child(3n+1)]:rounded-s-md [&:nth-child(3n+3)]:rounded-e-md [&>span]:text-f1-foreground-selected",
+                  cn(
+                    "rounded-none bg-f1-background-selected hover:bg-f1-background-selected [&>span]:text-f1-foreground-selected",
+                    compact
+                      ? "[&:nth-child(4n+1)]:rounded-s-sm [&:nth-child(4n+4)]:rounded-e-sm"
+                      : "[&:nth-child(3n+1)]:rounded-s-md [&:nth-child(3n+3)]:rounded-e-md"
+                  ),
                 (isStart || isEnd) &&
                   mode === "range" &&
                   "rounded-none bg-f1-background-selected after:opacity-100 [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
-                isStart && mode === "range" && isEnd && "rounded-s-md",
-                isEnd && mode === "range" && "rounded-e-md"
+                isStart &&
+                  mode === "range" &&
+                  isEnd &&
+                  (compact ? "rounded-s-sm" : "rounded-s-md"),
+                isEnd &&
+                  mode === "range" &&
+                  (compact ? "rounded-e-sm" : "rounded-e-md")
               )}
             >
               <span>{month.name}</span>
               {isCurrent && (
                 <div
                   className={cn(
-                    "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
+                    "absolute inset-x-0 z-20 mx-auto h-0.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
+                    compact ? "bottom-0.5 w-1" : "bottom-1 w-1.5",
                     isSelected && mode === "single" && "bg-f1-background",
                     (isStart || isEnd) && "bg-f1-background",
                     !isStart &&

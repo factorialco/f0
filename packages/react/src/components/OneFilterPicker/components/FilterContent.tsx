@@ -21,6 +21,8 @@ type FilterContentProps<Definition extends FiltersDefinition> = {
   tempFilters: FiltersState<Definition>
   /** Callback fired when a filter value changes */
   onFilterChange: (key: keyof Definition, value: unknown) => void
+  /** Tells us if we are in compact mode */
+  isCompactMode?: boolean
 }
 
 /**
@@ -44,6 +46,7 @@ export function FilterContent<Definition extends FiltersDefinition>({
   definition,
   tempFilters,
   onFilterChange,
+  isCompactMode,
 }: FilterContentProps<Definition>) {
   if (!selectedFilterKey) return null
 
@@ -72,12 +75,13 @@ export function FilterContent<Definition extends FiltersDefinition>({
         schema: T
         value: FilterValue<T>
         onChange: (v: FilterValue<T>) => void
+        isCompactMode?: boolean
       }) => React.ReactNode
-    )({ schema, value, onChange })
+    )({ schema, value, onChange, isCompactMode })
   }
 
   return (
-    <div className="relative flex w-full flex-col gap-1">
+    <div className="relative flex h-full w-full flex-col gap-1">
       <div className="relative flex h-full flex-col justify-between overflow-y-auto">
         {renderFilterForm(filter, currentValue, (value) =>
           onFilterChange(selectedFilterKey, value)

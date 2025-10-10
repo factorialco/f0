@@ -453,6 +453,47 @@ export const WithDataSourcePaginated: Story = {
     onChange: fn(),
     value: "option-2",
     source: createDataSourceDefinition<MockItem>({
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "eliseo-vargas", label: "Elise Vargas" },
+              { value: "alexander-smith", label: "Alexander Smith" },
+              { value: "bob-johnson", label: "Bob Johnson" },
+              { value: "carol-williams", label: "Carol Williams" },
+              { value: "dave-brown", label: "Dave Brown" },
+              { value: "saul-vargas", label: "Saul Vargas" },
+              { value: "michael-johnson", label: "Michael Johnson" },
+              { value: "john-williams", label: "John Williams" },
+              { value: "jane-brown", label: "Jane Brown" },
+              { value: "jose-martinez", label: "Jose Martinez" },
+              { value: "james-smith", label: "James Smith" },
+              { value: "david-williams", label: "David Williams" },
+              { value: "william-brown", label: "William Brown" },
+              { value: "emily-martinez", label: "Emily Martinez" },
+              { value: "luis-garcia", label: "Luis Garcia" },
+              { value: "robert-martinez", label: "Robert Martinez" },
+              { value: "joseph-smith", label: "Joseph Smith" },
+              { value: "daniel-williams", label: "Daniel Williams" },
+              { value: "patrick-brown", label: "Patrick Brown" },
+              { value: "charles-martinez", label: "Charles Martinez" },
+              { value: "anthony-smith", label: "Anthony Smith" },
+            ],
+          },
+        },
+        date: {
+          type: "date",
+          label: "Date",
+          options: {
+            minDate: new Date("2021-01-01"),
+            maxDate: new Date("2021-12-31"),
+            mode: "range",
+            view: "quarter",
+          },
+        },
+      },
       dataAdapter: {
         paginationType: "infinite-scroll",
         fetchData: (options) => {

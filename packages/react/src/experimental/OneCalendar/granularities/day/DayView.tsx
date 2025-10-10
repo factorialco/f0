@@ -17,6 +17,7 @@ interface DayViewProps {
   motionDirection?: number
   minDate?: Date
   maxDate?: Date
+  compact?: boolean
 }
 
 export function DayView({
@@ -28,6 +29,7 @@ export function DayView({
   motionDirection = 1,
   minDate,
   maxDate,
+  compact = false,
 }: DayViewProps) {
   const { locale } = useL10n()
 
@@ -69,6 +71,7 @@ export function DayView({
             month={month}
             locale={getLocale(locale)}
             weekStartsOn={1}
+            compact={compact}
           />
         </motion.div>
       </AnimatePresence>
@@ -96,6 +99,7 @@ export function DayView({
           onMonthChange={onMonthChange}
           locale={getLocale(locale)}
           weekStartsOn={1}
+          compact={compact}
         />
       </motion.div>
     </AnimatePresence>

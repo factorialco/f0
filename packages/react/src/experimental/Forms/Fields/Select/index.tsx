@@ -550,6 +550,7 @@ const SelectComponent = forwardRef(function Select<
         {openLocal && (
           <SelectContent
             items={items}
+            taller={!!source?.filters}
             className={selectContentClassName}
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
@@ -563,6 +564,9 @@ const SelectComponent = forwardRef(function Select<
                 grouping={localSource.grouping}
                 currentGrouping={localSource.currentGrouping}
                 onGroupingChange={localSource.setCurrentGrouping}
+                filters={localSource.filters}
+                currentFilters={localSource.currentFilters}
+                onFiltersChange={localSource.setCurrentFilters}
               />
             }
             onScrollBottom={handleScrollBottom}
@@ -570,7 +574,7 @@ const SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-          ></SelectContent>
+          />
         )}
       </SelectPrimitive>
     </>

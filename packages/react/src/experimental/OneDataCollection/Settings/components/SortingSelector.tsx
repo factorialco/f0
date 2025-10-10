@@ -56,8 +56,8 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
   }
 
   return (
-    <div className="flex flex-col gap-0 py-3">
-      <div className="flex items-end gap-2 px-3">
+    <div className="flex flex-col">
+      <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <Select
             label={i18n.collections.sorting.sortBy}
