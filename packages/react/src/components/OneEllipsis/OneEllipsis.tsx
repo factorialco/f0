@@ -52,18 +52,31 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
     },
     ref
   ) => {
+    const [hasEllipsis, setHasEllipsis] = useState(false)
+
     useEffect(() => {
       if (!ref || typeof ref !== "object" || disabled) return
 
       const element = ref.current
       if (!element) return
 
+      /**
+       * Finds the ellipsis state of the element and sets the state and emits the change
+       * @returns The ellipsis state of the element
+       */
+      const findAndSetEllipsisState = () => {
+        const ellipsis = checkForEllipsis(element, lines)
+        setHasEllipsis(ellipsis)
+        onHasEllipsisChange(ellipsis)
+        return checkForEllipsis(element, lines)
+      }
+
       // Initial check
-      onHasEllipsisChange(checkForEllipsis(element, lines))
+      findAndSetEllipsisState()
 
       // Set up resize observer
       const resizeObserver = new ResizeObserver(() => {
-        onHasEllipsisChange(checkForEllipsis(element, lines))
+        findAndSetEllipsisState()
       })
 
       resizeObserver.observe(element)
@@ -78,7 +91,9 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       {
         ref,
         className: cn(
-          noTooltip ? "pointer-events-none" : "pointer-events-auto",
+          noTooltip || !hasEllipsis
+            ? "pointer-events-none"
+            : "pointer-events-auto",
           "min-w-0 max-w-full overflow-hidden",
           !disabled && [
             lines === 1 ? "text-ellipsis" : "",
