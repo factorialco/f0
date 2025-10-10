@@ -7,7 +7,7 @@ import {
 } from "@/ui/chart"
 import { ComponentProps, ForwardedRef } from "react"
 import { Cell, Label, Pie, PieChart as PieChartPrimitive } from "recharts"
-import { autoColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig } from "../utils/types"
 
@@ -31,9 +31,9 @@ export const _PieChart = (
 ) => {
   const preparedData = data.map((item, index) => ({
     ...item,
-    fill:
-      dataConfig[item.label as keyof typeof dataConfig]?.color ||
-      autoColor(index),
+    fill: dataConfig[item.label as keyof typeof dataConfig]?.color
+      ? getColor(dataConfig[item.label as keyof typeof dataConfig].color!)
+      : getCategoricalColor(index),
   }))
   const values = data.map((item) => item.value)
   const sum = values.reduce((acc, value) => {

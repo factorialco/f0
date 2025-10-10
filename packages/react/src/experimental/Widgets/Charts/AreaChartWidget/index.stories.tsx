@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { AreaChartProps } from "../../../../components/Charts/AreaChart"
-import AreaChartStory from "../../../../components/Charts/AreaChart/index.stories"
+import { Default as AreaChartDefault } from "../../../../components/Charts/AreaChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
 import { AreaChartWidget } from "./index"
 
@@ -19,7 +19,7 @@ const meta: Meta<typeof AreaChartWidget> = {
       ...containerStoryArgs.header,
       title: "An area chart",
     },
-    chart: AreaChartStory.args as AreaChartProps,
+    chart: AreaChartDefault.args as AreaChartProps,
   },
   decorators: [WidgetDecorator],
 }
@@ -36,7 +36,7 @@ export const WithYAxis: Story = {
       title: "An area chart",
     },
     chart: {
-      ...(AreaChartStory.args as AreaChartProps),
+      ...(AreaChartDefault.args as AreaChartProps),
       yAxis: {
         hide: false,
       },
@@ -52,7 +52,7 @@ export const WithComment: Story = {
       comment: "44.000 $",
     },
     chart: {
-      ...(AreaChartStory.args as AreaChartProps),
+      ...(AreaChartDefault.args as AreaChartProps),
       yAxis: {
         hide: false,
       },
@@ -69,7 +69,7 @@ export const WithBlur: Story = {
       comment: "44.000 $",
     },
     chart: {
-      ...(AreaChartStory.args as AreaChartProps),
+      ...(AreaChartDefault.args as AreaChartProps),
       yAxis: {
         hide: false,
       },

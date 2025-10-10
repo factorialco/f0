@@ -19,7 +19,7 @@ import {
   YAxis,
 } from "recharts"
 import { usePrivacyMode } from "../../../lib/privacyMode"
-import { autoColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
   chartTooltipProps,
@@ -168,12 +168,20 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             >
               <stop
                 offset="5%"
-                stopColor={dataConfig[area].color || autoColor(index)}
+                stopColor={
+                  dataConfig[area].color
+                    ? getColor(dataConfig[area].color)
+                    : getCategoricalColor(index)
+                }
                 stopOpacity={0.8}
               />
               <stop
                 offset="95%"
-                stopColor={dataConfig[area].color || autoColor(index)}
+                stopColor={
+                  dataConfig[area].color
+                    ? getColor(dataConfig[area].color)
+                    : getCategoricalColor(index)
+                }
                 stopOpacity={0.1}
               />
             </linearGradient>
@@ -232,7 +240,11 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             mask={`url(#${chartId}-transparent-edges)`}
             fill={`url(#fill${area}-${chartId})`}
             fillOpacity={dataConfig[area].dashed ? 0 : 0.4}
-            stroke={dataConfig[area].color || autoColor(index)}
+            stroke={
+              dataConfig[area].color
+                ? getColor(dataConfig[area].color)
+                : getCategoricalColor(index)
+            }
             strokeWidth={1.5}
             strokeDasharray={dataConfig[area].dashed ? "4 4" : undefined}
           />

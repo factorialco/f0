@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
 import { BarChartProps } from "../../../../components/Charts/BarChart"
-import BarChartStory from "../../../../components/Charts/BarChart/index.stories"
+import { Default as BarChartDefault } from "../../../../components/Charts/BarChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
 import { BarChartWidget } from "./index"
 
@@ -18,7 +18,7 @@ const meta = {
       ...containerStoryArgs.header,
       title: "A bar chart",
     },
-    chart: BarChartStory.args as BarChartProps,
+    chart: BarChartDefault.args as BarChartProps,
   },
   decorators: [WidgetDecorator],
 } satisfies Meta<typeof BarChartWidget>
