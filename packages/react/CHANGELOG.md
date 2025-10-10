@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.233.1](https://github.com/factorialco/f0/compare/f0-react-v1.233.0...f0-react-v1.233.1) (2025-10-10)
+
+
+### Bug Fixes
+
+* **datacollection:** fix click propagation when celltypes has ellipsis ([#2797](https://github.com/factorialco/f0/issues/2797)) ([f791286](https://github.com/factorialco/f0/commit/f7912869e33e1c8378f164b52da3cf9c8eaea004))
+
 ## [1.233.0](https://github.com/factorialco/f0/compare/f0-react-v1.232.0...f0-react-v1.233.0) (2025-10-10)
 
 
