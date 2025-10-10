@@ -267,13 +267,9 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       )
     }
 
-    useEffect(
-      () => {
-        setLocalValue(value)
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when localValue changes
-      [value]
-    )
+    useEffect(() => {
+      setLocalValue(value)
+    }, [value])
 
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
