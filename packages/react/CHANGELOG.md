@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.233.2](https://github.com/factorialco/f0/compare/f0-react-v1.233.1...f0-react-v1.233.2) (2025-10-10)
+
+
+### Bug Fixes
+
+* add full width variant to BaseBanner ([#2795](https://github.com/factorialco/f0/issues/2795)) ([e2c9dc9](https://github.com/factorialco/f0/commit/e2c9dc921c3b915b298f838c3e4e29424225b1dc))
+
 ## [1.233.1](https://github.com/factorialco/f0/compare/f0-react-v1.233.0...f0-react-v1.233.1) (2025-10-10)
 
 
