@@ -16,7 +16,7 @@ function Cell({
   return renderProperty(item, property, "table")
 }
 const meta = {
-  title: "Value Display",
+  title: "Data Collection/Cell Types",
   component: Cell,
   parameters: {
     layout: "padded",
@@ -165,33 +165,16 @@ export const LongTextType: Story = {
   },
 }
 
-export const LongTextWithLines: Story = {
+export const LongTextFullText: Story = {
   args: {
     item: mockItem,
     property: {
-      label: "Description (2 lines)",
+      label: "Description (full text)",
       render: () => ({
         type: "longText",
         value: {
           text: "This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.",
-          lines: 2,
-        },
-      }),
-    },
-  },
-}
-
-export const LongTextWithLinesAndTooltip: Story = {
-  args: {
-    item: mockItem,
-    property: {
-      label: "Description (2 lines)",
-      render: () => ({
-        type: "longText",
-        value: {
-          text: "This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.",
-          lines: 2,
-          tooltip: true,
+          full: true,
         },
       }),
     },
