@@ -30,6 +30,54 @@ import { fixedForwardRef } from "../utils/forwardRef"
 import { prepareData } from "../utils/muncher"
 import { ChartPropsBase } from "../utils/types"
 
+const createScatter = (categoryKey: string) => {
+  const ScatterShape = (props: unknown) => {
+    const { cx, cy, fill, payload } = props as {
+      cx: number
+      cy: number
+      fill: string
+      payload?: Record<string, unknown>
+    }
+
+    const getScatterValue = () => {
+      if (!payload) return "-"
+
+      if (payload[categoryKey] !== undefined) {
+        return payload[categoryKey]
+      }
+
+      for (const [key, value] of Object.entries(payload)) {
+        if (typeof value === "number" && key !== "x") {
+          return value
+        }
+      }
+      return "-"
+    }
+
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={4}
+        fill={fill}
+        stroke="white"
+        strokeWidth={2}
+        ref={(el) => {
+          if (el?.parentElement) {
+            el.parentElement.setAttribute(
+              "aria-label",
+              `Data point: ${getScatterValue()}`
+            )
+          }
+        }}
+      />
+    )
+  }
+
+  ScatterShape.displayName = `Scatter-${categoryKey}`
+  return ScatterShape
+}
+
 type ChartDataPoint<K extends ChartConfig> = {
   label: string
   values: {
@@ -323,6 +371,7 @@ const _ComboChart = <K extends ChartConfig>(
             r={4}
             isAnimationActive={false}
             yAxisId={scatter?.axisPosition === "right" ? "right" : undefined}
+            shape={createScatter(String(category))}
           />
         ))}
         {legend && (
