@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.30.0](https://github.com/factorialco/f0/compare/f0-core-v1.29.0...f0-core-v1.30.0) (2025-10-10)
+
+
+### Features
+
+* **Charts:** color system ([#2765](https://github.com/factorialco/f0/issues/2765)) ([191d8bb](https://github.com/factorialco/f0/commit/191d8bb2d1cb01975446759700764ccef7a25575))
+
 ## [1.29.0](https://github.com/factorialco/f0/compare/f0-core-v1.28.0...f0-core-v1.29.0) (2025-09-30)
 
 
