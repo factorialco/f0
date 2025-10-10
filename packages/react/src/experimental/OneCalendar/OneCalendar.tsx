@@ -14,7 +14,9 @@ import {
 import { CalendarMode, CalendarView, DateRange, DateRangeString } from "./types"
 import { isActiveDate, toDateRange } from "./utils"
 
-export interface OneCalendarProps {
+const privateProps = ["compact"] as const
+
+interface OneCalendarInternalProps {
   mode: CalendarMode
   view: CalendarView
   onSelect?: (date: Date | DateRange | null) => void
@@ -26,6 +28,11 @@ export interface OneCalendarProps {
   maxDate?: Date
   compact?: boolean
 }
+
+export type OneCalendarProps = Omit<
+  OneCalendarInternalProps,
+  (typeof privateProps)[number]
+>
 
 export const getGranularitySimpleDefinition = (
   granularityKey: GranularityDefinitionKey
@@ -52,7 +59,7 @@ export const getGranularityDefinition = (
   return granularity
 }
 
-export function OneCalendar({
+const OneCalendarInternal = ({
   mode = "single",
   view = "month",
   onSelect,
@@ -63,7 +70,7 @@ export function OneCalendar({
   minDate,
   maxDate,
   compact = false,
-}: OneCalendarProps) {
+}: OneCalendarInternalProps) => {
   const i18n = useI18n()
 
   const [viewDate, setViewDate] = useState<Date>(defaultMonth)
@@ -316,3 +323,19 @@ export function OneCalendar({
     </div>
   )
 }
+
+const OneCalendarBase = (props: OneCalendarProps) => {
+  const publicProps = privateProps.reduce((acc, key) => {
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as OneCalendarInternalProps)
+
+  return <OneCalendarInternal {...publicProps} />
+}
+
+OneCalendarBase.displayName = "OneCalendar"
+
+export const OneCalendar = OneCalendarBase
+
+// Export internal component and types for advanced usage
+export { OneCalendarInternal, type OneCalendarInternalProps }

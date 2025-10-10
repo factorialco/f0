@@ -3,7 +3,7 @@
 import { Button } from "@/components/Actions/Button"
 import { FilterTypeComponentProps } from "../types"
 
-import { OneCalendar } from "@/experimental/OneCalendar"
+import { OneCalendarInternal } from "@/experimental/OneCalendar"
 import {
   CalendarMode,
   CalendarView,
@@ -47,7 +47,7 @@ export function DateFilter({
   return (
     <>
       <div className="space-y-4 overflow-x-hidden p-3">
-        <OneCalendar
+        <OneCalendarInternal
           defaultSelected={value || options.defaultSelected}
           onSelect={(date) => onChange(date ?? undefined)}
           view={options.view}
