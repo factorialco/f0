@@ -14,6 +14,8 @@ import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
 import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
+import { OneSwitch as OneSwitchPromotion } from "@/experimental/AiPromotionChat/OneSwitch"
+
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -291,6 +293,7 @@ export function PageHeader({
         )}
         <div>
           <OneSwitch />
+          <OneSwitchPromotion />
         </div>
       </div>
     </div>

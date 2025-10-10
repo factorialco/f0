@@ -20,9 +20,10 @@ const meta: Meta<typeof ApplicationFrame> = {
       agent: "one-workflow",
       credentials: "include",
       showDevConsole: false,
-      enabled: true,
+      enabled: false,
       greeting: "Hello, John",
     },
+    aiPromotion: true,
     sidebar: <Sidebar {...SidebarStories.default.args} />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
@@ -38,6 +39,7 @@ const DefaultStoryComponent = (
   return (
     <ApplicationFrame
       ai={args.ai}
+      aiPromotion={args.aiPromotion}
       sidebar={<Sidebar {...SidebarStories.default.args} />}
     >
       <Page {...PageStories.Default.args} />
