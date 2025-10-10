@@ -53,7 +53,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Data Collection",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -90,11 +90,81 @@ const meta = {
         "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "experimental", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const Simplest: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: ({ filters, sortings, search }) => {
+          return createPromiseDataFetch()({
+            filters,
+            sortings,
+            search,
+            navigationFilters: {},
+          })
+        },
+      },
+    })
+
+    return (
+      <div className="space-y-4">
+        <OneDataCollection
+          source={dataSource}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Name",
+                    render: (item) => ({
+                      type: "person",
+                      value: {
+                        firstName: item.name.split(" ")[0],
+                        lastName: item.name.split(" ")[1],
+                      },
+                    }),
+                    sorting: "name",
+                  },
+                  {
+                    label: "Email",
+                    render: (item) => item.email,
+                    sorting: "email",
+                  },
+                  {
+                    label: "Role",
+                    render: (item) => item.role,
+                    sorting: "role",
+                  },
+                  {
+                    label: "Department",
+                    render: (item) => item.department,
+                    sorting: "department",
+                    info: "Team that the employee belongs to",
+                  },
+                  {
+                    label: "Salary",
+                    render: (item) => ({
+                      type: "amount",
+                      value: item.salary,
+                    }),
+                    align: "right",
+                    sorting: "salary",
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
 
 // Basic examples with single visualization
 export const BasicTableView: Story = {

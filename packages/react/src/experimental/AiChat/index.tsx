@@ -2,6 +2,7 @@ import {
   CopilotKit,
   CopilotKitProps,
   useCopilotAction,
+  useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -9,6 +10,7 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
+import { useEffect } from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -73,9 +75,24 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
+      <ResetFunctionInjector />
       {children}
     </CopilotKit>
   )
+}
+
+const ResetFunctionInjector = () => {
+  const { setClearFunction } = useAiChat()
+  const { reset } = useCopilotChatInternal()
+
+  useEffect(() => {
+    setClearFunction(reset)
+    return () => {
+      setClearFunction(null)
+    }
+  }, [setClearFunction, reset])
+
+  return null
 }
 
 const AiChatCmp = () => {

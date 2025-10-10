@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.232.0](https://github.com/factorialco/f0/compare/f0-react-v1.231.0...f0-react-v1.232.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** longText defaults. Datacollection docs index. Fix oneEllipsis line-clamp-4 ([#2777](https://github.com/factorialco/f0/issues/2777)) ([fa8657e](https://github.com/factorialco/f0/commit/fa8657e6b85f57cc93c45e5597ea8abcba923b3d))
+
+## [1.231.0](https://github.com/factorialco/f0/compare/f0-react-v1.230.0...f0-react-v1.231.0) (2025-10-10)
+
+
+### Features
+
+* **select:** primitive multiselect ([#2775](https://github.com/factorialco/f0/issues/2775)) ([98ca803](https://github.com/factorialco/f0/commit/98ca8035ea0d340b7654689218c2f0de53577905))
+
+## [1.230.0](https://github.com/factorialco/f0/compare/f0-react-v1.229.0...f0-react-v1.230.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** toolbars improvements ([#2788](https://github.com/factorialco/f0/issues/2788)) ([eb55fad](https://github.com/factorialco/f0/commit/eb55fad83da41656316efc4b1c3cfaa922a9d8fc))
+
+## [1.229.0](https://github.com/factorialco/f0/compare/f0-react-v1.228.3...f0-react-v1.229.0) (2025-10-09)
+
+
+### Features
+
+* ai chat clear ([#2782](https://github.com/factorialco/f0/issues/2782)) ([478eb91](https://github.com/factorialco/f0/commit/478eb91c79c74dae57d08a993598ce34a19d410a))
+
+## [1.228.3](https://github.com/factorialco/f0/compare/f0-react-v1.228.2...f0-react-v1.228.3) (2025-10-08)
+
+
+### Bug Fixes
+
+* **Card:** hide empty content ([#2776](https://github.com/factorialco/f0/issues/2776)) ([54dd3cb](https://github.com/factorialco/f0/commit/54dd3cb94bc47d668d05b0fd42cb2c8c85d15beb))
+
 ## [1.228.2](https://github.com/factorialco/f0/compare/f0-react-v1.228.1...f0-react-v1.228.2) (2025-10-07)
 
 

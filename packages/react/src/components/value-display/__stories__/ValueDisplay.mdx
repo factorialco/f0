@@ -97,9 +97,13 @@ render: (item) => ({
 
 ### longText
 
-Renders long text with ellipsis truncation and tooltip support. Uses the
+Renders long text with ellipsis truncation with tooltip support. Uses the
 OneEllipsis component for better cross-browser support and automatic tooltip
-functionality.
+functionality. By default, the text will be truncated after 3 lines and show an
+ellipsis. When you hover over the text, a tooltip will display the full content.
+
+You can disable the truncation and show the full text by setting the `full`
+property to `true`.
 
 #### Value type
 
@@ -108,10 +112,17 @@ type value = string | number | undefined
 // or
 type value = {
     text: string | number | undefined
-    lines?: number
-    tooltip?: boolean
     placeholder?: string
-}
+} & (
+    | {
+        lines?: number
+        full?: never
+      }
+    | {
+        lines?: never
+        full: true
+      }
+  )
 ```
 
 #### LongTextType
@@ -127,7 +138,7 @@ render: (item) => ({
   }}
 />
 
-#### LongTextWithLines
+#### LongText With custom lines number
 
 <Canvas
   of={ValueDisplayStories.LongTextWithLines}
@@ -137,24 +148,7 @@ render: (item) => ({
     type: 'longText',
     value: {
         text: 'This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.',
-        lines: 2
-    }
-})`,
-  }}
-/>
-
-#### LongTextWithLinesAndTooltip
-
-<Canvas
-  of={ValueDisplayStories.LongTextWithLinesAndTooltip}
-  source={{
-    code: `
-render: (item) => ({
-    type: 'longText',
-    value: {
-        text: 'This is a very long description that demonstrates the longText cell type with a specific number of lines. The text will be truncated after 2 lines and show an ellipsis. When you hover over the text, a tooltip will display the full content. This is useful for maintaining consistent row heights in tables while still showing more content than a single line would allow.',
-        lines: 2,
-        tooltip: true
+        lines: 5
     }
 })`,
   }}

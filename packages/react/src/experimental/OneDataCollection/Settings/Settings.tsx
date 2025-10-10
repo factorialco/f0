@@ -92,11 +92,6 @@ export const Settings = <
     ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
     : 0
 
-  const shouldShowSettings =
-    (visualizations && visualizations.length > 1) ||
-    (groupByOptions > 0 && !grouping?.hideSelector) ||
-    (sortings && Object.keys(sortings).length > 0)
-
   const [open, setOpen] = useState(false)
 
   const handleVisualizationChange = (index: number) => {
@@ -161,8 +156,6 @@ export const Settings = <
       visualization.settings.resetHandler?.(settingsContext)
     })
   }
-
-  if (!shouldShowSettings) return null
 
   return (
     <div className="flex gap-2">

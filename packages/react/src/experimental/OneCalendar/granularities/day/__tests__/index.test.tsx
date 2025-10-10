@@ -67,6 +67,11 @@ describe("dayGranularity", () => {
       expect(result).toBe("15/01/2024")
     })
 
+    it("formats a single date correctly with long format", () => {
+      const result = dayGranularity.toString(baseDate, i18n, "long")
+      expect(result).toBe("15 Jan 2024")
+    })
+
     it("formats a date range correctly", () => {
       const result = dayGranularity.toString(
         {
@@ -76,6 +81,54 @@ describe("dayGranularity", () => {
         i18n
       )
       expect(result).toBe("15/01/2024 → 16/01/2024")
+    })
+
+    it("formats a date range correctly with long format", () => {
+      const result = dayGranularity.toString(
+        {
+          from: baseDate,
+          to: nextDayDate,
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("15 → 16 Jan 2024")
+    })
+
+    it("formats a date range across months correctly with long format", () => {
+      const result = dayGranularity.toString(
+        {
+          from: new Date(2024, 0, 31), // January 31, 2024
+          to: new Date(2024, 1, 1), // February 1, 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("31 Jan → 01 Feb 2024")
+    })
+
+    it("formats a date range across years correctly with long format", () => {
+      const result = dayGranularity.toString(
+        {
+          from: new Date(2023, 11, 31), // December 31, 2023
+          to: new Date(2024, 0, 1), // January 1, 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("31 Dec 2023 → 01 Jan 2024")
+    })
+
+    it("formats a long range in same month correctly with long format", () => {
+      const result = dayGranularity.toString(
+        {
+          from: new Date(2024, 0, 5), // January 5, 2024
+          to: new Date(2024, 0, 25), // January 25, 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("05 → 25 Jan 2024")
     })
   })
 

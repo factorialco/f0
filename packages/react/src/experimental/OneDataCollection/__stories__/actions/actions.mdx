@@ -17,6 +17,18 @@ import * as IndexStories from "../index.stories"
 
 ## Introduction
 
+Data Collection provides a hierarchy of actions for data operations:
+
+- **Primary action**: The main action, visually emphasized, designed for the
+  most common operation (such as “adding a new resource”).
+- **Secondary action**: Complementary actions with less visual prominence. If
+  there are multiple secondary actions, they should be grouped within the "More
+  options" (ellipsis) menu, to avoid adding a second button. The goal is to
+  minimize the toolbar space as much as possible to allow room for other
+  elements and to avoid overwhelming the user.
+- **"More options" button**: A dropdown menu containing additional actions,
+  optimizing space and maintaining a clean interface.
+
 Data collection allows you to define actions in different levels:
 
 ### Collection actions
@@ -138,7 +150,11 @@ const dataSource = useDataCollectionSource({
 
 ## Item actions
 
-It's also possible to define actions at item level.
+The items provide a streamlined interaction approach:
+
+- Primary interaction is navigational - clicking a row opens the associated
+  resource, side panel or modal.
+- Do not support individual cell-level actions
 
 The actions are defined in the `itemActions` prop of the
 `useDataCollectionSource` hook via a function that get the item and returns an
