@@ -1,8 +1,8 @@
-import { C as g, L as pe, c as ge, P as W, a as b, f as ve, b as be, A as xe, B as Ce, d as ye, e as we, g as Ne, V as Pe, h as M, i as G, j as H, k as Le, l as U, S as J, m as Y, n as Se, O as Fe, o as X, p as ke, q as De, F as K, r as Me, s as Te, t as Ie, D as Re, u as Be, v as Oe, w as $e, x as Q, y as w, U as Z, z as Ee, E as _e, G as z, H as je, I as ee, J as ze, K as Ve, M as Ae, N as qe, Q as We, R as Ge, X as He, T as Ue, W as Je, Y as Ye, Z as Xe, _ as Ke } from "./hooks-BhwWPM31.js";
-import { az as Ja, $ as Ya, aB as Xa, aK as Ka, a0 as Qa, a1 as Za, a2 as er, a3 as ar, a4 as rr, a5 as sr, a6 as tr, a7 as lr, a9 as or, aa as nr, ab as ir, ac as dr, aG as cr, ae as ur, af as fr, ag as mr, ah as hr, ak as pr, al as gr, am as vr, an as br, ap as xr, ad as Cr, ao as yr, aj as wr, aH as Nr, aA as Pr, au as Lr, ax as Sr, at as Fr, aL as kr, as as Dr, ar as Mr, a8 as Tr, ai as Ir, aq as Rr, av as Br, aC as Or, aD as $r, aE as Er, aM as _r, aw as jr, aF as zr, aJ as Vr, ay as Ar, aI as qr } from "./hooks-BhwWPM31.js";
+import { C as g, L as ge, c as ve, P as G, a as b, f as be, g as z, A as xe, B as Ce, b as ye, d as we, e as Ne, V as Pe, h as M, i as H, j as U, k as Le, l as J, S as Y, m as X, n as Se, O as Fe, o as K, p as ke, q as De, F as Q, r as Me, s as Te, t as Ie, D as Re, u as Be, v as Oe, w as $e, x as Z, y as w, U as ee, z as Ee, E as _e, G as V, H as je, I as ae, J as ze, K as Ve, M as Ae, N as qe, Q as We, R as Ge, X as He, T as Ue, W as Je, Y as Ye, Z as Xe, _ as Ke } from "./hooks-BH8LOQZ8.js";
+import { az as Ja, $ as Ya, aB as Xa, aK as Ka, a0 as Qa, a1 as Za, a2 as er, a3 as ar, a4 as rr, a5 as sr, a6 as tr, a7 as lr, a9 as or, aa as nr, ab as ir, ac as dr, aG as cr, ae as ur, af as fr, ag as mr, ah as hr, ak as pr, al as gr, am as vr, an as br, ap as xr, ad as Cr, ao as yr, aj as wr, aH as Nr, aA as Pr, au as Lr, ax as Sr, at as Fr, aL as kr, as as Dr, ar as Mr, a8 as Tr, ai as Ir, aq as Rr, av as Br, aC as Or, aD as $r, aE as Er, aM as _r, aw as jr, aF as zr, aJ as Vr, ay as Ar, aI as qr } from "./hooks-BH8LOQZ8.js";
 import { jsx as e, jsxs as c, Fragment as $ } from "react/jsx-runtime";
 import * as E from "react";
-import Qe, { useState as v, forwardRef as I, useRef as ae, useImperativeHandle as Ze, Children as ea, useEffect as re, createContext as aa } from "react";
+import Qe, { useState as v, forwardRef as I, useRef as re, useImperativeHandle as Ze, Children as ea, useEffect as se, createContext as aa } from "react";
 const Fa = {
   approvals: {
     history: "Approval history",
@@ -206,36 +206,36 @@ const Fa = {
 }, ka = g({
   name: "Link",
   type: "info"
-}, pe), Da = [
+}, ge), Da = [
   "person",
   "team",
   "company",
   "file",
   "flag"
 ];
-var _ = "Progress", j = 100, [ra, Ma] = ge(_), [sa, ta] = ra(_), se = E.forwardRef(
+var _ = "Progress", j = 100, [ra, Ma] = ve(_), [sa, ta] = ra(_), te = E.forwardRef(
   (a, r) => {
     const {
       __scopeProgress: s,
-      value: o = null,
+      value: l = null,
       max: t,
       getValueLabel: i = la,
       ...n
     } = a;
-    (t || t === 0) && !V(t) && console.error(oa(`${t}`, "Progress"));
-    const d = V(t) ? t : j;
-    o !== null && !A(o, d) && console.error(na(`${o}`, "Progress"));
-    const l = A(o, d) ? o : null, f = T(l) ? i(l, d) : void 0;
-    return /* @__PURE__ */ e(sa, { scope: s, value: l, max: d, children: /* @__PURE__ */ e(
-      W.div,
+    (t || t === 0) && !A(t) && console.error(oa(`${t}`, "Progress"));
+    const d = A(t) ? t : j;
+    l !== null && !q(l, d) && console.error(na(`${l}`, "Progress"));
+    const o = q(l, d) ? l : null, f = T(o) ? i(o, d) : void 0;
+    return /* @__PURE__ */ e(sa, { scope: s, value: o, max: d, children: /* @__PURE__ */ e(
+      G.div,
       {
         "aria-valuemax": d,
         "aria-valuemin": 0,
-        "aria-valuenow": T(l) ? l : void 0,
+        "aria-valuenow": T(o) ? o : void 0,
         "aria-valuetext": f,
         role: "progressbar",
-        "data-state": oe(l, d),
-        "data-value": l ?? void 0,
+        "data-state": ne(o, d),
+        "data-value": o ?? void 0,
         "data-max": d,
         ...n,
         ref: r
@@ -243,36 +243,36 @@ var _ = "Progress", j = 100, [ra, Ma] = ge(_), [sa, ta] = ra(_), se = E.forwardR
     ) });
   }
 );
-se.displayName = _;
-var te = "ProgressIndicator", le = E.forwardRef(
+te.displayName = _;
+var le = "ProgressIndicator", oe = E.forwardRef(
   (a, r) => {
-    const { __scopeProgress: s, ...o } = a, t = ta(te, s);
+    const { __scopeProgress: s, ...l } = a, t = ta(le, s);
     return /* @__PURE__ */ e(
-      W.div,
+      G.div,
       {
-        "data-state": oe(t.value, t.max),
+        "data-state": ne(t.value, t.max),
         "data-value": t.value ?? void 0,
         "data-max": t.max,
-        ...o,
+        ...l,
         ref: r
       }
     );
   }
 );
-le.displayName = te;
+oe.displayName = le;
 function la(a, r) {
   return `${Math.round(a / r * 100)}%`;
 }
-function oe(a, r) {
+function ne(a, r) {
   return a == null ? "indeterminate" : a === r ? "complete" : "loading";
 }
 function T(a) {
   return typeof a == "number";
 }
-function V(a) {
+function A(a) {
   return T(a) && !isNaN(a) && a > 0;
 }
-function A(a, r) {
+function q(a, r) {
   return T(a) && !isNaN(a) && a <= r && a >= 0;
 }
 function oa(a, r) {
@@ -286,9 +286,9 @@ function na(a, r) {
 
 Defaulting to \`null\`.`;
 }
-var ne = se, ia = le;
-const ie = E.forwardRef(({ className: a, value: r, ...s }, o) => e(ne, {
-  ref: o,
+var ie = te, ia = oe;
+const de = E.forwardRef(({ className: a, value: r, ...s }, l) => e(ie, {
+  ref: l,
   className: b("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", a),
   ...s,
   children: e(ia, {
@@ -299,15 +299,15 @@ const ie = E.forwardRef(({ className: a, value: r, ...s }, o) => e(ne, {
     }
   })
 }));
-ie.displayName = ne.displayName;
-const da = ({ value: a, max: r = 100, label: s, color: o }, t) => {
-  const i = o || be(0), n = a / r * 100;
+de.displayName = ie.displayName;
+const da = ({ value: a, max: r = 100, label: s, color: l }, t) => {
+  const i = l ? z(l) : z("categorical-1"), n = a / r * 100;
   return c("div", {
     className: "flex items-center space-x-2",
     "aria-live": "polite",
     children: [e("div", {
       className: "flex-grow",
-      children: e(ie, {
+      children: e(de, {
         color: i,
         value: n,
         className: "w-full",
@@ -321,7 +321,7 @@ const da = ({ value: a, max: r = 100, label: s, color: o }, t) => {
       children: s
     })]
   });
-}, ca = ve(da), Ta = g(
+}, ca = be(da), Ta = g(
   {
     name: "AreaChart",
     type: "info"
@@ -364,29 +364,29 @@ const da = ({ value: a, max: r = 100, label: s, color: o }, t) => {
   },
   ca
 ), O = ({ count: a, list: r }) => {
-  const [s, o] = v(!1), t = e(M, {
+  const [s, l] = v(!1), t = e(M, {
     label: `+${a}`
   });
-  return r != null && r.length ? c(G, {
+  return r != null && r.length ? c(H, {
     open: s,
-    onOpenChange: o,
-    children: [e(H, {
+    onOpenChange: l,
+    children: [e(U, {
       asChild: !0,
       children: e("button", {
         className: Le("inline-flex flex-shrink-0 items-center"),
         children: t
       })
-    }), e(U, {
+    }), e(J, {
       className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
       align: "end",
-      children: c(J, {
+      children: c(Y, {
         className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col",
         children: [r.map((i, n) => e("div", {
           className: "flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
           children: e(M, {
             ...i
           })
-        }, n)), e(Y, {
+        }, n)), e(X, {
           orientation: "vertical",
           className: "[&_div]:bg-f1-background"
         })]
@@ -395,18 +395,18 @@ const da = ({ value: a, max: r = 100, label: s, color: o }, t) => {
   }) : t;
 };
 O.displayName = "ChipCounter";
-const de = ({ chips: a, max: r = 4, remainingCount: s, layout: o = "compact" }) => {
-  if (o === "fill")
+const ce = ({ chips: a, max: r = 4, remainingCount: s, layout: l = "compact" }) => {
+  if (l === "fill")
     return e(Fe, {
       items: a,
-      renderListItem: (l) => e(M, {
-        ...l
+      renderListItem: (o) => e(M, {
+        ...o
       }),
       renderDropdownItem: () => null,
       forceShowingOverflowIndicator: s !== void 0,
-      renderOverflowIndicator: (l) => e(O, {
-        count: (s ?? 0) + l,
-        list: s ? void 0 : a.slice(a.length - l)
+      renderOverflowIndicator: (o) => e(O, {
+        count: (s ?? 0) + o,
+        list: s ? void 0 : a.slice(a.length - o)
       }),
       overflowIndicatorWithPopover: !1,
       className: "flex-1"
@@ -414,28 +414,28 @@ const de = ({ chips: a, max: r = 4, remainingCount: s, layout: o = "compact" }) 
   const t = a.slice(0, r), i = a.slice(r), n = s ?? a.length - r, d = n > 0;
   return c("div", {
     className: "flex items-center gap-2",
-    children: [t.map((l, f) => e(M, {
-      ...l
+    children: [t.map((o, f) => e(M, {
+      ...o
     }, f)), d && e(O, {
       count: n,
       list: s ? void 0 : i
     })]
   });
 };
-de.displayName = "F0ChipList";
-const _a = Se("F0ChipList", de), ua = {
+ce.displayName = "F0ChipList";
+const _a = Se("F0ChipList", ce), ua = {
   xs: 1,
   sm: 2,
   md: 2,
   lg: 2
-}, fa = I(function({ widgets: r, children: s }, o) {
-  const t = ae(null);
-  Ze(o, () => t.current);
+}, fa = I(function({ widgets: r, children: s }, l) {
+  const t = re(null);
+  Ze(l, () => t.current);
   const i = ea.toArray(r).filter((n) => !!n).map((n, d) => e("div", {
     className: "h-full @5xl:h-auto [&>div]:h-full",
     children: n
   }, d));
-  return e(X, {
+  return e(K, {
     layout: "home",
     children: c("div", {
       ref: t,
@@ -464,18 +464,18 @@ const _a = Se("F0ChipList", de), ua = {
       })]
     })
   });
-}), ma = I(function({ children: r, sideContent: s, mainColumnPosition: o = "left", sticky: t = !1 }, i) {
+}), ma = I(function({ children: r, sideContent: s, mainColumnPosition: l = "left", sticky: t = !1 }, i) {
   return e("div", {
     ref: i,
     className: "h-full",
     children: c("div", {
       className: b("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", t && "md:sticky md:top-0 md:max-h-full"),
       children: [e("main", {
-        className: b("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", t ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", o === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
+        className: b("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", t ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", l === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
         children: r
       }), e(ha, {
         sticky: t,
-        className: b("order-1", o === "right" ? "md:order-1" : "md:order-3"),
+        className: b("order-1", l === "right" ? "md:order-1" : "md:order-3"),
         children: s
       })]
     })
@@ -490,12 +490,12 @@ const _a = Se("F0ChipList", de), ua = {
       narrow: "max-w-screen-lg"
     }
   }
-}), ce = Qe.forwardRef(({ children: a, variant: r, className: s, ...o }, t) => e(X, {
+}), ue = Qe.forwardRef(({ children: a, variant: r, className: s, ...l }, t) => e(K, {
   layout: "standard",
   children: e("section", {
     ref: t,
     className: b("relative flex-1 overflow-auto", s),
-    ...o,
+    ...l,
     children: e("div", {
       className: b(pa({
         variant: r
@@ -504,11 +504,11 @@ const _a = Se("F0ChipList", de), ua = {
     })
   })
 }));
-ce.displayName = "StandardLayout";
+ue.displayName = "StandardLayout";
 const ja = g({
   name: "StandardLayout",
   type: "layout"
-}, ce), za = g({
+}, ue), za = g({
   name: "TwoColumnLayout",
   type: "layout"
 }, ma), Va = g({
@@ -528,8 +528,8 @@ const ja = g({
   }), e("span", {
     children: a
   })]
-}), ue = I(({ title: a, image: r, benefits: s, actions: o, withShadow: t = !0, module: i, moduleName: n, tag: d }, l) => c("div", {
-  ref: l,
+}), fe = I(({ title: a, image: r, benefits: s, actions: l, withShadow: t = !0, module: i, moduleName: n, tag: d }, o) => c("div", {
+  ref: o,
   className: b("bg-white flex flex-row rounded-xl border border-f1-border-secondary", t && "shadow-md"),
   children: [e("div", {
     className: "aspect-auto flex-shrink-0 overflow-hidden rounded-xl py-1 pl-1",
@@ -546,7 +546,7 @@ const ja = g({
         className: "flex flex-col gap-2",
         children: [c("div", {
           className: "flex flex-row items-center gap-2",
-          children: [i && e(K, {
+          children: [i && e(Q, {
             module: i
           }), n && e("p", {
             className: "text-base font-medium text-f1-foreground",
@@ -565,16 +565,16 @@ const ja = g({
       }), e(ga, {
         benefits: s
       })]
-    }), o && e("div", {
+    }), l && e("div", {
       className: "flex gap-3",
-      children: o
+      children: l
     })]
   })]
 }));
-ue.displayName = "ProductBlankslate";
-function ba({ isOpen: a, onClose: r, title: s, children: o, module: t, portalContainer: i }) {
+fe.displayName = "ProductBlankslate";
+function ba({ isOpen: a, onClose: r, title: s, children: l, module: t, portalContainer: i }) {
   const [n, d] = v(a);
-  return re(() => {
+  return se(() => {
     d(a);
   }, [a]), e(Re, {
     open: n,
@@ -589,20 +589,20 @@ function ba({ isOpen: a, onClose: r, title: s, children: o, module: t, portalCon
         className: "flex flex-row items-center justify-between px-4 py-4",
         children: [c(Oe, {
           className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground",
-          children: [t && e(K, {
+          children: [t && e(Q, {
             module: t,
             size: "lg"
           }), s]
         }), e($e, {
           variant: "outline",
-          icon: Q,
+          icon: Z,
           onClick: r,
           label: "Close modal",
           hideLabel: !0
         })]
-      }), c(J, {
+      }), c(Y, {
         className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col",
-        children: [o, e(Y, {
+        children: [l, e(X, {
           orientation: "vertical",
           className: "[&_div]:bg-f1-background"
         })]
@@ -610,7 +610,7 @@ function ba({ isOpen: a, onClose: r, title: s, children: o, module: t, portalCon
     })
   });
 }
-function Aa({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessage: i, successMessage: n, loadingState: d, nextSteps: l, closeLabel: f, primaryAction: m, modalTitle: N, modalModule: P, secondaryAction: u, portalContainer: x, tag: S }) {
+function Aa({ isOpen: a, onClose: r, title: s, image: l, benefits: t, errorMessage: i, successMessage: n, loadingState: d, nextSteps: o, closeLabel: f, primaryAction: m, modalTitle: N, modalModule: P, secondaryAction: u, portalContainer: x, tag: S }) {
   const [R, F] = v(a), [C, y] = v(null), [L, h] = v(!1), k = async () => {
     if (m != null && m.onClick) {
       h(!0);
@@ -634,9 +634,9 @@ function Aa({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessa
       portalContainer: x,
       children: e("div", {
         className: "pb-4 pl-4",
-        children: e(ue, {
+        children: e(fe, {
           title: s,
-          image: o,
+          image: l,
           benefits: t,
           withShadow: !1,
           tag: S,
@@ -659,7 +659,7 @@ function Aa({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessa
           })
         })
       })
-    }), C && e(Z, {
+    }), C && e(ee, {
       open: !0,
       onClose: () => {
         D(), y(null);
@@ -667,17 +667,17 @@ function Aa({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessa
       success: C === "success",
       errorMessage: i,
       successMessage: n,
-      nextSteps: l,
+      nextSteps: o,
       closeLabel: f,
       portalContainer: x
     })]
   });
 }
-function xa({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t, width: i, trackVisibility: n, actions: d, showConfirmation: l = !0 }) {
+function xa({ mediaUrl: a, title: r, description: s, onClose: l, dismissible: t, width: i, trackVisibility: n, actions: d, showConfirmation: o = !0 }) {
   const [f, m] = v(!1), N = () => {
-    m(!0), o && o();
+    m(!0), l && l();
   };
-  re(() => {
+  se(() => {
     n && n(!f);
   }, [n, f]);
   const P = a == null ? void 0 : a.includes(".mp4");
@@ -692,7 +692,7 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
           className: "absolute right-2 top-2 z-10",
           children: e(w, {
             variant: "ghost",
-            icon: Q,
+            icon: Z,
             size: "sm",
             hideLabel: !0,
             onClick: N,
@@ -714,10 +714,10 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
             }))
           }), c("div", {
             className: "flex flex-col gap-[2px] p-3",
-            children: [e(z, {
+            children: [e(V, {
               className: "text-lg font-medium",
               children: r
-            }), e(z, {
+            }), e(V, {
               className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary",
               children: s
             })]
@@ -725,7 +725,7 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
         })]
       }), d && e(je, {
         className: "p-3",
-        children: d.map((u) => u.type === "upsell" ? e(ee, {
+        children: d.map((u) => u.type === "upsell" ? e(ae, {
           label: u.label,
           onRequest: u.onClick,
           errorMessage: u.errorMessage,
@@ -733,7 +733,7 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
           loadingState: u.loadingState,
           nextSteps: u.nextSteps,
           closeLabel: u.closeLabel,
-          showConfirmation: l && u.showConfirmation,
+          showConfirmation: o && u.showConfirmation,
           variant: u.variant
         }, u.label) : e(w, {
           label: u.label,
@@ -744,37 +744,37 @@ function xa({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
     })
   });
 }
-const Ca = I(function({ primaryAction: r, secondaryAction: s, ...o }, t) {
-  const i = (l) => l.variant === "promote" ? e(ee, {
-    label: l.label,
+const Ca = I(function({ primaryAction: r, secondaryAction: s, ...l }, t) {
+  const i = (o) => o.variant === "promote" ? e(ae, {
+    label: o.label,
     onRequest: async () => {
-      await l.onClick();
+      await o.onClick();
     },
-    errorMessage: l.errorMessage,
-    successMessage: l.successMessage,
-    loadingState: l.loadingState,
-    nextSteps: l.nextSteps,
-    closeLabel: l.closeLabel,
-    showIcon: l.showIcon,
-    showConfirmation: l.showConfirmation,
-    variant: l.variant
+    errorMessage: o.errorMessage,
+    successMessage: o.successMessage,
+    loadingState: o.loadingState,
+    nextSteps: o.nextSteps,
+    closeLabel: o.closeLabel,
+    showIcon: o.showIcon,
+    showConfirmation: o.showConfirmation,
+    variant: o.variant
   }) : e(w, {
-    onClick: l.onClick,
-    label: l.label,
-    variant: l.variant || "default",
+    onClick: o.onClick,
+    label: o.label,
+    variant: o.variant || "default",
     size: "md",
-    icon: l.icon
+    icon: o.icon
   }), n = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0, d = (s == null ? void 0 : s.variant) !== "promote" ? s : void 0;
   return c(ze, {
     ref: t,
-    ...o,
+    ...l,
     primaryAction: n,
     secondaryAction: d,
     children: [(r == null ? void 0 : r.variant) === "promote" && i(r), (s == null ? void 0 : s.variant) === "promote" && i(s)]
   });
 });
 Ca.displayName = "UpsellingBanner";
-function qa({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t = "md", showIcon: i = !0, side: n = "right", align: d = "center", icon: l = Ve, mediaUrl: f, title: m, description: N, width: P = "300px", trackVisibility: u, actions: x, onClick: S, hideLabel: R = !1 }) {
+function qa({ isOpen: a, setIsOpen: r, label: s, variant: l = "promote", size: t = "md", showIcon: i = !0, side: n = "right", align: d = "center", icon: o = Ve, mediaUrl: f, title: m, description: N, width: P = "300px", trackVisibility: u, actions: x, onClick: S, hideLabel: R = !1 }) {
   const [F, C] = v(!1), [y, L] = v(null), [h, k] = v(null), D = (p) => {
     r(p), S && S();
   }, B = async (p) => {
@@ -786,27 +786,27 @@ function qa({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t
         C(!0), L("error");
       }
     }
-  }, fe = () => {
+  }, me = () => {
     L(null), C(!1), k(null), r(!1);
-  }, me = a && !F, he = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
+  }, he = a && !F, pe = x == null ? void 0 : x.map((p) => p.type === "upsell" ? {
     ...p,
     onClick: () => B(p)
   } : p);
   return c($, {
-    children: [c(G, {
-      open: me,
+    children: [c(H, {
+      open: he,
       onOpenChange: D,
-      children: [e(H, {
+      children: [e(U, {
         asChild: !0,
         children: e(w, {
-          variant: o,
+          variant: l,
           label: s,
           size: t,
-          icon: i ? l : void 0,
+          icon: i ? o : void 0,
           onClick: () => r(a),
           hideLabel: R
         })
-      }), e(U, {
+      }), e(J, {
         side: n,
         align: d,
         className: "w-fit border-none bg-transparent p-2 shadow-none",
@@ -818,13 +818,13 @@ function qa({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t
           dismissible: !1,
           width: P,
           trackVisibility: u,
-          actions: he,
+          actions: pe,
           showConfirmation: !1
         })
       })]
-    }), (h == null ? void 0 : h.type) === "upsell" && h.showConfirmation && y && e(Z, {
+    }), (h == null ? void 0 : h.type) === "upsell" && h.showConfirmation && y && e(ee, {
       open: !0,
-      onClose: fe,
+      onClose: me,
       success: y === "success",
       errorMessage: h.errorMessage,
       successMessage: h.successMessage,
@@ -835,12 +835,12 @@ function qa({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t
   });
 }
 const ya = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
-  const s = ae(null), [o, t] = v(s.current);
+  const s = re(null), [l, t] = v(s.current);
   return Ke(() => {
     t(s.current);
   }, []), e(ya.Provider, {
     value: {
-      element: o
+      element: l
     },
     children: e("div", {
       ref: s,
@@ -854,7 +854,7 @@ const ya = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
 }, Na = ({ children: a }) => e(Xe, {
   reducedMotion: "user",
   children: a
-}), Wa = ({ children: a, layout: r, link: s, privacyModeInitiallyEnabled: o, image: t, i18n: i, l10n: n, isDev: d = !1, dataCollectionStorageHandler: l, showExperimentalWarnings: f = !1 }) => e(Na, {
+}), Wa = ({ children: a, layout: r, link: s, privacyModeInitiallyEnabled: l, image: t, i18n: i, l10n: n, isDev: d = !1, dataCollectionStorageHandler: o, showExperimentalWarnings: f = !1 }) => e(Na, {
   children: e(Ae, {
     isDev: d,
     showExperimentalWarnings: f,
@@ -868,11 +868,11 @@ const ya = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
             ...r,
             children: e(He, {
               children: e(Ue, {
-                initiallyEnabled: o,
+                initiallyEnabled: l,
                 children: e(Je, {
                   ...t,
                   children: e(Ye, {
-                    handler: l,
+                    handler: o,
                     children: a
                   })
                 })
@@ -883,12 +883,12 @@ const ya = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
       })
     })
   })
-}), q = (a) => `datacollection-${a}`, Ga = {
+}), W = (a) => `datacollection-${a}`, Ga = {
   get: async (a) => JSON.parse(
-    localStorage.getItem(q(a)) ?? "{}"
+    localStorage.getItem(W(a)) ?? "{}"
   ),
   set: async (a, r) => {
-    localStorage.setItem(q(a), JSON.stringify(r));
+    localStorage.setItem(W(a), JSON.stringify(r));
   }
 };
 export {
@@ -908,7 +908,7 @@ export {
   sr as F0AvatarFile,
   tr as F0AvatarIcon,
   lr as F0AvatarList,
-  K as F0AvatarModule,
+  Q as F0AvatarModule,
   or as F0AvatarPerson,
   nr as F0AvatarTeam,
   ir as F0Card,
@@ -933,7 +933,7 @@ export {
   Cr as OneFilterPicker,
   Oa as PieChart,
   Ue as PrivacyModeProvider,
-  ue as ProductBlankslate,
+  fe as ProductBlankslate,
   yr as ProductCard,
   Aa as ProductModal,
   xa as ProductWidget,
@@ -941,9 +941,9 @@ export {
   ja as StandardLayout,
   wr as TagCounter,
   za as TwoColumnLayout,
-  Z as UpsellRequestResponseDialog,
+  ee as UpsellRequestResponseDialog,
   Ca as UpsellingBanner,
-  ee as UpsellingButton,
+  ae as UpsellingButton,
   qa as UpsellingPopover,
   $a as VerticalBarChart,
   Da as avatarVariants,
