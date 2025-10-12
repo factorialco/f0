@@ -87,16 +87,22 @@ const getFileTypeInfo = (file: FileLike): FileTypeInfo => {
   );
 
   if (matchedMimeKey) {
-    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]];
+    const fileTypeKey = MIME_MATCH_MAP[matchedMimeKey];
+    if (fileTypeKey && FILE_TYPE_MAP[fileTypeKey]) {
+      return FILE_TYPE_MAP[fileTypeKey];
+    }
   }
 
   const extension = file.name.toLowerCase().split(".").pop();
 
   if (extension && EXTENSION_MAP[extension]) {
-    return FILE_TYPE_MAP[EXTENSION_MAP[extension]];
+    const fileTypeKey = EXTENSION_MAP[extension];
+    if (fileTypeKey && FILE_TYPE_MAP[fileTypeKey]) {
+      return FILE_TYPE_MAP[fileTypeKey];
+    }
   }
 
-  return FILE_TYPE_MAP.default;
+  return FILE_TYPE_MAP.default!;
 };
 
 export { getFileTypeInfo };

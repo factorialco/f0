@@ -2,7 +2,7 @@ import { Text, Pressable, View } from "react-native";
 import { Counter } from "../Counter";
 import { cn } from "../../lib/utils";
 
-interface PresetProps {
+export interface PresetProps {
   label: string;
   number?: number;
   onClick?: () => void;

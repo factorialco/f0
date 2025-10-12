@@ -30,7 +30,7 @@ export const chipTextVariants = cva({
   },
 });
 
-interface ChipProps extends VariantProps<typeof chipContainerVariants> {
+export interface ChipProps extends VariantProps<typeof chipContainerVariants> {
   label: string;
   icon?: IconType;
   onClick?: () => void;
