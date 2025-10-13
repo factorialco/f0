@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.233.3](https://github.com/factorialco/f0/compare/f0-react-v1.233.2...f0-react-v1.233.3) (2025-10-13)
+
+
+### Bug Fixes
+
+* no reactions prop was not hidding the reactions, only comments ([b62f888](https://github.com/factorialco/f0/commit/b62f888c844526a8cec57313a08ace172b99dd63))
+
 ## [1.233.2](https://github.com/factorialco/f0/compare/f0-react-v1.233.1...f0-react-v1.233.2) (2025-10-10)
 
 
