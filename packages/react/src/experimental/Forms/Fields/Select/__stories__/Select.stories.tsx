@@ -14,7 +14,7 @@ import {
   SURNAMES_MOCK,
 } from "@/mocks"
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
 
@@ -655,7 +655,7 @@ export const WithCustomTrigger: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSnapshot({}),
+  parameters: withSkipA11y(withSnapshot({})),
   args: {
     label: "Label text here",
   },

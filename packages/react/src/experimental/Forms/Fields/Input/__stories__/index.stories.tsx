@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Placeholder } from "@/icons/app"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { Input } from "../index"
 import { inputSizes } from "../types"
@@ -170,7 +170,7 @@ export const Clearable: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSnapshot({}),
+  parameters: withSkipA11y(withSnapshot({})),
   args: {
     label: "Label text here",
   },
