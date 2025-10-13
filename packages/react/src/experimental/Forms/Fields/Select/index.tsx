@@ -3,7 +3,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -20,9 +19,9 @@ import {
   useGroups,
   WithGroupId,
 } from "@/hooks/datasource"
-import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
   SelectContent,
@@ -40,6 +39,8 @@ import {
   useRef,
   useState,
 } from "react"
+import { useDebounceCallback } from "usehooks-ts"
+import { Arrow } from "./components/Arrow"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
 import type { SelectItemObject, SelectItemProps } from "./types"
@@ -62,7 +63,7 @@ export type SelectProps<T extends string, R = unknown> = {
     option?: SelectItemObject<T, ResolvedRecordType<R>>
   ) => void
   onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>>
+    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => void
   value?: T
   defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
@@ -219,6 +220,13 @@ const SelectComponent = forwardRef(function Select<
     value || props.defaultItem?.value
   )
 
+  useEffect(() => {
+    if (value !== localValue) {
+      setLocalValue(value || props.defaultItem?.value)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, props.defaultItem])
+
   const dataSource = useMemo(() => {
     if (
       source &&
@@ -329,10 +337,8 @@ const SelectComponent = forwardRef(function Select<
   useEffect(() => {
     const foundOption = findOption(localValue)
 
-    if (foundOption) {
-      onChangeSelectedOption?.(foundOption)
-      setSelectedOption(foundOption)
-    }
+    onChangeSelectedOption?.(foundOption)
+    setSelectedOption(foundOption)
   }, [
     data.records,
     localValue,
@@ -359,16 +365,22 @@ const SelectComponent = forwardRef(function Select<
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
     setLocalValue(changedValue as T)
+
     const foundOption = findOption(changedValue)
 
-    if (foundOption) {
-      onChange?.(foundOption.value, foundOption.item, foundOption)
-    }
+    onChange?.(changedValue as T, foundOption?.item, foundOption)
   }
 
+  const debouncedHandleChangeOpenLocal = useDebounceCallback(
+    (open: boolean) => {
+      onOpenChange?.(open)
+      setOpenLocal(open)
+    },
+    100
+  )
+
   const handleChangeOpenLocal = (open: boolean) => {
-    onOpenChange?.(open)
-    setOpenLocal(open)
+    debouncedHandleChangeOpenLocal(open)
   }
 
   // const collapsible = localSource.grouping?.collapsible
@@ -518,35 +530,12 @@ const SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <div
-                  className={cn(
-                    "rounded-2xs bg-f1-background-secondary p-0.5",
-                    "flex items-center justify-center",
-                    !disabled && "cursor-pointer"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "origin-center transition-transform duration-200",
-                      "flex items-center justify-center",
-                      openLocal && "rotate-180"
-                    )}
-                  >
-                    <F0Icon
-                      onClick={() => {
-                        if (disabled) return
-                        handleChangeOpenLocal(!openLocal)
-                      }}
-                      icon={ChevronDown}
-                      size="sm"
-                      className={cn(
-                        "rounded-2xs bg-f1-background-secondary p-0.5 transition-transform duration-200",
-                        openLocal && "rotate-180",
-                        !disabled && "cursor-pointer"
-                      )}
-                    />
-                  </div>
-                </div>
+                <Arrow
+                  open={openLocal}
+                  disabled={disabled}
+                  size={size}
+                  className={cn(size === "sm" ? "-mt-0.5" : "-mt-2")}
+                />
               }
             >
               <button
@@ -561,6 +550,7 @@ const SelectComponent = forwardRef(function Select<
         {openLocal && (
           <SelectContent
             items={items}
+            taller={!!source?.filters}
             className={selectContentClassName}
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
@@ -574,6 +564,9 @@ const SelectComponent = forwardRef(function Select<
                 grouping={localSource.grouping}
                 currentGrouping={localSource.currentGrouping}
                 onGroupingChange={localSource.setCurrentGrouping}
+                filters={localSource.filters}
+                currentFilters={localSource.currentFilters}
+                onFiltersChange={localSource.setCurrentFilters}
               />
             }
             onScrollBottom={handleScrollBottom}
@@ -581,7 +574,7 @@ const SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-          ></SelectContent>
+          />
         )}
       </SelectPrimitive>
     </>

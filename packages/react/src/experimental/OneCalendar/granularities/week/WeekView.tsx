@@ -1,5 +1,5 @@
 import { Calendar } from "@/ui/calendar"
-import { endOfWeek, startOfWeek } from "date-fns"
+import { endOfISOWeek, startOfISOWeek } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import {
   DayClickEventHandler,
@@ -17,6 +17,7 @@ interface WeekViewProps {
   motionDirection?: number
   minDate?: Date
   maxDate?: Date
+  compact?: boolean
 }
 
 export function WeekView({
@@ -27,18 +28,19 @@ export function WeekView({
   motionDirection = 1,
   minDate,
   maxDate,
+  compact = false,
 }: WeekViewProps) {
   const { locale } = useL10n()
 
   const motionVariants = {
     hidden: (direction: number) => ({
       opacity: 0,
-      x: direction === 1 ? 40 : -40,
+      x: direction === 1 ? (compact ? 20 : 40) : compact ? -20 : -40,
     }),
     visible: { opacity: 1, x: 0 },
     exit: (direction: number) => ({
       opacity: 0,
-      x: direction === 1 ? -40 : 40,
+      x: direction === 1 ? (compact ? -20 : -40) : compact ? 20 : 40,
     }),
   }
 
@@ -48,8 +50,8 @@ export function WeekView({
       return
     }
 
-    const weekStart = startOfWeek(day, { weekStartsOn: 1 })
-    const weekEnd = endOfWeek(day, { weekStartsOn: 1 })
+    const weekStart = startOfISOWeek(day)
+    const weekEnd = endOfISOWeek(day)
 
     onSelect?.({
       from: weekStart,
@@ -60,8 +62,8 @@ export function WeekView({
   const selectedValue: DayPickerDateRange | undefined =
     selected instanceof Date
       ? {
-          from: startOfWeek(selected, { weekStartsOn: 1 }),
-          to: endOfWeek(selected, { weekStartsOn: 1 }),
+          from: startOfISOWeek(selected),
+          to: endOfISOWeek(selected),
         }
       : selected || undefined
 
@@ -76,7 +78,10 @@ export function WeekView({
         initial="hidden"
         animate="visible"
         exit="exit"
-        transition={{ duration: 0.15, ease: [0.455, 0.03, 0.515, 0.955] }}
+        transition={{
+          duration: compact ? 0.1 : 0.15,
+          ease: [0.455, 0.03, 0.515, 0.955],
+        }}
       >
         <Calendar
           key={month.toISOString()}
@@ -88,8 +93,10 @@ export function WeekView({
           onMonthChange={onMonthChange}
           locale={getLocale(locale)}
           weekStartsOn={1}
-          showOutsideDays
+          showOutsideDays={true}
           showWeekNumber
+          fixedWeeks={false}
+          compact={compact}
         />
       </motion.div>
     </AnimatePresence>

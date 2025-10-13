@@ -28,6 +28,7 @@ export function KanbanCard<T = unknown>({
   laneId,
   draggable = false,
   showIndicator = true,
+  disabledEdges = [],
   forcedEdge = null,
   ...props
 }: {
@@ -38,6 +39,7 @@ export function KanbanCard<T = unknown>({
   laneId?: string
   draggable?: boolean
   showIndicator?: boolean
+  disabledEdges?: Array<"top" | "bottom">
   forcedEdge?: "top" | "bottom" | null
 } & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
@@ -134,11 +136,20 @@ export function KanbanCard<T = unknown>({
         </F0Link>
       )}
       {showIndicator && (forcedEdge ?? overEdge) && (
-        <DropIndicator
-          edge={(forcedEdge ?? overEdge) as "top" | "bottom"}
-          type="terminal-no-bleed"
-          gap="4px"
-        />
+        <>
+          {(() => {
+            const activeEdge = (forcedEdge ?? overEdge) as "top" | "bottom"
+            const isEdgeDisabled = disabledEdges.includes(activeEdge)
+            if (isEdgeDisabled) return null
+            return (
+              <DropIndicator
+                edge={activeEdge}
+                type="terminal-no-bleed"
+                gap="4px"
+              />
+            )
+          })()}
+        </>
       )}
     </div>
   )

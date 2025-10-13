@@ -34,8 +34,9 @@ const ListButtons = ({ primaryAction, secondaryActions }: ListButtonsProps) => {
       />
     )
   }
+  const allActions = [primaryAction, ...(secondaryActions ?? [])]
   const items =
-    [primaryAction, ...(secondaryActions ?? [])].map((action) => ({
+    allActions.map((action) => ({
       label: action.label,
       value: action.label,
       icon: action.icon,
@@ -43,19 +44,24 @@ const ListButtons = ({ primaryAction, secondaryActions }: ListButtonsProps) => {
     })) || []
 
   const handleClick = (value: string) => {
-    const action = [primaryAction, ...(secondaryActions ?? [])].find(
-      (item) => item.label === value
-    )
-    if (action) {
+    const action = allActions.find((item) => item.label === value)
+    // Prevent disabled actions from executing
+    if (action && !action.disabled) {
       action.onClick?.()
     }
   }
+
+  // When there are secondary actions, don't disable the entire dropdown
+  // unless all actions are disabled. This allows users to access other actions
+  // even when the primary action is disabled (e.g., "Select All" is disabled
+  // but "Clear" is still available)
+  const allActionsDisabled = allActions.every((action) => action.disabled)
 
   return (
     <F0ButtonDropdown
       items={items}
       value={primaryAction.label}
-      disabled={primaryAction.disabled}
+      disabled={allActionsDisabled}
       onClick={handleClick}
       variant="outline"
       size="sm"

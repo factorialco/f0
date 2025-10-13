@@ -1,5 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"
 import { useState } from "react"
@@ -9,7 +10,7 @@ import {
 } from "../../actions"
 
 type CollectionActionProps = {
-  primaryActions?: ReturnType<PrimaryActionsDefinition>
+  primaryActions?: PrimaryActionsDefinition[]
   secondaryActions?: SecondaryActionsItemDefinition[]
   otherActions?: SecondaryActionsItemDefinition[]
 }
@@ -19,7 +20,10 @@ export const CollectionActions = ({
   secondaryActions,
   otherActions,
 }: CollectionActionProps) => {
-  const primaryActionsButton = (primaryActions && [primaryActions]) || []
+  const primaryActionsButtons = (
+    Array.isArray(primaryActions) ? primaryActions : [primaryActions]
+  ).filter((item) => item !== undefined)
+
   const secondaryActionsButtons = (secondaryActions || []).filter(
     (action) => action.type !== "separator"
   )
@@ -28,7 +32,7 @@ export const CollectionActions = ({
   const [open, onOpenChange] = useState(false)
 
   if (
-    primaryActionsButton.length === 0 &&
+    primaryActionsButtons.length === 0 &&
     secondaryActionsButtons.length === 0 &&
     dropdownActions.length === 0
   )
@@ -36,16 +40,29 @@ export const CollectionActions = ({
 
   return (
     <div className="flex flex-row-reverse items-center gap-2">
-      {primaryActionsButton.map((action) => (
+      {primaryActionsButtons.length === 1 ? (
         <F0Button
           size="md"
-          key={action.label}
-          onClick={action.onClick}
-          icon={action.icon}
+          onClick={primaryActionsButtons[0].onClick}
+          icon={primaryActionsButtons[0].icon}
           variant="default"
-          label={action.label}
+          label={primaryActionsButtons[0].label}
         />
-      ))}
+      ) : (
+        primaryActionsButtons.length > 1 && (
+          <F0ButtonDropdown
+            size="md"
+            items={primaryActionsButtons.map((action, index) => ({
+              label: action.label,
+              icon: action.icon,
+              value: index.toString(),
+            }))}
+            onClick={(value) => {
+              primaryActionsButtons[Number(value)]?.onClick?.()
+            }}
+          />
+        )
+      )}
 
       {secondaryActionsButtons?.map((action) => (
         <F0Button

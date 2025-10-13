@@ -3,15 +3,15 @@ import {
   addDays,
   addMonths,
   addYears,
+  endOfISOWeek,
   endOfMonth,
-  endOfWeek,
   endOfYear,
-  startOfWeek,
+  startOfISOWeek,
   startOfYear,
 } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { OneCalendar } from "./OneCalendar"
+import { OneCalendar, OneCalendarInternal } from "./OneCalendar"
 import { DateRange } from "./types"
 
 const mockDate = new Date(2025, 6, 30)
@@ -32,6 +32,8 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+type OneCalendarInternalStory = StoryObj<Meta<typeof OneCalendarInternal>>
 
 function SelectedDateDisplay({ range }: { range: DateRange }) {
   const formatDate = (date: Date) =>
@@ -283,10 +285,10 @@ export const Week: Story = {
   render: (args) => {
     const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
       const now = mockDate
-      const start = startOfWeek(now, { weekStartsOn: 1 })
+      const start = startOfISOWeek(now)
       return {
         from: start,
-        to: endOfWeek(start, { weekStartsOn: 1 }),
+        to: endOfISOWeek(start),
       }
     })
 
@@ -580,5 +582,214 @@ export const WithMinAndMaxYear: Story = {
     view: "year",
     minDate: mockDate,
     maxDate: addYears(mockDate, 2),
+  },
+}
+
+// Compact versions
+export const CompactMonthSingle: OneCalendarInternalStory = {
+  args: {
+    mode: "single",
+    view: "month",
+    compact: true,
+  },
+  render: (args) => {
+    const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
+      const now = mockDate
+      const start = new Date(now.getFullYear(), now.getMonth(), 1)
+      return {
+        from: start,
+        to: endOfMonth(start),
+      }
+    })
+
+    const handleSelect = (date: Date | DateRange | null) => {
+      if (!date) return
+      if (date instanceof Date) return
+      setSelectedRange(date)
+    }
+
+    return (
+      <div className="mx-auto max-w-64">
+        <OneCalendarInternal
+          {...args}
+          defaultSelected={selectedRange}
+          onSelect={handleSelect}
+        />
+        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+      </div>
+    )
+  },
+}
+
+export const CompactMonthRange: OneCalendarInternalStory = {
+  args: {
+    mode: "range",
+    view: "month",
+    compact: true,
+  },
+  render: (args) => {
+    const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
+      const now = mockDate
+      const start = new Date(now.getFullYear(), now.getMonth(), 1)
+      const end = new Date(now.getFullYear(), now.getMonth() + 4, 1)
+      return {
+        from: start,
+        to: endOfMonth(end),
+      }
+    })
+
+    const handleSelect = (date: Date | DateRange | null) => {
+      if (!date) return
+      if (date instanceof Date) return
+      setSelectedRange(date)
+    }
+
+    return (
+      <div className="mx-auto max-w-64">
+        <OneCalendarInternal
+          {...args}
+          defaultSelected={selectedRange}
+          onSelect={handleSelect}
+        />
+        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+      </div>
+    )
+  },
+}
+
+export const CompactWeek: OneCalendarInternalStory = {
+  args: {
+    mode: "single",
+    view: "week",
+    compact: true,
+  },
+  parameters: {
+    // Disable color contrast check for week view as it gets a false positive for middle range days
+    a11y: {
+      skipCi: true,
+    },
+  },
+  render: (args) => {
+    const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
+      const now = mockDate
+      const start = startOfISOWeek(now)
+      return {
+        from: start,
+        to: endOfISOWeek(start),
+      }
+    })
+
+    const handleSelect = (date: Date | DateRange | null) => {
+      if (!date) {
+        setSelectedRange(null)
+        return
+      }
+      if (!(date instanceof Date)) {
+        setSelectedRange(date)
+      }
+    }
+
+    return (
+      <div className="mx-auto max-w-64">
+        <OneCalendarInternal
+          {...args}
+          defaultSelected={selectedRange}
+          onSelect={handleSelect}
+        />
+        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+      </div>
+    )
+  },
+}
+
+export const CompactDayRange: OneCalendarInternalStory = {
+  args: {
+    mode: "range",
+    view: "day",
+    compact: true,
+  },
+  render: (args) => {
+    const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
+      const start = mockDate
+      const end = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate() + 5
+      )
+      return {
+        from: start,
+        to: end,
+      }
+    })
+
+    const handleSelect = (date: Date | DateRange | null) => {
+      if (!date) return
+      if (date instanceof Date) return
+      setSelectedRange(date)
+    }
+
+    return (
+      <div className="mx-auto max-w-64">
+        <OneCalendarInternal
+          {...args}
+          defaultSelected={selectedRange}
+          onSelect={handleSelect}
+        />
+        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+      </div>
+    )
+  },
+}
+
+// Comparison story showing both regular and compact side by side
+export const RegularVsCompact: Story = {
+  args: {
+    mode: "single",
+    view: "month",
+  },
+  render: () => {
+    const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
+      const now = mockDate
+      const start = new Date(now.getFullYear(), now.getMonth(), 1)
+      return {
+        from: start,
+        to: endOfMonth(start),
+      }
+    })
+
+    const handleSelect = (date: Date | DateRange | null) => {
+      if (!date) return
+      if (date instanceof Date) return
+      setSelectedRange(date)
+    }
+
+    return (
+      <div className="flex gap-8">
+        <div className="flex-1">
+          <h3 className="mb-4 text-lg font-medium">Regular</h3>
+          <OneCalendar
+            mode="single"
+            view="month"
+            defaultSelected={selectedRange}
+            onSelect={handleSelect}
+          />
+        </div>
+        <div className="flex-1">
+          <h3 className="mb-4 text-lg font-medium">Compact</h3>
+          <OneCalendarInternal
+            mode="single"
+            view="month"
+            compact={true}
+            defaultSelected={selectedRange}
+            onSelect={handleSelect}
+          />
+        </div>
+        {selectedRange && (
+          <div className="mt-6">
+            <SelectedDateDisplay range={selectedRange} />
+          </div>
+        )}
+      </div>
+    )
   },
 }

@@ -1,7 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { CheckDouble, Cross, InfoCircle, Warning } from "@/icons/app"
+import { CheckCircle, Cross, InfoCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { cva } from "cva"
@@ -25,7 +25,7 @@ const calloutVariants = cva({
 })
 
 const variantIcons: Record<string, IconType> = {
-  positive: CheckDouble, // Using CheckDouble as the primary action icon for positive
+  positive: CheckCircle,
   warning: Warning,
   info: InfoCircle,
 }

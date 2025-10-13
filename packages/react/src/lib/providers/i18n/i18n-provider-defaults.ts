@@ -48,12 +48,13 @@ export const defaultTranslations = {
   filters: {
     label: "Filters",
     applyFilters: "Apply filters",
+    applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
   },
   toc: {
-    search: "Search",
+    search: "Search...",
   },
   collections: {
     sorting: {
@@ -139,6 +140,8 @@ export const defaultTranslations = {
         currentDate: "This week",
         label: "Week",
         long: "Week of {{day}} {{month}} {{year}}",
+        longSingular: "Week of {{date}}",
+        longPlural: "Weeks of {{date}}",
       },
       month: {
         currentDate: "This month",

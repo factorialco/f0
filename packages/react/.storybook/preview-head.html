@@ -102,7 +102,7 @@
     @media screen and (min-width: 820px) {
       padding-top: 64px !important;
       padding-left: 72px !important;
-      padding-right: 190px !important;
+      padding-right: 72px !important;
     }
   }
 
@@ -166,6 +166,23 @@
 
   .toc-list .toc-list-item > a.is-active-link {
     color: #e51943 !important;
+  }
+
+  .toc-wrapper:empty,
+  .toc-wrapper .toc-list:empty {
+    display: none !important;
+  }
+
+  .toc-wrapper .toc-list li:only-child:empty ~ * {
+    display: none !important;
+  }
+
+  aside.sbdocs-toc--custom:has(.toc-wrapper:empty) {
+    display: none !important;
+  }
+
+  .sbdocs-content {
+    max-width: 100% !important;
   }
 
   input[type="radio"] {

@@ -6,7 +6,7 @@ import {
 } from "@/ui/tooltip"
 import { ForwardedRef } from "react"
 
-import { autoColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 
 export interface CategoryBarProps {
@@ -31,7 +31,9 @@ const _CategoryBarChart = (
         <div className="flex h-2 gap-1 overflow-hidden">
           {data.map((category, index) => {
             const percentage = (category.value / total) * 100
-            const color = category.color || autoColor(index)
+            const color = category.color
+              ? getColor(category.color)
+              : getCategoricalColor(index)
 
             const formatPercentage = (value: number): string => {
               const percentage = (value / total) * 100
@@ -85,7 +87,9 @@ const _CategoryBarChart = (
           role="list"
         >
           {data.map((category, index) => {
-            const color = category.color || autoColor(index)
+            const color = category.color
+              ? getColor(category.color)
+              : getCategoricalColor(index)
 
             return (
               <div

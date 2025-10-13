@@ -109,3 +109,23 @@ export const WithIcons: Story = {
     onClose: () => alert("Banner closed"),
   },
 }
+
+export const FullWidthText: Story = {
+  args: {
+    title: "⭐ Our top-selling add-on: Projects",
+    subtitle:
+      "Thousands of teams already trust Projects, our best-selling module, to plan, control costs, and keep everything on track. Add it to your plan before October 31st and get 1 year of One — your new AI assistant — for free.",
+    mediaUrl:
+      "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    variant: "full-width",
+    primaryAction: {
+      label: "Add Projects",
+      onClick: () => alert("Add Projects clicked"),
+    },
+    secondaryAction: {
+      label: "Learn More",
+      onClick: () => alert("Learn More clicked"),
+    },
+    onClose: () => alert("Banner closed"),
+  },
+}

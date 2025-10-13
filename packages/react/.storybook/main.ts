@@ -8,6 +8,9 @@ if (process.env.PUBLIC_BUILD) {
   process.env.STORYBOOK_PUBLIC_BUILD = process.env.PUBLIC_BUILD
 }
 
+// Mark that we're building for Storybook to preserve data-testid attributes
+process.env.STORYBOOK_BUILD = "true"
+
 const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",

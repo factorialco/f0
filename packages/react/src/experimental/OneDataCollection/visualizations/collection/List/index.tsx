@@ -1,7 +1,7 @@
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader/GroupHeader"
 import { useGroups } from "@/hooks/datasource/useGroups"
+import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
 import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
@@ -11,11 +11,11 @@ import {
   SortingsDefinition,
   useSelectable,
 } from "@/hooks/datasource"
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect } from "react"
 import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
-import { Spinner } from "../../../../Information/Spinner"
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { SummariesDefinition } from "../../../summary"
@@ -137,7 +137,12 @@ export const ListCollection = <
     defaultOpenGroups
   )
 
-  if (isInitialLoading) {
+  const showInitialLoading = useDebounceBoolean({
+    value: isInitialLoading,
+    delay: 100,
+  })
+
+  if (showInitialLoading) {
     return (
       <ListSkeleton
         source={source}
@@ -174,7 +179,6 @@ export const ListCollection = <
         aria-busy={showFullscreenLoading ? "true" : undefined}
       >
         <div className="min-h-0 flex-1 overflow-auto pb-3">
-          <AnimatePresence>{isInitialLoading && <Spinner />}</AnimatePresence>
           {data.type === "grouped" &&
             data.groups.map((group, index) => {
               const itemCount = group.itemCount

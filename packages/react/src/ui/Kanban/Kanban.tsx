@@ -14,15 +14,42 @@ import type {
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
 ): JSX.Element {
-  const { lanes, renderCard, getKey, className, dnd, loading } = props
+  const { lanes, renderCard, getKey, className, dnd, loading, onCreate } = props
 
   // Local source-of-truth for lanes to orchestrate moves centrally
   const [localLanes, setLocalLanes] = useState(
     () => lanes as KanbanProps<TRecord>["lanes"]
   )
+
+  const lastLanesRef = useRef<string>("")
+  const optimisticSignatureRef = useRef<string | null>(null)
+
   useEffect(() => {
-    setLocalLanes(lanes)
-  }, [lanes])
+    const newSignature = lanes
+      .map(
+        (l) =>
+          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+      )
+      .join("|")
+
+    // If we're in optimistic mode, only accept updates that match our optimistic state
+    if (optimisticSignatureRef.current !== null) {
+      if (newSignature === optimisticSignatureRef.current) {
+        // Props match optimistic update - accept and clear optimistic mode
+        optimisticSignatureRef.current = null
+        lastLanesRef.current = newSignature
+        setLocalLanes(lanes)
+      } else {
+        // Ignore stale props that don't match optimistic state
+        return
+      }
+    } else if (newSignature !== lastLanesRef.current) {
+      // Normal update: props have changed
+      lastLanesRef.current = newSignature
+      setLocalLanes(lanes)
+    }
+    // else: skip - already have these lanes
+  }, [lanes, getKey, localLanes])
 
   // Horizontal edge zones for board autoscroll (debug visibility + logs)
   const [isDragging, setIsDragging] = useState(false)
@@ -197,6 +224,17 @@ export function Kanban<TRecord extends RecordType>(
     // Optimistic apply
     setLocalLanes(next)
 
+    const optimisticSignature = next
+      .map(
+        (l) =>
+          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+      )
+      .join("|")
+
+    // Enter optimistic mode - ignore external updates until server confirms
+    optimisticSignatureRef.current = optimisticSignature
+    lastLanesRef.current = optimisticSignature
+
     try {
       // Call external move if provided
       const destinyRecord =
@@ -217,8 +255,8 @@ export function Kanban<TRecord extends RecordType>(
 
       if (result) {
         // Replace record by id with backend version
-        setLocalLanes((curr) =>
-          curr.map((lane) => {
+        setLocalLanes((curr) => {
+          const updated = curr.map((lane) => {
             if (lane.id !== toLaneId) return lane
             const items = [...lane.items]
             const idx = items.findIndex((item, index) => {
@@ -228,12 +266,23 @@ export function Kanban<TRecord extends RecordType>(
             if (idx !== -1) items.splice(idx, 1, result)
             return { ...lane, items }
           })
-        )
+
+          const serverSignature = updated
+            .map(
+              (l) =>
+                `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+            )
+            .join("|")
+          lastLanesRef.current = serverSignature
+
+          return updated
+        })
       }
       return result as TRecord
     } catch (e) {
-      // Rollback
+      // Rollback and exit optimistic mode
       setLocalLanes(prev)
+      optimisticSignatureRef.current = null
       throw e
     }
   }
@@ -244,14 +293,14 @@ export function Kanban<TRecord extends RecordType>(
         className={"relative h-full w-full [&>div>div]:h-full"}
         viewportRef={viewportRef}
       >
-        <div className="relative mb-2 flex h-full gap-2">
+        <div className="relative mb-2 flex h-full items-start gap-2">
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
               const total = lane.total ?? lane.items.length
               return (
                 <div
                   key={lane.id ?? String(laneIndex)}
-                  className="relative h-full shrink-0"
+                  className="relative shrink-0"
                   data-testid={`lane-${lane.id ?? String(laneIndex)}`}
                 >
                   <KanbanLane<TRecord>
@@ -276,6 +325,12 @@ export function Kanban<TRecord extends RecordType>(
                     hasMore={lane.hasMore}
                     loadingMore={lane.loadingMore}
                     fetchMore={lane.fetchMore}
+                    onPrimaryAction={
+                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
+                    }
+                    onFooterAction={
+                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
+                    }
                   />
                 </div>
               )
