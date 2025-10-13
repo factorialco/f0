@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.234.1](https://github.com/factorialco/f0/compare/f0-react-v1.234.0...f0-react-v1.234.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* **Card:** metadata in regular weight ([#2802](https://github.com/factorialco/f0/issues/2802)) ([acaaddc](https://github.com/factorialco/f0/commit/acaaddc8d5378774c6df92b168747216cb38ef66))
+
 ## [1.234.0](https://github.com/factorialco/f0/compare/f0-react-v1.233.3...f0-react-v1.234.0) (2025-10-13)
 
 
