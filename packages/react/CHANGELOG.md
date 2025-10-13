@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.234.0](https://github.com/factorialco/f0/compare/f0-react-v1.233.3...f0-react-v1.234.0) (2025-10-13)
+
+
+### Features
+
+* **Charts:** add ComboChart ([#2787](https://github.com/factorialco/f0/issues/2787)) ([d016027](https://github.com/factorialco/f0/commit/d016027a7c1a5a7d30b5db72ee5edc6534d25570))
+
 ## [1.233.3](https://github.com/factorialco/f0/compare/f0-react-v1.233.2...f0-react-v1.233.3) (2025-10-13)
 
 
