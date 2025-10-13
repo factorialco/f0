@@ -9,6 +9,12 @@ import { cn, focusRing } from "../../../lib/utils"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 
+import {
+  AiPromotionChat,
+  AiPromotionChatProvider,
+  AiPromotionChatProviderProps,
+} from "@/experimental/AiPromotionChat"
+import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
 import { breakpoints } from "@factorialco/f0-core"
 import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
@@ -18,6 +24,7 @@ import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
+  aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
   banner?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
@@ -28,12 +35,28 @@ export function ApplicationFrame({
   sidebar,
   banner,
   ai,
+  aiPromotion,
 }: ApplicationFrameProps) {
-  const AiProvider = ai ? AiChatProvider : Fragment
+  const AiProvider = ai?.enabled
+    ? AiChatProvider
+    : aiPromotion?.enabled
+      ? AiPromotionChatProvider
+      : Fragment
+  const aiProps = ai?.enabled
+    ? ai
+    : aiPromotion?.enabled
+      ? aiPromotion
+      : undefined
+
   return (
     <FrameProvider>
-      <AiProvider {...ai}>
-        <ApplicationFrameContent ai={ai} sidebar={sidebar} banner={banner}>
+      <AiProvider {...aiProps}>
+        <ApplicationFrameContent
+          ai={ai}
+          aiPromotion={aiPromotion}
+          sidebar={sidebar}
+          banner={banner}
+        >
           {children}
         </ApplicationFrameContent>
       </AiProvider>
@@ -101,6 +124,7 @@ function useAutoCloseSidebar(
 
 function ApplicationFrameContent({
   ai,
+  aiPromotion,
   children,
   sidebar,
   banner,
@@ -109,6 +133,7 @@ function ApplicationFrameContent({
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const { open: isAiChatOpen } = useAiChat()
+  const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,
     {
@@ -119,6 +144,10 @@ function ApplicationFrameContent({
   useEffect(() => {
     setForceFloat(isAiChatOpen)
   }, [isAiChatOpen, setForceFloat])
+
+  useEffect(() => {
+    setForceFloat(isAiPromotionChatOpen)
+  }, [isAiPromotionChatOpen, setForceFloat])
 
   useAutoCloseSidebar(isAiChatOpen, shouldAutoCloseSidebar)
 
@@ -192,6 +221,7 @@ function ApplicationFrameContent({
                 </motion.div>
               </motion.main>
               {ai && ai.enabled && <AiChat />}
+              {aiPromotion && aiPromotion.enabled && <AiPromotionChat />}
             </div>
           </LayoutGroup>
         </div>

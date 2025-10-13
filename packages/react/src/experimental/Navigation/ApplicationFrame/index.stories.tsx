@@ -1,3 +1,4 @@
+import ExternalLink from "@/icons/app/ExternalLink"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
@@ -20,8 +21,42 @@ const meta: Meta<typeof ApplicationFrame> = {
       agent: "one-workflow",
       credentials: "include",
       showDevConsole: false,
-      enabled: true,
+      enabled: false,
       greeting: "Hello, John",
+    },
+    aiPromotion: {
+      enabled: true,
+      greeting: "Hey Hellen,",
+      title: "Meet One, your AI agent",
+      description:
+        "One simplifies your daily tasks so you can focus on what really matters. Join the waitlist (open until November 30, 2025) to:",
+      benefits: [
+        {
+          noBoldText: "Get access at",
+          boldText: "no additional cost",
+        },
+        {
+          noBoldText: "Explore key features",
+          boldText: "early",
+        },
+        {
+          noBoldText: "Share feedback and",
+          boldText: "help shape One",
+        },
+      ],
+      actions: [
+        {
+          label: "Join the waitlist",
+          onClick: () => {},
+          variant: "promote",
+        },
+        {
+          label: "Learn more",
+          onClick: () => {},
+          variant: "ghost",
+          icon: ExternalLink,
+        },
+      ],
     },
     sidebar: <Sidebar {...SidebarStories.default.args} />,
     children: <Page {...PageStories.Default.args} />,
@@ -38,6 +73,7 @@ const DefaultStoryComponent = (
   return (
     <ApplicationFrame
       ai={args.ai}
+      aiPromotion={args.aiPromotion}
       sidebar={<Sidebar {...SidebarStories.default.args} />}
     >
       <Page {...PageStories.Default.args} />
