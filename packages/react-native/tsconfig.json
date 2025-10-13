@@ -25,22 +25,19 @@
   },
   "include": [
     "src",
-    "app",
-    "lib",
-    "ui",
+    "playground",
     "nativewind-env.d.ts",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    ".storybook"
+    "expo-env.d.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    ".storybook/storybook.requires.ts",
     "**/*.test.*",
     "**/*.spec.*",
     "**/__tests__/**",
-    "**/__snapshots__/**",
-    ".storybook/storybook.requires.ts"
+    "**/__snapshots__/**"
   ],
   "extends": "expo/tsconfig.base"
 }

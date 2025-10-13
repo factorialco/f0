@@ -1,7 +1,7 @@
 import React from "react";
 import type { Preview } from "@storybook/react";
 import { View } from "react-native";
-import "../global.css";
+import "../playground/global.css";
 
 const preview: Preview = {
   decorators: [

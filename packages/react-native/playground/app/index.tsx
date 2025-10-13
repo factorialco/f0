@@ -7,8 +7,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Info } from "../lib/icons/Info";
 
-import { Text } from "ui/text";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
+import { Text } from "../ui/text";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
   Card,
   CardContent,
@@ -16,10 +16,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "ui/avatar";
-import { Progress } from "ui/progress";
-import { Button } from "src/components/Button";
+} from "../ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Progress } from "../ui/progress";
+import { Button } from "../../src/components/Button";
 
 const GITHUB_AVATAR_URI =
   "https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg";

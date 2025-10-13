@@ -9,7 +9,7 @@ config.resolver.disableHierarchicalLookup = true;
 
 // First apply NativeWind
 const nativeWindConfig = withNativeWind(config, {
-  input: "./global.css",
+  input: "./playground/global.css",
   inlineRem: 16,
 });
 

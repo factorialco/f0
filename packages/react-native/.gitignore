@@ -5,6 +5,9 @@
 expo-env.d.ts
 # @end expo-cli
 
+# Expo
 .expo/
+*.expo.*
 
+# Distribution
 dist/
