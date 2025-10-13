@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Placeholder } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
-import { Input } from "./index"
+import { Input } from "../index"
+import { inputSizes } from "../types"
 
 const meta = {
   component: Input,
@@ -34,6 +36,15 @@ const meta = {
     error: {
       description:
         "Error message to display below the input, This is a shortcut for status.type = 'error'",
+    },
+    size: {
+      control: "select",
+      options: inputSizes,
+      defaultValue: "sm",
+    },
+    clearable: {
+      control: "boolean",
+      defaultValue: false,
     },
   },
   parameters: {
@@ -155,5 +166,53 @@ export const Clearable: Story = {
     label: "Label text here",
     maxLength: 10,
     clearable: true,
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    label: "Label text here",
+  },
+  render: () => {
+    const base = {
+      clearable: true,
+      icon: Placeholder,
+      labelIcon: Placeholder,
+      label: "Label text here",
+    }
+    const snapshotVariants = [
+      { ...base },
+      { ...base, value: "Value" },
+      { ...base, disabled: true },
+      { ...base, readonly: true },
+      { ...base, required: true },
+      { ...base, maxLength: 10, value: "Value" },
+      { ...base, hideLabel: true },
+      { ...base, error: true },
+      { ...base, status: { type: "error" as const, message: "Error message" } },
+      {
+        ...base,
+        status: { type: "warning" as const, message: "Warning message" },
+      },
+      { ...base, status: { type: "info" as const, message: "Info message" } },
+      { ...base, hint: "Hint message" },
+      { ...base },
+    ]
+    return (
+      <div className="flex flex-col gap-4">
+        {inputSizes.map((size) => (
+          <section key={size}>
+            <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
+            <div className="flex flex-col gap-4">
+              <Input size={size} label="Label text here" />
+              {snapshotVariants.map((variant, index) => (
+                <Input key={`${size}-${index}`} size={size} {...variant} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
   },
 }

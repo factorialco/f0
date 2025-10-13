@@ -419,7 +419,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
-                  size === "md" && "left-3 top-2.5"
+                  size === "md" && "left-3 top-[9px]"
                 )}
               >
                 {icon && (
@@ -488,7 +488,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5 pt-1.5",
+                  size === "md" && "pr-1.5",
                   "relative"
                 )}
               >
