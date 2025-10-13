@@ -132,7 +132,7 @@ const OverflowList = function OverflowList<T>({
         <div
           ref={measurementContainerRef}
           aria-hidden="true"
-          className="pointer-events-none invisible absolute left-0 top-0 flex opacity-0"
+          className="pointer-events-none invisible absolute left-0 top-0 flex opacity-0 *:flex-shrink-0"
           style={{ gap: gap > 0 ? `${gap}px` : undefined }}
           data-testid="overflow-measurement-container"
         >
@@ -149,7 +149,7 @@ const OverflowList = function OverflowList<T>({
       )}
 
       <div
-        className="flex items-center whitespace-nowrap"
+        className="flex min-w-0 items-center whitespace-nowrap"
         style={{ gap: gap > 0 ? `${gap}px` : undefined }}
         data-testid="overflow-visible-container"
       >
@@ -157,7 +157,7 @@ const OverflowList = function OverflowList<T>({
           visibleItems.map((item, index) => (
             <div
               key={`item-${index}`}
-              className="transition-all duration-150"
+              className="overflow-hidden transition-all duration-150"
               data-testid="overflow-visible-item"
               style={{ marginLeft: gap < 0 ? `${gap}px` : undefined }}
             >
@@ -176,7 +176,7 @@ const OverflowList = function OverflowList<T>({
                 <button
                   ref={overflowButtonRef}
                   className={cn(
-                    "inline-flex flex-shrink-0 items-center",
+                    "inline-flex w-fit flex-shrink-0 items-center",
                     focusRing()
                   )}
                 >

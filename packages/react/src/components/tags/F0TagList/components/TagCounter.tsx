@@ -16,7 +16,7 @@ type Props = {
 export const TagCounter = ({ count, list }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const counter = <F0TagRaw text={`+${count}`} />
+  const counter = <F0TagRaw text={`+${count}`} className="w-fit" />
 
   if (!list?.length) return counter
 
@@ -24,7 +24,10 @@ export const TagCounter = ({ count, list }: Props) => {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          className={cn("inline-flex flex-shrink-0 items-center", focusRing())}
+          className={cn(
+            "inline-flex w-fit flex-shrink-0 items-center",
+            focusRing()
+          )}
         >
           {counter}
         </button>

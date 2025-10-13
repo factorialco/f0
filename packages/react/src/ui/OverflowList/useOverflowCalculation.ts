@@ -86,8 +86,9 @@ export function useOverflowCalculation<T>(
         visibleCount++
       }
 
-      // Return the actual count without enforcing a minimum of 1
-      return Math.min(visibleCount, options?.max ?? items.length)
+      // Ensure we always show at least 1 item; it will truncate to fit
+      const capped = Math.min(visibleCount, options?.max ?? items.length)
+      return items.length > 0 ? Math.max(1, capped) : 0
     },
     [options?.max, items.length]
   )
