@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.235.1](https://github.com/factorialco/f0/compare/f0-react-v1.235.0...f0-react-v1.235.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* input size md alignments ([#2807](https://github.com/factorialco/f0/issues/2807)) ([622b407](https://github.com/factorialco/f0/commit/622b407092a4e294d3ff8ec4d09d9fc79d15f5c5))
+
 ## [1.235.0](https://github.com/factorialco/f0/compare/f0-react-v1.234.1...f0-react-v1.235.0) (2025-10-13)
 
 
