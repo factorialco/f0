@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { Select, SelectItemObject, SelectProps } from "../index"
+import { Select, SelectItemObject, SelectProps, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
-import { Appearance, Circle, Desktop, Plus } from "@/icons/app"
+import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import {
   DEPARTMENTS_MOCK,
   FIRST_NAMES_MOCK,
@@ -14,6 +14,7 @@ import {
   SURNAMES_MOCK,
 } from "@/mocks"
 
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
 
@@ -651,4 +652,61 @@ export const WithCustomTrigger: Story = {
       </div>
     </Select>
   ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSkipA11y(withSnapshot({})),
+  args: {
+    label: "Label text here",
+  },
+  render: () => {
+    const base = {
+      clearable: true,
+      icon: Placeholder,
+      labelIcon: Placeholder,
+      label: "Label text here",
+    }
+    const snapshotVariants = [
+      { ...base },
+      { ...base, disabled: true },
+      { ...base, readonly: true },
+      { ...base, required: true },
+      { ...base, hideLabel: true },
+      { ...base, error: true },
+      { ...base, status: { type: "error" as const, message: "Error message" } },
+      {
+        ...base,
+        status: { type: "warning" as const, message: "Warning message" },
+      },
+      { ...base, status: { type: "info" as const, message: "Info message" } },
+      { ...base, hint: "Hint message" },
+      { ...base },
+    ]
+    return (
+      <div className="flex flex-col gap-4">
+        {selectSizes.map((size) => (
+          <section key={size}>
+            <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
+            <div className="flex flex-col gap-4">
+              <Select
+                size={size}
+                label="Label text here"
+                onChange={fn()}
+                options={[]}
+              />
+              {snapshotVariants.map((variant, index) => (
+                <Select
+                  key={`${size}-${index}`}
+                  size={size}
+                  {...variant}
+                  onChange={fn()}
+                  options={[]}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
+  },
 }
