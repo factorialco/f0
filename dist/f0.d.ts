@@ -51,6 +51,7 @@ import { PersonCellValue as PersonCellValue_2 } from './types/person.tsx';
 import { PieChartProps } from './PieChart';
 import { PopoverContentProps } from '@radix-ui/react-popover';
 import * as React_2 from 'react';
+import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
@@ -275,7 +276,9 @@ export declare type AvatarVariant = DistributiveOmit<({
     type: "company";
 } & F0AvatarCompanyProps) | ({
     type: "file";
-} & F0AvatarFileProps), "size">;
+} & F0AvatarFileProps) | ({
+    type: "flag";
+} & F0AvatarFlagProps), "size">;
 
 declare type AvatarVariant_2 = ({
     type: "person";
@@ -285,11 +288,13 @@ declare type AvatarVariant_2 = ({
     type: "company";
 } & Omit<F0AvatarCompanyProps, "size">) | ({
     type: "file";
-} & Omit<F0AvatarFileProps, "size">);
+} & Omit<F0AvatarFileProps, "size">) | ({
+    type: "flag";
+} & Omit<F0AvatarFlagProps, "size">);
 
 export declare type AvatarVariants = (typeof avatarVariants)[number];
 
-export declare const avatarVariants: readonly ["person", "team", "company", "file"];
+export declare const avatarVariants: readonly ["person", "team", "company", "file", "flag"];
 
 export declare const Await: <T>({ resolve, fallback, error: errorFallback, children, }: AwaitProps<T>) => ReactNode;
 
@@ -360,6 +365,10 @@ declare type BaseAvatarProps = {
      */
     src?: string;
     /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
+    /**
      * The color of the avatar.
      * @default "random"
      */
@@ -386,6 +395,7 @@ declare type BaseBannerProps = {
     onClose?: () => void;
     isLoading?: boolean;
     children?: React.ReactNode;
+    variant?: "default" | "full-width";
 };
 
 declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
@@ -1013,7 +1023,7 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     /** Available actions that can be performed on records */
     itemActions?: ItemActions;
     /** Available primary actions that can be performed on the collection */
-    primaryActions?: PrimaryActionsDefinition;
+    primaryActions?: PrimaryActionsDefinitionFn;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
     /** Available summaries fields. If not provided, summaries is not allowed. */
@@ -1023,7 +1033,13 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     dataAdapter: DataCollectionDataAdapter<R, Filters, NavigationFilters>;
     /** Bulk actions that can be performed on the collection */
     bulkActions?: BulkActionsDefinition<R, Filters>;
-    totalItemSummary?: (totalItems: number) => string;
+    /** Total items summary that can be displayed on the collection
+     * If true, the total items summary will be displayed on the collection
+     * If a function is provided, the total items summary will be displayed on the collection
+     */
+    totalItemSummary?: boolean | ((totalItems: number) => string | null);
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
 };
@@ -1086,6 +1102,8 @@ export declare type DataSource<R extends RecordType, Filters extends FiltersDefi
     setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>;
     /** Function to provide an id for a record, necessary for append mode */
     idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
 };
 
 /**
@@ -1234,12 +1252,13 @@ export declare const defaultTranslations: {
     readonly filters: {
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
     readonly toc: {
-        readonly search: "Search";
+        readonly search: "Search...";
     };
     readonly collections: {
         readonly sorting: {
@@ -1325,6 +1344,8 @@ export declare const defaultTranslations: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
                 readonly long: "Week of {{day}} {{month}} {{year}}";
+                readonly longSingular: "Week of {{date}}";
+                readonly longPlural: "Weeks of {{date}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1556,6 +1577,12 @@ export declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<type
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+declare type F0AvatarFlagProps = {
+    flag: string;
+    size?: BaseAvatarProps["size"];
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
 export declare const F0AvatarIcon: {
     ({ icon, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarIconProps): JSX_2.Element;
     displayName: string;
@@ -1609,6 +1636,9 @@ declare type F0AvatarListPropsAvatars = {
 } | {
     type: "company";
     avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[];
+} | {
+    type: "flag";
+    avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[];
 } | {
     type: "file";
     avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
@@ -1871,6 +1901,8 @@ export declare type FilterOptions<FilterKeys extends string> = Record<FilterKeys
  */
 export declare type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>;
 
+export declare type FiltersMode = "default" | "compact";
+
 /**
  * Current state of all filters in a collection.
  * Maps filter keys to their current values.
@@ -1895,6 +1927,7 @@ declare type FilterTypeDefinition<Value = unknown, Options extends object = neve
         schema: Schema;
         value: Value;
         onChange: (value: Value) => void;
+        isCompactMode?: boolean;
     }) => React.ReactNode;
     /**
      * The value label to display in the filter chips
@@ -1932,6 +1965,10 @@ declare type FilterTypeSchema<Options extends object = never> = {
  * @template T - The filter definition type
  */
 export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : never;
+
+export declare type FlagAvatarVariant = Extract<AvatarVariant, {
+    type: "flag";
+}>;
 
 export declare const getAnimationVariants: (options?: AnimationVariantsOptions) => {
     hidden: {
@@ -1984,6 +2021,7 @@ declare interface GranularityDefinition {
         maxDate?: Date;
         setViewDate: (date: Date) => void;
         viewDate: Date;
+        compact?: boolean;
     }) => ReactNode;
     add: (date: DateRangeComplete, delta: number) => DateRangeComplete;
     getPrevNext(date: DateRange, options: DateNavigationOptions): PrevNextDateNavigation;
@@ -2163,6 +2201,8 @@ declare type KanbanLaneDefinition = {
     variant?: Variant;
 };
 
+declare type KanbanOnCreate = (laneId: string) => void | Promise<void>;
+
 declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toLaneId: string, sourceRecord: TRecord, destinyRecord: {
     record: TRecord;
     position: "above" | "below";
@@ -2178,6 +2218,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
         property: CardMetadataProperty;
     }>;
     onMove?: KanbanOnMove<Record>;
+    onCreate?: KanbanOnCreate;
 };
 
 declare type L10nContextValue = {
@@ -2217,7 +2258,7 @@ declare const layoutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare type Level = "info" | "warning" | "critical";
+export declare type Level = "info" | "warning" | "critical" | "positive";
 
 export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
@@ -2415,6 +2456,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onChange: (value: FiltersState<Definition>) => void;
     /** The children of the component */
     children?: React.ReactNode;
+    /** The mode of the component */
+    mode?: FiltersMode;
 };
 
 declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
@@ -2531,11 +2574,13 @@ declare type PrevNextDateNavigation = {
     next: DateRange | false;
 };
 
+declare type PrimaryActionsDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */
-declare type PrimaryActionsDefinition = () => Pick<DropdownItemObject, "onClick" | "label" | "icon"> | undefined;
+declare type PrimaryActionsDefinitionFn = () => PrimaryActionsDefinition | PrimaryActionsDefinition[] | undefined;
 
 export declare const PrivacyModeProvider: React_2.FC<{
     initiallyEnabled?: boolean;
@@ -2573,9 +2618,13 @@ export declare type ProductCardProps = {
     isVisible: boolean;
     dismissable?: boolean;
     trackVisibility?: (open: boolean) => void;
+} & ({
+    module?: never;
+    type: "one-campaign";
+} | {
     module: ModuleId;
-    type?: "one-campaign" | undefined;
-};
+    type?: never;
+});
 
 export declare function ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, }: ProductModalProps): JSX_2.Element;
 

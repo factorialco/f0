@@ -382,10 +382,18 @@ declare type AiChatProviderReturnValue = {
      */
     setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
     autoClearMinutes: number | null;
+    /**
+     * The initial message to display in the chat
+     */
     initialMessage?: string | string[];
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
     onThumbsUp?: (message: AIMessage) => void;
     onThumbsDown?: (message: AIMessage) => void;
+    /**
+     * Clear/reset the chat conversation
+     */
+    clear: () => void;
+    /* Excluded from this release type: setClearFunction */
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
@@ -528,7 +536,9 @@ declare type AvatarVariant = DistributiveOmit<({
     type: "company";
 } & F0AvatarCompanyProps) | ({
     type: "file";
-} & F0AvatarFileProps), "size">;
+} & F0AvatarFileProps) | ({
+    type: "flag";
+} & F0AvatarFlagProps), "size">;
 
 export declare const Badge: ({ type, size, icon }: BadgeProps) => JSX_2.Element;
 
@@ -578,6 +588,10 @@ declare type BaseAvatarProps = {
      */
     src?: string;
     /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
+    /**
      * The color of the avatar.
      * @default "random"
      */
@@ -610,6 +624,7 @@ export declare type BaseBannerProps = {
     onClose?: () => void;
     isLoading?: boolean;
     children?: React.ReactNode;
+    variant?: "default" | "full-width";
 };
 
 export declare const BaseCelebration: ({ link, firstName, lastName, src, onClick, canReact, lastEmojiReaction, onReactionSelect, type, typeLabel, date, }: CelebrationProps) => JSX_2.Element;
@@ -1466,7 +1481,7 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /** Available actions that can be performed on records */
     itemActions?: ItemActions;
     /** Available primary actions that can be performed on the collection */
-    primaryActions?: PrimaryActionsDefinition;
+    primaryActions?: PrimaryActionsDefinitionFn;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
     /** Available summaries fields. If not provided, summaries is not allowed. */
@@ -1476,7 +1491,13 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     dataAdapter: DataCollectionDataAdapter<R, Filters, NavigationFilters>;
     /** Bulk actions that can be performed on the collection */
     bulkActions?: BulkActionsDefinition<R, Filters>;
-    totalItemSummary?: (totalItems: number) => string;
+    /** Total items summary that can be displayed on the collection
+     * If true, the total items summary will be displayed on the collection
+     * If a function is provided, the total items summary will be displayed on the collection
+     */
+    totalItemSummary?: boolean | ((totalItems: number) => string | null);
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
 };
@@ -1557,6 +1578,8 @@ export declare type DataSource<R extends RecordType, Filters extends FiltersDefi
     setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>;
     /** Function to provide an id for a record, necessary for append mode */
     idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
 };
 
 /**
@@ -1745,12 +1768,13 @@ declare const defaultTranslations: {
     readonly filters: {
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
     readonly toc: {
-        readonly search: "Search";
+        readonly search: "Search...";
     };
     readonly collections: {
         readonly sorting: {
@@ -1836,6 +1860,8 @@ declare const defaultTranslations: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
                 readonly long: "Week of {{day}} {{month}} {{year}}";
+                readonly longSingular: "Week of {{date}}";
+                readonly longPlural: "Weeks of {{date}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -2056,7 +2082,7 @@ export declare const EntitySelect: <T>(props: EntitySelectProps<T> & {
     children?: React.ReactNode;
 }) => JSX_2.Element;
 
-declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
+declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append" | "size"> {
     entities: EntitySelectEntity[];
     groups: EntitySelectNamedGroup[];
     selectedGroup: string;
@@ -2160,6 +2186,12 @@ declare type F0AvatarCompanyProps = {
 declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
     size?: AvatarFileSize;
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarFlagProps = {
+    flag: string;
+    size?: BaseAvatarProps["size"];
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
@@ -2366,6 +2398,8 @@ export declare type FilterOptions<FilterKeys extends string> = Record<FilterKeys
  */
 export declare type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>;
 
+export declare type FiltersMode = "default" | "compact";
+
 /**
  * Current state of all filters in a collection.
  * Maps filter keys to their current values.
@@ -2390,6 +2424,7 @@ declare type FilterTypeDefinition<Value = unknown, Options extends object = neve
         schema: Schema;
         value: Value;
         onChange: (value: Value) => void;
+        isCompactMode?: boolean;
     }) => React.ReactNode;
     /**
      * The value label to display in the filter chips
@@ -2480,6 +2515,11 @@ export declare const getGranularityDefinition: (granularityKey: GranularityDefin
 export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
 
 /**
+ * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
+ */
+export declare const getPrimaryActions: (primaryActions: PrimaryActionsDefinitionFn | undefined) => PrimaryActionsDefinition[];
+
+/**
  * Get the secondaryActionsItems from the secondaryActionsDefinition or the actions property
  */
 export declare const getSecondaryActions: (secondaryActions: SecondaryActionsDefinition | undefined) => SecondaryActionsItemDefinition[];
@@ -2506,6 +2546,7 @@ export declare interface GranularityDefinition {
         maxDate?: Date;
         setViewDate: (date: Date) => void;
         viewDate: Date;
+        compact?: boolean;
     }) => ReactNode;
     add: (date: DateRangeComplete, delta: number) => DateRangeComplete;
     getPrevNext(date: DateRange, options: DateNavigationOptions): PrevNextDateNavigation;
@@ -2813,6 +2854,8 @@ declare type KanbanLaneDefinition = {
     variant?: Variant;
 };
 
+declare type KanbanOnCreate = (laneId: string) => void | Promise<void>;
+
 declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toLaneId: string, sourceRecord: TRecord, destinyRecord: {
     record: TRecord;
     position: "above" | "below";
@@ -2828,6 +2871,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
         property: CardMetadataProperty;
     }>;
     onMove?: KanbanOnMove<Record>;
+    onCreate?: KanbanOnCreate;
 };
 
 /**
@@ -2844,7 +2888,7 @@ export declare type lastIntentType = {
     customIntent?: string;
 } | null;
 
-declare type Level = "info" | "warning" | "critical";
+declare type Level = "info" | "warning" | "critical" | "positive";
 
 export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: LineChartProps;
@@ -3300,9 +3344,14 @@ declare type OneApprovalHistoryProps = {
     steps: ApprovalStep[];
 };
 
-export declare function OneCalendar({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, }: OneCalendarProps): JSX_2.Element;
+export declare const OneCalendar: {
+    (props: OneCalendarProps): JSX_2.Element;
+    displayName: string;
+};
 
-export declare interface OneCalendarProps {
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, }: OneCalendarInternalProps) => JSX_2.Element;
+
+export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
     onSelect?: (date: Date | DateRange | null) => void;
@@ -3312,7 +3361,10 @@ export declare interface OneCalendarProps {
     showInput?: boolean;
     minDate?: Date;
     maxDate?: Date;
+    compact?: boolean;
 }
+
+export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_3)[number]>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -3460,6 +3512,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onChange: (value: FiltersState<Definition>) => void;
     /** The children of the component */
     children?: React.ReactNode;
+    /** The mode of the component */
+    mode?: FiltersMode;
 };
 
 export declare const OneModal: OneModalComponent;
@@ -3794,11 +3848,13 @@ declare interface PrimaryActionButton extends PrimaryAction {
     onClick: () => void;
 }
 
+export declare type PrimaryActionsDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */
-export declare type PrimaryActionsDefinition = () => Pick<DropdownItemObject, "onClick" | "label" | "icon"> | undefined;
+export declare type PrimaryActionsDefinitionFn = () => PrimaryActionsDefinition | PrimaryActionsDefinition[] | undefined;
 
 export declare type primaryActionType = {
     action: actionType;
@@ -3816,6 +3872,8 @@ export declare const PrivateBox: FC<PropsWithChildren>;
 declare const privateProps: readonly ["append", "className", "pressed", "compact"];
 
 declare const privateProps_2: readonly [];
+
+declare const privateProps_3: readonly ["compact"];
 
 declare type ProductUpdate = {
     title: string;
@@ -3853,12 +3911,16 @@ declare type ProductUpdatesProp = {
             title: string;
             description: string;
             onClick: () => void;
-            module: ModuleId;
             dismissable: boolean;
             onClose?: () => void;
             trackVisibility?: (open: boolean) => void;
-            type?: "one-campaign" | undefined;
-        }>;
+        } & ({
+            module?: never;
+            type: "one-campaign";
+        } | {
+            module: ModuleId;
+            type?: never;
+        })>;
     };
 };
 
@@ -4226,7 +4288,7 @@ export declare type SelectItemProps<T, R = unknown> = SelectItemObject<T, R> | {
  */
 export declare type SelectProps<T extends string, R = unknown> = {
     onChange: (value: T, originalItem?: ResolvedRecordType<R>, option?: SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>> | undefined) => void;
     value?: T;
     defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>;
     children?: React.ReactNode;
@@ -4869,6 +4931,10 @@ export declare const TwoColumnsList: ForwardRefExoticComponent<TwoColumnsListTyp
 declare interface TwoColumnsListType {
     title?: string;
     titleValue?: string;
+    titleTooltip?: {
+        label?: string;
+        description: string;
+    };
     list: TwoColumnsItemType[];
 }
 
