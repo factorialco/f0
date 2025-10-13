@@ -19,8 +19,10 @@ import {
   ChatTextarea,
   ChatWindow,
   MessagesContainer,
+  SuggestionsList,
   UserMessage,
 } from "./components"
+import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { isAiMessage } from "./messageTypes"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
@@ -28,6 +30,7 @@ export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
   initialMessage?: string | string[]
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   onThumbsUp?: (message: AIMessage) => void
   onThumbsDown?: (message: AIMessage) => void
 } & Pick<
@@ -45,6 +48,7 @@ const AiChatProviderCmp = ({
   enabled = false,
   greeting,
   initialMessage,
+  welcomeScreenSuggestions,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -61,6 +65,7 @@ const AiChatProviderCmp = ({
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
+      welcomeScreenSuggestions={welcomeScreenSuggestions}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -151,6 +156,7 @@ const AiChatCmp = () => {
       Input={ChatTextarea}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
+      RenderSuggestionsList={SuggestionsList}
     />
   )
 }

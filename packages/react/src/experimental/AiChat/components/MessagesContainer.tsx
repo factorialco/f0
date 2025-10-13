@@ -9,9 +9,9 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import { isAgentStateMessage } from "../messageTypes"
-import OneIcon from "../OneIcon"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { Thinking } from "./Thinking"
+import { WelcomeScreen } from "./WelcomeScreen"
 
 type Turn = Array<Message | Array<Message>>
 
@@ -91,66 +91,10 @@ export const MessagesContainer = ({
       >
         <AnimatePresence mode="popLayout">
           {showWelcomeBlock && (
-            <motion.div
-              key="welcome"
-              className="absolute top-1/2 flex translate-y-[-50%] flex-col px-2"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              <motion.div
-                className="flex w-fit justify-center"
-                initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
-                transition={{
-                  opacity: { duration: 0.2, ease: "easeOut", delay: 0.4 },
-                  scale: { duration: 0.3, ease: [0.25, 0.46, 0.45, 1.94] },
-                  filter: { duration: 0.2, ease: "easeOut", delay: 0.4 },
-                }}
-              >
-                <OneIcon spin size="lg" className="my-4" />
-              </motion.div>
-              {greeting && (
-                <motion.p
-                  className="text-lg font-medium text-f1-foreground-secondary"
-                  initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-                  animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
-                  exit={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-                  transition={{
-                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.5 },
-                    filter: { duration: 0.2, ease: "easeOut", delay: 0.5 },
-                    translateY: {
-                      duration: 0.2,
-                      ease: [0.25, 0.46, 0.45, 1.94],
-                      delay: 0.5,
-                    },
-                  }}
-                >
-                  {greeting}
-                </motion.p>
-              )}
-              {initialMessages.map((message) => (
-                <motion.p
-                  className="text-2xl font-semibold text-f1-foreground"
-                  key={message.id}
-                  initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-                  animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
-                  exit={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-                  transition={{
-                    opacity: { duration: 0.2, ease: "easeOut", delay: 0.7 },
-                    filter: { duration: 0.2, ease: "easeOut", delay: 0.7 },
-                    translateY: {
-                      duration: 0.2,
-                      ease: [0.25, 0.46, 0.45, 1.94],
-                      delay: 0.7,
-                    },
-                  }}
-                >
-                  {message.content}
-                </motion.p>
-              ))}
-            </motion.div>
+            <WelcomeScreen
+              greeting={greeting}
+              initialMessages={initialMessages}
+            />
           )}
         </AnimatePresence>
         {turns.map((turnMessages, turnIndex) => {
