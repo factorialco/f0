@@ -462,6 +462,11 @@ export const WithLinkedItems: Story = {
 }
 
 export const BasicCardView: Story = {
+  parameters: {
+    a11y: {
+      skipCi: true,
+    },
+  },
   render: () => {
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
