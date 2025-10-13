@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.0](https://github.com/factorialco/f0/compare/f0-core-v1.30.0...f0-core-v1.31.0) (2025-10-13)
+
+
+### Features
+
+* inputfield detect autofill to disable placeholder ([#2789](https://github.com/factorialco/f0/issues/2789)) ([4605c18](https://github.com/factorialco/f0/commit/4605c18dfd26d23ccf004203f50bbde002287097))
+
 ## [1.30.0](https://github.com/factorialco/f0/compare/f0-core-v1.29.0...f0-core-v1.30.0) (2025-10-10)
 
 
