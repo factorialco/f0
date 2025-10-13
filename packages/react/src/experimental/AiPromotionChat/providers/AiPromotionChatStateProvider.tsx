@@ -47,7 +47,7 @@ const DEFAULT_MINUTES_TO_RESET = 15
 
 export const AiPromotionChatStateProvider: FC<
   PropsWithChildren<AiPromotionChatProviderProps>
-> = ({ children, enabled, ...rest }) => {
+> = ({ children, enabled = false, ...rest }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
