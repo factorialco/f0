@@ -3,6 +3,9 @@
  * Shows team name alongside a team avatar with optional badge.
  */
 import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { cn } from "@/lib/utils"
+import { tableDisplayClassNames } from "../const"
+import { ValueDisplayRendererContext } from "../renderers"
 import { WithAvatarBadge } from "./types"
 
 interface TeamValue {
@@ -11,8 +14,16 @@ interface TeamValue {
 }
 export type TeamCellValue = WithAvatarBadge<TeamValue>
 
-export const TeamCell = (args: TeamCellValue) => (
-  <div className="flex items-center gap-2">
+export const TeamCell = (
+  args: TeamCellValue,
+  meta: ValueDisplayRendererContext
+) => (
+  <div
+    className={cn(
+      "flex items-center gap-2",
+      meta.visualization === "table" && tableDisplayClassNames.avatar
+    )}
+  >
     <F0Avatar
       avatar={{
         type: "team",

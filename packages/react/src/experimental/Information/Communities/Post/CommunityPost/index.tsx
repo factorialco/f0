@@ -232,19 +232,17 @@ export const BaseCommunityPost = ({
           </div>
         )}
         <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        <Reactions
-          items={reactions?.items ?? []}
-          onInteraction={reactions?.onInteraction}
-          action={
-            !noReactionsButton
-              ? {
-                  label: comment.label,
-                  onClick: comment.onClick,
-                  icon: CommentIcon,
-                }
-              : undefined
-          }
-        />
+        {!noReactionsButton && (
+          <Reactions
+            items={reactions?.items ?? []}
+            onInteraction={reactions?.onInteraction}
+            action={{
+              label: comment.label,
+              onClick: comment.onClick,
+              icon: CommentIcon,
+            }}
+          />
+        )}
       </div>
     </div>
   )

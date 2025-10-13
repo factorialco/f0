@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.235.1](https://github.com/factorialco/f0/compare/f0-react-v1.235.0...f0-react-v1.235.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* input size md alignments ([#2807](https://github.com/factorialco/f0/issues/2807)) ([622b407](https://github.com/factorialco/f0/commit/622b407092a4e294d3ff8ec4d09d9fc79d15f5c5))
+
+## [1.235.0](https://github.com/factorialco/f0/compare/f0-react-v1.234.1...f0-react-v1.235.0) (2025-10-13)
+
+
+### Features
+
+* inputfield detect autofill to disable placeholder ([#2789](https://github.com/factorialco/f0/issues/2789)) ([4605c18](https://github.com/factorialco/f0/commit/4605c18dfd26d23ccf004203f50bbde002287097))
+
+## [1.234.1](https://github.com/factorialco/f0/compare/f0-react-v1.234.0...f0-react-v1.234.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* **Card:** metadata in regular weight ([#2802](https://github.com/factorialco/f0/issues/2802)) ([acaaddc](https://github.com/factorialco/f0/commit/acaaddc8d5378774c6df92b168747216cb38ef66))
+
+## [1.234.0](https://github.com/factorialco/f0/compare/f0-react-v1.233.3...f0-react-v1.234.0) (2025-10-13)
+
+
+### Features
+
+* **Charts:** add ComboChart ([#2787](https://github.com/factorialco/f0/issues/2787)) ([d016027](https://github.com/factorialco/f0/commit/d016027a7c1a5a7d30b5db72ee5edc6534d25570))
+
+## [1.233.3](https://github.com/factorialco/f0/compare/f0-react-v1.233.2...f0-react-v1.233.3) (2025-10-13)
+
+
+### Bug Fixes
+
+* no reactions prop was not hidding the reactions, only comments ([b62f888](https://github.com/factorialco/f0/commit/b62f888c844526a8cec57313a08ace172b99dd63))
+
 ## [1.233.2](https://github.com/factorialco/f0/compare/f0-react-v1.233.1...f0-react-v1.233.2) (2025-10-10)
 
 
