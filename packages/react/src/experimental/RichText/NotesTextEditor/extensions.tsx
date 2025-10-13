@@ -20,7 +20,7 @@ import {
   UnderlineExtension,
 } from "@/experimental/RichText/CoreEditor"
 import {
-  AIBlockConfigWithLabels,
+  AIBlockConfig,
   AIBlockExtension,
   AIBlockLabels,
 } from "@/experimental/RichText/CoreEditor/Extensions/AIBlock"
@@ -44,7 +44,7 @@ export const createNotesTextEditorExtensions = (
   placeholder: string,
   toolbarLabels: ToolbarLabels,
   groupLabels?: SlashCommandGroupLabels,
-  aiBlockConfig?: AIBlockConfigWithLabels,
+  aiBlockConfig?: AIBlockConfig,
   aiBlockLabels?: AIBlockLabels,
   moodTrackerLabels?: MoodTrackerLabels,
   liveCompanionLabels?: LiveCompanionLabels,
