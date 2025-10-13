@@ -23475,7 +23475,7 @@ const L4 = function({ items: t, renderListItem: n, renderDropdownItem: r, overfl
     children: [!d && l("div", {
       ref: b,
       "aria-hidden": "true",
-      className: "pointer-events-none invisible absolute left-0 top-0 flex opacity-0 *:flex-shrink-0",
+      className: "pointer-events-none invisible absolute left-0 top-0 flex opacity-0",
       style: {
         gap: c > 0 ? `${c}px` : void 0
       },
@@ -50216,7 +50216,7 @@ const oMt = Object.keys(dz), nw = ae(({ text: e, ...t }, n) => {
     ref: n,
     className: "border-[1px] border-solid border-f1-border-secondary",
     left: l("div", {
-      className: "m-1 aspect-square w-2 rounded-full",
+      className: "m-1 aspect-square h-2 w-2 rounded-full",
       style: {
         backgroundColor: r
       },
