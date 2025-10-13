@@ -32,8 +32,7 @@ export const MessagesContainer = ({
   const { messages, interrupt } = useCopilotChat()
 
   const translations = useI18n()
-  const { greeting, initialMessage } = useAiChat()
-  const [longestTurnHeight, setLongestTurnHeight] = useState<number>(0)
+  const { greeting, initialMessage, welcomeScreenSuggestions } = useAiChat()
   const initialMessages = useMemo(
     () =>
       makeInitialMessages(
@@ -54,32 +53,15 @@ export const MessagesContainer = ({
     ref: messagesContainerRef,
     box: "border-box",
   })
-  useEffect(() => {
-    if (!turnsContainerRef.current) {
-      return
-    }
-    const turnElements = turnsContainerRef.current.children
-    if (turnElements.length === 0) {
-      return
-    }
-
-    const lastTurnElement = turnElements[turnElements.length - 1]
-    const height = lastTurnElement.scrollHeight
-    setLongestTurnHeight((prev) => (prev >= height ? prev : height))
-  }, [messages.length, initialMessages.length])
   const turns = useMemo(() => {
     return convertMessagesToTurns(messages)
   }, [messages])
 
-  // the scroll container's height is manually controlled by the size of the biggest turn (see `motion.div` below)
-  // However the initial height is dynamic and set via `flex-1` class.
-  // This way the scroll container takes all available vertical space in the chat window.
-  // When we measure it's size in the effect and start manipulating the hight manually. The flex is reset to initial.
   return (
     <motion.div
       layout
       className={cn(
-        "scrollbar-macos relative isolate flex-1 px-4 pt-3",
+        "scrollbar-macos relative isolate flex flex-1 flex-col px-4 pt-3",
         "overflow-y-scroll"
       )}
       ref={messagesContainerRef}
@@ -87,23 +69,23 @@ export const MessagesContainer = ({
       <motion.div
         layout="position"
         ref={turnsContainerRef}
-        className={!showWelcomeBlock ? "flex flex-col gap-8" : undefined}
+        className={
+          showWelcomeBlock ? "flex flex-1 pb-4" : "flex flex-col gap-8"
+        }
       >
-        <AnimatePresence mode="popLayout">
-          {showWelcomeBlock && (
-            <WelcomeScreen
-              greeting={greeting}
-              initialMessages={initialMessages}
-            />
-          )}
-        </AnimatePresence>
+        {showWelcomeBlock && (
+          <WelcomeScreen
+            greeting={greeting}
+            initialMessages={initialMessages}
+            suggestions={welcomeScreenSuggestions}
+          />
+        )}
         {turns.map((turnMessages, turnIndex) => {
           const isCurrentTurn = turnIndex === turns.length - 1
 
           return (
             <div
               className="flex flex-col items-start justify-start gap-2"
-              key={`turn-${turnIndex}`}
               style={{
                 minHeight: isCurrentTurn
                   ? // "scroll" the current turn up in the view to make space for the assistant response,
@@ -111,6 +93,7 @@ export const MessagesContainer = ({
                     containerHeight * 0.8
                   : undefined,
               }}
+              key={`turn-${turnIndex}`}
             >
               {turnMessages.map((message, index) => {
                 const isCurrentMessage =
