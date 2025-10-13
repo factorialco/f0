@@ -10,6 +10,7 @@ import {
   Delete,
   Download,
   Envelope,
+  Inbox,
   Pencil,
   Person,
   Placeholder,
@@ -18,6 +19,7 @@ import {
   Target,
   Upload,
 } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import {
   CERTIFICATIONS_MOCK,
   DEPARTMENTS_MOCK,
@@ -31,6 +33,7 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { mockImage } from "@/testing/mocks/images"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
@@ -512,6 +515,7 @@ export const BasicCardView: Story = {
 
 // Examples with different property renderers
 export const RendererTypes: Story = {
+  parameters: withSnapshot({}),
   render: () => {
     const dataSource = useDataCollectionSource({
       filters,
@@ -524,6 +528,8 @@ export const RendererTypes: Story = {
         enabled: true,
       },
     })
+
+    let i = 0
 
     return (
       <OneDataCollection
@@ -562,7 +568,38 @@ export const RendererTypes: Story = {
                   sorting: "email",
                 },
                 {
-                  label: "Company",
+                  label: "Description",
+                  render: () => {
+                    return {
+                      type: "longText",
+                      value: {
+                        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                      },
+                    }
+                  },
+                },
+                {
+                  label: "Description",
+                  render: () => {
+                    return {
+                      type: "icon",
+                      value: {
+                        icon: Inbox,
+                        label: "Inbox",
+                      },
+                    }
+                  },
+                },
+                {
+                  label: "Date",
+                  render: () => ({
+                    type: "date",
+                    value: getMockValue(START_DATE_MOCK, i++),
+                  }),
+                },
+
+                {
+                  label: "Company List",
                   render: () => ({
                     type: "avatarList",
                     value: {
@@ -571,9 +608,35 @@ export const RendererTypes: Story = {
                         {
                           type: "company",
                           name: "Test company",
-                          src: "https://cdn.join-staging.com/products/controlling_portal_de_icon.jpeg",
+                          src: mockImage("company", 0),
+                        },
+                        {
+                          type: "company",
+                          name: "Test company 2",
+                          src: mockImage("company", 1),
                         },
                       ],
+                    },
+                  }),
+                },
+
+                {
+                  label: "Company",
+                  render: () => ({
+                    type: "company",
+                    value: {
+                      name: "Test company",
+                      src: mockImage("company", 0),
+                    },
+                  }),
+                },
+                {
+                  label: "Team",
+                  render: () => ({
+                    type: "team",
+                    value: {
+                      name: "Test team",
+                      src: mockImage("team", 0),
                     },
                   }),
                 },

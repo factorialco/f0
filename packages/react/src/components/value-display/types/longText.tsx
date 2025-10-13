@@ -4,6 +4,8 @@
  */
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { cn } from "@/lib/utils"
+import { tableDisplayClassNames } from "../const"
+import { ValueDisplayRendererContext } from "../renderers"
 import { isShowingPlaceholder, resolveValue } from "../utils"
 import { WithPlaceholder } from "./types"
 
@@ -38,7 +40,10 @@ export type LongTextValue = WithPlaceholder & {
 
 export type LongTextCellValue = string | number | undefined | LongTextValue
 
-export const LongTextCell = (args: LongTextCellValue) => {
+export const LongTextCell = (
+  args: LongTextCellValue,
+  meta: ValueDisplayRendererContext
+) => {
   const value = resolveValue<string | number>(args, "text")?.toString() || ""
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "text")
 
@@ -50,7 +55,8 @@ export const LongTextCell = (args: LongTextCellValue) => {
     <OneEllipsis
       className={cn(
         "whitespace-pre-wrap break-words text-f1-foreground",
-        shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
+        shouldShowPlaceholderStyling && "text-f1-foreground-secondary",
+        meta.visualization === "table" && tableDisplayClassNames.text
       )}
       lines={lines}
       disabled={fullText}
