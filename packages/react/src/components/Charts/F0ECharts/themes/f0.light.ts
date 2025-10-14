@@ -2,8 +2,8 @@ import { registerTheme } from "echarts"
 
 export const colorPalette = [
   "#ff0000",
-  "#00",
   "#00ff00",
+  "#0000ff",
   "#0000ff",
   "#000000",
   "#c42703",
@@ -15,7 +15,7 @@ export const theme = {
   textStyle: {
     fontFamily: "monospace",
     fontWeight: "bold",
-    fontSize: 30,
+    fontSize: 12,
   },
 
   title: {

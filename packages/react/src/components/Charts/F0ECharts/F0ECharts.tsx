@@ -5,13 +5,6 @@ import "./themes/f0.light"
 echarts.use(AriaComponent)
 
 export const F0ECharts = ({ options }: { options: echarts.EChartsOption }) => {
-  const optionsDefaults = {
-    aria: {
-      role: "img",
-      labelledby: "chart-title",
-    },
-  }
-
   const ref = useRef<HTMLDivElement>(null)
 
   const chart = useRef<echarts.ECharts | null>(null)
@@ -21,10 +14,26 @@ export const F0ECharts = ({ options }: { options: echarts.EChartsOption }) => {
     }
   }, [ref])
 
-  const optionsWithDefaults = useMemo(
-    () => Object.assign({}, optionsDefaults, options),
-    [options]
-  )
+  const optionsWithDefaults = useMemo(() => {
+    const optionsDefaults = {
+      aria: {
+        role: "img",
+        labelledby: "chart-title",
+      },
+      grid: {
+        left: 10,
+        right: 20,
+        top: "title" in options ? 50 : 10,
+        bottom: "legend" in options ? 70 : 10,
+      },
+      legend: {
+        ...options.legend,
+        show: options.legend ? true : false,
+      },
+    }
+
+    return Object.assign({}, optionsDefaults, options)
+  }, [options])
 
   useEffect(() => {
     chart.current?.setOption(optionsWithDefaults)

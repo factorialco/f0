@@ -31,26 +31,51 @@ export const Default: Story = {
   args: {
     options: {
       title: {
-        text: "F0ECharts",
+        text: "Monthly Performance Review vs. Average",
       },
-      grid: { top: 8, right: 8, bottom: 24, left: 36 },
-      xAxis: {
-        type: "category",
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      },
-      yAxis: {
-        type: "value",
-      },
-      series: [
-        {
-          data: [820, 932, 901, 934, 1290, 1330, 1320],
-          type: "line",
-          smooth: true,
-        },
-      ],
       tooltip: {
         trigger: "axis",
       },
+      legend: {
+        data: ["Employee", "Average"],
+      },
+      xAxis: {
+        type: "category",
+        data: [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ],
+      },
+      yAxis: {
+        type: "value",
+        name: "Performance Score",
+      },
+      series: [
+        {
+          name: "Employee",
+          type: "bar",
+          data: [78, 82, 85, 80, 88, 90, 92, 89, 87, 91, 93, 95],
+        },
+        {
+          name: "Average",
+          type: "line",
+          data: [80, 80, 81, 82, 83, 85, 86, 87, 86, 88, 89, 90],
+          smooth: true,
+          lineStyle: {
+            type: "dashed",
+          },
+        },
+      ],
     },
   },
 }
