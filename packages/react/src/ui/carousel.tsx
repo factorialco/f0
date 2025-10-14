@@ -239,7 +239,7 @@ const CarouselPrevious = React.forwardRef<
         label="Previous"
         icon={ArrowLeft}
         hideLabel
-      ></ButtonInternal>
+      />
     </div>
   )
 })
@@ -271,7 +271,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, ButtonInternalProps>(
           label="Next"
           icon={ArrowRight}
           hideLabel
-        ></ButtonInternal>
+        />
       </div>
     )
   }

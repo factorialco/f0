@@ -250,6 +250,7 @@ export const loadingVariants = cva({
       ghost: "border-f1-foreground border-t-transparent",
       promote: "border-f1-icon-promote border-t-transparent",
       outlinePromote: "border-f1-icon-promote border-t-transparent",
+      unstyled: "",
     },
   },
 })
