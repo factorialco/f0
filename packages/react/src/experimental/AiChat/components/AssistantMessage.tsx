@@ -63,7 +63,7 @@ export const AssistantMessage = ({
 
   return (
     <div
-      className="relative isolate flex w-full flex-col items-start justify-center last:mb-8"
+      className="relative isolate flex w-full flex-col items-start justify-center"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

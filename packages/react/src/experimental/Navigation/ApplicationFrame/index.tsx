@@ -16,7 +16,7 @@ import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
 import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
-interface ApplicationFrameProps {
+export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
   banner?: React.ReactNode
   sidebar: React.ReactNode
