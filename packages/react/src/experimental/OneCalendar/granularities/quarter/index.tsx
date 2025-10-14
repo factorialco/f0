@@ -91,6 +91,7 @@ export const quarterGranularity: GranularityDefinition = {
     }
     return formats[format] ?? formats.default
   },
+  toStringMaxWidth: () => 110,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

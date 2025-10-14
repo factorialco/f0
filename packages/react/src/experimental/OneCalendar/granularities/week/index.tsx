@@ -133,6 +133,7 @@ export const weekGranularity: GranularityDefinition = {
     }
     return formats[format] ?? formats.default
   },
+  toStringMaxWidth: () => 240,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
