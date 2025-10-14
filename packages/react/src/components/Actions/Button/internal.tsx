@@ -9,7 +9,14 @@ import { F0Icon, IconType } from "../../F0Icon"
 
 export type ButtonInternalProps = Pick<
   ComponentProps<typeof ShadcnButton>,
-  "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed"
+  | "variant"
+  | "size"
+  | "disabled"
+  | "type"
+  | "round"
+  | "className"
+  | "pressed"
+  | "style"
 > &
   DataAttributes & {
     /**
