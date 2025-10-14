@@ -268,8 +268,12 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     useEffect(() => {
-      setLocalValue(value)
-    }, [value])
+      setLocalValue(
+        maxLength && value && lengthProvider(value) > maxLength
+          ? value?.substring(0, maxLength)
+          : value
+      )
+    }, [value, lengthProvider, maxLength])
 
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
