@@ -1536,7 +1536,7 @@ export declare type F0AvatarModuleProps = VariantProps<typeof moduleAvatarVarian
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 export declare const F0AvatarPerson: {
-    ({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, terminated, }: F0AvatarPersonProps): JSX_2.Element;
+    ({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: F0AvatarPersonProps): JSX_2.Element;
     displayName: string;
 };
 
@@ -1562,9 +1562,9 @@ export declare type F0AvatarPersonProps = {
      */
     badge?: AvatarBadge;
     /**
-     * Whether the person is terminated. If true, the avatar will display an icon instead of the person's name or picture.
+     * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
      */
-    terminated?: boolean;
+    deactivated?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 export declare const F0AvatarTeam: {
@@ -3425,15 +3425,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

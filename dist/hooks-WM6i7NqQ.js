@@ -19259,7 +19259,7 @@ const n5e = (e, t) => V("svg", {
   });
 };
 QN.displayName = "FlagAvatar";
-const JN = ({ firstName: e, lastName: t, src: n, size: r, "aria-label": a, "aria-labelledby": i, badge: o, terminated: s }) => l(S0, {
+const JN = ({ firstName: e, lastName: t, src: n, size: r, "aria-label": a, "aria-labelledby": i, badge: o, deactivated: s }) => l(S0, {
   type: "rounded",
   name: [e, t],
   src: n,
@@ -19296,7 +19296,7 @@ const Za = ({ avatar: e, size: t = "xs" }) => {
         size: t,
         "aria-label": e["aria-label"],
         "aria-labelledby": e["aria-labelledby"],
-        terminated: e.terminated
+        deactivated: e.deactivated
       });
     case "team":
       return l(eR, {

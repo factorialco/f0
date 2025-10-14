@@ -2115,9 +2115,9 @@ declare type F0AvatarPersonProps = {
      */
     badge?: AvatarBadge;
     /**
-     * Whether the person is terminated. If true, the avatar will display an icon instead of the person's name or picture.
+     * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
      */
-    terminated?: boolean;
+    deactivated?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare const F0AvatarPulse: {
@@ -5221,15 +5221,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
