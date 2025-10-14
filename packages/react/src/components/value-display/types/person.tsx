@@ -4,6 +4,9 @@
  */
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { OneEllipsis } from "@/components/OneEllipsis"
+import { cn } from "@/lib/utils"
+import { tableDisplayClassNames } from "../const"
+import { ValueDisplayRendererContext } from "../renderers"
 import { WithAvatarBadge } from "./types"
 
 interface PersonValue {
@@ -14,10 +17,18 @@ interface PersonValue {
 
 export type PersonCellValue = WithAvatarBadge<PersonValue>
 
-export const PersonCell = (args: PersonCellValue) => {
+export const PersonCell = (
+  args: PersonCellValue,
+  meta: ValueDisplayRendererContext
+) => {
   const fullName = `${args.firstName.toString()} ${args.lastName.toString()}`
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-2">
+    <div
+      className={cn(
+        "flex min-w-0 flex-1 items-center gap-2",
+        meta.visualization === "table" && tableDisplayClassNames.avatar
+      )}
+    >
       <F0Avatar
         avatar={{
           type: "person",

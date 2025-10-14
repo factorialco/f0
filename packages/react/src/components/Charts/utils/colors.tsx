@@ -1,20 +1,20 @@
-const availableColors = {
-  "chart-1": "var(--chart-1)",
-  "chart-2": "var(--chart-2)",
-  "chart-3": "var(--chart-3)",
-  "chart-4": "var(--chart-4)",
-  "chart-5": "var(--chart-5)",
-  "chart-6": "var(--chart-6)",
-  "chart-7": "var(--chart-7)",
-  "chart-8": "var(--chart-8)",
+export const getCategoricalColor = (index: number, opacity?: number) => {
+  const categoricalColors = [
+    "categorical-1",
+    "categorical-2",
+    "categorical-3",
+    "categorical-4",
+    "categorical-5",
+    "categorical-6",
+    "categorical-7",
+    "categorical-8",
+  ]
+  return getColor(categoricalColors[index % categoricalColors.length], opacity)
 }
 
-export type ChartColor = keyof typeof availableColors
+export const getColor = (color: string, opacity?: number) => {
+  const opacityString = opacity !== undefined ? ` / ${opacity}` : ""
+  const chartColorName = `chart-${color}`
 
-export const autoColor = (index: number, withHSL = true) => {
-  const colors = Object.values(availableColors)
-  const color = colors[index % colors.length]
-  return withHSL ? `hsl(${color})` : color
+  return `hsl(var(--${chartColorName})${opacityString})`
 }
-
-export const chartColor = (color: ChartColor) => availableColors[color]

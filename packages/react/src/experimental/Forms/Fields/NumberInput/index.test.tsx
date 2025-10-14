@@ -30,7 +30,7 @@ describe("NumberInput", () => {
       const input = screen.getByRole("textbox")
       await userEvent.type(input, "-34.")
 
-      expect(input).toHaveValue("-34")
+      expect(input).toHaveValue("-34.")
       expect(onChange).toHaveBeenLastCalledWith(-34)
     })
   })

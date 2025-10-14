@@ -3,7 +3,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -22,6 +21,7 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
   SelectContent,
@@ -103,6 +103,7 @@ export type SelectProps<T extends string, R = unknown> = {
 ) &
   Pick<
     InputFieldProps<T>,
+    | "required"
     | "loading"
     | "hideLabel"
     | "clearable"
@@ -117,7 +118,6 @@ export type SelectProps<T extends string, R = unknown> = {
     | "status"
     | "hint"
   >
-
 const SelectItem = <T extends string, R>({
   item,
 }: {
@@ -207,6 +207,7 @@ const SelectComponent = forwardRef(function Select<
     error,
     status,
     hint,
+    required,
     ...props
   }: SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -509,6 +510,7 @@ const SelectComponent = forwardRef(function Select<
             <InputField
               label={label}
               error={error}
+              required={required}
               status={status}
               hint={hint}
               icon={icon}
@@ -534,7 +536,7 @@ const SelectComponent = forwardRef(function Select<
                   open={openLocal}
                   disabled={disabled}
                   size={size}
-                  className={cn(size === "sm" ? "-mt-0.5" : "-mt-2")}
+                  className={cn(size === "sm" ? "" : "-translate-y-px")}
                 />
               }
             >
@@ -550,6 +552,7 @@ const SelectComponent = forwardRef(function Select<
         {openLocal && (
           <SelectContent
             items={items}
+            taller={!!source?.filters}
             className={selectContentClassName}
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
@@ -563,6 +566,9 @@ const SelectComponent = forwardRef(function Select<
                 grouping={localSource.grouping}
                 currentGrouping={localSource.currentGrouping}
                 onGroupingChange={localSource.setCurrentGrouping}
+                filters={localSource.filters}
+                currentFilters={localSource.currentFilters}
+                onFiltersChange={localSource.setCurrentFilters}
               />
             }
             onScrollBottom={handleScrollBottom}
@@ -570,7 +576,7 @@ const SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-          ></SelectContent>
+          />
         )}
       </SelectPrimitive>
     </>

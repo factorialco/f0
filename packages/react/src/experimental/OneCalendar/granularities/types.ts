@@ -66,6 +66,7 @@ export interface GranularityDefinition {
     maxDate?: Date
     setViewDate: (date: Date) => void
     viewDate: Date
+    compact?: boolean
   }) => ReactNode
   // Adds a delta to a date range
   add: (date: DateRangeComplete, delta: number) => DateRangeComplete

@@ -313,10 +313,15 @@ export const getMockVisualizations = (options?: {
           id: "role4",
         },
         {
-          label: "Department 4",
-          render: (item) => item.department,
-          sorting: "department",
-          id: "department4",
+          label: "Long",
+          render: () => ({
+            type: "longText",
+            value: {
+              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+              lines: 4,
+            },
+          }),
+          id: "longText",
         },
         {
           label: "Permissions",

@@ -14,7 +14,10 @@ import {
   Radar,
   RadarChart as RadarChartPrimitive,
 } from "recharts"
-import { autoColor } from "../../../components/Charts/utils/colors"
+import {
+  getCategoricalColor,
+  getColor,
+} from "../../../components/Charts/utils/colors"
 import { fixedForwardRef } from "../../../components/Charts/utils/forwardRef"
 import { ChartConfig, ChartItem } from "../../../components/Charts/utils/types"
 
@@ -63,8 +66,16 @@ export const _RadarChart = <K extends ChartConfig>(
           <Radar
             key={key}
             dataKey={key}
-            fill={dataConfig[key].color || autoColor(index)}
-            stroke={dataConfig[key].color || autoColor(index)}
+            fill={
+              dataConfig[key].color
+                ? getColor(dataConfig[key].color)
+                : getCategoricalColor(index)
+            }
+            stroke={
+              dataConfig[key].color
+                ? getColor(dataConfig[key].color)
+                : getCategoricalColor(index)
+            }
             strokeWidth={1.5}
             fillOpacity={0.3}
             label={dataConfig[key].label}

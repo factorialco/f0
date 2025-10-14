@@ -10,6 +10,7 @@ import {
   Delete,
   Download,
   Envelope,
+  Inbox,
   Pencil,
   Person,
   Placeholder,
@@ -18,6 +19,7 @@ import {
   Target,
   Upload,
 } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import {
   CERTIFICATIONS_MOCK,
   DEPARTMENTS_MOCK,
@@ -31,6 +33,7 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { mockImage } from "@/testing/mocks/images"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
@@ -53,7 +56,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Data Collection",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -90,11 +93,81 @@ const meta = {
         "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "experimental", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const Simplest: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: ({ filters, sortings, search }) => {
+          return createPromiseDataFetch()({
+            filters,
+            sortings,
+            search,
+            navigationFilters: {},
+          })
+        },
+      },
+    })
+
+    return (
+      <div className="space-y-4">
+        <OneDataCollection
+          source={dataSource}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Name",
+                    render: (item) => ({
+                      type: "person",
+                      value: {
+                        firstName: item.name.split(" ")[0],
+                        lastName: item.name.split(" ")[1],
+                      },
+                    }),
+                    sorting: "name",
+                  },
+                  {
+                    label: "Email",
+                    render: (item) => item.email,
+                    sorting: "email",
+                  },
+                  {
+                    label: "Role",
+                    render: (item) => item.role,
+                    sorting: "role",
+                  },
+                  {
+                    label: "Department",
+                    render: (item) => item.department,
+                    sorting: "department",
+                    info: "Team that the employee belongs to",
+                  },
+                  {
+                    label: "Salary",
+                    render: (item) => ({
+                      type: "amount",
+                      value: item.salary,
+                    }),
+                    align: "right",
+                    sorting: "salary",
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
 
 // Basic examples with single visualization
 export const BasicTableView: Story = {
@@ -329,6 +402,7 @@ export const WithLinkedItems: Story = {
                         },
                       },
                     }),
+                    width: 100,
                     sorting: "name",
                   },
                   {
@@ -441,6 +515,7 @@ export const BasicCardView: Story = {
 
 // Examples with different property renderers
 export const RendererTypes: Story = {
+  parameters: withSnapshot({}),
   render: () => {
     const dataSource = useDataCollectionSource({
       filters,
@@ -453,6 +528,8 @@ export const RendererTypes: Story = {
         enabled: true,
       },
     })
+
+    let i = 0
 
     return (
       <OneDataCollection
@@ -491,7 +568,38 @@ export const RendererTypes: Story = {
                   sorting: "email",
                 },
                 {
-                  label: "Company",
+                  label: "Description",
+                  render: () => {
+                    return {
+                      type: "longText",
+                      value: {
+                        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                      },
+                    }
+                  },
+                },
+                {
+                  label: "Description",
+                  render: () => {
+                    return {
+                      type: "icon",
+                      value: {
+                        icon: Inbox,
+                        label: "Inbox",
+                      },
+                    }
+                  },
+                },
+                {
+                  label: "Date",
+                  render: () => ({
+                    type: "date",
+                    value: getMockValue(START_DATE_MOCK, i++),
+                  }),
+                },
+
+                {
+                  label: "Company List",
                   render: () => ({
                     type: "avatarList",
                     value: {
@@ -500,9 +608,35 @@ export const RendererTypes: Story = {
                         {
                           type: "company",
                           name: "Test company",
-                          src: "https://cdn.join-staging.com/products/controlling_portal_de_icon.jpeg",
+                          src: mockImage("company", 0),
+                        },
+                        {
+                          type: "company",
+                          name: "Test company 2",
+                          src: mockImage("company", 1),
                         },
                       ],
+                    },
+                  }),
+                },
+
+                {
+                  label: "Company",
+                  render: () => ({
+                    type: "company",
+                    value: {
+                      name: "Test company",
+                      src: mockImage("company", 0),
+                    },
+                  }),
+                },
+                {
+                  label: "Team",
+                  render: () => ({
+                    type: "team",
+                    value: {
+                      name: "Test team",
+                      src: mockImage("team", 0),
                     },
                   }),
                 },

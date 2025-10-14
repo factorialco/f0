@@ -1,5 +1,96 @@
 # Changelog
 
+## [1.235.3](https://github.com/factorialco/f0/compare/f0-react-v1.235.2...f0-react-v1.235.3) (2025-10-14)
+
+
+### Bug Fixes
+
+* show filters badge on select when some filters are applied ([#2814](https://github.com/factorialco/f0/issues/2814)) ([828ea37](https://github.com/factorialco/f0/commit/828ea3778ecdcea2d07be55c5343b411ab2b0d34))
+
+## [1.235.2](https://github.com/factorialco/f0/compare/f0-react-v1.235.1...f0-react-v1.235.2) (2025-10-14)
+
+
+### Bug Fixes
+
+* missing required prop in input and select ([#2811](https://github.com/factorialco/f0/issues/2811)) ([4cdf594](https://github.com/factorialco/f0/commit/4cdf594646aea708badb1b32ef39855197639c5a))
+
+## [1.235.1](https://github.com/factorialco/f0/compare/f0-react-v1.235.0...f0-react-v1.235.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* input size md alignments ([#2807](https://github.com/factorialco/f0/issues/2807)) ([622b407](https://github.com/factorialco/f0/commit/622b407092a4e294d3ff8ec4d09d9fc79d15f5c5))
+
+## [1.235.0](https://github.com/factorialco/f0/compare/f0-react-v1.234.1...f0-react-v1.235.0) (2025-10-13)
+
+
+### Features
+
+* inputfield detect autofill to disable placeholder ([#2789](https://github.com/factorialco/f0/issues/2789)) ([4605c18](https://github.com/factorialco/f0/commit/4605c18dfd26d23ccf004203f50bbde002287097))
+
+## [1.234.1](https://github.com/factorialco/f0/compare/f0-react-v1.234.0...f0-react-v1.234.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* **Card:** metadata in regular weight ([#2802](https://github.com/factorialco/f0/issues/2802)) ([acaaddc](https://github.com/factorialco/f0/commit/acaaddc8d5378774c6df92b168747216cb38ef66))
+
+## [1.234.0](https://github.com/factorialco/f0/compare/f0-react-v1.233.3...f0-react-v1.234.0) (2025-10-13)
+
+
+### Features
+
+* **Charts:** add ComboChart ([#2787](https://github.com/factorialco/f0/issues/2787)) ([d016027](https://github.com/factorialco/f0/commit/d016027a7c1a5a7d30b5db72ee5edc6534d25570))
+
+## [1.233.3](https://github.com/factorialco/f0/compare/f0-react-v1.233.2...f0-react-v1.233.3) (2025-10-13)
+
+
+### Bug Fixes
+
+* no reactions prop was not hidding the reactions, only comments ([b62f888](https://github.com/factorialco/f0/commit/b62f888c844526a8cec57313a08ace172b99dd63))
+
+## [1.233.2](https://github.com/factorialco/f0/compare/f0-react-v1.233.1...f0-react-v1.233.2) (2025-10-10)
+
+
+### Bug Fixes
+
+* add full width variant to BaseBanner ([#2795](https://github.com/factorialco/f0/issues/2795)) ([e2c9dc9](https://github.com/factorialco/f0/commit/e2c9dc921c3b915b298f838c3e4e29424225b1dc))
+
+## [1.233.1](https://github.com/factorialco/f0/compare/f0-react-v1.233.0...f0-react-v1.233.1) (2025-10-10)
+
+
+### Bug Fixes
+
+* **datacollection:** fix click propagation when celltypes has ellipsis ([#2797](https://github.com/factorialco/f0/issues/2797)) ([f791286](https://github.com/factorialco/f0/commit/f7912869e33e1c8378f164b52da3cf9c8eaea004))
+
+## [1.233.0](https://github.com/factorialco/f0/compare/f0-react-v1.232.0...f0-react-v1.233.0) (2025-10-10)
+
+
+### Features
+
+* **Charts:** color system ([#2765](https://github.com/factorialco/f0/issues/2765)) ([191d8bb](https://github.com/factorialco/f0/commit/191d8bb2d1cb01975446759700764ccef7a25575))
+
+## [1.232.0](https://github.com/factorialco/f0/compare/f0-react-v1.231.0...f0-react-v1.232.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** longText defaults. Datacollection docs index. Fix oneEllipsis line-clamp-4 ([#2777](https://github.com/factorialco/f0/issues/2777)) ([fa8657e](https://github.com/factorialco/f0/commit/fa8657e6b85f57cc93c45e5597ea8abcba923b3d))
+
+## [1.231.0](https://github.com/factorialco/f0/compare/f0-react-v1.230.0...f0-react-v1.231.0) (2025-10-10)
+
+
+### Features
+
+* **select:** primitive multiselect ([#2775](https://github.com/factorialco/f0/issues/2775)) ([98ca803](https://github.com/factorialco/f0/commit/98ca8035ea0d340b7654689218c2f0de53577905))
+
+## [1.230.0](https://github.com/factorialco/f0/compare/f0-react-v1.229.0...f0-react-v1.230.0) (2025-10-10)
+
+
+### Features
+
+* **datacollection:** toolbars improvements ([#2788](https://github.com/factorialco/f0/issues/2788)) ([eb55fad](https://github.com/factorialco/f0/commit/eb55fad83da41656316efc4b1c3cfaa922a9d8fc))
+
 ## [1.229.0](https://github.com/factorialco/f0/compare/f0-react-v1.228.3...f0-react-v1.229.0) (2025-10-09)
 
 

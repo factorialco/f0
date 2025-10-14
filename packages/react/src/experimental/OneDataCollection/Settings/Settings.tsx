@@ -92,11 +92,6 @@ export const Settings = <
     ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
     : 0
 
-  const shouldShowSettings =
-    (visualizations && visualizations.length > 1) ||
-    (groupByOptions > 0 && !grouping?.hideSelector) ||
-    (sortings && Object.keys(sortings).length > 0)
-
   const [open, setOpen] = useState(false)
 
   const handleVisualizationChange = (index: number) => {
@@ -162,8 +157,6 @@ export const Settings = <
     })
   }
 
-  if (!shouldShowSettings) return null
-
   return (
     <div className="flex gap-2">
       <Popover open={open} onOpenChange={setOpen}>
@@ -199,20 +192,24 @@ export const Settings = <
                 !!grouping.mandatory &&
                 Object.entries(grouping.groupBy).length < 2
               ) && (
-                <GroupingSelector
-                  key="grouping"
-                  grouping={grouping}
-                  currentGrouping={currentGrouping}
-                  onGroupingChange={handleGroupingChange}
-                />
+                <div className="p-3">
+                  <GroupingSelector
+                    key="grouping"
+                    grouping={grouping}
+                    currentGrouping={currentGrouping}
+                    onGroupingChange={handleGroupingChange}
+                  />
+                </div>
               ),
             hasSortings && (
-              <SortingSelector
-                key="sorting"
-                currentSortings={currentSortings}
-                onChange={onSortingsChange}
-                sortings={sortings}
-              />
+              <div className="p-3">
+                <SortingSelector
+                  key="sorting"
+                  currentSortings={currentSortings}
+                  onChange={onSortingsChange}
+                  sortings={sortings}
+                />
+              </div>
             ),
             hasVisualizacionSettings && (
               <section key="visualization-settings" className="p-3">

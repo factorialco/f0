@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -13,7 +14,9 @@ import {
 import { CalendarMode, CalendarView, DateRange, DateRangeString } from "./types"
 import { isActiveDate, toDateRange } from "./utils"
 
-export interface OneCalendarProps {
+const privateProps = ["compact"] as const
+
+interface OneCalendarInternalProps {
   mode: CalendarMode
   view: CalendarView
   onSelect?: (date: Date | DateRange | null) => void
@@ -23,7 +26,13 @@ export interface OneCalendarProps {
   showInput?: boolean
   minDate?: Date
   maxDate?: Date
+  compact?: boolean
 }
+
+export type OneCalendarProps = Omit<
+  OneCalendarInternalProps,
+  (typeof privateProps)[number]
+>
 
 export const getGranularitySimpleDefinition = (
   granularityKey: GranularityDefinitionKey
@@ -50,7 +59,7 @@ export const getGranularityDefinition = (
   return granularity
 }
 
-export function OneCalendar({
+const OneCalendarInternal = ({
   mode = "single",
   view = "month",
   onSelect,
@@ -60,7 +69,8 @@ export function OneCalendar({
   showInput = false,
   minDate,
   maxDate,
-}: OneCalendarProps) {
+  compact = false,
+}: OneCalendarInternalProps) => {
   const i18n = useI18n()
 
   const [viewDate, setViewDate] = useState<Date>(defaultMonth)
@@ -259,8 +269,18 @@ export function OneCalendar({
         </div>
       )}
       {showNavigation && (
-        <div className="flex items-center justify-between pb-3">
-          <div className="text-lg font-medium text-f1-foreground">
+        <div
+          className={cn(
+            "flex items-center justify-between",
+            compact ? "mx-2 pb-2" : "pb-3"
+          )}
+        >
+          <div
+            className={cn(
+              "font-medium text-f1-foreground",
+              compact ? "text-md" : "text-lg"
+            )}
+          >
             {getHeaderLabel()}
           </div>
           <div className="flex items-center gap-2">
@@ -297,8 +317,25 @@ export function OneCalendar({
           viewDate,
           minDate,
           maxDate,
+          compact,
         })}
       </div>
     </div>
   )
 }
+
+const OneCalendarBase = (props: OneCalendarProps) => {
+  const publicProps = privateProps.reduce((acc, key) => {
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as OneCalendarInternalProps)
+
+  return <OneCalendarInternal {...publicProps} />
+}
+
+OneCalendarBase.displayName = "OneCalendar"
+
+export const OneCalendar = OneCalendarBase
+
+// Export internal component and types for advanced usage
+export { OneCalendarInternal, type OneCalendarInternalProps }

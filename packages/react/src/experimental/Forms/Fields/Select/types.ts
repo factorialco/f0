@@ -1,5 +1,6 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import { INPUTFIELD_SIZES } from "@/ui/InputField"
 
 export type SelectItemObject<T, R = unknown> = {
   type?: "item"
@@ -15,3 +16,5 @@ export type SelectItemObject<T, R = unknown> = {
 export type SelectItemProps<T, R = unknown> =
   | SelectItemObject<T, R>
   | { type: "separator" }
+
+export const selectSizes = INPUTFIELD_SIZES
