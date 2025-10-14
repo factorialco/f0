@@ -8,7 +8,7 @@ import {
   InternalAvatarProps,
 } from "@/ui/Avatar"
 import { forwardRef, useMemo } from "react"
-import { F0Icon } from "../../../F0Icon"
+import { F0Icon, F0IconProps } from "../../../F0Icon"
 import { AvatarSize, avatarSizes, BaseAvatarProps, sizesMapping } from "./types"
 import {
   getAvatarColor,
@@ -19,6 +19,15 @@ import {
 } from "./utils"
 
 const DEFAULT_SIZE = "md"
+
+const iconSize: Record<AvatarSize, F0IconProps["size"]> = {
+  xs: "xs",
+  sm: "xs",
+  md: "md",
+  lg: "md",
+  xl: "lg",
+  "2xl": "lg",
+}
 
 export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
   (
@@ -127,7 +136,11 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
               }
             >
               {icon ? (
-                <F0Icon icon={icon.icon} color={icon.color} />
+                <F0Icon
+                  icon={icon.icon}
+                  color={icon.color}
+                  size={iconSize[mappedSize]}
+                />
               ) : (
                 <>
                   {!flag ? (

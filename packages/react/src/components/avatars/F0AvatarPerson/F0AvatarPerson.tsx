@@ -1,4 +1,4 @@
-import { Person } from "@/icons/app"
+import { PersonNegative } from "@/icons/app"
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarPersonProps } from "./types"
 
@@ -22,7 +22,9 @@ export const F0AvatarPerson = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
-      icon={terminated ? { icon: Person, color: "secondary" } : undefined}
+      icon={
+        terminated ? { icon: PersonNegative, color: "secondary" } : undefined
+      }
     />
   )
 }
