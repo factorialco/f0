@@ -1,7 +1,0 @@
-export { AssistantMessage } from "./AssistantMessage"
-export { ChatButton } from "./ChatButton"
-export { ChatHeader } from "./ChatHeader"
-export { ChatTextarea } from "./ChatTextarea"
-export { SidebarWindow as ChatWindow } from "./ChatWindow"
-export { MessagesContainer } from "./MessagesContainer"
-export { UserMessage } from "./UserMessage"
