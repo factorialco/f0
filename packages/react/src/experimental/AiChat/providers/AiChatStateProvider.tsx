@@ -20,8 +20,8 @@ export interface AiChatState {
   agent?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  onThumbsUp?: (message: AIMessage, threadId: string) => void
+  onThumbsDown?: (message: AIMessage, threadId: string) => void
 }
 
 type AiChatProviderReturnValue = {
@@ -52,8 +52,8 @@ type AiChatProviderReturnValue = {
   setWelcomeScreenSuggestions: React.Dispatch<
     React.SetStateAction<WelcomeScreenSuggestion[]>
   >
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  onThumbsUp?: (message: AIMessage, threadId: string) => void
+  onThumbsDown?: (message: AIMessage, threadId: string) => void
   /**
    * Clear/reset the chat conversation
    */

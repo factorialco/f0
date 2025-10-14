@@ -3,6 +3,7 @@ import {
   CopilotKitProps,
   useCopilotAction,
   useCopilotChatInternal,
+  useCopilotContext,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -31,8 +32,8 @@ export type AiChatProviderProps = {
   greeting?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  onThumbsUp?: (message: AIMessage, threadId: string) => void
+  onThumbsDown?: (message: AIMessage, threadId: string) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -102,6 +103,7 @@ const ResetFunctionInjector = () => {
 
 const AiChatCmp = () => {
   const { enabled, open, setOpen, onThumbsUp, onThumbsDown } = useAiChat()
+  const { threadId } = useCopilotContext()
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -141,12 +143,12 @@ const AiChatCmp = () => {
       }}
       onThumbsUp={(message) => {
         if (isAiMessage(message)) {
-          onThumbsUp?.(message)
+          onThumbsUp?.(message, threadId)
         }
       }}
       onThumbsDown={(message) => {
         if (isAiMessage(message)) {
-          onThumbsDown?.(message)
+          onThumbsDown?.(message, threadId)
         }
       }}
       Window={ChatWindow}
