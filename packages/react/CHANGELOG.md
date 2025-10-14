@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.236.0](https://github.com/factorialco/f0/compare/f0-react-v1.235.3...f0-react-v1.236.0) (2025-10-14)
+
+
+### Features
+
+* **ai-chat:** add welcome screen suggestions ([#2804](https://github.com/factorialco/f0/issues/2804)) ([8196519](https://github.com/factorialco/f0/commit/81965198c64a5dd562e3ed60cdbc7c0b45045adb))
+
 ## [1.235.3](https://github.com/factorialco/f0/compare/f0-react-v1.235.2...f0-react-v1.235.3) (2025-10-14)
 
 
