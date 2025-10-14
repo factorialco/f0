@@ -56,6 +56,8 @@ const AiPromotionChatCmp = () => {
   const { enabled, greeting, title, description, benefits, actions } =
     useAiPromotionChat()
 
+  console.log("AiPromotionChatCmp", { enabled, greeting, title })
+
   if (!enabled) {
     return null
   }

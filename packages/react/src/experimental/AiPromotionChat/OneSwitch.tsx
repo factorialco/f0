@@ -20,6 +20,8 @@ export const OneSwitch = ({
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
 
+  console.log("OneSwitch", { enabled })
+
   if (!enabled) {
     return null
   }

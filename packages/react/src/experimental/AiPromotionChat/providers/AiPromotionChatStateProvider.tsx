@@ -1,5 +1,7 @@
 "use client"
 
+import { IconType } from "@/components/F0Icon"
+import { ButtonVariant } from "@/ui/button"
 import {
   createContext,
   FC,
@@ -9,7 +11,23 @@ import {
   useRef,
   useState,
 } from "react"
-import { AiPromotionChatProviderProps } from ".."
+
+export interface AiPromotionChatState {
+  enabled: boolean
+  greeting?: string
+  title?: string
+  description?: string
+  benefits?: {
+    noBoldText: string
+    boldText: string
+  }[]
+  actions?: {
+    label: string
+    onClick: () => void
+    variant: ButtonVariant
+    icon?: IconType
+  }[]
+}
 
 const AiPromotionChatStateContext =
   createContext<AiPromotionChatProviderReturnValue | null>(null)
@@ -39,14 +57,14 @@ type AiPromotionChatProviderReturnValue = {
    */
   setClearFunction: (clearFn: (() => void) | null) => void
 } & Pick<
-  AiPromotionChatProviderProps,
+  AiPromotionChatState,
   "greeting" | "title" | "description" | "benefits" | "actions"
 >
 
 const DEFAULT_MINUTES_TO_RESET = 15
 
 export const AiPromotionChatStateProvider: FC<
-  PropsWithChildren<AiPromotionChatProviderProps>
+  PropsWithChildren<AiPromotionChatState>
 > = ({ children, enabled = false, ...rest }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
