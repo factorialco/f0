@@ -105,6 +105,7 @@ const ButtonInternal = forwardRef<
       mode={hideLabel ? "only" : "default"}
       aria-label={ariaLabel || props.title || label}
       title={props.title || (hideLabel ? label : undefined)}
+      compact={!!shouldHideLabel}
     >
       <div className={cn(isLoading && "invisible", "flex items-center gap-1")}>
         {icon && (
