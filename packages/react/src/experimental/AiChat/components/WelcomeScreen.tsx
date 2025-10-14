@@ -3,11 +3,10 @@ import { AnimatePresence, motion } from "motion/react"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
 import { IconType } from "@/components/F0Icon/F0Icon"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
-import { CopilotChatSuggestion } from "@copilotkit/react-ui"
 import { Message, randomId } from "@copilotkit/shared"
 import OneIcon from "../OneIcon"
 
-export type WelcomeScreenSuggestion = { icon: IconType } & CopilotChatSuggestion
+export type WelcomeScreenSuggestion = { icon: IconType; message: string }
 
 const MAX_SUGGESTIONS = 3
 
