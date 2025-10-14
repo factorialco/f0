@@ -1,25 +1,69 @@
 import { cn } from "@/lib/utils"
-import { ReactNode, forwardRef } from "react"
+import {
+  Children,
+  ReactElement,
+  ReactNode,
+  forwardRef,
+  isValidElement,
+} from "react"
+import {
+  PageLayoutBlock,
+  PageLayoutBlockComponent,
+  PageLayoutBlockProps,
+} from "./components/PageLayoutBlock"
+
+// Type for components that inherit from PageLayoutBlock
+export type PageLayoutBlockElement = ReactElement<PageLayoutBlockProps>
 
 export interface PageLayoutProps {
   children: ReactNode
-  aside: ReactNode
-  header: ReactNode
+  aside?: ReactNode
+  header?: ReactNode
   variant?: "main-aside" | "aside-main"
-  stickyAside?: boolean
 }
 
-export const PageLayout = forwardRef<HTMLDivElement, PageLayoutProps>(
+// Utility to check if a component is a valid PageLayoutBlock
+const isPageLayoutBlockComponent = (
+  child: ReactNode
+): child is PageLayoutBlockElement => {
+  return (
+    isValidElement(child) &&
+    ((child.type as unknown as PageLayoutBlockComponent)
+      ?.__isPageLayoutBlock === true ||
+      child.type === PageLayoutBlock ||
+      (typeof child.type === "function" &&
+        (child.type as { displayName?: string }).displayName ===
+          "PageLayoutBlock"))
+  )
+}
+
+// Utility to validate all children are PageLayoutBlock components
+const validatePageLayoutChildren = (children: ReactNode): void => {
+  const childArray = Children.toArray(children)
+
+  for (const child of childArray) {
+    if (!isPageLayoutBlockComponent(child)) {
+      console.warn(
+        `PageLayout: Child component must inherit from PageLayoutBlock. Found:`,
+        child
+      )
+    }
+  }
+}
+
+const PageLayoutComponent = forwardRef<HTMLDivElement, PageLayoutProps>(
   function PageLayout(
-    {
-      children: mainContent,
-      aside,
-      header,
-      variant = "main-aside",
-      stickyAside = false,
-    },
+    { children: mainContent, aside, header, variant = "main-aside" },
     ref
   ) {
+    const stickyHeader = true
+    const stickyAside = true
+
+    // Validate that all children are PageLayoutBlock components in development
+    if (process.env.NODE_ENV === "development") {
+      validatePageLayoutChildren(mainContent)
+    }
+
     return (
       <div ref={ref} className="h-full">
         <div
@@ -27,7 +71,7 @@ export const PageLayout = forwardRef<HTMLDivElement, PageLayoutProps>(
             "flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row",
             "flex-col",
             "overflow-y-auto",
-            stickyAside && "md:sticky md:top-0 md:max-h-full"
+            stickyHeader && "md:sticky md:top-0 md:max-h-full"
           )}
         >
           <main
@@ -42,7 +86,11 @@ export const PageLayout = forwardRef<HTMLDivElement, PageLayoutProps>(
               "border-t border-solid border-t-f1-border-secondary sm:border-t-0"
             )}
           >
-            {header && <header>{header}</header>}
+            {header && (
+              <header className={cn(stickyHeader && "z-30 md:sticky md:top-0")}>
+                {header}
+              </header>
+            )}
             <div className="flex-1">{mainContent}</div>
           </main>
 
@@ -62,3 +110,9 @@ export const PageLayout = forwardRef<HTMLDivElement, PageLayoutProps>(
     )
   }
 )
+
+export const PageLayout = Object.assign(PageLayoutComponent, {
+  Block: PageLayoutBlock,
+  isBlockComponent: isPageLayoutBlockComponent,
+  validateChildren: validatePageLayoutChildren,
+})
