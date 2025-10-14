@@ -1,8 +1,7 @@
-import { F0IconProps } from "@/components/F0Icon"
+import { F0IconProps, IconType } from "@/components/F0Icon"
+import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { InternalAvatarProps } from "@/ui/Avatar"
 import { ReactElement } from "react"
-import { IconType } from "../../../F0Icon"
-import { AvatarBadge } from "../../F0Avatar/types"
 
 export const avatarSizes = ["xs", "sm", "md", "lg", "xl", "2xl"] as const
 

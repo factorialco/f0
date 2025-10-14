@@ -1,4 +1,5 @@
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
+import { F0Icon, F0IconProps } from "@/components/F0Icon"
 import { Badge } from "@/experimental/Information/Badge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
@@ -8,7 +9,6 @@ import {
   InternalAvatarProps,
 } from "@/ui/Avatar"
 import { forwardRef, useMemo } from "react"
-import { F0Icon, F0IconProps } from "../../../F0Icon"
 import { AvatarSize, avatarSizes, BaseAvatarProps, sizesMapping } from "./types"
 import {
   getAvatarColor,
