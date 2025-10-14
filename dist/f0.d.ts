@@ -620,16 +620,16 @@ declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
 };
 
 declare const cardPropertyRenderers: {
-    readonly text: (args: TextCellValue) => default_2.JSX.Element;
+    readonly text: (args: TextCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
-    readonly date: (args: DateCellValue) => default_2.JSX.Element;
+    readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
-    readonly person: (args: PersonCellValue) => default_2.JSX.Element;
-    readonly company: (args: CompanyCellValue) => default_2.JSX.Element;
-    readonly team: (args: TeamCellValue) => default_2.JSX.Element;
+    readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
     readonly status: (args: StatusCellValue) => default_2.JSX.Element;
     readonly tag: (args: TagCellValue) => default_2.JSX.Element;
-    readonly avatarList: (args: AvatarListCellValue) => default_2.JSX.Element;
+    readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
     readonly tagList: (args: TagListCellValue) => default_2.JSX.Element;
     readonly alertTag: (args: AlertTagCellValue) => default_2.JSX.Element;
     readonly dotTag: (args: DotTagCellValue) => default_2.JSX.Element;
@@ -3296,22 +3296,22 @@ declare type ValueDisplayRendererDefinition = {
 }[keyof typeof valueDisplayRenderers];
 
 declare const valueDisplayRenderers: {
-    readonly text: (args: TextCellValue_2) => JSX_2.Element;
-    readonly longText: (args: LongTextCellValue) => JSX_2.Element;
+    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly longText: (args: LongTextCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
-    readonly date: (args: DateCellValue_2) => JSX_2.Element;
+    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
-    readonly avatarList: (args: AvatarListCellValue_2) => JSX_2.Element;
+    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly status: (args: StatusCellValue_2) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue_2) => JSX_2.Element;
-    readonly person: (args: PersonCellValue_2) => JSX_2.Element;
-    readonly percentage: (args: PercentageCellValue) => JSX_2.Element | null;
-    readonly company: (args: CompanyCellValue_2) => JSX_2.Element;
-    readonly team: (args: TeamCellValue_2) => JSX_2.Element;
+    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
+    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly tag: (args: TagCellValue_2) => JSX_2.Element;
     readonly dotTag: (args: DotTagCellValue_2) => JSX_2.Element;
     readonly tagList: (args: TagListCellValue_2) => JSX_2.Element;
-    readonly icon: (args: IconCellValue) => JSX_2.Element;
+    readonly icon: (args: IconCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly file: (args: FileCellValue_2) => JSX_2.Element;
     readonly folder: (args: FolderCellValue_2) => JSX_2.Element;
 };
@@ -3414,15 +3414,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

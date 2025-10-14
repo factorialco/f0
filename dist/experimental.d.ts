@@ -912,16 +912,16 @@ declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
 };
 
 declare const cardPropertyRenderers: {
-    readonly text: (args: TextCellValue_2) => default_2.JSX.Element;
+    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly date: (args: DateCellValue_2) => default_2.JSX.Element;
+    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly person: (args: PersonCellValue_2) => default_2.JSX.Element;
-    readonly company: (args: CompanyCellValue_2) => default_2.JSX.Element;
-    readonly team: (args: TeamCellValue_2) => default_2.JSX.Element;
+    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly status: (args: StatusCellValue_2) => default_2.JSX.Element;
     readonly tag: (args: TagCellValue_2) => default_2.JSX.Element;
-    readonly avatarList: (args: AvatarListCellValue_2) => default_2.JSX.Element;
+    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly tagList: (args: TagListCellValue_2) => default_2.JSX.Element;
     readonly alertTag: (args: AlertTagCellValue_2) => default_2.JSX.Element;
     readonly dotTag: (args: DotTagCellValue_2) => default_2.JSX.Element;
@@ -4225,6 +4225,8 @@ export declare type SelectProps<T extends string, R = unknown> = {
     options: SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
+export declare const selectSizes: readonly ["sm", "md"];
+
 export declare function Shortcut({ keys, variant }: ShortcutProps): JSX_2.Element | null;
 
 declare interface ShortcutProps extends VariantProps<typeof shortcutVariants> {
@@ -4899,22 +4901,22 @@ declare type ValueDisplayRendererDefinition = {
 }[keyof typeof valueDisplayRenderers];
 
 declare const valueDisplayRenderers: {
-    readonly text: (args: TextCellValue) => JSX_2.Element;
-    readonly longText: (args: LongTextCellValue) => JSX_2.Element;
+    readonly text: (args: TextCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly longText: (args: LongTextCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly date: (args: DateCellValue) => JSX_2.Element;
+    readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly avatarList: (args: AvatarListCellValue) => JSX_2.Element;
+    readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly status: (args: StatusCellValue) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue) => JSX_2.Element;
-    readonly person: (args: PersonCellValue) => JSX_2.Element;
-    readonly percentage: (args: PercentageCellValue) => JSX_2.Element | null;
-    readonly company: (args: CompanyCellValue) => JSX_2.Element;
-    readonly team: (args: TeamCellValue) => JSX_2.Element;
+    readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
+    readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly tag: (args: TagCellValue) => JSX_2.Element;
     readonly dotTag: (args: DotTagCellValue) => JSX_2.Element;
     readonly tagList: (args: TagListCellValue) => JSX_2.Element;
-    readonly icon: (args: IconCellValue) => JSX_2.Element;
+    readonly icon: (args: IconCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly file: (args: FileCellValue) => JSX_2.Element;
     readonly folder: (args: FolderCellValue) => JSX_2.Element;
 };
@@ -5179,15 +5181,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
