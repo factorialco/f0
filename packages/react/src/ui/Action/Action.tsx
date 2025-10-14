@@ -134,6 +134,7 @@ export const Action = React.forwardRef<
       target={target}
       rel={target === "_blank" ? "noopener noreferrer" : undefined}
       aria-disabled={disabled}
+      role="link"
     >
       {innerContent}
     </Link>
@@ -145,6 +146,7 @@ export const Action = React.forwardRef<
       onBlur={props.onBlur}
       ref={ref as React.Ref<HTMLButtonElement>}
       data-pressed={pressed}
+      role="button"
     >
       {innerContent}
     </button>
