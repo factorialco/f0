@@ -8,6 +8,7 @@ export type InputProps<T extends string> = Pick<
 > &
   Pick<
     InputFieldProps<T>,
+    | "required"
     | "disabled"
     | "size"
     | "onChange"
