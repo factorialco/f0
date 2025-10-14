@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.235.3](https://github.com/factorialco/f0/compare/f0-react-v1.235.2...f0-react-v1.235.3) (2025-10-14)
+
+
+### Bug Fixes
+
+* show filters badge on select when some filters are applied ([#2814](https://github.com/factorialco/f0/issues/2814)) ([828ea37](https://github.com/factorialco/f0/commit/828ea3778ecdcea2d07be55c5343b411ab2b0d34))
+
 ## [1.235.2](https://github.com/factorialco/f0/compare/f0-react-v1.235.1...f0-react-v1.235.2) (2025-10-14)
 
 
