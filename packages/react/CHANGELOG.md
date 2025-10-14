@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.235.2](https://github.com/factorialco/f0/compare/f0-react-v1.235.1...f0-react-v1.235.2) (2025-10-14)
+
+
+### Bug Fixes
+
+* missing required prop in input and select ([#2811](https://github.com/factorialco/f0/issues/2811)) ([4cdf594](https://github.com/factorialco/f0/commit/4cdf594646aea708badb1b32ef39855197639c5a))
+
 ## [1.235.1](https://github.com/factorialco/f0/compare/f0-react-v1.235.0...f0-react-v1.235.1) (2025-10-13)
 
 
