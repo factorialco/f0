@@ -49591,7 +49591,8 @@ const aMt = ["sm", "md", "lg"], MT = (e) => dz.includes(e), Gi = "group relative
       critical: "border-f1-icon-critical border-t-transparent",
       ghost: "border-f1-foreground border-t-transparent",
       promote: "border-f1-icon-promote border-t-transparent",
-      outlinePromote: "border-f1-icon-promote border-t-transparent"
+      outlinePromote: "border-f1-icon-promote border-t-transparent",
+      unstyled: ""
     }
   }
 }), N7 = Z.forwardRef((e, t) => {
@@ -49666,6 +49667,7 @@ const aMt = ["sm", "md", "lg"], MT = (e) => dz.includes(e), Gi = "group relative
     target: g,
     rel: g === "_blank" ? "noopener noreferrer" : void 0,
     "aria-disabled": c,
+    role: "link",
     children: W
   }) : l("button", {
     ...D,
@@ -49674,6 +49676,7 @@ const aMt = ["sm", "md", "lg"], MT = (e) => dz.includes(e), Gi = "group relative
     onBlur: e.onBlur,
     ref: t,
     "data-pressed": d,
+    role: "button",
     children: W
   });
   return o || s ? V("div", {
@@ -94505,102 +94508,110 @@ function jyt({ filters: e, value: t, onChange: n, isOpen: r, onOpenChange: a, hi
     const W = H1(_.type);
     return Math.max(E, (W == null ? void 0 : W.formHeight) || SO);
   }, 0), [e]), x = T1();
-  return o === "compact" ? V("div", {
-    className: "flex items-center gap-2",
-    children: [l(Ia, {
-      variant: "outline",
-      label: h.filters.label,
-      icon: uL,
-      pressed: m,
-      onClick: () => g(!m),
-      "aria-controls": m ? x : void 0,
-      hideLabel: !0,
-      compact: !0
-    }), l(zr, {
-      mode: "popLayout",
-      propagate: !1,
-      children: m && l(On.div, {
-        initial: {
-          opacity: 0
-        },
-        animate: {
-          opacity: 1
-        },
-        exit: {
-          opacity: 0
-        },
-        transition: {
-          duration: 0.1
-        },
-        className: "absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background",
-        children: V("div", {
-          className: "flex h-full flex-col transition-all",
-          children: [l("div", {
-            className: "pl-1.5 pt-1.5",
-            children: l(Dn, {
-              label: "Back",
-              icon: KF,
-              variant: "ghost",
-              size: "sm",
-              onClick: M
-            })
-          }), l("div", {
-            className: "flex flex-1",
-            children: s ? l(On.div, {
-              initial: {
-                opacity: 0
-              },
-              animate: {
-                opacity: 1
-              },
-              exit: {
-                opacity: 0
-              },
-              transition: {
-                duration: 0.2
-              },
-              className: "h-full w-full bg-f1-background",
-              children: l(kO, {
-                selectedFilterKey: s,
-                definition: e,
-                tempFilters: C,
-                onFilterChange: y,
-                isCompactMode: !0
+  if (o === "compact") {
+    const k = !!Object.values(C).length;
+    return V("div", {
+      className: "flex items-center gap-2",
+      children: [V("div", {
+        className: "relative",
+        children: [l(Ia, {
+          variant: "outline",
+          label: h.filters.label,
+          icon: uL,
+          pressed: m,
+          onClick: () => g(!m),
+          "aria-controls": m ? x : void 0,
+          hideLabel: !0
+        }), k && l("div", {
+          className: "absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold"
+        })]
+      }), l(zr, {
+        mode: "popLayout",
+        propagate: !1,
+        children: m && l(On.div, {
+          initial: {
+            opacity: 0
+          },
+          animate: {
+            opacity: 1
+          },
+          exit: {
+            opacity: 0
+          },
+          transition: {
+            duration: 0.1
+          },
+          className: "absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background",
+          children: V("div", {
+            className: "flex h-full flex-col transition-all",
+            children: [l("div", {
+              className: "pl-1.5 pt-1.5",
+              children: l(Dn, {
+                label: "Back",
+                icon: KF,
+                variant: "ghost",
+                size: "sm",
+                onClick: M
               })
-            }, "filter-content") : l(On.div, {
-              initial: {
-                opacity: 0
-              },
-              animate: {
-                opacity: 1
-              },
-              exit: {
-                opacity: 0
-              },
-              transition: {
-                duration: 0.2
-              },
-              className: "h-full w-full bg-f1-background",
-              children: l(EO, {
-                definition: e,
-                tempFilters: C,
-                selectedFilterKey: s,
-                onFilterSelect: (k) => c(k),
-                onClickApplyFilters: b,
-                isCompactMode: !0
+            }), l("div", {
+              className: "flex flex-1",
+              children: s ? l(On.div, {
+                initial: {
+                  opacity: 0
+                },
+                animate: {
+                  opacity: 1
+                },
+                exit: {
+                  opacity: 0
+                },
+                transition: {
+                  duration: 0.2
+                },
+                className: "h-full w-full bg-f1-background",
+                children: l(kO, {
+                  selectedFilterKey: s,
+                  definition: e,
+                  tempFilters: C,
+                  onFilterChange: y,
+                  isCompactMode: !0
+                })
+              }, "filter-content") : l(On.div, {
+                initial: {
+                  opacity: 0
+                },
+                animate: {
+                  opacity: 1
+                },
+                exit: {
+                  opacity: 0
+                },
+                transition: {
+                  duration: 0.2
+                },
+                className: "h-full w-full bg-f1-background",
+                children: l(EO, {
+                  definition: e,
+                  tempFilters: C,
+                  selectedFilterKey: s,
+                  onFilterSelect: (E) => c(E),
+                  onClickApplyFilters: b,
+                  isCompactMode: !0
+                })
+              }, "filter-list")
+            }), s && l("div", {
+              className: "sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2",
+              children: l(Dn, {
+                onClick: P,
+                label: h.filters.applySelection
               })
-            }, "filter-list")
-          }), s && l("div", {
-            className: "sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2",
-            children: l(Dn, {
-              onClick: P,
-              label: h.filters.applySelection
-            })
-          })]
+            })]
+          })
         })
-      })
-    })]
-  }) : l("div", {
+      })]
+    });
+  }
+  return l("div", {
     className: "flex items-center gap-2",
     children: V(_y, {
       open: m,

@@ -356,14 +356,15 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
     initialMessage?: string | string[];
-    onThumbsUp?: (message: AIMessage) => void;
-    onThumbsDown?: (message: AIMessage) => void;
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    onThumbsUp?: (message: AIMessage, threadId: string) => void;
+    onThumbsDown?: (message: AIMessage, threadId: string) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -387,8 +388,10 @@ declare type AiChatProviderReturnValue = {
      */
     initialMessage?: string | string[];
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
-    onThumbsUp?: (message: AIMessage) => void;
-    onThumbsDown?: (message: AIMessage) => void;
+    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
+    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
+    onThumbsUp?: (message: AIMessage, threadId: string) => void;
+    onThumbsDown?: (message: AIMessage, threadId: string) => void;
     /**
      * Clear/reset the chat conversation
      */
@@ -401,8 +404,9 @@ declare interface AiChatState {
     enabled: boolean;
     agent?: string;
     initialMessage?: string | string[];
-    onThumbsUp?: (message: AIMessage) => void;
-    onThumbsDown?: (message: AIMessage) => void;
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    onThumbsUp?: (message: AIMessage, threadId: string) => void;
+    onThumbsDown?: (message: AIMessage, threadId: string) => void;
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -468,7 +472,7 @@ declare const alertVariants: (props?: ({
 
 export declare function ApplicationFrame({ children, sidebar, banner, ai, }: ApplicationFrameProps): JSX_2.Element;
 
-declare interface ApplicationFrameProps {
+export declare interface ApplicationFrameProps {
     ai?: Omit<AiChatProviderProps, "children">;
     banner?: React.ReactNode;
     sidebar: React.ReactNode;
@@ -2808,7 +2812,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
+export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
 };
 
@@ -4311,7 +4315,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
     mapOptions?: never;
     searchFn?: (option: SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
     options: SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 export declare const selectSizes: readonly ["sm", "md"];
 
@@ -5098,6 +5102,11 @@ declare interface WeekdaysProps {
     daysOfTheWeek?: string[];
 }
 
+declare type WelcomeScreenSuggestion = {
+    icon: IconType;
+    message: string;
+};
+
 export declare const Widget: default_2.ForwardRefExoticComponent<WidgetProps & {
     children: ReactNode;
 } & default_2.RefAttributes<HTMLDivElement>> & {
@@ -5249,6 +5258,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
@@ -5258,8 +5276,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
 }
@@ -5267,13 +5285,4 @@ declare module "@tiptap/core" {
 
 declare namespace Calendar {
     var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
-        };
-    }
 }
