@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.236.0](https://github.com/factorialco/f0/compare/f0-react-v1.235.3...f0-react-v1.236.0) (2025-10-14)
+
+
+### Features
+
+* **ai-chat:** add welcome screen suggestions ([#2804](https://github.com/factorialco/f0/issues/2804)) ([8196519](https://github.com/factorialco/f0/commit/81965198c64a5dd562e3ed60cdbc7c0b45045adb))
+
+## [1.235.3](https://github.com/factorialco/f0/compare/f0-react-v1.235.2...f0-react-v1.235.3) (2025-10-14)
+
+
+### Bug Fixes
+
+* show filters badge on select when some filters are applied ([#2814](https://github.com/factorialco/f0/issues/2814)) ([828ea37](https://github.com/factorialco/f0/commit/828ea3778ecdcea2d07be55c5343b411ab2b0d34))
+
+## [1.235.2](https://github.com/factorialco/f0/compare/f0-react-v1.235.1...f0-react-v1.235.2) (2025-10-14)
+
+
+### Bug Fixes
+
+* missing required prop in input and select ([#2811](https://github.com/factorialco/f0/issues/2811)) ([4cdf594](https://github.com/factorialco/f0/commit/4cdf594646aea708badb1b32ef39855197639c5a))
+
 ## [1.235.1](https://github.com/factorialco/f0/compare/f0-react-v1.235.0...f0-react-v1.235.1) (2025-10-13)
 
 

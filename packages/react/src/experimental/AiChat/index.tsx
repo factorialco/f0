@@ -3,6 +3,7 @@ import {
   CopilotKitProps,
   useCopilotAction,
   useCopilotChatInternal,
+  useCopilotContext,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -19,8 +20,10 @@ import {
   ChatTextarea,
   ChatWindow,
   MessagesContainer,
+  SuggestionsList,
   UserMessage,
 } from "./components"
+import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { isAiMessage } from "./messageTypes"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
@@ -28,8 +31,9 @@ export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
   initialMessage?: string | string[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  onThumbsUp?: (message: AIMessage, threadId: string) => void
+  onThumbsDown?: (message: AIMessage, threadId: string) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -45,6 +49,7 @@ const AiChatProviderCmp = ({
   enabled = false,
   greeting,
   initialMessage,
+  welcomeScreenSuggestions,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -61,6 +66,7 @@ const AiChatProviderCmp = ({
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
+      welcomeScreenSuggestions={welcomeScreenSuggestions}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -97,6 +103,7 @@ const ResetFunctionInjector = () => {
 
 const AiChatCmp = () => {
   const { enabled, open, setOpen, onThumbsUp, onThumbsDown } = useAiChat()
+  const { threadId } = useCopilotContext()
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -136,12 +143,12 @@ const AiChatCmp = () => {
       }}
       onThumbsUp={(message) => {
         if (isAiMessage(message)) {
-          onThumbsUp?.(message)
+          onThumbsUp?.(message, threadId)
         }
       }}
       onThumbsDown={(message) => {
         if (isAiMessage(message)) {
-          onThumbsDown?.(message)
+          onThumbsDown?.(message, threadId)
         }
       }}
       Window={ChatWindow}
@@ -151,6 +158,7 @@ const AiChatCmp = () => {
       Input={ChatTextarea}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
+      RenderSuggestionsList={SuggestionsList}
     />
   )
 }

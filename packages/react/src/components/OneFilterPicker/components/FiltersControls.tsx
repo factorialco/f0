@@ -111,18 +111,24 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const id = useId()
 
   if (mode === "compact") {
+    const hasFiltersApplied = !!Object.values(localFiltersValue).length
+
     return (
       <div className="flex items-center gap-2">
-        <ButtonInternal
-          variant="outline"
-          label={i18n.filters.label}
-          icon={Filter}
-          pressed={isOpen}
-          onClick={() => onOpenChange(!isOpen)}
-          aria-controls={isOpen ? id : undefined}
-          hideLabel
-          compact
-        />
+        <div className="relative">
+          <ButtonInternal
+            variant="outline"
+            label={i18n.filters.label}
+            icon={Filter}
+            pressed={isOpen}
+            onClick={() => onOpenChange(!isOpen)}
+            aria-controls={isOpen ? id : undefined}
+            hideLabel
+          />
+          {hasFiltersApplied && (
+            <div className="absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold" />
+          )}
+        </div>
         <AnimatePresence mode="popLayout" propagate={false}>
           {isOpen && (
             <motion.div

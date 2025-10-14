@@ -103,6 +103,7 @@ export type SelectProps<T extends string, R = unknown> = {
 ) &
   Pick<
     InputFieldProps<T>,
+    | "required"
     | "loading"
     | "hideLabel"
     | "clearable"
@@ -117,7 +118,6 @@ export type SelectProps<T extends string, R = unknown> = {
     | "status"
     | "hint"
   >
-
 const SelectItem = <T extends string, R>({
   item,
 }: {
@@ -207,6 +207,7 @@ const SelectComponent = forwardRef(function Select<
     error,
     status,
     hint,
+    required,
     ...props
   }: SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -509,6 +510,7 @@ const SelectComponent = forwardRef(function Select<
             <InputField
               label={label}
               error={error}
+              required={required}
               status={status}
               hint={hint}
               icon={icon}
