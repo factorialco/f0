@@ -1,5 +1,7 @@
+import { F0IconProps } from "@/components/F0Icon"
 import { InternalAvatarProps } from "@/ui/Avatar"
 import { ReactElement } from "react"
+import { IconType } from "../../../F0Icon"
 import { AvatarBadge } from "../../F0Avatar/types"
 
 export const avatarSizes = ["xs", "sm", "md", "lg", "xl", "2xl"] as const
@@ -35,6 +37,13 @@ export type BaseAvatarProps = {
    * This is a workaround until we implement the ability to deal with images
    */
   flag?: ReactElement
+  /**
+   * Optional icon to display on the avatar. Will override the name or image if provided.
+   */
+  icon?: {
+    icon: IconType
+    color?: F0IconProps["color"]
+  }
   /**
    * The color of the avatar.
    * @default "random"

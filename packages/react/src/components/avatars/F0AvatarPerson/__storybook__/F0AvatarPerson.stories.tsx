@@ -60,6 +60,13 @@ export const WithBadgeTooltip: Story = {
   },
 }
 
+export const Terminated: Story = {
+  args: {
+    ...Default.args,
+    terminated: true,
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -104,6 +111,20 @@ export const Snapshot: Story = {
               lastName="Perez"
               src={mockImage("person", index)}
               badge={{ type: "module", module: "inbox" }}
+            />
+          ))}
+        </div>
+      </section>
+      <section>
+        <h4 className="text-lg font-semibold">Terminated</h4>
+        <div className="flex flex-row gap-2">
+          {avatarSizes.map((size) => (
+            <F0AvatarPerson
+              key={size}
+              size={size}
+              terminated
+              firstName="Juanito"
+              lastName="Perez"
             />
           ))}
         </div>

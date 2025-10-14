@@ -1,3 +1,4 @@
+import { Person } from "@/icons/app"
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarPersonProps } from "./types"
 
@@ -9,6 +10,7 @@ export const F0AvatarPerson = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  terminated,
 }: F0AvatarPersonProps) => {
   return (
     <BaseAvatar
@@ -20,6 +22,7 @@ export const F0AvatarPerson = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
+      icon={terminated ? { icon: Person, color: "secondary" } : undefined}
     />
   )
 }

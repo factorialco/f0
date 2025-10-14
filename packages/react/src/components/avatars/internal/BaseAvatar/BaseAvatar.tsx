@@ -8,6 +8,7 @@ import {
   InternalAvatarProps,
 } from "@/ui/Avatar"
 import { forwardRef, useMemo } from "react"
+import { F0Icon } from "../../../F0Icon"
 import { AvatarSize, avatarSizes, BaseAvatarProps, sizesMapping } from "./types"
 import {
   getAvatarColor,
@@ -31,6 +32,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       "aria-labelledby": ariaLabelledby,
       badge,
       flag,
+      icon,
     },
     ref
   ) => {
@@ -117,22 +119,30 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
               translate="no"
               data-a11y-color-contrast-ignore
               className={
-                src || flag
-                  ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
-                  : ""
+                icon
+                  ? "bg-f1-background-secondary"
+                  : src || flag
+                    ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
+                    : ""
               }
             >
-              {!flag ? (
-                <AvatarImage src={src} alt={initials} />
+              {icon ? (
+                <F0Icon icon={icon.icon} color={icon.color} />
               ) : (
-                <span className="absolute inset-0">{flag}</span>
+                <>
+                  {!flag ? (
+                    <AvatarImage src={src} alt={initials} />
+                  ) : (
+                    <span className="absolute inset-0">{flag}</span>
+                  )}
+                  <AvatarFallback
+                    data-a11y-color-contrast-ignore
+                    className="select-none"
+                  >
+                    {initials}
+                  </AvatarFallback>
+                </>
               )}
-              <AvatarFallback
-                data-a11y-color-contrast-ignore
-                className="select-none"
-              >
-                {initials}
-              </AvatarFallback>
             </AvatarComponent>
           </div>
 
