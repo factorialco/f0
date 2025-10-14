@@ -60,10 +60,10 @@ export const WithBadgeTooltip: Story = {
   },
 }
 
-export const Terminated: Story = {
+export const Deactivated: Story = {
   args: {
     ...Default.args,
-    terminated: true,
+    deactivated: true,
   },
 }
 
@@ -116,13 +116,13 @@ export const Snapshot: Story = {
         </div>
       </section>
       <section>
-        <h4 className="text-lg font-semibold">Terminated</h4>
+        <h4 className="text-lg font-semibold">Deactivated</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size) => (
             <F0AvatarPerson
               key={size}
               size={size}
-              terminated
+              deactivated
               firstName="Juanito"
               lastName="Perez"
             />

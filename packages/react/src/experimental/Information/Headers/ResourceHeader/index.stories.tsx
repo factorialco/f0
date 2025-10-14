@@ -505,7 +505,7 @@ export const NoDescription: Story = {
   },
 }
 
-export const TerminatedEmployee: Story = {
+export const DeactivatedEmployee: Story = {
   args: {
     ...PersonHeader.args,
     title: "John Doe",
@@ -514,7 +514,7 @@ export const TerminatedEmployee: Story = {
       type: "person",
       firstName: "John",
       lastName: "Doe",
-      terminated: true,
+      deactivated: true,
     },
   },
 }
@@ -533,7 +533,9 @@ export const Snapshot: Story = {
         />
         <ResourceHeader {...(WithDropdownAction.args as ResourceHeaderProps)} />
         <ResourceHeader {...(PersonHeader.args as ResourceHeaderProps)} />
-        <ResourceHeader {...(TerminatedEmployee.args as ResourceHeaderProps)} />
+        <ResourceHeader
+          {...(DeactivatedEmployee.args as ResourceHeaderProps)}
+        />
       </div>
     )
   },

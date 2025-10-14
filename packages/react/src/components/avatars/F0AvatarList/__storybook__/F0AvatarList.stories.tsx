@@ -37,7 +37,7 @@ const dummyPeople = [
     firstName: "Hellen",
     lastName: "Fernández",
     src: "/avatars/person04.jpg",
-    terminated: true,
+    deactivated: true,
   },
 ]
 

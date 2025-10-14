@@ -10,7 +10,7 @@ export const F0AvatarPerson = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
-  terminated,
+  deactivated,
 }: F0AvatarPersonProps) => {
   return (
     <BaseAvatar
@@ -23,7 +23,7 @@ export const F0AvatarPerson = ({
       aria-labelledby={ariaLabelledby}
       badge={badge}
       icon={
-        terminated ? { icon: PersonNegative, color: "secondary" } : undefined
+        deactivated ? { icon: PersonNegative, color: "secondary" } : undefined
       }
     />
   )
