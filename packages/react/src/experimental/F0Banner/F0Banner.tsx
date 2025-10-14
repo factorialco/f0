@@ -26,7 +26,7 @@ const bannerVariants = cva({
     },
     compact: {
       true: "gap-3 p-2 pr-10",
-      false: "p-0.5",
+      false: "flex-col gap-0 p-0.5",
     },
   },
   defaultVariants: {
@@ -37,6 +37,7 @@ const bannerVariants = cva({
 
 export interface F0BannerProps extends VariantProps<typeof bannerVariants> {
   title: string
+  description?: string
   icon?: IconType
   onClose?: () => void
   link?: BannerLinkProps
@@ -45,6 +46,7 @@ export interface F0BannerProps extends VariantProps<typeof bannerVariants> {
 
 export const F0Banner = ({
   title,
+  description,
   type,
   compact,
   icon = Placeholder,
@@ -56,7 +58,7 @@ export const F0Banner = ({
     <div
       className={cn(
         bannerVariants({ type, compact }),
-        "relative flex gap-3 @container/banner"
+        "relative flex @container/banner"
       )}
     >
       <div className="absolute right-2 top-2">
@@ -69,7 +71,12 @@ export const F0Banner = ({
           onClick={onClose}
         />
       </div>
-      <div className="flex gap-2 @md/banner:grow">
+      <div
+        className={cn(
+          "flex gap-2 @md/banner:grow",
+          !compact && "px-1.5 py-1.5"
+        )}
+      >
         {type === "default" ? (
           <F0AvatarIcon icon={icon as IconType} size="sm" />
         ) : (
@@ -77,17 +84,31 @@ export const F0Banner = ({
         )}
         <div className="flex flex-col">
           <p className="pt-0.5 font-medium text-f1-foreground">{title}</p>
-          <p className="text-f1-foreground-secondary">Description</p>
-          {(link || actions) && (
+          {compact && description && (
+            <p className="text-f1-foreground-secondary">{description}</p>
+          )}
+          {compact && (link || actions) && (
             <div className="mt-3 @md/banner:hidden">
               <BannerActions link={link} actions={actions} compact={compact} />
             </div>
           )}
         </div>
       </div>
-      <div className="hidden @md/banner:block">
-        <BannerActions link={link} actions={actions} compact={compact} />
-      </div>
+      {compact && (link || actions) && (
+        <div className="hidden @md/banner:block">
+          <BannerActions link={link} actions={actions} compact={compact} />
+        </div>
+      )}
+      {!compact && (description || link || actions) && (
+        <div className="rounded bg-f1-background shadow">
+          <div className="p-4">{description}</div>
+          {(link || actions) && (
+            <div className="border border-solid border-transparent border-t-f1-border-secondary px-4 py-3">
+              <BannerActions link={link} actions={actions} compact={compact} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

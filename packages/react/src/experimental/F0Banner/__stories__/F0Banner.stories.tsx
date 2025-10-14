@@ -17,6 +17,15 @@ const meta: Meta<typeof F0Banner> = {
       control: "text",
       description: "The title of the banner",
     },
+    type: {
+      control: "select",
+      options: ["default", "positive", "warning", "info", "critical"],
+      description: "The type of the banner",
+    },
+    compact: {
+      control: "boolean",
+      description: "Whether the banner is compact",
+    },
   },
 } satisfies Meta<typeof F0Banner>
 
@@ -27,6 +36,8 @@ type Story = StoryObj<typeof F0Banner>
 export const Default: Story = {
   args: {
     title: "This is a banner message",
+    description:
+      "This is a banner message that is very long and will wrap to the next line",
     type: "default",
     compact: false,
     link: {
