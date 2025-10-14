@@ -158,6 +158,7 @@ export const WithMaxLength: Story = {
   args: {
     label: "Label text here",
     maxLength: 10,
+    value: "longtext should be truncated",
   },
 }
 
