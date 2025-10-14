@@ -49742,6 +49742,7 @@ const qEe = Nt({
     mode: n ? "only" : "default",
     "aria-label": m || g.title || t,
     title: g.title || (n ? t : void 0),
+    compact: !!P,
     children: V("div", {
       className: se(M && "invisible", "flex items-center gap-1"),
       children: [o && l(xt, {
