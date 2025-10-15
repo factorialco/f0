@@ -548,10 +548,7 @@ export function useData<
     }: FetchDataParams<Filters>) => {
       try {
         // Clean up any existing subscription before creating a new one
-        if (
-          cleanup.current &&
-          paginationInfoRef.current?.type === "infinite-scroll"
-        ) {
+        if (cleanup.current && paginationInfo?.type === "pages") {
           console.warn("fetchDataAndUpdate cleanup.current")
           cleanup.current()
           cleanup.current = undefined
@@ -767,11 +764,11 @@ export function useData<
         'unsubscribe on "useData", pagination type: ',
         paginationInfoRef.current?.type ?? ""
       )
-      if (paginationInfoRef.current?.type !== "infinite-scroll") {
+      if (paginationInfo?.type === "pages") {
         cleanup.current?.()
       }
     }
-  }, [])
+  }, [paginationInfo?.type])
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 
