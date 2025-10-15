@@ -41,8 +41,9 @@
     "build:watch": "tsup --watch",
     "dev": "tsup --watch",
     "clean": "rm -rf dist",
-    "dev:storybook": "STORYBOOK_ENABLED=true expo start -c",
-    "dev:app": "STORYBOOK_ENABLED=false expo start -c",
+    "compile-css": "npx tailwindcss -i ./playground/global.css -o ./node_modules/.cache/nativewind/global.css",
+    "dev:storybook": "pnpm compile-css && STORYBOOK_ENABLED=true expo start -c",
+    "dev:app": "pnpm compile-css && STORYBOOK_ENABLED=false expo start -c",
     "type-check": "tsc --noEmit",
     "lint": "eslint -c eslint.config.mjs . --report-unused-disable-directives --max-warnings 0",
     "lint-fix": "pnpm run lint -- --fix",
@@ -55,8 +56,7 @@
     "start:storybook": "expo start --dev-client",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
-    "postinstall": "npx tailwindcss -i ./playground/global.css -o ./node_modules/.cache/nativewind/global.css"
+    "web": "expo start --web"
   },
   "keywords": [
     "factorial",
