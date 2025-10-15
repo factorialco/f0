@@ -28,18 +28,12 @@ export function ThemeToggle() {
         >
           {isDarkColorScheme ? (
             <MoonStar
-              // @ts-expect-error - iconWithClassName adds className support
               className="text-foreground"
               size={23}
               strokeWidth={1.25}
             />
           ) : (
-            <Sun
-              // @ts-expect-error - iconWithClassName adds className support
-              className="text-foreground"
-              size={24}
-              strokeWidth={1.25}
-            />
+            <Sun className="text-foreground" size={24} strokeWidth={1.25} />
           )}
         </View>
       )}
