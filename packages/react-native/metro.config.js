@@ -5,7 +5,8 @@ const withStorybook = require("@storybook/react-native/metro/withStorybook");
 
 const config = getDefaultConfig(__dirname);
 
-config.resolver.disableHierarchicalLookup = true;
+// Since SDK 52+, Expo automatically configures Metro for monorepos
+// No need for manual watchFolders, resolver.nodeModulesPath, or disableHierarchicalLookup
 
 // First apply NativeWind
 const nativeWindConfig = withNativeWind(config, {
