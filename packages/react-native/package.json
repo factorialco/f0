@@ -132,6 +132,7 @@
     "react": "^19.0.0",
     "react-native": "^0.79.5",
     "react-native-svg": "^15.11.2",
+    "react-native-worklets": "^0.6.1",
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "tsup": "^8.3.5",

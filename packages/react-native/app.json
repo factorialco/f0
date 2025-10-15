@@ -22,7 +22,8 @@
       }
     },
     "web": {
-      "favicon": "./playground/assets/favicon.png"
+      "favicon": "./playground/assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": ["expo-router"],
     "experiments": {
