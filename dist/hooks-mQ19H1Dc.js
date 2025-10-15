@@ -95799,10 +95799,10 @@ function EMt(e, {
             }
           });
         };
-        console.warn(
+        console.warn("Fetching data with cursor:", ve), console.warn("appendMode:", U), console.warn(
           "fetchDataAndUpdate paginationInfo?.type",
           W == null ? void 0 : W.type
-        ), b.current && (W == null ? void 0 : W.type) === "pages" && (console.warn("fetchDataAndUpdate cleanup.current"), b.current(), b.current = void 0);
+        ), b.current && (console.warn("fetchDataAndUpdate cleanup.current"), b.current(), b.current = void 0);
         const Le = [
           ...c ? [
             {
@@ -95882,7 +95882,7 @@ function EMt(e, {
         }
         if (ee.hasMore) {
           const fe = ee.cursor;
-          G(!0), m(!0), X.current = !0, ue({
+          console.warn("Loading more with cursor:", fe), G(!0), m(!0), X.current = !0, ue({
             filters: Y,
             appendMode: !0,
             cursor: fe,
