@@ -79,7 +79,11 @@ export const categorizeItemsByDate = <
     } else if (diffDays <= 30) {
       groups.lastMonth.push(item);
     } else {
-      groups[date.getFullYear()].push(item);
+      const year = date.getFullYear();
+      if (!groups[year]) {
+        groups[year] = [];
+      }
+      groups[year].push(item);
     }
   });
 

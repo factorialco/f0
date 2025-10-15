@@ -11,3 +11,5 @@ expo-env.d.ts
 
 # Distribution
 dist/
+package/
+*.tgz

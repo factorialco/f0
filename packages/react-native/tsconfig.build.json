@@ -23,6 +23,7 @@
   "exclude": [
     "**/*.test.*",
     "**/*.spec.*",
+    "**/*.stories.*",
     "**/__tests__/**",
     "**/__snapshots__/**",
     "**/node_modules/**",

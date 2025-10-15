@@ -1,9 +1,35 @@
 import { defineConfig } from "tsup";
+import { glob } from "glob";
+
+// Get all source files excluding tests, stories, and snapshots
+const getEntryPoints = () => {
+  const patterns = [
+    "src/index.ts",
+    "src/components/**/*.tsx",
+    "src/components/**/*.ts",
+    "src/icons/**/*.ts",
+    "src/icons/**/*.tsx",
+    "src/lib/**/*.ts",
+    "src/lib/**/*.tsx",
+    "src/ui/**/*.tsx",
+  ];
+
+  const ignore = [
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/__tests__/**",
+    "**/__snapshots__/**",
+  ];
+
+  return glob.sync(patterns, { ignore });
+};
 
 export default defineConfig({
-  entry: {
-    index: "src/index.ts",
-  },
+  entry: getEntryPoints(),
   format: ["esm", "cjs"],
   dts: true,
   splitting: false,

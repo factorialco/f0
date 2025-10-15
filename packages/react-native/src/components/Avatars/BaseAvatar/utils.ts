@@ -17,7 +17,7 @@ export function getInitials(
   const isSmall = size === "xsmall" || size === "small";
   const minChar = isFile ? 3 : 2;
 
-  if (isSmall) return (nameArray[0][0] ?? "").toUpperCase();
+  if (isSmall) return (nameArray[0]?.[0] ?? "").toUpperCase();
   if (!Array.isArray(name)) return name.slice(0, minChar).toUpperCase();
 
   return nameArray
