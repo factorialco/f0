@@ -49678,7 +49678,7 @@ const aMt = ["sm", "md", "lg"], MT = (e) => dz.includes(e), Gi = "group relative
     "data-pressed": d,
     role: "button",
     children: N
-  }), D = L ? l(P1, {
+  }), D = !c && L ? l(P1, {
     description: L,
     children: I
   }) : I;
@@ -51002,6 +51002,7 @@ const lMt = ({ items: e, onClick: t, value: n, ...r }) => {
       icon: c.icon
     }),
     className: "rounded-r-none after:rounded-r-none",
+    tooltip: r.tooltip,
     appendOutside: l(CB, {
       items: d,
       align: "end",
