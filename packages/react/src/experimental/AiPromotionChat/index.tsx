@@ -57,12 +57,12 @@ const AiPromotionChatCmp = () => {
     <div className="p-1 pl-0">
       <ChatWindow clickOutsideToClose hitEscapeToClose shortcut="">
         <div className="flex-1 content-center overflow-y-auto">
-          <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-4 p-6">
             {/* Header with icon and greeting */}
             <div className="flex flex-col gap-4">
               <OneIcon spin size="lg" />
               <div>
-                <p className="text-sm text-f1-foreground-secondary">
+                <p className="text-lg font-medium text-f1-foreground-secondary">
                   {greeting}
                 </p>
                 <h1 className="text-2xl font-semibold text-f1-foreground">
@@ -73,18 +73,18 @@ const AiPromotionChatCmp = () => {
 
             {/* Description */}
             {description && (
-              <p className="text-sm text-f1-foreground-secondary">
+              <p className="text-md text-f1-foreground-secondary">
                 {description}
               </p>
             )}
 
             {/* Benefits list */}
             {benefits?.length && (
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col gap-2">
                 {benefits.map((benefit, index) => (
                   <li key={index} className="flex items-center gap-1">
                     <Check className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm text-f1-foreground">
+                    <span className="text-md text-f1-foreground">
                       {benefit.noBoldText} <strong>{benefit.boldText}</strong>
                     </span>
                   </li>
@@ -94,7 +94,7 @@ const AiPromotionChatCmp = () => {
 
             {/* Actions */}
             {actions?.length && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 pt-2">
                 {actions.map((action, index) => (
                   <CustomButton key={index} action={action} />
                 ))}

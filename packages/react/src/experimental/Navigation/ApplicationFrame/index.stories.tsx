@@ -55,7 +55,7 @@ const meta: Meta<typeof ApplicationFrame> = {
           label: "Learn more",
           onClick: () => {},
           buttonType: "internal",
-          buttonVariant: "outline",
+          buttonVariant: "ghost",
           isLoading: false,
           icon: ExternalLink,
         },
