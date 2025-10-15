@@ -27,7 +27,7 @@ type DialogProps = {
     title: string
     description: string
   }
-  actions: {
+  actions?: {
     primary: PrimaryAction
     secondary: SecondaryAction
   }
