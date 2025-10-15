@@ -2,9 +2,9 @@ import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
+import { F0Button } from "@/components/F0Button"
+import { useI18n } from "@/lib/providers/i18n"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Button } from "../../components/Actions/Button"
-import { useI18n } from "../../lib/providers/i18n"
 import {
   GranularityDefinition,
   GranularityDefinitionKey,
@@ -284,21 +284,19 @@ const OneCalendarInternal = ({
             {getHeaderLabel()}
           </div>
           <div className="flex items-center gap-2">
-            <Button
+            <F0Button
               onClick={() => navigate(-1)}
               variant="outline"
               label={i18n.navigation.previous}
               hideLabel
-              round
               icon={ChevronLeft}
               size="sm"
             />
-            <Button
+            <F0Button
               onClick={() => navigate(1)}
               variant="outline"
               label={i18n.navigation.next}
               hideLabel
-              round
               icon={ChevronRight}
               size="sm"
             />

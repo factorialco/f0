@@ -1,8 +1,9 @@
-import { Button } from "@/components/Actions/Button"
-import { OneDropdownButton } from "@/components/Actions/OneDropdownButton"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"
 import { useState } from "react"
-import { Dropdown } from "../../../Navigation/Dropdown"
 import {
   PrimaryActionsDefinition,
   SecondaryActionsItemDefinition,
@@ -40,7 +41,7 @@ export const CollectionActions = ({
   return (
     <div className="flex flex-row-reverse items-center gap-2">
       {primaryActionsButtons.length === 1 ? (
-        <Button
+        <F0Button
           size="md"
           onClick={primaryActionsButtons[0].onClick}
           icon={primaryActionsButtons[0].icon}
@@ -49,7 +50,7 @@ export const CollectionActions = ({
         />
       ) : (
         primaryActionsButtons.length > 1 && (
-          <OneDropdownButton
+          <F0ButtonDropdown
             size="md"
             items={primaryActionsButtons.map((action, index) => ({
               label: action.label,
@@ -64,7 +65,7 @@ export const CollectionActions = ({
       )}
 
       {secondaryActionsButtons?.map((action) => (
-        <Button
+        <F0Button
           size="md"
           key={action.label}
           onClick={action.onClick}
@@ -82,7 +83,7 @@ export const CollectionActions = ({
           open={open}
           onOpenChange={onOpenChange}
         >
-          <Button
+          <ButtonInternal
             variant="outline"
             icon={Ellipsis}
             label="Actions"

@@ -21,7 +21,7 @@ import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/Da
 import { MotionGlobalConfig } from "motion"
 MotionGlobalConfig.skipAnimations = true
 
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+const TestProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataCollectionStorageProvider
       handler={{
@@ -41,7 +41,7 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
 const zeroRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper">
-): RenderResult => render(ui, { wrapper: AllTheProviders, ...options })
+): RenderResult => render(ui, { wrapper: TestProviders, ...options })
 
 type RendererableContainer = ReactDOMClient.Container
 type HydrateableContainer = Parameters<
@@ -58,6 +58,6 @@ const zeroRenderHook = <
   render: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> | undefined
 ): RenderHookResult<Result, Props> =>
-  renderHook(render, { wrapper: AllTheProviders, ...options })
+  renderHook(render, { wrapper: TestProviders, ...options })
 
-export { userEvent, zeroRender, zeroRenderHook }
+export { TestProviders, userEvent, zeroRender, zeroRenderHook }

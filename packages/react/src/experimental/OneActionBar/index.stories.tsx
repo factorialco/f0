@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import {
   Delete,
@@ -177,7 +177,7 @@ export const NoSelectedItems: Story = {
 
     return (
       <div className="relative flex h-full w-full items-center justify-center">
-        <Button
+        <F0Button
           variant="outline"
           onClick={() => setOpen(!open)}
           label={open ? "Hide ActionBar" : "Show ActionBar"}

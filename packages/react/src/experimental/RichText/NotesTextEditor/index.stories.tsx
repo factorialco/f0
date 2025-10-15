@@ -254,7 +254,7 @@ export const Default: Story = {
       {
         type: "text",
         content: "Metadata",
-        label: "Meta",
+        label: "Metadata",
       },
     ],
   },

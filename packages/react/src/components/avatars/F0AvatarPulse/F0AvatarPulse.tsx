@@ -1,4 +1,4 @@
-import { Button as ActionButton } from "@/components/Actions/Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import {
   FaceNegative,
@@ -10,7 +10,7 @@ import {
 } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
-import { Button } from "@/ui/button"
+import { Action } from "@/ui/Action"
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
 import { BaseAvatar } from "../internal/BaseAvatar"
@@ -153,22 +153,23 @@ export const F0AvatarPulse = ({
             />
             {pulse ? (
               <div className="absolute -bottom-1.5 -right-1.5 inline-flex rounded-sm bg-f1-background">
-                <Button
+                <Action
                   variant="neutral"
                   size="sm"
+                  compact
                   onClick={(event) => {
                     event.preventDefault()
                     event.stopPropagation()
                     onPulseClick()
                   }}
-                  round
                   aria-label={translations.actions.edit}
                 >
                   <F0Icon
                     icon={pulseIcon[pulse]}
                     color={pulseIconColor[pulse]}
+                    size="sm"
                   />
-                </Button>
+                </Action>
               </div>
             ) : (
               <motion.div
@@ -182,7 +183,8 @@ export const F0AvatarPulse = ({
                 }}
                 className="absolute -bottom-1.5 -right-1.5 rounded-sm bg-f1-background"
               >
-                <ActionButton
+                <ButtonInternal
+                  compact
                   label={translations.actions.add}
                   variant="neutral"
                   size="sm"

@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 
 type HighlightBannerProps = {
@@ -24,7 +24,7 @@ export const HighlightBanner = ({
         </div>
       </div>
       <div className="w-full sm:w-fit [&>div]:w-full">
-        <Button label={buttonLabel} variant="outline" onClick={onClick} />
+        <F0Button label={buttonLabel} variant="outline" onClick={onClick} />
       </div>
     </div>
   )

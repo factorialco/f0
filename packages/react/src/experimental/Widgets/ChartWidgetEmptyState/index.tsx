@@ -1,8 +1,8 @@
+import { F0Button, type F0ButtonProps } from "@/components/F0Button"
+import { IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { forwardRef } from "react"
-import { Button, ButtonProps } from "../../../components/Actions/Button"
-import { IconType } from "../../../components/F0Icon"
-import { cn } from "../../../lib/utils"
 import EmptyBarChart from "./Backgrounds/EmptyBarChart"
 import EmptyLineChart from "./Backgrounds/EmptyLineChart"
 
@@ -34,7 +34,7 @@ const BG_CLASSNAMES: Record<Type, string> = {
   "bar-chart": "from-f1-background-promote",
 }
 
-const BUTTON_VARIANT: Record<Type, ButtonProps["variant"]> = {
+const BUTTON_VARIANT: Record<Type, F0ButtonProps["variant"]> = {
   "line-chart": "default",
   "bar-chart": "promote",
 }
@@ -77,7 +77,7 @@ export const ChartWidgetEmptyState = forwardRef<HTMLDivElement, Props>(
           <div className="relative flex min-h-28 flex-1 flex-col items-start gap-5">
             <p className="flex w-3/4 text-xl font-semibold">{content}</p>
             {buttonLabel && (
-              <Button
+              <F0Button
                 label={buttonLabel}
                 icon={buttonIcon}
                 variant={buttonVariant}

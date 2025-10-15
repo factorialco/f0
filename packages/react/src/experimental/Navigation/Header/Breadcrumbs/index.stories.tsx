@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
 import { SelectItemProps } from "@/experimental/Forms/Fields/Select/types"
@@ -10,7 +11,6 @@ import {
 } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { Button } from "../../../../ui/button"
 import { Breadcrumbs, BreadcrumbsProps } from "./index"
 
 const meta: Meta<typeof Breadcrumbs> = {
@@ -324,7 +324,7 @@ export const Interactive: Story = {
     return (
       <div className="space-y-4">
         <div className="flex gap-2">
-          <Button
+          <F0Button
             onClick={handleAdd}
             disabled={
               breadcrumbs.length >=
@@ -333,19 +333,19 @@ export const Interactive: Story = {
                 : documentsBreadcrumbs.length)
             }
             variant="outline"
-          >
-            Add Breadcrumb
-          </Button>
-          <Button
+            label="Add Breadcrumb"
+          ></F0Button>
+          <F0Button
             onClick={handleRemove}
             disabled={breadcrumbs.length <= 1}
             variant="outline"
-          >
-            Remove Breadcrumb
-          </Button>
-          <Button onClick={handleSwitch} variant="outline">
-            Switch Section
-          </Button>
+            label="Remove Breadcrumb"
+          ></F0Button>
+          <F0Button
+            onClick={handleSwitch}
+            variant="outline"
+            label="Switch Section"
+          ></F0Button>
         </div>
         <div
           className="flex w-full items-center"

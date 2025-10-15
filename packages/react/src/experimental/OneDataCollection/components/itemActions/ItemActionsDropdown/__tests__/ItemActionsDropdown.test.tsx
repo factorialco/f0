@@ -1,5 +1,5 @@
 import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
-import { render, screen } from "@testing-library/react"
+import { zeroRender as render, screen } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 import { ItemActionsDropdown } from "../ItemActionsDropdown"
 
@@ -15,6 +15,7 @@ vi.mock("@/lib/utils", () => ({
 
 vi.mock("@/icons/app", () => ({
   Ellipsis: () => <div data-testid="ellipsis-icon">...</div>,
+  Windows: () => <div data-testid="windows-icon">Windows</div>,
 }))
 
 vi.mock("@/experimental/Navigation/Dropdown", () => ({

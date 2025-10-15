@@ -1,11 +1,11 @@
-import { Button } from "@/components/Actions/Button"
-import { F0Icon } from "@/components/F0Icon/F0Icon"
+import { F0Button } from "@/components/F0Button"
+import { F0Icon } from "@/components/F0Icon"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-import { cn, focusRing } from "../../../lib/utils"
 import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 import type {
   FilterTypeDefinition,
@@ -137,7 +137,7 @@ export function FilterList<Definition extends FiltersDefinition>({
         </div>
         {isCompactMode && (
           <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-            <Button
+            <F0Button
               onClick={onClickApplyFilters}
               label={i18n.filters.applyFilters}
             />

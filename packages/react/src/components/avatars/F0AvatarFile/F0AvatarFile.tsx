@@ -1,5 +1,4 @@
 import { Badge } from "@/experimental/Information/Badge"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"
 import { ElementRef, forwardRef, useMemo } from "react"
@@ -7,6 +6,7 @@ import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
 import { AvatarFileSize, FileDef } from "./types"
 import { getAvatarSize, getBadgeSize, getFileTypeInfo } from "./utils"
 
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { AvatarBadge } from "../F0Avatar/types"
 import { F0AvatarModule } from "../F0AvatarModule"
 

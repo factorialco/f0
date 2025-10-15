@@ -38,6 +38,7 @@ export const defaultTranslations = {
     thumbsDown: "Dislike",
     other: "Other actions",
     toggle: "Toggle",
+    toggle_dropdown_menu: "Toggle dropdown menu",
   },
   status: {
     selected: {

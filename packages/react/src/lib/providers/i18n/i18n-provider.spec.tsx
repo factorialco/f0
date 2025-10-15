@@ -14,6 +14,7 @@ describe("I18nProvider", () => {
     const customTranslations: TranslationsType = {
       ...defaultTranslations,
       actions: {
+        ...defaultTranslations.actions,
         add: "Add",
         edit: "Edit",
         save: "Desar",

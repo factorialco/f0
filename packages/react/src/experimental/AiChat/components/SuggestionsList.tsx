@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { RenderSuggestionsListProps } from "@copilotkit/react-ui"
 
 export const SuggestionsList = ({

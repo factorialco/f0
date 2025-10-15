@@ -8,9 +8,10 @@ import React, { ComponentProps } from "react"
 import { cn } from "../../../lib/utils"
 import { Shortcut } from "../../Information/Shortcut"
 
-type TooltipProps = {
+type TooltipInternalProps = {
   children: React.ReactNode
   shortcut?: ComponentProps<typeof Shortcut>["keys"]
+  delay?: number
 } & (
   | {
       label: string
@@ -22,15 +23,16 @@ type TooltipProps = {
     }
 )
 
-export function Tooltip({
+export function TooltipInternal({
   label,
   description,
   children,
   shortcut,
-}: TooltipProps) {
+  delay = 700,
+}: TooltipInternalProps) {
   return (
     <>
-      <TooltipProvider>
+      <TooltipProvider delayDuration={delay}>
         <TooltipPrimitive>
           <TooltipTrigger asChild className="pointer-events-auto">
             {children}
@@ -41,7 +43,9 @@ export function Tooltip({
                 {label && <p className="font-semibold">{label}</p>}
                 {shortcut && <Shortcut keys={shortcut} variant="inverse" />}
               </div>
-              {description && <p className="font-normal">{description}</p>}
+              {description && (
+                <p className="font-normal">{description.toString()}</p>
+              )}
             </div>
           </TooltipContent>
         </TooltipPrimitive>
@@ -49,3 +53,21 @@ export function Tooltip({
     </>
   )
 }
+
+const privateProps = ["delay"] as const
+
+export type TooltipProps = Omit<
+  TooltipInternalProps,
+  (typeof privateProps)[number]
+>
+
+const Tooltip = (props: TooltipProps) => {
+  const publicProps = privateProps.reduce((acc, key) => {
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as TooltipInternalProps)
+
+  return <Tooltip {...publicProps} />
+}
+
+export { Tooltip }
