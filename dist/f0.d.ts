@@ -93,6 +93,10 @@ declare type ActionButtonProps = ActionBaseProps & {
 
 declare interface ActionCommonProps {
     /**
+     * Tooltip
+     */
+    tooltip?: string | false;
+    /**
      * The variant of the action.
      */
     variant?: ActionVariant;
@@ -541,7 +545,7 @@ export declare type ButtonDropdownVariant = (typeof buttonDropdownVariants)[numb
 
 export declare const buttonDropdownVariants: readonly ["default", "outline", "neutral"];
 
-declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant" | "tooltip"> & DataAttributes & {
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
@@ -583,6 +587,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     size?: ButtonSize;
     /**
+     * @private
      * Appends a React node after the button content (for custom UI extensions).
      */
     append?: React.ReactNode;
@@ -591,9 +596,20 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     disabled?: boolean;
     /**
+     * @private
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean;
+    /**
+     * @private
+     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     */
+    noAutoTooltip?: boolean;
+    /**
+     * @private
+     * If true, the button will not automatically add a title based label
+     */
+    noTitle?: boolean;
 } & ({
     /**
      * The URL to navigate to when the button is clicked.
@@ -1242,6 +1258,7 @@ export declare const defaultTranslations: {
         readonly thumbsDown: "Dislike";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
+        readonly toggle_dropdown_menu: "Toggle dropdown menu";
     };
     readonly status: {
         readonly selected: {
@@ -2587,7 +2604,7 @@ export declare const PrivacyModeProvider: React_2.FC<{
     children: ReactNode;
 }>;
 
-declare const privateProps: readonly ["append", "className", "pressed", "compact"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip"];
 
 declare const privateProps_2: readonly ["forceVerticalMetadata", "disableOverlayLink"];
 

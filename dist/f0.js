@@ -1,7 +1,7 @@
-import { c as ve, P as G, a as b, f as be, g as j, C as v, B as xe, b as Ce, L as ye, d as we, V as Ne, A as Pe, e as Se, h as H, i as Le, j as M, k as U, l as J, m as Fe, n as Y, S as X, o as K, p as De, O as ke, q as Q, r as Me, s as Te, F as Z, t as Be, u as Ie, v as Re, D as Oe, w as $e, x as Ee, y as _e, z as ee, E as w, U as ae, G as Ve, H as je, I as z, J as ze, K as se, M as Ae, N as qe, Q as We, R as Ge, T as He, W as Ue, X as Je, Y as Ye, Z as Xe, _ as Ke, $ as Qe, a0 as Ze } from "./hooks-DhzxXTM7.js";
-import { aD as as, aF as ss, aO as rs, a1 as ts, a2 as os, a3 as ls, a4 as ns, a5 as is, a6 as ds, a7 as cs, a8 as us, aa as fs, ab as ms, ac as hs, ad as ps, ae as gs, af as vs, aK as bs, ag as xs, ai as Cs, aj as ys, ak as ws, al as Ns, ao as Ps, ap as Ss, aq as Ls, ar as Fs, at as Ds, ah as ks, as as Ms, an as Ts, aL as Bs, aE as Is, ay as Rs, aB as Os, ax as $s, aP as Es, aw as _s, av as Vs, a9 as js, am as zs, au as As, az as qs, aG as Ws, aH as Gs, aI as Hs, aQ as Us, aA as Js, aJ as Ys, aN as Xs, aC as Ks, aM as Qs } from "./hooks-DhzxXTM7.js";
+import { c as ve, P as G, a as b, f as be, g as j, C as v, B as xe, b as Ce, L as ye, d as we, V as Ne, A as Pe, e as Se, h as H, i as Le, j as M, k as U, l as J, m as Fe, n as Y, S as X, o as K, p as De, O as ke, q as Q, r as Me, s as Te, F as Z, t as Be, u as Ie, v as Re, D as Oe, w as $e, x as _e, y as Ee, z as ee, E as w, U as ae, G as Ve, H as je, I as z, J as ze, K as se, M as Ae, N as qe, Q as We, R as Ge, T as He, W as Ue, X as Je, Y as Ye, Z as Xe, _ as Ke, $ as Qe, a0 as Ze } from "./hooks-BezOTbMR.js";
+import { aD as as, aF as ss, aO as rs, a1 as ts, a2 as os, a3 as ls, a4 as ns, a5 as is, a6 as ds, a7 as cs, a8 as us, aa as fs, ab as ms, ac as hs, ad as ps, ae as gs, af as vs, aK as bs, ag as xs, ai as Cs, aj as ys, ak as ws, al as Ns, ao as Ps, ap as Ss, aq as Ls, ar as Fs, at as Ds, ah as ks, as as Ms, an as Ts, aL as Bs, aE as Is, ay as Rs, aB as Os, ax as $s, aP as _s, aw as Es, av as Vs, a9 as js, am as zs, au as As, az as qs, aG as Ws, aH as Gs, aI as Hs, aQ as Us, aA as Js, aJ as Ys, aN as Xs, aC as Ks, aM as Qs } from "./hooks-BezOTbMR.js";
 import { jsx as e, jsxs as c, Fragment as $ } from "react/jsx-runtime";
-import * as E from "react";
+import * as _ from "react";
 import ea, { useState as g, forwardRef as B, useRef as re, useImperativeHandle as aa, Children as sa, useEffect as te, createContext as ra } from "react";
 const ka = {
   approvals: {
@@ -42,7 +42,8 @@ const ka = {
     thumbsUp: "Like",
     thumbsDown: "Dislike",
     other: "Other actions",
-    toggle: "Toggle"
+    toggle: "Toggle",
+    toggle_dropdown_menu: "Toggle dropdown menu"
   },
   status: {
     selected: {
@@ -211,7 +212,7 @@ const ka = {
   "file",
   "flag"
 ];
-var _ = "Progress", V = 100, [ta, Ta] = ve(_), [oa, la] = ta(_), oe = E.forwardRef(
+var E = "Progress", V = 100, [ta, Ta] = ve(E), [oa, la] = ta(E), oe = _.forwardRef(
   (a, s) => {
     const {
       __scopeProgress: r,
@@ -241,8 +242,8 @@ var _ = "Progress", V = 100, [ta, Ta] = ve(_), [oa, la] = ta(_), oe = E.forwardR
     ) });
   }
 );
-oe.displayName = _;
-var le = "ProgressIndicator", ne = E.forwardRef(
+oe.displayName = E;
+var le = "ProgressIndicator", ne = _.forwardRef(
   (a, s) => {
     const { __scopeProgress: r, ...o } = a, t = la(le, r);
     return /* @__PURE__ */ e(
@@ -285,7 +286,7 @@ function da(a, s) {
 Defaulting to \`null\`.`;
 }
 var de = oe, ca = ne;
-const ce = E.forwardRef(({ className: a, value: s, ...r }, o) => e(de, {
+const ce = _.forwardRef(({ className: a, value: s, ...r }, o) => e(de, {
   ref: o,
   className: b("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", a),
   ...r,
@@ -349,13 +350,13 @@ const ua = ({ value: a, max: s = 100, label: r, color: o }, t) => {
     type: "info"
   },
   we
-), Ea = v(
+), _a = v(
   {
     name: "VerticalBarChart",
     type: "info"
   },
   Ne
-), _a = v(
+), Ea = v(
   {
     name: "ProgressBarChart",
     type: "info"
@@ -585,13 +586,13 @@ function Ca({ isOpen: a, onClose: s, title: r, children: o, module: t, portalCon
       container: i,
       children: [c("div", {
         className: "flex flex-row items-center justify-between px-4 py-4",
-        children: [c(Ee, {
+        children: [c(_e, {
           className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground",
           children: [t && e(Z, {
             module: t,
             size: "lg"
           }), r]
-        }), e(_e, {
+        }), e(Ee, {
           variant: "outline",
           icon: ee,
           onClick: s,
@@ -936,7 +937,7 @@ export {
   Ms as ProductCard,
   Ya as ProductModal,
   ya as ProductWidget,
-  _a as ProgressBarChart,
+  Ea as ProgressBarChart,
   Ha as StandardLayout,
   Ts as TagCounter,
   Ua as TwoColumnLayout,
@@ -944,7 +945,7 @@ export {
   wa as UpsellingBanner,
   se as UpsellingButton,
   Xa as UpsellingPopover,
-  Ea as VerticalBarChart,
+  _a as VerticalBarChart,
   Ma as avatarVariants,
   Bs as buildTranslations,
   Aa as buttonDropdownSizes,
@@ -959,8 +960,8 @@ export {
   De as experimental,
   Os as getAnimationVariants,
   $s as getDataSourcePaginationType,
-  Es as getEmojiLabel,
-  _s as isInfiniteScrollPagination,
+  _s as getEmojiLabel,
+  Es as isInfiniteScrollPagination,
   Vs as isPageBasedPagination,
   Wa as linkVariants,
   js as modules,
