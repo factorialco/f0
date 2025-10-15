@@ -1,8 +1,8 @@
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { OverflowList } from "@/ui/OverflowList"
 import { AvatarVariant, F0Avatar } from "../F0Avatar"
 import { MaxCounter } from "./components/MaxCounter"
 
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useMemo } from "react"
 import { AvatarListSize, avatarListSizes, F0AvatarListProps } from "./types"
 import { getAvatarDisplayName } from "./utils"

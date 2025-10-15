@@ -1,4 +1,4 @@
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -154,12 +154,13 @@ export const Action = React.forwardRef<
     </button>
   )
 
-  const element =
-    !disabled && tooltip ? (
-      <Tooltip description={tooltip}>{mainElement}</Tooltip>
-    ) : (
-      mainElement
-    )
+  const element = tooltip ? (
+    <TooltipInternal description={tooltip.toString()} delay={1000}>
+      {mainElement}
+    </TooltipInternal>
+  ) : (
+    mainElement
+  )
 
   if (prependOutside || appendOutside) {
     return (

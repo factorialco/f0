@@ -1,10 +1,10 @@
 import { F0Button } from "@/components/F0Button"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Tooltip } from "./index"
+import { TooltipInternal } from "./index"
 
-const meta: Meta<typeof Tooltip> = {
+const meta: Meta<typeof TooltipInternal> = {
   title: "Tooltip",
-  component: Tooltip,
+  component: TooltipInternal,
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story) => (
@@ -15,7 +15,7 @@ const meta: Meta<typeof Tooltip> = {
 
 export default meta
 
-type Story = StoryObj<typeof Tooltip>
+type Story = StoryObj<typeof TooltipInternal>
 
 export const Basic: Story = {
   args: {
