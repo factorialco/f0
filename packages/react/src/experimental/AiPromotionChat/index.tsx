@@ -1,10 +1,8 @@
 import { Check } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 
-import { ButtonInternal } from "@/components/Actions/Button/internal"
-import { ButtonVariant } from "@/ui/button"
-import { IconType } from "../../components/F0Icon"
 import { ChatTextarea, ChatWindow } from "./components"
+import { ActionProps, CustomButton } from "./components/CustomButton"
 import OneIcon from "./OneIcon"
 import {
   AiPromotionChatStateProvider,
@@ -20,12 +18,7 @@ export type AiPromotionChatProviderProps = {
     noBoldText: string
     boldText: string
   }[]
-  actions?: {
-    label: string
-    onClick: () => void
-    variant: ButtonVariant
-    icon?: IconType
-  }[]
+  actions?: ActionProps[]
   children: React.ReactNode
 }
 
@@ -55,8 +48,6 @@ const AiPromotionChatProviderCmp = ({
 const AiPromotionChatCmp = () => {
   const { enabled, greeting, title, description, benefits, actions } =
     useAiPromotionChat()
-
-  console.log("AiPromotionChatCmp", { enabled, greeting, title })
 
   if (!enabled) {
     return null
@@ -105,13 +96,7 @@ const AiPromotionChatCmp = () => {
             {actions?.length && (
               <div className="flex flex-col gap-3">
                 {actions.map((action, index) => (
-                  <ButtonInternal
-                    key={index}
-                    label={action.label || ""}
-                    onClick={action.onClick}
-                    variant={action.variant}
-                    icon={action.icon}
-                  />
+                  <CustomButton key={index} action={action} />
                 ))}
               </div>
             )}

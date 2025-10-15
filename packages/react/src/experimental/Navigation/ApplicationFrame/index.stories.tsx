@@ -48,12 +48,15 @@ const meta: Meta<typeof ApplicationFrame> = {
         {
           label: "Join the waitlist",
           onClick: () => {},
-          variant: "promote",
+          buttonType: "gradient",
+          isLoading: false,
         },
         {
           label: "Learn more",
           onClick: () => {},
-          variant: "ghost",
+          buttonType: "internal",
+          buttonVariant: "outline",
+          isLoading: false,
           icon: ExternalLink,
         },
       ],

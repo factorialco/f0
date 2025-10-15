@@ -1,7 +1,5 @@
 "use client"
 
-import { IconType } from "@/components/F0Icon"
-import { ButtonVariant } from "@/ui/button"
 import {
   createContext,
   FC,
@@ -11,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { ActionProps } from "../components/CustomButton"
 
 export interface AiPromotionChatState {
   enabled: boolean
@@ -21,12 +20,7 @@ export interface AiPromotionChatState {
     noBoldText: string
     boldText: string
   }[]
-  actions?: {
-    label: string
-    onClick: () => void
-    variant: ButtonVariant
-    icon?: IconType
-  }[]
+  actions?: ActionProps[]
 }
 
 const AiPromotionChatStateContext =
