@@ -552,7 +552,7 @@ export function useData<
           cleanup.current &&
           paginationInfoRef.current?.type === "infinite-scroll"
         ) {
-          console.log("fetchDataAndUpdate cleanup.current")
+          console.warn("fetchDataAndUpdate cleanup.current")
           cleanup.current()
           cleanup.current = undefined
         }
@@ -763,7 +763,7 @@ export function useData<
 
   useEffect(() => {
     return () => {
-      console.log(
+      console.warn(
         'unsubscribe on "useData", pagination type: ',
         paginationInfoRef.current?.type ?? ""
       )
