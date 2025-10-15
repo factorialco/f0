@@ -1,0 +1,30 @@
+import Svg, { Path } from 'react-native-svg';
+import { forwardRef } from 'react';
+import { jsx } from 'react/jsx-runtime';
+
+// src/icons/modules/Finance.tsx
+var SvgFinance = (props, ref) => /* @__PURE__ */ jsx(
+  Svg,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsx(
+      Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M9.2 2.899a.933.933 0 0 0-.897 1.19l.708 2.478c-.641.36-1.507 1.031-2.27 2.257C5.767 10.384 5 12.776 5 16.432c0 1.157.43 2.301 1.15 3.165.723.87 1.786 1.504 3.05 1.504h5.6c1.264 0 2.327-.635 3.05-1.504A5 5 0 0 0 19 16.432c0-3.656-.768-6.048-1.74-7.608-.764-1.226-1.63-1.898-2.27-2.257l.707-2.478a.933.933 0 0 0-.897-1.19zm3.963 3.267.4-1.4h-3.126l.4 1.4zM12.115 9.5c.479 0 .867.388.867.866v.263c.483.185 1.044.515 1.015 1.107-.025.507-.4.857-.864.816-.176 0-.323-.104-.482-.217-.187-.134-.391-.28-.68-.28-.45 0-.62.191-.62.553 0 .433.529.614 1.144.824.856.293 1.88.643 1.88 1.81 0 .958-.49 1.68-1.393 2.061v.33a.866.866 0 1 1-1.733 0v-.228a2.66 2.66 0 0 1-1.31-.819.866.866 0 0 1 1.304-1.14l.028.031c.125.146.342.4.7.4.262 0 .627-.208.627-.551 0-.409-.468-.535-1.033-.687-.856-.232-1.935-.523-1.935-1.953a2.22 2.22 0 0 1 1.62-2.135v-.185c0-.478.387-.866.865-.866",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef = forwardRef(SvgFinance);
+var Finance_default = ForwardRef;
+
+export { Finance_default as default };
+//# sourceMappingURL=Finance.mjs.map
+//# sourceMappingURL=Finance.mjs.map

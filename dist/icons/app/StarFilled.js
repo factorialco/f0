@@ -1,0 +1,34 @@
+'use strict';
+
+var Svg = require('react-native-svg');
+var react = require('react');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
+
+var Svg__default = /*#__PURE__*/_interopDefault(Svg);
+
+// src/icons/app/StarFilled.tsx
+var SvgStarFilled = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M11.55 4.457c.284-.143.616-.143.9 0 .238.118.369.323.437.44.072.124.147.283.224.446l1.624 3.453 3.624.555c.17.026.34.052.477.087s.366.105.545.302c.206.23.298.537.26.836-.031.255-.17.443-.26.553s-.211.235-.335.362l-2.638 2.695.623 3.813c.03.18.058.354.069.497.01.14.018.374-.1.602-.141.272-.399.475-.712.536a1.05 1.05 0 0 1-.623-.091 6 6 0 0 1-.433-.224L12 17.536l-3.232 1.783a6 6 0 0 1-.434.224 1.05 1.05 0 0 1-.622.091A1.02 1.02 0 0 1 7 19.098a1.1 1.1 0 0 1-.1-.602c.01-.143.04-.317.069-.497l.623-3.813-2.638-2.695a6 6 0 0 1-.336-.362 1.1 1.1 0 0 1-.26-.553c-.037-.3.054-.607.261-.836a1.06 1.06 0 0 1 .545-.302c.137-.035.307-.06.477-.087l.025-.003 3.599-.552 1.614-3.431.01-.022c.077-.163.152-.322.224-.446.068-.117.199-.322.437-.44"
+      }
+    )
+  }
+);
+var ForwardRef = react.forwardRef(SvgStarFilled);
+var StarFilled_default = ForwardRef;
+
+module.exports = StarFilled_default;
+//# sourceMappingURL=StarFilled.js.map
+//# sourceMappingURL=StarFilled.js.map

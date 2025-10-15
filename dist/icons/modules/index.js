@@ -1,0 +1,832 @@
+'use strict';
+
+var Svg = require('react-native-svg');
+var react = require('react');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
+
+var Svg__default = /*#__PURE__*/_interopDefault(Svg);
+
+// src/icons/modules/Benefits.tsx
+var SvgBenefits = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M6.25 6.5A3.25 3.25 0 0 1 12 4.423 3.25 3.25 0 1 1 16.577 9h.756c.62 0 .93 0 1.185.068a2 2 0 0 1 1.414 1.414c.068.255.068.565.068 1.185 0 .31 0 .465-.034.592a1 1 0 0 1-.707.707c-.127.034-.282.034-.592.034H5.333c-.31 0-.465 0-.592-.034a1 1 0 0 1-.707-.707C4 12.132 4 11.977 4 11.667c0-.62 0-.93.068-1.185a2 2 0 0 1 1.414-1.414C5.737 9 6.047 9 6.667 9h.756A3.24 3.24 0 0 1 6.25 6.5M9.5 4.75c.966 0 1.75.784 1.75 1.75v1.75H9.5a1.75 1.75 0 1 1 0-3.5m5 3.5h-1.75V6.5a1.75 1.75 0 1 1 1.75 1.75",
+          clipRule: "evenodd"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M5 14.5a.5.5 0 0 1 .5-.5H11a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H8a3 3 0 0 1-3-3zM12.5 14.5a.5.5 0 0 1 .5-.5h5.5a.5.5 0 0 1 .5.5V17a3 3 0 0 1-3 3h-3a.5.5 0 0 1-.5-.5z"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef = react.forwardRef(SvgBenefits);
+var Benefits_default = ForwardRef;
+var SvgCalendar = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M10 4a1 1 0 1 0-2 0v1h-.5A3.5 3.5 0 0 0 4 8.5v9A3.5 3.5 0 0 0 7.5 21h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 5H16V4a1 1 0 1 0-2 0v1h-4zm-2.4 6h8.8c.56 0 .84 0 1.054.109a1 1 0 0 1 .437.437C18 10.76 18 11.04 18 11.6v4.2c0 1.12 0 1.68-.218 2.108a2 2 0 0 1-.874.874C16.48 19 15.92 19 14.8 19H9.2c-1.12 0-1.68 0-2.108-.218a2 2 0 0 1-.874-.874C6 17.48 6 16.92 6 15.8v-4.2c0-.56 0-.84.109-1.054a1 1 0 0 1 .437-.437C6.76 10 7.04 10 7.6 10",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef2 = react.forwardRef(SvgCalendar);
+var Calendar_default = ForwardRef2;
+var SvgCards = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M3.022 8.125h17.956c-.032-.655-.11-1.106-.305-1.487a3 3 0 0 0-1.311-1.311C18.72 5 17.88 5 16.2 5H7.8c-1.68 0-2.52 0-3.162.327a3 3 0 0 0-1.311 1.311c-.194.381-.273.832-.305 1.487"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M21 9.875H3V14.2c0 1.68 0 2.52.327 3.162a3 3 0 0 0 1.311 1.311C5.28 19 6.12 19 7.8 19h8.4c1.68 0 2.52 0 3.162-.327a3 3 0 0 0 1.311-1.311C21 16.72 21 15.88 21 14.2zM13.125 15c0-.483.392-.875.875-.875h3a.875.875 0 0 1 0 1.75h-3a.875.875 0 0 1-.875-.875",
+          clipRule: "evenodd"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef3 = react.forwardRef(SvgCards);
+var Cards_default = ForwardRef3;
+var SvgClockIn = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-7-3a1 1 0 1 0-2 0v2.465a2 2 0 0 0 .89 1.664l2.555 1.703a1 1 0 0 0 1.11-1.664L13 11.465z",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef4 = react.forwardRef(SvgClockIn);
+var ClockIn_default = ForwardRef4;
+var SvgDiscover = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M11.715 3.332c.18-.09.39-.09.57 0a.66.66 0 0 1 .27.263c.03.051.06.112.08.157l.005.01.413.878.914.14.011.002c.047.007.114.017.172.032a.65.65 0 0 1 .33.191.65.65 0 0 1 .162.518.66.66 0 0 1-.151.336 2 2 0 0 1-.119.128l-.008.009-.675.69.16.98.002.011c.008.05.02.116.024.175a.642.642 0 0 1-.514.696.65.65 0 0 1-.385-.05 2 2 0 0 1-.156-.079l-.01-.005-.81-.447-.81.447-.01.005a2 2 0 0 1-.156.08.65.65 0 0 1-.385.049.64.64 0 0 1-.514-.696c.005-.059.016-.125.024-.175l.002-.011.16-.98-.675-.69-.008-.009c-.034-.034-.082-.083-.119-.128a.66.66 0 0 1-.15-.336.65.65 0 0 1 .161-.518.65.65 0 0 1 .33-.191c.058-.015.125-.025.172-.032l.011-.002.914-.14.413-.877.005-.01c.02-.046.05-.107.08-.158a.66.66 0 0 1 .27-.263M5.362 6.509c.18-.09.39-.09.57 0a.66.66 0 0 1 .27.263c.03.05.06.112.08.157l.005.01.413.878.914.14.011.002c.047.007.114.017.172.031a.65.65 0 0 1 .33.192.65.65 0 0 1 .162.517.66.66 0 0 1-.15.336c-.038.046-.085.094-.12.129l-.008.008-.675.69.16.98.002.012c.008.05.02.116.024.175a.642.642 0 0 1-.514.696.65.65 0 0 1-.385-.05 2 2 0 0 1-.156-.08l-.01-.005-.81-.447-.81.447-.01.005a2 2 0 0 1-.156.08.65.65 0 0 1-.385.05.64.64 0 0 1-.514-.697 2 2 0 0 1 .026-.186l.16-.98-.675-.69-.008-.008a2 2 0 0 1-.119-.129.66.66 0 0 1-.15-.336.65.65 0 0 1 .161-.517.65.65 0 0 1 .33-.192 2 2 0 0 1 .183-.033l.914-.14.413-.878.005-.01c.02-.045.05-.106.08-.157a.66.66 0 0 1 .27-.263M12 10.147c.585 0 1.059.474 1.059 1.059v8.47a1.059 1.059 0 0 1-2.118 0v-8.47c0-.585.474-1.059 1.059-1.059M4.643 14.048a1.06 1.06 0 0 1 1.339-.67c1.46.486 3.9 2.634 3.9 6.299a1.059 1.059 0 0 1-2.117 0c0-2.689-1.795-4.07-2.453-4.29a1.06 1.06 0 0 1-.67-1.34M19.357 14.048a1.06 1.06 0 0 0-1.339-.67c-1.46.486-3.9 2.634-3.9 6.299a1.059 1.059 0 0 0 2.117 0c0-2.689 1.795-4.07 2.453-4.29.555-.185.854-.785.67-1.34",
+          clipRule: "evenodd"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M18.638 6.509a.64.64 0 0 0-.57 0 .66.66 0 0 0-.27.263c-.03.05-.06.112-.08.157l-.005.01-.413.878-.914.14-.011.002a2 2 0 0 0-.172.031.65.65 0 0 0-.33.192.65.65 0 0 0-.162.517.66.66 0 0 0 .15.336c.038.046.085.094.12.129l.008.008.675.69-.16.98-.002.012c-.008.05-.02.116-.024.175a.642.642 0 0 0 .514.696.65.65 0 0 0 .385-.05c.054-.024.114-.056.156-.08l.01-.005.81-.447.81.447.01.005c.042.024.102.056.156.08.05.022.2.085.385.05a.64.64 0 0 0 .514-.697 2 2 0 0 0-.024-.174l-.002-.012-.16-.98.675-.69.008-.008c.034-.035.082-.083.119-.129a.66.66 0 0 0 .15-.336.65.65 0 0 0-.161-.517.65.65 0 0 0-.33-.192 2 2 0 0 0-.172-.031l-.011-.002-.914-.14-.413-.878-.005-.01a2 2 0 0 0-.08-.157.66.66 0 0 0-.27-.263"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef5 = react.forwardRef(SvgDiscover);
+var Discover_default = ForwardRef5;
+var SvgDocuments = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M5.7 3.85A2.7 2.7 0 0 0 3 6.55v9a3.6 3.6 0 0 0 3.6 3.6h10.8a3.6 3.6 0 0 0 3.6-3.6v-5.4a3.6 3.6 0 0 0-3.6-3.6h-4.243a.257.257 0 0 1-.257-.257 2.443 2.443 0 0 0-2.443-2.443z"
+      }
+    )
+  }
+);
+var ForwardRef6 = react.forwardRef(SvgDocuments);
+var Documents_default = ForwardRef6;
+var SvgEngagement = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M7.2 4.03A3.2 3.2 0 0 0 4 7.23v6.4a3.2 3.2 0 0 0 3.2 3.2v2.234c0 1.069 1.293 1.604 2.049.848l2.848-2.848a.8.8 0 0 1 .566-.235H16.8a3.2 3.2 0 0 0 3.2-3.2v-6.4a3.2 3.2 0 0 0-3.2-3.2zm1.349 6.953q.4.747 1.097 1.44c.779.696 1.21 1.047 1.956 1.515h.002c.126.07.262.122.398.122s.27-.052.394-.122q.174-.096.357-.216v-.001a10.7 10.7 0 0 0 1.605-1.299 6 6 0 0 0 1.093-1.439q.406-.757.408-1.543.001-.578-.189-1.063a2.5 2.5 0 0 0-.525-.824 2.3 2.3 0 0 0-.763-.528c-.177-.094-.545-.187-.907-.195-.623-.013-1.22.251-1.474.557a2 2 0 0 0-.465-.33c-.286-.15-.626-.22-1.007-.22q-.476 0-.908.189-.428.186-.762.527-.335.348-.525.823v.001q-.191.485-.19 1.063c0 .524.138 1.04.405 1.543",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef7 = react.forwardRef(SvgEngagement);
+var Engagement_default = ForwardRef7;
+var SvgFinance = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M9.2 2.899a.933.933 0 0 0-.897 1.19l.708 2.478c-.641.36-1.507 1.031-2.27 2.257C5.767 10.384 5 12.776 5 16.432c0 1.157.43 2.301 1.15 3.165.723.87 1.786 1.504 3.05 1.504h5.6c1.264 0 2.327-.635 3.05-1.504A5 5 0 0 0 19 16.432c0-3.656-.768-6.048-1.74-7.608-.764-1.226-1.63-1.898-2.27-2.257l.707-2.478a.933.933 0 0 0-.897-1.19zm3.963 3.267.4-1.4h-3.126l.4 1.4zM12.115 9.5c.479 0 .867.388.867.866v.263c.483.185 1.044.515 1.015 1.107-.025.507-.4.857-.864.816-.176 0-.323-.104-.482-.217-.187-.134-.391-.28-.68-.28-.45 0-.62.191-.62.553 0 .433.529.614 1.144.824.856.293 1.88.643 1.88 1.81 0 .958-.49 1.68-1.393 2.061v.33a.866.866 0 1 1-1.733 0v-.228a2.66 2.66 0 0 1-1.31-.819.866.866 0 0 1 1.304-1.14l.028.031c.125.146.342.4.7.4.262 0 .627-.208.627-.551 0-.409-.468-.535-1.033-.687-.856-.232-1.935-.523-1.935-1.953a2.22 2.22 0 0 1 1.62-2.135v-.185c0-.478.387-.866.865-.866",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef8 = react.forwardRef(SvgFinance);
+var Finance_default = ForwardRef8;
+var SvgGoals = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M5.9 3a.9.9 0 0 1 .9.9v.357c.655-.202 1.537-.357 2.7-.357 1.62 0 2.48.571 3.2 1.051l.003.002c.628.42 1.12.747 2.197.747 1.249 0 2.033-.208 2.478-.386.223-.089.365-.172.44-.222l.066-.048A.9.9 0 0 1 19.4 5.7v7.984c0 .027.004.172-.041.33a1.1 1.1 0 0 1-.403.577l-.005.003c-.46.347-1.658 1.006-4.051 1.006-1.62 0-2.48-.571-3.2-1.051l-.003-.002c-.628-.42-1.12-.747-2.197-.747-1.249 0-2.034.208-2.478.386q-.129.051-.222.098V20.1a.9.9 0 1 1-1.8 0V3.9a.9.9 0 0 1 .9-.9"
+      }
+    )
+  }
+);
+var ForwardRef9 = react.forwardRef(SvgGoals);
+var Goals_default = ForwardRef9;
+var SvgHome = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+      }
+    )
+  }
+);
+var ForwardRef10 = react.forwardRef(SvgHome);
+var Home_default = ForwardRef10;
+var SvgHub = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(Svg.G, { fill: "currentColor", filter: "url(#Hub_svg__a)", children: /* @__PURE__ */ jsxRuntime.jsx(Svg.Path, { d: "M4.5 7.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0M4.5 15A1.5 1.5 0 0 1 6 13.5h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 9 19.5H6A1.5 1.5 0 0 1 4.5 18zM13.5 6A1.5 1.5 0 0 1 15 4.5h3A1.5 1.5 0 0 1 19.5 6v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 13.5 9zM13.5 15a1.5 1.5 0 0 1 1.5-1.5h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5z" }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(Svg.Defs, {})
+    ]
+  }
+);
+var ForwardRef11 = react.forwardRef(SvgHub);
+var Hub_default = ForwardRef11;
+var SvgInbox = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M5.004 6.749A4 4 0 0 1 8.31 5h6.993a4 4 0 0 1 3.094 1.465l2.377 2.901A1 1 0 0 1 21 10v5a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-5a1 1 0 0 1 .173-.563zM8.31 7a2 2 0 0 0-1.653.874L5.891 9h1.088c1.367 0 2.533.988 2.757 2.336a.795.795 0 0 0 .784.664h2.96c.388 0 .72-.281.783-.664A2.795 2.795 0 0 1 17.02 9h.868L16.85 7.733A2 2 0 0 0 15.303 7z"
+      }
+    )
+  }
+);
+var ForwardRef12 = react.forwardRef(SvgInbox);
+var Inbox_default = ForwardRef12;
+var SvgKudos = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "m11.895 5.955.105.082.105-.082C12.747 5.465 13.72 5 15.062 5c1.434 0 2.676.702 3.539 1.677C19.46 7.648 20 8.95 20 10.286c0 1.338-.542 2.608-1.253 3.711-.716 1.111-1.654 2.13-2.563 2.982a27.5 27.5 0 0 1-3.623 2.85l-.018.011-.006.003-.002.002a1 1 0 0 1-1.07 0L12 19c-.535.845-.536.844-.536.844h-.001l-.006-.004-.018-.012a12 12 0 0 1-.3-.198 27.48 27.48 0 0 1-3.323-2.65c-.91-.854-1.847-1.872-2.563-2.983C4.543 12.894 4 11.624 4 10.286 4 7.143 6.655 5 8.938 5c1.34 0 2.315.465 2.957.955"
+      }
+    )
+  }
+);
+var ForwardRef13 = react.forwardRef(SvgKudos);
+var Kudos_default = ForwardRef13;
+var SvgMyDocuments = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M3 6.55a2.7 2.7 0 0 1 2.7-2.7h4.757A2.443 2.443 0 0 1 12.9 6.293c0 .142.115.257.257.257H17.4a3.6 3.6 0 0 1 3.6 3.6v5.4a3.6 3.6 0 0 1-3.6 3.6H6.6a3.6 3.6 0 0 1-3.6-3.6zm11.118 4.394a2.144 2.144 0 1 1-4.289 0 2.144 2.144 0 0 1 4.289 0m-2.145 2.919c-1.203 0-2.264.567-3.081 1.21-.847.668-.284 1.827.795 1.827h4.573c1.079 0 1.642-1.159.795-1.826-.817-.644-1.878-1.211-3.081-1.211",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef14 = react.forwardRef(SvgMyDocuments);
+var MyDocuments_default = ForwardRef14;
+var SvgOrganization = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M14.506 8.99c0 .647-.124 1.265-.35 1.833a3.403 3.403 0 1 0-.978-5.21 4.94 4.94 0 0 1 1.328 3.376M12.22 13.814c1.028-.62 2.23-1.075 3.545-1.075 2.173 0 4.037 1.239 5.32 2.422.89.818.246 2.116-.962 2.116h-3.19a2.6 2.6 0 0 0-.65-.916c-1.013-.933-2.4-1.965-4.064-2.547M13.356 8.99a3.81 3.81 0 1 1-7.621 0 3.81 3.81 0 0 1 7.621 0M9.545 14.494c-2.433 0-4.52 1.387-5.958 2.712-.995.916-.275 2.37 1.078 2.37h9.761c1.353 0 2.073-1.454 1.078-2.37-1.438-1.325-3.525-2.712-5.959-2.712"
+      }
+    )
+  }
+);
+var ForwardRef15 = react.forwardRef(SvgOrganization);
+var Organization_default = ForwardRef15;
+var SvgOverviews = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M11 12.2a.8.8 0 0 0 .8.8H17c.552 0 1.008.45.93.997A7.001 7.001 0 0 1 4 13a7 7 0 0 1 6.003-6.93c.547-.078.997.378.997.93z"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M14 4c0-.552.45-1.007.997-.93a7 7 0 0 1 5.933 5.933c.078.547-.378.997-.93.997h-5.5a.5.5 0 0 1-.5-.5z"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef16 = react.forwardRef(SvgOverviews);
+var Overviews_default = ForwardRef16;
+var SvgPayroll = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M6.046 4.51A3.046 3.046 0 0 0 3 7.556v6.092a3.046 3.046 0 0 0 3.046 3.045h9.137a3.046 3.046 0 0 0 3.046-3.046V7.557a3.046 3.046 0 0 0-3.046-3.046zm4.569 2.284c.42 0 .761.341.761.762h.761a.761.761 0 0 1 0 1.523h-1.903a.38.38 0 0 0 0 .761h.761a1.904 1.904 0 0 1 .381 3.77v.038a.761.761 0 0 1-1.523 0h-.761a.761.761 0 1 1 0-1.523h1.903a.38.38 0 0 0 0-.762h-.761a1.904 1.904 0 0 1-.38-3.77v-.037c0-.42.34-.762.76-.762",
+          clipRule: "evenodd"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M21 9.586a.761.761 0 1 0-1.523 0v4.57a3.807 3.807 0 0 1-3.807 3.806H8.055a.761.761 0 1 0 0 1.523h7.615a5.33 5.33 0 0 0 5.33-5.33z"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef17 = react.forwardRef(SvgPayroll);
+var Payroll_default = ForwardRef17;
+var SvgPerformance = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M15.333 8.667a1.333 1.333 0 0 1 0-2.667h5.334C21.403 6 22 6.597 22 7.333v5.334a1.333 1.333 0 0 1-2.667 0v-2.115l-4.991 4.992a7 7 0 0 1-.374.355 2 2 0 0 1-.683.394 2 2 0 0 1-1.236 0c-.31-.101-.535-.268-.683-.394-.128-.109-.262-.243-.375-.355l-2.324-2.325-4.39 4.39a1.333 1.333 0 0 1-1.886-1.885l4.6-4.601c.113-.112.247-.246.375-.355.148-.126.372-.293.683-.394.401-.13.834-.13 1.236 0 .31.1.535.268.683.394.128.108.262.243.374.355l2.325 2.325 4.78-4.781z"
+      }
+    )
+  }
+);
+var ForwardRef18 = react.forwardRef(SvgPerformance);
+var Performance_default = ForwardRef18;
+var SvgProfile = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M12 12.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9M4.965 17.702C6.663 16.138 9.127 14.5 12 14.5s5.337 1.638 7.035 3.202c1.175 1.082.325 2.798-1.272 2.798H6.237c-1.597 0-2.447-1.716-1.272-2.798"
+      }
+    )
+  }
+);
+var ForwardRef19 = react.forwardRef(SvgProfile);
+var Profile_default = ForwardRef19;
+var SvgProjects = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M8 6a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3h1a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4zm-3 7v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3h-5v.75c0 .69-.56 1.25-1.25 1.25h-1.5c-.69 0-1.25-.56-1.25-1.25V13zm5-7h4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1m2 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef20 = react.forwardRef(SvgProjects);
+var Projects_default = ForwardRef20;
+var SvgRecruitment = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M11.579 3.5a7.579 7.579 0 1 0 4.73 13.5l2.253 2.253a.842.842 0 0 0 1.191-1.19L17.5 15.81A7.579 7.579 0 0 0 11.578 3.5m2.32 5.65a2.15 2.15 0 1 1-4.298 0 2.15 2.15 0 0 1 4.298 0m-2.149 2.924c-1.206 0-2.27.569-3.09 1.215-.848.668-.283 1.83.798 1.83h4.584c1.081 0 1.646-1.162.797-1.83-.82-.646-1.883-1.215-3.089-1.215",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef21 = react.forwardRef(SvgRecruitment);
+var Recruitment_default = ForwardRef21;
+var SvgReports = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M12 2.85c.36 0 .65.292.65.65v.85H20a.65.65 0 0 1 0 1.3h-.35V12A3.65 3.65 0 0 1 16 15.65h-2.43l3.89 3.89a.651.651 0 0 1-.92.92l-3.89-3.89V20a.651.651 0 0 1-1.3 0v-3.43l-3.89 3.89a.651.651 0 0 1-.92-.92l3.891-3.89h-2.43A3.65 3.65 0 0 1 4.35 12V5.65H4a.65.65 0 1 1 0-1.3h7.35V3.5a.65.65 0 0 1 .65-.65m3.96 5.69a.65.65 0 0 0-.817-.083l-.103.083L13 10.58l-1.54-1.54a.65.65 0 0 0-.817-.083l-.103.083-2 2a.65.65 0 0 0 .92.92L11 10.42l1.54 1.54a.65.65 0 0 0 .92 0l2.5-2.5.083-.102a.65.65 0 0 0-.083-.818",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef22 = react.forwardRef(SvgReports);
+var Reports_default = ForwardRef22;
+var SvgSales = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "m5.172 14.086.171.171 5-5 1.75 1.75a1.768 1.768 0 0 0 2.5-2.5L11.964 5.88a3 3 0 0 0-4.242 0l-2.55 2.55a4 4 0 0 0 0 5.657"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M13.987 6.063a2.83 2.83 0 0 1 2.856.694l1.672 1.672a4 4 0 0 1 0 5.656l-4.258 4.258a2 2 0 0 1-2.828 0l-.586-.586-.086.086a2 2 0 0 1-2.828 0c-.323-.323-.857-.29-1.305-.2a1.41 1.41 0 0 1-1.28-.386l-.25-.25a1.77 1.77 0 0 1-.467-1.667c.504.335 1.19.281 1.635-.164l4.081-4.08.831.83.115.11a3.068 3.068 0 0 0 4.333-4.333l-.11-.115z"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "m14.593 8.507.121.134a1.768 1.768 0 0 1-2.62 2.366l-1.75-1.75 2.5-2.5z"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef23 = react.forwardRef(SvgSales);
+var Sales_default = ForwardRef23;
+var SvgSettings = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M9.752 4.372c1.038-1.662 3.458-1.662 4.496 0l.74 1.185c.238.38.65.619 1.098.634l1.396.048c1.958.068 3.168 2.164 2.248 3.894l-.656 1.233a1.35 1.35 0 0 0 0 1.268l.656 1.233c.92 1.73-.29 3.826-2.248 3.893l-1.396.049a1.35 1.35 0 0 0-1.098.634l-.74 1.185c-1.038 1.662-3.458 1.662-4.496 0l-.74-1.185a1.35 1.35 0 0 0-1.098-.634l-1.396-.049c-1.958-.067-3.168-2.163-2.248-3.893l.656-1.233a1.35 1.35 0 0 0 0-1.268l-.656-1.233c-.92-1.73.29-3.826 2.248-3.894l1.396-.048a1.35 1.35 0 0 0 1.098-.634zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef24 = react.forwardRef(SvgSettings);
+var Settings_default = ForwardRef24;
+var SvgShifts = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M5.65 5A3.65 3.65 0 0 0 2 8.65V15a3.65 3.65 0 0 0 3.65 3.65h6.98a5.8 5.8 0 0 1 7.02-8.538V8.65A3.65 3.65 0 0 0 16 5zM5 9.65A.65.65 0 0 1 5.65 9h4a.65.65 0 1 1 0 1.3h-4A.65.65 0 0 1 5 9.65M5 14a.65.65 0 0 1 .65-.65h2a.65.65 0 1 1 0 1.3h-2A.65.65 0 0 1 5 14",
+          clipRule: "evenodd"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M17.5 11a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9m0 2.35a.65.65 0 0 1 .65.65v1.054c0 .061.03.118.082.152l1.128.753a.65.65 0 0 1-.72 1.082l-1.13-.753a1.48 1.48 0 0 1-.66-1.234V14a.65.65 0 0 1 .65-.65",
+          clipRule: "evenodd"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef25 = react.forwardRef(SvgShifts);
+var Shifts_default = ForwardRef25;
+var SvgSocial = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M12 4.35A7.65 7.65 0 1 1 12 19.65 7.65 7.65 0 0 1 12 4.35m3.184 9.104a.876.876 0 0 0-1.23-.137 3.13 3.13 0 0 1-3.907 0 .876.876 0 0 0-1.094 1.366 4.88 4.88 0 0 0 6.094 0 .876.876 0 0 0 .137-1.23M10 9.125a.875.875 0 0 0-.875.875v1a.875.875 0 0 0 1.75 0v-1A.875.875 0 0 0 10 9.125m4 0a.875.875 0 0 0-.875.875v1a.875.875 0 0 0 1.75 0v-1A.875.875 0 0 0 14 9.125",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef26 = react.forwardRef(SvgSocial);
+var Social_default = ForwardRef26;
+var SvgSoftware = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M3 7.5a3.6 3.6 0 0 1 3.6-3.6h10.8A3.6 3.6 0 0 1 21 7.5v5.4a3.6 3.6 0 0 1-3.6 3.6h-1.8v1.8h.9a.9.9 0 1 1 0 1.8h-9a.9.9 0 0 1 0-1.8h.9v-1.8H6.6A3.6 3.6 0 0 1 3 12.9zm3.6 7.2h10.8a1.8 1.8 0 0 0 1.8-1.8V7.5a1.8 1.8 0 0 0-1.8-1.8H6.6a1.8 1.8 0 0 0-1.8 1.8v5.4a1.8 1.8 0 0 0 1.8 1.8"
+      }
+    )
+  }
+);
+var ForwardRef27 = react.forwardRef(SvgSoftware);
+var Software_default = ForwardRef27;
+var SvgSpaces = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M10.446 3.948a3.2 3.2 0 0 1 3.108 0l4.8 2.667A3.2 3.2 0 0 1 20 9.412v5.176a3.2 3.2 0 0 1-1.646 2.797l-4.8 2.667a3.2 3.2 0 0 1-3.108 0l-4.8-2.667A3.2 3.2 0 0 1 4 14.588V9.412a3.2 3.2 0 0 1 1.646-2.797zm2.331 1.399a1.6 1.6 0 0 0-1.554 0L6.447 8 12 11.085 17.553 8zm5.622 4.013L12.8 12.47v6.17l1.6-.889v-3.236a1.6 1.6 0 0 1 .823-1.399l.388-.215a.8.8 0 0 1 1.189.699v2.818l.777-.431a1.6 1.6 0 0 0 .823-1.4V9.36",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef28 = react.forwardRef(SvgSpaces);
+var Spaces_default = ForwardRef28;
+var SvgSpending = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M6.667 4.889A2.667 2.667 0 0 0 4 7.6v7.956a3.555 3.555 0 0 0 3.556 3.555h8.889A3.555 3.555 0 0 0 20 15.555V12a3.56 3.56 0 0 0-2.667-3.443V7.556a2.667 2.667 0 0 0-2.667-2.667zm-.889 2.692a.89.89 0 0 0 .889.864h8.888v-.89a.89.89 0 0 0-.889-.888h-8a.89.89 0 0 0-.888.889zm11.555 6.197a1.333 1.333 0 1 1-2.666 0 1.333 1.333 0 0 1 2.666 0",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef29 = react.forwardRef(SvgSpending);
+var Spending_default = ForwardRef29;
+var SvgTasks = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0m11.338-2.592a.8.8 0 0 1 .054 1.13l-4 4.4a.8.8 0 0 1-1.158.028l-1.6-1.6a.8.8 0 0 1 1.132-1.132l1.006 1.007 3.436-3.78a.8.8 0 0 1 1.13-.053",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef30 = react.forwardRef(SvgTasks);
+var Tasks_default = ForwardRef30;
+var SvgTimeOff = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        fillRule: "evenodd",
+        d: "M8.907 3.573c-1.102-.007-2.253.416-2.734 1.31a.89.89 0 0 0 .089.974l1.043 1.305C4.51 7.693 3.036 9.572 3 11.328c-.01.517.41.906.888.906h1.418a4.7 4.7 0 0 0-.244 3.477.888.888 0 0 0 1.244.524l3.222-1.61-.343 4.116H7.921a.843.843 0 0 0 0 1.686h8.158a.843.843 0 0 0 0-1.686h-1.264l-.343-4.117 3.222 1.611a.888.888 0 0 0 1.244-.524 4.7 4.7 0 0 0-.244-3.477h1.418a.89.89 0 0 0 .888-.906c-.036-1.757-1.51-3.635-4.305-4.166l1.043-1.305a.89.89 0 0 0 .09-.974c-.482-.894-1.633-1.317-2.735-1.31-.98.007-2.08.338-3.093 1.123-1.013-.785-2.112-1.116-3.093-1.123m3.8 10.169L12 13.388l-.707.354-.417 5h2.248z",
+        clipRule: "evenodd"
+      }
+    )
+  }
+);
+var ForwardRef31 = react.forwardRef(SvgTimeOff);
+var TimeOff_default = ForwardRef31;
+var SvgTimeTracking = (props, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          fillRule: "evenodd",
+          d: "M8.85 2.05a.9.9 0 1 0 0 1.8h2.25v.95a8.101 8.101 0 1 0 1.8 0v-.95h2.25a.9.9 0 1 0 0-1.8zM12.9 9.7a.9.9 0 0 0-1.8 0v2.628a1.8 1.8 0 0 0 .907 1.563l2.697 1.54a.9.9 0 1 0 .893-1.562L12.9 12.328z",
+          clipRule: "evenodd"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Svg.Path,
+        {
+          fill: "currentColor",
+          d: "M6.336 5.836a.9.9 0 1 0-1.272-1.272l-1.8 1.8a.9.9 0 0 0 1.272 1.272zM18.936 4.564a.9.9 0 0 0-1.272 1.272l1.8 1.8a.9.9 0 0 0 1.272-1.272z"
+        }
+      )
+    ]
+  }
+);
+var ForwardRef32 = react.forwardRef(SvgTimeTracking);
+var TimeTracking_default = ForwardRef32;
+var SvgTrainings = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M12 6.83C10.748 6.076 9.515 5.3 8.277 5.3c-1.414 0-2.715.547-3.943 1.53A.89.89 0 0 0 4 7.524v8.373c0 .765.464 1.328.998 1.615.524.282 1.198.35 1.81.094 1.354-.569 2.815-.38 4.698.88.299.199.689.199.988 0 1.883-1.26 3.344-1.449 4.699-.88.61.256 1.285.188 1.81-.094.533-.287.997-.85.997-1.615V7.524a.89.89 0 0 0-.334-.694c-1.228-.983-2.529-1.53-3.943-1.53-1.239 0-2.471.776-3.723 1.53"
+      }
+    )
+  }
+);
+var ForwardRef33 = react.forwardRef(SvgTrainings);
+var Trainings_default = ForwardRef33;
+var SvgTreasury = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M11.77 3.054c.151-.036.309-.036.46 0l7.5 1.765a1 1 0 0 1 .77.973V8a1 1 0 0 1-1 1h-.85v7h.85a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h.85V9H4.5a1 1 0 0 1-1-1V5.792a1 1 0 0 1 .77-.973zM10.65 16h2.7V9h-2.7zm4 0h2.7V9h-2.7zm-8 0h2.7V9h-2.7z"
+      }
+    )
+  }
+);
+var ForwardRef34 = react.forwardRef(SvgTreasury);
+var Treasury_default = ForwardRef34;
+var SvgWorkflows = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        fill: "currentColor",
+        d: "M17.42 4.455a1.125 1.125 0 0 0-1.59 1.59l.329.33h-3.85A4.5 4.5 0 0 0 8.491 8.49l-.83 1.328a2.25 2.25 0 0 1-1.908 1.057H3.125a1.125 1.125 0 0 0 0 2.25h2.63c.775 0 1.496.4 1.907 1.057l.83 1.328a4.5 4.5 0 0 0 3.816 2.115h3.851l-.33.33a1.125 1.125 0 0 0 1.592 1.59l2.25-2.25c.439-.439.439-1.151 0-1.59l-2.25-2.25a1.125 1.125 0 0 0-1.591 1.59l.329.33h-3.85a2.25 2.25 0 0 1-1.909-1.057l-.83-1.328a4.5 4.5 0 0 0-.839-.99c.322-.284.606-.616.84-.99l.83-1.328a2.25 2.25 0 0 1 1.907-1.057h3.851l-.33.33a1.125 1.125 0 0 0 1.592 1.59l2.25-2.25c.439-.439.439-1.151 0-1.59z"
+      }
+    )
+  }
+);
+var ForwardRef35 = react.forwardRef(SvgWorkflows);
+var Workflows_default = ForwardRef35;
+
+exports.Benefits = Benefits_default;
+exports.Calendar = Calendar_default;
+exports.Cards = Cards_default;
+exports.ClockIn = ClockIn_default;
+exports.Discover = Discover_default;
+exports.Documents = Documents_default;
+exports.Engagement = Engagement_default;
+exports.Finance = Finance_default;
+exports.Goals = Goals_default;
+exports.Home = Home_default;
+exports.Hub = Hub_default;
+exports.Inbox = Inbox_default;
+exports.Kudos = Kudos_default;
+exports.MyDocuments = MyDocuments_default;
+exports.Organization = Organization_default;
+exports.Overviews = Overviews_default;
+exports.Payroll = Payroll_default;
+exports.Performance = Performance_default;
+exports.Profile = Profile_default;
+exports.Projects = Projects_default;
+exports.Recruitment = Recruitment_default;
+exports.Reports = Reports_default;
+exports.Sales = Sales_default;
+exports.Settings = Settings_default;
+exports.Shifts = Shifts_default;
+exports.Social = Social_default;
+exports.Software = Software_default;
+exports.Spaces = Spaces_default;
+exports.Spending = Spending_default;
+exports.Tasks = Tasks_default;
+exports.TimeOff = TimeOff_default;
+exports.TimeTracking = TimeTracking_default;
+exports.Trainings = Trainings_default;
+exports.Treasury = Treasury_default;
+exports.Workflows = Workflows_default;
+//# sourceMappingURL=index.js.map
+//# sourceMappingURL=index.js.map

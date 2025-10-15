@@ -1,0 +1,36 @@
+'use strict';
+
+var Svg = require('react-native-svg');
+var react = require('react');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
+
+var Svg__default = /*#__PURE__*/_interopDefault(Svg);
+
+// src/icons/app/HoldHeart.tsx
+var SvgHoldHeart = (props, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+  Svg__default.default,
+  {
+    fill: "none",
+    viewBox: "0 0 24 24",
+    className: props.className,
+    ref,
+    ...props,
+    children: /* @__PURE__ */ jsxRuntime.jsx(
+      Svg.Path,
+      {
+        stroke: "currentColor",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M6.027 21H8.7a.49.49 0 0 0 .442-.276c.598-1.27.853-2.514.853-3.72 0-.652-.228-1.081-.533-1.783-.194-.446-.427-.95-.587-1.207-.321-.518-.948-.68-1.411-.448s-.582.789-.332 1.289.953 1.87.287 2.307c-.418.275-.937.2-1.317-.273-.224-.28-.6-.774-.6-1.193V11c0-1-.253-2-1.269-2C3.22 9 3 10 3 11v5c0 1.51.596 2.266 2.204 4.57.187.268.495.43.823.43M17.97 21h-2.675a.49.49 0 0 1-.441-.276c-.598-1.27-.854-2.514-.854-3.72 0-.652.228-1.081.533-1.783.194-.446.428-.95.587-1.207.322-.518.948-.68 1.411-.448s.583.789.333 1.289-.954 1.87-.288 2.307c.419.275.938.2 1.317-.273.224-.28.6-.774.6-1.193V11c0-1 .253-2 1.269-2 1.015 0 1.234 1 1.234 2v5c0 1.51-.596 2.266-2.203 4.57-.188.268-.496.43-.823.43M14.261 2C16.198 2 17.5 3.764 17.5 5.41 17.5 8.745 12 12 12 12c-.098 0-5.5-3.256-5.5-6.59C6.5 3.765 7.802 2 9.739 2c1.112 0 1.84.539 2.261 1.013A2.95 2.95 0 0 1 14.261 2"
+      }
+    )
+  }
+);
+var ForwardRef = react.forwardRef(SvgHoldHeart);
+var HoldHeart_default = ForwardRef;
+
+module.exports = HoldHeart_default;
+//# sourceMappingURL=HoldHeart.js.map
+//# sourceMappingURL=HoldHeart.js.map
