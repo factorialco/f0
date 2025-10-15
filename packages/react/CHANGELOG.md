@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.236.2](https://github.com/factorialco/f0/compare/f0-react-v1.236.1...f0-react-v1.236.2) (2025-10-15)
+
+
+### Bug Fixes
+
+* **Dialog:** loading spinner size ([#2824](https://github.com/factorialco/f0/issues/2824)) ([84dd7ba](https://github.com/factorialco/f0/commit/84dd7bae1a509c1199d03e362fc6f37b0f49e913))
+
 ## [1.236.1](https://github.com/factorialco/f0/compare/f0-react-v1.236.0...f0-react-v1.236.1) (2025-10-15)
 
 
