@@ -95800,7 +95800,7 @@ function EMt(e, {
             }
           });
         };
-        b.current && ((J = Z.current) == null ? void 0 : J.type) === "infinite-scroll" && (console.log("fetchDataAndUpdate cleanup.current"), b.current(), b.current = void 0);
+        b.current && ((J = Z.current) == null ? void 0 : J.type) === "infinite-scroll" && (console.warn("fetchDataAndUpdate cleanup.current"), b.current(), b.current = void 0);
         const Ae = [
           ...c ? [
             {
@@ -95929,7 +95929,7 @@ function EMt(e, {
     ]
   ), Fe(() => () => {
     var ee, fe, me;
-    console.log(
+    console.warn(
       'unsubscribe on "useData", pagination type: ',
       ((ee = Z.current) == null ? void 0 : ee.type) ?? ""
     ), ((fe = Z.current) == null ? void 0 : fe.type) !== "infinite-scroll" && ((me = b.current) == null || me.call(b));
