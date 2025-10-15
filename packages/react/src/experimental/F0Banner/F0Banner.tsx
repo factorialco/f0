@@ -15,7 +15,7 @@ import {
 } from "./components/BannerActions"
 
 const bannerVariants = cva({
-  base: "w-full rounded-lg",
+  base: "relative flex w-full gap-3 rounded-lg p-2",
   variants: {
     type: {
       default: "bg-f1-background-tertiary",
@@ -24,23 +24,41 @@ const bannerVariants = cva({
       info: "bg-f1-background-info",
       critical: "bg-f1-background-critical",
     },
-    compact: {
-      true: "gap-3 p-2 pr-10",
-      false: "flex-col gap-0 p-0.5",
-    },
   },
   defaultVariants: {
     type: "default",
-    compact: false,
   },
 })
 
 export interface F0BannerProps extends VariantProps<typeof bannerVariants> {
+  /**
+   * The title of the banner
+   */
   title: string
+
+  /**
+   * The description of the banner
+   */
   description?: string
+
+  /**
+   * The icon of the banner. If the type is not "default", the icon will be ignored
+   */
   icon?: IconType
+
+  /**
+   * The function to close the banner
+   */
   onClose?: () => void
+
+  /**
+   * If provided, a link will be displayed below the description, or to right of the title if compact is true
+   */
   link?: BannerLinkProps
+
+  /**
+   * If provided, action buttons will be displayed below the description, or to right of the title if compact is true
+   */
   actions?: BannerButtonProps[]
 }
 
@@ -48,7 +66,6 @@ export const F0Banner = ({
   title,
   description,
   type,
-  compact,
   icon = Placeholder,
   onClose,
   link,
@@ -57,56 +74,46 @@ export const F0Banner = ({
   return (
     <div
       className={cn(
-        bannerVariants({ type, compact }),
-        "relative flex @container/banner"
+        bannerVariants({ type }),
+        "@container/banner",
+        onClose && "pr-10"
       )}
     >
-      <div className="absolute right-2 top-2">
-        <Button
-          variant="ghost"
-          icon={Cross}
-          size="sm"
-          hideLabel
-          label="Close"
-          onClick={onClose}
-        />
-      </div>
-      <div
-        className={cn(
-          "flex gap-2 @md/banner:grow",
-          !compact && "px-1.5 py-1.5"
-        )}
-      >
-        {type === "default" ? (
-          <F0AvatarIcon icon={icon as IconType} size="sm" />
-        ) : (
-          <F0AvatarAlert type={type as AlertAvatarProps["type"]} size="sm" />
-        )}
-        <div className="flex flex-col">
-          <p className="pt-0.5 font-medium text-f1-foreground">{title}</p>
-          {compact && description && (
-            <p className="text-f1-foreground-secondary">{description}</p>
-          )}
-          {compact && (link || actions) && (
-            <div className="mt-3 @md/banner:hidden">
-              <BannerActions link={link} actions={actions} compact={compact} />
-            </div>
-          )}
-        </div>
-      </div>
-      {compact && (link || actions) && (
-        <div className="hidden @md/banner:block">
-          <BannerActions link={link} actions={actions} compact={compact} />
+      {onClose && (
+        <div className="absolute right-2 top-2">
+          <Button
+            variant="ghost"
+            icon={Cross}
+            size="sm"
+            hideLabel
+            label="Close"
+            onClick={onClose}
+          />
         </div>
       )}
-      {!compact && (description || link || actions) && (
-        <div className="rounded bg-f1-background shadow">
-          <div className="p-4">{description}</div>
+      <div className="flex gap-2 @md/banner:grow">
+        <div className="shrink-0">
+          {type === "default" ? (
+            <F0AvatarIcon icon={icon as IconType} size="sm" />
+          ) : (
+            <F0AvatarAlert type={type as AlertAvatarProps["type"]} size="sm" />
+          )}
+        </div>
+        <div className="flex flex-col">
+          <p className="pt-0.5 font-medium text-f1-foreground">{title}</p>
+          {description && (
+            <p className="text-f1-foreground-secondary">{description}</p>
+          )}
           {(link || actions) && (
-            <div className="border border-solid border-transparent border-t-f1-border-secondary px-4 py-3">
-              <BannerActions link={link} actions={actions} compact={compact} />
+            <div className="mt-3 @md/banner:hidden">
+              <BannerActions link={link} actions={actions} />
             </div>
           )}
+        </div>
+      </div>
+      {(link || actions) && (
+        <div className="hidden @md/banner:block">
+          <BannerActions link={link} actions={actions} />
         </div>
       )}
     </div>

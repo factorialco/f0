@@ -14,14 +14,9 @@ export interface BannerButtonProps {
 export interface BannerActionsProps {
   link?: BannerLinkProps
   actions?: BannerButtonProps[]
-  compact?: boolean
 }
 
-export const BannerActions = ({
-  link,
-  actions,
-  compact = false,
-}: BannerActionsProps) => {
+export const BannerActions = ({ link, actions }: BannerActionsProps) => {
   return (
     <div className="flex gap-3">
       {link && (
@@ -36,7 +31,7 @@ export const BannerActions = ({
             onClick={action.onClick}
             label={action.label}
             variant="outline"
-            size={compact ? "sm" : "md"}
+            size="sm"
           />
         ))}
     </div>

@@ -1,4 +1,6 @@
+import { Button } from "@/components/Actions/Button"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 import { F0Banner } from "../F0Banner"
 
 const meta: Meta<typeof F0Banner> = {
@@ -22,10 +24,6 @@ const meta: Meta<typeof F0Banner> = {
       options: ["default", "positive", "warning", "info", "critical"],
       description: "The type of the banner",
     },
-    compact: {
-      control: "boolean",
-      description: "Whether the banner is compact",
-    },
   },
 } satisfies Meta<typeof F0Banner>
 
@@ -39,7 +37,6 @@ export const Default: Story = {
     description:
       "This is a banner message that is very long and will wrap to the next line",
     type: "default",
-    compact: false,
     link: {
       href: "/",
       target: "_blank",
@@ -59,15 +56,41 @@ export const Positive: Story = {
   args: {
     title: "This is a banner message",
     type: "positive",
-    compact: false,
   },
 }
 
 export const LongTitle: Story = {
   args: {
+    ...Default.args,
     title:
       "This is a banner message that is very long and will wrap to the next line",
-    type: "default",
-    compact: false,
+  },
+}
+
+export const WithClose: Story = {
+  args: {
+    ...Default.args,
+    onClose: () => {},
+  },
+  render: ({ ...args }) => {
+    const [isOpen, setIsOpen] = useState(true)
+
+    const toggleBanner = () => {
+      setIsOpen((prev) => !prev)
+    }
+
+    return (
+      <>
+        {isOpen && <F0Banner {...args} onClose={toggleBanner} />}
+        {!isOpen && (
+          <Button
+            label="Open"
+            onClick={toggleBanner}
+            size="sm"
+            variant="outline"
+          />
+        )}
+      </>
+    )
   },
 }
