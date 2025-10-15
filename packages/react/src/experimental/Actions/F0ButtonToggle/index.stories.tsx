@@ -35,6 +35,11 @@ const meta = {
       description:
         "The accessible label for the button. Required for accessibility.",
     },
+    hideLabel: {
+      control: "boolean",
+      description:
+        "Whether to hide the label visually. When false, the label will be displayed next to the icon. Defaults to true.",
+    },
     icon: {
       description: "Icon to display in the button. Required prop.",
     },
@@ -57,6 +62,26 @@ export const Default: Story = {
   args: {
     label: "Default Toggle",
     icon: Placeholder,
+  },
+  render: (args) => {
+    const [selected, setSelected] = useState(false)
+
+    return (
+      <F0ButtonToggle
+        {...args}
+        icon={selected ? Microphone : MicrophoneNegative}
+        selected={selected}
+        onSelectedChange={setSelected}
+      />
+    )
+  },
+}
+
+export const WithVisibleLabel: Story = {
+  args: {
+    label: "Microphone",
+    icon: Placeholder,
+    hideLabel: false,
   },
   render: (args) => {
     const [selected, setSelected] = useState(false)

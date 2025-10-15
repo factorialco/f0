@@ -26,7 +26,12 @@ import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
 import "../index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
-import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
+import {
+  actionType,
+  MetadataItemValue,
+  notesModeType,
+  NotesTextEditorHandle,
+} from "./types"
 
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
@@ -47,6 +52,9 @@ interface NotesTextEditorProps {
   actions?: actionType[]
   metadata?: MetadataItemValue[]
   withPadding?: boolean
+  notesMode?: notesModeType
+  onNotesModeChange?: (notesMode: notesModeType) => void
+  isLoadingContent?: boolean
 }
 
 const NotesTextEditorComponent = forwardRef<
@@ -64,6 +72,9 @@ const NotesTextEditorComponent = forwardRef<
     actions,
     metadata,
     withPadding = false,
+    notesMode = "manual",
+    onNotesModeChange,
+    isLoadingContent = false,
   },
   ref
 ) {
@@ -227,7 +238,12 @@ const NotesTextEditorComponent = forwardRef<
     >
       {((actions && actions.length > 0) ||
         (metadata && metadata.length > 0)) && (
-        <Header actions={actions} metadata={metadata} />
+        <Header
+          actions={actions}
+          metadata={metadata}
+          notesMode={notesMode}
+          onNotesModeChange={onNotesModeChange}
+        />
       )}
       <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
         <Toolbar
@@ -288,13 +304,23 @@ const NotesTextEditorComponent = forwardRef<
             </div>
           </DragHandle>
 
-          <EditorContent
-            editor={editor}
-            className={cn(
-              "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
-              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
-            )}
-          />
+          {isLoadingContent ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-5 w-full rounded-md" />
+              <Skeleton className="h-5 w-4/5 rounded-md" />
+              <Skeleton className="h-5 w-3/5 rounded-md" />
+              <Skeleton className="h-5 w-full rounded-md" />
+              <Skeleton className="h-5 w-1/2 rounded-md" />
+            </div>
+          ) : (
+            <EditorContent
+              editor={editor}
+              className={cn(
+                "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
+                withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
+              )}
+            />
+          )}
         </div>
       </ScrollArea>
     </div>

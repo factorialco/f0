@@ -257,6 +257,11 @@ export const Default: Story = {
         label: "Meta",
       },
     ],
+    notesMode: "manual",
+    onNotesModeChange: (notesMode) => {
+      console.log("Notes mode changed:", notesMode)
+    },
+    isLoadingContent: false,
   },
 }
 

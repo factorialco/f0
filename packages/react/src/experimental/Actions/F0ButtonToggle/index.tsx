@@ -11,6 +11,7 @@ interface F0ButtonToggleProps {
   disabled?: boolean
   icon: IconType
   size?: "sm" | "md" | "lg"
+  hideLabel?: boolean
 }
 
 export const F0ButtonToggle = forwardRef<
@@ -25,6 +26,7 @@ export const F0ButtonToggle = forwardRef<
       disabled = false,
       icon,
       size = "md",
+      hideLabel = true,
       ...props
     },
     ref
@@ -41,6 +43,7 @@ export const F0ButtonToggle = forwardRef<
           focusRing(),
           buttonSizeVariants({ size }),
           actionVariants({ variant: selected ? "selected" : "ghost" }),
+          !hideLabel && "px-2",
           {
             "h-6": size === "sm",
             "h-8": size === "md",
@@ -50,6 +53,7 @@ export const F0ButtonToggle = forwardRef<
         {...props}
       >
         <F0Icon icon={icon} size={size} />
+        {!hideLabel && <span className="text-sm font-medium">{label}</span>}
       </TogglePrimitive.Root>
     )
   }

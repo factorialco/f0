@@ -27,4 +27,11 @@ type MetadataItemValue =
   | { type: "dot-tag"; label: string; color: NewColor }
   | { type: "tag"; label: string; icon?: IconType }
 
-export type { actionType, MetadataItemValue, NotesTextEditorHandle }
+type notesModeType = "manual" | "auto"
+
+export type {
+  actionType,
+  MetadataItemValue,
+  notesModeType,
+  NotesTextEditorHandle,
+}

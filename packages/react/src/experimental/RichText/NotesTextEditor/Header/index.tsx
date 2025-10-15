@@ -2,12 +2,16 @@ import { Button } from "@/components/Actions/Button"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { F0ButtonToggle } from "@/experimental/Actions/F0ButtonToggle"
+import { Ai, AlignTextLeft } from "@/icons/app"
 import { Fragment } from "react"
-import { actionType, MetadataItemValue } from "../types"
+import { actionType, MetadataItemValue, notesModeType } from "../types"
 
 interface HeaderProps {
   actions?: actionType[]
   metadata?: MetadataItemValue[]
+  notesMode?: notesModeType
+  onNotesModeChange?: (notesMode: notesModeType) => void
 }
 
 const buildMetadataItems = ({ items }: { items: MetadataItemValue[] }) =>
@@ -35,13 +39,18 @@ const buildMetadataItems = ({ items }: { items: MetadataItemValue[] }) =>
     </Fragment>
   ))
 
-const Header = ({ actions, metadata }: HeaderProps) => {
+const Header = ({
+  actions,
+  metadata,
+  notesMode,
+  onNotesModeChange,
+}: HeaderProps) => {
   return (
     <div className="flex items-center justify-between px-6 py-3">
       <div className="flex flex-row items-center gap-2">
         {buildMetadataItems({ items: metadata || [] })}
       </div>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row items-center gap-2">
         {actions?.map((action, index) => (
           <Button
             key={index}
@@ -52,6 +61,26 @@ const Header = ({ actions, metadata }: HeaderProps) => {
             hideLabel={action.hideLabel}
           />
         ))}
+        {onNotesModeChange && (
+          <>
+            <div className="mx-2 h-4 w-[1px] bg-f1-border" />
+            <div className="flex flex-row items-center gap-0.5">
+              <F0ButtonToggle
+                label="Manual Notes"
+                icon={AlignTextLeft}
+                selected={notesMode === "manual"}
+                onSelectedChange={() => onNotesModeChange("manual")}
+              />
+              <F0ButtonToggle
+                label="Auto"
+                icon={Ai}
+                hideLabel={false}
+                selected={notesMode === "auto"}
+                onSelectedChange={() => onNotesModeChange("auto")}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
