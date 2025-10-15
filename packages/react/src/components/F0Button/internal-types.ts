@@ -6,7 +6,13 @@ export type { ButtonType }
 
 export type ButtonInternalProps = Pick<
   ActionProps,
-  "size" | "disabled" | "className" | "pressed" | "compact" | "variant"
+  | "size"
+  | "disabled"
+  | "className"
+  | "pressed"
+  | "compact"
+  | "variant"
+  | "tooltip"
 > &
   DataAttributes & {
     /**
@@ -52,6 +58,7 @@ export type ButtonInternalProps = Pick<
      */
     size?: ButtonSize
     /**
+     * @private
      * Appends a React node after the button content (for custom UI extensions).
      */
     append?: React.ReactNode
@@ -60,9 +67,20 @@ export type ButtonInternalProps = Pick<
      */
     disabled?: boolean
     /**
+     * @private
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean
+    /**
+     * @private
+     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     */
+    noAutoTooltip?: boolean
+    /**
+     * @private
+     * If true, the button will not automatically add a title based label
+     */
+    noTitle?: boolean
   } & ( // Target can only be used if href is provided
     | {
         /**

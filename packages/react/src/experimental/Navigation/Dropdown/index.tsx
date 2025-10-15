@@ -60,6 +60,7 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
             variant="outline"
             size="lg"
             pressed={open}
+            noTitle
           />
         )}
       </DrawerTrigger>

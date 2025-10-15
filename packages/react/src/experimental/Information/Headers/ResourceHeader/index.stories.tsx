@@ -82,6 +82,12 @@ export const Default: Story = {
         icon: Icon.Pencil,
         onClick: fn(),
       },
+      {
+        label: "Export",
+        icon: Icon.Download,
+        hideLabel: true,
+        onClick: fn(),
+      },
     ],
 
     otherActions: [

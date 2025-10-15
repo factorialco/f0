@@ -91,6 +91,11 @@ const meta = {
       description:
         "Callback fired when the button is clicked. Supports async functions for loading state.",
     },
+    tooltip: {
+      control: "text",
+      description:
+        "The tooltip to show when the button is hovered. If not provided, when the hideLabel is true, the tooltip will be generated based on the label property.",
+    },
     href: {
       control: "text",
       description:
@@ -248,9 +253,9 @@ export const Sizes: Story = {
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex items-center gap-4">
-      <F0Button {...args} size="lg" label="Large" />
-      <F0Button {...args} size="md" label="Medium" />
-      <F0Button {...args} size="sm" label="Small" />
+      <F0Button {...args} size="lg" label="Large" tooltip="Large button" />
+      <F0Button {...args} size="md" label="Medium" tooltip="Medium button" />
+      <F0Button {...args} size="sm" label="Small" tooltip="Small button" />
     </div>
   ),
 }

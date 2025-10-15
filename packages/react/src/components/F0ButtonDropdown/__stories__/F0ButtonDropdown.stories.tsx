@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Add, Replace } from "@/icons/app/index.ts"
+import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
 import { F0ButtonDropdown } from "../index"
 import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
 
@@ -33,6 +34,11 @@ const meta = {
       control: "select",
       options: buttonDropdownVariants,
       description: "Visual style variant of the button",
+      table: {
+        type: {
+          summary: buttonDropdownVariants.join(" | "),
+        },
+      },
     },
     size: {
       control: "select",
@@ -54,8 +60,18 @@ const meta = {
       table: {
         type: {
           summary: "ButtonDropdownItem[]",
+          detail: `type ButtonDropdownItem = { 
+  value: string; 
+  label: string; 
+  icon?: IconType; 
+  critical?: boolean 
+}`,
         },
       },
+    },
+    tooltip: {
+      control: "text",
+      description: "Tooltip to explain the button",
     },
   },
 } satisfies Meta<typeof F0ButtonDropdown>
@@ -84,4 +100,52 @@ export const Default: Story = {
       },
     ],
   },
+}
+
+// Basic Variants
+export const WithTooltip: Story = {
+  args: {
+    variant: "default",
+    tooltip: "Tooltip to explain the button",
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        icon: Replace,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+      },
+    ],
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        icon: Replace,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+        critical: true,
+      },
+    ],
+  },
+  render: (args) => <F0ButtonDropdown {...args} />,
 }

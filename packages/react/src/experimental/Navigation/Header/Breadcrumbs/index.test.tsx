@@ -1,5 +1,7 @@
 import { Home, Settings } from "@/icons/app"
-import { render, within } from "@testing-library/react"
+import { zeroRender as render } from "@/testing/test-utils"
+import { within } from "@testing-library/react"
+
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Breadcrumbs } from "./index"
 

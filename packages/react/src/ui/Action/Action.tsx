@@ -1,3 +1,4 @@
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -40,6 +41,7 @@ export const Action = React.forwardRef<
     title,
     compact = false,
     "aria-label": ariaLabel,
+    tooltip,
     ...restProps
   } = props
 
@@ -152,17 +154,24 @@ export const Action = React.forwardRef<
     </button>
   )
 
+  const element =
+    !disabled && tooltip ? (
+      <Tooltip description={tooltip}>{mainElement}</Tooltip>
+    ) : (
+      mainElement
+    )
+
   if (prependOutside || appendOutside) {
     return (
       <div className="flex items-center">
         {prependOutside}
-        {mainElement}
+        {element}
         {appendOutside}
       </div>
     )
   }
 
-  return mainElement
+  return element
 })
 
 Action.displayName = "Action"

@@ -1,8 +1,5 @@
-import { F0Button, F0ButtonProps } from "@/components/F0Button"
-import {
-  F0ButtonDropdown,
-  F0ButtonDropdownProps,
-} from "@/components/F0ButtonDropdown"
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
@@ -22,10 +19,12 @@ import {
   DropdownItem,
   MobileDropdown,
 } from "@/experimental/Navigation/Dropdown"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
-import { Fragment, memo } from "react"
+import { Fragment } from "react"
 
+export type HeaderSecondaryAction = SecondaryAction & {
+  hideLabel?: boolean
+}
 interface BaseHeaderProps {
   title: string
   avatar?:
@@ -38,7 +37,7 @@ interface BaseHeaderProps {
 
   description?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
-  secondaryActions?: SecondaryAction[]
+  secondaryActions?: HeaderSecondaryAction[]
   otherActions?: (DropdownItem & { isVisible?: boolean })[]
   status?: {
     label: string
@@ -51,42 +50,6 @@ interface BaseHeaderProps {
 
 const isVisible = (action: { isVisible?: boolean }) =>
   action.isVisible !== false
-
-const ButtonWithTooltip = memo(function ButtonWithTooltip({
-  tooltip,
-  ...buttonProps
-}: F0ButtonProps & { tooltip?: string }) {
-  if (tooltip) {
-    const Wrapper = buttonProps.disabled ? "span" : Fragment
-    return (
-      <Tooltip description={tooltip}>
-        <Wrapper>
-          <F0Button {...buttonProps} />
-        </Wrapper>
-      </Tooltip>
-    )
-  }
-  return <F0Button {...buttonProps} />
-})
-
-const DropdownButtonWithTooltip = memo(function DropdownButtonWithTooltip({
-  tooltip,
-  ...dropdownProps
-}: F0ButtonDropdownProps<string> & {
-  tooltip?: string
-}) {
-  if (tooltip) {
-    const Wrapper = dropdownProps.disabled ? "span" : Fragment
-    return (
-      <Tooltip description={tooltip}>
-        <Wrapper>
-          <F0ButtonDropdown {...dropdownProps} />
-        </Wrapper>
-      </Tooltip>
-    )
-  }
-  return <F0ButtonDropdown {...dropdownProps} />
-})
 
 export function BaseHeader({
   title,
@@ -173,7 +136,7 @@ export function BaseHeader({
         <div className="flex w-full shrink-0 flex-col gap-x-2 gap-y-3 md:hidden">
           {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) && (
             <div className="w-full md:hidden [&>*]:w-full">
-              <ButtonWithTooltip
+              <F0Button
                 label={primaryAction.label}
                 onClick={primaryAction.onClick}
                 variant="default"
@@ -186,7 +149,7 @@ export function BaseHeader({
           )}
           {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) && (
             <div className="w-full md:hidden [&>*]:w-full">
-              <DropdownButtonWithTooltip
+              <F0ButtonDropdown
                 items={primaryAction.items}
                 onClick={primaryAction.onClick}
                 variant="default"
@@ -201,12 +164,13 @@ export function BaseHeader({
           {visibleSecondaryActions.map((action) => (
             <Fragment key={action.label}>
               <div className="w-full md:hidden [&>*]:w-full [&>span]:block [&>span_div]:w-full">
-                <ButtonWithTooltip
+                <F0Button
                   label={action.label}
                   onClick={action.onClick}
                   variant={action.variant ?? "outline"}
                   icon={action.icon}
                   size="lg"
+                  hideLabel={action.hideLabel}
                   disabled={action.disabled}
                   tooltip={action.tooltip}
                 />
@@ -230,11 +194,12 @@ export function BaseHeader({
           {visibleSecondaryActions.map((action) => (
             <Fragment key={action.label}>
               <div className="hidden md:block">
-                <ButtonWithTooltip
+                <F0Button
                   label={action.label}
                   onClick={action.onClick}
                   variant={action.variant ?? "outline"}
                   icon={action.icon}
+                  hideLabel={action.hideLabel}
                   disabled={action.disabled}
                   tooltip={action.tooltip}
                 />
@@ -247,7 +212,7 @@ export function BaseHeader({
             )}
           {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) && (
             <div className="hidden md:block">
-              <ButtonWithTooltip
+              <F0Button
                 label={primaryAction.label}
                 onClick={primaryAction.onClick}
                 variant="default"
@@ -259,7 +224,7 @@ export function BaseHeader({
           )}
           {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) && (
             <div className="hidden md:block">
-              <DropdownButtonWithTooltip
+              <F0ButtonDropdown
                 items={primaryAction.items}
                 onClick={primaryAction.onClick}
                 variant="default"

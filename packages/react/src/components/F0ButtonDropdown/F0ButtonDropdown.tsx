@@ -61,6 +61,7 @@ const F0ButtonDropdown = ({
         aria-label={selectedItem.label}
         prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
         className="rounded-r-none after:rounded-r-none"
+        tooltip={props.tooltip}
         appendOutside={
           <DropdownInternal
             items={dropdownItems}

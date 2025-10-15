@@ -25,6 +25,10 @@ export type ActionSize = (typeof actionSizes)[number]
 
 export interface ActionCommonProps {
   /**
+   * Tooltip
+   */
+  tooltip?: string | false
+  /**
    * The variant of the action.
    */
   variant?: ActionVariant

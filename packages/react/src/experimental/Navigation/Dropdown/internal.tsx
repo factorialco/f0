@@ -4,6 +4,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -86,6 +87,7 @@ export function DropdownInternal({
   onOpenChange: controlledOnOpenChange,
   ...rest
 }: DropdownInternalProps) {
+  const i18n = useI18n()
   const [internalOpen, setInternalOpen] = useState(false)
 
   const isControlled =
@@ -102,10 +104,12 @@ export function DropdownInternal({
             hideLabel
             icon={icon}
             size={size}
-            label="..."
+            label={i18n.actions.toggle_dropdown_menu}
             variant="outline"
             pressed={open}
             compact
+            noAutoTooltip
+            noTitle
           />
         )}
       </DropdownMenuTrigger>

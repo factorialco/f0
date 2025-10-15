@@ -56,6 +56,11 @@ export type F0ButtonDropdownProps<T = string> = {
    */
   loading?: boolean
   /**
+   * The tooltip of the button.
+   * @default undefined
+   */
+  tooltip?: string
+  /**
    * The callback function to be called when the button is clicked.
    * @param value The value of the item that was clicked.
    * @param item The item that was clicked.

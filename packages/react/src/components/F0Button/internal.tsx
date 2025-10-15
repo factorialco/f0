@@ -65,6 +65,9 @@ const ButtonInternal = forwardRef<
     append,
     className,
     "aria-label": ariaLabel,
+    tooltip,
+    noAutoTooltip,
+    noTitle,
     ...props
   },
   ref
@@ -99,12 +102,15 @@ const ButtonInternal = forwardRef<
       disabled={disabled || isLoading}
       ref={ref}
       {...props}
+      tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
       onClick={handleClick}
       loading={isLoading}
       className={className}
       mode={hideLabel ? "only" : "default"}
       aria-label={ariaLabel || props.title || label}
-      title={props.title || (hideLabel ? label : undefined)}
+      title={
+        noTitle ? undefined : props.title || (hideLabel ? label : undefined)
+      }
       compact={!!shouldHideLabel}
     >
       <div className={cn(isLoading && "invisible", "flex items-center gap-1")}>

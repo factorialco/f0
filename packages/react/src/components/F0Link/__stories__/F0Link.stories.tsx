@@ -22,6 +22,10 @@ const meta = {
       control: "select",
       options: linkVariants,
     },
+    tooltip: {
+      control: "text",
+      description: "The tooltip to show when the link is hovered.",
+    },
   },
   args: {
     children: "Link",
@@ -91,6 +95,8 @@ export const Snapshot: Story = {
       <F0Link {...args} variant="unstyled" />
       <h3>Disabled</h3>
       <F0Link {...args} variant="link" disabled />
+      <h3>Tooltip</h3>
+      <F0Link {...args} variant="link" tooltip="Tooltip" />
     </div>
   ),
 }
