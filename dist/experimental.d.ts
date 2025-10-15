@@ -3900,6 +3900,8 @@ declare const privateProps_2: readonly [];
 
 declare const privateProps_3: readonly ["compact"];
 
+declare const privateProps_4: readonly ["delay"];
+
 declare type ProductUpdate = {
     title: string;
     href: string;
@@ -4921,11 +4923,12 @@ export declare interface ToolbarProps {
     plainHtmlMode?: boolean;
 }
 
-export declare function Tooltip({ label, description, children, shortcut, }: TooltipProps): default_2.JSX.Element;
+export declare const Tooltip: (props: TooltipProps) => default_2.JSX.Element;
 
-declare type TooltipProps = {
+declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
+    delay?: number;
 } & ({
     label: string;
     description?: string;
@@ -4933,6 +4936,8 @@ declare type TooltipProps = {
     label?: string;
     description: string;
 });
+
+export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_4)[number]>;
 
 declare interface TranscriptLabels {
     deleteBlock: string;
