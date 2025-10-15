@@ -95799,7 +95799,10 @@ function EMt(e, {
             }
           });
         };
-        b.current && (W == null ? void 0 : W.type) === "pages" && (console.warn("fetchDataAndUpdate cleanup.current"), b.current(), b.current = void 0);
+        console.warn(
+          "fetchDataAndUpdate paginationInfo?.type",
+          W == null ? void 0 : W.type
+        ), b.current && (W == null ? void 0 : W.type) === "pages" && (console.warn("fetchDataAndUpdate cleanup.current"), b.current(), b.current = void 0);
         const Le = [
           ...c ? [
             {
@@ -95928,11 +95931,8 @@ function EMt(e, {
     ]
   ), Fe(() => () => {
     var ee;
-    console.warn(
-      'unsubscribe on "useData", pagination type: ',
-      (W == null ? void 0 : W.type) ?? ""
-    ), (W == null ? void 0 : W.type) === "pages" && ((ee = b.current) == null || ee.call(b));
-  }, [W == null ? void 0 : W.type]);
+    console.warn('unsubscribe on "useEffect"'), (ee = b.current) == null || ee.call(b);
+  }, []);
   const ge = I ? I - A : 0;
   return {
     data: ie,
