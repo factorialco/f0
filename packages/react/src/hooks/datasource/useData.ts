@@ -547,12 +547,14 @@ export function useData<
       cursor = null,
     }: FetchDataParams<Filters>) => {
       try {
+        console.warn("Fetching data with cursor:", cursor)
+        console.warn("appendMode:", appendMode)
         // Clean up any existing subscription before creating a new one
         console.warn(
           "fetchDataAndUpdate paginationInfo?.type",
           paginationInfo?.type
         )
-        if (cleanup.current && paginationInfo?.type === "pages") {
+        if (cleanup.current) {
           console.warn("fetchDataAndUpdate cleanup.current")
           cleanup.current()
           cleanup.current = undefined
@@ -706,6 +708,9 @@ export function useData<
       if (currentPaginationInfo.hasMore) {
         // Extract the cursor from paginationInfo
         const currentCursor = currentPaginationInfo.cursor
+
+        // Add debugging
+        console.warn("Loading more with cursor:", currentCursor)
 
         setIsLoadingMore(true)
         setIsLoading(true)
