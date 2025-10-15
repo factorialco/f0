@@ -95927,11 +95927,11 @@ function EMt(e, {
       ...i
     ]
   ), Fe(() => () => {
-    var ee, fe;
+    var ee;
     console.warn(
       'unsubscribe on "useData", pagination type: ',
-      ((ee = z.current) == null ? void 0 : ee.type) ?? ""
-    ), (W == null ? void 0 : W.type) === "pages" && ((fe = b.current) == null || fe.call(b));
+      (W == null ? void 0 : W.type) ?? ""
+    ), (W == null ? void 0 : W.type) === "pages" && ((ee = b.current) == null || ee.call(b));
   }, [W == null ? void 0 : W.type]);
   const ge = I ? I - A : 0;
   return {
