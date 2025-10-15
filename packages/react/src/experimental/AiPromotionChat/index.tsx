@@ -1,4 +1,5 @@
-import { Check } from "@/icons/app"
+import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { Check, Cross } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { ChatTextarea, ChatWindow } from "./components"
@@ -46,7 +47,7 @@ const AiPromotionChatProviderCmp = ({
 }
 
 const AiPromotionChatCmp = () => {
-  const { enabled, greeting, title, description, benefits, actions } =
+  const { enabled, greeting, title, description, benefits, actions, setOpen } =
     useAiPromotionChat()
 
   if (!enabled) {
@@ -56,8 +57,19 @@ const AiPromotionChatCmp = () => {
   return (
     <div className="p-1 pl-0">
       <ChatWindow clickOutsideToClose hitEscapeToClose shortcut="">
+        {/* Close button header */}
+        <div className="flex items-center justify-end p-3 pb-0">
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label=""
+            icon={Cross}
+            onClick={() => setOpen(false)}
+          />
+        </div>
+
         <div className="flex-1 content-center overflow-y-auto">
-          <div className="flex flex-col gap-4 p-6">
+          <div className="flex flex-col gap-4 p-6 pt-3">
             {/* Header with icon and greeting */}
             <div className="flex flex-col gap-4">
               <OneIcon spin size="lg" />
