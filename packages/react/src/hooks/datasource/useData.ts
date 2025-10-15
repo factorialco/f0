@@ -548,6 +548,10 @@ export function useData<
     }: FetchDataParams<Filters>) => {
       try {
         // Clean up any existing subscription before creating a new one
+        console.warn(
+          "fetchDataAndUpdate paginationInfo?.type",
+          paginationInfo?.type
+        )
         if (cleanup.current && paginationInfo?.type === "pages") {
           console.warn("fetchDataAndUpdate cleanup.current")
           cleanup.current()
@@ -760,15 +764,11 @@ export function useData<
 
   useEffect(() => {
     return () => {
-      console.warn(
-        'unsubscribe on "useData", pagination type: ',
-        paginationInfo?.type ?? ""
-      )
-      if (paginationInfo?.type === "pages") {
-        cleanup.current?.()
-      }
+      console.warn('unsubscribe on "useEffect"')
+
+      cleanup.current?.()
     }
-  }, [paginationInfo?.type])
+  }, [])
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 
