@@ -52,7 +52,6 @@ exports[`PageHeader Snapshot - renders correctly with multiple actions 1`] = `
       </Text>
       <Text>
         Icon:
-        Bell
       </Text>
       <Text>
         Badge
@@ -98,7 +97,6 @@ exports[`PageHeader Snapshot - renders correctly with multiple actions 1`] = `
       </Text>
       <Text>
         Icon:
-        Bell
       </Text>
     </View>
   </View>
@@ -157,7 +155,6 @@ exports[`PageHeader Snapshot - renders correctly with one action 1`] = `
       </Text>
       <Text>
         Icon:
-        Bell
       </Text>
     </View>
   </View>
@@ -216,7 +213,6 @@ exports[`PageHeader Snapshot - renders correctly with one action with a badge 1`
       </Text>
       <Text>
         Icon:
-        Bell
       </Text>
       <Text>
         Badge

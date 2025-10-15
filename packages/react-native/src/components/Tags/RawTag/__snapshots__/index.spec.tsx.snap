@@ -131,7 +131,6 @@ exports[`RawTag Snapshot with icon 1`] = `
       aria-hidden={true}
       bbHeight="100%"
       bbWidth="100%"
-      className="shrink-0 w-4 h-4 stroke-sm text-f1-icon"
       fill="none"
       focusable={false}
       meetOrSlice={0}
