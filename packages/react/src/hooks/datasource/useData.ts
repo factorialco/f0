@@ -762,7 +762,7 @@ export function useData<
     return () => {
       console.warn(
         'unsubscribe on "useData", pagination type: ',
-        paginationInfoRef.current?.type ?? ""
+        paginationInfo?.type ?? ""
       )
       if (paginationInfo?.type === "pages") {
         cleanup.current?.()
