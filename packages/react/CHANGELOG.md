@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.236.1](https://github.com/factorialco/f0/compare/f0-react-v1.236.0...f0-react-v1.236.1) (2025-10-15)
+
+
+### Bug Fixes
+
+* allow no actions on dialogs ([#2820](https://github.com/factorialco/f0/issues/2820)) ([9846f12](https://github.com/factorialco/f0/commit/9846f1249c39b9b17d0fb81bd975a111cf8f344d))
+
 ## [1.236.0](https://github.com/factorialco/f0/compare/f0-react-v1.235.3...f0-react-v1.236.0) (2025-10-14)
 
 
