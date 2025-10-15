@@ -77,7 +77,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@factorialco/f0-core": "workspace:*",
+    "@factorialco/f0-core": "latest",
     "@react-native-community/datetimepicker": "^8.4.1",
     "@react-native-community/slider": "^4.5.6",
     "@rn-primitives/avatar": "~1.1.0",
