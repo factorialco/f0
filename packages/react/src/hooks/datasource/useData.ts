@@ -757,11 +757,11 @@ export function useData<
     ]
   )
 
-  useEffect(() => {
-    return () => {
-      cleanup.current?.()
-    }
-  }, [])
+  // useEffect(() => {
+  //   return () => {
+  //     cleanup.current?.()
+  //   }
+  // }, [])
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 
