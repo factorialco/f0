@@ -242,16 +242,14 @@ const NotesTextEditorComponent = forwardRef<
         (metadata && metadata.length > 0)) && (
         <Header actions={actions} metadata={metadata} />
       )}
-      <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-16px)] -translate-x-1/2 rounded-lg bg-f1-background shadow-md">
-        <ScrollArea className="w-full p-2">
-          <Toolbar
-            labels={toolbarLabels}
-            editor={editor}
-            disableButtons={false}
-            showEmojiPicker={false}
-            plainHtmlMode={false}
-          />
-        </ScrollArea>
+      <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+        <Toolbar
+          labels={toolbarLabels}
+          editor={editor}
+          disableButtons={false}
+          showEmojiPicker={false}
+          plainHtmlMode={false}
+        />
       </div>
 
       <ScrollArea className="h-full gap-6">
