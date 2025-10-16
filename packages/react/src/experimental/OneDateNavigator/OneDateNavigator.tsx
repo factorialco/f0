@@ -1,14 +1,14 @@
 import {
-  OneDatePickerPopup,
-  OneDatePickerPopupProps,
-} from "@/ui/DatePickerPopup/OneDatePickerPopup"
+  DatePickerPopup,
+  DatePickerPopupProps,
+} from "@/ui/DatePickerPopup/DatePickerPopup"
 import { useMemo, useState } from "react"
 import { granularityDefinitions } from "../OneCalendar"
 import { DateRange, DateRangeComplete } from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 export interface OneDatePickerProps
-  extends Omit<OneDatePickerPopupProps, "children"> {
+  extends Omit<DatePickerPopupProps, "children"> {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }
@@ -55,7 +55,7 @@ export function OneDateNavigator({
   }
 
   return (
-    <OneDatePickerPopup
+    <DatePickerPopup
       onSelect={handleSelect}
       value={value}
       defaultValue={defaultValue}
@@ -68,6 +68,7 @@ export function OneDateNavigator({
       compareTo={compareTo}
       defaultCompareTo={defaultCompareTo}
       onCompareToChange={handleCompareToChange}
+      asChild
     >
       <DatePickerTrigger
         value={value}
@@ -82,6 +83,6 @@ export function OneDateNavigator({
         hideGoToCurrent={hideGoToCurrent}
         onClick={() => setIsOpen(true)}
       />
-    </OneDatePickerPopup>
+    </DatePickerPopup>
   )
 }

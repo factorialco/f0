@@ -30,6 +30,8 @@ export type InputProps = Omit<
     | "role"
     | "onClickContent"
     | "appendTag"
+    | "onFocus"
+    | "onBlur"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -62,6 +64,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onClickContent,
       hideLabel,
       name,
+      onFocus,
+      onBlur,
       ...props
     },
     ref
@@ -95,6 +99,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onClickContent={onClickContent}
         name={name}
         appendTag={appendTag}
+        onFocus={onFocus}
+        onBlur={onBlur}
       >
         <input
           type={type}
