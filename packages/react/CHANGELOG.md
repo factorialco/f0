@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.236.3](https://github.com/factorialco/f0/compare/f0-react-v1.236.2...f0-react-v1.236.3) (2025-10-16)
+
+
+### Bug Fixes
+
+* **RichTextDisplay:** enhance sanitization options for content rendering ([#2827](https://github.com/factorialco/f0/issues/2827)) ([5acf18f](https://github.com/factorialco/f0/commit/5acf18f9600dc5ce737361a167b94b20d2359a7f))
+
 ## [1.236.2](https://github.com/factorialco/f0/compare/f0-react-v1.236.1...f0-react-v1.236.2) (2025-10-15)
 
 
