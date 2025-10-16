@@ -15,7 +15,6 @@ import {
 import { Observable } from "zen-observable-ts"
 import {
   BaseFetchOptions,
-  DataAdapter,
   GroupingDefinition,
   InfiniteScrollPaginatedResponse,
   PageBasedPaginatedResponse,
@@ -332,6 +331,7 @@ export function useData<
     newData: R[],
     idProvider: (item: R, index?: number) => string | number | symbol
   ): R[] => {
+    console.log("mergeItems", prevData, newData)
     {
       // The Map order is guaranteed to be the same as the order of the items in the array. Check https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps
       const idMap = new Map(
@@ -366,11 +366,7 @@ export function useData<
           dataAdapter.paginationType
 
         // Update pagination info based on the pagination type
-        if (
-          paginationType &&
-          ["pages", "infinite-scroll"].includes(paginationType) &&
-          paginationType !== "no-pagination"
-        ) {
+        if (paginationType && isPageBasedPagination(paginationType)) {
           // For page-based pagination
           const common = {
             total: result.total,
@@ -735,13 +731,18 @@ export function useData<
       if (!isLoadingMoreRef.current) {
         setIsLoading(true)
         // Explicitly pass 0 as the initial position for infinite scroll
-        const initialPosition =
-          dataAdapter.paginationType === "infinite-scroll" ? 0 : 1
+        const initialPosition = isInfiniteScrollPagination(
+          dataAdapter.paginationType
+        )
+          ? 0
+          : 1
         fetchDataAndUpdate({
           filters: mergedFilters,
           currentPage: initialPosition,
           search: searchValue.current,
-          cursor: dataAdapter.paginationType === "infinite-scroll" ? "0" : null, // Pass "0" as initial cursor
+          cursor: isInfiniteScrollPagination(dataAdapter.paginationType)
+            ? "0"
+            : null, // Pass "0" as initial cursor
         })
       }
     },
@@ -780,22 +781,52 @@ export function useData<
 }
 
 // Type guard functions to check pagination types
+export function isPageBasedPagination(paginationType?: PaginationType): boolean
 export function isPageBasedPagination<R extends RecordType>(
   pagination: PaginationInfo | null
-): pagination is PageBasedPaginatedResponse<R> {
-  return pagination !== null && pagination.type === "pages"
+): pagination is PageBasedPaginatedResponse<R>
+export function isPageBasedPagination<_R extends RecordType>(
+  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
+): boolean {
+  const paginationTypeKey =
+    typeof paginationTypeOrInfo === "string"
+      ? paginationTypeOrInfo
+      : paginationTypeOrInfo?.type
+
+  return paginationTypeKey === "pages"
 }
 
 // Type guard function to check if the pagination is infinite scroll
+export function isInfiniteScrollPagination(
+  paginationType?: PaginationType
+): boolean
 export function isInfiniteScrollPagination<R extends RecordType>(
-  pagination: PaginationInfo | null
-): pagination is InfiniteScrollPaginatedResponse<R> {
-  return pagination !== null && pagination.type === "infinite-scroll"
+  pagination?: PaginationInfo | null
+): pagination is InfiniteScrollPaginatedResponse<R>
+export function isInfiniteScrollPagination<_R extends RecordType>(
+  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
+): boolean {
+  const paginationTypeKey =
+    typeof paginationTypeOrInfo === "string"
+      ? paginationTypeOrInfo
+      : paginationTypeOrInfo?.type
+
+  return paginationTypeKey === "infinite-scroll"
 }
 
 export function isAccumulativePagination(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- we don't care about the type here
-  dataAdapter: DataAdapter<any, any>
+  paginationType?: PaginationType
+): boolean
+export function isAccumulativePagination(
+  paginationInfo?: PaginationInfo | null
+): boolean
+export function isAccumulativePagination(
+  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
 ): boolean {
-  return dataAdapter.paginationType === "infinite-scroll"
+  const paginationTypeKey =
+    typeof paginationTypeOrInfo === "string"
+      ? paginationTypeOrInfo
+      : paginationTypeOrInfo?.type
+
+  return paginationTypeKey === "infinite-scroll"
 }
