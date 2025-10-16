@@ -4220,7 +4220,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
     selectContentClassName?: string;
     actions?: Action[];
 } & ({
-    source: DataSource<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>> | DataSource<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
     mapOptions: (item: ResolvedRecordType<R>) => SelectItemProps<T, ResolvedRecordType<R>>;
     options?: never;
 } | {
@@ -5191,15 +5191,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
