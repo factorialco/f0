@@ -126,3 +126,31 @@ export type VisualizationProps<
     >
   >
 }
+
+/**
+ * Returns the custom visualization props based on the data collection source.
+ *
+ * @template Source - The data collection source
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type CustomVisualizationProps<Source> = {
+  onSelectItems: OnSelectItemsCallback<
+    Source extends DataCollectionSource<infer R, any, any, any, any, any, any>
+      ? R
+      : never,
+    Source extends DataCollectionSource<any, infer F, any, any, any, any, any>
+      ? F
+      : never
+  >
+  onLoadData: OnLoadDataCallback<
+    Source extends DataCollectionSource<infer R, any, any, any, any, any, any>
+      ? R
+      : never,
+    Source extends DataCollectionSource<any, infer F, any, any, any, any, any>
+      ? F
+      : never
+  >
+  onLoadError: OnLoadErrorCallback
+  source: Source
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
