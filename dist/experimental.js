@@ -57960,7 +57960,7 @@ const Qie = (t) => {
     }
   }, [C]);
   return C ? b("div", {
-    className: "relative flex h-full w-full flex-col border border-solid border-f1-border",
+    className: "relative flex h-full w-full flex-col",
     ref: w,
     id: x,
     children: [(l && l.length > 0 || c && c.length > 0) && f(nre, {
