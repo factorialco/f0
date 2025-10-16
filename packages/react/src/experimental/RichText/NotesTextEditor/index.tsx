@@ -234,7 +234,7 @@ const NotesTextEditorComponent = forwardRef<
 
   return (
     <div
-      className="relative flex h-full w-full flex-col border border-solid border-f1-border"
+      className="relative flex h-full w-full flex-col"
       ref={containerRef}
       id={editorId}
     >
