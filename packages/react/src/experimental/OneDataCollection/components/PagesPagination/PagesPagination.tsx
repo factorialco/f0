@@ -1,5 +1,5 @@
 import { OnePagination } from "@/experimental/OnePagination"
-import { isPagePagination, PaginationInfo } from "@/hooks/datasource"
+import { isPagesPagination, PaginationInfo } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +14,7 @@ export const PagesPagination = ({
 }) => {
   const t = useI18n()
   return (
-    isPagePagination(paginationInfo) && (
+    isPagesPagination(paginationInfo) && (
       <div
         className={cn(
           "flex w-full items-center justify-between px-4",

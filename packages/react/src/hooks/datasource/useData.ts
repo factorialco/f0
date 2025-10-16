@@ -13,21 +13,25 @@ import {
   useState,
 } from "react"
 import { Observable, Subscription } from "zen-observable-ts"
+import { getRecordsFromResponse, groupBy } from "./internal/utils"
 import {
   BaseFetchOptions,
   GroupingDefinition,
-  InfiniteScrollPaginatedResponse,
-  PageBasedPaginatedResponse,
-  PaginatedResponse,
   PaginationInfo,
-  PaginationType,
   PromiseOrObservable,
   RecordType,
   SortingsDefinition,
   SortingsStateMultiple,
 } from "./types"
 import { DataSource } from "./types/datasource.typings"
-import { groupBy } from "./utils"
+import { DataResponse } from "./types/fetch.typings"
+import {
+  getDataSourcePaginationType,
+  isInfiniteScrollPagination,
+  isNotPaginatedResponse,
+  isPagesPagination,
+  isPaginatedPagination,
+} from "./utils"
 
 /**
  * Represents an error that occurred during data fetching
@@ -36,11 +40,6 @@ export interface DataError {
   message: string
   cause?: unknown
 }
-
-/**
- * Response structure for non-paginated data
- */
-type SimpleResult<T> = T[]
 
 /**
  * Hook options for useData
@@ -68,7 +67,7 @@ export interface UseDataOptions<
    * It is called with the response data.
    * @param response - The response data.
    */
-  onResponse?: (response: PaginatedResponse<R> | SimpleResult<R>) => void
+  onResponse?: (response: DataResponse<R>) => void
 }
 
 /**
@@ -347,22 +346,21 @@ export function useData<
   }
 
   const handleFetchSuccess = useCallback(
-    (
-      result: PaginatedResponse<R> | SimpleResult<R>,
-      appendMode: boolean,
-      isLoadingYet?: boolean
-    ) => {
+    (result: DataResponse<R>, appendMode: boolean, isLoadingYet?: boolean) => {
       /**
        * Call to the onResponse callback
        */
       onResponse?.(result)
 
-      let records: R[] = []
-      if ("records" in result) {
-        records = result.records
+      const records = getRecordsFromResponse(result)
+
+      console.log("records---->", records)
+
+      if (isNotPaginatedResponse(result)) {
+        setTotalItems(result.length)
+      } else {
         // Use a default value of "pages" when paginationType is undefined
-        const paginationType: PaginationType | undefined =
-          dataAdapter.paginationType
+        const paginationType = getDataSourcePaginationType(dataAdapter)
 
         // Update pagination info based on the pagination type
         if (isPaginatedPagination(paginationType)) {
@@ -371,7 +369,9 @@ export function useData<
             total: result.total,
             perPage: result.perPage,
           }
-          if (paginationType === "pages") {
+          setTotalItems(result.total)
+
+          if (isPagesPagination(paginationType)) {
             setPaginationInfo({
               ...common,
               type: "pages" as const,
@@ -381,7 +381,9 @@ export function useData<
                   ? result.pagesCount
                   : Math.ceil(result.total / result.perPage),
             })
-          } else if (paginationType === "infinite-scroll") {
+          }
+
+          if (isInfiniteScrollPagination(paginationType)) {
             setPaginationInfo({
               ...common,
               type: "infinite-scroll" as const,
@@ -397,20 +399,13 @@ export function useData<
                   : rawData.length + result.records.length < result.total,
             })
           }
-
-          setTotalItems(result.total)
         }
-      } else {
-        // For non-paginated results, always replace
-        records = result
-        setTotalItems?.(result.length)
       }
 
       setRawData(
-        records
-        // appendMode
-        //   ? (prevData) => mergeItems(prevData, records, idProvider)
-        //   : records
+        appendMode
+          ? (prevData) => mergeItems(prevData, records, idProvider)
+          : records
       )
       setError(null)
       setIsInitialLoading(false)
@@ -524,7 +519,7 @@ export function useData<
     [setError, setIsInitialLoading, setIsLoading]
   )
 
-  type ResultType = PaginatedResponse<R> | SimpleResult<R>
+  type ResultType = DataResponse<R>
 
   // Define a type for the fetch parameters to make the function more maintainable
   type FetchDataParams<Filters extends FiltersDefinition> = {
@@ -587,7 +582,7 @@ export function useData<
 
           const defaultPerPage = 20
 
-          // Safely access perPage, defaulting to 20 if not available
+          // Safely access perPage, default to 20 if not available
           const perPageValue =
             "perPage" in dataAdapter && dataAdapter.perPage !== undefined
               ? dataAdapter.perPage
@@ -597,7 +592,7 @@ export function useData<
           return dataAdapter.fetchData({
             ...baseFetchOptions,
             pagination: {
-              ...(isPagePagination(dataAdapter.paginationType)
+              ...(isPagesPagination(dataAdapter.paginationType)
                 ? {
                     currentPage,
                     perPage: perPageValue,
@@ -636,9 +631,9 @@ export function useData<
 
         subscriptionRef.current = observableRef.current.subscribe({
           next: (state) => {
-            console.log("next", state)
+            console.log("state", state)
             if (state.data) {
-              handleFetchSuccess(state.data, appendMode, state.loading)
+              handleFetchSuccess(state.data, appendMode, state.loading, cursor)
             } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
@@ -674,7 +669,7 @@ export function useData<
   const setPage = useCallback(
     (page: number) => {
       // Return early if not page-based pagination or trying to set the same page
-      if (!isPagePagination(paginationInfo)) {
+      if (!isPagesPagination(paginationInfo)) {
         return
       }
 
@@ -795,75 +790,4 @@ export function useData<
     mergedFilters,
     totalItems: total,
   }
-}
-
-// Type guard functions to check pagination types
-export function isPagePagination(paginationType?: PaginationType): boolean
-export function isPagePagination<R extends RecordType>(
-  pagination: PaginationInfo | null
-): pagination is PageBasedPaginatedResponse<R>
-export function isPagePagination<_R extends RecordType>(
-  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
-): boolean {
-  const paginationTypeKey =
-    typeof paginationTypeOrInfo === "string"
-      ? paginationTypeOrInfo
-      : paginationTypeOrInfo?.type
-
-  return paginationTypeKey === "pages"
-}
-
-// Type guard function to check if the pagination is infinite scroll
-export function isInfiniteScrollPagination(
-  paginationType?: PaginationType
-): boolean
-export function isInfiniteScrollPagination<R extends RecordType>(
-  pagination?: PaginationInfo | null
-): pagination is InfiniteScrollPaginatedResponse<R>
-export function isInfiniteScrollPagination<_R extends RecordType>(
-  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
-): boolean {
-  const paginationTypeKey =
-    typeof paginationTypeOrInfo === "string"
-      ? paginationTypeOrInfo
-      : paginationTypeOrInfo?.type
-
-  return paginationTypeKey === "infinite-scroll"
-}
-
-export function isAccumulativePagination(
-  paginationType?: PaginationType
-): boolean
-export function isAccumulativePagination(
-  paginationInfo?: PaginationInfo | null
-): boolean
-export function isAccumulativePagination(
-  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
-): boolean {
-  const paginationTypeKey =
-    typeof paginationTypeOrInfo === "string"
-      ? paginationTypeOrInfo
-      : paginationTypeOrInfo?.type
-
-  return paginationTypeKey === "infinite-scroll"
-}
-
-/**
- * Is the dta paginated?
- */
-export function isPaginatedPagination(paginationType?: PaginationType): boolean
-export function isPaginatedPagination<R extends RecordType>(
-  pagination?: PaginationInfo | null
-): pagination is PaginatedResponse<R>
-export function isPaginatedPagination<_R extends RecordType>(
-  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
-): boolean {
-  const paginationTypeKey =
-    typeof paginationTypeOrInfo === "string"
-      ? paginationTypeOrInfo
-      : paginationTypeOrInfo?.type
-
-  return (
-    paginationTypeKey === "pages" || paginationTypeKey === "infinite-scroll"
-  )
 }

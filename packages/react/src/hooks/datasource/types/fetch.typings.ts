@@ -50,6 +50,11 @@ export type BaseResponse<R> = {
 export type PaginationType = "pages" | "infinite-scroll" | "no-pagination"
 
 /**
+ * Response structure for non-paginated data
+ */
+export type NotPaginatedResponse<T> = T[]
+
+/**
  * Represents a base structure for paginated API responses, providing
  * details about the records on the current page and pagination metadata.
  *
@@ -131,6 +136,11 @@ export type PaginatedResponse<TRecord> =
 export type PaginationInfo =
   | Omit<PageBasedPaginatedResponse<unknown>, "records">
   | Omit<InfiniteScrollPaginatedResponse<unknown>, "records">
+
+/**
+ * Response
+ */
+export type DataResponse<T> = NotPaginatedResponse<T> | PaginatedResponse<T>
 
 /**
  * Base data adapter configuration for non-paginated collections

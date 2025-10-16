@@ -1356,7 +1356,7 @@ export function createDataAdapter<
               })
 
               let i = 0
-              setInterval(() => {
+              setTimeout(() => {
                 const fetch = () =>
                   filterData(
                     data,
