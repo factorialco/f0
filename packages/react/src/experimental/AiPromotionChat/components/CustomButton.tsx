@@ -14,9 +14,15 @@ export type ActionProps = {
 
 type CustomButtonProps = {
   action: ActionProps
+  onClose: () => void
 }
 
-export const CustomButton = ({ action }: CustomButtonProps) => {
+export const CustomButton = ({ action, onClose }: CustomButtonProps) => {
+  const handleClick = () => {
+    action.onClick()
+    onClose()
+  }
+
   switch (action.buttonType) {
     case "gradient":
       return (
@@ -43,7 +49,7 @@ export const CustomButton = ({ action }: CustomButtonProps) => {
           onMouseLeave={(e) => {
             e.currentTarget.style.opacity = "1"
           }}
-          onClick={action.onClick}
+          onClick={handleClick}
         >
           {action.isLoading ? <Spinner size="small" /> : action.label}
         </button>
@@ -53,7 +59,7 @@ export const CustomButton = ({ action }: CustomButtonProps) => {
       return (
         <ButtonInternal
           label={action.label || ""}
-          onClick={action.onClick}
+          onClick={handleClick}
           variant={action.buttonVariant}
           icon={action.icon}
         />

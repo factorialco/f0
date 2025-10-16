@@ -21,11 +21,11 @@ const meta: Meta<typeof ApplicationFrame> = {
       agent: "one-workflow",
       credentials: "include",
       showDevConsole: false,
-      enabled: false,
+      enabled: true,
       greeting: "Hello, John",
     },
     aiPromotion: {
-      enabled: true,
+      enabled: false,
       greeting: "Hey Hellen,",
       title: "Meet One, your AI agent",
       description:

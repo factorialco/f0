@@ -20,6 +20,8 @@ export type AiPromotionChatProviderProps = {
     boldText: string
   }[]
   actions?: ActionProps[]
+  onShow?: () => void
+  onHide?: () => void
   children: React.ReactNode
 }
 
@@ -30,6 +32,8 @@ const AiPromotionChatProviderCmp = ({
   description,
   benefits,
   actions,
+  onShow,
+  onHide,
   children,
 }: AiPromotionChatProviderProps) => {
   return (
@@ -40,6 +44,8 @@ const AiPromotionChatProviderCmp = ({
       description={description}
       benefits={benefits}
       actions={actions}
+      onShow={onShow}
+      onHide={onHide}
     >
       {children}
     </AiPromotionChatStateProvider>
@@ -47,8 +53,21 @@ const AiPromotionChatProviderCmp = ({
 }
 
 const AiPromotionChatCmp = () => {
-  const { enabled, greeting, title, description, benefits, actions, setOpen } =
-    useAiPromotionChat()
+  const {
+    enabled,
+    greeting,
+    title,
+    description,
+    benefits,
+    actions,
+    setOpen,
+    onHide,
+  } = useAiPromotionChat()
+
+  const handleClose = () => {
+    setOpen(false)
+    onHide?.()
+  }
 
   if (!enabled) {
     return null
@@ -64,7 +83,7 @@ const AiPromotionChatCmp = () => {
             hideLabel
             label=""
             icon={Cross}
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
           />
         </div>
 
@@ -108,7 +127,11 @@ const AiPromotionChatCmp = () => {
             {actions?.length && (
               <div className="flex flex-col gap-3 pt-2">
                 {actions.map((action, index) => (
-                  <CustomButton key={index} action={action} />
+                  <CustomButton
+                    key={index}
+                    action={action}
+                    onClose={() => setOpen(false)}
+                  />
                 ))}
               </div>
             )}

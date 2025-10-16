@@ -21,6 +21,8 @@ export interface AiPromotionChatState {
     boldText: string
   }[]
   actions?: ActionProps[]
+  onShow?: () => void
+  onHide?: () => void
 }
 
 const AiPromotionChatStateContext =
@@ -52,14 +54,20 @@ type AiPromotionChatProviderReturnValue = {
   setClearFunction: (clearFn: (() => void) | null) => void
 } & Pick<
   AiPromotionChatState,
-  "greeting" | "title" | "description" | "benefits" | "actions"
+  | "greeting"
+  | "title"
+  | "description"
+  | "benefits"
+  | "actions"
+  | "onShow"
+  | "onHide"
 >
 
 const DEFAULT_MINUTES_TO_RESET = 15
 
 export const AiPromotionChatStateProvider: FC<
   PropsWithChildren<AiPromotionChatState>
-> = ({ children, enabled, ...rest }) => {
+> = ({ children, enabled, onShow, ...rest }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
@@ -86,6 +94,7 @@ export const AiPromotionChatStateProvider: FC<
   }, [enabled])
 
   useEffect(() => {
+    if (open) onShow?.()
     if (!open) {
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
