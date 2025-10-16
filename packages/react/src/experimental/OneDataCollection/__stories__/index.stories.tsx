@@ -43,6 +43,7 @@ import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import {
   createDataAdapter,
+  createObservableDataFetch,
   createPromiseDataFetch,
   ExampleComponent,
   filterPresets,
@@ -104,7 +105,7 @@ export const Simplest: Story = {
     const dataSource = useDataCollectionSource({
       dataAdapter: {
         fetchData: ({ filters, sortings, search }) => {
-          return createPromiseDataFetch()({
+          return createObservableDataFetch()({
             filters,
             sortings,
             search,
@@ -1174,6 +1175,7 @@ export const WithInfiniteScrollPagination: Story = {
         delay: 500,
         paginationType: "infinite-scroll",
         perPage: 10,
+        useObservable: true,
       }),
     })
 

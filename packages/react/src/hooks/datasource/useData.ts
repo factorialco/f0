@@ -15,6 +15,7 @@ import {
 import { Observable } from "zen-observable-ts"
 import {
   BaseFetchOptions,
+  DataAdapter,
   GroupingDefinition,
   InfiniteScrollPaginatedResponse,
   PageBasedPaginatedResponse,
@@ -547,8 +548,8 @@ export function useData<
       cursor = null,
     }: FetchDataParams<Filters>) => {
       try {
-        // Clean up any existing subscription before creating a new one
-        if (cleanup.current) {
+        // Clean up any existing subscription before creating a new one if the pagination is not accumulative
+        if (cleanup.current && !appendMode) {
           cleanup.current()
           cleanup.current = undefined
         }
@@ -618,9 +619,8 @@ export function useData<
           return
         }
 
-        // TODO: check this
         const observable: Observable<DataType<ResultType>> =
-          "subscribe" in result ? result : promiseToObservable(result)
+          promiseToObservable(result)
 
         const subscription = observable.subscribe({
           next: (state) => {
@@ -791,4 +791,11 @@ export function isInfiniteScrollPagination<R extends RecordType>(
   pagination: PaginationInfo | null
 ): pagination is InfiniteScrollPaginatedResponse<R> {
   return pagination !== null && pagination.type === "infinite-scroll"
+}
+
+export function isAccumulativePagination(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- we don't care about the type here
+  dataAdapter: DataAdapter<any, any>
+): boolean {
+  return dataAdapter.paginationType === "infinite-scroll"
 }

@@ -7,8 +7,12 @@ export interface PromiseState<T> {
 }
 
 export function promiseToObservable<T>(
-  promise: Promise<T>
+  promise: Promise<T> | Observable<PromiseState<T>>
 ): Observable<PromiseState<T>> {
+  if ("subscribe" in promise) {
+    return promise
+  }
+
   return new Observable((observer) => {
     // Initial loading state
     observer.next({
