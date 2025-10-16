@@ -101,7 +101,7 @@ export const AiPromotionChatStateProvider: FC<
       ).matches
       setShouldPlayEntranceAnimation(!prefersReducedMotion)
     }
-  }, [open])
+  }, [open, onShow])
 
   return (
     <AiPromotionChatStateContext.Provider
