@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { Observable } from "zen-observable-ts"
+import { Observable, Subscription } from "zen-observable-ts"
 import {
   BaseFetchOptions,
   GroupingDefinition,
@@ -331,7 +331,6 @@ export function useData<
     newData: R[],
     idProvider: (item: R, index?: number) => string | number | symbol
   ): R[] => {
-    console.log("mergeItems", prevData, newData)
     {
       // The Map order is guaranteed to be the same as the order of the items in the array. Check https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps
       const idMap = new Map(
@@ -366,7 +365,7 @@ export function useData<
           dataAdapter.paginationType
 
         // Update pagination info based on the pagination type
-        if (paginationType && isPageBasedPagination(paginationType)) {
+        if (isPaginatedPagination(paginationType)) {
           // For page-based pagination
           const common = {
             total: result.total,
@@ -408,9 +407,10 @@ export function useData<
       }
 
       setRawData(
-        appendMode
-          ? (prevData) => mergeItems(prevData, records, idProvider)
-          : records
+        records
+        // appendMode
+        //   ? (prevData) => mergeItems(prevData, records, idProvider)
+        //   : records
       )
       setError(null)
       setIsInitialLoading(false)
@@ -535,6 +535,11 @@ export function useData<
     search?: string | undefined
   }
 
+  const observableRef = useRef<Observable<DataType<ResultType>> | undefined>(
+    undefined
+  )
+  const subscriptionRef = useRef<Subscription | undefined>(undefined)
+
   const fetchDataAndUpdate = useCallback(
     async ({
       filters,
@@ -592,12 +597,12 @@ export function useData<
           return dataAdapter.fetchData({
             ...baseFetchOptions,
             pagination: {
-              ...(dataAdapter.paginationType === "pages"
+              ...(isPagePagination(dataAdapter.paginationType)
                 ? {
                     currentPage,
                     perPage: perPageValue,
                   }
-                : dataAdapter.paginationType === "infinite-scroll"
+                : isInfiniteScrollPagination(dataAdapter.paginationType)
                   ? {
                       cursor,
                       perPage: perPageValue,
@@ -618,8 +623,20 @@ export function useData<
         const observable: Observable<DataType<ResultType>> =
           promiseToObservable(result)
 
-        const subscription = observable.subscribe({
+        observableRef.current =
+          appendMode && observableRef.current
+            ? observableRef.current.concat(observable)
+            : observable
+
+        // Always clean up previous subscription when creating a new one
+        // The concatenated observable will re-emit all necessary values
+        if (subscriptionRef.current) {
+          subscriptionRef.current.unsubscribe()
+        }
+
+        subscriptionRef.current = observableRef.current.subscribe({
           next: (state) => {
+            console.log("next", state)
             if (state.data) {
               handleFetchSuccess(state.data, appendMode, state.loading)
             } else if (state.loading) {
@@ -634,7 +651,7 @@ export function useData<
           },
         })
 
-        cleanup.current = () => subscription.unsubscribe()
+        cleanup.current = () => subscriptionRef.current?.unsubscribe()
       } catch (error) {
         handleFetchError(error)
       }
@@ -657,7 +674,7 @@ export function useData<
   const setPage = useCallback(
     (page: number) => {
       // Return early if not page-based pagination or trying to set the same page
-      if (!isPageBasedPagination(paginationInfo)) {
+      if (!isPagePagination(paginationInfo)) {
         return
       }
 
@@ -781,11 +798,11 @@ export function useData<
 }
 
 // Type guard functions to check pagination types
-export function isPageBasedPagination(paginationType?: PaginationType): boolean
-export function isPageBasedPagination<R extends RecordType>(
+export function isPagePagination(paginationType?: PaginationType): boolean
+export function isPagePagination<R extends RecordType>(
   pagination: PaginationInfo | null
 ): pagination is PageBasedPaginatedResponse<R>
-export function isPageBasedPagination<_R extends RecordType>(
+export function isPagePagination<_R extends RecordType>(
   paginationTypeOrInfo?: PaginationType | PaginationInfo | null
 ): boolean {
   const paginationTypeKey =
@@ -829,4 +846,24 @@ export function isAccumulativePagination(
       : paginationTypeOrInfo?.type
 
   return paginationTypeKey === "infinite-scroll"
+}
+
+/**
+ * Is the dta paginated?
+ */
+export function isPaginatedPagination(paginationType?: PaginationType): boolean
+export function isPaginatedPagination<R extends RecordType>(
+  pagination?: PaginationInfo | null
+): pagination is PaginatedResponse<R>
+export function isPaginatedPagination<_R extends RecordType>(
+  paginationTypeOrInfo?: PaginationType | PaginationInfo | null
+): boolean {
+  const paginationTypeKey =
+    typeof paginationTypeOrInfo === "string"
+      ? paginationTypeOrInfo
+      : paginationTypeOrInfo?.type
+
+  return (
+    paginationTypeKey === "pages" || paginationTypeKey === "infinite-scroll"
+  )
 }
