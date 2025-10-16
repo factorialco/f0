@@ -35,7 +35,7 @@ const RichTextDisplay = forwardRef<RichTextDisplayHandle, RichTextDisplayProps>(
             : content,
           {
             ADD_ATTR: ["target"],
-            ALLOWED_ATTR: ["href", "target", "rel"],
+            ALLOWED_ATTR: ["href", "target", "rel", "class"],
           }
         ),
       [format, content]
