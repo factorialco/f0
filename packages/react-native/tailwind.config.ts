@@ -4,7 +4,11 @@ const { hairlineWidth } = require("nativewind/theme");
 /** @type {import("tailwindcss").Config} */
 module.exports = {
   ...baseConfig,
-  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  content: [
+    "./playground/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+    ".storybook/**/*.{ts,tsx}",
+  ],
   presets: [require("nativewind/preset")],
   darkMode: "false",
   theme: {

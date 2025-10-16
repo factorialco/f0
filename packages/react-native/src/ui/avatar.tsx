@@ -68,6 +68,7 @@ type AvatarProps = React.ComponentPropsWithoutRef<typeof View> & {
   size?: (typeof sizes)[number];
   type?: (typeof type)[number];
   color?: (typeof color)[number];
+  className?: string;
 };
 
 const Avatar = ({ size, type, color, className, ...props }: AvatarProps) => (

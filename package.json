@@ -27,7 +27,10 @@
   },
   "pnpm": {
     "overrides": {
-      "esm-env": "npm:esm-env-runtime@^0.1.1"
+      "esm-env": "npm:esm-env-runtime@^0.1.1",
+      "@types/react": "19.0.14",
+      "react": "19.0.0",
+      "react-dom": "19.0.0"
     }
   }
 }

@@ -1,20 +1,43 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "lib": ["DOM", "ESNext"],
+    "noEmit": true,
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "jsx": "react-native",
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
     "outDir": "dist",
+    "rootDir": ".",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "paths": {
-      "@factorialco/f0-core": ["../core/src"]
+      "@factorialco/f0-core/*": ["../core/src/*"],
+      "lib/*": ["./lib/*"],
+      "ui/*": ["./ui/*"],
+      "src/*": ["./src/*"]
     },
     "types": ["nativewind/types", "jest"]
   },
-  "include": ["src", "nativewind-env.d.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src",
+    "playground",
+    "nativewind-env.d.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".storybook/storybook.requires.ts",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**",
+    "**/__snapshots__/**"
+  ],
+  "extends": "expo/tsconfig.base"
 }

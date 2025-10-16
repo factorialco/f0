@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "F0 React Native Storybook",
+    "slug": "f0-react-native-storybook",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./playground/assets/icon.svg",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./playground/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./playground/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./playground/assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
