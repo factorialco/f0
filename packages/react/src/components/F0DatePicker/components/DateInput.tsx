@@ -1,8 +1,9 @@
 import type {
-  DateRangeComplete,
   GranularityDefinition,
+  GranularityDefinitionKey,
 } from "@/experimental/OneCalendar"
-import { isValidDate } from "@/experimental/OneCalendar/utils"
+import { isActiveDate } from "@/experimental/OneCalendar/utils"
+import { Calendar } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/ui/InputField/InputField"
@@ -12,19 +13,16 @@ import { DatePickerValue } from "../types"
 type DateInputProps = {
   value: DatePickerValue | undefined
   className?: string
-  onDateChange?: (date: DateRangeComplete) => void
+  onDateChange?: (date: DatePickerValue | undefined) => void
   onClick?: () => void
-  granularity?: GranularityDefinition
+  granularity: GranularityDefinition & { key: GranularityDefinitionKey }
   open?: boolean
   onOpenChange?: (open: boolean) => void
-} & Pick<
+  minDate?: Date
+  maxDate?: Date
+} & Omit<
   InputFieldProps<string>,
-  | "label"
-  | "hideLabel"
-  | "error"
-  | "disabled"
-  | "placeholder"
-  | "onClickContent"
+  "onChange" | "onBlur" | "onFocus" | "icon" | "value"
 >
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -32,33 +30,40 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     {
       value,
       onDateChange,
-      disabled,
-      className,
       granularity,
       onOpenChange,
-      label,
-      hideLabel,
-      placeholder,
+      minDate,
+      maxDate,
+      ...inputProps
     },
     ref
   ) => {
-    const [localValue, setLocalValue] = useState("")
+    const [inputValue, setInputValue] = useState("")
     const [error, setError] = useState(false)
     const i18n = useI18n()
 
     useEffect(() => {
-      if (granularity) {
-        setLocalValue(granularity.toString(value?.value, i18n))
-      }
+      setInputValue(granularity.toString(value?.value, i18n))
     }, [value, granularity, i18n])
 
+    const isValidDate = (date: Date | undefined | null) => {
+      return isActiveDate(date, granularity, {
+        minDate,
+        maxDate,
+      })
+    }
+
     const handleBlur = () => {
-      const range = granularity?.toRange(
-        granularity?.fromString(localValue, i18n)
+      const range = granularity.toRange(
+        granularity.fromString(inputValue, i18n)
       )
+
       if (range && isValidDate(range?.from) && isValidDate(range?.to)) {
-        onDateChange?.(range)
-        onOpenChange?.(false)
+        onDateChange?.({
+          value: range,
+          granularity: granularity.key,
+        })
+        setError(false)
       } else {
         setError(true)
       }
@@ -66,17 +71,14 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 
     return (
       <Input
-        label={label}
-        hideLabel={hideLabel}
+        {...inputProps}
+        icon={Calendar}
         ref={ref}
-        placeholder={`${placeholder} TODO component not ready, just a boilerplate`}
-        value={localValue}
-        disabled={disabled}
-        error={error}
-        className={className}
         onFocus={() => onOpenChange?.(true)}
-        onChange={setLocalValue}
+        onChange={setInputValue}
+        error={error || inputProps.error}
         onBlur={handleBlur}
+        value={inputValue}
         onClickContent={() => onOpenChange?.(true)}
       />
     )
