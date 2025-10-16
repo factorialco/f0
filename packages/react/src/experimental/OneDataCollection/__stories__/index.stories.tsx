@@ -909,18 +909,19 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
   ),
 }
 
-const jsonDataSource = useDataCollectionSource({
-  filters,
-  sortings,
-  presets: filterPresets,
-  dataAdapter: {
-    fetchData: createPromiseDataFetch(),
-  },
-})
+const useJsonDataSource = () =>
+  useDataCollectionSource({
+    filters,
+    sortings,
+    presets: filterPresets,
+    dataAdapter: {
+      fetchData: createPromiseDataFetch(),
+    },
+  })
 
 const JsonVisualization = ({
   source,
-}: CustomVisualizationProps<typeof jsonDataSource>) => {
+}: CustomVisualizationProps<ReturnType<typeof useJsonDataSource>>) => {
   const { data, isLoading } = useDataCollectionData(source)
 
   if (isLoading) {
@@ -940,6 +941,8 @@ const JsonVisualization = ({
 
 export const WithCustomJsonView: Story = {
   render: () => {
+    const jsonDataSource = useJsonDataSource()
+
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
     })
