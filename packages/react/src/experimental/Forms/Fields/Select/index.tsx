@@ -6,7 +6,7 @@ import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import {
   BaseFetchOptions,
   BaseResponse,
-  DataSourceDefinition,
+  DataSource,
   FiltersDefinition,
   getDataSourcePaginationType,
   GroupingDefinition,
@@ -80,7 +80,7 @@ export type SelectProps<T extends string, R = unknown> = {
   actions?: Action[]
 } & (
   | {
-      source: DataSourceDefinition<
+      source: DataSource<
         ResolvedRecordType<R>,
         FiltersDefinition,
         SortingsDefinition,
