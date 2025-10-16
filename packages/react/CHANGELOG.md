@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.236.4](https://github.com/factorialco/f0/compare/f0-react-v1.236.3...f0-react-v1.236.4) (2025-10-16)
+
+
+### Bug Fixes
+
+* **RichTextDisplay:** add 'class' to allowed attributes for content rendering ([#2829](https://github.com/factorialco/f0/issues/2829)) ([13b9516](https://github.com/factorialco/f0/commit/13b9516449d153f086edd8c182751677cbd6bfba))
+
 ## [1.236.3](https://github.com/factorialco/f0/compare/f0-react-v1.236.2...f0-react-v1.236.3) (2025-10-16)
 
 
