@@ -63,7 +63,7 @@ const NotesTextEditorComponent = forwardRef<
     onTitleChange,
     actions,
     metadata,
-    withPadding = false,
+    withPadding: _withPadding = false,
   },
   ref
 ) {
@@ -82,12 +82,25 @@ const NotesTextEditorComponent = forwardRef<
 
   const [initialContent] = useState(() => initialEditorState?.content || "")
   const [title, setTitle] = useState(initialEditorState?.title || "")
+  const [isNarrowContainer, setIsNarrowContainer] = useState(false)
 
   useEffect(() => {
     if (onTitleChange) {
       onTitleChange(title)
     }
   }, [title, onTitleChange])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) =>
+      setIsNarrowContainer(entries[0].contentRect.width < 767)
+    )
+
+    resizeObserver.observe(containerRef.current)
+
+    return () => resizeObserver.disconnect()
+  }, [])
 
   const editor = useEditor({
     extensions: createNotesTextEditorExtensions(
@@ -221,7 +234,7 @@ const NotesTextEditorComponent = forwardRef<
 
   return (
     <div
-      className="relative flex h-full w-full flex-col"
+      className="relative flex h-full w-full flex-col border border-solid border-f1-border"
       ref={containerRef}
       id={editorId}
     >
@@ -246,7 +259,7 @@ const NotesTextEditorComponent = forwardRef<
           <div
             className={cn(
               "flex flex-col pb-5 pt-5 transition-all duration-300",
-              withPadding ? "px-32" : "px-14"
+              isNarrowContainer ? "px-14" : "px-32"
             )}
           >
             <input
@@ -294,7 +307,7 @@ const NotesTextEditorComponent = forwardRef<
             editor={editor}
             className={cn(
               "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
-              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
+              isNarrowContainer ? "[&>div]:px-14" : "[&>div]:px-32"
             )}
           />
         </div>
