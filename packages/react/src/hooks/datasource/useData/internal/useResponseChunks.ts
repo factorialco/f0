@@ -1,6 +1,7 @@
 import { sortBy } from "lodash"
 import { useMemo, useState } from "react"
 import { DataResponse, PaginationType, RecordType } from "../../types"
+import { getRecordsFromResponse } from "./utils"
 
 type ChunksState<R extends RecordType> = {
   paginationType: PaginationType
@@ -93,12 +94,18 @@ export const useResponseChunks = <R extends RecordType>(
 
       const isUpdated = !prev.chunks.has(key)
 
-      newChunks.set(key, {
-        order,
-        updatedAt: Date.now(),
-        response,
-        updated: isUpdated,
-      })
+      const records = getRecordsFromResponse(response)
+      if (records.length === 0) {
+        // If the chunk has no records, delete it
+        newChunks.delete(key)
+      } else {
+        newChunks.set(key, {
+          order,
+          updatedAt: Date.now(),
+          response,
+          updated: isUpdated,
+        })
+      }
       // Ensure the chunks are in order to simplify the logic in other parts of the code
       return {
         ...prev,

@@ -344,12 +344,12 @@ export function useData<
       .map((chunk) => getRecordsFromResponse(chunk.response as DataResponse<R>))
       .flat()
 
-    setRawData(records)
-
     // Dont update the pagination info if still loading
     if (loading) {
       return
     }
+
+    setRawData(records)
     const paginationType = getPaginationType(chunksState.paginationType)
     if (paginationType === "no-pagination" || !lastChunk) {
       setTotalItems(records.length)
