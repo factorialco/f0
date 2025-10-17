@@ -1,2 +1,2 @@
-export * from "./OneDatePickerPopup"
+export * from "./DatePickerPopup"
 export * from "./types"
