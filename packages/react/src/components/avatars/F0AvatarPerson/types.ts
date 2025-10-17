@@ -22,4 +22,8 @@ export type F0AvatarPersonProps = {
    * The badge to display on the avatar. Can be a module badge or a custom badge.
    */
   badge?: AvatarBadge
+  /**
+   * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+   */
+  deactivated?: boolean
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">

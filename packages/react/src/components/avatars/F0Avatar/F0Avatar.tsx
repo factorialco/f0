@@ -30,6 +30,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           size={size}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          deactivated={avatar.deactivated}
         />
       )
     case "team":
