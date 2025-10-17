@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.238.0](https://github.com/factorialco/f0/compare/f0-react-v1.237.0...f0-react-v1.238.0) (2025-10-17)
+
+
+### Features
+
+* **DataCollection:** improve usage of custom visualization ([#2826](https://github.com/factorialco/f0/issues/2826)) ([496c32b](https://github.com/factorialco/f0/commit/496c32b6621cfe4efad294c803f23cecc2ed3e04))
+
 ## [1.237.0](https://github.com/factorialco/f0/compare/f0-react-v1.236.4...f0-react-v1.237.0) (2025-10-17)
 
 
