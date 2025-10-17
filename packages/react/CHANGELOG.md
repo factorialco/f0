@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.237.0](https://github.com/factorialco/f0/compare/f0-react-v1.236.4...f0-react-v1.237.0) (2025-10-17)
+
+
+### Features
+
+* duplicate one sidepanel without AI ([#2810](https://github.com/factorialco/f0/issues/2810)) ([394ffd8](https://github.com/factorialco/f0/commit/394ffd812a1d64614bc41042de1ead3e55844a40))
+
 ## [1.236.4](https://github.com/factorialco/f0/compare/f0-react-v1.236.3...f0-react-v1.236.4) (2025-10-16)
 
 
