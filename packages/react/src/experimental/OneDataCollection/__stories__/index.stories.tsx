@@ -41,6 +41,7 @@ import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import type { CustomVisualizationProps } from "../visualizations/collection"
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -908,21 +909,19 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
   ),
 }
 
+const useJsonDataSource = () =>
+  useDataCollectionSource({
+    filters,
+    sortings,
+    presets: filterPresets,
+    dataAdapter: {
+      fetchData: createPromiseDataFetch(),
+    },
+  })
+
 const JsonVisualization = ({
   source,
-}: {
-  source: ReturnType<
-    typeof useDataCollectionSource<
-      (typeof mockUsers)[number],
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<(typeof mockUsers)[number]>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<(typeof mockUsers)[number]>
-    >
-  >
-}) => {
+}: CustomVisualizationProps<ReturnType<typeof useJsonDataSource>>) => {
   const { data, isLoading } = useDataCollectionData(source)
 
   if (isLoading) {
@@ -942,39 +941,21 @@ const JsonVisualization = ({
 
 export const WithCustomJsonView: Story = {
   render: () => {
-    type MockUser = (typeof mockUsers)[number]
-    type MockActions = ItemActionsDefinition<MockUser>
+    const jsonDataSource = useJsonDataSource()
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
     })
 
-    const dataSource = useDataCollectionSource<
-      MockUser,
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      MockActions,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >({
-      filters,
-      sortings,
-      presets: filterPresets,
-      dataAdapter: {
-        fetchData: createPromiseDataFetch(),
-      },
-    })
-
     return (
       <OneDataCollection
-        source={dataSource}
+        source={jsonDataSource}
         visualizations={[
           {
             type: "custom",
             label: "JSON View",
             icon: Ai,
-            component: ({ source }) => <JsonVisualization source={source} />,
+            component: (props) => <JsonVisualization {...props} />,
           },
           mockVisualizations.table,
           mockVisualizations.card,
