@@ -42,6 +42,13 @@ export type PropertyDefinition<T> = {
   hide?: (item: T) => boolean
 }
 
+const undefinedValueByVisualization: Partial<
+  Record<VisualizationType, string | undefined> & { default: string }
+> = {
+  default: "-",
+  list: undefined,
+}
+
 export const renderProperty = <R extends RecordType>(
   item: R,
   property: PropertyDefinition<R>,
@@ -49,10 +56,10 @@ export const renderProperty = <R extends RecordType>(
 ): ReactNode => {
   const renderDefinition = property.render(item)
 
-  let undefinedValue: string | undefined = "-"
-  if (visualization === "list") {
-    undefinedValue = undefined
-  }
+  const undefinedValue =
+    visualization in undefinedValueByVisualization
+      ? undefinedValueByVisualization[visualization]
+      : undefinedValueByVisualization.default
 
   return metadataRenderer(
     renderDefinition as ValueDisplayRendererDefinition,
