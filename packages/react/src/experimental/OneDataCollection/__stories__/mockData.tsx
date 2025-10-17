@@ -248,6 +248,12 @@ export const getMockVisualizations = (options?: {
           id: "email",
         },
         {
+          label: "Salary",
+          render: (item) => item.salary,
+          sorting: "salary",
+          id: "salary",
+        },
+        {
           label: "Role",
           render: (item) => item.role,
           sorting: "role",
@@ -774,7 +780,20 @@ export const createObservableDataFetch = (delay = 0) => {
             summaries: summaries as unknown as MockUser,
           },
         })
-        observer.complete()
+        let i = 0
+        setInterval(() => {
+          observer.next({
+            loading: false,
+            error: null,
+            data: {
+              records: filteredData.map((user) => ({
+                ...user,
+                salary: (user.salary ?? 0) + i++ * 123,
+              })),
+              summaries: summaries as unknown as MockUser,
+            },
+          })
+        }, 1000)
       }, delay)
 
       return () => clearTimeout(timeoutId)
@@ -1260,6 +1279,7 @@ export function createDataAdapter<
                 data: null,
               })
 
+              let i = 0
               setTimeout(() => {
                 const fetch = () =>
                   filterData(
@@ -1270,12 +1290,19 @@ export function createDataAdapter<
                   ) as PaginatedResponse<TRecord>
 
                 try {
+                  const data = fetch()
+                  console.log("data", data)
                   observer.next({
                     loading: false,
                     error: null,
-                    data: fetch(),
+                    data: {
+                      ...data,
+                      records: data.records.map((record) => ({
+                        ...record,
+                        salary: (record.salary ?? 0) + i++ * 1234,
+                      })),
+                    },
                   })
-                  observer.complete()
                 } catch (error) {
                   observer.next({
                     loading: false,
@@ -1328,34 +1355,45 @@ export function createDataAdapter<
                 data: null,
               })
 
-              setTimeout(() => {
-                const fetch = () =>
-                  filterData(
-                    data,
-                    filters,
-                    sortings,
-                    pagination
-                  ) as InfiniteScrollPaginatedResponse<TRecord>
+              let i = 0
+              setInterval(
+                () => {
+                  const fetch = () =>
+                    filterData(
+                      data,
+                      filters,
+                      sortings,
+                      pagination
+                    ) as InfiniteScrollPaginatedResponse<TRecord>
 
-                const fetchData = fetch()
+                  const fetchData = fetch()
 
-                try {
-                  observer.next({
-                    loading: false,
-                    error: null,
-                    data: fetchData,
-                  })
-                  observer.complete()
-                } catch (error) {
-                  observer.next({
-                    loading: false,
-                    error:
-                      error instanceof Error ? error : new Error(String(error)),
-                    data: null,
-                  })
-                  observer.complete()
-                }
-              }, delay)
+                  try {
+                    observer.next({
+                      loading: false,
+                      error: null,
+                      data: {
+                        ...fetchData,
+                        records: fetchData.records.map((record) => ({
+                          ...record,
+                          salary: (record.salary ?? 0) + i++ * 1234,
+                        })),
+                      },
+                    })
+                  } catch (error) {
+                    observer.next({
+                      loading: false,
+                      error:
+                        error instanceof Error
+                          ? error
+                          : new Error(String(error)),
+                      data: null,
+                    })
+                  }
+                },
+                2000 +
+                  333 * (pagination?.cursor ? Number(pagination.cursor) : 0)
+              )
             }
           )
         }

@@ -159,6 +159,7 @@ export const TableCollection = <
     onSelectItems,
     source.defaultSelectedItems
   )
+
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
@@ -338,14 +339,16 @@ export const TableCollection = <
                         select={statusToChecked(
                           groupAllSelectedStatus[group.key]
                         )}
-                        onSelectChange={(checked) =>
+                        onSelectChange={(checked: boolean) =>
                           handleSelectGroupChange(group, checked)
                         }
                         showOpenChange={collapsible}
                         label={group.label}
                         itemCount={itemCount}
                         open={openGroups[group.key]}
-                        onOpenChange={(open) => setGroupOpen(group.key, open)}
+                        onOpenChange={(open: boolean) =>
+                          setGroupOpen(group.key, open)
+                        }
                       />
                     </TableCell>
                     <TableCell
@@ -409,7 +412,7 @@ export const TableCollection = <
                 />
               )
             })}
-          {paginationInfo?.type === "infinite-scroll" &&
+          {isInfiniteScrollPagination(paginationInfo) &&
             isLoadingMore &&
             Array.from({ length: 5 }).map((_, rowIndex) => (
               <TableRow key={`skeleton-row-${rowIndex}`}>
