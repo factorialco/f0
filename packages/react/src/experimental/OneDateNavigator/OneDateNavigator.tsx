@@ -2,6 +2,7 @@ import {
   OneDatePickerPopup,
   OneDatePickerPopupProps,
 } from "@/ui/DatePickerPopup/OneDatePickerPopup"
+import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
 import { useEffect, useMemo, useState } from "react"
 import { granularityDefinitions } from "../OneCalendar"
 import { DateRange, DateRangeComplete } from "../OneCalendar/types"
@@ -32,9 +33,12 @@ export function OneDateNavigator({
   )
 
   useEffect(() => {
-    console.log("value changed", value)
-    setLocalValue(value)
-  }, [value])
+    if (isSameDatePickerValue(value, localValue)) {
+      return
+    }
+    setLocalValue(value || defaultValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
+  }, [value, defaultValue])
 
   const [compareToValue, setCompareToValue] = useState<
     DateRangeComplete | DateRangeComplete[] | undefined

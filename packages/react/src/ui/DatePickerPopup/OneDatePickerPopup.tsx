@@ -14,6 +14,7 @@ import { getCompareToValue } from "./compareTo"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
 import { DatePickerValue, DatePreset } from "./types"
+import { isSameDatePickerValue } from "./utils"
 
 export type CompareToDefKey = string
 export type CompareToDef = {
@@ -68,7 +69,11 @@ export function OneDatePickerPopup({
   )
 
   useEffect(() => {
+    if (isSameDatePickerValue(value, localValue)) {
+      return
+    }
     setLocalValue(value || defaultValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, defaultValue])
 
   const localGranularity = useMemo(
