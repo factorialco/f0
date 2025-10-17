@@ -49,11 +49,16 @@ export const renderProperty = <R extends RecordType>(
 ): ReactNode => {
   const renderDefinition = property.render(item)
 
+  let undefinedValue: string | undefined = "-"
+  if (visualization === "list") {
+    undefinedValue = undefined
+  }
+
   return metadataRenderer(
     renderDefinition as ValueDisplayRendererDefinition,
     {
       visualization,
     },
-    "-"
+    undefinedValue
   )
 }

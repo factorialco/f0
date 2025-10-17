@@ -76,7 +76,7 @@ export const Row = <
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "table")
+    return renderProperty(item, property, "list")
   }
 
   const { actions } = useI18n()
@@ -140,13 +140,19 @@ export const Row = <
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
         {(fields || [])
           .filter((field) => !field.hide?.(item))
-          .map((field) => (
-            <div key={String(field.label)}>
-              <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
-                {renderCell(item, field)}
+          .map((field) => {
+            const content = renderCell(item, field)
+
+            if (!content) return null
+
+            return (
+              <div key={String(field.label)}>
+                <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
+                  {content}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
       </div>
       {source.itemActions && (
         <>
