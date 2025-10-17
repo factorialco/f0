@@ -151,11 +151,11 @@ const defaultFetchDataAndUpdateOptions = <
   options: O
 ): O => options
 
-const defaultIdProvider = (
-  item: RecordType,
-  index?: number
-): string | number =>
-  "id" in item ? `${item.id}` : index || JSON.stringify(item)
+// const defaultIdProvider = (
+//   item: RecordType,
+//   index?: number
+// ): string | number =>
+//   "id" in item ? `${item.id}` : index || JSON.stringify(item)
 
 /**
  * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
@@ -249,7 +249,6 @@ export function useData<
     setIsLoading,
     currentGrouping,
     grouping,
-    idProvider = defaultIdProvider,
     itemPreFilter,
   } = source
 
@@ -268,8 +267,16 @@ export function useData<
 
   const { paginationInfo, setPaginationInfo } = usePaginationState()
 
-  const { chunksState, setChunk, resetChunks, lastChunk, lastUpdatedChunk } =
-    useResponseChunks<R>(dataAdapter.paginationType)
+  const {
+    chunksState,
+    setChunk,
+    resetChunks,
+    lastChunk,
+    lastUpdatedChunk,
+    setChunkIsFirstLoad,
+    chunksLoadingState,
+    lastChunkIsFirstLoad,
+  } = useResponseChunks<R>(dataAdapter.paginationType)
 
   useEffect(() => {
     if (itemPreFilter) {
@@ -329,30 +336,9 @@ export function useData<
         : deferredSearch
   }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
-  //   /**
-  //    * Merges 2 arrays of items using the idProvider to update the existing items
-  //    * and add the new items
-  //    */
-  //   const mergeItems = (
-  //     prevData: R[],
-  //     newData: R[],
-  //     idProvider: (item: R, index?: number) => string | number | symbol
-  //   ): R[] => {
-  //     {
-  //       // The Map order is guaranteed to be the same as the order of the items in the array. Check https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps
-  //       const idMap = new Map(
-  //         prevData.map((item, index) => [idProvider(item, index), item])
-  //       )
-
-  //       for (const [index, record] of newData.entries()) {
-  //         const id = idProvider(record, index)
-  //         idMap.set(id, record)
-  //       }
-
-  //       return Array.from(idMap.values())
-  //     }
-  //   }
-
+  /**
+   * Update the raw data and the pagination info based on the chunks state
+   */
   useEffect(() => {
     const records = Array.from(chunksState.chunks.values())
       .map((chunk) => getRecordsFromResponse(chunk.response as DataResponse<R>))
@@ -410,7 +396,6 @@ export function useData<
             lastChunkResponse.cursor !== undefined
               ? lastChunkResponse.cursor
               : "0"
-          console.log("cursor---->", cursor)
           // : appendMode
           //   ? String(result.perPage)
           //   : "0",
@@ -428,32 +413,44 @@ export function useData<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- this should only be executed on chunks change
   }, [chunksState, lastUpdatedChunk, lastChunk, loading])
 
+  /**
+   * Updatesd the global loading state based on the chunks loading state
+   */
+  useEffect(() => {
+    const chunksLoadingStateValues = Array.from(chunksLoadingState.values())
+
+    // Set initial loading state
+    const isFirstLoadOfSomeChunk = chunksLoadingStateValues.some(
+      (chunk) => chunk.firstLoad
+    )
+    setIsLoading(isFirstLoadOfSomeChunk)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when chunksLoadingState changes
+  }, [chunksLoadingState])
+
+  /**
+   * Update the loading more state based on the last chunk loading state
+   */
+  useEffect(() => {
+    setIsLoadingMore(lastChunkIsFirstLoad)
+  }, [lastChunkIsFirstLoad])
+
+  /**
+   * Handle the fetch success (it can be executed multiple times for the same chunk, for example observable emit multiple times)
+   */
   const handleFetchSuccess = useCallback(
-    (
-      key: string,
-      result: DataResponse<R>,
-      appendMode: boolean,
-      isLoadingYet?: boolean
-    ) => {
+    (key: string, result: DataResponse<R>, isLoadingYet?: boolean) => {
       /**
        * Call to the onResponse callback
        */
       onResponse?.(result)
 
-      if (!appendMode) {
-        console.log("resetChunks---->")
-        // resetChunks()
-      }
+      setIsInitialLoading(false)
+      setChunkIsFirstLoad(key, !!isLoadingYet)
+
       setChunk(key, result)
 
-      console.log("isLoadingYet---->", isLoadingYet)
-      setError(null)
-      setTimeout(() => {
-        setIsInitialLoading(false)
-        setIsLoading(!!isLoadingYet)
-        setIsLoadingMore(false)
-        isLoadingMoreRef.current = false
-      }, 5000)
+      isLoadingMoreRef.current = false
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -469,6 +466,9 @@ export function useData<
     ]
   )
 
+  /**
+   * Build the data object based on the raw data and the grouping
+   */
   const data = useMemo(() => {
     // if (hasLanes) return { type: "flat" as const, records: [] }
     // Add the groupId to the data if grouping is enabled
@@ -540,8 +540,11 @@ export function useData<
     }
   }, [rawData, currentGrouping, grouping, mergedFilters])
 
+  /**
+   * Handle the fetch error
+   */
   const handleFetchError = useCallback(
-    (error: unknown) => {
+    (error: unknown, chunkkey?: string) => {
       setError({
         message: "Error fetching data",
         cause: error,
@@ -551,10 +554,14 @@ export function useData<
         cause: error,
       })
       setIsInitialLoading(false)
-      setIsLoading(false)
+      if (chunkkey) {
+        setChunkIsFirstLoad(chunkkey, false)
+      } else {
+        resetChunks()
+      }
       setIsLoadingMore(false)
-      // Clear the cleanup reference when an error occurs
-      cleanup.current.clear()
+      // // Clear the cleanup reference when an error occurs
+      // cleanup.current.clear()
       isLoadingMoreRef.current = false
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the onError changes
@@ -572,6 +579,9 @@ export function useData<
     search?: string | undefined
   }
 
+  /**
+   * Fetch the data and update the chunks state
+   */
   const fetchDataAndUpdate = useCallback(
     async ({
       filters,
@@ -585,6 +595,7 @@ export function useData<
         if (cleanup.current && !appendMode) {
           cleanup.current.forEach((cleanupFn) => cleanupFn())
           cleanup.current.clear()
+          resetChunks()
         }
 
         const sortings: SortingsStateMultiple = [
@@ -625,38 +636,36 @@ export function useData<
 
         const result = fetcher()
 
-        // Handle synchronous data
+        /**
+         * Synchronous data
+         */
         if (!("then" in result || "subscribe" in result)) {
-          handleFetchSuccess("non-paginated", result, appendMode)
+          handleFetchSuccess("non-paginated", result, false)
           return
         }
 
+        /**
+         * Async data
+         */
         const observable: Observable<DataType<ResultType>> =
           promiseToObservable(result)
 
+        // Allows us to identify the chunk to know if its new or is a refresh
         const requestKey = cursor ?? currentPage?.toString() ?? "0"
 
-        // If we request the same page or cursor again, we need to clean up the previous subscription
-        const requestCleanup = cleanup.current.get(requestKey)
-        if (requestCleanup) {
-          console.log("requestCleanup---->", requestKey)
-          requestCleanup()
-          cleanup.current.delete(requestKey)
+        // If the chunk is already in the state, we don't need to fetch it again the observable will handle the updates
+        if (chunksState.chunks.has(requestKey)) {
+          return
         }
 
         const subscription = observable.subscribe({
           next: (state) => {
             if (state.data) {
-              handleFetchSuccess(
-                requestKey,
-                state.data,
-                appendMode,
-                state.loading
-              )
+              handleFetchSuccess(requestKey, state.data, state.loading)
             } else if (state.loading) {
-              setIsLoading(true)
+              setChunkIsFirstLoad(requestKey, true)
             } else if (state.error) {
-              handleFetchError(state.error)
+              handleFetchError(state.error, requestKey)
             }
           },
           error: handleFetchError,
@@ -716,7 +725,9 @@ export function useData<
   const loadMore = useCallback(
     () => {
       const currentPaginationInfo = paginationInfoRef.current
-      if (!currentPaginationInfo || loading) return
+      if (!currentPaginationInfo || loading) {
+        return
+      }
 
       if (!isInfiniteScrollPagination(currentPaginationInfo)) {
         console.warn(
@@ -733,7 +744,6 @@ export function useData<
         setIsLoading(true)
         isLoadingMoreRef.current = true
 
-        // Use named parameters
         fetchDataAndUpdate({
           filters: mergedFilters,
           appendMode: true,
@@ -790,8 +800,9 @@ export function useData<
   )
 
   useEffect(() => {
+    const cleanupCurrent = cleanup.current
     return () => {
-      cleanup.current?.forEach((cleanupFn) => cleanupFn())
+      cleanupCurrent?.forEach((cleanupFn) => cleanupFn())
     }
   }, [])
 

@@ -19,7 +19,9 @@ export const useInfiniteScrollPagination = (
     }
 
     const loadingIndicator = loadingIndicatorRef.current
-    if (!loadingIndicator) return
+    if (!loadingIndicator) {
+      return
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {

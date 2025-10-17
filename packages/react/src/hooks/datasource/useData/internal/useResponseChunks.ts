@@ -9,11 +9,18 @@ type ChunksState<R extends RecordType> = {
     {
       order: number
       updatedAt: number
+      updated: boolean
       response: DataResponse<R>
     }
   >
 }
 
+/**
+ * Hook for managing the state of the chunks
+ * We store the pages responses in a map and the order of the pages to allow us to update the chunck data (records) when a chunk is updated by an observable after the initial load
+ * @param paginationType
+ * @returns
+ */
 export const useResponseChunks = <R extends RecordType>(
   paginationType: PaginationType | undefined
 ) => {
@@ -23,11 +30,56 @@ export const useResponseChunks = <R extends RecordType>(
     chunks: new Map(),
   })
 
+  const [chunksLoadingState, setChunksLoadingState] = useState<
+    Map<
+      string,
+      {
+        firstLoad: boolean
+        loading: boolean
+      }
+    >
+  >(new Map())
+
+  const setChunkIsFirstLoad = (key: string, firstLoad: boolean) => {
+    const chunk = chunksState.chunks.get(key)
+    // If the chunk is already loaded, it can not be the first load true, only can disable it
+    if (chunk && firstLoad) {
+      return
+    }
+    setChunksLoadingState((prev) => {
+      const newChunksLoadingState = new Map(prev)
+      newChunksLoadingState.set(key, {
+        firstLoad,
+        loading: prev.get(key)?.loading ?? false,
+      })
+      return newChunksLoadingState
+    })
+  }
+
+  /**
+   * REturns if the last chunk on the list is first load
+   */
+  const lastChunkIsFirstLoad = useMemo(() => {
+    return Array.from(chunksLoadingState.values()).pop()?.firstLoad ?? false
+  }, [chunksLoadingState])
+
+  const setChunkLoading = (key: string, loading: boolean) => {
+    setChunksLoadingState((prev) => {
+      const newChunksLoadingState = new Map(prev)
+      newChunksLoadingState.set(key, {
+        firstLoad: prev.get(key)?.firstLoad ?? false,
+        loading,
+      })
+      return newChunksLoadingState
+    })
+  }
+
   const resetChunks = () => {
     setChunksState({
       paginationType: localPaginationType,
       chunks: new Map(),
     })
+    setChunksLoadingState(new Map())
   }
 
   const setChunk = (key: string, response: DataResponse<R>) => {
@@ -39,7 +91,14 @@ export const useResponseChunks = <R extends RecordType>(
           ? prev.chunks.get(key)?.order
           : prev.chunks.size) ?? 0
 
-      newChunks.set(key, { order, updatedAt: Date.now(), response })
+      const isUpdated = !prev.chunks.has(key)
+
+      newChunks.set(key, {
+        order,
+        updatedAt: Date.now(),
+        response,
+        updated: isUpdated,
+      })
       // Ensure the chunks are in order to simplify the logic in other parts of the code
       return {
         ...prev,
@@ -66,5 +125,9 @@ export const useResponseChunks = <R extends RecordType>(
     chunksState,
     setChunk,
     resetChunks,
+    chunksLoadingState,
+    setChunkIsFirstLoad,
+    setChunkLoading,
+    lastChunkIsFirstLoad,
   }
 }

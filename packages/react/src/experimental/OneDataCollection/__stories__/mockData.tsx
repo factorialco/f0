@@ -1355,8 +1355,6 @@ export function createDataAdapter<
                 data: null,
               })
 
-              console.log("fetchData---->", pagination)
-
               let i = 0
               setInterval(
                 () => {
