@@ -1,7 +1,9 @@
 import { granularityDefinitions } from "@/experimental/OneCalendar"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { subDays } from "date-fns"
 import { useState } from "react"
+import { expect, within } from "storybook/test"
 import { CalendarView, DateRange } from "../../OneCalendar/types"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
@@ -108,6 +110,12 @@ export const WithDefaultDate: Story = {
       granularity: "month",
     } as DatePickerValue,
     granularities: ["month"],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Ensure the default value is rendered
+    const trigger = canvas.getByText("Jul 2025")
+    expect(trigger).toBeInTheDocument()
   },
 }
 
