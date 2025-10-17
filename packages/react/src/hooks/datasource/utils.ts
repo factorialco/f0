@@ -23,6 +23,12 @@ export const getDataSourcePaginationType = <
   return dataAdapter.paginationType ?? "no-pagination"
 }
 
+export function getPaginationType(
+  paginationType: PaginationType | undefined
+): PaginationType {
+  return paginationType ?? "no-pagination"
+}
+
 /**
  * Is the data paginated?
  */

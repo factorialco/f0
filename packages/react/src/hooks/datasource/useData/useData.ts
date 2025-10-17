@@ -12,8 +12,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { Observable, Subscription } from "zen-observable-ts"
-import { getRecordsFromResponse, groupBy } from "./internal/utils"
+import { Observable } from "zen-observable-ts"
 import {
   BaseFetchOptions,
   GroupingDefinition,
@@ -22,16 +21,18 @@ import {
   RecordType,
   SortingsDefinition,
   SortingsStateMultiple,
-} from "./types"
-import { DataSource } from "./types/datasource.typings"
-import { DataResponse } from "./types/fetch.typings"
+} from "../types"
+import { DataSource } from "../types/datasource.typings"
+import { DataResponse, PaginatedResponse } from "../types/fetch.typings"
 import {
-  getDataSourcePaginationType,
+  getPaginationType,
   isInfiniteScrollPagination,
-  isNotPaginatedResponse,
   isPagesPagination,
   isPaginatedPagination,
-} from "./utils"
+} from "../utils"
+import { getPaginationRequestParams } from "./internal/pagination"
+import { useResponseChunks } from "./internal/useResponseChunks"
+import { getRecordsFromResponse, groupBy } from "./internal/utils"
 
 /**
  * Represents an error that occurred during data fetching
@@ -252,7 +253,7 @@ export function useData<
     itemPreFilter,
   } = source
 
-  const cleanup = useRef<(() => void) | undefined>()
+  const cleanup = useRef<Map<string, () => void>>(new Map())
 
   const {
     isInitialLoading,
@@ -266,6 +267,9 @@ export function useData<
   const [filteredItemsCount, setFilteredItemsCount] = useState<number>(0)
 
   const { paginationInfo, setPaginationInfo } = usePaginationState()
+
+  const { chunksState, setChunk, resetChunks, lastChunk, lastUpdatedChunk } =
+    useResponseChunks<R>(dataAdapter.paginationType)
 
   useEffect(() => {
     if (itemPreFilter) {
@@ -302,6 +306,10 @@ export function useData<
 
   const isLoadingMoreRef = useRef(false)
 
+  const loading = useMemo(() => {
+    return isLoading || isLoadingMore
+  }, [isLoading, isLoadingMore])
+
   const mergedFilters = useMemo(() => {
     return { ...currentFilters, ...filters }
   }, [currentFilters, filters])
@@ -321,97 +329,131 @@ export function useData<
         : deferredSearch
   }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
-  /**
-   * Merges 2 arrays of items using the idProvider to update the existing items
-   * and add the new items
-   */
-  const mergeItems = (
-    prevData: R[],
-    newData: R[],
-    idProvider: (item: R, index?: number) => string | number | symbol
-  ): R[] => {
-    {
-      // The Map order is guaranteed to be the same as the order of the items in the array. Check https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps
-      const idMap = new Map(
-        prevData.map((item, index) => [idProvider(item, index), item])
-      )
+  //   /**
+  //    * Merges 2 arrays of items using the idProvider to update the existing items
+  //    * and add the new items
+  //    */
+  //   const mergeItems = (
+  //     prevData: R[],
+  //     newData: R[],
+  //     idProvider: (item: R, index?: number) => string | number | symbol
+  //   ): R[] => {
+  //     {
+  //       // The Map order is guaranteed to be the same as the order of the items in the array. Check https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps
+  //       const idMap = new Map(
+  //         prevData.map((item, index) => [idProvider(item, index), item])
+  //       )
 
-      for (const [index, record] of newData.entries()) {
-        const id = idProvider(record, index)
-        idMap.set(id, record)
-      }
+  //       for (const [index, record] of newData.entries()) {
+  //         const id = idProvider(record, index)
+  //         idMap.set(id, record)
+  //       }
 
-      return Array.from(idMap.values())
+  //       return Array.from(idMap.values())
+  //     }
+  //   }
+
+  useEffect(() => {
+    const records = Array.from(chunksState.chunks.values())
+      .map((chunk) => getRecordsFromResponse(chunk.response as DataResponse<R>))
+      .flat()
+
+    setRawData(records)
+
+    // Dont update the pagination info if still loading
+    if (loading) {
+      return
     }
-  }
+    const paginationType = getPaginationType(chunksState.paginationType)
+    if (paginationType === "no-pagination" || !lastChunk) {
+      setTotalItems(records.length)
+    } else {
+      const lastChunkResponse = lastChunk.response as PaginatedResponse<R>
+      const lastUpdatedChunkResponse =
+        lastUpdatedChunk.response as PaginatedResponse<R>
+
+      // Update pagination info based on the pagination type
+      if (isPaginatedPagination(paginationType)) {
+        // For page-based pagination
+        const common = {
+          total: lastUpdatedChunkResponse.total,
+          perPage: lastUpdatedChunkResponse.perPage,
+        }
+        setTotalItems(lastUpdatedChunkResponse.total)
+
+        if (isPagesPagination(paginationType)) {
+          setPaginationInfo({
+            ...common,
+            type: "pages" as const,
+            currentPage:
+              "currentPage" in lastUpdatedChunkResponse
+                ? lastUpdatedChunkResponse.currentPage
+                : 1,
+            pagesCount:
+              "pagesCount" in lastUpdatedChunkResponse
+                ? lastUpdatedChunkResponse.pagesCount
+                : Math.ceil(
+                    lastUpdatedChunkResponse.total /
+                      lastUpdatedChunkResponse.perPage
+                  ),
+          })
+        }
+
+        if (isInfiniteScrollPagination(paginationType)) {
+          const hasMore =
+            "hasMore" in lastChunkResponse
+              ? lastChunkResponse.hasMore
+              : rawData.length + records.length < lastChunkResponse.total
+
+          const cursor =
+            "cursor" in lastChunkResponse &&
+            lastChunkResponse.cursor !== undefined
+              ? lastChunkResponse.cursor
+              : "0"
+          console.log("cursor---->", cursor)
+          // : appendMode
+          //   ? String(result.perPage)
+          //   : "0",
+
+          setPaginationInfo({
+            ...common,
+            type: "infinite-scroll" as const,
+            cursor,
+            hasMore,
+          })
+        }
+      }
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- this should only be executed on chunks change
+  }, [chunksState, lastUpdatedChunk, lastChunk, loading])
 
   const handleFetchSuccess = useCallback(
-    (result: DataResponse<R>, appendMode: boolean, isLoadingYet?: boolean) => {
+    (
+      key: string,
+      result: DataResponse<R>,
+      appendMode: boolean,
+      isLoadingYet?: boolean
+    ) => {
       /**
        * Call to the onResponse callback
        */
       onResponse?.(result)
 
-      const records = getRecordsFromResponse(result)
-
-      console.log("records---->", records)
-
-      if (isNotPaginatedResponse(result)) {
-        setTotalItems(result.length)
-      } else {
-        // Use a default value of "pages" when paginationType is undefined
-        const paginationType = getDataSourcePaginationType(dataAdapter)
-
-        // Update pagination info based on the pagination type
-        if (isPaginatedPagination(paginationType)) {
-          // For page-based pagination
-          const common = {
-            total: result.total,
-            perPage: result.perPage,
-          }
-          setTotalItems(result.total)
-
-          if (isPagesPagination(paginationType)) {
-            setPaginationInfo({
-              ...common,
-              type: "pages" as const,
-              currentPage: "currentPage" in result ? result.currentPage : 1,
-              pagesCount:
-                "pagesCount" in result
-                  ? result.pagesCount
-                  : Math.ceil(result.total / result.perPage),
-            })
-          }
-
-          if (isInfiniteScrollPagination(paginationType)) {
-            setPaginationInfo({
-              ...common,
-              type: "infinite-scroll" as const,
-              cursor:
-                "cursor" in result && result.cursor !== undefined
-                  ? result.cursor
-                  : appendMode
-                    ? String(result.perPage)
-                    : "0",
-              hasMore:
-                "hasMore" in result
-                  ? result.hasMore
-                  : rawData.length + result.records.length < result.total,
-            })
-          }
-        }
+      if (!appendMode) {
+        console.log("resetChunks---->")
+        // resetChunks()
       }
+      setChunk(key, result)
 
-      setRawData(
-        appendMode
-          ? (prevData) => mergeItems(prevData, records, idProvider)
-          : records
-      )
+      console.log("isLoadingYet---->", isLoadingYet)
       setError(null)
-      setIsInitialLoading(false)
-      setIsLoading(!!isLoadingYet)
-      setIsLoadingMore(false)
-      isLoadingMoreRef.current = false
+      setTimeout(() => {
+        setIsInitialLoading(false)
+        setIsLoading(!!isLoadingYet)
+        setIsLoadingMore(false)
+        isLoadingMoreRef.current = false
+      }, 5000)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -512,7 +554,7 @@ export function useData<
       setIsLoading(false)
       setIsLoadingMore(false)
       // Clear the cleanup reference when an error occurs
-      cleanup.current = undefined
+      cleanup.current.clear()
       isLoadingMoreRef.current = false
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the onError changes
@@ -530,11 +572,6 @@ export function useData<
     search?: string | undefined
   }
 
-  const observableRef = useRef<Observable<DataType<ResultType>> | undefined>(
-    undefined
-  )
-  const subscriptionRef = useRef<Subscription | undefined>(undefined)
-
   const fetchDataAndUpdate = useCallback(
     async ({
       filters,
@@ -546,8 +583,8 @@ export function useData<
       try {
         // Clean up any existing subscription before creating a new one if the pagination is not accumulative
         if (cleanup.current && !appendMode) {
-          cleanup.current()
-          cleanup.current = undefined
+          cleanup.current.forEach((cleanupFn) => cleanupFn())
+          cleanup.current.clear()
         }
 
         const sortings: SortingsStateMultiple = [
@@ -569,41 +606,20 @@ export function useData<
             : []),
         ]
 
-        const baseFetchOptions: BaseFetchOptions<Filters> = fetchParamsProvider(
-          {
-            filters,
-            search,
-            sortings,
-          }
-        )
-
         function fetcher(): PromiseOrObservable<ResultType> {
           setTotalItems(undefined)
 
-          const defaultPerPage = 20
-
-          // Safely access perPage, default to 20 if not available
-          const perPageValue =
-            "perPage" in dataAdapter && dataAdapter.perPage !== undefined
-              ? dataAdapter.perPage
-              : defaultPerPage
-
-          // Use appropriate pagination type based on dataAdapter configuration
           return dataAdapter.fetchData({
-            ...baseFetchOptions,
-            pagination: {
-              ...(isPagesPagination(dataAdapter.paginationType)
-                ? {
-                    currentPage,
-                    perPage: perPageValue,
-                  }
-                : isInfiniteScrollPagination(dataAdapter.paginationType)
-                  ? {
-                      cursor,
-                      perPage: perPageValue,
-                    }
-                  : {}),
-            },
+            ...fetchParamsProvider({
+              filters,
+              search,
+              sortings,
+            }),
+            pagination: getPaginationRequestParams(
+              dataAdapter,
+              currentPage,
+              cursor
+            ),
           }) as PromiseOrObservable<ResultType>
         }
 
@@ -611,29 +627,32 @@ export function useData<
 
         // Handle synchronous data
         if (!("then" in result || "subscribe" in result)) {
-          handleFetchSuccess(result, appendMode)
+          handleFetchSuccess("non-paginated", result, appendMode)
           return
         }
 
         const observable: Observable<DataType<ResultType>> =
           promiseToObservable(result)
 
-        observableRef.current =
-          appendMode && observableRef.current
-            ? observableRef.current.concat(observable)
-            : observable
+        const requestKey = cursor ?? currentPage?.toString() ?? "0"
 
-        // Always clean up previous subscription when creating a new one
-        // The concatenated observable will re-emit all necessary values
-        if (subscriptionRef.current) {
-          subscriptionRef.current.unsubscribe()
+        // If we request the same page or cursor again, we need to clean up the previous subscription
+        const requestCleanup = cleanup.current.get(requestKey)
+        if (requestCleanup) {
+          console.log("requestCleanup---->", requestKey)
+          requestCleanup()
+          cleanup.current.delete(requestKey)
         }
 
-        subscriptionRef.current = observableRef.current.subscribe({
+        const subscription = observable.subscribe({
           next: (state) => {
-            console.log("state", state)
             if (state.data) {
-              handleFetchSuccess(state.data, appendMode, state.loading, cursor)
+              handleFetchSuccess(
+                requestKey,
+                state.data,
+                appendMode,
+                state.loading
+              )
             } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
@@ -642,11 +661,11 @@ export function useData<
           },
           error: handleFetchError,
           complete: () => {
-            cleanup.current = undefined
+            cleanup.current?.delete(requestKey)
           },
         })
 
-        cleanup.current = () => subscriptionRef.current?.unsubscribe()
+        cleanup.current.set(requestKey, () => subscription.unsubscribe())
       } catch (error) {
         handleFetchError(error)
       }
@@ -697,7 +716,7 @@ export function useData<
   const loadMore = useCallback(
     () => {
       const currentPaginationInfo = paginationInfoRef.current
-      if (!currentPaginationInfo || isLoading || isLoadingMore) return
+      if (!currentPaginationInfo || loading) return
 
       if (!isInfiniteScrollPagination(currentPaginationInfo)) {
         console.warn(
@@ -772,7 +791,7 @@ export function useData<
 
   useEffect(() => {
     return () => {
-      cleanup.current?.()
+      cleanup.current?.forEach((cleanupFn) => cleanupFn())
     }
   }, [])
 

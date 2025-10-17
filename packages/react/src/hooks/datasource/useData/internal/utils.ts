@@ -1,5 +1,5 @@
-import { DataResponse, RecordType } from "../types"
-import { isNotPaginatedResponse } from "../utils"
+import { DataResponse, RecordType } from "../../types"
+import { isNotPaginatedResponse } from "../../utils"
 
 export const groupBy = <R>(array: R[], key: keyof R): Map<string, R[]> => {
   const result: Map<string, R[]> = new Map()

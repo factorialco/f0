@@ -1280,7 +1280,7 @@ export function createDataAdapter<
               })
 
               let i = 0
-              setInterval(() => {
+              setTimeout(() => {
                 const fetch = () =>
                   filterData(
                     data,
@@ -1355,39 +1355,47 @@ export function createDataAdapter<
                 data: null,
               })
 
+              console.log("fetchData---->", pagination)
+
               let i = 0
-              setTimeout(() => {
-                const fetch = () =>
-                  filterData(
-                    data,
-                    filters,
-                    sortings,
-                    pagination
-                  ) as InfiniteScrollPaginatedResponse<TRecord>
+              setInterval(
+                () => {
+                  const fetch = () =>
+                    filterData(
+                      data,
+                      filters,
+                      sortings,
+                      pagination
+                    ) as InfiniteScrollPaginatedResponse<TRecord>
 
-                const fetchData = fetch()
+                  const fetchData = fetch()
 
-                try {
-                  observer.next({
-                    loading: false,
-                    error: null,
-                    data: {
-                      ...fetchData,
-                      records: fetchData.records.map((record) => ({
-                        ...record,
-                        salary: (record.salary ?? 0) + i++ * 1234,
-                      })),
-                    },
-                  })
-                } catch (error) {
-                  observer.next({
-                    loading: false,
-                    error:
-                      error instanceof Error ? error : new Error(String(error)),
-                    data: null,
-                  })
-                }
-              }, delay)
+                  try {
+                    observer.next({
+                      loading: false,
+                      error: null,
+                      data: {
+                        ...fetchData,
+                        records: fetchData.records.map((record) => ({
+                          ...record,
+                          salary: (record.salary ?? 0) + i++ * 1234,
+                        })),
+                      },
+                    })
+                  } catch (error) {
+                    observer.next({
+                      loading: false,
+                      error:
+                        error instanceof Error
+                          ? error
+                          : new Error(String(error)),
+                      data: null,
+                    })
+                  }
+                },
+                2000 +
+                  333 * (pagination?.cursor ? Number(pagination.cursor) : 0)
+              )
             }
           )
         }
