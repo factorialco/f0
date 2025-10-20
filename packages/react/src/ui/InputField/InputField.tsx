@@ -293,7 +293,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       handleChange(emptyValue)
     }
 
-    const handleClickContent = () => {
+    const handleClickContent = (e: React.MouseEvent) => {
+      // Stops the propagation to avoid pass clicks to the parent elenments, for example a modal can be closed by clicking on the input field if no stopPropagation and preventDefault are called.
+      e.stopPropagation()
+      e.preventDefault()
       if (!disabled) {
         onClickContent?.()
       }

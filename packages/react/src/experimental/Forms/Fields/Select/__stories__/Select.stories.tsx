@@ -243,6 +243,18 @@ const meta: Meta = {
     disabled: false,
     showSearchBox: false,
   },
+  decorators: [
+    (Story) => (
+      <div
+        className="w-[350px]"
+        onClick={() => {
+          console.log("click was get in elements bellow the select")
+        }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof SelectWithHooks>
 
