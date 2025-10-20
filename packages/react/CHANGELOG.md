@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.239.1](https://github.com/factorialco/f0/compare/f0-react-v1.239.0...f0-react-v1.239.1) (2025-10-20)
+
+
+### Bug Fixes
+
+* add min height for data collection list view rows ([#2845](https://github.com/factorialco/f0/issues/2845)) ([b7c5153](https://github.com/factorialco/f0/commit/b7c5153237478422541eb6fc2523ddb42f13b3ef))
+
 ## [1.239.0](https://github.com/factorialco/f0/compare/f0-react-v1.238.1...f0-react-v1.239.0) (2025-10-20)
 
 
