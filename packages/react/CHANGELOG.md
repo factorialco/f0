@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.238.1](https://github.com/factorialco/f0/compare/f0-react-v1.238.0...f0-react-v1.238.1) (2025-10-20)
+
+
+### Bug Fixes
+
+* inputfield stop propagation ([#2842](https://github.com/factorialco/f0/issues/2842)) ([e18fcce](https://github.com/factorialco/f0/commit/e18fcce0b469170f1a935be307f7f8d38fa0a0ce))
+
 ## [1.238.0](https://github.com/factorialco/f0/compare/f0-react-v1.237.0...f0-react-v1.238.0) (2025-10-17)
 
 
