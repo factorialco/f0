@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.239.0](https://github.com/factorialco/f0/compare/f0-react-v1.238.1...f0-react-v1.239.0) (2025-10-20)
+
+
+### Features
+
+* **AvatarPerson:** Terminated employee ([#2812](https://github.com/factorialco/f0/issues/2812)) ([0b9d1c6](https://github.com/factorialco/f0/commit/0b9d1c6c4f3a812dbb71d4184e350c43300a101e))
+
 ## [1.238.1](https://github.com/factorialco/f0/compare/f0-react-v1.238.0...f0-react-v1.238.1) (2025-10-20)
 
 
