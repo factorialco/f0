@@ -269,13 +269,13 @@ export function useData<
 
   const {
     chunksState,
-    setChunk,
+    setChunkData,
     resetChunks,
     lastChunk,
     lastUpdatedChunk,
-    setChunkIsFirstLoad,
+    setChunkLoading,
     chunksLoadingState,
-    lastChunkIsFirstLoad,
+    initChunkIfNeeded,
   } = useResponseChunks<R>(dataAdapter.paginationType)
 
   useEffect(() => {
@@ -413,27 +413,24 @@ export function useData<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- this should only be executed on chunks change
   }, [chunksState, lastUpdatedChunk, lastChunk, loading])
 
-  /**
-   * Updatesd the global loading state based on the chunks loading state
-   */
   useEffect(() => {
-    const chunksLoadingStateValues = Array.from(chunksLoadingState.values())
-
-    // Set initial loading state
-    const isFirstLoadOfSomeChunk = chunksLoadingStateValues.some(
-      (chunk) => chunk.firstLoad
+    const isFirstLoadOfSomeChunk = Object.values(chunksLoadingState).some(
+      (chunk) => chunk.loading && !chunk.firstLoadComplete
     )
     setIsLoading(isFirstLoadOfSomeChunk)
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when chunksLoadingState changes
+    if (!isFirstLoadOfSomeChunk) {
+      setIsLoadingMore(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- this should only be executed on chunks change
   }, [chunksLoadingState])
 
-  /**
-   * Update the loading more state based on the last chunk loading state
-   */
-  useEffect(() => {
-    setIsLoadingMore(lastChunkIsFirstLoad)
-  }, [lastChunkIsFirstLoad])
+  // /**
+  //  * Update the loading more state based on the last chunk loading state
+  //  */
+  // useEffect(() => {
+  //   console.log("lastChunkIsFirstLoad ----> ", lastChunkIsFirstLoad)
+  //   setIsLoadingMore(lastChunkIsFirstLoad)
+  // }, [lastChunkIsFirstLoad])
 
   /**
    * Handle the fetch success (it can be executed multiple times for the same chunk, for example observable emit multiple times)
@@ -446,9 +443,8 @@ export function useData<
       onResponse?.(result)
 
       setIsInitialLoading(false)
-      setChunkIsFirstLoad(key, !!isLoadingYet)
-
-      setChunk(key, result)
+      setChunkLoading(key, !isLoadingYet)
+      setChunkData(key, result)
 
       isLoadingMoreRef.current = false
     },
@@ -553,12 +549,10 @@ export function useData<
         message: "Error fetching data",
         cause: error,
       })
-      setIsInitialLoading(false)
-      if (chunkkey) {
-        setChunkIsFirstLoad(chunkkey, false)
-      } else {
+      if (!chunkkey) {
         resetChunks()
       }
+      setIsInitialLoading(false)
       setIsLoadingMore(false)
       // // Clear the cleanup reference when an error occurs
       // cleanup.current.clear()
@@ -590,9 +584,11 @@ export function useData<
       appendMode = false,
       cursor = null,
     }: FetchDataParams<Filters>) => {
+      console.log("test")
       try {
         // Clean up any existing subscription before creating a new one if the pagination is not accumulative
         if (cleanup.current && !appendMode) {
+          console.log("Cleanup")
           cleanup.current.forEach((cleanupFn) => cleanupFn())
           cleanup.current.clear()
           resetChunks()
@@ -658,12 +654,15 @@ export function useData<
           return
         }
 
+        console.log("here ----->", chunksState, chunksLoadingState)
         const subscription = observable.subscribe({
           next: (state) => {
+            initChunkIfNeeded(requestKey, true)
+            console.log("state----", state, chunksLoadingState)
             if (state.data) {
               handleFetchSuccess(requestKey, state.data, state.loading)
             } else if (state.loading) {
-              setChunkIsFirstLoad(requestKey, true)
+              setChunkLoading(requestKey, true)
             } else if (state.error) {
               handleFetchError(state.error, requestKey)
             }
@@ -725,6 +724,7 @@ export function useData<
   const loadMore = useCallback(
     () => {
       const currentPaginationInfo = paginationInfoRef.current
+
       if (!currentPaginationInfo || loading) {
         return
       }
