@@ -248,7 +248,7 @@ const meta: Meta = {
       <div
         className="w-[350px]"
         onClick={() => {
-          console.log("click was get in elements bellow the select")
+          console.log("click was received in elements below the select")
         }}
       >
         <Story />
