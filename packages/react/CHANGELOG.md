@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.239.2](https://github.com/factorialco/f0/compare/f0-react-v1.239.1...f0-react-v1.239.2) (2025-10-20)
+
+
+### Bug Fixes
+
+* card compact bug overflow ([#2847](https://github.com/factorialco/f0/issues/2847)) ([56d8c9b](https://github.com/factorialco/f0/commit/56d8c9b3365a39f86271f7ebfa01efd23918e233))
+
 ## [1.239.1](https://github.com/factorialco/f0/compare/f0-react-v1.239.0...f0-react-v1.239.1) (2025-10-20)
 
 
