@@ -543,6 +543,9 @@ const SelectComponent = forwardRef(function Select<
               <button
                 className="flex w-full items-center justify-between"
                 aria-label={label || placeholder}
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
               >
                 {selectedOption && <SelectValue item={selectedOption} />}
               </button>
