@@ -424,14 +424,6 @@ export function useData<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- this should only be executed on chunks change
   }, [chunksLoadingState])
 
-  // /**
-  //  * Update the loading more state based on the last chunk loading state
-  //  */
-  // useEffect(() => {
-  //   console.log("lastChunkIsFirstLoad ----> ", lastChunkIsFirstLoad)
-  //   setIsLoadingMore(lastChunkIsFirstLoad)
-  // }, [lastChunkIsFirstLoad])
-
   /**
    * Handle the fetch success (it can be executed multiple times for the same chunk, for example observable emit multiple times)
    */
@@ -584,11 +576,9 @@ export function useData<
       appendMode = false,
       cursor = null,
     }: FetchDataParams<Filters>) => {
-      console.log("test")
       try {
         // Clean up any existing subscription before creating a new one if the pagination is not accumulative
         if (cleanup.current && !appendMode) {
-          console.log("Cleanup")
           cleanup.current.forEach((cleanupFn) => cleanupFn())
           cleanup.current.clear()
           resetChunks()
@@ -636,7 +626,9 @@ export function useData<
          * Synchronous data
          */
         if (!("then" in result || "subscribe" in result)) {
-          handleFetchSuccess("non-paginated", result, false)
+          const requestKey = "non-paginated"
+          initChunkIfNeeded(requestKey, false)
+          handleFetchSuccess(requestKey, result, false)
           return
         }
 
@@ -654,11 +646,9 @@ export function useData<
           return
         }
 
-        console.log("here ----->", chunksState, chunksLoadingState)
         const subscription = observable.subscribe({
           next: (state) => {
             initChunkIfNeeded(requestKey, true)
-            console.log("state----", state, chunksLoadingState)
             if (state.data) {
               handleFetchSuccess(requestKey, state.data, state.loading)
             } else if (state.loading) {
