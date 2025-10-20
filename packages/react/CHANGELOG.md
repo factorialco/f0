@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.239.3](https://github.com/factorialco/f0/compare/f0-react-v1.239.2...f0-react-v1.239.3) (2025-10-20)
+
+
+### Bug Fixes
+
+* make default item label work for select ([#2849](https://github.com/factorialco/f0/issues/2849)) ([af8f3ea](https://github.com/factorialco/f0/commit/af8f3ea082904947bd33f4db8441499233cbe11c))
+
 ## [1.239.2](https://github.com/factorialco/f0/compare/f0-react-v1.239.1...f0-react-v1.239.2) (2025-10-20)
 
 
