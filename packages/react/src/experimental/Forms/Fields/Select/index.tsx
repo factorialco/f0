@@ -321,6 +321,11 @@ const SelectComponent = forwardRef(function Select<
       if (value === undefined) {
         return undefined
       }
+
+      if (value === props.defaultItem?.value) {
+        return props.defaultItem
+      }
+
       for (const option of data.records) {
         const mappedOption = optionMapper(option)
         if (
@@ -332,7 +337,7 @@ const SelectComponent = forwardRef(function Select<
       }
       return undefined
     },
-    [data.records, optionMapper]
+    [data.records, optionMapper, props.defaultItem]
   )
 
   useEffect(() => {
