@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.239.4](https://github.com/factorialco/f0/compare/f0-react-v1.239.3...f0-react-v1.239.4) (2025-10-20)
+
+
+### Bug Fixes
+
+* **SelectItem:** top and bottom paddings ([#2850](https://github.com/factorialco/f0/issues/2850)) ([6ac1b8c](https://github.com/factorialco/f0/commit/6ac1b8ca3efe5b565fab6cfd585958358e607598))
+
 ## [1.239.3](https://github.com/factorialco/f0/compare/f0-react-v1.239.2...f0-react-v1.239.3) (2025-10-20)
 
 
