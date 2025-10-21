@@ -579,7 +579,7 @@ const SelectComponent = forwardRef(function Select<
                 onFiltersChange={localSource.setCurrentFilters}
               />
             }
-            hasFilters={!!localSource.filters}
+            forceMinHeight={!!localSource.filters}
             onScrollBottom={handleScrollBottom}
             scrollMargin={10}
             isLoadingMore={isLoadingMore}
