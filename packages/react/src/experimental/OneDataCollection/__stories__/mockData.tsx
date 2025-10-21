@@ -32,6 +32,7 @@ import {
   RecordType,
   SelectedItemsState,
 } from "@/hooks/datasource/types"
+import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
   Ai,
   Briefcase,
@@ -907,7 +908,7 @@ export const ExampleComponent = ({
   paginationType?: PaginationType
   primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
-  searchBar?: boolean
+  searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
   onStateChange?: (state: DataCollectionStatusComplete) => void
@@ -1011,13 +1012,16 @@ export const ExampleComponent = ({
       defaultSelectedItems,
       bulkActions,
       totalItemSummary,
-      search: searchBar
-        ? {
-            enabled: true,
-            sync: true,
-            debounceTime: 300,
-          }
-        : undefined,
+      search:
+        searchBar === true
+          ? {
+              enabled: true,
+              sync: true,
+              debounceTime: 300,
+            }
+          : typeof searchBar === "object"
+            ? searchBar
+            : undefined,
       dataAdapter: dataAdapterMemoized,
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
