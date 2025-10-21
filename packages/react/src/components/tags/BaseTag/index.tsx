@@ -37,7 +37,7 @@ export const BaseTag = forwardRef<HTMLDivElement, Props>(
     >
       {left}
       {!!text && (
-        <span title={text} className="line-clamp-1">
+        <span title={text} className="line-clamp-1 truncate">
           {text}
         </span>
       )}

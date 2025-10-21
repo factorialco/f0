@@ -13,5 +13,10 @@ interface TagListValue {
 export type TagListCellValue = TagListValue
 
 export const TagListCell = (args: TagListCellValue) => (
-  <F0TagList type={args.type} tags={args.tags as TagVariant[]} max={args.max} />
+  <F0TagList
+    layout="fill"
+    type={args.type}
+    tags={args.tags as TagVariant[]}
+    max={args.max}
+  />
 )
