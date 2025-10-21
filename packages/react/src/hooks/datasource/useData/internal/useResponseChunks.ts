@@ -92,6 +92,17 @@ export const useResponseChunks = <R extends RecordType>(
     })
   }
 
+  const deleteChunk = (key: string) => {
+    setChunksState((prev) => {
+      const newChunks = new Map(prev.chunks)
+      newChunks.delete(key)
+      return {
+        ...prev,
+        chunks: newChunks,
+      }
+    })
+  }
+
   const setChunkData = (key: string, response: DataResponse<R>) => {
     setChunksState((prev) => {
       const newChunks = new Map(prev.chunks)
@@ -103,20 +114,39 @@ export const useResponseChunks = <R extends RecordType>(
 
       const isUpdated = !prev.chunks.has(key)
 
+      console.log(
+        "====================== setPaginationInfo",
+        key,
+        response,
+        "======================="
+      )
       const records = getRecordsFromResponse(response)
+      console.log("setPaginationInfo records", records)
       if (records.length === 0) {
         // If the chunk has no records, delete it
         newChunks.delete(key)
+        console.log("setPaginationInfo records deleted", key)
       } else {
-        newChunks.set(key, {
+        const chunk = {
           order,
           updatedAt: Date.now(),
           response,
           firstLoadComplete: true,
           loading: false,
           updated: isUpdated,
-        })
+        }
+        newChunks.set(key, chunk)
+        console.log("setPaginationInfo set chunk", key, chunk)
       }
+
+      console.log("setPaginationInfo newChunks", {
+        ...prev,
+        chunks: newChunks,
+      })
+
+      console.log(
+        "----------------------------------------------------------- setPaginationInfo return -----------------------------------------------------------"
+      )
       return {
         ...prev,
         chunks: newChunks,
@@ -143,5 +173,6 @@ export const useResponseChunks = <R extends RecordType>(
     initChunkIfNeeded,
     setChunkLoading,
     chunksLoadingState,
+    deleteChunk,
   }
 }

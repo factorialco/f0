@@ -101,7 +101,9 @@ export interface UseDataReturn<R extends RecordType> {
   mergedFilters: FiltersState<FiltersDefinition>
 }
 
-type DataType<T> = PromiseState<T>
+type DataType<T> = PromiseState<T> & {
+  requestKey: string
+}
 
 export type GroupRecord<RecordType> = {
   key: string
@@ -276,6 +278,7 @@ export function useData<
     setChunkLoading,
     chunksLoadingState,
     initChunkIfNeeded,
+    deleteChunk,
   } = useResponseChunks<R>(dataAdapter.paginationType)
 
   useEffect(() => {
@@ -344,6 +347,10 @@ export function useData<
       .map((chunk) => getRecordsFromResponse(chunk.response as DataResponse<R>))
       .flat()
 
+    console.log("records", records)
+
+    console.log("chunksState.chunks", Array.from(chunksState.chunks.entries()))
+
     // Dont update the pagination info if still loading
     if (loading) {
       return
@@ -400,6 +407,12 @@ export function useData<
           //   ? String(result.perPage)
           //   : "0",
 
+          console.log("setPaginationInfo", {
+            ...common,
+            type: "infinite-scroll" as const,
+            cursor,
+            hasMore,
+          })
           setPaginationInfo({
             ...common,
             type: "infinite-scroll" as const,
@@ -424,21 +437,55 @@ export function useData<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- this should only be executed on chunks change
   }, [chunksLoadingState])
 
+  const TEMP_REQUEST_KEY = "0"
+  const getRequestKey = useCallback(
+    (cursor: string | null, currentPage: number | undefined) => {
+      return cursor ?? currentPage?.toString() ?? TEMP_REQUEST_KEY
+    },
+    []
+  )
+
+  const requestKeyFromResult = useCallback((result: DataResponse<R>) => {
+    return getRequestKey(
+      "cursor" in result ? result.cursor : null,
+      "currentPage" in result ? result.currentPage : undefined
+    )
+  }, [])
+
   /**
    * Handle the fetch success (it can be executed multiple times for the same chunk, for example observable emit multiple times)
    */
   const handleFetchSuccess = useCallback(
     (key: string, result: DataResponse<R>, isLoadingYet?: boolean) => {
       /**
+       * Sets loading state
+       */
+      setIsInitialLoading(false)
+      setChunkLoading(key, !!isLoadingYet)
+      isLoadingMoreRef.current = false
+
+      /**
+       * Checks if the chuck has a temp Key (0) and if so, deletes it and sets the new key
+       */
+      if (key === TEMP_REQUEST_KEY) {
+        deleteChunk(TEMP_REQUEST_KEY)
+        key = requestKeyFromResult(result)
+      }
+      console.log("handleFetchSuccess", key, result)
+      /**
+       * Checks if the data key mismatch and if so, returns
+       */
+      if ("cursor" in result && result.cursor !== key) {
+        console.log("handleFetchSuccess cursor mismatch", key, result)
+        return
+      }
+
+      /**
        * Call to the onResponse callback
        */
       onResponse?.(result)
 
-      setIsInitialLoading(false)
-      setChunkLoading(key, !isLoadingYet)
       setChunkData(key, result)
-
-      isLoadingMoreRef.current = false
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -579,9 +626,10 @@ export function useData<
       try {
         // Clean up any existing subscription before creating a new one if the pagination is not accumulative
         if (cleanup.current && !appendMode) {
-          cleanup.current.forEach((cleanupFn) => cleanupFn())
-          cleanup.current.clear()
-          resetChunks()
+          console.log("cleanup.current", cursor)
+          // cleanup.current.forEach((cleanupFn) => cleanupFn())
+          // cleanup.current.clear()
+          // resetChunks()
         }
 
         const sortings: SortingsStateMultiple = [
@@ -635,11 +683,21 @@ export function useData<
         /**
          * Async data
          */
-        const observable: Observable<DataType<ResultType>> =
-          promiseToObservable(result)
-
         // Allows us to identify the chunk to know if its new or is a refresh
-        const requestKey = cursor ?? currentPage?.toString() ?? "0"
+        const requestKey = getRequestKey(cursor, currentPage)
+        console.log(
+          "requestKey",
+          requestKey,
+          "cursor",
+          cursor,
+          "currentPage",
+          currentPage
+        )
+        const observable: Observable<DataType<ResultType>> =
+          promiseToObservable(result).map((state) => ({
+            ...state,
+            requestKey,
+          }))
 
         // If the chunk is already in the state, we don't need to fetch it again the observable will handle the updates
         if (chunksState.chunks.has(requestKey)) {
@@ -648,13 +706,16 @@ export function useData<
 
         const subscription = observable.subscribe({
           next: (state) => {
-            initChunkIfNeeded(requestKey, true)
+            console.log("next", state.requestKey)
+
+            initChunkIfNeeded(state.requestKey, true)
             if (state.data) {
-              handleFetchSuccess(requestKey, state.data, state.loading)
+              console.log("next data", state.requestKey, state.data)
+              handleFetchSuccess(state.requestKey, state.data, state.loading)
             } else if (state.loading) {
-              setChunkLoading(requestKey, true)
+              setChunkLoading(state.requestKey, true)
             } else if (state.error) {
-              handleFetchError(state.error, requestKey)
+              handleFetchError(state.error, state.requestKey)
             }
           },
           error: handleFetchError,
@@ -713,6 +774,11 @@ export function useData<
   // In loadMore function
   const loadMore = useCallback(
     () => {
+      console.log(
+        "loadMore",
+        "paginationInfoRef.current",
+        paginationInfoRef.current
+      )
       const currentPaginationInfo = paginationInfoRef.current
 
       if (!currentPaginationInfo || loading) {

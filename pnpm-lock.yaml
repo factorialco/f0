@@ -97,8 +97,8 @@ importers:
         specifier: ^1.10.2
         version: 1.10.2
       '@factorialco/f0-core':
-        specifier: workspace:*
-        version: link:../core
+        specifier: latest
+        version: 1.32.0(@tailwindcss/container-queries@0.1.1(tailwindcss@3.4.17))(tailwindcss-animate@1.0.7(tailwindcss@3.4.17))(tailwindcss@3.4.17)(typescript@5.8.2)
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.10.0(react-hook-form@7.54.2(react@18.3.1))
@@ -2419,7 +2419,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {node: '>=0.10.0'}
+    engines: {'0': node >=0.10.0}
 
   '@expo/cli@0.22.24':
     resolution: {integrity: sha512-lhdenxBC8/x/vL39j79eXE09mOaqNNLmiSDdY/PblnI+UNzGgsQ48hBTYa/MQhd0ioXXVKurZL2941dLKwcxJw==}
@@ -2494,6 +2494,14 @@ packages:
   '@expo/xcpretty@4.3.2':
     resolution: {integrity: sha512-ReZxZ8pdnoI3tP/dNnJdnmAk7uLT4FjsKDGW7YeDdvdOMz2XCQSmSCM9IWlrXuWtMF9zeSB6WJtEhCQ41gQOfw==}
     hasBin: true
+
+  '@factorialco/f0-core@1.32.0':
+    resolution: {integrity: sha512-baPTLn8rKtfn8mqLndtjX2M1o5jajMhwUbFwSYmb3MPSHND/taXHmOQyTgYHcJ/Iw1H44o2QW64m8XS5lQoGIQ==}
+    peerDependencies:
+      '@tailwindcss/container-queries': ^0.1.1
+      tailwindcss: ^3.4.3
+      tailwindcss-animate: ^1.0.7
+      typescript: ^5.7.2
 
   '@fastify/busboy@3.1.1':
     resolution: {integrity: sha512-5DGmA8FTdB2XbDeEwc/5ZXBl6UbBAyBOOLlPuBnZ/N1SwdH9Ii+cOX3tBROlDgcTXxjOYnLMVoKk9+FXAw0CJw==}
@@ -15509,6 +15517,13 @@ snapshots:
       find-up: 5.0.0
       js-yaml: 4.1.0
 
+  '@factorialco/f0-core@1.32.0(@tailwindcss/container-queries@0.1.1(tailwindcss@3.4.17))(tailwindcss-animate@1.0.7(tailwindcss@3.4.17))(tailwindcss@3.4.17)(typescript@5.8.2)':
+    dependencies:
+      '@tailwindcss/container-queries': 0.1.1(tailwindcss@3.4.17)
+      tailwindcss: 3.4.17
+      tailwindcss-animate: 1.0.7(tailwindcss@3.4.17)
+      typescript: 5.8.2
+
   '@fastify/busboy@3.1.1': {}
 
   '@floating-ui/core@1.6.9':
@@ -19535,14 +19550,6 @@ snapshots:
       picocolors: 1.1.1
       playwright: 1.52.0
 
-  axios@1.8.4:
-    dependencies:
-      follow-redirects: 1.15.9
-      form-data: 4.0.2
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-
   axios@1.8.4(debug@4.4.1):
     dependencies:
       follow-redirects: 1.15.9(debug@4.4.1)
@@ -21442,8 +21449,6 @@ snapshots:
 
   flow-parser@0.263.0: {}
 
-  follow-redirects@1.15.9: {}
-
   follow-redirects@1.15.9(debug@4.4.1):
     optionalDependencies:
       debug: 4.4.1
@@ -22012,7 +22017,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.9
+      follow-redirects: 1.15.9(debug@4.4.1)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -27305,7 +27310,7 @@ snapshots:
 
   wait-on@7.2.0:
     dependencies:
-      axios: 1.8.4
+      axios: 1.8.4(debug@4.4.1)
       joi: 17.13.3
       lodash: 4.17.21
       minimist: 1.2.8
