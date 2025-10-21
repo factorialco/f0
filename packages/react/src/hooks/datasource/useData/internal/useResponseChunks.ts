@@ -103,7 +103,11 @@ export const useResponseChunks = <R extends RecordType>(
     })
   }
 
-  const setChunkData = (key: string, response: DataResponse<R>) => {
+  const setChunkData = (
+    key: string,
+    response: DataResponse<R>,
+    newKey?: string
+  ) => {
     setChunksState((prev) => {
       const newChunks = new Map(prev.chunks)
 
@@ -135,7 +139,10 @@ export const useResponseChunks = <R extends RecordType>(
           loading: false,
           updated: isUpdated,
         }
-        newChunks.set(key, chunk)
+        newChunks.set(newKey ?? key, chunk)
+        if (newKey !== key) {
+          newChunks.delete(key)
+        }
         console.log("setPaginationInfo set chunk", key, chunk)
       }
 

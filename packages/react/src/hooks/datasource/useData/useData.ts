@@ -278,7 +278,6 @@ export function useData<
     setChunkLoading,
     chunksLoadingState,
     initChunkIfNeeded,
-    deleteChunk,
   } = useResponseChunks<R>(dataAdapter.paginationType)
 
   useEffect(() => {
@@ -427,6 +426,7 @@ export function useData<
   }, [chunksState, lastUpdatedChunk, lastChunk, loading])
 
   useEffect(() => {
+    console.log("chunksLoadingState", chunksLoadingState)
     const isFirstLoadOfSomeChunk = Object.values(chunksLoadingState).some(
       (chunk) => chunk.loading && !chunk.firstLoadComplete
     )
@@ -445,13 +445,6 @@ export function useData<
     []
   )
 
-  const requestKeyFromResult = useCallback((result: DataResponse<R>) => {
-    return getRequestKey(
-      "cursor" in result ? result.cursor : null,
-      "currentPage" in result ? result.currentPage : undefined
-    )
-  }, [])
-
   /**
    * Handle the fetch success (it can be executed multiple times for the same chunk, for example observable emit multiple times)
    */
@@ -464,21 +457,7 @@ export function useData<
       setChunkLoading(key, !!isLoadingYet)
       isLoadingMoreRef.current = false
 
-      /**
-       * Checks if the chuck has a temp Key (0) and if so, deletes it and sets the new key
-       */
-      if (key === TEMP_REQUEST_KEY) {
-        deleteChunk(TEMP_REQUEST_KEY)
-        key = requestKeyFromResult(result)
-      }
       console.log("handleFetchSuccess", key, result)
-      /**
-       * Checks if the data key mismatch and if so, returns
-       */
-      if ("cursor" in result && result.cursor !== key) {
-        console.log("handleFetchSuccess cursor mismatch", key, result)
-        return
-      }
 
       /**
        * Call to the onResponse callback
@@ -706,11 +685,8 @@ export function useData<
 
         const subscription = observable.subscribe({
           next: (state) => {
-            console.log("next", state.requestKey)
-
             initChunkIfNeeded(state.requestKey, true)
             if (state.data) {
-              console.log("next data", state.requestKey, state.data)
               handleFetchSuccess(state.requestKey, state.data, state.loading)
             } else if (state.loading) {
               setChunkLoading(state.requestKey, true)
