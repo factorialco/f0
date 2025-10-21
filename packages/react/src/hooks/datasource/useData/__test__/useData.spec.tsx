@@ -12,10 +12,10 @@ import {
   PaginatedDataAdapter,
   PaginatedFetchOptions,
   RecordType,
-} from "../types"
-import { DataSource } from "../types/datasource.typings"
-import { SortingsDefinition } from "../types/sortings.typings"
-import { GROUP_ID_SYMBOL, useData, WithGroupId } from "../useData"
+} from "../../types"
+import { DataSource } from "../../types/datasource.typings"
+import { SortingsDefinition } from "../../types/sortings.typings"
+import { GROUP_ID_SYMBOL, useData, WithGroupId } from "../../useData"
 interface TestRecord extends RecordType {
   id: number
   name: string

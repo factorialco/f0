@@ -8,26 +8,11 @@ import {
   FiltersState,
   GroupingDefinition,
   GroupingState,
-  PaginationType,
   RecordType,
   SortingsDefinition,
   SortingsState,
 } from "./types"
 import { SearchOptions } from "./types/search.typings"
-
-/**
- * Get the pagination type of a data adapter
- * @param dataAdapter - The data adapter to get the pagination type of
- * @returns The pagination type of the data adapter
- */
-
-export const getDataSourcePaginationType = <
-  D extends { paginationType?: PaginationType | undefined | never },
->(
-  dataAdapter: D
-): PaginationType => {
-  return dataAdapter.paginationType ?? "no-pagination"
-}
 
 /**
  * Create a data source definition from a data source definition
