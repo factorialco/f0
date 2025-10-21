@@ -40,7 +40,7 @@ export const WithSyncSearch: Story = {
     <ExampleComponent
       searchBar={{
         enabled: true,
-        // Set sync to false to simulate async search with debounce
+        // Set sync to true for immediate search results
         sync: true,
         // Set debounce time to 300ms
         debounceTime: 300,
