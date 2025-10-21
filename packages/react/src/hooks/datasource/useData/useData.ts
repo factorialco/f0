@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { Observable } from "zen-observable-ts"
+import { Observable, Subscription } from "zen-observable-ts"
 import {
   BaseFetchOptions,
   GroupingDefinition,
@@ -591,6 +591,8 @@ export function useData<
     search?: string | undefined
   }
 
+  const subscriptionRef = useRef<Subscription | undefined>(undefined)
+
   /**
    * Fetch the data and update the chunks state
    */
@@ -683,8 +685,9 @@ export function useData<
           return
         }
 
-        const subscription = observable.subscribe({
+        subscriptionRef.current = observable.subscribe({
           next: (state) => {
+            console.log("next", state)
             initChunkIfNeeded(state.requestKey, true)
             if (state.data) {
               handleFetchSuccess(state.requestKey, state.data, state.loading)
