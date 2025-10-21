@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.239.4](https://github.com/factorialco/f0/compare/f0-react-v1.239.3...f0-react-v1.239.4) (2025-10-20)
+
+
+### Bug Fixes
+
+* **SelectItem:** top and bottom paddings ([#2850](https://github.com/factorialco/f0/issues/2850)) ([6ac1b8c](https://github.com/factorialco/f0/commit/6ac1b8ca3efe5b565fab6cfd585958358e607598))
+
+## [1.239.3](https://github.com/factorialco/f0/compare/f0-react-v1.239.2...f0-react-v1.239.3) (2025-10-20)
+
+
+### Bug Fixes
+
+* make default item label work for select ([#2849](https://github.com/factorialco/f0/issues/2849)) ([af8f3ea](https://github.com/factorialco/f0/commit/af8f3ea082904947bd33f4db8441499233cbe11c))
+
+## [1.239.2](https://github.com/factorialco/f0/compare/f0-react-v1.239.1...f0-react-v1.239.2) (2025-10-20)
+
+
+### Bug Fixes
+
+* card compact bug overflow ([#2847](https://github.com/factorialco/f0/issues/2847)) ([56d8c9b](https://github.com/factorialco/f0/commit/56d8c9b3365a39f86271f7ebfa01efd23918e233))
+
+## [1.239.1](https://github.com/factorialco/f0/compare/f0-react-v1.239.0...f0-react-v1.239.1) (2025-10-20)
+
+
+### Bug Fixes
+
+* add min height for data collection list view rows ([#2845](https://github.com/factorialco/f0/issues/2845)) ([b7c5153](https://github.com/factorialco/f0/commit/b7c5153237478422541eb6fc2523ddb42f13b3ef))
+
+## [1.239.0](https://github.com/factorialco/f0/compare/f0-react-v1.238.1...f0-react-v1.239.0) (2025-10-20)
+
+
+### Features
+
+* **AvatarPerson:** Terminated employee ([#2812](https://github.com/factorialco/f0/issues/2812)) ([0b9d1c6](https://github.com/factorialco/f0/commit/0b9d1c6c4f3a812dbb71d4184e350c43300a101e))
+
+## [1.238.1](https://github.com/factorialco/f0/compare/f0-react-v1.238.0...f0-react-v1.238.1) (2025-10-20)
+
+
+### Bug Fixes
+
+* inputfield stop propagation ([#2842](https://github.com/factorialco/f0/issues/2842)) ([e18fcce](https://github.com/factorialco/f0/commit/e18fcce0b469170f1a935be307f7f8d38fa0a0ce))
+
 ## [1.238.0](https://github.com/factorialco/f0/compare/f0-react-v1.237.0...f0-react-v1.238.0) (2025-10-17)
 
 
