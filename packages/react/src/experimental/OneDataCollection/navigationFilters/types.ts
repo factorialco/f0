@@ -3,8 +3,16 @@ import {
   DateNavigatorFilterDefinition,
   DateValue,
 } from "./filterTypes/DateNavigation/types"
+import type {
+  ListNavigatorFilterDefinition,
+  ListValue,
+} from "./filterTypes/ListNavigation/types"
 
-export type NavigationFilter<T, InitialValue = T> = {
+export type NavigationFilter<
+  T,
+  InitialValue = T,
+  FilterDef = NavigationFilterDefinition,
+> = {
   /**
    * Converts the initial value to the correct type for the filter.
    * This is useful for filters that have a complex internal state but the initial value is a simple type, for example a navigation filter. The initial can be a simple date but the internal state converts it to a date range based on the granularity.
@@ -14,7 +22,7 @@ export type NavigationFilter<T, InitialValue = T> = {
    */
   valueConverter?: (
     defaultValue: InitialValue,
-    filterDef: NavigationFilterComponentProps<T>["filter"],
+    filterDef: FilterDef,
     i18n: TranslationsType
   ) => T
   /**
@@ -22,7 +30,9 @@ export type NavigationFilter<T, InitialValue = T> = {
    * @param props - The props of the filter
    * @returns The rendered component
    */
-  render: (props: NavigationFilterComponentProps<T>) => React.ReactNode
+  render: (
+    props: NavigationFilterComponentProps<T, FilterDef>
+  ) => React.ReactNode
 }
 
 export type NavigationFilterDefinitionBase<T> = {
@@ -30,10 +40,15 @@ export type NavigationFilterDefinitionBase<T> = {
   defaultValue: T
 }
 
-export type NavigationFilterDefinition = DateNavigatorFilterDefinition
+export type NavigationFilterDefinition =
+  | DateNavigatorFilterDefinition
+  | ListNavigatorFilterDefinition
 
-export type NavigationFilterComponentProps<T> = {
-  filter: NavigationFilterDefinition
+export type NavigationFilterComponentProps<
+  T,
+  FilterDef = NavigationFilterDefinition,
+> = {
+  filter: FilterDef
   value: T
   onChange: (value: T) => void
 }
@@ -55,9 +70,11 @@ export type NavigationFiltersDefinition<Keys extends string = string> = Record<
  */
 export type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition
   ? DateValue
-  : T extends undefined
-    ? undefined
-    : never
+  : T extends ListNavigatorFilterDefinition
+    ? ListValue
+    : T extends undefined
+      ? undefined
+      : never
 
 /**
  * Current state of all navigation filters in a collection.
