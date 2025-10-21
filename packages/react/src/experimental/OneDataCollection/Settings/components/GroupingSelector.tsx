@@ -5,6 +5,7 @@ import {
   GroupingState,
   RecordType,
 } from "@/hooks/datasource"
+import { SortOrder } from "@/hooks/datasource/types/sortings.typings"
 import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -62,8 +63,8 @@ export const GroupingSelector = <
   ]
 
   return (
-    <div className="flex flex-col gap-0 py-3">
-      <div className="flex items-end gap-2 px-3">
+    <div className="flex flex-col">
+      <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <Select
             label={i18n.collections.grouping.groupBy}
@@ -75,7 +76,14 @@ export const GroupingSelector = <
                 value !== EmptyGroupingValue
                   ? {
                       field: value as keyof Grouping["groupBy"],
-                      order: currentGrouping?.order ?? "asc",
+                      order:
+                        (
+                          grouping.groupBy[
+                            value as keyof Grouping["groupBy"]
+                          ] as { defaultDirection?: SortOrder }
+                        )?.defaultDirection ??
+                        currentGrouping?.order ??
+                        "asc",
                     }
                   : undefined
               )

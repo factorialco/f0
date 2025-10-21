@@ -15,7 +15,7 @@ import {
   componentTypes,
   type ComponentMetadata,
   type ComponentTypes,
-} from "./component"
+} from "./component/types"
 
 declare global {
   interface Window {

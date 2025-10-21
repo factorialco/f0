@@ -8,16 +8,31 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { Kanban, List, Table } from "@/icons/app"
+import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
-import { TableCollection, TableCollectionProps } from "./Table"
+import {
+  handleTableResetSettings,
+  TableCollection,
+  TableCollectionProps,
+  SettingsRenderer as tableSettingsRenderer,
+  TableVisualizationSettings,
+} from "./Table"
 
-export type VisualizacionTypeDefinition<Props> = {
+export type VisualizacionTypeDefinition<
+  Props,
+  Settings = Record<string, never>,
+> = {
   render: (props: Props) => JSX.Element
   name: string
   icon: IconType
+  settings: {
+    default: Settings
+    renderer?: (props: Props) => JSX.Element | null
+    resetHandler?: (settings: DataCollectionSettingsContextType) => void
+  }
 }
 
 type CollectionVisualizations<
@@ -38,7 +53,8 @@ type CollectionVisualizations<
       ItemActions,
       NavigationFilters,
       Grouping
-    >
+    >,
+    TableVisualizationSettings
   >
   list: VisualizacionTypeDefinition<
     ListCollectionProps<
@@ -88,16 +104,16 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Table",
     icon: Table,
     render: <
-      Record extends RecordType,
+      R extends RecordType,
       Filters extends FiltersDefinition,
       Sortings extends SortingsDefinition,
       Summaries extends SummariesDefinition,
-      ItemActions extends ItemActionsDefinition<Record>,
+      ItemActions extends ItemActionsDefinition<R>,
       NavigationFilters extends NavigationFiltersDefinition,
-      Grouping extends GroupingDefinition<Record>,
+      Grouping extends GroupingDefinition<R>,
     >(
       props: TableCollectionProps<
-        Record,
+        R,
         Filters,
         Sortings,
         Summaries,
@@ -108,7 +124,7 @@ export const collectionVisualizations: CollectionVisualizations<
     ) => {
       return (
         <TableCollection<
-          Record,
+          R,
           Filters,
           Sortings,
           Summaries,
@@ -120,10 +136,21 @@ export const collectionVisualizations: CollectionVisualizations<
         />
       )
     },
+    settings: {
+      renderer: tableSettingsRenderer,
+      resetHandler: handleTableResetSettings,
+      default: {
+        order: [],
+        hidden: [],
+      },
+    },
   },
   list: {
     name: "List",
     icon: List,
+    settings: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -161,6 +188,9 @@ export const collectionVisualizations: CollectionVisualizations<
   card: {
     name: "Card",
     icon: Kanban,
+    settings: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -198,6 +228,9 @@ export const collectionVisualizations: CollectionVisualizations<
   kanban: {
     name: "Kanban",
     icon: Kanban,
+    settings: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,

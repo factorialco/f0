@@ -3,7 +3,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -20,8 +19,9 @@ import {
   useGroups,
   WithGroupId,
 } from "@/hooks/datasource"
-import { ChevronDown } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
   SelectContent,
@@ -39,6 +39,8 @@ import {
   useRef,
   useState,
 } from "react"
+import { useDebounceCallback } from "usehooks-ts"
+import { Arrow } from "./components/Arrow"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
 import type { SelectItemObject, SelectItemProps } from "./types"
@@ -61,7 +63,7 @@ export type SelectProps<T extends string, R = unknown> = {
     option?: SelectItemObject<T, ResolvedRecordType<R>>
   ) => void
   onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>>
+    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => void
   value?: T
   defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
@@ -92,11 +94,16 @@ export type SelectProps<T extends string, R = unknown> = {
   | {
       source?: never
       mapOptions?: never
+      searchFn?: (
+        option: SelectItemProps<T, unknown>,
+        search?: string
+      ) => boolean | undefined
       options: SelectItemProps<T, unknown>[]
     }
 ) &
   Pick<
     InputFieldProps<T>,
+    | "required"
     | "loading"
     | "hideLabel"
     | "clearable"
@@ -111,7 +118,6 @@ export type SelectProps<T extends string, R = unknown> = {
     | "status"
     | "hint"
   >
-
 const SelectItem = <T extends string, R>({
   item,
 }: {
@@ -160,6 +166,14 @@ const SelectValue = forwardRef<
   )
 })
 
+const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
+  return (
+    option.type === "separator" ||
+    !search ||
+    option.label.toLowerCase().includes(search.toLowerCase())
+  )
+}
+
 const SelectComponent = forwardRef(function Select<
   T extends string,
   R = unknown,
@@ -193,6 +207,7 @@ const SelectComponent = forwardRef(function Select<
     error,
     status,
     hint,
+    required,
     ...props
   }: SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -205,6 +220,13 @@ const SelectComponent = forwardRef(function Select<
   const [localValue, setLocalValue] = useState(
     value || props.defaultItem?.value
   )
+
+  useEffect(() => {
+    if (value !== localValue) {
+      setLocalValue(value || props.defaultItem?.value)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, props.defaultItem])
 
   const dataSource = useMemo(() => {
     if (
@@ -231,18 +253,22 @@ const SelectComponent = forwardRef(function Select<
             }: BaseFetchOptions<FiltersDefinition>): PromiseOrObservable<
               BaseResponse<ActualRecordType>
             > => {
+              // Apply the search function to the options
+              const searchFn =
+                "searchFn" in props && props.searchFn
+                  ? props.searchFn
+                  : defaultSearchFn
+
               return {
                 records: options.filter(
-                  (option) =>
-                    option.type === "separator" ||
-                    !search ||
-                    option.label.toLowerCase().includes(search.toLowerCase())
+                  (option) => searchFn(option, search) ?? true
                 ) as unknown as ActualRecordType[],
               }
             },
           },
     }
-  }, [options, source])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options, source, "searchFn" in props && props.searchFn])
 
   const localSource = useDataSource(
     {
@@ -274,7 +300,7 @@ const SelectComponent = forwardRef(function Select<
     [mapOptions, source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore } =
+  const { data, isInitialLoading, loadMore, isLoadingMore, isLoading } =
     useData<ActualRecordType>(localSource)
 
   const { currentSearch, setCurrentSearch } = localSource
@@ -295,6 +321,11 @@ const SelectComponent = forwardRef(function Select<
       if (value === undefined) {
         return undefined
       }
+
+      if (value === props.defaultItem?.value) {
+        return props.defaultItem
+      }
+
       for (const option of data.records) {
         const mappedOption = optionMapper(option)
         if (
@@ -306,16 +337,14 @@ const SelectComponent = forwardRef(function Select<
       }
       return undefined
     },
-    [data.records, optionMapper]
+    [data.records, optionMapper, props.defaultItem]
   )
 
   useEffect(() => {
     const foundOption = findOption(localValue)
 
-    if (foundOption) {
-      onChangeSelectedOption?.(foundOption)
-      setSelectedOption(foundOption)
-    }
+    onChangeSelectedOption?.(foundOption)
+    setSelectedOption(foundOption)
   }, [
     data.records,
     localValue,
@@ -342,19 +371,22 @@ const SelectComponent = forwardRef(function Select<
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
     setLocalValue(changedValue as T)
+
     const foundOption = findOption(changedValue)
 
-    if (foundOption) {
-      onChange?.(foundOption.value, foundOption.item, foundOption)
-    }
+    onChange?.(changedValue as T, foundOption?.item, foundOption)
   }
 
+  const debouncedHandleChangeOpenLocal = useDebounceCallback(
+    (open: boolean) => {
+      onOpenChange?.(open)
+      setOpenLocal(open)
+    },
+    100
+  )
+
   const handleChangeOpenLocal = (open: boolean) => {
-    onOpenChange?.(open)
-    setOpenLocal(open)
-    setTimeout(() => {
-      searchInputRef.current?.focus()
-    }, 0)
+    debouncedHandleChangeOpenLocal(open)
   }
 
   // const collapsible = localSource.grouping?.collapsible
@@ -417,11 +449,45 @@ const SelectComponent = forwardRef(function Select<
     loadMore()
   }
 
+  const isLoadingOrLoadingMore = loading || isLoading || isLoadingMore
+
+  const loadingFocusInterval = useRef<NodeJS.Timeout | null>(null)
+  const clearLoadingFocusInterval = useCallback(() => {
+    if (loadingFocusInterval.current) {
+      clearInterval(loadingFocusInterval.current)
+      loadingFocusInterval.current = null
+    }
+  }, [loadingFocusInterval])
+
+  // Focus the search input when the data is loaded or loading
+
   useEffect(() => {
-    setTimeout(() => {
+    if (!openLocal) {
+      clearLoadingFocusInterval()
+      return
+    }
+
+    requestAnimationFrame(() => {
       searchInputRef.current?.focus()
-    }, 0)
-  }, [data])
+    })
+
+    // When is loading we need to focus the search repeatedly until the data is loaded
+    if (isLoadingOrLoadingMore && !loadingFocusInterval.current) {
+      loadingFocusInterval.current = setInterval(() => {
+        searchInputRef.current?.focus()
+      }, 100)
+    } else if (!isLoadingOrLoadingMore && loadingFocusInterval.current) {
+      clearLoadingFocusInterval()
+    }
+  }, [data, isLoadingOrLoadingMore, openLocal, clearLoadingFocusInterval])
+
+  useEffect(() => {
+    setInterval(() => {
+      searchInputRef.current?.focus()
+    }, 100)
+  }, [openLocal])
+
+  const i18n = useI18n()
 
   return (
     <>
@@ -449,6 +515,7 @@ const SelectComponent = forwardRef(function Select<
             <InputField
               label={label}
               error={error}
+              required={required}
               status={status}
               hint={hint}
               icon={icon}
@@ -460,46 +527,30 @@ const SelectComponent = forwardRef(function Select<
               disabled={disabled}
               clearable={clearable}
               size={size}
-              loading={isInitialLoading || loading}
+              loadingIndicator={{
+                asOverlay: true,
+                offset: 26,
+              }}
+              loading={isInitialLoading || loading || isLoading}
               name={name}
               onClickContent={() => {
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <div
-                  className={cn(
-                    "rounded-2xs bg-f1-background-secondary p-0.5",
-                    "flex items-center justify-center",
-                    !disabled && "cursor-pointer"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "origin-center transition-transform duration-200",
-                      "flex items-center justify-center",
-                      openLocal && "rotate-180"
-                    )}
-                  >
-                    <F0Icon
-                      onClick={() => {
-                        if (disabled) return
-                        handleChangeOpenLocal(!openLocal)
-                      }}
-                      icon={ChevronDown}
-                      size="sm"
-                      className={cn(
-                        "rounded-2xs bg-f1-background-secondary p-0.5 transition-transform duration-200",
-                        openLocal && "rotate-180",
-                        !disabled && "cursor-pointer"
-                      )}
-                    />
-                  </div>
-                </div>
+                <Arrow
+                  open={openLocal}
+                  disabled={disabled}
+                  size={size}
+                  className={cn(size === "sm" ? "" : "-translate-y-px")}
+                />
               }
             >
               <button
                 className="flex w-full items-center justify-between"
                 aria-label={label || placeholder}
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
               >
                 {selectedOption && <SelectValue item={selectedOption} />}
               </button>
@@ -509,8 +560,9 @@ const SelectComponent = forwardRef(function Select<
         {openLocal && (
           <SelectContent
             items={items}
+            taller={!!source?.filters}
             className={selectContentClassName}
-            emptyMessage={searchEmptyMessage}
+            emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
             top={
               <SelectTopActions
@@ -522,11 +574,17 @@ const SelectComponent = forwardRef(function Select<
                 grouping={localSource.grouping}
                 currentGrouping={localSource.currentGrouping}
                 onGroupingChange={localSource.setCurrentGrouping}
+                filters={localSource.filters}
+                currentFilters={localSource.currentFilters}
+                onFiltersChange={localSource.setCurrentFilters}
               />
             }
             onScrollBottom={handleScrollBottom}
+            scrollMargin={10}
             isLoadingMore={isLoadingMore}
-          ></SelectContent>
+            isLoading={isLoading || loading}
+            showLoadingIndicator={!!children}
+          />
         )}
       </SelectPrimitive>
     </>

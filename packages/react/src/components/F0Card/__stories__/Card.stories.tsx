@@ -7,6 +7,7 @@ import {
   Envelope,
   ExternalLink,
   Lightbulb,
+  Link,
   Office,
   Star,
 } from "@/icons/app"
@@ -66,6 +67,7 @@ export const Default: Story = {
       firstName: "Daniel",
       lastName: "Moreno",
     },
+    compact: false,
     title: "Daniel Moreno",
     description: "This is a cool description",
     metadata: [
@@ -91,6 +93,14 @@ export const Default: Story = {
             status: "positive",
             label: "Active",
           },
+        },
+      },
+      {
+        icon: Link,
+        property: {
+          type: "text",
+          value:
+            "https://docs.google.com/spreadsheets/d/1jO1tPWhNe1y_ciSmNVYHugIPaOIEWOqrHR50Du2wvbc/edit",
         },
       },
     ],
@@ -349,7 +359,7 @@ export const IntentsShowcase: Story = {
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
-    <div className="flex w-full flex-wrap gap-2 overflow-auto">
+    <div className="flex max-w-xl flex-col gap-2">
       <F0Card.Skeleton />
       <F0Card.Skeleton compact />
       <F0Card {...Default.args} />

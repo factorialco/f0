@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
+import { Platform } from "./types"
 import { detectPlatform } from "./user-platform"
-
-export type Platform = "mac" | "windows" | "linux" | "mobile" | "unknown"
 
 type Context = {
   platform: Platform

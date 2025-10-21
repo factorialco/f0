@@ -12,6 +12,7 @@ export type FilterTypeComponentProps<
   schema: FilterTypeSchema<Options>
   value: Value
   onChange: (value: Value) => void
+  isCompactMode?: boolean
 }
 
 export type FilterTypeContext<Options extends object = never> = {
@@ -32,6 +33,7 @@ export type FilterTypeDefinition<
     schema: Schema
     value: Value
     onChange: (value: Value) => void
+    isCompactMode?: boolean
   }) => React.ReactNode
   /**
    * The value label to display in the filter chips

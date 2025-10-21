@@ -8,7 +8,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { KanbanOnMove } from "@/ui/Kanban/types"
+import { KanbanOnCreate, KanbanOnMove } from "@/ui/Kanban/types"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { CollectionProps, SummariesDefinition } from "../../../types"
@@ -32,6 +32,7 @@ export type KanbanVisualizationOptions<
     record: Record
   ) => ReadonlyArray<{ icon: IconType; property: CardMetadataProperty }>
   onMove?: KanbanOnMove<Record>
+  onCreate?: KanbanOnCreate
 }
 
 export type KanbanCollectionProps<

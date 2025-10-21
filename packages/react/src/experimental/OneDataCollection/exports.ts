@@ -8,4 +8,7 @@ export type * from "./summary"
 export type * from "./types"
 // For backwards compatibility
 export * from "@/hooks/datasource/types"
+export * from "./hooks/useDataCollectionData"
 export * from "./hooks/useDataCollectionSource"
+export * from "./hooks/useInfiniteScrollPagination"
+export type { CustomVisualizationProps } from "./visualizations/collection/types"

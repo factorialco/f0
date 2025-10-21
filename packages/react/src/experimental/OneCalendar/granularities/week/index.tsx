@@ -2,6 +2,10 @@ import {
   addDays,
   addMonths,
   endOfISOWeek,
+  formatDate,
+  isSameISOWeek,
+  isSameMonth,
+  isSameYear,
   parse,
   startOfISOWeek,
   startOfMonth,
@@ -9,12 +13,12 @@ import {
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
-  formatDateToString,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
+import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { WeekView } from "./WeekView"
 
@@ -29,6 +33,64 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
     from: startOfISOWeek(addDays(date.from, delta * 7)),
     to: endOfISOWeek(addDays(date.to, delta * 7)),
   }
+}
+
+const toStringSort = (date: DateRange | Date | undefined | null) => {
+  const dateRange = toWeekGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+  // Single date
+  if (!dateRange.to || isSameISOWeek(dateRange.from, dateRange.to)) {
+    return formatDate(dateRange.from, "'W'I yyyy")
+  }
+
+  // Range
+  // Same year
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${formatDate(dateRange.from, "'W'I")} ${rangeSeparator} ${formatDate(dateRange.to, "'W'I yyyy")}`
+  }
+
+  // Different month and year
+  return `${formatDate(dateRange.from, "'W'I yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "'W'I yyyy")}`
+}
+
+const toStringLong = (
+  date: DateRange | Date | undefined | null,
+  i18nStrings: {
+    singular: string
+    plural: string
+  }
+) => {
+  const dateRange = toWeekGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+
+  const toI18nString = (
+    dateString: string,
+    type: "singular" | "plural" = "singular"
+  ) => (i18nStrings[type] || "").replace("{{date}}", dateString)
+
+  // Single date
+  if (!dateRange.to || isSameISOWeek(dateRange.from, dateRange.to)) {
+    return toI18nString(formatDate(dateRange.from, "d MMM yyyy"))
+  }
+
+  // Range
+
+  const startOfToWeek = startOfISOWeek(dateRange.to)
+  // Same month
+  if (isSameMonth(dateRange.from, dateRange.to)) {
+    return `${toI18nString(formatDate(dateRange.from, "d"), "plural")} ${rangeSeparator} ${toI18nString(formatDate(startOfToWeek, "d MMM yyyy"))}`
+  }
+  // Same year
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${toI18nString(formatDate(dateRange.from, "d MMM"), "plural")} ${rangeSeparator} ${toI18nString(formatDate(startOfToWeek, "d MMM yyyy"))}`
+  }
+
+  // Different month and year
+  return `${toI18nString(formatDate(dateRange.from, "d MMM yyyy"), "plural")} ${rangeSeparator} ${toI18nString(formatDate(startOfToWeek, "d MMM yyyy"))}`
 }
 
 export const weekGranularity: GranularityDefinition = {
@@ -63,14 +125,15 @@ export const weekGranularity: GranularityDefinition = {
   toRange: (date) => toWeekGranularityDateRange(date),
   toString: (date, i18n, format = "default") => {
     const formats: Record<DateStringFormat, string> = {
-      default: formatDateToString(date, "'W'I yyyy"),
-      long: i18n.date.granularities.week.long
-        .replace("%{month}", formatDateToString(date, "MMM"))
-        .replace("%{year}", formatDateToString(date, "yyyy"))
-        .replace("%{day}", formatDateToString(date, "d")),
+      default: toStringSort(date),
+      long: toStringLong(date, {
+        singular: i18n.date.granularities.week.longSingular,
+        plural: i18n.date.granularities.week.longPlural,
+      }),
     }
     return formats[format] ?? formats.default
   },
+  toStringMaxWidth: () => 240,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
@@ -121,6 +184,7 @@ export const weekGranularity: GranularityDefinition = {
         motionDirection={renderProps.motionDirection}
         minDate={minDate ? minDate.from : undefined}
         maxDate={maxDate ? maxDate.to : undefined}
+        compact={renderProps.compact}
       />
     )
   },

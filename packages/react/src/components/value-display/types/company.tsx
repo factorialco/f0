@@ -3,6 +3,9 @@
  * Shows company name alongside a company avatar with optional badge.
  */
 import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { cn } from "@/lib/utils"
+import { tableDisplayClassNames } from "../const"
+import { ValueDisplayRendererContext } from "../renderers"
 import { WithAvatarBadge } from "./types"
 
 interface CompanyValue {
@@ -11,8 +14,16 @@ interface CompanyValue {
 }
 export type CompanyCellValue = WithAvatarBadge<CompanyValue>
 
-export const CompanyCell = (args: CompanyCellValue) => (
-  <div className="flex items-center gap-2">
+export const CompanyCell = (
+  args: CompanyCellValue,
+  meta: ValueDisplayRendererContext
+) => (
+  <div
+    className={cn(
+      "flex items-center gap-2",
+      meta.visualization === "table" && tableDisplayClassNames.avatar
+    )}
+  >
     <F0Avatar
       avatar={{
         type: "company",

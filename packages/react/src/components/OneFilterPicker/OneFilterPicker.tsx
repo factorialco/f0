@@ -7,7 +7,7 @@ import { PresetsDefinition } from "./types"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
 import { cn } from "@/lib/utils"
-import type { FiltersDefinition, FiltersState } from "./types"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 
 /**
  * Props for the Filters component.
@@ -20,10 +20,14 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   value: FiltersState<Definition>
   /** Optional preset configurations that users can select */
   presets?: PresetsDefinition<Definition>
+  /** Whether presets are currently loading */
+  presetsLoading?: boolean
   /** Callback fired when filters are changed */
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
   children?: React.ReactNode
+  /** The mode of the component */
+  mode?: FiltersMode
 }
 
 /**
@@ -90,6 +94,8 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   filters,
   value,
   children,
+  presetsLoading = false,
+  mode = "default",
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
   const defaultFilters = useRef(value)
@@ -105,7 +111,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   useEffect(() => {
     setLocalFiltersValue(value)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
-  }, [JSON.stringify(filters)])
+  }, [JSON.stringify(filters), JSON.stringify(value)])
 
   const removeFilterValue = (key: keyof Definition) => {
     const newFilters = { ...localFiltersValue }
@@ -123,7 +129,9 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     <FiltersContext.Provider
       value={{
         ...props,
+        mode,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
+        presetsLoading,
         value: localFiltersValue,
         filters: filters,
         removeFilterValue,
@@ -153,6 +161,7 @@ const FiltersControls = () => {
     setFiltersValue,
     presets,
     emitFilterChange,
+    mode,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -177,6 +186,7 @@ const FiltersControls = () => {
         onOpenChange={setIsFiltersOpen}
         isOpen={isFiltersOpen}
         hideLabel={!!presets}
+        mode={mode}
       />
       {!!presets?.length && (
         <div className="flex items-center">
@@ -192,7 +202,7 @@ FiltersControls.displayName = "OneFilterPicker.Controls"
  * Filter presets
  */
 const FiltersPresets = () => {
-  const { presets, value, setFiltersValue, emitPresetClick } =
+  const { presets, presetsLoading, value, setFiltersValue, emitPresetClick } =
     useContext(FiltersContext)
 
   const handlePresetClick = (presetFilter: FiltersState<FiltersDefinition>) => {
@@ -204,6 +214,7 @@ const FiltersPresets = () => {
     presets && (
       <FiltersPresetsComponent
         presets={presets}
+        presetsLoading={presetsLoading}
         value={value}
         onPresetsChange={handlePresetClick}
       />
@@ -272,7 +283,7 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
           </div>
         )}
       </div>
-      <FiltersChipsList />
+      {(!props.mode || props.mode === "default") && <FiltersChipsList />}
     </FiltersRoot>
   )
 }

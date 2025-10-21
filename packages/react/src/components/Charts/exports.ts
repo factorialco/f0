@@ -1,4 +1,4 @@
-import { Component } from "../../lib/component"
+import { Component } from "../../lib/component/component"
 
 import { AreaChart as AreaChartComponent } from "./AreaChart"
 import { BarChart as BarChartComponent } from "./BarChart"

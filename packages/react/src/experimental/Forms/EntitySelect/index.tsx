@@ -11,8 +11,8 @@ import {
   EntitySelectSubEntity,
 } from "./types"
 
-export const EntitySelect = (
-  props: EntitySelectProps & { children?: React.ReactNode }
+export const EntitySelect = <T,>(
+  props: EntitySelectProps<T> & { children?: React.ReactNode }
 ) => {
   const [open, setOpen] = useState(
     (props.alwaysOpen || props.defaultOpen) ?? false
@@ -452,16 +452,35 @@ export const EntitySelect = (
 
   return (
     <Popover {...props} onOpenChange={onOpenChange} open={open}>
-      <PopoverTrigger className="w-full" disabled={props.disabled}>
+      <PopoverTrigger
+        className="w-full"
+        disabled={props.disabled}
+        aria-label={props.label || props.placeholder}
+      >
         {props.children ? (
           props.children
         ) : (
           <Trigger
-            placeholder={props.triggerPlaceholder}
-            selected={props.triggerSelected}
+            selected={props.selectedItemsCopy}
             selectedEntities={props.selectedEntities ?? []}
-            disabled={props.disabled}
             hiddenAvatar={props.hiddenAvatar}
+            label={props.label}
+            labelIcon={props.labelIcon}
+            icon={props.icon}
+            error={props.error}
+            status={props.status}
+            hint={props.hint}
+            hideLabel={props.hideLabel}
+            maxLength={props.maxLength}
+            value={props.value?.toString() ?? undefined}
+            disabled={props.disabled}
+            placeholder={props.placeholder}
+            loading={props.alwaysOpen ? props.loading : false}
+            required={props.required}
+            readonly={props.readonly}
+            append={props.append}
+            size={props.size}
+            open={open}
           />
         )}
       </PopoverTrigger>

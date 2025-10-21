@@ -67,6 +67,11 @@ describe("monthGranularity", () => {
       expect(result).toBe("01/2024")
     })
 
+    it("formats a single date correctly with long format", () => {
+      const result = monthGranularity.toString(baseDate, i18n, "long")
+      expect(result).toBe("Jan 2024")
+    })
+
     it("formats a date range correctly", () => {
       const result = monthGranularity.toString(
         {
@@ -76,6 +81,69 @@ describe("monthGranularity", () => {
         i18n
       )
       expect(result).toBe("01/2024 → 02/2024")
+    })
+
+    it("formats a date range correctly with long format", () => {
+      const result = monthGranularity.toString(
+        {
+          from: baseDate,
+          to: nextMonthDate,
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Jan → Feb 2024")
+    })
+
+    it("formats a month range across years correctly with long format", () => {
+      const result = monthGranularity.toString(
+        {
+          from: new Date(2023, 11, 15), // December 2023
+          to: new Date(2024, 1, 15), // February 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Dec 2023 → Feb 2024")
+    })
+
+    it("formats a long month range in same year correctly with long format", () => {
+      const result = monthGranularity.toString(
+        {
+          from: new Date(2024, 2, 15), // March 2024
+          to: new Date(2024, 8, 15), // September 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Mar → Sep 2024")
+    })
+
+    it("formats first month of year correctly with long format", () => {
+      const result = monthGranularity.toString(
+        new Date(2024, 0, 15),
+        i18n,
+        "long"
+      ) // January 2024
+      expect(result).toBe("Jan 2024")
+    })
+
+    it("formats last month of year correctly with long format", () => {
+      const result = monthGranularity.toString(
+        new Date(2024, 11, 15),
+        i18n,
+        "long"
+      ) // December 2024
+      expect(result).toBe("Dec 2024")
+    })
+
+    it("formats leap year February correctly with long format", () => {
+      const result = monthGranularity.toString(
+        new Date(2024, 1, 15),
+        i18n,
+        "long"
+      ) // February 2024 (leap year)
+      expect(result).toBe("Feb 2024")
     })
   })
 

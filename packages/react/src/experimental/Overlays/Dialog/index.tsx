@@ -27,7 +27,7 @@ type DialogProps = {
     title: string
     description: string
   }
-  actions: {
+  actions?: {
     primary: PrimaryAction
     secondary: SecondaryAction
   }
@@ -74,15 +74,15 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
             </div>
           </DialogHeader>
           {actions && (
-            <DialogFooter className="px-4 pb-4 pt-2 [&_div]:w-full">
-              <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3">
+            <DialogFooter className="px-4 pb-4 pt-2">
+              <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3 [&>div]:w-full">
                 <Button variant="outline" {...actions.secondary} />
                 <Button
                   {...actions.primary}
                   variant={actions.primary.variant || "default"}
                 />
               </div>
-              <div className="flex flex-col-reverse gap-2 sm:hidden">
+              <div className="flex flex-col-reverse gap-2 sm:hidden [&>div]:w-full">
                 <Button variant="outline" {...actions.secondary} size="lg" />
                 <Button
                   {...actions.primary}

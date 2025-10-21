@@ -1,5 +1,5 @@
 import { forwardRef } from "react"
-import { autoColor } from "../../../../components/Charts/utils/colors"
+import { getColor } from "../../../../components/Charts/utils/colors"
 
 interface DualProgressBarProps {
   value: number
@@ -14,7 +14,10 @@ export const ProgressBarDuo = forwardRef<HTMLDivElement, DualProgressBarProps>(
       <div ref={ref} className="flex h-2 w-full gap-0.5 overflow-hidden">
         <div
           className="rounded transition-all duration-300 ease-in-out"
-          style={{ width: `${percentage}%`, backgroundColor: autoColor(0) }}
+          style={{
+            width: `${percentage}%`,
+            backgroundColor: getColor("categorical-1"),
+          }}
         />
         <div
           className="rounded bg-f1-foreground-disabled transition-all duration-300 ease-in-out"

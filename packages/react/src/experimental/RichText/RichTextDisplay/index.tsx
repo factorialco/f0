@@ -1,18 +1,46 @@
 import { cn } from "@/lib/utils"
 import DOMPurify from "dompurify"
-import { forwardRef, HTMLAttributes } from "react"
+import { forwardRef, HTMLAttributes, useMemo } from "react"
+import rehypeStringify from "rehype-stringify"
+import remarkGfm from "remark-gfm"
+import remarkParse from "remark-parse"
+import remarkRehype from "remark-rehype"
+import { unified } from "unified"
 import "../index.css"
 
 interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
   content: string
   className?: string
+  format?: "html" | "markdown"
 }
 
 type RichTextDisplayHandle = HTMLDivElement
 
+const PROCESSOR = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeStringify)
+
 const RichTextDisplay = forwardRef<RichTextDisplayHandle, RichTextDisplayProps>(
-  function RichTextDisplay({ content, className, ...props }, ref) {
-    const isHtml = /<[^>]*>/.test(content)
+  function RichTextDisplay(
+    { content, className, format = "html", ...props },
+    ref
+  ) {
+    const sanitized = useMemo(
+      () =>
+        DOMPurify.sanitize(
+          format === "markdown"
+            ? String(PROCESSOR.processSync(content))
+            : content,
+          {
+            ADD_ATTR: ["target"],
+            ALLOWED_ATTR: ["href", "target", "rel", "class"],
+          }
+        ),
+      [format, content]
+    )
+    const isHtml = /<[^>]*>/.test(sanitized)
 
     return (
       <div
@@ -23,7 +51,7 @@ const RichTextDisplay = forwardRef<RichTextDisplayHandle, RichTextDisplayProps>(
           className
         )}
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(content),
+          __html: sanitized,
         }}
         {...props}
       />

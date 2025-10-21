@@ -35,6 +35,8 @@ export type DataSourceDefinition<
   currentFilters?: FiltersState<Filters>
   /** Predefined filter configurations that can be applied */
   presets?: PresetsDefinition<Filters>
+  /** Whether presets are currently loading */
+  presetsLoading?: boolean
 
   /** Search configuration */
   search?: SearchOptions
@@ -73,6 +75,8 @@ export type DataSource<
   currentFilters: FiltersState<Filters>
   /** Function to update the current filters state */
   setCurrentFilters: React.Dispatch<React.SetStateAction<FiltersState<Filters>>>
+  /** Whether presets are currently loading */
+  presetsLoading?: boolean
   /** Current state of applied sortings */
   currentSortings: SortingsState<Sortings>
   /** Function to update the current sortings state */
@@ -99,4 +103,7 @@ export type DataSource<
     item: Item,
     index?: number
   ) => string | number | symbol
+
+  /** Item filter that can be used to filter the items before they are displayed */
+  itemPreFilter?: (item: R) => boolean
 }

@@ -1,0 +1,210 @@
+import {
+  Canvas,
+  Meta,
+  Controls,
+  Unstyled,
+  Story,
+} from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as ActionsStories from "./actions/collection-actions.stories"
+import * as ItemActionsStories from "./actions/item-actions.stories"
+import * as IndexStories from "./index.stories"
+
+<Meta title="Data collection/Status Persistence" />
+
+# Data collection / Status Persistence
+
+The OneDataCollection component supports persisting user preferences and state
+across sessions using the `DataCollectionStorageProvider`. This allows users to
+maintain their preferred settings like filters, sorting, grouping, search terms,
+and visualization preferences.
+
+## Overview
+
+The persistence system consists of two main parts:
+
+- **datacollection ID**: A unique identifier that identifies the data collection
+  (this will be used as the key for the storage, but for other purposes like
+  state sharing via url, analytics, etc.)
+
+- **Storage Features**: Configuration that defines which features should be
+  persisted
+
+## Storage Key
+
+### Required Format
+
+The storage key **must** follow the format: `{name}/{version}`
+
+```typescript
+// Valid examples
+"employees/v1"
+"projects/dashboard/v2"
+"customers/list/v1.2"
+
+// Invalid examples
+"employees" // Missing version
+"employees/1" // Version must start with 'v'
+"/v1" // Empty name
+"employees/v" // Version needs identifier
+```
+
+### Key Components
+
+- **Name**: Can be a simple name or a path (e.g., `employees`,
+  `projects/dashboard`)
+- **Version**: Must start with 'v' followed by alphanumeric characters, but not
+  dots:
+
+  - ✅ `v1`,
+  - ❌ `v2.1`, `v1.0.0`
+
+### Why Versioning is Critical
+
+The version part of the key is essential for handling breaking changes in your
+data collection configuration. You **must** update the version when:
+
+- **Filter definitions change**: New filters added, existing filters modified or
+  removed
+- **Column structure changes**: New columns added, columns renamed, or data
+  types modified
+- **Grouping options change**: Available grouping fields modified
+- **Sorting options change**: Available sorting fields modified
+- **Visualization configuration changes**: New visualizations added or existing
+  ones modified
+
+```typescript
+// Initial implementation
+<OneDataCollection storageKey="employees/v1" />
+
+// After adding new filters or changing column structure
+<OneDataCollection storageKey="employees/v2" />
+```
+
+Without version updates, users might experience:
+
+- Errors when loading incompatible stored settings
+- Missing or broken filter states
+- Incorrect column configurations
+
+## Storage Features
+
+Storage features determine which aspects of the data collection state should be
+persisted and restored.
+
+### Available Features
+
+The system supports the following storage features:
+
+- `"filters"` - User-applied filters
+- `"navigationFilters"` - Navigation-based filters
+- `"sortings"` - Column sorting preferences
+- `"grouping"` - Row grouping configuration
+- `"visualization"` - Selected visualization type
+- `"search"` - Search query terms
+- `"settings"` - Component settings (always included automatically)
+
+### Feature Configuration
+
+#### Store All Features
+
+```typescript
+<OneDataCollection
+  id="employees/v1"
+/>
+```
+
+or are the same
+
+```typescript
+<OneDataCollection
+  id="employees/v1"
+  storage={{
+    features: ["*"]
+  }} // or ["all"] or none that means all features are stored
+/>
+```
+
+#### Store Specific Features
+
+```typescript
+<OneDataCollection
+  id="employees/v1"
+  storage={{
+    features: ["filters", "sortings", "search"]
+  }}
+/>
+```
+
+#### Store All Except Specific Features
+
+```typescript
+<OneDataCollection
+  id="employees/v1"
+  storage={{
+    features: ["*", "!grouping", "!visualization"]
+  }} // All except grouping and visualization
+/>
+```
+
+#### No Persistence
+
+```typescript
+<OneDataCollection
+  // No id provided - no persistence
+/>
+```
+
+## Implementation Example
+
+### Basic Setup
+
+```typescript
+  <OneDataCollection
+    id="employees/v1"
+    storage={{
+      features: ["*"]
+    }}
+    // ... other props
+  />
+```
+
+### Advanced Configuration
+
+```typescript
+<OneDataCollection
+  id="projects/dashboard/v2"
+  storage={{
+    features: [
+    "filters",      // Store user filters
+    "sortings",     // Store column sorting
+    "search",       // Store search terms
+    "!grouping"     // Don't store grouping (reset each session)
+    ]
+  }}
+  // ... other props
+/>
+```
+
+## Best Practices
+
+### 1. Version Management
+
+- Start with `v1` for new implementations
+- Increment version when making breaking changes to data structure
+- Use semantic versioning is not allowed - ❌ `v1.0.0`, `v1.1.0`, `v2.0.0`
+
+### 2. Feature Selection
+
+- Only persist features that enhance user experience
+- Consider performance impact of storing large filter states
+- Exclude frequently changing features that shouldn't persist
+
+### 3. Storage Key (ID) Naming
+
+- Use descriptive names that reflect the data and context
+- Use paths for hierarchical organization
+  (`[module]/[datacollection descriptive name]`) e.g.
+  `organization/employees/v1`
+- Keep names consistent across your application

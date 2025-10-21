@@ -151,6 +151,12 @@ export function useDataCollectionLanesData<
     [source.grouping]
   )
 
+  // Track dataAdapter changes to force refetch when cache updates
+  const dataAdapterSignature = useMemo(
+    () => JSON.stringify(source.dataAdapter),
+    [source.dataAdapter]
+  )
+
   const lanesProvider = useMemo(
     () => {
       return (lanes || []).map((lane) => (
@@ -181,6 +187,7 @@ export function useDataCollectionLanesData<
       currentGroupingSignature,
       currentSearchSignature,
       groupingSignature,
+      dataAdapterSignature, // Include dataAdapter to detect cache updates
     ]
   )
 

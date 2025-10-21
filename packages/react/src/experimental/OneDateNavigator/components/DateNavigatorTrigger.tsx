@@ -158,38 +158,46 @@ const DateNavigatorTrigger = forwardRef<
         // Prevent the date picker from being triggered when the user clicks on the input
         onClick={(e) => e.stopPropagation()}
       >
-        {navigation && (
-          <Button
+        <div
+          className={cn(
+            "flex flex-1 gap-1",
+            navigation ? "justify-between" : "justify-center"
+          )}
+        >
+          {navigation && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={ChevronLeft}
+              label="Previous"
+              hideLabel
+              disabled={!nextPrev?.prev}
+              onClick={() => handleNavigation(nextPrev?.prev ?? false)}
+            />
+          )}
+          <ButtonInternal
             size="sm"
             variant="ghost"
-            icon={ChevronLeft}
-            label="Previous"
-            hideLabel
-            disabled={!nextPrev?.prev}
-            onClick={() => handleNavigation(nextPrev?.prev ?? false)}
+            label={label}
+            onClick={onClick}
+            disabled={disabled}
+            style={{ minWidth: granularity?.toStringMaxWidth() }}
+            className={cn(highlighted && "bg-f1-background-secondary-hover")}
           />
-        )}
-        <ButtonInternal
-          size="sm"
-          variant="ghost"
-          label={label}
-          onClick={onClick}
-          disabled={disabled}
-          className={cn(highlighted && "bg-f1-background-secondary-hover")}
-        />
-        {navigation && (
-          <Button
-            variant="ghost"
-            icon={ChevronRight}
-            label="Next"
-            hideLabel
-            size="sm"
-            disabled={!nextPrev?.next}
-            onClick={() => handleNavigation(nextPrev?.next ?? false)}
-          />
-        )}
+          {navigation && (
+            <Button
+              variant="ghost"
+              icon={ChevronRight}
+              label="Next"
+              hideLabel
+              size="sm"
+              disabled={!nextPrev?.next}
+              onClick={() => handleNavigation(nextPrev?.next ?? false)}
+            />
+          )}
+        </div>
         {!hideGoToCurrent && currentDate && (
-          <div className="border-l-solid flex-1 border-[#f00]">
+          <div className="border-l-solid flex-shrink-0 border-[#f00]">
             <Button
               size="sm"
               variant="ghost"

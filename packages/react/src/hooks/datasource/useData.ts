@@ -4,7 +4,6 @@ import type {
 } from "@/components/OneFilterPicker/types"
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-import { groupBy } from "lodash"
 import {
   useCallback,
   useDeferredValue,
@@ -28,6 +27,7 @@ import {
   SortingsStateMultiple,
 } from "./types"
 import { DataSource } from "./types/datasource.typings"
+import { groupBy } from "./utils"
 
 /**
  * Represents an error that occurred during data fetching
@@ -250,6 +250,7 @@ export function useData<
     currentGrouping,
     grouping,
     idProvider = defaultIdProvider,
+    itemPreFilter,
   } = source
 
   const cleanup = useRef<(() => void) | undefined>()
@@ -263,7 +264,30 @@ export function useData<
     setError,
   } = useDataFetchState<R>()
 
+  const [filteredItemsCount, setFilteredItemsCount] = useState<number>(0)
+
   const { paginationInfo, setPaginationInfo } = usePaginationState()
+
+  useEffect(() => {
+    if (itemPreFilter) {
+      setRawData((currentData) => {
+        const originalItemsCount = currentData.length
+        const filteredData = currentData.filter(itemPreFilter)
+        const newItemsCount = filteredData.length
+        const filteredItemsCount = originalItemsCount - newItemsCount
+        setFilteredItemsCount(filteredItemsCount)
+        setPaginationInfo((info) =>
+          info
+            ? {
+                ...info,
+                total: info.total - filteredItemsCount,
+              }
+            : null
+        )
+        return filteredData
+      })
+    }
+  }, [itemPreFilter, setRawData, setPaginationInfo])
 
   // We need to use a ref to get the latest paginationInfo value
   // because the paginationInfo is updated asynchronously
@@ -323,7 +347,11 @@ export function useData<
   }
 
   const handleFetchSuccess = useCallback(
-    (result: PaginatedResponse<R> | SimpleResult<R>, appendMode: boolean) => {
+    (
+      result: PaginatedResponse<R> | SimpleResult<R>,
+      appendMode: boolean,
+      isLoadingYet?: boolean
+    ) => {
       /**
        * Call to the onResponse callback
        */
@@ -389,7 +417,7 @@ export function useData<
       )
       setError(null)
       setIsInitialLoading(false)
-      setIsLoading(false)
+      setIsLoading(!!isLoadingYet)
       setIsLoadingMore(false)
       isLoadingMoreRef.current = false
     },
@@ -447,12 +475,17 @@ export function useData<
       return {
         type: "grouped" as const,
         records: data,
-        groups: Object.entries(groupedData).map(([key, value]) => ({
-          key,
-          label: groupConfig.label(key as unknown, mergedFilters),
-          itemCount: groupConfig.itemCount?.(key as unknown, mergedFilters),
-          records: value,
-        })),
+        groups: Array.from(groupedData.entries()).map(
+          ([groupKey, groupRecords]) => ({
+            key: groupKey,
+            label: groupConfig.label(groupKey as unknown, mergedFilters),
+            itemCount: groupConfig.itemCount?.(
+              groupKey as unknown,
+              mergedFilters
+            ),
+            records: groupRecords,
+          })
+        ),
       }
     }
 
@@ -533,7 +566,7 @@ export function useData<
             ? [
                 {
                   field: currentGrouping.field as string,
-                  order: currentGrouping.order,
+                  order: currentGrouping.order ?? "asc",
                 },
               ]
             : []),
@@ -591,12 +624,12 @@ export function useData<
 
         const subscription = observable.subscribe({
           next: (state) => {
-            if (state.loading) {
+            if (state.data) {
+              handleFetchSuccess(state.data, appendMode, state.loading)
+            } else if (state.loading) {
               setIsLoading(true)
             } else if (state.error) {
               handleFetchError(state.error)
-            } else if (state.data) {
-              handleFetchSuccess(state.data, appendMode)
             }
           },
           error: handleFetchError,
@@ -730,6 +763,8 @@ export function useData<
     }
   }, [])
 
+  const total = totalItems ? totalItems - filteredItemsCount : 0
+
   return {
     data,
     isInitialLoading,
@@ -740,7 +775,7 @@ export function useData<
     setPage,
     loadMore,
     mergedFilters,
-    totalItems,
+    totalItems: total,
   }
 }
 

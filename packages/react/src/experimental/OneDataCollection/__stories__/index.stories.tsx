@@ -10,6 +10,7 @@ import {
   Delete,
   Download,
   Envelope,
+  Inbox,
   Pencil,
   Person,
   Placeholder,
@@ -18,6 +19,7 @@ import {
   Target,
   Upload,
 } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import {
   CERTIFICATIONS_MOCK,
   DEPARTMENTS_MOCK,
@@ -31,12 +33,15 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { mockImage } from "@/testing/mocks/images"
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { useEffect, useState } from "react"
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import type { CustomVisualizationProps } from "../visualizations/collection"
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -52,7 +57,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Data Collection",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -83,12 +88,87 @@ const meta = {
       description:
         "<p>Callback triggered when a bulk action is performed. It gets the action name, and the same args as `inSelectItems`. ‼️ Please check the `onSelectItems` docs for more information.</p>",
     },
+    onStateChange: {
+      action: "onStateChange",
+      description:
+        "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
+    },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "experimental", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const Simplest: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: ({ filters, sortings, search }) => {
+          return createPromiseDataFetch()({
+            filters,
+            sortings,
+            search,
+            navigationFilters: {},
+          })
+        },
+      },
+    })
+
+    return (
+      <div className="space-y-4">
+        <OneDataCollection
+          source={dataSource}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Name",
+                    render: (item) => ({
+                      type: "person",
+                      value: {
+                        firstName: item.name.split(" ")[0],
+                        lastName: item.name.split(" ")[1],
+                      },
+                    }),
+                    sorting: "name",
+                  },
+                  {
+                    label: "Email",
+                    render: (item) => item.email,
+                    sorting: "email",
+                  },
+                  {
+                    label: "Role",
+                    render: (item) => item.role,
+                    sorting: "role",
+                  },
+                  {
+                    label: "Department",
+                    render: (item) => item.department,
+                    sorting: "department",
+                    info: "Team that the employee belongs to",
+                  },
+                  {
+                    label: "Salary",
+                    render: (item) => ({
+                      type: "amount",
+                      value: item.salary,
+                    }),
+                    align: "right",
+                    sorting: "salary",
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
 
 // Basic examples with single visualization
 export const BasicTableView: Story = {
@@ -234,11 +314,6 @@ export const BasicTableView: Story = {
   },
 }
 
-// Examples with multiple visualizations
-export const TableFrozenCols: Story = {
-  render: () => <ExampleComponent frozenColumns={2} />,
-}
-
 // Basic examples with single visualization
 export const WithLinkedItems: Story = {
   render: () => {
@@ -328,6 +403,7 @@ export const WithLinkedItems: Story = {
                         },
                       },
                     }),
+                    width: 100,
                     sorting: "name",
                   },
                   {
@@ -440,6 +516,7 @@ export const BasicCardView: Story = {
 
 // Examples with different property renderers
 export const RendererTypes: Story = {
+  parameters: withSnapshot({}),
   render: () => {
     const dataSource = useDataCollectionSource({
       filters,
@@ -448,7 +525,12 @@ export const RendererTypes: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
+      search: {
+        enabled: true,
+      },
     })
+
+    let i = 0
 
     return (
       <OneDataCollection
@@ -487,7 +569,38 @@ export const RendererTypes: Story = {
                   sorting: "email",
                 },
                 {
-                  label: "Company",
+                  label: "Description",
+                  render: () => {
+                    return {
+                      type: "longText",
+                      value: {
+                        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                      },
+                    }
+                  },
+                },
+                {
+                  label: "Description",
+                  render: () => {
+                    return {
+                      type: "icon",
+                      value: {
+                        icon: Inbox,
+                        label: "Inbox",
+                      },
+                    }
+                  },
+                },
+                {
+                  label: "Date",
+                  render: () => ({
+                    type: "date",
+                    value: getMockValue(START_DATE_MOCK, i++),
+                  }),
+                },
+
+                {
+                  label: "Company List",
                   render: () => ({
                     type: "avatarList",
                     value: {
@@ -496,9 +609,35 @@ export const RendererTypes: Story = {
                         {
                           type: "company",
                           name: "Test company",
-                          src: "https://cdn.join-staging.com/products/controlling_portal_de_icon.jpeg",
+                          src: mockImage("company", 0),
+                        },
+                        {
+                          type: "company",
+                          name: "Test company 2",
+                          src: mockImage("company", 1),
                         },
                       ],
+                    },
+                  }),
+                },
+
+                {
+                  label: "Company",
+                  render: () => ({
+                    type: "company",
+                    value: {
+                      name: "Test company",
+                      src: mockImage("company", 0),
+                    },
+                  }),
+                },
+                {
+                  label: "Team",
+                  render: () => ({
+                    type: "team",
+                    value: {
+                      name: "Test team",
+                      src: mockImage("team", 0),
                     },
                   }),
                 },
@@ -540,6 +679,7 @@ export const RendererTypes: Story = {
                   render: (item) => ({
                     type: "avatarList",
                     value: {
+                      max: 1,
                       avatarList: [
                         {
                           type: "person",
@@ -769,21 +909,19 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
   ),
 }
 
+const useJsonDataSource = () =>
+  useDataCollectionSource({
+    filters,
+    sortings,
+    presets: filterPresets,
+    dataAdapter: {
+      fetchData: createPromiseDataFetch(),
+    },
+  })
+
 const JsonVisualization = ({
   source,
-}: {
-  source: ReturnType<
-    typeof useDataCollectionSource<
-      (typeof mockUsers)[number],
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<(typeof mockUsers)[number]>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<(typeof mockUsers)[number]>
-    >
-  >
-}) => {
+}: CustomVisualizationProps<ReturnType<typeof useJsonDataSource>>) => {
   const { data, isLoading } = useDataCollectionData(source)
 
   if (isLoading) {
@@ -803,39 +941,21 @@ const JsonVisualization = ({
 
 export const WithCustomJsonView: Story = {
   render: () => {
-    type MockUser = (typeof mockUsers)[number]
-    type MockActions = ItemActionsDefinition<MockUser>
+    const jsonDataSource = useJsonDataSource()
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
     })
 
-    const dataSource = useDataCollectionSource<
-      MockUser,
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      MockActions,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >({
-      filters,
-      sortings,
-      presets: filterPresets,
-      dataAdapter: {
-        fetchData: createPromiseDataFetch(),
-      },
-    })
-
     return (
       <OneDataCollection
-        source={dataSource}
+        source={jsonDataSource}
         visualizations={[
           {
             type: "custom",
             label: "JSON View",
             icon: Ai,
-            component: ({ source }) => <JsonVisualization source={source} />,
+            component: (props) => <JsonVisualization {...props} />,
           },
           mockVisualizations.table,
           mockVisualizations.card,
@@ -1062,6 +1182,14 @@ export const WithInfiniteScrollPagination: Story = {
 // This is a test to see if the table visualization works with one column
 export const WithInfiniteScrollPaginationOneCol: Story = {
   render: () => {
+    const [presetsLoading, setPresetsLoading] = useState(true)
+
+    useEffect(() => {
+      setTimeout(() => {
+        setPresetsLoading(false)
+      }, 2000)
+    }, [])
+
     // Create a fixed set of paginated users so we're not regenerating them on every render
     const paginatedMockUsers = generateMockUsers(50)
 
@@ -1072,6 +1200,7 @@ export const WithInfiniteScrollPaginationOneCol: Story = {
     const source = useDataCollectionSource({
       filters,
       presets: filterPresets,
+      presetsLoading,
       sortings,
       selectable: (item) => (item.id !== "user-1a" ? item.id : undefined),
       bulkActions: (allSelected) => {
@@ -2091,20 +2220,4 @@ export const TableWithSecondaryActions: Story = {
       />
     )
   },
-}
-
-export const TotalItemsSummary: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'The `totalItemSummary` useDataCollectionSource prop allows you to customize how the total number of items is displayed in the collection header. It receives a function that takes the total count as a parameter and returns a string to be displayed. By default, if no `totalItemSummary` is provided, it will display "{count} items".',
-      },
-    },
-  },
-  render: () => (
-    <ExampleComponent
-      totalItemSummary={(totalItems) => `Total items: ${totalItems}`}
-    />
-  ),
 }

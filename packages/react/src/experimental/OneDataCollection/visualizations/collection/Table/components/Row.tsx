@@ -17,8 +17,8 @@ import {
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-import { TableColumnDefinition } from ".."
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { TableColumnDefinition } from "../types"
 import { useSticky } from "../useSticky"
 
 export type RowProps<
@@ -149,7 +149,6 @@ const RowComponentInner = <
         </TableCell>
       ))}
 
-      {/** Mobile item actions */}
       {source.itemActions && (
         <>
           {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
@@ -162,7 +161,7 @@ const RowComponentInner = <
               />
             </ItemActionsRowContainer>
           </td>
-
+          {/** Mobile item actions */}
           <TableCell
             key={`table-cell-${groupIndex}-${index}-actions`}
             width={68}

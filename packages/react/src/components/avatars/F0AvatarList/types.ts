@@ -1,6 +1,7 @@
 import {
   CompanyAvatarVariant,
   FileAvatarVariant,
+  FlagAvatarVariant,
   PersonAvatarVariant,
   TeamAvatarVariant,
 } from "../F0Avatar/types"
@@ -22,6 +23,10 @@ export type F0AvatarListPropsAvatars =
   | {
       type: "company"
       avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[]
+    }
+  | {
+      type: "flag"
+      avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[]
     }
   | {
       type: "file"

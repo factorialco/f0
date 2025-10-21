@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
 import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
+import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -118,7 +119,8 @@ export function PageHeader({
   productUpdates,
   favorites,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar } = useSidebar()
+  const { sidebarState, toggleSidebar, isLastToggleInvokedByUser } =
+    useSidebar()
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -156,12 +158,15 @@ export function PageHeader({
               <div className="mr-3">
                 <Button
                   ref={(buttonEl) => {
-                    buttonEl?.focus()
+                    // if action was triggered by user, focus the close button
+                    if (isLastToggleInvokedByUser) {
+                      buttonEl?.focus()
+                    }
                   }}
                   variant="ghost"
                   hideLabel
                   round
-                  onClick={toggleSidebar}
+                  onClick={() => toggleSidebar()}
                   label="Open main menu"
                   icon={Menu}
                 />
@@ -287,6 +292,7 @@ export function PageHeader({
         )}
         <div>
           <OneSwitch />
+          <OnePromotionSwitch />
         </div>
       </div>
     </div>

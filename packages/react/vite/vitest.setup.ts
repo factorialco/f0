@@ -71,6 +71,7 @@ vi.stubGlobal(
   "ResizeObserver",
   class MockedResizeObserver {
     observe = vi.fn()
+    unobserve = vi.fn()
     disconnect = vi.fn()
   }
 )

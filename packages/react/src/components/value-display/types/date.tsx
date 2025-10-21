@@ -6,6 +6,8 @@ import { formatDateValue } from "../utils"
 
 import { cn } from "@/lib/utils"
 
+import { tableDisplayClassNames } from "../const"
+import { ValueDisplayRendererContext } from "../renderers"
 import { isShowingPlaceholder } from "../utils"
 import { WithPlaceholder } from "./types"
 
@@ -14,7 +16,10 @@ interface DateValue extends WithPlaceholder {
 }
 export type DateCellValue = Date | undefined | DateValue
 
-export const DateCell = (args: DateCellValue) => {
+export const DateCell = (
+  args: DateCellValue,
+  meta: ValueDisplayRendererContext
+) => {
   const formattedDate = formatDateValue(args)
 
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "date")
@@ -22,8 +27,9 @@ export const DateCell = (args: DateCellValue) => {
   return (
     <div
       className={cn(
-        "text-f1-foreground",
-        shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
+        "monospace text-f1-foreground",
+        shouldShowPlaceholderStyling && "text-f1-foreground-secondary",
+        meta.visualization === "table" && tableDisplayClassNames.text
       )}
     >
       {formattedDate}
