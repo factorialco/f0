@@ -1,7 +1,10 @@
-import { granularityDefinitions } from "@/experimental/OneCalendar"
+import {
+  GranularityDefinitionKey,
+  granularityDefinitions,
+} from "@/experimental/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DateInput } from "./components/DateInput"
 import { DatePickerValue, F0DatePickerProps } from "./types"
 
@@ -28,44 +31,80 @@ export function F0DatePicker({
     return granularities[0] ?? "day"
   }, [granularities])
 
+  const getGranularity = useCallback(
+    (granularityKey: GranularityDefinitionKey | undefined) => {
+      const key = granularityKey || defaultGranularity
+      if (!granularityDefinitions[key]) {
+        throw new Error(`Invalid granularity ${key}`)
+      }
+      return {
+        ...granularityDefinitions[key],
+        key,
+      }
+    },
+    [defaultGranularity]
+  )
+
+  /**
+   * Returns a value rante in the correct granularity
+   */
+  const toSafeRange = useCallback(
+    (value: DatePickerValue | undefined) => {
+      if (!value) {
+        return undefined
+      }
+
+      const granularity = getGranularity(value?.granularity)
+
+      return value
+        ? {
+            value: granularity.toRange(
+              granularity.calendarMode === "range"
+                ? value.value
+                : (value.value?.from ?? undefined)
+            ),
+            granularity: value.granularity,
+          }
+        : undefined
+    },
+    [getGranularity]
+  )
+
   const granularity = useMemo(() => {
-    const granularityKey = localValue?.granularity || defaultGranularity
-    if (!granularityDefinitions[granularityKey]) {
-      throw new Error(`Invalid granularity ${granularityKey}`)
-    }
-    return {
-      ...granularityDefinitions[granularityKey],
-      key: granularityKey,
-    }
-  }, [localValue?.granularity, defaultGranularity])
+    return getGranularity(localValue?.granularity)
+  }, [localValue?.granularity, getGranularity])
 
   useEffect(() => {
-    if (!isSameDatePickerValue(localValue, value)) {
-      setLocalValue(
-        value
-          ? {
-              // Forces the value to the correct granularity
-              value: granularity.toRange(value.value?.from ?? undefined),
-              granularity: value.granularity,
-            }
-          : undefined
-      )
+    const safeValue = toSafeRange(value)
+    if (!isSameDatePickerValue(localValue, safeValue)) {
+      setLocalValue(safeValue)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
-  }, [value, granularity])
+  }, [value])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
-    handleChangeDate(value)
+    const safeValue = toSafeRange(value)
+    const newGranularity = getGranularity(safeValue?.granularity)
+    const shouldClose =
+      newGranularity.calendarMode !== "range" &&
+      safeValue?.granularity === localValue?.granularity &&
+      !isSameDatePickerValue(safeValue, localValue)
+
+    handleChangeDate(safeValue)
 
     // If the granularity is not a range, close the popup
-    if (granularity.calendarMode !== "range") {
+    if (shouldClose) {
       setIsOpen(false)
     }
   }
 
   const handleChangeDate = (value: DatePickerValue | undefined) => {
-    setLocalValue(value)
-    onChange?.(value, granularity.toString(value?.value, i18n))
+    const safeValue = toSafeRange(value)
+    setLocalValue(safeValue)
+    if (!isSameDatePickerValue(safeValue, localValue)) {
+      const granularity = getGranularity(safeValue?.granularity)
+      onChange?.(safeValue, granularity.toString(safeValue?.value, i18n))
+    }
   }
 
   const handlePickerOpenChange = (open: boolean) => {

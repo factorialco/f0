@@ -53,24 +53,6 @@ export interface DatePickerPopupProps {
 
 const PRESET_CUSTOM = "__custom__"
 
-const isEqualDatePickerValue = (
-  a: DatePickerValue | undefined,
-  b: DatePickerValue | undefined
-): boolean => {
-  if (!a && !b) {
-    return true
-  }
-  if (!a || !b) {
-    return false
-  }
-
-  return (
-    a.value?.from.getTime() === b.value?.from.getTime() &&
-    a.value?.to.getTime() === b.value?.to.getTime() &&
-    a.granularity === b.granularity
-  )
-}
-
 export function DatePickerPopup({
   onSelect,
   defaultValue,
@@ -91,10 +73,9 @@ export function DatePickerPopup({
   )
 
   useEffect(() => {
-    if (isSameDatePickerValue(value, localValue)) {
-      return
+    if (!isSameDatePickerValue(value, localValue)) {
+      setLocalValue(value || defaultValue)
     }
-    setLocalValue(value || defaultValue)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, defaultValue])
 
@@ -119,7 +100,7 @@ export function DatePickerPopup({
   }
 
   const handleSelect = (value: DatePickerValue) => {
-    if (isEqualDatePickerValue(value, localValue)) {
+    if (isSameDatePickerValue(value, localValue)) {
       return
     }
 

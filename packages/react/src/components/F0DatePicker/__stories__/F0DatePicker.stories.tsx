@@ -13,6 +13,7 @@ import {
 import { F0DatePicker } from "../F0DatePicker"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue, F0DatePickerProps } from "../types"
+import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
 const meta = {
@@ -35,7 +36,7 @@ const meta = {
           "The component also allows you to define presets that will be displayed in the component. Check the presets section for more information.",
           "For each granularity the input selector will show a button to navigate to the current date in the granularity, you can hide that via props",
           "The component also allows you navigation arrows to allow user to navigate to the next or previous item in the granularity.",
-          "Note the value and the default value are an object with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
+          "Note the value and  are an object with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
@@ -67,22 +68,31 @@ const meta = {
         },
       },
     },
-    ...getInputFieldArgs([
-      "label",
-      "placeholder",
-      "value",
-      "onChange",
-      "size",
-      "error",
-      "disabled",
-      "className",
-      "required",
-      "clearable",
-      "children",
-      "icon",
-      "maxLength",
-      "hideMaxLength",
-    ]),
+    onChange: {
+      description: "The function to call when the value changes",
+      control: "function",
+      table: {
+        type: {
+          summary:
+            "(value: DatePickerValue | undefined, stringValue: string | undefined) => void",
+        },
+      },
+    },
+    open: {
+      description: "Whether the date picker is open",
+      control: "boolean",
+    },
+    onOpenChange: {
+      description:
+        "The function to call when the date picker is opened or closed",
+      control: "function",
+      table: {
+        type: {
+          summary: "(open: boolean) => void",
+        },
+      },
+    },
+    ...getInputFieldArgs(inputFieldInheritedProps),
   },
   tags: ["autodocs", "experimental"],
   decorators: [
@@ -101,7 +111,6 @@ const meta = {
               ...args,
               value: args?.value,
               onChange: (value, simple) => {
-                console.log("value", value, simple)
                 setValue(value)
                 setValueSimple(simple)
               },
@@ -184,6 +193,14 @@ export const WithValueWithRangeGranularity: Story = {
       },
       granularity: "range",
     },
+  },
+}
+
+export const WithMultipleGranularities: Story = {
+  args: {
+    label: "Date",
+    placeholder: "Select a date",
+    granularities: ["day", "week", "month", "quarter"],
   },
 }
 
