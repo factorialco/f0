@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.240.2](https://github.com/factorialco/f0/compare/f0-react-v1.240.1...f0-react-v1.240.2) (2025-10-22)
+
+
+### Bug Fixes
+
+* establish min height for select with filters ([#2856](https://github.com/factorialco/f0/issues/2856)) ([f3fda1a](https://github.com/factorialco/f0/commit/f3fda1ad7c0b76e87434a4da19f6165e17e7f7f5))
+
 ## [1.240.1](https://github.com/factorialco/f0/compare/f0-react-v1.240.0...f0-react-v1.240.1) (2025-10-22)
 
 
