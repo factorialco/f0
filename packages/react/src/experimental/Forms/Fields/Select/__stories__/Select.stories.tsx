@@ -203,6 +203,7 @@ const meta: Meta = {
         "  avatar?: AvatarVariant\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
+        "  disabled?: boolean\n" +
         "}```",
     },
     onChange: {
@@ -273,6 +274,25 @@ export const WithPreselectedValue: Story = {
   args: {
     label: "Select a theme",
     value: "dark",
+  },
+}
+
+export const WithDisabledOptions: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    options: items.map((item, index) => {
+      return {
+        value: item.id,
+        label: item.name,
+        icon: icons[item.id],
+        description: item.description,
+        tag: item.tag,
+        item,
+        disabled: index === 1,
+      }
+    }),
   },
 }
 

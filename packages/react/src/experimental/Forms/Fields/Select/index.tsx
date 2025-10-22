@@ -124,7 +124,7 @@ const SelectItem = <T extends string, R>({
   item: SelectItemObject<T, R>
 }) => {
   return (
-    <SelectItemPrimitive value={item.value}>
+    <SelectItemPrimitive value={item.value} disabled={item.disabled}>
       <div className="flex w-full items-start gap-1.5">
         {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
         {item.icon && (

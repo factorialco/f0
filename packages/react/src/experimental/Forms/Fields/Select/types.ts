@@ -11,6 +11,7 @@ export type SelectItemObject<T, R = unknown> = {
   tag?: string
   icon?: IconType
   item?: R
+  disabled?: boolean
 }
 
 export type SelectItemProps<T, R = unknown> =
