@@ -62,6 +62,7 @@ type SelectContentProps = (
   onScrollTop?: () => void
   isLoadingMore?: boolean
   isLoading?: boolean
+  forceMinHeight?: boolean
   scrollMargin?: number
   taller?: boolean
 }
@@ -82,6 +83,7 @@ const SelectContent = forwardRef<
       isLoadingMore,
       isLoading,
       scrollMargin,
+      forceMinHeight,
       showLoadingIndicator,
       ...props
     },
@@ -161,7 +163,8 @@ const SelectContent = forwardRef<
       <div
         className={cn(
           !asList && "transition-opacity delay-100",
-          asList || virtualReady ? "" : "opacity-0"
+          asList || virtualReady ? "" : "opacity-0",
+          !asList && forceMinHeight ? "min-h-[450px]" : ""
         )}
         style={{
           height: virtualizer.getTotalSize() + VIEWBOX_VERTICAL_PADDING,
