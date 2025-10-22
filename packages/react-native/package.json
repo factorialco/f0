@@ -4,39 +4,6 @@
   "description": "React Native components for F0 Design System",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "default": "./dist/index.mjs"
-    },
-    "./icons": {
-      "types": "./dist/icons/index.d.ts",
-      "import": "./dist/icons/index.mjs",
-      "require": "./dist/icons/index.js",
-      "default": "./dist/icons/index.mjs"
-    },
-    "./icons/app": {
-      "types": "./dist/icons/app/index.d.ts",
-      "import": "./dist/icons/app/index.mjs",
-      "require": "./dist/icons/app/index.js",
-      "default": "./dist/icons/app/index.mjs"
-    },
-    "./icons/modules": {
-      "types": "./dist/icons/modules/index.d.ts",
-      "import": "./dist/icons/modules/index.mjs",
-      "require": "./dist/icons/modules/index.js",
-      "default": "./dist/icons/modules/index.mjs"
-    },
-    "./tailwind.config": "./tailwind.config.ts"
-  },
   "files": [
     "dist",
     "tailwind.config.ts"
@@ -78,11 +45,19 @@
     "react-native": "0.79.5",
     "react-native-svg": "^15.8.0",
     "tailwindcss": "^3.4.3",
-    "twemoji-parser": "^14.0.0",
-    "typescript": "^5.7.2"
+    "twemoji-parser": "^14.0.0"
   },
   "dependencies": {
     "@factorialco/f0-core": "workspace:*",
+    "clsx": "^2.1.1",
+    "cva": "1.0.0-beta.3",
+    "expo-clipboard": "^7.1.4",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.28.3",
+    "@babel/runtime": "^7.28.4",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/datetimepicker": "^8.4.1",
     "@react-native-community/slider": "^4.5.6",
     "@rn-primitives/avatar": "~1.1.0",
@@ -91,25 +66,6 @@
     "@rn-primitives/slot": "~1.1.0",
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
-    "clsx": "^2.1.1",
-    "cva": "1.0.0-beta.3",
-    "entities": "^2.2.0",
-    "expo-clipboard": "^7.1.4",
-    "expo-constants": "^17.1.7",
-    "expo-linking": "~7.1.7",
-    "install": "^0.13.0",
-    "lodash": "^4.17.21",
-    "npx": "^10.2.2",
-    "react-native-gesture-handler": "^2.24.0",
-    "react-native-reanimated": "~3.17.5",
-    "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "^4.11.1",
-    "tailwind-merge": "^2.6.0"
-  },
-  "devDependencies": {
-    "@babel/preset-env": "^7.28.3",
-    "@babel/runtime": "^7.28.4",
-    "@react-native-async-storage/async-storage": "^2.1.2",
     "@storybook/addon-ondevice-actions": "^8.6.4",
     "@storybook/addon-ondevice-controls": "^8.6.4",
     "@storybook/addon-ondevice-notes": "^8.6.4",
@@ -122,7 +78,10 @@
     "@types/twemoji-parser": "^13.1.4",
     "babel-jest": "^29.7.0",
     "babel-plugin-module-resolver": "^5.0.0",
+    "date-fns": "^3.6.0",
     "expo": "^53.0.23",
+    "expo-constants": "^17.1.7",
+    "expo-linking": "~7.1.7",
     "expo-modules-core": "~2.5.0",
     "expo-navigation-bar": "~4.2.8",
     "expo-router": "^5.1.7",
@@ -137,11 +96,16 @@
     "prettier-plugin-tailwindcss": "^0.6.10",
     "react": "^19.0.0",
     "react-native": "^0.79.5",
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-reanimated": "~3.17.5",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "^4.11.1",
     "react-native-svg": "^15.11.2",
     "react-native-worklets": "^0.6.1",
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "tsup": "^8.3.5",
+    "twemoji-parser": "^14.0.0",
     "typescript": "^5.8.3"
   }
 }
