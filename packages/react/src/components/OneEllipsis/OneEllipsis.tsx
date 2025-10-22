@@ -7,7 +7,7 @@ import {
 } from "@/ui/tooltip"
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
 
-const allTags = [
+export const tags = [
   "h1",
   "h2",
   "h3",
@@ -20,9 +20,7 @@ const allTags = [
   "label",
   "code",
 ] as const
-
-export { allTags as tags }
-export type Tag = (typeof allTags)[number]
+export type Tag = (typeof tags)[number]
 
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   if (!element) return false
