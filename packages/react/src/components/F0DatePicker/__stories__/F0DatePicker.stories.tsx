@@ -1,3 +1,5 @@
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { subDays } from "date-fns"
 import MockDate from "mockdate"
@@ -38,12 +40,52 @@ const meta = {
       },
     },
   },
+  argTypes: {
+    value: {
+      description:
+        "The value of the date picker. You can pass a Date, a string, or a DatePickerValue object. If you pass a Date, it will be converted to a DatePickerValue object with the granularity 'day'.",
+      control: {
+        type: "object",
+      },
+      table: {
+        type: {
+          summary: "DatePickerValue | Date | string | undefined",
+          detail:
+            "type DatePickerValue = { value: {from: Date, to: Date}, granularity: GranularityDefinitionKey }",
+        },
+      },
+    },
+    granularities: {
+      description: "The granularities that the user can select",
+      table: {
+        type: {
+          summary: "GranularityDefinitionKey[]",
+          detail:
+            "type GranularityDefinitionKey = 'day' | 'week' | 'month' | 'quarter' | 'halfyear' | 'year' | 'range'",
+        },
+      },
+    },
+    ...getInputFieldArgs([
+      "label",
+      "placeholder",
+      "value",
+      "onChange",
+      "size",
+      "error",
+      "disabled",
+      "className",
+      "required",
+      "clearable",
+      "children",
+      "icon",
+      "maxLength",
+      "hideMaxLength",
+    ]),
+  },
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story, { args }) => {
-      const [value, setValue] = useState<DatePickerValue | undefined>(
-        args?.value
-      )
+      const [value, setValue] = useState<DatePickerValue>(args?.value)
 
       return (
         <div style={{ width: "300px" }}>
@@ -179,7 +221,7 @@ export const WithInfo: Story = {
   },
 }
 
-export const withHint: Story = {
+export const WithHint: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
@@ -192,5 +234,20 @@ export const WithClearable: Story = {
     label: "Date",
     placeholder: "Select a date",
     clearable: true,
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSkipA11y(withSnapshot({})),
+  args: {
+    label: "Date",
+    placeholder: "Select a date",
+  },
+  render: () => {
+    return (
+      <div className="flex w-fit flex-col gap-2">
+        <F0DatePicker {...Default.args} />
+      </div>
+    )
   },
 }

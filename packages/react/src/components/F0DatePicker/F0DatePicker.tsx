@@ -1,63 +1,9 @@
-import {
-  GranularityDefinitionKey,
-  granularityDefinitions,
-} from "@/experimental/OneCalendar"
-import { TranslationsType, useI18n } from "@/lib/providers/i18n"
-import { DatePickerPopup } from "@/ui/DatePickerPopup"
+import { granularityDefinitions } from "@/experimental/OneCalendar"
+import { useI18n } from "@/lib/providers/i18n"
+import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { DateInput } from "./components/DateInput"
 import { DatePickerValue, F0DatePickerProps } from "./types"
-
-const normalizeValue = (
-  value: DatePickerValue | Date | string | undefined,
-  granularityKey: GranularityDefinitionKey,
-  i18n: TranslationsType
-): DatePickerValue | undefined => {
-  const granularity = granularityDefinitions[granularityKey]
-  if (!granularity) {
-    throw new Error(`Invalid granularity ${granularityKey}`)
-  }
-
-  if (value === undefined) {
-    return undefined
-  }
-  if (value instanceof Date) {
-    return {
-      value: granularity.toRange(value),
-      granularity: granularityKey,
-    }
-  }
-  if (typeof value === "string") {
-    return {
-      value: granularity.toRange(
-        granularity.fromString(value, i18n) ?? undefined
-      ),
-      granularity: granularityKey,
-    }
-  }
-  return value
-}
-
-// Converts the value to a date or string depending on the value we get from
-const denormalizeValue = (
-  value: DatePickerValue | undefined,
-  granularityKey: GranularityDefinitionKey,
-  i18n: TranslationsType,
-  denormalizationTarget: "date" | "string"
-) => {
-  if (!value) {
-    return undefined
-  }
-  const granularity = granularityDefinitions[granularityKey]
-  if (!granularity) {
-    throw new Error(`Invalid granularity ${granularityKey}`)
-  }
-  if (denormalizationTarget === "date") {
-    return value.value?.from
-  }
-
-  return granularity.toString(value.value, i18n)
-}
 
 export function F0DatePicker({
   onChange,
@@ -89,24 +35,24 @@ export function F0DatePicker({
   }, [localValue?.granularity, defaultGranularity])
 
   useEffect(() => {
-    setLocalValue(normalizeValue(value, granularity.key, i18n))
-  }, [value, granularity.key, i18n])
+    if (!isSameDatePickerValue(localValue, value)) {
+      setLocalValue(value)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
+  }, [value])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
-    console.log("handleSelect", value)
     handleChangeDate(value)
-    // setIsOpen(false)
+
+    // If the granularity is not a range, close the popup
+    if (granularity.calendarMode !== "range") {
+      setIsOpen(false)
+    }
   }
 
   const handleChangeDate = (value: DatePickerValue | undefined) => {
     setLocalValue(value)
-    const denormalizedValue = denormalizeValue(
-      value,
-      granularity.key,
-      i18n,
-      value instanceof Date ? "date" : "string"
-    )
-    onChange?.(denormalizedValue, value)
+    onChange?.(value, granularity.toString(value?.value, i18n))
   }
 
   const handlePickerOpenChange = (open: boolean) => {
@@ -114,23 +60,32 @@ export function F0DatePicker({
     inputProps.onOpenChange?.(open)
   }
 
+  const availablePresets = useMemo(() => {
+    return presets.filter((preset) =>
+      granularities.includes(preset.granularity)
+    )
+  }, [presets, granularities])
+
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (isOpen) {
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         inputRef.current?.focus()
-      })
+      }, 500)
     }
   }, [isOpen])
 
   return (
     <>
+      {JSON.stringify(localValue, null, 2)}
+      <p>minDate: {JSON.stringify(minDate, null, 2)}</p>
+      <p>maxDate: {JSON.stringify(maxDate, null, 2)}</p>
       <DatePickerPopup
         hideCalendarInput
         onSelect={handleSelect}
         value={localValue}
-        presets={presets}
+        presets={availablePresets}
         granularities={granularities}
         minDate={minDate}
         maxDate={maxDate}

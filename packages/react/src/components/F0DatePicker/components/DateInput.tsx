@@ -9,6 +9,7 @@ import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/ui/InputField/InputField"
 import { forwardRef, useEffect, useState } from "react"
 import { DatePickerValue } from "../types"
+import { InputFieldInheritedProps } from "../types.internal"
 
 type DateInputProps = {
   value: DatePickerValue | undefined
@@ -21,10 +22,7 @@ type DateInputProps = {
   onClear?: () => void
   minDate?: Date
   maxDate?: Date
-} & Omit<
-  InputFieldProps<string>,
-  "onChange" | "onBlur" | "onFocus" | "icon" | "value"
->
+} & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
   (
@@ -45,6 +43,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const i18n = useI18n()
 
     useEffect(() => {
+      console.log("useEffect", value, granularity.toString(value?.value, i18n))
       setInputValue(granularity.toString(value?.value, i18n))
     }, [value, granularity, i18n])
 
@@ -55,19 +54,23 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       })
     }
 
-    const handleBlur = () => {
+    const handleNewValue = (
+      inputValue: string,
+      granularity: GranularityDefinition & { key: GranularityDefinitionKey }
+    ) => {
+      if (inputValue === "") {
+        onDateChange?.({
+          value: undefined,
+          granularity: granularity.key,
+        })
+
+        setError(inputProps.required ?? false)
+        return
+      }
+
       const range = granularity.toRange(
         granularity.fromString(inputValue, i18n)
       )
-
-      if (inputValue === "") {
-        onDateChange?.({
-          value: range,
-          granularity: granularity.key,
-        })
-        setError(false)
-        return
-      }
 
       if (range && isValidDate(range?.from) && isValidDate(range?.to)) {
         onDateChange?.({
@@ -76,14 +79,21 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         })
         setError(false)
       } else {
-        console.log("inputValue", inputValue)
-        console.log(
-          "inputProps.required",
-          inputProps.required,
-          inputValue === "" && !inputProps.required
-        )
-        setError(inputValue === "" && !inputProps.required)
+        setError(true)
       }
+    }
+
+    const handleBlur = () => {
+      console.log(
+        "handleBlur2",
+        inputValue,
+        granularity.toString(value?.value, i18n)
+      )
+      handleNewValue(inputValue, granularity)
+    }
+    const handleChange = (value: string) => {
+      console.log("handleChange", value)
+      setInputValue(value)
     }
 
     return (
@@ -95,8 +105,9 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         onClear={() => {
           onClear?.()
           setInputValue("")
+          handleNewValue("", granularity)
         }}
-        onChange={setInputValue}
+        onChange={handleChange}
         error={error || inputProps.error}
         onBlur={handleBlur}
         value={inputValue}

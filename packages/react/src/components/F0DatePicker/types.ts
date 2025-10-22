@@ -1,26 +1,21 @@
-import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities"
 import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
 } from "@/ui/DatePickerPopup"
 import { InputFieldProps } from "@/ui/InputField/InputField"
+import { InputFieldInheritedProps } from "./types.internal"
 
 export * from "@/ui/DatePickerPopup/types"
 
-export type DatePickerValue = DatePickerPopupValue & {
-  value?: Date | string | undefined
-  granularity?: GranularityDefinitionKey
-}
+export type DatePickerValue = DatePickerPopupValue
 
-export type F0DatePickerProps = Omit<
+export type F0DatePickerProps = Pick<
   DatePickerPopupProps,
-  "children" | "onSelect" | "value" | "defaultValue"
+  "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange"
 > & {
-  hideNavigation?: boolean
-  hideGoToCurrent?: boolean
   onChange?: (
-    simpleValue: Date | string | undefined,
-    value: DatePickerValue | undefined
+    value: DatePickerValue | undefined,
+    stringValue: string | undefined
   ) => void
-  value?: DatePickerValue | Date | string | undefined
-} & Omit<InputFieldProps<string>, "onChange" | "onBlur" | "onFocus" | "icon">
+  value?: DatePickerValue
+} & Pick<InputFieldProps<string>, InputFieldInheritedProps>
