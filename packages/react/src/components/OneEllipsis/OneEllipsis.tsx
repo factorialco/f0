@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-import { allTags, type AsAllowedList } from "@/ui/Text"
 import {
   Tooltip,
   TooltipContent,
@@ -7,6 +6,23 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
+
+const allTags = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "span",
+  "div",
+  "label",
+  "code",
+] as const
+
+export { allTags as tags }
+export type Tag = (typeof allTags)[number]
 
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   if (!element) return false
@@ -18,9 +34,6 @@ const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   // For single line, check if content width exceeds container width
   return element.scrollWidth > element.clientWidth
 }
-
-export { allTags as tags }
-export type Tag = AsAllowedList
 
 type EllipsisWrapperProps = {
   children: string
