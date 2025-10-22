@@ -1,3 +1,4 @@
+import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities"
 import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
@@ -6,7 +7,10 @@ import { InputFieldProps } from "@/ui/InputField/InputField"
 
 export * from "@/ui/DatePickerPopup/types"
 
-export type DatePickerValue = DatePickerPopupValue
+export type DatePickerValue = DatePickerPopupValue & {
+  value?: Date | string | undefined
+  granularity?: GranularityDefinitionKey
+}
 
 export type F0DatePickerProps = Omit<
   DatePickerPopupProps,

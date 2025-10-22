@@ -4,7 +4,7 @@ import {
 } from "@/experimental/OneCalendar"
 import { TranslationsType, useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup } from "@/ui/DatePickerPopup"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { DateInput } from "./components/DateInput"
 import { DatePickerValue, F0DatePickerProps } from "./types"
 
@@ -69,12 +69,7 @@ export function F0DatePicker({
   ...inputProps
 }: F0DatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
-  const [isOpen, _setIsOpen] = useState(false)
-
-  const setIsOpen = (open: boolean) => {
-    _setIsOpen(open)
-    console.log("isOpen", open)
-  }
+  const [isOpen, setIsOpen] = useState(false)
 
   const i18n = useI18n()
 
@@ -98,8 +93,9 @@ export function F0DatePicker({
   }, [value, granularity.key, i18n])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
+    console.log("handleSelect", value)
     handleChangeDate(value)
-    setIsOpen(false)
+    // setIsOpen(false)
   }
 
   const handleChangeDate = (value: DatePickerValue | undefined) => {
@@ -118,6 +114,16 @@ export function F0DatePicker({
     inputProps.onOpenChange?.(open)
   }
 
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus()
+      })
+    }
+  }, [isOpen])
+
   return (
     <>
       <DatePickerPopup
@@ -132,6 +138,7 @@ export function F0DatePicker({
         onOpenChange={handlePickerOpenChange}
       >
         <DateInput
+          ref={inputRef}
           {...inputProps}
           value={localValue}
           granularity={granularity}

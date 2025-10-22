@@ -18,6 +18,7 @@ type DateInputProps = {
   granularity: GranularityDefinition & { key: GranularityDefinitionKey }
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  onClear?: () => void
   minDate?: Date
   maxDate?: Date
 } & Omit<
@@ -34,6 +35,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       onOpenChange,
       minDate,
       maxDate,
+      onClear,
       ...inputProps
     },
     ref
@@ -58,6 +60,15 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         granularity.fromString(inputValue, i18n)
       )
 
+      if (inputValue === "") {
+        onDateChange?.({
+          value: range,
+          granularity: granularity.key,
+        })
+        setError(false)
+        return
+      }
+
       if (range && isValidDate(range?.from) && isValidDate(range?.to)) {
         onDateChange?.({
           value: range,
@@ -65,7 +76,13 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         })
         setError(false)
       } else {
-        setError(true)
+        console.log("inputValue", inputValue)
+        console.log(
+          "inputProps.required",
+          inputProps.required,
+          inputValue === "" && !inputProps.required
+        )
+        setError(inputValue === "" && !inputProps.required)
       }
     }
 
@@ -75,6 +92,10 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         icon={Calendar}
         ref={ref}
         onFocus={() => onOpenChange?.(true)}
+        onClear={() => {
+          onClear?.()
+          setInputValue("")
+        }}
         onChange={setInputValue}
         error={error || inputProps.error}
         onBlur={handleBlur}

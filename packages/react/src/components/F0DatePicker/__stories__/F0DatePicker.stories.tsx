@@ -40,17 +40,17 @@ const meta = {
   },
   tags: ["autodocs", "experimental"],
   decorators: [
-    (Story) => {
+    (Story, { args }) => {
       const [value, setValue] = useState<DatePickerValue | undefined>(
-        Story.args?.defaultValue
+        args?.value
       )
 
       return (
         <div style={{ width: "300px" }}>
           <Story
             args={{
-              ...Story.args,
-              value: value,
+              ...args,
+              value: args?.value,
               onChange: (value) => {
                 console.log("value", value)
                 setValue(value)
@@ -87,43 +87,40 @@ const presets = [
   },
 ]
 
-export const Simple: Story = {
+export const Default: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    defaultValue: {
-      granularity: "day",
-    } as DatePickerValue,
   },
 }
 
-export const WithCustomRange: Story = {
+export const WithValueAsDate: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    defaultValue: {
-      granularity: "month",
-    } as DatePickerValue,
+    value: today,
   },
 }
 
-export const HideGoToCurrent: Story = {
+export const WithValueAsString: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    hideGoToCurrent: true,
+    value: "20/12/2025",
   },
 }
 
-export const WithDefaultDate: Story = {
+export const WithValueWithGranularity: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    hideGoToCurrent: true,
-    defaultValue: {
-      value: { from: new Date(2025, 6, 30), to: new Date(2025, 6, 30) },
-      granularity: "day",
-    } as DatePickerValue,
+    value: {
+      value: {
+        from: subDays(today, 7),
+        to: today,
+      },
+      granularity: "range",
+    },
   },
 }
 
@@ -131,9 +128,9 @@ export const WithPresets: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    defaultValue: {
+    value: {
       granularity: "month",
-    } as DatePickerValue,
+    },
     granularities: ["day", "week", "month", "quarter"],
     presets,
   },
@@ -143,9 +140,9 @@ export const WithMinMaxDates: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    defaultValue: {
-      granularity: "day",
-    } as DatePickerValue,
+    value: {
+      value: today,
+    },
     granularities: ["day", "week", "month"],
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     maxDate: today, // Can't select dates after today
@@ -157,9 +154,6 @@ export const WithError: Story = {
     label: "Date",
     placeholder: "Select a date",
     error: true,
-    defaultValue: {
-      granularity: "day",
-    } as DatePickerValue,
   },
 }
 
@@ -171,9 +165,6 @@ export const WithWarning: Story = {
       type: "warning" as const,
       message: "Warning message",
     },
-    defaultValue: {
-      granularity: "day",
-    } as DatePickerValue,
   },
 }
 
@@ -201,8 +192,5 @@ export const WithClearable: Story = {
     label: "Date",
     placeholder: "Select a date",
     clearable: true,
-    defaultValue: {
-      granularity: "day",
-    } as DatePickerValue,
   },
 }
