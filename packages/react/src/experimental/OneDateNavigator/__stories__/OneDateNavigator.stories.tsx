@@ -1,6 +1,9 @@
 import { granularityDefinitions } from "@/experimental/OneCalendar"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { subDays } from "date-fns"
+import { useState } from "react"
+import { expect, within } from "storybook/test"
 import { CalendarView, DateRange } from "../../OneCalendar/types"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
@@ -22,6 +25,157 @@ const meta = {
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
+      },
+    },
+  },
+  argTypes: {
+    defaultValue: {
+      description:
+        "⚠️ Deprecated. Use the `value` prop instead. The initial value of the date picker. ",
+      table: {
+        type: {
+          summary: "DatePickerValue | undefined",
+          detail:
+            "type DatePickerValue = { value: {from: Date, to: Date}, granularity: GranularityDefinitionKey }",
+        },
+      },
+    },
+    hideGoToCurrent: {
+      description:
+        "Whether to hide the go to current button (Today, This week, This month, This quarter, This half year, This year, ...)",
+      table: {
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
+    hideNavigation: {
+      description: "Whether to hide the navigation arrows",
+      table: {
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
+    granularities: {
+      description: "The granularities that the user can select",
+      table: {
+        type: {
+          summary: "GranularityDefinitionKey[]",
+        },
+      },
+    },
+    presets: {
+      description:
+        "The presets to display in the date picker. A preset is a predefined date rande e.g Yesterday, Last 7 days, Last month, etc.",
+      table: {
+        type: {
+          summary: "DatePreset[]",
+          detail:
+            "type DatePreset = { label: string, granularity: GranularityDefinitionKey, value: DateRange }",
+        },
+      },
+    },
+    value: {
+      description: "The value of the date picker",
+      table: {
+        type: {
+          summary: "DatePickerValue | undefined",
+          detail:
+            "type DatePickerValue = { value: {from: Date, to: Date}, granularity: GranularityDefinitionKey }",
+        },
+        defaultValue: {
+          summary: "undefined",
+        },
+      },
+      control: {
+        type: "object",
+        value: {
+          granularity: "day",
+          value: {
+            from: new Date(),
+            to: new Date(),
+          },
+        },
+      },
+    },
+    onSelect: {
+      description:
+        "The callback function that is called when the user selects a value",
+      table: {
+        type: {
+          summary: "function",
+        },
+        detail: "function(value: DatePickerValue | undefined) => void",
+      },
+    },
+    compareTo: {
+      description: "The compare to options to display in the date picker",
+      table: {
+        type: {
+          summary: "DatePickerCompareTo",
+        },
+      },
+    },
+    defaultCompareTo: {
+      description: "The default compare to value",
+      table: {
+        type: {
+          summary: "CompareToDefKey",
+        },
+      },
+    },
+    onCompareToChange: {
+      description:
+        "The callback function that is called when the user selects a compare to value",
+      table: {
+        type: {
+          summary: "function",
+        },
+        detail:
+          "function(compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void",
+      },
+    },
+    minDate: {
+      description: "The minimum date that the user can select",
+      table: {
+        type: {
+          summary: "Date",
+        },
+      },
+    },
+    maxDate: {
+      description: "The maximum date that the user can select",
+      table: {
+        type: {
+          summary: "Date",
+        },
+      },
+    },
+    disabled: {
+      description: "Whether the date picker is disabled",
+      table: {
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
+    open: {
+      description: "Whether the date picker is open",
+      table: {
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
+    onOpenChange: {
+      description:
+        "The callback function that is called when the user opens or closes the date picker",
+      table: {
+        type: {
+          summary: "function",
+        },
+        detail: "function(open: boolean) => void",
       },
     },
   },
@@ -107,6 +261,12 @@ export const WithDefaultDate: Story = {
       granularity: "month",
     } as DatePickerValue,
     granularities: ["month"],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Ensure the default value is rendered
+    const trigger = canvas.getByText("Jul 2025")
+    expect(trigger).toBeInTheDocument()
   },
 }
 
@@ -235,6 +395,52 @@ export const WithCompareTo: Story = {
         },
       ],
     },
+  },
+}
+
+export const ChangeValueFromOutside: Story = {
+  args: {
+    defaultValue: {
+      granularity: "day",
+    } as DatePickerValue,
+    granularities: ["day", "week", "month", "quarter"],
+  },
+  render: (args) => {
+    const [value, setValue] = useState<DatePickerValue | undefined>(
+      args.defaultValue
+    )
+    return (
+      <>
+        <OneDateNavigator
+          {...args}
+          value={value}
+          onSelect={(value) => setValue(value)}
+        />
+        <div className="mt-4">
+          <button
+            onClick={() =>
+              setValue({
+                granularity: "day",
+                value: granularityDefinitions.day.toRange(new Date()),
+              })
+            }
+          >
+            Set Today
+          </button>
+
+          <button
+            onClick={() =>
+              setValue({
+                granularity: "month",
+                value: granularityDefinitions.month.toRange(new Date()),
+              })
+            }
+          >
+            Set Granularity to Month
+          </button>
+        </div>
+      </>
+    )
   },
 }
 
