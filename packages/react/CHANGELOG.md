@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.240.0](https://github.com/factorialco/f0/compare/f0-react-v1.239.4...f0-react-v1.240.0) (2025-10-22)
+
+
+### Features
+
+* datenavigator value prop ([#2841](https://github.com/factorialco/f0/issues/2841)) ([ba8baf3](https://github.com/factorialco/f0/commit/ba8baf35d4c34fee4c091104d4bd3e85b5fad7aa))
+
 ## [1.239.4](https://github.com/factorialco/f0/compare/f0-react-v1.239.3...f0-react-v1.239.4) (2025-10-20)
 
 
