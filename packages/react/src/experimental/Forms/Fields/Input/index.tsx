@@ -26,6 +26,7 @@ export type InputProps<T extends string> = Pick<
     | "hint"
   > & {
     type?: Exclude<HTMLInputTypeAttribute, "number">
+    onPressEnter?: () => void
   }
 
 const Input = <T extends string = string>(props: InputProps<T>) => {
@@ -33,6 +34,11 @@ const Input = <T extends string = string>(props: InputProps<T>) => {
     <ShadcnInput
       {...props}
       onChange={(value) => props.onChange?.(value as T)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          props.onPressEnter?.()
+        }
+      }}
     />
   )
 }

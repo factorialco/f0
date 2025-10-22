@@ -17,7 +17,6 @@ type DateInputProps = {
   onDateChange?: (date: DatePickerValue | undefined) => void
   onClick?: () => void
   granularity: GranularityDefinition & { key: GranularityDefinitionKey }
-  open?: boolean
   onOpenChange?: (open: boolean) => void
   onClear?: () => void
   minDate?: Date
@@ -43,7 +42,6 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const i18n = useI18n()
 
     useEffect(() => {
-      console.log("useEffect", value, granularity.toString(value?.value, i18n))
       setInputValue(granularity.toString(value?.value, i18n))
     }, [value, granularity, i18n])
 
@@ -84,35 +82,36 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     }
 
     const handleBlur = () => {
-      console.log(
-        "handleBlur2",
-        inputValue,
-        granularity.toString(value?.value, i18n)
-      )
       handleNewValue(inputValue, granularity)
     }
     const handleChange = (value: string) => {
-      console.log("handleChange", value)
       setInputValue(value)
     }
 
     return (
-      <Input
-        {...inputProps}
-        icon={Calendar}
-        ref={ref}
-        onFocus={() => onOpenChange?.(true)}
-        onClear={() => {
-          onClear?.()
-          setInputValue("")
-          handleNewValue("", granularity)
-        }}
-        onChange={handleChange}
-        error={error || inputProps.error}
-        onBlur={handleBlur}
-        value={inputValue}
-        onClickContent={() => onOpenChange?.(true)}
-      />
+      <>
+        <Input
+          {...inputProps}
+          icon={Calendar}
+          ref={ref}
+          onFocus={() => onOpenChange?.(true)}
+          onClear={() => {
+            onClear?.()
+            setInputValue("")
+            handleNewValue("", granularity)
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleBlur()
+            }
+          }}
+          onChange={handleChange}
+          error={error || inputProps.error}
+          onBlur={handleBlur}
+          value={inputValue}
+          onClickContent={() => onOpenChange?.(true)}
+        />
+      </>
     )
   }
 )

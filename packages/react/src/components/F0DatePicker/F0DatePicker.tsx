@@ -12,10 +12,15 @@ export function F0DatePicker({
   granularities = ["day"],
   minDate,
   maxDate,
+  open = false,
   ...inputProps
 }: F0DatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(open)
+
+  useEffect(() => {
+    setIsOpen(open)
+  }, [open])
 
   const i18n = useI18n()
 
@@ -36,10 +41,18 @@ export function F0DatePicker({
 
   useEffect(() => {
     if (!isSameDatePickerValue(localValue, value)) {
-      setLocalValue(value)
+      setLocalValue(
+        value
+          ? {
+              // Forces the value to the correct granularity
+              value: granularity.toRange(value.value?.from ?? undefined),
+              granularity: value.granularity,
+            }
+          : undefined
+      )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
-  }, [value])
+  }, [value, granularity])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
     handleChangeDate(value)
@@ -67,40 +80,33 @@ export function F0DatePicker({
   }, [presets, granularities])
 
   const inputRef = useRef<HTMLInputElement>(null)
-
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
+    if (isOpen && inputRef.current) {
+      requestAnimationFrame(() => {
         inputRef.current?.focus()
-      }, 500)
+      })
     }
   }, [isOpen])
 
   return (
-    <>
-      {JSON.stringify(localValue, null, 2)}
-      <p>minDate: {JSON.stringify(minDate, null, 2)}</p>
-      <p>maxDate: {JSON.stringify(maxDate, null, 2)}</p>
-      <DatePickerPopup
-        hideCalendarInput
-        onSelect={handleSelect}
+    <DatePickerPopup
+      hideCalendarInput
+      onSelect={handleSelect}
+      value={localValue}
+      presets={availablePresets}
+      granularities={granularities}
+      minDate={minDate}
+      maxDate={maxDate}
+      open={isOpen}
+      onOpenChange={handlePickerOpenChange}
+    >
+      <DateInput
+        ref={inputRef}
+        {...inputProps}
         value={localValue}
-        presets={availablePresets}
-        granularities={granularities}
-        minDate={minDate}
-        maxDate={maxDate}
-        open={isOpen}
-        onOpenChange={handlePickerOpenChange}
-      >
-        <DateInput
-          ref={inputRef}
-          {...inputProps}
-          value={localValue}
-          granularity={granularity}
-          onDateChange={handleChangeDate}
-          open={isOpen}
-        />
-      </DatePickerPopup>
-    </>
+        granularity={granularity}
+        onDateChange={handleChangeDate}
+      />
+    </DatePickerPopup>
   )
 }

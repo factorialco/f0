@@ -1,9 +1,11 @@
 export const inputFieldInheritedProps = [
   "label",
   "placeholder",
+  "hideLabel",
   "size",
   "error",
   "disabled",
+  "readonly",
   "required",
   "clearable",
   "labelIcon",

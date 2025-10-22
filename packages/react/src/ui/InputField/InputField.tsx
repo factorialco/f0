@@ -331,13 +331,13 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const localInputRef = useRef<HTMLElement>(null)
     const inputRef = useMemo(
       () => props.inputRef ?? localInputRef,
-      [props.inputRef]
+      [props.inputRef, localInputRef]
     )
 
     useEffect(() => {
       if (isAutofilled && !intervalRef.current) {
         intervalRef.current = setInterval(() => {
-          // Gets the element depending on the type of the ref
+          // Gets the elemment depending on the type of the ref
           const element =
             typeof inputRef === "object" && inputRef?.current
               ? (inputRef.current as HTMLElement)

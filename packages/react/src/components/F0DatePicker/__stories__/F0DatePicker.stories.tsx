@@ -1,16 +1,18 @@
+import { Placeholder } from "@/icons/app"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
+import { fn } from "storybook/internal/test"
 import {
   CalendarView,
   DateRange,
 } from "../../../experimental/OneCalendar/types"
 import { F0DatePicker } from "../F0DatePicker"
 import { predefinedPresets } from "../presets"
-import { DatePickerValue } from "../types"
+import { datepickerSizes, DatePickerValue, F0DatePickerProps } from "../types"
 
 const mockDate = new Date(2025, 6, 30)
 const meta = {
@@ -84,23 +86,30 @@ const meta = {
   },
   tags: ["autodocs", "experimental"],
   decorators: [
-    (Story, { args }) => {
-      const [value, setValue] = useState<DatePickerValue>(args?.value)
+    (Story, { args, parameters }) => {
+      const width = parameters?.width || "300px"
+      const [value, setValue] = useState<DatePickerValue | undefined>(
+        args?.value as DatePickerValue
+      )
+
+      const [valueSimple, setValueSimple] = useState<string | undefined>()
 
       return (
-        <div style={{ width: "300px" }}>
+        <div style={{ width }}>
           <Story
             args={{
               ...args,
               value: args?.value,
-              onChange: (value) => {
-                console.log("value", value)
+              onChange: (value, simple) => {
+                console.log("value", value, simple)
                 setValue(value)
+                setValueSimple(simple)
               },
             }}
           />
           <div className="text-gray-500 mt-10 text-sm">
-            Value: {JSON.stringify(value)}
+            <p>Value: {JSON.stringify(value, null, 2)}</p>
+            <p>Value Simple: {valueSimple}</p>
           </div>
         </div>
       )
@@ -136,23 +145,35 @@ export const Default: Story = {
   },
 }
 
-export const WithValueAsDate: Story = {
+export const WithValueWithMonthGranularity: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    value: today,
+    value: {
+      value: {
+        from: subDays(today, 7),
+        to: today,
+      },
+      granularity: "month",
+    },
   },
 }
 
-export const WithValueAsString: Story = {
+export const WithValueWithWeekGranularity: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
-    value: "20/12/2025",
+    value: {
+      value: {
+        from: subDays(today, 7),
+        to: today,
+      },
+      granularity: "week",
+    },
   },
 }
 
-export const WithValueWithGranularity: Story = {
+export const WithValueWithRangeGranularity: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
@@ -171,6 +192,7 @@ export const WithPresets: Story = {
     label: "Date",
     placeholder: "Select a date",
     value: {
+      value: undefined,
       granularity: "month",
     },
     granularities: ["day", "week", "month", "quarter"],
@@ -183,7 +205,11 @@ export const WithMinMaxDates: Story = {
     label: "Date",
     placeholder: "Select a date",
     value: {
-      value: today,
+      value: {
+        from: today,
+        to: today,
+      },
+      granularity: "day",
     },
     granularities: ["day", "week", "month"],
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
@@ -238,15 +264,60 @@ export const WithClearable: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({})),
+  parameters: withSkipA11y(withSnapshot({ width: "100%" })),
   args: {
-    label: "Date",
-    placeholder: "Select a date",
+    label: "Label text here",
   },
   render: () => {
+    const base = {
+      clearable: true,
+      labelIcon: Placeholder,
+      label: "Label text here",
+    }
+    const snapshotVariants = [
+      { ...base },
+      { ...base, disabled: true },
+      { ...base, readonly: true },
+      { ...base, required: true },
+      { ...base, hideLabel: true },
+
+      { ...base, error: true },
+      { ...base, status: { type: "error" as const, message: "Error message" } },
+      {
+        ...base,
+        status: { type: "warning" as const, message: "Warning message" },
+      },
+      { ...base, status: { type: "info" as const, message: "Info message" } },
+      { ...base, hint: "Hint message" },
+      { ...base, open: true },
+    ] satisfies F0DatePickerProps[]
     return (
-      <div className="flex w-fit flex-col gap-2">
-        <F0DatePicker {...Default.args} />
+      <div className="flex flex-col gap-4">
+        {datepickerSizes.map((size) => (
+          <section key={size}>
+            <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
+            <div className="flex flex-col gap-4">
+              <F0DatePicker
+                size={size}
+                label="Label text here"
+                onChange={fn()}
+              />
+              {snapshotVariants.map((variant, index) => (
+                <div
+                  key={`${size}-${index}`}
+                  className={variant.open ? "mb-[400px]" : ""}
+                >
+                  <p className="mb-3 text-sm">
+                    Variant: {JSON.stringify(variant)}
+                  </p>
+                  <div style={{ width: "300px" }}>
+                    <F0DatePicker size={size} {...variant} onChange={fn()} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     )
   },

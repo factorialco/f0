@@ -2,7 +2,7 @@ import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
 } from "@/ui/DatePickerPopup"
-import { InputFieldProps } from "@/ui/InputField/InputField"
+import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField/InputField"
 import { InputFieldInheritedProps } from "./types.internal"
 
 export * from "@/ui/DatePickerPopup/types"
@@ -19,3 +19,5 @@ export type F0DatePickerProps = Pick<
   ) => void
   value?: DatePickerValue
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
+
+export const datepickerSizes = INPUTFIELD_SIZES
