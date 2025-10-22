@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { allTags, type AsAllowedList } from "@/ui/Text"
 import {
   Tooltip,
   TooltipContent,
@@ -18,8 +19,8 @@ const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   return element.scrollWidth > element.clientWidth
 }
 
-export const tags = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"] as const
-export type Tag = (typeof tags)[number]
+export { allTags as tags }
+export type Tag = AsAllowedList
 
 type EllipsisWrapperProps = {
   children: string

@@ -1,21 +1,22 @@
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { cn } from "@/lib/utils"
 import type React from "react"
-import { createElement, forwardRef, type ReactNode } from "react"
-import { OneEllipsis } from "../OneEllipsis"
+import { createElement, forwardRef } from "react"
+import { type AsAllowedList } from "./types"
 import {
-  type AsAllowedList,
+  defaultTag,
+  textVariants,
   type TextVariant,
   type TextVariants,
-} from "./types"
-import { defaultTag, textVariants } from "./variants"
+} from "./variants"
 
-export interface TextInternalProps
+export interface TextProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "className">,
     React.RefAttributes<HTMLElement> {
   /**
    * Content to be rendered
    */
-  children?: ReactNode
+  content: string
 
   /**
    * The text variant to render. Determines styling and default semantic element.
@@ -60,10 +61,10 @@ export interface TextInternalProps
 /**
  * Text component for consistent typography across the application.
  */
-export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
+export const Text = forwardRef<HTMLElement, TextProps>(
   (
     {
-      children,
+      content,
       variant,
       align,
       className,
@@ -89,7 +90,7 @@ export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
           className={cn(textVariants({ variant, align }), className)}
           {...htmlProps}
         >
-          {children as string}
+          {content}
         </OneEllipsis>
       )
     }
@@ -101,9 +102,9 @@ export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
         className: cn(textVariants({ variant, align }), className),
         ref: forwardedRef,
       },
-      children
+      content
     )
   }
 )
 
-TextInternal.displayName = "TextInternal"
+Text.displayName = "Text"

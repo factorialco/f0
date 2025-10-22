@@ -1,38 +1,22 @@
+import { Text, TextProps, type TextTags } from "@/ui/Text"
 import { forwardRef } from "react"
-import { TextInternal, TextInternalProps } from "./TextInternal"
 
-const privateProps = ["className"] as const
-const _privateVariants = [
-  "selected",
-  "heading-large",
-  "label-input",
-  "warning",
-  "critical",
-  "positive",
-  "info",
-  "warning-strong",
-  "critical-strong",
-  "positive-strong",
-  "info-strong",
+const _allowedVariants = [
+  "body",
+  "description",
+  "small",
+  "inverse",
+  "code",
+  "label",
 ] as const
 
-export type F0TextProps = Omit<
-  TextInternalProps,
-  (typeof privateProps)[number]
-> & {
-  variant?: Exclude<
-    TextInternalProps["variant"],
-    (typeof _privateVariants)[number]
-  >
+export type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
+  variant?: (typeof _allowedVariants)[number]
+  as?: TextTags
 }
 
-export const F0Text = forwardRef<HTMLElement, F0TextProps>((props) => {
-  const publicProps = privateProps.reduce((acc, key) => {
-    const { [key]: _, ...rest } = acc
-    return rest
-  }, props as TextInternalProps)
-
-  return <TextInternal {...publicProps} />
+export const F0Text = forwardRef<HTMLElement, F0TextProps>((props, ref) => {
+  return <Text ref={ref} {...props} />
 })
 
 F0Text.displayName = "F0Text"

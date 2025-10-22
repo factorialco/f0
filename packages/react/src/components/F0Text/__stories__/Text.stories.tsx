@@ -22,31 +22,24 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     variant: "body",
-    children: "This is a text wrapped in the Text component.",
+    content: "This is a text wrapped in the Text component.",
   },
 }
 
 export const Variants: Story = {
   args: {
-    children: "",
+    content: "",
   },
   render: () => (
     <div className="flex flex-col gap-2">
-      <F0Text variant="heading">Heading Text</F0Text>
-      <F0Text variant="description">
-        This is a description text. Lorem ipsum dolor sit amet, consectetur
-        adipiscing elit.
-      </F0Text>
-      <F0Text>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-        mollit anim id est laborum.
-      </F0Text>
-      <F0Text variant="small">This is a small text.</F0Text>
+      <F0Text
+        variant="description"
+        content="This is a description text. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+      />
+      <F0Text content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
+      <F0Text variant="small" content="This is a small text." />
+      <F0Text variant="code" content="const example = 'code text';" />
+      <F0Text variant="label" content="Label text" />
     </div>
   ),
 }
@@ -57,7 +50,7 @@ export const TextAlignment: Story = {
   },
   args: {
     variant: "body",
-    children: "Text alignment",
+    content: "Text alignment",
   },
   render: (args) => (
     <div className="flex flex-col gap-2">
@@ -74,7 +67,7 @@ export const TextEllipsis: Story = {
   },
   args: {
     variant: "body",
-    children:
+    content:
       "This is a very long text that will be truncated with ellipsis when it exceeds the container width and demonstrates the ellipsis functionality.",
     ellipsis: true,
   },
