@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.240.1](https://github.com/factorialco/f0/compare/f0-react-v1.240.0...f0-react-v1.240.1) (2025-10-22)
+
+
+### Bug Fixes
+
+* add no response option to Product Modal ([#2859](https://github.com/factorialco/f0/issues/2859)) ([d0264ad](https://github.com/factorialco/f0/commit/d0264adbe6c12a2fc0e005b003e5b237812b01fe))
+
 ## [1.240.0](https://github.com/factorialco/f0/compare/f0-react-v1.239.4...f0-react-v1.240.0) (2025-10-22)
 
 
