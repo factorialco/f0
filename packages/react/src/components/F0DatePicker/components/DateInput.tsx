@@ -105,6 +105,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
               handleBlur()
             }
           }}
+          type="text"
           onChange={handleChange}
           error={error || inputProps.error}
           onBlur={handleBlur}

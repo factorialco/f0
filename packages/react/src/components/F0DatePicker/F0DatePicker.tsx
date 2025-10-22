@@ -138,6 +138,7 @@ export function F0DatePicker({
       maxDate={maxDate}
       open={isOpen}
       onOpenChange={handlePickerOpenChange}
+      asChild
     >
       <DateInput
         ref={inputRef}

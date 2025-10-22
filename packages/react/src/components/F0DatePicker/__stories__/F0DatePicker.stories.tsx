@@ -12,7 +12,7 @@ import {
 } from "../../../experimental/OneCalendar/types"
 import { F0DatePicker } from "../F0DatePicker"
 import { predefinedPresets } from "../presets"
-import { datepickerSizes, DatePickerValue, F0DatePickerProps } from "../types"
+import { datepickerSizes, DatePickerValue } from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
@@ -291,7 +291,7 @@ export const Snapshot: Story = {
       labelIcon: Placeholder,
       label: "Label text here",
     }
-    const snapshotVariants = [
+    const snapshotVariants: (Record<string, unknown> & typeof base)[] = [
       { ...base },
       { ...base, disabled: true },
       { ...base, readonly: true },
@@ -307,7 +307,7 @@ export const Snapshot: Story = {
       { ...base, status: { type: "info" as const, message: "Info message" } },
       { ...base, hint: "Hint message" },
       { ...base, open: true },
-    ] satisfies F0DatePickerProps[]
+    ]
     return (
       <div className="flex flex-col gap-4">
         {datepickerSizes.map((size) => (

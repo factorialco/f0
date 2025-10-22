@@ -1,6 +1,6 @@
 import { experimentalComponent } from "@/lib/experimental"
 
-export { F0DatePicker as _F0DatePicker } from "./F0DatePicker"
+import { F0DatePicker as _F0DatePicker } from "./F0DatePicker"
 export * from "./presets"
 export * from "./types"
 
