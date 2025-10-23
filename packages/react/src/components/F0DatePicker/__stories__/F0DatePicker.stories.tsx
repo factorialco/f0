@@ -36,7 +36,7 @@ const meta = {
           "The component also allows you to define presets that will be displayed in the component. Check the presets section for more information.",
           "For each granularity the input selector will show a button to navigate to the current date in the granularity, you can hide that via props",
           "The component also allows you navigation arrows to allow user to navigate to the next or previous item in the granularity.",
-          "Note the value and  are an object with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
+          "Note the value and defaultValue are objects with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
