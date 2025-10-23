@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.241.0](https://github.com/factorialco/f0/compare/f0-react-v1.240.3...f0-react-v1.241.0) (2025-10-23)
+
+
+### Features
+
+* **DropdownButton:** Enable description and separator options ([#2868](https://github.com/factorialco/f0/issues/2868)) ([ccfa61b](https://github.com/factorialco/f0/commit/ccfa61ba55de7f1b9ab5b4bd1ac5acec993740fc))
+
 ## [1.240.3](https://github.com/factorialco/f0/compare/f0-react-v1.240.2...f0-react-v1.240.3) (2025-10-23)
 
 
