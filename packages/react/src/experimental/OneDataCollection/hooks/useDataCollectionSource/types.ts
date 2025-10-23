@@ -30,8 +30,8 @@ export type BulkActionsDefinition<
   Filters extends FiltersDefinition,
 > = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) =>
   | {
-      primary: BulkActionDefinition[]
-      secondary?: BulkActionDefinition[]
+      primary?: (BulkActionDefinition | { type: "separator" })[]
+      secondary?: (BulkActionDefinition | { type: "separator" })[]
     }
   | {
       warningMessage: string

@@ -822,6 +822,7 @@ export const WithSelectableAndBulkActions: Story = {
               icon: Download,
               id: "download",
             },
+            { type: "separator" },
             {
               label: allSelected ? "Delete All" : "Delete",
               icon: Delete,
