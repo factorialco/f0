@@ -18,7 +18,7 @@ const ExampleComponent = (props: Omit<DatePickerPopupProps, "children">) => {
       open={open}
       onOpenChange={setOpen}
     >
-      <button>Click me {JSON.stringify(value)}</button>
+      Click me {JSON.stringify(value)}
     </DatePickerPopup>
   )
 }
