@@ -337,7 +337,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     useEffect(() => {
       if (isAutofilled && !intervalRef.current) {
         intervalRef.current = setInterval(() => {
-          // Gets the elemment depending on the type of the ref
+          // Gets the element depending on the type of the ref
           const element =
             typeof inputRef === "object" && inputRef?.current
               ? (inputRef.current as HTMLElement)
