@@ -500,8 +500,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {(clearable || append || appendTag || loading) && (
               <div
                 className={cn(
-                  "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5",
+                  "flex h-fit items-center gap-1.5 self-center pr-[3px]",
+                  size === "md" && "pr-[7px]",
                   "relative"
                 )}
               >
@@ -514,7 +514,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                          "mt-pxflex mr-px h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
+                          "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
                         tabIndex={0}
@@ -531,13 +531,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 )}
 
                 {(append || appendTag) && (
-                  <div
-                    className={cn(
-                      "mt-px flex h-fit items-center",
-                      size === "sm" && "h-[24px] pr-0.5",
-                      size === "md" && "pr-0.1 h-[25px]"
-                    )}
-                  >
+                  <div className="flex min-h-6 min-w-6 items-center justify-center self-center">
                     {append}
                     {appendTag && <AppendTag text={appendTag} />}
                   </div>
