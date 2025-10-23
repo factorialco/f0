@@ -25,6 +25,7 @@ export type TextareaProps = Omit<
     | "error"
     | "status"
     | "hint"
+    | "onKeyDown"
   >
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(

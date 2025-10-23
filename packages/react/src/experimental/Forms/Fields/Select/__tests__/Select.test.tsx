@@ -177,6 +177,26 @@ describe("Select", () => {
     )
   })
 
+  it("should not lose the focus when the search input is focused and the list changes", async () => {
+    const user = userEvent.setup({ delay: 100 })
+    render(
+      <Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+        showSearchBox
+      />
+    )
+
+    await openSelect(user)
+    await user.type(screen.getByRole("searchbox"), "Option 1")
+
+    expect(screen.getByText("Option 1")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    )
+  })
+
   it("shows empty message when no options match search", async () => {
     const user = userEvent.setup()
     render(

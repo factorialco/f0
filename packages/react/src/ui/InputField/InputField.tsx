@@ -12,6 +12,7 @@ import {
   forwardRef,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -160,11 +161,13 @@ export type InputFieldProps<T> = {
   readonly?: boolean
   clearable?: boolean
   role?: string
+  inputRef?: React.Ref<unknown>
   "aria-controls"?: AriaAttributes["aria-controls"]
   "aria-expanded"?: AriaAttributes["aria-expanded"]
   onClear?: () => void
   onFocus?: () => void
   onBlur?: () => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   canGrow?: boolean
   children: React.ReactNode & {
     onFocus?: () => void
@@ -291,6 +294,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const handleClear = () => {
       handleChange(emptyValue)
+      props.onClear?.()
     }
 
     const handleClickContent = () => {
@@ -324,15 +328,24 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
-    const inputRef = useRef<HTMLElement>(null)
+    const localInputRef = useRef<HTMLElement>(null)
+    const inputRef = useMemo(
+      () => props.inputRef ?? localInputRef,
+      [props.inputRef]
+    )
 
     useEffect(() => {
       if (isAutofilled && !intervalRef.current) {
         intervalRef.current = setInterval(() => {
-          if (inputRef.current) {
+          // Gets the element depending on the type of the ref
+          const element =
+            typeof inputRef === "object" && inputRef?.current
+              ? (inputRef.current as HTMLElement)
+              : null
+          if (element) {
             const stillAutofilled =
-              inputRef.current.matches(":-webkit-autofill") ||
-              inputRef.current.matches(":autofill")
+              element.matches(":-webkit-autofill") ||
+              element.matches(":autofill")
             if (!stillAutofilled) {
               setIsAutofilled(false)
               if (intervalRef.current) {
@@ -351,7 +364,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           intervalRef.current = null
         }
       }
-    }, [isAutofilled])
+    }, [isAutofilled, inputRef])
     /**********************/
 
     return (
