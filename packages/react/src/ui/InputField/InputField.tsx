@@ -553,12 +553,15 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                             "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
                             "via-[#FFFFFF] via-60% dark:via-[#192231]",
                             "to-transparent to-100%",
-                            size === "md" && "right-3 top-2.5"
+                            size === "md" && "right-3"
                           ),
                         inputElementVariants({ size })
                       )}
                       style={{
-                        right: loadingIndicator?.offset,
+                        right:
+                          typeof loadingIndicator?.offset === "number"
+                            ? loadingIndicator?.offset + (size === "md" ? 6 : 0)
+                            : undefined,
                       }}
                     >
                       <Spinner size="small" className="mt-[1px]" />
