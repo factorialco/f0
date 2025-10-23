@@ -331,7 +331,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const localInputRef = useRef<HTMLElement>(null)
     const inputRef = useMemo(
       () => props.inputRef ?? localInputRef,
-      [props.inputRef, localInputRef]
+      [props.inputRef]
     )
 
     useEffect(() => {
