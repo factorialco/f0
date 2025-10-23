@@ -137,6 +137,7 @@ const inputFieldStatusVariants = cva({
 })
 
 export type InputFieldProps<T> = {
+  autoFocus?: boolean
   label: string
   placeholder?: string
   labelIcon?: IconType

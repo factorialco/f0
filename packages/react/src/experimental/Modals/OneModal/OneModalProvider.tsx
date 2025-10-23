@@ -1,17 +1,19 @@
 import { createContext, useContext } from "react"
-import { ModalPosition } from "./types"
+import { ContentPadding, ModalPosition } from "./types"
 
 type OneModalContextType = {
   open: boolean
   onClose: () => void
   shownBottomSheet: boolean
   position: ModalPosition
+  contentPadding: ContentPadding
 }
 
 export const OneModalContext = createContext<OneModalContextType>({
   open: false,
   onClose: () => {},
   position: "center",
+  contentPadding: "md",
   shownBottomSheet: false,
 })
 
@@ -19,6 +21,7 @@ export const OneModalProvider = ({
   isOpen,
   onClose,
   shownBottomSheet = false,
+  contentPadding,
   position,
   children,
 }: {
@@ -27,10 +30,17 @@ export const OneModalProvider = ({
   shownBottomSheet?: boolean
   position: ModalPosition
   children: React.ReactNode
+  contentPadding: ContentPadding
 }) => {
   return (
     <OneModalContext.Provider
-      value={{ open: isOpen, onClose, position, shownBottomSheet }}
+      value={{
+        open: isOpen,
+        onClose,
+        position,
+        shownBottomSheet,
+        contentPadding,
+      }}
     >
       {children}
     </OneModalContext.Provider>
