@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.241.1](https://github.com/factorialco/f0/compare/f0-react-v1.241.0...f0-react-v1.241.1) (2025-10-23)
+
+
+### Bug Fixes
+
+* improve select component arrows ([#2867](https://github.com/factorialco/f0/issues/2867)) ([0ec6a35](https://github.com/factorialco/f0/commit/0ec6a35580c508d9ccdc72d1ae73b0d859750574))
+
 ## [1.241.0](https://github.com/factorialco/f0/compare/f0-react-v1.240.3...f0-react-v1.241.0) (2025-10-23)
 
 
