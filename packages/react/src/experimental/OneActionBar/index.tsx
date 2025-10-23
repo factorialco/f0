@@ -18,7 +18,10 @@ type ActionType = {
   onClick?: () => void
   disabled?: boolean
   critical?: boolean
+  description?: string
 }
+
+type ActionBarItem = ActionType | { type: "separator" }
 
 interface OneActionBarProps {
   /**
@@ -29,12 +32,12 @@ interface OneActionBarProps {
   /**
    * The primary action
    */
-  primaryActions?: ActionType[]
+  primaryActions?: ActionBarItem[]
 
   /**
    * The secondary actions
    */
-  secondaryActions?: ActionType[]
+  secondaryActions?: ActionBarItem[]
 
   /**
    * The number of selected items. If not defined, the action bar will not show the selected items count and the unselect button.
@@ -51,6 +54,10 @@ interface OneActionBarProps {
    * The warning message to show in the action bar
    */
   warningMessage?: string
+}
+
+function isActionType(item: ActionBarItem): item is ActionType {
+  return "label" in item
 }
 
 const Alert = ({ message }: { message: string }) => {
@@ -77,11 +84,17 @@ export const OneActionBar = ({
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const visibleSecondaryActions = secondaryActions.slice(0, 2)
-  const dropdownActions = secondaryActions.slice(2).map((action) => ({
-    ...action,
-    critical: action.critical || false,
-  })) as DropdownItem[]
+  const visibleSecondaryActions = secondaryActions
+    .slice(0, 2)
+    .filter(isActionType)
+  const dropdownActions = secondaryActions.slice(2).map((action) =>
+    isActionType(action)
+      ? {
+          ...action,
+          critical: action.critical || false,
+        }
+      : action
+  ) as DropdownItem[]
 
   return (
     <AnimatePresence>
@@ -130,21 +143,29 @@ export const OneActionBar = ({
                   <MobileDropdown items={secondaryActions} />
                   {primaryActions.length > 1 ? (
                     <OneDropdownButton
-                      items={primaryActions.map((action) => ({
-                        value: action.label,
-                        label: action.label,
-                        icon: action.icon,
-                        critical: action.critical,
-                      }))}
+                      items={primaryActions.map((action) =>
+                        isActionType(action)
+                          ? {
+                              value: action.label,
+                              label: action.label,
+                              icon: action.icon,
+                              critical: action.critical,
+                              description: action.description,
+                            }
+                          : { type: "separator" as const }
+                      )}
                       onClick={(value) => {
                         const action = primaryActions.find(
-                          (a) => a.label === value
+                          (a) => isActionType(a) && a.label === value
                         )
-                        action?.onClick?.()
+                        if (action && isActionType(action)) {
+                          action.onClick?.()
+                        }
                       }}
                       size="lg"
                     />
-                  ) : primaryActions.length === 1 ? (
+                  ) : primaryActions.length === 1 &&
+                    isActionType(primaryActions[0]) ? (
                     <Button
                       label={primaryActions[0].label}
                       icon={primaryActions[0].icon}
@@ -179,20 +200,28 @@ export const OneActionBar = ({
                     ))}
                   {primaryActions.length > 1 ? (
                     <OneDropdownButton
-                      items={primaryActions.map((action) => ({
-                        value: action.label,
-                        label: action.label,
-                        icon: action.icon,
-                        critical: action.critical,
-                      }))}
+                      items={primaryActions.map((action) =>
+                        isActionType(action)
+                          ? {
+                              value: action.label,
+                              label: action.label,
+                              icon: action.icon,
+                              critical: action.critical,
+                              description: action.description,
+                            }
+                          : { type: "separator" as const }
+                      )}
                       onClick={(value) => {
                         const action = primaryActions.find(
-                          (a) => a.label === value
+                          (a) => isActionType(a) && a.label === value
                         )
-                        action?.onClick?.()
+                        if (action && isActionType(action)) {
+                          action.onClick?.()
+                        }
                       }}
                     />
-                  ) : primaryActions.length === 1 ? (
+                  ) : primaryActions.length === 1 &&
+                    isActionType(primaryActions[0]) ? (
                     <Button
                       label={primaryActions[0].label}
                       icon={primaryActions[0].icon}
