@@ -500,8 +500,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {(clearable || append || appendTag || loading) && (
               <div
                 className={cn(
-                  "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5",
+                  "flex h-fit items-center gap-1.5 self-center pr-[3px]",
+                  size === "md" && "pr-[7px]",
                   "relative"
                 )}
               >
@@ -514,9 +514,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                          "mt-pxflex mr-px h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
+                          "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
+                        type="button"
                         tabIndex={0}
                         data-testid="clear-button"
                         onClick={(e) => {
@@ -524,20 +525,18 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           handleClear()
                         }}
                       >
-                        <F0Icon icon={CrossedCircle} color="bold" size="md" />
+                        <F0Icon
+                          icon={CrossedCircle}
+                          color="default"
+                          size="md"
+                        />
                       </motion.button>
                     )}
                   </AnimatePresence>
                 )}
 
                 {(append || appendTag) && (
-                  <div
-                    className={cn(
-                      "mt-px flex h-fit items-center",
-                      size === "sm" && "h-[24px] pr-0.5",
-                      size === "md" && "pr-0.1 h-[25px]"
-                    )}
-                  >
+                  <div className="flex min-h-6 min-w-6 items-center justify-center self-center">
                     {append}
                     {appendTag && <AppendTag text={appendTag} />}
                   </div>
@@ -554,12 +553,15 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                             "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
                             "via-[#FFFFFF] via-60% dark:via-[#192231]",
                             "to-transparent to-100%",
-                            size === "md" && "right-3 top-2.5"
+                            size === "md" && "right-3"
                           ),
                         inputElementVariants({ size })
                       )}
                       style={{
-                        right: loadingIndicator?.offset,
+                        right:
+                          typeof loadingIndicator?.offset === "number"
+                            ? loadingIndicator?.offset + (size === "md" ? 6 : 0)
+                            : undefined,
                       }}
                     >
                       <Spinner size="small" className="mt-[1px]" />

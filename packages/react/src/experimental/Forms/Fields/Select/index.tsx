@@ -20,7 +20,6 @@ import {
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
@@ -537,12 +536,7 @@ const SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={size}
-                  className={cn(size === "sm" ? "" : "-translate-y-px")}
-                />
+                <Arrow open={openLocal} disabled={disabled} size={size} />
               }
             >
               <button
