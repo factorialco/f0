@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Add, Replace } from "../../../icons/app/index.ts"
+import { Add, Delete, Pencil, Replace, Save } from "../../../icons/app/index.ts"
 import { OneDropdownButton } from "./index"
 import { oneDropdownButtonSizes, oneDropdownButtonVariants } from "./types.ts"
 
@@ -69,6 +69,39 @@ export const Default: Story = {
       {
         value: "3",
         label: "Item 3",
+      },
+    ],
+  },
+}
+
+export const WithDescription: Story = {
+  args: {
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        description: "New creation process",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        description: "Edit item's information",
+        icon: Pencil,
+      },
+      { type: "separator" },
+      {
+        value: "3",
+        label: "Item 3",
+        description: "Save changes",
+        icon: Save,
+      },
+      {
+        value: "4",
+        label: "Item 4",
+        description: "Delete item",
+        icon: Delete,
+        critical: true,
       },
     ],
   },

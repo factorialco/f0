@@ -1,6 +1,10 @@
 import { useI18n } from "@/lib/providers/i18n"
 import { useMemo, useState } from "react"
-import { DropdownInternal } from "../../../experimental/Navigation/Dropdown/internal.tsx"
+import {
+  DropdownInternal,
+  DropdownItemObject,
+  DropdownItemSeparator,
+} from "../../../experimental/Navigation/Dropdown/internal.tsx"
 import { ChevronDown } from "../../../icons/app/index.ts"
 import { cn, focusRing } from "../../../lib/utils.ts"
 import { Action } from "../../../ui/Action/index.tsx"
@@ -8,24 +12,30 @@ import {
   actionVariants,
   buttonSizeVariants,
 } from "../../../ui/Action/variants.ts"
-import { F0Icon, IconType } from "../../F0Icon/index.tsx"
+import { F0Icon } from "../../F0Icon/index.tsx"
 import { OneDropdownButtonSize, OneDropdownButtonVariant } from "./types.ts"
 
-export type OneDropdownButtonItem<T = string> = {
+export type OneDropdownButtonItem<T = string> = Pick<
+  DropdownItemObject,
+  "label" | "icon" | "critical" | "description"
+> & {
   value: T
-  label: string
-  icon?: IconType
-  critical?: boolean
 }
 
 export type OneDropdownButtonProps<T = string> = {
   size?: OneDropdownButtonSize
-  items: OneDropdownButtonItem<T>[]
+  items: (OneDropdownButtonItem<T> | DropdownItemSeparator)[]
   variant?: OneDropdownButtonVariant
   value?: T
   disabled?: boolean
   loading?: boolean
   onClick: (value: T, item: OneDropdownButtonItem<T>) => void
+}
+
+function isDropdownItem<T>(
+  item: OneDropdownButtonItem<T> | DropdownItemSeparator
+): item is OneDropdownButtonItem<T> {
+  return "value" in item
 }
 
 const OneDropdownButton = ({
@@ -37,28 +47,40 @@ const OneDropdownButton = ({
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
-  const localValue = useMemo(() => value || items[0].value, [value, items])
+  const selectableItems = useMemo(() => items.filter(isDropdownItem), [items])
+
+  const localValue = useMemo(
+    () => value || selectableItems[0]?.value,
+    [value, selectableItems]
+  )
 
   const selectedItem = useMemo(
-    () => items.find((item) => item.value === localValue),
-    [localValue, items]
+    () => selectableItems.find((item) => item.value === localValue),
+    [localValue, selectableItems]
   )
 
   const handleClick = () => {
-    onClick(localValue, items.find((value) => value.value === localValue)!)
+    const item = selectableItems.find((item) => item.value === localValue)
+    if (item) {
+      onClick(localValue, item)
+    }
   }
 
   const dropdownItems = useMemo(
     () =>
       items
-        .filter((item) => item.value !== localValue)
-        .map((item) => ({
-          ...item,
-          onClick: () => {
-            onClick(item.value, item)
-            setIsOpen(false)
-          },
-        })),
+        .filter((item) => !isDropdownItem(item) || item.value !== localValue)
+        .map((item) =>
+          isDropdownItem(item)
+            ? {
+                ...item,
+                onClick: () => {
+                  onClick(item.value, item)
+                  setIsOpen(false)
+                },
+              }
+            : item
+        ),
     [items, localValue, onClick]
   )
 
