@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.240.3](https://github.com/factorialco/f0/compare/f0-react-v1.240.2...f0-react-v1.240.3) (2025-10-23)
+
+
+### Bug Fixes
+
+* select's  searchbox lose focus while typing ([fcbe8a0](https://github.com/factorialco/f0/commit/fcbe8a08955e6e55835cef625466d7b3369d142a))
+
 ## [1.240.2](https://github.com/factorialco/f0/compare/f0-react-v1.240.1...f0-react-v1.240.2) (2025-10-22)
 
 
