@@ -177,7 +177,7 @@ describe("Select", () => {
     )
   })
 
-  it("should not lost the focus when the search input is focused and the list changes", async () => {
+  it("should not lose the focus when the search input is focused and the list changes", async () => {
     const user = userEvent.setup({ delay: 100 })
     render(
       <Select
