@@ -517,6 +517,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
+                        type="button"
                         tabIndex={0}
                         data-testid="clear-button"
                         onClick={(e) => {
@@ -524,7 +525,11 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           handleClear()
                         }}
                       >
-                        <F0Icon icon={CrossedCircle} color="bold" size="md" />
+                        <F0Icon
+                          icon={CrossedCircle}
+                          color="default"
+                          size="md"
+                        />
                       </motion.button>
                     )}
                   </AnimatePresence>
