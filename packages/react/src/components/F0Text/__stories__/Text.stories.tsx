@@ -1,3 +1,4 @@
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0Text } from "../index"
 
@@ -78,4 +79,48 @@ export const TextEllipsis: Story = {
       </div>
     ),
   ],
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    content: "",
+  },
+  render: () => (
+    <div className="flex w-fit flex-col gap-4">
+      <h3 className="text-lg font-semibold">All Text Variants</h3>
+
+      <section>
+        <h4 className="text-lg font-semibold">All Variants</h4>
+        <div className="flex flex-col gap-2">
+          <F0Text variant="description" content="Description variant text" />
+          <F0Text variant="body" content="Body variant text (default)" />
+          <F0Text variant="small" content="Small variant text" />
+          <F0Text variant="code" content="const code = 'Code variant text';" />
+          <F0Text variant="label" content="Label variant text" />
+          <F0Text variant="inverse" content="Inverse variant text" />
+        </div>
+      </section>
+
+      <section>
+        <h4 className="text-lg font-semibold">Text Alignment</h4>
+        <div className="flex w-96 flex-col gap-2">
+          <F0Text variant="body" align="left" content="Left aligned text" />
+          <F0Text variant="body" align="center" content="Center aligned text" />
+          <F0Text variant="body" align="right" content="Right aligned text" />
+        </div>
+      </section>
+
+      <section>
+        <h4 className="text-lg font-semibold">Text with Ellipsis</h4>
+        <div className="w-96">
+          <F0Text
+            variant="body"
+            content="This is a very long text that will be truncated with ellipsis when it exceeds the container width"
+            ellipsis
+          />
+        </div>
+      </section>
+    </div>
+  ),
 }
