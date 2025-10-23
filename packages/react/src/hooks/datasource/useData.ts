@@ -547,8 +547,15 @@ export function useData<
       cursor = null,
     }: FetchDataParams<Filters>) => {
       try {
+        console.warn("Fetching data with cursor:", cursor)
+        console.warn("appendMode:", appendMode)
         // Clean up any existing subscription before creating a new one
+        console.warn(
+          "fetchDataAndUpdate paginationInfo?.type",
+          paginationInfo?.type
+        )
         if (cleanup.current) {
+          console.warn("fetchDataAndUpdate cleanup.current")
           cleanup.current()
           cleanup.current = undefined
         }
@@ -702,6 +709,9 @@ export function useData<
         // Extract the cursor from paginationInfo
         const currentCursor = currentPaginationInfo.cursor
 
+        // Add debugging
+        console.warn("Loading more with cursor:", currentCursor)
+
         setIsLoadingMore(true)
         setIsLoading(true)
         isLoadingMoreRef.current = true
@@ -759,6 +769,8 @@ export function useData<
 
   useEffect(() => {
     return () => {
+      console.warn('unsubscribe on "useEffect"')
+
       cleanup.current?.()
     }
   }, [])
