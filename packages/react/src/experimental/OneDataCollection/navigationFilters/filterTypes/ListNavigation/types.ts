@@ -5,10 +5,11 @@ export type ListNavigationOptions = {
   options: F0ListNavigationProps["options"]
 }
 
-export type ListNavigatorFilterDefinition =
-  NavigationFilterDefinitionBase<ListValue> & {
-    type: "list-navigator"
-  } & ListNavigationOptions
+export type ListNavigatorFilterDefinition = NavigationFilterDefinitionBase<
+  ListValue,
+  "list-navigator"
+> &
+  ListNavigationOptions
 
 export type ListValue = string
 

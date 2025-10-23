@@ -10,8 +10,8 @@ import type {
 
 export type NavigationFilter<
   T,
+  FilterDef extends NavigationFilterDefinition,
   InitialValue = T,
-  FilterDef = NavigationFilterDefinition,
 > = {
   /**
    * Converts the initial value to the correct type for the filter.
@@ -35,8 +35,8 @@ export type NavigationFilter<
   ) => React.ReactNode
 }
 
-export type NavigationFilterDefinitionBase<T> = {
-  type: string
+export type NavigationFilterDefinitionBase<T, Type extends string> = {
+  type: Readonly<Type>
   defaultValue: T
 }
 
@@ -46,7 +46,7 @@ export type NavigationFilterDefinition =
 
 export type NavigationFilterComponentProps<
   T,
-  FilterDef = NavigationFilterDefinition,
+  FilterDef extends NavigationFilterDefinition,
 > = {
   filter: FilterDef
   value: T
