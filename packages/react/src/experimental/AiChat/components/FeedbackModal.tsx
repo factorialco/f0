@@ -33,7 +33,12 @@ export const FeedbackModal = ({
   }
 
   return (
-    <OneModal position="center" isOpen onClose={handleClose} size="sm">
+    <OneModal
+      position="center"
+      isOpen
+      onClose={handleClose}
+      contentPadding="sm"
+    >
       <OneModal.Header title={title}></OneModal.Header>
       <OneModal.Content>
         <div className="flex flex-col gap-6 p-4">
