@@ -11,8 +11,8 @@ const isDateValue = (
 
 const dateNavigatorFilter: NavigationFilter<
   DateValue,
-  DateValue | Date | DateRange | undefined | null,
-  DateNavigatorFilterDefinition
+  DateNavigatorFilterDefinition,
+  DateValue | Date | DateRange | undefined | null
 > = {
   valueConverter: function (value, filterDef, i18n) {
     const availableGranularities = Array.isArray(filterDef.granularity)
@@ -40,6 +40,6 @@ const dateNavigatorFilter: NavigationFilter<
   render: (props) => {
     return <DateNavigation {...props} />
   },
-}
+} as const
 
 export default dateNavigatorFilter
