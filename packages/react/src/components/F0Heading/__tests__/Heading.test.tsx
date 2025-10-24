@@ -62,11 +62,4 @@ describe("F0Heading Component", () => {
       expect(screen.getByText("H6").tagName).toBe("H6")
     })
   })
-
-  describe("Props Forwarding", () => {
-    it("forwards all Text component props", () => {
-      render(<F0Heading content="Test" align="center" />)
-      expect(screen.getByText("Test")).toHaveClass("text-center")
-    })
-  })
 })

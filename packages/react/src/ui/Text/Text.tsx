@@ -1,4 +1,5 @@
 import { OneEllipsis } from "@/components/OneEllipsis"
+import { parseMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import type React from "react"
 import { createElement, forwardRef } from "react"
@@ -56,6 +57,13 @@ export interface TextProps
    * @default false
    */
   noEllipsisTooltip?: boolean
+
+  /**
+   * Enable markdown parsing for content
+   * Supports basic markdown: bold, italic, links, headings, lists, etc.
+   * @default false
+   */
+  markdown?: boolean
 }
 
 /**
@@ -71,6 +79,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       as,
       ellipsis,
       noEllipsisTooltip,
+      markdown,
       ...htmlProps
     },
     forwardedRef
@@ -78,6 +87,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     const asTag = as ?? defaultTag[variant ?? "body"]
 
     // If ellipsis is enabled, wrap with the ellipsis component
+    // Note: markdown is disabled when ellipsis is enabled since OneEllipsis only accepts string children
     if (ellipsis !== undefined) {
       const lines = typeof ellipsis === "number" ? ellipsis : 1
 
@@ -88,6 +98,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
           noTooltip={noEllipsisTooltip}
           tag={asTag}
           className={cn(textVariants({ variant, align }), className)}
+          markdown={markdown}
           {...htmlProps}
         >
           {content}
@@ -95,6 +106,19 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       )
     }
 
+    // If markdown is enabled, parse and render as HTML
+    if (markdown) {
+      const html = parseMarkdown(content)
+
+      return createElement(asTag, {
+        ...htmlProps,
+        className: cn(textVariants({ variant, align }), className),
+        ref: forwardedRef,
+        dangerouslySetInnerHTML: { __html: html },
+      })
+    }
+
+    // Default: render as plain text
     return createElement(
       asTag,
       {

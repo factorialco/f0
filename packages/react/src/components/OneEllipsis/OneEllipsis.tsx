@@ -1,3 +1,4 @@
+import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import {
   Tooltip,
@@ -41,6 +42,7 @@ type EllipsisWrapperProps = {
   onHasEllipsisChange: (hasEllipsis: boolean) => void
   disabled?: boolean
   tag: Tag
+  markdown?: boolean
 }
 
 /**
@@ -60,6 +62,7 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       onHasEllipsisChange,
       noTooltip,
       disabled,
+      markdown,
       ...props
     },
     ref
@@ -98,6 +101,8 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       }
     }, [ref, onHasEllipsisChange, lines, disabled])
 
+    const html = markdown ? parseMarkdown(children) : undefined
+
     return React.createElement(
       props.tag,
       {
@@ -118,8 +123,11 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
           lineClamp: lines > 1 ? lines : undefined,
         },
         ...props,
+        ...(markdown && html
+          ? { dangerouslySetInnerHTML: { __html: html } }
+          : {}),
       },
-      children
+      markdown ? undefined : children
     )
   }
 )
@@ -150,6 +158,11 @@ type OneEllipsisProps = {
    * The tag to use for the text.
    */
   tag?: Tag
+  /**
+   * Enable markdown parsing for content
+   * @default false
+   */
+  markdown?: boolean
 }
 
 const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
@@ -160,6 +173,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
       children,
       noTooltip = false,
       disabled = false,
+      markdown = false,
       ...props
     },
     forwardedRef
@@ -177,6 +191,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
           lines={lines}
           onHasEllipsisChange={setHasEllipsis}
           disabled={disabled}
+          markdown={markdown}
           {...props}
           tag={props.tag ?? "span"}
           data-testid="one-ellipsis"
@@ -186,13 +201,17 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
         </EllipsisWrapper>
       )
       // eslint-disable-next-line react-hooks/exhaustive-deps -- We dont want to track props as dependencies
-    }, [className, lines, ref, children, disabled])
+    }, [className, lines, ref, children, disabled, markdown])
+
+    const plainText = useMemo(() => {
+      return markdown ? stripMarkdown(children) : children
+    }, [children, markdown])
 
     return hasEllipsis && !noTooltip ? (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>{Text}</TooltipTrigger>
-          <TooltipContent className="max-w-xl">{children}</TooltipContent>
+          <TooltipContent className="max-w-xl">{plainText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     ) : (

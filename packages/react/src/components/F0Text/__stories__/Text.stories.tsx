@@ -81,6 +81,23 @@ export const TextEllipsis: Story = {
   ],
 }
 
+export const Markdown: Story = {
+  args: {
+    content:
+      "This is a **bold** text and this is a [link](https://www.google.com).",
+    markdown: true,
+  },
+}
+
+export const MarkdownWithEllipsis: Story = {
+  args: {
+    content:
+      "This is a **bold** text and this is a [link](https://www.google.com), this is a **bold** text and this is a [link](https://www.google.com), this is a **bold** text and this is a [link](https://www.google.com).",
+    markdown: true,
+    ellipsis: true,
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {
