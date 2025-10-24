@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import React from "react"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { defaultTranslations, I18nProvider } from "../../lib/providers/i18n"
-import { OneDatePickerPopup } from "./OneDatePickerPopup"
+import { DatePickerPopup } from "./DatePickerPopup"
 import { DatePreset } from "./types"
 
 // Mock ResizeObserver for tests
@@ -49,7 +49,7 @@ describe("OneDatePickerPopup", () => {
   it("renders the trigger button", () => {
     render(
       <TestWrapper>
-        <OneDatePickerPopup {...defaultProps} />
+        <DatePickerPopup {...defaultProps} />
       </TestWrapper>
     )
     expect(screen.getByText("Open Date Picker")).toBeInTheDocument()
@@ -59,7 +59,7 @@ describe("OneDatePickerPopup", () => {
     const user = userEvent.setup()
     render(
       <TestWrapper>
-        <OneDatePickerPopup {...defaultProps} presets={mockPresets} />
+        <DatePickerPopup {...defaultProps} presets={mockPresets} />
       </TestWrapper>
     )
 
@@ -74,7 +74,7 @@ describe("OneDatePickerPopup", () => {
     const user = userEvent.setup()
     render(
       <TestWrapper>
-        <OneDatePickerPopup {...defaultProps} presets={mockPresets} />
+        <DatePickerPopup {...defaultProps} presets={mockPresets} />
       </TestWrapper>
     )
 
@@ -89,7 +89,7 @@ describe("OneDatePickerPopup", () => {
     const user = userEvent.setup()
     render(
       <TestWrapper>
-        <OneDatePickerPopup
+        <DatePickerPopup
           {...defaultProps}
           granularities={["day", "week", "month"]}
         />
@@ -107,7 +107,7 @@ describe("OneDatePickerPopup", () => {
     const user = userEvent.setup()
     render(
       <TestWrapper>
-        <OneDatePickerPopup {...defaultProps} presets={mockPresets} />
+        <DatePickerPopup {...defaultProps} presets={mockPresets} />
       </TestWrapper>
     )
 
@@ -124,7 +124,7 @@ describe("OneDatePickerPopup", () => {
 
     render(
       <TestWrapper>
-        <OneDatePickerPopup
+        <DatePickerPopup
           {...defaultProps}
           minDate={minDate}
           maxDate={maxDate}
@@ -141,7 +141,7 @@ describe("OneDatePickerPopup", () => {
   it("handles disabled state correctly", async () => {
     render(
       <TestWrapper>
-        <OneDatePickerPopup {...defaultProps} disabled />
+        <DatePickerPopup {...defaultProps} disabled />
       </TestWrapper>
     )
 

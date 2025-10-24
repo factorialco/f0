@@ -2,27 +2,24 @@ import { CalendarView, DateRange } from "@/experimental/OneCalendar/types"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { subDays } from "date-fns"
 import { useState } from "react"
-import {
-  OneDatePickerPopup,
-  OneDatePickerPopupProps,
-} from "../OneDatePickerPopup"
+import { DatePickerPopup, DatePickerPopupProps } from "../DatePickerPopup"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"
 
-const ExampleComponent = (props: Omit<OneDatePickerPopupProps, "children">) => {
+const ExampleComponent = (props: Omit<DatePickerPopupProps, "children">) => {
   const [value, setValue] = useState<DatePickerValue | undefined>(undefined)
   const [open, setOpen] = useState(false)
 
   return (
-    <OneDatePickerPopup
+    <DatePickerPopup
       {...props}
       onSelect={setValue}
       value={value}
       open={open}
       onOpenChange={setOpen}
     >
-      <button>Click me {JSON.stringify(value)}</button>
-    </OneDatePickerPopup>
+      Click me {JSON.stringify(value)}
+    </DatePickerPopup>
   )
 }
 
@@ -33,7 +30,7 @@ const meta = {
     docs: {
       description: {
         component: [
-          "The `OneDatePickerPopup` component is an internal component to render the date selection popup used in other components like date navigator or date input. It allows the user to select a <strong>range of time</strong> (from a start datetime to an end datetime). With different granularities (day, week, month, quarter, halfyear, year, range). When the user select an item in a granularity is selecting that range of time, e.g. when the user select a day, the range start of the day (30/07/2025 00:00:00) to the end of the day (30/07/2025 23:59:59) is selected.",
+          "The `DatePickerPopup` component is an internal component to render the date selection popup used in other components like date navigator or date input. It allows the user to select a <strong>range of time</strong> (from a start datetime to an end datetime). With different granularities (day, week, month, quarter, halfyear, year, range). When the user select an item in a granularity is selecting that range of time, e.g. when the user select a day, the range start of the day (30/07/2025 00:00:00) to the end of the day (30/07/2025 23:59:59) is selected.",
           "The component allows you to define the available granularities for the user (if not defined the default ones is day).",
           "The component also allows you to define presets that will be displayed in the component. Check the presets section for more information.",
           "Note the value and the default value are an object with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
