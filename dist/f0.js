@@ -1,5 +1,5 @@
-import { C as v, L as ye, c as Ce, P as J, a as p, f as we, g as A, A as Ne, B as Le, b as Pe, d as Se, e as Fe, V as ke, h as D, i as Y, j as X, k as Te, l as K, S as Q, m as Z, n as Me, O as De, o as ee, p as Ie, q as Be, r as ae, s as Re, F as re, t as Oe, u as $e, v as Ee, D as _e, w as je, x as Ve, y as ze, z as te, E as L, U as se, G as Ae, H as He, I as H, J as qe, K as oe, M as We, N as Ge, Q as Ue, R as Je, T as Ye, W as Xe, X as Ke, Y as Qe, Z as Ze, _ as ea, $ as aa, a0 as ra } from "./hooks-BwgEsacf.js";
-import { aB as rr, a1 as tr, aD as sr, aM as or, a2 as lr, a3 as nr, a4 as ir, a5 as dr, a6 as cr, a7 as ur, a8 as fr, a9 as mr, ab as pr, ac as gr, ad as hr, ae as vr, aI as xr, ag as br, ah as yr, ai as Cr, aj as wr, am as Nr, an as Lr, ao as Pr, ap as Sr, ar as Fr, af as kr, aq as Tr, al as Mr, aJ as Dr, aC as Ir, aw as Br, az as Rr, av as Or, aN as $r, au as Er, at as _r, aa as jr, ak as Vr, as as zr, ax as Ar, aE as Hr, aF as qr, aG as Wr, aO as Gr, ay as Ur, aH as Jr, aL as Yr, aA as Xr, aK as Kr } from "./hooks-BwgEsacf.js";
+import { C as v, L as ye, c as Ce, P as J, a as g, f as we, g as A, A as Ne, B as Le, b as Pe, d as Se, e as Fe, V as ke, h as D, i as Y, j as X, k as Te, l as K, S as Q, m as Z, n as Me, O as De, o as ee, p as Ie, q as Be, r as ae, s as Re, F as re, t as Oe, u as $e, v as Ee, D as _e, w as je, x as Ve, y as ze, z as te, E as L, U as se, G as Ae, H as He, I as H, J as qe, K as oe, M as We, N as Ge, Q as Ue, R as Je, T as Ye, W as Xe, X as Ke, Y as Qe, Z as Ze, _ as ea, $ as aa, a0 as ra } from "./hooks-BwgEsacf.js";
+import { aB as rr, a1 as tr, aD as sr, aM as or, a2 as lr, a3 as nr, a4 as ir, a5 as dr, a6 as cr, a7 as ur, a8 as fr, a9 as mr, ab as gr, ac as pr, ad as hr, ae as vr, aI as xr, ag as br, ah as yr, ai as Cr, aj as wr, am as Nr, an as Lr, ao as Pr, ap as Sr, ar as Fr, af as kr, aq as Tr, al as Mr, aJ as Dr, aC as Ir, aw as Br, az as Rr, av as Or, aN as $r, au as Er, at as _r, aa as jr, ak as Vr, as as zr, ax as Ar, aE as Hr, aF as qr, aG as Wr, aO as Gr, ay as Ur, aH as Jr, aL as Yr, aA as Xr, aK as Kr } from "./hooks-BwgEsacf.js";
 import { jsx as e, jsxs as c, Fragment as E } from "react/jsx-runtime";
 import * as _ from "react";
 import ta, { useState as x, forwardRef as y, createElement as q, useRef as le, useImperativeHandle as sa, Children as oa, useEffect as ne, createContext as la } from "react";
@@ -290,7 +290,7 @@ Defaulting to \`null\`.`;
 var fe = ie, ma = ce;
 const me = _.forwardRef(({ className: a, value: r, ...t }, s) => e(fe, {
   ref: s,
-  className: p("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", a),
+  className: g("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", a),
   ...t,
   children: e(ma, {
     className: "h-full w-full flex-1 transition-all",
@@ -301,7 +301,7 @@ const me = _.forwardRef(({ className: a, value: r, ...t }, s) => e(fe, {
   })
 }));
 me.displayName = fe.displayName;
-const pa = ({ value: a, max: r = 100, label: t, color: s }, o) => {
+const ga = ({ value: a, max: r = 100, label: t, color: s }, o) => {
   const n = s ? A(s) : A("categorical-1"), i = a / r * 100;
   return c("div", {
     className: "flex items-center space-x-2",
@@ -322,7 +322,7 @@ const pa = ({ value: a, max: r = 100, label: t, color: s }, o) => {
       children: t
     })]
   });
-}, ga = we(pa), ja = v(
+}, pa = we(ga), ja = v(
   {
     name: "AreaChart",
     type: "info"
@@ -363,7 +363,7 @@ const pa = ({ value: a, max: r = 100, label: t, color: s }, o) => {
     name: "ProgressBarChart",
     type: "info"
   },
-  ga
+  pa
 ), $ = ({ count: a, list: r }) => {
   const [t, s] = x(!1), o = e(D, {
     label: `+${a}`
@@ -396,7 +396,7 @@ const pa = ({ value: a, max: r = 100, label: t, color: s }, o) => {
   }) : o;
 };
 $.displayName = "ChipCounter";
-const pe = ({ chips: a, max: r = 4, remainingCount: t, layout: s = "compact" }) => {
+const ge = ({ chips: a, max: r = 4, remainingCount: t, layout: s = "compact" }) => {
   if (s === "fill")
     return e(De, {
       items: a,
@@ -423,8 +423,8 @@ const pe = ({ chips: a, max: r = 4, remainingCount: t, layout: s = "compact" }) 
     })]
   });
 };
-pe.displayName = "F0ChipList";
-const Ga = Me("F0ChipList", pe), O = ee({
+ge.displayName = "F0ChipList";
+const Ga = Me("F0ChipList", ge), O = ee({
   base: "text-base text-f1-foreground",
   variants: {
     variant: {
@@ -492,7 +492,7 @@ const Ga = Me("F0ChipList", pe), O = ee({
       lines: typeof n == "number" ? n : 1,
       noTooltip: i,
       tag: m,
-      className: p(O({
+      className: g(O({
         variant: r,
         align: t
       }), s),
@@ -504,7 +504,7 @@ const Ga = Me("F0ChipList", pe), O = ee({
     const b = Be(a);
     return q(m, {
       ...l,
-      className: p(O({
+      className: g(O({
         variant: r,
         align: t
       }), s),
@@ -516,7 +516,7 @@ const Ga = Me("F0ChipList", pe), O = ee({
   }
   return q(m, {
     ...l,
-    className: p(O({
+    className: g(O({
       variant: r,
       align: t
     }), s),
@@ -532,7 +532,7 @@ const va = y((a, r) => e(z, {
 va.displayName = "F0Heading";
 const xa = y((a, r) => e(z, {
   ref: r,
-  markdown: !0,
+  markdown: a.markdown ?? !0,
   ...a
 }));
 xa.displayName = "F0Text";
@@ -582,19 +582,19 @@ const ba = {
     ref: n,
     className: "h-full",
     children: c("div", {
-      className: p("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", o && "md:sticky md:top-0 md:max-h-full"),
+      className: g("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", o && "md:sticky md:top-0 md:max-h-full"),
       children: [e("main", {
-        className: p("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", o ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", s === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
+        className: g("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", o ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", s === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
         children: r
       }), e(wa, {
         sticky: o,
-        className: p("order-1", s === "right" ? "md:order-1" : "md:order-3"),
+        className: g("order-1", s === "right" ? "md:order-1" : "md:order-3"),
         children: t
       })]
     })
   });
 }), wa = ({ children: a, className: r }) => e("aside", {
-  className: p("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", r),
+  className: g("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", r),
   children: a
 }), Na = ee({
   base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
@@ -603,25 +603,25 @@ const ba = {
       narrow: "max-w-screen-lg"
     }
   }
-}), ge = ta.forwardRef(({ children: a, variant: r, className: t, ...s }, o) => e(ae, {
+}), pe = ta.forwardRef(({ children: a, variant: r, className: t, ...s }, o) => e(ae, {
   layout: "standard",
   children: e("section", {
     ref: o,
-    className: p("relative flex-1 overflow-auto", t),
+    className: g("relative flex-1 overflow-auto", t),
     ...s,
     children: e("div", {
-      className: p(Na({
+      className: g(Na({
         variant: r
       })),
       children: a
     })
   })
 }));
-ge.displayName = "StandardLayout";
+pe.displayName = "StandardLayout";
 const Ua = v({
   name: "StandardLayout",
   type: "layout"
-}, ge), Ja = v({
+}, pe), Ja = v({
   name: "TwoColumnLayout",
   type: "layout"
 }, Ca), Ya = v({
@@ -643,7 +643,7 @@ const Ua = v({
   })]
 }), he = y(({ title: a, image: r, benefits: t, actions: s, withShadow: o = !0, module: n, moduleName: i, tag: d }, l) => c("div", {
   ref: l,
-  className: p("bg-white flex flex-row rounded-xl border border-f1-border-secondary", o && "shadow-md"),
+  className: g("bg-white flex flex-row rounded-xl border border-f1-border-secondary", o && "shadow-md"),
   children: [e("div", {
     className: "aspect-auto flex-shrink-0 overflow-hidden rounded-xl py-1 pl-1",
     children: e("img", {
@@ -724,15 +724,15 @@ function Sa({ isOpen: a, onClose: r, title: t, children: s, module: o, portalCon
   });
 }
 function Xa({ isOpen: a, onClose: r, title: t, image: s, benefits: o, errorMessage: n, successMessage: i, loadingState: d, nextSteps: l, closeLabel: f, primaryAction: m, modalTitle: b, modalModule: P, secondaryAction: u, portalContainer: C, tag: F }) {
-  const [B, k] = x(a), [w, N] = x(null), [S, g] = x(!1), T = async () => {
+  const [B, k] = x(a), [w, N] = x(null), [S, p] = x(!1), T = async () => {
     if (m != null && m.onClick) {
-      g(!0);
+      p(!0);
       try {
         await m.onClick(), k(!1), N("success");
       } catch {
         N("error");
       } finally {
-        g(!1);
+        p(!1);
       }
     }
   }, M = () => {
@@ -888,7 +888,7 @@ const ka = y(function({ primaryAction: r, secondaryAction: t, ...s }, o) {
 });
 ka.displayName = "UpsellingBanner";
 function Ka({ isOpen: a, setIsOpen: r, label: t, variant: s = "promote", size: o = "md", showIcon: n = !0, side: i = "right", align: d = "center", icon: l = Ge, mediaUrl: f, title: m, description: b, width: P = "300px", trackVisibility: u, actions: C, onClick: F, hideLabel: B = !1 }) {
-  const [k, w] = x(!1), [N, S] = x(null), [g, T] = x(null), M = (h) => {
+  const [k, w] = x(!1), [N, S] = x(null), [p, T] = x(null), M = (h) => {
     r(h), F && F();
   }, R = async (h) => {
     if (h.type === "upsell") {
@@ -935,14 +935,14 @@ function Ka({ isOpen: a, setIsOpen: r, label: t, variant: s = "promote", size: o
           showConfirmation: !1
         })
       })]
-    }), (g == null ? void 0 : g.type) === "upsell" && g.showConfirmation && N && e(se, {
+    }), (p == null ? void 0 : p.type) === "upsell" && p.showConfirmation && N && e(se, {
       open: !0,
       onClose: ve,
       success: N === "success",
-      errorMessage: g.errorMessage,
-      successMessage: g.successMessage,
-      nextSteps: g.nextSteps,
-      closeLabel: g.closeLabel,
+      errorMessage: p.errorMessage,
+      successMessage: p.successMessage,
+      nextSteps: p.nextSteps,
+      closeLabel: p.closeLabel,
       portalContainer: null
     })]
   });
@@ -958,7 +958,7 @@ const Ta = la(null), Ma = ({ children: a, fullScreen: r = !0 }) => {
     children: e("div", {
       ref: t,
       id: "f0-layout",
-      className: p({
+      className: g({
         "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]": r
       }),
       children: a
@@ -1022,8 +1022,8 @@ export {
   fr as F0AvatarIcon,
   mr as F0AvatarList,
   re as F0AvatarModule,
-  pr as F0AvatarPerson,
-  gr as F0AvatarTeam,
+  gr as F0AvatarPerson,
+  pr as F0AvatarTeam,
   hr as F0Card,
   vr as F0Checkbox,
   Ga as F0ChipList,
