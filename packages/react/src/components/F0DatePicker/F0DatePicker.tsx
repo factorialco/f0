@@ -46,7 +46,7 @@ export function F0DatePicker({
   )
 
   /**
-   * Returns a value rante in the correct granularity
+   * Returns a value range in the correct granularity
    */
   const toSafeRange = useCallback(
     (value: DatePickerValue | undefined) => {
