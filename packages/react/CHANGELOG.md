@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.241.2](https://github.com/factorialco/f0/compare/f0-react-v1.241.1...f0-react-v1.241.2) (2025-10-24)
+
+
+### Bug Fixes
+
+* truncate input value to maxLenght when the value is updated via prop ([#2816](https://github.com/factorialco/f0/issues/2816)) ([a75ffb6](https://github.com/factorialco/f0/commit/a75ffb6434d7ae06173b37691488f072965dbb96))
+
 ## [1.241.1](https://github.com/factorialco/f0/compare/f0-react-v1.241.0...f0-react-v1.241.1) (2025-10-23)
 
 
