@@ -79,8 +79,12 @@ export const useDataCollectionSource = <
 
         return [
           key,
-          filterType?.valueConverter
-            ? filterType.valueConverter(filter.defaultValue, filter, i18n)
+          filterType.valueConverter
+            ? filterType.valueConverter(
+                filter.defaultValue as never,
+                filter as never,
+                i18n
+              )
             : filter.defaultValue,
         ]
       })
