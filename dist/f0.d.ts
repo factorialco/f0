@@ -1679,6 +1679,7 @@ export declare const F0Text: ForwardRefExoticComponent<Omit<F0TextProps, "ref"> 
 export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
     variant?: (typeof _allowedVariants_2)[number];
     as?: TextTags;
+    markdown?: boolean;
 };
 
 export declare type FileAvatarVariant = Extract<AvatarVariant, {
@@ -3037,6 +3038,11 @@ declare interface TextProps extends Omit<default_2.HTMLAttributes<HTMLElement>, 
      * @default false
      */
     noEllipsisTooltip?: boolean;
+    /**
+     * Enable markdown parsing for content
+     * @default false
+     */
+    markdown?: boolean;
 }
 
 declare type TextTags = (typeof textTags)[number];
@@ -3511,15 +3517,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
