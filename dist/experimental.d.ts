@@ -855,7 +855,7 @@ export declare interface ButtonConfig {
     };
 }
 
-declare type ButtonInternalProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed" | "style"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed" | "style"> & DataAttributes_2 & {
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
@@ -1420,6 +1420,10 @@ declare type Data<R extends RecordType> = {
  * @template Filters - The available filter configurations
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
+
+declare interface DataAttributes_2 {
+    [key: `data-${string}`]: string | undefined;
+}
 
 export declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
@@ -2002,7 +2006,7 @@ declare type DropdownInternalProps = {
     align?: "start" | "end";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-} & DataAttributes;
+} & DataAttributes_2;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator;
 
@@ -3309,7 +3313,7 @@ export declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefi
 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes;
+} & DataAttributes_2;
 
 declare type NavigationProps = {
     previous?: {
@@ -4648,7 +4652,7 @@ export declare type SummaryType = "sum";
 
 export declare function Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, ...rest }: SwitchProps): JSX_2.Element;
 
-declare interface SwitchProps extends DataAttributes {
+declare interface SwitchProps extends DataAttributes_2 {
     /**
      * The title of the switch
      */
@@ -4691,7 +4695,7 @@ export declare type TabItem = {
     label: string;
     index?: boolean;
     variant?: "default" | "upsell";
-} & DataAttributes & ({
+} & DataAttributes_2 & ({
     href: string;
 } | {
     id: string;
@@ -5442,8 +5446,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -5451,8 +5455,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
     }
 }

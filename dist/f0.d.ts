@@ -429,7 +429,7 @@ export declare const Button: ForwardRefExoticComponent<ButtonProps & RefAttribut
 
 declare const Button_2: React_2.ForwardRefExoticComponent<ButtonProps_2 & React_2.RefAttributes<HTMLButtonElement>>;
 
-declare type ButtonInternalProps = Pick<ComponentProps<typeof Button_2>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed" | "style"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ComponentProps<typeof Button_2>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed" | "style"> & DataAttributes_2 & {
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
@@ -674,7 +674,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 
 export declare const CategoryBarChart: ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-declare interface CheckboxProps extends DataAttributes {
+declare interface CheckboxProps extends DataAttributes_2 {
     /**
      * The title of the checkbox
      */
@@ -881,6 +881,10 @@ export declare type Data<R extends RecordType> = {
  * @template Filters - The available filter configurations
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
+
+declare interface DataAttributes_2 {
+    [key: `data-${string}`]: string | undefined;
+}
 
 declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
@@ -2123,7 +2127,7 @@ declare type LinkContextValue = {
     component?: (props: LinkProps_2, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element;
 };
 
-export declare interface LinkProps extends LinkProps_2, VariantProps<typeof linkVariants>, DataAttributes {
+export declare interface LinkProps extends LinkProps_2, VariantProps<typeof linkVariants>, DataAttributes_2 {
     stopPropagation?: boolean;
 }
 
@@ -2271,7 +2275,7 @@ declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition 
 
 declare type NavigationItem = Pick<LinkProps_2, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes;
+} & DataAttributes_2;
 
 /**
  * Utility type to extract all possible paths from nested object.
@@ -3464,8 +3468,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -3473,8 +3477,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
     }
 }
