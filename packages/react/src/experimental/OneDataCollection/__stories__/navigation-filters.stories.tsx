@@ -153,3 +153,19 @@ export const WithPresets: Story = {
     },
   },
 }
+
+export const ListNavigation: Story = {
+  args: {
+    navigationFilters: {
+      list: {
+        type: "list-navigator",
+        defaultValue: "123",
+        options: [
+          { label: "123", value: "123" },
+          { label: "456", value: "456" },
+          { label: "789", value: "789" },
+        ],
+      },
+    },
+  },
+}
