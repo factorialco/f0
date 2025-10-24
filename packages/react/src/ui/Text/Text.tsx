@@ -60,7 +60,6 @@ export interface TextProps
 
   /**
    * Enable markdown parsing for content
-   * Supports basic markdown: bold, italic, links, headings, lists, etc.
    * @default false
    */
   markdown?: boolean

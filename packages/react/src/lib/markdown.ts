@@ -1,30 +1,24 @@
-import { Link } from "@/components/Actions/Link"
-import { ReactNode } from "react"
-import * as prod from "react/jsx-runtime"
-import type { Options } from "rehype-react"
-import rehypeReact from "rehype-react"
+import DOMPurify from "dompurify"
+import rehypeStringify from "rehype-stringify"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import { unified } from "unified"
 
-const options: Options = {
-  ...prod,
-  components: {
-    a: Link,
-  },
-}
-
 const PROCESSOR = unified()
   .use(remarkParse)
   .use(remarkRehype)
-  .use(rehypeReact, options)
+  .use(rehypeStringify)
 
 /**
  * Parses markdown content and returns sanitized HTML
  */
-export function parseMarkdown(content: string): ReactNode {
-  const result = PROCESSOR.processSync(content)
-  return result.result
+export function parseMarkdown(content: string): string {
+  const html = String(PROCESSOR.processSync(content))
+
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["strong", "b", "em", "i"],
+    KEEP_CONTENT: true,
+  })
 }
 
 /**

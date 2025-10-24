@@ -83,8 +83,7 @@ export const TextEllipsis: Story = {
 
 export const Markdown: Story = {
   args: {
-    content:
-      "This is a **bold** text and this is a [link](https://www.google.com).",
+    content: "This is a **bold** text and this is a *italic* text.",
     markdown: true,
   },
 }
@@ -92,7 +91,7 @@ export const Markdown: Story = {
 export const MarkdownWithEllipsis: Story = {
   args: {
     content:
-      "This is a **bold** text and this is a [link](https://www.google.com), this is a **bold** text and this is a [link](https://www.google.com), this is a **bold** text and this is a [link](https://www.google.com).",
+      "This is a **bold** text and this is a *italic* text and this is a **bold** text and this is a *italic* text.",
     markdown: true,
     ellipsis: true,
   },
