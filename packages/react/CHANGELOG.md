@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.242.1](https://github.com/factorialco/f0/compare/f0-react-v1.242.0...f0-react-v1.242.1) (2025-10-24)
+
+
+### Bug Fixes
+
+* export combochart ([#2876](https://github.com/factorialco/f0/issues/2876)) ([603a1d4](https://github.com/factorialco/f0/commit/603a1d4be22f43967a0e916bb8566b2692a6f9bb))
+
 ## [1.242.0](https://github.com/factorialco/f0/compare/f0-react-v1.241.2...f0-react-v1.242.0) (2025-10-24)
 
 
