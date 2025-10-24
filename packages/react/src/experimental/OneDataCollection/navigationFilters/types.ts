@@ -1,17 +1,19 @@
 import { TranslationsType } from "@/lib/providers/i18n"
 import {
   DateNavigatorFilterDefinition,
+  dateNavigatorFilterType,
   DateValue,
 } from "./filterTypes/DateNavigation/types"
 import type {
   ListNavigatorFilterDefinition,
+  listNavigatorFilterType,
   ListValue,
 } from "./filterTypes/ListNavigation/types"
 
 export type NavigationFilter<
   T,
+  FilterDef extends NavigationFilterDefinition,
   InitialValue = T,
-  FilterDef = NavigationFilterDefinition,
 > = {
   /**
    * Converts the initial value to the correct type for the filter.
@@ -35,18 +37,24 @@ export type NavigationFilter<
   ) => React.ReactNode
 }
 
-export type NavigationFilterDefinitionBase<T> = {
-  type: string
+export type NavigationFilterDefinitionBase<T, Type extends string> = {
+  type: Readonly<Type>
   defaultValue: T
 }
 
+export type NavigationFilterDefinitionMap = {
+  [dateNavigatorFilterType]: DateNavigatorFilterDefinition
+  [listNavigatorFilterType]: ListNavigatorFilterDefinition
+}
+
 export type NavigationFilterDefinition =
-  | DateNavigatorFilterDefinition
-  | ListNavigatorFilterDefinition
+  NavigationFilterDefinitionMap[keyof NavigationFilterDefinitionMap]
+
+export type NavigationFilterType = keyof NavigationFilterDefinitionMap
 
 export type NavigationFilterComponentProps<
   T,
-  FilterDef = NavigationFilterDefinition,
+  FilterDef extends NavigationFilterDefinition,
 > = {
   filter: FilterDef
   value: T

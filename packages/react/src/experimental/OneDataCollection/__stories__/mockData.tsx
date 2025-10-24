@@ -47,6 +47,7 @@ import {
   Upload,
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
+import { addDays } from "date-fns"
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
@@ -107,6 +108,16 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
     },
   },
 ]
+
+export const navigationFiltersMock = {
+  date: {
+    type: "date-navigator" as const,
+    defaultValue: new Date(),
+    granularity: ["day"],
+    min: new Date(),
+    max: addDays(new Date(), 1),
+  },
+}
 
 /**
  * MockDataCache - Simulates Apollo cache behavior with observable pattern
@@ -642,7 +653,7 @@ export const filterUsers = (
   users: MockUser[],
   filterValues: FiltersState<typeof filters>,
   sortingState: SortingsStateMultiple,
-  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>,
+  navigationFilters?: NavigationFiltersState<typeof navigationFiltersMock>,
   search?: string
 ) => {
   let filteredUsers = [...users]

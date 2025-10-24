@@ -1,5 +1,5 @@
 import React from "react"
-import { navigationFilterTypes } from "../../navigationFilters"
+import { getFilterDefinitionByType } from "../../navigationFilters"
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -26,13 +26,20 @@ export const NavigationFilters = <
     <>
       {navigationFilters &&
         Object.entries(navigationFilters).map(([key, filter]) => {
-          const filterDef = navigationFilterTypes[filter.type]
+          const filterDef = getFilterDefinitionByType(filter.type)
+
+          if (!filterDef) {
+            return null
+          }
+
+          /* as never is used as typescript can't infer the type correctly
+              when we use Object.entries */
           return (
             <React.Fragment key={key}>
               {filterDef.render({
-                filter: filter,
-                value: currentNavigationFilters[key]!,
-                onChange: (value) => {
+                filter: filter as never,
+                value: currentNavigationFilters[key]! as never,
+                onChange: (value: (typeof filter)["defaultValue"]) => {
                   onChangeNavigationFilters({
                     ...currentNavigationFilters,
                     [key]: value,

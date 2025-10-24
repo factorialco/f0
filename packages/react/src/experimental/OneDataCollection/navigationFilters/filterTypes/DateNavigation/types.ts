@@ -12,11 +12,13 @@ export type DateNavigationOptions = {
   hideGoToCurrent?: boolean
 }
 
+export const dateNavigatorFilterType = "date-navigator" as const
+
 export type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<
-  Date | DateRange | DateValue
-> & {
-  type: "date-navigator"
-} & DateNavigationOptions
+  Date | DateRange | DateValue,
+  typeof dateNavigatorFilterType
+> &
+  DateNavigationOptions
 
 export type DateValue = {
   // Represents the selected value in a date-time range, e.g  for a day "2021-01-01T00:00:00Z - 2021-01-07T23:59:59Z"

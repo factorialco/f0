@@ -1,9 +1,9 @@
 import { Button } from "@/components/Actions/Button"
 import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { Select } from "@/experimental/Forms/Fields/Select"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/ui/Select"
 import { forwardRef, useState } from "react"
 
 interface ListNavigationOption {
@@ -58,28 +58,22 @@ export const F0ListNavigation = forwardRef<
         )}
 
         <Select
+          label="Navigation"
+          hideLabel
           value={value}
-          onValueChange={onChange}
+          onChange={onChange}
           open={isOpen}
           onOpenChange={setIsOpen}
+          options={options}
         >
-          <SelectTrigger asChild>
-            <ButtonInternal
-              size="sm"
-              variant="ghost"
-              label={selectedItem?.label}
-              onClick={() => {}}
-              disabled={disabled}
-              className={cn(isOpen && "bg-f1-background-secondary-hover")}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {options?.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
+          <ButtonInternal
+            size="sm"
+            variant="ghost"
+            label={selectedItem?.label}
+            onClick={() => {}}
+            disabled={disabled}
+            className={cn(isOpen && "bg-f1-background-secondary-hover")}
+          />
         </Select>
 
         {hideNavigation ? null : (
