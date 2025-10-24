@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.243.0](https://github.com/factorialco/f0/compare/f0-react-v1.242.1...f0-react-v1.243.0) (2025-10-24)
+
+
+### Features
+
+* component F0DatePicker ([#2840](https://github.com/factorialco/f0/issues/2840)) ([a650572](https://github.com/factorialco/f0/commit/a650572d05a3cb5f7f82014cdf6a5fc3485f0f80))
+
 ## [1.242.1](https://github.com/factorialco/f0/compare/f0-react-v1.242.0...f0-react-v1.242.1) (2025-10-24)
 
 
