@@ -14,6 +14,7 @@ import { ReactElement, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
+import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
@@ -280,6 +281,7 @@ export function PageHeader({
         )}
         <div>
           <OneSwitch />
+          <OnePromotionSwitch />
         </div>
       </div>
     </div>

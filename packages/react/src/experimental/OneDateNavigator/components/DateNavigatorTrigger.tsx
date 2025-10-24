@@ -181,6 +181,7 @@ const DateNavigatorTrigger = forwardRef<
             label={label}
             onClick={onClick}
             disabled={disabled}
+            style={{ minWidth: granularity?.toStringMaxWidth() }}
             className={cn(highlighted && "bg-f1-background-secondary-hover")}
           />
           {navigation && (

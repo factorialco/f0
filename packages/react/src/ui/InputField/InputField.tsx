@@ -12,6 +12,7 @@ import {
   forwardRef,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -160,11 +161,13 @@ export type InputFieldProps<T> = {
   readonly?: boolean
   clearable?: boolean
   role?: string
+  inputRef?: React.Ref<unknown>
   "aria-controls"?: AriaAttributes["aria-controls"]
   "aria-expanded"?: AriaAttributes["aria-expanded"]
   onClear?: () => void
   onFocus?: () => void
   onBlur?: () => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   canGrow?: boolean
   children: React.ReactNode & {
     onFocus?: () => void
@@ -268,8 +271,12 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     useEffect(() => {
-      setLocalValue(value)
-    }, [value])
+      setLocalValue(
+        maxLength && value && lengthProvider(value) > maxLength
+          ? value?.substring(0, maxLength)
+          : value
+      )
+    }, [value, lengthProvider, maxLength])
 
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -291,6 +298,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const handleClear = () => {
       handleChange(emptyValue)
+      props.onClear?.()
     }
 
     const handleClickContent = () => {
@@ -324,15 +332,24 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
-    const inputRef = useRef<HTMLElement>(null)
+    const localInputRef = useRef<HTMLElement>(null)
+    const inputRef = useMemo(
+      () => props.inputRef ?? localInputRef,
+      [props.inputRef]
+    )
 
     useEffect(() => {
       if (isAutofilled && !intervalRef.current) {
         intervalRef.current = setInterval(() => {
-          if (inputRef.current) {
+          // Gets the element depending on the type of the ref
+          const element =
+            typeof inputRef === "object" && inputRef?.current
+              ? (inputRef.current as HTMLElement)
+              : null
+          if (element) {
             const stillAutofilled =
-              inputRef.current.matches(":-webkit-autofill") ||
-              inputRef.current.matches(":autofill")
+              element.matches(":-webkit-autofill") ||
+              element.matches(":autofill")
             if (!stillAutofilled) {
               setIsAutofilled(false)
               if (intervalRef.current) {
@@ -351,7 +368,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           intervalRef.current = null
         }
       }
-    }, [isAutofilled])
+    }, [isAutofilled, inputRef])
     /**********************/
 
     return (
@@ -487,8 +504,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {(clearable || append || appendTag || loading) && (
               <div
                 className={cn(
-                  "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5",
+                  "flex h-fit items-center gap-1.5 self-center pr-[3px]",
+                  size === "md" && "pr-[7px]",
                   "relative"
                 )}
               >
@@ -501,9 +518,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                          "mt-pxflex mr-px h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
+                          "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
+                        type="button"
                         tabIndex={0}
                         data-testid="clear-button"
                         onClick={(e) => {
@@ -511,20 +529,18 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           handleClear()
                         }}
                       >
-                        <F0Icon icon={CrossedCircle} color="bold" size="md" />
+                        <F0Icon
+                          icon={CrossedCircle}
+                          color="default"
+                          size="md"
+                        />
                       </motion.button>
                     )}
                   </AnimatePresence>
                 )}
 
                 {(append || appendTag) && (
-                  <div
-                    className={cn(
-                      "mt-px flex h-fit items-center",
-                      size === "sm" && "h-[24px] pr-0.5",
-                      size === "md" && "pr-0.1 h-[25px]"
-                    )}
-                  >
+                  <div className="flex min-h-6 min-w-6 items-center justify-center self-center">
                     {append}
                     {appendTag && <AppendTag text={appendTag} />}
                   </div>
@@ -541,12 +557,15 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                             "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
                             "via-[#FFFFFF] via-60% dark:via-[#192231]",
                             "to-transparent to-100%",
-                            size === "md" && "right-3 top-2.5"
+                            size === "md" && "right-3"
                           ),
                         inputElementVariants({ size })
                       )}
                       style={{
-                        right: loadingIndicator?.offset,
+                        right:
+                          typeof loadingIndicator?.offset === "number"
+                            ? loadingIndicator?.offset + (size === "md" ? 6 : 0)
+                            : undefined,
                       }}
                     >
                       <Spinner size="small" className="mt-[1px]" />

@@ -203,6 +203,7 @@ const meta: Meta = {
         "  avatar?: AvatarVariant\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
+        "  disabled?: boolean\n" +
         "}```",
     },
     onChange: {
@@ -243,6 +244,18 @@ const meta: Meta = {
     disabled: false,
     showSearchBox: false,
   },
+  decorators: [
+    (Story) => (
+      <div
+        className="w-[350px]"
+        onClick={() => {
+          console.log("click was received in elements below the select")
+        }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof SelectWithHooks>
 
@@ -261,6 +274,25 @@ export const WithPreselectedValue: Story = {
   args: {
     label: "Select a theme",
     value: "dark",
+  },
+}
+
+export const WithDisabledOptions: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    options: items.map((item, index) => {
+      return {
+        value: item.id,
+        label: item.name,
+        icon: icons[item.id],
+        description: item.description,
+        tag: item.tag,
+        item,
+        disabled: index === 1,
+      }
+    }),
   },
 }
 

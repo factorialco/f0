@@ -76,7 +76,7 @@ export const Row = <
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "table")
+    return renderProperty(item, property, "list")
   }
 
   const { actions } = useI18n()
@@ -97,7 +97,7 @@ export const Row = <
   return (
     <div
       className={cn(
-        "relative flex w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:p-2 md:pl-3 md:pr-4",
+        "relative flex min-h-[64px] w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:p-2 md:pl-3 md:pr-4",
         "group after:absolute after:inset-y-0 after:-right-px after:z-10 after:hidden after:h-full after:w-10 after:bg-gradient-to-r after:from-transparent after:via-f1-background after:via-75% after:to-f1-background after:transition-all after:content-[''] hover:after:via-[#F5F6F8] hover:after:to-[#F5F6F8] dark:hover:after:via-[#192231] dark:hover:after:to-[#192231] md:after:block hover:md:bg-f1-background-hover"
       )}
     >
@@ -140,13 +140,19 @@ export const Row = <
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
         {(fields || [])
           .filter((field) => !field.hide?.(item))
-          .map((field) => (
-            <div key={String(field.label)}>
-              <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
-                {renderCell(item, field)}
+          .map((field) => {
+            const content = renderCell(item, field)
+
+            if (!content) return null
+
+            return (
+              <div key={String(field.label)}>
+                <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
+                  {content}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
       </div>
       {source.itemActions && (
         <>

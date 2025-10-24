@@ -42,6 +42,7 @@ type ProductModalProps = {
   primaryAction?: Action
   secondaryAction?: Action
   portalContainer?: HTMLElement | null
+  showResponseDialog?: boolean
 }
 
 type Action = {
@@ -71,6 +72,7 @@ export function ProductModal({
   secondaryAction,
   portalContainer,
   tag,
+  showResponseDialog = true,
 }: ProductModalProps) {
   const [isModalOpen, setIsOpen] = useState(isOpen)
   const [responseStatus, setResponseStatus] = useState<ResponseStatus>(null)
@@ -82,9 +84,13 @@ export function ProductModal({
       try {
         await primaryAction.onClick()
         setIsOpen(false)
-        setResponseStatus("success")
+        if (showResponseDialog) {
+          setResponseStatus("success")
+        }
       } catch {
-        setResponseStatus("error")
+        if (showResponseDialog) {
+          setResponseStatus("error")
+        }
       } finally {
         setInternalLoading(false)
       }
@@ -141,7 +147,7 @@ export function ProductModal({
         </div>
       </CustomModal>
 
-      {responseStatus && (
+      {responseStatus && showResponseDialog && (
         <UpsellRequestResponseDialog
           open={true}
           onClose={() => {

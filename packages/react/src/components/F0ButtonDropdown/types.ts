@@ -24,6 +24,10 @@ export type ButtonDropdownItem<T = string> = {
    * @default false
    */
   critical?: boolean
+  /**
+   * The description of the item.
+   */
+  description?: string
 }
 
 export type F0ButtonDropdownProps<T = string> = {

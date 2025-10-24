@@ -211,3 +211,68 @@ export const MultiplePrimaryActions: Story = {
     ],
   },
 }
+
+export const WithDescription: Story = {
+  args: {
+    ...Default.args,
+    primaryActions: [
+      {
+        label: "Export",
+        onClick: fn(),
+        icon: Upload,
+      },
+      {
+        label: "Export to Excel",
+        onClick: fn(),
+        icon: Upload,
+        description: "Export to Excel",
+      },
+      {
+        label: "Export to PDF",
+        onClick: fn(),
+        icon: Upload,
+        description: "Export to PDF",
+      },
+      { type: "separator" },
+      {
+        label: "Export to CSV",
+        onClick: fn(),
+        icon: Upload,
+        description: "Export to CSV",
+      },
+      {
+        label: "Export to JSON",
+        onClick: fn(),
+        icon: Upload,
+        description: "Export to JSON",
+      },
+    ],
+    secondaryActions: [
+      {
+        label: "Share",
+        onClick: fn(),
+        icon: Share,
+      },
+      {
+        label: "Duplicate",
+        onClick: fn(),
+        icon: LayersFront,
+        description: "Duplicate items",
+      },
+      {
+        label: "Export to CSV",
+        onClick: fn(),
+        icon: Upload,
+        description: "Export to CSV",
+      },
+      { type: "separator" },
+      {
+        label: "Delete",
+        onClick: fn(),
+        icon: Delete,
+        description: "Delete items",
+        critical: true,
+      },
+    ],
+  },
+}

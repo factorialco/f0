@@ -1,6 +1,6 @@
 import { F0Icon } from "@/components/F0Icon/F0Icon"
+import { DropdownOpen } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { ChevronDown } from "lucide-react"
 
 export const Arrow = ({
   disabled,
@@ -18,10 +18,11 @@ export const Arrow = ({
   return (
     <div
       className={cn(
-        "rounded-2xs bg-f1-background-secondary p-0.5",
-        "flex h-fit items-center justify-center",
         !disabled && "cursor-pointer",
-        size === "sm" ? "h-5 w-5" : "h-7 w-6",
+        "origin-center transition-transform duration-200",
+        "flex items-center justify-center",
+        open && "rotate-180",
+        size === "md" && "scale-110",
         className
       )}
       onClick={() => {
@@ -29,23 +30,15 @@ export const Arrow = ({
         onChange?.(!open)
       }}
     >
-      <div
+      <F0Icon
+        icon={DropdownOpen}
+        size="lg"
         className={cn(
-          "origin-center transition-transform duration-200",
-          "flex items-center justify-center",
-          open && "rotate-180"
+          "rounded-2xs bg-f1-background-secondary p-0.5 transition-transform duration-200",
+          open && "rotate-180",
+          !disabled && "cursor-pointer"
         )}
-      >
-        <F0Icon
-          icon={ChevronDown}
-          size="sm"
-          className={cn(
-            "rounded-2xs bg-f1-background-secondary p-0.5 transition-transform duration-200",
-            open && "rotate-180",
-            !disabled && "cursor-pointer"
-          )}
-        />
-      </div>
+      />
     </div>
   )
 }

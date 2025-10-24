@@ -257,10 +257,14 @@ const OneDataCollectionComp = <
   /**
    * Bulk actions
    */
+  type MappedBulkAction =
+    | (BulkActionDefinition & { onClick: () => void })
+    | { type: "separator" }
+
   const [bulkActions, setBulkActions] = useState<
     | {
-        primary?: BulkActionDefinition[]
-        secondary?: BulkActionDefinition[]
+        primary?: MappedBulkAction[]
+        secondary?: MappedBulkAction[]
       }
     | { warningMessage: string }
     | undefined
@@ -313,15 +317,23 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
-    const mapBulkActions = (action: BulkActionDefinition) => ({
-      ...action,
-      onClick: () => {
-        onBulkAction?.(action.id, selectedItems, clearSelectedItems)
-        if (!action.keepSelection) {
-          clearSelectedItems()
-        }
-      },
-    })
+    const mapBulkActions = (
+      action: BulkActionDefinition | { type: "separator" }
+    ): MappedBulkAction => {
+      if ("type" in action && action.type === "separator") {
+        return { type: "separator" as const }
+      }
+      const bulkAction = action as BulkActionDefinition
+      return {
+        ...bulkAction,
+        onClick: () => {
+          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems)
+          if (!bulkAction.keepSelection) {
+            clearSelectedItems()
+          }
+        },
+      }
+    }
 
     if (bulkActions) {
       if ("primary" in bulkActions) {

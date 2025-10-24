@@ -2,6 +2,7 @@ import { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
@@ -126,3 +127,35 @@ export type VisualizationProps<
     >
   >
 }
+
+/**
+ * Returns the custom visualization props based on the data collection source.
+ *
+ * @template Source - The data collection source
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+type InferRecord<S> = S extends {
+  dataAdapter: DataCollectionDataAdapter<infer R, any, any>
+}
+  ? R
+  : never
+
+type InferFilters<S> = S extends {
+  dataAdapter: DataCollectionDataAdapter<any, infer F, any>
+}
+  ? F
+  : never
+
+export type CustomVisualizationProps<
+  Source extends { dataAdapter: DataCollectionDataAdapter<any, any, any> },
+> = {
+  onSelectItems: OnSelectItemsCallback<
+    InferRecord<Source>,
+    InferFilters<Source>
+  >
+  onLoadData: OnLoadDataCallback<InferRecord<Source>, InferFilters<Source>>
+  onLoadError: OnLoadErrorCallback
+  source: Source
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

@@ -22,7 +22,6 @@ import {
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import {
   CERTIFICATIONS_MOCK,
-  DEPARTMENTS_MOCK,
   DOT_TAG_COLORS_MOCK,
   EDUCATION_MOCK,
   getMockValue,
@@ -41,6 +40,7 @@ import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import type { CustomVisualizationProps } from "../visualizations/collection"
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -827,6 +827,7 @@ export const WithSelectableAndBulkActions: Story = {
               icon: Download,
               id: "download",
             },
+            { type: "separator" },
             {
               label: allSelected ? "Delete All" : "Delete",
               icon: Delete,
@@ -913,21 +914,19 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
   ),
 }
 
+const useJsonDataSource = () =>
+  useDataCollectionSource({
+    filters,
+    sortings,
+    presets: filterPresets,
+    dataAdapter: {
+      fetchData: createPromiseDataFetch(),
+    },
+  })
+
 const JsonVisualization = ({
   source,
-}: {
-  source: ReturnType<
-    typeof useDataCollectionSource<
-      (typeof mockUsers)[number],
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<(typeof mockUsers)[number]>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<(typeof mockUsers)[number]>
-    >
-  >
-}) => {
+}: CustomVisualizationProps<ReturnType<typeof useJsonDataSource>>) => {
   const { data, isLoading } = useDataCollectionData(source)
 
   if (isLoading) {
@@ -947,39 +946,21 @@ const JsonVisualization = ({
 
 export const WithCustomJsonView: Story = {
   render: () => {
-    type MockUser = (typeof mockUsers)[number]
-    type MockActions = ItemActionsDefinition<MockUser>
+    const jsonDataSource = useJsonDataSource()
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
     })
 
-    const dataSource = useDataCollectionSource<
-      MockUser,
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      MockActions,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >({
-      filters,
-      sortings,
-      presets: filterPresets,
-      dataAdapter: {
-        fetchData: createPromiseDataFetch(),
-      },
-    })
-
     return (
       <OneDataCollection
-        source={dataSource}
+        source={jsonDataSource}
         visualizations={[
           {
             type: "custom",
             label: "JSON View",
             icon: Ai,
-            component: ({ source }) => <JsonVisualization source={source} />,
+            component: (props) => <JsonVisualization {...props} />,
           },
           mockVisualizations.table,
           mockVisualizations.card,
@@ -1430,354 +1411,6 @@ export const WithAdvancedActions: Story = {
               ],
             },
           },
-        ]}
-      />
-    )
-  },
-}
-
-// Search functionality demonstration
-export const WithSyncSearch: Story = {
-  render: () => {
-    const mockUserData = [
-      {
-        id: "user-1",
-        name: "John Doe",
-        email: "john@example.com",
-        role: "Senior Engineer",
-        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 0),
-        status: "active",
-        isStarred: true,
-      },
-      {
-        id: "user-2",
-        name: "Jane Smith",
-        email: "jane@example.com",
-        role: "Product Manager",
-        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 1),
-        status: "active",
-        isStarred: false,
-      },
-      {
-        id: "user-3",
-        name: "Alice Johnson",
-        email: "alice@example.com",
-        role: "UX Designer",
-        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 2),
-        status: "active",
-        isStarred: false,
-      },
-      {
-        id: "user-4",
-        name: "Bob Brown",
-        email: "bob@example.com",
-        role: "Developer",
-        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 0),
-        status: "inactive",
-        isStarred: true,
-      },
-      {
-        id: "user-5",
-        name: "Emma Wilson",
-        email: "emma@example.com",
-        role: "Marketing Lead",
-        department: getMockValue(DEPARTMENTS_MOCK as unknown as string[], 3),
-        status: "active",
-        isStarred: false,
-      },
-    ]
-
-    // TODO allow to infer the type of the data source
-    const source = useDataCollectionSource<
-      (typeof mockUserData)[number],
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<(typeof mockUserData)[number]>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<(typeof mockUserData)[number]>
-    >({
-      filters,
-      sortings,
-      search: {
-        enabled: true,
-        // Set sync to true to see immediate search results without debounce
-        sync: true,
-      },
-      dataAdapter: {
-        fetchData: ({ filters, sortings, search }) => {
-          // Store mock data in a local variable for filtering
-
-          // Apply search filter if search term is provided
-          let filteredUsers = [...mockUserData]
-
-          if (search) {
-            const searchLower = search.toLowerCase()
-            filteredUsers = filteredUsers.filter(
-              (user) =>
-                user.name.toLowerCase().includes(searchLower) ||
-                user.email.toLowerCase().includes(searchLower) ||
-                user.role.toLowerCase().includes(searchLower) ||
-                user.department.toLowerCase().includes(searchLower)
-            )
-            console.log(
-              `Searching for: "${search}" - Found ${filteredUsers.length} results`
-            )
-          }
-
-          // Apply department filter if provided
-          const departmentFilter = filters.department as string[] | undefined
-          if (departmentFilter && departmentFilter.length > 0) {
-            filteredUsers = filteredUsers.filter((user) =>
-              departmentFilter.includes(user.department)
-            )
-          }
-
-          // Apply sorting if provided
-          if (sortings) {
-            sortings.forEach(({ field, order }) => {
-              filteredUsers.sort((a, b) => {
-                const aValue = a[field as keyof (typeof mockUserData)[number]]
-                const bValue = b[field as keyof (typeof mockUserData)[number]]
-
-                if (typeof aValue === "string" && typeof bValue === "string") {
-                  return order === "asc"
-                    ? aValue.localeCompare(bValue)
-                    : bValue.localeCompare(aValue)
-                }
-
-                return 0
-              })
-            })
-          }
-
-          return { records: filteredUsers }
-        },
-      },
-    })
-
-    return (
-      <OneDataCollection
-        source={source}
-        visualizations={[
-          {
-            type: "table",
-            options: {
-              columns: [
-                {
-                  label: "Name",
-                  render: (item) => item.name,
-                  sorting: "name",
-                },
-                {
-                  label: "Email",
-                  render: (item) => item.email,
-                  sorting: "email",
-                },
-                {
-                  label: "Role",
-                  render: (item) => item.role,
-                  sorting: "role",
-                },
-                {
-                  label: "Department",
-                  render: (item) => item.department,
-                  sorting: "department",
-                },
-              ],
-            },
-          },
-          {
-            type: "card",
-            options: {
-              title: (item) => item.name,
-              cardProperties: [
-                {
-                  label: "Email",
-                  icon: Envelope,
-                  render: (item) => item.email,
-                },
-                {
-                  label: "Role",
-                  icon: Briefcase,
-                  render: (item) => item.role,
-                },
-                {
-                  label: "Department",
-                  icon: Building,
-                  render: (item) => item.department,
-                },
-                {
-                  label: "Teammates",
-                  icon: Person,
-                  render: (item) => ({
-                    type: "avatarList",
-                    value: {
-                      avatarList: [
-                        {
-                          type: "person",
-                          firstName: item.name,
-                          lastName: "Doe",
-                          src: "/avatars/person01.jpg",
-                        },
-                        {
-                          type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
-                          src: "/avatars/person04.jpg",
-                        },
-                        {
-                          type: "person",
-                          firstName: "Sergio",
-                          lastName: "Carracedo",
-                          src: "/avatars/person05.jpg",
-                        },
-                      ],
-                    },
-                  }),
-                },
-                {
-                  label: "Status",
-                  icon: CheckCircle,
-                  render: (item) => ({
-                    type: "status",
-                    value: {
-                      status:
-                        item.status === "active" ? "positive" : "critical",
-                      label:
-                        item.status.charAt(0).toUpperCase() +
-                        item.status.slice(1),
-                    },
-                  }),
-                },
-              ],
-            },
-          },
-        ]}
-      />
-    )
-  },
-}
-
-// Example with async search functionality
-export const WithAsyncSearch: Story = {
-  render: () => {
-    const mockVisualizations = getMockVisualizations({
-      frozenColumns: 0,
-    })
-
-    type MockUser = (typeof mockUsers)[number]
-    type MockActions = ItemActionsDefinition<MockUser>
-
-    const source = useDataCollectionSource<
-      MockUser,
-      typeof filters,
-      typeof sortings,
-      SummariesDefinition,
-      MockActions,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >({
-      filters,
-      sortings,
-      search: {
-        enabled: true,
-        // Set sync to false to simulate async search with debounce
-        sync: false,
-        // Set debounce time to 300ms
-        debounceTime: 300,
-      },
-      itemActions: (item) => [
-        {
-          label: "Edit",
-          icon: Pencil,
-          onClick: () => console.log(`Editing ${item.name}`),
-          description: "Modify user information",
-        },
-        {
-          label: "View Profile",
-          icon: Ai,
-          onClick: () => console.log(`Viewing ${item.name}'s profile`),
-        },
-        { type: "separator" },
-        {
-          label: item.isStarred ? "Remove Star" : "Star User",
-          icon: Star,
-          onClick: () => console.log(`Toggling star for ${item.name}`),
-          description: item.isStarred
-            ? "Remove from favorites"
-            : "Add to favorites",
-        },
-      ],
-      dataAdapter: {
-        fetchData: ({ filters, sortings, search }) => {
-          // Simulate an API call with a delay
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              const mockUserData = generateMockUsers(20)
-              let filteredUsers = [...mockUserData]
-
-              if (search) {
-                const searchLower = search.toLowerCase()
-                filteredUsers = filteredUsers.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(searchLower) ||
-                    user.email.toLowerCase().includes(searchLower) ||
-                    user.role.toLowerCase().includes(searchLower) ||
-                    user.department.toLowerCase().includes(searchLower)
-                )
-                console.log(
-                  `Async search for: "${search}" - Found ${filteredUsers.length} results`
-                )
-              }
-
-              // Apply department filter if provided
-              const departmentFilter = filters.department as
-                | string[]
-                | undefined
-              if (departmentFilter && departmentFilter.length > 0) {
-                filteredUsers = filteredUsers.filter((user) =>
-                  departmentFilter.includes(user.department)
-                )
-              }
-
-              // Apply sorting if provided
-              if (sortings) {
-                sortings.forEach(({ field, order }) => {
-                  const direction = order
-
-                  filteredUsers.sort((a, b) => {
-                    const aValue = a[field as keyof MockUser]
-                    const bValue = b[field as keyof MockUser]
-
-                    if (
-                      typeof aValue === "string" &&
-                      typeof bValue === "string"
-                    ) {
-                      return direction === "asc"
-                        ? aValue.localeCompare(bValue)
-                        : bValue.localeCompare(aValue)
-                    }
-
-                    return 0
-                  })
-                })
-              }
-
-              resolve({ records: filteredUsers })
-            }, 1000) // Simulate 1 second delay for API response
-          })
-        },
-      },
-    })
-
-    return (
-      <OneDataCollection
-        source={source}
-        visualizations={[
-          mockVisualizations.table,
-          mockVisualizations.card,
-          mockVisualizations.list,
         ]}
       />
     )

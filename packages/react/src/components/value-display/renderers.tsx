@@ -94,13 +94,13 @@ const renderIsRendererDefinition = (
 export const metadataRenderer: ValueDisplayRenderer = (
   def,
   context,
-  undefinedValue = ""
+  undefinedValue
 ): ReactNode => {
   const { type, value } = renderIsRendererDefinition(def)
     ? def
     : ({
         type: "text" as const,
-        value: def ?? "-",
+        value: def ?? undefinedValue,
       } satisfies ValueDisplayRendererDefinition)
 
   // Type assertion to ensure the renderer function is typed correctly as typescript can't infer the type correctly

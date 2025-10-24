@@ -1,12 +1,36 @@
 import { F0Icon } from "@/components/F0Icon"
-import { DropdownInternal } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import {
+  DropdownInternal,
+  DropdownItemSeparator,
+} from "@/experimental/Navigation/Dropdown/internal.tsx"
 import { ChevronDown } from "@/icons/app/index.ts"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Action } from "@/ui/Action/index.tsx"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants.ts"
 import { useMemo, useState } from "react"
-import { F0ButtonDropdownProps } from "./types.ts"
+import {
+  ButtonDropdownItem,
+  ButtonDropdownSize,
+  ButtonDropdownVariant,
+  F0ButtonDropdownProps,
+} from "./types.ts"
+
+export type F0DropdownButtonProps<T = string> = {
+  size?: ButtonDropdownSize
+  items: (ButtonDropdownItem<T> | DropdownItemSeparator)[]
+  variant?: ButtonDropdownVariant
+  value?: T
+  disabled?: boolean
+  loading?: boolean
+  onClick: (value: T, item: ButtonDropdownItem<T>) => void
+}
+
+function isButtonDropdownItem<T>(
+  item: ButtonDropdownItem<T> | DropdownItemSeparator
+): item is ButtonDropdownItem<T> {
+  return "value" in item
+}
 
 const F0ButtonDropdown = ({
   items,
@@ -17,28 +41,45 @@ const F0ButtonDropdown = ({
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
-  const localValue = useMemo(() => value || items[0].value, [value, items])
+  const selectableItems = useMemo(
+    () => items.filter(isButtonDropdownItem),
+    [items]
+  )
+
+  const localValue = useMemo(
+    () => value || selectableItems[0]?.value,
+    [value, selectableItems]
+  )
 
   const selectedItem = useMemo(
-    () => items.find((item) => item.value === localValue),
-    [localValue, items]
+    () => selectableItems.find((item) => item.value === localValue),
+    [localValue, selectableItems]
   )
 
   const handleClick = () => {
-    onClick(localValue, items.find((value) => value.value === localValue)!)
+    const item = selectableItems.find((item) => item.value === localValue)
+    if (item) {
+      onClick(localValue, item)
+    }
   }
 
   const dropdownItems = useMemo(
     () =>
       items
-        .filter((item) => item.value !== localValue)
-        .map((item) => ({
-          ...item,
-          onClick: () => {
-            onClick(item.value, item)
-            setIsOpen(false)
-          },
-        })),
+        .filter(
+          (item) => !isButtonDropdownItem(item) || item.value !== localValue
+        )
+        .map((item) =>
+          isButtonDropdownItem(item)
+            ? {
+                ...item,
+                onClick: () => {
+                  onClick(item.value, item)
+                  setIsOpen(false)
+                },
+              }
+            : item
+        ),
     [items, localValue, onClick]
   )
 

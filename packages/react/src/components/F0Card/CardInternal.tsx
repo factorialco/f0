@@ -244,7 +244,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 <div
                   className={cn(
                     "flex flex-col gap-0.5",
-                    compact && "flex-row flex-wrap gap-x-3 gap-y-0",
+                    compact && "gap-x-3 gap-y-0",
                     forceVerticalMetadata && "flex-col gap-y-0.5"
                   )}
                 >

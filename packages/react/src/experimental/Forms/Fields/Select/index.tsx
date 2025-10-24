@@ -20,7 +20,6 @@ import {
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
@@ -124,7 +123,7 @@ const SelectItem = <T extends string, R>({
   item: SelectItemObject<T, R>
 }) => {
   return (
-    <SelectItemPrimitive value={item.value}>
+    <SelectItemPrimitive value={item.value} disabled={item.disabled}>
       <div className="flex w-full items-start gap-1.5">
         {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
         {item.icon && (
@@ -321,6 +320,11 @@ const SelectComponent = forwardRef(function Select<
       if (value === undefined) {
         return undefined
       }
+
+      if (value === props.defaultItem?.value) {
+        return props.defaultItem
+      }
+
       for (const option of data.records) {
         const mappedOption = optionMapper(option)
         if (
@@ -332,7 +336,7 @@ const SelectComponent = forwardRef(function Select<
       }
       return undefined
     },
-    [data.records, optionMapper]
+    [data.records, optionMapper, props.defaultItem]
   )
 
   useEffect(() => {
@@ -532,17 +536,15 @@ const SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={size}
-                  className={cn(size === "sm" ? "" : "-translate-y-px")}
-                />
+                <Arrow open={openLocal} disabled={disabled} size={size} />
               }
             >
               <button
                 className="flex w-full items-center justify-between"
                 aria-label={label || placeholder}
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
               >
                 {selectedOption && <SelectValue item={selectedOption} />}
               </button>
@@ -571,6 +573,7 @@ const SelectComponent = forwardRef(function Select<
                 onFiltersChange={localSource.setCurrentFilters}
               />
             }
+            forceMinHeight={!!localSource.filters}
             onScrollBottom={handleScrollBottom}
             scrollMargin={10}
             isLoadingMore={isLoadingMore}
