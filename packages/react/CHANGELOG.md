@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.244.0](https://github.com/factorialco/f0/compare/f0-react-v1.243.0...f0-react-v1.244.0) (2025-10-24)
+
+
+### Features
+
+* **Icons:** add `Shield` component ([#2880](https://github.com/factorialco/f0/issues/2880)) ([81411d3](https://github.com/factorialco/f0/commit/81411d3628fed2e195212c0ac020fe8672ada171))
+
 ## [1.243.0](https://github.com/factorialco/f0/compare/f0-react-v1.242.1...f0-react-v1.243.0) (2025-10-24)
 
 
