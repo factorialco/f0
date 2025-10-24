@@ -13,10 +13,11 @@ const _allowedVariants = [
 export type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
   variant?: (typeof _allowedVariants)[number]
   as?: TextTags
+  markdown?: boolean
 }
 
 export const F0Text = forwardRef<HTMLElement, F0TextProps>((props, ref) => {
-  return <Text ref={ref} markdown={true} {...props} />
+  return <Text ref={ref} markdown={props.markdown ?? true} {...props} />
 })
 
 F0Text.displayName = "F0Text"

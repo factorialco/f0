@@ -13,6 +13,7 @@ const meta = {
       description: "The variant of the heading",
       table: {
         type: { summary: "string" },
+        defaultValue: { summary: "heading" },
       },
     },
     as: {
@@ -21,6 +22,14 @@ const meta = {
       description: "The HTML tag to render the heading as",
       table: {
         type: { summary: "string" },
+      },
+    },
+    ellipsis: {
+      control: "boolean",
+      description: "Whether to render the heading with ellipsis",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
   },

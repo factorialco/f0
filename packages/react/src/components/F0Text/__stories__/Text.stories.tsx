@@ -13,6 +13,7 @@ const meta = {
       description: "The variant of the text",
       table: {
         type: { summary: "string" },
+        defaultValue: { summary: "body" },
       },
     },
     as: {
@@ -21,6 +22,22 @@ const meta = {
       description: "The HTML tag to render the text as",
       table: {
         type: { summary: "string" },
+      },
+    },
+    ellipsis: {
+      control: "boolean",
+      description: "Whether to render the text with ellipsis",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    markdown: {
+      control: "boolean",
+      description: "Whether to render the text as markdown",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
       },
     },
   },
