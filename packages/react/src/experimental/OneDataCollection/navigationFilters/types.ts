@@ -1,10 +1,12 @@
 import { TranslationsType } from "@/lib/providers/i18n"
 import {
   DateNavigatorFilterDefinition,
+  dateNavigatorFilterType,
   DateValue,
 } from "./filterTypes/DateNavigation/types"
 import type {
   ListNavigatorFilterDefinition,
+  listNavigatorFilterType,
   ListValue,
 } from "./filterTypes/ListNavigation/types"
 
@@ -40,9 +42,15 @@ export type NavigationFilterDefinitionBase<T, Type extends string> = {
   defaultValue: T
 }
 
+export type NavigationFilterDefinitionMap = {
+  [dateNavigatorFilterType]: DateNavigatorFilterDefinition
+  [listNavigatorFilterType]: ListNavigatorFilterDefinition
+}
+
 export type NavigationFilterDefinition =
-  | DateNavigatorFilterDefinition
-  | ListNavigatorFilterDefinition
+  NavigationFilterDefinitionMap[keyof NavigationFilterDefinitionMap]
+
+export type NavigationFilterType = keyof NavigationFilterDefinitionMap
 
 export type NavigationFilterComponentProps<
   T,

@@ -12,9 +12,11 @@ export type DateNavigationOptions = {
   hideGoToCurrent?: boolean
 }
 
+export const dateNavigatorFilterType = "date-navigator" as const
+
 export type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<
   Date | DateRange | DateValue,
-  "date-navigator"
+  typeof dateNavigatorFilterType
 > &
   DateNavigationOptions
 

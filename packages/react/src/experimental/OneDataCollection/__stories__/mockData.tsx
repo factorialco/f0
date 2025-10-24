@@ -110,13 +110,13 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
 
 export const navigationFiltersMock = {
   date: {
-    type: "date-navigator",
+    type: "date-navigator" as const,
     defaultValue: new Date(),
     granularity: ["day"],
     min: new Date(),
     max: addDays(new Date(), 1),
   },
-} as const
+}
 
 /**
  * MockDataCache - Simulates Apollo cache behavior with observable pattern
