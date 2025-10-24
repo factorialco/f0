@@ -3,7 +3,7 @@ import { Input } from "@/experimental/Forms/Fields/Input"
 import { OneModal } from "@/experimental/Modals/OneModal"
 import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage } from "@copilotkit/shared"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { UserReaction } from "./FeedbackProvider"
 
 interface ReactionModalProps {
@@ -21,16 +21,33 @@ export const FeedbackModal = ({
 }: ReactionModalProps) => {
   const [text, setText] = useState("")
   const translations = useI18n()
-  const { title, description, placeholder } =
+  const { title, label, placeholder } =
     reactionType === "like"
       ? translations.ai.feedbackModal.positive
       : translations.ai.feedbackModal.negative
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     onSubmit(message, text)
-  }
+  }, [text, message, onSubmit])
   const handleClose = () => {
     onClose(message)
   }
+
+  // handle keyboard submit manually because using built-in <form> fails
+  // due to unmount of the dialog before the form is processed
+  useEffect(() => {
+    const handleKeyboard = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        event.preventDefault()
+        handleSubmit()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyboard)
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyboard)
+    }
+  }, [handleSubmit])
 
   return (
     <OneModal
@@ -42,13 +59,9 @@ export const FeedbackModal = ({
       <OneModal.Header title={title}></OneModal.Header>
       <OneModal.Content>
         <div className="flex flex-col gap-6 p-4">
-          <p className="text-balance text-base text-f1-foreground-secondary">
-            {description}
-          </p>
           <Input
             autoFocus
-            label={title}
-            hideLabel
+            label={label}
             placeholder={placeholder}
             value={text}
             onChange={(value) => setText(value.trim())}
