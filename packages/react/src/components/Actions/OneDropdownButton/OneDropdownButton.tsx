@@ -107,7 +107,7 @@ const OneDropdownButton = ({
           )
           return acc
         }, []),
-    [items, onClick]
+    [items, onClick, localValue]
   )
 
   const dropdownSize =

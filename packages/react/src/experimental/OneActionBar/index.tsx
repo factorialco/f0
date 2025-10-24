@@ -127,7 +127,8 @@ export const OneActionBar = ({
   )
 
   /**
-   *
+   * Transforms the normalized primary actions into a format suitable for dropdown components.
+   * Each action group and its items are mapped to the expected dropdown item structure.
    */
   const primaryActionsDropdownItems = useMemo(() => {
     {

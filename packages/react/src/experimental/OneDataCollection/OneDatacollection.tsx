@@ -290,7 +290,7 @@ const OneDataCollectionComp = <
     return groups
   }, [])
   /**
-   * Creates the bulk actions groups to avoid change the datacolletion interface
+   * Creates the bulk actions groups to avoid change the datacollection interface
    */
   const bulkActionsGroups = useMemo(() => {
     if (!bulkActions) {
