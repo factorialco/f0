@@ -6,6 +6,24 @@ const meta = {
   component: F0Heading,
   title: "Heading",
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    variant: {
+      options: ["heading", "heading-large"],
+      control: "select",
+      description: "The variant of the heading",
+      table: {
+        type: { summary: "string" },
+      },
+    },
+    as: {
+      control: "select",
+      options: ["h1", "h2", "h3", "h4", "h5", "h6"],
+      description: "The HTML tag to render the heading as",
+      table: {
+        type: { summary: "string" },
+      },
+    },
+  },
   decorators: [
     (Story) => (
       <div className="flex w-full items-center justify-center p-4">

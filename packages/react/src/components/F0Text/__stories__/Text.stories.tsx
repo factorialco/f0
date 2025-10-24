@@ -6,6 +6,24 @@ const meta = {
   component: F0Text,
   title: "Text",
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    variant: {
+      options: ["body", "description", "small", "inverse", "code", "label"],
+      control: "select",
+      description: "The variant of the text",
+      table: {
+        type: { summary: "string" },
+      },
+    },
+    as: {
+      control: "select",
+      options: ["p", "code", "label"],
+      description: "The HTML tag to render the text as",
+      table: {
+        type: { summary: "string" },
+      },
+    },
+  },
   decorators: [
     (Story) => (
       <div className="flex w-full items-center justify-center p-4">
@@ -84,7 +102,6 @@ export const TextEllipsis: Story = {
 export const Markdown: Story = {
   args: {
     content: "This is a **bold** text and this is a *italic* text.",
-    markdown: true,
   },
 }
 
@@ -92,7 +109,6 @@ export const MarkdownWithEllipsis: Story = {
   args: {
     content:
       "This is a **bold** text and this is a *italic* text and this is a **bold** text and this is a *italic* text.",
-    markdown: true,
     ellipsis: true,
   },
 }
@@ -134,6 +150,17 @@ export const Snapshot: Story = {
             variant="body"
             content="This is a very long text that will be truncated with ellipsis when it exceeds the container width"
             ellipsis
+          />
+        </div>
+      </section>
+
+      <section>
+        <h4 className="text-lg font-semibold">Text with Markdown</h4>
+        <div className="w-96">
+          <F0Text
+            variant="body"
+            content="This is a **bold** text and this is a *italic* text."
+            markdown
           />
         </div>
       </section>

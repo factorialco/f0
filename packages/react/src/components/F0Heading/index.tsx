@@ -1,1 +1,1 @@
-export { F0Heading, type F0HeadingProps } from "./F0Heading"
+export * from "./F0Heading"
