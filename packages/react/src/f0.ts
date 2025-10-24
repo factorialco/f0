@@ -1,4 +1,4 @@
-import "./global.d.ts"
+/// <reference types="./global" />
 
 export * from "./components/exports"
 export * from "./hooks/exports"

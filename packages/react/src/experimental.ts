@@ -1,4 +1,3 @@
-import "./global.d.ts"
+/// <reference types="./global" />
 
 export * from "./experimental/exports"
-// 1
