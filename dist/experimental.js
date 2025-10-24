@@ -17746,7 +17746,7 @@ const V$ = (t) => Array.isArray(t) ? t.every(j$) ? [{
     onClick: () => {
       t(g.value, g), s(!1);
     }
-  }))), p), []), [o, t]), h = n.size === "sm" ? "[&_.main]:w-6" : n.size === "lg" ? "[&_.main]:w-10" : "[&_.main]:w-8";
+  }))), p), []), [o, t, l]), h = n.size === "sm" ? "[&_.main]:w-6" : n.size === "lg" ? "[&_.main]:w-10" : "[&_.main]:w-8";
   return c && f(uk, {
     onClick: d,
     variant: n.variant,
