@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.241.1",
+  "version": "1.242.0",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -48,10 +48,10 @@
     "vitest:ci": "pnpm run vitest --reporter=dot"
   },
   "peerDependencies": {
-    "@copilotkit/react-core": "^1.10.2",
-    "@copilotkit/react-ui": "^1.10.2",
-    "@copilotkit/runtime": "^1.10.2",
-    "@copilotkit/shared": "^1.10.2",
+    "@copilotkit/react-core": "^1.10.6",
+    "@copilotkit/react-ui": "^1.10.6",
+    "@copilotkit/runtime": "^1.10.6",
+    "@copilotkit/shared": "^1.10.6",
     "@hookform/resolvers": "^3.9.0",
     "@number-flow/react": "^0.5.10",
     "@radix-ui/react-accordion": "^1.1.2",

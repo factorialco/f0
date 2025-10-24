@@ -274,8 +274,14 @@ export declare type AiChatProviderProps = {
     greeting?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    onThumbsUp?: (message: AIMessage, threadId: string) => void;
-    onThumbsDown?: (message: AIMessage, threadId: string) => void;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -301,8 +307,14 @@ declare type AiChatProviderReturnValue = {
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
     welcomeScreenSuggestions: WelcomeScreenSuggestion[];
     setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
-    onThumbsUp?: (message: AIMessage, threadId: string) => void;
-    onThumbsDown?: (message: AIMessage, threadId: string) => void;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
     /**
      * Clear/reset the chat conversation
      */
@@ -316,8 +328,14 @@ declare interface AiChatState {
     agent?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    onThumbsUp?: (message: AIMessage, threadId: string) => void;
-    onThumbsDown?: (message: AIMessage, threadId: string) => void;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
 }
 
 /**
@@ -1329,6 +1347,8 @@ declare type Content = (ComponentProps<typeof DataList.Item> & {
     type: "dot-tag";
 });
 
+declare type ContentPadding = "sm" | "md";
+
 declare type CopyActionType = {
     type: "copy";
     text?: string;
@@ -1720,6 +1740,7 @@ declare const defaultTranslations: {
         readonly add: "Add";
         readonly edit: "Edit";
         readonly save: "Save";
+        readonly send: "Send";
         readonly cancel: "Cancel";
         readonly copy: "Copy";
         readonly close: "Close";
@@ -1889,10 +1910,22 @@ declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Write something here...";
+        readonly inputPlaceholder: "Ask about time, people, or company info…";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly feedbackModal: {
+            readonly positive: {
+                readonly title: "What did you like about this response?";
+                readonly placeholder: "What did you like about this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+            readonly negative: {
+                readonly title: "What could have been better in this response?";
+                readonly placeholder: "What could have been better in this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2775,6 +2808,7 @@ declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLA
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
 declare type InputFieldProps<T> = {
+    autoFocus?: boolean;
     label: string;
     placeholder?: string;
     labelIcon?: IconType;
@@ -2847,7 +2881,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
+export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
 };
 
@@ -3634,6 +3668,8 @@ declare type OneModalProps = {
     onClose: () => void;
     /** Whether to render the modal as a bottom sheet on mobile */
     asBottomSheetInMobile?: boolean;
+    /** the padding of internal content areas (header, content, footer) */
+    contentPadding?: ContentPadding;
     position?: ModalPosition;
     /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
     children: default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>> | default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[];
@@ -5417,15 +5453,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

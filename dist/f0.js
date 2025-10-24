@@ -1,9 +1,9 @@
-import { C as h, L as ge, c as ve, P as G, a as v, f as be, g as z, A as ye, B as xe, b as Ce, d as we, e as Ne, V as Le, h as D, i as H, j as J, k as Pe, l as Y, S as X, m as K, n as Se, O as Fe, o as Q, p as ke, q as Me, F as Z, r as De, s as Te, t as Ie, D as Be, u as Ae, v as Re, w as Oe, x as ee, y as C, U as ae, z as $e, E as Ee, G as U, H as _e, I as re, J as je, K as ze, M as Ue, N as Ve, Q as qe, R as We, X as Ge, T as He, W as Je, Y as Ye, Z as Xe, _ as Ke } from "./hooks-D_V5iWT1.js";
-import { az as Ha, $ as Ja, aB as Ya, aK as Xa, a0 as Ka, a1 as Qa, a2 as Za, a3 as er, a4 as ar, a5 as rr, a6 as sr, a7 as tr, a9 as or, aa as lr, ab as nr, ac as ir, aG as cr, ae as dr, af as ur, ag as fr, ah as mr, ak as pr, al as hr, am as gr, an as vr, ap as br, ad as yr, ao as xr, aj as Cr, aH as wr, aA as Nr, au as Lr, ax as Pr, at as Sr, aL as Fr, as as kr, ar as Mr, a8 as Dr, ai as Tr, aq as Ir, av as Br, aC as Ar, aD as Rr, aE as Or, aM as $r, aw as Er, aF as _r, aJ as jr, ay as zr, aI as Ur } from "./hooks-D_V5iWT1.js";
+import { C as h, L as ge, c as ve, P as q, a as v, f as be, g as W, A as ye, B as xe, b as Ce, d as we, e as Ne, V as Le, h as D, i as G, j as Y, k as Pe, l as J, S as X, m as K, n as Se, O as ke, o as Q, p as Fe, q as Me, F as Z, r as De, s as Te, t as Ae, D as Ie, u as Be, v as Re, w as Oe, x as ee, y as C, U as ae, z as $e, E as Ee, G as z, H as _e, I as re, J as je, K as We, M as ze, N as Ue, Q as Ve, R as He, X as qe, T as Ge, W as Ye, Y as Je, Z as Xe, _ as Ke } from "./hooks-CpGAjLLx.js";
+import { az as Ga, $ as Ya, aB as Ja, aK as Xa, a0 as Ka, a1 as Qa, a2 as Za, a3 as er, a4 as ar, a5 as rr, a6 as sr, a7 as tr, a9 as or, aa as lr, ab as nr, ac as ir, aG as cr, ae as dr, af as ur, ag as fr, ah as mr, ak as pr, al as hr, am as gr, an as vr, ap as br, ad as yr, ao as xr, aj as Cr, aH as wr, aA as Nr, au as Lr, ax as Pr, at as Sr, aL as kr, as as Fr, ar as Mr, a8 as Dr, ai as Tr, aq as Ar, av as Ir, aC as Br, aD as Rr, aE as Or, aM as $r, aw as Er, aF as _r, aJ as jr, ay as Wr, aI as zr } from "./hooks-CpGAjLLx.js";
 import { jsx as e, jsxs as d, Fragment as $ } from "react/jsx-runtime";
 import * as E from "react";
-import Qe, { useState as g, forwardRef as I, useRef as se, useImperativeHandle as Ze, Children as ea, useEffect as te, createContext as aa } from "react";
-const Fa = {
+import Qe, { useState as g, forwardRef as A, useRef as se, useImperativeHandle as Ze, Children as ea, useEffect as te, createContext as aa } from "react";
+const ka = {
   approvals: {
     history: "Approval history",
     statuses: {
@@ -26,6 +26,7 @@ const Fa = {
     add: "Add",
     edit: "Edit",
     save: "Save",
+    send: "Send",
     cancel: "Cancel",
     copy: "Copy",
     close: "Close",
@@ -195,16 +196,28 @@ const Fa = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Write something here...",
+    inputPlaceholder: "Ask about time, people, or company info…",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection"
+    thoughtsGroupTitle: "Reflection",
+    feedbackModal: {
+      positive: {
+        title: "What did you like about this response?",
+        placeholder: "What did you like about this response? How could it be even better?",
+        description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al."
+      },
+      negative: {
+        title: "What could have been better in this response?",
+        placeholder: "What could have been better in this response? How could it be even better?",
+        description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al."
+      }
+    }
   },
   select: {
     noResults: "No results found",
     loadingMore: "Loading..."
   }
-}, ka = h({
+}, Fa = h({
   name: "Link",
   type: "info"
 }, ge), Ma = [
@@ -223,12 +236,12 @@ var _ = "Progress", j = 100, [ra] = ve(_), [sa, ta] = ra(_), oe = E.forwardRef(
       getValueLabel: i = oa,
       ...n
     } = a;
-    (t || t === 0) && !V(t) && console.error(la(`${t}`, "Progress"));
-    const c = V(t) ? t : j;
-    o !== null && !q(o, c) && console.error(na(`${o}`, "Progress"));
-    const l = q(o, c) ? o : null, f = T(l) ? i(l, c) : void 0;
+    (t || t === 0) && !U(t) && console.error(la(`${t}`, "Progress"));
+    const c = U(t) ? t : j;
+    o !== null && !V(o, c) && console.error(na(`${o}`, "Progress"));
+    const l = V(o, c) ? o : null, f = T(l) ? i(l, c) : void 0;
     return /* @__PURE__ */ e(sa, { scope: s, value: l, max: c, children: /* @__PURE__ */ e(
-      G.div,
+      q.div,
       {
         "aria-valuemax": c,
         "aria-valuemin": 0,
@@ -249,7 +262,7 @@ var le = "ProgressIndicator", ne = E.forwardRef(
   (a, r) => {
     const { __scopeProgress: s, ...o } = a, t = ta(le, s);
     return /* @__PURE__ */ e(
-      G.div,
+      q.div,
       {
         "data-state": ie(t.value, t.max),
         "data-value": t.value ?? void 0,
@@ -270,10 +283,10 @@ function ie(a, r) {
 function T(a) {
   return typeof a == "number";
 }
-function V(a) {
+function U(a) {
   return T(a) && !isNaN(a) && a > 0;
 }
-function q(a, r) {
+function V(a, r) {
   return T(a) && !isNaN(a) && a <= r && a >= 0;
 }
 function la(a, r) {
@@ -302,7 +315,7 @@ const de = E.forwardRef(({ className: a, value: r, ...s }, o) => e(ce, {
 }));
 de.displayName = ce.displayName;
 const ca = ({ value: a, max: r = 100, label: s, color: o }, t) => {
-  const i = o ? z(o) : z("categorical-1"), n = a / r * 100;
+  const i = o ? W(o) : W("categorical-1"), n = a / r * 100;
   return d("div", {
     className: "flex items-center space-x-2",
     "aria-live": "polite",
@@ -334,19 +347,19 @@ const ca = ({ value: a, max: r = 100, label: s, color: o }, t) => {
     type: "info"
   },
   xe
-), Ia = h(
+), Aa = h(
   {
     name: "CategoryBarChart",
     type: "info"
   },
   Ce
-), Ba = h(
+), Ia = h(
   {
     name: "LineChart",
     type: "info"
   },
   we
-), Aa = h(
+), Ba = h(
   {
     name: "PieChart",
     type: "info"
@@ -368,16 +381,16 @@ const ca = ({ value: a, max: r = 100, label: s, color: o }, t) => {
   const [s, o] = g(!1), t = e(D, {
     label: `+${a}`
   });
-  return r?.length ? d(H, {
+  return r?.length ? d(G, {
     open: s,
     onOpenChange: o,
-    children: [e(J, {
+    children: [e(Y, {
       asChild: !0,
       children: e("button", {
         className: Pe("inline-flex flex-shrink-0 items-center"),
         children: t
       })
-    }), e(Y, {
+    }), e(J, {
       className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
       align: "end",
       children: d(X, {
@@ -398,7 +411,7 @@ const ca = ({ value: a, max: r = 100, label: s, color: o }, t) => {
 O.displayName = "ChipCounter";
 const ue = ({ chips: a, max: r = 4, remainingCount: s, layout: o = "compact" }) => {
   if (o === "fill")
-    return e(Fe, {
+    return e(ke, {
       items: a,
       renderListItem: (l) => e(D, {
         ...l
@@ -429,7 +442,7 @@ const $a = Se("F0ChipList", ue), ua = {
   sm: 2,
   md: 2,
   lg: 2
-}, fa = I(function({ widgets: r, children: s }, o) {
+}, fa = A(function({ widgets: r, children: s }, o) {
   const t = se(null);
   Ze(o, () => t.current);
   const i = ea.toArray(r).filter((n) => !!n).map((n, c) => e("div", {
@@ -443,7 +456,7 @@ const $a = Se("F0ChipList", ue), ua = {
       className: "@container",
       children: [d("div", {
         className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden",
-        children: [e(ke, {
+        children: [e(Fe, {
           columns: ua,
           showArrows: !1,
           children: i
@@ -465,7 +478,7 @@ const $a = Se("F0ChipList", ue), ua = {
       })]
     })
   });
-}), ma = I(function({ children: r, sideContent: s, mainColumnPosition: o = "left", sticky: t = !1 }, i) {
+}), ma = A(function({ children: r, sideContent: s, mainColumnPosition: o = "left", sticky: t = !1 }, i) {
   return e("div", {
     ref: i,
     className: "h-full",
@@ -523,13 +536,13 @@ const Ea = h({
 }), va = ({ text: a }) => d("div", {
   className: "flex flex-row items-start gap-2",
   children: [e(Te, {
-    icon: Ie,
+    icon: Ae,
     size: "md",
     className: "text-f1-icon-positive"
   }), e("span", {
     children: a
   })]
-}), me = I(({ title: a, image: r, benefits: s, actions: o, withShadow: t = !0, module: i, moduleName: n, tag: c }, l) => d("div", {
+}), me = A(({ title: a, image: r, benefits: s, actions: o, withShadow: t = !0, module: i, moduleName: n, tag: c }, l) => d("div", {
   ref: l,
   className: v("bg-white flex flex-row rounded-xl border border-f1-border-secondary", t && "shadow-md"),
   children: [e("div", {
@@ -577,13 +590,13 @@ function ba({ isOpen: a, onClose: r, title: s, children: o, module: t, portalCon
   const [n, c] = g(a);
   return te(() => {
     c(a);
-  }, [a]), e(Be, {
+  }, [a]), e(Ie, {
     open: n,
     onOpenChange: (f) => {
       c(f), f || r();
     },
     modal: !0,
-    children: d(Ae, {
+    children: d(Be, {
       className: "max-h-[620px] w-[760px] overflow-y-auto overflow-x-hidden bg-f1-background",
       container: i,
       children: [d("div", {
@@ -611,8 +624,8 @@ function ba({ isOpen: a, onClose: r, title: s, children: o, module: t, portalCon
     })
   });
 }
-function za({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessage: i, successMessage: n, loadingState: c, nextSteps: l, closeLabel: f, primaryAction: m, modalTitle: w, modalModule: N, secondaryAction: u, portalContainer: F, tag: k, showResponseDialog: L = !0 }) {
-  const [B, x] = g(a), [P, y] = g(null), [b, S] = g(!1), A = async () => {
+function Wa({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessage: i, successMessage: n, loadingState: c, nextSteps: l, closeLabel: f, primaryAction: m, modalTitle: w, modalModule: N, secondaryAction: u, portalContainer: k, tag: F, showResponseDialog: L = !0 }) {
+  const [I, x] = g(a), [P, y] = g(null), [b, S] = g(!1), B = async () => {
     if (m?.onClick) {
       S(!0);
       try {
@@ -628,11 +641,11 @@ function za({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessa
   }, R = b;
   return d($, {
     children: [e(ba, {
-      isOpen: B,
+      isOpen: I,
       onClose: M,
       title: w,
       module: N,
-      portalContainer: F,
+      portalContainer: k,
       children: e("div", {
         className: "pb-4 pl-4",
         children: e(me, {
@@ -640,14 +653,14 @@ function za({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessa
           image: o,
           benefits: t,
           withShadow: !1,
-          tag: k,
+          tag: F,
           actions: d("div", {
             className: "flex gap-3",
             children: [m && e(C, {
               variant: m.variant,
               label: R ? c.label : m.label,
               icon: m.icon || void 0,
-              onClick: A,
+              onClick: B,
               loading: m.loading,
               size: m.size
             }), u && e(C, {
@@ -670,7 +683,7 @@ function za({ isOpen: a, onClose: r, title: s, image: o, benefits: t, errorMessa
       successMessage: n,
       nextSteps: l,
       closeLabel: f,
-      portalContainer: F
+      portalContainer: k
     })]
   });
 }
@@ -715,10 +728,10 @@ function ya({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
             }))
           }), d("div", {
             className: "flex flex-col gap-[2px] p-3",
-            children: [e(U, {
+            children: [e(z, {
               className: "text-lg font-medium",
               children: r
-            }), e(U, {
+            }), e(z, {
               className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary",
               children: s
             })]
@@ -745,7 +758,7 @@ function ya({ mediaUrl: a, title: r, description: s, onClose: o, dismissible: t,
     })
   });
 }
-const xa = I(function({ primaryAction: r, secondaryAction: s, ...o }, t) {
+const xa = A(function({ primaryAction: r, secondaryAction: s, ...o }, t) {
   const i = (l) => l.variant === "promote" ? e(re, {
     label: l.label,
     onRequest: async () => {
@@ -775,9 +788,9 @@ const xa = I(function({ primaryAction: r, secondaryAction: s, ...o }, t) {
   });
 });
 xa.displayName = "UpsellingBanner";
-function Ua({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t = "md", showIcon: i = !0, side: n = "right", align: c = "center", icon: l = ze, mediaUrl: f, title: m, description: w, width: N = "300px", trackVisibility: u, actions: F, onClick: k, hideLabel: L = !1 }) {
-  const [B, x] = g(!1), [P, y] = g(null), [b, S] = g(null), A = (p) => {
-    r(p), k && k();
+function za({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t = "md", showIcon: i = !0, side: n = "right", align: c = "center", icon: l = We, mediaUrl: f, title: m, description: w, width: N = "300px", trackVisibility: u, actions: k, onClick: F, hideLabel: L = !1 }) {
+  const [I, x] = g(!1), [P, y] = g(null), [b, S] = g(null), B = (p) => {
+    r(p), F && F();
   }, M = async (p) => {
     if (p.type === "upsell") {
       S(p);
@@ -789,15 +802,15 @@ function Ua({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t
     }
   }, R = () => {
     y(null), x(!1), S(null), r(!1);
-  }, pe = a && !B, he = F?.map((p) => p.type === "upsell" ? {
+  }, pe = a && !I, he = k?.map((p) => p.type === "upsell" ? {
     ...p,
     onClick: () => M(p)
   } : p);
   return d($, {
-    children: [d(H, {
+    children: [d(G, {
       open: pe,
-      onOpenChange: A,
-      children: [e(J, {
+      onOpenChange: B,
+      children: [e(Y, {
         asChild: !0,
         children: e(C, {
           variant: o,
@@ -807,7 +820,7 @@ function Ua({ isOpen: a, setIsOpen: r, label: s, variant: o = "promote", size: t
           onClick: () => r(a),
           hideLabel: L
         })
-      }), e(Y, {
+      }), e(J, {
         side: n,
         align: c,
         className: "w-fit border-none bg-transparent p-2 shadow-none",
@@ -855,24 +868,24 @@ const Ca = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
 }, Na = ({ children: a }) => e(Xe, {
   reducedMotion: "user",
   children: a
-}), Va = ({ children: a, layout: r, link: s, privacyModeInitiallyEnabled: o, image: t, i18n: i, l10n: n, isDev: c = !1, dataCollectionStorageHandler: l, showExperimentalWarnings: f = !1 }) => e(Na, {
-  children: e(Ue, {
+}), Ua = ({ children: a, layout: r, link: s, privacyModeInitiallyEnabled: o, image: t, i18n: i, l10n: n, isDev: c = !1, dataCollectionStorageHandler: l, showExperimentalWarnings: f = !1 }) => e(Na, {
+  children: e(ze, {
     isDev: c,
     showExperimentalWarnings: f,
-    children: e(Ve, {
+    children: e(Ue, {
       ...n,
-      children: e(qe, {
+      children: e(Ve, {
         ...i,
-        children: e(We, {
+        children: e(He, {
           ...s,
           children: e(wa, {
             ...r,
-            children: e(Ge, {
-              children: e(He, {
+            children: e(qe, {
+              children: e(Ge, {
                 initiallyEnabled: o,
-                children: e(Je, {
+                children: e(Ye, {
                   ...t,
-                  children: e(Ye, {
+                  children: e(Je, {
                     handler: l,
                     children: a
                   })
@@ -884,22 +897,22 @@ const Ca = aa(null), wa = ({ children: a, fullScreen: r = !0 }) => {
       })
     })
   })
-}), W = (a) => `datacollection-${a}`, qa = {
+}), H = (a) => `datacollection-${a}`, Va = {
   get: async (a) => JSON.parse(
-    localStorage.getItem(W(a)) ?? "{}"
+    localStorage.getItem(H(a)) ?? "{}"
   ),
   set: async (a, r) => {
-    localStorage.setItem(W(a), JSON.stringify(r));
+    localStorage.setItem(H(a), JSON.stringify(r));
   }
 };
 export {
   Da as AreaChart,
-  Ha as Await,
+  Ga as Await,
   Ta as BarChart,
   C as Button,
-  Ia as CategoryBarChart,
-  Ja as CopyButton,
-  Ya as DndProvider,
+  Aa as CategoryBarChart,
+  Ya as CopyButton,
+  Ja as DndProvider,
   Xa as EmojiImage,
   Ka as F0Avatar,
   Qa as F0AvatarAlert,
@@ -917,7 +930,7 @@ export {
   $a as F0ChipList,
   cr as F0EventCatcherProvider,
   Te as F0Icon,
-  Va as F0Provider,
+  Ua as F0Provider,
   dr as F0TagAlert,
   ur as F0TagBalance,
   fr as F0TagCompany,
@@ -929,14 +942,14 @@ export {
   vr as F0TagTeam,
   br as GROUP_ID_SYMBOL,
   ja as HomeLayout,
-  Ba as LineChart,
-  ka as Link,
+  Ia as LineChart,
+  Fa as Link,
   yr as OneFilterPicker,
-  Aa as PieChart,
-  He as PrivacyModeProvider,
+  Ba as PieChart,
+  Ge as PrivacyModeProvider,
   me as ProductBlankslate,
   xr as ProductCard,
-  za as ProductModal,
+  Wa as ProductModal,
   ya as ProductWidget,
   Oa as ProgressBarChart,
   Ea as StandardLayout,
@@ -945,31 +958,31 @@ export {
   ae as UpsellRequestResponseDialog,
   xa as UpsellingBanner,
   re as UpsellingButton,
-  Ua as UpsellingPopover,
+  za as UpsellingPopover,
   Ra as VerticalBarChart,
   Ma as avatarVariants,
   wr as buildTranslations,
   Nr as createAtlaskitDriver,
   Lr as createDataSourceDefinition,
-  qa as dataCollectionLocalStorageHandler,
-  Fa as defaultTranslations,
+  Va as dataCollectionLocalStorageHandler,
+  ka as defaultTranslations,
   Se as experimental,
   Pr as getAnimationVariants,
   Sr as getDataSourcePaginationType,
-  Fr as getEmojiLabel,
-  kr as isInfiniteScrollPagination,
+  kr as getEmojiLabel,
+  Fr as isInfiniteScrollPagination,
   Mr as isPageBasedPagination,
   Dr as modules,
   Tr as tagDotColors,
-  Ir as useData,
-  Br as useDataSource,
-  Ar as useDndEvents,
+  Ar as useData,
+  Ir as useDataSource,
+  Br as useDndEvents,
   Rr as useDraggable,
   Or as useDroppableList,
   $r as useEmojiConfetti,
   Er as useGroups,
   _r as usePrivacyMode,
   jr as useReducedMotion,
-  zr as useSelectable,
-  Ur as useXRay
+  Wr as useSelectable,
+  zr as useXRay
 };

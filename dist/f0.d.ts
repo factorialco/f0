@@ -1112,6 +1112,7 @@ export declare const defaultTranslations: {
         readonly add: "Add";
         readonly edit: "Edit";
         readonly save: "Save";
+        readonly send: "Send";
         readonly cancel: "Cancel";
         readonly copy: "Copy";
         readonly close: "Close";
@@ -1281,10 +1282,22 @@ export declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Write something here...";
+        readonly inputPlaceholder: "Ask about time, people, or company info…";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly feedbackModal: {
+            readonly positive: {
+                readonly title: "What did you like about this response?";
+                readonly placeholder: "What did you like about this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+            readonly negative: {
+                readonly title: "What could have been better in this response?";
+                readonly placeholder: "What could have been better in this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -3434,15 +3447,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
