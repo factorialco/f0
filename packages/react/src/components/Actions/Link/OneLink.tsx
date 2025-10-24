@@ -1,3 +1,4 @@
+import { DataAttributes } from "@/global.types"
 import { cva, type VariantProps } from "cva"
 import { forwardRef } from "react"
 import ExternalLink from "../../../icons/app/ExternalLink"
