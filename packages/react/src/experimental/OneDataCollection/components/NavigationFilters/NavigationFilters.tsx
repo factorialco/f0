@@ -1,5 +1,5 @@
 import React from "react"
-import { navigationFilterTypes } from "../../navigationFilters"
+import { getFilterDefinitionByType } from "../../navigationFilters"
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -26,9 +26,14 @@ export const NavigationFilters = <
     <>
       {navigationFilters &&
         Object.entries(navigationFilters).map(([key, filter]) => {
-          const filterDef = navigationFilterTypes[filter.type]
+          const filterDef = getFilterDefinitionByType(filter.type)
+
+          if (!filterDef) {
+            return null
+          }
+
           /* as never is used as typescript can't infer the type correctly
-              because of the recursive type definitions. */
+              when we use Object.entries */
           return (
             <React.Fragment key={key}>
               {filterDef.render({
