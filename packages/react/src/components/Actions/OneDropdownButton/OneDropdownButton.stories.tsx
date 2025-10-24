@@ -15,9 +15,12 @@ const meta = {
     },
     docs: {
       description: {
-        component:
-          "<p>Action button that allows to select the action using a dropdown.</p>" +
-          "<p>This component received a list of items (each item has a value), when the user clicks the button the component emits the `onClick` event with the value of the item and the item itself</p>",
+        component: [
+          "Action button that allows to select the action using a dropdown.",
+          "This component received a list of items (each item has a value), when the user clicks the button the component emits the `onClick` event with the value of the item and the item itself",
+        ]
+          .map((text) => `<p>${text}</p>`)
+          .join(""),
       },
     },
   },
@@ -44,6 +47,21 @@ const meta = {
     },
     loading: {
       control: "boolean",
+    },
+    items: {
+      control: "object",
+      description: "The items to display in the dropdown",
+
+      table: {
+        type: {
+          summary:
+            "OneDropdownButtonItem[] | OneDropdownButtonGroup[] | OneDropdownButtonGroup",
+          detail: [
+            "type OneDropdownButtonItem = { value: string, label: string, icon?: React.ReactNode, critical?: boolean, description?: string }",
+            "type OneDropdownButtonGroup = { label?: string, items: OneDropdownButtonItem[] }",
+          ].join("\n"),
+        },
+      },
     },
   },
 } satisfies Meta<typeof OneDropdownButton>
@@ -89,7 +107,6 @@ export const WithDescription: Story = {
         description: "Edit item's information",
         icon: Pencil,
       },
-      { type: "separator" },
       {
         value: "3",
         label: "Item 3",
@@ -102,6 +119,41 @@ export const WithDescription: Story = {
         description: "Delete item",
         icon: Delete,
         critical: true,
+      },
+    ],
+  },
+}
+
+export const WithGroups: Story = {
+  args: {
+    items: [
+      {
+        label: "Group 1",
+        items: [
+          {
+            value: "1",
+            label: "Item 1",
+            description: "New creation process",
+            icon: Add,
+          },
+          {
+            value: "2",
+            label: "Item 2",
+            description: "Edit item's information",
+            icon: Pencil,
+          },
+        ],
+      },
+      {
+        label: "Group 2",
+        items: [
+          {
+            value: "3",
+            label: "Item 3",
+            description: "Save changes",
+            icon: Save,
+          },
+        ],
       },
     ],
   },
