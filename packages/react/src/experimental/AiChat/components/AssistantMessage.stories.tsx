@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { AssistantMessage } from "./AssistantMessage"
+import { FeedbackModalProvider } from "./FeedbackProvider"
 
 const meta = {
   title: "Experimental/AiChat/AssistantMessage",
@@ -11,7 +12,9 @@ const meta = {
   decorators: [
     (Story) => (
       <div className="w-96 bg-f1-background p-4">
-        <Story />
+        <FeedbackModalProvider>
+          <Story />
+        </FeedbackModalProvider>
       </div>
     ),
   ],
