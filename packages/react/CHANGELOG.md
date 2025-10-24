@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.242.0](https://github.com/factorialco/f0/compare/f0-react-v1.241.2...f0-react-v1.242.0) (2025-10-24)
+
+
+### Features
+
+* **aichat:** show popup asking for feedback ([#2869](https://github.com/factorialco/f0/issues/2869)) ([65491b7](https://github.com/factorialco/f0/commit/65491b7ee7b7087be444777af2f2b3d72c4a7760))
+
 ## [1.241.2](https://github.com/factorialco/f0/compare/f0-react-v1.241.1...f0-react-v1.241.2) (2025-10-24)
 
 
