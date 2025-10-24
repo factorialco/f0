@@ -212,50 +212,62 @@ export const MultiplePrimaryActions: Story = {
   },
 }
 
-export const WithDescription: Story = {
+const clickMock = (value: string) => {
+  console.log("clicked", value)
+}
+export const WithGroupsAndDescription: Story = {
   args: {
     ...Default.args,
     primaryActions: [
       {
         label: "Export",
-        onClick: fn(),
-        icon: Upload,
+        items: [
+          {
+            label: "Export",
+            onClick: () => clickMock("Export"),
+            icon: Upload,
+          },
+          {
+            label: "Export to Excel",
+            onClick: () => clickMock("Export to Excel"),
+            icon: Upload,
+            description: "Export to Excel",
+          },
+          {
+            label: "Export to PDF",
+            onClick: () => clickMock("Export to PDF"),
+            icon: Upload,
+            description: "Export to PDF",
+          },
+        ],
       },
       {
-        label: "Export to Excel",
-        onClick: fn(),
-        icon: Upload,
-        description: "Export to Excel",
-      },
-      {
-        label: "Export to PDF",
-        onClick: fn(),
-        icon: Upload,
-        description: "Export to PDF",
-      },
-      { type: "separator" },
-      {
-        label: "Export to CSV",
-        onClick: fn(),
-        icon: Upload,
-        description: "Export to CSV",
-      },
-      {
-        label: "Export to JSON",
-        onClick: fn(),
-        icon: Upload,
-        description: "Export to JSON",
+        label: "Export Text",
+        items: [
+          {
+            label: "Export to CSV",
+            onClick: () => clickMock("Export to CSV"),
+            icon: Upload,
+            description: "Export to CSV",
+          },
+          {
+            label: "Export to JSON",
+            onClick: () => clickMock("Export to JSON"),
+            icon: Upload,
+            description: "Export to JSON",
+          },
+        ],
       },
     ],
     secondaryActions: [
       {
         label: "Share",
-        onClick: fn(),
+        onClick: () => clickMock("Share"),
         icon: Share,
       },
       {
         label: "Duplicate",
-        onClick: fn(),
+        onClick: () => clickMock("Duplicate"),
         icon: LayersFront,
         description: "Duplicate items",
       },
@@ -265,7 +277,6 @@ export const WithDescription: Story = {
         icon: Upload,
         description: "Export to CSV",
       },
-      { type: "separator" },
       {
         label: "Delete",
         onClick: fn(),

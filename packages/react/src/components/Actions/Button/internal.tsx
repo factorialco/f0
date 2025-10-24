@@ -1,5 +1,6 @@
 import { Button as ShadcnButton } from "@/ui/button"
 
+import { DataAttributes } from "@/global.types"
 import { EmojiImage } from "@/lib/emojis.tsx"
 import { cn } from "@/lib/utils"
 import { cva } from "cva"

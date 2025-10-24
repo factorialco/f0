@@ -1,3 +1,4 @@
+import { DataAttributes } from "@/global.types"
 import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 import { Dispatch, useEffect, useState } from "react"
 import { F0Icon } from "../../../components/F0Icon"

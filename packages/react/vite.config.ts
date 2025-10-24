@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react"
 import { consola } from "consola"
 import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
+import { copyFileSync } from "node:fs"
 import path, { resolve } from "path"
 import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
@@ -67,6 +68,13 @@ if (process.env.BUILD_TYPES) {
       include: ["src"],
       exclude: ["**/*.stories.tsx"],
       rollupTypes: true,
+      afterBuild: () => {
+        // Copy global.d.ts to dist - needed because rollupTypes doesn't inline ambient declarations
+        const src = resolve(__dirname, "src/global.d.ts")
+        const dest = resolve(__dirname, "dist/global.d.ts")
+        copyFileSync(src, dest)
+        consola.success("Copied global.d.ts to dist/")
+      },
     })
   )
 }
