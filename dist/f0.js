@@ -1,5 +1,5 @@
-import { C as v, L as ye, c as Ce, P as J, a as p, f as we, g as A, A as Ne, B as Le, b as Pe, d as Se, e as Fe, V as Te, h as D, i as Y, j as X, k as ke, l as K, S as Q, m as Z, n as Me, O as De, o as ee, p as Ie, q as Be, r as ae, s as Re, F as re, t as Oe, u as $e, v as Ee, D as _e, w as je, x as Ve, y as ze, z as te, E as L, U as se, G as Ae, H as He, I as H, J as qe, K as oe, M as We, N as Ge, Q as Ue, R as Je, T as Ye, W as Xe, X as Ke, Y as Qe, Z as Ze, _ as ea, $ as aa, a0 as ra } from "./hooks-BwgEsacf.js";
-import { aB as rr, a1 as tr, aD as sr, aM as or, a2 as lr, a3 as nr, a4 as ir, a5 as dr, a6 as cr, a7 as ur, a8 as fr, a9 as mr, ab as pr, ac as gr, ad as hr, ae as vr, aI as xr, ag as br, ah as yr, ai as Cr, aj as wr, am as Nr, an as Lr, ao as Pr, ap as Sr, ar as Fr, af as Tr, aq as kr, al as Mr, aJ as Dr, aC as Ir, aw as Br, az as Rr, av as Or, aN as $r, au as Er, at as _r, aa as jr, ak as Vr, as as zr, ax as Ar, aE as Hr, aF as qr, aG as Wr, aO as Gr, ay as Ur, aH as Jr, aL as Yr, aA as Xr, aK as Kr } from "./hooks-BwgEsacf.js";
+import { C as v, L as ye, c as Ce, P as J, a as p, f as we, g as A, A as Ne, B as Le, b as Pe, d as Se, e as Fe, V as ke, h as D, i as Y, j as X, k as Te, l as K, S as Q, m as Z, n as Me, O as De, o as ee, p as Ie, q as Be, r as ae, s as Re, F as re, t as Oe, u as $e, v as Ee, D as _e, w as je, x as Ve, y as ze, z as te, E as L, U as se, G as Ae, H as He, I as H, J as qe, K as oe, M as We, N as Ge, Q as Ue, R as Je, T as Ye, W as Xe, X as Ke, Y as Qe, Z as Ze, _ as ea, $ as aa, a0 as ra } from "./hooks-BwgEsacf.js";
+import { aB as rr, a1 as tr, aD as sr, aM as or, a2 as lr, a3 as nr, a4 as ir, a5 as dr, a6 as cr, a7 as ur, a8 as fr, a9 as mr, ab as pr, ac as gr, ad as hr, ae as vr, aI as xr, ag as br, ah as yr, ai as Cr, aj as wr, am as Nr, an as Lr, ao as Pr, ap as Sr, ar as Fr, af as kr, aq as Tr, al as Mr, aJ as Dr, aC as Ir, aw as Br, az as Rr, av as Or, aN as $r, au as Er, at as _r, aa as jr, ak as Vr, as as zr, ax as Ar, aE as Hr, aF as qr, aG as Wr, aO as Gr, ay as Ur, aH as Jr, aL as Yr, aA as Xr, aK as Kr } from "./hooks-BwgEsacf.js";
 import { jsx as e, jsxs as c, Fragment as E } from "react/jsx-runtime";
 import * as _ from "react";
 import ta, { useState as x, forwardRef as y, createElement as q, useRef as le, useImperativeHandle as sa, Children as oa, useEffect as ne, createContext as la } from "react";
@@ -357,7 +357,7 @@ const pa = ({ value: a, max: r = 100, label: t, color: s }, o) => {
     name: "VerticalBarChart",
     type: "info"
   },
-  Te
+  ke
 ), Wa = v(
   {
     name: "ProgressBarChart",
@@ -374,7 +374,7 @@ const pa = ({ value: a, max: r = 100, label: t, color: s }, o) => {
     children: [e(X, {
       asChild: !0,
       children: e("button", {
-        className: ke("inline-flex flex-shrink-0 items-center"),
+        className: Te("inline-flex flex-shrink-0 items-center"),
         children: o
       })
     }), e(K, {
@@ -532,6 +532,7 @@ const va = y((a, r) => e(z, {
 va.displayName = "F0Heading";
 const xa = y((a, r) => e(z, {
   ref: r,
+  markdown: !0,
   ...a
 }));
 xa.displayName = "F0Text";
@@ -723,11 +724,11 @@ function Sa({ isOpen: a, onClose: r, title: t, children: s, module: o, portalCon
   });
 }
 function Xa({ isOpen: a, onClose: r, title: t, image: s, benefits: o, errorMessage: n, successMessage: i, loadingState: d, nextSteps: l, closeLabel: f, primaryAction: m, modalTitle: b, modalModule: P, secondaryAction: u, portalContainer: C, tag: F }) {
-  const [B, T] = x(a), [w, N] = x(null), [S, g] = x(!1), k = async () => {
+  const [B, k] = x(a), [w, N] = x(null), [S, g] = x(!1), T = async () => {
     if (m != null && m.onClick) {
       g(!0);
       try {
-        await m.onClick(), T(!1), N("success");
+        await m.onClick(), k(!1), N("success");
       } catch {
         N("error");
       } finally {
@@ -735,7 +736,7 @@ function Xa({ isOpen: a, onClose: r, title: t, image: s, benefits: o, errorMessa
       }
     }
   }, M = () => {
-    T(!1), r == null || r();
+    k(!1), r == null || r();
   }, R = S;
   return c(E, {
     children: [e(Sa, {
@@ -758,7 +759,7 @@ function Xa({ isOpen: a, onClose: r, title: t, image: s, benefits: o, errorMessa
               variant: m.variant,
               label: R ? d.label : m.label,
               icon: m.icon || void 0,
-              onClick: k,
+              onClick: T,
               loading: m.loading,
               size: m.size
             }), u && e(L, {
@@ -856,7 +857,7 @@ function Fa({ mediaUrl: a, title: r, description: t, onClose: s, dismissible: o,
     })
   });
 }
-const Ta = y(function({ primaryAction: r, secondaryAction: t, ...s }, o) {
+const ka = y(function({ primaryAction: r, secondaryAction: t, ...s }, o) {
   const n = (l) => l.variant === "promote" ? e(oe, {
     label: l.label,
     onRequest: async () => {
@@ -885,13 +886,13 @@ const Ta = y(function({ primaryAction: r, secondaryAction: t, ...s }, o) {
     children: [(r == null ? void 0 : r.variant) === "promote" && n(r), (t == null ? void 0 : t.variant) === "promote" && n(t)]
   });
 });
-Ta.displayName = "UpsellingBanner";
+ka.displayName = "UpsellingBanner";
 function Ka({ isOpen: a, setIsOpen: r, label: t, variant: s = "promote", size: o = "md", showIcon: n = !0, side: i = "right", align: d = "center", icon: l = Ge, mediaUrl: f, title: m, description: b, width: P = "300px", trackVisibility: u, actions: C, onClick: F, hideLabel: B = !1 }) {
-  const [T, w] = x(!1), [N, S] = x(null), [g, k] = x(null), M = (h) => {
+  const [k, w] = x(!1), [N, S] = x(null), [g, T] = x(null), M = (h) => {
     r(h), F && F();
   }, R = async (h) => {
     if (h.type === "upsell") {
-      k(h);
+      T(h);
       try {
         await h.onClick(), h.showConfirmation && (w(!0), S("success"));
       } catch {
@@ -899,8 +900,8 @@ function Ka({ isOpen: a, setIsOpen: r, label: t, variant: s = "promote", size: o
       }
     }
   }, ve = () => {
-    S(null), w(!1), k(null), r(!1);
-  }, xe = a && !T, be = C == null ? void 0 : C.map((h) => h.type === "upsell" ? {
+    S(null), w(!1), T(null), r(!1);
+  }, xe = a && !k, be = C == null ? void 0 : C.map((h) => h.type === "upsell" ? {
     ...h,
     onClick: () => R(h)
   } : h);
@@ -946,11 +947,11 @@ function Ka({ isOpen: a, setIsOpen: r, label: t, variant: s = "promote", size: o
     })]
   });
 }
-const ka = la(null), Ma = ({ children: a, fullScreen: r = !0 }) => {
+const Ta = la(null), Ma = ({ children: a, fullScreen: r = !0 }) => {
   const t = le(null), [s, o] = x(t.current);
   return ra(() => {
     o(t.current);
-  }, []), e(ka.Provider, {
+  }, []), e(Ta.Provider, {
     value: {
       element: s
     },
@@ -1044,11 +1045,11 @@ export {
   Ya as HomeLayout,
   Aa as LineChart,
   $a as Link,
-  Tr as OneFilterPicker,
+  kr as OneFilterPicker,
   Ha as PieChart,
   Qe as PrivacyModeProvider,
   he as ProductBlankslate,
-  kr as ProductCard,
+  Tr as ProductCard,
   Xa as ProductModal,
   Fa as ProductWidget,
   Wa as ProgressBarChart,
@@ -1056,7 +1057,7 @@ export {
   Mr as TagCounter,
   Ja as TwoColumnLayout,
   se as UpsellRequestResponseDialog,
-  Ta as UpsellingBanner,
+  ka as UpsellingBanner,
   oe as UpsellingButton,
   Ka as UpsellingPopover,
   qa as VerticalBarChart,
