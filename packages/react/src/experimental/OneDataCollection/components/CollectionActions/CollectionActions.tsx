@@ -24,9 +24,7 @@ export const CollectionActions = ({
     Array.isArray(primaryActions) ? primaryActions : [primaryActions]
   ).filter((item) => item !== undefined)
 
-  const secondaryActionsButtons = (secondaryActions || []).filter(
-    (action) => action.type !== "separator"
-  )
+  const secondaryActionsButtons = secondaryActions || []
   const dropdownActions = otherActions || []
 
   const [open, onOpenChange] = useState(false)

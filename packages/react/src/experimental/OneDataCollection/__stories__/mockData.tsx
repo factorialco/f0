@@ -1468,9 +1468,6 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       onClick: () => console.log(`Another user action`),
       description: "User actions",
     },
-
-    // Separator between action groups
-    { type: "separator" },
     {
       label: "Export",
       icon: Upload,

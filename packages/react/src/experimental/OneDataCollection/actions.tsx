@@ -37,7 +37,7 @@ export const getPrimaryActions = (
  */
 export type SecondaryActionsItemDefinition = Pick<
   DropdownItemObject,
-  "label" | "icon" | "description" | "critical"
+  "label" | "icon" | "description" | "critical" | "onClick"
 > & {
   enabled?: boolean
   hideLabelWhenExpanded?: boolean
