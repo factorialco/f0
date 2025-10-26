@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Check, Cross } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 

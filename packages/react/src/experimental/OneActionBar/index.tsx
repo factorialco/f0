@@ -1,6 +1,9 @@
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import {
+  ButtonDropdownGroup,
+  F0ButtonDropdown,
+} from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
@@ -130,21 +133,19 @@ export const OneActionBar = ({
    * Transforms the normalized primary actions into a format suitable for dropdown components.
    * Each action group and its items are mapped to the expected dropdown item structure.
    */
-  const primaryActionsDropdownItems = useMemo(() => {
+  const primaryActionsDropdownItems = useMemo<ButtonDropdownGroup[]>(() => {
     {
-      return primaryActions.map(
-        (group): ActionBarGroup => ({
-          ...group,
-          items: group.items.map((item) => ({
-            value: item.label,
-            label: item.label,
-            icon: item.icon,
-            critical: item.critical,
-            description: item.description,
-            disabled: item.disabled,
-          })),
-        })
-      )
+      return primaryActions.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          value: item.label,
+          label: item.label,
+          icon: item.icon,
+          critical: item.critical,
+          description: item.description,
+          disabled: item.disabled,
+        })),
+      }))
     }
   }, [primaryActions])
 

@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { OneModal } from "@/experimental/Modals/OneModal"
 import { useI18n } from "@/lib/providers/i18n"
