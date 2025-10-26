@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react"
 
 import userEvent from "@testing-library/user-event"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
-import { OneDatePickerPopup } from "./OneDatePickerPopup"
+import { DatePickerPopup } from "./DatePickerPopup"
 import { DatePreset } from "./types"
 
 // Mock ResizeObserver for tests
@@ -43,13 +43,13 @@ describe("OneDatePickerPopup", () => {
   })
 
   it("renders the trigger button", () => {
-    render(<OneDatePickerPopup {...defaultProps} />)
+    render(<DatePickerPopup {...defaultProps} />)
     expect(screen.getByText("Open Date Picker")).toBeInTheDocument()
   })
 
   it("shows presets when provided", async () => {
     const user = userEvent.setup()
-    render(<OneDatePickerPopup {...defaultProps} presets={mockPresets} />)
+    render(<DatePickerPopup {...defaultProps} presets={mockPresets} />)
 
     await user.click(screen.getByText("Open Date Picker"))
     expect(screen.getByRole("option", { name: "Today" })).toBeInTheDocument()
@@ -60,7 +60,7 @@ describe("OneDatePickerPopup", () => {
 
   it("calls onSelect when a preset is selected", async () => {
     const user = userEvent.setup()
-    render(<OneDatePickerPopup {...defaultProps} presets={mockPresets} />)
+    render(<DatePickerPopup {...defaultProps} presets={mockPresets} />)
 
     await user.click(screen.getByText("Open Date Picker"))
     await user.click(screen.getByRole("option", { name: "Today" }))
@@ -72,7 +72,7 @@ describe("OneDatePickerPopup", () => {
   it("shows granularity selector when multiple granularities are provided", async () => {
     const user = userEvent.setup()
     render(
-      <OneDatePickerPopup
+      <DatePickerPopup
         {...defaultProps}
         granularities={["day", "week", "month"]}
       />
@@ -87,7 +87,7 @@ describe("OneDatePickerPopup", () => {
 
   it("shows custom range mode when custom preset is selected", async () => {
     const user = userEvent.setup()
-    render(<OneDatePickerPopup {...defaultProps} presets={mockPresets} />)
+    render(<DatePickerPopup {...defaultProps} presets={mockPresets} />)
 
     await user.click(screen.getByText("Open Date Picker"))
     await user.click(screen.getByRole("option", { name: "Custom" }))
@@ -101,11 +101,7 @@ describe("OneDatePickerPopup", () => {
     const maxDate = new Date("2024-12-31")
 
     render(
-      <OneDatePickerPopup
-        {...defaultProps}
-        minDate={minDate}
-        maxDate={maxDate}
-      />
+      <DatePickerPopup {...defaultProps} minDate={minDate} maxDate={maxDate} />
     )
 
     await user.click(screen.getByText("Open Date Picker"))
@@ -115,7 +111,7 @@ describe("OneDatePickerPopup", () => {
   })
 
   it("handles disabled state correctly", async () => {
-    render(<OneDatePickerPopup {...defaultProps} disabled />)
+    render(<DatePickerPopup {...defaultProps} disabled />)
 
     const trigger = screen.getByText("Open Date Picker")
     // Try to click the trigger

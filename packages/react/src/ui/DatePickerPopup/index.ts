@@ -1,3 +1,3 @@
-export * from "./OneDatePickerPopup"
+export * from "./DatePickerPopup"
 export * from "./types"
 export * from "./utils"

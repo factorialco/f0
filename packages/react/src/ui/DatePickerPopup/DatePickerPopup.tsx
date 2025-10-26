@@ -29,7 +29,7 @@ export type DatePickerCompareTo = Record<
   CompareToDef[]
 >
 
-export interface OneDatePickerPopupProps {
+export interface DatePickerPopupProps {
   onSelect?: (value: DatePickerValue | undefined) => void
   value?: DatePickerValue
   defaultValue?: DatePickerValue
@@ -44,6 +44,8 @@ export interface OneDatePickerPopupProps {
   onOpenChange?: (open: boolean) => void
   compareTo?: DatePickerCompareTo
   defaultCompareTo?: CompareToDefKey
+  hideCalendarInput?: boolean
+  asChild?: boolean
   onCompareToChange?: (
     compareTo: DateRangeComplete | DateRangeComplete[] | undefined
   ) => void
@@ -51,7 +53,7 @@ export interface OneDatePickerPopupProps {
 
 const PRESET_CUSTOM = "__custom__"
 
-export function OneDatePickerPopup({
+export function DatePickerPopup({
   onSelect,
   defaultValue,
   presets = [],
@@ -60,19 +62,20 @@ export function OneDatePickerPopup({
   compareTo,
   defaultCompareTo,
   onCompareToChange,
+  hideCalendarInput,
   value,
+  asChild,
   ...props
-}: OneDatePickerPopupProps) {
+}: DatePickerPopupProps) {
   const i18n = useI18n()
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
     value || defaultValue
   )
 
   useEffect(() => {
-    if (isSameDatePickerValue(value, localValue)) {
-      return
+    if (!isSameDatePickerValue(value, localValue)) {
+      setLocalValue(value || defaultValue)
     }
-    setLocalValue(value || defaultValue)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, defaultValue])
 
@@ -97,6 +100,10 @@ export function OneDatePickerPopup({
   }
 
   const handleSelect = (value: DatePickerValue) => {
+    if (isSameDatePickerValue(value, localValue)) {
+      return
+    }
+
     setLocalValue(value)
     onSelect?.(value)
   }
@@ -215,7 +222,7 @@ export function OneDatePickerPopup({
 
   return (
     <Popover open={props.open} onOpenChange={props.onOpenChange}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent className="w-full overflow-auto" align="start">
         {showPresets ? (
           <PresetList
@@ -248,7 +255,7 @@ export function OneDatePickerPopup({
             )}
             <div className="min-w-[300px] flex-1">
               <OneCalendar
-                showInput
+                showInput={!hideCalendarInput}
                 mode={calendarMode}
                 view={calendarView}
                 onSelect={handleSelectDate}
