@@ -1,7 +1,4 @@
-import {
-  DropdownItem,
-  DropdownItemObject,
-} from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { DropdownItemObject } from "@/experimental/Navigation/Dropdown/internal.tsx"
 
 export type PrimaryActionsDefinition = Pick<
   DropdownItemObject,
@@ -38,7 +35,10 @@ export const getPrimaryActions = (
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-export type SecondaryActionsItemDefinition = DropdownItem & {
+export type SecondaryActionsItemDefinition = Pick<
+  DropdownItemObject,
+  "label" | "icon" | "description" | "critical"
+> & {
   enabled?: boolean
   hideLabelWhenExpanded?: boolean
 }
