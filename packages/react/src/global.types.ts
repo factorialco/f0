@@ -1,5 +1,5 @@
 export type UrlString = `http://${string}` | `https://${string}`
 
-export interface DataAttributes {
+export type DataAttributes = {
   [key: `data-${string}`]: string | undefined
 }
