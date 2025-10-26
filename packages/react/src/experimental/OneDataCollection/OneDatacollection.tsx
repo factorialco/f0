@@ -14,6 +14,7 @@ import type {
 } from "../../components/OneFilterPicker/types"
 import { ActionBarItem, OneActionBar } from "../OneActionBar"
 import {
+  filterActions,
   getPrimaryActions,
   getSecondaryActions,
   MAX_EXPANDED_ACTIONS,
@@ -213,7 +214,7 @@ const OneDataCollectionComp = <
   )
 
   const allSecondaryActions = useMemo(
-    () => getSecondaryActions(secondaryActions),
+    () => filterActions(getSecondaryActions(secondaryActions)),
     [secondaryActions]
   )
 
@@ -229,15 +230,24 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
+  // Extracts the expandedSecondaryActions from the first group
   const secondaryActionsItems = useMemo(
-    () => allSecondaryActions.slice(0, expandedSecondaryActions) || [],
+    () =>
+      allSecondaryActions[0]?.items.slice(0, expandedSecondaryActions) || [],
     [allSecondaryActions, expandedSecondaryActions]
   )
 
-  const otherActionsItems = useMemo(
-    () => allSecondaryActions.slice(expandedSecondaryActions),
-    [allSecondaryActions, expandedSecondaryActions]
-  )
+  // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
+  const otherActionsItems = useMemo(() => {
+    return [
+      {
+        ...allSecondaryActions[0],
+        items:
+          allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
+      },
+      ...allSecondaryActions.slice(1),
+    ].filter((group) => group.items.length > 0)
+  }, [allSecondaryActions, expandedSecondaryActions])
 
   const hasCollectionsActions =
     primaryActionItems?.length > 0 || allSecondaryActions?.length > 0

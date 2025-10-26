@@ -21,7 +21,7 @@ import { DropdownItemContent } from "./DropdownItem"
 export type DropdownItemSeparator = { type: "separator" }
 export type DropdownItem = DropdownItemObject | DropdownItemSeparator
 
-export type DropdownItemObject = NavigationItem & {
+export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   type?: "item"
   onClick?: () => void
   icon?: IconType
@@ -105,7 +105,7 @@ export function DropdownInternal({
             hideLabel
             icon={icon}
             size={size}
-            label={i18n.actions.toggle_dropdown_menu}
+            label={i18n.actions.toggleDropdownMenu}
             variant="outline"
             pressed={open}
             compact

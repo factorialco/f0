@@ -10,6 +10,8 @@ export type TabItem = {
   label: string
   index?: boolean
   variant?: "default" | "upsell"
+  // TODO: This is a temporary solution to allow for onClick handling. We should find a better way to handle this.
+  onClick?: () => void
 } & DataAttributes &
   ({ href: string } | { id: string })
 

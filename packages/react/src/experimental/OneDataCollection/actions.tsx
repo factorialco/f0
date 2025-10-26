@@ -1,6 +1,6 @@
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown/internal.tsx"
 
-export type PrimaryActionsDefinition = Pick<
+export type PrimaryActionItemDefinition = Pick<
   DropdownItemObject,
   "onClick" | "label" | "icon"
 >
@@ -10,8 +10,8 @@ export type PrimaryActionsDefinition = Pick<
  * @returns An action
  */
 export type PrimaryActionsDefinitionFn = () =>
-  | PrimaryActionsDefinition
-  | PrimaryActionsDefinition[]
+  | PrimaryActionItemDefinition
+  | PrimaryActionItemDefinition[]
   | undefined
 
 /**
@@ -19,7 +19,7 @@ export type PrimaryActionsDefinitionFn = () =>
  */
 export const getPrimaryActions = (
   primaryActions: PrimaryActionsDefinitionFn | undefined
-): PrimaryActionsDefinition[] => {
+): PrimaryActionItemDefinition[] => {
   if (!primaryActions) {
     return []
   }
@@ -27,7 +27,7 @@ export const getPrimaryActions = (
   const items = primaryActions()
 
   return (Array.isArray(items) ? items : [items]).filter(
-    (item): item is PrimaryActionsDefinition => item !== undefined
+    (item): item is PrimaryActionItemDefinition => item !== undefined
   )
 }
 
@@ -35,7 +35,7 @@ export const getPrimaryActions = (
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-export type SecondaryActionsItemDefinition = Pick<
+export type SecondaryActionItem = Pick<
   DropdownItemObject,
   "label" | "icon" | "description" | "critical" | "onClick"
 > & {
@@ -43,7 +43,49 @@ export type SecondaryActionsItemDefinition = Pick<
   hideLabelWhenExpanded?: boolean
 }
 
+export type SecondaryActionGroup = {
+  label?: string
+  items: SecondaryActionItem[]
+}
+
+export type SecondaryActionsItems =
+  | SecondaryActionItem[]
+  | SecondaryActionItem[][]
+  | SecondaryActionGroup[]
+
 export const MAX_EXPANDED_ACTIONS = 2
+
+const isSecondaryActionGroup = (
+  item: SecondaryActionsItems[number]
+): item is SecondaryActionGroup => {
+  return "items" in item
+}
+
+const isSecondaryActionItem = (
+  item: SecondaryActionsItems[number]
+): item is SecondaryActionItem => {
+  return "label" in item && !("items" in item)
+}
+
+const normalizeSecondaryActions = (
+  items: SecondaryActionsItems
+): SecondaryActionGroup[] => {
+  if (items.every(isSecondaryActionGroup)) {
+    return items
+  }
+
+  if (items.every(isSecondaryActionItem)) {
+    return [
+      {
+        items: items,
+      },
+    ]
+  }
+
+  return items.map((item) => ({
+    items: item,
+  })) satisfies SecondaryActionGroup[]
+}
 
 type Enumerate<
   N extends number,
@@ -55,24 +97,26 @@ type Enumerate<
 export type SecondaryActionsDefinition =
   | {
       expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>
-      actions: () => Array<SecondaryActionsItemDefinition> | undefined
+      actions: () => SecondaryActionsItems | undefined
     }
-  | (() => Array<SecondaryActionsItemDefinition> | undefined)
+  | (() => SecondaryActionsItems | undefined)
 
 /**
  * Get the secondaryActionsItems from the secondaryActionsDefinition or the actions property
  */
 export const getSecondaryActions = (
   secondaryActions: SecondaryActionsDefinition | undefined
-): SecondaryActionsItemDefinition[] => {
+): SecondaryActionGroup[] => {
   if (!secondaryActions) {
     return []
   }
 
   if (typeof secondaryActions === "function") {
-    return secondaryActions() || []
+    return normalizeSecondaryActions(secondaryActions() || [])
   }
-  return "actions" in secondaryActions ? secondaryActions.actions() || [] : []
+  return "actions" in secondaryActions
+    ? normalizeSecondaryActions(secondaryActions.actions() || [])
+    : []
 }
 
 /**
@@ -81,8 +125,13 @@ export const getSecondaryActions = (
  * @returns An array of filtered actions
  */
 export const filterActions = (
-  actions: SecondaryActionsDefinition
-): SecondaryActionsItemDefinition[] =>
-  getSecondaryActions(actions).filter(
-    (action) => action.enabled === undefined || action.enabled
-  )
+  groups: SecondaryActionGroup[]
+): SecondaryActionGroup[] =>
+  groups.map((group) => {
+    return {
+      ...group,
+      items: group.items.filter(
+        (action) => action.enabled === undefined || action.enabled
+      ),
+    }
+  })

@@ -22,7 +22,6 @@ export const Default: Story = {
         onClick: () => console.log("Create clicked"),
         icon: Icons.Add,
         description: "New creation process",
-        "data-test": "foo",
       },
       {
         label: "Edit",
@@ -62,7 +61,6 @@ export const PlayTest: Story = {
         onClick: () => console.log("Create clicked"),
         icon: Icons.Add,
         description: "New creation process",
-        "data-test": "foo",
       },
       {
         label: "Edit",
