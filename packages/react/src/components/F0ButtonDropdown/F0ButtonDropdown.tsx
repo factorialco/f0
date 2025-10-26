@@ -1,7 +1,7 @@
 import { F0Icon } from "@/components/F0Icon"
 import {
   DropdownInternal,
-  DropdownItemSeparator,
+  DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
 import { ChevronDown } from "@/icons/app/index.ts"
 import { useI18n } from "@/lib/providers/i18n"
@@ -10,15 +10,43 @@ import { Action } from "@/ui/Action/index.tsx"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants.ts"
 import { useMemo, useState } from "react"
 import {
+  ButtonDropdownGroup,
   ButtonDropdownItem,
   ButtonDropdownSize,
   ButtonDropdownVariant,
   F0ButtonDropdownProps,
 } from "./types.ts"
 
+/**
+ * Normalize the items to an array of DropdownButtonGroup
+ */
+const normalizeItems = (
+  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
+) => {
+  if (Array.isArray(items)) {
+    // ButtonDropdownItem[]
+    if (items.every(isButtonDropdownItem)) {
+      return [
+        {
+          items: items,
+        },
+      ]
+    } else {
+      // ButtonDropdownGroup[]
+      return items
+    }
+  } else {
+    // ButtonDropdownGroup
+    return [items]
+  }
+}
+
 export type F0DropdownButtonProps<T = string> = {
   size?: ButtonDropdownSize
-  items: (ButtonDropdownItem<T> | DropdownItemSeparator)[]
+  items:
+    | ButtonDropdownItem<T>[]
+    | ButtonDropdownGroup<T>[]
+    | ButtonDropdownGroup<T>
   variant?: ButtonDropdownVariant
   value?: T
   disabled?: boolean
@@ -26,14 +54,13 @@ export type F0DropdownButtonProps<T = string> = {
   onClick: (value: T, item: ButtonDropdownItem<T>) => void
 }
 
-function isButtonDropdownItem<T>(
-  item: ButtonDropdownItem<T> | DropdownItemSeparator
+function isButtonDropdownItem<T = string>(
+  item: ButtonDropdownItem<T> | ButtonDropdownGroup<T>
 ): item is ButtonDropdownItem<T> {
   return "value" in item
 }
 
 const F0ButtonDropdown = ({
-  items,
   onClick,
   value,
   ...props
@@ -41,23 +68,30 @@ const F0ButtonDropdown = ({
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
-  const selectableItems = useMemo(
-    () => items.filter(isButtonDropdownItem),
-    [items]
+  /**
+   * Normalize the items to an array of DropdownButtonGroup
+   */
+  const items: ButtonDropdownGroup<string>[] = useMemo(
+    () => normalizeItems(props.items),
+    [props.items]
   )
 
+  const flattenedItems = useMemo(() => {
+    return items.flatMap((item) => item.items)
+  }, [items])
+
   const localValue = useMemo(
-    () => value || selectableItems[0]?.value,
-    [value, selectableItems]
+    () => value || flattenedItems[0]?.value,
+    [value, flattenedItems]
   )
 
   const selectedItem = useMemo(
-    () => selectableItems.find((item) => item.value === localValue),
-    [localValue, selectableItems]
+    () => flattenedItems.find((item) => item.value === localValue),
+    [localValue, flattenedItems]
   )
 
   const handleClick = () => {
-    const item = selectableItems.find((item) => item.value === localValue)
+    const item = flattenedItems.find((item) => item.value === localValue)
     if (item) {
       onClick(localValue, item)
     }
@@ -66,21 +100,26 @@ const F0ButtonDropdown = ({
   const dropdownItems = useMemo(
     () =>
       items
-        .filter(
-          (item) => !isButtonDropdownItem(item) || item.value !== localValue
-        )
-        .map((item) =>
-          isButtonDropdownItem(item)
-            ? {
+        .map((group) => group.items)
+        .reduce<DropdownItem[]>((acc, curr) => {
+          if (acc.length > 0) {
+            acc.push({ type: "separator" })
+          }
+          acc.push(
+            ...curr
+              // exclude the selected item
+              .filter((item) => item.value !== localValue)
+              .map((item) => ({
                 ...item,
                 onClick: () => {
                   onClick(item.value, item)
                   setIsOpen(false)
                 },
-              }
-            : item
-        ),
-    [items, localValue, onClick]
+              }))
+          )
+          return acc
+        }, []),
+    [items, onClick, localValue]
   )
 
   const dropdownSize =

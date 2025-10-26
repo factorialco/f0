@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Add, Replace } from "@/icons/app/index.ts"
+import { Add, Pencil, Replace, Save } from "@/icons/app/index.ts"
 import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
 import { F0ButtonDropdown } from "../index"
 import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
@@ -121,6 +121,73 @@ export const WithTooltip: Story = {
       {
         value: "3",
         label: "Item 3",
+      },
+    ],
+  },
+}
+
+export const WithDescription: Story = {
+  args: {
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        description: "New creation process",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        description: "Edit item's information",
+        icon: Pencil,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+        description: "Save changes",
+        icon: Save,
+      },
+      {
+        value: "4",
+        label: "Item 4",
+        description: "Delete item",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+}
+
+export const WithGroups: Story = {
+  args: {
+    items: [
+      {
+        label: "Group 1",
+        items: [
+          {
+            value: "1",
+            label: "Item 1",
+            description: "New creation process",
+            icon: Add,
+          },
+          {
+            value: "2",
+            label: "Item 2",
+            description: "Edit item's information",
+            icon: Pencil,
+          },
+        ],
+      },
+      {
+        label: "Group 2",
+        items: [
+          {
+            value: "3",
+            label: "Item 3",
+            description: "Save changes",
+            icon: Save,
+          },
+        ],
       },
     ],
   },

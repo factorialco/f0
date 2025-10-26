@@ -13,6 +13,7 @@ import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
 import { ChatSpinner } from "./ChatSpinner"
+import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
   isGenerating,
@@ -20,8 +21,6 @@ export const AssistantMessage = ({
   markdownTagRenderers,
   message,
   onCopy,
-  onThumbsDown,
-  onThumbsUp,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
   const isThinkingTool =
@@ -39,9 +38,8 @@ export const AssistantMessage = ({
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
-  const [reactionValue, setReactionValue] = useState<"like" | "dislike" | null>(
-    null
-  )
+  const { open: openFeedbackModal } = useFeedbackModal()
+  const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
   const [isHovered, setIsHovered] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
   const handleMouseEnter = useCallback(() => {
@@ -113,8 +111,11 @@ export const AssistantMessage = ({
                   hideLabel
                   disabled={isGenerating}
                   onClick={(e) => {
-                    setReactionValue((val) => (val === "like" ? null : "like"))
-                    onThumbsUp?.(message)
+                    const newValue = reactionValue === "like" ? null : "like"
+                    if (newValue) {
+                      openFeedbackModal(newValue, message)
+                    }
+                    setReactionValue(newValue)
                     e.currentTarget.blur()
                   }}
                 />
@@ -130,10 +131,12 @@ export const AssistantMessage = ({
                   hideLabel
                   disabled={isGenerating}
                   onClick={(e) => {
-                    setReactionValue((val) =>
-                      val === "dislike" ? null : "dislike"
-                    )
-                    onThumbsDown?.(message)
+                    const newValue =
+                      reactionValue === "dislike" ? null : "dislike"
+                    if (newValue) {
+                      openFeedbackModal(newValue, message)
+                    }
+                    setReactionValue(newValue)
                     e.currentTarget.blur()
                   }}
                 />

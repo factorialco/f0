@@ -81,6 +81,12 @@ export type ButtonInternalProps = Pick<
      * If true, the button will not automatically add a title based label
      */
     noTitle?: boolean
+
+    /**
+     * @private
+     * The style of the button.
+     */
+    style?: React.CSSProperties
   } & ( // Target can only be used if href is provided
     | {
         /**

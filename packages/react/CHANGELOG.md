@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.242.1](https://github.com/factorialco/f0/compare/f0-react-v1.242.0...f0-react-v1.242.1) (2025-10-24)
+
+
+### Bug Fixes
+
+* export combochart ([#2876](https://github.com/factorialco/f0/issues/2876)) ([603a1d4](https://github.com/factorialco/f0/commit/603a1d4be22f43967a0e916bb8566b2692a6f9bb))
+
+## [1.242.0](https://github.com/factorialco/f0/compare/f0-react-v1.241.2...f0-react-v1.242.0) (2025-10-24)
+
+
+### Features
+
+* **aichat:** show popup asking for feedback ([#2869](https://github.com/factorialco/f0/issues/2869)) ([65491b7](https://github.com/factorialco/f0/commit/65491b7ee7b7087be444777af2f2b3d72c4a7760))
+
+## [1.241.2](https://github.com/factorialco/f0/compare/f0-react-v1.241.1...f0-react-v1.241.2) (2025-10-24)
+
+
+### Bug Fixes
+
+* truncate input value to maxLenght when the value is updated via prop ([#2816](https://github.com/factorialco/f0/issues/2816)) ([a75ffb6](https://github.com/factorialco/f0/commit/a75ffb6434d7ae06173b37691488f072965dbb96))
+
 ## [1.241.1](https://github.com/factorialco/f0/compare/f0-react-v1.241.0...f0-react-v1.241.1) (2025-10-23)
 
 

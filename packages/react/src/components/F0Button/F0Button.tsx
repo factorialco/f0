@@ -13,6 +13,7 @@ const privateProps = [
   "compact",
   "noTitle",
   "noAutoTooltip",
+  "style",
 ] as const
 
 export type F0ButtonProps = Omit<

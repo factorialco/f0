@@ -2,7 +2,7 @@ import { useLayout } from "@/components/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
@@ -12,7 +12,7 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
-import { OneActionBar } from "../OneActionBar"
+import { ActionBarItem, OneActionBar } from "../OneActionBar"
 import {
   getPrimaryActions,
   getSecondaryActions,
@@ -269,6 +269,45 @@ const OneDataCollectionComp = <
     | { warningMessage: string }
     | undefined
   >(undefined)
+
+  const groupItems = useCallback((items: MappedBulkAction[] | undefined) => {
+    if (!items) {
+      return []
+    }
+    const groups = []
+    let currentGroupItems: ActionBarItem[] = []
+    for (const item of items) {
+      if ("type" in item && item.type === "separator") {
+        groups.push({ items: currentGroupItems })
+        currentGroupItems = []
+      } else {
+        currentGroupItems.push(item as ActionBarItem)
+      }
+    }
+    if (currentGroupItems.length > 0) {
+      groups.push({ items: currentGroupItems })
+    }
+    return groups
+  }, [])
+  /**
+   * Creates the bulk actions groups to avoid change the datacollection interface
+   */
+  const bulkActionsGroups = useMemo(() => {
+    if (!bulkActions) {
+      return undefined
+    }
+    if ("warningMessage" in bulkActions) {
+      return {
+        warningMessage: bulkActions.warningMessage,
+      }
+    }
+    return {
+      primary: groupItems(bulkActions.primary ?? []),
+      secondary: (bulkActions?.secondary ?? []).filter(
+        (action) => !("type" in action && action.type === "separator")
+      ) as ActionBarItem[],
+    }
+  }, [bulkActions, groupItems])
 
   const [showActionBar, setShowActionBar] = useState(false)
 
@@ -683,10 +722,14 @@ const OneDataCollectionComp = <
               isOpen={showActionBar}
               selectedNumber={selectedItemsCount}
               primaryActions={
-                "primary" in bulkActions ? bulkActions?.primary : []
+                bulkActionsGroups && "primary" in bulkActionsGroups
+                  ? bulkActionsGroups.primary
+                  : []
               }
               secondaryActions={
-                "secondary" in bulkActions ? bulkActions?.secondary : []
+                bulkActionsGroups && "secondary" in bulkActionsGroups
+                  ? bulkActionsGroups.secondary
+                  : []
               }
               warningMessage={
                 "warningMessage" in bulkActions

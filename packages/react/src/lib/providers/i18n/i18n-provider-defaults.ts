@@ -21,6 +21,7 @@ export const defaultTranslations = {
     add: "Add",
     edit: "Edit",
     save: "Save",
+    send: "Send",
     cancel: "Cancel",
     copy: "Copy",
     close: "Close",
@@ -191,10 +192,26 @@ export const defaultTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Write something here...",
+    inputPlaceholder: "Ask about time, people, or company info…",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
+    feedbackModal: {
+      positive: {
+        title: "What did you like about this response?",
+        placeholder:
+          "What did you like about this response? How could it be even better?",
+        description:
+          "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.",
+      },
+      negative: {
+        title: "What could have been better in this response?",
+        placeholder:
+          "What could have been better in this response? How could it be even better?",
+        description:
+          "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.",
+      },
+    },
   },
   select: {
     noResults: "No results found",

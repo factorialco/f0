@@ -18,6 +18,7 @@ describe("I18nProvider", () => {
         add: "Add",
         edit: "Edit",
         save: "Desar",
+        send: "Enviar",
         cancel: "Cancelar",
         copy: "Copiar",
         skipToContent: "Saltar a contenido",
