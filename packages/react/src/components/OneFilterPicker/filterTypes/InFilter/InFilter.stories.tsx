@@ -350,17 +350,24 @@ const mockUsers: MockUser[] = generateMockUsers(30)
 const DataSourceFilterOptions: InFilterOptions<string, MockUser> = {
   source: createDataSourceDefinition({
     dataAdapter: {
-      fetchData: async ({ pagination }) => {
+      fetchData: async ({ pagination, search }) => {
         const { cursor, perPage = 10 } = pagination
         const startIndex = cursor ? parseInt(cursor) : 0
         const endIndex = startIndex + perPage
-        const paginatedUsers = mockUsers.slice(startIndex, endIndex)
-        const hasMore = endIndex < mockUsers.length
+
+        const users = search
+          ? mockUsers.filter((user) =>
+              user.name.toLowerCase().includes(search.toLowerCase())
+            )
+          : mockUsers
+
+        const paginatedUsers = users.slice(startIndex, endIndex)
+        const hasMore = endIndex < users.length
         const nextCursor = hasMore ? endIndex.toString() : null
 
         return {
           records: paginatedUsers,
-          total: mockUsers.length,
+          total: users.length,
           perPage,
           type: "infinite-scroll",
           cursor: nextCursor,

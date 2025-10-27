@@ -34,9 +34,13 @@ export async function loadOptions<T>(
   return options
 }
 
-export function useLoadOptions<T, R extends RecordType = RecordType>(
+export function useLoadOptions<T, R extends RecordType = RecordType>({
+  schema,
+  search,
+}: {
   schema: InFilterDefinition<T, R>
-) {
+  search: string | undefined
+}) {
   const cacheKey = getCacheKey(schema)
 
   // Only use state for async options
@@ -54,7 +58,7 @@ export function useLoadOptions<T, R extends RecordType = RecordType>(
           ...source,
           search: {
             enabled: true,
-            sync: false,
+            sync: true,
           },
         }
       : {
@@ -68,7 +72,7 @@ export function useLoadOptions<T, R extends RecordType = RecordType>(
   )
 
   const { data, isInitialLoading, loadMore, isLoadingMore, paginationInfo } =
-    useData(dataSource, {}, [source])
+    useData({ ...dataSource, currentSearch: search }, {}, [source])
 
   const materializeOptions = useCallback(
     async (clearCache = false) => {

@@ -82,8 +82,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   const [searchTerm, setSearchTerm] = useState("")
 
   const { options, isLoading, error, loadOptions, loadMore } = useLoadOptions({
-    ...schema,
-    type: "in",
+    schema: {
+      ...schema,
+      type: "in",
+    },
+    search: searchTerm,
   })
 
   useEffect(() => {
@@ -92,10 +95,12 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const filteredOptions = useMemo(
     () =>
-      options.filter((option) =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [options, searchTerm]
+      "source" in schema.options
+        ? options
+        : options.filter((option) =>
+            option.label.toLowerCase().includes(searchTerm.toLowerCase())
+          ),
+    [schema, options, searchTerm]
   )
 
   const items = useMemo(
@@ -210,11 +215,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
               {isCompactMode && (
                 <>
                   <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-                  <div
-                    className={cn(
-                      "flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1"
-                    )}
-                  >
+                  <div className="flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1">
                     <span className="max-w-[250px] flex-1 whitespace-nowrap">
                       <OneEllipsis className="text-f1-foreground-secondary">
                         {selectedText}
