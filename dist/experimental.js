@@ -27939,9 +27939,6 @@ function oH({ value: t, onChange: e, filter: n }) {
   });
 }
 const aH = {
-  valueConverter: function(t, e, n) {
-    return t;
-  },
   render: (t) => f(oH, {
     ...t
   })
