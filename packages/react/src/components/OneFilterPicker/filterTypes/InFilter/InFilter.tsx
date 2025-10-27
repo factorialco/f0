@@ -189,7 +189,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   return (
     <div aria-label={schema.label}>
-      <Select value={value} onValueChange={onChange} multiple asList>
+      <Select value={value} onValueChange={onChange} multiple asListWithScroll>
         <SelectContent
           items={items}
           onScrollBottom={loadMore}

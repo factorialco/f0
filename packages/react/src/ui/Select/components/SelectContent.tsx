@@ -110,7 +110,14 @@ const SelectContent = forwardRef<
     const [animationStarted, setAnimationStarted] = useState(false)
 
     // Get the value and the open status from the select context
-    const { value, open, asList } = useContext(SelectContext)
+    const {
+      value,
+      open,
+      asList: asListProp,
+      asListWithScroll,
+    } = useContext(SelectContext)
+
+    const asList = asListProp || asListWithScroll
 
     const valueArray = useMemo(
       () =>
@@ -206,7 +213,6 @@ const SelectContent = forwardRef<
 
     const content = (
       <SelectPrimitive.Content
-        asChild={asList}
         ref={ref}
         className={cn(
           "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
@@ -246,28 +252,28 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                taller ? "max-h-[440px]" : "max-h-[300px]",
+                asList && !asListWithScroll
+                  ? "max-h-full"
+                  : taller
+                    ? "max-h-[440px]"
+                    : "max-h-[300px]",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
               scrollMargin={scrollMargin}
             >
-              {asList ? (
-                viewportContent
-              ) : (
-                <SelectPrimitive.Viewport
-                  asChild
-                  className={cn(
-                    "p-1",
-                    !asList &&
-                      position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
-                  )}
-                >
-                  {viewportContent}
-                </SelectPrimitive.Viewport>
-              )}
+              <SelectPrimitive.Viewport
+                asChild
+                className={cn(
+                  "p-1",
+                  !asList &&
+                    position === "popper" &&
+                    "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                )}
+              >
+                {viewportContent}
+              </SelectPrimitive.Viewport>
             </ScrollArea>
           </div>
           {props.bottom}
