@@ -8,6 +8,7 @@ import { Spinner } from "@/experimental/Information/Spinner"
 import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Select, SelectContent, SelectItem } from "@/ui/Select"
 import { useEffect, useMemo, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
@@ -80,21 +81,39 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const [searchTerm, setSearchTerm] = useState("")
 
-  const { options, isLoading, error, loadOptions, loadMore, hasMore } =
-    useLoadOptions({
-      ...schema,
-      type: "in",
-    })
+  const { options, isLoading, error, loadOptions, loadMore } = useLoadOptions({
+    ...schema,
+    type: "in",
+  })
 
   useEffect(() => {
     setSearchTerm("")
   }, [schema])
 
-  const filteredOptions = useMemo(() => {
-    return options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [options, searchTerm])
+  const filteredOptions = useMemo(
+    () =>
+      options.filter((option) =>
+        option.label.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [options, searchTerm]
+  )
+
+  const items = useMemo(
+    () =>
+      (filteredOptions || []).map((option) => ({
+        value: option.value,
+        height: 40,
+        item: (
+          <SelectItem
+            value={option.value}
+            className="pb-2 pt-2 font-medium first-of-type:pb-2 first-of-type:pt-2"
+          >
+            {option.label}
+          </SelectItem>
+        ),
+      })),
+    [filteredOptions]
+  )
 
   if (isLoading) {
     return (
@@ -168,128 +187,78 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       : i18n.status.selected.plural
   }`.toLowerCase()
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
-    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 10
-
-    if (isNearBottom && hasMore && loadMore && !isLoading) {
-      loadMore()
-    }
-  }
-
   return (
-    <div
-      className="flex min-h-full w-full flex-col"
-      role="group"
-      aria-label={schema.label}
-    >
-      {showSearch && (
-        <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
-          <F1SearchBox
-            placeholder={i18n.toc.search}
-            value={searchTerm}
-            onChange={setSearchTerm}
-            clearable
-          />
-        </div>
-      )}
-      {isCompactMode && (
-        <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-      )}
-      <div
-        className={cn(
-          "max-h-[350px] overflow-y-scroll px-2",
-          isCompactMode && "px-1"
-        )}
-        onScroll={handleScroll}
-      >
-        {isCompactMode && (
-          <div
-            className={cn(
-              "flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1"
-            )}
-          >
-            <span className="max-w-[250px] flex-1 whitespace-nowrap">
-              <OneEllipsis className="text-f1-foreground-secondary">
-                {selectedText}
-              </OneEllipsis>
-            </span>
-            <F0Checkbox
-              id="select-all"
-              title="Select all"
-              checked={value.length === filteredOptions.length}
-              onCheckedChange={handleCheckSelectAll}
-              presentational
-              hideLabel
-            />
-          </div>
-        )}
-        {filteredOptions.map((option) => {
-          const isSelected = value.includes(option.value)
-          const optionId = `option-${String(option.value)}`
-
-          return (
-            <div
-              key={String(option.value)}
-              className={cn(
-                "flex w-full flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded p-2 font-medium transition-colors hover:bg-f1-background-secondary",
-                isCompactMode && "py-1 pr-1",
-                focusRing()
+    <div aria-label={schema.label}>
+      <Select value={value} onValueChange={onChange} multiple asList>
+        <SelectContent
+          items={items}
+          onScrollBottom={loadMore}
+          isLoading={isLoading}
+          isLoadingMore={isLoading}
+          top={
+            <div className="flex min-h-full w-full flex-col">
+              {showSearch && (
+                <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
+                  <F1SearchBox
+                    placeholder={i18n.toc.search}
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    clearable
+                  />
+                </div>
               )}
-              onClick={() => {
-                onChange(
-                  isSelected
-                    ? value.filter((v) => v !== option.value)
-                    : [...value, option.value]
-                )
-              }}
-            >
-              <span className="max-w-[250px] flex-1 whitespace-nowrap">
-                <OneEllipsis>{option.label}</OneEllipsis>
-              </span>
-              <F0Checkbox
-                id={optionId}
-                title={option.label}
-                checked={isSelected}
-                presentational
-                hideLabel
-              />
+              {isCompactMode && (
+                <>
+                  <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
+                  <div
+                    className={cn(
+                      "flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1"
+                    )}
+                  >
+                    <span className="max-w-[250px] flex-1 whitespace-nowrap">
+                      <OneEllipsis className="text-f1-foreground-secondary">
+                        {selectedText}
+                      </OneEllipsis>
+                    </span>
+                    <F0Checkbox
+                      id="select-all"
+                      title="Select all"
+                      checked={value.length === filteredOptions.length}
+                      onCheckedChange={handleCheckSelectAll}
+                      presentational
+                      hideLabel
+                    />
+                  </div>
+                </>
+              )}
             </div>
-          )
-        })}
-        {hasMore && loadMore && (
-          <div className="flex w-full items-center justify-center py-2">
-            <Button
-              variant="outline"
-              label={isLoading ? "Loading..." : "Load More"}
-              onClick={loadMore}
-              disabled={isLoading}
-              size="sm"
-            />
-          </div>
-        )}
-      </div>
-      {!isCompactMode && (
-        <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-          <Button
-            variant="outline"
-            label="Select all"
-            onClick={handleSelectAll}
-            disabled={
-              filteredOptions.length === 0 ||
-              (Array.isArray(value) && value.length === filteredOptions.length)
-            }
-            size="sm"
-          />
-          <Button
-            variant="ghost"
-            label="Clear"
-            onClick={handleClear}
-            disabled={!Array.isArray(value) || value.length === 0}
-            size="sm"
-          />
-        </div>
-      )}
+          }
+          bottom={
+            !isCompactMode && (
+              <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+                <Button
+                  variant="outline"
+                  label="Select all"
+                  onClick={handleSelectAll}
+                  disabled={
+                    filteredOptions.length === 0 ||
+                    (Array.isArray(value) &&
+                      value.length === filteredOptions.length)
+                  }
+                  size="sm"
+                />
+                <Button
+                  variant="ghost"
+                  label="Clear"
+                  onClick={handleClear}
+                  disabled={!Array.isArray(value) || value.length === 0}
+                  size="sm"
+                />
+              </div>
+            )
+          }
+        />
+      </Select>
     </div>
   )
 }

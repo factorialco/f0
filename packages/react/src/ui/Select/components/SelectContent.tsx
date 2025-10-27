@@ -246,11 +246,7 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList
-                  ? "max-h-full"
-                  : taller
-                    ? "max-h-[440px]"
-                    : "max-h-[300px]",
+                taller ? "max-h-[440px]" : "max-h-[300px]",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}
