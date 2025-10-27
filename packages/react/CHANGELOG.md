@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.244.1](https://github.com/factorialco/f0/compare/f0-react-v1.244.0...f0-react-v1.244.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* add keyboard actions and update design ([#2882](https://github.com/factorialco/f0/issues/2882)) ([4fa7828](https://github.com/factorialco/f0/commit/4fa78289afc0c35d1274c4e4adee90da53eb2136))
+
 ## [1.244.0](https://github.com/factorialco/f0/compare/f0-react-v1.243.0...f0-react-v1.244.0) (2025-10-24)
 
 
