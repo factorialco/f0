@@ -67,7 +67,7 @@ const Tooltip = (props: TooltipProps) => {
     return rest
   }, props as TooltipInternalProps)
 
-  return <Tooltip {...publicProps} />
+  return <TooltipInternal {...publicProps} />
 }
 
 export { Tooltip }
