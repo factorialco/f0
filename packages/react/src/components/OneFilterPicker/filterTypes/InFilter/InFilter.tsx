@@ -5,6 +5,7 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { Spinner } from "@/experimental/Information/Spinner"
+import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
@@ -16,10 +17,10 @@ import { useLoadOptions } from "./useLoadOptions"
  * Props for the InFilter component.
  * @template T - The type of values that can be selected
  */
-type InFilterComponentProps<T = unknown> = FilterTypeComponentProps<
-  T[],
-  InFilterOptions<T>
->
+type InFilterComponentProps<
+  T = unknown,
+  R extends RecordType = RecordType,
+> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>
 
 /**
  * A multi-select filter component that allows users to select multiple options from a predefined list.
@@ -69,20 +70,21 @@ type InFilterComponentProps<T = unknown> = FilterTypeComponentProps<
  * />
  * ```
  */
-export function InFilter<T extends string>({
+export function InFilter<T extends string, R extends RecordType = RecordType>({
   schema,
   value,
   onChange,
   isCompactMode,
-}: InFilterComponentProps<T>) {
+}: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
   const [searchTerm, setSearchTerm] = useState("")
 
-  const { options, isLoading, error, loadOptions } = useLoadOptions({
-    ...schema,
-    type: "in",
-  })
+  const { options, isLoading, error, loadOptions, loadMore, hasMore } =
+    useLoadOptions({
+      ...schema,
+      type: "in",
+    })
 
   useEffect(() => {
     setSearchTerm("")
@@ -166,6 +168,15 @@ export function InFilter<T extends string>({
       : i18n.status.selected.plural
   }`.toLowerCase()
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 10
+
+    if (isNearBottom && hasMore && loadMore && !isLoading) {
+      loadMore()
+    }
+  }
+
   return (
     <div
       className="flex min-h-full w-full flex-col"
@@ -190,6 +201,7 @@ export function InFilter<T extends string>({
           "max-h-[350px] overflow-y-scroll px-2",
           isCompactMode && "px-1"
         )}
+        onScroll={handleScroll}
       >
         {isCompactMode && (
           <div
@@ -245,6 +257,17 @@ export function InFilter<T extends string>({
             </div>
           )
         })}
+        {hasMore && loadMore && (
+          <div className="flex w-full items-center justify-center py-2">
+            <Button
+              variant="outline"
+              label={isLoading ? "Loading..." : "Load More"}
+              onClick={loadMore}
+              disabled={isLoading}
+              size="sm"
+            />
+          </div>
+        )}
       </div>
       {!isCompactMode && (
         <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
