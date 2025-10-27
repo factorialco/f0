@@ -8,7 +8,12 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: ["TODO"].map((text) => `<p>${text}.</p>`).join(""),
+        component: [
+          "The `F0ListNavigation` component allows the user to select an option frim a given list",
+          "The component also allows you navigation arrows to allow user to navigate to the next or previous item in the list.",
+        ]
+          .map((text) => `<p>${text}.</p>`)
+          .join(""),
       },
     },
   },
@@ -33,13 +38,13 @@ type Story = StoryObj<typeof meta>
 
 export const Simple: Story = {
   args: {
-    value: "cycle-1",
+    value: "engineering",
     onChange: () => {},
     options: [
-      { label: "10/02/2025 → 17/02/2025", value: "cycle-1" },
-      { label: "10/02/2025 → 17/02/2025", value: "cycle-2" },
-      { label: "17/02/2025 → 24/02/2025", value: "cycle-3" },
-      { label: "24/02/2025 → 03/03/2025", value: "cycle-4" },
+      { label: "Engineering", value: "engineering" },
+      { label: "Sales", value: "sales" },
+      { label: "Marketing", value: "marketing" },
+      { label: "Finance", value: "finance" },
     ],
   },
 }

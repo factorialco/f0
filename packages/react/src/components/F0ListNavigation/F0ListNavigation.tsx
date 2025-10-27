@@ -1,10 +1,10 @@
-import { Button } from "@/components/Actions/Button"
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Select } from "@/experimental/Forms/Fields/Select"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { forwardRef, useState } from "react"
+import { useState } from "react"
 
 interface ListNavigationOption {
   value: string
@@ -15,14 +15,17 @@ export interface F0ListNavigationProps {
   value: string
   disabled?: boolean
   onChange: (newValue: string) => void
-  options: [ListNavigationOption, ...ListNavigationOption[]]
+  options: ListNavigationOption[]
   hideNavigation?: boolean
 }
 
-export const F0ListNavigation = forwardRef<
-  HTMLDivElement,
-  F0ListNavigationProps
->(({ value, hideNavigation, disabled, onChange, options }, ref) => {
+export const F0ListNavigation = ({
+  value,
+  hideNavigation,
+  disabled,
+  onChange,
+  options,
+}: F0ListNavigationProps) => {
   const i18n = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -31,7 +34,6 @@ export const F0ListNavigation = forwardRef<
 
   return (
     <div
-      ref={ref}
       className={cn(
         "inline-flex cursor-auto appearance-none gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover",
         "[%>*] py-1",
@@ -46,7 +48,7 @@ export const F0ListNavigation = forwardRef<
         )}
       >
         {hideNavigation ? null : (
-          <Button
+          <F0Button
             size="sm"
             variant="ghost"
             icon={ChevronLeft}
@@ -77,7 +79,7 @@ export const F0ListNavigation = forwardRef<
         </Select>
 
         {hideNavigation ? null : (
-          <Button
+          <F0Button
             variant="ghost"
             icon={ChevronRight}
             label={i18n.navigation.next}
@@ -90,7 +92,6 @@ export const F0ListNavigation = forwardRef<
       </div>
     </div>
   )
-})
+}
 
-// Add display name for better debugging
 F0ListNavigation.displayName = "ListNavigation"

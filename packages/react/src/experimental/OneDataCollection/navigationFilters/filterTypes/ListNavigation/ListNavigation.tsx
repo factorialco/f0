@@ -6,6 +6,10 @@ export function ListNavigation({
   onChange,
   filter,
 }: ListNavigationProps) {
+  if (filter.options.length === 0) {
+    return null
+  }
+
   return (
     <div className="flex items-center gap-2">
       <F0ListNavigation
