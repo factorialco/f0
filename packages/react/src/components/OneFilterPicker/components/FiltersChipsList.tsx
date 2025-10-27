@@ -28,14 +28,18 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   const i18n = useI18n()
 
   const activeFilterKeys = Object.keys(filters).filter((key) => {
-    const filterValue = value[key as keyof Filters]
+    const filterValue = value?.[key as keyof Filters]
     const filterSchema = filters[key as keyof Filters]
-    return (
-      (filterSchema.type === "in" &&
-        Array.isArray(filterValue) &&
-        filterValue.length > 0) ||
-      !!filterValue
-    )
+
+    console.log("filterSchema", filterSchema)
+    console.log("filterValue", filterValue)
+
+    const filterType = getFilterType(filterSchema.type)
+
+    return filterType.isEmpty(filterValue, {
+      schema: filterSchema as unknown as FilterTypeSchema,
+      i18n,
+    })
   }) as Array<keyof Filters>
 
   if (activeFilterKeys.length === 0) return null
@@ -50,7 +54,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
               return null
             }
 
-            const currentValue = value[key]
+            const currentValue = value?.[key as keyof Filters]
 
             const filterType = getFilterType(filterSchema.type)
             type FilterType = FilterDefinitionsByType[typeof filterSchema.type]

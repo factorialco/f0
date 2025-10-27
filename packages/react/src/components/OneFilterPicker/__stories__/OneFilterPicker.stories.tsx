@@ -29,6 +29,27 @@ const meta = {
   component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
     return <OneFilterPickerComponent {...props} />
   },
+  decorators: [
+    (Story, { args }) => {
+      const [filters, setFilters] = useState<
+        FiltersState<typeof filterDefinition>
+      >(args?.value as FiltersState<typeof filterDefinition>)
+
+      return (
+        <>
+          <div className="mb-10 w-[600px]">
+            <Story args={{ ...args, value: filters, onChange: setFilters }} />
+          </div>
+          <p>
+            Filters:
+            <pre className="font-mono text-sm">
+              {JSON.stringify(filters, null, 2)}
+            </pre>
+          </p>
+        </>
+      )
+    },
+  ],
 } satisfies Meta
 
 export default meta
@@ -483,4 +504,21 @@ const SourceBasedPaginationComponent = () => {
 
 export const WithSourceBasedPagination: Story = {
   render: () => <SourceBasedPaginationComponent />,
+}
+
+export const WithRangeFilter: Story = {
+  args: {
+    filters: {
+      ...filterDefinition,
+      range: {
+        type: "range",
+        label: "Range",
+        options: {
+          min: 0,
+          max: 100,
+        },
+      },
+    },
+    onChange: (value) => console.log("Range filter changed", value),
+  },
 }

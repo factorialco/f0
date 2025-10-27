@@ -2,6 +2,7 @@ import { DateRange } from "@/experimental/OneCalendar/types"
 import { RecordType } from "@/hooks/datasource"
 import dateFilter, { DateFilterDefinition } from "./DateFilter"
 import inFilter, { InFilterDefinition } from "./InFilter"
+import rangeFilter, { RangeFilterDefinition } from "./RangeFilter"
 import searchFilter, { SearchFilterDefinition } from "./SearchFilter"
 import { FilterTypeDefinition } from "./types"
 
@@ -15,12 +16,14 @@ export type FilterDefinitionsByType<
   in: InFilterDefinition<T, R>
   search: SearchFilterDefinition
   date: DateFilterDefinition
+  range: RangeFilterDefinition
 }
 
 export const filterTypes = {
   in: inFilter,
   search: searchFilter,
   date: dateFilter,
+  range: rangeFilter,
 } as const
 
 /**
@@ -38,7 +41,9 @@ export type FilterValue<T extends FilterDefinition> =
       ? string
       : T extends DateFilterDefinition
         ? DateRange | Date | undefined
-        : never
+        : T extends RangeFilterDefinition
+          ? [number | undefined, number | undefined] | undefined
+          : never
 
 /**
  * Base definition for all filter types.

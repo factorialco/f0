@@ -64,7 +64,7 @@ export function FilterContent<Definition extends FiltersDefinition>({
   // TODO Find a way to avoid 'as'
   // Type assertion to ensure the renderer function is typed correctly as typescript can't infer the type correctly
   type FilterType = FilterDefinitionsByType[typeof filter.type]
-  const currentValue = (tempFilters[selectedFilterKey] ||
+  const currentValue = (tempFilters?.[selectedFilterKey] ||
     filterType.emptyValue) as FilterValue<FilterType>
 
   function renderFilterForm<T extends FilterDefinition>({

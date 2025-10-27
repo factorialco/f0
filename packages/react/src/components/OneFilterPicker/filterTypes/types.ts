@@ -29,7 +29,10 @@ export type FilterTypeDefinition<
 > = {
   /** Check if the value is empty */
   emptyValue: EmptyValue
-  isEmpty: (value: Value, context: FilterTypeContext<Options>) => boolean
+  isEmpty: (
+    value: Value | undefined,
+    context: FilterTypeContext<Options>
+  ) => boolean
   /** Render the filter form */
   render: <Schema extends FilterTypeSchema<Options>>(props: {
     schema: Schema
