@@ -198,17 +198,13 @@ export const defaultTranslations = {
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
-        placeholder:
-          "What did you like about this response? How could it be even better?",
-        description:
-          "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.",
+        label: "Your feedback helps us make Factorial AI better",
+        placeholder: "Share what worked well",
       },
       negative: {
-        title: "What could have been better in this response?",
-        placeholder:
-          "What could have been better in this response? How could it be even better?",
-        description:
-          "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.",
+        title: "What could have been better?",
+        label: "Your feedback helps us improve future answers",
+        placeholder: "Share what didn’t work",
       },
     },
   },
