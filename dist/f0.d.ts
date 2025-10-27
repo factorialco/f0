@@ -3,6 +3,7 @@ import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag.tsx';
 import { AmountCellValue } from '../../value-display/types/amount';
 import { AmountCellValue as AmountCellValue_2 } from './types/amount.tsx';
 import { AnchorHTMLAttributes } from 'react';
+import { AriaAttributes } from 'react';
 import { AvatarListCellValue } from '../../value-display/types/avatarList';
 import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList.tsx';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
@@ -409,11 +410,18 @@ declare type BulkActionDefinition = {
     icon?: IconType;
     id: string;
     keepSelection?: boolean;
+    critical?: boolean;
+    description?: string;
+    disabled?: boolean;
 };
 
 declare type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) => {
-    primary: BulkActionDefinition[];
-    secondary?: BulkActionDefinition[];
+    primary?: (BulkActionDefinition | {
+        type: "separator";
+    })[];
+    secondary?: (BulkActionDefinition | {
+        type: "separator";
+    })[];
 } | {
     warningMessage: string;
 };
@@ -786,11 +794,54 @@ declare const columnWidths: {
     readonly fit: 1;
 };
 
+export declare const ComboChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+label?: boolean;
+legend?: boolean;
+showValueUnderLabel?: boolean;
+bar?: {
+categories: string | string[];
+axisLabel?: string;
+hideAxis?: boolean;
+axisPosition?: "left" | "right";
+} | undefined;
+line?: ({
+categories: string | string[];
+axisLabel?: string;
+hideAxis?: boolean;
+axisPosition?: "left" | "right";
+} & {
+dot?: boolean;
+lineType?: "natural" | "linear";
+}) | undefined;
+scatter?: {
+categories: string | string[];
+axisLabel?: string;
+hideAxis?: boolean;
+axisPosition?: "left" | "right";
+} | undefined;
+onClick?: ((data: {
+label: string;
+values: {
+[x: string]: number;
+};
+}) => void) | undefined;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
 export declare type CompanyAvatarVariant = Extract<AvatarVariant, {
     type: "company";
 }>;
 
 declare type CompanyTagProps = ComponentProps<typeof F0TagCompany>;
+
+declare type CompareToDef = {
+    label: string;
+    value: {
+        delta: number;
+        units: GranularityDefinitionKey;
+    } | ((value: DateRangeComplete) => DateRangeComplete | DateRangeComplete[]);
+};
+
+declare type CompareToDefKey = string;
 
 declare type ComponentTypes = (typeof componentTypes)[number];
 
@@ -1054,7 +1105,38 @@ declare type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<Date
 
 declare const dateNavigatorFilterType: "date-navigator";
 
-declare interface DatePreset {
+declare type DatePickerCompareTo = Record<GranularityDefinitionKey, CompareToDef[]>;
+
+declare interface DatePickerPopupProps {
+    onSelect?: (value: DatePickerValue_2 | undefined) => void;
+    value?: DatePickerValue_2;
+    defaultValue?: DatePickerValue_2;
+    presets?: DatePreset[];
+    granularities?: GranularityDefinitionKey[];
+    minDate?: Date;
+    maxDate?: Date;
+    disabled?: boolean;
+    hideGoToCurrent?: boolean;
+    children: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    compareTo?: DatePickerCompareTo;
+    defaultCompareTo?: CompareToDefKey;
+    hideCalendarInput?: boolean;
+    asChild?: boolean;
+    onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
+}
+
+export declare const datepickerSizes: readonly ["sm", "md"];
+
+export declare type DatePickerValue = DatePickerValue_2;
+
+declare type DatePickerValue_2 = {
+    value: DateRangeComplete | undefined;
+    granularity: GranularityDefinitionKey;
+};
+
+export declare interface DatePreset {
     label: string;
     granularity: GranularityDefinitionKey;
     value: DateRange | (() => DateRange);
@@ -1105,6 +1187,7 @@ export declare const defaultTranslations: {
         readonly add: "Add";
         readonly edit: "Edit";
         readonly save: "Save";
+        readonly send: "Send";
         readonly cancel: "Cancel";
         readonly copy: "Copy";
         readonly close: "Close";
@@ -1274,10 +1357,22 @@ export declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Write something here...";
+        readonly inputPlaceholder: "Ask about time, people, or company info…";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly feedbackModal: {
+            readonly positive: {
+                readonly title: "What did you like about this response?";
+                readonly placeholder: "What did you like about this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+            readonly negative: {
+                readonly title: "What could have been better in this response?";
+                readonly placeholder: "What could have been better in this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1613,6 +1708,18 @@ export declare const F0ChipList: {
     ({ chips, max, remainingCount: initialRemainingCount, layout, }: Props): JSX_2.Element;
     displayName: string;
 };
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0DatePicker: typeof F0DatePicker_2;
+
+declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, ...inputProps }: F0DatePickerProps): JSX_2.Element;
+
+export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange"> & {
+    onChange?: (value: DatePickerValue | undefined, stringValue: string | undefined) => void;
+    value?: DatePickerValue;
+} & Pick<InputFieldProps<string>, InputFieldInheritedProps>;
 
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
@@ -1975,6 +2082,86 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
      */
     hasMore: boolean;
 };
+
+declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
+
+declare type InputFieldInheritedProps = (typeof inputFieldInheritedProps)[number];
+
+declare const inputFieldInheritedProps: readonly ["label", "placeholder", "hideLabel", "size", "error", "disabled", "readonly", "required", "clearable", "labelIcon", "status", "hint"];
+
+declare type InputFieldProps<T> = {
+    autoFocus?: boolean;
+    label: string;
+    placeholder?: string;
+    labelIcon?: IconType;
+    hideLabel?: boolean;
+    hidePlaceholder?: boolean;
+    name?: string;
+    onClickPlaceholder?: () => void;
+    onClickChildren?: () => void;
+    onClickContent?: () => void;
+    value?: T | undefined;
+    onChange?: (value: T) => void;
+    size?: InputFieldSize;
+    error?: string | boolean;
+    status?: InputFieldStatus;
+    hint?: string;
+    disabled?: boolean;
+    className?: string;
+    required?: boolean;
+    readonly?: boolean;
+    clearable?: boolean;
+    role?: string;
+    inputRef?: React.Ref<unknown>;
+    "aria-controls"?: AriaAttributes["aria-controls"];
+    "aria-expanded"?: AriaAttributes["aria-expanded"];
+    onClear?: () => void;
+    onFocus?: () => void;
+    onBlur?: () => void;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+    canGrow?: boolean;
+    children: React.ReactNode & {
+        onFocus?: () => void;
+        onBlur?: () => void;
+        onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+        onChange?: (value: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+        value?: T;
+    };
+    icon?: IconType;
+    isEmpty?: (value: T | undefined) => boolean;
+    emptyValue?: T;
+    maxLength?: number;
+    hideMaxLength?: boolean;
+    append?: React.ReactNode;
+    appendTag?: string;
+    lengthProvider?: (value: T | undefined) => number;
+    loading?: boolean;
+    avatar?: AvatarVariant;
+    loadingIndicator?: {
+        /**
+         * If true, the loading spinner will be displayed over the content without affecting the layout
+         */
+        asOverlay?: boolean;
+        /**
+         * The offset of the loading spinner from the content
+         */
+        offset?: number;
+    };
+};
+
+declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
+
+declare type InputFieldStatus = {
+    type: Exclude<InputFieldStatusType, "error">;
+    message: string;
+} | {
+    type: "error";
+    message?: string;
+};
+
+declare const inputFieldStatus: readonly ["default", "warning", "info", "error"];
+
+declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
@@ -2394,6 +2581,8 @@ declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
 export declare const PieChart: ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
+export declare const predefinedPresets: Record<string, DatePreset>;
+
 /**
  * Defines preset filter configurations that can be applied to a collection.
  * @template Filters - The available filter configurations
@@ -2466,7 +2655,7 @@ export declare type ProductCardProps = {
     type?: never;
 });
 
-export declare function ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, }: ProductModalProps): JSX_2.Element;
+export declare function ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, showResponseDialog, }: ProductModalProps): JSX_2.Element;
 
 declare type ProductModalProps = {
     isOpen: boolean;
@@ -2504,6 +2693,7 @@ declare type ProductModalProps = {
     primaryAction?: Action_2;
     secondaryAction?: Action_2;
     portalContainer?: HTMLElement | null;
+    showResponseDialog?: boolean;
 };
 
 export declare function ProductWidget({ mediaUrl, title, description, onClose, dismissible, width, trackVisibility, actions, showConfirmation, }: ProductWidgetProps): JSX_2.Element;

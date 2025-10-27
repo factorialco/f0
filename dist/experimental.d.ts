@@ -274,8 +274,14 @@ export declare type AiChatProviderProps = {
     greeting?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    onThumbsUp?: (message: AIMessage, threadId: string) => void;
-    onThumbsDown?: (message: AIMessage, threadId: string) => void;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -301,8 +307,14 @@ declare type AiChatProviderReturnValue = {
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
     welcomeScreenSuggestions: WelcomeScreenSuggestion[];
     setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
-    onThumbsUp?: (message: AIMessage, threadId: string) => void;
-    onThumbsDown?: (message: AIMessage, threadId: string) => void;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
     /**
      * Clear/reset the chat conversation
      */
@@ -316,8 +328,14 @@ declare interface AiChatState {
     agent?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    onThumbsUp?: (message: AIMessage, threadId: string) => void;
-    onThumbsDown?: (message: AIMessage, threadId: string) => void;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
 }
 
 /**
@@ -808,11 +826,18 @@ export declare type BulkActionDefinition = {
     icon?: IconType;
     id: string;
     keepSelection?: boolean;
+    critical?: boolean;
+    description?: string;
+    disabled?: boolean;
 };
 
 export declare type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) => {
-    primary: BulkActionDefinition[];
-    secondary?: BulkActionDefinition[];
+    primary?: (BulkActionDefinition | {
+        type: "separator";
+    })[];
+    secondary?: (BulkActionDefinition | {
+        type: "separator";
+    })[];
 } | {
     warningMessage: string;
 };
@@ -1322,6 +1347,8 @@ declare type Content = (ComponentProps<typeof DataList.Item> & {
     type: "dot-tag";
 });
 
+declare type ContentPadding = "sm" | "md";
+
 declare type CopyActionType = {
     type: "copy";
     text?: string;
@@ -1624,6 +1651,26 @@ declare const dateNavigatorFilterType: "date-navigator";
 
 declare type DatePickerCompareTo = Record<GranularityDefinitionKey, CompareToDef[]>;
 
+declare interface DatePickerPopupProps {
+    onSelect?: (value: DatePickerValue | undefined) => void;
+    value?: DatePickerValue;
+    defaultValue?: DatePickerValue;
+    presets?: DatePreset[];
+    granularities?: GranularityDefinitionKey[];
+    minDate?: Date;
+    maxDate?: Date;
+    disabled?: boolean;
+    hideGoToCurrent?: boolean;
+    children: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    compareTo?: DatePickerCompareTo;
+    defaultCompareTo?: CompareToDefKey;
+    hideCalendarInput?: boolean;
+    asChild?: boolean;
+    onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
+}
+
 export declare type DatePickerValue = {
     value: DateRangeComplete | undefined;
     granularity: GranularityDefinitionKey;
@@ -1713,6 +1760,7 @@ declare const defaultTranslations: {
         readonly add: "Add";
         readonly edit: "Edit";
         readonly save: "Save";
+        readonly send: "Send";
         readonly cancel: "Cancel";
         readonly copy: "Copy";
         readonly close: "Close";
@@ -1882,10 +1930,22 @@ declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Write something here...";
+        readonly inputPlaceholder: "Ask about time, people, or company info…";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly feedbackModal: {
+            readonly positive: {
+                readonly title: "What did you like about this response?";
+                readonly placeholder: "What did you like about this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+            readonly negative: {
+                readonly title: "What could have been better in this response?";
+                readonly placeholder: "What could have been better in this response? How could it be even better?";
+                readonly description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al.";
+            };
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2771,11 +2831,12 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "status" | "disabled" | "size" | "icon" | "loading" | "hideLabel" | "append" | "maxLength" | "required" | "error" | "labelIcon" | "onClickContent" | "hint" | "clearable" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "size" | "icon" | "loading" | "hideLabel" | "append" | "maxLength" | "required" | "error" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
 declare type InputFieldProps<T> = {
+    autoFocus?: boolean;
     label: string;
     placeholder?: string;
     labelIcon?: IconType;
@@ -2797,11 +2858,13 @@ declare type InputFieldProps<T> = {
     readonly?: boolean;
     clearable?: boolean;
     role?: string;
+    inputRef?: React.Ref<unknown>;
     "aria-controls"?: AriaAttributes["aria-controls"];
     "aria-expanded"?: AriaAttributes["aria-expanded"];
     onClear?: () => void;
     onFocus?: () => void;
     onBlur?: () => void;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     canGrow?: boolean;
     children: React.ReactNode & {
         onFocus?: () => void;
@@ -2846,8 +2909,9 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
+export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
+    onPressEnter?: () => void;
 };
 
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
@@ -3492,43 +3556,22 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     };
 };
 
-export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, ...props }: OneDatePickerProps): JSX_2.Element;
+export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, ...props }: OneDatePickerProps): JSX_2.Element;
 
-declare interface OneDatePickerPopupProps {
-    onSelect?: (value: DatePickerValue | undefined) => void;
-    value?: DatePickerValue;
-    defaultValue?: DatePickerValue;
-    presets?: DatePreset[];
-    granularities?: GranularityDefinitionKey[];
-    minDate?: Date;
-    maxDate?: Date;
-    disabled?: boolean;
-    hideGoToCurrent?: boolean;
-    children: React.ReactNode;
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-    compareTo?: DatePickerCompareTo;
-    defaultCompareTo?: CompareToDefKey;
-    onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
-}
-
-export declare interface OneDatePickerProps extends Omit<OneDatePickerPopupProps, "children"> {
+export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children"> {
     hideNavigation?: boolean;
     hideGoToCurrent?: boolean;
 }
 
 export declare const OneDropdownButton: ({ items, onClick, value, ...props }: OneDropdownButtonProps) => JSX_2.Element | undefined;
 
-export declare type OneDropdownButtonItem<T = string> = {
+export declare type OneDropdownButtonItem<T = string> = Pick<DropdownItemObject, "label" | "icon" | "critical" | "description"> & {
     value: T;
-    label: string;
-    icon?: IconType;
-    critical?: boolean;
 };
 
 export declare type OneDropdownButtonProps<T = string> = {
     size?: OneDropdownButtonSize;
-    items: OneDropdownButtonItem<T>[];
+    items: (OneDropdownButtonItem<T> | DropdownItemSeparator)[];
     variant?: OneDropdownButtonVariant;
     value?: T;
     disabled?: boolean;
@@ -3658,6 +3701,8 @@ declare type OneModalProps = {
     onClose: () => void;
     /** Whether to render the modal as a bottom sheet on mobile */
     asBottomSheetInMobile?: boolean;
+    /** the padding of internal content areas (header, content, footer) */
+    contentPadding?: ContentPadding;
     position?: ModalPosition;
     /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
     children: default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>> | default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[];
@@ -4369,6 +4414,7 @@ export declare type SelectItemObject<T, R = unknown> = {
     tag?: string;
     icon?: IconType;
     item?: R;
+    disabled?: boolean;
 };
 
 export declare type SelectItemProps<T, R = unknown> = SelectItemObject<T, R> | {
@@ -4848,7 +4894,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "status" | "icon" | "hideLabel" | "maxLength" | "placeholder" | "error" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "icon" | "hideLabel" | "maxLength" | "placeholder" | "error" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
