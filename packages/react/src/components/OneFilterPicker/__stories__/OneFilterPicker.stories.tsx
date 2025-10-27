@@ -509,7 +509,6 @@ export const WithSourceBasedPagination: Story = {
 export const WithRangeFilter: Story = {
   args: {
     filters: {
-      ...filterDefinition,
       range: {
         type: "range",
         label: "Range",

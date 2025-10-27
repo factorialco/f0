@@ -2,7 +2,7 @@ import { DateRange } from "@/experimental/OneCalendar/types"
 import { RecordType } from "@/hooks/datasource"
 import dateFilter, { DateFilterDefinition } from "./DateFilter"
 import inFilter, { InFilterDefinition } from "./InFilter"
-import rangeFilter, { RangeFilterDefinition } from "./RangeFilter"
+import rangeFilter, { RangeFilterDefinition } from "./NumberFilter"
 import searchFilter, { SearchFilterDefinition } from "./SearchFilter"
 import { FilterTypeDefinition } from "./types"
 

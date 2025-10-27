@@ -20,7 +20,7 @@ interface FiltersChipsListProps<Filters extends FiltersDefinition> {
 
 export function FiltersChipsList<Filters extends FiltersDefinition>({
   filters,
-  value,
+  value = {},
   onFilterSelect,
   onFilterRemove,
   onClearAll,
@@ -28,11 +28,8 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   const i18n = useI18n()
 
   const activeFilterKeys = Object.keys(filters).filter((key) => {
-    const filterValue = value?.[key as keyof Filters]
+    const filterValue = value[key as keyof Filters]
     const filterSchema = filters[key as keyof Filters]
-
-    console.log("filterSchema", filterSchema)
-    console.log("filterValue", filterValue)
 
     const filterType = getFilterType(filterSchema.type)
 

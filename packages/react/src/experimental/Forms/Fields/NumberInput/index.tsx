@@ -1,9 +1,10 @@
+import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
-import { forwardRef, useEffect, useState } from "react"
+import { forwardRef, useEffect, useMemo, useState } from "react"
 import { F0Icon } from "../../../../components/F0Icon"
 import { ChevronDown, ChevronUp } from "../../../../icons/app"
 import { InputProps } from "../Input"
-import { extractNumber } from "./extractNumber"
+import { extractNumber } from "./internal/extractNumber"
 
 const formatValue = (value: number, locale: string, maxDecimals?: number) =>
   new Intl.NumberFormat(locale, {
@@ -30,9 +31,26 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
     { locale, value, maxDecimals, step, min, max, onChange, units, ...props },
     ref
   ) {
+    const i18n = useI18n()
     const [fieldValue, setFieldValue] = useState<string>(() =>
       value != null ? formatValue(value, locale, maxDecimals) : ""
     )
+
+    const localHint = useMemo(() => {
+      if (props.hint !== undefined) {
+        return props.hint
+      }
+      if (min != null && max != null) {
+        return i18n.t("numberInput.between", { min, max })
+      }
+      if (min != null) {
+        return i18n.t("numberInput.greaterThan", { min })
+      }
+      if (max != null) {
+        return i18n.t("numberInput.lessThan", { max })
+      }
+      return undefined
+    }, [min, max, props.hint, i18n])
 
     const handleChange = (value: string) => {
       const extractedData = extractNumber(value, { maxDecimals })
@@ -41,10 +59,31 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
         return
       }
 
-      const { formattedValue, value: parsedValue } = extractedData
+      const { value: parsedValue } = extractedData
 
-      setFieldValue(formattedValue)
-      onChange?.(parsedValue)
+      /**
+       * Apply min and max constraints
+       */
+      if (parsedValue === null) {
+        setFieldValue("")
+        onChange?.(null)
+        return
+      }
+
+      /**
+       * Reformat the number to the correct format
+       */
+      const finalValue = Math.max(
+        min ?? -Infinity,
+        Math.min(max ?? Infinity, parsedValue)
+      )
+
+      const finalExtractedData = extractNumber(finalValue.toString(), {
+        maxDecimals,
+      })
+      setFieldValue(finalExtractedData?.formattedValue ?? "")
+
+      onChange?.(finalExtractedData?.value ?? null)
     }
 
     const handleStep = (type: "increase" | "decrease") => () => {
@@ -106,6 +145,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           inputMode="decimal"
           onChange={handleChange}
           {...props}
+          hint={localHint}
           appendTag={units}
           append={<Arrows />}
         />

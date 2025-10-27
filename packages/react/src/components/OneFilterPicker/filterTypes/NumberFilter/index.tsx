@@ -2,23 +2,23 @@ import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeDefinition } from "../types"
 import { getOptionsWithDefaults } from "../utils"
 import {
+  NumberFilterOptions,
   RangeFilter,
-  RangeFilterOptions,
   RangeFilterValue,
-} from "./RangeFilter"
+} from "./NumberFilter"
 
 const isEmpty = (value: RangeFilterValue): value is undefined => {
   return !value || (value[0] === undefined && value[1] === undefined)
 }
 
-const defaults: RangeFilterOptions = {
+const defaults: NumberFilterOptions = {
   min: undefined,
   max: undefined,
 }
 
 export const rangeFilter: FilterTypeDefinition<
   RangeFilterValue,
-  RangeFilterOptions
+  NumberFilterOptions
 > = {
   emptyValue: [undefined, undefined],
   render: (props) => {
@@ -46,5 +46,5 @@ export const rangeFilter: FilterTypeDefinition<
 export default rangeFilter
 
 export type RangeFilterDefinition = BaseFilterDefinition<"range"> & {
-  options?: RangeFilterOptions
+  options?: NumberFilterOptions
 }

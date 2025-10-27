@@ -96,7 +96,7 @@ export function FilterList<Definition extends FiltersDefinition>({
             const filterType = getFilterType(filter.type)
 
             type FilterType = FilterDefinitionsByType[typeof filter.type]
-            const currentValue = tempFilters?.[key] as FilterValue<FilterType>
+            const currentValue = tempFilters[key] as FilterValue<FilterType>
             const typedFilterType = filterType as FilterTypeDefinition<
               FilterValue<FilterType>
             >

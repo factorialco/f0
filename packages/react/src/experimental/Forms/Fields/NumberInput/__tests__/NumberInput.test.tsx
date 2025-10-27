@@ -2,8 +2,8 @@ import { composeStory } from "@storybook/react-vite"
 import { render, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "storybook/test"
 import { describe, expect, test, vi } from "vitest"
-import { NumberInput } from "./index"
-import Meta, { WithStep } from "./index.stories"
+import { NumberInput } from "../index"
+import Meta, { WithStep } from "../index.stories"
 
 const WithStepStory = composeStory(WithStep, Meta)
 

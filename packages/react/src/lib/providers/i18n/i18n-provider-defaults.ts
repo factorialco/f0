@@ -54,6 +54,10 @@ export const defaultTranslations = {
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
+    aboveOrEqual: "Above or equal to",
+    value: "Value",
+    belowOrEqual: "Below or equal to",
+    range_title: "Use range",
   },
   toc: {
     search: "Search...",
@@ -213,6 +217,11 @@ export const defaultTranslations = {
     noResults: "No results found",
     loadingMore: "Loading...",
   },
+  numberInput: {
+    between: "Between {{min}} and {{max}}",
+    greaterThan: "Greater than {{min}}",
+    lessThan: "Less than {{max}}",
+  },
 } as const
 
 type TranslationShape<T> = {
@@ -222,5 +231,27 @@ type TranslationShape<T> = {
       ? TranslationShape<T[K]>
       : never
 }
+
+// Utility type to generate all possible dot-separated paths from nested object
+type PathsToStringProps<T> = T extends string
+  ? []
+  : {
+      [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>]
+    }[Extract<keyof T, string>]
+
+type Join<T extends string[], D extends string> = T extends []
+  ? never
+  : T extends [infer F]
+    ? F
+    : T extends [infer F, ...infer R]
+      ? F extends string
+        ? `${F}${D}${Join<Extract<R, string[]>, D>}`
+        : never
+      : string
+
+export type TranslationKey = Join<
+  PathsToStringProps<typeof defaultTranslations>,
+  "."
+>
 
 export type TranslationsType = TranslationShape<typeof defaultTranslations>
