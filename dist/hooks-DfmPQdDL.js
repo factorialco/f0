@@ -52258,7 +52258,7 @@ const a1 = {}, G_e = (e, t) => {
     }), a1[e] = {
       ...a1[e],
       uses: (((s = a1[e]) == null ? void 0 : s.uses) ?? 0) + 1
-    }), t(...i);
+    }), typeof t != "function" && "render" in t ? t.render(...i) : t(...i);
   };
 };
 function U_e(e) {

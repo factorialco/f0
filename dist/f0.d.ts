@@ -1658,7 +1658,9 @@ declare type EventParams = Record<string, EventScalar | Array<EventScalar>>;
 
 declare type EventScalar = string | number | boolean | undefined | null;
 
-export declare const experimental: <T extends (...args: any[]) => any>(name: string, component: T) => T;
+export declare const experimental: <T extends (...args: any[]) => any>(name: string, component: T | {
+    render: T;
+}) => T;
 
 declare type ExtractVisualizationSettings<T> = T extends {
     settings: {
