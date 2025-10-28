@@ -10,7 +10,7 @@ import {
   PageLayoutBlock,
   PageLayoutBlockComponent,
   PageLayoutBlockProps,
-} from "./components/PageLayoutBlock"
+} from "./PageLayoutBlock"
 
 // Type for components that inherit from PageLayoutBlock
 export type PageLayoutBlockElement = ReactElement<PageLayoutBlockProps>
@@ -76,9 +76,10 @@ const PageLayoutComponent = forwardRef<HTMLDivElement, PageLayoutProps>(
         >
           <main
             className={cn(
-              "sm:min-h-xs order-2 h-fit border-0 sm:flex-1 sm:border-solid md:order-2",
+              "sm:min-h-xs h-fit border-0",
+              "order-1 sm:flex-1 sm:border-solid md:order-2",
               stickyAside
-                ? "auto overflow-x-hidden md:h-full md:max-h-full md:overflow-y-auto"
+                ? "md:auto md:h-full md:max-h-full md:overflow-y-auto md:overflow-x-hidden"
                 : "min-h-full",
               variant === "aside-main"
                 ? "sm:border-l sm:border-l-f1-border-secondary"
@@ -87,7 +88,7 @@ const PageLayoutComponent = forwardRef<HTMLDivElement, PageLayoutProps>(
             )}
           >
             {header && (
-              <header className={cn(stickyHeader && "z-30 md:sticky md:top-0")}>
+              <header className={cn(stickyHeader && "sticky top-0 z-30")}>
                 {header}
               </header>
             )}
@@ -98,7 +99,7 @@ const PageLayoutComponent = forwardRef<HTMLDivElement, PageLayoutProps>(
             <aside
               className={cn(
                 "min-w-30 sm:basis-1/4 md:max-w-80",
-                "order-1",
+                "order-2",
                 variant === "aside-main" ? "md:order-1" : "md:order-3"
               )}
             >

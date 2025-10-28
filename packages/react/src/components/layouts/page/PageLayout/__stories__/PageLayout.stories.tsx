@@ -146,6 +146,10 @@ export const WithContentBlocks: Story = {
             All systems operational ✅
           </div>
         </PageLayoutContentBlock>
+
+        <div>
+          <p>Block</p>
+        </div>
       </>
     ),
   },
