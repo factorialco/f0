@@ -288,7 +288,7 @@ const DataSourceFilterOptions: InFilterOptions<
     },
     search: {
       enabled: true,
-      sync: false,
+      sync: true,
     },
   }),
   mapOptions: (user: { id: string; name: string; email: string }) => ({

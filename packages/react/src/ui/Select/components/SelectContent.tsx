@@ -214,6 +214,7 @@ const SelectContent = forwardRef<
     const content = (
       <SelectPrimitive.Content
         ref={ref}
+        asChild={asList}
         className={cn(
           "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
           !asList &&
@@ -256,7 +257,7 @@ const SelectContent = forwardRef<
                   ? "max-h-full"
                   : taller
                     ? "max-h-[440px]"
-                    : "max-h-[300px]",
+                    : "max-h-[320px]",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}

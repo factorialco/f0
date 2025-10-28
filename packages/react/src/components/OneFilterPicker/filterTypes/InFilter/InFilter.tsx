@@ -120,7 +120,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     [filteredOptions]
   )
 
-  if (isLoading) {
+  if (isLoading && !options.length) {
     return (
       <div className="flex w-full items-center justify-center py-4">
         <Spinner size="small" />
@@ -158,7 +158,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   // Determine if we should show the search input
   // Show search when we have loaded options (regardless of whether they came from static or async source)
-  const showSearch = options.length > 0 && !isLoading
+  const showSearch = options.length > 0
 
   const handleSelectAll = () => {
     const allValues = filteredOptions.map((option) => option.value)
@@ -193,7 +193,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   }`.toLowerCase()
 
   return (
-    <div aria-label={schema.label}>
+    <div aria-label={schema.label} role="group">
       <Select value={value} onValueChange={onChange} multiple asListWithScroll>
         <SelectContent
           items={items}
@@ -215,7 +215,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
               {isCompactMode && (
                 <>
                   <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-                  <div className="flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1">
+                  <div className="flex w-full flex-1 items-center justify-between gap-1 rounded py-1 pl-4 pr-3">
                     <span className="max-w-[250px] flex-1 whitespace-nowrap">
                       <OneEllipsis className="text-f1-foreground-secondary">
                         {selectedText}
