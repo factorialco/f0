@@ -1,9 +1,9 @@
-import { C as _, L as pt, S as xe, a as mt, f as ne, b as K, c as ht, A as vt, i as U, d as yt, e as Te, E as bt, g as X, h as gt, j as xt, k as wt, l as Pt, m as $, n as De, u as Ct, G as St, o as Nt, p as we, q as At, r as _e, s as Ot, B as Ie, X as Ee, Y as le, t as kt, v as je, w as Lt, x as Ft, y as Tt, z as Dt, D as _t, F as It, H as Et, I as jt, J as Pe, K as $t, M as W, N as oe, O as Mt, P as Bt, Q as Rt, R as $e, T as I, U as zt, V as Kt, W as Wt, Z as Gt, _ as qt, $ as Vt, a0 as Z, a1 as Me, a2 as Be, a3 as Ht, a4 as Re, a5 as ze, a6 as Ke, a7 as We, a8 as Yt, a9 as Ge, aa as Jt, ab as Ut, ac as Xt, ad as Ce, ae as ie, af as Zt, ag as Qt, ah as qe, ai as ea, aj as ta, ak as Ve, al as aa, am as ra, an as na, ao as oa, ap as ia, aq as sa, ar as la, as as He, at as B, au as Ye, av as ca, aw as ua, ax as Se, ay as da, az as Je, aA as fa, aB as pa, aC as ma, aD as ha, aE as va, aF as ya, aG as ba, aH as ga, aI as xa, aJ as wa, aK as Pa, aL as Ca } from "./hooks-DfWgtHhy.js";
-import { bl as Hr, aM as Yr, bn as Jr, bw as Ur, aN as Xr, aO as Zr, aP as Qr, aQ as en, aR as tn, aS as an, aT as rn, aU as nn, aW as on, aX as sn, aY as ln, aZ as cn, bs as un, b0 as dn, b1 as fn, b2 as pn, b3 as mn, b6 as hn, b7 as vn, b8 as yn, b9 as bn, bb as gn, a$ as xn, ba as wn, b5 as Pn, bt as Cn, bm as Sn, bg as Nn, bj as An, bf as On, bx as kn, be as Ln, bd as Fn, aV as Tn, a_ as Dn, b4 as _n, bc as In, bh as En, bo as jn, bp as $n, bq as Mn, by as Bn, bi as Rn, br as zn, bv as Kn, bk as Wn, bu as Gn } from "./hooks-DfWgtHhy.js";
+import { S as xe, a as mt, f as ne, L as K, b as ht, A as vt, i as U, c as yt, d as Te, E as bt, g as X, e as gt, h as xt, C as wt, j as Pt, k as $, l as Fe, u as St, G as Ct, m as Nt, n as we, o as At, p as Ie, q as Ot, B as _e, X as Ee, Y as le, r as kt, s as je, t as Lt, v as Dt, w as Tt, x as Ft, y as It, z as _t, D as Et, F as jt, H as Pe, I as $t, J as W, K as oe, M as Bt, N as Mt, O as Rt, P as $e, Q as _, R as I, T as zt, U as Kt, V as Wt, W as Gt, Z as Vt, _ as qt, $ as Yt, a0 as Be, a1 as Ht, a2 as Z, a3 as Me, a4 as Re, a5 as Jt, a6 as ze, a7 as Ke, a8 as We, a9 as Ge, aa as Ut, ab as Ve, ac as Xt, ad as Zt, ae as Qt, af as Se, ag as ie, ah as ea, ai as ta, aj as qe, ak as aa, al as ra, am as Ye, an as na, ao as oa, ap as ia, aq as sa, ar as la, as as ca, at as ua, au as He, av as M, aw as Je, ax as da, ay as fa, az as Ce, aA as pa, aB as Ue, aC as ma, aD as ha, aE as va, aF as ya, aG as ba, aH as ga, aI as xa, aJ as wa, aK as Pa, aL as Sa, aM as Ca, aN as Na } from "./hooks-rjsVZjmG.js";
+import { bp as en, br as tn, bA as an, aO as rn, aP as nn, aQ as on, aR as sn, aS as ln, aT as cn, aU as un, aV as dn, aX as fn, aY as pn, aZ as mn, a_ as hn, a$ as vn, b0 as yn, bw as bn, b2 as gn, b4 as xn, b5 as wn, b6 as Pn, b7 as Sn, ba as Cn, bb as Nn, bc as An, bd as On, bf as kn, b3 as Ln, be as Dn, b9 as Tn, bx as Fn, bq as In, bk as _n, bn as En, bj as jn, bB as $n, bi as Bn, bh as Mn, aW as Rn, b1 as zn, b8 as Kn, bg as Wn, bl as Gn, bs as Vn, bt as qn, bu as Yn, bC as Hn, bm as Jn, bv as Un, bz as Xn, bo as Zn, by as Qn } from "./hooks-rjsVZjmG.js";
 import { jsx as n, jsxs as N, Fragment as ae } from "react/jsx-runtime";
 import * as fe from "react";
-import k, { PureComponent as Sa, useState as F, forwardRef as V, useEffect as M, useMemo as se, useCallback as Ne, useRef as pe, useImperativeHandle as Na, Children as Aa, createContext as Oa } from "react";
-const Cr = {
+import k, { PureComponent as Aa, useState as D, forwardRef as q, useEffect as B, useMemo as se, useCallback as Ne, useRef as pe, useImperativeHandle as Oa, Children as ka, createContext as La } from "react";
+const Nr = {
   approvals: {
     history: "Approval history",
     statuses: {
@@ -43,7 +43,8 @@ const Cr = {
     thumbsUp: "Like",
     thumbsDown: "Dislike",
     other: "Other actions",
-    toggle: "Toggle"
+    toggle: "Toggle",
+    toggleDropdownMenu: "Toggle dropdown menu"
   },
   status: {
     selected: {
@@ -203,13 +204,13 @@ const Cr = {
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
-        placeholder: "What did you like about this response? How could it be even better?",
-        description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al."
+        label: "Your feedback helps us make Factorial AI better",
+        placeholder: "Share what worked well"
       },
       negative: {
-        title: "What could have been better in this response?",
-        placeholder: "What could have been better in this response? How could it be even better?",
-        description: "Your feedback helps Factorial Al improve. The messages from your chat, the search results, and your feedback will be sent to Factorial to help improve Factorial Al."
+        title: "What could have been better?",
+        label: "Your feedback helps us improve future answers",
+        placeholder: "Share what didn’t work"
       }
     }
   },
@@ -217,10 +218,7 @@ const Cr = {
     noResults: "No results found",
     loadingMore: "Loading..."
   }
-}, Sr = _({
-  name: "Link",
-  type: "info"
-}, pt), Nr = [
+}, Ar = [
   "person",
   "team",
   "company",
@@ -235,41 +233,41 @@ function R(e) {
     return t && typeof Symbol == "function" && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t;
   }, R(e);
 }
-function ka(e, t) {
+function Da(e, t) {
   if (!(e instanceof t))
     throw new TypeError("Cannot call a class as a function");
 }
-function La(e, t) {
+function Ta(e, t) {
   for (var r = 0; r < t.length; r++) {
     var a = t[r];
-    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Ze(a.key), a);
+    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Qe(a.key), a);
   }
 }
 function Fa(e, t, r) {
-  return t && La(e.prototype, t), Object.defineProperty(e, "prototype", { writable: !1 }), e;
+  return t && Ta(e.prototype, t), Object.defineProperty(e, "prototype", { writable: !1 }), e;
 }
-function Ta(e, t, r) {
-  return t = Q(t), Da(e, Ue() ? Reflect.construct(t, r || [], Q(e).constructor) : t.apply(e, r));
+function Ia(e, t, r) {
+  return t = Q(t), _a(e, Xe() ? Reflect.construct(t, r || [], Q(e).constructor) : t.apply(e, r));
 }
-function Da(e, t) {
+function _a(e, t) {
   if (t && (R(t) === "object" || typeof t == "function"))
     return t;
   if (t !== void 0)
     throw new TypeError("Derived constructors may only return object or undefined");
-  return _a(e);
+  return Ea(e);
 }
-function _a(e) {
+function Ea(e) {
   if (e === void 0)
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
 }
-function Ue() {
+function Xe() {
   try {
     var e = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
     }));
   } catch {
   }
-  return (Ue = function() {
+  return (Xe = function() {
     return !!e;
   })();
 }
@@ -278,7 +276,7 @@ function Q(e) {
     return r.__proto__ || Object.getPrototypeOf(r);
   }, Q(e);
 }
-function Ia(e, t) {
+function ja(e, t) {
   if (typeof t != "function" && t !== null)
     throw new TypeError("Super expression must either be null or a function");
   e.prototype = Object.create(t && t.prototype, { constructor: { value: e, writable: !0, configurable: !0 } }), Object.defineProperty(e, "prototype", { writable: !1 }), t && ce(e, t);
@@ -288,14 +286,14 @@ function ce(e, t) {
     return a.__proto__ = o, a;
   }, ce(e, t);
 }
-function Xe(e, t, r) {
-  return t = Ze(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
+function Ze(e, t, r) {
+  return t = Qe(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
 }
-function Ze(e) {
-  var t = Ea(e, "string");
+function Qe(e) {
+  var t = $a(e, "string");
   return R(t) == "symbol" ? t : t + "";
 }
-function Ea(e, t) {
+function $a(e, t) {
   if (R(e) != "object" || !e) return e;
   var r = e[Symbol.toPrimitive];
   if (r !== void 0) {
@@ -307,23 +305,23 @@ function Ea(e, t) {
 }
 var re = /* @__PURE__ */ function(e) {
   function t() {
-    return ka(this, t), Ta(this, t, arguments);
+    return Da(this, t), Ia(this, t, arguments);
   }
-  return Ia(t, e), Fa(t, [{
+  return ja(t, e), Fa(t, [{
     key: "render",
     value: function() {
       return null;
     }
   }]);
 }(k.Component);
-Xe(re, "displayName", "ZAxis");
-Xe(re, "defaultProps", {
+Ze(re, "displayName", "ZAxis");
+Ze(re, "defaultProps", {
   zAxisId: 0,
   range: [64, 64],
   scale: "auto",
   type: "number"
 });
-var ja = ["option", "isActive"];
+var Ba = ["option", "isActive"];
 function G() {
   return G = Object.assign ? Object.assign.bind() : function(e) {
     for (var t = 1; t < arguments.length; t++) {
@@ -334,9 +332,9 @@ function G() {
     return e;
   }, G.apply(this, arguments);
 }
-function $a(e, t) {
+function Ma(e, t) {
   if (e == null) return {};
-  var r = Ma(e, t), a, o;
+  var r = Ra(e, t), a, o;
   if (Object.getOwnPropertySymbols) {
     var s = Object.getOwnPropertySymbols(e);
     for (o = 0; o < s.length; o++)
@@ -344,7 +342,7 @@ function $a(e, t) {
   }
   return r;
 }
-function Ma(e, t) {
+function Ra(e, t) {
   if (e == null) return {};
   var r = {};
   for (var a in e)
@@ -354,8 +352,8 @@ function Ma(e, t) {
     }
   return r;
 }
-function Ba(e) {
-  var t = e.option, r = e.isActive, a = $a(e, ja);
+function za(e) {
+  var t = e.option, r = e.isActive, a = Ma(e, Ba);
   return typeof t == "string" ? /* @__PURE__ */ k.createElement(xe, G({
     option: /* @__PURE__ */ k.createElement(mt, G({
       type: t
@@ -376,15 +374,15 @@ function z(e) {
     return t && typeof Symbol == "function" && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t;
   }, z(e);
 }
-function q() {
-  return q = Object.assign ? Object.assign.bind() : function(e) {
+function V() {
+  return V = Object.assign ? Object.assign.bind() : function(e) {
     for (var t = 1; t < arguments.length; t++) {
       var r = arguments[t];
       for (var a in r)
         Object.prototype.hasOwnProperty.call(r, a) && (e[a] = r[a]);
     }
     return e;
-  }, q.apply(this, arguments);
+  }, V.apply(this, arguments);
 }
 function Ae(e, t) {
   var r = Object.keys(e);
@@ -396,7 +394,7 @@ function Ae(e, t) {
   }
   return r;
 }
-function D(e) {
+function F(e) {
   for (var t = 1; t < arguments.length; t++) {
     var r = arguments[t] != null ? arguments[t] : {};
     t % 2 ? Ae(Object(r), !0).forEach(function(a) {
@@ -407,41 +405,41 @@ function D(e) {
   }
   return e;
 }
-function Ra(e, t) {
+function Ka(e, t) {
   if (!(e instanceof t))
     throw new TypeError("Cannot call a class as a function");
 }
 function Oe(e, t) {
   for (var r = 0; r < t.length; r++) {
     var a = t[r];
-    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, et(a.key), a);
+    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, tt(a.key), a);
   }
 }
-function za(e, t, r) {
+function Wa(e, t, r) {
   return t && Oe(e.prototype, t), r && Oe(e, r), Object.defineProperty(e, "prototype", { writable: !1 }), e;
 }
-function Ka(e, t, r) {
-  return t = ee(t), Wa(e, Qe() ? Reflect.construct(t, r || [], ee(e).constructor) : t.apply(e, r));
+function Ga(e, t, r) {
+  return t = ee(t), Va(e, et() ? Reflect.construct(t, r || [], ee(e).constructor) : t.apply(e, r));
 }
-function Wa(e, t) {
+function Va(e, t) {
   if (t && (z(t) === "object" || typeof t == "function"))
     return t;
   if (t !== void 0)
     throw new TypeError("Derived constructors may only return object or undefined");
-  return Ga(e);
+  return qa(e);
 }
-function Ga(e) {
+function qa(e) {
   if (e === void 0)
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
 }
-function Qe() {
+function et() {
   try {
     var e = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
     }));
   } catch {
   }
-  return (Qe = function() {
+  return (et = function() {
     return !!e;
   })();
 }
@@ -450,7 +448,7 @@ function ee(e) {
     return r.__proto__ || Object.getPrototypeOf(r);
   }, ee(e);
 }
-function qa(e, t) {
+function Ya(e, t) {
   if (typeof t != "function" && t !== null)
     throw new TypeError("Super expression must either be null or a function");
   e.prototype = Object.create(t && t.prototype, { constructor: { value: e, writable: !0, configurable: !0 } }), Object.defineProperty(e, "prototype", { writable: !1 }), t && ue(e, t);
@@ -461,13 +459,13 @@ function ue(e, t) {
   }, ue(e, t);
 }
 function j(e, t, r) {
-  return t = et(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
+  return t = tt(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
 }
-function et(e) {
-  var t = Va(e, "string");
+function tt(e) {
+  var t = Ha(e, "string");
   return z(t) == "symbol" ? t : t + "";
 }
-function Va(e, t) {
+function Ha(e, t) {
   if (z(e) != "object" || !e) return e;
   var r = e[Symbol.toPrimitive];
   if (r !== void 0) {
@@ -477,13 +475,13 @@ function Va(e, t) {
   }
   return String(e);
 }
-var H = /* @__PURE__ */ function(e) {
+var Y = /* @__PURE__ */ function(e) {
   function t() {
     var r;
-    Ra(this, t);
+    Ka(this, t);
     for (var a = arguments.length, o = new Array(a), s = 0; s < a; s++)
       o[s] = arguments[s];
-    return r = Ka(this, t, [].concat(o)), j(r, "state", {
+    return r = Ga(this, t, [].concat(o)), j(r, "state", {
       isAnimationFinished: !1
     }), j(r, "handleAnimationEnd", function() {
       r.setState({
@@ -493,20 +491,20 @@ var H = /* @__PURE__ */ function(e) {
       r.setState({
         isAnimationFinished: !1
       });
-    }), j(r, "id", Ct("recharts-scatter-")), r;
+    }), j(r, "id", St("recharts-scatter-")), r;
   }
-  return qa(t, e), za(t, [{
+  return Ya(t, e), Wa(t, [{
     key: "renderSymbolsStatically",
     value: function(a) {
       var o = this, s = this.props, l = s.shape, d = s.activeShape, i = s.activeIndex, m = ne(this.props, !1);
       return a.map(function(c, f) {
-        var h = i === f, u = h ? d : l, x = D(D({}, m), c);
-        return /* @__PURE__ */ k.createElement(K, q({
+        var h = i === f, u = h ? d : l, x = F(F({}, m), c);
+        return /* @__PURE__ */ k.createElement(K, V({
           className: "recharts-scatter-symbol",
           key: "symbol-".concat(c == null ? void 0 : c.cx, "-").concat(c == null ? void 0 : c.cy, "-").concat(c == null ? void 0 : c.size, "-").concat(f)
         }, ht(o.props, c, f), {
           role: "img"
-        }), /* @__PURE__ */ k.createElement(Ba, q({
+        }), /* @__PURE__ */ k.createElement(za, V({
           option: u,
           isActive: h,
           key: "symbol-".concat(f)
@@ -532,19 +530,19 @@ var H = /* @__PURE__ */ function(e) {
         onAnimationEnd: this.handleAnimationEnd,
         onAnimationStart: this.handleAnimationStart
       }, function(h) {
-        var u = h.t, x = s.map(function(A, C) {
-          var O = f && f[C];
+        var u = h.t, x = s.map(function(A, S) {
+          var O = f && f[S];
           if (O) {
             var g = U(O.cx, A.cx), b = U(O.cy, A.cy), w = U(O.size, A.size);
-            return D(D({}, A), {}, {
+            return F(F({}, A), {}, {
               cx: g(u),
               cy: b(u),
               size: w(u)
             });
           }
-          var S = U(0, A.size);
-          return D(D({}, A), {}, {
-            size: S(u)
+          var C = U(0, A.size);
+          return F(F({}, A), {}, {
+            size: C(u)
           });
         });
         return /* @__PURE__ */ k.createElement(K, null, a.renderSymbolsStatically(x));
@@ -571,12 +569,12 @@ var H = /* @__PURE__ */ function(e) {
           xAxis: l,
           yAxis: d,
           layout: u === "x" ? "vertical" : "horizontal",
-          dataPointFormatter: function(C, O) {
+          dataPointFormatter: function(S, O) {
             return {
-              x: C.cx,
-              y: C.cy,
-              value: u === "x" ? +C.node.x : +C.node.y,
-              errorVal: X(C, O)
+              x: S.cx,
+              y: S.cy,
+              value: u === "x" ? +S.node.x : +S.node.y,
+              errorVal: X(S, O)
             };
           }
         });
@@ -594,8 +592,8 @@ var H = /* @__PURE__ */ function(e) {
           };
         });
       else if (l === "fitting") {
-        var h = gt(o), u = h.xmin, x = h.xmax, A = h.a, C = h.b, O = function(w) {
-          return A * w + C;
+        var h = gt(o), u = h.xmin, x = h.xmax, A = h.a, S = h.b, O = function(w) {
+          return A * w + S;
         };
         c = [{
           x: u,
@@ -605,13 +603,13 @@ var H = /* @__PURE__ */ function(e) {
           y: O(x)
         }];
       }
-      var g = D(D(D({}, i), {}, {
+      var g = F(F(F({}, i), {}, {
         fill: "none",
         stroke: i && i.fill
       }, m), {}, {
         points: c
       });
-      return /* @__PURE__ */ k.isValidElement(s) ? f = /* @__PURE__ */ k.cloneElement(s, g) : xt(s) ? f = s(g) : f = /* @__PURE__ */ k.createElement(wt, q({}, g, {
+      return /* @__PURE__ */ k.isValidElement(s) ? f = /* @__PURE__ */ k.cloneElement(s, g) : xt(s) ? f = s(g) : f = /* @__PURE__ */ k.createElement(wt, V({}, g, {
         type: d
       })), /* @__PURE__ */ k.createElement(K, {
         className: "recharts-scatter-line",
@@ -624,12 +622,12 @@ var H = /* @__PURE__ */ function(e) {
       var a = this.props, o = a.hide, s = a.points, l = a.line, d = a.className, i = a.xAxis, m = a.yAxis, c = a.left, f = a.top, h = a.width, u = a.height, x = a.id, A = a.isAnimationActive;
       if (o || !s || !s.length)
         return null;
-      var C = this.state.isAnimationFinished, O = Pt("recharts-scatter", d), g = i && i.allowDataOverflow, b = m && m.allowDataOverflow, w = g || b, S = $(x) ? this.id : x;
+      var S = this.state.isAnimationFinished, O = Pt("recharts-scatter", d), g = i && i.allowDataOverflow, b = m && m.allowDataOverflow, w = g || b, C = $(x) ? this.id : x;
       return /* @__PURE__ */ k.createElement(K, {
         className: O,
-        clipPath: w ? "url(#clipPath-".concat(S, ")") : null
+        clipPath: w ? "url(#clipPath-".concat(C, ")") : null
       }, g || b ? /* @__PURE__ */ k.createElement("defs", null, /* @__PURE__ */ k.createElement("clipPath", {
-        id: "clipPath-".concat(S)
+        id: "clipPath-".concat(C)
       }, /* @__PURE__ */ k.createElement("rect", {
         x: g ? c : c - h / 2,
         y: b ? f : f - u / 2,
@@ -637,7 +635,7 @@ var H = /* @__PURE__ */ function(e) {
         height: b ? u : u * 2
       }))) : null, l && this.renderLine(), this.renderErrorBar(), /* @__PURE__ */ k.createElement(K, {
         key: "recharts-scatter-symbols"
-      }, this.renderSymbols()), (!A || C) && De.renderCallByParent(this.props, s));
+      }, this.renderSymbols()), (!A || S) && Fe.renderCallByParent(this.props, s));
     }
   }], [{
     key: "getDerivedStateFromProps",
@@ -651,9 +649,9 @@ var H = /* @__PURE__ */ function(e) {
       } : null;
     }
   }]);
-}(Sa);
-j(H, "displayName", "Scatter");
-j(H, "defaultProps", {
+}(Aa);
+j(Y, "displayName", "Scatter");
+j(Y, "defaultProps", {
   xAxisId: 0,
   yAxisId: 0,
   zAxisId: 0,
@@ -663,17 +661,17 @@ j(H, "defaultProps", {
   data: [],
   shape: "circle",
   hide: !1,
-  isAnimationActive: !St.isSsr,
+  isAnimationActive: !Ct.isSsr,
   animationBegin: 0,
   animationDuration: 400,
   animationEasing: "linear"
 });
-j(H, "getComposedData", function(e) {
-  var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, d = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = Te(o.props.children, Nt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, x = a ? a.range : re.defaultProps.range, A = x && x[0], C = t.scale.bandwidth ? t.scale.bandwidth() : 0, O = r.scale.bandwidth ? r.scale.bandwidth() : 0, g = s.map(function(b, w) {
-    var S = X(b, f), y = X(b, h), v = !$(u) && X(b, u) || "-", L = [{
+j(Y, "getComposedData", function(e) {
+  var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, d = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = Te(o.props.children, Nt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, x = a ? a.range : re.defaultProps.range, A = x && x[0], S = t.scale.bandwidth ? t.scale.bandwidth() : 0, O = r.scale.bandwidth ? r.scale.bandwidth() : 0, g = s.map(function(b, w) {
+    var C = X(b, f), y = X(b, h), v = !$(u) && X(b, u) || "-", L = [{
       name: $(t.dataKey) ? o.props.name : t.name || t.dataKey,
       unit: t.unit || "",
-      value: S,
+      value: C,
       payload: b,
       dataKey: f,
       type: m
@@ -696,7 +694,7 @@ j(H, "getComposedData", function(e) {
     var T = we({
       axis: t,
       ticks: l,
-      bandSize: C,
+      bandSize: S,
       entry: b,
       index: w,
       dataKey: f
@@ -708,7 +706,7 @@ j(H, "getComposedData", function(e) {
       index: w,
       dataKey: h
     }), p = v !== "-" ? a.scale(v) : A, P = Math.sqrt(Math.max(p, 0) / Math.PI);
-    return D(D({}, b), {}, {
+    return F(F({}, b), {}, {
       cx: T,
       cy: E,
       x: T - P,
@@ -720,7 +718,7 @@ j(H, "getComposedData", function(e) {
       height: 2 * P,
       size: p,
       node: {
-        x: S,
+        x: C,
         y,
         z: v
       },
@@ -732,13 +730,13 @@ j(H, "getComposedData", function(e) {
       payload: b
     }, c && c[w] && c[w].props);
   });
-  return D({
+  return F({
     points: g
   }, i);
 });
-var Ha = At({
+var Ja = At({
   chartName: "ComposedChart",
-  GraphicalChild: [_e, Ot, Ie, H],
+  GraphicalChild: [Ie, Ot, _e, Y],
   axisComponents: [{
     axisType: "xAxis",
     AxisComp: Ee
@@ -751,7 +749,7 @@ var Ha = At({
   }],
   formatAxisMap: kt
 });
-const Ya = (e) => {
+const Ua = (e) => {
   const t = (r) => {
     const { cx: a, cy: o, fill: s, payload: l } = r, d = () => {
       if (!l) return "-";
@@ -775,16 +773,16 @@ const Ya = (e) => {
     });
   };
   return t.displayName = `Scatter-${e}`, t;
-}, Ja = ({ dataConfig: e, data: t, xAxis: r, yAxis: a = {
+}, Xa = ({ dataConfig: e, data: t, xAxis: r, yAxis: a = {
   hide: !0
 }, label: o = !1, hideTooltip: s = !1, hideGrid: l = !1, aspect: d, legend: i, showValueUnderLabel: m = !1, bar: c, line: f, scatter: h, onClick: u }, x) => {
   var v, L, T, E;
-  const A = Lt(t), C = c != null && c.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], O = f != null && f.categories ? Array.isArray(f.categories) ? f.categories : [f.categories] : [], g = h != null && h.categories ? Array.isArray(h.categories) ? h.categories : [h.categories] : [], b = [...C, ...O, ...g], w = Math.max(...A.flatMap((p) => b.map((P) => Ft(a != null && a.tickFormatter ? a.tickFormatter(`${p[P]}`) : `${p[P]}`)))), S = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "left"), y = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "right");
+  const A = Lt(t), S = c != null && c.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], O = f != null && f.categories ? Array.isArray(f.categories) ? f.categories : [f.categories] : [], g = h != null && h.categories ? Array.isArray(h.categories) ? h.categories : [h.categories] : [], b = [...S, ...O, ...g], w = Math.max(...A.flatMap((p) => b.map((P) => Dt(a != null && a.tickFormatter ? a.tickFormatter(`${p[P]}`) : `${p[P]}`)))), C = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "left"), y = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "right");
   return n(Tt, {
     config: e,
     ref: x,
     aspect: d,
-    children: N(Ha, {
+    children: N(Ja, {
       accessibilityLayer: !0,
       data: A,
       margin: {
@@ -801,24 +799,24 @@ const Ya = (e) => {
           label: p.activeLabel,
           values: {}
         };
-        for (const Y of p.activePayload)
-          P.values[Y.name] = Y.value;
+        for (const H of p.activePayload)
+          P.values[H.name] = H.value;
         u(P);
       },
-      children: [!s && n(Dt, {
-        ..._t(),
-        content: n(It, {
+      children: [!s && n(Ft, {
+        ...It(),
+        content: n(_t, {
           yAxisFormatter: a.tickFormatter
         })
       }), !l && n(Et, {
         ...jt()
-      }), S.length > 0 && n(le, {
+      }), C.length > 0 && n(le, {
         ...Pe(a),
         tick: !0,
-        width: a.width ?? w + 20 + (y.length > 0 && ((v = S[0]) != null && v.axisLabel) ? 20 : 0),
-        hide: a.hide || S.some((p) => p == null ? void 0 : p.hideAxis),
-        label: (L = S[0]) != null && L.axisLabel ? {
-          value: S[0].axisLabel,
+        width: a.width ?? w + 20 + (y.length > 0 && ((v = C[0]) != null && v.axisLabel) ? 20 : 0),
+        hide: a.hide || C.some((p) => p == null ? void 0 : p.hideAxis),
+        label: (L = C[0]) != null && L.axisLabel ? {
+          value: C[0].axisLabel,
           angle: -90,
           position: "insideLeft"
         } : void 0
@@ -827,7 +825,7 @@ const Ya = (e) => {
         yAxisId: "right",
         orientation: "right",
         tick: !0,
-        width: a.width ?? w + 20 + (S.length > 0 && ((T = y[0]) != null && T.axisLabel) ? 20 : 0),
+        width: a.width ?? w + 20 + (C.length > 0 && ((T = y[0]) != null && T.axisLabel) ? 20 : 0),
         hide: a.hide || y.some((p) => p == null ? void 0 : p.hideAxis),
         label: (E = y[0]) != null && E.axisLabel ? {
           value: y[0].axisLabel,
@@ -839,9 +837,9 @@ const Ya = (e) => {
         hide: r == null ? void 0 : r.hide,
         tick: m ? (p) => {
           var be, ge;
-          const { x: P, y: Y, payload: ve } = p, ye = ((be = t.find((ft) => ft.label === ve.value)) == null ? void 0 : be.values) || "", J = Object.keys(ye).length === 1 ? (ge = Object.values(ye)) == null ? void 0 : ge[0] : void 0, dt = J !== void 0 && a.tickFormatter ? a.tickFormatter(`${J}`) : J.toLocaleString();
+          const { x: P, y: H, payload: ve } = p, ye = ((be = t.find((pt) => pt.label === ve.value)) == null ? void 0 : be.values) || "", J = Object.keys(ye).length === 1 ? (ge = Object.values(ye)) == null ? void 0 : ge[0] : void 0, ft = J !== void 0 && a.tickFormatter ? a.tickFormatter(`${J}`) : J.toLocaleString();
           return N("g", {
-            transform: `translate(${P},${Y})`,
+            transform: `translate(${P},${H})`,
             children: [n("text", {
               x: 0,
               y: 0,
@@ -855,39 +853,39 @@ const Ya = (e) => {
               dy: 28,
               textAnchor: "middle",
               className: "!fill-f1-foreground text-sm font-medium",
-              children: dt
+              children: ft
             })]
           });
         } : void 0
-      }), C.map((p, P) => n(Ie, {
+      }), S.map((p, P) => n(_e, {
         isAnimationActive: !1,
         dataKey: String(p),
         fill: e[p].color ? W(e[p].color) : oe(P),
         radius: 4,
         maxBarSize: 32,
-        children: o && n(De, {
+        children: o && n(Fe, {
           position: "top",
           offset: 10,
           className: "fill-f1-foreground",
           fontSize: 12
         }, `label-${String(p)}`)
-      }, `bar-${String(p)}`)), O.map((p, P) => n(_e, {
+      }, `bar-${String(p)}`)), O.map((p, P) => n(Ie, {
         type: (f == null ? void 0 : f.lineType) ?? "natural",
         dataKey: String(p),
-        stroke: e[p].color ? W(e[p].color) : oe(C.length + P),
+        stroke: e[p].color ? W(e[p].color) : oe(S.length + P),
         strokeWidth: 2,
         dot: (f == null ? void 0 : f.dot) ?? !1,
         isAnimationActive: !1,
         yAxisId: (f == null ? void 0 : f.axisPosition) === "right" ? "right" : void 0
-      }, `line-${String(p)}`)), g.map((p, P) => n(H, {
+      }, `line-${String(p)}`)), g.map((p, P) => n(Y, {
         dataKey: String(p),
-        fill: e[p].color ? W(e[p].color) : oe(C.length + O.length + P),
+        fill: e[p].color ? W(e[p].color) : oe(S.length + O.length + P),
         r: 4,
         isAnimationActive: !1,
         yAxisId: (h == null ? void 0 : h.axisPosition) === "right" ? "right" : void 0,
-        shape: Ya(String(p))
-      }, `scatter-${String(p)}`)), i && n(Mt, {
-        content: n(Bt, {
+        shape: Ua(String(p))
+      }, `scatter-${String(p)}`)), i && n(Bt, {
+        content: n(Mt, {
           nameKey: "label"
         }),
         align: "center",
@@ -897,21 +895,21 @@ const Ya = (e) => {
       })]
     })
   });
-}, Ua = je(Ja);
-var me = "Progress", he = 100, [Xa, Ar] = Rt(me), [Za, Qa] = Xa(me), tt = fe.forwardRef(
+}, Za = je(Xa);
+var me = "Progress", he = 100, [Qa, Or] = Rt(me), [er, tr] = Qa(me), at = fe.forwardRef(
   (e, t) => {
     const {
       __scopeProgress: r,
       value: a = null,
       max: o,
-      getValueLabel: s = er,
+      getValueLabel: s = ar,
       ...l
     } = e;
-    (o || o === 0) && !ke(o) && console.error(tr(`${o}`, "Progress"));
+    (o || o === 0) && !ke(o) && console.error(rr(`${o}`, "Progress"));
     const d = ke(o) ? o : he;
-    a !== null && !Le(a, d) && console.error(ar(`${a}`, "Progress"));
+    a !== null && !Le(a, d) && console.error(nr(`${a}`, "Progress"));
     const i = Le(a, d) ? a : null, m = te(i) ? s(i, d) : void 0;
-    return /* @__PURE__ */ n(Za, { scope: r, value: i, max: d, children: /* @__PURE__ */ n(
+    return /* @__PURE__ */ n(er, { scope: r, value: i, max: d, children: /* @__PURE__ */ n(
       $e.div,
       {
         "aria-valuemax": d,
@@ -919,7 +917,7 @@ var me = "Progress", he = 100, [Xa, Ar] = Rt(me), [Za, Qa] = Xa(me), tt = fe.for
         "aria-valuenow": te(i) ? i : void 0,
         "aria-valuetext": m,
         role: "progressbar",
-        "data-state": nt(i, d),
+        "data-state": ot(i, d),
         "data-value": i ?? void 0,
         "data-max": d,
         ...l,
@@ -928,14 +926,14 @@ var me = "Progress", he = 100, [Xa, Ar] = Rt(me), [Za, Qa] = Xa(me), tt = fe.for
     ) });
   }
 );
-tt.displayName = me;
-var at = "ProgressIndicator", rt = fe.forwardRef(
+at.displayName = me;
+var rt = "ProgressIndicator", nt = fe.forwardRef(
   (e, t) => {
-    const { __scopeProgress: r, ...a } = e, o = Qa(at, r);
+    const { __scopeProgress: r, ...a } = e, o = tr(rt, r);
     return /* @__PURE__ */ n(
       $e.div,
       {
-        "data-state": nt(o.value, o.max),
+        "data-state": ot(o.value, o.max),
         "data-value": o.value ?? void 0,
         "data-max": o.max,
         ...a,
@@ -944,11 +942,11 @@ var at = "ProgressIndicator", rt = fe.forwardRef(
     );
   }
 );
-rt.displayName = at;
-function er(e, t) {
+nt.displayName = rt;
+function ar(e, t) {
   return `${Math.round(e / t * 100)}%`;
 }
-function nt(e, t) {
+function ot(e, t) {
   return e == null ? "indeterminate" : e === t ? "complete" : "loading";
 }
 function te(e) {
@@ -960,10 +958,10 @@ function ke(e) {
 function Le(e, t) {
   return te(e) && !isNaN(e) && e <= t && e >= 0;
 }
-function tr(e, t) {
+function rr(e, t) {
   return `Invalid prop \`max\` of value \`${e}\` supplied to \`${t}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${he}\`.`;
 }
-function ar(e, t) {
+function nr(e, t) {
   return `Invalid prop \`value\` of value \`${e}\` supplied to \`${t}\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${he} if no \`max\` prop is set)
@@ -971,12 +969,12 @@ function ar(e, t) {
 
 Defaulting to \`null\`.`;
 }
-var ot = tt, rr = rt;
-const it = fe.forwardRef(({ className: e, value: t, ...r }, a) => n(ot, {
+var it = at, or = nt;
+const st = fe.forwardRef(({ className: e, value: t, ...r }, a) => n(it, {
   ref: a,
-  className: I("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", e),
+  className: _("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", e),
   ...r,
-  children: n(rr, {
+  children: n(or, {
     className: "h-full w-full flex-1 transition-all",
     style: {
       backgroundColor: r.color,
@@ -984,15 +982,15 @@ const it = fe.forwardRef(({ className: e, value: t, ...r }, a) => n(ot, {
     }
   })
 }));
-it.displayName = ot.displayName;
-const nr = ({ value: e, max: t = 100, label: r, color: a }, o) => {
+st.displayName = it.displayName;
+const ir = ({ value: e, max: t = 100, label: r, color: a }, o) => {
   const s = a ? W(a) : W("categorical-1"), l = e / t * 100;
   return N("div", {
     className: "flex items-center space-x-2",
     "aria-live": "polite",
     children: [n("div", {
       className: "flex-grow",
-      children: n(it, {
+      children: n(st, {
         color: s,
         value: l,
         className: "w-full",
@@ -1006,78 +1004,78 @@ const nr = ({ value: e, max: t = 100, label: r, color: a }, o) => {
       children: r
     })]
   });
-}, or = je(nr), Or = _(
+}, sr = je(ir), kr = I(
   {
     name: "AreaChart",
     type: "info"
   },
-  zt
-), kr = _(
+  qt
+), Lr = I(
   {
     name: "BarChart",
     type: "info"
   },
-  Kt
-), Lr = _(
+  zt
+), Dr = I(
   {
     name: "CategoryBarChart",
     type: "info"
   },
-  Wt
-), Fr = _(
+  Kt
+), Tr = I(
   {
     name: "LineChart",
     type: "info"
   },
-  Gt
-), Tr = _(
+  Wt
+), Fr = I(
   {
     name: "PieChart",
     type: "info"
   },
-  qt
-), Dr = _(
+  Gt
+), Ir = I(
   {
     name: "VerticalBarChart",
     type: "info"
   },
   Vt
-), _r = _(
+), _r = I(
   {
     name: "ProgressBarChart",
     type: "info"
   },
-  or
-), Ir = _(
+  sr
+), Er = I(
   {
     name: "ComboChart",
     type: "info"
   },
-  Ua
-), de = ({ count: e, list: t }) => {
-  const [r, a] = F(!1), o = n(Z, {
+  Za
+), jr = Yt, $r = Be, Br = ["default", "outline", "neutral"], Mr = Be, Rr = ["sm", "md", "lg"], zr = Ht, de = ({ count: e, list: t }) => {
+  const [r, a] = D(!1), o = n(Z, {
     label: `+${e}`
   });
   return t != null && t.length ? N(Me, {
     open: r,
     onOpenChange: a,
-    children: [n(Be, {
+    children: [n(Re, {
       asChild: !0,
       children: n("button", {
-        className: Ht("inline-flex flex-shrink-0 items-center"),
+        className: Jt("inline-flex flex-shrink-0 items-center"),
         children: o
       })
-    }), n(Re, {
+    }), n(ze, {
       className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
       align: "end",
-      children: N(ze, {
+      children: N(Ke, {
         className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col",
         children: [t.map((s, l) => n("div", {
           className: "flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
           children: n(Z, {
             ...s
           })
-        }, l)), n(Ke, {
+        }, l)), n(We, {
           orientation: "vertical",
           className: "[&_div]:bg-f1-background"
         })]
@@ -1086,9 +1084,9 @@ const nr = ({ value: e, max: t = 100, label: r, color: a }, o) => {
   }) : o;
 };
 de.displayName = "ChipCounter";
-const st = ({ chips: e, max: t = 4, remainingCount: r, layout: a = "compact" }) => {
+const lt = ({ chips: e, max: t = 4, remainingCount: r, layout: a = "compact" }) => {
   if (a === "fill")
-    return n(Yt, {
+    return n(Ut, {
       items: e,
       renderListItem: (i) => n(Z, {
         ...i
@@ -1113,13 +1111,13 @@ const st = ({ chips: e, max: t = 4, remainingCount: r, layout: a = "compact" }) 
     })]
   });
 };
-st.displayName = "F0ChipList";
-const Er = We("F0ChipList", st), lt = V(({ value: e, onDateChange: t, granularity: r, onOpenChange: a, minDate: o, maxDate: s, onClear: l, ...d }, i) => {
-  const [m, c] = F(""), [f, h] = F(!1), u = Ge();
-  M(() => {
+lt.displayName = "F0ChipList";
+const Kr = Ge("F0ChipList", lt), ct = q(({ value: e, onDateChange: t, granularity: r, onOpenChange: a, minDate: o, maxDate: s, onClear: l, ...d }, i) => {
+  const [m, c] = D(""), [f, h] = D(!1), u = Ve();
+  B(() => {
     c(r.toString(e == null ? void 0 : e.value, u));
   }, [e, r, u]);
-  const x = (g) => Xt(g, r, {
+  const x = (g) => Qt(g, r, {
     minDate: o,
     maxDate: s
   }), A = (g, b) => {
@@ -1135,44 +1133,44 @@ const Er = We("F0ChipList", st), lt = V(({ value: e, onDateChange: t, granularit
       value: w,
       granularity: b.key
     }), h(!1)) : h(!0);
-  }, C = () => {
+  }, S = () => {
     A(m, r);
   };
   return n(ae, {
-    children: n(Jt, {
+    children: n(Xt, {
       ...d,
-      icon: Ut,
+      icon: Zt,
       ref: i,
       onFocus: () => a == null ? void 0 : a(!0),
       onClear: () => {
         l == null || l(), c(""), A("", r);
       },
       onKeyDown: (g) => {
-        g.key === "Enter" && C();
+        g.key === "Enter" && S();
       },
       type: "text",
       onChange: (g) => {
         c(g);
       },
       error: f || d.error,
-      onBlur: C,
+      onBlur: S,
       value: m,
       onClickContent: () => a == null ? void 0 : a(!0)
     })
   });
 });
-lt.displayName = "DateInput";
-function ir({ onChange: e, value: t, presets: r = [], granularities: a = ["day"], minDate: o, maxDate: s, open: l = !1, ...d }) {
-  const [i, m] = F(), [c, f] = F(l);
-  M(() => {
+ct.displayName = "DateInput";
+function lr({ onChange: e, value: t, presets: r = [], granularities: a = ["day"], minDate: o, maxDate: s, open: l = !1, ...d }) {
+  const [i, m] = D(), [c, f] = D(l);
+  B(() => {
     f(l);
   }, [l]);
-  const h = Ge(), u = se(() => a[0] ?? "day", [a]), x = Ne((y) => {
+  const h = Ve(), u = se(() => a[0] ?? "day", [a]), x = Ne((y) => {
     const v = y || u;
-    if (!Ce[v])
+    if (!Se[v])
       throw new Error(`Invalid granularity ${v}`);
     return {
-      ...Ce[v],
+      ...Se[v],
       key: v
     };
   }, [u]), A = Ne((y) => {
@@ -1184,8 +1182,8 @@ function ir({ onChange: e, value: t, presets: r = [], granularities: a = ["day"]
       value: v.toRange(v.calendarMode === "range" ? y.value : ((L = y.value) == null ? void 0 : L.from) ?? void 0),
       granularity: y.granularity
     } : void 0;
-  }, [x]), C = se(() => x(i == null ? void 0 : i.granularity), [i == null ? void 0 : i.granularity, x]);
-  M(() => {
+  }, [x]), S = se(() => x(i == null ? void 0 : i.granularity), [i == null ? void 0 : i.granularity, x]);
+  B(() => {
     const y = A(t);
     ie(i, y) || m(y);
   }, [t]);
@@ -1201,13 +1199,13 @@ function ir({ onChange: e, value: t, presets: r = [], granularities: a = ["day"]
   }, b = (y) => {
     var v;
     f(y), (v = d.onOpenChange) == null || v.call(d, y);
-  }, w = se(() => r.filter((y) => a.includes(y.granularity)), [r, a]), S = pe(null);
-  return M(() => {
-    c && S.current && requestAnimationFrame(() => {
+  }, w = se(() => r.filter((y) => a.includes(y.granularity)), [r, a]), C = pe(null);
+  return B(() => {
+    c && C.current && requestAnimationFrame(() => {
       var y;
-      (y = S.current) == null || y.focus();
+      (y = C.current) == null || y.focus();
     });
-  }, [c]), n(Zt, {
+  }, [c]), n(ea, {
     hideCalendarInput: !0,
     onSelect: O,
     value: i,
@@ -1218,27 +1216,27 @@ function ir({ onChange: e, value: t, presets: r = [], granularities: a = ["day"]
     open: c,
     onOpenChange: b,
     asChild: !0,
-    children: n(lt, {
-      ref: S,
+    children: n(ct, {
+      ref: C,
       ...d,
       value: i,
-      granularity: C,
+      granularity: S,
       onDateChange: g
     })
   });
 }
-const jr = Qt, $r = We(
+const Wr = ta, Gr = Ge(
   "F0DatePicker",
-  ir
-), sr = {
+  lr
+), cr = {
   xs: 1,
   sm: 2,
   md: 2,
   lg: 2
-}, lr = V(function({ widgets: t, children: r }, a) {
+}, ur = q(function({ widgets: t, children: r }, a) {
   const o = pe(null);
-  Na(a, () => o.current);
-  const s = Aa.toArray(t).filter((l) => !!l).map((l, d) => n("div", {
+  Oa(a, () => o.current);
+  const s = ka.toArray(t).filter((l) => !!l).map((l, d) => n("div", {
     className: "h-full @5xl:h-auto [&>div]:h-full",
     children: l
   }, d));
@@ -1249,8 +1247,8 @@ const jr = Qt, $r = We(
       className: "@container",
       children: [N("div", {
         className: "flex flex-col gap-6 px-5 pt-4 @md:pt-2 @5xl:hidden",
-        children: [n(ea, {
-          columns: sr,
+        children: [n(aa, {
+          columns: cr,
           showArrows: !1,
           children: s
         }), n("main", {
@@ -1271,73 +1269,73 @@ const jr = Qt, $r = We(
       })]
     })
   });
-}), cr = V(function({ children: t, sideContent: r, mainColumnPosition: a = "left", sticky: o = !1 }, s) {
+}), dr = q(function({ children: t, sideContent: r, mainColumnPosition: a = "left", sticky: o = !1 }, s) {
   return n("div", {
     ref: s,
     className: "h-full",
     children: N("div", {
-      className: I("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", o && "md:sticky md:top-0 md:max-h-full"),
+      className: _("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", o && "md:sticky md:top-0 md:max-h-full"),
       children: [n("main", {
-        className: I("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", o ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", a === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
+        className: _("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", o ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", a === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
         children: t
-      }), n(ur, {
+      }), n(fr, {
         sticky: o,
-        className: I("order-1", a === "right" ? "md:order-1" : "md:order-3"),
+        className: _("order-1", a === "right" ? "md:order-1" : "md:order-3"),
         children: r
       })]
     })
   });
-}), ur = ({ children: e, className: t }) => n("aside", {
-  className: I("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", t),
+}), fr = ({ children: e, className: t }) => n("aside", {
+  className: _("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", t),
   children: e
-}), dr = ta({
+}), pr = ra({
   base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
       narrow: "max-w-screen-lg"
     }
   }
-}), ct = k.forwardRef(({ children: e, variant: t, className: r, ...a }, o) => n(qe, {
+}), ut = k.forwardRef(({ children: e, variant: t, className: r, ...a }, o) => n(qe, {
   layout: "standard",
   children: n("section", {
     ref: o,
-    className: I("relative flex-1 overflow-auto", r),
+    className: _("relative flex-1 overflow-auto", r),
     ...a,
     children: n("div", {
-      className: I(dr({
+      className: _(pr({
         variant: t
       })),
       children: e
     })
   })
 }));
-ct.displayName = "StandardLayout";
-const Mr = _({
+ut.displayName = "StandardLayout";
+const Vr = I({
   name: "StandardLayout",
   type: "layout"
-}, ct), Br = _({
+}, ut), qr = I({
   name: "TwoColumnLayout",
   type: "layout"
-}, cr), Rr = _({
+}, dr), Yr = I({
   name: "HomeLayout",
   type: "layout"
-}, lr), fr = ({ benefits: e }) => n("div", {
+}, ur), mr = ({ benefits: e }) => n("div", {
   className: "flex flex-col gap-2",
-  children: e.map((t, r) => n(pr, {
+  children: e.map((t, r) => n(hr, {
     text: t
   }, r))
-}), pr = ({ text: e }) => N("div", {
+}), hr = ({ text: e }) => N("div", {
   className: "flex flex-row items-start gap-2",
-  children: [n(ra, {
-    icon: na,
+  children: [n(oa, {
+    icon: ia,
     size: "md",
     className: "text-f1-icon-positive"
   }), n("span", {
     children: e
   })]
-}), ut = V(({ title: e, image: t, benefits: r, actions: a, withShadow: o = !0, module: s, moduleName: l, tag: d }, i) => N("div", {
+}), dt = q(({ title: e, image: t, benefits: r, actions: a, withShadow: o = !0, module: s, moduleName: l, tag: d }, i) => N("div", {
   ref: i,
-  className: I("bg-white flex flex-row rounded-xl border border-f1-border-secondary", o && "shadow-md"),
+  className: _("bg-white flex flex-row rounded-xl border border-f1-border-secondary", o && "shadow-md"),
   children: [n("div", {
     className: "aspect-auto flex-shrink-0 overflow-hidden rounded-xl py-1 pl-1",
     children: n("img", {
@@ -1353,7 +1351,7 @@ const Mr = _({
         className: "flex flex-col gap-2",
         children: [N("div", {
           className: "flex flex-row items-center gap-2",
-          children: [s && n(Ve, {
+          children: [s && n(Ye, {
             module: s
           }), l && n("p", {
             className: "text-base font-medium text-f1-foreground",
@@ -1361,7 +1359,7 @@ const Mr = _({
           })]
         }), d && n("div", {
           className: "flex justify-start",
-          children: n(aa, {
+          children: n(na, {
             icon: d.icon,
             text: d.label
           })
@@ -1369,7 +1367,7 @@ const Mr = _({
           className: "font-bold text-xl text-f1-foreground",
           children: e
         })]
-      }), n(fr, {
+      }), n(mr, {
         benefits: r
       })]
     }), a && n("div", {
@@ -1378,38 +1376,38 @@ const Mr = _({
     })]
   })]
 }));
-ut.displayName = "ProductBlankslate";
-function mr({ isOpen: e, onClose: t, title: r, children: a, module: o, portalContainer: s }) {
-  const [l, d] = F(e);
-  return M(() => {
+dt.displayName = "ProductBlankslate";
+function vr({ isOpen: e, onClose: t, title: r, children: a, module: o, portalContainer: s }) {
+  const [l, d] = D(e);
+  return B(() => {
     d(e);
-  }, [e]), n(oa, {
+  }, [e]), n(sa, {
     open: l,
     onOpenChange: (m) => {
       d(m), m || t();
     },
     modal: !0,
-    children: N(ia, {
+    children: N(la, {
       className: "max-h-[620px] w-[760px] overflow-y-auto overflow-x-hidden bg-f1-background",
       container: s,
       children: [N("div", {
         className: "flex flex-row items-center justify-between px-4 py-4",
-        children: [N(sa, {
+        children: [N(ca, {
           className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground",
-          children: [o && n(Ve, {
+          children: [o && n(Ye, {
             module: o,
             size: "lg"
           }), r]
-        }), n(la, {
+        }), n(ua, {
           variant: "outline",
           icon: He,
           onClick: t,
           label: "Close modal",
           hideLabel: !0
         })]
-      }), N(ze, {
+      }), N(Ke, {
         className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col",
-        children: [a, n(Ke, {
+        children: [a, n(We, {
           orientation: "vertical",
           className: "[&_div]:bg-f1-background"
         })]
@@ -1417,23 +1415,23 @@ function mr({ isOpen: e, onClose: t, title: r, children: a, module: o, portalCon
     })
   });
 }
-function zr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessage: s, successMessage: l, loadingState: d, nextSteps: i, closeLabel: m, primaryAction: c, modalTitle: f, modalModule: h, secondaryAction: u, portalContainer: x, tag: A, showResponseDialog: C = !0 }) {
-  const [O, g] = F(e), [b, w] = F(null), [S, y] = F(!1), v = async () => {
+function Hr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessage: s, successMessage: l, loadingState: d, nextSteps: i, closeLabel: m, primaryAction: c, modalTitle: f, modalModule: h, secondaryAction: u, portalContainer: x, tag: A, showResponseDialog: S = !0 }) {
+  const [O, g] = D(e), [b, w] = D(null), [C, y] = D(!1), v = async () => {
     if (c != null && c.onClick) {
       y(!0);
       try {
-        await c.onClick(), g(!1), C && w("success");
+        await c.onClick(), g(!1), S && w("success");
       } catch {
-        C && w("error");
+        S && w("error");
       } finally {
         y(!1);
       }
     }
   }, L = () => {
     g(!1), t == null || t();
-  }, T = S;
+  }, T = C;
   return N(ae, {
-    children: [n(mr, {
+    children: [n(vr, {
       isOpen: O,
       onClose: L,
       title: f,
@@ -1441,7 +1439,7 @@ function zr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
       portalContainer: x,
       children: n("div", {
         className: "pb-4 pl-4",
-        children: n(ut, {
+        children: n(dt, {
           title: r,
           image: a,
           benefits: o,
@@ -1449,14 +1447,14 @@ function zr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
           tag: A,
           actions: N("div", {
             className: "flex gap-3",
-            children: [c && n(B, {
+            children: [c && n(M, {
               variant: c.variant,
               label: T ? d.label : c.label,
               icon: c.icon || void 0,
               onClick: v,
               loading: c.loading,
               size: c.size
-            }), u && n(B, {
+            }), u && n(M, {
               onClick: u.onClick,
               label: u.label,
               variant: u.variant,
@@ -1466,7 +1464,7 @@ function zr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
           })
         })
       })
-    }), b && C && n(Ye, {
+    }), b && S && n(Je, {
       open: !0,
       onClose: () => {
         L(), w(null);
@@ -1480,24 +1478,24 @@ function zr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
     })]
   });
 }
-function hr({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o, width: s, trackVisibility: l, actions: d, showConfirmation: i = !0 }) {
-  const [m, c] = F(!1), f = () => {
+function yr({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o, width: s, trackVisibility: l, actions: d, showConfirmation: i = !0 }) {
+  const [m, c] = D(!1), f = () => {
     c(!0), a && a();
   };
-  M(() => {
+  B(() => {
     l && l(!m);
   }, [l, m]);
   const h = e == null ? void 0 : e.includes(".mp4");
   return n(ae, {
-    children: m ? null : N(ca, {
+    children: m ? null : N(da, {
       style: {
         width: s
       },
       className: "relative bg-f1-background p-1",
-      children: [N(ua, {
+      children: [N(fa, {
         children: [o && n("div", {
           className: "absolute right-2 top-2 z-10",
-          children: n(B, {
+          children: n(M, {
             variant: "ghost",
             icon: He,
             size: "sm",
@@ -1521,18 +1519,18 @@ function hr({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o,
             }))
           }), N("div", {
             className: "flex flex-col gap-[2px] p-3",
-            children: [n(Se, {
+            children: [n(Ce, {
               className: "text-lg font-medium",
               children: t
-            }), n(Se, {
+            }), n(Ce, {
               className: "line-clamp-3 text-base font-normal text-f1-foreground-secondary",
               children: r
             })]
           })]
         })]
-      }), d && n(da, {
+      }), d && n(pa, {
         className: "p-3",
-        children: d.map((u) => u.type === "upsell" ? n(Je, {
+        children: d.map((u) => u.type === "upsell" ? n(Ue, {
           label: u.label,
           onRequest: u.onClick,
           errorMessage: u.errorMessage,
@@ -1542,7 +1540,7 @@ function hr({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o,
           closeLabel: u.closeLabel,
           showConfirmation: i && u.showConfirmation,
           variant: u.variant
-        }, u.label) : n(B, {
+        }, u.label) : n(M, {
           label: u.label,
           onClick: u.onClick,
           variant: u.variant
@@ -1551,8 +1549,8 @@ function hr({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o,
     })
   });
 }
-const vr = V(function({ primaryAction: t, secondaryAction: r, ...a }, o) {
-  const s = (i) => i.variant === "promote" ? n(Je, {
+const br = q(function({ primaryAction: t, secondaryAction: r, ...a }, o) {
+  const s = (i) => i.variant === "promote" ? n(Ue, {
     label: i.label,
     onRequest: async () => {
       await i.onClick();
@@ -1565,14 +1563,14 @@ const vr = V(function({ primaryAction: t, secondaryAction: r, ...a }, o) {
     showIcon: i.showIcon,
     showConfirmation: i.showConfirmation,
     variant: i.variant
-  }) : n(B, {
+  }) : n(M, {
     onClick: i.onClick,
     label: i.label,
     variant: i.variant || "default",
     size: "md",
     icon: i.icon
   }), l = (t == null ? void 0 : t.variant) !== "promote" ? t : void 0, d = (r == null ? void 0 : r.variant) !== "promote" ? r : void 0;
-  return N(fa, {
+  return N(ma, {
     ref: o,
     ...a,
     primaryAction: l,
@@ -1580,9 +1578,9 @@ const vr = V(function({ primaryAction: t, secondaryAction: r, ...a }, o) {
     children: [(t == null ? void 0 : t.variant) === "promote" && s(t), (r == null ? void 0 : r.variant) === "promote" && s(r)]
   });
 });
-vr.displayName = "UpsellingBanner";
-function Kr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o = "md", showIcon: s = !0, side: l = "right", align: d = "center", icon: i = pa, mediaUrl: m, title: c, description: f, width: h = "300px", trackVisibility: u, actions: x, onClick: A, hideLabel: C = !1 }) {
-  const [O, g] = F(!1), [b, w] = F(null), [S, y] = F(null), v = (P) => {
+br.displayName = "UpsellingBanner";
+function Jr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o = "md", showIcon: s = !0, side: l = "right", align: d = "center", icon: i = ha, mediaUrl: m, title: c, description: f, width: h = "300px", trackVisibility: u, actions: x, onClick: A, hideLabel: S = !1 }) {
+  const [O, g] = D(!1), [b, w] = D(null), [C, y] = D(null), v = (P) => {
     t(P), A && A();
   }, L = async (P) => {
     if (P.type === "upsell") {
@@ -1603,21 +1601,21 @@ function Kr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o
     children: [N(Me, {
       open: E,
       onOpenChange: v,
-      children: [n(Be, {
+      children: [n(Re, {
         asChild: !0,
-        children: n(B, {
+        children: n(M, {
           variant: a,
           label: r,
           size: o,
           icon: s ? i : void 0,
           onClick: () => t(e),
-          hideLabel: C
+          hideLabel: S
         })
-      }), n(Re, {
+      }), n(ze, {
         side: l,
         align: d,
         className: "w-fit border-none bg-transparent p-2 shadow-none",
-        children: n(hr, {
+        children: n(yr, {
           mediaUrl: m,
           title: c,
           description: f,
@@ -1629,56 +1627,56 @@ function Kr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o
           showConfirmation: !1
         })
       })]
-    }), (S == null ? void 0 : S.type) === "upsell" && S.showConfirmation && b && n(Ye, {
+    }), (C == null ? void 0 : C.type) === "upsell" && C.showConfirmation && b && n(Je, {
       open: !0,
       onClose: T,
       success: b === "success",
-      errorMessage: S.errorMessage,
-      successMessage: S.successMessage,
-      nextSteps: S.nextSteps,
-      closeLabel: S.closeLabel,
+      errorMessage: C.errorMessage,
+      successMessage: C.successMessage,
+      nextSteps: C.nextSteps,
+      closeLabel: C.closeLabel,
       portalContainer: null
     })]
   });
 }
-const yr = Oa(null), br = ({ children: e, fullScreen: t = !0 }) => {
-  const r = pe(null), [a, o] = F(r.current);
-  return Ca(() => {
+const gr = La(null), xr = ({ children: e, fullScreen: t = !0 }) => {
+  const r = pe(null), [a, o] = D(r.current);
+  return Na(() => {
     o(r.current);
-  }, []), n(yr.Provider, {
+  }, []), n(gr.Provider, {
     value: {
       element: a
     },
     children: n("div", {
       ref: r,
       id: "f0-layout",
-      className: I({
+      className: _({
         "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]": t
       }),
       children: e
     })
   });
-}, gr = ({ children: e }) => n(Pa, {
+}, wr = ({ children: e }) => n(Ca, {
   reducedMotion: "user",
   children: e
-}), Wr = ({ children: e, layout: t, link: r, privacyModeInitiallyEnabled: a, image: o, i18n: s, l10n: l, isDev: d = !1, dataCollectionStorageHandler: i, showExperimentalWarnings: m = !1 }) => n(gr, {
-  children: n(ma, {
+}), Ur = ({ children: e, layout: t, link: r, privacyModeInitiallyEnabled: a, image: o, i18n: s, l10n: l, isDev: d = !1, dataCollectionStorageHandler: i, showExperimentalWarnings: m = !1 }) => n(wr, {
+  children: n(va, {
     isDev: d,
     showExperimentalWarnings: m,
-    children: n(ha, {
+    children: n(ya, {
       ...l,
-      children: n(va, {
+      children: n(ba, {
         ...s,
-        children: n(ya, {
+        children: n(ga, {
           ...r,
-          children: n(br, {
+          children: n(xr, {
             ...t,
-            children: n(ba, {
-              children: n(ga, {
+            children: n(xa, {
+              children: n(wa, {
                 initiallyEnabled: a,
-                children: n(xa, {
+                children: n(Pa, {
                   ...o,
-                  children: n(wa, {
+                  children: n(Sa, {
                     handler: i,
                     children: e
                   })
@@ -1690,96 +1688,103 @@ const yr = Oa(null), br = ({ children: e, fullScreen: t = !0 }) => {
       })
     })
   })
-}), Fe = (e) => `datacollection-${e}`, Gr = {
+}), De = (e) => `datacollection-${e}`, Xr = {
   get: async (e) => JSON.parse(
-    localStorage.getItem(Fe(e)) ?? "{}"
+    localStorage.getItem(De(e)) ?? "{}"
   ),
   set: async (e, t) => {
-    localStorage.setItem(Fe(e), JSON.stringify(t));
+    localStorage.setItem(De(e), JSON.stringify(t));
   }
 };
 export {
-  Or as AreaChart,
-  Hr as Await,
-  kr as BarChart,
-  B as Button,
-  Lr as CategoryBarChart,
-  Ir as ComboChart,
-  Yr as CopyButton,
-  Jr as DndProvider,
-  Ur as EmojiImage,
-  Xr as F0Avatar,
-  Zr as F0AvatarAlert,
-  Qr as F0AvatarCompany,
-  en as F0AvatarDate,
-  tn as F0AvatarEmoji,
-  an as F0AvatarFile,
-  rn as F0AvatarIcon,
-  nn as F0AvatarList,
-  Ve as F0AvatarModule,
-  on as F0AvatarPerson,
-  sn as F0AvatarTeam,
-  ln as F0Card,
-  cn as F0Checkbox,
-  Er as F0ChipList,
-  $r as F0DatePicker,
-  un as F0EventCatcherProvider,
-  ra as F0Icon,
-  Wr as F0Provider,
-  dn as F0TagAlert,
-  fn as F0TagBalance,
-  pn as F0TagCompany,
-  mn as F0TagDot,
-  hn as F0TagList,
-  vn as F0TagPerson,
-  aa as F0TagRaw,
-  yn as F0TagStatus,
-  bn as F0TagTeam,
-  gn as GROUP_ID_SYMBOL,
-  Rr as HomeLayout,
-  Fr as LineChart,
-  Sr as Link,
-  xn as OneFilterPicker,
-  Tr as PieChart,
-  ga as PrivacyModeProvider,
-  ut as ProductBlankslate,
-  wn as ProductCard,
-  zr as ProductModal,
-  hr as ProductWidget,
+  kr as AreaChart,
+  en as Await,
+  Lr as BarChart,
+  Dr as CategoryBarChart,
+  Er as ComboChart,
+  tn as DndProvider,
+  an as EmojiImage,
+  rn as F0Avatar,
+  nn as F0AvatarAlert,
+  on as F0AvatarCompany,
+  sn as F0AvatarDate,
+  ln as F0AvatarEmoji,
+  cn as F0AvatarFile,
+  un as F0AvatarIcon,
+  dn as F0AvatarList,
+  Ye as F0AvatarModule,
+  fn as F0AvatarPerson,
+  pn as F0AvatarTeam,
+  M as F0Button,
+  mn as F0ButtonDropdown,
+  hn as F0ButtonToggle,
+  vn as F0Card,
+  yn as F0Checkbox,
+  Kr as F0ChipList,
+  Gr as F0DatePicker,
+  bn as F0EventCatcherProvider,
+  oa as F0Icon,
+  gn as F0Link,
+  Ur as F0Provider,
+  xn as F0TagAlert,
+  wn as F0TagBalance,
+  Pn as F0TagCompany,
+  Sn as F0TagDot,
+  Cn as F0TagList,
+  Nn as F0TagPerson,
+  na as F0TagRaw,
+  An as F0TagStatus,
+  On as F0TagTeam,
+  kn as GROUP_ID_SYMBOL,
+  Yr as HomeLayout,
+  Tr as LineChart,
+  Ln as OneFilterPicker,
+  Fr as PieChart,
+  wa as PrivacyModeProvider,
+  dt as ProductBlankslate,
+  Dn as ProductCard,
+  Hr as ProductModal,
+  yr as ProductWidget,
   _r as ProgressBarChart,
-  Mr as StandardLayout,
-  Pn as TagCounter,
-  Br as TwoColumnLayout,
-  Ye as UpsellRequestResponseDialog,
-  vr as UpsellingBanner,
-  Je as UpsellingButton,
-  Kr as UpsellingPopover,
-  Dr as VerticalBarChart,
-  Nr as avatarVariants,
-  Cn as buildTranslations,
-  Sn as createAtlaskitDriver,
-  Nn as createDataSourceDefinition,
-  Gr as dataCollectionLocalStorageHandler,
-  jr as datepickerSizes,
-  Cr as defaultTranslations,
-  We as experimental,
-  An as getAnimationVariants,
-  On as getDataSourcePaginationType,
-  kn as getEmojiLabel,
-  Ln as isInfiniteScrollPagination,
-  Fn as isPageBasedPagination,
-  Tn as modules,
-  Dn as predefinedPresets,
-  _n as tagDotColors,
-  In as useData,
-  En as useDataSource,
-  jn as useDndEvents,
-  $n as useDraggable,
-  Mn as useDroppableList,
-  Bn as useEmojiConfetti,
-  Rn as useGroups,
-  zn as usePrivacyMode,
-  Kn as useReducedMotion,
-  Wn as useSelectable,
-  Gn as useXRay
+  Vr as StandardLayout,
+  Tn as TagCounter,
+  qr as TwoColumnLayout,
+  Je as UpsellRequestResponseDialog,
+  br as UpsellingBanner,
+  Ue as UpsellingButton,
+  Jr as UpsellingPopover,
+  Ir as VerticalBarChart,
+  Ar as avatarVariants,
+  Fn as buildTranslations,
+  Mr as buttonDropdownSizes,
+  Br as buttonDropdownVariants,
+  $r as buttonSizes,
+  Rr as buttonToggleSizes,
+  jr as buttonVariants,
+  In as createAtlaskitDriver,
+  _n as createDataSourceDefinition,
+  Xr as dataCollectionLocalStorageHandler,
+  Wr as datepickerSizes,
+  Nr as defaultTranslations,
+  Ge as experimental,
+  En as getAnimationVariants,
+  jn as getDataSourcePaginationType,
+  $n as getEmojiLabel,
+  Bn as isInfiniteScrollPagination,
+  Mn as isPageBasedPagination,
+  zr as linkVariants,
+  Rn as modules,
+  zn as predefinedPresets,
+  Kn as tagDotColors,
+  Wn as useData,
+  Gn as useDataSource,
+  Vn as useDndEvents,
+  qn as useDraggable,
+  Yn as useDroppableList,
+  Hn as useEmojiConfetti,
+  Jn as useGroups,
+  Un as usePrivacyMode,
+  Xn as useReducedMotion,
+  Zn as useSelectable,
+  Qn as useXRay
 };
