@@ -1,3 +1,4 @@
+import { DataAttributes } from "@/global.types"
 import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 import { Dispatch, useEffect, useState } from "react"
 import { F0Icon } from "../../../components/F0Icon"
@@ -9,6 +10,8 @@ export type TabItem = {
   label: string
   index?: boolean
   variant?: "default" | "upsell"
+  // TODO: This is a temporary solution to allow for onClick handling. We should find a better way to handle this.
+  onClick?: () => void
 } & DataAttributes &
   ({ href: string } | { id: string })
 

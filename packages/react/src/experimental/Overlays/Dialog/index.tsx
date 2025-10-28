@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from "@/components/Actions/Button"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import {
   F0AvatarAlert,
   type AlertAvatarProps,
@@ -13,7 +13,7 @@ import {
 } from "@/ui/dialog"
 import { forwardRef, useCallback, useState } from "react"
 
-type BaseAction = Pick<ButtonProps, "label" | "onClick" | "icon" | "disabled">
+type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
 
 type PrimaryActionVariant = "default" | "critical" | "neutral"
 type PrimaryAction = BaseAction & {
@@ -76,15 +76,15 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
           {actions && (
             <DialogFooter className="px-4 pb-4 pt-2">
               <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3 [&>div]:w-full">
-                <Button variant="outline" {...actions.secondary} />
-                <Button
+                <F0Button variant="outline" {...actions.secondary} />
+                <F0Button
                   {...actions.primary}
                   variant={actions.primary.variant || "default"}
                 />
               </div>
               <div className="flex flex-col-reverse gap-2 sm:hidden [&>div]:w-full">
-                <Button variant="outline" {...actions.secondary} size="lg" />
-                <Button
+                <F0Button variant="outline" {...actions.secondary} size="lg" />
+                <F0Button
                   {...actions.primary}
                   variant={actions.primary.variant || "default"}
                   size="lg"

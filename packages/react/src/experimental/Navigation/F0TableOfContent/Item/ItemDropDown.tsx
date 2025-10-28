@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ellipsis } from "@/icons/app"
 import { Dropdown, DropdownItem } from "../../Dropdown"
 
@@ -29,11 +29,10 @@ export function ItemDropDown({
       open={open}
       onOpenChange={setOpen}
     >
-      <Button
+      <ButtonInternal
         icon={Ellipsis}
         label="Actions"
         hideLabel
-        round
         variant="ghost"
         pressed={open}
         size="sm"

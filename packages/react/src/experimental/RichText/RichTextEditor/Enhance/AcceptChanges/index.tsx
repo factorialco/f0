@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
 import {
   enhanceLabelsType,
@@ -29,7 +29,7 @@ const AcceptChanges = ({
 
   return (
     <div className="dark flex items-center gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-0.5 drop-shadow-sm">
-      <Button
+      <F0Button
         label={labels?.rejectChangesButtonLabel || i18n.actions.cancel}
         onClick={(e) => {
           e.preventDefault()
@@ -41,10 +41,9 @@ const AcceptChanges = ({
         size="sm"
         variant="outline"
         icon={Cross}
-        type="button"
       />
 
-      <Button
+      <F0Button
         label={labels?.repeatButtonLabel || i18n.filters.retry}
         onClick={(e) => {
           e.preventDefault()
@@ -57,12 +56,11 @@ const AcceptChanges = ({
         size="sm"
         variant="outline"
         icon={Reset}
-        type="button"
       />
 
       <ToolbarDivider />
 
-      <Button
+      <F0Button
         label={labels?.acceptChangesButtonLabel || i18n.actions.save}
         onClick={(e) => {
           e.preventDefault()
@@ -73,7 +71,6 @@ const AcceptChanges = ({
         size="sm"
         variant="default"
         icon={Check}
-        type="button"
       />
     </div>
   )

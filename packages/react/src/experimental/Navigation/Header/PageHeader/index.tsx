@@ -1,11 +1,10 @@
-import { Button } from "@/components/Actions/Button"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
@@ -13,8 +12,10 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
@@ -84,28 +85,18 @@ function PageNavigationLink({
 }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
-    <Link
+    <F0Button
       href={href}
       title={label}
       aria-label={label}
       disabled={disabled}
       ref={ref}
-    >
-      <Button
-        size="sm"
-        variant="outline"
-        round
-        label={label}
-        icon={icon}
-        hideLabel
-        disabled={disabled}
-        onClick={(e) => {
-          e.preventDefault()
-          if (disabled) return
-          ref.current?.click()
-        }}
-      />
-    </Link>
+      size="sm"
+      variant="outline"
+      label={label}
+      icon={icon}
+      hideLabel
+    />
   )
 }
 
@@ -156,7 +147,7 @@ export function PageHeader({
               exit={{ opacity: 0, width: 0 }}
             >
               <div className="mr-3">
-                <Button
+                <F0Button
                   ref={(buttonEl) => {
                     // if action was triggered by user, focus the close button
                     if (isLastToggleInvokedByUser) {
@@ -165,7 +156,6 @@ export function PageHeader({
                   }}
                   variant="ghost"
                   hideLabel
-                  round
                   onClick={() => toggleSidebar()}
                   label="Open main menu"
                   icon={Menu}
@@ -186,10 +176,9 @@ export function PageHeader({
             !("loading" in parentBreadcrumb) && (
               <div className="absolute left-4">
                 <Link href={parentBreadcrumb.href}>
-                  <Button
+                  <F0Button
                     variant="ghost"
                     hideLabel
-                    round
                     label="Back"
                     icon={ChevronLeft}
                     onClick={(e) => e.preventDefault()}
@@ -306,7 +295,7 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
   if ("actions" in action) {
     return (
       <Dropdown items={action.actions} open={isOpen} onOpenChange={setIsOpen}>
-        <Button
+        <ButtonInternal
           size="md"
           variant="outline"
           label={action.label}
@@ -325,7 +314,7 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
       aria-label={action.label}
       ref={ref}
     >
-      <Button
+      <F0Button
         size="md"
         variant="outline"
         label={action.label}
