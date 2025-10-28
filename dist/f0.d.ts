@@ -1736,7 +1736,7 @@ declare interface F0ListNavigationProps {
     value: string;
     disabled?: boolean;
     onChange: (newValue: string) => void;
-    options: [ListNavigationOption, ...ListNavigationOption[]];
+    options: ListNavigationOption[];
     hideNavigation?: boolean;
 }
 
@@ -3644,15 +3644,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

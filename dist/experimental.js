@@ -27929,7 +27929,7 @@ const iH = (t) => "date" in t, rH = {
 });
 Sk.displayName = "ListNavigation";
 function oH({ value: t, onChange: e, filter: n }) {
-  return f("div", {
+  return n.options.length === 0 ? null : f("div", {
     className: "flex items-center gap-2",
     children: f(Sk, {
       value: t,
