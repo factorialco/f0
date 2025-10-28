@@ -111,6 +111,34 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   if (mode === "compact") {
     const hasFiltersApplied = !!Object.values(localFiltersValue).length
 
+    const BackButton = (
+      <div className="pl-1.5 pt-1.5">
+        <Button
+          label="Back"
+          icon={ArrowLeft}
+          variant="ghost"
+          size="sm"
+          onClick={handleGoBack}
+        />
+      </div>
+    )
+
+    const ApplySelectionButton = (
+      <>
+        {selectedFilterKey && (
+          <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
+            <Button
+              onClick={handleApplyFiltersSelection}
+              label={i18n.filters.applySelection}
+            />
+          </div>
+        )}
+      </>
+    )
+
+    const isInFilterSelected =
+      selectedFilterKey && filters?.[selectedFilterKey].type === "in"
+
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
@@ -138,15 +166,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
               <div className="flex h-full flex-col transition-all">
-                <div className="pl-1.5 pt-1.5">
-                  <Button
-                    label="Back"
-                    icon={ArrowLeft}
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleGoBack}
-                  />
-                </div>
+                {!isInFilterSelected && BackButton}
                 <div className="flex flex-1">
                   {selectedFilterKey ? (
                     <motion.div
@@ -162,6 +182,8 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                         definition={filters}
                         tempFilters={localFiltersValue}
                         onFilterChange={updateFilterValue}
+                        top={BackButton}
+                        bottom={ApplySelectionButton}
                         isCompactMode
                       />
                     </motion.div>
@@ -187,14 +209,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     </motion.div>
                   )}
                 </div>
-                {selectedFilterKey && (
-                  <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-                    <Button
-                      onClick={handleApplyFiltersSelection}
-                      label={i18n.filters.applySelection}
-                    />
-                  </div>
-                )}
+                {!isInFilterSelected && ApplySelectionButton}
               </div>
             </motion.div>
           )}

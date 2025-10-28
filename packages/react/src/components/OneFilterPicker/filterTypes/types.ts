@@ -13,6 +13,8 @@ export type FilterTypeComponentProps<
   value: Value
   onChange: (value: Value) => void
   isCompactMode?: boolean
+  top?: React.ReactNode
+  bottom?: React.ReactNode
 }
 
 export type FilterTypeContext<Options extends object = never> = {

@@ -76,6 +76,8 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   value,
   onChange,
   isCompactMode,
+  top,
+  bottom,
 }: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
@@ -202,6 +204,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           isLoadingMore={isLoading}
           top={
             <div className="flex min-h-full w-full flex-col">
+              {top}
               {showSearch && (
                 <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
                   <F1SearchBox
@@ -235,28 +238,31 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             </div>
           }
           bottom={
-            !isCompactMode && (
-              <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-                <Button
-                  variant="outline"
-                  label="Select all"
-                  onClick={handleSelectAll}
-                  disabled={
-                    filteredOptions.length === 0 ||
-                    (Array.isArray(value) &&
-                      value.length === filteredOptions.length)
-                  }
-                  size="sm"
-                />
-                <Button
-                  variant="ghost"
-                  label="Clear"
-                  onClick={handleClear}
-                  disabled={!Array.isArray(value) || value.length === 0}
-                  size="sm"
-                />
-              </div>
-            )
+            <>
+              {bottom}
+              {!isCompactMode && (
+                <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+                  <Button
+                    variant="outline"
+                    label="Select all"
+                    onClick={handleSelectAll}
+                    disabled={
+                      filteredOptions.length === 0 ||
+                      (Array.isArray(value) &&
+                        value.length === filteredOptions.length)
+                    }
+                    size="sm"
+                  />
+                  <Button
+                    variant="ghost"
+                    label="Clear"
+                    onClick={handleClear}
+                    disabled={!Array.isArray(value) || value.length === 0}
+                    size="sm"
+                  />
+                </div>
+              )}
+            </>
           }
         />
       </Select>
