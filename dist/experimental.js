@@ -1,5 +1,5 @@
-import { bD as Zv, bE as Qv, bF as Rg, bG as al, bH as hC, bI as pC, bJ as mC, bK as Nu, bL as gC, bM as yC, bN as vC, bO as ne, bP as Xv, bQ as bC, f as Zs, bR as Ma, j as Ic, bS as e5, h as Il, bT as kC, L as Lu, bU as xC, A as wC, i as Dl, c as CC, l as _C, G as SC, g as Fg, bV as NC, k as Pg, o as LC, bW as t5, bX as n5, bY as EC, bZ as To, ai as MC, av as ue, b_ as Ao, ao as Ce, b$ as i5, ab as Ve, c0 as Oo, c1 as Ye, c2 as TC, Q as T, b2 as Yi, at as it, au as Rn, c3 as r5, ac as Vp, c4 as Wp, c5 as AC, c6 as OC, c7 as IC, aq as s5, ar as o5, c8 as Io, c9 as a5, ca as ll, P as nn, O as qp, cb as l5, cc as Jr, cd as Up, ce as DC, cf as Zt, cg as Bg, ch as RC, ci as cl, cj as Dc, ck as FC, cl as PC, cm as bt, al as un, cn as ee, co as df, cp as Bn, aD as BC, a7 as pi, a8 as zC, cq as c5, cr as ar, cs as Gp, ct as gs, cu as Pi, cv as Q1, cw as d5, cx as $C, cy as jC, cz as f5, cA as HC, cB as VC, cC as WC, cD as u5, cE as h5, cF as p5, a5 as mt, cG as m5, cH as qC, cI as UC, cJ as GC, cK as KC, cL as JC, cM as YC, cN as ZC, cO as g5, cP as QC, ak as XC, be as e_, cQ as y5, cR as ff, cS as Fn, bc as ys, cT as _n, am as Kp, as as X1, cU as zg, bz as Do, cV as $g, cW as Rc, cX as eh, cY as t_, a9 as Ts, cZ as vs, c_ as v5, c$ as ir, d0 as b5, d1 as k5, ap as Jp, s as n_, w as i_, x as r_, z as s_, J as jg, K as Hg, M as o_, N as a_, d2 as l_, d3 as c_, d4 as Ro, d5 as Yp, aX as Ii, aZ as bs, d6 as Ta, d7 as d_, d8 as x5, d9 as w5, da as f_, db as u_, a3 as Zp, a4 as Qp, a6 as Xp, R as zn, dc as C5, dd as h_, de as p_, df as m_, dg as _5, az as g_, dh as th, di as S5, aU as Fc, dj as y_, dk as v_, dl as b_, dm as k_, dn as x_, bA as uf, aR as nh, bC as w_, bB as C_, dp as N5, an as Ir, dq as __, dr as S_, ds as Pc, b7 as hf, aV as em, aO as pf, dt as mf, du as tm, dv as L5, aY as N_, aQ as E5, aM as M5, dw as dl, dx as L_, dy as T5, dz as A5, dA as E_, aP as Fo, aS as O5, aB as M_, dB as T_, bg as A_, bh as O_, bo as gf, bm as nm, ax as yf, dC as vf, dD as bf, ay as kf, dE as im, bn as I5, a$ as rm, dF as I_, bt as D_, dG as ih, dH as R_, dI as Bc, dJ as F_, bi as zc, bu as P_, dK as B_, bs as D5, dL as z_, br as $_, bq as j_, dM as H_, b0 as rh, dN as V_, af as sm, dO as W_, dP as q_, ag as U_, ah as G_, dQ as K_, dR as J_, dS as Y_, dT as Z_, b3 as Q_, bl as X_, dU as eS, dV as tS, dW as nS, aT as iS, dX as fl, dY as om, a_ as am, dZ as lm, d_ as ul, d$ as R5, e0 as rS, e1 as F5, e2 as sS, bv as P5, e3 as B5, b4 as z5, e4 as oS, e5 as aS, e6 as lS, aA as cS, _ as dS, T as fS, V as uS, W as hS, Z as pS, U as mS, e7 as Vg, e8 as gS, e9 as yS, m as vS, ad as bS, ea as $5, eb as kS } from "./hooks-DfmPQdDL.js";
-import { aC as Zre, ee as Qre, ef as Xre, ed as ese, aW as tse, b1 as nse, ec as ise } from "./hooks-DfmPQdDL.js";
+import { bD as Zv, bE as Qv, bF as Rg, bG as al, bH as hC, bI as pC, bJ as mC, bK as Nu, bL as gC, bM as yC, bN as vC, bO as ne, bP as Xv, bQ as bC, f as Zs, bR as Ma, j as Ic, bS as e5, h as Il, bT as kC, L as Lu, bU as xC, A as wC, i as Dl, c as CC, l as _C, G as SC, g as Fg, bV as NC, k as Pg, o as LC, bW as t5, bX as n5, bY as EC, bZ as To, ai as MC, av as ue, b_ as Ao, ao as Ce, b$ as i5, ab as Ve, c0 as Oo, c1 as Ye, c2 as TC, Q as T, b2 as Yi, at as it, au as Rn, c3 as r5, ac as Vp, c4 as Wp, c5 as AC, c6 as OC, c7 as IC, aq as s5, ar as o5, c8 as Io, c9 as a5, ca as ll, P as nn, O as qp, cb as l5, cc as Jr, cd as Up, ce as DC, cf as Zt, cg as Bg, ch as RC, ci as cl, cj as Dc, ck as FC, cl as PC, cm as bt, al as un, cn as ee, co as df, cp as Bn, aD as BC, a7 as pi, a8 as zC, cq as c5, cr as ar, cs as Gp, ct as gs, cu as Pi, cv as Q1, cw as d5, cx as $C, cy as jC, cz as f5, cA as HC, cB as VC, cC as WC, cD as u5, cE as h5, cF as p5, a5 as mt, cG as m5, cH as qC, cI as UC, cJ as GC, cK as KC, cL as JC, cM as YC, cN as ZC, cO as g5, cP as QC, ak as XC, be as e_, cQ as y5, cR as ff, cS as Fn, bc as ys, cT as _n, am as Kp, as as X1, cU as zg, bz as Do, cV as $g, cW as Rc, cX as eh, cY as t_, a9 as Ts, cZ as vs, c_ as v5, c$ as ir, d0 as b5, d1 as k5, ap as Jp, s as n_, w as i_, x as r_, z as s_, J as jg, K as Hg, M as o_, N as a_, d2 as l_, d3 as c_, d4 as Ro, d5 as Yp, aX as Ii, aZ as bs, d6 as Ta, d7 as d_, d8 as x5, d9 as w5, da as f_, db as u_, a3 as Zp, a4 as Qp, a6 as Xp, R as zn, dc as C5, dd as h_, de as p_, df as m_, dg as _5, az as g_, dh as th, di as S5, aU as Fc, dj as y_, dk as v_, dl as b_, dm as k_, dn as x_, bA as uf, aR as nh, bC as w_, bB as C_, dp as N5, an as Ir, dq as __, dr as S_, ds as Pc, b7 as hf, aV as em, aO as pf, dt as mf, du as tm, dv as L5, aY as N_, aQ as E5, aM as M5, dw as dl, dx as L_, dy as T5, dz as A5, dA as E_, aP as Fo, aS as O5, aB as M_, dB as T_, bg as A_, bh as O_, bo as gf, bm as nm, ax as yf, dC as vf, dD as bf, ay as kf, dE as im, bn as I5, a$ as rm, dF as I_, bt as D_, dG as ih, dH as R_, dI as Bc, dJ as F_, bi as zc, bu as P_, dK as B_, bs as D5, dL as z_, br as $_, bq as j_, dM as H_, b0 as rh, dN as V_, af as sm, dO as W_, dP as q_, ag as U_, ah as G_, dQ as K_, dR as J_, dS as Y_, dT as Z_, b3 as Q_, bl as X_, dU as eS, dV as tS, dW as nS, aT as iS, dX as fl, dY as om, a_ as am, dZ as lm, d_ as ul, d$ as R5, e0 as rS, e1 as F5, e2 as sS, bv as P5, e3 as B5, b4 as z5, e4 as oS, e5 as aS, e6 as lS, aA as cS, _ as dS, T as fS, V as uS, W as hS, Z as pS, U as mS, e7 as Vg, e8 as gS, e9 as yS, m as vS, ad as bS, ea as $5, eb as kS } from "./hooks-FR_aLeXL.js";
+import { aC as Zre, ee as Qre, ef as Xre, ed as ese, aW as tse, b1 as nse, ec as ise } from "./hooks-FR_aLeXL.js";
 import { jsxs as b, jsx as f, Fragment as Me } from "react/jsx-runtime";
 import { useCopilotChatInternal as xf, useCopilotContext as xS, useCopilotAction as wS, CopilotKit as CS } from "@copilotkit/react-core";
 import { Markdown as _S, useChatContext as SS, CopilotSidebar as NS } from "@copilotkit/react-ui";
@@ -27542,10 +27542,9 @@ const tH = (t) => "date" in t, nH = {
   render: (t) => f(eH, {
     ...t
   })
-}, iH = "date-navigator", mk = W(({ value: t, hideNavigation: e, disabled: n, onChange: i, options: r }, s) => {
-  const o = Ve(), [a, l] = j(!1), c = r.findIndex((u) => u.value === t), d = r[c];
+}, iH = "date-navigator", mk = ({ value: t, hideNavigation: e, disabled: n, onChange: i, options: r }) => {
+  const s = Ve(), [o, a] = j(!1), l = r.findIndex((d) => d.value === t), c = r[l];
   return f("div", {
-    ref: s,
     className: T("inline-flex cursor-auto appearance-none gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover", "[%>*] py-1", mt("focus:ring-f1-border-hover"), n && "cursor-not-allowed bg-f1-background-secondary opacity-50"),
     children: b("div", {
       className: T("flex flex-1 gap-1", e ? "justify-center" : "justify-between"),
@@ -27553,39 +27552,39 @@ const tH = (t) => "date" in t, nH = {
         size: "sm",
         variant: "ghost",
         icon: ff,
-        label: o.navigation.previous,
+        label: s.navigation.previous,
         hideLabel: !0,
-        disabled: n || c === 0,
-        onClick: () => i(r[c - 1].value)
+        disabled: n || l === 0,
+        onClick: () => i(r[l - 1].value)
       }), f(gs, {
         label: "Navigation",
         hideLabel: !0,
         value: t,
         onChange: i,
-        open: a,
-        onOpenChange: l,
+        open: o,
+        onOpenChange: a,
         options: r,
         children: f(it, {
           size: "sm",
           variant: "ghost",
-          label: d == null ? void 0 : d.label,
+          label: c == null ? void 0 : c.label,
           onClick: () => {
           },
           disabled: n,
-          className: T(a && "bg-f1-background-secondary-hover")
+          className: T(o && "bg-f1-background-secondary-hover")
         })
       }), e ? null : f(ue, {
         variant: "ghost",
         icon: ar,
-        label: o.navigation.next,
+        label: s.navigation.next,
         hideLabel: !0,
         size: "sm",
-        disabled: n || c >= r.length - 1,
-        onClick: () => i(r[c + 1].value)
+        disabled: n || l >= r.length - 1,
+        onClick: () => i(r[l + 1].value)
       })]
     })
   });
-});
+};
 mk.displayName = "ListNavigation";
 const rH = Ts("F0ListNavigation", mk);
 function sH({ value: t, onChange: e, filter: n }) {

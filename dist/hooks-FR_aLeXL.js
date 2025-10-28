@@ -52232,10 +52232,7 @@ const a1 = {}, G_e = (e, t) => {
   const n = () => {
     Object.entries(a1).forEach(([i, o]) => {
       const s = o.uses - o.usesReported;
-      s > 0 && (console.warn(
-        `🚧 The \x1B[1m${i}\x1B[0m component is experimental. Use it at your own risk.`,
-        `Found ${o.uses} uses. ${o.usesReported === -1 ? "" : `New uses found since last report: ${s}`}`
-      ), a1[i] = {
+      s > 0 && (console.warn(`🚧 The \x1B[1m${i}\x1B[0m component is experimental. Use it at your own risk.`, `Found ${o.uses} uses. ${o.usesReported === -1 ? "" : `New uses found since last report: ${s}`}`), a1[i] = {
         ...o,
         usesReported: o.uses
       });
@@ -52251,14 +52248,19 @@ const a1 = {}, G_e = (e, t) => {
       };
   };
   return (...i) => {
-    var s;
-    return voe() && (a(), a1[e] || (a1[e] = {
+    var c;
+    voe() && (a(), a1[e] || (a1[e] = {
       uses: 0,
       usesReported: -1
     }), a1[e] = {
       ...a1[e],
-      uses: (((s = a1[e]) == null ? void 0 : s.uses) ?? 0) + 1
-    }), typeof t != "function" && "render" in t ? t.render(...i) : t(...i);
+      uses: (((c = a1[e]) == null ? void 0 : c.uses) ?? 0) + 1
+    });
+    const s = t(...i);
+    return Object.freeze({
+      ...s,
+      maturity: "experimental"
+    });
   };
 };
 function U_e(e) {
