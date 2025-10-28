@@ -91,18 +91,20 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     search: searchTerm,
   })
 
+  const hasSource = "source" in schema.options
+
   useEffect(() => {
     setSearchTerm("")
   }, [schema])
 
   const filteredOptions = useMemo(
     () =>
-      "source" in schema.options
+      hasSource
         ? options
         : options.filter((option) =>
             option.label.toLowerCase().includes(searchTerm.toLowerCase())
           ),
-    [schema, options, searchTerm]
+    [hasSource, options, searchTerm]
   )
 
   const items = useMemo(
@@ -215,7 +217,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                   />
                 </div>
               )}
-              {isCompactMode && (
+              {isCompactMode && !hasSource && (
                 <>
                   <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
                   <div className="flex w-full flex-1 items-center justify-between gap-1 rounded py-1 pl-4 pr-3">
