@@ -341,6 +341,11 @@ declare interface AiChatState {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
+export declare const AiFullscreenChat: () => JSX_2.Element | null;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
 export declare const AiPromotionChat: () => JSX_2.Element | null;
 
 export declare const AiPromotionChatProvider: ({ enabled, greeting, title, description, benefits, actions, onShow, onHide, children, }: AiPromotionChatProviderProps) => JSX_2.Element;
