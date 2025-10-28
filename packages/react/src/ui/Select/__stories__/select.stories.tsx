@@ -13,7 +13,7 @@ import {
 const SelectWithHooks = ({
   options,
   placeholder,
-  asList,
+  as,
   ...props
 }: SelectProps) => {
   const { value, multiple } = props
@@ -84,8 +84,8 @@ const SelectWithHooks = ({
       <RenderSelect
         value={localValue}
         multiple={multiple}
+        as={as}
         {...props}
-        asList={asList}
         onValueChange={handleValueChange}
       >
         <SelectTrigger>
@@ -142,7 +142,7 @@ export const Default: Story = {}
 
 export const AsList: Story = {
   args: {
-    asList: true,
+    as: "list",
   },
   parameters: {
     docs: {

@@ -110,14 +110,10 @@ const SelectContent = forwardRef<
     const [animationStarted, setAnimationStarted] = useState(false)
 
     // Get the value and the open status from the select context
-    const {
-      value,
-      open,
-      asList: asListProp,
-      asListWithScroll,
-    } = useContext(SelectContext)
+    const { value, open, as: asSelectProp } = useContext(SelectContext)
 
-    const asList = asListProp || asListWithScroll
+    const asList =
+      asSelectProp === "list" || asSelectProp === "list-with-scroll"
 
     const valueArray = useMemo(
       () =>
@@ -214,7 +210,7 @@ const SelectContent = forwardRef<
     const content = (
       <SelectPrimitive.Content
         ref={ref}
-        asChild={asList && !asListWithScroll}
+        asChild={asSelectProp === "list"}
         className={cn(
           "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
           !asList &&
@@ -253,7 +249,7 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList && !asListWithScroll
+                asList && asSelectProp !== "list-with-scroll"
                   ? "max-h-full"
                   : taller
                     ? "max-h-[440px]"
