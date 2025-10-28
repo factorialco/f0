@@ -1,6 +1,6 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
+import { useI18n } from "@/lib/providers/i18n"
 import { AnimatePresence } from "motion/react"
-import { useI18n } from "../../../lib/providers/i18n"
 import {
   FilterDefinitionsByType,
   FilterTypeDefinition,
@@ -81,7 +81,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
         </AnimatePresence>
       </div>
 
-      <Button
+      <F0Button
         variant="ghost"
         label={i18n.actions.clear}
         size="sm"

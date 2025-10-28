@@ -16,6 +16,7 @@ import {
   BreadcrumbState,
   DropdownItemWithoutIcon,
 } from "./types"
+export * from "./types"
 
 export interface BreadcrumbsProps {
   /** Array of breadcrumb items to display */

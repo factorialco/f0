@@ -138,6 +138,7 @@ const inputFieldStatusVariants = cva({
 })
 
 export type InputFieldProps<T> = {
+  autoFocus?: boolean
   label: string
   placeholder?: string
   labelIcon?: IconType
@@ -271,8 +272,12 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     useEffect(() => {
-      setLocalValue(value)
-    }, [value])
+      setLocalValue(
+        maxLength && value && lengthProvider(value) > maxLength
+          ? value?.substring(0, maxLength)
+          : value
+      )
+    }, [value, lengthProvider, maxLength])
 
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -331,7 +336,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const localInputRef = useRef<HTMLElement>(null)
     const inputRef = useMemo(
       () => props.inputRef ?? localInputRef,
-      [props.inputRef]
+      [props.inputRef, localInputRef]
     )
 
     useEffect(() => {

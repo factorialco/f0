@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -53,7 +53,6 @@ export const ChatTextarea = () => {
           label={translation.ai.sendMessage}
           icon={ArrowUp}
           hideLabel
-          round
         />
       </div>
     </motion.div>

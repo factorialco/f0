@@ -1,7 +1,6 @@
-import { Button } from "@/components/Actions/Button"
+import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { ButtonVariant } from "@/ui/button"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"
@@ -124,7 +123,7 @@ export function ProductModal({
             actions={
               <div className="flex gap-3">
                 {primaryAction && (
-                  <Button
+                  <F0Button
                     variant={primaryAction.variant}
                     label={isLoading ? loadingState.label : primaryAction.label}
                     icon={primaryAction.icon || undefined}
@@ -134,7 +133,7 @@ export function ProductModal({
                   />
                 )}
                 {secondaryAction && (
-                  <Button
+                  <F0Button
                     onClick={secondaryAction.onClick}
                     label={secondaryAction.label}
                     variant={secondaryAction.variant}

@@ -1,7 +1,7 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ButtonVariant } from "@/components/F0Button/types"
 import { IconType } from "@/components/F0Icon/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
-import { ButtonVariant } from "@/ui/button"
 
 export type ActionProps = {
   buttonType: "gradient" | "internal"

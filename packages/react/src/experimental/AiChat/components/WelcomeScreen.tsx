@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon/F0Icon"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
@@ -52,7 +52,7 @@ export const WelcomeScreen = ({
           </motion.div>
           {greeting && (
             <motion.p
-              className="text-lg font-medium text-f1-foreground-secondary"
+              className="text-lg font-semibold text-f1-foreground-secondary"
               initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
               transition={{
@@ -70,7 +70,7 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className="text-2xl font-semibold text-f1-foreground"
+              className="text-lg font-semibold text-f1-foreground"
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
@@ -88,7 +88,7 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="-ml-2 flex flex-col items-start gap-2">
+        <div className="-ml-2 flex flex-col items-start gap-[6px]">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               key={index}

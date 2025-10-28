@@ -1,5 +1,5 @@
-import { Button } from "@/components/Actions/Button"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle, DottedCircle } from "@/icons/app"
 import {
@@ -100,14 +100,14 @@ const DialogActions = ({
 
   const renderButtons = (isSmallScreen = false) => (
     <>
-      <Button
+      <F0Button
         variant="outline"
         label={closeLabel}
         onClick={onClose}
         size={isSmallScreen ? "lg" : undefined}
       />
       {showSecondButton && (
-        <Button
+        <F0Button
           variant="promote"
           label={successButtonLabel}
           onClick={() => {

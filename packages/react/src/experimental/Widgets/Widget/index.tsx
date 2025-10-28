@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from "@/components/Actions/Button"
+import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
@@ -39,7 +39,7 @@ export interface WidgetProps {
     }
     count?: number
   }
-  action?: ButtonProps
+  action?: F0ButtonProps
   summaries?: Array<{
     label: string
     value: string | number
@@ -155,12 +155,11 @@ const Container = forwardRef<
                 </PrivateBox>
                 {!!header.canBeBlurred && (
                   <span>
-                    <Button
+                    <F0Button
                       icon={privacyModeEnabled ? EyeInvisible : EyeVisible}
                       hideLabel
                       label="hide/show"
                       variant="outline"
-                      round
                       onClick={togglePrivacyMode}
                       size="sm"
                     />
@@ -209,7 +208,7 @@ const Container = forwardRef<
       </CardContent>
       {action && (
         <CardFooter>
-          <Button variant="neutral" size="sm" {...action} />
+          <F0Button variant="neutral" size="sm" {...action} />
         </CardFooter>
       )}
     </Card>

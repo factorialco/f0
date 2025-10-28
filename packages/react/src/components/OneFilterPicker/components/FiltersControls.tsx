@@ -1,9 +1,11 @@
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { Filter } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useId, useMemo, useState } from "react"
-import { ArrowLeft, Filter } from "../../../icons/app"
-import { useI18n } from "../../../lib/providers/i18n"
-import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover"
-import { Button } from "../../Actions/Button"
+import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
 import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
@@ -113,7 +115,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
     const BackButton = (
       <div className="pl-1.5 pt-1.5">
-        <Button
+        <F0Button
           label="Back"
           icon={ArrowLeft}
           variant="ghost"
@@ -127,7 +129,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       <>
         {selectedFilterKey && (
           <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-            <Button
+            <F0Button
               onClick={handleApplyFiltersSelection}
               label={i18n.filters.applySelection}
             />
@@ -142,7 +144,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
-          <Button
+          <ButtonInternal
             variant="outline"
             label={i18n.filters.label}
             icon={Filter}
@@ -150,7 +152,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             onClick={() => onOpenChange(!isOpen)}
             aria-controls={isOpen ? id : undefined}
             hideLabel
-            round
           />
           {hasFiltersApplied && (
             <div className="absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold" />
@@ -222,14 +223,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     <div className="flex items-center gap-2">
       <Popover open={isOpen} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
-          <Button
+          <ButtonInternal
             variant="outline"
             label={i18n.filters.label}
             icon={Filter}
             pressed={isOpen}
             onClick={() => onOpenChange(!isOpen)}
             hideLabel={hideLabel}
-            round={hideLabel}
             aria-controls={isOpen ? id : undefined}
           />
         </PopoverTrigger>
@@ -265,7 +265,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               )}
             </div>
             <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-              <Button
+              <F0Button
                 onClick={handleApplyFilters}
                 label={i18n.filters.applyFilters}
               />

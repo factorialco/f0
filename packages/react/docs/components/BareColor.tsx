@@ -1,7 +1,7 @@
 import { useState } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { CopyIcon } from "lucide-react"
-import { Button } from "../../src/components/Actions/Button"
 
 type Props = {
   name: string
@@ -30,7 +30,7 @@ export function BareColor({ name }: Props) {
         </span>
       </div>
       <div className="invert-0 filter dark:invert">
-        <Button
+        <F0Button
           onClick={copyToClipboard}
           variant="ghost"
           disabled={copied}
