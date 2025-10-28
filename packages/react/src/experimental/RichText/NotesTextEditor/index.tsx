@@ -28,6 +28,8 @@ import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
 
+const MEDIUM_CONTAINER_WIDTH = 768 // the width of a container that is considered medium by tailwind
+
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
   placeholder: string
@@ -94,7 +96,9 @@ const NotesTextEditorComponent = forwardRef<
     if (!containerRef.current) return
 
     const resizeObserver = new ResizeObserver((entries) =>
-      setIsNarrowContainer(entries[0].contentRect.width < 767)
+      setIsNarrowContainer(
+        entries[0].contentRect.width < MEDIUM_CONTAINER_WIDTH
+      )
     )
 
     resizeObserver.observe(containerRef.current)
