@@ -49,7 +49,6 @@ export function AiChatTranslationsProvider({
   children,
   translations,
 }: AiChatTranslationsProviderProps): JSX.Element {
-  console.log("aichat", translations)
   return (
     <AiChatTranslationsContext.Provider value={translations}>
       {children}
