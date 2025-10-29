@@ -5,11 +5,11 @@ import {
   ThumbsUp,
   ThumbsUpFilled,
 } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { ChatSpinner } from "./ChatSpinner"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
@@ -35,7 +35,7 @@ export const AssistantMessage = ({
   )
   const isEmptyMessage = !content && !subComponent
 
-  const translations = useI18n()
+  const translations = useAiChatTranslations()
   const { open: openFeedbackModal } = useFeedbackModal()
   const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
   const [isHovered, setIsHovered] = useState(false)
@@ -104,7 +104,7 @@ export const AssistantMessage = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  label={translations.actions.thumbsUp}
+                  label={translations.ai.thumbsUp}
                   icon={reactionValue === "like" ? ThumbsUpFilled : ThumbsUp}
                   hideLabel
                   disabled={isGenerating}
@@ -122,7 +122,7 @@ export const AssistantMessage = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  label={translations.actions.thumbsDown}
+                  label={translations.ai.thumbsDown}
                   icon={
                     reactionValue === "dislike" ? ThumbsDownFilled : ThumbsDown
                   }

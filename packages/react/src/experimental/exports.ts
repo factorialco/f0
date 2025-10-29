@@ -2,7 +2,6 @@ import { Component } from "../lib/component/component"
 import { ScrollArea as ScrollAreaComponent } from "./Utilities/ScrollArea"
 
 export * from "./Actions/exports"
-export * from "./AiChat/exports"
 export * from "./AiPromotionChat/exports"
 export * from "./Banners/exports"
 export * from "./Charts/exports"

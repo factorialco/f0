@@ -1,17 +1,17 @@
 import { ButtonInternal } from "@/components/Actions/Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 
 export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const translation = useI18n()
+  const translation = useAiChatTranslations()
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -110,7 +110,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder={translation.ai.inputPlaceholder}
+          placeholder={translation.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
             "mx-3 mb-0 max-h-36 flex-1 resize-none overflow-y-scroll outline-none transition-all",
@@ -125,7 +125,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           <ButtonInternal
             type="submit"
             variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
+            label={translation.stopAnswerGeneration}
             icon={SolidStop}
             hideLabel
             round
@@ -135,7 +135,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             type="submit"
             disabled={!hasDataToSend}
             variant={hasDataToSend ? "default" : "neutral"}
-            label={translation.ai.sendMessage}
+            label={translation.sendMessage}
             icon={ArrowUp}
             hideLabel
             round

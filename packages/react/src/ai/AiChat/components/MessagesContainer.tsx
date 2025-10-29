@@ -1,7 +1,6 @@
 import { ButtonInternal } from "@/components/Actions/Button/internal"
 
 import { ArrowDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
@@ -14,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import { isAgentStateMessage } from "../messageTypes"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
@@ -50,7 +50,7 @@ const Messages = ({
     isOpen,
   } = useFeedbackModal()
 
-  const translations = useI18n()
+  const translations = useAiChatTranslations()
   const {
     greeting,
     initialMessage,
@@ -60,10 +60,8 @@ const Messages = ({
   } = useAiChat()
   const initialMessages = useMemo(
     () =>
-      makeInitialMessages(
-        initialMessage || translations.ai.defaultInitialMessage
-      ),
-    [initialMessage, translations.ai.defaultInitialMessage]
+      makeInitialMessages(initialMessage || translations.defaultInitialMessage),
+    [initialMessage, translations.defaultInitialMessage]
   )
   const showWelcomeBlock =
     messages.length == 0 && (greeting || initialMessages.length > 0)
@@ -179,7 +177,7 @@ const Messages = ({
               <div className="rounded bg-f1-background">
                 <ButtonInternal
                   onClick={() => scrollToBottom()}
-                  label={translations.ai.scrollToBottom}
+                  label={translations.scrollToBottom}
                   variant="neutral"
                   icon={ArrowDown}
                   hideLabel

@@ -1,5 +1,6 @@
 "use client"
 
+import { AiChatTranslationsProvider } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import { createContext, ReactNode, useContext } from "react"
 import { TranslationsType } from "./i18n-provider-defaults"
 const I18nContext = createContext<TranslationsType | null>(null)
@@ -14,7 +15,11 @@ export function I18nProvider({
   translations,
 }: I18nProviderProps): JSX.Element {
   return (
-    <I18nContext.Provider value={translations}>{children}</I18nContext.Provider>
+    <I18nContext.Provider value={translations}>
+      <AiChatTranslationsProvider translations={translations}>
+        {children}
+      </AiChatTranslationsProvider>
+    </I18nContext.Provider>
   )
 }
 

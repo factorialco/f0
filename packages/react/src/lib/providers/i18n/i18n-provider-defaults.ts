@@ -1,3 +1,5 @@
+import { AiChatTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+
 export const defaultTranslations = {
   approvals: {
     history: "Approval history",
@@ -185,29 +187,7 @@ export const defaultTranslations = {
     remove: "Remove favorite",
   },
   notifications: "Notifications",
-  ai: {
-    openChat: "Open Chat with One AI",
-    closeChat: "Close Chat with One AI",
-    scrollToBottom: "Scroll to bottom",
-    welcome: "Ask or create with One",
-    defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Ask about time, people, or company info…",
-    stopAnswerGeneration: "Stop generating",
-    sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
-    feedbackModal: {
-      positive: {
-        title: "What did you like about this response?",
-        label: "Your feedback helps us make Factorial AI better",
-        placeholder: "Share what worked well",
-      },
-      negative: {
-        title: "What could have been better?",
-        label: "Your feedback helps us improve future answers",
-        placeholder: "Share what didn’t work",
-      },
-    },
-  },
+
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
@@ -222,4 +202,5 @@ type TranslationShape<T> = {
       : never
 }
 
-export type TranslationsType = TranslationShape<typeof defaultTranslations>
+export type TranslationsType = TranslationShape<typeof defaultTranslations> &
+  AiChatTranslations

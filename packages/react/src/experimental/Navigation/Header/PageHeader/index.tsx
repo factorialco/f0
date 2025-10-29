@@ -13,7 +13,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useRef, useState } from "react"
 
-import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
+import { OneSwitch } from "@/ai/AiChat/OneSwitch"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
