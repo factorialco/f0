@@ -17,6 +17,7 @@ import React, { type ReactElement } from "react"
 import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
 export * from "@testing-library/react"
 
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { MotionGlobalConfig } from "motion"
 MotionGlobalConfig.skipAnimations = true
@@ -30,7 +31,9 @@ const TestProviders = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <UserPlatformProvider showExperimentalWarnings={false}>
-        <I18nProvider translations={defaultTranslations}>
+        <I18nProvider
+          translations={{ ...defaultTranslations, ...aiTranslations }}
+        >
           {children}
         </I18nProvider>
       </UserPlatformProvider>

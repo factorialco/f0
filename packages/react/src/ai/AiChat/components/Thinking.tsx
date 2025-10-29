@@ -37,7 +37,7 @@ export const Thinking = ({ messages }: ThinkingProps) => {
           <span className="mr-2 *:block">
             <F0Icon icon={Lightbulb} className="block" />
           </span>
-          <span className="mr-[2px]">{translations.thoughtsGroupTitle}</span>
+          <span className="mr-[2px]">{translations.ai.thoughtsGroupTitle}</span>
           <F0Icon
             icon={ChevronRight}
             className="h-4 w-4 transition-transform duration-200"

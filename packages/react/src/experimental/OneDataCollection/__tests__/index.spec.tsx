@@ -26,13 +26,16 @@ import {
   useDataCollectionSource,
 } from "../hooks/useDataCollectionSource"
 
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
+  <I18nProvider translations={{ ...defaultTranslations, ...aiTranslations }}>
+    {children}
+  </I18nProvider>
 )
 
 describe("Collections", () => {

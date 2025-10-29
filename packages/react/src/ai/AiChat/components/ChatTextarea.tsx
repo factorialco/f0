@@ -110,7 +110,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder={translation.inputPlaceholder}
+          placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
             "mx-3 mb-0 max-h-36 flex-1 resize-none overflow-y-scroll outline-none transition-all",
@@ -125,7 +125,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           <ButtonInternal
             type="submit"
             variant="neutral"
-            label={translation.stopAnswerGeneration}
+            label={translation.ai.stopAnswerGeneration}
             icon={SolidStop}
             hideLabel
           />
@@ -134,7 +134,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             type="submit"
             disabled={!hasDataToSend}
             variant={hasDataToSend ? "default" : "neutral"}
-            label={translation.sendMessage}
+            label={translation.ai.sendMessage}
             icon={ArrowUp}
             hideLabel
           />
