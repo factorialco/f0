@@ -39,6 +39,7 @@ import { FolderCellValue } from './types/folder.tsx';
 import { FolderCellValue as FolderCellValue_2 } from '../../value-display/types/folder';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon.tsx';
@@ -93,7 +94,7 @@ declare type Action = {
     label: string;
     onClick: () => void;
     icon?: IconType;
-    variant?: ButtonVariant;
+    variant?: F0ButtonProps["variant"];
     disabled?: boolean;
 };
 
@@ -104,19 +105,104 @@ declare type Action_2 = {
     variant?: "default" | "outline" | "promote";
 };
 
-export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {
+declare type ActionBaseProps = ActionCommonProps & DataAttributes;
+
+declare type ActionButtonProps = ActionBaseProps & {
+    type?: ButtonType;
+    href?: never;
+    target?: never;
+    onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+declare interface ActionCommonProps {
+    /**
+     * Tooltip
+     */
+    tooltip?: string | false;
+    /**
+     * The variant of the action.
+     */
+    variant?: ActionVariant;
+    /**
+     * The children of the action.
+     */
+    children: ReactNode;
+    /**
+     * The prepend of the action.
+     */
+    prepend?: ReactNode;
+    /**
+     * The append of the action.
+     */
+    append?: ReactNode;
+    /**
+     * The prepend outside (next to the button) of the action.
+     */
+    prependOutside?: ReactNode;
+    /**
+     * The append outside of the action.
+     */
+    appendOutside?: ReactNode;
+    /**
+     * The disabled state of the action.
+     */
+    disabled?: boolean;
+    /**
+     * The loading state of the action.
+     */
+    loading?: boolean;
+    /**
+     * The pressed state of the action.
+     */
+    pressed?: boolean;
+    /**
+     * The class name of the action.
+     */
+    className?: string;
+    /**
+     * The size of the action.
+     */
+    size?: ActionSize;
+    /**
+     * The render mode.
+     * @default "default"
+     */
+    mode?: "default" | "only";
+    /**
+     * The title of the action.
+     */
+    title?: string;
+    /**
+     * make the left and right padding of the action smaller.
+     */
+    compact?: boolean;
+    /**
+     * The aria label of the action.
+     */
+    "aria-label"?: string;
+    /**
+     * The tab index of the action.
+     */
+    tabIndex?: number;
+}
+
+export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     onClick: () => void;
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
-
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
+declare type ActionLinkProps = ActionBaseProps & {
+    href: string;
+    target?: NavTarget;
+    rel?: string;
+    onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+    className?: string;
+};
 
 declare type ActionProps = {
     buttonType: "gradient" | "internal";
@@ -127,7 +213,9 @@ declare type ActionProps = {
     icon?: IconType;
 };
 
-declare type ActionProps_2 = {
+declare type ActionProps_2 = ActionLinkProps | ActionButtonProps;
+
+declare type ActionProps_3 = {
     /**
      * The label of the action
      */
@@ -179,6 +267,10 @@ declare type ActionProps_2 = {
     type?: "default";
 });
 
+declare type ActionSize = (typeof actionSizes)[number];
+
+declare const actionSizes: readonly ["sm", "md", "lg"];
+
 declare type ActionType = CopyActionType | NavigateActionType;
 
 export declare type actionType = {
@@ -197,6 +289,10 @@ declare type actionType_2 = {
     hideLabel?: boolean;
     variant?: "default" | "outline" | "neutral";
 };
+
+declare type ActionVariant = (typeof actionVariants)[number];
+
+declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "link", "unstyled", "mention"];
 
 export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element) & {
     Skeleton: () => default_2.JSX.Element;
@@ -262,14 +358,7 @@ declare type AIButton = {
     editable?: boolean;
 };
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AiChat: () => JSX_2.Element | null;
-
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
-
-export declare type AiChatProviderProps = {
+declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
     initialMessage?: string | string[];
@@ -284,64 +373,7 @@ export declare type AiChatProviderProps = {
     }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
-declare type AiChatProviderReturnValue = {
-    enabled: boolean;
-    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    shouldPlayEntranceAnimation: boolean;
-    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
-    tmp_setAgent: (agent?: string) => void;
-    /**
-     * Set the amount of minutes after which the chat will be cleared automatically
-     * Set `null` to disable auto-clearing
-     *
-     * @default 15
-     */
-    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
-    autoClearMinutes: number | null;
-    /**
-     * The initial message to display in the chat
-     */
-    initialMessage?: string | string[];
-    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
-    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
-    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    /**
-     * Clear/reset the chat conversation
-     */
-    clear: () => void;
-    /* Excluded from this release type: setClearFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
-
-declare interface AiChatState {
-    greeting?: string;
-    enabled: boolean;
-    agent?: string;
-    initialMessage?: string | string[];
-    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-}
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AiFullscreenChat: () => JSX_2.Element | null;
+declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -400,6 +432,34 @@ declare interface AiPromotionChatState {
     onShow?: () => void;
     onHide?: () => void;
 }
+
+declare const aiTranslations: {
+    ai: {
+        openChat: string;
+        closeChat: string;
+        scrollToBottom: string;
+        welcome: string;
+        defaultInitialMessage: string;
+        inputPlaceholder: string;
+        stopAnswerGeneration: string;
+        sendMessage: string;
+        thoughtsGroupTitle: string;
+        thumbsUp: string;
+        thumbsDown: string;
+        feedbackModal: {
+            positive: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+            negative: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+        };
+    };
+};
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
     variant?: "info" | "warning" | "positive" | "destructive" | undefined;
@@ -692,7 +752,7 @@ declare interface BaseHeaderProps_2 {
     } | AvatarVariant;
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-    secondaryActions?: SecondaryAction[];
+    secondaryActions?: HeaderSecondaryAction[];
     otherActions?: (DropdownItem & {
         isVisible?: boolean;
     })[];
@@ -750,13 +810,13 @@ declare type BreadcrumbBaseItemType = NavigationItem & {
     label: string;
 };
 
-declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType;
+export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType;
 
-declare type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
+export declare type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
     loading: true;
 };
 
-declare type BreadcrumbNavItemType = BreadcrumbBaseItemType & {
+export declare type BreadcrumbNavItemType = BreadcrumbBaseItemType & {
     module?: ModuleId;
 };
 
@@ -785,7 +845,7 @@ export declare function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps): 
 
 export declare function BreadcrumbSelect<T extends string, R = unknown>({ ...props }: BreadcrumbSelectProps<T, R>): JSX_2.Element;
 
-declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
+export declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
     type: "select";
     searchbox?: boolean;
     externalSearch?: boolean;
@@ -808,6 +868,15 @@ export declare interface BreadcrumbsProps {
     /** Array of breadcrumb items to display */
     breadcrumbs: BreadcrumbItemType[];
     append?: ReactNode;
+}
+
+export declare interface BreadcrumbState {
+    visibleCount: number;
+    headItem: BreadcrumbItemType | null;
+    tailItems: BreadcrumbItemType[];
+    collapsedItems: BreadcrumbItemType[];
+    isOnly: boolean;
+    minWidth: number | undefined;
 }
 
 declare interface BreakType {
@@ -847,8 +916,6 @@ export declare type BulkActionsDefinition<R extends RecordType, Filters extends 
     warningMessage: string;
 };
 
-declare const Button: React_2.ForwardRefExoticComponent<ButtonProps_2 & React_2.RefAttributes<HTMLButtonElement>>;
-
 export declare interface ButtonConfig {
     key: string;
     icon: IconType;
@@ -860,11 +927,47 @@ export declare interface ButtonConfig {
     };
 }
 
-declare type ButtonInternalProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed" | "style"> & DataAttributes & {
+declare type ButtonDropdownItem<T = string> = {
+    /**
+     * The value of the item.
+     */
+    value: T;
+    /**
+     * The label of the item.
+     */
+    label: string;
+    /**
+     * The icon of the item.
+     */
+    icon?: IconType;
+    /**
+     * Whether the item is critical.
+     * @default false
+     */
+    critical?: boolean;
+    /**
+     * The description of the item.
+     */
+    description?: string;
+};
+
+declare type ButtonInternalProps = Pick<ActionProps_2, "size" | "disabled" | "className" | "pressed" | "compact" | "variant" | "tooltip"> & DataAttributes & {
+    /**
+     * The aria-label of the button if not provided title or label will be used.
+     */
+    "aria-label"?: string;
+    /**
+     * The variant of the button.
+     */
+    variant?: ButtonVariant;
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    /**
+     * The title of the button.
+     */
+    title?: string;
     /**
      * The visible label for the button. Required for accessibility.
      */
@@ -888,52 +991,67 @@ declare type ButtonInternalProps = Pick<ComponentProps<typeof Button>, "variant"
     /**
      * Sets the button size. 'lg' for mobile, 'md' for desktop, 'sm' for compact/secondary actions.
      */
-    size?: "sm" | "md" | "lg";
+    size?: ButtonSize;
     /**
+     * @private
      * Appends a React node after the button content (for custom UI extensions).
      */
     append?: React.ReactNode;
-    /**
-     * Appends a React node as a separate button, visually grouped with the main button.
-     */
-    appendButton?: React.ReactNode;
     /**
      * If true, the button is inactive and does not respond to user interaction.
      */
     disabled?: boolean;
     /**
+     * @private
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean;
-};
-
-declare type ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
-
-declare interface ButtonProps_2 extends React_2.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-    asChild?: boolean;
-    round?: boolean;
-    size?: ButtonSize;
-    variant?: ButtonVariant;
-    appendButton?: React_2.ReactNode;
-    pressed?: boolean;
-}
-
-declare type ButtonSize = (typeof sizes)[number];
-
-declare type ButtonVariant = (typeof variants)[number];
-
-declare const buttonVariants: (props?: ({
-    disabled?: boolean | undefined;
-    pressed?: boolean | undefined;
-    variant?: "default" | "critical" | "promote" | "neutral" | "outline" | "ghost" | "outlinePromote" | undefined;
-    size?: "lg" | "md" | "sm" | undefined;
+    /**
+     * @private
+     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     */
+    noAutoTooltip?: boolean;
+    /**
+     * @private
+     * If true, the button will not automatically add a title based label
+     */
+    noTitle?: boolean;
+    /**
+     * @private
+     * The style of the button.
+     */
+    style?: React.CSSProperties;
 } & ({
-    class?: ClassValue;
-    className?: never;
+    /**
+     * The URL to navigate to when the button is clicked.
+     */
+    href: string;
+    /**
+     * The target to navigate to when the button is clicked.
+     */
+    target?: NavTarget;
+    type?: never;
 } | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+    href?: never;
+    target?: never;
+    type?: ButtonType;
+});
+
+declare type ButtonSize = (typeof buttonSizes)[number];
+
+declare const buttonSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
+
+export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
+
+declare type ButtonType = (typeof buttonTypes)[number];
+
+declare const buttonTypes: readonly ["button", "submit", "reset"];
+
+declare type ButtonVariant = (typeof buttonVariants)[number];
+
+declare const buttonVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
 export declare type CalendarDate = {
     day: number;
@@ -989,7 +1107,7 @@ declare interface CalloutSkeletonProps {
     variant?: CalloutVariant;
 }
 
-declare type CalloutVariant = (typeof variants_2)[number];
+declare type CalloutVariant = (typeof variants)[number];
 
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
@@ -1134,7 +1252,7 @@ declare type ChartConfig_2 = {
 
 declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
 
-declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_3> {
+declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_2> {
     config: ChartConfig_2;
     children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
 }
@@ -1425,6 +1543,10 @@ declare type Data<R extends RecordType> = {
  * @template Filters - The available filter configurations
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
+
+declare type DataAttributes_2 = {
+    [key: `data-${string}`]: string | undefined;
+};
 
 export declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
@@ -1783,6 +1905,7 @@ declare const defaultTranslations: {
         readonly thumbsDown: "Dislike";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
+        readonly toggleDropdownMenu: "Toggle dropdown menu";
     };
     readonly status: {
         readonly selected: {
@@ -1929,29 +2052,6 @@ declare const defaultTranslations: {
         readonly remove: "Remove favorite";
     };
     readonly notifications: "Notifications";
-    readonly ai: {
-        readonly openChat: "Open Chat with One AI";
-        readonly closeChat: "Close Chat with One AI";
-        readonly scrollToBottom: "Scroll to bottom";
-        readonly welcome: "Ask or create with One";
-        readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info…";
-        readonly stopAnswerGeneration: "Stop generating";
-        readonly sendMessage: "Send message";
-        readonly thoughtsGroupTitle: "Reflection";
-        readonly feedbackModal: {
-            readonly positive: {
-                readonly title: "What did you like about this response?";
-                readonly label: "Your feedback helps us make Factorial AI better";
-                readonly placeholder: "Share what worked well";
-            };
-            readonly negative: {
-                readonly title: "What could have been better?";
-                readonly label: "Your feedback helps us improve future answers";
-                readonly placeholder: "Share what didn’t work";
-            };
-        };
-    };
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
@@ -1984,17 +2084,17 @@ description: string;
 actions?: {
 primary: {
 label: string;
-onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined | undefined;
 icon?: IconType_2 | undefined;
+onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
+disabled?: boolean | undefined;
 } & {
 variant?: "default" | "critical" | "neutral";
 };
 secondary: {
 label: string;
-onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined | undefined;
 icon?: IconType_2 | undefined;
+onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
+disabled?: boolean | undefined;
 };
 };
 open?: boolean;
@@ -2022,16 +2122,16 @@ export declare const Dropdown: (props: DropdownProps) => JSX_2.Element;
 declare type DropdownInternalProps = {
     items: DropdownItem[];
     icon?: IconType;
-    size?: ButtonProps["size"];
+    size?: F0ButtonProps["size"];
     children?: default_2.ReactNode;
     align?: "start" | "end";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-} & DataAttributes;
+} & DataAttributes_2;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator;
 
-export declare type DropdownItemObject = NavigationItem & {
+export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     type?: "item";
     onClick?: () => void;
     icon?: IconType;
@@ -2044,13 +2144,13 @@ declare type DropdownItemSeparator = {
     type: "separator";
 };
 
+export declare type DropdownItemWithoutIcon = Omit<DropdownItemObject, "icon">;
+
 declare const DropdownMenu: React_2.FC<DropdownMenuPrimitive.DropdownMenuProps>;
 
 declare const DropdownMenuItem: React_2.ForwardRefExoticComponent<Omit<DropdownMenuPrimitive.DropdownMenuItemProps & React_2.RefAttributes<HTMLDivElement>, "ref"> & {
     inset?: boolean;
 } & React_2.RefAttributes<HTMLDivElement>>;
-
-declare const DropdownMenuTrigger: React_2.ForwardRefExoticComponent<DropdownMenuPrimitive.DropdownMenuTriggerProps & React_2.RefAttributes<HTMLButtonElement>>;
 
 declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_2)[number]> & {
     open?: boolean;
@@ -2073,7 +2173,7 @@ declare type EmptyState = {
     emoji?: string;
     title: string;
     description?: string;
-    actions?: ActionProps_2[];
+    actions?: ActionProps_3[];
 };
 
 declare const emptyStatesTypes: readonly ["no-data", "no-results", "error"];
@@ -2320,15 +2420,36 @@ declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
+
 export declare const F0ButtonToggle: ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>;
 
-declare interface F0ButtonToggleProps {
+export declare interface F0ButtonToggleProps {
+    /**
+     * Whether the button is in selected/active state.
+     */
     selected?: boolean;
+    /**
+     * Callback fired when the button is selected.
+     */
     onSelectedChange?: (selected: boolean) => void;
+    /**
+     * The accessible label for the button.
+     */
     label: string;
+    /**
+     * Whether the button is disabled.
+     */
     disabled?: boolean;
-    icon: IconType;
-    size?: "sm" | "md" | "lg";
+    /**
+     * The icon to display in the button. Can be a single icon or an array of two icons the first for the non-selected state and the second for the selected state.
+     */
+    icon: IconType | [IconType, IconType];
+    /**
+     * The size of the button.
+     * @default "md"
+     */
+    size?: ButtonToggleSize;
 }
 
 export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -2355,7 +2476,7 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "onFocus" | "onBlur" | "disabled" | "size" | "loading" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "disabled" | "placeholder" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -2416,7 +2537,7 @@ export declare type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES];
  * @param actions - The actions to filter
  * @returns An array of filtered actions
  */
-export declare const filterActions: (actions: SecondaryActionsDefinition) => SecondaryActionsItemDefinition[];
+export declare const filterActions: (groups: SecondaryActionGroup[]) => SecondaryActionGroup[];
 
 /**
  * Union of all available filter types.
@@ -2576,12 +2697,12 @@ export declare const getGranularitySimpleDefinition: (granularityKey: Granularit
 /**
  * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
  */
-export declare const getPrimaryActions: (primaryActions: PrimaryActionsDefinitionFn | undefined) => PrimaryActionsDefinition[];
+export declare const getPrimaryActions: (primaryActions: PrimaryActionsDefinitionFn | undefined) => PrimaryActionItemDefinition[];
 
 /**
  * Get the secondaryActionsItems from the secondaryActionsDefinition or the actions property
  */
-export declare const getSecondaryActions: (secondaryActions: SecondaryActionsDefinition | undefined) => SecondaryActionsItemDefinition[];
+export declare const getSecondaryActions: (secondaryActions: SecondaryActionsDefinition | undefined) => SecondaryActionGroup[];
 
 export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
@@ -2692,6 +2813,10 @@ declare type HeaderProps = {
     };
 };
 
+declare type HeaderSecondaryAction = SecondaryAction & {
+    hideLabel?: boolean;
+};
+
 export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
 
 export declare const HighlightBanner: ({ title, subtitle, buttonLabel, onClick, }: HighlightBannerProps) => JSX_2.Element;
@@ -2701,16 +2826,6 @@ declare type HighlightBannerProps = {
     subtitle: string;
     buttonLabel: string;
     onClick?: () => void;
-};
-
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
-
-export declare type HILActionConfirmationProps = {
-    text?: string;
-    confirmationText: string;
-    onConfirm: () => void;
-    cancelText: string;
-    onCancel: () => void;
 };
 
 declare type HTMLString = string;
@@ -2828,7 +2943,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "size" | "icon" | "loading" | "hideLabel" | "append" | "maxLength" | "required" | "error" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -3335,7 +3450,7 @@ export declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefi
 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes;
+} & DataAttributes_2;
 
 declare type NavigationProps = {
     previous?: {
@@ -3351,6 +3466,8 @@ declare type NavigationProps = {
         total: number;
     };
 };
+
+declare type NavTarget = HTMLAttributeAnchorTarget;
 
 /**
  * Utility type to extract all possible paths from nested object.
@@ -3538,30 +3655,6 @@ export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "
     hideGoToCurrent?: boolean;
 }
 
-export declare const OneDropdownButton: ({ items, onClick, value, ...props }: OneDropdownButtonProps) => JSX_2.Element | undefined;
-
-export declare type OneDropdownButtonItem<T = string> = Pick<DropdownItemObject, "label" | "icon" | "critical" | "description"> & {
-    value: T;
-};
-
-export declare type OneDropdownButtonProps<T = string> = {
-    size?: OneDropdownButtonSize;
-    items: (OneDropdownButtonItem<T> | DropdownItemSeparator)[];
-    variant?: OneDropdownButtonVariant;
-    value?: T;
-    disabled?: boolean;
-    loading?: boolean;
-    onClick: (value: T, item: OneDropdownButtonItem<T>) => void;
-};
-
-declare type OneDropdownButtonSize = (typeof oneDropdownButtonSizes)[number];
-
-declare const oneDropdownButtonSizes: readonly ["sm", "md", "lg"];
-
-declare type OneDropdownButtonVariant = (typeof oneDropdownButtonVariants)[number];
-
-declare const oneDropdownButtonVariants: readonly ["default", "outline", "neutral"];
-
 export declare function OneEmptyState({ title, description, variant, emoji, actions, }: Types.OneEmptyStateProps): JSX_2.Element;
 
 declare type OneEmptyStateProps = {
@@ -3580,7 +3673,7 @@ declare type OneEmptyStateProps = {
      * and can include a label, click handler, optional icon, and button variant.
      * @optional
      */
-    actions?: ActionProps_2[];
+    actions?: ActionProps_3[];
 } & ({
     /**
      * The variant of the empty state
@@ -3964,13 +4057,13 @@ declare interface PrimaryActionButton extends PrimaryAction {
     onClick: () => void;
 }
 
-export declare type PrimaryActionsDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */
-export declare type PrimaryActionsDefinitionFn = () => PrimaryActionsDefinition | PrimaryActionsDefinition[] | undefined;
+export declare type PrimaryActionsDefinitionFn = () => PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
 export declare type primaryActionType = {
     action: actionType;
@@ -3978,18 +4071,20 @@ export declare type primaryActionType = {
 };
 
 declare interface PrimaryDropdownAction<T> extends PrimaryAction {
-    items: OneDropdownButtonItem<T>[];
+    items: ButtonDropdownItem<T>[];
     value?: T;
-    onClick: (value: T, item: OneDropdownButtonItem<T>) => void;
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
 }
 
 export declare const PrivateBox: FC<PropsWithChildren>;
 
-declare const privateProps: readonly ["append", "appendButton", "className"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
 
 declare const privateProps_2: readonly [];
 
 declare const privateProps_3: readonly ["compact"];
+
+declare const privateProps_4: readonly ["delay"];
 
 declare type ProductUpdate = {
     title: string;
@@ -4007,7 +4102,7 @@ declare type ProductUpdatesProp = {
     hasUnread?: boolean;
     currentModule: string;
     onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"];
-    onHeaderClick?: ComponentProps<typeof DropdownMenuTrigger>["onClick"];
+    onHeaderClick?: F0ButtonProps["onClick"];
     onItemClick?: ComponentProps<typeof DropdownMenuItem>["onClick"];
     emptyScreen: {
         title: string;
@@ -4099,7 +4194,7 @@ declare type Props_2 = {
     /** Description text below the title */
     description: string;
     /**  Complementary action specific to the section */
-    action?: Pick<ButtonProps, "label" | "onClick"> & {
+    action?: Pick<F0ButtonProps, "label" | "onClick"> & {
         icon?: IconType;
         variant?: "default" | "outline";
     };
@@ -4315,19 +4410,26 @@ declare interface SecondaryAction extends PrimaryActionButton {
     variant?: "outline" | "critical" | "outlinePromote" | "promote";
 }
 
-export declare type SecondaryActionsDefinition = {
-    expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>;
-    actions: () => Array<SecondaryActionsItemDefinition> | undefined;
-} | (() => Array<SecondaryActionsItemDefinition> | undefined);
+export declare type SecondaryActionGroup = {
+    label?: string;
+    items: SecondaryActionItem[];
+};
 
 /**
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-export declare type SecondaryActionsItemDefinition = DropdownItem & {
+export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
 };
+
+export declare type SecondaryActionsDefinition = {
+    expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>;
+    actions: () => SecondaryActionsItems | undefined;
+} | (() => SecondaryActionsItems | undefined);
+
+export declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
 
 export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
 
@@ -4489,8 +4591,6 @@ declare type SidebarState = "locked" | "unlocked" | "hidden";
  */
 declare type SimpleResult<T> = T[];
 
-declare const sizes: readonly ["sm", "md", "lg"];
-
 declare const skeletonVariants: (props?: ({
     height?: "lg" | "md" | "sm" | undefined;
 } & ({
@@ -4539,7 +4639,7 @@ declare interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
 }
 
 declare const spinnerVariants: (props?: ({
-    size?: "small" | "large" | "medium" | undefined;
+    size?: "small" | "medium" | "large" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -4557,8 +4657,8 @@ width?: "auto" | "full" | undefined;
 paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
-alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -4587,8 +4687,8 @@ width?: "auto" | "full" | undefined;
 paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
-alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -4651,7 +4751,7 @@ export declare type SummaryType = "sum";
 
 export declare function Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, ...rest }: SwitchProps): JSX_2.Element;
 
-declare interface SwitchProps extends DataAttributes {
+declare interface SwitchProps extends DataAttributes_2 {
     /**
      * The title of the switch
      */
@@ -4694,7 +4794,8 @@ export declare type TabItem = {
     label: string;
     index?: boolean;
     variant?: "default" | "upsell";
-} & DataAttributes & ({
+    onClick?: () => void;
+} & DataAttributes_2 & ({
     href: string;
 } | {
     id: string;
@@ -4869,7 +4970,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "icon" | "hideLabel" | "maxLength" | "placeholder" | "error" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
@@ -5020,11 +5121,12 @@ export declare interface ToolbarProps {
     plainHtmlMode?: boolean;
 }
 
-export declare function Tooltip({ label, description, children, shortcut, }: TooltipProps): default_2.JSX.Element;
+export declare const Tooltip: (props: TooltipProps) => default_2.JSX.Element;
 
-declare type TooltipProps = {
+declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
+    delay?: number;
 } & ({
     label: string;
     description?: string;
@@ -5032,6 +5134,8 @@ declare type TooltipProps = {
     label?: string;
     description: string;
 });
+
+export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_4)[number]>;
 
 declare interface TranscriptLabels {
     deleteBlock: string;
@@ -5045,7 +5149,11 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
-declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
+declare type TranslationsType = TranslationShape<typeof defaultTranslations> & AiChatTranslations;
 
 declare interface TwoColumnsItemType {
     title: string;
@@ -5068,14 +5176,12 @@ declare type Type = "bar-chart" | "line-chart";
 
 declare namespace Types {
     export {
-        ActionProps_2 as ActionProps,
+        ActionProps_3 as ActionProps,
         OneEmptyStateProps
     }
 }
 
 declare type URL_2 = string;
-
-export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
@@ -5196,11 +5302,9 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
 
-declare const variants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
+declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
 
-declare const variants_2: readonly ["ai", "critical", "positive", "info", "warning"];
-
-declare const variants_3: (props?: ({
+declare const variants_2: (props?: ({
     aspect?: "small" | "square" | "wide" | undefined;
 } & ({
     class?: ClassValue;
@@ -5346,7 +5450,7 @@ export declare interface WidgetProps {
         };
         count?: number;
     };
-    action?: ButtonProps;
+    action?: F0ButtonProps;
     summaries?: Array<{
         label: string;
         value: string | number;

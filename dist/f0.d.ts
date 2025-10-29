@@ -31,6 +31,7 @@ import { FolderCellValue } from '../../value-display/types/folder';
 import { FolderCellValue as FolderCellValue_2 } from './types/folder.tsx';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon.tsx';
 import { ImgHTMLAttributes } from 'react';
@@ -41,9 +42,7 @@ import { internalAvatarTypes as internalAvatarTypes_2 } from '../../../ui/Avatar
 import { JSX as JSX_2 } from 'react';
 import { LineChartConfig } from '../../ui/chart';
 import { LineChartPropsBase } from './utils/types';
-import { LinkProps as LinkProps_3 } from './Link';
 import { LongTextCellValue } from './types/longText.tsx';
-import { MouseEventHandler } from 'react';
 import { NumberCellValue } from '../../value-display/types/number';
 import { NumberCellValue as NumberCellValue_2 } from './types/number.tsx';
 import { Observable } from 'zen-observable-ts';
@@ -82,11 +81,148 @@ declare type Action_2 = {
     loading?: boolean;
 };
 
-declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {
+declare type ActionBaseProps = ActionCommonProps & DataAttributes;
+
+declare type ActionButtonProps = ActionBaseProps & {
+    type?: ButtonType;
+    href?: never;
+    target?: never;
+    onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+declare interface ActionCommonProps {
+    /**
+     * Tooltip
+     */
+    tooltip?: string | false;
+    /**
+     * The variant of the action.
+     */
+    variant?: ActionVariant;
+    /**
+     * The children of the action.
+     */
+    children: ReactNode;
+    /**
+     * The prepend of the action.
+     */
+    prepend?: ReactNode;
+    /**
+     * The append of the action.
+     */
+    append?: ReactNode;
+    /**
+     * The prepend outside (next to the button) of the action.
+     */
+    prependOutside?: ReactNode;
+    /**
+     * The append outside of the action.
+     */
+    appendOutside?: ReactNode;
+    /**
+     * The disabled state of the action.
+     */
+    disabled?: boolean;
+    /**
+     * The loading state of the action.
+     */
+    loading?: boolean;
+    /**
+     * The pressed state of the action.
+     */
+    pressed?: boolean;
+    /**
+     * The class name of the action.
+     */
+    className?: string;
+    /**
+     * The size of the action.
+     */
+    size?: ActionSize;
+    /**
+     * The render mode.
+     * @default "default"
+     */
+    mode?: "default" | "only";
+    /**
+     * The title of the action.
+     */
+    title?: string;
+    /**
+     * make the left and right padding of the action smaller.
+     */
+    compact?: boolean;
+    /**
+     * The aria label of the action.
+     */
+    "aria-label"?: string;
+    /**
+     * The tab index of the action.
+     */
+    tabIndex?: number;
+}
+
+declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     onClick: () => void;
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
 });
+
+declare type ActionLinkProps = ActionBaseProps & {
+    href: string;
+    target?: NavTarget;
+    rel?: string;
+    onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+    className?: string;
+};
+
+declare type ActionLinkVariant = (typeof actionLinkVariants)[number];
+
+declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
+
+declare type ActionProps = ActionLinkProps | ActionButtonProps;
+
+declare type ActionSize = (typeof actionSizes)[number];
+
+declare const actionSizes: readonly ["sm", "md", "lg"];
+
+declare type ActionVariant = (typeof actionVariants)[number];
+
+declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "link", "unstyled", "mention"];
+
+declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
+
+declare const aiTranslations: {
+    ai: {
+        openChat: string;
+        closeChat: string;
+        scrollToBottom: string;
+        welcome: string;
+        defaultInitialMessage: string;
+        inputPlaceholder: string;
+        stopAnswerGeneration: string;
+        sendMessage: string;
+        thoughtsGroupTitle: string;
+        thumbsUp: string;
+        thumbsDown: string;
+        feedbackModal: {
+            positive: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+            negative: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+        };
+    };
+};
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -426,15 +562,60 @@ declare type BulkActionsDefinition<R extends RecordType, Filters extends Filters
     warningMessage: string;
 };
 
-export declare const Button: ForwardRefExoticComponent<ButtonProps & RefAttributes<HTMLButtonElement>>;
+export declare type ButtonDropdownGroup<T = string> = {
+    label?: string;
+    items: ButtonDropdownItem<T>[];
+};
 
-declare const Button_2: React_2.ForwardRefExoticComponent<ButtonProps_2 & React_2.RefAttributes<HTMLButtonElement>>;
+export declare type ButtonDropdownItem<T = string> = {
+    /**
+     * The value of the item.
+     */
+    value: T;
+    /**
+     * The label of the item.
+     */
+    label: string;
+    /**
+     * The icon of the item.
+     */
+    icon?: IconType;
+    /**
+     * Whether the item is critical.
+     * @default false
+     */
+    critical?: boolean;
+    /**
+     * The description of the item.
+     */
+    description?: string;
+};
 
-declare type ButtonInternalProps = Pick<ComponentProps<typeof Button_2>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed" | "style"> & DataAttributes & {
+export declare type ButtonDropdownSize = (typeof buttonDropdownSizes)[number];
+
+export declare const buttonDropdownSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonDropdownVariant = (typeof buttonDropdownVariants)[number];
+
+export declare const buttonDropdownVariants: readonly ["default", "outline", "neutral"];
+
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant" | "tooltip"> & DataAttributes & {
+    /**
+     * The aria-label of the button if not provided title or label will be used.
+     */
+    "aria-label"?: string;
+    /**
+     * The variant of the button.
+     */
+    variant?: ButtonVariant;
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    /**
+     * The title of the button.
+     */
+    title?: string;
     /**
      * The visible label for the button. Required for accessibility.
      */
@@ -458,52 +639,67 @@ declare type ButtonInternalProps = Pick<ComponentProps<typeof Button_2>, "varian
     /**
      * Sets the button size. 'lg' for mobile, 'md' for desktop, 'sm' for compact/secondary actions.
      */
-    size?: "sm" | "md" | "lg";
+    size?: ButtonSize;
     /**
+     * @private
      * Appends a React node after the button content (for custom UI extensions).
      */
     append?: React.ReactNode;
-    /**
-     * Appends a React node as a separate button, visually grouped with the main button.
-     */
-    appendButton?: React.ReactNode;
     /**
      * If true, the button is inactive and does not respond to user interaction.
      */
     disabled?: boolean;
     /**
+     * @private
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean;
-};
-
-export declare type ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
-
-declare interface ButtonProps_2 extends React_2.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-    asChild?: boolean;
-    round?: boolean;
-    size?: ButtonSize;
-    variant?: ButtonVariant;
-    appendButton?: React_2.ReactNode;
-    pressed?: boolean;
-}
-
-declare type ButtonSize = (typeof sizes)[number];
-
-declare type ButtonVariant = (typeof variants)[number];
-
-declare const buttonVariants: (props?: ({
-    disabled?: boolean | undefined;
-    pressed?: boolean | undefined;
-    variant?: "default" | "critical" | "promote" | "neutral" | "outline" | "ghost" | "outlinePromote" | undefined;
-    size?: "lg" | "md" | "sm" | undefined;
+    /**
+     * @private
+     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     */
+    noAutoTooltip?: boolean;
+    /**
+     * @private
+     * If true, the button will not automatically add a title based label
+     */
+    noTitle?: boolean;
+    /**
+     * @private
+     * The style of the button.
+     */
+    style?: React.CSSProperties;
 } & ({
-    class?: ClassValue;
-    className?: never;
+    /**
+     * The URL to navigate to when the button is clicked.
+     */
+    href: string;
+    /**
+     * The target to navigate to when the button is clicked.
+     */
+    target?: NavTarget;
+    type?: never;
 } | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+    href?: never;
+    target?: never;
+    type?: ButtonType;
+});
+
+export declare type ButtonSize = (typeof buttonSizes)[number];
+
+export declare const buttonSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
+
+export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
+
+declare type ButtonType = (typeof buttonTypes)[number];
+
+declare const buttonTypes: readonly ["button", "submit", "reset"];
+
+export declare type ButtonVariant = (typeof buttonVariants)[number];
+
+export declare const buttonVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
 declare type CalendarMode = "single" | "range";
 
@@ -660,7 +856,7 @@ declare interface CardSecondaryAction {
     onClick: () => void;
 }
 
-declare interface CardSecondaryLink extends Pick<LinkProps, "href" | "target" | "disabled"> {
+declare interface CardSecondaryLink extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
     label: string;
 }
 
@@ -675,7 +871,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 
 export declare const CategoryBarChart: ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-declare interface CheckboxProps extends DataAttributes {
+declare interface CheckboxProps extends DataAttributes_2 {
     /**
      * The title of the checkbox
      */
@@ -847,15 +1043,6 @@ declare type ComponentTypes = (typeof componentTypes)[number];
 
 declare const componentTypes: readonly ["layout", "info", "action", "form"];
 
-export declare const CopyButton: ForwardRefExoticComponent<Omit<CopyButtonProps, "ref"> & RefAttributes<HTMLButtonElement>>;
-
-declare type CopyButtonProps = Omit<ComponentProps<typeof Button_2>, "onClick" | "children" | "title" | "label" | "hideLabel" | "icon" | "round"> & {
-    valueToCopy: string;
-    copiedTooltipLabel?: string;
-    copyTooltipLabel?: string;
-    onCopy?: MouseEventHandler<HTMLButtonElement>;
-};
-
 export declare function createAtlaskitDriver(instanceId: symbol): DndDriver;
 
 /**
@@ -892,6 +1079,10 @@ export declare type Data<R extends RecordType> = {
  * @template Filters - The available filter configurations
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
+
+declare type DataAttributes_2 = {
+    [key: `data-${string}`]: string | undefined;
+};
 
 declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
@@ -1205,6 +1396,7 @@ export declare const defaultTranslations: {
         readonly thumbsDown: "Dislike";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
+        readonly toggleDropdownMenu: "Toggle dropdown menu";
     };
     readonly status: {
         readonly selected: {
@@ -1351,29 +1543,6 @@ export declare const defaultTranslations: {
         readonly remove: "Remove favorite";
     };
     readonly notifications: "Notifications";
-    readonly ai: {
-        readonly openChat: "Open Chat with One AI";
-        readonly closeChat: "Close Chat with One AI";
-        readonly scrollToBottom: "Scroll to bottom";
-        readonly welcome: "Ask or create with One";
-        readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info…";
-        readonly stopAnswerGeneration: "Stop generating";
-        readonly sendMessage: "Send message";
-        readonly thoughtsGroupTitle: "Reflection";
-        readonly feedbackModal: {
-            readonly positive: {
-                readonly title: "What did you like about this response?";
-                readonly label: "Your feedback helps us make Factorial AI better";
-                readonly placeholder: "Share what worked well";
-            };
-            readonly negative: {
-                readonly title: "What could have been better?";
-                readonly label: "Your feedback helps us improve future answers";
-                readonly placeholder: "Share what didn’t work";
-            };
-        };
-    };
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
@@ -1426,7 +1595,7 @@ export declare type DragPayload<T = unknown> = {
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator;
 
-declare type DropdownItemObject = NavigationItem & {
+declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     type?: "item";
     onClick?: () => void;
     icon?: IconType;
@@ -1457,10 +1626,11 @@ export declare type DropIntent = {
     type: "cancel";
 };
 
-export declare function EmojiImage({ emoji, size }: EmojiImageProps): JSX_2.Element;
+export declare function EmojiImage({ emoji, size, alt }: EmojiImageProps): JSX_2.Element;
 
 export declare interface EmojiImageProps extends VariantProps<typeof emojiVariants> {
     emoji: string;
+    alt?: string;
 }
 
 declare const emojiVariants: (props?: ({
@@ -1686,6 +1856,84 @@ export declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+export declare const F0Button: ForwardRefExoticComponent<F0ButtonProps & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>;
+
+export declare const F0ButtonDropdown: ({ onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined;
+
+export declare type F0ButtonDropdownProps<T = string> = {
+    /**
+     * The size of the button.
+     * @default "md"
+     */
+    size?: ButtonDropdownSize;
+    /**
+     * The items to display in the dropdown.
+     */
+    items: ButtonDropdownItem<T>[] | ButtonDropdownGroup<T>[] | ButtonDropdownGroup<T>;
+    /**
+     * The variant of the button.
+     * @default "default"
+     */
+    variant?: ButtonDropdownVariant;
+    /**
+     * The value of the button.
+     */
+    value?: T;
+    /**
+     * The disabled state of the button.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * The loading state of the button.
+     * @default false
+     */
+    loading?: boolean;
+    /**
+     * The tooltip of the button.
+     * @default undefined
+     */
+    tooltip?: string;
+    /**
+     * The callback function to be called when the button is clicked.
+     * @param value The value of the item that was clicked.
+     * @param item The item that was clicked.
+     */
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
+};
+
+export declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
+
+export declare const F0ButtonToggle: ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>;
+
+export declare interface F0ButtonToggleProps {
+    /**
+     * Whether the button is in selected/active state.
+     */
+    selected?: boolean;
+    /**
+     * Callback fired when the button is selected.
+     */
+    onSelectedChange?: (selected: boolean) => void;
+    /**
+     * The accessible label for the button.
+     */
+    label: string;
+    /**
+     * Whether the button is disabled.
+     */
+    disabled?: boolean;
+    /**
+     * The icon to display in the button. Can be a single icon or an array of two icons the first for the non-selected state and the second for the selected state.
+     */
+    icon: IconType | [IconType, IconType];
+    /**
+     * The size of the button.
+     * @default "md"
+     */
+    size?: ButtonToggleSize;
+}
+
 export declare const F0Card: ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: ({ compact }: {
         compact?: boolean;
@@ -1721,6 +1969,16 @@ export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularitie
     value?: DatePickerValue;
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>;
 
+export declare type F0DropdownButtonProps<T = string> = {
+    size?: ButtonDropdownSize;
+    items: ButtonDropdownItem<T>[] | ButtonDropdownGroup<T>[] | ButtonDropdownGroup<T>;
+    variant?: ButtonDropdownVariant;
+    value?: T;
+    disabled?: boolean;
+    loading?: boolean;
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
+};
+
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
 export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps_2, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
@@ -1731,6 +1989,18 @@ export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantPro
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
+
+export declare const F0Link: ForwardRefExoticComponent<Omit<ActionLinkProps, "href" | "variant"> & {
+variant?: ActionLinkVariant;
+stopPropagation?: boolean;
+href?: string;
+} & RefAttributes<HTMLAnchorElement>>;
+
+export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
+    variant?: ActionLinkVariant;
+    stopPropagation?: boolean;
+    href?: string;
+};
 
 export declare const F0Provider: React.FC<{
     children: React.ReactNode;
@@ -2250,32 +2520,17 @@ export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBas
 lineType?: "natural" | "linear";
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-export declare const Link: ForwardRefExoticComponent<Omit<LinkProps_3 & RefAttributes<HTMLAnchorElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
-
 declare type LinkContextValue = {
     currentPath?: string;
-    component?: (props: LinkProps_2, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element;
+    component?: (props: LinkProps, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element;
 };
 
-export declare interface LinkProps extends LinkProps_2, VariantProps<typeof linkVariants>, DataAttributes {
-    stopPropagation?: boolean;
-}
-
-declare type LinkProps_2 = AnchorHTMLAttributes<HTMLAnchorElement> & {
+declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     exactMatch?: boolean;
     disabled?: boolean;
 };
 
-declare const linkVariants: (props?: ({
-    variant?: "link" | "unstyled" | undefined;
-    disabled?: boolean | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+export declare const linkVariants: readonly ["link", "unstyled", "mention"];
 
 /**
  * Group List: Renders the list for a group
@@ -2403,9 +2658,11 @@ declare type NavigationFiltersState<Definition extends Record<string, Navigation
  */
 declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition ? DateValue : T extends undefined ? undefined : never;
 
-declare type NavigationItem = Pick<LinkProps_2, "href" | "exactMatch" | "onClick"> & {
+declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes;
+} & DataAttributes_2;
+
+declare type NavTarget = HTMLAttributeAnchorTarget;
 
 /**
  * Utility type to extract all possible paths from nested object.
@@ -2575,20 +2832,20 @@ declare type PrevNextDateNavigation = {
     next: DateRange | false;
 };
 
-declare type PrimaryActionsDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */
-declare type PrimaryActionsDefinitionFn = () => PrimaryActionsDefinition | PrimaryActionsDefinition[] | undefined;
+declare type PrimaryActionsDefinitionFn = () => PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
 export declare const PrivacyModeProvider: React_2.FC<{
     initiallyEnabled?: boolean;
     children: ReactNode;
 }>;
 
-declare const privateProps: readonly ["append", "appendButton", "className"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
 
 declare const privateProps_2: readonly ["forceVerticalMetadata", "disableOverlayLink"];
 
@@ -2813,19 +3070,26 @@ declare type SearchOptions = {
     debounceTime?: number;
 };
 
-declare type SecondaryActionsDefinition = {
-    expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>;
-    actions: () => Array<SecondaryActionsItemDefinition> | undefined;
-} | (() => Array<SecondaryActionsItemDefinition> | undefined);
+declare type SecondaryActionGroup = {
+    label?: string;
+    items: SecondaryActionItem[];
+};
 
 /**
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-declare type SecondaryActionsItemDefinition = DropdownItem & {
+declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
 };
+
+declare type SecondaryActionsDefinition = {
+    expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>;
+    actions: () => SecondaryActionsItems | undefined;
+} | (() => SecondaryActionsItems | undefined);
+
+declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
 
 /**
  * Represents a collection of selected items.
@@ -2863,8 +3127,6 @@ export declare type SelectedItemsState = {
  * Response structure for non-paginated data
  */
 declare type SimpleResult<T> = T[];
-
-declare const sizes: readonly ["sm", "md", "lg"];
 
 /**
  * Type helper to extract keys from a SortingsDefinition
@@ -3167,7 +3429,11 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
-export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
+export declare type TranslationsType = TranslationShape<typeof defaultTranslations> & AiChatTranslations;
 
 export declare const TwoColumnLayout: ForwardRefExoticComponent<Omit<TwoColumnLayoutProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
@@ -3196,7 +3462,7 @@ secondaryAction?: DefaultAction | PromoteAction;
 
 export declare function UpsellingButton({ label, showIcon, onRequest, showConfirmation, loading: externalLoading, errorMessage, successMessage, loadingState, nextSteps, closeLabel, variant, onModalStateChange, portalContainer, ...props }: UpsellingButtonProps): JSX_2.Element;
 
-export declare interface UpsellingButtonProps extends Omit<ButtonProps, "icon"> {
+export declare interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"> {
     variant?: "promote" | "outlinePromote";
     /**
      * The text to be displayed in the button
@@ -3250,8 +3516,8 @@ declare type UpsellingPopoverProps = {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     label: string;
-    variant: ButtonProps["variant"];
-    size?: ButtonProps["size"];
+    variant: F0ButtonProps["variant"];
+    size?: F0ButtonProps["size"];
     side?: PopoverContentProps["side"];
     align?: PopoverContentProps["align"];
     icon?: IconType;
@@ -3521,8 +3787,6 @@ declare const valueDisplayRenderers: {
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
 export declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
-
-declare const variants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
 export declare const VerticalBarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
