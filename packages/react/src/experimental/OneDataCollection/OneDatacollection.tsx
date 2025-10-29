@@ -2,25 +2,28 @@ import { useLayout } from "@/components/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { Skeleton } from "@/ui/skeleton"
 import { OneFilterPicker } from "../../components/OneFilterPicker"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
-import { OneActionBar } from "../OneActionBar"
-import { getSecondaryActions, MAX_EXPANDED_ACTIONS } from "./actions"
+import { ActionBarItem, OneActionBar } from "../OneActionBar"
+import {
+  filterActions,
+  getPrimaryActions,
+  getSecondaryActions,
+  MAX_EXPANDED_ACTIONS,
+} from "./actions"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
+import { Search } from "./components/Search"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { ItemActionsDefinition } from "./item-actions"
-import { navigationFilterTypes } from "./navigationFilters"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
-import { Search } from "./search"
 import { Settings } from "./Settings"
 import { SummariesDefinition } from "./summary"
 import type {
@@ -41,7 +44,9 @@ import {
   OnSelectItemsCallback,
   RecordType,
 } from "@/hooks/datasource"
-import React from "react"
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
+import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
+import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
   DataCollectionStatusComplete,
   DataCollectionStorageFeaturesDefinition,
@@ -179,10 +184,7 @@ const OneDataCollectionComp = <
     primaryActions,
     secondaryActions,
     // Summary
-    totalItemSummary = (totalItems: number | undefined) =>
-      totalItems !== undefined
-        ? `${totalItems} ${i18n.collections.itemsCount}`
-        : null,
+    totalItemSummary,
     currentGrouping,
     setCurrentGrouping,
     grouping,
@@ -190,6 +192,7 @@ const OneDataCollectionComp = <
     setCurrentSortings,
     sortings,
   } = source
+
   const [currentVisualization, setCurrentVisualization] = useState(0)
 
   const defaultSortings = useRef(currentSortings)
@@ -205,13 +208,13 @@ const OneDataCollectionComp = <
   /**
    * Data collection actions
    */
-  const primaryActionItem = useMemo(
-    () => primaryActions && primaryActions(),
+  const primaryActionItems = useMemo(
+    () => getPrimaryActions(primaryActions),
     [primaryActions]
   )
 
   const allSecondaryActions = useMemo(
-    () => getSecondaryActions(secondaryActions),
+    () => filterActions(getSecondaryActions(secondaryActions)),
     [secondaryActions]
   )
 
@@ -227,18 +230,27 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
+  // Extracts the expandedSecondaryActions from the first group
   const secondaryActionsItems = useMemo(
-    () => allSecondaryActions.slice(0, expandedSecondaryActions) || [],
+    () =>
+      allSecondaryActions[0]?.items.slice(0, expandedSecondaryActions) || [],
     [allSecondaryActions, expandedSecondaryActions]
   )
 
-  const otherActionsItems = useMemo(
-    () => allSecondaryActions.slice(expandedSecondaryActions),
-    [allSecondaryActions, expandedSecondaryActions]
-  )
+  // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
+  const otherActionsItems = useMemo(() => {
+    return [
+      {
+        ...allSecondaryActions[0],
+        items:
+          allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
+      },
+      ...allSecondaryActions.slice(1),
+    ].filter((group) => group.items.length > 0)
+  }, [allSecondaryActions, expandedSecondaryActions])
 
   const hasCollectionsActions =
-    !!primaryActionItem || allSecondaryActions?.length > 0
+    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
 
   /**
    * Clear selected items function
@@ -255,20 +267,73 @@ const OneDataCollectionComp = <
   /**
    * Bulk actions
    */
+  type MappedBulkAction =
+    | (BulkActionDefinition & { onClick: () => void })
+    | { type: "separator" }
+
   const [bulkActions, setBulkActions] = useState<
     | {
-        primary?: BulkActionDefinition[]
-        secondary?: BulkActionDefinition[]
+        primary?: MappedBulkAction[]
+        secondary?: MappedBulkAction[]
       }
     | { warningMessage: string }
     | undefined
   >(undefined)
+
+  const groupItems = useCallback((items: MappedBulkAction[] | undefined) => {
+    if (!items) {
+      return []
+    }
+    const groups = []
+    let currentGroupItems: ActionBarItem[] = []
+    for (const item of items) {
+      if ("type" in item && item.type === "separator") {
+        groups.push({ items: currentGroupItems })
+        currentGroupItems = []
+      } else {
+        currentGroupItems.push(item as ActionBarItem)
+      }
+    }
+    if (currentGroupItems.length > 0) {
+      groups.push({ items: currentGroupItems })
+    }
+    return groups
+  }, [])
+  /**
+   * Creates the bulk actions groups to avoid change the datacollection interface
+   */
+  const bulkActionsGroups = useMemo(() => {
+    if (!bulkActions) {
+      return undefined
+    }
+    if ("warningMessage" in bulkActions) {
+      return {
+        warningMessage: bulkActions.warningMessage,
+      }
+    }
+    return {
+      primary: groupItems(bulkActions.primary ?? []),
+      secondary: (bulkActions?.secondary ?? []).filter(
+        (action) => !("type" in action && action.type === "separator")
+      ) as ActionBarItem[],
+    }
+  }, [bulkActions, groupItems])
 
   const [showActionBar, setShowActionBar] = useState(false)
 
   const [selectedItemsCount, setSelectedItemsCount] = useState(0)
 
   const i18n = useI18n()
+
+  const totalItemSummaryFn = useMemo(() => {
+    if (totalItemSummary === true) {
+      return (totalItems: number | undefined) =>
+        totalItems !== undefined
+          ? `${totalItems} ${i18n.collections.itemsCount}`
+          : null
+    }
+    return totalItemSummary || undefined
+  }, [totalItemSummary, i18n])
 
   const onSelectItemsLocal: OnSelectItemsCallback<R, Filters> = (
     selectedItems,
@@ -301,15 +366,23 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
-    const mapBulkActions = (action: BulkActionDefinition) => ({
-      ...action,
-      onClick: () => {
-        onBulkAction?.(action.id, selectedItems, clearSelectedItems)
-        if (!action.keepSelection) {
-          clearSelectedItems()
-        }
-      },
-    })
+    const mapBulkActions = (
+      action: BulkActionDefinition | { type: "separator" }
+    ): MappedBulkAction => {
+      if ("type" in action && action.type === "separator") {
+        return { type: "separator" as const }
+      }
+      const bulkAction = action as BulkActionDefinition
+      return {
+        ...bulkAction,
+        onClick: () => {
+          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems)
+          if (!bulkAction.keepSelection) {
+            clearSelectedItems()
+          }
+        },
+      }
+    }
 
     if (bulkActions) {
       if ("primary" in bulkActions) {
@@ -380,6 +453,11 @@ const OneDataCollectionComp = <
     )
   }
 
+  const showPresetsLoading = useDebounceBoolean({
+    value: !!presetsLoading,
+    delay: 100,
+  })
+
   useEffect(() => {
     setEmptyStateType(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional we should remove the empty state when the filters, search, navigation filters change
@@ -390,8 +468,16 @@ const OneDataCollectionComp = <
     source.dataAdapter,
   ])
 
+  const showTotalItemSummary = useMemo(() => {
+    return totalItemSummaryFn !== undefined
+  }, [totalItemSummaryFn])
+
   const totalItemSummaryResult =
-    totalItems !== undefined ? totalItemSummary?.(totalItems) : null
+    totalItemSummaryFn === undefined
+      ? null
+      : totalItems !== undefined
+        ? totalItemSummaryFn(totalItems)
+        : null
 
   /**
    * Settings
@@ -433,9 +519,10 @@ const OneDataCollectionComp = <
     }
   )
 
-  const isReady = useMemo(() => {
-    return isInitialLoading && storageReady
-  }, [isInitialLoading, storageReady])
+  const showTotalItemSummarySkeleton = useDebounceBoolean({
+    value: isInitialLoading && storageReady,
+    delay: 100,
+  })
 
   /** State */
   useEffect(() => {
@@ -460,6 +547,61 @@ const OneDataCollectionComp = <
   ])
   /************************/
 
+  /** Toolbars */
+  const shouldShowSettings = useMemo(() => {
+    const groupByOptions = grouping
+      ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
+      : 0
+    return (
+      (visualizations && visualizations.length > 1) ||
+      (groupByOptions > 0 && !grouping?.hideSelector) ||
+      (sortings && Object.keys(sortings).length > 0)
+    )
+  }, [visualizations, grouping, sortings])
+
+  const bottomRightHasItems = useMemo(() => {
+    return (
+      elementsRightActions ||
+      hasCollectionsActions ||
+      shouldShowSettings ||
+      (search && search.enabled)
+    )
+  }, [elementsRightActions, hasCollectionsActions, shouldShowSettings, search])
+
+  const totalItemSummaryPosition = useMemo(() => {
+    if (!showTotalItemSummary) {
+      return false
+    }
+    return filters ? "top" : "bottom"
+  }, [filters, showTotalItemSummary])
+
+  const navigationFiltersPosition = useMemo(() => {
+    if (!navigationFilters) {
+      return false
+    }
+    return bottomRightHasItems ? "top" : "bottom"
+  }, [navigationFilters, bottomRightHasItems])
+
+  const showTopToolbar = useMemo(() => {
+    return (
+      totalItemSummaryPosition === "top" || navigationFiltersPosition === "top"
+    )
+  }, [totalItemSummaryPosition, navigationFiltersPosition])
+
+  const showBottomToolbar = useMemo(() => {
+    return (
+      filters ||
+      bottomRightHasItems ||
+      navigationFiltersPosition === "bottom" ||
+      totalItemSummaryPosition === "bottom"
+    )
+  }, [
+    filters,
+    bottomRightHasItems,
+    navigationFiltersPosition,
+    totalItemSummaryPosition,
+  ])
+
   return (
     <div
       className={cn(
@@ -471,89 +613,94 @@ const OneDataCollectionComp = <
         width: layout === "standard" ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout
       }}
     >
-      {(totalItemSummary !== undefined || navigationFilters) && (
+      {showTopToolbar && (
         <div className="border-f1-border-primary flex gap-4 px-4">
-          <div className="flex flex-1 flex-shrink gap-4 text-lg font-semibold">
-            {isReady ? (
-              <Skeleton className="h-5 w-24" />
-            ) : (
-              <div className="flex h-5 items-center">
-                {totalItemSummaryResult}
-              </div>
-            )}
-          </div>
+          {totalItemSummaryPosition === "top" && (
+            <TotalItemsSummary
+              isReady={!showTotalItemSummarySkeleton}
+              totalItemSummaryResult={totalItemSummaryResult}
+            />
+          )}
           <div className="flex flex-1 flex-shrink justify-end">
-            {navigationFilters &&
-              Object.entries(navigationFilters).map(([key, filter]) => {
-                const filterDef = navigationFilterTypes[filter.type]
-                return (
-                  <React.Fragment key={key}>
-                    {filterDef.render({
-                      filter: filter,
-                      value: currentNavigationFilters[key]!,
-                      onChange: (value) => {
-                        setCurrentNavigationFilters({
-                          ...currentNavigationFilters,
-                          [key]: value,
-                        })
-                      },
-                    })}
-                  </React.Fragment>
-                )
-              })}
+            {navigationFiltersPosition === "top" && (
+              <NavigationFiltersComponent
+                navigationFilters={navigationFilters}
+                currentNavigationFilters={currentNavigationFilters}
+                onChangeNavigationFilters={setCurrentNavigationFilters}
+              />
+            )}
           </div>
         </div>
       )}
-      <div
-        className={cn("flex flex-col gap-4 px-4", fullHeight && "max-h-full")}
-      >
-        <OneFilterPicker
-          filters={filters}
-          value={currentFilters}
-          presets={presets}
-          presetsLoading={presetsLoading}
-          onChange={(value) => setCurrentFilters(value)}
+      {showBottomToolbar && (
+        <div
+          className={cn("flex flex-row gap-4 px-4", fullHeight && "max-h-full")}
         >
-          {isLoading && (
-            <motion.div
-              className="flex h-8 w-8 items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{
-                opacity: 0,
-              }}
+          {totalItemSummaryPosition === "bottom" && (
+            <TotalItemsSummary
+              isReady={!showTotalItemSummarySkeleton}
+              totalItemSummaryResult={totalItemSummaryResult}
+            />
+          )}
+          <div className="flex-1">
+            <OneFilterPicker
+              filters={filters}
+              value={currentFilters}
+              presets={presets}
+              presetsLoading={showPresetsLoading}
+              onChange={(value) => setCurrentFilters(value)}
             >
-              <Spinner size="small" />
-            </motion.div>
-          )}
-          {search && (
-            <Search onChange={setCurrentSearch} value={currentSearch} />
-          )}
-          <Settings
-            visualizations={visualizations}
-            currentVisualization={currentVisualization}
-            onVisualizationChange={setCurrentVisualization}
-            grouping={grouping}
-            currentGrouping={currentGrouping}
-            onGroupingChange={setCurrentGrouping}
-            sortings={sortings}
-            currentSortings={currentSortings}
-            onSortingsChange={setCurrentSortings}
-          />
-          {hasCollectionsActions && (
-            <>
-              {elementsRightActions && (
-                <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+              {isLoading && (
+                <motion.div
+                  className="flex h-8 w-8 items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{
+                    opacity: 0,
+                  }}
+                >
+                  <Spinner size="small" />
+                </motion.div>
               )}
-              <CollectionActions
-                primaryActions={primaryActionItem}
-                secondaryActions={secondaryActionsItems}
-                otherActions={otherActionsItems}
-              />
-            </>
-          )}
-        </OneFilterPicker>
-      </div>
+              {search && (
+                <Search onChange={setCurrentSearch} value={currentSearch} />
+              )}
+              {shouldShowSettings && (
+                <Settings
+                  visualizations={visualizations}
+                  currentVisualization={currentVisualization}
+                  onVisualizationChange={setCurrentVisualization}
+                  grouping={grouping}
+                  currentGrouping={currentGrouping}
+                  onGroupingChange={setCurrentGrouping}
+                  sortings={sortings}
+                  currentSortings={currentSortings}
+                  onSortingsChange={setCurrentSortings}
+                />
+              )}
+              {hasCollectionsActions && (
+                <>
+                  {elementsRightActions && (
+                    <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+                  )}
+                  <CollectionActions
+                    primaryActions={primaryActionItems}
+                    secondaryActions={secondaryActionsItems}
+                    otherActions={otherActionsItems}
+                  />
+                </>
+              )}
+              {navigationFiltersPosition === "bottom" && (
+                <NavigationFiltersComponent
+                  navigationFilters={navigationFilters}
+                  currentNavigationFilters={currentNavigationFilters}
+                  onChangeNavigationFilters={setCurrentNavigationFilters}
+                />
+              )}
+            </OneFilterPicker>
+          </div>
+        </div>
+      )}
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
       <div
         className={cn(
@@ -585,10 +732,14 @@ const OneDataCollectionComp = <
               isOpen={showActionBar}
               selectedNumber={selectedItemsCount}
               primaryActions={
-                "primary" in bulkActions ? bulkActions?.primary : []
+                bulkActionsGroups && "primary" in bulkActionsGroups
+                  ? bulkActionsGroups.primary
+                  : []
               }
               secondaryActions={
-                "secondary" in bulkActions ? bulkActions?.secondary : []
+                bulkActionsGroups && "secondary" in bulkActionsGroups
+                  ? bulkActionsGroups.secondary
+                  : []
               }
               warningMessage={
                 "warningMessage" in bulkActions

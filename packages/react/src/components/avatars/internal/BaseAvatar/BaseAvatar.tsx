@@ -1,4 +1,5 @@
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
+import { F0Icon, F0IconProps } from "@/components/F0Icon"
 import { Badge } from "@/experimental/Information/Badge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
@@ -19,6 +20,15 @@ import {
 
 const DEFAULT_SIZE = "md"
 
+const iconSize: Record<AvatarSize, F0IconProps["size"]> = {
+  xs: "xs",
+  sm: "xs",
+  md: "md",
+  lg: "md",
+  xl: "lg",
+  "2xl": "lg",
+}
+
 export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
   (
     {
@@ -31,6 +41,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       "aria-labelledby": ariaLabelledby,
       badge,
       flag,
+      icon,
     },
     ref
   ) => {
@@ -117,31 +128,41 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
               translate="no"
               data-a11y-color-contrast-ignore
               className={
-                src || flag
-                  ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
-                  : ""
+                icon
+                  ? "bg-f1-background-secondary"
+                  : src || flag
+                    ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
+                    : ""
               }
             >
-              {!flag ? (
-                <AvatarImage src={src} alt={initials} />
+              {icon ? (
+                <F0Icon
+                  icon={icon.icon}
+                  color={icon.color}
+                  size={iconSize[mappedSize]}
+                />
               ) : (
-                <span className="absolute inset-0">{flag}</span>
+                <>
+                  {!flag ? (
+                    <AvatarImage src={src} alt={initials} />
+                  ) : (
+                    <span className="absolute inset-0">{flag}</span>
+                  )}
+                  <AvatarFallback
+                    data-a11y-color-contrast-ignore
+                    className="select-none"
+                  >
+                    {initials}
+                  </AvatarFallback>
+                </>
               )}
-              <AvatarFallback
-                data-a11y-color-contrast-ignore
-                className="select-none"
-              >
-                {initials}
-              </AvatarFallback>
             </AvatarComponent>
           </div>
 
           {badge && (
             <div className="absolute -bottom-0.5 -right-0.5">
               {badge.tooltip ? (
-                <Tooltip description={badge.tooltip}>
-                  <div className="cursor-help">{badgeContent}</div>
-                </Tooltip>
+                <Tooltip description={badge.tooltip}>{badgeContent}</Tooltip>
               ) : (
                 badgeContent
               )}

@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.33.0](https://github.com/factorialco/f0/compare/f0-core-v1.32.0...f0-core-v1.33.0) (2025-10-24)
+
+
+### Features
+
+* **Icons:** add `Shield` component ([#2880](https://github.com/factorialco/f0/issues/2880)) ([81411d3](https://github.com/factorialco/f0/commit/81411d3628fed2e195212c0ac020fe8672ada171))
+
+## [1.32.0](https://github.com/factorialco/f0/compare/f0-core-v1.31.0...f0-core-v1.32.0) (2025-10-20)
+
+
+### Features
+
+* **AvatarPerson:** Terminated employee ([#2812](https://github.com/factorialco/f0/issues/2812)) ([0b9d1c6](https://github.com/factorialco/f0/commit/0b9d1c6c4f3a812dbb71d4184e350c43300a101e))
+
+## [1.31.0](https://github.com/factorialco/f0/compare/f0-core-v1.30.0...f0-core-v1.31.0) (2025-10-13)
+
+
+### Features
+
+* inputfield detect autofill to disable placeholder ([#2789](https://github.com/factorialco/f0/issues/2789)) ([4605c18](https://github.com/factorialco/f0/commit/4605c18dfd26d23ccf004203f50bbde002287097))
+
+## [1.30.0](https://github.com/factorialco/f0/compare/f0-core-v1.29.0...f0-core-v1.30.0) (2025-10-10)
+
+
+### Features
+
+* **Charts:** color system ([#2765](https://github.com/factorialco/f0/issues/2765)) ([191d8bb](https://github.com/factorialco/f0/commit/191d8bb2d1cb01975446759700764ccef7a25575))
+
 ## [1.29.0](https://github.com/factorialco/f0/compare/f0-core-v1.28.0...f0-core-v1.29.0) (2025-09-30)
 
 

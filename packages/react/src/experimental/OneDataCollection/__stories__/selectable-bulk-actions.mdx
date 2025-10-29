@@ -8,7 +8,7 @@ import {
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as DataCollectionStories from "./index.stories"
-import * as ActionDataCollectionStories from "./collection-actions.stories"
+import * as ActionDataCollectionStories from "./actions/collection-actions.stories"
 
 <Meta title="Data collection/Selectable and bulk actions" />
 
@@ -155,6 +155,24 @@ This works in the same way for the groups.
 />
 
 ## Bulk actions
+
+Bulk Actions allow users to select multiple items in a table and perform an
+action on all of them simultaneously. This functionality significantly improves
+user efficiency when working with large data sets, eliminating the need to
+perform the same action repeatedly on individual items.
+
+It includes several key elements:
+
+1. **Main checkbox**: Located in the table header, it allows selecting or
+   deselecting all visible items.
+2. **Individual checkboxes**: Positioned in the first column of each row, they
+   allow selecting specific items.
+3. **Floating toolbar**: A dark bar that appears at the bottom of the screen
+   when items are selected. It contains:
+   - **Counter**: Displays the number of selected items.
+   - **Available actions**: Buttons or dropdown menu representing the actions
+     that can be performed on the selected items.
+   - **Cancel button**: Allows deselecting all items and hiding the toolbar.
 
 The bulk actions allows you to define a set of actions that will be available
 when the user has selected items.

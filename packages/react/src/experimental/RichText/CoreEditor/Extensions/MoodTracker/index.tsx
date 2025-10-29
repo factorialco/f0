@@ -1,9 +1,9 @@
-import { Button } from "@/components/Actions/Button"
 import {
   Pulse,
   pulseIcon,
   pulseIconColor,
 } from "@/components/avatars/F0AvatarPulse"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
@@ -118,7 +118,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
 
           <div className="flex flex-row items-center gap-1">
             {/* Toggle button */}
-            <Button
+            <F0Button
               onClick={handleToggleCollapse}
               variant="outline"
               hideLabel

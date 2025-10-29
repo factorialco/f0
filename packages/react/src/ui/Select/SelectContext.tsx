@@ -1,15 +1,16 @@
 import { createContext, useContext } from "react"
 
-type SelectContextType = {
-  value?: string
+export type SelectContextType = {
   open?: boolean
   asList?: boolean
+  multiple?: boolean
+  value: string[] | string
 }
-
 export const SelectContext = createContext<SelectContextType>({
-  value: undefined,
+  value: "",
   open: false,
   asList: false,
+  multiple: false,
 })
 
 export const useSelectContext = () => useContext(SelectContext)

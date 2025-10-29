@@ -3,7 +3,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-import * as SelectPrimitive from "@radix-ui/react-select"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import {
   ComponentPropsWithoutRef,
@@ -18,6 +17,7 @@ import {
 } from "react"
 import { VirtualItem } from "../index"
 import { SelectContext } from "../SelectContext"
+import * as SelectPrimitive from "./radix-ui"
 
 const VIEWBOX_VERTICAL_PADDING = 8
 
@@ -31,18 +31,24 @@ type SelectItemProps = ComponentPropsWithoutRef<
   top?: ReactNode
   bottom?: ReactNode
   emptyMessage?: string
-  value?: string
   showLoadingIndicator?: boolean
-}
+} & (
+    | {
+        value?: string[]
+        multiple: true
+      }
+    | {
+        value?: string
+        multiple?: false
+      }
+  )
 
-type BaseSelectContentProps = Omit<SelectItemProps, "children">
-
-type SelectContentWithItemsProps = BaseSelectContentProps & {
+type SelectContentWithItemsProps = Omit<SelectItemProps, "children"> & {
   items: VirtualItem[]
   children?: never
 }
 
-type SelectContentWithChildrenProps = SelectItemProps & {
+type SelectContentWithChildrenProps = Omit<SelectItemProps, "children"> & {
   items?: never
   children: ReactNode
 }
@@ -56,9 +62,10 @@ type SelectContentProps = (
   onScrollTop?: () => void
   isLoadingMore?: boolean
   isLoading?: boolean
+  forceMinHeight?: boolean
   scrollMargin?: number
+  taller?: boolean
 }
-
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
   SelectContentProps
@@ -69,12 +76,14 @@ const SelectContent = forwardRef<
       className,
       children,
       position = "popper",
+      taller = false,
       emptyMessage,
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
       isLoading,
       scrollMargin,
+      forceMinHeight,
       showLoadingIndicator,
       ...props
     },
@@ -103,9 +112,23 @@ const SelectContent = forwardRef<
     // Get the value and the open status from the select context
     const { value, open, asList } = useContext(SelectContext)
 
+    const valueArray = useMemo(
+      () =>
+        new Set(
+          (Array.isArray(value) ? value : [value]).filter(
+            (item) => item !== undefined
+          )
+        ),
+      [value]
+    )
+
     const positionIndex = useMemo(() => {
-      return (items && items.findIndex((item) => item.value === value)) || 0
-    }, [items, value])
+      return (
+        items?.findIndex(
+          (item) => item.value !== undefined && valueArray.has(item.value)
+        ) || 0
+      )
+    }, [items, valueArray])
 
     const virtualizer = useVirtualizer({
       count: items?.length || 0,
@@ -140,7 +163,8 @@ const SelectContent = forwardRef<
       <div
         className={cn(
           !asList && "transition-opacity delay-100",
-          asList || virtualReady ? "" : "opacity-0"
+          asList || virtualReady ? "" : "opacity-0",
+          !asList && forceMinHeight ? "min-h-[450px]" : ""
         )}
         style={{
           height: virtualizer.getTotalSize() + VIEWBOX_VERTICAL_PADDING,
@@ -185,7 +209,7 @@ const SelectContent = forwardRef<
         asChild={asList}
         ref={ref}
         className={cn(
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden text-f1-foreground",
+          "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
           !asList &&
             "rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-md data-[state=closed]:fade-out-0 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:zoom-out-95 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[side=bottom]:slide-in-from-top-2",
           !asList &&
@@ -226,7 +250,11 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList ? "max-h-full" : "max-h-[300px]",
+                asList
+                  ? "max-h-full"
+                  : taller
+                    ? "max-h-[440px]"
+                    : "max-h-[300px]",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}
@@ -258,7 +286,21 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>
+      <SelectPrimitive.Portal>
+        <>
+          {/* Overlay to prevent clicks on the content */}
+          {open && (
+            <div
+              className="pointer-events-auto fixed inset-0 z-40"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            ></div>
+          )}
+          {content}
+        </>
+      </SelectPrimitive.Portal>
     )
   }
 )

@@ -7,8 +7,10 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react"
+import { WelcomeScreenSuggestion } from "../components/WelcomeScreen"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -17,8 +19,15 @@ export interface AiChatState {
   enabled: boolean
   agent?: string
   initialMessage?: string | string[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  onThumbsUp?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  onThumbsDown?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
 }
 
 type AiChatProviderReturnValue = {
@@ -37,12 +46,35 @@ type AiChatProviderReturnValue = {
    */
   setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
   autoClearMinutes: number | null
+
+  /**
+   * The initial message to display in the chat
+   */
   initialMessage?: string | string[]
   setInitialMessage: React.Dispatch<
     React.SetStateAction<string | string[] | undefined>
   >
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions: WelcomeScreenSuggestion[]
+  setWelcomeScreenSuggestions: React.Dispatch<
+    React.SetStateAction<WelcomeScreenSuggestion[]>
+  >
+  onThumbsUp?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  onThumbsDown?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  /**
+   * Clear/reset the chat conversation
+   */
+  clear: () => void
+  /**
+   * Internal function to set the clear function from CopilotKit
+   * @internal
+   */
+  setClearFunction: (clearFn: (() => void) | null) => void
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -52,6 +84,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   enabled,
   agent: initialAgent,
   initialMessage: initialInitialMessage,
+  welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   onThumbsDown,
   onThumbsUp,
   ...rest
@@ -61,6 +94,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(true)
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
+  const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
+    WelcomeScreenSuggestion[]
+  >(initialWelcomeScreenSuggestions)
 
   const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
     DEFAULT_MINUTES_TO_RESET
@@ -69,8 +105,21 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     string | string[] | undefined
   >(initialInitialMessage)
 
+  // Store the reset function from CopilotKit
+  const clearFunctionRef = useRef<(() => void) | null>(null)
+
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
+  }
+
+  const setClearFunction = (clearFn: (() => void) | null) => {
+    clearFunctionRef.current = clearFn
+  }
+
+  const clear = () => {
+    if (clearFunctionRef.current) {
+      clearFunctionRef.current()
+    }
   }
 
   useEffect(() => {
@@ -102,8 +151,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         autoClearMinutes: enabledInternal ? autoClearMinutes : null,
         initialMessage,
         setInitialMessage,
+        welcomeScreenSuggestions,
+        setWelcomeScreenSuggestions,
         onThumbsUp,
         onThumbsDown,
+        clear,
+        setClearFunction,
       }}
     >
       {children}
@@ -115,6 +168,7 @@ const noopFn = () => {}
 
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
+
   if (context === null) {
     return {
       enabled: false,
@@ -126,9 +180,13 @@ export function useAiChat(): AiChatProviderReturnValue {
       agent: undefined,
       tmp_setAgent: noopFn,
       setAutoClearMinutes: noopFn,
+      clear: noopFn,
+      setClearFunction: noopFn,
       autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,
+      welcomeScreenSuggestions: [],
+      setWelcomeScreenSuggestions: noopFn,
       onThumbsUp: noopFn,
       onThumbsDown: noopFn,
     }

@@ -1,0 +1,132 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks"
+import LinkTo from "@storybook/addon-links/react"
+import * as DataCollectionFiltersStories from "./filters.stories"
+
+<Meta title="Data collection/Filters" />
+
+# Data collection Filters
+
+## Introduction
+
+Filtering allows users to define custom filtering criteria by selecting options
+from various categories through the dropdown panel.
+
+### Filtering Panel
+
+It is activated by clicking on the funnel icon. Once activated, a panel is
+displayed with:
+
+- Filter categories (team, workplace, job title, etc.)
+- List of options within each category
+- A search field to quickly find specific options
+- Selection and action buttons.
+- Calendar
+  - Month and year selector with navigation arrows for browsing different time
+    periods
+  - Weekly view with day headers (Mo, Tu, We, Th, Fr, Sa, Su)
+  - Selectable days for choosing specific dates
+  - Date range selector with "from" and "to" fields
+  - Option to either select dates directly on the calendar or enter them
+    manually
+
+### Chips
+
+When a filter is applied, the system generates "chips" that:
+
+- Accumulate from left to right at the bottom of the presets and filtering
+  section
+- Show the user exactly which filters are active
+- Include the category name and the selected value
+- Include a close icon (X) that allows the user to remove that specific filter
+  with a single click
+- Remain active until the user explicitly removes them.
+
+### Presets
+
+Presets are predefined filter combinations. For example, if you have a
+department filter, you can create a preset to show only the Engineering team
+
+{/* prettier-ignore */}
+Filters related types are defined in the <LinkTo kind="Components/FilterPicker" story="Documentation">FiltersPicker
+documentation</LinkTo> component.
+
+## Setting Filters, presets and use them in the data source
+
+To enable filters in your data collection component, supply the filter attribute
+in the source prop, for the presets use the presets attribute, remember you need
+to define the filters first and apply a preset over an existing filter.
+
+Example:
+
+```tsx
+const filters: FiltersDefinition<typeof mockUsers> = {
+  department: {
+    type: "in",
+    label: "Department",
+    options: {
+      options: [
+        { value: "Engineering", label: "Engineering" },
+        { value: "Marketing", label: "Marketing" },
+        // …
+      ],
+    },
+  },
+  search: { type: "search", label: "Search" },
+  date: { type: "date", label: "Date" },
+} as const
+
+const presets: PresetsDefinition<typeof filters> = [
+  { label: "Engineering Only", filter: { department: ["Engineering"] } },
+  { label: "Product Team", filter: { department: ["Product"] } },
+]
+```
+
+```tsx
+<OneDataCollection
+  source={{
+    // ...
+    filters,
+    presets,
+    dataAdapter: {
+        fetchData: fetchData({ filters: newFilters }) {
+            //... your code to featch the data
+        }
+      },
+  }}
+/>
+```
+
+### Example
+
+<Canvas of={DataCollectionFiltersStories.PresetsExample} />
+
+### Reading Filter Values
+
+The `dataAdapter.fetchData` function receives the current filters as an
+argument, independently if the filter was set manually or by a preset.
+
+{/* prettier-ignore */}
+Check the component <LinkTo kind="Components/FiltersPicker" story="Documentation">FiltersPicker
+documentation</LinkTo> for more details about the filters types.
+
+### Search
+
+The search bar is a tool that facilitates locating data within the table. Its
+main function is to allow users to find specific information quickly and
+efficiently.
+
+- **Collapsible and expandable**: The search field is hidden when not in use and
+  expands when activated.
+- **Real-time search**: As the user types, the results are dynamically updated.
+- **Row filtering**: Only rows that match the search criteria are displayed,
+  hiding those that are not relevant.
+
+#### Examples
+
+**With sync search**
+
+<Canvas of={DataCollectionFiltersStories.WithSyncSearch} />
+
+**With async search**
+
+<Canvas of={DataCollectionFiltersStories.WithAsyncSearch} />

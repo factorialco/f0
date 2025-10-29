@@ -1,3 +1,8 @@
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import { EllipsisHorizontal } from "@/icons/app"
+import { Link } from "@/lib/linkHandler"
+import { cn } from "@/lib/utils.ts"
 import {
   Drawer,
   DrawerContent,
@@ -5,11 +10,6 @@ import {
   DrawerTrigger,
 } from "@/ui/drawer"
 import { useState } from "react"
-import { Button } from "../../../components/Actions/Button/index.tsx"
-import { F0Icon } from "../../../components/F0Icon/index.tsx"
-import { EllipsisHorizontal } from "../../../icons/app"
-import { Link } from "../../../lib/linkHandler"
-import { cn } from "../../../lib/utils.ts"
 import { DropdownItemContent } from "./DropdownItem"
 import {
   DropdownInternal,
@@ -54,12 +54,13 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         {children || (
-          <Button
+          <ButtonInternal
             label="Other actions"
             icon={EllipsisHorizontal}
             variant="outline"
             size="lg"
             pressed={open}
+            noTitle
           />
         )}
       </DrawerTrigger>

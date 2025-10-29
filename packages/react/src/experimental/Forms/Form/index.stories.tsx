@@ -1,10 +1,10 @@
+import { F0Button } from "@/components/F0Button"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Button } from "@/components/Actions/Button"
+import { F0Checkbox } from "@/components/F0Checkbox"
+import { Textarea } from "@/ui/textarea"
 import { UseFormReturn } from "react-hook-form"
 import { number, z } from "zod"
-import { F0Checkbox } from "../../../components/F0Checkbox"
-import { Textarea } from "../../../ui/textarea"
 import { AutoGrid } from "../../Utilities/Layout/AutoGrid"
 import { Input } from "../Fields/Input"
 import { NumberInput } from "../Fields/NumberInput"
@@ -591,7 +591,7 @@ export const NestedSchemas: Story = {
             </FormField>
 
             <div className="mt-3">
-              <Button
+              <F0Button
                 variant="neutral"
                 label="Add an item"
                 type="button"

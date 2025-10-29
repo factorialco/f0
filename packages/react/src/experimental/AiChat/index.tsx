@@ -2,6 +2,7 @@ import {
   CopilotKit,
   CopilotKitProps,
   useCopilotAction,
+  useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
@@ -9,6 +10,7 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
+import { useEffect } from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -17,17 +19,25 @@ import {
   ChatTextarea,
   ChatWindow,
   MessagesContainer,
+  SuggestionsList,
   UserMessage,
 } from "./components"
-import { isAiMessage } from "./messageTypes"
+import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
 export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
   initialMessage?: string | string[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  onThumbsUp?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  onThumbsDown?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -43,6 +53,7 @@ const AiChatProviderCmp = ({
   enabled = false,
   greeting,
   initialMessage,
+  welcomeScreenSuggestions,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -59,6 +70,7 @@ const AiChatProviderCmp = ({
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
+      welcomeScreenSuggestions={welcomeScreenSuggestions}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -73,13 +85,28 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
+      <ResetFunctionInjector />
       {children}
     </CopilotKit>
   )
 }
 
+const ResetFunctionInjector = () => {
+  const { setClearFunction } = useAiChat()
+  const { reset } = useCopilotChatInternal()
+
+  useEffect(() => {
+    setClearFunction(reset)
+    return () => {
+      setClearFunction(null)
+    }
+  }, [setClearFunction, reset])
+
+  return null
+}
+
 const AiChatCmp = () => {
-  const { enabled, open, setOpen, onThumbsUp, onThumbsDown } = useAiChat()
+  const { enabled, open, setOpen } = useAiChat()
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -117,16 +144,6 @@ const AiChatCmp = () => {
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      onThumbsUp={(message) => {
-        if (isAiMessage(message)) {
-          onThumbsUp?.(message)
-        }
-      }}
-      onThumbsDown={(message) => {
-        if (isAiMessage(message)) {
-          onThumbsDown?.(message)
-        }
-      }}
       Window={ChatWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
@@ -134,6 +151,7 @@ const AiChatCmp = () => {
       Input={ChatTextarea}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
+      RenderSuggestionsList={SuggestionsList}
     />
   )
 }

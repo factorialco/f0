@@ -1,9 +1,9 @@
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Toolbar, ToolbarLabels } from "@/experimental/RichText/CoreEditor"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { Handle, Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
@@ -266,25 +266,24 @@ const NotesTextEditorComponent = forwardRef<
             onNodeChange={handleNodeChange}
           >
             <div className="flex flex-row">
-              <Button
-                round
+              <ButtonInternal
+                compact
                 variant="ghost"
                 size="sm"
                 className="text-f1-foreground-tertiary"
                 onClick={handlePlusClick}
-              >
-                <F0Icon icon={Plus} size="sm" />
-              </Button>
-              <Button
-                round
-                variant="ghost"
-                size="sm"
-                className="text-f1-foreground-tertiary"
-                data-drag-handle
+                label="Add paragraph"
+                hideLabel
+                icon={Plus}
+              ></ButtonInternal>
+
+              <div
+                className="flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary"
                 draggable
+                data-drag-handle
               >
                 <F0Icon icon={Handle} size="xs" />
-              </Button>
+              </div>
             </div>
           </DragHandle>
 

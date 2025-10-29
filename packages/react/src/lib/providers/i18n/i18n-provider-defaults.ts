@@ -21,6 +21,7 @@ export const defaultTranslations = {
     add: "Add",
     edit: "Edit",
     save: "Save",
+    send: "Send",
     cancel: "Cancel",
     copy: "Copy",
     close: "Close",
@@ -38,6 +39,7 @@ export const defaultTranslations = {
     thumbsDown: "Dislike",
     other: "Other actions",
     toggle: "Toggle",
+    toggleDropdownMenu: "Toggle dropdown menu",
   },
   status: {
     selected: {
@@ -48,12 +50,13 @@ export const defaultTranslations = {
   filters: {
     label: "Filters",
     applyFilters: "Apply filters",
+    applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
   },
   toc: {
-    search: "Search",
+    search: "Search...",
   },
   collections: {
     sorting: {
@@ -139,6 +142,8 @@ export const defaultTranslations = {
         currentDate: "This week",
         label: "Week",
         long: "Week of {{day}} {{month}} {{year}}",
+        longSingular: "Week of {{date}}",
+        longPlural: "Weeks of {{date}}",
       },
       month: {
         currentDate: "This month",
@@ -187,10 +192,22 @@ export const defaultTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Write something here...",
+    inputPlaceholder: "Ask about time, people, or company info…",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
+    feedbackModal: {
+      positive: {
+        title: "What did you like about this response?",
+        label: "Your feedback helps us make Factorial AI better",
+        placeholder: "Share what worked well",
+      },
+      negative: {
+        title: "What could have been better?",
+        label: "Your feedback helps us improve future answers",
+        placeholder: "Share what didn’t work",
+      },
+    },
   },
   select: {
     noResults: "No results found",

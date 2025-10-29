@@ -30,6 +30,10 @@ export type InputProps = Omit<
     | "role"
     | "onClickContent"
     | "appendTag"
+    | "onFocus"
+    | "onBlur"
+    | "onClear"
+    | "readonly"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -48,6 +52,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       value,
       placeholder,
       clearable,
+      onClear,
       size,
       loading,
       isEmpty,
@@ -62,6 +67,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onClickContent,
       hideLabel,
       name,
+      onFocus,
+      onBlur,
+      onKeyDown,
+      readonly,
       ...props
     },
     ref
@@ -80,6 +89,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         loading={loading}
         clearable={clearable}
         className={className}
+        onClear={onClear}
         placeholder={placeholder || ""}
         size={size}
         role={role}
@@ -95,11 +105,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onClickContent={onClickContent}
         name={name}
         appendTag={appendTag}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        inputRef={ref}
+        readonly={readonly}
       >
         <input
           type={type}
-          ref={ref}
           {...props}
+          onKeyDown={onKeyDown}
           className={cn(
             "[&::-webkit-search-cancel-button]:hidden",
             "w-full shrink disabled:cursor-not-allowed"

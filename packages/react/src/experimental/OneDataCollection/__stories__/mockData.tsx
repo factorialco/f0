@@ -32,6 +32,7 @@ import {
   RecordType,
   SelectedItemsState,
 } from "@/hooks/datasource/types"
+import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
   Ai,
   Briefcase,
@@ -48,9 +49,9 @@ import {
 import { DEPARTMENTS_MOCK } from "@/mocks"
 import { OneDataCollection } from ".."
 import {
-  PrimaryActionsDefinition,
+  PrimaryActionsDefinitionFn,
+  SecondaryActionItem,
   SecondaryActionsDefinition,
-  SecondaryActionsItemDefinition,
 } from "../actions"
 import {
   DataCollectionStatusComplete,
@@ -313,10 +314,15 @@ export const getMockVisualizations = (options?: {
           id: "role4",
         },
         {
-          label: "Department 4",
-          render: (item) => item.department,
-          sorting: "department",
-          id: "department4",
+          label: "Long",
+          render: () => ({
+            type: "longText",
+            value: {
+              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+              lines: 4,
+            },
+          }),
+          id: "longText",
         },
         {
           label: "Permissions",
@@ -351,6 +357,7 @@ export const getMockVisualizations = (options?: {
           label: "Email",
           icon: Envelope,
           render: (item) => item.email,
+          hide: (item) => !item.email,
         },
         {
           label: "Role",
@@ -864,6 +871,7 @@ export const ExampleComponent = ({
    * Enable Apollo-like cache behavior for testing optimistic updates
    */
   enableCache = true,
+  hideFilters,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -895,17 +903,18 @@ export const ExampleComponent = ({
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
-  totalItemSummary?: (totalItems: number) => string
+  totalItemSummary?: true | ((totalItems: number) => string)
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
   paginationType?: PaginationType
-  primaryActions?: PrimaryActionsDefinition
+  primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
-  searchBar?: boolean
+  searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
   onStateChange?: (state: DataCollectionStatusComplete) => void
   enableCache?: boolean
+  hideFilters?: boolean
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -959,7 +968,7 @@ export const ExampleComponent = ({
 
   const dataSource = useDataCollectionSource(
     {
-      filters,
+      filters: hideFilters ? undefined : filters,
       navigationFilters,
       presets: usePresets ? filterPresets : undefined,
       sortings,
@@ -1004,13 +1013,16 @@ export const ExampleComponent = ({
       defaultSelectedItems,
       bulkActions,
       totalItemSummary,
-      search: searchBar
-        ? {
-            enabled: true,
-            sync: true,
-            debounceTime: 300,
-          }
-        : undefined,
+      search:
+        searchBar === true
+          ? {
+              enabled: true,
+              sync: true,
+              debounceTime: 300,
+            }
+          : typeof searchBar === "object"
+            ? searchBar
+            : undefined,
       dataAdapter: dataAdapterMemoized,
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
@@ -1447,7 +1459,7 @@ export function createDataAdapter<
 }
 
 // Example of a comprehensive actions definition with various types of actions
-export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
+export const buildSecondaryActions = (): SecondaryActionItem[] => {
   return [
     // Action with description
     {
@@ -1456,9 +1468,6 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       onClick: () => console.log(`Another user action`),
       description: "User actions",
     },
-
-    // Separator between action groups
-    { type: "separator" },
     {
       label: "Export",
       icon: Upload,

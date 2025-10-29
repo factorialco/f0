@@ -1,5 +1,6 @@
 import { TableCell as TableCellRoot } from "@/ui/table"
 import { AnimatePresence, motion } from "motion/react"
+import { useRef } from "react"
 import { Link } from "../../../lib/linkHandler"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
@@ -68,6 +69,8 @@ export function TableCell({
 
   const colWidth = getColWidth(width)
 
+  const linkRef = useRef<HTMLAnchorElement>(null)
+
   return (
     <TableCellRoot
       colSpan={colSpan}
@@ -79,6 +82,7 @@ export function TableCell({
         isSticky && "sticky z-10",
         isStickyRight &&
           "bg-f1-background before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:bg-f1-background before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-[''] group-hover:before:bg-f1-background-hover",
+        href && "cursor-pointer",
         className
       )}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
@@ -118,14 +122,20 @@ export function TableCell({
           className={
             (cn(width !== "auto" && "overflow-hidden"), "relative z-[1]")
           }
+          onClick={() => {
+            // Force the link to be clicked even if the element pointer-events: auto
+            linkRef.current?.click()
+            onClick?.()
+          }}
         >
           {children}
         </div>
       </div>
       {href && (
         <Link
+          ref={linkRef}
           href={href}
-          className="pointer-events-auto absolute inset-0 !z-0 block bg-[#00]"
+          className="pointer-events-auto absolute inset-0 !z-0 block"
           tabIndex={firstCell ? undefined : -1}
         >
           <span className="sr-only">{actions.view}</span>

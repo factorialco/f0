@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
@@ -127,7 +127,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
 
           <div className="flex flex-row items-center gap-1">
             {/* Toggle button */}
-            <Button
+            <F0Button
               onClick={handleToggleCollapse}
               variant="outline"
               hideLabel

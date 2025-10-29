@@ -3,7 +3,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -21,7 +20,7 @@ import {
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
   SelectContent,
@@ -103,6 +102,7 @@ export type SelectProps<T extends string, R = unknown> = {
 ) &
   Pick<
     InputFieldProps<T>,
+    | "required"
     | "loading"
     | "hideLabel"
     | "clearable"
@@ -117,14 +117,13 @@ export type SelectProps<T extends string, R = unknown> = {
     | "status"
     | "hint"
   >
-
 const SelectItem = <T extends string, R>({
   item,
 }: {
   item: SelectItemObject<T, R>
 }) => {
   return (
-    <SelectItemPrimitive value={item.value}>
+    <SelectItemPrimitive value={item.value} disabled={item.disabled}>
       <div className="flex w-full items-start gap-1.5">
         {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
         {item.icon && (
@@ -209,6 +208,7 @@ const SelectComponent = forwardRef(function Select<
     error,
     status,
     hint,
+    required,
     ...props
   }: SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -221,6 +221,13 @@ const SelectComponent = forwardRef(function Select<
   const [localValue, setLocalValue] = useState(
     value || props.defaultItem?.value
   )
+
+  useEffect(() => {
+    if (value !== localValue) {
+      setLocalValue(value || props.defaultItem?.value)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, props.defaultItem])
 
   const dataSource = useMemo(() => {
     if (
@@ -315,6 +322,11 @@ const SelectComponent = forwardRef(function Select<
       if (value === undefined) {
         return undefined
       }
+
+      if (value === props.defaultItem?.value) {
+        return props.defaultItem
+      }
+
       for (const option of data.records) {
         const mappedOption = optionMapper(option)
         if (
@@ -326,7 +338,7 @@ const SelectComponent = forwardRef(function Select<
       }
       return undefined
     },
-    [data.records, optionMapper]
+    [data.records, optionMapper, props.defaultItem]
   )
 
   useEffect(() => {
@@ -504,6 +516,7 @@ const SelectComponent = forwardRef(function Select<
             <InputField
               label={label}
               error={error}
+              required={required}
               status={status}
               hint={hint}
               icon={icon}
@@ -525,17 +538,15 @@ const SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={size}
-                  className={cn(size === "sm" ? "-mt-0.5" : "-mt-2")}
-                />
+                <Arrow open={openLocal} disabled={disabled} size={size} />
               }
             >
               <button
                 className="flex w-full items-center justify-between"
                 aria-label={label || placeholder}
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
               >
                 {selectedOption && <SelectValue item={selectedOption} />}
               </button>
@@ -545,6 +556,7 @@ const SelectComponent = forwardRef(function Select<
         {openLocal && (
           <SelectContent
             items={items}
+            taller={!!source?.filters}
             className={selectContentClassName}
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
@@ -558,14 +570,18 @@ const SelectComponent = forwardRef(function Select<
                 grouping={localSource.grouping}
                 currentGrouping={localSource.currentGrouping}
                 onGroupingChange={localSource.setCurrentGrouping}
+                filters={localSource.filters}
+                currentFilters={localSource.currentFilters}
+                onFiltersChange={localSource.setCurrentFilters}
               />
             }
+            forceMinHeight={!!localSource.filters}
             onScrollBottom={handleScrollBottom}
             scrollMargin={10}
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-          ></SelectContent>
+          />
         )}
       </SelectPrimitive>
     </>

@@ -1,8 +1,8 @@
-import { Button } from "@/ui/button"
+import { F0Icon } from "@/components/F0Icon"
+import { Cross } from "@/icons/app"
+import { cn } from "@/lib/utils"
+import { Action } from "@/ui/Action"
 import { useEffect, useRef } from "react"
-import { F0Icon } from "../../../../components/F0Icon"
-import { Cross } from "../../../../icons/app"
-import { cn } from "../../../../lib/utils"
 import { useSidebar } from "../../ApplicationFrame/FrameProvider"
 
 export type SidebarIconProps = {
@@ -75,14 +75,15 @@ export function SidebarIcon() {
   }, [prevSidebarState, sidebarState])
 
   return (
-    <Button
+    <Action
       variant="ghost"
       size="md"
-      round
       onClick={() => toggleSidebar()}
       className="group hover:bg-f1-background-hover"
       title="Close Sidebar"
       ref={buttonRef}
+      compact
+      aria-label="Close Sidebar"
     >
       <div className={cn("hidden", { flex: !isSmallScreen })}>
         <SidebarIconSvg isExpanded={sidebarState === "locked"} />
@@ -90,6 +91,6 @@ export function SidebarIcon() {
       <div className={cn("hidden", { flex: isSmallScreen })}>
         <F0Icon icon={Cross} size="md" />
       </div>
-    </Button>
+    </Action>
   )
 }
