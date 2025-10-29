@@ -1,19 +1,6 @@
 import { cn } from "@/lib/utils"
-import {
-  Children,
-  ReactElement,
-  ReactNode,
-  forwardRef,
-  isValidElement,
-} from "react"
-import {
-  PageLayoutBlock,
-  PageLayoutBlockComponent,
-  PageLayoutBlockProps,
-} from "./PageLayoutBlock"
-
-// Type for components that inherit from PageLayoutBlock
-export type PageLayoutBlockElement = ReactElement<PageLayoutBlockProps>
+import { ReactNode, forwardRef } from "react"
+import { validatePageLayoutChildren } from "./utils"
 
 export interface PageLayoutProps {
   children: ReactNode
@@ -22,36 +9,7 @@ export interface PageLayoutProps {
   variant?: "main-aside" | "aside-main"
 }
 
-// Utility to check if a component is a valid PageLayoutBlock
-const isPageLayoutBlockComponent = (
-  child: ReactNode
-): child is PageLayoutBlockElement => {
-  return (
-    isValidElement(child) &&
-    ((child.type as unknown as PageLayoutBlockComponent)
-      ?.__isPageLayoutBlock === true ||
-      child.type === PageLayoutBlock ||
-      (typeof child.type === "function" &&
-        (child.type as { displayName?: string }).displayName ===
-          "PageLayoutBlock"))
-  )
-}
-
-// Utility to validate all children are PageLayoutBlock components
-const validatePageLayoutChildren = (children: ReactNode): void => {
-  const childArray = Children.toArray(children)
-
-  for (const child of childArray) {
-    if (!isPageLayoutBlockComponent(child)) {
-      console.warn(
-        `PageLayout: Child component must inherit from PageLayoutBlock. Found:`,
-        child
-      )
-    }
-  }
-}
-
-const PageLayoutComponent = forwardRef<HTMLDivElement, PageLayoutProps>(
+const PageLayout = forwardRef<HTMLDivElement, PageLayoutProps>(
   function PageLayout(
     { children: mainContent, aside, header, variant = "main-aside" },
     ref
@@ -112,8 +70,4 @@ const PageLayoutComponent = forwardRef<HTMLDivElement, PageLayoutProps>(
   }
 )
 
-export const PageLayout = Object.assign(PageLayoutComponent, {
-  Block: PageLayoutBlock,
-  isBlockComponent: isPageLayoutBlockComponent,
-  validateChildren: validatePageLayoutChildren,
-})
+export { PageLayout }
