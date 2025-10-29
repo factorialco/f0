@@ -1,8 +1,11 @@
-import { Button, ButtonProps } from "@/components/Actions/Button"
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
+import { F0ButtonProps } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
+import { DataAttributes } from "@/global.types"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -18,7 +21,7 @@ import { DropdownItemContent } from "./DropdownItem"
 export type DropdownItemSeparator = { type: "separator" }
 export type DropdownItem = DropdownItemObject | DropdownItemSeparator
 
-export type DropdownItemObject = NavigationItem & {
+export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   type?: "item"
   onClick?: () => void
   icon?: IconType
@@ -30,7 +33,7 @@ export type DropdownItemObject = NavigationItem & {
 export type DropdownInternalProps = {
   items: DropdownItem[]
   icon?: IconType
-  size?: ButtonProps["size"]
+  size?: F0ButtonProps["size"]
   children?: React.ReactNode
   align?: "start" | "end"
   open?: boolean
@@ -85,6 +88,7 @@ export function DropdownInternal({
   onOpenChange: controlledOnOpenChange,
   ...rest
 }: DropdownInternalProps) {
+  const i18n = useI18n()
   const [internalOpen, setInternalOpen] = useState(false)
 
   const isControlled =
@@ -96,15 +100,17 @@ export function DropdownInternal({
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         {children || (
-          <Button
+          <ButtonInternal
             {...rest}
             hideLabel
             icon={icon}
             size={size}
-            label="..."
-            round
+            label={i18n.actions.toggleDropdownMenu}
             variant="outline"
             pressed={open}
+            compact
+            noAutoTooltip
+            noTitle
           />
         )}
       </DropdownMenuTrigger>

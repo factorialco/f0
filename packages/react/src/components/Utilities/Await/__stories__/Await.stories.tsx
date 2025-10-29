@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { Skeleton } from "@/ui/skeleton"
 import { ComponentProps, useCallback, useEffect, useState } from "react"
 import { Await } from "../index"
@@ -26,7 +26,7 @@ const ExampleComponent = (args: Story["args"]) => {
   return (
     <>
       <div style={{ marginBottom: "20px" }}>
-        <Button onClick={() => triggerPromise()} label="Trigger promise" />
+        <F0Button onClick={() => triggerPromise()} label="Trigger promise" />
       </div>
       <Await fallback={args.fallback} resolve={value}>
         {args.children}

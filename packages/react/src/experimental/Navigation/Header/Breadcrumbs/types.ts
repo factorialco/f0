@@ -20,15 +20,15 @@ type BreadcrumbBaseItemType = NavigationItem & {
   label: string
 }
 
-type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
+export type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
   loading: true
 }
 
-type BreadcrumbNavItemType = BreadcrumbBaseItemType & {
+export type BreadcrumbNavItemType = BreadcrumbBaseItemType & {
   module?: ModuleId
 }
 
-type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
+export type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
   type: "select"
   searchbox?: boolean
   externalSearch?: boolean

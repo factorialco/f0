@@ -103,7 +103,6 @@ export const BasicKanbanVisualization: Story = {
             icon: Pencil,
             onClick: () => console.log("Editing item"),
           },
-          { type: "separator" },
           {
             label: "Remove all items",
             icon: Delete,

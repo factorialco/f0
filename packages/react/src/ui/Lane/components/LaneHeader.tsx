@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
 import { Counter } from "@/experimental/Information/Counter"
 import { Plus } from "@/icons/app"
@@ -24,7 +24,7 @@ export const LaneHeader = ({
       <Counter size="md" type="default" value={count} />
       {showPrimary && (
         <div className="ml-auto flex items-center gap-1 pr-1">
-          <Button
+          <F0Button
             variant="ghost"
             size="sm"
             label="Add"

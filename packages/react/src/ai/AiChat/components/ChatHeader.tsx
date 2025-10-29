@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
 import { cn } from "@/lib/utils"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"

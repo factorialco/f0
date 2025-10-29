@@ -50,8 +50,8 @@ import { DEPARTMENTS_MOCK } from "@/mocks"
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
+  SecondaryActionItem,
   SecondaryActionsDefinition,
-  SecondaryActionsItemDefinition,
 } from "../actions"
 import {
   DataCollectionStatusComplete,
@@ -357,6 +357,7 @@ export const getMockVisualizations = (options?: {
           label: "Email",
           icon: Envelope,
           render: (item) => item.email,
+          hide: (item) => !item.email,
         },
         {
           label: "Role",
@@ -1458,7 +1459,7 @@ export function createDataAdapter<
 }
 
 // Example of a comprehensive actions definition with various types of actions
-export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
+export const buildSecondaryActions = (): SecondaryActionItem[] => {
   return [
     // Action with description
     {
@@ -1467,9 +1468,6 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       onClick: () => console.log(`Another user action`),
       description: "User actions",
     },
-
-    // Separator between action groups
-    { type: "separator" },
     {
       label: "Export",
       icon: Upload,

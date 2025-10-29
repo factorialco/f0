@@ -1,4 +1,6 @@
-import { Button, CopyButton } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
+import { ButtonCopy } from "@/ui/ButtonCopy"
+
 import {
   ThumbsDown,
   ThumbsDownFilled,
@@ -90,7 +92,7 @@ export const AssistantMessage = ({
           >
             <div className="flex gap-1">
               <div>
-                <CopyButton
+                <ButtonCopy
                   variant="ghost"
                   valueToCopy={content}
                   disabled={isGenerating}
@@ -101,7 +103,7 @@ export const AssistantMessage = ({
                 />
               </div>
               <div>
-                <Button
+                <F0Button
                   variant="ghost"
                   size="sm"
                   label={translations.ai.thumbsUp}
@@ -119,7 +121,7 @@ export const AssistantMessage = ({
                 />
               </div>
               <div>
-                <Button
+                <F0Button
                   variant="ghost"
                   size="sm"
                   label={translations.ai.thumbsDown}

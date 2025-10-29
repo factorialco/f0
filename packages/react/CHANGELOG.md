@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.245.0](https://github.com/factorialco/f0/compare/f0-react-v1.244.1...f0-react-v1.245.0) (2025-10-28)
+
+
+### Features
+
+* rename buttons ([daccd92](https://github.com/factorialco/f0/commit/daccd928375d32055ab244b4ac45d0bc916e2d60))
+* stabilize F0Button, F0ButtonDropdown, F0ButtonToggle and F0Link components ([daccd92](https://github.com/factorialco/f0/commit/daccd928375d32055ab244b4ac45d0bc916e2d60))
+
 ## [1.244.1](https://github.com/factorialco/f0/compare/f0-react-v1.244.0...f0-react-v1.244.1) (2025-10-27)
 
 

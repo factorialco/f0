@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
@@ -248,7 +248,7 @@ export function InFilter<T extends string>({
       </div>
       {!isCompactMode && (
         <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-          <Button
+          <F0Button
             variant="outline"
             label="Select all"
             onClick={handleSelectAll}
@@ -258,7 +258,7 @@ export function InFilter<T extends string>({
             }
             size="sm"
           />
-          <Button
+          <F0Button
             variant="ghost"
             label="Clear"
             onClick={handleClear}

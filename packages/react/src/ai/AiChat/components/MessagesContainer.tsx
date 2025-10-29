@@ -1,5 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
-
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import {

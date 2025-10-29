@@ -1,6 +1,8 @@
-import { render, within } from "@testing-library/react"
+import { Home, Settings } from "@/icons/app"
+import { zeroRender as render } from "@/testing/test-utils"
+import { within } from "@testing-library/react"
+
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Home, Settings } from "../../../../icons/app"
 import { Breadcrumbs } from "./index"
 
 // Mock ResizeObserver

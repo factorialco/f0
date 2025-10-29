@@ -1,5 +1,5 @@
-import { Button } from "@/components/Actions/Button"
-import { OneDropdownButton } from "@/components/Actions/OneDropdownButton"
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Action } from "../../../Fields/Select/SelectBottomActions"
 
 interface Props {
@@ -24,7 +24,7 @@ interface ListButtonsProps {
 const ListButtons = ({ primaryAction, secondaryActions }: ListButtonsProps) => {
   if (!secondaryActions || secondaryActions.length === 0) {
     return (
-      <Button
+      <F0Button
         disabled={primaryAction.disabled}
         variant={primaryAction.variant}
         onClick={primaryAction.onClick}
@@ -58,7 +58,7 @@ const ListButtons = ({ primaryAction, secondaryActions }: ListButtonsProps) => {
   const allActionsDisabled = allActions.every((action) => action.disabled)
 
   return (
-    <OneDropdownButton
+    <F0ButtonDropdown
       items={items}
       value={primaryAction.label}
       disabled={allActionsDisabled}
