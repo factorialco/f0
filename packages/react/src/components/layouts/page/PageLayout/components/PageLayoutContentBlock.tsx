@@ -4,7 +4,7 @@ import {
   PageLayoutBlock,
   PageLayoutBlockProps,
   createPageLayoutBlock,
-} from "../PageLayoutBlock"
+} from "./PageLayoutBlock/PageLayoutBlock"
 
 export interface PageLayoutContentBlockProps extends PageLayoutBlockProps {
   title: string
