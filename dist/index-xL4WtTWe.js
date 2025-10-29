@@ -1,7 +1,7 @@
 import { jsxs as v, jsx as n, Fragment as K } from "react/jsx-runtime";
 import { useCopilotChatInternal as ue, useCopilotContext as Yt, useCopilotAction as Xe, CopilotKit as qt } from "@copilotkit/react-core";
 import { Markdown as Qt, useChatContext as Xt, CopilotSidebar as Jt, CopilotChat as en } from "@copilotkit/react-ui";
-import { ad as tn, ae as nn, af as $e, I as an, u as Je, ag as rn, ah as q, ai as T, s as ae, aj as on, ak as sn, al as ln, b as x, am as cn, an as dn, ao as un, D as fn, v as mn, ap as Q, aq as gn, ar as xe, P as A, a as et, as as tt, at as z, au as Ne, av as hn, aw as P, ax as He, ay as pn, az as oe, aA as le, aB as vn, aC as bn, aD as nt, q as ke, aE as at, aF as Cn, aG as Me, z as wn, S as yn, l as xn, aH as Nn, aI as rt, aJ as kn, aK as Mn, F as En, B as $, x as pe, w as Ke, aL as ze, aM as Rn, aN as Tn, y as ve, V as Sn, aO as X, aP as In, a9 as Ln, aQ as Ue, aR as Pn, aS as On, aT as An, m as Ee } from "./dialog-BcJxSpgz.js";
+import { ad as tn, ae as nn, af as $e, I as an, u as Je, ag as rn, ah as q, ai as T, s as ae, aj as on, ak as sn, al as ln, b as x, am as cn, an as dn, ao as un, D as fn, v as mn, ap as Q, aq as gn, ar as xe, P as A, a as et, as as tt, at as z, au as Ne, av as hn, aw as P, ax as He, ay as pn, az as oe, aA as le, aB as vn, aC as bn, aD as nt, q as ke, aE as at, aF as Cn, aG as Me, z as wn, S as yn, l as xn, aH as Nn, aI as rt, aJ as kn, aK as Mn, F as En, B as $, x as pe, w as Ke, aL as ze, aM as Rn, aN as Tn, y as ve, V as Sn, aO as X, aP as In, a9 as Ln, aQ as Ue, aR as Pn, aS as On, aT as An, m as Ee } from "./dialog-D4MX282D.js";
 import * as g from "react";
 import { forwardRef as I, createContext as fe, useRef as F, useState as S, useCallback as Z, useContext as re, useMemo as ce, useEffect as H, useId as me } from "react";
 import _n from "react-dom";
@@ -2774,7 +2774,7 @@ const Gt = ({ suggestions: e, onSuggestionClick: t }) => n("div", {
       });
     }
   }), e ? n(en, {
-    className: "h-full w-full",
+    className: "relative flex h-full w-full",
     Messages: jt,
     Input: $t,
     UserMessage: Wt,
