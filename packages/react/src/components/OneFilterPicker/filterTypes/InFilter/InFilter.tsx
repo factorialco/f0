@@ -218,6 +218,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                     placeholder={i18n.toc.search}
                     value={searchTerm}
                     onChange={setSearchTerm}
+                    autoFocus
                     clearable
                   />
                 </div>

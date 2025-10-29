@@ -22,7 +22,7 @@ import { useState } from "react"
 const SelectWithHooks = (props: SelectProps<string>) => {
   const { label, ...restProps } = props
   const [localValue, setLocalValue] = useState(props.value)
-  const [, setSearchValue] = useState("")
+  const [searchValue, setSearchValue] = useState("")
   // Sets a click handler to change the label's value
   const handleOnChange = (
     value: string,
@@ -52,6 +52,7 @@ const SelectWithHooks = (props: SelectProps<string>) => {
         {...restProps}
         value={localValue}
         onChange={handleOnChange}
+        searchValue={searchValue}
         onSearchChange={handleOnSearchChange}
       />
     </div>
