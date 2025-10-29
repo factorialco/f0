@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.246.0](https://github.com/factorialco/f0/compare/f0-react-v1.245.0...f0-react-v1.246.0) (2025-10-29)
+
+
+### Features
+
+* **RichTextEditor:** fix header and toolbar responsive scroll ([#2832](https://github.com/factorialco/f0/issues/2832)) ([050e5af](https://github.com/factorialco/f0/commit/050e5af21187e37b15b250282e597b11b72aab97))
+
 ## [1.245.0](https://github.com/factorialco/f0/compare/f0-react-v1.244.1...f0-react-v1.245.0) (2025-10-28)
 
 
