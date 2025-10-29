@@ -118,6 +118,7 @@ export default defineConfig({
       entry: {
         ["f0"]: resolve(__dirname, "src/f0.ts"),
         ["experimental"]: resolve(__dirname, "src/experimental.ts"),
+        ["ai"]: resolve(__dirname, "src/ai.ts"),
       },
       fileName: (_, entryName) => {
         return `${entryName}.js`

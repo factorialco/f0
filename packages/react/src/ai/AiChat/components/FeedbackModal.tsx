@@ -4,6 +4,7 @@ import { OneModal } from "@/experimental/Modals/OneModal"
 import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { UserReaction } from "./FeedbackProvider"
 
 interface ReactionModalProps {
@@ -20,11 +21,12 @@ export const FeedbackModal = ({
   message,
 }: ReactionModalProps) => {
   const [text, setText] = useState("")
-  const translations = useI18n()
+  const translation = useAiChatTranslations()
+  const globalTranslations = useI18n()
   const { title, label, placeholder } =
     reactionType === "like"
-      ? translations.ai.feedbackModal.positive
-      : translations.ai.feedbackModal.negative
+      ? translation.ai.feedbackModal.positive
+      : translation.ai.feedbackModal.negative
   const handleSubmit = useCallback(() => {
     onSubmit(message, text)
   }, [text, message, onSubmit])
@@ -74,11 +76,11 @@ export const FeedbackModal = ({
         <div className="flex flex-1 flex-row-reverse gap-3">
           <ButtonInternal
             onClick={handleSubmit}
-            label={translations.actions.send}
+            label={globalTranslations.actions.send}
           />
           <ButtonInternal
             onClick={handleClose}
-            label={translations.actions.cancel}
+            label={globalTranslations.actions.cancel}
             variant="outline"
           />
         </div>
