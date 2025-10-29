@@ -37,7 +37,7 @@ export const AssistantMessage = ({
   )
   const isEmptyMessage = !content && !subComponent
 
-  const translations = useI18n()
+  const translations = useAiChatTranslations()
   const { open: openFeedbackModal } = useFeedbackModal()
   const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
 

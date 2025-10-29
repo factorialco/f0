@@ -7,6 +7,7 @@ import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
@@ -40,7 +41,7 @@ export const ChatHeader = (props: HeaderProps) => {
         <ButtonInternal
           variant="ghost"
           hideLabel
-          label={translations.ai.closeChat}
+          label={translations.closeChat}
           icon={Cross}
           onClick={() => setOpen(false)}
         />

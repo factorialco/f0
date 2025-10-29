@@ -1,6 +1,5 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
@@ -227,7 +226,7 @@ export const ChatTextarea = ({
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder={translation.ai.inputPlaceholder}
+          placeholder={translation.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
             "max-h-[120px] min-h-[32px] resize-none px-3 py-0 outline-none transition-all sm:h-auto sm:max-h-[240px]",
@@ -259,7 +258,7 @@ export const ChatTextarea = ({
           <ButtonInternal
             type="submit"
             variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
+            label={translation.stopAnswerGeneration}
             icon={SolidStop}
             hideLabel
           />

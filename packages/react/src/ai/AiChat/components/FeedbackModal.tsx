@@ -3,6 +3,7 @@ import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { UserReaction } from "./FeedbackProvider"
 
 interface ReactionModalProps {
@@ -19,11 +20,12 @@ export const FeedbackModal = ({
   message,
 }: ReactionModalProps) => {
   const [text, setText] = useState("")
-  const translations = useI18n()
+  const aiTranslations = useAiChatTranslations()
+  const globalTranslations = useI18n()
   const { title, label, placeholder } =
     reactionType === "like"
-      ? translations.ai.feedbackModal.positive
-      : translations.ai.feedbackModal.negative
+      ? aiTranslations.feedbackModal.positive
+      : aiTranslations.feedbackModal.negative
   const handleSubmit = useCallback(() => {
     onSubmit(message, text)
   }, [text, message, onSubmit])
