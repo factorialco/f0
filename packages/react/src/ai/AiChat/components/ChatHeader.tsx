@@ -41,7 +41,7 @@ export const ChatHeader = (props: HeaderProps) => {
         <ButtonInternal
           variant="ghost"
           hideLabel
-          label={translations.closeChat}
+          label={translations.ai.closeChat}
           icon={Cross}
           onClick={() => setOpen(false)}
         />

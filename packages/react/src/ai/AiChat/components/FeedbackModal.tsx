@@ -20,12 +20,12 @@ export const FeedbackModal = ({
   message,
 }: ReactionModalProps) => {
   const [text, setText] = useState("")
-  const aiTranslations = useAiChatTranslations()
+  const translation = useAiChatTranslations()
   const globalTranslations = useI18n()
   const { title, label, placeholder } =
     reactionType === "like"
-      ? aiTranslations.feedbackModal.positive
-      : aiTranslations.feedbackModal.negative
+      ? translation.ai.feedbackModal.positive
+      : translation.ai.feedbackModal.negative
   const handleSubmit = useCallback(() => {
     onSubmit(message, text)
   }, [text, message, onSubmit])

@@ -19,6 +19,7 @@ import React, { type ReactElement } from "react"
 import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
 export * from "@testing-library/react"
 
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { L10nProvider } from "@/lib/providers/l10n"
 import { MotionGlobalConfig } from "motion"

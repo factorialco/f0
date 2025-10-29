@@ -226,7 +226,7 @@ export const ChatTextarea = ({
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder={translation.inputPlaceholder}
+          placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
             "max-h-[120px] min-h-[32px] resize-none px-3 py-0 outline-none transition-all sm:h-auto sm:max-h-[240px]",
@@ -258,7 +258,7 @@ export const ChatTextarea = ({
           <ButtonInternal
             type="submit"
             variant="neutral"
-            label={translation.stopAnswerGeneration}
+            label={translation.ai.stopAnswerGeneration}
             icon={SolidStop}
             hideLabel
           />

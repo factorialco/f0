@@ -59,8 +59,10 @@ const Messages = ({
   } = useAiChat()
   const initialMessages = useMemo(
     () =>
-      makeInitialMessages(initialMessage || translations.defaultInitialMessage),
-    [initialMessage, translations.defaultInitialMessage]
+      makeInitialMessages(
+        initialMessage || translations.ai.defaultInitialMessage
+      ),
+    [initialMessage, translations.ai.defaultInitialMessage]
   )
   const showWelcomeBlock =
     messages.length == 0 && (greeting || initialMessages.length > 0)
@@ -176,7 +178,7 @@ const Messages = ({
               <div className="rounded bg-f1-background">
                 <ButtonInternal
                   onClick={() => scrollToBottom()}
-                  label={translations.scrollToBottom}
+                  label={translations.ai.scrollToBottom}
                   variant="neutral"
                   icon={ArrowDown}
                   hideLabel

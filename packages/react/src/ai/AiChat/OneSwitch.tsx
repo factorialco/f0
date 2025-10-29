@@ -52,7 +52,7 @@ export const OneSwitch = ({
                 }}
                 checked={open}
                 aria-label={
-                  open ? translations.closeChat : translations.openChat
+                  open ? translations.ai.closeChat : translations.ai.openChat
                 }
                 className={cn(
                   "group relative h-8 w-12 rounded-full border-none bg-f1-background-inverse-secondary transition-all hover:bg-f1-background-hover",
@@ -89,7 +89,7 @@ export const OneSwitch = ({
           </TooltipTrigger>
           {!open && (
             <TooltipContent side="left" className="font-medium">
-              {translations.welcome}
+              {translations.ai.welcome}
             </TooltipContent>
           )}
         </Tooltip>
