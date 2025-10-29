@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 import { ReactNode, forwardRef } from "react"
-import { validatePageLayoutChildren } from "./utils"
+import { validatePageLayoutChildren } from "./internal/utils"
 
 export interface PageLayoutProps {
   children: ReactNode

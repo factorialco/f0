@@ -1,10 +1,8 @@
 import { cn } from "@/lib/utils"
 import { ReactNode } from "react"
-import {
-  PageLayoutBlock,
-  PageLayoutBlockProps,
-  createPageLayoutBlock,
-} from "./PageLayoutBlock/PageLayoutBlock"
+import { createPageLayoutBlock } from "../utils"
+import { PageLayoutBlockProps } from "./PageLayoutBlock"
+import { PageLayoutBlock } from "./PageLayoutBlock/PageLayoutBlock"
 
 export interface PageLayoutContentBlockProps extends PageLayoutBlockProps {
   title: string

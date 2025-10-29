@@ -1,4 +1,17 @@
+import { IconType } from "@/components/F0Icon"
 import { ReactElement } from "react"
+
+export interface LayoutBlockActionItem {
+  label: string
+  description?: string
+  icon?: IconType
+  onClick: () => void
+}
+
+export interface LayoutBlockActionGroup {
+  label?: string
+  items: LayoutBlockActionItem[]
+}
 
 export interface PageLayoutBlockProps {
   children: React.ReactNode
@@ -11,6 +24,17 @@ export interface PageLayoutBlockProps {
   onDragEnd?: (e: React.DragEvent) => void
   onDrop?: (e: React.DragEvent) => void
   dragId?: string
+  /**
+   * The actions to display in the block.
+   */
+  actions?:
+    | LayoutBlockActionItem[]
+    | LayoutBlockActionGroup[]
+    | LayoutBlockActionGroup
+  /**
+   * TODO: Limit the elements here to button or onebutton
+   */
+  primaryAction?: React.ReactNode
 }
 
 // Base marker interface for PageLayoutBlock components

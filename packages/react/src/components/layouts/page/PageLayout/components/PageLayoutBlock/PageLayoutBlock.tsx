@@ -1,7 +1,13 @@
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
 import { cva } from "cva"
-import { forwardRef } from "react"
-import { PageLayoutBlockComponent, PageLayoutBlockProps } from "./types"
+import { forwardRef, useMemo } from "react"
+import {
+  LayoutBlockActionGroup,
+  LayoutBlockActionItem,
+  PageLayoutBlockComponent,
+  PageLayoutBlockProps,
+} from "./types"
 
 const variants = cva({
   base: "flex w-full flex-col p-4",
@@ -14,6 +20,59 @@ const variants = cva({
   },
 })
 
+/**
+ * Converts the item actions definition to dropdown items
+ * @param actions - The item actions definition to convert
+ * @param item - The item to convert the actions for
+ * @returns An array of dropdown items
+ */
+export const actionsToLayoutBlockActionItems = (
+  actions: LayoutBlockActionGroup[] | undefined
+): DropdownItem[] => {
+  return (actions || [])
+    .map((group) => group.items)
+    .reduce<DropdownItem[]>((acc, curr) => {
+      if (acc.length > 0) {
+        acc.push({ type: "separator" })
+      }
+      acc.push(...curr)
+      return acc
+    }, [])
+}
+
+/**
+ * Normalize the items to an array of DropdownButtonGroup
+ */
+const normalizeActionItems = (
+  items:
+    | LayoutBlockActionItem[]
+    | LayoutBlockActionGroup[]
+    | LayoutBlockActionGroup
+) => {
+  const isActionDefinition = (
+    item: LayoutBlockActionItem | LayoutBlockActionGroup
+  ): item is LayoutBlockActionItem => {
+    return "onClick" in item
+  }
+
+  if (Array.isArray(items)) {
+    // LayoutBlockActionItem[] case
+    if (items.every(isActionDefinition)) {
+      return [
+        {
+          items: items,
+        },
+      ]
+    } else {
+      // LayoutBlockActionGroup[] case
+      return items
+    }
+  } else {
+    // LayoutBlockActionGroup case
+    return [items]
+  }
+}
+
 export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
   (
     {
@@ -25,14 +84,30 @@ export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
       onDragEnd,
       onDrop,
       dragId,
+      primaryAction,
       ...props
     },
     ref
   ) => {
+    const actions = useMemo(
+      () => normalizeActionItems(props.actions || []),
+      [props.actions]
+    )
+
+    const actionsDropdownItems: DropdownItem[] = useMemo(
+      () => actions.flatMap((action) => action.items),
+      [actions]
+    )
+
+    const showActionsBar = useMemo(
+      () => actionsDropdownItems.length > 0 || !!primaryAction,
+      [actionsDropdownItems, primaryAction]
+    )
+
     return (
       <div
         ref={ref}
-        className={cn(variants({ variant }), className)}
+        className={cn(variants({ variant }), "group", className)}
         draggable={draggable}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
@@ -40,7 +115,18 @@ export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
         data-drag-id={dragId}
         {...props}
       >
-        {children}
+        {showActionsBar && (
+          <div className="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+            {!!primaryAction && primaryAction}
+            {actionsDropdownItems.length > 0 && (
+              <Dropdown
+                items={actionsToLayoutBlockActionItems(actions)}
+                data-testid="actions-dropdown"
+              />
+            )}
+          </div>
+        )}
+        <div data-testid="content">{children}</div>
       </div>
     )
   }

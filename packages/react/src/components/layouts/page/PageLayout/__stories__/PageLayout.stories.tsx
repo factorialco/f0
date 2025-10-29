@@ -147,9 +147,18 @@ export const WithContentBlocks: Story = {
           </div>
         </PageLayoutContentBlock>
 
-        <div>
-          <p>Block</p>
-        </div>
+        <PageLayout.Group sortable onSort={(items) => console.log(items)}>
+          <PageLayoutContentBlock title="System Status" titleLevel="h4">
+            <div className="text-sm text-f1-foreground-secondary">
+              All systems operational ✅
+            </div>
+          </PageLayoutContentBlock>
+          <PageLayoutContentBlock title="System Status 2" titleLevel="h4">
+            <div className="text-sm text-f1-foreground-secondary">
+              All systems operational 2✅
+            </div>
+          </PageLayoutContentBlock>
+        </PageLayout.Group>
       </>
     ),
   },

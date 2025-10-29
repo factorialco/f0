@@ -6,8 +6,5 @@ export * from "./components/PageLayoutGroup/types"
 
 export const PageLayout = Object.assign(PageLayoutComponent, {
   Block: PageLayoutBlock,
-})
-
-export const PageLayoutGroup = Object.assign(PageLayoutGroupComponent, {
   Group: PageLayoutGroup,
 })

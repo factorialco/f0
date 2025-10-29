@@ -27,6 +27,10 @@ const config: StorybookConfig = {
       directory: "../src/experimental",
       titlePrefix: "Components",
     },
+    {
+      directory: "../src/co-creation",
+      titlePrefix: "CoCreation",
+    },
     ...(process.env.STORYBOOK_PUBLIC_BUILD
       ? []
       : [
