@@ -15,7 +15,7 @@ import { F0Provider } from "@/lib/providers/f0"
 import { DocsContainer } from "./DocsContainer.tsx"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
-import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider.tsx"
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
