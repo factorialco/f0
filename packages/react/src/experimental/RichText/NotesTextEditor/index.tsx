@@ -28,6 +28,8 @@ import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
 
+const MEDIUM_CONTAINER_WIDTH = 768 // the width of a container that is considered medium by tailwind
+
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
   placeholder: string
@@ -63,7 +65,7 @@ const NotesTextEditorComponent = forwardRef<
     onTitleChange,
     actions,
     metadata,
-    withPadding = false,
+    withPadding: _withPadding = false,
   },
   ref
 ) {
@@ -82,12 +84,27 @@ const NotesTextEditorComponent = forwardRef<
 
   const [initialContent] = useState(() => initialEditorState?.content || "")
   const [title, setTitle] = useState(initialEditorState?.title || "")
+  const [isNarrowContainer, setIsNarrowContainer] = useState(false)
 
   useEffect(() => {
     if (onTitleChange) {
       onTitleChange(title)
     }
   }, [title, onTitleChange])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) =>
+      setIsNarrowContainer(
+        entries[0].contentRect.width < MEDIUM_CONTAINER_WIDTH
+      )
+    )
+
+    resizeObserver.observe(containerRef.current)
+
+    return () => resizeObserver.disconnect()
+  }, [])
 
   const editor = useEditor({
     extensions: createNotesTextEditorExtensions(
@@ -229,7 +246,7 @@ const NotesTextEditorComponent = forwardRef<
         (metadata && metadata.length > 0)) && (
         <Header actions={actions} metadata={metadata} />
       )}
-      <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+      <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
         <Toolbar
           labels={toolbarLabels}
           editor={editor}
@@ -244,7 +261,7 @@ const NotesTextEditorComponent = forwardRef<
           <div
             className={cn(
               "flex flex-col pb-5 pt-5 transition-all duration-300",
-              withPadding ? "px-32" : "px-14"
+              isNarrowContainer ? "px-14" : "px-32"
             )}
           >
             <input
@@ -291,7 +308,7 @@ const NotesTextEditorComponent = forwardRef<
             editor={editor}
             className={cn(
               "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
-              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
+              isNarrowContainer ? "[&>div]:px-14" : "[&>div]:px-32"
             )}
           />
         </div>
