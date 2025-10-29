@@ -25,6 +25,7 @@ export type InputProps<T extends string> = Pick<
     | "error"
     | "status"
     | "hint"
+    | "autocomplete"
   > & {
     type?: Exclude<HTMLInputTypeAttribute, "number">
     onPressEnter?: () => void
