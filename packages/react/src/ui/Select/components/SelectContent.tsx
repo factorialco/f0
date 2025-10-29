@@ -191,11 +191,15 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          !asList &&
+            position === "popper" &&
+            "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),450px)]",
           className,
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0"
         )}
         position={asList ? "item-aligned" : position}
+        collisionPadding={16}
         {...props}
         onAnimationStart={() => {
           // Set the animation state to started as the elements are visible
@@ -238,7 +242,7 @@ const SelectContent = forwardRef<
                     "p-1",
                     !asList &&
                       position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                      "h-[var(--radix-select-trigger-height)] w-full"
                   )}
                 >
                   {viewportContent}
