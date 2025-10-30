@@ -19,6 +19,7 @@ import {
   ChatTextarea,
   ChatWindow,
   MessagesContainer,
+  MessagesContainerFullscreen,
   SuggestionsList,
   UserMessage,
 } from "./components"
@@ -190,8 +191,8 @@ const AiFullscreenChatCmp = () => {
 
   return (
     <CopilotChat
-      className="relative flex h-full w-full flex-col"
-      Messages={MessagesContainer}
+      className="relative flex h-full w-full flex-col overflow-hidden"
+      Messages={MessagesContainerFullscreen}
       Input={ChatTextarea}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
