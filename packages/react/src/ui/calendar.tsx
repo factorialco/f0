@@ -36,23 +36,23 @@ function Calendar({
           props.showWeekNumber
             ? compact
               ? "w-[30px] flex-shrink-0"
-              : "w-7 flex-shrink-0"
+              : "w-full"
             : "w-full",
-          compact ? "h-6 text-sm" : "h-7 text-sm"
+          compact ? "h-6 text-sm" : "h-8 text-sm"
         ),
         row: cn(
           "flex w-full items-center",
           props.showWeekNumber ? "justify-start" : "justify-between",
-          compact ? "mt-1" : "mt-1.5"
+          compact ? "mt-1" : "mt-2"
         ),
         cell: cn(
           "text-center font-medium p-0 relative text-f1-foreground transition-all duration-100",
           props.showWeekNumber
             ? compact
               ? "w-[30px] flex-shrink-0"
-              : "w-7 flex-shrink-0"
+              : "w-full"
             : "w-full",
-          compact ? "rounded-sm h-7 text-sm" : "rounded-md h-9 text-sm",
+          compact ? "rounded-sm h-7 text-sm" : "rounded-md h-10 text-sm",
           "before:absolute before:inset-0 before:z-0 before:bg-f1-background-selected-bold before:opacity-0 before:transition-all before:duration-100 before:content-[''] hover:before:bg-f1-background-selected-bold-hover before:pointer-events-none",
           compact ? "before:rounded-sm" : "before:rounded-md",
           "[&:has([aria-selected].day-range-start)]:before:opacity-100 [&:has([aria-selected].day-range-end)]:before:opacity-100",
@@ -62,7 +62,10 @@ function Calendar({
             : "first:[&:has([aria-selected].day-range-middle)]:rounded-l-md last:[&:has([aria-selected].day-range-middle)]:rounded-r-md first:[&:has([aria-selected].day-range-end)]:rounded-r-md first:[&:has([aria-selected].day-range-end)]:rounded-l-md last:[&:has([aria-selected].day-range-start)]:rounded-l-md last:[&:has([aria-selected].day-range-start)]:rounded-r-md",
           "[&:has([aria-selected].day-range-start)]:bg-f1-background-selected [&:has([aria-selected].day-range-end)]:bg-f1-background-selected",
           cn(
-            "[&>span.rdp-weeknumber]:text-f1-foreground-secondary [&>span.rdp-weeknumber]:flex [&>span.rdp-weeknumber]:items-center [&>span.rdp-weeknumber]:justify-center [&>span.rdp-weeknumber]:w-full [&>span.rdp-weeknumber]:h-full [&>span.rdp-weeknumber]:font-normal",
+            "[&>span.rdp-weeknumber]:text-f1-foreground-secondary [&>span.rdp-weeknumber]:flex [&>span.rdp-weeknumber]:items-center [&>span.rdp-weeknumber]:justify-center [&>span.rdp-weeknumber]:h-full [&>span.rdp-weeknumber]:font-normal",
+            compact
+              ? "[&>span.rdp-weeknumber]:w-[30px] [&>span.rdp-weeknumber]:flex-shrink-0"
+              : "[&>span.rdp-weeknumber]:w-7 [&>span.rdp-weeknumber]:flex-shrink-0",
             "[&>span.rdp-weeknumber]:text-sm"
           ),
           props.mode === "single" &&
@@ -76,7 +79,7 @@ function Calendar({
             ? props.showWeekNumber
               ? "h-7 w-[30px] text-sm"
               : "h-7 w-7 text-sm"
-            : "h-9 w-9 text-sm"
+            : "h-10 w-10 text-sm"
         ),
         day_range_start:
           "day-range-start aria-selected:text-f1-foreground-inverse",
