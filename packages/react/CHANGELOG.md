@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.247.1](https://github.com/factorialco/f0/compare/f0-react-v1.247.0...f0-react-v1.247.1) (2025-10-30)
+
+
+### Bug Fixes
+
+* **select:** constrain dropdown width within parent container ([#2889](https://github.com/factorialco/f0/issues/2889)) ([6bc6d28](https://github.com/factorialco/f0/commit/6bc6d286d691f67a9a6bf969da9ebb558415d287))
+
 ## [1.247.0](https://github.com/factorialco/f0/compare/f0-react-v1.246.0...f0-react-v1.247.0) (2025-10-30)
 
 
