@@ -132,13 +132,13 @@ const SelectItem = <T extends string, R>({
           </div>
         )}
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="line-clamp-2 break-words font-medium">
+          <OneEllipsis lines={2} className="font-medium">
             {item.label}
-          </span>
+          </OneEllipsis>
           {item.description && (
-            <div className="line-clamp-2 break-words text-f1-foreground-secondary">
+            <OneEllipsis lines={2} className="text-f1-foreground-secondary">
               {item.description}
-            </div>
+            </OneEllipsis>
           )}
         </div>
         {item.tag && (
@@ -156,7 +156,10 @@ const SelectValue = forwardRef<
   { item: SelectItemObject<string> }
 >(function SelectValue({ item }, ref) {
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-1.5" ref={ref}>
+    <div
+      className="flex min-w-0 flex-1 items-center justify-start gap-1.5"
+      ref={ref}
+    >
       {item.icon && (
         <div className="h-5 shrink-0 text-f1-icon">
           <F0Icon icon={item.icon} />
