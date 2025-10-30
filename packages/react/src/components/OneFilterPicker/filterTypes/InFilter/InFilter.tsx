@@ -210,6 +210,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           isLoading={isLoading}
           isLoadingMore={isLoading}
           className="h-full"
+          asChild={!isCompactMode}
           top={
             <div className="flex w-full flex-col">
               {top}

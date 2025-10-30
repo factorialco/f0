@@ -11,9 +11,9 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => {
-  const { as } = useContext(SelectContext)
+  const { as: asSelectProp } = useContext(SelectContext)
 
-  return as === "list-with-scroll" ? null : (
+  return asSelectProp === "list-with-scroll" ? null : (
     <SelectPrimitive.Trigger ref={ref} className={cn(className)} {...props}>
       {children}
     </SelectPrimitive.Trigger>

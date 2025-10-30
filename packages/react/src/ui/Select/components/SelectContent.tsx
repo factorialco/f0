@@ -85,6 +85,7 @@ const SelectContent = forwardRef<
       scrollMargin,
       forceMinHeight,
       showLoadingIndicator,
+      asChild,
       ...props
     },
     ref
@@ -210,7 +211,7 @@ const SelectContent = forwardRef<
     const content = (
       <SelectPrimitive.Content
         ref={ref}
-        asChild={asSelectProp === "list"}
+        asChild={asChild || asSelectProp === "list"}
         className={cn(
           "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
           !asList &&
@@ -260,17 +261,21 @@ const SelectContent = forwardRef<
               onScrollTop={onScrollTop}
               scrollMargin={scrollMargin}
             >
-              <SelectPrimitive.Viewport
-                asChild
-                className={cn(
-                  "p-1",
-                  !asList &&
-                    position === "popper" &&
-                    "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
-                )}
-              >
-                {viewportContent}
-              </SelectPrimitive.Viewport>
+              {asList ? (
+                viewportContent
+              ) : (
+                <SelectPrimitive.Viewport
+                  asChild
+                  className={cn(
+                    "p-1",
+                    !asList &&
+                      position === "popper" &&
+                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                  )}
+                >
+                  {viewportContent}
+                </SelectPrimitive.Viewport>
+              )}
             </ScrollArea>
           </div>
           {props.bottom}
