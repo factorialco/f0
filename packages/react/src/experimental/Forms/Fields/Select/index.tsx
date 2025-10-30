@@ -127,16 +127,18 @@ const SelectItem = <T extends string, R>({
       <div className="flex w-full items-start gap-1.5">
         {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
         {item.icon && (
-          <div className="text-f1-icon">
+          <div className="shrink-0 text-f1-icon">
             <F0Icon icon={item.icon} />
           </div>
         )}
-        <div className="flex flex-1 flex-col">
-          <span className="line-clamp-2 font-medium">{item.label}</span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <OneEllipsis lines={2} className="font-medium">
+            {item.label}
+          </OneEllipsis>
           {item.description && (
-            <div className="line-clamp-2 text-f1-foreground-secondary">
+            <OneEllipsis lines={2} className="text-f1-foreground-secondary">
               {item.description}
-            </div>
+            </OneEllipsis>
           )}
         </div>
         {item.tag && (
@@ -154,7 +156,10 @@ const SelectValue = forwardRef<
   { item: SelectItemObject<string> }
 >(function SelectValue({ item }, ref) {
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-1.5" ref={ref}>
+    <div
+      className="flex min-w-0 flex-1 items-center justify-start gap-1.5"
+      ref={ref}
+    >
       {item.icon && (
         <div className="h-5 shrink-0 text-f1-icon">
           <F0Icon icon={item.icon} />
