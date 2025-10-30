@@ -264,7 +264,7 @@ const AiFullscreenChatCmp = () => {
 
   return (
     <CopilotChat
-      className="relative flex h-full w-full"
+      className="relative flex h-full w-full flex-col"
       Messages={MessagesContainer}
       Input={ChatTextarea}
       UserMessage={UserMessage}
