@@ -392,5 +392,6 @@ export const WithDataSource: Story = {
     },
     value: [],
     onChange: () => {},
+    asChild: false,
   },
 }

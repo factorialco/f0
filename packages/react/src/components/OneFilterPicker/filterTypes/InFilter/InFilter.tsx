@@ -21,7 +21,9 @@ import { useLoadOptions } from "./useLoadOptions"
 type InFilterComponentProps<
   T = unknown,
   R extends RecordType = RecordType,
-> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>
+> = FilterTypeComponentProps<T[], InFilterOptions<T, R>> & {
+  asChild?: boolean
+}
 
 /**
  * A multi-select filter component that allows users to select multiple options from a predefined list.
@@ -78,6 +80,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   isCompactMode,
   top,
   bottom,
+  asChild,
 }: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
@@ -210,7 +213,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           isLoading={isLoading}
           isLoadingMore={isLoading}
           className="h-full"
-          asChild={!isCompactMode}
+          asChild={asChild !== undefined ? asChild : !isCompactMode}
           top={
             <div className="flex w-full flex-col">
               {top}
