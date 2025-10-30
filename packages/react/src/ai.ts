@@ -18,3 +18,10 @@ export {
   type AiChatTranslations,
   type AiChatTranslationsProviderProps,
 } from "./ai/AiChat/providers/AiChatTranslationsProvider"
+export {
+  I18nProvider,
+  defaultTranslations,
+  useI18n,
+  type I18nProviderProps,
+  type TranslationsType,
+} from "./lib/providers/i18n"
