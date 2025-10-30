@@ -197,7 +197,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   }`.toLowerCase()
 
   return (
-    <div aria-label={schema.label} role="group">
+    <div aria-label={schema.label} role="group" className="h-full">
       <Select
         value={value}
         onValueChange={onChange}
@@ -209,8 +209,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           onScrollBottom={loadMore}
           isLoading={isLoading}
           isLoadingMore={isLoading}
+          className="h-full"
           top={
-            <div className="flex min-h-full w-full flex-col">
+            <div className="flex w-full flex-col">
               {top}
               {showSearch && (
                 <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
@@ -224,7 +225,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 </div>
               )}
               <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-              <div className="flex w-full flex-1 items-center justify-between gap-1 rounded py-1 pl-4 pr-3">
+              <div className="flex w-full items-center justify-between gap-1 rounded py-1 pl-4 pr-3">
                 <span className="max-w-[250px] flex-1 whitespace-nowrap">
                   <OneEllipsis className="text-f1-foreground-secondary">
                     {selectedText}
@@ -244,10 +245,10 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             </div>
           }
           bottom={
-            <>
+            <div className="flex w-full flex-col">
               {bottom}
               {!isCompactMode && (
-                <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
                   <F0Button
                     variant="outline"
                     label="Select all"
@@ -268,7 +269,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                   />
                 </div>
               )}
-            </>
+            </div>
           }
         />
       </Select>

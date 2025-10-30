@@ -106,7 +106,7 @@ const Select = <T extends string = string>(props: SelectProps<T>) => {
       }
 
   return (
-    <div className="[&>div]:!relative">
+    <div className="h-full [&>div]:!relative [&>div]:!h-full">
       <SelectPrimitive.Root<T> {...primitiveProps} />
     </div>
   )
