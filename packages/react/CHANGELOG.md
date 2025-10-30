@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.247.0](https://github.com/factorialco/f0/compare/f0-react-v1.246.0...f0-react-v1.247.0) (2025-10-30)
+
+
+### Features
+
+* **forms:** add autocomplete attribute to inputs ([#2890](https://github.com/factorialco/f0/issues/2890)) ([09493fc](https://github.com/factorialco/f0/commit/09493fce992a6979a954b3bcb5020d4c35f8fad9))
+
 ## [1.246.0](https://github.com/factorialco/f0/compare/f0-react-v1.245.0...f0-react-v1.246.0) (2025-10-29)
 
 
