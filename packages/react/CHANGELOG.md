@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.247.2](https://github.com/factorialco/f0/compare/f0-react-v1.247.1...f0-react-v1.247.2) (2025-10-30)
+
+
+### Bug Fixes
+
+* set proper size for non compact calendar ([#2896](https://github.com/factorialco/f0/issues/2896)) ([47804b2](https://github.com/factorialco/f0/commit/47804b2d54cb2225d58282bfa19fb38af87d6db0))
+
 ## [1.247.1](https://github.com/factorialco/f0/compare/f0-react-v1.247.0...f0-react-v1.247.1) (2025-10-30)
 
 
