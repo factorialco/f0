@@ -2774,7 +2774,7 @@ const Gt = ({ suggestions: e, onSuggestionClick: t }) => n("div", {
       });
     }
   }), e ? n(en, {
-    className: "relative flex h-full w-full",
+    className: "relative flex h-full w-full flex-col",
     Messages: jt,
     Input: $t,
     UserMessage: Wt,
