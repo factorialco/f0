@@ -15,6 +15,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type AutoFill,
 } from "react"
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
@@ -162,6 +163,7 @@ export type InputFieldProps<T> = {
   readonly?: boolean
   clearable?: boolean
   role?: string
+  autocomplete?: AutoFill
   inputRef?: React.Ref<unknown>
   "aria-controls"?: AriaAttributes["aria-controls"]
   "aria-expanded"?: AriaAttributes["aria-expanded"]

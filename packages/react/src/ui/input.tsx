@@ -34,6 +34,7 @@ export type InputProps = Omit<
     | "onBlur"
     | "onClear"
     | "readonly"
+    | "autocomplete"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
