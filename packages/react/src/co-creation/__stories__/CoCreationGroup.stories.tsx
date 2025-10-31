@@ -1,7 +1,6 @@
-import { PageLayout } from "@/components/layouts/page/PageLayout"
-import { AiChatProvider } from "@/experimental/AiChat"
-import { AiChat } from "@/experimental/AiChat/index"
 import { useAiChat } from "@/experimental/AiChat/providers/AiChatStateProvider"
+import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
+import { useCoAgent, useCopilotContext } from "@copilotkit/react-core"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect } from "react"
 import { CoCreationGroup } from "../components/CoCreationGroup/CoCreationGroup"
@@ -13,10 +12,17 @@ import { TextCCBManifest } from "./blocks/Text"
 
 const Demo = ({ children }: { children: React.ReactElement }) => {
   const { setOpen } = useAiChat()
+
+  const { threadId } = useCopilotContext()
+  const { state } = useCoAgent<{ query: string; concept: string }>({
+    name: "one-workflow",
+    initialState: { query: "", concept: "" },
+  })
+
   useEffect(() => {
     setOpen(true)
   }, [setOpen])
-  return <PageLayout aside={<AiChat />}>{children}</PageLayout>
+  return <>{children}</>
 }
 const meta = {
   title: "CoCreationGroup",
@@ -34,19 +40,21 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <div>
-          <AiChatProvider
-            enabled
-            agent="one-workflow"
-            runtimeUrl="http://localhost:4111/copilotkit"
-            credentials="include"
-            showDevConsole={false}
-          >
-            <Demo>
-              <Story />
-            </Demo>
-          </AiChatProvider>
-        </div>
+        <ApplicationFrame
+          sidebar={null}
+          ai={{
+            runtimeUrl: "http://localhost:4111/copilotkit",
+            agent: "one-workflow",
+            credentials: "include",
+            showDevConsole: true,
+            enabled: true,
+            greeting: "Hello, John",
+          }}
+        >
+          <Demo>
+            <Story />
+          </Demo>
+        </ApplicationFrame>
       )
     },
   ],
