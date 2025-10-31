@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.247.3](https://github.com/factorialco/f0/compare/f0-react-v1.247.2...f0-react-v1.247.3) (2025-10-31)
+
+
+### Bug Fixes
+
+* f0button empty label warn ([#2898](https://github.com/factorialco/f0/issues/2898)) ([3ffb376](https://github.com/factorialco/f0/commit/3ffb3767827a42c7eb105993c1751dcd3ca4229e))
+
 ## [1.247.2](https://github.com/factorialco/f0/compare/f0-react-v1.247.1...f0-react-v1.247.2) (2025-10-30)
 
 
