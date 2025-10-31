@@ -377,6 +377,51 @@ export const PersonHeader: Story = {
   },
 }
 
+export const EmojiHeader: Story = {
+  args: {
+    title: "Summer Party 2024",
+    description: "Annual company summer celebration event",
+    avatar: {
+      type: "emoji",
+      emoji: "🎉",
+    },
+    primaryAction: {
+      label: "RSVP",
+      icon: Icon.Check,
+      onClick: fn(),
+    },
+    secondaryActions: [
+      {
+        label: "Share",
+        icon: Icon.ExternalLink,
+        onClick: fn(),
+      },
+    ],
+    metadata: [
+      {
+        label: "Date",
+        value: { type: "text", content: "July 15, 2024" },
+      },
+      {
+        label: "Location",
+        value: { type: "text", content: "Barcelona Beach Club" },
+      },
+      {
+        label: "Organizer",
+        value: {
+          type: "avatar",
+          variant: {
+            type: "person",
+            firstName: "Ana",
+            lastName: "García",
+          },
+          text: "Ana García",
+        },
+      },
+    ],
+  },
+}
+
 export const TeamHeader: Story = {
   args: {
     title: "Product designers",
