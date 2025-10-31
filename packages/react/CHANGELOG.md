@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.247.4](https://github.com/factorialco/f0/compare/f0-react-v1.247.3...f0-react-v1.247.4) (2025-10-31)
+
+
+### Bug Fixes
+
+* link h-fit ([#2900](https://github.com/factorialco/f0/issues/2900)) ([0356c44](https://github.com/factorialco/f0/commit/0356c4471c1daae9eabcfa7e8e40e00686c22221))
+
 ## [1.247.3](https://github.com/factorialco/f0/compare/f0-react-v1.247.2...f0-react-v1.247.3) (2025-10-31)
 
 
