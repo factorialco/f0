@@ -72,7 +72,7 @@ export const useTextFormatEnforcer = (
     if (text !== undefined && rules) {
       textFormatEnforcer(text, rules, options.warn, options.componentName)
     }
-  }, [text, rules, options.warn, options.componentName])
+  }, [text, rules, options])
 }
 
 export { containsEmojis }
