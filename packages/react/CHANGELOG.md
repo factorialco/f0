@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.248.0](https://github.com/factorialco/f0/compare/f0-react-v1.247.4...f0-react-v1.248.0) (2025-10-31)
+
+
+### Features
+
+* add support for source prop for "in" filter ([#2884](https://github.com/factorialco/f0/issues/2884)) ([72a4f5c](https://github.com/factorialco/f0/commit/72a4f5cfb0a138d54f377f88436ab857ddb41438))
+
 ## [1.247.4](https://github.com/factorialco/f0/compare/f0-react-v1.247.3...f0-react-v1.247.4) (2025-10-31)
 
 
