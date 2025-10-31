@@ -552,10 +552,22 @@ const OneDataCollectionComp = <
     const groupByOptions = grouping
       ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
       : 0
+
+    const tableVisualization = Object.values(visualizations).find(
+      (visualization) => visualization.type === "table"
+    )
+
+    // Show table settings if the table visualization is defined and the allowColumnHiding or allowColumnReordering options are true
+    const showTableSettings =
+      !!tableVisualization &&
+      (!!tableVisualization.options?.allowColumnHiding ||
+        !!tableVisualization.options.allowColumnReordering)
+
     return (
       (visualizations && visualizations.length > 1) ||
       (groupByOptions > 0 && !grouping?.hideSelector) ||
-      (sortings && Object.keys(sortings).length > 0)
+      (sortings && Object.keys(sortings).length > 0) ||
+      showTableSettings
     )
   }, [visualizations, grouping, sortings])
 
