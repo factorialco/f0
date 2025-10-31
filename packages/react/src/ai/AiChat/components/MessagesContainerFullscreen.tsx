@@ -9,7 +9,6 @@ import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useMemo, useRef } from "react"
-import { useResizeObserver } from "usehooks-ts"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { FeedbackModal } from "./FeedbackModal"
@@ -18,6 +17,15 @@ import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
 
+/**
+ * MessagesContainerFullscreen - Used in fullscreen chat (CopilotChat)
+ *
+ * Layout: Flexbox layout separating scrollable messages and sticky input footer.
+ * - Messages scroll inside a flex-1 container.
+ * - Input stays sticky at the bottom like a normal chat UI.
+ *
+ * Used by: AiFullscreenChat
+ */
 export const MessagesContainerFullscreen = (props: MessagesProps) => {
   return (
     <FeedbackModalProvider>
@@ -62,8 +70,9 @@ const Messages = ({
       ),
     [initialMessage, translations.ai.defaultInitialMessage]
   )
+
   const showWelcomeBlock =
-    messages.length == 0 && (greeting || initialMessages.length > 0)
+    messages.length === 0 && (greeting || initialMessages.length > 0)
 
   const {
     messagesContainerRef,
@@ -71,51 +80,40 @@ const Messages = ({
     showScrollToBottom,
     scrollToBottom,
   } = useScrollToBottom()
-  const { height: containerHeight = 0 } = useResizeObserver({
-    ref: messagesContainerRef,
-    box: "border-box",
-  })
-  const turns = useMemo(() => {
-    return convertMessagesToTurns(messages)
-  }, [messages])
+
+  const turns = useMemo(() => convertMessagesToTurns(messages), [messages])
 
   return (
     <>
-      <motion.div
-        layout
-        className={cn(
-          "scrollbar-macos relative isolate flex flex-1 flex-col px-4 pt-3",
-          "min-h-0 overflow-y-scroll"
-        )}
-        ref={messagesContainerRef}
+      <div
+        className="flex h-full w-full flex-col overflow-hidden"
+        style={{ position: "relative", minHeight: 0 }}
       >
-        <motion.div
-          layout="position"
-          ref={turnsContainerRef}
-          className={
-            showWelcomeBlock ? "flex flex-1 pb-3" : "flex flex-col gap-8"
-          }
-        >
-          {showWelcomeBlock && (
-            <WelcomeScreen
-              greeting={greeting}
-              initialMessages={initialMessages}
-              suggestions={welcomeScreenSuggestions}
-            />
+        {/* Messages section */}
+        <div
+          ref={messagesContainerRef}
+          className={cn(
+            "scrollbar-macos flex flex-1 flex-col overflow-y-auto px-4 pt-3",
+            showWelcomeBlock ? "justify-end" : "justify-start"
           )}
-          {turns.map((turnMessages, turnIndex) => {
-            const isCurrentTurn = turnIndex === turns.length - 1
+          style={{ minHeight: 0 }}
+        >
+          <div
+            ref={turnsContainerRef}
+            className={showWelcomeBlock ? "flex pb-3" : "flex flex-col gap-8"}
+            style={{ width: "100%" }}
+          >
+            {showWelcomeBlock && (
+              <WelcomeScreen
+                greeting={greeting}
+                initialMessages={initialMessages}
+                suggestions={welcomeScreenSuggestions}
+              />
+            )}
 
-            return (
+            {turns.map((turnMessages, turnIndex) => (
               <div
                 className="flex flex-col items-start justify-start gap-2"
-                style={{
-                  minHeight: isCurrentTurn
-                    ? // "scroll" the current turn up in the view to make space for the assistant response,
-                      // but leave 20% of the container height on the top to show part of the previous dialog
-                      containerHeight * 0.8
-                    : undefined,
-                }}
                 key={`turn-${turnIndex}`}
               >
                 {turnMessages.map((message, index) => {
@@ -141,7 +139,7 @@ const Messages = ({
                       key={`${turnIndex}-${index}`}
                       message={
                         Array.isArray(message)
-                          ? message[message.length - 1] // show last thought when the thinking is ongoing
+                          ? message[message.length - 1]
                           : message
                       }
                       inProgress={inProgress}
@@ -157,35 +155,49 @@ const Messages = ({
                   )
                 })}
               </div>
-            )
-          })}
-          {interrupt}
-        </motion.div>
-        <footer className="copilotKitMessagesFooter" ref={messagesEndRef}>
+            ))}
+
+            {interrupt}
+            <div ref={messagesEndRef} className="h-2" />
+          </div>
+
+          <AnimatePresence>
+            {showScrollToBottom && (
+              <motion.div
+                className="sticky bottom-20 z-10 flex justify-center"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="rounded bg-f1-background">
+                  <ButtonInternal
+                    onClick={() => scrollToBottom()}
+                    label={translations.ai.scrollToBottom}
+                    variant="neutral"
+                    icon={ArrowDown}
+                    hideLabel
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Input section (sticky footer) */}
+        <footer
+          className="copilotKitMessagesFooter bg-white border-gray-200 w-full border-t"
+          style={{
+            position: "sticky",
+            bottom: 0,
+            zIndex: 10,
+            flexShrink: 0,
+          }}
+        >
           {children}
         </footer>
-        <AnimatePresence>
-          {showScrollToBottom && (
-            <motion.div
-              className="sticky bottom-2 z-10 flex justify-center"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="rounded bg-f1-background">
-                <ButtonInternal
-                  onClick={() => scrollToBottom()}
-                  label={translations.ai.scrollToBottom}
-                  variant="neutral"
-                  icon={ArrowDown}
-                  hideLabel
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      </div>
+
       {isOpen && (
         <FeedbackModal
           onSubmit={(message, feedback) => {

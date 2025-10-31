@@ -264,14 +264,23 @@ const AiFullscreenChatCmp = () => {
   }
 
   return (
-    <CopilotChat
-      className="relative flex h-full w-full flex-col overflow-hidden"
-      Messages={MessagesContainerFullscreen}
-      Input={ChatTextarea}
-      UserMessage={UserMessage}
-      AssistantMessage={AssistantMessage}
-      RenderSuggestionsList={SuggestionsList}
-    />
+    <div className="bg-white flex h-full w-full flex-col overflow-hidden">
+      <div className="relative flex flex-1 flex-col overflow-hidden">
+        {/* Use grid to reorder layout */}
+        <div className="grid h-full w-full grid-rows-[1fr_auto]">
+          {/* Messages take remaining height */}
+          <div className="overflow-y-auto">
+            <CopilotChat
+              Messages={MessagesContainerFullscreen}
+              Input={ChatTextarea}
+              UserMessage={UserMessage}
+              AssistantMessage={AssistantMessage}
+              RenderSuggestionsList={SuggestionsList}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
