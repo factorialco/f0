@@ -40,9 +40,11 @@ const SelectItem = React.forwardRef<
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
       {multiple ? (
         <Checkbox
+          title="Select item"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           checked={selected}
+          hideLabel
         />
       ) : (
         selected && (

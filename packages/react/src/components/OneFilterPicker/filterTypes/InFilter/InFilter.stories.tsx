@@ -224,6 +224,7 @@ const AsyncOptionsWithSearchExample = () => {
         }}
         value={selectedValues}
         onChange={handleChange}
+        asChild={false}
       />
     </div>
   )

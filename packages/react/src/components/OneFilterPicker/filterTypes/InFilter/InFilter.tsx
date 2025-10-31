@@ -213,6 +213,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           isLoading={isLoading}
           isLoadingMore={isLoading}
           className="h-full"
+          aria-label={schema.label}
           asChild={asChild !== undefined ? asChild : !isCompactMode}
           top={
             <div className="flex w-full flex-col">
@@ -225,6 +226,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                     onChange={setSearchTerm}
                     autoFocus
                     clearable
+                    name={`${schema.label}-search`}
                   />
                 </div>
               )}
@@ -252,7 +254,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             <div className="flex w-full flex-col">
               {bottom}
               {!isCompactMode && (
-                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+                <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
                   <F0Button
                     variant="outline"
                     label="Select all"
