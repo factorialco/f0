@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.249.0](https://github.com/factorialco/f0/compare/f0-react-v1.248.0...f0-react-v1.249.0) (2025-10-31)
+
+
+### Features
+
+* **F0Avatar:** add emoji variant support and update related components ([#2902](https://github.com/factorialco/f0/issues/2902)) ([f194067](https://github.com/factorialco/f0/commit/f194067b83d0d9cbb57648277612cdae4cdbe8bf))
+
 ## [1.248.0](https://github.com/factorialco/f0/compare/f0-react-v1.247.4...f0-react-v1.248.0) (2025-10-31)
 
 
