@@ -1,3 +1,4 @@
+import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
 import { AlertTagCellValue } from './types/alertTag.tsx';
 import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
@@ -6,6 +7,7 @@ import { AmountCellValue as AmountCellValue_2 } from '../../value-display/types/
 import { AnchorHTMLAttributes } from 'react';
 import { AreaChartWidgetProps } from './AreaChartWidget';
 import { AriaAttributes } from 'react';
+import { AutoFill as AutoFill_2 } from 'react';
 import { AvatarListCellValue } from './types/avatarList.tsx';
 import { AvatarListCellValue as AvatarListCellValue_2 } from '../../value-display/types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
@@ -28,6 +30,7 @@ import { DotTagCellValue } from './types/dotTag.tsx';
 import { DotTagCellValue as DotTagCellValue_2 } from '../../value-display/types/dotTag';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
+import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FieldPath } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
@@ -37,6 +40,7 @@ import { FolderCellValue } from './types/folder.tsx';
 import { FolderCellValue as FolderCellValue_2 } from '../../value-display/types/folder';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon.tsx';
@@ -62,6 +66,7 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import * as RechartsPrimitive from 'recharts';
 import { RefAttributes } from 'react';
+import { RefObject } from 'react';
 import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { StatusCellValue } from './types/status.tsx';
 import { StatusCellValue as StatusCellValue_2 } from '../../value-display/types/status';
@@ -90,7 +95,7 @@ declare type Action = {
     label: string;
     onClick: () => void;
     icon?: IconType;
-    variant?: ButtonVariant;
+    variant?: F0ButtonProps["variant"];
     disabled?: boolean;
 };
 
@@ -101,7 +106,90 @@ declare type Action_2 = {
     variant?: "default" | "outline" | "promote";
 };
 
-export declare type ActionDefinition = DropdownItemSeparator | (Omit<DropdownItemObject, "type" | "onClick"> & {
+declare type ActionBaseProps = ActionCommonProps & DataAttributes;
+
+declare type ActionButtonProps = ActionBaseProps & {
+    type?: ButtonType;
+    href?: never;
+    target?: never;
+    onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+declare interface ActionCommonProps {
+    /**
+     * Tooltip
+     */
+    tooltip?: string | false;
+    /**
+     * The variant of the action.
+     */
+    variant?: ActionVariant;
+    /**
+     * The children of the action.
+     */
+    children: ReactNode;
+    /**
+     * The prepend of the action.
+     */
+    prepend?: ReactNode;
+    /**
+     * The append of the action.
+     */
+    append?: ReactNode;
+    /**
+     * The prepend outside (next to the button) of the action.
+     */
+    prependOutside?: ReactNode;
+    /**
+     * The append outside of the action.
+     */
+    appendOutside?: ReactNode;
+    /**
+     * The disabled state of the action.
+     */
+    disabled?: boolean;
+    /**
+     * The loading state of the action.
+     */
+    loading?: boolean;
+    /**
+     * The pressed state of the action.
+     */
+    pressed?: boolean;
+    /**
+     * The class name of the action.
+     */
+    className?: string;
+    /**
+     * The size of the action.
+     */
+    size?: ActionSize;
+    /**
+     * The render mode.
+     * @default "default"
+     */
+    mode?: "default" | "only";
+    /**
+     * The title of the action.
+     */
+    title?: string;
+    /**
+     * make the left and right padding of the action smaller.
+     */
+    compact?: boolean;
+    /**
+     * The aria label of the action.
+     */
+    "aria-label"?: string;
+    /**
+     * The tab index of the action.
+     */
+    tabIndex?: number;
+}
+
+export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     onClick: () => void;
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
@@ -115,7 +203,28 @@ export declare interface ActionItemProps {
     inGroup?: boolean;
 }
 
+declare type ActionLinkProps = ActionBaseProps & {
+    href: string;
+    target?: NavTarget;
+    rel?: string;
+    onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+    className?: string;
+};
+
 declare type ActionProps = {
+    buttonType: "gradient" | "internal";
+    label: string;
+    onClick: () => void;
+    isLoading: boolean;
+    buttonVariant?: ButtonVariant;
+    icon?: IconType;
+};
+
+declare type ActionProps_2 = ActionLinkProps | ActionButtonProps;
+
+declare type ActionProps_3 = {
     /**
      * The label of the action
      */
@@ -167,6 +276,10 @@ declare type ActionProps = {
     type?: "default";
 });
 
+declare type ActionSize = (typeof actionSizes)[number];
+
+declare const actionSizes: readonly ["sm", "md", "lg"];
+
 declare type ActionType = CopyActionType | NavigateActionType;
 
 export declare type actionType = {
@@ -185,6 +298,10 @@ declare type actionType_2 = {
     hideLabel?: boolean;
     variant?: "default" | "outline" | "neutral";
 };
+
+declare type ActionVariant = (typeof actionVariants)[number];
+
+declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "link", "unstyled", "mention"];
 
 export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element) & {
     Skeleton: () => default_2.JSX.Element;
@@ -255,11 +372,21 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
-export declare const AiChatProvider: ({ enabled, greeting, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
+    initialMessage?: string | string[];
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 declare type AiChatProviderReturnValue = {
@@ -278,12 +405,100 @@ declare type AiChatProviderReturnValue = {
      */
     setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
     autoClearMinutes: number | null;
+    /**
+     * The initial message to display in the chat
+     */
+    initialMessage?: string | string[];
+    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
+    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
+    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    /**
+     * Clear/reset the chat conversation
+     */
+    clear: () => void;
+    /* Excluded from this release type: setClearFunction */
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
     greeting?: string;
     enabled: boolean;
     agent?: string;
+    initialMessage?: string | string[];
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const AiPromotionChat: () => JSX_2.Element | null;
+
+export declare const AiPromotionChatProvider: ({ enabled, greeting, title, description, benefits, actions, onShow, onHide, children, }: AiPromotionChatProviderProps) => JSX_2.Element;
+
+export declare type AiPromotionChatProviderProps = {
+    enabled?: boolean;
+    greeting?: string;
+    title?: string;
+    description?: string;
+    benefits?: {
+        noBoldText: string;
+        boldText: string;
+    }[];
+    actions?: ActionProps[];
+    onShow?: () => void;
+    onHide?: () => void;
+    children: React.ReactNode;
+};
+
+declare type AiPromotionChatProviderReturnValue = {
+    enabled: boolean;
+    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    shouldPlayEntranceAnimation: boolean;
+    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
+    /**
+     * Set the amount of minutes after which the chat will be cleared automatically
+     * Set `null` to disable auto-clearing
+     *
+     * @default 15
+     */
+    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
+    autoClearMinutes: number | null;
+    /**
+     * Clear/reset the chat conversation
+     */
+    clear: () => void;
+    /* Excluded from this release type: setClearFunction */
+} & Pick<AiPromotionChatState, "greeting" | "title" | "description" | "benefits" | "actions" | "onShow" | "onHide">;
+
+declare interface AiPromotionChatState {
+    enabled: boolean;
+    greeting?: string;
+    title?: string;
+    description?: string;
+    benefits?: {
+        noBoldText: string;
+        boldText: string;
+    }[];
+    actions?: ActionProps[];
+    onShow?: () => void;
+    onHide?: () => void;
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -347,10 +562,11 @@ declare const alertVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare function ApplicationFrame({ children, sidebar, banner, ai, }: ApplicationFrameProps): JSX_2.Element;
+export declare function ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, }: ApplicationFrameProps): JSX_2.Element;
 
-declare interface ApplicationFrameProps {
+export declare interface ApplicationFrameProps {
     ai?: Omit<AiChatProviderProps, "children">;
+    aiPromotion?: Omit<AiPromotionChatProviderProps, "children">;
     banner?: React.ReactNode;
     sidebar: React.ReactNode;
     children: React.ReactNode;
@@ -401,6 +617,8 @@ declare type AvatarBadge = ({
     tooltip?: string;
 };
 
+declare const avatarEmojiSizes: readonly ["sm", "md", "lg", "xl"];
+
 declare type AvatarFileSize = (typeof avatarFileSizes)[number];
 
 declare const avatarFileSizes: readonly ["xs", "sm", "md", "lg"];
@@ -412,12 +630,16 @@ declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
 declare type AvatarVariant = DistributiveOmit<({
     type: "person";
 } & F0AvatarPersonProps) | ({
+    type: "emoji";
+} & F0AvatarEmojiProps) | ({
     type: "team";
 } & F0AvatarTeamProps) | ({
     type: "company";
 } & F0AvatarCompanyProps) | ({
     type: "file";
-} & F0AvatarFileProps), "size">;
+} & F0AvatarFileProps) | ({
+    type: "flag";
+} & F0AvatarFlagProps), "size">;
 
 export declare const Badge: ({ type, size, icon }: BadgeProps) => JSX_2.Element;
 
@@ -467,6 +689,17 @@ declare type BaseAvatarProps = {
      */
     src?: string;
     /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
+    /**
+     * Optional icon to display on the avatar. Will override the name or image if provided.
+     */
+    icon?: {
+        icon: IconType;
+        color?: F0IconProps["color"];
+    };
+    /**
      * The color of the avatar.
      * @default "random"
      */
@@ -499,6 +732,7 @@ export declare type BaseBannerProps = {
     onClose?: () => void;
     isLoading?: boolean;
     children?: React.ReactNode;
+    variant?: "default" | "full-width";
 };
 
 export declare const BaseCelebration: ({ link, firstName, lastName, src, onClick, canReact, lastEmojiReaction, onReactionSelect, type, typeLabel, date, }: CelebrationProps) => JSX_2.Element;
@@ -562,7 +796,7 @@ declare interface BaseHeaderProps_2 {
     } | AvatarVariant;
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-    secondaryActions?: SecondaryAction[];
+    secondaryActions?: HeaderSecondaryAction[];
     otherActions?: (DropdownItem & {
         isVisible?: boolean;
     })[];
@@ -620,13 +854,13 @@ declare type BreadcrumbBaseItemType = NavigationItem & {
     label: string;
 };
 
-declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType;
+export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType;
 
-declare type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
+export declare type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
     loading: true;
 };
 
-declare type BreadcrumbNavItemType = BreadcrumbBaseItemType & {
+export declare type BreadcrumbNavItemType = BreadcrumbBaseItemType & {
     module?: ModuleId;
 };
 
@@ -655,7 +889,7 @@ export declare function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps): 
 
 export declare function BreadcrumbSelect<T extends string, R = unknown>({ ...props }: BreadcrumbSelectProps<T, R>): JSX_2.Element;
 
-declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
+export declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
     type: "select";
     searchbox?: boolean;
     externalSearch?: boolean;
@@ -680,6 +914,15 @@ export declare interface BreadcrumbsProps {
     append?: ReactNode;
 }
 
+export declare interface BreadcrumbState {
+    visibleCount: number;
+    headItem: BreadcrumbItemType | null;
+    tailItems: BreadcrumbItemType[];
+    collapsedItems: BreadcrumbItemType[];
+    isOnly: boolean;
+    minWidth: number | undefined;
+}
+
 declare interface BreakType {
     id: string;
     name: string;
@@ -701,16 +944,21 @@ export declare type BulkActionDefinition = {
     icon?: IconType;
     id: string;
     keepSelection?: boolean;
+    critical?: boolean;
+    description?: string;
+    disabled?: boolean;
 };
 
 export declare type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) => {
-    primary: BulkActionDefinition[];
-    secondary?: BulkActionDefinition[];
+    primary?: (BulkActionDefinition | {
+        type: "separator";
+    })[];
+    secondary?: (BulkActionDefinition | {
+        type: "separator";
+    })[];
 } | {
     warningMessage: string;
 };
-
-declare const Button: React_2.ForwardRefExoticComponent<ButtonProps_2 & React_2.RefAttributes<HTMLButtonElement>>;
 
 export declare interface ButtonConfig {
     key: string;
@@ -723,11 +971,47 @@ export declare interface ButtonConfig {
     };
 }
 
-declare type ButtonInternalProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "disabled" | "type" | "round" | "className" | "pressed"> & DataAttributes & {
+declare type ButtonDropdownItem<T = string> = {
+    /**
+     * The value of the item.
+     */
+    value: T;
+    /**
+     * The label of the item.
+     */
+    label: string;
+    /**
+     * The icon of the item.
+     */
+    icon?: IconType;
+    /**
+     * Whether the item is critical.
+     * @default false
+     */
+    critical?: boolean;
+    /**
+     * The description of the item.
+     */
+    description?: string;
+};
+
+declare type ButtonInternalProps = Pick<ActionProps_2, "size" | "disabled" | "className" | "pressed" | "compact" | "variant" | "tooltip"> & DataAttributes & {
+    /**
+     * The aria-label of the button if not provided title or label will be used.
+     */
+    "aria-label"?: string;
+    /**
+     * The variant of the button.
+     */
+    variant?: ButtonVariant;
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    /**
+     * The title of the button.
+     */
+    title?: string;
     /**
      * The visible label for the button. Required for accessibility.
      */
@@ -751,52 +1035,63 @@ declare type ButtonInternalProps = Pick<ComponentProps<typeof Button>, "variant"
     /**
      * Sets the button size. 'lg' for mobile, 'md' for desktop, 'sm' for compact/secondary actions.
      */
-    size?: "sm" | "md" | "lg";
+    size?: ButtonSize;
     /**
+     * @private
      * Appends a React node after the button content (for custom UI extensions).
      */
     append?: React.ReactNode;
-    /**
-     * Appends a React node as a separate button, visually grouped with the main button.
-     */
-    appendButton?: React.ReactNode;
     /**
      * If true, the button is inactive and does not respond to user interaction.
      */
     disabled?: boolean;
     /**
+     * @private
      * If true, the button is visually active or selected (pressed state).
      */
     pressed?: boolean;
-};
-
-declare type ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
-
-declare interface ButtonProps_2 extends React_2.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-    asChild?: boolean;
-    round?: boolean;
-    size?: ButtonSize;
-    variant?: ButtonVariant;
-    appendButton?: React_2.ReactNode;
-    pressed?: boolean;
-}
-
-declare type ButtonSize = (typeof sizes)[number];
-
-declare type ButtonVariant = (typeof variants_2)[number];
-
-declare const buttonVariants: (props?: ({
-    disabled?: boolean | undefined;
-    pressed?: boolean | undefined;
-    variant?: "default" | "critical" | "promote" | "neutral" | "outline" | "ghost" | "outlinePromote" | undefined;
-    size?: "lg" | "md" | "sm" | undefined;
+    /**
+     * @private
+     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     */
+    noAutoTooltip?: boolean;
+    /**
+     * @private
+     * If true, the button will not automatically add a title based label
+     */
+    noTitle?: boolean;
+    /**
+     * @private
+     * The style of the button.
+     */
+    style?: React.CSSProperties;
 } & ({
-    class?: ClassValue;
-    className?: never;
+    /**
+     * The URL to navigate to when the button is clicked.
+     */
+    href: string;
+    /**
+     * The target to navigate to when the button is clicked.
+     */
+    target?: NavTarget;
+    type?: never;
 } | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+    href?: never;
+    target?: never;
+    type?: ButtonType;
+});
+
+declare type ButtonSize = (typeof buttonSizes)[number];
+
+declare const buttonSizes: readonly ["sm", "md", "lg"];
+
+declare type ButtonType = (typeof buttonTypes)[number];
+
+declare const buttonTypes: readonly ["button", "submit", "reset"];
+
+declare type ButtonVariant = (typeof buttonVariants)[number];
+
+declare const buttonVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
 export declare type CalendarDate = {
     day: number;
@@ -833,6 +1128,27 @@ export declare type CalendarMode = "single" | "range";
 
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
 
+declare type CalloutAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+};
+
+declare interface CalloutInternalProps {
+    title: string;
+    onClose?: () => void;
+    children: React.ReactNode;
+    actions?: CalloutAction[];
+    variant: CalloutVariant;
+}
+
+declare interface CalloutSkeletonProps {
+    compact?: boolean;
+    variant?: CalloutVariant;
+}
+
+declare type CalloutVariant = (typeof variants)[number];
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -865,16 +1181,16 @@ declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
 };
 
 declare const cardPropertyRenderers: {
-    readonly text: (args: TextCellValue_2) => default_2.JSX.Element;
+    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly date: (args: DateCellValue_2) => default_2.JSX.Element;
+    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly person: (args: PersonCellValue_2) => default_2.JSX.Element;
-    readonly company: (args: CompanyCellValue_2) => default_2.JSX.Element;
-    readonly team: (args: TeamCellValue_2) => default_2.JSX.Element;
+    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly status: (args: StatusCellValue_2) => default_2.JSX.Element;
     readonly tag: (args: TagCellValue_2) => default_2.JSX.Element;
-    readonly avatarList: (args: AvatarListCellValue_2) => default_2.JSX.Element;
+    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
     readonly tagList: (args: TagListCellValue_2) => default_2.JSX.Element;
     readonly alertTag: (args: AlertTagCellValue_2) => default_2.JSX.Element;
     readonly dotTag: (args: DotTagCellValue_2) => default_2.JSX.Element;
@@ -976,7 +1292,7 @@ declare type ChartConfig_2 = {
 
 declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
 
-declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants> {
+declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_2> {
     config: ChartConfig_2;
     children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
 }
@@ -1194,6 +1510,8 @@ declare type Content = (ComponentProps<typeof DataList.Item> & {
     type: "dot-tag";
 });
 
+declare type ContentPadding = "sm" | "md";
+
 declare type CopyActionType = {
     type: "copy";
     text?: string;
@@ -1231,6 +1549,15 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
 
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
 
+export declare type CustomVisualizationProps<Source extends {
+    dataAdapter: DataCollectionDataAdapter<any, any, any>;
+}> = {
+    onSelectItems: OnSelectItemsCallback<InferRecord<Source>, InferFilters<Source>>;
+    onLoadData: OnLoadDataCallback<InferRecord<Source>, InferFilters<Source>>;
+    onLoadError: OnLoadErrorCallback;
+    source: Source;
+};
+
 export declare const Dashboard: ForwardRefExoticComponent<DashboardProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: () => JSX_2.Element;
 };
@@ -1244,12 +1571,22 @@ declare type DashboardProps_2 = {
     children: ReactNode[];
 };
 
+declare type Data<R extends RecordType> = {
+    records: WithGroupId<R>[];
+    type: "grouped" | "flat";
+    groups: GroupRecord<R>[];
+};
+
 /**
  * Combined type for all possible data adapter configurations
  * @template R - The type of records in the collection
  * @template Filters - The available filter configurations
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
+
+declare type DataAttributes_2 = {
+    [key: `data-${string}`]: string | undefined;
+};
 
 export declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
@@ -1310,7 +1647,7 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /** Available actions that can be performed on records */
     itemActions?: ItemActions;
     /** Available primary actions that can be performed on the collection */
-    primaryActions?: PrimaryActionsDefinition;
+    primaryActions?: PrimaryActionsDefinitionFn;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
     /** Available summaries fields. If not provided, summaries is not allowed. */
@@ -1320,7 +1657,13 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     dataAdapter: DataCollectionDataAdapter<R, Filters, NavigationFilters>;
     /** Bulk actions that can be performed on the collection */
     bulkActions?: BulkActionsDefinition<R, Filters>;
-    totalItemSummary?: (totalItems: number) => string;
+    /** Total items summary that can be displayed on the collection
+     * If true, the total items summary will be displayed on the collection
+     * If a function is provided, the total items summary will be displayed on the collection
+     */
+    totalItemSummary?: boolean | ((totalItems: number) => string | null);
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
 };
@@ -1401,6 +1744,8 @@ export declare type DataSource<R extends RecordType, Filters extends FiltersDefi
     setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>;
     /** Function to provide an id for a record, necessary for append mode */
     idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol;
+    /** Item filter that can be used to filter the items before they are displayed */
+    itemPreFilter?: (item: R) => boolean;
 };
 
 /**
@@ -1472,6 +1817,26 @@ declare type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<Date
 } & DateNavigationOptions_2;
 
 declare type DatePickerCompareTo = Record<GranularityDefinitionKey, CompareToDef[]>;
+
+declare interface DatePickerPopupProps {
+    onSelect?: (value: DatePickerValue | undefined) => void;
+    value?: DatePickerValue;
+    defaultValue?: DatePickerValue;
+    presets?: DatePreset[];
+    granularities?: GranularityDefinitionKey[];
+    minDate?: Date;
+    maxDate?: Date;
+    disabled?: boolean;
+    hideGoToCurrent?: boolean;
+    children: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    compareTo?: DatePickerCompareTo;
+    defaultCompareTo?: CompareToDefKey;
+    hideCalendarInput?: boolean;
+    asChild?: boolean;
+    onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
+}
 
 export declare type DatePickerValue = {
     value: DateRangeComplete | undefined;
@@ -1562,6 +1927,7 @@ declare const defaultTranslations: {
         readonly add: "Add";
         readonly edit: "Edit";
         readonly save: "Save";
+        readonly send: "Send";
         readonly cancel: "Cancel";
         readonly copy: "Copy";
         readonly close: "Close";
@@ -1579,6 +1945,7 @@ declare const defaultTranslations: {
         readonly thumbsDown: "Dislike";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
+        readonly toggleDropdownMenu: "Toggle dropdown menu";
     };
     readonly status: {
         readonly selected: {
@@ -1589,12 +1956,13 @@ declare const defaultTranslations: {
     readonly filters: {
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
     };
     readonly toc: {
-        readonly search: "Search";
+        readonly search: "Search...";
     };
     readonly collections: {
         readonly sorting: {
@@ -1680,6 +2048,8 @@ declare const defaultTranslations: {
                 readonly currentDate: "This week";
                 readonly label: "Week";
                 readonly long: "Week of {{day}} {{month}} {{year}}";
+                readonly longSingular: "Week of {{date}}";
+                readonly longPlural: "Weeks of {{date}}";
             };
             readonly month: {
                 readonly currentDate: "This month";
@@ -1727,10 +2097,23 @@ declare const defaultTranslations: {
         readonly closeChat: "Close Chat with One AI";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
-        readonly initialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Write something here...";
+        readonly defaultInitialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Ask about time, people, or company info…";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
+        readonly feedbackModal: {
+            readonly positive: {
+                readonly title: "What did you like about this response?";
+                readonly label: "Your feedback helps us make Factorial AI better";
+                readonly placeholder: "Share what worked well";
+            };
+            readonly negative: {
+                readonly title: "What could have been better?";
+                readonly label: "Your feedback helps us improve future answers";
+                readonly placeholder: "Share what didn’t work";
+            };
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1761,20 +2144,20 @@ type: AlertAvatarProps_2["type"];
 title: string;
 description: string;
 };
-actions: {
+actions?: {
 primary: {
 label: string;
-onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined | undefined;
 icon?: IconType_2 | undefined;
+onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
+disabled?: boolean | undefined;
 } & {
 variant?: "default" | "critical" | "neutral";
 };
 secondary: {
 label: string;
-onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined | undefined;
 icon?: IconType_2 | undefined;
+onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
+disabled?: boolean | undefined;
 };
 };
 open?: boolean;
@@ -1802,16 +2185,16 @@ export declare const Dropdown: (props: DropdownProps) => JSX_2.Element;
 declare type DropdownInternalProps = {
     items: DropdownItem[];
     icon?: IconType;
-    size?: ButtonProps["size"];
+    size?: F0ButtonProps["size"];
     children?: default_2.ReactNode;
     align?: "start" | "end";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-} & DataAttributes;
+} & DataAttributes_2;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator;
 
-export declare type DropdownItemObject = NavigationItem & {
+export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     type?: "item";
     onClick?: () => void;
     icon?: IconType;
@@ -1824,13 +2207,13 @@ declare type DropdownItemSeparator = {
     type: "separator";
 };
 
+export declare type DropdownItemWithoutIcon = Omit<DropdownItemObject, "icon">;
+
 declare const DropdownMenu: React_2.FC<DropdownMenuPrimitive.DropdownMenuProps>;
 
 declare const DropdownMenuItem: React_2.ForwardRefExoticComponent<Omit<DropdownMenuPrimitive.DropdownMenuItemProps & React_2.RefAttributes<HTMLDivElement>, "ref"> & {
     inset?: boolean;
 } & React_2.RefAttributes<HTMLDivElement>>;
-
-declare const DropdownMenuTrigger: React_2.ForwardRefExoticComponent<DropdownMenuPrimitive.DropdownMenuTriggerProps & React_2.RefAttributes<HTMLButtonElement>>;
 
 declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_2)[number]> & {
     open?: boolean;
@@ -1853,7 +2236,7 @@ declare type EmptyState = {
     emoji?: string;
     title: string;
     description?: string;
-    actions?: ActionProps[];
+    actions?: ActionProps_3[];
 };
 
 declare const emptyStatesTypes: readonly ["no-data", "no-results", "error"];
@@ -1901,7 +2284,7 @@ export declare const EntitySelect: <T>(props: EntitySelectProps<T> & {
     children?: React.ReactNode;
 }) => JSX_2.Element;
 
-declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append"> {
+declare interface EntitySelectCommonProps<T> extends Omit<PopoverProps, "children" | "modal">, Pick<InputFieldProps<string>, "label" | "labelIcon" | "icon" | "error" | "status" | "hint" | "hideLabel" | "maxLength" | "disabled" | "placeholder" | "loading" | "required" | "readonly" | "append" | "size"> {
     entities: EntitySelectEntity[];
     groups: EntitySelectNamedGroup[];
     selectedGroup: string;
@@ -2002,9 +2385,20 @@ declare type F0AvatarCompanyProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+declare type F0AvatarEmojiProps = {
+    emoji: string;
+    size?: (typeof avatarEmojiSizes)[number];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
 declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
     size?: AvatarFileSize;
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarFlagProps = {
+    flag: string;
+    size?: BaseAvatarProps["size"];
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
@@ -2041,6 +2435,10 @@ declare type F0AvatarPersonProps = {
      * The badge to display on the avatar. Can be a module badge or a custom badge.
      */
     badge?: AvatarBadge;
+    /**
+     * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     */
+    deactivated?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare const F0AvatarPulse: {
@@ -2090,15 +2488,19 @@ declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0ButtonToggle: ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>;
+declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number]>;
 
-declare interface F0ButtonToggleProps {
-    selected?: boolean;
-    onSelectedChange?: (selected: boolean) => void;
-    label: string;
-    disabled?: boolean;
+export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>> & {
+    Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0CalloutProps = CalloutInternalProps;
+
+declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
-    size?: "sm" | "md" | "lg";
+    size?: "lg" | "md" | "sm" | "xs";
+    state?: "normal" | "animate";
+    color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
@@ -2129,7 +2531,7 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "onFocus" | "onBlur" | "disabled" | "size" | "loading" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "disabled" | "placeholder" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -2190,7 +2592,7 @@ export declare type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES];
  * @param actions - The actions to filter
  * @returns An array of filtered actions
  */
-export declare const filterActions: (actions: SecondaryActionsDefinition) => SecondaryActionsItemDefinition[];
+export declare const filterActions: (groups: SecondaryActionGroup[]) => SecondaryActionGroup[];
 
 /**
  * Union of all available filter types.
@@ -2202,8 +2604,8 @@ export declare type FilterDefinition = FilterDefinitionsByType[keyof FilterDefin
 /**
  * All the available filter types
  */
-declare type FilterDefinitionsByType<T = unknown> = {
-    in: InFilterDefinition<T>;
+declare type FilterDefinitionsByType<T = unknown, R extends RecordType = RecordType> = {
+    in: InFilterDefinition<T, R>;
     search: SearchFilterDefinition;
     date: DateFilterDefinition;
 };
@@ -2231,6 +2633,8 @@ export declare type FilterOptions<FilterKeys extends string> = Record<FilterKeys
  */
 export declare type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>;
 
+export declare type FiltersMode = "default" | "compact";
+
 /**
  * Current state of all filters in a collection.
  * Maps filter keys to their current values.
@@ -2255,6 +2659,7 @@ declare type FilterTypeDefinition<Value = unknown, Options extends object = neve
         schema: Schema;
         value: Value;
         onChange: (value: Value) => void;
+        isCompactMode?: boolean;
     }) => React.ReactNode;
     /**
      * The value label to display in the filter chips
@@ -2345,9 +2750,14 @@ export declare const getGranularityDefinition: (granularityKey: GranularityDefin
 export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
 
 /**
+ * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
+ */
+export declare const getPrimaryActions: (primaryActions: PrimaryActionsDefinitionFn | undefined) => PrimaryActionItemDefinition[];
+
+/**
  * Get the secondaryActionsItems from the secondaryActionsDefinition or the actions property
  */
-export declare const getSecondaryActions: (secondaryActions: SecondaryActionsDefinition | undefined) => SecondaryActionsItemDefinition[];
+export declare const getSecondaryActions: (secondaryActions: SecondaryActionsDefinition | undefined) => SecondaryActionGroup[];
 
 export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
@@ -2356,6 +2766,7 @@ export declare interface GranularityDefinition {
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
     toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
+    toStringMaxWidth: () => number;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
     navigateUIView: (viewDate: Date, direction: -1 | 1) => Date;
     navigate: (date: Date, direction: -1 | 1) => Date;
@@ -2371,6 +2782,7 @@ export declare interface GranularityDefinition {
         maxDate?: Date;
         setViewDate: (date: Date) => void;
         viewDate: Date;
+        compact?: boolean;
     }) => ReactNode;
     add: (date: DateRangeComplete, delta: number) => DateRangeComplete;
     getPrevNext(date: DateRange, options: DateNavigationOptions): PrevNextDateNavigation;
@@ -2381,6 +2793,11 @@ export declare type GranularityDefinitionKey = keyof typeof granularityDefinitio
 export declare const granularityDefinitions: Record<string, GranularityDefinition>;
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+/**
+ * Symbol used to identify the groupId in the data
+ */
+declare const GROUP_ID_SYMBOL: unique symbol;
 
 /**
  * Defines the structure and configuration of a grouping options for a data source.
@@ -2419,6 +2836,13 @@ export declare type GroupingState<R extends RecordType, Grouping extends Groupin
     order?: SortOrder;
 } | undefined;
 
+declare type GroupRecord<RecordType> = {
+    key: string;
+    label: string | Promise<string>;
+    itemCount: number | undefined | Promise<number | undefined>;
+    records: RecordType[];
+};
+
 declare type HeaderProps = {
     module: {
         id: ModuleId;
@@ -2442,6 +2866,10 @@ declare type HeaderProps = {
         onChange: (newValue: boolean) => void;
         label: string;
     };
+};
+
+declare type HeaderSecondaryAction = SecondaryAction & {
+    hideLabel?: boolean;
 };
 
 export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
@@ -2478,6 +2906,16 @@ declare type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefA
     animate?: "normal" | "animate";
 }>;
 
+declare const iconVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "xs" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
 declare type IdStructure = {
     id: string;
     children?: IdStructure[];
@@ -2501,10 +2939,23 @@ export declare interface IndicatorsListProps {
     items: ComponentProps<typeof Indicator>[];
 }
 
+declare type InferFilters<S> = S extends {
+    dataAdapter: DataCollectionDataAdapter<any, infer F, any>;
+} ? F : never;
+
+/**
+ * Returns the custom visualization props based on the data collection source.
+ *
+ * @template Source - The data collection source
+ */
+declare type InferRecord<S> = S extends {
+    dataAdapter: DataCollectionDataAdapter<infer R, any, any>;
+} ? R : never;
+
 declare type InferSchema<T extends SchemaType> = z.infer<T>;
 
-declare type InFilterDefinition<T = unknown> = BaseFilterDefinition<"in"> & {
-    options: InFilterOptions_2<T>;
+declare type InFilterDefinition<T = unknown, R extends RecordType = RecordType> = BaseFilterDefinition<"in"> & {
+    options: InFilterOptions_2<T, R>;
 };
 
 /**
@@ -2523,10 +2974,14 @@ declare type InFilterOptionItem<T = unknown> = {
  * Represents the options for the InFilter component.
  * @template T - Type of the underlying value
  */
-declare type InFilterOptions_2<T> = {
+declare type InFilterOptions_2<T, R extends RecordType = RecordType> = {
     cache?: boolean;
+} & ({
     options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
-};
+} | {
+    source: DataSourceDefinition<R, FiltersDefinition, SortingsDefinition, GroupingDefinition<R>>;
+    mapOptions: (item: R) => InFilterOptionItem<T>;
+});
 
 /**
  * Represents a paginated response structure tailored for infinite scroll implementations.
@@ -2557,11 +3012,12 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "status" | "disabled" | "size" | "icon" | "loading" | "hideLabel" | "append" | "maxLength" | "required" | "error" | "hint" | "labelIcon" | "onClickContent" | "clearable" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
 declare type InputFieldProps<T> = {
+    autoFocus?: boolean;
     label: string;
     placeholder?: string;
     labelIcon?: IconType;
@@ -2583,11 +3039,14 @@ declare type InputFieldProps<T> = {
     readonly?: boolean;
     clearable?: boolean;
     role?: string;
+    autocomplete?: AutoFill_2;
+    inputRef?: React.Ref<unknown>;
     "aria-controls"?: AriaAttributes["aria-controls"];
     "aria-expanded"?: AriaAttributes["aria-expanded"];
     onClear?: () => void;
     onFocus?: () => void;
     onBlur?: () => void;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     canGrow?: boolean;
     children: React.ReactNode & {
         onFocus?: () => void;
@@ -2632,8 +3091,9 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
+export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
+    onPressEnter?: () => void;
 };
 
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
@@ -2678,6 +3138,8 @@ declare type KanbanLaneDefinition = {
     variant?: Variant;
 };
 
+declare type KanbanOnCreate = (laneId: string) => void | Promise<void>;
+
 declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toLaneId: string, sourceRecord: TRecord, destinyRecord: {
     record: TRecord;
     position: "above" | "below";
@@ -2693,6 +3155,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
         property: CardMetadataProperty;
     }>;
     onMove?: KanbanOnMove<Record>;
+    onCreate?: KanbanOnCreate;
 };
 
 /**
@@ -2711,7 +3174,7 @@ export declare type lastIntentType = {
 
 declare type Level = (typeof levels)[number];
 
-declare const levels: readonly ["info", "warning", "critical"];
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: LineChartProps;
@@ -3059,7 +3522,7 @@ export declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefi
 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes;
+} & DataAttributes_2;
 
 declare type NavigationProps = {
     previous?: {
@@ -3075,6 +3538,19 @@ declare type NavigationProps = {
         total: number;
     };
 };
+
+declare type NavTarget = HTMLAttributeAnchorTarget;
+
+/**
+ * Utility type to extract all possible paths from nested object.
+ * Generates hyphenated paths from nested object structure
+ * Only includes parent key if it has a DEFAULT property
+ */
+declare type NestedKeyOf<T> = {
+    [K in keyof T & string]: T[K] extends object ? K extends "DEFAULT" ? never : T[K] extends {
+        DEFAULT: string;
+    } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
+}[keyof T & string];
 
 declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
 
@@ -3165,9 +3641,14 @@ declare type OneApprovalHistoryProps = {
     steps: ApprovalStep[];
 };
 
-export declare function OneCalendar({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, }: OneCalendarProps): JSX_2.Element;
+export declare const OneCalendar: {
+    (props: OneCalendarProps): JSX_2.Element;
+    displayName: string;
+};
 
-export declare interface OneCalendarProps {
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, }: OneCalendarInternalProps) => JSX_2.Element;
+
+export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
     onSelect?: (date: Date | DateRange | null) => void;
@@ -3177,7 +3658,10 @@ export declare interface OneCalendarProps {
     showInput?: boolean;
     minDate?: Date;
     maxDate?: Date;
+    compact?: boolean;
 }
+
+export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_3)[number]>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -3236,57 +3720,12 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     };
 };
 
-export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, ...props }: OneDatePickerProps): JSX_2.Element;
+export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, ...props }: OneDatePickerProps): JSX_2.Element;
 
-declare interface OneDatePickerPopupProps {
-    onSelect?: (value: DatePickerValue | undefined) => void;
-    value?: DatePickerValue;
-    defaultValue?: DatePickerValue;
-    presets?: DatePreset[];
-    granularities?: GranularityDefinitionKey[];
-    minDate?: Date;
-    maxDate?: Date;
-    disabled?: boolean;
-    hideGoToCurrent?: boolean;
-    children: React.ReactNode;
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-    compareTo?: DatePickerCompareTo;
-    defaultCompareTo?: CompareToDefKey;
-    onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
-}
-
-export declare interface OneDatePickerProps extends Omit<OneDatePickerPopupProps, "children"> {
+export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children"> {
     hideNavigation?: boolean;
     hideGoToCurrent?: boolean;
 }
-
-export declare const OneDropdownButton: ({ items, onClick, value, ...props }: OneDropdownButtonProps) => JSX_2.Element | undefined;
-
-export declare type OneDropdownButtonItem<T = string> = {
-    value: T;
-    label: string;
-    icon?: IconType;
-    critical?: boolean;
-};
-
-export declare type OneDropdownButtonProps<T = string> = {
-    size?: OneDropdownButtonSize;
-    items: OneDropdownButtonItem<T>[];
-    variant?: OneDropdownButtonVariant;
-    value?: T;
-    disabled?: boolean;
-    loading?: boolean;
-    onClick: (value: T, item: OneDropdownButtonItem<T>) => void;
-};
-
-declare type OneDropdownButtonSize = (typeof oneDropdownButtonSizes)[number];
-
-declare const oneDropdownButtonSizes: readonly ["sm", "md", "lg"];
-
-declare type OneDropdownButtonVariant = (typeof oneDropdownButtonVariants)[number];
-
-declare const oneDropdownButtonVariants: readonly ["default", "outline", "neutral"];
 
 export declare function OneEmptyState({ title, description, variant, emoji, actions, }: Types.OneEmptyStateProps): JSX_2.Element;
 
@@ -3306,7 +3745,7 @@ declare type OneEmptyStateProps = {
      * and can include a label, click handler, optional icon, and button variant.
      * @optional
      */
-    actions?: ActionProps[];
+    actions?: ActionProps_3[];
 } & ({
     /**
      * The variant of the empty state
@@ -3352,6 +3791,10 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onChange: (value: FiltersState<Definition>) => void;
     /** The children of the component */
     children?: React.ReactNode;
+    /** The mode of the component */
+    mode?: FiltersMode;
+    /** Callback fired when filters open state is changed */
+    onOpenChange?: (isOpen: boolean) => void;
 };
 
 export declare const OneModal: OneModalComponent;
@@ -3400,6 +3843,8 @@ declare type OneModalProps = {
     onClose: () => void;
     /** Whether to render the modal as a bottom sheet on mobile */
     asBottomSheetInMobile?: boolean;
+    /** the padding of internal content areas (header, content, footer) */
+    contentPadding?: ContentPadding;
     position?: ModalPosition;
     /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
     children: default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>> | default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[];
@@ -3686,11 +4131,13 @@ declare interface PrimaryActionButton extends PrimaryAction {
     onClick: () => void;
 }
 
+export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */
-export declare type PrimaryActionsDefinition = () => Pick<DropdownItemObject, "onClick" | "label" | "icon"> | undefined;
+export declare type PrimaryActionsDefinitionFn = () => PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
 export declare type primaryActionType = {
     action: actionType;
@@ -3698,16 +4145,20 @@ export declare type primaryActionType = {
 };
 
 declare interface PrimaryDropdownAction<T> extends PrimaryAction {
-    items: OneDropdownButtonItem<T>[];
+    items: ButtonDropdownItem<T>[];
     value?: T;
-    onClick: (value: T, item: OneDropdownButtonItem<T>) => void;
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
 }
 
 export declare const PrivateBox: FC<PropsWithChildren>;
 
-declare const privateProps: readonly ["append", "appendButton", "className"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
 
 declare const privateProps_2: readonly [];
+
+declare const privateProps_3: readonly ["compact"];
+
+declare const privateProps_4: readonly ["delay"];
 
 declare type ProductUpdate = {
     title: string;
@@ -3725,7 +4176,7 @@ declare type ProductUpdatesProp = {
     hasUnread?: boolean;
     currentModule: string;
     onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"];
-    onHeaderClick?: ComponentProps<typeof DropdownMenuTrigger>["onClick"];
+    onHeaderClick?: F0ButtonProps["onClick"];
     onItemClick?: ComponentProps<typeof DropdownMenuItem>["onClick"];
     emptyScreen: {
         title: string;
@@ -3745,12 +4196,16 @@ declare type ProductUpdatesProp = {
             title: string;
             description: string;
             onClick: () => void;
-            module: ModuleId;
             dismissable: boolean;
             onClose?: () => void;
             trackVisibility?: (open: boolean) => void;
-            type?: "one-campaign" | undefined;
-        }>;
+        } & ({
+            module?: never;
+            type: "one-campaign";
+        } | {
+            module: ModuleId;
+            type?: never;
+        })>;
     };
 };
 
@@ -3805,7 +4260,7 @@ declare type Props_2 = {
     /** Description text below the title */
     description: string;
     /**  Complementary action specific to the section */
-    action?: Pick<ButtonProps, "label" | "onClick"> & {
+    action?: Pick<F0ButtonProps, "label" | "onClick"> & {
         icon?: IconType;
         variant?: "default" | "outline";
     };
@@ -4021,19 +4476,26 @@ declare interface SecondaryAction extends PrimaryActionButton {
     variant?: "outline" | "critical" | "outlinePromote" | "promote";
 }
 
-export declare type SecondaryActionsDefinition = {
-    expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>;
-    actions: () => Array<SecondaryActionsItemDefinition> | undefined;
-} | (() => Array<SecondaryActionsItemDefinition> | undefined);
+export declare type SecondaryActionGroup = {
+    label?: string;
+    items: SecondaryActionItem[];
+};
 
 /**
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-export declare type SecondaryActionsItemDefinition = DropdownItem & {
+export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
 };
+
+export declare type SecondaryActionsDefinition = {
+    expanded: Enumerate<typeof MAX_EXPANDED_ACTIONS>;
+    actions: () => SecondaryActionsItems | undefined;
+} | (() => SecondaryActionsItems | undefined);
+
+export declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
 
 export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
 
@@ -4095,6 +4557,7 @@ export declare type SelectItemObject<T, R = unknown> = {
     tag?: string;
     icon?: IconType;
     item?: R;
+    disabled?: boolean;
 };
 
 export declare type SelectItemProps<T, R = unknown> = SelectItemObject<T, R> | {
@@ -4110,7 +4573,7 @@ export declare type SelectItemProps<T, R = unknown> = SelectItemObject<T, R> | {
  */
 export declare type SelectProps<T extends string, R = unknown> = {
     onChange: (value: T, originalItem?: ResolvedRecordType<R>, option?: SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>> | undefined) => void;
     value?: T;
     defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>;
     children?: React.ReactNode;
@@ -4133,7 +4596,9 @@ export declare type SelectProps<T extends string, R = unknown> = {
     mapOptions?: never;
     searchFn?: (option: SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
     options: SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+export declare const selectSizes: readonly ["sm", "md"];
 
 export declare function Shortcut({ keys, variant }: ShortcutProps): JSX_2.Element | null;
 
@@ -4187,7 +4652,10 @@ declare interface SidebarProps {
 
 declare type SidebarState = "locked" | "unlocked" | "hidden";
 
-declare const sizes: readonly ["sm", "md", "lg"];
+/**
+ * Response structure for non-paginated data
+ */
+declare type SimpleResult<T> = T[];
 
 declare const skeletonVariants: (props?: ({
     height?: "lg" | "md" | "sm" | undefined;
@@ -4237,7 +4705,7 @@ declare interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
 }
 
 declare const spinnerVariants: (props?: ({
-    size?: "small" | "large" | "medium" | undefined;
+    size?: "small" | "medium" | "large" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -4255,8 +4723,8 @@ width?: "auto" | "full" | undefined;
 paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
-alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -4285,8 +4753,8 @@ width?: "auto" | "full" | undefined;
 paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
-alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -4351,7 +4819,7 @@ export declare type SummaryType = "sum";
 
 export declare function Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, ...rest }: SwitchProps): JSX_2.Element;
 
-declare interface SwitchProps extends DataAttributes {
+declare interface SwitchProps extends DataAttributes_2 {
     /**
      * The title of the switch
      */
@@ -4394,7 +4862,8 @@ export declare type TabItem = {
     label: string;
     index?: boolean;
     variant?: "default" | "upsell";
-} & DataAttributes & ({
+    onClick?: () => void;
+} & DataAttributes_2 & ({
     href: string;
 } | {
     id: string;
@@ -4571,7 +5040,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "status" | "icon" | "hideLabel" | "maxLength" | "placeholder" | "error" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
@@ -4722,11 +5191,12 @@ export declare interface ToolbarProps {
     plainHtmlMode?: boolean;
 }
 
-export declare function Tooltip({ label, description, children, shortcut, }: TooltipProps): default_2.JSX.Element;
+export declare const Tooltip: (props: TooltipProps) => default_2.JSX.Element;
 
-declare type TooltipProps = {
+declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
+    delay?: number;
 } & ({
     label: string;
     description?: string;
@@ -4734,6 +5204,8 @@ declare type TooltipProps = {
     label?: string;
     description: string;
 });
+
+export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_4)[number]>;
 
 declare interface TranscriptLabels {
     deleteBlock: string;
@@ -4759,6 +5231,10 @@ export declare const TwoColumnsList: ForwardRefExoticComponent<TwoColumnsListTyp
 declare interface TwoColumnsListType {
     title?: string;
     titleValue?: string;
+    titleTooltip?: {
+        label?: string;
+        description: string;
+    };
     list: TwoColumnsItemType[];
 }
 
@@ -4766,7 +5242,7 @@ declare type Type = "bar-chart" | "line-chart";
 
 declare namespace Types {
     export {
-        ActionProps,
+        ActionProps_3 as ActionProps,
         OneEmptyStateProps
     }
 }
@@ -4775,11 +5251,72 @@ declare type URL_2 = string;
 
 export declare function useAiChat(): AiChatProviderReturnValue;
 
+export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
+
+export declare type UseDataCollectionData<R extends RecordType> = UseDataCollectionDataReturn<R> & {
+    summaries?: R;
+};
+
+export declare function useDataCollectionData<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActionsDefinition<R>, NavigationFilters, Grouping>, options?: UseDataOptions<R, Filters>): UseDataCollectionData<R>;
+
+/**
+ * Hook return type for useData
+ */
+declare type UseDataCollectionDataReturn<R extends RecordType> = UseDataReturn<R> & {
+    summaries?: R;
+};
+
 export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+
+/**
+ * Hook options for useData
+ */
+declare interface UseDataOptions<R extends RecordType, Filters extends FiltersDefinition> {
+    filters?: Partial<FiltersState<Filters>>;
+    /**
+     * A function that is called when an error occurs during data fetching.
+     * It is called with the error object.
+     * @param error - The error object.
+     */
+    onError?: (error: DataError) => void;
+    /**
+     * A function that provides the fetch parameters for the data source.
+     * It is called before each fetch request and can be used to modify the fetch parameters.
+     * @param options - The fetch parameters for the data source.
+     * @returns The fetch parameters for the data source.
+     */
+    fetchParamsProvider?: <O extends BaseFetchOptions<Filters>>(options: O) => O;
+    /**
+     * A function that is called when the data is fetched successfully.
+     * It is called with the response data.
+     * @param response - The response data.
+     */
+    onResponse?: (response: PaginatedResponse<R> | SimpleResult<R>) => void;
+}
+
+/**
+ * Hook return type for useData
+ */
+declare interface UseDataReturn<R extends RecordType> {
+    data: Data<R>;
+    isInitialLoading: boolean;
+    isLoading: boolean;
+    isLoadingMore: boolean;
+    error: DataError | null;
+    paginationInfo: PaginationInfo | null;
+    setPage: (page: number) => void;
+    loadMore: () => void;
+    totalItems: number | undefined;
+    mergedFilters: FiltersState<FiltersDefinition>;
+}
 
 export { useForm }
 
 export declare function useFormSchema<Schema extends SchemaType, FormData extends InferSchema<Schema>>(schema: Schema, options: UseFormProps<FormData>, onSubmit: OnSubmitHandler<FormData>): FormType<Schema, FormData>;
+
+export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
+    loadingIndicatorRef: RefObject<HTMLTableCellElement>;
+};
 
 export declare interface User {
     id: string;
@@ -4809,22 +5346,22 @@ declare type ValueDisplayRendererDefinition = {
 }[keyof typeof valueDisplayRenderers];
 
 declare const valueDisplayRenderers: {
-    readonly text: (args: TextCellValue) => JSX_2.Element;
-    readonly longText: (args: LongTextCellValue) => JSX_2.Element;
+    readonly text: (args: TextCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly longText: (args: LongTextCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly date: (args: DateCellValue) => JSX_2.Element;
+    readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly avatarList: (args: AvatarListCellValue) => JSX_2.Element;
+    readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly status: (args: StatusCellValue) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue) => JSX_2.Element;
-    readonly person: (args: PersonCellValue) => JSX_2.Element;
-    readonly percentage: (args: PercentageCellValue) => JSX_2.Element | null;
-    readonly company: (args: CompanyCellValue) => JSX_2.Element;
-    readonly team: (args: TeamCellValue) => JSX_2.Element;
+    readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
+    readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly tag: (args: TagCellValue) => JSX_2.Element;
     readonly dotTag: (args: DotTagCellValue) => JSX_2.Element;
     readonly tagList: (args: TagListCellValue) => JSX_2.Element;
-    readonly icon: (args: IconCellValue) => JSX_2.Element;
+    readonly icon: (args: IconCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly file: (args: FileCellValue) => JSX_2.Element;
     readonly folder: (args: FolderCellValue) => JSX_2.Element;
 };
@@ -4833,7 +5370,9 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 declare type Variant = (typeof statuses)[number];
 
-declare const variants: (props?: ({
+declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
+
+declare const variants_2: (props?: ({
     aspect?: "small" | "square" | "wide" | undefined;
 } & ({
     class?: ClassValue;
@@ -4842,8 +5381,6 @@ declare const variants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
-
-declare const variants_2: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote"];
 
 export declare const VerticalBarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: VerticalBarChartProps;
@@ -4920,6 +5457,11 @@ declare interface WeekdaysProps {
     daysOfTheWeek?: string[];
 }
 
+declare type WelcomeScreenSuggestion = {
+    icon: IconType;
+    message: string;
+};
+
 export declare const Widget: default_2.ForwardRefExoticComponent<WidgetProps & {
     children: ReactNode;
 } & default_2.RefAttributes<HTMLDivElement>> & {
@@ -4976,7 +5518,7 @@ export declare interface WidgetProps {
         };
         count?: number;
     };
-    action?: ButtonProps;
+    action?: F0ButtonProps;
     summaries?: Array<{
         label: string;
         value: string | number;
@@ -5031,6 +5573,10 @@ export declare const WidgetStrip: ForwardRefExoticComponent<DashboardProps_2 & R
 
 declare type WidgetWidth = "sm" | "md" | "lg";
 
+declare type WithGroupId<RecordType> = RecordType & {
+    [GROUP_ID_SYMBOL]: unknown | undefined;
+};
+
 declare type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<PropertyDefinition_2<R>, "hide"> & {
     sorting?: SortingKey<Sortings>;
     /**
@@ -5062,8 +5608,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -5071,8 +5617,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
@@ -5087,15 +5633,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
