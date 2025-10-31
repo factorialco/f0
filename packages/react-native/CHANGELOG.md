@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.20.0...f0-react-native-v0.20.1) (2025-10-09)
+
+
+### Bug Fixes
+
+* **react-native:** fix exports and improve package compatibility ([#2784](https://github.com/factorialco/f0/issues/2784)) ([d80bbec](https://github.com/factorialco/f0/commit/d80bbecc30e8e7c3b42cd9de1489867e123bb791))
+
 ## [0.20.0](https://github.com/factorialco/factorial-one/compare/f0-react-native-v0.19.1...f0-react-native-v0.20.0) (2025-09-11)
 
 

@@ -31,6 +31,9 @@ export type BulkActionDefinition = {
   icon?: IconType
   id: string
   keepSelection?: boolean // If true, the selection will not be cleared after the action is performed (false by default)
+  critical?: boolean
+  description?: string
+  disabled?: boolean
 }
 
 /**

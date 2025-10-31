@@ -1,4 +1,5 @@
 import { PromiseState } from "@/lib/promise-to-observable"
+import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
@@ -31,6 +32,7 @@ import {
   RecordType,
   SelectedItemsState,
 } from "@/hooks/datasource/types"
+import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
   Ai,
   Briefcase,
@@ -47,9 +49,9 @@ import {
 import { DEPARTMENTS_MOCK } from "@/mocks"
 import { OneDataCollection } from ".."
 import {
-  PrimaryActionsDefinition,
+  PrimaryActionsDefinitionFn,
+  SecondaryActionItem,
   SecondaryActionsDefinition,
-  SecondaryActionsItemDefinition,
 } from "../actions"
 import {
   DataCollectionStatusComplete,
@@ -106,6 +108,93 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
   },
 ]
 
+/**
+ * MockDataCache - Simulates Apollo cache behavior with observable pattern
+ * Updates data mutations and notifies subscribers when data changes
+ *
+ * @example
+ * const cache = new MockDataCache(mockUsers)
+ * cache.subscribe(() => console.log('Data changed!'))
+ * cache.updateItemDepartment('user-1', 'Engineering')
+ *
+ * KNOWN ISSUE - Selection State Not Preserved Across Lane Moves:
+ * ==============================================================
+ * When moving items between Kanban lanes, selection state is lost.
+ *
+ * Root Cause:
+ * - Each lane has its own independent `useSelectable` instance
+ * - Selection state is stored per-lane in `itemsState` Map
+ * - When an item moves from Lane A → Lane B:
+ *   * Lane A: Has the item selected in its local state
+ *   * Lane B: Has no knowledge of the selection (empty state for that item)
+ * - No mechanism exists to sync selection state between lanes
+ *
+ * Why This Happens with Apollo Too:
+ * - Apollo cache preserves object references but doesn't automatically
+ *   sync React component state (which is what `useSelectable` manages)
+ * - The issue is architectural: selection state needs to be global,
+ *   not scoped per-lane
+ *
+ * Potential Solutions (for future PR):
+ * 1. Make selection state global at DataCollection level
+ * 2. Sync selection state between lanes when items move
+ * 3. Use defaultSelectedItems to persist state across lane changes
+ *
+ * This mock correctly simulates Apollo cache behavior. The selection
+ * issue is a system design limitation that also exists in production.
+ */
+export class MockDataCache<T extends MockUser> {
+  // Map of id -> object for efficient updates
+  private dataMap: Map<string, T>
+  private subscribers: Set<() => void> = new Set()
+
+  constructor(initialData: T[]) {
+    // Initialize cache with data
+    this.dataMap = new Map(initialData.map((item) => [item.id, item]))
+  }
+
+  getData(): T[] {
+    // Return array of objects from cache
+    return Array.from(this.dataMap.values())
+  }
+
+  /**
+   * Subscribe to cache changes - simulates Apollo's cache.watch
+   * Returns unsubscribe function
+   */
+  subscribe(callback: () => void): () => void {
+    this.subscribers.add(callback)
+    return () => {
+      this.subscribers.delete(callback)
+    }
+  }
+
+  /**
+   * Notify all subscribers that data has changed
+   */
+  private notify() {
+    this.subscribers.forEach((callback) => callback())
+  }
+
+  updateItemDepartment(itemId: string, newDepartment: string): T | null {
+    const item = this.dataMap.get(itemId)
+    if (!item) return null
+
+    // Update the cached object
+    item.department = newDepartment as (typeof DEPARTMENTS_MOCK)[number]
+
+    // Notify subscribers that cache has changed (simulates Apollo)
+    this.notify()
+
+    return item
+  }
+
+  reset(newData: T[]) {
+    this.dataMap = new Map(newData.map((item) => [item.id, item]))
+    this.notify()
+  }
+}
+
 // Mock data
 export const mockUsers = generateMockUsers(10)
 
@@ -117,6 +206,7 @@ export const getMockVisualizations = (options?: {
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
   }
+  cache?: MockDataCache<MockUser>
 }): Record<
   Exclude<VisualizationType, "custom">,
   Visualization<
@@ -224,10 +314,15 @@ export const getMockVisualizations = (options?: {
           id: "role4",
         },
         {
-          label: "Department 4",
-          render: (item) => item.department,
-          sorting: "department",
-          id: "department4",
+          label: "Long",
+          render: () => ({
+            type: "longText",
+            value: {
+              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+              lines: 4,
+            },
+          }),
+          id: "longText",
         },
         {
           label: "Permissions",
@@ -262,6 +357,7 @@ export const getMockVisualizations = (options?: {
           label: "Email",
           icon: Envelope,
           render: (item) => item.email,
+          hide: (item) => !item.email,
         },
         {
           label: "Role",
@@ -424,6 +520,9 @@ export const getMockVisualizations = (options?: {
   kanban: {
     type: "kanban",
     options: {
+      onCreate: (a) => {
+        console.log("onCreate", a)
+      },
       lanes: [
         {
           id: "eng",
@@ -459,21 +558,54 @@ export const getMockVisualizations = (options?: {
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },
       ],
-      onMove: async (
-        _fromLaneId: string,
-        _toLaneId: string,
-        sourceRecord: MockUser,
-        _destinyRecord: { record: MockUser; position: "above" | "below" } | null
-      ): Promise<MockUser> => {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 10))
+      onMove: options?.cache
+        ? async (
+            _fromLaneId: string,
+            toLaneId: string,
+            sourceRecord: MockUser,
+            _destinyRecord: {
+              record: MockUser
+              position: "above" | "below"
+            } | null
+          ): Promise<MockUser> => {
+            // Map lane ID to department
+            console.log(
+              "onMove",
+              _fromLaneId,
+              toLaneId,
+              sourceRecord,
+              _destinyRecord
+            )
 
-        // Simulate success/error randomly for testing
-        // if (Math.random() > 0.7) {
-        //   throw new Error("Simulated move error")
-        // }
-        return await sourceRecord
-      },
+            const laneToDepartment: Record<string, string> = {
+              eng: "Engineering",
+              prod: "Product",
+              design: "Design",
+              other: "Marketing",
+            }
+
+            const newDepartment = laneToDepartment[toLaneId]
+
+            // Update cache IMMEDIATELY (before async delay) - simulates Apollo Optimistic Response
+            if (newDepartment && options.cache) {
+              options.cache.updateItemDepartment(sourceRecord.id, newDepartment)
+            }
+
+            // Simulate API call delay AFTER cache update (very short for better UX)
+            await new Promise((resolve) => setTimeout(resolve, 50))
+
+            if (newDepartment) {
+              // Return the updated record
+              return {
+                ...sourceRecord,
+                department: newDepartment as (typeof DEPARTMENTS_MOCK)[number],
+              }
+            }
+
+            // Fallback if no cache
+            return sourceRecord
+          }
+        : undefined,
     },
   },
 })
@@ -651,7 +783,10 @@ export const createObservableDataFetch = (delay = 0) => {
     })
 }
 
-export const createPromiseDataFetch = (delay = 500) => {
+export const createPromiseDataFetch = (
+  delay = 500,
+  cache?: MockDataCache<MockUser>
+) => {
   return (
     options: DataCollectionBaseFetchOptions<
       FiltersType,
@@ -667,8 +802,10 @@ export const createPromiseDataFetch = (delay = 500) => {
 
     return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
+        // Use cache if provided, otherwise use static mockUsers
+        const sourceData = cache ? cache.getData() : mockUsers
         const filteredData = filterUsers(
-          mockUsers,
+          sourceData,
           filters,
           sortingsState,
           navigationFilters,
@@ -730,6 +867,11 @@ export const ExampleComponent = ({
   tableAllowColumnReordering = false,
   tableAllowColumnHiding = false,
   onStateChange,
+  /**
+   * Enable Apollo-like cache behavior for testing optimistic updates
+   */
+  enableCache = true,
+  hideFilters,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -761,89 +903,136 @@ export const ExampleComponent = ({
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
-  totalItemSummary?: (totalItems: number) => string
+  totalItemSummary?: true | ((totalItems: number) => string)
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
   paginationType?: PaginationType
-  primaryActions?: PrimaryActionsDefinition
+  primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
-  searchBar?: boolean
+  searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
   onStateChange?: (state: DataCollectionStatusComplete) => void
+  enableCache?: boolean
+  hideFilters?: boolean
 }) => {
+  // Create a cache instance to simulate Apollo cache behavior
+  const cache = useMemo(() => {
+    const c = enableCache ? new MockDataCache(mockUsers) : undefined
+    console.log(
+      "[ExampleComponent] Cache created:",
+      !!c,
+      "with",
+      mockUsers.length,
+      "users"
+    )
+    return c
+  }, [enableCache])
+
+  // Subscribe to cache changes and force refetch (simulates Apollo cache.watch)
+  const [cacheVersion, setCacheVersion] = useState(0)
+
+  useEffect(() => {
+    if (!cache) return
+
+    const unsubscribe = cache.subscribe(() => {
+      setCacheVersion((v) => v + 1)
+    })
+
+    return unsubscribe
+  }, [cache])
+
   const mockVisualizations = getMockVisualizations({
     table: {
       frozenColumns,
       allowColumnHiding: tableAllowColumnHiding,
       allowColumnReordering: tableAllowColumnReordering,
     },
+    cache,
   })
 
-  const dataSource = useDataCollectionSource({
-    filters,
-    navigationFilters,
-    presets: usePresets ? filterPresets : undefined,
-    sortings,
-    grouping,
-    currentGrouping: currentGrouping,
-    primaryActions,
-    secondaryActions,
-    itemUrl: (item) => `/users/${item.id}`,
-    itemActions: (item) => [
-      {
-        label: "Edit",
-        icon: Pencil,
-        onClick: () => console.log(`Editing ${item.name}`),
-        description: "Modify user information",
-        type: "primary",
-      },
-      {
-        label: "View Profile",
-        icon: Ai,
-        onClick: () => console.log(`Viewing ${item.name}'s profile`),
-      },
-      { type: "separator" },
-      {
-        label: item.isStarred ? "Remove Star" : "Star User",
-        icon: Star,
-        onClick: () => console.log(`Toggling star for ${item.name}`),
-        description: item.isStarred
-          ? "Remove from favorites"
-          : "Add to favorites",
-      },
-      {
-        label: "Delete",
-        icon: Delete,
-        onClick: () => console.log(`Deleting ${item.name}`),
-        critical: true,
-        description: "Permanently remove user",
-        enabled: item.department === "Engineering" && item.status === "active",
-      },
-    ],
-    selectable,
-    defaultSelectedItems,
-    bulkActions,
-    totalItemSummary,
-    search: searchBar
-      ? {
-          enabled: true,
-          sync: true,
-          debounceTime: 300,
-        }
-      : undefined,
-    dataAdapter: dataAdapter ?? {
+  // Create dataAdapter that responds to cache changes
+  // By including cacheVersion in the useMemo deps and in the returned object,
+  // we ensure that useData detects the change and triggers a refetch
+  const dataAdapterMemoized = useMemo(() => {
+    if (dataAdapter) return dataAdapter
+
+    return {
       fetchData: useObservable
         ? createObservableDataFetch()
-        : createPromiseDataFetch(),
+        : createPromiseDataFetch(100, cache),
+      // Include cacheVersion as a property so dataAdapter reference changes
+      _cacheVersion: cacheVersion,
+    }
+  }, [dataAdapter, useObservable, cache, cacheVersion])
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: hideFilters ? undefined : filters,
+      navigationFilters,
+      presets: usePresets ? filterPresets : undefined,
+      sortings,
+      grouping,
+      currentGrouping: currentGrouping,
+      primaryActions,
+      secondaryActions,
+      itemUrl: (item) => `/users/${item.id}`,
+      itemActions: (item) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          onClick: () => console.log(`Editing ${item.name}`),
+          description: "Modify user information",
+          type: "primary",
+        },
+        {
+          label: "View Profile",
+          icon: Ai,
+          onClick: () => console.log(`Viewing ${item.name}'s profile`),
+        },
+        { type: "separator" },
+        {
+          label: item.isStarred ? "Remove Star" : "Star User",
+          icon: Star,
+          onClick: () => console.log(`Toggling star for ${item.name}`),
+          description: item.isStarred
+            ? "Remove from favorites"
+            : "Add to favorites",
+        },
+        {
+          label: "Delete",
+          icon: Delete,
+          onClick: () => console.log(`Deleting ${item.name}`),
+          critical: true,
+          description: "Permanently remove user",
+          enabled:
+            item.department === "Engineering" && item.status === "active",
+        },
+      ],
+      selectable,
+      defaultSelectedItems,
+      bulkActions,
+      totalItemSummary,
+      search:
+        searchBar === true
+          ? {
+              enabled: true,
+              sync: true,
+              debounceTime: 300,
+            }
+          : typeof searchBar === "object"
+            ? searchBar
+            : undefined,
+      dataAdapter: dataAdapterMemoized,
+      lanes: [
+        { id: "eng", filters: { department: ["Engineering"] } },
+        { id: "prod", filters: { department: ["Product"] } },
+        { id: "design", filters: { department: ["Design"] } },
+        { id: "other", filters: { department: ["Marketing"] } },
+      ],
     },
-    lanes: [
-      { id: "eng", filters: { department: ["Engineering"] } },
-      { id: "prod", filters: { department: ["Product"] } },
-      { id: "design", filters: { department: ["Design"] } },
-      { id: "other", filters: { department: ["Marketing"] } },
-    ],
-  })
+    [cacheVersion]
+  ) // Pass cacheVersion as dependency to force refetch on cache changes
 
   return (
     <div
@@ -1270,7 +1459,7 @@ export function createDataAdapter<
 }
 
 // Example of a comprehensive actions definition with various types of actions
-export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
+export const buildSecondaryActions = (): SecondaryActionItem[] => {
   return [
     // Action with description
     {
@@ -1279,9 +1468,6 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       onClick: () => console.log(`Another user action`),
       description: "User actions",
     },
-
-    // Separator between action groups
-    { type: "separator" },
     {
       label: "Export",
       icon: Upload,
@@ -1295,4 +1481,24 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       description: "Import users",
     },
   ]
+}
+
+export const getMockVisualizationsWithCreate = (
+  params: { onCreate: (laneId: string) => void } & Parameters<
+    typeof getMockVisualizations
+  >[0]
+) => {
+  const { onCreate, ...rest } = params
+  const base = getMockVisualizations(rest)
+
+  return {
+    ...base,
+    kanban: {
+      type: "kanban" as const,
+      options: {
+        ...(base.kanban.type === "kanban" ? base.kanban.options : {}),
+        onCreate,
+      },
+    },
+  }
 }

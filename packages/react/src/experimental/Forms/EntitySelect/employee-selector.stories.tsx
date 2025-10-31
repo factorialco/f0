@@ -1,4 +1,4 @@
-import { Search } from "@/icons/app"
+import { Plus, Search } from "@/icons/app"
 import avatar from "@storybook-static/avatars/person02.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
@@ -133,6 +133,13 @@ const meta: Meta<EmployeeSelectorProps> = {
     },
     onSelect: fn(),
   },
+  decorators: [
+    (Story) => (
+      <div className="h-[520px] w-full">
+        <Story />
+      </div>
+    ),
+  ],
   parameters: {
     layout: "centered",
     docs: {
@@ -276,5 +283,105 @@ export const Default: Story = {
   },
   args: {
     singleSelector: false,
+  },
+}
+
+// --------------------------------------
+// TEST STORY WITH ACTIONS
+// --------------------------------------
+// This story tests the Footer behavior when actions are provided
+// along with Select All and Clear options
+export const WithActions: Story = {
+  render: (props) => {
+    const [loading, setLoading] = useState<boolean>(true)
+    const [fetchEmployees, setFetchEmployees] = useState<FetchEmployee[]>([])
+    const [selectedGroup, setSelectedGroup] = useState<string>("all")
+    const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
+    const [selectedEmployees, setSelectedEmployees] = useState<
+      EntitySelectEntity[]
+    >([])
+
+    const onOpenChange = (open: boolean) => {
+      if (open) {
+        setTimeout(() => {
+          setFetchEmployees([...response.employees.employeeNames])
+          setLoading(false)
+        }, 500)
+      } else {
+        setLoading(true)
+      }
+    }
+
+    const onSelect = (el: EntitySelectEntity[] | EntitySelectEntity | null) => {
+      const newSelection = Array.isArray(el) ? el : el ? [el] : []
+      setSelectedEmployees(newSelection)
+    }
+
+    const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
+      if (expanded) {
+        setExpandedElements([id].concat(expandedElements))
+      } else {
+        setExpandedElements(expandedElements.filter((el) => el !== id))
+      }
+    }
+
+    return (
+      <div className="w-60">
+        <EntitySelect
+          label="Role"
+          hideLabel={true}
+          groups={[{ label: "None", value: "all", groupType: "avatar" }]}
+          selectedGroup={selectedGroup}
+          onGroupChange={(value) => setSelectedGroup(value ?? "all")}
+          entities={fetchEmployees.map((emp) => ({
+            id: emp.id,
+            name: emp.fullName,
+            avatar: emp.avatar?.url || undefined,
+            expanded: expandedElements.includes(emp.id),
+          }))}
+          loading={loading}
+          icon={Search}
+          onOpenChange={onOpenChange}
+          onItemExpandedChange={onItemExpandedChange}
+          placeholder="Select employees..."
+          selectedItemsCopy="employees selected"
+          searchPlaceholder="Search..."
+          selectAllLabel="Select all"
+          clearLabel="Clear"
+          selectedLabel="selected"
+          notFoundTitle="No results found"
+          notFoundSubtitle="Try searching with a different term."
+          singleSelector={props.singleSelector}
+          onSelect={onSelect}
+          selectedEntities={selectedEmployees}
+          // Actions to test Footer behavior
+          actions={[
+            {
+              label: "New employee",
+              onClick: () => fn(),
+              icon: Plus,
+              variant: "default",
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  args: {
+    singleSelector: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+This story tests the Footer behavior when actions are provided alongside Select All and Clear options.
+
+**Key test scenarios:**
+1. When all employees are selected, "Select All" should be disabled but the dropdown should remain accessible to reach "Clear"
+2. The left dropdown (Select All/Clear) and right dropdown (actions) should work independently
+3. Actions should be clickable and log their execution
+        `,
+      },
+    },
   },
 }

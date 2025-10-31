@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { Select } from "@/experimental/Forms/Fields/Select"
 import {
   GroupingDefinition,
@@ -63,8 +63,8 @@ export const GroupingSelector = <
   ]
 
   return (
-    <div className="flex flex-col gap-0 py-3">
-      <div className="flex items-end gap-2 px-3">
+    <div className="flex flex-col">
+      <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <Select
             label={i18n.collections.grouping.groupBy}
@@ -91,7 +91,7 @@ export const GroupingSelector = <
           />
         </div>
         {currentGrouping?.field && (
-          <Button
+          <F0Button
             hideLabel
             label={i18n.collections.grouping.toggleDirection}
             variant="outline"

@@ -7,7 +7,7 @@ import { RecordType } from "@/hooks/datasource"
 
 export type ActionDefinition =
   | DropdownItemSeparator
-  | (Omit<DropdownItemObject, "type" | "onClick"> & {
+  | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
       onClick: () => void
       enabled?: boolean
       type?: "primary" | "secondary" | "other"

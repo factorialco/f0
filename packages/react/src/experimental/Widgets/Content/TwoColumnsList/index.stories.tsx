@@ -78,3 +78,25 @@ export const TitleWithValue: Story = {
     ],
   },
 }
+
+export const TitleWithTooltip: Story = {
+  args: {
+    title: "Balance",
+    titleValue: "+10h",
+    titleTooltip: {
+      label: "Balance",
+      description:
+        "Difference between the hours an employee worked and the scheduled hours.",
+    },
+    list: [
+      {
+        title: "Planned time",
+        info: "170h",
+      },
+      {
+        title: "Effective worked time",
+        info: "180h",
+      },
+    ],
+  },
+}

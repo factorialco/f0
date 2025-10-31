@@ -1,15 +1,15 @@
 "use client"
 
+import { ArrowLeft, ArrowRight } from "@/icons/app"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
 import * as React from "react"
-import { F0Icon } from "../components/F0Icon"
-import { ArrowLeft, ArrowRight } from "../icons/app"
 
-import { SPACE_FOR_WIDGET_SHADOW } from "../experimental/Navigation/Carousel/DynamicCarousel"
-import { cn } from "../lib/utils"
-import { Button } from "./button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ButtonInternalProps } from "@/components/F0Button/internal-types"
+import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
+import { cn } from "@/lib/utils"
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
@@ -213,7 +213,7 @@ CarouselItem.displayName = "CarouselItem"
 
 const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof Button>
+  ButtonInternalProps
 >(({ className, variant = "outline", ...props }, ref) => {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
@@ -227,60 +227,55 @@ const CarouselPrevious = React.forwardRef<
           : "-top-3 left-1/2 -translate-x-1/2 rotate-90"
       )}
     >
-      <Button
+      <ButtonInternal
+        compact
         ref={ref}
         size="sm"
         variant={variant}
-        round
-        className={cn(
-          "absolute opacity-100 transition-all",
-
-          className
-        )}
+        className={cn("absolute opacity-100 transition-all", className)}
         disabled={!canScrollPrev}
         onClick={scrollPrev}
         {...props}
-      >
-        <F0Icon size="sm" icon={ArrowLeft} />
-        <span className="sr-only">Previous</span>
-      </Button>
+        label="Previous"
+        icon={ArrowLeft}
+        hideLabel
+      />
     </div>
   )
 })
 CarouselPrevious.displayName = "CarouselPrevious"
 
-const CarouselNext = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<typeof Button>
->(({ className, variant = "outline", ...props }, ref) => {
-  const { orientation, scrollNext, canScrollNext } = useCarousel()
+const CarouselNext = React.forwardRef<HTMLButtonElement, ButtonInternalProps>(
+  ({ className, variant = "outline", ...props }, ref) => {
+    const { orientation, scrollNext, canScrollNext } = useCarousel()
 
-  return (
-    <div
-      className={cn(
-        "absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100",
-        !canScrollNext && "opacity-0 group-hover/carousel:opacity-0",
-        orientation === "horizontal"
-          ? "-right-3 top-1/2 -translate-y-1/2"
-          : "-bottom-3 left-1/2 -translate-x-1/2 rotate-90"
-      )}
-    >
-      <Button
-        ref={ref}
-        size="sm"
-        variant={variant}
-        round
-        className={cn("absolute opacity-100 transition-all", className)}
-        disabled={!canScrollNext}
-        onClick={scrollNext}
-        {...props}
+    return (
+      <div
+        className={cn(
+          "absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100",
+          !canScrollNext && "opacity-0 group-hover/carousel:opacity-0",
+          orientation === "horizontal"
+            ? "-right-3 top-1/2 -translate-y-1/2"
+            : "-bottom-3 left-1/2 -translate-x-1/2 rotate-90"
+        )}
       >
-        <F0Icon size="sm" icon={ArrowRight} />
-        <span className="sr-only">Next</span>
-      </Button>
-    </div>
-  )
-})
+        <ButtonInternal
+          ref={ref}
+          size="sm"
+          variant={variant}
+          compact
+          className={cn("absolute opacity-100 transition-all", className)}
+          disabled={!canScrollNext}
+          onClick={scrollNext}
+          {...props}
+          label="Next"
+          icon={ArrowRight}
+          hideLabel
+        />
+      </div>
+    )
+  }
+)
 CarouselNext.displayName = "CarouselNext"
 
 const CarouselDots = React.forwardRef<

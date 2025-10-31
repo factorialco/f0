@@ -1,5 +1,5 @@
-import { Link } from "@/components/Actions/Link"
 import { CardInternal } from "@/components/F0Card/CardInternal"
+import { F0Link } from "@/components/F0Link"
 import { useDraggable } from "@/lib/dnd/hooks"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -28,6 +28,7 @@ export function KanbanCard<T = unknown>({
   laneId,
   draggable = false,
   showIndicator = true,
+  disabledEdges = [],
   forcedEdge = null,
   ...props
 }: {
@@ -38,6 +39,7 @@ export function KanbanCard<T = unknown>({
   laneId?: string
   draggable?: boolean
   showIndicator?: boolean
+  disabledEdges?: Array<"top" | "bottom">
   forcedEdge?: "top" | "bottom" | null
 } & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
@@ -121,25 +123,33 @@ export function KanbanCard<T = unknown>({
     >
       <CardInternal {...props} disableOverlayLink={draggable} />
       {props.link && (
-        <Link
+        <F0Link
           ref={linkRef}
           href={props.link}
-          style={{
-            zIndex: 1,
-          }}
           className={cn(
-            "z-1 pointer-events-none absolute inset-0 block rounded-xl",
+            "!z-1 pointer-events-none absolute inset-0 block rounded-xl",
             focusRing()
           )}
           aria-label={props.title}
-        />
+        >
+          &nbsp;
+        </F0Link>
       )}
       {showIndicator && (forcedEdge ?? overEdge) && (
-        <DropIndicator
-          edge={(forcedEdge ?? overEdge) as "top" | "bottom"}
-          type="terminal-no-bleed"
-          gap="4px"
-        />
+        <>
+          {(() => {
+            const activeEdge = (forcedEdge ?? overEdge) as "top" | "bottom"
+            const isEdgeDisabled = disabledEdges.includes(activeEdge)
+            if (isEdgeDisabled) return null
+            return (
+              <DropIndicator
+                edge={activeEdge}
+                type="terminal-no-bleed"
+                gap="4px"
+              />
+            )
+          })()}
+        </>
       )}
     </div>
   )

@@ -7,8 +7,8 @@ import {
 } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-import * as ActionsStories from "./collection-actions.stories"
-import * as ItemActionsStories from "./item-actions.stories"
+import * as ActionsStories from "./actions/collection-actions.stories"
+import * as ItemActionsStories from "./actions/item-actions.stories"
 import * as IndexStories from "./index.stories"
 
 <Meta title="Data collection/Status Persistence" />
@@ -31,7 +31,10 @@ The persistence system consists of two main parts:
 - **Storage Features**: Configuration that defines which features should be
   persisted
 
-## Storage Key
+## Data Collection ID
+
+To enable the persistence of the data collection state, you need to provide a
+unique id to the data collection via `id` prop.
 
 ### Required Format
 
@@ -76,10 +79,10 @@ data collection configuration. You **must** update the version when:
 
 ```typescript
 // Initial implementation
-<OneDataCollection storageKey="employees/v1" />
+<OneDataCollection id="employees/v1" />
 
 // After adding new filters or changing column structure
-<OneDataCollection storageKey="employees/v2" />
+<OneDataCollection id="employees/v2" />
 ```
 
 Without version updates, users might experience:

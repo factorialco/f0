@@ -16,9 +16,10 @@ import {
   YAxis,
 } from "recharts"
 
-import { autoColor } from "../utils/colors"
+import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
+  chartTooltipProps,
   measureTextWidth,
   xAxisProps,
   yAxisProps,
@@ -74,8 +75,8 @@ const _BarChart = <K extends ChartConfig>(
         ...item,
         fill:
           index === array.length - 1
-            ? autoColor(0)
-            : `hsl(${autoColor(0, false)} / 0.5)`,
+            ? getCategoricalColor(index)
+            : getCategoricalColor(index, 0.5),
       }
     }
 
@@ -124,7 +125,7 @@ const _BarChart = <K extends ChartConfig>(
       >
         {!hideTooltip && (
           <ChartTooltip
-            cursor
+            {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
             }
@@ -199,7 +200,9 @@ const _BarChart = <K extends ChartConfig>(
             fill={
               highlightLastBar
                 ? (((data: { fill: string }) => data.fill) as unknown as string)
-                : (dataConfig[key].color ?? autoColor(index))
+                : dataConfig[key].color
+                  ? getColor(dataConfig[key].color)
+                  : getCategoricalColor(index)
             }
             radius={type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
             maxBarSize={32}

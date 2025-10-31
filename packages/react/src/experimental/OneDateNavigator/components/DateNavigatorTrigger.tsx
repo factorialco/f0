@@ -1,5 +1,5 @@
-import { Button } from "@/components/Actions/Button"
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import type {
   DateRange,
   DateRangeComplete,
@@ -165,7 +165,7 @@ const DateNavigatorTrigger = forwardRef<
           )}
         >
           {navigation && (
-            <Button
+            <F0Button
               size="sm"
               variant="ghost"
               icon={ChevronLeft}
@@ -181,10 +181,11 @@ const DateNavigatorTrigger = forwardRef<
             label={label}
             onClick={onClick}
             disabled={disabled}
+            style={{ minWidth: granularity?.toStringMaxWidth() }}
             className={cn(highlighted && "bg-f1-background-secondary-hover")}
           />
           {navigation && (
-            <Button
+            <F0Button
               variant="ghost"
               icon={ChevronRight}
               label="Next"
@@ -197,7 +198,7 @@ const DateNavigatorTrigger = forwardRef<
         </div>
         {!hideGoToCurrent && currentDate && (
           <div className="border-l-solid flex-shrink-0 border-[#f00]">
-            <Button
+            <F0Button
               size="sm"
               variant="ghost"
               label={

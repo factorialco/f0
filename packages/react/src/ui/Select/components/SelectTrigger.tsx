@@ -1,8 +1,8 @@
-import * as SelectPrimitive from "@radix-ui/react-select"
+import { cn } from "@/lib/utils.ts"
 import * as React from "react"
 import { useContext } from "react"
-import { cn } from "../../../lib/utils.ts"
 import { SelectContext } from "../SelectContext.tsx"
+import * as SelectPrimitive from "./radix-ui"
 
 /**
  * Select Trigger component
@@ -11,9 +11,9 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => {
-  const { asList } = useContext(SelectContext)
+  const { as: asSelectProp } = useContext(SelectContext)
 
-  return asList ? null : (
+  return asSelectProp === "list-with-scroll" ? null : (
     <SelectPrimitive.Trigger ref={ref} className={cn(className)} {...props}>
       {children}
     </SelectPrimitive.Trigger>

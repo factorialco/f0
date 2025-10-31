@@ -1,6 +1,8 @@
 import { ComponentProps, ReactNode } from "react"
 import { F0AvatarCompany, F0AvatarCompanyProps } from "../F0AvatarCompany"
+import { F0AvatarEmoji, F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFile, F0AvatarFileProps } from "../F0AvatarFile"
+import { F0AvatarFlag, F0AvatarFlagProps } from "../F0AvatarFlag"
 import { F0AvatarPerson, F0AvatarPersonProps } from "../F0AvatarPerson"
 import { F0AvatarTeam, F0AvatarTeamProps } from "../F0AvatarTeam"
 import { AvatarSize } from "../internal/BaseAvatar"
@@ -15,6 +17,8 @@ export type AvatarVariant =
   | ({ type: "team" } & Omit<F0AvatarTeamProps, "size">)
   | ({ type: "company" } & Omit<F0AvatarCompanyProps, "size">)
   | ({ type: "file" } & Omit<F0AvatarFileProps, "size">)
+  | ({ type: "flag" } & Omit<F0AvatarFlagProps, "size">)
+  | ({ type: "emoji" } & Omit<F0AvatarEmojiProps, "size">)
 
 export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
   switch (avatar.type) {
@@ -28,6 +32,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           size={size}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          deactivated={avatar.deactivated}
         />
       )
     case "team":
@@ -58,6 +63,25 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           file={avatar.file}
           size={size as ComponentProps<typeof F0AvatarFile>["size"]}
           badge={avatar.badge}
+          aria-label={avatar["aria-label"]}
+          aria-labelledby={avatar["aria-labelledby"]}
+        />
+      )
+    case "flag":
+      return (
+        <F0AvatarFlag
+          flag={avatar.flag}
+          size={size as ComponentProps<typeof F0AvatarFile>["size"]}
+          badge={avatar.badge}
+          aria-label={avatar["aria-label"]}
+          aria-labelledby={avatar["aria-labelledby"]}
+        />
+      )
+    case "emoji":
+      return (
+        <F0AvatarEmoji
+          emoji={avatar.emoji}
+          size={size as ComponentProps<typeof F0AvatarEmoji>["size"]}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
         />

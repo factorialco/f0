@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
-import AreaChartStory from "../../../../components/Charts/AreaChart/index.stories"
 import { LineChartProps } from "../../../../components/Charts/LineChart"
+import { Default as LineChartDefault } from "../../../../components/Charts/LineChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
 import { LineChartWidget } from "./index"
 
@@ -18,7 +18,7 @@ const meta = {
       ...containerStoryArgs.header,
       title: "A line chart",
     },
-    chart: AreaChartStory.args as LineChartProps,
+    chart: LineChartDefault.args as LineChartProps,
   },
   decorators: [WidgetDecorator],
 } satisfies Meta<typeof LineChartWidget>

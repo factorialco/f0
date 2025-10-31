@@ -1,5 +1,10 @@
 import { createContext } from "react"
-import { FiltersDefinition, FiltersState, PresetsDefinition } from "./types"
+import {
+  FiltersDefinition,
+  FiltersMode,
+  FiltersState,
+  PresetsDefinition,
+} from "./types"
 
 export type FiltersContextType<Definition extends FiltersDefinition> = {
   filters: Definition | undefined
@@ -12,6 +17,7 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   setIsFiltersOpen: (isOpen: boolean) => void
   emitFilterChange: (filters: FiltersState<Definition>) => void
   emitPresetClick: (filters: FiltersState<Definition>) => void
+  mode?: FiltersMode
 }
 
 export const FiltersContext = createContext<
@@ -27,4 +33,5 @@ export const FiltersContext = createContext<
   setIsFiltersOpen: () => {},
   emitFilterChange: () => {},
   emitPresetClick: () => {},
+  mode: "default",
 })

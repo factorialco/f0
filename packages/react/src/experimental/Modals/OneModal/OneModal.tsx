@@ -6,7 +6,7 @@ import React, { ComponentProps, useEffect, useMemo, useState } from "react"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
-import { ModalPosition } from "./types"
+import { ContentPadding, ModalPosition } from "./types"
 import { useIsSmallScreen } from "./utils"
 
 export type OneModalProps = {
@@ -16,6 +16,8 @@ export type OneModalProps = {
   onClose: () => void
   /** Whether to render the modal as a bottom sheet on mobile */
   asBottomSheetInMobile?: boolean
+  /** the padding of internal content areas (header, content, footer) */
+  contentPadding?: ContentPadding
   position?: ModalPosition
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
@@ -34,6 +36,7 @@ export const OneModal: React.FC<OneModalProps> = ({
   position = "center",
   onClose,
   isOpen,
+  contentPadding = "md",
   children,
 }) => {
   const [open, setOpen] = useState(isOpen)
@@ -84,6 +87,7 @@ export const OneModal: React.FC<OneModalProps> = ({
         isOpen={open}
         onClose={handleClose}
         position={position}
+        contentPadding={contentPadding}
         shownBottomSheet
       >
         <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -95,7 +99,12 @@ export const OneModal: React.FC<OneModalProps> = ({
   }
 
   return (
-    <OneModalProvider isOpen={open} onClose={handleClose} position={position}>
+    <OneModalProvider
+      isOpen={open}
+      onClose={handleClose}
+      position={position}
+      contentPadding={contentPadding}
+    >
       <Dialog
         open={open}
         onOpenChange={onClose}

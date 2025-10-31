@@ -1,4 +1,4 @@
-export const levels = ["info", "warning", "critical"] as const
+export const levels = ["info", "warning", "critical", "positive"] as const
 
 export type Level = (typeof levels)[number]
 

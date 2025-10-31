@@ -1,7 +1,6 @@
-import { Button } from "@/components/Actions/Button"
+import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { ButtonVariant } from "@/ui/button"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"
@@ -43,6 +42,7 @@ type ProductModalProps = {
   primaryAction?: Action
   secondaryAction?: Action
   portalContainer?: HTMLElement | null
+  showResponseDialog?: boolean
 }
 
 type Action = {
@@ -72,6 +72,7 @@ export function ProductModal({
   secondaryAction,
   portalContainer,
   tag,
+  showResponseDialog = true,
 }: ProductModalProps) {
   const [isModalOpen, setIsOpen] = useState(isOpen)
   const [responseStatus, setResponseStatus] = useState<ResponseStatus>(null)
@@ -83,9 +84,13 @@ export function ProductModal({
       try {
         await primaryAction.onClick()
         setIsOpen(false)
-        setResponseStatus("success")
+        if (showResponseDialog) {
+          setResponseStatus("success")
+        }
       } catch {
-        setResponseStatus("error")
+        if (showResponseDialog) {
+          setResponseStatus("error")
+        }
       } finally {
         setInternalLoading(false)
       }
@@ -118,7 +123,7 @@ export function ProductModal({
             actions={
               <div className="flex gap-3">
                 {primaryAction && (
-                  <Button
+                  <F0Button
                     variant={primaryAction.variant}
                     label={isLoading ? loadingState.label : primaryAction.label}
                     icon={primaryAction.icon || undefined}
@@ -128,7 +133,7 @@ export function ProductModal({
                   />
                 )}
                 {secondaryAction && (
-                  <Button
+                  <F0Button
                     onClick={secondaryAction.onClick}
                     label={secondaryAction.label}
                     variant={secondaryAction.variant}
@@ -142,7 +147,7 @@ export function ProductModal({
         </div>
       </CustomModal>
 
-      {responseStatus && (
+      {responseStatus && showResponseDialog && (
         <UpsellRequestResponseDialog
           open={true}
           onClose={() => {

@@ -64,6 +64,13 @@ export const CriticalAlertTag: Story = {
   },
 }
 
+export const PositiveAlertTag: Story = {
+  args: {
+    text: "Success",
+    level: "positive",
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (

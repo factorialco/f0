@@ -7,6 +7,7 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react"
@@ -33,8 +34,11 @@ export function KanbanLane<TRecord extends RecordType>({
   allowReorder?: boolean
 } & LaneProps<TRecord>) {
   const laneRef = useRef<HTMLDivElement | null>(null)
+  const outerRef = useRef<HTMLDivElement | null>(null)
+  const measureRef = useRef<HTMLDivElement | null>(null)
   // const coordinator = useMoveCoordinator()
   const [isOver, setIsOver] = useState(false)
+  const [calculatedHeight, setCalculatedHeight] = useState<number | null>(null)
   const hasFullDnD = Boolean(id && getLaneResourceIndexById)
 
   // Autoscroll state
@@ -46,6 +50,9 @@ export function KanbanLane<TRecord extends RecordType>({
   const [isDragging, setIsDragging] = useState(false)
   const [forcedIndex, setForcedIndex] = useState<number | null>(null)
   const [forcedEdge, setForcedEdge] = useState<"top" | "bottom" | null>(null)
+  const [showEmptyLanePlaceholder, setShowEmptyLanePlaceholder] =
+    useState(false)
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number>(-1)
 
   useDroppableList(
     hasFullDnD
@@ -129,12 +136,51 @@ export function KanbanLane<TRecord extends RecordType>({
       findTypeOfDropForLane(id, dropTargets)
 
     return monitorForElements({
-      onDropTargetChange: ({ location }) => {
+      onDropTargetChange: ({ location, source }) => {
         const overThisLane = location.current.dropTargets.some((t) => {
           const data = t.data as { type?: string; id?: string }
           return data.type === "list-droppable" && data.id === id
         })
         setIsOver(overThisLane)
+
+        // Get source info
+        const sourceId = String((source.data as { id?: string }).id)
+        const sourceLaneIdFromPayload = String(
+          (source.data as unknown as { data?: { laneId?: string } }).data
+            ?.laneId ?? ""
+        )
+        const initialLaneId =
+          sourceLaneIdFromPayload ||
+          String(
+            (
+              location.initial.dropTargets.find(
+                (t) => (t.data as { type?: string }).type === "list-droppable"
+              )?.data as { id?: string }
+            )?.id ?? ""
+          )
+        const isSameLane = String(initialLaneId) === String(id)
+
+        // Find source index using getKey for consistent identification
+        const sourceIndex = laneProps.items.findIndex((item, idx) => {
+          const itemKey = String(laneProps.getKey(item, idx))
+          return itemKey === sourceId
+        })
+
+        // Track dragged item index in this lane (for preventing useless drop indicators)
+        if (overThisLane && isSameLane) {
+          setDraggedItemIndex(sourceIndex)
+        } else if (!overThisLane || !isSameLane) {
+          setDraggedItemIndex(-1)
+        }
+
+        // Check if lane is empty and should show placeholder
+        if (overThisLane && isDragging && laneProps.items.length === 0) {
+          setShowEmptyLanePlaceholder(true)
+          setForcedIndex(null)
+          setForcedEdge(null)
+        } else if (overThisLane && isDragging && laneProps.items.length > 0) {
+          setShowEmptyLanePlaceholder(false)
+        }
 
         if (overThisLane && isDragging) {
           const host = viewportRef.current || laneRef.current
@@ -197,12 +243,33 @@ export function KanbanLane<TRecord extends RecordType>({
                         nearestEdge = clientY < midY ? "top" : "bottom"
                       }
                     }
-                    setForcedIndex(nearestIdx >= 0 ? nearestIdx : null)
-                    setForcedEdge(nearestIdx >= 0 ? nearestEdge : null)
-                  } else {
-                    setForcedIndex(null)
-                    setForcedEdge(null)
+
+                    // Check if this would be a useless drop (same lane, same position)
+                    const wouldBeUselessDrop =
+                      isSameLane &&
+                      sourceIndex >= 0 &&
+                      // 1. Above itself
+                      ((nearestIdx === sourceIndex && nearestEdge === "top") ||
+                        // 2. Below itself
+                        (nearestIdx === sourceIndex &&
+                          nearestEdge === "bottom") ||
+                        // 3. Below the card above (stays in same position)
+                        (nearestIdx === sourceIndex - 1 &&
+                          nearestEdge === "bottom") ||
+                        // 4. Above the card below (stays in same position)
+                        (nearestIdx === sourceIndex + 1 &&
+                          nearestEdge === "top"))
+
+                    if (wouldBeUselessDrop) {
+                      // Don't show indicator for useless drops
+                      setForcedIndex(null)
+                      setForcedEdge(null)
+                    } else {
+                      setForcedIndex(nearestIdx >= 0 ? nearestIdx : null)
+                      setForcedEdge(nearestIdx >= 0 ? nearestEdge : null)
+                    }
                   }
+                  // Note: Empty lane placeholder is handled at the top of onDropTargetChange
                 }
               } else if (forcedIndex !== null || forcedEdge !== null) {
                 // Clear forced indicator when a real card target is active
@@ -216,15 +283,23 @@ export function KanbanLane<TRecord extends RecordType>({
           if (!overThisLane) {
             setForcedIndex(null)
             setForcedEdge(null)
+            setShowEmptyLanePlaceholder(false)
+            setDraggedItemIndex(-1)
           }
         }
       },
       onDrop: async ({ location, source }) => {
+        setIsOver(false)
+        setShowEmptyLanePlaceholder(false)
         const sourceId = String((source.data as { id?: string }).id)
         const sourceItem = source.data.data as TRecord
-        const resourceIndexOnLane = laneProps.items.findIndex(
-          (item) => (item as unknown as { id?: string }).id === sourceId
-        )
+
+        // Find source index using getKey for consistency
+        const resourceIndexOnLane = laneProps.items.findIndex((item, idx) => {
+          const itemKey = String(laneProps.getKey(item, idx))
+          return itemKey === sourceId
+        })
+
         const sourceLaneIdFromPayload = String(
           (source.data as unknown as { data?: { laneId?: string } }).data
             ?.laneId ?? ""
@@ -240,6 +315,64 @@ export function KanbanLane<TRecord extends RecordType>({
           )
 
         const isCrossLane = String(initialLaneId) !== String(id)
+
+        // Early check: prevent useless drops in same lane
+        if (!isCrossLane && resourceIndexOnLane >= 0) {
+          // Check if dropping on card target
+          const cardTarget = location.current.dropTargets.find((t) => {
+            const data = t.data as { type?: string }
+            return data.type === "list-card-target"
+          })
+
+          if (cardTarget) {
+            const targetIndex = (cardTarget.data as { index?: number }).index
+            // Extract edge info from cardTarget
+            const edge = (cardTarget.data as { closestEdge?: string })
+              .closestEdge as "top" | "bottom" | undefined
+
+            if (targetIndex !== undefined && edge) {
+              // Check if this would be a useless drop based on target card and edge
+              let wouldBeUselessDrop = false
+
+              if (targetIndex === resourceIndexOnLane) {
+                // Dropping on same card - always useless
+                wouldBeUselessDrop = true
+              } else if (
+                targetIndex === resourceIndexOnLane - 1 &&
+                edge === "bottom"
+              ) {
+                // Dropping below card above = stays in same position
+                wouldBeUselessDrop = true
+              } else if (
+                targetIndex === resourceIndexOnLane + 1 &&
+                edge === "top"
+              ) {
+                // Dropping above card below = stays in same position
+                wouldBeUselessDrop = true
+              }
+
+              if (wouldBeUselessDrop) {
+                return
+              }
+            }
+          }
+        }
+
+        // Check if this would be a useless drop in same lane
+        if (!isCrossLane && forcedIndex !== null && forcedEdge !== null) {
+          const wouldBeUselessDrop =
+            (forcedIndex === resourceIndexOnLane && forcedEdge === "top") ||
+            (forcedIndex === resourceIndexOnLane && forcedEdge === "bottom") ||
+            (forcedIndex === resourceIndexOnLane - 1 &&
+              forcedEdge === "bottom") ||
+            (forcedIndex === resourceIndexOnLane + 1 && forcedEdge === "top")
+
+          if (wouldBeUselessDrop) {
+            setForcedIndex(null)
+            setForcedEdge(null)
+            return
+          }
+        }
 
         // Only the lane actually under the pointer should handle the drop
         const overThisLane = location.current.dropTargets.some((t) => {
@@ -324,18 +457,35 @@ export function KanbanLane<TRecord extends RecordType>({
           return
         }
 
+        // Additional check: prevent useless drops in same lane with final computed params
+        if (!isCrossLane && onMoveParams.indexOfTarget !== undefined) {
+          const targetIdx = onMoveParams.indexOfTarget
+          const position = onMoveParams.position
+          const wouldBeUselessDrop =
+            (targetIdx === resourceIndexOnLane && position === "above") ||
+            (targetIdx === resourceIndexOnLane && position === "below") ||
+            (targetIdx === resourceIndexOnLane - 1 && position === "below") ||
+            (targetIdx === resourceIndexOnLane + 1 && position === "above")
+
+          if (wouldBeUselessDrop) {
+            return
+          }
+        }
+
         // Single upward call. Parent/Story updates state; coordinator not needed here.
         await onMove?.(onMoveParams)
         setForcedIndex(null)
         setForcedEdge(null)
       },
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     id,
     getLaneResourceIndexById,
     onMove,
     isDragging,
     laneProps.items,
+    laneProps.getKey,
     forcedIndex,
     forcedEdge,
   ])
@@ -363,8 +513,16 @@ export function KanbanLane<TRecord extends RecordType>({
 
   // Track drag lifecycle via DnD driver
   useDndEvents(({ phase }) => {
-    if (phase === "start") setIsDragging(true)
-    if (phase === "drop" || phase === "cancel") setIsDragging(false)
+    if (phase === "start") {
+      setIsDragging(true)
+    }
+    if (phase === "drop" || phase === "cancel") {
+      setIsDragging(false)
+      setShowEmptyLanePlaceholder(false)
+      setForcedIndex(null)
+      setForcedEdge(null)
+      setDraggedItemIndex(-1)
+    }
   })
 
   // Test hook: allow stories to trigger onMove without real DnD
@@ -398,8 +556,102 @@ export function KanbanLane<TRecord extends RecordType>({
       window.removeEventListener("kanban-test-move", handler as EventListener)
   }, [id, onMove])
 
+  // Calculate dynamic height based on content and container
+  useLayoutEffect(() => {
+    const measure = measureRef.current
+    const outer = outerRef.current
+    if (!measure || !outer) return
+
+    let rafId: number | null = null
+    let lastCalculatedHeight: number | null = null
+
+    const calculateHeight = () => {
+      // Get parent flex container (the one with items-start)
+      const flexContainer = outer.parentElement?.parentElement
+      if (!flexContainer) return
+
+      // Get max available height from the flex container
+      const maxHeight = flexContainer.offsetHeight
+
+      // Temporarily remove height constraint to measure natural content height
+      const originalHeight = outer.style.height
+      outer.style.height = "auto"
+
+      // Force reflow to ensure accurate measurement
+      void measure.offsetHeight
+
+      // Get natural content height by looking at the Lane component inside
+      const contentHeight = measure.scrollHeight
+
+      // Restore constraint
+      outer.style.height = originalHeight
+
+      // Calculate final height based on parent constraints
+      let finalHeight: number
+      const MIN_HEIGHT = 400 // Minimum height when no parent constraint
+
+      // If parent height is very small (< 100px), it means no real constraint
+      // Parent likely has no defined height and is collapsing
+      if (maxHeight < 100) {
+        // No real height constraint from parent
+        // Use content height but ensure a minimum
+        finalHeight = Math.max(contentHeight, MIN_HEIGHT)
+      } else {
+        // Parent has meaningful height constraint - cap at parent height
+        finalHeight = Math.min(contentHeight, maxHeight)
+      }
+
+      // Only update if height changed by more than 1px (avoid unnecessary re-renders)
+      if (
+        lastCalculatedHeight === null ||
+        Math.abs(finalHeight - lastCalculatedHeight) > 1
+      ) {
+        lastCalculatedHeight = finalHeight
+        setCalculatedHeight(finalHeight)
+      }
+    }
+
+    // Calculate immediately in layout effect
+    calculateHeight()
+
+    // Debounced recalculation using requestAnimationFrame
+    const scheduleCalculation = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(() => {
+        calculateHeight()
+        rafId = null
+      })
+    }
+
+    // Observe changes in content
+    const resizeObserver = new ResizeObserver(scheduleCalculation)
+
+    resizeObserver.observe(measure)
+
+    // Also observe the flex container for viewport changes
+    const flexContainer = outer.parentElement?.parentElement
+    if (flexContainer) {
+      resizeObserver.observe(flexContainer)
+    }
+
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+      resizeObserver.disconnect()
+    }
+  }, [laneProps.items.length, laneProps.loading, showEmptyLanePlaceholder])
+
   return (
-    <div className="relative h-full rounded">
+    <div
+      ref={outerRef}
+      className="relative rounded"
+      style={{
+        height: calculatedHeight ? `${calculatedHeight}px` : undefined,
+      }}
+    >
       <div
         ref={laneRef}
         className={
@@ -407,7 +659,7 @@ export function KanbanLane<TRecord extends RecordType>({
         }
         style={{
           backgroundColor: isOver
-            ? "hsla(210, 91%, 22%, 0.04)"
+            ? "hsla(210, 91%, 22%, 0.08)"
             : "hsla(210, 91%, 22%, 0.02)",
         }}
       >
@@ -420,22 +672,48 @@ export function KanbanLane<TRecord extends RecordType>({
           )}
           aria-hidden
         />
-        <Lane<TRecord>
-          {...laneProps}
-          renderCard={(item, index) => {
-            const node = laneProps.renderCard(item, index)
-            if (isValidElement(node)) {
-              const edge = index === forcedIndex ? forcedEdge : null
-              return cloneElement(
-                node as React.ReactElement<Record<string, unknown>>,
-                {
-                  forcedEdge: edge,
-                }
-              )
+        <div ref={measureRef} className="flex h-full flex-col">
+          <Lane<TRecord>
+            {...laneProps}
+            dropPlaceholderIndex={
+              showEmptyLanePlaceholder && laneProps.items.length === 0
+                ? 0
+                : undefined
             }
-            return node
-          }}
-        />
+            renderCard={(item, index) => {
+              const node = laneProps.renderCard(item, index)
+              if (isValidElement(node)) {
+                const edge = index === forcedIndex ? forcedEdge : null
+
+                // Determine which edges should be disabled for this card to prevent useless drops
+                const disabledEdges: Array<"top" | "bottom"> = []
+                if (draggedItemIndex >= 0) {
+                  if (index === draggedItemIndex) {
+                    // The dragged card itself - disable both edges
+                    disabledEdges.push("top", "bottom")
+                  } else if (index === draggedItemIndex - 1) {
+                    // Card immediately above - disable bottom edge
+                    // (dropping below it would be same position as current dragged item)
+                    disabledEdges.push("bottom")
+                  } else if (index === draggedItemIndex + 1) {
+                    // Card immediately below - disable top edge
+                    // (dropping above it would be same position as current dragged item)
+                    disabledEdges.push("top")
+                  }
+                }
+
+                return cloneElement(
+                  node as React.ReactElement<Record<string, unknown>>,
+                  {
+                    forcedEdge: edge,
+                    disabledEdges,
+                  }
+                )
+              }
+              return node
+            }}
+          />
+        </div>
       </div>
     </div>
   )

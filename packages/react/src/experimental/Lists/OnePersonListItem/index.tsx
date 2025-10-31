@@ -1,6 +1,6 @@
-import { Button } from "@/components/Actions/Button"
 import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
 import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
@@ -96,7 +96,7 @@ const BaseOnePersonListItem = React.forwardRef<
         {"actions" in props && (
           <div className="flex flex-1 flex-row items-center justify-end gap-2">
             {props.actions?.primary && (
-              <Button
+              <F0Button
                 variant="outline"
                 onClick={props.actions.primary.onClick}
                 label={props.actions.primary.label}
@@ -105,7 +105,7 @@ const BaseOnePersonListItem = React.forwardRef<
             )}
 
             {props.actions?.secondary && (
-              <Button
+              <F0Button
                 variant="outline"
                 onClick={props.actions.secondary.onClick}
                 label="Secondary"

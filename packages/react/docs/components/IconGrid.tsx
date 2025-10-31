@@ -90,7 +90,7 @@ export function IconGrid() {
   }, [searchTerm])
 
   return (
-    <div className="flex flex-col gap-4 pt-4">
+    <div className="flex flex-col gap-4">
       <div className="relative w-full">
         <input
           type="text"

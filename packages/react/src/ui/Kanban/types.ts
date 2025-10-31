@@ -46,6 +46,9 @@ export interface KanbanProps<TRecord extends RecordType> {
   /** Optional CSS classes for root */
   className?: string
 
+  /** Optional callback triggered when requesting a new record in a lane */
+  onCreate?: KanbanOnCreate
+
   /** Optional DnD configuration to enable droppable lanes */
   dnd?: {
     instanceId: symbol
@@ -53,6 +56,8 @@ export interface KanbanProps<TRecord extends RecordType> {
     onMove?: KanbanOnMove<TRecord>
   }
 }
+
+export type KanbanOnCreate = (laneId: string) => void | Promise<void>
 
 export type KanbanOnMove<TRecord extends RecordType> = (
   fromLaneId: string,

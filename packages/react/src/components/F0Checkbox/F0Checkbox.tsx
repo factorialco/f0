@@ -1,3 +1,4 @@
+import { DataAttributes } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
 import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
 

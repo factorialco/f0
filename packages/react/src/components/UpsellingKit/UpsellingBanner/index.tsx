@@ -1,4 +1,4 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import {
   BaseBanner,
@@ -58,7 +58,7 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
       }
 
       return (
-        <Button
+        <F0Button
           onClick={action.onClick}
           label={action.label}
           variant={action.variant || "default"}

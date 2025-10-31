@@ -2,14 +2,7 @@ import type { Meta } from "@storybook/react-vite"
 
 import { LineChart } from "./index"
 
-const singleDataConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
-  },
-}
-
-const meta: Meta<typeof LineChart<typeof singleDataConfig>> = {
+const meta: Meta = {
   component: LineChart,
   title: "Charts/LineChart",
   argTypes: {
@@ -30,52 +23,86 @@ const meta: Meta<typeof LineChart<typeof singleDataConfig>> = {
 
 export default meta
 
-export const Default: Meta<typeof LineChart<typeof singleDataConfig>> = {
-  args: {
-    dataConfig: singleDataConfig,
-    xAxis: {
-      tickFormatter: (value: string) => value.slice(0, 3),
-    },
-    yAxis: {
-      hide: true,
-      tickFormatter: (value: string) =>
-        `${Number.isNaN(parseFloat(value)) ? value : (parseFloat(value) / 100).toFixed(2) + " €"}`,
-    },
-    data: [
-      { label: "January", values: { desktop: 186 } },
-      { label: "February", values: { desktop: 305 } },
-      { label: "March", values: { desktop: 237 } },
-      { label: "April", values: { desktop: 73 } },
-      { label: "May", values: { desktop: 209 } },
-      { label: "June", values: { desktop: 214 } },
-    ],
+const timeToHireDataConfig = {
+  timeToHire: {
+    label: "Time to hire",
   },
 }
 
-const multiDataConfig = {
-  desktop: {
-    label: "Desktop",
-  },
-  mobile: {
-    label: "Mobile",
-    dashed: true,
-  },
-}
-
-export const MultipleLines: Meta<typeof LineChart<typeof multiDataConfig>> = {
+export const Default: Meta<typeof LineChart<typeof timeToHireDataConfig>> = {
   args: {
-    dataConfig: multiDataConfig,
+    dataConfig: timeToHireDataConfig,
     xAxis: {
       hide: false,
       tickFormatter: (value: string) => value.slice(0, 3),
     },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${value} days`,
+    },
     data: [
-      { label: "January", values: { desktop: 186, mobile: 120 } },
-      { label: "February", values: { desktop: 305, mobile: 180 } },
-      { label: "March", values: { desktop: 237, mobile: 150 } },
-      { label: "April", values: { desktop: 73, mobile: 90 } },
-      { label: "May", values: { desktop: 209, mobile: 160 } },
-      { label: "June", values: { desktop: 214, mobile: 200 } },
+      { label: "January", values: { timeToHire: 24 } },
+      { label: "February", values: { timeToHire: 17 } },
+      { label: "March", values: { timeToHire: 25 } },
+      { label: "April", values: { timeToHire: 30 } },
+      { label: "May", values: { timeToHire: 10 } },
+      { label: "June", values: { timeToHire: 26 } },
     ],
+    lineType: "linear",
+  },
+}
+
+const timeToHireBySeniorityDataConfig = {
+  junior: {
+    label: "Junior",
+  },
+  mid: {
+    label: "Mid",
+  },
+  senior: {
+    label: "Senior",
+  },
+}
+
+export const MultipleLines: Meta<
+  typeof LineChart<typeof timeToHireBySeniorityDataConfig>
+> = {
+  args: {
+    dataConfig: timeToHireBySeniorityDataConfig,
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value.slice(0, 3),
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${value} days`,
+    },
+    data: [
+      {
+        label: "January",
+        values: { junior: 18, mid: 28, senior: 45 },
+      },
+      {
+        label: "February",
+        values: { junior: 15, mid: 25, senior: 42 },
+      },
+      {
+        label: "March",
+        values: { junior: 28, mid: 30, senior: 55 },
+      },
+      {
+        label: "April",
+        values: { junior: 16, mid: 26, senior: 40 },
+      },
+      {
+        label: "May",
+        values: { junior: 14, mid: 24, senior: 38 },
+      },
+      {
+        label: "June",
+        values: { junior: 20, mid: 24, senior: 44 },
+      },
+    ],
+    lineType: "linear",
   },
 }

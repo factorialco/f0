@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import ChatSpinner from "./ChatSpinner"
+import { ChatSpinner } from "./ChatSpinner"
 
 const meta: Meta<typeof ChatSpinner> = {
   title: "Experimental/AiChat/ChatSpinner",

@@ -3,6 +3,7 @@
  * Supports both direct number values and objects with placeholder states.
  */
 import { cn } from "@/lib/utils"
+import { tableDisplayClassNames } from "../const"
 import { ValueDisplayRendererContext } from "../renderers"
 import { isShowingPlaceholder, resolveValue } from "../utils"
 import { WithPlaceholder } from "./types"
@@ -40,7 +41,10 @@ export const NumberCell = (
     <div
       className={cn(
         "flex flex-1 items-center gap-1 text-f1-foreground",
-        meta.visualization === "table" && "justify-end",
+        meta.visualization === "table" && [
+          "justify-end",
+          tableDisplayClassNames.text,
+        ],
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
       )}
     >

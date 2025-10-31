@@ -3,7 +3,7 @@ import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { CrossedCircle } from "@/icons/app"
-import { cn } from "@/lib/utils.ts"
+import { cn, focusRing } from "@/lib/utils.ts"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import {
@@ -12,7 +12,10 @@ import {
   forwardRef,
   useEffect,
   useId,
+  useMemo,
+  useRef,
   useState,
+  type AutoFill,
 } from "react"
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
@@ -136,6 +139,7 @@ const inputFieldStatusVariants = cva({
 })
 
 export type InputFieldProps<T> = {
+  autoFocus?: boolean
   label: string
   placeholder?: string
   labelIcon?: IconType
@@ -159,11 +163,14 @@ export type InputFieldProps<T> = {
   readonly?: boolean
   clearable?: boolean
   role?: string
+  autocomplete?: AutoFill
+  inputRef?: React.Ref<unknown>
   "aria-controls"?: AriaAttributes["aria-controls"]
   "aria-expanded"?: AriaAttributes["aria-expanded"]
   onClear?: () => void
   onFocus?: () => void
   onBlur?: () => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   canGrow?: boolean
   children: React.ReactNode & {
     onFocus?: () => void
@@ -266,16 +273,13 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       )
     }
 
-    useEffect(
-      () => {
-        if (localValue === value) {
-          return
-        }
-        setLocalValue(value)
-      },
-      // localValue is a dep because we want to recociliate both values, in some cases the value will not change for example when the parent limits the chars the user can input
-      [value, localValue, emptyValue]
-    )
+    useEffect(() => {
+      setLocalValue(
+        maxLength && value && lengthProvider(value) > maxLength
+          ? value?.substring(0, maxLength)
+          : value
+      )
+    }, [value, lengthProvider, maxLength])
 
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -297,6 +301,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const handleClear = () => {
       handleChange(emptyValue)
+      props.onClear?.()
     }
 
     const handleClickContent = () => {
@@ -316,6 +321,58 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         onClickPlaceholder?.()
       }
     }
+
+    /**
+     * Detect if the input is being autofilled
+     */
+    const [isAutofilled, setIsAutofilled] = useState(false)
+    const handleAnimationStart = (
+      e: React.AnimationEvent<HTMLInputElement>
+    ) => {
+      if (e.animationName === "autofill") {
+        setIsAutofilled(true)
+      }
+    }
+
+    const intervalRef = useRef<NodeJS.Timeout | null>(null)
+    const localInputRef = useRef<HTMLElement>(null)
+    const inputRef = useMemo(
+      () => props.inputRef ?? localInputRef,
+      [props.inputRef, localInputRef]
+    )
+
+    useEffect(() => {
+      if (isAutofilled && !intervalRef.current) {
+        intervalRef.current = setInterval(() => {
+          // Gets the element depending on the type of the ref
+          const element =
+            typeof inputRef === "object" && inputRef?.current
+              ? (inputRef.current as HTMLElement)
+              : null
+          if (element) {
+            const stillAutofilled =
+              element.matches(":-webkit-autofill") ||
+              element.matches(":autofill")
+            if (!stillAutofilled) {
+              setIsAutofilled(false)
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+                intervalRef.current = null
+              }
+            }
+          }
+        }, 100)
+      }
+
+      // Cleanup function to clear interval on unmount or dependency change
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
+          intervalRef.current = null
+        }
+      }
+    }, [isAutofilled, inputRef])
+    /**********************/
 
     return (
       <div
@@ -382,7 +439,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
-                  size === "md" && "left-3 top-2.5"
+                  size === "md" && "left-3 top-[9px]"
                 )}
               >
                 {icon && (
@@ -403,9 +460,11 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 onChange: handleChange,
                 onBlur: props.onBlur,
                 onFocus: props.onFocus,
+                onAnimationStart: handleAnimationStart,
                 disabled: noEdit,
                 readOnly: readonly,
                 role,
+                ref: inputRef,
                 "aria-controls": ariaControls,
                 "aria-expanded": ariaExpanded,
                 id,
@@ -432,7 +491,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),
-                  placeholder && !hidePlaceholder && isEmpty(localValue)
+                  placeholder &&
+                    !hidePlaceholder &&
+                    isEmpty(localValue) &&
+                    !isAutofilled
                     ? "opacity-1"
                     : "opacity-0"
                 )}
@@ -445,36 +507,43 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {(clearable || append || appendTag || loading) && (
               <div
                 className={cn(
-                  "flex h-fit items-center gap-1.5 self-center pr-1",
-                  size === "md" && "pr-1.5 pt-1.5",
+                  "flex h-fit items-center gap-1.5 self-center pr-[3px]",
+                  size === "md" && "pr-[7px]",
                   "relative"
                 )}
               >
                 {clearable && !noEdit && (
                   <AnimatePresence initial={!isEmpty(localValue)}>
                     {!isEmpty(localValue) && (
-                      <motion.div
+                      <motion.button
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="mr-px mt-px flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
-                        onClick={handleClear}
+                        className={cn(
+                          "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
+                          focusRing()
+                        )}
+                        type="button"
+                        tabIndex={0}
+                        data-testid="clear-button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleClear()
+                        }}
                       >
-                        <F0Icon icon={CrossedCircle} color="bold" size="md" />
-                      </motion.div>
+                        <F0Icon
+                          icon={CrossedCircle}
+                          color="default"
+                          size="md"
+                        />
+                      </motion.button>
                     )}
                   </AnimatePresence>
                 )}
 
                 {(append || appendTag) && (
-                  <div
-                    className={cn(
-                      "mt-px flex h-fit items-center",
-                      size === "sm" && "h-[24px] pr-0.5",
-                      size === "md" && "pr-0.1 h-[25px]"
-                    )}
-                  >
+                  <div className="flex min-h-6 min-w-6 items-center justify-center self-center">
                     {append}
                     {appendTag && <AppendTag text={appendTag} />}
                   </div>
@@ -491,12 +560,15 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                             "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
                             "via-[#FFFFFF] via-60% dark:via-[#192231]",
                             "to-transparent to-100%",
-                            size === "md" && "right-3 top-2.5"
+                            size === "md" && "right-3"
                           ),
                         inputElementVariants({ size })
                       )}
                       style={{
-                        right: loadingIndicator?.offset,
+                        right:
+                          typeof loadingIndicator?.offset === "number"
+                            ? loadingIndicator?.offset + (size === "md" ? 6 : 0)
+                            : undefined,
                       }}
                     >
                       <Spinner size="small" className="mt-[1px]" />

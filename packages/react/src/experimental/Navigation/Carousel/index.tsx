@@ -132,8 +132,8 @@ export const Carousel = ({
           </CarouselContent>
           {showArrows && (
             <>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious label="Previous" />
+              <CarouselNext label="Next" />
             </>
           )}
         </div>

@@ -5,7 +5,7 @@ const baseButton =
   "group relative inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border-none p-0 text-base font-medium shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] transition-colors [&_.main]:transform-gpu [&_.main]:transition-transform [&_.main]:duration-100 active:[&_.main]:translate-y-px [&_.main]:flex [&_.main]:items-center [&_.main]:justify-center disabled:opacity-30 disabled:cursor-not-allowed no-underline"
 
 const baseLink =
-  "relative flex-row font-medium h-fit [&[aria-disabled=true]]:pointer-events-none [&[aria-disabled=true]]:cursor-not-allowed [&[aria-disabled=true]]:opacity-30 transition-colors"
+  "relative flex-row font-medium [&[aria-disabled=true]]:pointer-events-none [&[aria-disabled=true]]:cursor-not-allowed [&[aria-disabled=true]]:opacity-30 transition-colors"
 
 export const actionVariants = cva({
   base: "inline-flex items-center gap-1 text-base font-medium transition-colors",
@@ -57,6 +57,7 @@ export const actionVariants = cva({
         baseLink,
         "text-f1-foreground underline decoration-f1-border-hover decoration-1 underline-offset-[5px] visited:text-f1-foreground hover:text-f1-foreground hover:decoration-f1-border-bold active:text-f1-foreground"
       ),
+      unstyled: cn(baseLink, "text-inherit no-underline"),
       mention: cn(
         baseLink,
         "bg-f1-background-accent !px-1.5 font-medium text-f1-foreground-accent"
@@ -116,6 +117,7 @@ export const iconVariants = cva({
       link: "",
       mention: "",
       selected: "",
+      unstyled: "",
     },
     mode: {
       default: "",
@@ -170,6 +172,11 @@ export const iconVariants = cva({
       class: "[&>svg]:text-f1-icon-accent",
     },
     {
+      variant: "unstyled",
+      mode: "default",
+      class: "[&>svg]:text-f1-icon-accent",
+    },
+    {
       variant: "default",
       mode: "only",
       class: "[&>svg]:text-f1-icon-inverse dark:[&>svg]:text-f1-icon-bold",
@@ -211,6 +218,11 @@ export const iconVariants = cva({
       class: "[&>svg]:text-f1-icon",
     },
     {
+      variant: "unstyled",
+      mode: "only",
+      class: "[&>svg]:text-f1-icon",
+    },
+    {
       variant: "mention",
       mode: "default",
       class: "[&>svg]:text-f1-icon-accent",
@@ -219,5 +231,26 @@ export const iconVariants = cva({
   defaultVariants: {
     variant: "default",
     mode: "default",
+  },
+})
+
+export const loadingVariants = cva({
+  base: "rounded-full border-solid border-t-transparent will-change-transform",
+  variants: {
+    size: {
+      sm: "h-3 w-3 border-[1px]",
+      md: "h-4 w-4 border-2",
+      lg: "h-5 w-5 border-2",
+    },
+    variant: {
+      default: "border-f1-foreground-inverse border-t-transparent",
+      outline: "border-f1-foreground border-t-transparent",
+      neutral: "border-f1-foreground border-t-transparent",
+      critical: "border-f1-icon-critical border-t-transparent",
+      ghost: "border-f1-foreground border-t-transparent",
+      promote: "border-f1-icon-promote border-t-transparent",
+      outlinePromote: "border-f1-icon-promote border-t-transparent",
+      unstyled: "",
+    },
   },
 })
