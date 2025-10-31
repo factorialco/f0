@@ -21,6 +21,7 @@ import {
   generateCountries,
   getPresetMock,
   samplePresets,
+  sourceBasedDefinition,
 } from "./mockData"
 
 const meta = {
@@ -461,4 +462,25 @@ export const WithLargeAsyncOptions: Story = {
 
 export const WithLargeAsyncOptionsWithCache: Story = {
   render: () => <LargeAsyncOptionsComponent cache={true} />,
+}
+
+// Example with source-based pagination
+const SourceBasedPaginationComponent = () => {
+  const [filters, setFilters] = useState<
+    FiltersState<typeof sourceBasedDefinition>
+  >({})
+
+  return (
+    <div className="w-96">
+      <OneFilterPickerComponent
+        filters={sourceBasedDefinition}
+        value={filters}
+        onChange={setFilters}
+      />
+    </div>
+  )
+}
+
+export const WithSourceBasedPagination: Story = {
+  render: () => <SourceBasedPaginationComponent />,
 }

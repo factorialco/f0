@@ -52,7 +52,7 @@ export const PresetList = ({ presets, ...props }: PresetListProps) => {
   }
 
   return (
-    <Select asList value={currentPreset} onValueChange={handlePresetSelect}>
+    <Select as="list" value={currentPreset} onValueChange={handlePresetSelect}>
       <SelectContent>
         {Object.entries(presets).map(([key, preset]) => (
           <SelectItem key={key} value={key}>

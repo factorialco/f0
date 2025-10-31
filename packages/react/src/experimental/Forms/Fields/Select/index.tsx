@@ -30,14 +30,7 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
@@ -217,7 +210,6 @@ const SelectComponent = forwardRef(function Select<
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
-  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [openLocal, setOpenLocal] = useState(open)
 
@@ -357,12 +349,6 @@ const SelectComponent = forwardRef(function Select<
     onChangeSelectedOption,
   ])
 
-  useEffect(() => {
-    if (open) {
-      searchInputRef.current?.focus()
-    }
-  }, [open])
-
   const onSearchChangeLocal = useCallback(
     (value: string) => {
       setCurrentSearch(value)
@@ -453,44 +439,6 @@ const SelectComponent = forwardRef(function Select<
     loadMore()
   }
 
-  const isLoadingOrLoadingMore = loading || isLoading || isLoadingMore
-
-  const loadingFocusInterval = useRef<NodeJS.Timeout | null>(null)
-  const clearLoadingFocusInterval = useCallback(() => {
-    if (loadingFocusInterval.current) {
-      clearInterval(loadingFocusInterval.current)
-      loadingFocusInterval.current = null
-    }
-  }, [loadingFocusInterval])
-
-  // Focus the search input when the data is loaded or loading
-
-  useEffect(() => {
-    if (!openLocal) {
-      clearLoadingFocusInterval()
-      return
-    }
-
-    requestAnimationFrame(() => {
-      searchInputRef.current?.focus()
-    })
-
-    // When is loading we need to focus the search repeatedly until the data is loaded
-    if (isLoadingOrLoadingMore && !loadingFocusInterval.current) {
-      loadingFocusInterval.current = setInterval(() => {
-        searchInputRef.current?.focus()
-      }, 100)
-    } else if (!isLoadingOrLoadingMore && loadingFocusInterval.current) {
-      clearLoadingFocusInterval()
-    }
-  }, [data, isLoadingOrLoadingMore, openLocal, clearLoadingFocusInterval])
-
-  useEffect(() => {
-    setInterval(() => {
-      searchInputRef.current?.focus()
-    }, 100)
-  }, [openLocal])
-
   const i18n = useI18n()
 
   return (
@@ -565,7 +513,6 @@ const SelectComponent = forwardRef(function Select<
             bottom={<SelectBottomActions actions={actions} />}
             top={
               <SelectTopActions
-                searchInputRef={searchInputRef}
                 searchValue={currentSearch}
                 onSearchChange={onSearchChangeLocal}
                 searchBoxPlaceholder={searchBoxPlaceholder}

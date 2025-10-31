@@ -28,6 +28,8 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   children?: React.ReactNode
   /** The mode of the component */
   mode?: FiltersMode
+  /** Callback fired when filters open state is changed */
+  onOpenChange?: (isOpen: boolean) => void
 }
 
 /**
@@ -96,6 +98,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   children,
   presetsLoading = false,
   mode = "default",
+  onOpenChange,
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
   const defaultFilters = useRef(value)
@@ -105,6 +108,10 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   })
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+
+  useEffect(() => {
+    onOpenChange?.(isFiltersOpen)
+  }, [isFiltersOpen, onOpenChange])
 
   const [localFiltersValue, setLocalFiltersValue] = useState(value)
 
