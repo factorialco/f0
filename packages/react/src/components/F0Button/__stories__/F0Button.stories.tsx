@@ -194,7 +194,7 @@ export const IconVariants: Story = {
       <div>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Only icon</div>
         <div className="flex gap-2">
-          <F0Button {...args} variant="default" label="" icon={Add} hideLabel />
+          <F0Button {...args} variant="default" label="Default" icon={Add} hideLabel />
           <F0Button
             {...args}
             variant="outline"
