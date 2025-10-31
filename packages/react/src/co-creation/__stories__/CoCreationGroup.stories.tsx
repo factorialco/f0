@@ -40,7 +40,7 @@ const meta = {
             agent="one-workflow"
             runtimeUrl="http://localhost:4111/copilotkit"
             credentials="include"
-            showDevConsole={false}
+            showDevConsole={true}
           >
             <Demo>
               <Story />
