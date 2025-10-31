@@ -239,7 +239,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           </div>
           {(metadata || children) && (
-            <CardContent>
+            <CardContent className="pointer-events-none">
               {metadata && (
                 <div
                   className={cn(
