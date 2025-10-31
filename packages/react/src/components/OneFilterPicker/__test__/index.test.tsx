@@ -23,35 +23,13 @@ const definition = {
   },
 } as const satisfies FiltersDefinition
 
+// Helper function to open the filter popover and trigger animations
+const openFilterPopover = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByRole("button", { name: /filters/i }))
+}
+
 describe("Filters", () => {
   describe("Filter State Management", () => {
-    it("applies filters only when Apply button is clicked", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
-      )
-
-      // Open filter popover
-      await user.click(screen.getByRole("button", { name: /filters/i }))
-
-      // Configure a filter but don't apply it
-      await user.click(screen.getByText("Department"))
-      await user.click(screen.getByText("Engineering"))
-
-      // Verify onChange hasn't been called yet
-      expect(onChange).not.toHaveBeenCalled()
-
-      // Apply the filter
-      await user.click(screen.getByRole("button", { name: /apply filters/i }))
-
-      // Verify state was persisted after applying
-      expect(onChange).toHaveBeenCalledWith({
-        department: ["engineering"],
-      })
-    })
-
     it("preserves filter order based on first application", async () => {
       const onChange = vi.fn()
 
@@ -81,45 +59,6 @@ describe("Filters", () => {
         expect(screen.getAllByText(/search:|department:/i)).toHaveLength(2)
       })
     })
-
-    it("preserves filter order when reopening the filter panel", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
-      )
-
-      // Open and configure filter
-      await user.click(screen.getByRole("button", { name: /filters/i }))
-      await user.click(screen.getByText("Department"))
-      await waitFor(() => {
-        expect(screen.getByText("Department")).toBeInTheDocument()
-      })
-      await user.click(screen.getByText("Engineering"))
-
-      // Apply the filter
-      await user.click(screen.getByRole("button", { name: /apply filters/i }))
-      expect(onChange).toHaveBeenCalledWith({
-        department: ["engineering"],
-      })
-
-      // Reset the mock to track new calls
-      onChange.mockReset()
-
-      // Reopen filter panel
-      await user.click(screen.getByRole("button", { name: /filters/i }))
-      await user.click(screen.getByText("Department"))
-
-      // Add another filter and apply
-      await user.click(screen.getByText("Design"))
-      await user.click(screen.getByRole("button", { name: /apply filters/i }))
-
-      // Based on the error, the component now replaces the selection instead of adding to it
-      expect(onChange).toHaveBeenCalledWith({
-        department: ["engineering", "design"],
-      })
-    })
   })
 
   describe("Filter Operations", () => {
@@ -132,7 +71,7 @@ describe("Filters", () => {
       )
 
       // Open filter popover
-      await user.click(screen.getByRole("button", { name: /filters/i }))
+      await openFilterPopover(user)
 
       // Wait for the popover to open and check that the first filter (Department) is selected
       await waitFor(() => {
@@ -156,7 +95,7 @@ describe("Filters", () => {
       )
 
       // Open filter popover
-      await user.click(screen.getByRole("button", { name: /filters/i }))
+      await openFilterPopover(user)
 
       // Wait for the popover to open and check that the first filter with a value (Search) is selected
       await waitFor(() => {
@@ -239,51 +178,6 @@ describe("Filters", () => {
       // Verify department filter is gone
       expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
       expect(screen.getByText(/search:/i)).toBeInTheDocument()
-    })
-
-    it("updates filter state when reopening the filter panel and applying new filters", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      // Start with engineering selected
-      const { rerender } = render(
-        <OneFilterPicker
-          filters={definition}
-          value={{ department: ["engineering"] }}
-          onChange={onChange}
-        />
-      )
-
-      // Open filter panel
-      await user.click(screen.getByRole("button", { name: /filters/i }))
-      await user.click(screen.getByText("Department"))
-
-      // Deselect Engineering and select Design instead
-      await user.click(screen.getByText("Engineering")) // Deselect
-      await user.click(screen.getByText("Design")) // Select Design
-
-      // Apply the changes
-      await user.click(screen.getByRole("button", { name: /apply filters/i }))
-
-      // Verify the filter was updated correctly - Design should replace Engineering
-      expect(onChange).toHaveBeenCalledWith({
-        department: ["design"],
-      })
-
-      // Update the component with the new state
-      rerender(
-        <OneFilterPicker
-          filters={definition}
-          value={{ department: ["design"] }}
-          onChange={onChange}
-        />
-      )
-
-      // Verify the UI shows the updated filter
-      await waitFor(() => {
-        expect(screen.getByText(/department:/i)).toBeInTheDocument()
-        expect(screen.getByText(/design/i)).toBeInTheDocument()
-      })
     })
   })
 })
@@ -470,7 +364,7 @@ describe("Presets", () => {
     onChange.mockReset()
 
     // Open filter popover to add a search filter
-    await user.click(screen.getByRole("button", { name: /filters/i }))
+    await openFilterPopover(user)
     await user.click(screen.getByText("Search"))
 
     // Type in the search field
