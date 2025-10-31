@@ -1,4 +1,9 @@
+import { PageLayout } from "@/components/layouts/page/PageLayout"
+import { AiChatProvider } from "@/experimental/AiChat"
+import { AiChat } from "@/experimental/AiChat/index"
+import { useAiChat } from "@/experimental/AiChat/providers/AiChatStateProvider"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useEffect } from "react"
 import { CoCreationGroup } from "../components/CoCreationGroup/CoCreationGroup"
 import { CoCreationBlockInstance, CoCreationBlockManifest } from "../types"
 import { AvatarCCBManifest } from "./blocks/Avatar"
@@ -6,6 +11,13 @@ import { KeyValueCCBManifest } from "./blocks/KeyValue"
 import { LongTextCCBManifest } from "./blocks/LongText"
 import { TextCCBManifest } from "./blocks/Text"
 
+const Demo = ({ children }: { children: React.ReactElement }) => {
+  const { setOpen } = useAiChat()
+  useEffect(() => {
+    setOpen(true)
+  }, [setOpen])
+  return <PageLayout aside={<AiChat />}>{children}</PageLayout>
+}
 const meta = {
   title: "CoCreationGroup",
   component: CoCreationGroup,
@@ -20,11 +32,23 @@ const meta = {
   },
   tags: ["autodocs", "experimental"],
   decorators: [
-    (Story) => (
-      <div style={{ width: "700px" }}>
-        <Story />
-      </div>
-    ),
+    (Story) => {
+      return (
+        <div>
+          <AiChatProvider
+            enabled
+            agent="one-workflow"
+            runtimeUrl="http://localhost:4111/copilotkit"
+            credentials="include"
+            showDevConsole={false}
+          >
+            <Demo>
+              <Story />
+            </Demo>
+          </AiChatProvider>
+        </div>
+      )
+    },
   ],
 } satisfies Meta<typeof CoCreationGroup>
 

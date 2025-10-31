@@ -107,7 +107,7 @@ export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
     return (
       <div
         ref={ref}
-        className={cn(variants({ variant }), "group", className)}
+        className={cn(variants({ variant }), "relative", className)}
         draggable={draggable}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
@@ -116,7 +116,7 @@ export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
         {...props}
       >
         {showActionsBar && (
-          <div className="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute right-0 top-0 flex items-center justify-end gap-2 p-4">
             {!!primaryAction && primaryAction}
             {actionsDropdownItems.length > 0 && (
               <Dropdown
