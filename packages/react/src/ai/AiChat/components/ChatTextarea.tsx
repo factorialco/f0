@@ -1,17 +1,17 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 
 export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const translation = useI18n()
+  const translation = useAiChatTranslations()
 
   const hasDataToSend = inputValue.trim().length > 0
 

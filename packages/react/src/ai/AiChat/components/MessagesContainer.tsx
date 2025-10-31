@@ -1,6 +1,5 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
@@ -13,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import { isAgentStateMessage } from "../messageTypes"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
@@ -49,7 +49,7 @@ const Messages = ({
     isOpen,
   } = useFeedbackModal()
 
-  const translations = useI18n()
+  const translations = useAiChatTranslations()
   const {
     greeting,
     initialMessage,

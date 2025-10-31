@@ -1,7 +1,7 @@
+import { OneSwitch } from "@/ai/AiChat/OneSwitch"
 import { F0Button } from "@/components/F0Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
-import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"

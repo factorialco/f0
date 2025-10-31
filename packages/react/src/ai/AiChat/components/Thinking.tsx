@@ -2,7 +2,6 @@ import { F0Icon } from "@/components/F0Icon/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import Lightbulb from "@/icons/app/Lightbulb"
 import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { motion } from "motion/react"
@@ -12,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../../../ui/collapsible"
+import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 
 type ThinkingProps = {
   messages: Message[]
@@ -24,7 +24,7 @@ type ThinkingProps = {
 export const Thinking = ({ messages }: ThinkingProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
-  const translations = useI18n()
+  const translations = useAiChatTranslations()
 
   return (
     <div className="mb-1">

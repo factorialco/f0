@@ -4,6 +4,7 @@ import {
   type RenderOptions,
 } from "@testing-library/react"
 import type { ReactElement } from "react"
+import { aiTranslations } from "./ai/AiChat/providers/AiChatTranslationsProvider"
 import { defaultTranslations, I18nProvider } from "./lib/providers/i18n"
 
 // Test provider for i18n - can be used in individual tests
@@ -11,7 +12,11 @@ export const TestI18nProvider = ({
   children,
 }: {
   children: React.ReactNode
-}) => <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
+}) => (
+  <I18nProvider translations={{ ...defaultTranslations, ...aiTranslations }}>
+    {children}
+  </I18nProvider>
+)
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return <TestI18nProvider>{children}</TestI18nProvider>

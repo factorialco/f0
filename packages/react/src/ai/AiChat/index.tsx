@@ -4,7 +4,7 @@ import {
   useCopilotAction,
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
-import { CopilotSidebar } from "@copilotkit/react-ui"
+import { CopilotChat, CopilotSidebar } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
@@ -19,6 +19,7 @@ import {
   ChatTextarea,
   ChatWindow,
   MessagesContainer,
+  MessagesContainerFullscreen,
   SuggestionsList,
   UserMessage,
 } from "./components"
@@ -156,14 +157,72 @@ const AiChatCmp = () => {
   )
 }
 
+const AiFullscreenChatCmp = () => {
+  const { enabled } = useAiChat()
+
+  useCopilotAction({
+    name: "orchestratorThinking",
+    description: "Display orchestrator thinking process (non-blocking)",
+    parameters: [
+      {
+        name: "message",
+        description: "User-friendly progress message",
+        required: true,
+      },
+    ],
+    // render only when backend wants to display the thinking
+    available: "disabled",
+    render: (props) => {
+      return (
+        <div className={props.status ? "-ml-1" : undefined}>
+          <ActionItem
+            title={props.args.message ?? "thinking"}
+            status={props.status === "complete" ? "completed" : props.status}
+            inGroup={props.result?.inGroup}
+          />
+        </div>
+      )
+    },
+  })
+
+  if (!enabled) {
+    return null
+  }
+
+  return (
+    <div className="bg-white flex h-full w-full flex-col overflow-hidden">
+      <div className="relative flex flex-1 flex-col overflow-hidden">
+        {/* Use grid to reorder layout */}
+        <div className="grid h-full w-full grid-rows-[1fr_auto]">
+          {/* Messages take remaining height */}
+          <div className="overflow-y-auto">
+            <CopilotChat
+              Messages={MessagesContainerFullscreen}
+              Input={ChatTextarea}
+              UserMessage={UserMessage}
+              AssistantMessage={AssistantMessage}
+              RenderSuggestionsList={SuggestionsList}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 const AiChat = experimentalComponent("AiChat", AiChatCmp)
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const AiFullscreenChat = experimentalComponent("AiChat", AiFullscreenChatCmp)
 
 const AiChatProvider = experimentalComponent(
   "AiChatProvider",
   AiChatProviderCmp
 )
 
-export { AiChat, AiChatProvider }
+export { AiChat, AiChatProvider, AiFullscreenChat }
