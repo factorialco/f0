@@ -139,6 +139,13 @@ export const filterDefinition: FiltersDefinition = {
       ],
     },
   },
+  salary: {
+    type: "number",
+    label: "Salary",
+    options: {
+      mode: "range",
+    },
+  },
 }
 
 // Define sample presets for use in stories

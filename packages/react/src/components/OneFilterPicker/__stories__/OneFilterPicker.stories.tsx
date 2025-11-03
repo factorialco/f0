@@ -37,7 +37,7 @@ const meta = {
 
       return (
         <>
-          <div className="mb-10 w-[600px]">
+          <div className="mb-10 w-[800px]">
             <Story args={{ ...args, value: filters, onChange: setFilters }} />
           </div>
           <p>
@@ -506,18 +506,18 @@ export const WithSourceBasedPagination: Story = {
   render: () => <SourceBasedPaginationComponent />,
 }
 
-export const WithRangeFilter: Story = {
+export const WithNumberFilter: Story = {
   args: {
     filters: {
-      range: {
-        type: "range",
-        label: "Range",
+      number: {
+        type: "number",
+        label: "Number",
         options: {
           min: 0,
           max: 100,
         },
       },
     },
-    onChange: (value) => console.log("Range filter changed", value),
+    onChange: (value) => console.log("Number filter changed", value),
   },
 }

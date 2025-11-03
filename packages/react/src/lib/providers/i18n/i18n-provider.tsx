@@ -2,12 +2,12 @@
 
 import { createContext, ReactNode, useContext } from "react"
 import { TranslationKey, TranslationsType } from "./i18n-provider-defaults"
-const I18nContext = createContext<
-  | (TranslationsType & {
-      t: (key: TranslationKey, args?: Record<string, string | number>) => string
-    })
-  | null
->(null)
+
+export type I18nContextType = TranslationsType & {
+  t: (key: TranslationKey, args?: Record<string, string | number>) => string
+}
+
+const I18nContext = createContext<I18nContextType | null>(null)
 
 export interface I18nProviderProps {
   children: ReactNode

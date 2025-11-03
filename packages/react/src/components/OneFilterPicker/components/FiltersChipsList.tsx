@@ -33,13 +33,18 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
 
     const filterType = getFilterType(filterSchema.type)
 
-    return filterType.isEmpty(filterValue, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- We need to pass the filter value as any to the isEmpty function
+    const isEmpty = filterType.isEmpty(filterValue as any, {
       schema: filterSchema as unknown as FilterTypeSchema,
       i18n,
     })
+
+    return !isEmpty
   }) as Array<keyof Filters>
 
-  if (activeFilterKeys.length === 0) return null
+  if (activeFilterKeys.length === 0) {
+    return null
+  }
 
   return (
     <div className="mt-2 flex items-start justify-between gap-2">
@@ -47,6 +52,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
         <AnimatePresence presenceAffectsLayout initial={false}>
           {activeFilterKeys.map((key) => {
             const filterSchema = filters[key]
+
             if (!filters[key]) {
               return null
             }

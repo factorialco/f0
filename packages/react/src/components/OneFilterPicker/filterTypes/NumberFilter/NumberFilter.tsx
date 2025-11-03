@@ -28,7 +28,7 @@ export type NumberFilterComponentProps = FilterTypeComponentProps<
 /**
  * A date filter component that provides date picker.
  */
-export function RangeFilter({
+export function NumberFilter({
   value,
   onChange,
   schema,

@@ -2,12 +2,12 @@ import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeDefinition } from "../types"
 import { getOptionsWithDefaults } from "../utils"
 import {
+  NumberFilter,
   NumberFilterOptions,
-  RangeFilter,
-  RangeFilterValue,
+  NumberFilterValue,
 } from "./NumberFilter"
 
-const isEmpty = (value: RangeFilterValue): value is undefined => {
+const isEmpty = (value: NumberFilterValue): value is undefined => {
   return !value || (value[0] === undefined && value[1] === undefined)
 }
 
@@ -16,19 +16,20 @@ const defaults: NumberFilterOptions = {
   max: undefined,
 }
 
-export const rangeFilter: FilterTypeDefinition<
-  RangeFilterValue,
+export const numberFilter: FilterTypeDefinition<
+  NumberFilterValue,
   NumberFilterOptions
 > = {
   emptyValue: [undefined, undefined],
   render: (props) => {
     const options = getOptionsWithDefaults(props.schema.options, defaults)
-    return <RangeFilter {...props} schema={{ ...props.schema, options }} />
+    return <NumberFilter {...props} schema={{ ...props.schema, options }} />
   },
   isEmpty,
-  chipLabel: (value) => {
+  chipLabel: (value, context) => {
+    const i18n = context.i18n
     if (value?.[0] !== undefined && value?.[1] !== undefined) {
-      return `${value?.[0]} - ${value?.[1]}`
+      return i18n.t("filters.range", { min: value?.[0], max: value?.[1] })
     }
 
     if (value?.[1] !== undefined) {
@@ -43,8 +44,8 @@ export const rangeFilter: FilterTypeDefinition<
   },
 }
 
-export default rangeFilter
+export default numberFilter
 
-export type RangeFilterDefinition = BaseFilterDefinition<"range"> & {
+export type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
   options?: NumberFilterOptions
 }

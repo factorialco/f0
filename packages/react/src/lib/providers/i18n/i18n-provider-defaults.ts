@@ -58,6 +58,7 @@ export const defaultTranslations = {
     value: "Value",
     belowOrEqual: "Below or equal to",
     range_title: "Use range",
+    range: "Between {{min}} and {{max}}",
   },
   toc: {
     search: "Search...",
