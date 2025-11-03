@@ -3,6 +3,7 @@ import {
   createAccessibilityExtension,
   createPlaceholderExtension,
   createSlashCommandExtension,
+  createTableOfContentsExtension,
   CustomTaskExtension,
   DetailsContentExtension,
   DetailsExtension,
@@ -12,6 +13,7 @@ import {
   MoodTrackerExtension,
   PersistSelection,
   StarterKitExtension,
+  TableOfContentsItem,
   TaskListExtension,
   TextAlignExtension,
   TextStyleExtension,
@@ -48,7 +50,8 @@ export const createNotesTextEditorExtensions = (
   aiBlockLabels?: AIBlockLabels,
   moodTrackerLabels?: MoodTrackerLabels,
   liveCompanionLabels?: LiveCompanionLabels,
-  transcriptLabels?: TranscriptLabels
+  transcriptLabels?: TranscriptLabels,
+  onTableOfContentsUpdate?: (items: TableOfContentsItem[]) => void
 ) => {
   // Create enhanced config with labels if both are provided
   const enhancedAIBlockConfig =
@@ -68,7 +71,7 @@ export const createNotesTextEditorExtensions = (
   const enhancedTranscriptConfig: TranscriptConfig | undefined =
     transcriptLabels ? { labels: transcriptLabels } : undefined
 
-  return [
+  const extensions = [
     StarterKitExtension,
     UnderlineExtension,
     TextStyleExtension,
@@ -103,4 +106,11 @@ export const createNotesTextEditorExtensions = (
       enhancedAIBlockConfig
     ),
   ]
+
+  // Add table of contents extension if callback is provided
+  if (onTableOfContentsUpdate) {
+    extensions.push(createTableOfContentsExtension(onTableOfContentsUpdate))
+  }
+
+  return extensions
 }
