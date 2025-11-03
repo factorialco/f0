@@ -1,29 +1,16 @@
-import { useAiChat } from "@/experimental/AiChat/providers/AiChatStateProvider"
-import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
-import { useCoAgent, useCopilotContext } from "@copilotkit/react-core"
+import { PageLayout } from "@/components/layouts/page/PageLayout"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect } from "react"
-import { CoCreationGroup } from "../components/CoCreationGroup/CoCreationGroup"
+import { useCocreationGroup } from "../components/CoCreationGroup"
+import {
+  CoCreationGroup,
+  cocreationModes,
+} from "../components/CoCreationGroup/CoCreationGroup"
 import { CoCreationBlockInstance, CoCreationBlockManifest } from "../types"
 import { AvatarCCBManifest } from "./blocks/Avatar"
 import { KeyValueCCBManifest } from "./blocks/KeyValue"
 import { LongTextCCBManifest } from "./blocks/LongText"
 import { TextCCBManifest } from "./blocks/Text"
 
-const Demo = ({ children }: { children: React.ReactElement }) => {
-  const { setOpen } = useAiChat()
-
-  const { threadId } = useCopilotContext()
-  const { state } = useCoAgent<{ query: string; concept: string }>({
-    name: "one-workflow",
-    initialState: { query: "", concept: "" },
-  })
-
-  useEffect(() => {
-    setOpen(true)
-  }, [setOpen])
-  return <>{children}</>
-}
 const meta = {
   title: "CoCreationGroup",
   component: CoCreationGroup,
@@ -37,24 +24,37 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    mode: {
+      description: "The mode of the co-creation group",
+      options: cocreationModes,
+      control: { type: "select" },
+    },
+  },
   decorators: [
-    (Story) => {
+    (Story, { args }) => {
+      const { instructions } = useCocreationGroup({
+        blockManifests: args.blockManifests,
+        agentInstructions: args.agentInstructions,
+        agentContext: args.agentContext,
+        mode: args.mode,
+      })
+
       return (
-        <ApplicationFrame
-          sidebar={null}
-          ai={{
-            runtimeUrl: "http://localhost:4111/copilotkit",
-            agent: "one-workflow",
-            credentials: "include",
-            showDevConsole: true,
-            enabled: true,
-            greeting: "Hello, John",
-          }}
+        <PageLayout
+          aside={
+            <>
+              <h4>Agent intructions</h4>
+              {instructions.map((instruction) => (
+                <p key={instruction}>
+                  <pre>{instruction}</pre>
+                </p>
+              ))}
+            </>
+          }
         >
-          <Demo>
-            <Story />
-          </Demo>
-        </ApplicationFrame>
+          <Story />
+        </PageLayout>
       )
     },
   ],
@@ -107,11 +107,12 @@ const blocks: CoCreationBlockInstance[] = [
 // Basic Variants
 export const Default: Story = {
   args: {
-    blocks,
-    agentAvailableBlockTyoes: avaliableBlocks,
+    blockInstances: blocks,
+    blockManifests: avaliableBlocks,
     agentInstructions: [
       "I want to represent the user data using the blocks available ",
     ],
+    mode: "co-creation",
     agentContext: [
       "The user data is:",
       "John Doe",

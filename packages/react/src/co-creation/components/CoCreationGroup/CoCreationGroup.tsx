@@ -2,14 +2,29 @@ import {
   CoCreationBlockInstance,
   CoCreationBlockManifest,
 } from "@/co-creation/types"
+import { F0Button } from "@/components/F0Button/F0Button"
 import { PageLayout } from "@/components/layouts/page/PageLayout"
+import { Plus } from "lucide-react"
 import { CoCreationBlock } from "./components/CoCreationBlock"
+
+export const cocreationModes = [
+  "co-creation",
+  "co-editing",
+  "co-review",
+] as const
+
+export type CoCreationGroupMode = (typeof cocreationModes)[number]
 
 export type CoCreationGroupProps = {
   /**
-   * The blocks that are available for the agent to use
+   * The blocks manifests that are available to use
    */
-  agentAvailableBlockTyoes: CoCreationBlockManifest[]
+  blockManifests: CoCreationBlockManifest[]
+
+  /**
+   * The block instances that are currently in the group and their props
+   */
+  blockInstances: CoCreationBlockInstance[]
 
   /**
    * The instructions for the agent to follow when creating the group
@@ -22,39 +37,58 @@ export type CoCreationGroupProps = {
   agentContext: string | string[]
 
   /**
-   * The blocks that are currently in the group and their props
+   * The mode of the co-creation group
+   * - "co-creation": The agent or user will create and manipulate the block instances and the blocks content
+   * - "co-editing": The block instances list are fixed and the agent or user will edit the blocks content only
+   * - "co-review": The block instances list and the blocks content are fixed and the agent can awswer questions about the content
+   * @default "co-review"
    */
-  blocks: CoCreationBlockInstance[]
+  mode: CoCreationGroupMode
 }
 
-export const CoCreationGroup = (props: CoCreationGroupProps) => {
-  const blockWithDefinitions = props.blocks.map((block) => {
-    const manifest = props.agentAvailableBlockTyoes.find(
-      (b) => b.id === block.type
-    )
-    return {
-      ...block,
-      manifest,
-    }
-  })
-
+export const CoCreationGroup = ({
+  blockInstances,
+  blockManifests,
+  mode,
+}: CoCreationGroupProps) => {
   return (
     <PageLayout.Group>
-      {blockWithDefinitions.map((block) => {
-        return block.manifest ? (
+      {blockInstances.map((instance) => {
+        const manifest = blockManifests.find((b) => b.id === instance.type)
+        return manifest ? (
           <CoCreationBlock
-            key={block.id}
+            key={instance.id}
             onClickOneButton={() => {
-              console.log("onClickOneButton", block)
+              console.log("onClickOneButton", instance)
             }}
-            block={block}
+            instance={instance}
+            manifest={manifest}
+            mode={mode}
+            onClickAddBlock={() => {
+              console.log("onClickAddBlock")
+            }}
           >
-            <block.manifest.component key={block.id} {...block.props} />
+            <manifest.component key={instance.id} {...instance.props} />
           </CoCreationBlock>
         ) : (
-          "Invalid block"
+          "Invalid block instance (type not found)"
         )
       })}
+
+      {mode === "co-creation" && (
+        <div className="relative flex w-full items-center justify-center p-1 align-middle after:absolute after:bottom-3 after:left-0 after:right-0 after:h-1 after:bg-f1-background-secondary after:content-['']">
+          <F0Button
+            label="Insert new block"
+            onClick={() => {
+              console.log("onClickAddBlock")
+            }}
+            hideLabel
+            variant="ghost"
+            icon={Plus}
+            size="sm"
+          />
+        </div>
+      )}
     </PageLayout.Group>
   )
 }
