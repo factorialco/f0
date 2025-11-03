@@ -50,7 +50,8 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
         return i18n.t("numberInput.lessThan", { max })
       }
       return undefined
-    }, [min, max, props.hint, i18n])
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to re-render when the i18n changes
+    }, [min, max, props.hint])
 
     const handleChange = (value: string) => {
       const extractedData = extractNumber(value, { maxDecimals })

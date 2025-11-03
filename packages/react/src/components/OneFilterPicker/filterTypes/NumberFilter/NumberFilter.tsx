@@ -26,7 +26,7 @@ export type NumberFilterComponentProps = FilterTypeComponentProps<
 }
 
 /**
- * A date filter component that provides date picker.
+ * A number filter component that provides number input.
  */
 export function NumberFilter({
   value,
@@ -52,7 +52,7 @@ export function NumberFilter({
     options.modes?.[0] ?? "single"
   )
 
-  const hangleChange = (inputValue: number | null, index: "from" | "to") => {
+  const handleChange = (inputValue: number | null, index: "from" | "to") => {
     if (selectionMode === "range") {
       onChange([
         index === "from" ? (inputValue ?? undefined) : value?.[0],
@@ -76,7 +76,7 @@ export function NumberFilter({
               }
               locale={l10n.locale}
               value={value?.[0]}
-              onChange={(inputValue) => hangleChange(inputValue, "from")}
+              onChange={(inputValue) => handleChange(inputValue, "from")}
               max={options.max}
               min={options.min}
             />
@@ -89,7 +89,7 @@ export function NumberFilter({
                   label={i18n.filters.belowOrEqual}
                   locale={l10n.locale}
                   value={value?.[1]}
-                  onChange={(inputValue) => hangleChange(inputValue, "to")}
+                  onChange={(inputValue) => handleChange(inputValue, "to")}
                   max={options.max}
                   min={options.min}
                 />
