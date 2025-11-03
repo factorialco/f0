@@ -979,6 +979,7 @@ export const ExampleComponent = ({
       currentGrouping: currentGrouping,
       primaryActions,
       secondaryActions,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
       itemUrl: (item) => `/users/${item.id}`,
       itemActions: (item) => [
         {
