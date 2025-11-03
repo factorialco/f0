@@ -2,6 +2,7 @@
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
 import { CheckCircle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
@@ -18,6 +19,10 @@ type ProductBlankslateProps = {
   tag?: {
     label: string
     icon: IconType
+  }
+  promoTag?: {
+    label: string
+    variant?: Variant
   }
 }
 
@@ -54,6 +59,7 @@ export const ProductBlankslate = forwardRef<
       module,
       moduleName,
       tag,
+      promoTag,
     },
     ref
   ) => {
@@ -86,9 +92,15 @@ export const ProductBlankslate = forwardRef<
                   </p>
                 )}
               </div>
-              {tag && (
-                <div className="flex justify-start">
-                  <F0TagRaw icon={tag.icon} text={tag.label} />
+              {(tag || promoTag) && (
+                <div className="flex justify-start gap-2">
+                  {tag && <F0TagRaw icon={tag.icon} text={tag.label} />}
+                  {promoTag && (
+                    <F0TagStatus
+                      variant={promoTag.variant || "positive"}
+                      text={promoTag.label}
+                    />
+                  )}
                 </div>
               )}
               <h2 className="font-bold text-xl text-f1-foreground">{title}</h2>
