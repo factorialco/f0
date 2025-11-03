@@ -5,7 +5,7 @@ import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 
 export type NumberFilterOptions = {
@@ -48,9 +48,25 @@ export function NumberFilter({
 
   const showModeSwitch =
     options.modes === undefined || options.modes?.length > 1
-  const [selectionMode, setSelectionMode] = useState(
-    options.modes?.[0] ?? "single"
-  )
+
+  const modeFromValue = useCallback((value: NumberFilterValue) => {
+    if (value?.[0] !== undefined && value?.[1] !== undefined) {
+      return "range"
+    }
+    if (value?.[0] !== undefined) {
+      return "single"
+    }
+    return "single"
+  }, [])
+
+  const [selectionMode, setSelectionMode] = useState(modeFromValue(value))
+
+  const handleModeChange = (checked: boolean) => {
+    setSelectionMode(checked ? "range" : "single")
+    if (!checked) {
+      onChange([value?.[0], undefined])
+    }
+  }
 
   const handleChange = (inputValue: number | null, index: "from" | "to") => {
     if (selectionMode === "range") {
@@ -101,9 +117,7 @@ export function NumberFilter({
           <Switch
             title={i18n.filters.range_title}
             checked={selectionMode === "range"}
-            onCheckedChange={(checked) =>
-              setSelectionMode(checked ? "range" : "single")
-            }
+            onCheckedChange={handleModeChange}
           />
         )}
       </div>
