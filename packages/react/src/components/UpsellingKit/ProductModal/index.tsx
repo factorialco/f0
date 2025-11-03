@@ -1,6 +1,7 @@
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { Variant } from "@/components/tags/F0TagStatus"
 import { useState } from "react"
 import { ProductBlankslate } from "../ProductBlankslate"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"
@@ -39,6 +40,10 @@ type ProductModalProps = {
     label: string
     icon: IconType
   }
+  promoTag?: {
+    label: string
+    variant?: Variant
+  }
   primaryAction?: Action
   secondaryAction?: Action
   portalContainer?: HTMLElement | null
@@ -72,6 +77,7 @@ export function ProductModal({
   secondaryAction,
   portalContainer,
   tag,
+  promoTag,
   showResponseDialog = true,
 }: ProductModalProps) {
   const [isModalOpen, setIsOpen] = useState(isOpen)
@@ -120,6 +126,7 @@ export function ProductModal({
             benefits={benefits}
             withShadow={false}
             tag={tag}
+            promoTag={promoTag}
             actions={
               <div className="flex gap-3">
                 {primaryAction && (
