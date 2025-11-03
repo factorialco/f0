@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.251.1](https://github.com/factorialco/f0/compare/f0-react-v1.251.0...f0-react-v1.251.1) (2025-11-03)
+
+
+### Bug Fixes
+
+* card other options click propagation ([#2912](https://github.com/factorialco/f0/issues/2912)) ([2293c3b](https://github.com/factorialco/f0/commit/2293c3b2b6ea621aecb9cb60c03da48dc5746e2d))
+
 ## [1.251.0](https://github.com/factorialco/f0/compare/f0-react-v1.250.0...f0-react-v1.251.0) (2025-11-03)
 
 
