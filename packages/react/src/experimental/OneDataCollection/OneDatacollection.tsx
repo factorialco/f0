@@ -561,7 +561,7 @@ const OneDataCollectionComp = <
     const showTableSettings =
       !!tableVisualization &&
       (!!tableVisualization.options?.allowColumnHiding ||
-        !!tableVisualization.options.allowColumnReordering)
+        !!tableVisualization.options?.allowColumnReordering)
 
     return (
       (visualizations && visualizations.length > 1) ||
