@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.249.1](https://github.com/factorialco/f0/compare/f0-react-v1.249.0...f0-react-v1.249.1) (2025-11-03)
+
+
+### Bug Fixes
+
+* show settings when table visualization can order or hide cols ([#2905](https://github.com/factorialco/f0/issues/2905)) ([b11b494](https://github.com/factorialco/f0/commit/b11b49436e0558b2d41c22f30c02b5f221bd6039))
+
 ## [1.249.0](https://github.com/factorialco/f0/compare/f0-react-v1.248.0...f0-react-v1.249.0) (2025-10-31)
 
 
