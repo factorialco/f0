@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Placeholder } from "@/icons/app"
 import { useState } from "react"
-import { NumberInput } from "./index"
+import { NumberInput } from "../index"
 
 const meta = {
   render: (props) => <NumberInput key={JSON.stringify(props)} {...props} />,

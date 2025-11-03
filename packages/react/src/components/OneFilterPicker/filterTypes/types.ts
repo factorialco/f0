@@ -1,4 +1,4 @@
-import { TranslationsType } from "@/lib/providers/i18n"
+import { I18nContextType } from "@/lib/providers/i18n"
 
 export type FilterTypeSchema<Options extends object = never> = {
   options: Options extends never ? never : Options
@@ -19,7 +19,7 @@ export type FilterTypeComponentProps<
 
 export type FilterTypeContext<Options extends object = never> = {
   schema: FilterTypeSchema<Options>
-  i18n: TranslationsType
+  i18n: I18nContextType
 }
 
 export type FilterTypeDefinition<
@@ -29,7 +29,10 @@ export type FilterTypeDefinition<
 > = {
   /** Check if the value is empty */
   emptyValue: EmptyValue
-  isEmpty: (value: Value, context: FilterTypeContext<Options>) => boolean
+  isEmpty: (
+    value: Value | undefined,
+    context: FilterTypeContext<Options>
+  ) => boolean
   /** Render the filter form */
   render: <Schema extends FilterTypeSchema<Options>>(props: {
     schema: Schema

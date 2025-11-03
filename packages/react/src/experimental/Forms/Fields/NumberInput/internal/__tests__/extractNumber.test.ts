@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { Options, extractNumber } from "./extractNumber"
+import { Options, extractNumber } from "../extractNumber"
 
 describe("extractNumber", () => {
   const integerOptions: Options = { maxDecimals: 0 }
