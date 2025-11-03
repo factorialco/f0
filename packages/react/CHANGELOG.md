@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.251.0](https://github.com/factorialco/f0/compare/f0-react-v1.250.0...f0-react-v1.251.0) (2025-11-03)
+
+
+### Features
+
+* range filter ([#2907](https://github.com/factorialco/f0/issues/2907)) ([dfd3fc7](https://github.com/factorialco/f0/commit/dfd3fc7834c6a9524291221c4372b900caa8bd84))
+
 ## [1.250.0](https://github.com/factorialco/f0/compare/f0-react-v1.249.1...f0-react-v1.250.0) (2025-11-03)
 
 
