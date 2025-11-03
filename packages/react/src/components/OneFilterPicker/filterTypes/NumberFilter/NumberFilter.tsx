@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { useI18n } from "@/lib/providers/i18n"
@@ -65,26 +65,11 @@ export function RangeFilter({
 
   return (
     <>
-      <div className="space-y-4 overflow-x-hidden p-3">
-        {showModeSwitch && (
-          <Switch
-            title={i18n.filters.range_title}
-            checked={selectionMode === "range"}
-            onCheckedChange={(checked) =>
-              setSelectionMode(checked ? "range" : "single")
-            }
-          />
-        )}
+      <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-6">
         <div className="flex flex-row gap-2">
           <div className="flex-1">
             <NumberInput
               label={
-                selectionMode === "range"
-                  ? i18n.filters.aboveOrEqual
-                  : i18n.filters.value
-              }
-              hideLabel
-              placeholder={
                 selectionMode === "range"
                   ? i18n.filters.aboveOrEqual
                   : i18n.filters.value
@@ -97,26 +82,36 @@ export function RangeFilter({
             />
           </div>
           {selectionMode === "range" && (
-            <div className="flex-1">
-              <NumberInput
-                label={i18n.filters.belowOrEqual}
-                hideLabel
-                placeholder={i18n.filters.belowOrEqual}
-                locale={l10n.locale}
-                value={value?.[1]}
-                onChange={(inputValue) => hangleChange(inputValue, "to")}
-                max={options.max}
-                min={options.min}
-              />
-            </div>
+            <>
+              <div className="flex items-center justify-center">-</div>
+              <div className="flex-1">
+                <NumberInput
+                  label={i18n.filters.belowOrEqual}
+                  locale={l10n.locale}
+                  value={value?.[1]}
+                  onChange={(inputValue) => hangleChange(inputValue, "to")}
+                  max={options.max}
+                  min={options.min}
+                />
+              </div>
+            </>
           )}
         </div>
+        {showModeSwitch && (
+          <Switch
+            title={i18n.filters.range_title}
+            checked={selectionMode === "range"}
+            onCheckedChange={(checked) =>
+              setSelectionMode(checked ? "range" : "single")
+            }
+          />
+        )}
       </div>
       {!isCompactMode && (
         <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-          <Button
+          <F0Button
             variant="ghost"
-            label="Clear"
+            label={i18n.actions.clear}
             onClick={() => clear()}
             disabled={!value}
             size="sm"
