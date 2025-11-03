@@ -260,6 +260,226 @@ export const Default: Story = {
   },
 }
 
+const contentWithHeadings = {
+  type: "doc",
+  content: [
+    {
+      type: "heading",
+      attrs: { level: 1 },
+      content: [{ type: "text", text: "Introduction to Our Project" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "This document provides an overview of the project structure and main components.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 2 },
+      content: [{ type: "text", text: "Getting Started" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Before diving into the details, let's cover the basics of how to set up the project.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
+      content: [{ type: "text", text: "Installation" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Follow these steps to install the necessary dependencies for the project.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
+      content: [{ type: "text", text: "Configuration" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Configure your environment with the appropriate settings before running.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 2 },
+      content: [{ type: "text", text: "Architecture Overview" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Understanding the architecture is key to working effectively with this project.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
+      content: [{ type: "text", text: "Frontend Components" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "The frontend is built using modern React components with TypeScript.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
+      content: [{ type: "text", text: "Backend Services" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Our backend services handle all the business logic and data persistence.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 1 },
+      content: [{ type: "text", text: "Best Practices" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Follow these guidelines to maintain high code quality throughout the project.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 2 },
+      content: [{ type: "text", text: "Code Style Guidelines" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "We follow industry-standard code style guidelines with ESLint and Prettier.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
+      content: [{ type: "text", text: "Naming Conventions" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Use descriptive names for variables, functions, and components.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
+      content: [{ type: "text", text: "Testing Strategy" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Write comprehensive tests for all your code using Jest and Testing Library.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 2 },
+      content: [{ type: "text", text: "Documentation" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "Always document your code with clear comments and update the README.",
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 1 },
+      content: [{ type: "text", text: "Conclusion" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        {
+          type: "text",
+          text: "This concludes our documentation. Happy coding and good luck with your project!",
+        },
+      ],
+    },
+  ],
+}
+
+export const WithTableOfContents: Story = {
+  name: "With Table of Contents",
+  render: (args) => (
+    <div className="h-[800px] w-full">
+      <NotesTextEditor {...args} />
+    </div>
+  ),
+  args: {
+    placeholder: "Enter '/' to open the command palette...",
+    showTableOfContents: true,
+    labels: {
+      toolbarLabels: defaultToolbarLabels,
+      slashCommandGroupLabels: defaultSlashCommandGroupLabels,
+      aiBlockLabels: defaultAIBlockLabels,
+      moodTrackerLabels: defaultMoodTrackerLabels,
+      liveCompanionLabels: defaultLiveCompanionLabels,
+      transcriptLabels: defaultTranscriptLabels,
+      titlePlaceholder: "Project Documentation",
+    },
+    onTitleChange: (title) => {
+      console.log("Title changed:", title)
+    },
+    onChange: (value) => {
+      console.log("Content changed:", value)
+    },
+    initialEditorState: {
+      content: contentWithHeadings,
+      title: "Project Documentation",
+    },
+  },
+}
+
 type SkeletonStory = StoryObj<typeof NotesTextEditorSkeleton>
 
 export const Skeleton: SkeletonStory = {

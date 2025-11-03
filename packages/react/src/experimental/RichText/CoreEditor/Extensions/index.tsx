@@ -15,6 +15,9 @@ export * from "./StarterKit"
 export * from "./TaskList"
 export * from "./TextAlign"
 
+// Dynamic table of contents
+export * from "./TableOfContents"
+
 // Dynamic extensions (require configuration)
 export * from "./Accessibility"
 export * from "./CharacterCount"
