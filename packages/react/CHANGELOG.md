@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.250.0](https://github.com/factorialco/f0/compare/f0-react-v1.249.1...f0-react-v1.250.0) (2025-11-03)
+
+
+### Features
+
+* add promoTag to product modal component ([#2906](https://github.com/factorialco/f0/issues/2906)) ([bdc2c42](https://github.com/factorialco/f0/commit/bdc2c428d5cc01185ad81300731148bd210e8680))
+
 ## [1.249.1](https://github.com/factorialco/f0/compare/f0-react-v1.249.0...f0-react-v1.249.1) (2025-11-03)
 
 
