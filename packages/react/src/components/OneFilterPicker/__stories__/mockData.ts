@@ -143,7 +143,8 @@ export const filterDefinition: FiltersDefinition = {
     type: "number",
     label: "Salary",
     options: {
-      mode: "range",
+      modes: ["range", "single"],
+      min: 0,
     },
   },
 }
