@@ -22,9 +22,9 @@ import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
 import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
 import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
-import "../index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
+import "./index.css"
 import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
 
 interface NotesTextEditorProps {
@@ -241,18 +241,18 @@ const NotesTextEditorComponent = forwardRef<
 
       <ScrollArea className="h-full gap-6">
         {showTitle && (
-          <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-5 pt-5 transition-all duration-300">
+          <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-4 pt-5 transition-all duration-300">
             <input
               disabled={!onTitleChange}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={labels.titlePlaceholder || ""}
-              className="text-3xl font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
+              className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>
         )}
         <div
-          className="basic-text-editor-container h-full"
+          className="notes-text-editor h-full"
           onClick={() => editor.commands.focus()}
         >
           <DragHandle
