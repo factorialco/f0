@@ -214,7 +214,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           isLoadingMore={isLoading}
           className="h-full"
           aria-label={schema.label}
-          asChild={asChild !== undefined ? asChild : !isCompactMode}
           top={
             <div className="flex w-full flex-col">
               {top}

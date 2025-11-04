@@ -136,6 +136,13 @@ export const DEPARTMENTS_MOCK = [
   "Product",
   "Design",
   "Marketing",
+  "Sales",
+  "Finance",
+  "Legal",
+  "Operations",
+  "Research",
+  "IT",
+  "Customer Support",
 ] as const
 export const YEARS_OF_EXPERIENCIE_MOCK = [
   8, 12, 4, 15, 7, 3, 11, 6, 13, 2, 9, 14, 5, 10, 1, 8, 13, 4, 11, 6,

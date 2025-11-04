@@ -240,7 +240,7 @@ const SelectContent = forwardRef<
       >
         <>
           {props.top}
-          <div className="relative">
+          <div className="relative flex min-h-0 flex-1">
             {showLoadingIndicator && loadingNewContent && (
               <div
                 className="absolute inset-0 flex cursor-progress items-center justify-center"
@@ -253,7 +253,7 @@ const SelectContent = forwardRef<
             <ScrollArea
               viewportRef={parentRef}
               className={cn(
-                "flex flex-col overflow-y-auto",
+                "flex min-h-0 flex-1 flex-col overflow-y-auto",
                 asList && asSelectProp !== "list-with-scroll"
                   ? "max-h-full"
                   : taller
