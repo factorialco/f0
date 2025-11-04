@@ -17,8 +17,7 @@ consumer of `f0`
 
 Building the library will be necessary to use it in the same way as in
 production, but in some scenarios (like local development) we can skip
-publishing and reinstalling (check how to: [in local development](#local) or
-[in coder](#coder))
+publishing and reinstalling (check how to: [in local development](#local)
 
 ## How to
 
@@ -41,7 +40,7 @@ This applies when both `f0` and `factorial`'s monorepo are in the local computer
 5. Run `pnpm link --global @factorialco/f0-react` to use the local version of
    the package
 
-### How to use local version of `f0` in coder {#cder}
+### How to use local version of `f0` using sync
 
 This applies when `f0` is in your local computer and `factorial`'s monorepo is
 in coder's dev environment
@@ -50,25 +49,25 @@ in coder's dev environment
 
 - [rsync](https://linux.die.net/man/1/rsync) in your local computer:
   `brew install rsync`
-- [coder cli](https://coder.com/docs/install/cli) in your local computer
-  - ![Coder ssh](images/coder.png)
-- Configure coder cli if its the first time you connect by ssh:
-  `coder login https://coder.factorial.dev`
-- Create if not exists `packages/react/.env.local` and add this line
-  `CODER_REMOTE=[YOUR_CODER_SSH_CONNECTION_STRING]`, for example:
-  `CODER_REMOTE=coder.sergiocarracedo-dev-env`
+- (optional) Create if not exists `packages/react/.env.local` and add this line
+  `F0_REMOTE_SYNC=[your application]`, for example:
+  `F0_REMOTE_SYNC=/home/sergio/factorial/frontend`
   > This file is in the `.gitignore` file, so it won't be pushed to the
   > repository
+- Add folligin to target workspace vite.config.ts
+
+```
+watch: {
+      ignored: ['!**/node_modules/@factorialco/f0-react/**'],
+    }
+```
 
 **Steps:**
 
 1. Go to the `f0` folder: `cd f0/packages/react`
-2. Run `pnpm dev:coder` to rebuild the project on any change and sync that build
-   to coder workspace
-3. On the `factorial` project you may need to clean vite cache (rm -Rf
-   frontend/node_modules/.vite) and restart frontend service: make
-   session.frontend
+2. Run `pnpm dev:sync [target]` to rebuild the project on any change and sync
+   that build to target. e.g. `pnpm dev:sync /works/factorial/frontend`
 
 > Now on each change in the `f0`'s source code, the changes will be reflected in
-> the coder workspace and the frontend will be reloaded using always the latest
+> the target project and the frontend will be reloaded using always the latest
 > `f0`'s code.

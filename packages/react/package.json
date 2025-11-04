@@ -21,7 +21,7 @@
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
-    "dev:coder": "pnpm build --watch -- --buildSync",
+    "dev:sync": "pnpm build --watch -- --buildSync",
     "start": "pnpm run dev",
     "size": "pnpm run build && size-limit",
     "build": "tsc --project ./tsconfig-build.json && run-p build-icons && BUILD_TYPES=true vite build -- --tailwind",

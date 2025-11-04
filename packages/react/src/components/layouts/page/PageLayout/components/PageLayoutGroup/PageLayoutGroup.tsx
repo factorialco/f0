@@ -9,8 +9,12 @@ import {
 import { PageLayoutGroupComponent, PageLayoutGroupProps } from "./types"
 
 export const PageLayoutGroup = forwardRef<HTMLDivElement, PageLayoutGroupProps>(
-  ({ children, sortable = false, onSort, ...props }, ref) => {
+  ({ children, onSort, ...props }, ref) => {
     const [items, setItems] = useState<ReactNode[]>(Children.toArray(children))
+
+    useEffect(() => {
+      setItems(Children.toArray(children))
+    }, [children])
 
     useEffect(() => {
       onSort?.(items)

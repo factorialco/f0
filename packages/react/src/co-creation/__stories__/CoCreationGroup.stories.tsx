@@ -53,7 +53,7 @@ const meta = {
             </>
           }
         >
-          <Story />
+          <Story args={args} />
         </PageLayout>
       )
     },
