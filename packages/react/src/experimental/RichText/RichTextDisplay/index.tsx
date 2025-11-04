@@ -32,7 +32,11 @@ const RichTextDisplay = forwardRef<RichTextDisplayHandle, RichTextDisplayProps>(
         DOMPurify.sanitize(
           format === "markdown"
             ? String(PROCESSOR.processSync(content))
-            : content
+            : content,
+          {
+            ADD_ATTR: ["target"],
+            ALLOWED_ATTR: ["href", "target", "rel", "class"],
+          }
         ),
       [format, content]
     )

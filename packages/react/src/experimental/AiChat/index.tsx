@@ -19,17 +19,25 @@ import {
   ChatTextarea,
   ChatWindow,
   MessagesContainer,
+  SuggestionsList,
   UserMessage,
 } from "./components"
-import { isAiMessage } from "./messageTypes"
+import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 
 export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
   initialMessage?: string | string[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  onThumbsUp?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  onThumbsDown?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -45,6 +53,7 @@ const AiChatProviderCmp = ({
   enabled = false,
   greeting,
   initialMessage,
+  welcomeScreenSuggestions,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -61,6 +70,7 @@ const AiChatProviderCmp = ({
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
+      welcomeScreenSuggestions={welcomeScreenSuggestions}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -96,7 +106,7 @@ const ResetFunctionInjector = () => {
 }
 
 const AiChatCmp = () => {
-  const { enabled, open, setOpen, onThumbsUp, onThumbsDown } = useAiChat()
+  const { enabled, open, setOpen } = useAiChat()
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -134,16 +144,6 @@ const AiChatCmp = () => {
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      onThumbsUp={(message) => {
-        if (isAiMessage(message)) {
-          onThumbsUp?.(message)
-        }
-      }}
-      onThumbsDown={(message) => {
-        if (isAiMessage(message)) {
-          onThumbsDown?.(message)
-        }
-      }}
       Window={ChatWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
@@ -151,6 +151,7 @@ const AiChatCmp = () => {
       Input={ChatTextarea}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
+      RenderSuggestionsList={SuggestionsList}
     />
   )
 }

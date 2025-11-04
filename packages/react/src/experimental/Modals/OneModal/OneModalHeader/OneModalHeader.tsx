@@ -1,4 +1,4 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import {
   DropdownInternal,
@@ -11,6 +11,7 @@ import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/dialog"
 import { DrawerTitle } from "@/ui/drawer"
 import { useOneModal } from "../OneModalProvider"
+import { ContentPadding } from "../types"
 
 export type OneModalHeaderProps = {
   title?: string
@@ -26,12 +27,22 @@ export type OneModalHeaderProps = {
   otherActions?: DropdownInternalProps["items"]
 }
 
+const classesByContentPadding: Record<ContentPadding, string> = {
+  sm: "py-3 px-4",
+  md: "p-5 pb-3",
+}
+
 export const OneModalHeader = ({
   title,
   module,
   otherActions,
 }: OneModalHeaderProps) => {
-  const { onClose, shownBottomSheet, position: modalPosition } = useOneModal()
+  const {
+    onClose,
+    shownBottomSheet,
+    position: modalPosition,
+    contentPadding,
+  } = useOneModal()
 
   const dialogClassName = cn(
     "font-semibold text-f1-foreground",
@@ -87,7 +98,10 @@ export const OneModalHeader = ({
     )
   }
 
-  const containerClassName = "flex flex-col gap-3 bg-f1-background p-5 pb-3"
+  const containerClassName = cn(
+    "flex flex-col gap-3 bg-f1-background",
+    classesByContentPadding[contentPadding]
+  )
 
   if (module && !shownBottomSheet) {
     return (

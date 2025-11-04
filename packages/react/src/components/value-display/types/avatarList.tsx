@@ -11,6 +11,9 @@ import {
   F0AvatarList,
   F0AvatarListProps,
 } from "@/components/avatars/F0AvatarList"
+import { cn } from "@/lib/utils"
+import { tableDisplayClassNames } from "../const"
+import { ValueDisplayRendererContext } from "../renderers"
 
 type AvatarListValue = {
   max?: number
@@ -30,11 +33,19 @@ type AvatarListValue = {
 )
 export type AvatarListCellValue = AvatarListValue
 
-export const AvatarListCell = (args: AvatarListCellValue) => {
+export const AvatarListCell = (
+  args: AvatarListCellValue,
+  meta: ValueDisplayRendererContext
+) => {
   const type = args.type ?? ("person" as const)
 
   return (
-    <div className="pointer-events-auto w-full">
+    <div
+      className={cn(
+        "pointer-events-auto w-full",
+        meta.visualization === "table" && tableDisplayClassNames.avatarList
+      )}
+    >
       <F0AvatarList
         {...({
           type,

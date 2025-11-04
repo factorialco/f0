@@ -2,6 +2,7 @@ import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { BadgeProps } from "@/experimental/Information/Badge"
 import { DistributiveOmit } from "@/lib/typescript-utils/distributive-omit"
 import { F0AvatarCompanyProps } from "../F0AvatarCompany"
+import { F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFileProps } from "../F0AvatarFile"
 import { F0AvatarFlagProps } from "../F0AvatarFlag"
 import { F0AvatarPersonProps } from "../F0AvatarPerson"
@@ -32,6 +33,7 @@ export type AvatarVariants = (typeof avatarVariants)[number]
 
 export type AvatarVariant = DistributiveOmit<
   | ({ type: "person" } & F0AvatarPersonProps)
+  | ({ type: "emoji" } & F0AvatarEmojiProps)
   | ({ type: "team" } & F0AvatarTeamProps)
   | ({ type: "company" } & F0AvatarCompanyProps)
   | ({ type: "file" } & F0AvatarFileProps)

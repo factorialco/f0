@@ -32,6 +32,7 @@ import {
   RecordType,
   SelectedItemsState,
 } from "@/hooks/datasource/types"
+import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
   Ai,
   Briefcase,
@@ -49,8 +50,8 @@ import { DEPARTMENTS_MOCK } from "@/mocks"
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
+  SecondaryActionItem,
   SecondaryActionsDefinition,
-  SecondaryActionsItemDefinition,
 } from "../actions"
 import {
   DataCollectionStatusComplete,
@@ -204,6 +205,7 @@ export const getMockVisualizations = (options?: {
     frozenColumns?: 0 | 1 | 2
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
+    noSorting?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -237,20 +239,20 @@ export const getMockVisualizations = (options?: {
             },
           }),
           id: "name",
-          sorting: "name",
+          sorting: options?.table?.noSorting ? undefined : "name",
           hidden: options?.table?.allowColumnHiding ? true : undefined,
           order: options?.table?.allowColumnReordering ? 3 : undefined,
         },
         {
           label: "Email",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
           id: "email",
         },
         {
           label: "Role",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
           id: "role",
           order: options?.table?.allowColumnReordering ? 2 : undefined,
           noHiding: options?.table?.allowColumnHiding,
@@ -259,57 +261,57 @@ export const getMockVisualizations = (options?: {
           id: "department",
           label: "Department",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
           order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
         {
           id: "email2",
           label: "Email 2",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
           order: options?.table?.allowColumnReordering ? 1 : undefined,
         },
         {
           id: "role2",
           label: "Role 2",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
         },
         {
           id: "department2",
           label: "Department 2",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
           order: options?.table?.allowColumnReordering ? 10 : undefined,
         },
         {
           id: "email3",
           label: "Email 3",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
         },
         {
           id: "role3",
           label: "Role 3",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
         },
         {
           label: "Department 3",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
           id: "department3",
         },
         {
           label: "Email 4",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
           id: "email4",
         },
         {
           label: "Role 4",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
           id: "role4",
         },
         {
@@ -333,7 +335,7 @@ export const getMockVisualizations = (options?: {
             ]
               .filter(Boolean)
               .join(", "),
-          sorting: "permissions.read",
+          sorting: options?.table?.noSorting ? undefined : "permissions.read",
           id: "permissions",
           order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
@@ -356,6 +358,7 @@ export const getMockVisualizations = (options?: {
           label: "Email",
           icon: Envelope,
           render: (item) => item.email,
+          hide: (item) => !item.email,
         },
         {
           label: "Role",
@@ -849,6 +852,7 @@ export const ExampleComponent = ({
   bulkActions,
   currentGrouping,
   grouping,
+  noSorting = false,
   navigationFilters,
   totalItemSummary,
   visualizations,
@@ -904,10 +908,11 @@ export const ExampleComponent = ({
   totalItemSummary?: true | ((totalItems: number) => string)
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
+  noSorting?: boolean
   paginationType?: PaginationType
   primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
-  searchBar?: boolean
+  searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
   onStateChange?: (state: DataCollectionStatusComplete) => void
@@ -969,11 +974,12 @@ export const ExampleComponent = ({
       filters: hideFilters ? undefined : filters,
       navigationFilters,
       presets: usePresets ? filterPresets : undefined,
-      sortings,
+      sortings: noSorting ? undefined : sortings,
       grouping,
       currentGrouping: currentGrouping,
       primaryActions,
       secondaryActions,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
       itemUrl: (item) => `/users/${item.id}`,
       itemActions: (item) => [
         {
@@ -1011,13 +1017,16 @@ export const ExampleComponent = ({
       defaultSelectedItems,
       bulkActions,
       totalItemSummary,
-      search: searchBar
-        ? {
-            enabled: true,
-            sync: true,
-            debounceTime: 300,
-          }
-        : undefined,
+      search:
+        searchBar === true
+          ? {
+              enabled: true,
+              sync: true,
+              debounceTime: 300,
+            }
+          : typeof searchBar === "object"
+            ? searchBar
+            : undefined,
       dataAdapter: dataAdapterMemoized,
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
@@ -1454,7 +1463,7 @@ export function createDataAdapter<
 }
 
 // Example of a comprehensive actions definition with various types of actions
-export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
+export const buildSecondaryActions = (): SecondaryActionItem[] => {
   return [
     // Action with description
     {
@@ -1463,9 +1472,6 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       onClick: () => console.log(`Another user action`),
       description: "User actions",
     },
-
-    // Separator between action groups
-    { type: "separator" },
     {
       label: "Export",
       icon: Upload,

@@ -142,6 +142,7 @@ export const halfyearGranularity: GranularityDefinition = {
     }
     return formats[format] ?? formats.default
   },
+  toStringMaxWidth: () => 155,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

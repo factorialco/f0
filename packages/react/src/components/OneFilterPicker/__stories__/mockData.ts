@@ -1,3 +1,8 @@
+import {
+  createDataSourceDefinition,
+  type PaginatedFetchOptions,
+} from "@/hooks/datasource"
+import { InFilterOptions } from "../filterTypes/InFilter/types"
 import { FiltersDefinition, PresetsDefinition } from "../types"
 
 export const filterDefinition: FiltersDefinition = {
@@ -134,6 +139,14 @@ export const filterDefinition: FiltersDefinition = {
       ],
     },
   },
+  salary: {
+    type: "number",
+    label: "Salary",
+    options: {
+      modes: ["range", "single"],
+      min: 0,
+    },
+  },
 }
 
 // Define sample presets for use in stories
@@ -219,4 +232,84 @@ export const getPresetMock = (itemsCount: boolean = false) => {
     ...preset,
     itemsCount: itemsCount ? () => index * 12 : undefined,
   }))
+}
+
+// Mock data for source-based pagination
+const generateMockUsers = (count: number) => {
+  const users = []
+  for (let i = 0; i < count; i++) {
+    users.push({
+      id: `user-${i}`,
+      name: `User ${i}`,
+      email: `user${i}@example.com`,
+    })
+  }
+  return users
+}
+
+const DataSourceFilterOptions: InFilterOptions<
+  string,
+  { id: string; name: string; email: string }
+> = {
+  source: createDataSourceDefinition({
+    dataAdapter: {
+      fetchData: async (options: PaginatedFetchOptions<FiltersDefinition>) => {
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        const allUsers = generateMockUsers(100) // 100 total users
+        let filteredUsers = allUsers
+
+        // Apply search filter
+        if (options.search) {
+          const searchTerm = options.search.toLowerCase()
+          filteredUsers = allUsers.filter(
+            (user) =>
+              user.name.toLowerCase().includes(searchTerm) ||
+              user.email.toLowerCase().includes(searchTerm)
+          )
+        }
+
+        // Apply pagination
+        const perPage = options.pagination?.perPage || 20
+        const cursor = options.pagination?.cursor
+          ? parseInt(options.pagination.cursor)
+          : 0
+        const startIndex = cursor
+        const endIndex = startIndex + perPage
+
+        const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
+        const hasMore = endIndex < filteredUsers.length
+        const nextCursor = hasMore ? endIndex.toString() : null
+
+        return {
+          records: paginatedUsers,
+          total: filteredUsers.length,
+          perPage,
+          type: "infinite-scroll" as const,
+          cursor: nextCursor,
+          hasMore,
+        }
+      },
+      paginationType: "infinite-scroll" as const,
+      perPage: 20,
+    },
+    search: {
+      enabled: true,
+      sync: true,
+    },
+  }),
+  mapOptions: (user: { id: string; name: string; email: string }) => ({
+    value: user.id,
+    label: user.name,
+  }),
+}
+
+// Create a mock data source with pagination
+export const sourceBasedDefinition: FiltersDefinition = {
+  users: {
+    type: "in",
+    label: "Users (Paginated)",
+    options: DataSourceFilterOptions as unknown as InFilterOptions<string>,
+  },
 }

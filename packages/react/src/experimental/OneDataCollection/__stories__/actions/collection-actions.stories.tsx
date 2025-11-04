@@ -1,7 +1,7 @@
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { Ai, Person } from "@/icons/app"
+import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import {
   DataCollectionSource,
@@ -234,6 +234,79 @@ export const WithExpandedActionsExample: Story = {
       secondaryActions: {
         expanded: 1,
         actions: buildSecondaryActions,
+      },
+    })
+
+    dataSource.setCurrentFilters({
+      status: ["active"],
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
+// Basic story showing all action types
+export const WithGroupedExpandedActionsExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ],
+          },
+        },
+      },
+      dataAdapter: {
+        fetchData: ({ filters }) =>
+          Promise.resolve({
+            records: mockUsers.filter((user) =>
+              filters.status?.includes(user.status)
+            ),
+          }),
+      },
+      primaryActions: () => ({
+        label: "Create user",
+        icon: Ai,
+        onClick: () => console.log(`Creating a user`),
+      }),
+      secondaryActions: {
+        expanded: 2,
+        actions: () => [
+          [
+            // Action with description
+            {
+              label: "Edit",
+              icon: Pencil,
+              onClick: () => console.log(`Another user action`),
+              description: "User actions",
+            },
+            {
+              label: "Export",
+              icon: Upload,
+              onClick: () => console.log(`Downloading users`),
+              description: "Download users",
+            },
+            {
+              label: "Import",
+              icon: Download,
+              onClick: () => console.log(`Importing users`),
+              description: "Import users",
+            },
+          ],
+          [
+            {
+              label: "Delete all",
+              icon: Delete,
+              onClick: () => console.log(`Delete`),
+              description: "User actions",
+            },
+          ],
+        ],
       },
     })
 

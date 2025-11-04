@@ -21,6 +21,7 @@ export const defaultTranslations = {
     add: "Add",
     edit: "Edit",
     save: "Save",
+    send: "Send",
     cancel: "Cancel",
     copy: "Copy",
     close: "Close",
@@ -38,6 +39,7 @@ export const defaultTranslations = {
     thumbsDown: "Dislike",
     other: "Other actions",
     toggle: "Toggle",
+    toggleDropdownMenu: "Toggle dropdown menu",
   },
   status: {
     selected: {
@@ -48,12 +50,18 @@ export const defaultTranslations = {
   filters: {
     label: "Filters",
     applyFilters: "Apply filters",
+    applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
+    aboveOrEqual: "Above or equal to",
+    value: "Value",
+    belowOrEqual: "Below or equal to",
+    range_title: "Use range",
+    range: "Between {{min}} and {{max}}",
   },
   toc: {
-    search: "Search",
+    search: "Search...",
   },
   collections: {
     sorting: {
@@ -189,14 +197,31 @@ export const defaultTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Write something here...",
+    inputPlaceholder: "Ask about time, people, or company info…",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
+    feedbackModal: {
+      positive: {
+        title: "What did you like about this response?",
+        label: "Your feedback helps us make Factorial AI better",
+        placeholder: "Share what worked well",
+      },
+      negative: {
+        title: "What could have been better?",
+        label: "Your feedback helps us improve future answers",
+        placeholder: "Share what didn’t work",
+      },
+    },
   },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
+  },
+  numberInput: {
+    between: "Between {{min}} and {{max}}",
+    greaterThan: "Greater than {{min}}",
+    lessThan: "Less than {{max}}",
   },
 } as const
 
@@ -207,5 +232,27 @@ type TranslationShape<T> = {
       ? TranslationShape<T[K]>
       : never
 }
+
+// Utility type to generate all possible dot-separated paths from nested object
+type PathsToStringProps<T> = T extends string
+  ? []
+  : {
+      [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>]
+    }[Extract<keyof T, string>]
+
+type Join<T extends string[], D extends string> = T extends []
+  ? never
+  : T extends [infer F]
+    ? F
+    : T extends [infer F, ...infer R]
+      ? F extends string
+        ? `${F}${D}${Join<Extract<R, string[]>, D>}`
+        : never
+      : string
+
+export type TranslationKey = Join<
+  PathsToStringProps<typeof defaultTranslations>,
+  "."
+>
 
 export type TranslationsType = TranslationShape<typeof defaultTranslations>

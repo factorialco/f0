@@ -7,7 +7,7 @@ import { PresetsDefinition } from "./types"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
 import { cn } from "@/lib/utils"
-import type { FiltersDefinition, FiltersState } from "./types"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 
 /**
  * Props for the Filters component.
@@ -26,6 +26,10 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
   children?: React.ReactNode
+  /** The mode of the component */
+  mode?: FiltersMode
+  /** Callback fired when filters open state is changed */
+  onOpenChange?: (isOpen: boolean) => void
 }
 
 /**
@@ -93,6 +97,8 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   value,
   children,
   presetsLoading = false,
+  mode = "default",
+  onOpenChange,
   ...props
 }: OneFilterPickerRootProps<Definition>) => {
   const defaultFilters = useRef(value)
@@ -103,10 +109,14 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
+  useEffect(() => {
+    onOpenChange?.(isFiltersOpen)
+  }, [isFiltersOpen, onOpenChange])
+
   const [localFiltersValue, setLocalFiltersValue] = useState(value)
 
   useEffect(() => {
-    setLocalFiltersValue(value)
+    setLocalFiltersValue(value ?? {})
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
   }, [JSON.stringify(filters), JSON.stringify(value)])
 
@@ -126,6 +136,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     <FiltersContext.Provider
       value={{
         ...props,
+        mode,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
         presetsLoading,
         value: localFiltersValue,
@@ -157,6 +168,7 @@ const FiltersControls = () => {
     setFiltersValue,
     presets,
     emitFilterChange,
+    mode,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -181,6 +193,7 @@ const FiltersControls = () => {
         onOpenChange={setIsFiltersOpen}
         isOpen={isFiltersOpen}
         hideLabel={!!presets}
+        mode={mode}
       />
       {!!presets?.length && (
         <div className="flex items-center">
@@ -277,7 +290,7 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
           </div>
         )}
       </div>
-      <FiltersChipsList />
+      {(!props.mode || props.mode === "default") && <FiltersChipsList />}
     </FiltersRoot>
   )
 }

@@ -63,6 +63,7 @@ export const yearGranularity: GranularityDefinition = {
     }
     return formats[format] ?? formats.default
   },
+  toStringMaxWidth: () => 70,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

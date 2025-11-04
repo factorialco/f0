@@ -1,7 +1,7 @@
 import { F0Icon } from "@/components/F0Icon"
 import { Ai } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
+import { Action } from "@/ui/Action"
 import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -59,7 +59,7 @@ const EnhanceActivator = ({
       }}
     >
       <Popover.Trigger asChild>
-        <Button
+        <Action
           type="button"
           ref={enhanceButtonRef}
           variant="outline"
@@ -67,6 +67,9 @@ const EnhanceActivator = ({
           onClick={(e) => {
             handleEnhanceClick(e)
           }}
+          aria-label={
+            enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic"
+          }
           disabled={disableButtons || isLoadingEnhance}
           className={cn(
             "bg-gradient-to-r from-[#f9f0dd80] to-[#d4ccfd80] text-[#6143a7] dark:from-[#6143a7] dark:to-[#7846ef] dark:text-f1-foreground [&>button>svg]:text-[#6143a7] dark:[&>button>svg]:text-f1-foreground",
@@ -76,7 +79,7 @@ const EnhanceActivator = ({
           <F0Icon icon={Ai} />
           {!hideLabel &&
             (enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic")}
-        </Button>
+        </Action>
       </Popover.Trigger>
       <Popover.Portal container={document.body}>
         <Popover.Content

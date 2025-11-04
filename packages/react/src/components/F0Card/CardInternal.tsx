@@ -1,4 +1,4 @@
-import { Link } from "@/components/Actions/Link"
+import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { cn, focusRing } from "@/lib/utils"
@@ -160,14 +160,13 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         ref={ref}
       >
         {link && !disableOverlayLink && (
-          <Link
+          <F0Link
             href={link}
-            style={{
-              zIndex: 1,
-            }}
             className={cn("z-1 absolute inset-0 block rounded-xl", focusRing())}
             aria-label={title}
-          />
+          >
+            &nbsp;
+          </F0Link>
         )}
 
         {image && (
@@ -240,12 +239,12 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           </div>
           {(metadata || children) && (
-            <CardContent>
+            <CardContent className="pointer-events-none">
               {metadata && (
                 <div
                   className={cn(
                     "flex flex-col gap-0.5",
-                    compact && "flex-row flex-wrap gap-x-3 gap-y-0",
+                    compact && "gap-x-3 gap-y-0",
                     forceVerticalMetadata && "flex-col gap-y-0.5"
                   )}
                 >

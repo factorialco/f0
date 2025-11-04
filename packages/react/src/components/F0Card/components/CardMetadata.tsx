@@ -34,7 +34,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
 
   if (!renderer) {
     return (
-      <div className="flex h-8 items-center gap-1.5 font-medium">
+      <div className="flex h-8 items-center gap-1.5">
         {"icon" in metadata && (
           <F0Icon icon={metadata.icon} color="default" size="md" />
         )}
@@ -49,7 +49,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
   ) => React.ReactNode
 
   return (
-    <div className="flex h-8 items-center gap-1.5 font-medium">
+    <div className="flex h-8 items-center gap-1.5">
       {"icon" in metadata && (
         <F0Icon icon={metadata.icon} color="default" size="md" />
       )}

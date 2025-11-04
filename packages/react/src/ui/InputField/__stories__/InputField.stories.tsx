@@ -165,6 +165,7 @@ export const WithMaxLength: Story = {
     ...Default.args,
     maxLength: 10,
     hideMaxLength: false,
+    value: "long text should be truncated",
   },
 }
 

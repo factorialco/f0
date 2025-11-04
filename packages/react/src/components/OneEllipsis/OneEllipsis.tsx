@@ -91,9 +91,7 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       {
         ref,
         className: cn(
-          noTooltip || !hasEllipsis
-            ? "pointer-events-none"
-            : "pointer-events-auto",
+          !noTooltip && hasEllipsis && "pointer-events-auto",
           "min-w-0 max-w-full overflow-hidden",
           !disabled && [
             lines === 1 ? "text-ellipsis" : "",

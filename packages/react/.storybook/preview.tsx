@@ -52,10 +52,13 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
+              console.log("Link clicked", event, ...args)
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()
-              if (props.href) setCurrentPath(props.href)
+              if (props.href) {
+                setCurrentPath(props.href)
+              }
             }}
           />
         ),

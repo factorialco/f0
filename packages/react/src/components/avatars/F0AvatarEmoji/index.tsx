@@ -1,1 +1,1 @@
-export { F0AvatarEmoji } from "./F0AvatarEmoji"
+export { F0AvatarEmoji, type F0AvatarEmojiProps } from "./F0AvatarEmoji"

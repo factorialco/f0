@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { WelcomeScreenSuggestion } from "../components/WelcomeScreen"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -18,8 +19,15 @@ export interface AiChatState {
   enabled: boolean
   agent?: string
   initialMessage?: string | string[]
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  onThumbsUp?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  onThumbsDown?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
 }
 
 type AiChatProviderReturnValue = {
@@ -46,8 +54,18 @@ type AiChatProviderReturnValue = {
   setInitialMessage: React.Dispatch<
     React.SetStateAction<string | string[] | undefined>
   >
-  onThumbsUp?: (message: AIMessage) => void
-  onThumbsDown?: (message: AIMessage) => void
+  welcomeScreenSuggestions: WelcomeScreenSuggestion[]
+  setWelcomeScreenSuggestions: React.Dispatch<
+    React.SetStateAction<WelcomeScreenSuggestion[]>
+  >
+  onThumbsUp?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
+  onThumbsDown?: (
+    message: AIMessage,
+    { threadId, feedback }: { threadId: string; feedback: string }
+  ) => void
   /**
    * Clear/reset the chat conversation
    */
@@ -66,6 +84,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   enabled,
   agent: initialAgent,
   initialMessage: initialInitialMessage,
+  welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   onThumbsDown,
   onThumbsUp,
   ...rest
@@ -75,6 +94,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(true)
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
+  const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
+    WelcomeScreenSuggestion[]
+  >(initialWelcomeScreenSuggestions)
 
   const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
     DEFAULT_MINUTES_TO_RESET
@@ -129,6 +151,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         autoClearMinutes: enabledInternal ? autoClearMinutes : null,
         initialMessage,
         setInitialMessage,
+        welcomeScreenSuggestions,
+        setWelcomeScreenSuggestions,
         onThumbsUp,
         onThumbsDown,
         clear,
@@ -161,6 +185,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,
+      welcomeScreenSuggestions: [],
+      setWelcomeScreenSuggestions: noopFn,
       onThumbsUp: noopFn,
       onThumbsDown: noopFn,
     }

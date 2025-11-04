@@ -22,7 +22,7 @@ export function GranularitySelector({
   return (
     <div className="flex flex-col gap-2">
       <h6 className="text-sm font-medium">{i18n.date.selectedBy}</h6>
-      <Select value={value} onValueChange={handleChange} asList>
+      <Select value={value} onValueChange={handleChange} as="list">
         <SelectContent>
           {granularities.map((granularity) => (
             <SelectItem key={granularity} value={granularity}>

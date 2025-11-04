@@ -1,9 +1,9 @@
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Toolbar, ToolbarLabels } from "@/experimental/RichText/CoreEditor"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { Handle, Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Button } from "@/ui/button"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
@@ -27,6 +27,8 @@ import "../index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
+
+const MEDIUM_CONTAINER_WIDTH = 768 // the width of a container that is considered medium by tailwind
 
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
@@ -63,7 +65,7 @@ const NotesTextEditorComponent = forwardRef<
     onTitleChange,
     actions,
     metadata,
-    withPadding = false,
+    withPadding: _withPadding = false,
   },
   ref
 ) {
@@ -82,12 +84,27 @@ const NotesTextEditorComponent = forwardRef<
 
   const [initialContent] = useState(() => initialEditorState?.content || "")
   const [title, setTitle] = useState(initialEditorState?.title || "")
+  const [isNarrowContainer, setIsNarrowContainer] = useState(false)
 
   useEffect(() => {
     if (onTitleChange) {
       onTitleChange(title)
     }
   }, [title, onTitleChange])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) =>
+      setIsNarrowContainer(
+        entries[0].contentRect.width < MEDIUM_CONTAINER_WIDTH
+      )
+    )
+
+    resizeObserver.observe(containerRef.current)
+
+    return () => resizeObserver.disconnect()
+  }, [])
 
   const editor = useEditor({
     extensions: createNotesTextEditorExtensions(
@@ -229,7 +246,7 @@ const NotesTextEditorComponent = forwardRef<
         (metadata && metadata.length > 0)) && (
         <Header actions={actions} metadata={metadata} />
       )}
-      <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+      <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
         <Toolbar
           labels={toolbarLabels}
           editor={editor}
@@ -244,7 +261,7 @@ const NotesTextEditorComponent = forwardRef<
           <div
             className={cn(
               "flex flex-col pb-5 pt-5 transition-all duration-300",
-              withPadding ? "px-32" : "px-14"
+              isNarrowContainer ? "px-14" : "px-32"
             )}
           >
             <input
@@ -266,25 +283,24 @@ const NotesTextEditorComponent = forwardRef<
             onNodeChange={handleNodeChange}
           >
             <div className="flex flex-row">
-              <Button
-                round
+              <ButtonInternal
+                compact
                 variant="ghost"
                 size="sm"
                 className="text-f1-foreground-tertiary"
                 onClick={handlePlusClick}
-              >
-                <F0Icon icon={Plus} size="sm" />
-              </Button>
-              <Button
-                round
-                variant="ghost"
-                size="sm"
-                className="text-f1-foreground-tertiary"
-                data-drag-handle
+                label="Add paragraph"
+                hideLabel
+                icon={Plus}
+              ></ButtonInternal>
+
+              <div
+                className="flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary"
                 draggable
+                data-drag-handle
               >
                 <F0Icon icon={Handle} size="xs" />
-              </Button>
+              </div>
             </div>
           </DragHandle>
 
@@ -292,7 +308,7 @@ const NotesTextEditorComponent = forwardRef<
             editor={editor}
             className={cn(
               "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
-              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
+              isNarrowContainer ? "[&>div]:px-14" : "[&>div]:px-32"
             )}
           />
         </div>

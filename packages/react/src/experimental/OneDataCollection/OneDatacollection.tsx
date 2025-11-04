@@ -2,7 +2,7 @@ import { useLayout } from "@/components/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
@@ -12,8 +12,9 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
-import { OneActionBar } from "../OneActionBar"
+import { ActionBarItem, OneActionBar } from "../OneActionBar"
 import {
+  filterActions,
   getPrimaryActions,
   getSecondaryActions,
   MAX_EXPANDED_ACTIONS,
@@ -213,7 +214,7 @@ const OneDataCollectionComp = <
   )
 
   const allSecondaryActions = useMemo(
-    () => getSecondaryActions(secondaryActions),
+    () => filterActions(getSecondaryActions(secondaryActions)),
     [secondaryActions]
   )
 
@@ -229,15 +230,24 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
+  // Extracts the expandedSecondaryActions from the first group
   const secondaryActionsItems = useMemo(
-    () => allSecondaryActions.slice(0, expandedSecondaryActions) || [],
+    () =>
+      allSecondaryActions[0]?.items.slice(0, expandedSecondaryActions) || [],
     [allSecondaryActions, expandedSecondaryActions]
   )
 
-  const otherActionsItems = useMemo(
-    () => allSecondaryActions.slice(expandedSecondaryActions),
-    [allSecondaryActions, expandedSecondaryActions]
-  )
+  // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
+  const otherActionsItems = useMemo(() => {
+    return [
+      {
+        ...allSecondaryActions[0],
+        items:
+          allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
+      },
+      ...allSecondaryActions.slice(1),
+    ].filter((group) => group.items.length > 0)
+  }, [allSecondaryActions, expandedSecondaryActions])
 
   const hasCollectionsActions =
     primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
@@ -257,14 +267,57 @@ const OneDataCollectionComp = <
   /**
    * Bulk actions
    */
+  type MappedBulkAction =
+    | (BulkActionDefinition & { onClick: () => void })
+    | { type: "separator" }
+
   const [bulkActions, setBulkActions] = useState<
     | {
-        primary?: BulkActionDefinition[]
-        secondary?: BulkActionDefinition[]
+        primary?: MappedBulkAction[]
+        secondary?: MappedBulkAction[]
       }
     | { warningMessage: string }
     | undefined
   >(undefined)
+
+  const groupItems = useCallback((items: MappedBulkAction[] | undefined) => {
+    if (!items) {
+      return []
+    }
+    const groups = []
+    let currentGroupItems: ActionBarItem[] = []
+    for (const item of items) {
+      if ("type" in item && item.type === "separator") {
+        groups.push({ items: currentGroupItems })
+        currentGroupItems = []
+      } else {
+        currentGroupItems.push(item as ActionBarItem)
+      }
+    }
+    if (currentGroupItems.length > 0) {
+      groups.push({ items: currentGroupItems })
+    }
+    return groups
+  }, [])
+  /**
+   * Creates the bulk actions groups to avoid change the datacollection interface
+   */
+  const bulkActionsGroups = useMemo(() => {
+    if (!bulkActions) {
+      return undefined
+    }
+    if ("warningMessage" in bulkActions) {
+      return {
+        warningMessage: bulkActions.warningMessage,
+      }
+    }
+    return {
+      primary: groupItems(bulkActions.primary ?? []),
+      secondary: (bulkActions?.secondary ?? []).filter(
+        (action) => !("type" in action && action.type === "separator")
+      ) as ActionBarItem[],
+    }
+  }, [bulkActions, groupItems])
 
   const [showActionBar, setShowActionBar] = useState(false)
 
@@ -313,15 +366,23 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
-    const mapBulkActions = (action: BulkActionDefinition) => ({
-      ...action,
-      onClick: () => {
-        onBulkAction?.(action.id, selectedItems, clearSelectedItems)
-        if (!action.keepSelection) {
-          clearSelectedItems()
-        }
-      },
-    })
+    const mapBulkActions = (
+      action: BulkActionDefinition | { type: "separator" }
+    ): MappedBulkAction => {
+      if ("type" in action && action.type === "separator") {
+        return { type: "separator" as const }
+      }
+      const bulkAction = action as BulkActionDefinition
+      return {
+        ...bulkAction,
+        onClick: () => {
+          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems)
+          if (!bulkAction.keepSelection) {
+            clearSelectedItems()
+          }
+        },
+      }
+    }
 
     if (bulkActions) {
       if ("primary" in bulkActions) {
@@ -491,10 +552,22 @@ const OneDataCollectionComp = <
     const groupByOptions = grouping
       ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
       : 0
+
+    const tableVisualization = Object.values(visualizations).find(
+      (visualization) => visualization.type === "table"
+    )
+
+    // Show table settings if the table visualization is defined and the allowColumnHiding or allowColumnReordering options are true
+    const showTableSettings =
+      !!tableVisualization &&
+      (!!tableVisualization.options?.allowColumnHiding ||
+        !!tableVisualization.options?.allowColumnReordering)
+
     return (
       (visualizations && visualizations.length > 1) ||
       (groupByOptions > 0 && !grouping?.hideSelector) ||
-      (sortings && Object.keys(sortings).length > 0)
+      (sortings && Object.keys(sortings).length > 0) ||
+      showTableSettings
     )
   }, [visualizations, grouping, sortings])
 
@@ -671,10 +744,14 @@ const OneDataCollectionComp = <
               isOpen={showActionBar}
               selectedNumber={selectedItemsCount}
               primaryActions={
-                "primary" in bulkActions ? bulkActions?.primary : []
+                bulkActionsGroups && "primary" in bulkActionsGroups
+                  ? bulkActionsGroups.primary
+                  : []
               }
               secondaryActions={
-                "secondary" in bulkActions ? bulkActions?.secondary : []
+                bulkActionsGroups && "secondary" in bulkActionsGroups
+                  ? bulkActionsGroups.secondary
+                  : []
               }
               warningMessage={
                 "warningMessage" in bulkActions

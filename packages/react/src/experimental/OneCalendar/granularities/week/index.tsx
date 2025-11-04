@@ -133,6 +133,7 @@ export const weekGranularity: GranularityDefinition = {
     }
     return formats[format] ?? formats.default
   },
+  toStringMaxWidth: () => 240,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
@@ -183,6 +184,7 @@ export const weekGranularity: GranularityDefinition = {
         motionDirection={renderProps.motionDirection}
         minDate={minDate ? minDate.from : undefined}
         maxDate={maxDate ? maxDate.to : undefined}
+        compact={renderProps.compact}
       />
     )
   },
