@@ -231,7 +231,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 </div>
               )}
               <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-              <div className="flex w-full items-center justify-between gap-1 rounded py-1 pl-4 pr-3">
+              <div className="flex w-full items-center justify-between gap-1 rounded py-1 pl-3 pr-2">
                 <span className="max-w-[250px] flex-1 whitespace-nowrap">
                   <OneEllipsis className="text-f1-foreground-secondary">
                     {selectedText}
