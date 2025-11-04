@@ -1,33 +1,33 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { F0ECharts } from "../index"
+import { F0Chart } from "../index"
 
 const meta = {
-  component: F0ECharts,
-  title: "Charts/F0ECharts",
-  tags: ["autodocs", "experimental", "internal"],
+  component: F0Chart,
+  title: "Charts/F0Chart",
+  tags: ["autodocs", "experimental"],
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "A wrapper around ECharts for React that provides a simple line chart visualization. This is an experimental component.",
+          "A wrapper around ECharts for React that provides a chart visualization. This is an experimental component.",
       },
     },
   },
   decorators: [
     (Story) => (
-      <div className="h-80 w-96">
+      <div className="h-96 w-[640px]">
         <Story />
       </div>
     ),
   ],
-} satisfies Meta<typeof F0ECharts>
+} satisfies Meta<typeof F0Chart>
 
 export default meta
-type Story = StoryObj<typeof F0ECharts>
+type Story = StoryObj<typeof F0Chart>
 
 export const Default: Story = {
-  render: (args) => <F0ECharts {...args} />,
+  render: (args) => <F0Chart {...args} />,
   args: {
     options: {
       title: {
@@ -42,18 +42,18 @@ export const Default: Story = {
       xAxis: {
         type: "category",
         data: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
+          "January",
+          "February",
+          "March",
+          "April",
           "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
         ],
       },
       yAxis: {

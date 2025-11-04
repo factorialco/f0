@@ -1,28 +1,39 @@
+import { colord } from "colord"
 import { registerTheme } from "echarts"
+import { baseColors } from "../../../../../../core/src/tokens/colors"
+
+function chartColor(hslValue: string): string {
+  return colord(`hsl(${hslValue})`).toHex()
+}
 
 export const colorPalette = [
-  "#ff0000",
-  "#00ff00",
-  "#0000ff",
-  "#0000ff",
-  "#000000",
-  "#c42703",
-  "#d07e75",
+  chartColor(baseColors.malibu[50]),
+  chartColor(baseColors.orange[50]),
+  chartColor(baseColors.lilac[50]),
+  chartColor(baseColors.camel[50]),
+  chartColor(baseColors.purple[50]),
+  chartColor(baseColors.smoke[50]),
+  chartColor(baseColors.flubber[60]),
 ]
 
 export const theme = {
   color: colorPalette,
   textStyle: {
-    fontFamily: "monospace",
-    fontWeight: "bold",
+    fontFamily: "Inter, sans-serif",
+    fontWeight: "normal",
     fontSize: 12,
+    overflow: "truncate",
+    color: chartColor(baseColors.grey[80]),
   },
 
   title: {
     textStyle: {
-      fontWeight: "normal",
-      color: "#d8361b",
+      color: chartColor(baseColors.grey[80]),
+      overflow: "truncate",
+      fontSize: 16,
+      fontWeight: "medium",
     },
+    show: false,
   },
 
   visualMap: {
@@ -38,23 +49,36 @@ export const theme = {
   },
 
   tooltip: {
-    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 16,
+    borderWith: 0,
+    textStyle: {
+      color: chartColor(baseColors.grey[80]),
+      fontSize: 12,
+    },
+    trigger: "item",
+    position: function (
+      point: [number, number],
+      _params: unknown,
+      _dom: unknown,
+      _rect: unknown,
+      size: { viewSize: [number, number]; contentSize: [number, number] }
+    ) {
+      const tooltipWidth = size.contentSize[0]
+      const isLeftHalf = point[0] < size.viewSize[0] / 2
+      const x = isLeftHalf ? point[0] + 10 : point[0] - tooltipWidth - 10
+
+      return [x, "20%"]
+    },
     axisPointer: {
-      // Axis indicator, coordinate trigger effective
-      type: "line", // The default is a straight line： 'line' | 'shadow'
+      type: "line",
       lineStyle: {
-        // Straight line indicator style settings
-        color: "#d8361b",
+        color: chartColor(baseColors.grey[30]),
         type: "dashed",
       },
-      crossStyle: {
-        color: "#d8361b",
-      },
-      shadowStyle: {
-        // Shadow indicator style settings
-        color: "rgba(200,200,200,0.3)",
-      },
     },
+    extraCssText:
+      "box-shadow: 0px 12px 24px -14px rgba(13, 22, 37, 0.2), 0px 0px 0px 1px rgba(13, 22, 37, 0.1); border-radius: 16px; border-radius: 10px; border: none; background-filter: blur(30px); background: rgba(255, 255, 255, 0.97);",
+    transitionDuration: 0.2,
   },
 
   // Area scaling controller
@@ -70,41 +94,50 @@ export const theme = {
 
   categoryAxis: {
     axisLine: {
-      // Coordinate axis
       lineStyle: {
-        // Property 'lineStyle' controls line styles
-        color: "#d8361b",
+        color: chartColor(baseColors.grey[10]),
       },
     },
     splitLine: {
-      // Separation line
       lineStyle: {
-        // Property 'lineStyle' (see lineStyle) controls line styles
-        color: ["#eee"],
+        color: chartColor(baseColors.grey[10]),
       },
+    },
+    axisLabel: {
+      color: chartColor(baseColors.grey[50]),
+      fontSize: 12,
+      fontWeight: "medium",
     },
   },
 
   valueAxis: {
+    nameTextStyle: {
+      color: chartColor(baseColors.grey[50]),
+      fontSize: 12,
+      fontWeight: "medium",
+    },
+    nameTruncate: {
+      maxWidth: 48,
+    },
+    nameGap: 10,
     axisLine: {
       // Coordinate axis
       lineStyle: {
         // Property 'lineStyle' controls line styles
-        color: "#d8361b",
-      },
-    },
-    splitArea: {
-      show: true,
-      areaStyle: {
-        color: ["rgba(250,250,250,0.1)", "rgba(200,200,200,0.1)"],
+        color: chartColor(baseColors.grey[10]),
       },
     },
     splitLine: {
       // Separation line
       lineStyle: {
         // Property 'lineStyle' (see lineStyle) controls line styles
-        color: ["#eee"],
+        color: chartColor(baseColors.grey[10]),
       },
+    },
+    axisLabel: {
+      color: chartColor(baseColors.grey[50]),
+      fontSize: 12,
+      fontWeight: "medium",
     },
   },
 
@@ -180,6 +213,21 @@ export const theme = {
         ],
         width: 8,
       },
+    },
+  },
+
+  bar: {
+    itemStyle: {
+      borderRadius: 6,
+    },
+  },
+
+  legend: {
+    selectedMode: false,
+    textStyle: {
+      color: chartColor(baseColors.grey[50]),
+      fontSize: 12,
+      fontWeight: "medium",
     },
   },
 }

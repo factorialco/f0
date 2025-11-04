@@ -1,10 +1,10 @@
 import { experimentalComponent } from "@/lib/experimental"
-import { F0ECharts as _F0ECharts } from "./F0ECharts"
+import { F0Chart as _F0Chart } from "./F0Chart"
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0ECharts = experimentalComponent<typeof _F0ECharts>(
-  "F0ECharts",
-  _F0ECharts
+export const F0Chart = experimentalComponent<typeof _F0Chart>(
+  "F0Chart",
+  _F0Chart
 )
