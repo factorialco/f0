@@ -67,16 +67,14 @@ export function FilterList<Definition extends FiltersDefinition>({
       )}
     >
       <div className="flex flex-col p-2">
-        {selectedFilterKey ? null : (
-          <F1SearchBox
-            key="filter-list-search"
-            name="filter-list-search"
-            placeholder={i18n.toc.search}
-            value={searchValue}
-            onChange={setSearchValue}
-            clearable
-          />
-        )}
+        <F1SearchBox
+          key="filter-list-search"
+          name="filter-list-search"
+          placeholder={i18n.toc.search}
+          value={searchValue}
+          onChange={setSearchValue}
+          clearable
+        />
       </div>
       <div
         className={cn(

@@ -49,15 +49,14 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
     <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
       <div className="flex flex-1 flex-row gap-2">
         <div className="flex-1">
-          {isFiltersOpen ? null : (
-            <F1SearchBox
-              placeholder={searchBoxPlaceholder ?? i18n.toc.search}
-              onChange={onSearchChange}
-              value={searchValue}
-              autoFocus={!isFiltersOpen}
-              clearable
-            />
-          )}
+          <F1SearchBox
+            placeholder={searchBoxPlaceholder ?? i18n.toc.search}
+            onChange={onSearchChange}
+            value={searchValue}
+            debounceTime={400}
+            autoFocus={!isFiltersOpen}
+            clearable
+          />
         </div>
         {filters && (
           <OneFilterPicker
