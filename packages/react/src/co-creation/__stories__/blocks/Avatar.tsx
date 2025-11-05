@@ -1,5 +1,4 @@
 import { CoCreationBlockManifest } from "@/co-creation/types"
-import { F0Avatar } from "@/components/avatars/F0Avatar"
 import z from "zod"
 
 export const AvatarProps = z.object({
@@ -10,13 +9,8 @@ export const AvatarProps = z.object({
 
 export const Avatar = (props: z.infer<typeof AvatarProps>) => {
   return (
-    <F0Avatar
-      avatar={{
-        type: "person",
-        firstName: props.firstName,
-        lastName: props.lastName,
-      }}
-    />
+    <>This should be an avatar component</>
+    //<F0AvatarPerson firstName={props.firstName} lastName={props.lastName} />
   )
 }
 

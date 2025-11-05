@@ -7,6 +7,7 @@ import {
 } from "../components/CoCreationGroup/CoCreationGroup"
 import { CoCreationBlockInstance, CoCreationBlockManifest } from "../types"
 import { AvatarCCBManifest } from "./blocks/Avatar"
+import { ChartCCBManifest } from "./blocks/Chart"
 import { KeyValueCCBManifest } from "./blocks/KeyValue"
 import { LongTextCCBManifest } from "./blocks/LongText"
 import { TextCCBManifest } from "./blocks/Text"
@@ -68,6 +69,7 @@ const avaliableBlocks: CoCreationBlockManifest[] = [
   KeyValueCCBManifest,
   AvatarCCBManifest,
   LongTextCCBManifest,
+  ChartCCBManifest,
 ]
 
 const blocks: CoCreationBlockInstance[] = [
