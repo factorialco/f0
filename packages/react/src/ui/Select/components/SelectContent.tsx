@@ -113,8 +113,7 @@ const SelectContent = forwardRef<
     // Get the value and the open status from the select context
     const { value, open, as: asSelectProp } = useContext(SelectContext)
 
-    const asList =
-      asSelectProp === "list" || asSelectProp === "list-with-scroll"
+    const asList = asSelectProp === "list"
 
     const valueArray = useMemo(
       () =>
@@ -192,8 +191,8 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">
-                  {i18n.select.loadingMore}
+                <div className="flex w-full items-center justify-center py-4">
+                  <Spinner size="small" />
                 </div>
               ) : (
                 items[virtualItem.index].item
@@ -254,7 +253,7 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList && asSelectProp !== "list-with-scroll"
+                asList
                   ? "max-h-full"
                   : taller
                     ? "max-h-[440px]"
