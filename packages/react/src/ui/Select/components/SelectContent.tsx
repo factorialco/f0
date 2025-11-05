@@ -1,6 +1,5 @@
 import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useVirtualizer } from "@tanstack/react-virtual"
@@ -94,8 +93,6 @@ const SelectContent = forwardRef<
     // The scrollable element for your list
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
-
-    const i18n = useI18n()
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
