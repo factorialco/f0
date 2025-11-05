@@ -49,12 +49,16 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
               size="md"
               target="_blank"
               variant="ghost"
-              className="justify-start truncate"
+              className="justify-start truncate hover:bg-f1-background-hover"
               compact
               prepend={
                 source.icon && (
                   <div className="mr-1 flex items-center justify-center">
-                    <F0Icon icon={getIconComponent(source.icon)} size="md" />
+                    <F0Icon
+                      icon={getIconComponent(source.icon)}
+                      size="md"
+                      color="default"
+                    />
                   </div>
                 )
               }
