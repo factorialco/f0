@@ -117,7 +117,9 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             "mb-0 mt-3 max-h-[240px] flex-1 resize-none px-3 outline-none transition-all",
             "whitespace-pre-wrap break-words",
             "text-f1-foreground placeholder:text-f1-foreground-secondary",
-            hasScrollbar ? "overflow-y-scroll" : "overflow-y-hidden"
+            hasScrollbar
+              ? "scrollbar-macos overflow-y-scroll"
+              : "overflow-y-hidden"
           )}
         />
       </div>
