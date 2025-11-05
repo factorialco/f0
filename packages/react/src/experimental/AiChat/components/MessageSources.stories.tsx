@@ -1,3 +1,4 @@
+import { BookOpen, Code } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { MessageSources } from "./MessageSources"
 
@@ -16,10 +17,12 @@ export const Default: Story = {
       {
         title: "TypeScript Official Documentation",
         link: "https://www.typescriptlang.org/docs/",
+        icon: Code,
       },
       {
         title: "React Documentation",
         link: "https://react.dev/",
+        icon: BookOpen,
       },
     ],
   },

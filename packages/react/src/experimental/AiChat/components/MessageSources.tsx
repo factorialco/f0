@@ -1,3 +1,4 @@
+import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
 import { Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action/Action"
@@ -6,6 +7,7 @@ import { AiCollapsibleMessage } from "./AiCollapsibleMessage"
 export type Source = {
   title: string
   link: string
+  icon?: IconType
 }
 
 export type MessageSourcesProps = {
@@ -34,6 +36,14 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
             target="_blank"
             variant="ghost"
             className="justify-start truncate"
+            compact
+            prepend={
+              source.icon && (
+                <div className="mr-1 flex items-center justify-center">
+                  <F0Icon icon={source.icon} size="md" />
+                </div>
+              )
+            }
           >
             {source.title}
           </Action>
