@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.252.1](https://github.com/factorialco/f0/compare/f0-react-v1.252.0...f0-react-v1.252.1) (2025-11-05)
+
+
+### Bug Fixes
+
+* **NotesTextEditor:** adjust styles ([#2916](https://github.com/factorialco/f0/issues/2916)) ([befb8af](https://github.com/factorialco/f0/commit/befb8af7372bd026d47625cca103d6b744eb6fc2))
+
 ## [1.252.0](https://github.com/factorialco/f0/compare/f0-react-v1.251.1...f0-react-v1.252.0) (2025-11-05)
 
 
