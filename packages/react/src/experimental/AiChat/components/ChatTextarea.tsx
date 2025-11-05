@@ -18,7 +18,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   useEffect(() => {
     if (textareaRef.current && inputValue.length > 0) {
       const { scrollHeight } = textareaRef.current
-      const maxHeight = 192
+      const maxHeight = 240
       setHasScrollbar(scrollHeight > maxHeight)
     } else {
       setHasScrollbar(false)
@@ -84,7 +84,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
       <div className="grid grid-cols-1 grid-rows-1">
         <div
           aria-hidden={true}
-          className="pointer-events-none invisible col-start-1 row-start-1 mb-0 mt-3 max-h-[192px] whitespace-pre-wrap break-words px-3 text-f1-foreground"
+          className="pointer-events-none invisible col-start-1 row-start-1 mb-0 mt-3 max-h-[240px] whitespace-pre-wrap break-words px-3 text-f1-foreground"
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
         </div>
@@ -114,7 +114,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
-            "mb-0 mt-3 max-h-[192px] flex-1 resize-none px-3 outline-none transition-all",
+            "mb-0 mt-3 max-h-[240px] flex-1 resize-none px-3 outline-none transition-all",
             "whitespace-pre-wrap break-words",
             "text-f1-foreground placeholder:text-f1-foreground-secondary",
             hasScrollbar ? "overflow-y-scroll" : "overflow-y-hidden"
