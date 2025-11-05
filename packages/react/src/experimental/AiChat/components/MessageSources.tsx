@@ -30,7 +30,7 @@ export type MessageSourcesProps = {
 export const MessageSources = ({ sources }: MessageSourcesProps) => {
   const translations = useI18n()
 
-  if (!sources || sources.length === 0) {
+  if (!sources || sources.length === 0 || !Array.isArray(sources)) {
     return null
   }
 
