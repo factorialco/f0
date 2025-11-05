@@ -6,7 +6,11 @@ import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import OneIcon from "../OneIcon"
 
-export type WelcomeScreenSuggestion = { icon: IconType; message: string }
+export type WelcomeScreenSuggestion = {
+  icon: IconType
+  message: string
+  prompt?: string
+}
 
 const MAX_SUGGESTIONS = 3
 
@@ -121,7 +125,7 @@ export const WelcomeScreen = ({
                   sendMessage({
                     id: randomId(),
                     role: "user",
-                    content: suggestion.message,
+                    content: suggestion.prompt || suggestion.message,
                   })
                 }
               />
