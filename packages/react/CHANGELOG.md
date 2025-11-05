@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.252.0](https://github.com/factorialco/f0/compare/f0-react-v1.251.1...f0-react-v1.252.0) (2025-11-05)
+
+
+### Features
+
+* add OpenLinkAction type and component to DataList ([#2918](https://github.com/factorialco/f0/issues/2918)) ([f8f44b6](https://github.com/factorialco/f0/commit/f8f44b68774d03fa7ef92c5a461050ab97974c77))
+
 ## [1.251.1](https://github.com/factorialco/f0/compare/f0-react-v1.251.0...f0-react-v1.251.1) (2025-11-03)
 
 
