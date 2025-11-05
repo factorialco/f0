@@ -20,15 +20,17 @@ export const Thinking = ({ messages }: ThinkingProps) => {
       icon={Lightbulb}
       title={translations.ai.thoughtsGroupTitle}
     >
-      {messages.map((message, index) => (
-        <div key={index}>
-          {message.role === "assistant" &&
-            message.generativeUI?.({
-              status: "complete",
-              result: { inGroup: true },
-            })}
-        </div>
-      ))}
+      <div className="flex flex-col gap-2 pl-7">
+        {messages.map((message, index) => (
+          <div key={index}>
+            {message.role === "assistant" &&
+              message.generativeUI?.({
+                status: "complete",
+                result: { inGroup: true },
+              })}
+          </div>
+        ))}
+      </div>
     </AiCollapsibleMessage>
   )
 }

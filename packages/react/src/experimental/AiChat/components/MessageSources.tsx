@@ -26,7 +26,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
       icon={Search}
       title={translations.ai.resourcesGroupTitle}
     >
-      <div className="-ml-7 flex flex-col gap-1 rounded-lg border border-solid border-f1-border-secondary p-2">
+      <div className="flex flex-col gap-1 rounded-lg border border-solid border-f1-border-secondary p-2">
         {sources.map((source, index) => (
           <Action
             key={index}
