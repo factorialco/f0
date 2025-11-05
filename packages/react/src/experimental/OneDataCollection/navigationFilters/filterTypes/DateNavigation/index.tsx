@@ -1,8 +1,7 @@
 import { DateRange, granularityDefinitions } from "@/experimental/OneCalendar"
-import { TranslationsType } from "@/lib/providers/i18n"
-import { NavigationFilter, NavigationFilterComponentProps } from "../../types"
+import { NavigationFilter } from "../../types"
 import { DateNavigation } from "./DateNavigation"
-import { DateValue } from "./types"
+import { DateNavigatorFilterDefinition, DateValue } from "./types"
 
 const isDateValue = (
   value: Date | DateRange | DateValue
@@ -12,15 +11,10 @@ const isDateValue = (
 
 const dateNavigatorFilter: NavigationFilter<
   DateValue,
+  DateNavigatorFilterDefinition,
   DateValue | Date | DateRange | undefined | null
 > = {
-  valueConverter: function <
-    FilterDef extends NavigationFilterComponentProps<DateValue>["filter"],
-  >(
-    value: Date | DateRange | DateValue | null | undefined,
-    filterDef: FilterDef,
-    i18n: TranslationsType
-  ) {
+  valueConverter: function (value, filterDef, i18n) {
     const availableGranularities = Array.isArray(filterDef.granularity)
       ? filterDef.granularity
       : [filterDef.granularity]
@@ -43,9 +37,9 @@ const dateNavigatorFilter: NavigationFilter<
       granularity,
     }
   },
-  render: (props: NavigationFilterComponentProps<DateValue>) => {
+  render: (props) => {
     return <DateNavigation {...props} />
   },
-}
+} as const
 
 export default dateNavigatorFilter

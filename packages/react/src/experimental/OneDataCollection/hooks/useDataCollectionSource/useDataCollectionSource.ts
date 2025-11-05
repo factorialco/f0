@@ -14,7 +14,7 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../../item-actions"
-import { navigationFilterTypes } from "../../navigationFilters"
+import { getFilterDefinitionByType } from "../../navigationFilters"
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -71,11 +71,20 @@ export const useDataCollectionSource = <
 
     return Object.fromEntries(
       Object.entries(navigationFilters).map(([key, filter]) => {
-        const filterType = navigationFilterTypes[filter.type]
+        const filterType = getFilterDefinitionByType(filter.type)
+
+        if (!filterType) {
+          return [key, filter.defaultValue]
+        }
+
         return [
           key,
           filterType.valueConverter
-            ? filterType.valueConverter(filter.defaultValue, filter, i18n)
+            ? filterType.valueConverter(
+                filter.defaultValue as never,
+                filter as never,
+                i18n
+              )
             : filter.defaultValue,
         ]
       })

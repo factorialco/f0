@@ -153,3 +153,20 @@ export const WithPresets: Story = {
     },
   },
 }
+
+export const ListNavigation: Story = {
+  args: {
+    navigationFilters: {
+      list: {
+        type: "list-navigator",
+        defaultValue: "engineering",
+        options: [
+          { label: "Engineering", value: "engineering" },
+          { label: "Sales", value: "sales" },
+          { label: "Marketing", value: "marketing" },
+          { label: "Finance", value: "finance" },
+        ],
+      },
+    },
+  },
+}

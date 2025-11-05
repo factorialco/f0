@@ -174,7 +174,42 @@ definition in the `granularityDefinitions` object in the file
   meta={DataCollectionNavigationFiltersStories}
 />
 
-### Adding a new navigation filter
+## ListNavigation (type: "list-navigator")
+
+The ListNavigation filter is a navigation filter that allows you to filter the
+data by a list of values.
+
+### Options
+
+- `options`: The options of the list navigation filter.
+
+### Example
+
+```tsx
+const dataSource = useDataCollectionSource({
+  navigationFilters: {
+    list: {
+      type: "list-navigator",
+      defaultValue: "engineering",
+      options: [
+        { label: "Engineering", value: "engineering" },
+        { label: "Sales", value: "sales" },
+        { label: "Marketing", value: "marketing" },
+        { label: "Finance", value: "finance" },
+      ],
+    },
+  },
+})
+```
+
+### Examples
+
+<Canvas
+  of={DataCollectionNavigationFiltersStories.ListNavigation}
+  meta={DataCollectionNavigationFiltersStories}
+/>
+
+## Adding a new navigation filter
 
 > Remember navigation fitler need always a value can not be empty by definition
 
