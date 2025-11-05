@@ -8,7 +8,7 @@ import { Spinner } from "@/experimental/Information/Spinner"
 import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
 import { useLoadOptions } from "./useLoadOptions"
@@ -80,6 +80,8 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const [searchTerm, setSearchTerm] = useState("")
 
+  const canLoadMore = useRef(true)
+
   const { options, isLoading, error, loadOptions, loadMore } = useLoadOptions({
     schema: {
       ...schema,
@@ -87,6 +89,19 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     },
     search: searchTerm,
   })
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout
+    if (isLoading) {
+      canLoadMore.current = false
+    } else {
+      timeout = setTimeout(() => {
+        canLoadMore.current = true
+      }, 1000)
+    }
+
+    return () => clearTimeout(timeout)
+  }, [isLoading])
 
   const hasSource = "source" in schema.options
 
@@ -171,9 +186,12 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   }
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    // Prevent multiple simultaneous calls
+    if (isLoading || !loadMore || !canLoadMore.current) return
+
     const target = event.target as HTMLDivElement
     if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
-      loadMore?.()
+      loadMore()
     }
   }
 
