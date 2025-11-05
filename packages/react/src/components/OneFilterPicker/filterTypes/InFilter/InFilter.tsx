@@ -75,8 +75,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   value,
   onChange,
   isCompactMode,
-  top,
-  bottom,
 }: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
@@ -174,7 +172,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement
-    if (target.scrollTop + target.clientHeight >= target.scrollHeight) {
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
       loadMore?.()
     }
   }
@@ -201,8 +199,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           />
         </div>
       )}
-      {top}
-      {bottom}
       {isCompactMode && (
         <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
       )}
@@ -264,6 +260,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             </div>
           )
         })}
+        {isLoading && (
+          <div className="flex w-full items-center justify-center py-4">
+            <Spinner size="small" />
+          </div>
+        )}
       </div>
       {!isCompactMode && (
         <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
