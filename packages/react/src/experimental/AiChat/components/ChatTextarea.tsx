@@ -113,8 +113,8 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
-            "mx-3 mb-0 max-h-36 flex-1 resize-none overflow-y-scroll outline-none transition-all",
-            "bg-f1-background text-f1-foreground placeholder:text-f1-foreground-secondary",
+            "mb-0 max-h-36 flex-1 resize-none overflow-y-auto px-3 outline-none transition-all",
+            "text-f1-foreground placeholder:text-f1-foreground-secondary",
             !hasScrollbar && "mt-3"
           )}
         />
