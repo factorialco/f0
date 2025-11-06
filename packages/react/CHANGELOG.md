@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.254.0](https://github.com/factorialco/f0/compare/f0-react-v1.253.0...f0-react-v1.254.0) (2025-11-06)
+
+
+### Features
+
+* **AiChat:** new copilotAction sources ([#2920](https://github.com/factorialco/f0/issues/2920)) ([d1f9f60](https://github.com/factorialco/f0/commit/d1f9f60bd78c5bb6262ffa7f4e1e58db66a1d7cc))
+* **RichTextEditor:** add Table extension ([#2927](https://github.com/factorialco/f0/issues/2927)) ([f34eeb9](https://github.com/factorialco/f0/commit/f34eeb9ce46e66addceebc4aca6cab763c89753a))
+
 ## [1.253.0](https://github.com/factorialco/f0/compare/f0-react-v1.252.3...f0-react-v1.253.0) (2025-11-06)
 
 
