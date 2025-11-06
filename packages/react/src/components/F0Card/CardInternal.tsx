@@ -142,6 +142,15 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     ref
   ) {
     const linkRef = useRef<HTMLAnchorElement>(null)
+
+    const emulateLinkClick = (
+      e: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
+    ) => {
+      linkRef?.current?.click()
+      onClick?.()
+      e.preventDefault()
+      e.stopPropagation()
+    }
     return (
       <Card
         className={cn(
@@ -198,13 +207,15 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         <div className="flex grow flex-col gap-2">
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
-              {...(disableOverlayLink
+              {...(!disableOverlayLink
                 ? {
                     onClick: (e) => {
-                      linkRef?.current?.click()
-                      onClick?.()
-                      e.preventDefault()
-                      e.stopPropagation()
+                      emulateLinkClick(e)
+                    },
+                    onKeyDown: (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        emulateLinkClick(e)
+                      }
                     },
                     role: "button",
                     "aria-label": title,
