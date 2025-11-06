@@ -44,10 +44,6 @@ const Input = <T extends string = string>({
 }: InputProps<T>) => {
   const [showPassword, setShowPassword] = useState(false)
 
-  const handlePasswordVisibilityToggle = (value: boolean) => {
-    setShowPassword(value)
-  }
-
   const localType = useMemo(() => {
     return type === "password" ? (showPassword ? "text" : "password") : type
   }, [showPassword, type])
@@ -71,7 +67,7 @@ const Input = <T extends string = string>({
         type === "password" ? (
           <PasswordVisibilityToggle
             value={showPassword}
-            onChange={handlePasswordVisibilityToggle}
+            onChange={setShowPassword}
           />
         ) : undefined
       }

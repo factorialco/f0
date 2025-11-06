@@ -17,6 +17,12 @@ export const defaultTranslations = {
     previous: "Previous",
     next: "Next",
   },
+  inputs: {
+    password: {
+      show: "Show password",
+      hide: "Hide password",
+    },
+  },
   actions: {
     add: "Add",
     edit: "Edit",
