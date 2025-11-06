@@ -915,7 +915,9 @@ export const ExampleComponent = ({
   searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
-  onStateChange?: (state: DataCollectionStatusComplete) => void
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<typeof filters>>
+  ) => void
   enableCache?: boolean
   hideFilters?: boolean
 }) => {

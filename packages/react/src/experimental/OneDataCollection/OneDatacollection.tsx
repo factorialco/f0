@@ -113,7 +113,9 @@ export type OneDataCollectionProps<
   fullHeight?: boolean
 
   /** Function to handle state change */
-  onStateChange?: (state: DataCollectionStatusComplete) => void
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<Filters>>
+  ) => void
 
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
