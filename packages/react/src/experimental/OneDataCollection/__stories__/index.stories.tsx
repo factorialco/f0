@@ -977,7 +977,7 @@ export const WithTableVisualization: Story = {
     const source = useDataCollectionSource({
       filters,
       sortings,
-      defaultSorting: {
+      defaultSortings: {
         field: "name",
         order: "asc",
       },
