@@ -527,7 +527,7 @@ const OneDataCollectionComp = <
   /** State */
   useEffect(() => {
     onStateChange?.({
-      filters: currentFilters,
+      filters: currentFilters as FiltersState<Filters>,
       sortings: currentSortings as SortingsState<SortingsDefinition>,
       visualization: currentVisualization,
       grouping: currentGrouping as GroupingState<R, GroupingDefinition<R>>,
