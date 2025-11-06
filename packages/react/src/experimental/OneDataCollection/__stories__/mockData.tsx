@@ -31,6 +31,7 @@ import {
   PaginationType,
   RecordType,
   SelectedItemsState,
+  SortingsState,
 } from "@/hooks/datasource/types"
 import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
@@ -851,6 +852,8 @@ export const ExampleComponent = ({
   defaultSelectedItems,
   bulkActions,
   currentGrouping,
+  currentSortings,
+  currentNavigationFilters,
   grouping,
   noSorting = false,
   navigationFilters,
@@ -869,6 +872,7 @@ export const ExampleComponent = ({
   tableAllowColumnReordering = false,
   tableAllowColumnHiding = false,
   onStateChange,
+  currentFilters,
   /**
    * Enable Apollo-like cache behavior for testing optimistic updates
    */
@@ -920,6 +924,9 @@ export const ExampleComponent = ({
   ) => void
   enableCache?: boolean
   hideFilters?: boolean
+  currentFilters?: FiltersState<FiltersType>
+  currentSortings?: SortingsState<typeof sortings>
+  currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -974,7 +981,10 @@ export const ExampleComponent = ({
   const dataSource = useDataCollectionSource(
     {
       filters: hideFilters ? undefined : filters,
+      currentFilters,
+      currentSortings,
       navigationFilters,
+      currentNavigationFilters,
       presets: usePresets ? filterPresets : undefined,
       sortings: noSorting ? undefined : sortings,
       grouping,

@@ -12,6 +12,7 @@ export * from "./DetailsContent"
 export * from "./DetailsSummary"
 export * from "./Link"
 export * from "./StarterKit"
+export * from "./Table"
 export * from "./TaskList"
 export * from "./TextAlign"
 

@@ -207,6 +207,7 @@ export const defaultTranslations = {
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
+    resourcesGroupTitle: "Resources",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",

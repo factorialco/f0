@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.256.0](https://github.com/factorialco/f0/compare/f0-react-v1.255.1...f0-react-v1.256.0) (2025-11-06)
+
+
+### Features
+
+* **icons:** add group icon ([#2928](https://github.com/factorialco/f0/issues/2928)) ([5da9d30](https://github.com/factorialco/f0/commit/5da9d304a4955ac5a75841307ee5649ca9fb1ed1))
+
+## [1.255.1](https://github.com/factorialco/f0/compare/f0-react-v1.255.0...f0-react-v1.255.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* cards link unstyled and click thought header ([#2934](https://github.com/factorialco/f0/issues/2934)) ([7f08d64](https://github.com/factorialco/f0/commit/7f08d6447e58fcff941f5ca4d24e9f8736ab0796))
+
+## [1.255.0](https://github.com/factorialco/f0/compare/f0-react-v1.254.0...f0-react-v1.255.0) (2025-11-06)
+
+
+### Features
+
+* useData hook allow change grouping and filters from outside ([#2929](https://github.com/factorialco/f0/issues/2929)) ([7b4c2b8](https://github.com/factorialco/f0/commit/7b4c2b8d998b2714e5265dc0b0f1cf688fff07ed))
+
+## [1.254.0](https://github.com/factorialco/f0/compare/f0-react-v1.253.0...f0-react-v1.254.0) (2025-11-06)
+
+
+### Features
+
+* **AiChat:** new copilotAction sources ([#2920](https://github.com/factorialco/f0/issues/2920)) ([d1f9f60](https://github.com/factorialco/f0/commit/d1f9f60bd78c5bb6262ffa7f4e1e58db66a1d7cc))
+* **RichTextEditor:** add Table extension ([#2927](https://github.com/factorialco/f0/issues/2927)) ([f34eeb9](https://github.com/factorialco/f0/commit/f34eeb9ce46e66addceebc4aca6cab763c89753a))
+
+## [1.253.0](https://github.com/factorialco/f0/compare/f0-react-v1.252.3...f0-react-v1.253.0) (2025-11-06)
+
+
+### Features
+
+* add spacing options to Split and Stack components ([#2931](https://github.com/factorialco/f0/issues/2931)) ([12bcb11](https://github.com/factorialco/f0/commit/12bcb11add73697fbc8e462eb7d6ccb15fce749f))
+
 ## [1.252.3](https://github.com/factorialco/f0/compare/f0-react-v1.252.2...f0-react-v1.252.3) (2025-11-06)
 
 

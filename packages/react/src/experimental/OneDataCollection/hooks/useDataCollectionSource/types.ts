@@ -115,6 +115,9 @@ export type DataCollectionSourceDefinition<
 
   /** Navigation filters */
   navigationFilters?: NavigationFilters
+
+  currentNavigationFilters?: NavigationFiltersState<NavigationFilters>
+
   /** URL for a single item in the collection */
   itemUrl?: (item: R) => string | undefined
   /** Click handler for a single item in the collection */

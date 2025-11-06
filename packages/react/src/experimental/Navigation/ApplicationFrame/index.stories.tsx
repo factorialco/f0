@@ -1,3 +1,4 @@
+import { Lightbulb } from "@/icons/app"
 import ExternalLink from "@/icons/app/ExternalLink"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
@@ -23,6 +24,21 @@ const meta: Meta<typeof ApplicationFrame> = {
       showDevConsole: false,
       enabled: true,
       greeting: "Hello, John",
+      welcomeScreenSuggestions: [
+        {
+          icon: Lightbulb,
+          message: "Get access at no additional cost",
+        },
+        {
+          icon: Lightbulb,
+          message: "Explore key features early",
+        },
+        {
+          icon: Lightbulb,
+          message:
+            "Share feedback and help shape One y ademas este mensaje va a desbordar y va a hacer que todo se vaya a la siguiente linea",
+        },
+      ],
     },
     aiPromotion: {
       enabled: false,

@@ -29,21 +29,32 @@ export type DataSourceDefinition<
   Sortings extends SortingsDefinition = SortingsDefinition,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
 > = {
+  /***** FILTERS ***************************************************/
   /** Available filter configurations */
   filters?: Filters
+  /** Default filters state (this is the state that the source will back on reset)*/
+  defaultFilters?: FiltersState<Filters>
   /** Current state of applied filters */
   currentFilters?: FiltersState<Filters>
   /** Predefined filter configurations that can be applied */
   presets?: PresetsDefinition<Filters>
   /** Whether presets are currently loading */
   presetsLoading?: boolean
+  /*******************************************************/
 
+  /***** SEARCH ***************************************************/
   /** Search configuration */
   search?: SearchOptions
+  /*******************************************************/
 
+  /***** SORTINGS ***************************************************/
   /** Available sorting fields. If not provided, sorting is not allowed. */
   sortings?: Sortings
-  defaultSorting?: SortingsState<Sortings>
+  /** Default sorting state (this is the state that the source will back on reset)*/
+  defaultSortings?: SortingsState<Sortings>
+  /** Current state of applied sortings */
+  currentSortings?: SortingsState<Sortings>
+  /*******************************************************/
 
   /** Data adapter responsible for fetching and managing data */
   dataAdapter: DataAdapter<R, Filters>
@@ -53,9 +64,14 @@ export type DataSourceDefinition<
   /** Default selected items */
   defaultSelectedItems?: SelectedItemsState
 
+  /***** GROUPING ***************************************************/
   /** Grouping configuration */
   grouping?: Grouping
+  /** Default grouping state (this is the state that the source will back on reset)*/
+  defaultGrouping?: GroupingState<R, Grouping>
+  /** Current state of applied grouping */
   currentGrouping?: GroupingState<R, Grouping>
+  /*******************************************************/
 }
 
 /**
@@ -77,18 +93,28 @@ export type DataSource<
   setCurrentFilters: React.Dispatch<React.SetStateAction<FiltersState<Filters>>>
   /** Whether presets are currently loading */
   presetsLoading?: boolean
+
+  /***** SORTINGS ***************************************************/
   /** Current state of applied sortings */
   currentSortings: SortingsState<Sortings>
   /** Function to update the current sortings state */
   setCurrentSortings: React.Dispatch<
     React.SetStateAction<SortingsState<Sortings>>
   >
+  /*******************************************************/
+
+  /***** SEARCH ***************************************************/
   currentSearch: undefined | string
   debouncedCurrentSearch: undefined | string
   setCurrentSearch: (search: string | undefined) => void
+  /*******************************************************/
+
+  /***** LOADING ***************************************************/
   isLoading: boolean
   setIsLoading: (loading: boolean) => void
+  /*******************************************************/
 
+  /***** GROUPING ***************************************************/
   /** Current state of applied grouping */
   currentGrouping?: Grouping["mandatory"] extends true
     ? Exclude<GroupingState<R, Grouping>, undefined>
@@ -97,6 +123,7 @@ export type DataSource<
   setCurrentGrouping: React.Dispatch<
     React.SetStateAction<GroupingState<R, Grouping>>
   >
+  /*******************************************************/
 
   /** Function to provide an id for a record, necessary for append mode */
   idProvider?: <Item extends R>(
