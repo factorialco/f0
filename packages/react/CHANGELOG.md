@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.253.0](https://github.com/factorialco/f0/compare/f0-react-v1.252.3...f0-react-v1.253.0) (2025-11-06)
+
+
+### Features
+
+* add spacing options to Split and Stack components ([#2931](https://github.com/factorialco/f0/issues/2931)) ([12bcb11](https://github.com/factorialco/f0/commit/12bcb11add73697fbc8e462eb7d6ccb15fce749f))
+
 ## [1.252.3](https://github.com/factorialco/f0/compare/f0-react-v1.252.2...f0-react-v1.252.3) (2025-11-06)
 
 
