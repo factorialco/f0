@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.252.3](https://github.com/factorialco/f0/compare/f0-react-v1.252.2...f0-react-v1.252.3) (2025-11-06)
+
+
+### Bug Fixes
+
+* onStageChange filter type ([#2930](https://github.com/factorialco/f0/issues/2930)) ([a2dc149](https://github.com/factorialco/f0/commit/a2dc149b564a8cd5ffe34cabaf61287e47e582ec))
+
 ## [1.252.2](https://github.com/factorialco/f0/compare/f0-react-v1.252.1...f0-react-v1.252.2) (2025-11-06)
 
 
