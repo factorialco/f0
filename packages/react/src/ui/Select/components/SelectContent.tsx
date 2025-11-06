@@ -1,6 +1,5 @@
 import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useVirtualizer } from "@tanstack/react-virtual"
@@ -95,8 +94,6 @@ const SelectContent = forwardRef<
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
 
-    const i18n = useI18n()
-
     const isEmpty = useMemo(() => {
       if (isVirtual) {
         return items.filter((item) => item.value).length === 0
@@ -113,8 +110,7 @@ const SelectContent = forwardRef<
     // Get the value and the open status from the select context
     const { value, open, as: asSelectProp } = useContext(SelectContext)
 
-    const asList =
-      asSelectProp === "list" || asSelectProp === "list-with-scroll"
+    const asList = asSelectProp === "list"
 
     const valueArray = useMemo(
       () =>
@@ -192,8 +188,8 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">
-                  {i18n.select.loadingMore}
+                <div className="flex w-full items-center justify-center py-4">
+                  <Spinner size="small" />
                 </div>
               ) : (
                 items[virtualItem.index].item
@@ -254,12 +250,14 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList && asSelectProp !== "list-with-scroll"
+                asList
                   ? "max-h-full"
                   : taller
                     ? "max-h-[440px]"
                     : "max-h-[320px]",
-                loadingNewContent && "select-none opacity-10 transition-opacity"
+                loadingNewContent &&
+                  "select-none opacity-10 transition-opacity",
+                forceMinHeight && "min-h-[450px]"
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}

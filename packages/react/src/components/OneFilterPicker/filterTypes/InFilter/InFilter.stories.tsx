@@ -224,7 +224,6 @@ const AsyncOptionsWithSearchExample = () => {
         }}
         value={selectedValues}
         onChange={handleChange}
-        asChild={false}
       />
     </div>
   )
@@ -393,6 +392,5 @@ export const WithDataSource: Story = {
     },
     value: [],
     onChange: () => {},
-    asChild: false,
   },
 }

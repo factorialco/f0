@@ -9,7 +9,7 @@ type SelectOption = {
 }
 
 export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
-  as?: "list" | "list-with-scroll"
+  as?: "list"
   placeholder?: string
   options?: SelectOption[]
 }
@@ -20,12 +20,10 @@ export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
 
 const Select = <T extends string = string>(props: SelectProps<T>) => {
   type Value = NonNullable<typeof props.value>
-  const [internalOpen, setInternalOpen] = useState(
-    !!(props.as === "list" || props.as === "list-with-scroll")
-  )
+  const [internalOpen, setInternalOpen] = useState(!!(props.as === "list"))
 
   const isOpen =
-    props.as === "list" || props.as === "list-with-scroll"
+    props.as === "list"
       ? true
       : props.open !== undefined
         ? props.open
