@@ -198,14 +198,18 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         <div className="flex grow flex-col gap-2">
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
-              onClick={(e) => {
-                linkRef?.current?.click()
-                onClick?.()
-                e.preventDefault()
-                e.stopPropagation()
-              }}
-              role="button"
-              aria-label={title}
+              {...(disableOverlayLink
+                ? {
+                    onClick: (e) => {
+                      linkRef?.current?.click()
+                      onClick?.()
+                      e.preventDefault()
+                      e.stopPropagation()
+                    },
+                    role: "button",
+                    "aria-label": title,
+                  }
+                : {})}
               className={cn(
                 "relative flex-col gap-0 p-0",
                 image && !compact && "pt-3",
