@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.245.0",
+  "version": "1.254.0",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -164,7 +164,7 @@
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "user-agent-data-types": "^0.4.2",
-    "vite": "^7.1.12",
+    "vite": "^7.2.1",
     "vite-plugin-dts": "4.3.0",
     "vite-plugin-lib-inject-css": "^2.2.1",
     "vitest": "^3.0.7"
@@ -214,6 +214,7 @@
     "@tiptap/extension-mention": "^2.11.5",
     "@tiptap/extension-node-range": "^2.24.0",
     "@tiptap/extension-placeholder": "^2.11.5",
+    "@tiptap/extension-table": "^3.10.2",
     "@tiptap/extension-task-item": "^2.11.5",
     "@tiptap/extension-task-list": "^2.11.5",
     "@tiptap/extension-text-align": "^2.11.5",

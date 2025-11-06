@@ -7,6 +7,7 @@ import { AmountCellValue as AmountCellValue_2 } from '../../value-display/types/
 import { AnchorHTMLAttributes } from 'react';
 import { AreaChartWidgetProps } from './AreaChartWidget';
 import { AriaAttributes } from 'react';
+import { AutoFill as AutoFill_2 } from 'react';
 import { AvatarListCellValue } from './types/avatarList.tsx';
 import { AvatarListCellValue as AvatarListCellValue_2 } from '../../value-display/types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
@@ -52,6 +53,8 @@ import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText.tsx';
 import { NumberCellValue } from './types/number.tsx';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
+import { NumberFilterOptions } from './NumberFilter/NumberFilter';
+import { NumberFilterValue } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
 import { Path } from 'react-hook-form';
 import { PercentageCellValue } from './types/percentage.tsx';
@@ -279,7 +282,7 @@ declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
-declare type ActionType = CopyActionType | NavigateActionType;
+declare type ActionType = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 export declare type actionType = {
     label: string;
@@ -591,7 +594,7 @@ export declare const AreaChartWidget: ForwardRefExoticComponent<Omit<AreaChartWi
 
 export declare const AutoGrid: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 tileSize?: "lg" | "md" | "sm" | undefined;
-gap?: "2" | "4" | "8" | undefined;
+gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "xl" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "0.5" | "1.5" | "2.5" | undefined;
 } & ({
 class?: ClassValue;
 className?: never;
@@ -616,6 +619,8 @@ declare type AvatarBadge = ({
     tooltip?: string;
 };
 
+declare const avatarEmojiSizes: readonly ["sm", "md", "lg", "xl"];
+
 declare type AvatarFileSize = (typeof avatarFileSizes)[number];
 
 declare const avatarFileSizes: readonly ["xs", "sm", "md", "lg"];
@@ -627,6 +632,8 @@ declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
 declare type AvatarVariant = DistributiveOmit<({
     type: "person";
 } & F0AvatarPersonProps) | ({
+    type: "emoji";
+} & F0AvatarEmojiProps) | ({
     type: "team";
 } & F0AvatarTeamProps) | ({
     type: "company";
@@ -1666,16 +1673,16 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
 /**
  * The status of the data collection
  */
-declare type DataCollectionStatus = {
+declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<FiltersDefinition>> = {
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
-    filters?: FiltersState<FiltersDefinition>;
+    filters?: CurrentFiltersState;
     search?: string | undefined;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
 };
 
-declare type DataCollectionStatusComplete = DataCollectionStatus & {
+declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
     settings?: DataCollectionSettings;
 };
 
@@ -1955,6 +1962,11 @@ declare const defaultTranslations: {
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
+        readonly aboveOrEqual: "Above or equal to";
+        readonly value: "Value";
+        readonly belowOrEqual: "Below or equal to";
+        readonly range_title: "Use range";
+        readonly range: "Between {{min}} and {{max}}";
     };
     readonly toc: {
         readonly search: "Search...";
@@ -2097,6 +2109,7 @@ declare const defaultTranslations: {
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly resourcesGroupTitle: "Resources";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -2113,6 +2126,11 @@ declare const defaultTranslations: {
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+    };
+    readonly numberInput: {
+        readonly between: "Between {{min}} and {{max}}";
+        readonly greaterThan: "Greater than {{min}}";
+        readonly lessThan: "Less than {{max}}";
     };
 };
 
@@ -2380,6 +2398,11 @@ declare type F0AvatarCompanyProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+declare type F0AvatarEmojiProps = {
+    emoji: string;
+    size?: (typeof avatarEmojiSizes)[number];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
 declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
     size?: AvatarFileSize;
@@ -2577,10 +2600,11 @@ export declare type FilterDefinition = FilterDefinitionsByType[keyof FilterDefin
 /**
  * All the available filter types
  */
-declare type FilterDefinitionsByType<T = unknown> = {
-    in: InFilterDefinition<T>;
+declare type FilterDefinitionsByType<T = unknown, R extends RecordType = RecordType> = {
+    in: InFilterDefinition<T, R>;
     search: SearchFilterDefinition;
     date: DateFilterDefinition;
+    number: NumberFilterDefinition;
 };
 
 /**
@@ -2620,13 +2644,13 @@ export declare type FiltersState<Definition extends Record<string, FilterDefinit
 
 declare type FilterTypeContext<Options extends object = never> = {
     schema: FilterTypeSchema<Options>;
-    i18n: TranslationsType;
+    i18n: I18nContextType;
 };
 
 declare type FilterTypeDefinition<Value = unknown, Options extends object = never, EmptyValue = Value> = {
     /** Check if the value is empty */
     emptyValue: EmptyValue;
-    isEmpty: (value: Value, context: FilterTypeContext<Options>) => boolean;
+    isEmpty: (value: Value | undefined, context: FilterTypeContext<Options>) => boolean;
     /** Render the filter form */
     render: <Schema extends FilterTypeSchema<Options>>(props: {
         schema: Schema;
@@ -2654,6 +2678,7 @@ declare const filterTypes: {
     readonly in: FilterTypeDefinition<string[], InFilterOptions<string>>;
     readonly search: FilterTypeDefinition<string>;
     readonly date: FilterTypeDefinition<Date | DateRange | undefined, DateFilterOptions>;
+    readonly number: FilterTypeDefinition<NumberFilterValue, NumberFilterOptions>;
 };
 
 declare type FilterTypeSchema<Options extends object = never> = {
@@ -2669,7 +2694,7 @@ declare type FilterTypeSchema<Options extends object = never> = {
  * This type is used to ensure type safety when working with filter values.
  * @template T - The filter definition type
  */
-export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : never;
+export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : T extends NumberFilterDefinition ? [number | undefined, number | undefined] | undefined : never;
 
 export declare type FlattenedItem = {
     parent: EntitySelectEntity | null;
@@ -2868,6 +2893,10 @@ export declare type HILActionConfirmationProps = {
 
 declare type HTMLString = string;
 
+declare type I18nContextType = TranslationsType & {
+    t: (key: TranslationKey, args?: Record<string, string | number>) => string;
+};
+
 declare const iconSizes: {
     readonly xs: "xs";
     readonly sm: "xs";
@@ -2927,8 +2956,8 @@ declare type InferRecord<S> = S extends {
 
 declare type InferSchema<T extends SchemaType> = z.infer<T>;
 
-declare type InFilterDefinition<T = unknown> = BaseFilterDefinition<"in"> & {
-    options: InFilterOptions_2<T>;
+declare type InFilterDefinition<T = unknown, R extends RecordType = RecordType> = BaseFilterDefinition<"in"> & {
+    options: InFilterOptions_2<T, R>;
 };
 
 /**
@@ -2947,10 +2976,14 @@ declare type InFilterOptionItem<T = unknown> = {
  * Represents the options for the InFilter component.
  * @template T - Type of the underlying value
  */
-declare type InFilterOptions_2<T> = {
+declare type InFilterOptions_2<T, R extends RecordType = RecordType> = {
     cache?: boolean;
+} & ({
     options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
-};
+} | {
+    source: DataSourceDefinition<R, FiltersDefinition, SortingsDefinition, GroupingDefinition<R>>;
+    mapOptions: (item: R) => InFilterOptionItem<T>;
+});
 
 /**
  * Represents a paginated response structure tailored for infinite scroll implementations.
@@ -2981,7 +3014,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -3008,6 +3041,7 @@ declare type InputFieldProps<T> = {
     readonly?: boolean;
     clearable?: boolean;
     role?: string;
+    autocomplete?: AutoFill_2;
     inputRef?: React.Ref<unknown>;
     "aria-controls"?: AriaAttributes["aria-controls"];
     "aria-expanded"?: AriaAttributes["aria-expanded"];
@@ -3059,7 +3093,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint"> & {
+export declare type InputProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -3097,6 +3131,8 @@ declare type ItemProps = {
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
 
 export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, }: TOCItemSectionHeaderProps): JSX_2.Element;
+
+declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
 
 declare type KanbanCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, KanbanVisualizationOptions<Record, Filters, Sortings>>;
 
@@ -3565,13 +3601,23 @@ export declare interface NotesTextEditorProps {
     withPadding?: boolean;
 }
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
 
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
     withTitle?: boolean;
     withPadding?: boolean;
 }
+
+declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
+    options?: NumberFilterOptions_2;
+};
+
+declare type NumberFilterOptions_2 = {
+    min?: number;
+    max?: number;
+    modes?: ("range" | "single")[];
+};
 
 export declare const NumberInput: ForwardRefExoticComponent<Omit<NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
@@ -3665,7 +3711,7 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     onTotalItemsChange?: (totalItems: number) => void;
     fullHeight?: boolean;
     /** Function to handle state change */
-    onStateChange?: (state: DataCollectionStatusComplete) => void;
+    onStateChange?: (state: DataCollectionStatusComplete<FiltersState<Filters>>) => void;
     /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
      */
     id?: string;
@@ -3759,6 +3805,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     children?: React.ReactNode;
     /** The mode of the component */
     mode?: FiltersMode;
+    /** Callback fired when filters open state is changed */
+    onOpenChange?: (isOpen: boolean) => void;
 };
 
 export declare const OneModal: OneModalComponent;
@@ -3903,6 +3951,11 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
 
 declare type OnSubmitHandler<TFieldValues extends FieldValues, TTransformedValues extends FieldValues | undefined = undefined> = (data: ReturnType<UseFormHandleSubmit<TFieldValues, TTransformedValues>>) => Promise<Success | FormError<TFieldValues>> | Success | FormError<TFieldValues>;
 
+declare type OpenLinkActionType = {
+    type: "open-link";
+    href: string;
+};
+
 declare interface Option_2 {
     title?: string;
     description?: string;
@@ -4038,6 +4091,10 @@ export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "
  * - "no-pagination": Represents a collection that does not use pagination.
  */
 export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
+
+declare type PathsToStringProps<T> = T extends string ? [] : {
+    [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
+}[Extract<keyof T, string>];
 
 declare type PersonAvatarVariant = Extract<AvatarVariant, {
     type: "person";
@@ -4706,7 +4763,7 @@ className?: never;
 class?: never;
 className?: ClassValue;
 })) | undefined) => string> & VariantProps<(props?: ({
-gap?: "2" | "4" | "8" | undefined;
+gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "xl" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "0.5" | "1.5" | "2.5" | undefined;
 wrap?: boolean | undefined;
 } & ({
 class?: ClassValue;
@@ -4736,7 +4793,7 @@ className?: never;
 class?: never;
 className?: ClassValue;
 })) | undefined) => string> & VariantProps<(props?: ({
-gap?: "2" | "4" | "8" | undefined;
+gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "xl" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "0.5" | "1.5" | "2.5" | undefined;
 } & ({
 class?: ClassValue;
 className?: never;
@@ -5182,6 +5239,8 @@ declare interface TranscriptLabels {
     messagesCount: string;
     messagesCountSingular: string;
 }
+
+declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
 declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
