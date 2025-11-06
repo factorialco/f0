@@ -80,51 +80,6 @@ const defaultTranscriptLabels = {
   messagesCountSingular: "message",
 }
 
-const initialContent = {
-  type: "doc",
-  content: [
-    {
-      type: "moodTracker",
-      attrs: {
-        data: {
-          title: "Last week mood tracker:",
-          averageMoodComment:
-            'Average feeling of "manolo" this week: Walking on sunshine',
-          days: [
-            {
-              day: "Monday",
-              mood: "superPositive",
-              comment:
-                "More training opportunities would help us grow our skills.",
-            },
-            {
-              day: "Tuesday",
-              mood: "superPositive",
-              comment: "Great team collaboration today!",
-            },
-          ],
-        },
-        config: null,
-        isOpen: true,
-      },
-    },
-    {
-      type: "aiBlock",
-      attrs: {
-        data: {},
-        config: null,
-        isCollapsed: false,
-      },
-    },
-    {
-      type: "paragraph",
-      attrs: {
-        textAlign: null,
-      },
-    },
-  ],
-}
-
 export const Default: Story = {
   args: {
     placeholder: "Enter '/' to open the command palette...",
@@ -145,7 +100,20 @@ export const Default: Story = {
     },
 
     initialEditorState: {
-      content: initialContent,
+      content: `  <table>
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <th colspan="3">Description</th>
+      </tr>
+      <tr>
+        <td>Cyndi Lauper</td>
+        <td>Singer</td>
+        <td>Songwriter</td>
+        <td>Actress</td>
+      </tr>
+    </tbody>
+  </table>`,
       title: "Meeting title",
     },
 
@@ -221,18 +189,27 @@ export const Default: Story = {
 
     actions: [
       {
-        label: "Actions 2",
-        onClick: () => {
-          console.log("Actions 2")
-        },
-        hideLabel: true,
-        icon: Placeholder,
-      },
-      {
         label: "Actions",
         onClick: () => {
           console.log("Actions")
         },
+      },
+    ],
+    secondaryActions: [
+      {
+        label: "More Actions",
+        onClick: () => {
+          console.log("More Actions")
+        },
+        icon: Placeholder,
+      },
+      {
+        label: "More Actions 2",
+        onClick: () => {
+          console.log("More Actions 2")
+        },
+        icon: Placeholder,
+        critical: true,
       },
     ],
     metadata: [
@@ -253,8 +230,16 @@ export const Default: Story = {
       },
       {
         type: "text",
-        content: "Metadata",
-        label: "Metadata",
+
+        label: "label",
+        content: "hello",
+      },
+      {
+        type: "person",
+        label: "Person",
+        firstName: "Raúl",
+        lastName: "Sigüenza",
+        src: "/avatars/person01.jpg",
       },
     ],
   },

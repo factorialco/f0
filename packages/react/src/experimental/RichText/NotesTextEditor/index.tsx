@@ -25,7 +25,12 @@ import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import "./index.css"
-import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
+import {
+  actionType,
+  MetadataItemValue,
+  NotesTextEditorHandle,
+  secondaryActionsType,
+} from "./types"
 
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
@@ -44,6 +49,7 @@ interface NotesTextEditorProps {
     titlePlaceholder?: string
   }
   actions?: actionType[]
+  secondaryActions?: secondaryActionsType[]
   metadata?: MetadataItemValue[]
   withPadding?: boolean
 }
@@ -61,6 +67,7 @@ const NotesTextEditorComponent = forwardRef<
     aiBlockConfig,
     onTitleChange,
     actions,
+    secondaryActions,
     metadata,
     withPadding: _withPadding = false,
   },
@@ -217,7 +224,9 @@ const NotesTextEditorComponent = forwardRef<
   }, [editor])
 
   const showHeader =
-    (actions && actions.length > 0) || (metadata && metadata.length > 0)
+    (actions && actions.length > 0) ||
+    (metadata && metadata.length > 0) ||
+    (secondaryActions && secondaryActions.length > 0)
   const showTitle = onTitleChange || title
 
   if (!editor) return null
@@ -228,7 +237,13 @@ const NotesTextEditorComponent = forwardRef<
       ref={containerRef}
       id={editorId}
     >
-      {showHeader && <Header actions={actions} metadata={metadata} />}
+      {showHeader && (
+        <Header
+          actions={actions}
+          metadata={metadata}
+          secondaryActions={secondaryActions}
+        />
+      )}
       {!readonly && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
           <Toolbar
