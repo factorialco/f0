@@ -67,16 +67,14 @@ const Header = ({ actions, metadata, secondaryActions }: HeaderProps) => {
       </ScrollArea>
       <div className="flex flex-shrink-0 flex-row gap-2">
         {secondaryActions && (
-          <>
-            <Dropdown
-              items={secondaryActions.map((action) => ({
-                label: action.label,
-                icon: action.icon,
-                onClick: action.onClick,
-                critical: action.critical,
-              }))}
-            />
-          </>
+          <Dropdown
+            items={secondaryActions.map((action) => ({
+              label: action.label,
+              icon: action.icon,
+              onClick: action.onClick,
+              critical: action.critical,
+            }))}
+          />
         )}
         {actions?.map((action, index) => (
           <F0Button
