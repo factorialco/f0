@@ -23,7 +23,7 @@ export const F0TagDot = forwardRef<HTMLDivElement, Props>(
         className="border-[1px] border-solid border-f1-border-secondary"
         left={
           <div
-            className="m-1 aspect-square w-2 rounded-full"
+            className="m-1 aspect-square h-2 w-2 rounded-full"
             style={{
               backgroundColor,
             }}
