@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.255.1](https://github.com/factorialco/f0/compare/f0-react-v1.255.0...f0-react-v1.255.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* cards link unstyled and click thought header ([#2934](https://github.com/factorialco/f0/issues/2934)) ([7f08d64](https://github.com/factorialco/f0/commit/7f08d6447e58fcff941f5ca4d24e9f8736ab0796))
+
 ## [1.255.0](https://github.com/factorialco/f0/compare/f0-react-v1.254.0...f0-react-v1.255.0) (2025-11-06)
 
 
