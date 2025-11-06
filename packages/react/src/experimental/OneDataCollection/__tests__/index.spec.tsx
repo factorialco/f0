@@ -586,7 +586,7 @@ describe("Collections", () => {
               label: "Name",
             },
           },
-          defaultSorting: {
+          defaultSortings: {
             field: "name",
             order: "desc",
           },
@@ -681,7 +681,7 @@ describe("Collections", () => {
               label: "Name",
             },
           },
-          defaultSorting,
+          defaultSortings: defaultSorting,
         }),
       { wrapper: TestWrapper }
     )
@@ -742,7 +742,7 @@ describe("Collections", () => {
             name: { label: "Name" },
             email: { label: "Email" },
           },
-          defaultSorting: {
+          defaultSortings: {
             field: "name",
             order: "desc",
           },

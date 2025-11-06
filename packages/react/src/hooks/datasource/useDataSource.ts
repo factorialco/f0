@@ -97,7 +97,7 @@ export function useDataSource<
     currentGrouping: externalCurrentGrouping,
     filters,
     search,
-    defaultSortings,
+    defaultSorting,
     currentSortings: externalCurrentSortings,
     dataAdapter,
     grouping,
@@ -142,7 +142,8 @@ export function useDataSource<
     )
 
   useDeepCompareEffect(() => {
-    setCurrentSortings(externalCurrentSortings || null)
+    if (!externalCurrentSortings) return
+    setCurrentSortings(externalCurrentSortings)
   }, [externalCurrentSortings])
   /******************* SEARCH ***************************************************/
   const searchOptions = {

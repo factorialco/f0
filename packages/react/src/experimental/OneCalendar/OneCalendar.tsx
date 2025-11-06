@@ -104,7 +104,7 @@ const OneCalendarInternal = ({
 
   useEffect(() => {
     setSelected(defaultSelected)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the defaultSelected changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be run when the defaultSelected changes
   }, [defaultSelected])
 
   // Handle ui view navigation
