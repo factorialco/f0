@@ -212,3 +212,44 @@ Placeholder component
 .rich-text-details.rich-text-details {
   @apply mb-2;
 }
+
+/* Table-specific styling */
+.notes-text-editor table {
+  @apply m-0 w-full table-fixed overflow-hidden;
+  border-collapse: collapse;
+}
+
+.notes-text-editor table td,
+.notes-text-editor table th {
+  @apply relative box-border min-w-4 border border-solid border-f1-border-secondary p-2 align-top;
+}
+
+.notes-text-editor table td > *,
+.notes-text-editor table th > * {
+  @apply mb-0;
+}
+
+.notes-text-editor table th {
+  @apply text-left;
+}
+
+.notes-text-editor table th > * {
+  @apply font-medium text-f1-foreground-secondary;
+}
+
+.notes-text-editor table .selectedCell:after {
+  @apply absolute bottom-0 left-0 right-0 top-0 z-10 bg-f1-background-selected/20;
+  content: "";
+}
+
+.notes-text-editor table .column-resize-handle {
+  @apply absolute -bottom-0.5 -right-0.5 top-0 w-1 cursor-col-resize bg-f1-border-selected-bold;
+}
+
+.notes-text-editor .tableWrapper {
+  @apply mb-3 overflow-x-auto;
+}
+
+.notes-text-editor .resize-cursor {
+  @apply cursor-col-resize;
+}

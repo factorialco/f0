@@ -1,5 +1,4 @@
 import {
-  ColorExtension,
   createAccessibilityExtension,
   createPlaceholderExtension,
   createSlashCommandExtension,
@@ -12,6 +11,7 @@ import {
   MoodTrackerExtension,
   PersistSelection,
   StarterKitExtension,
+  TableExtension,
   TaskListExtension,
   TextAlignExtension,
   TextStyleExtension,
@@ -72,7 +72,6 @@ export const createNotesTextEditorExtensions = (
     StarterKitExtension,
     UnderlineExtension,
     TextStyleExtension,
-    ColorExtension,
     TypographyExtension,
     TaskListExtension,
     CustomTaskExtension,
@@ -82,6 +81,7 @@ export const createNotesTextEditorExtensions = (
     DetailsExtension,
     DetailsSummaryExtension,
     DetailsContentExtension,
+    TableExtension,
     MoodTrackerExtension.configure({
       currentConfig: enhancedMoodTrackerConfig,
     }),
