@@ -27,16 +27,6 @@ export type CoCreationGroupProps = {
   blockInstances: CoCreationBlockInstance[]
 
   /**
-   * The instructions for the agent to follow when creating the group
-   */
-  agentInstructions: string | string[]
-
-  /**
-   * The context for the agent to use when creating the group
-   */
-  agentContext: string | string[]
-
-  /**
    * The mode of the co-creation group
    * - "co-creation": The agent or user will create and manipulate the block instances and the blocks content
    * - "co-editing": The block instances list are fixed and the agent or user will edit the blocks content only

@@ -9,7 +9,10 @@ export const AvatarProps = z.object({
 
 export const Avatar = (props: z.infer<typeof AvatarProps>) => {
   return (
-    <>This should be an avatar component</>
+    <>
+      This should be an avatar {props.type} with name {props.firstName}{" "}
+      {props.lastName}
+    </>
     //<F0AvatarPerson firstName={props.firstName} lastName={props.lastName} />
   )
 }

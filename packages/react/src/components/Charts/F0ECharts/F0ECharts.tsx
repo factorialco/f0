@@ -1,8 +1,6 @@
 import * as echarts from "echarts"
-import { AriaComponent } from "echarts/components"
 import { useEffect, useMemo, useRef } from "react"
 import "./themes/f0.light"
-echarts.use(AriaComponent)
 
 export const F0ECharts = ({ options }: { options: echarts.EChartsOption }) => {
   const ref = useRef<HTMLDivElement>(null)
