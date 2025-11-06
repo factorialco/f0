@@ -237,13 +237,23 @@ Placeholder component
   @apply font-medium text-f1-foreground-secondary;
 }
 
+.notes-text-editor table td:first-child,
+.notes-text-editor table th:first-child {
+  @apply border-l-0;
+}
+
+.notes-text-editor table td:last-child,
+.notes-text-editor table th:last-child {
+  @apply border-r-0;
+}
+
 .notes-text-editor table .selectedCell:after {
-  @apply absolute bottom-0 left-0 right-0 top-0 z-10 bg-f1-background-selected/20;
+  @apply pointer-events-none absolute bottom-0 left-0 right-0 top-0 z-10 bg-f1-background-selected;
   content: "";
 }
 
 .notes-text-editor table .column-resize-handle {
-  @apply absolute -bottom-0.5 -right-0.5 top-0 w-1 cursor-col-resize bg-f1-border-selected-bold;
+  @apply pointer-events-none absolute -bottom-0.5 -right-0.5 top-0 w-1 cursor-col-resize bg-f1-border-selected-bold;
 }
 
 .notes-text-editor .tableWrapper {

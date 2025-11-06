@@ -229,21 +229,22 @@ const NotesTextEditorComponent = forwardRef<
       id={editorId}
     >
       {showHeader && <Header actions={actions} metadata={metadata} />}
-      <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
-        <Toolbar
-          labels={toolbarLabels}
-          editor={editor}
-          disableButtons={false}
-          showEmojiPicker={false}
-          plainHtmlMode={false}
-        />
-      </div>
-
+      {!readonly && (
+        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+          <Toolbar
+            labels={toolbarLabels}
+            editor={editor}
+            disableButtons={false}
+            showEmojiPicker={false}
+            plainHtmlMode={false}
+          />
+        </div>
+      )}
       <ScrollArea className="h-full gap-6">
         {showTitle && (
           <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-4 pt-5 transition-all duration-300">
             <input
-              disabled={!onTitleChange}
+              disabled={!onTitleChange || readonly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={labels.titlePlaceholder || ""}
