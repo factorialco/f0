@@ -45,6 +45,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
@@ -525,7 +526,7 @@ const OneDataCollectionComp = <
   })
 
   /** State */
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     onStateChange?.({
       filters: currentFilters,
       sortings: currentSortings as SortingsState<SortingsDefinition>,
@@ -536,7 +537,6 @@ const OneDataCollectionComp = <
       settings: settings,
     })
   }, [
-    onStateChange,
     currentFilters,
     currentSearch,
     currentNavigationFilters,

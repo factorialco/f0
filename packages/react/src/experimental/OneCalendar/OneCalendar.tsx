@@ -104,11 +104,8 @@ const OneCalendarInternal = ({
 
   useEffect(() => {
     setSelected(defaultSelected)
-  }, [defaultSelected, setSelected])
-
-  useEffect(() => {
-    // setSelected(defaultSelected)
-  }, [defaultSelected, setSelected])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the defaultSelected changes
+  }, [defaultSelected])
 
   // Handle ui view navigation
   const navigate = (direction: -1 | 1) => {
@@ -184,7 +181,11 @@ const OneCalendarInternal = ({
       const range = toDateRange(selected)
       if (!range) return
 
-      const newRange = granularity.toRange(range.from)
+      // Convert the range to the correct granularity reducing the range to the correct granularity
+      const newRange =
+        mode === "range"
+          ? granularity.toRange(range)
+          : granularity.toRange(range.from)
 
       handleSelect(newRange)
     },

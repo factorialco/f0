@@ -57,8 +57,6 @@ describe("groupBy", () => {
       const grouped = groupBy(items, "priority")
       const groupKeys = Array.from(grouped.keys())
 
-      console.log(grouped, groupKeys)
-
       // Should maintain order: 3 (first), 1 (second), 2 (third)
       expect(groupKeys).toEqual(["3", "1", "2"])
     })
