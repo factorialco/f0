@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
-import { type ReactNode, forwardRef } from "react"
+import { type ReactNode, forwardRef, useRef } from "react"
 import { OneEllipsis } from "../OneEllipsis/OneEllipsis"
 import {
   CardActions,
@@ -141,6 +141,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     },
     ref
   ) {
+    const linkRef = useRef<HTMLAnchorElement>(null)
     return (
       <Card
         className={cn(
@@ -162,8 +163,10 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {link && !disableOverlayLink && (
           <F0Link
             href={link}
+            variant="unstyled"
             className={cn("z-1 absolute inset-0 block rounded-xl", focusRing())}
             aria-label={title}
+            ref={linkRef}
           >
             &nbsp;
           </F0Link>
@@ -195,6 +198,14 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         <div className="flex grow flex-col gap-2">
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
+              onClick={(e) => {
+                linkRef?.current?.click()
+                onClick?.()
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+              role="button"
+              aria-label={title}
               className={cn(
                 "relative flex-col gap-0 p-0",
                 image && !compact && "pt-3",
