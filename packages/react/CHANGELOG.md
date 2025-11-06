@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.255.0](https://github.com/factorialco/f0/compare/f0-react-v1.254.0...f0-react-v1.255.0) (2025-11-06)
+
+
+### Features
+
+* useData hook allow change grouping and filters from outside ([#2929](https://github.com/factorialco/f0/issues/2929)) ([7b4c2b8](https://github.com/factorialco/f0/commit/7b4c2b8d998b2714e5265dc0b0f1cf688fff07ed))
+
 ## [1.254.0](https://github.com/factorialco/f0/compare/f0-react-v1.253.0...f0-react-v1.254.0) (2025-11-06)
 
 
