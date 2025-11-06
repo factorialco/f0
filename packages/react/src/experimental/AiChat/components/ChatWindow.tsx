@@ -41,7 +41,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           }}
         >
           <motion.div
-            className="relative flex h-full w-[360px] flex-col overflow-x-hidden"
+            className="relative flex h-full w-[360px] flex-col overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
