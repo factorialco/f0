@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.252.2](https://github.com/factorialco/f0/compare/f0-react-v1.252.1...f0-react-v1.252.2) (2025-11-06)
+
+
+### Bug Fixes
+
+* improve select glitchy behavior ([#2914](https://github.com/factorialco/f0/issues/2914)) ([c7230a8](https://github.com/factorialco/f0/commit/c7230a80c8951711368bad273c6cfd25011c22d7))
+
 ## [1.252.1](https://github.com/factorialco/f0/compare/f0-react-v1.252.0...f0-react-v1.252.1) (2025-11-05)
 
 
