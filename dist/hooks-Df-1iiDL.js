@@ -54175,12 +54175,12 @@ const BVe = re(function({ compact: t = !1, avatar: n, image: r, title: a, descri
       secondaryActions: d,
       compact: t
     }), x && l("div", {
-      className: "absolute bottom-3 left-3 right-3 z-10 translate-y-2 opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100",
+      className: "absolute bottom-0 left-1/2 z-10 flex -translate-x-1/2 translate-y-1/2 justify-center opacity-0 transition-all group-hover:opacity-100",
       children: T("button", {
         onClick: (E) => {
           E.stopPropagation(), x.onClick();
         },
-        className: "bg-f1-primary text-white hover:bg-f1-primary-hover flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium shadow-lg",
+        className: "flex items-center justify-center gap-2 rounded-lg border border-f1-border bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg hover:bg-f1-background-hover",
         "aria-label": x.label || "Action",
         children: [x.icon && l(x.icon, {
           className: "h-5 w-5",
