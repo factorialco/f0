@@ -11,7 +11,6 @@ export const PasswordVisibilityToggle = ({
   value,
   onChange,
 }: PasswordVisibilityToggleProps) => {
-
   const i18n = useI18n()
   return (
     <F0ButtonToggle
