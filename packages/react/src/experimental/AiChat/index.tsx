@@ -116,16 +116,17 @@ const AiChatCmp = () => {
       {
         name: "message",
         description: "User-friendly progress message",
-        required: true,
+        required: false,
       },
     ],
     // render only when backend wants to display the thinking
     available: "disabled",
     render: (props) => {
+      console.log("props", props)
       return (
         <div className={props.status ? "-ml-1" : undefined}>
           <ActionItem
-            title={props.args.message ?? "thinking"}
+            title={props.args.message ?? "Thinking..."}
             status={props.status === "complete" ? "completed" : props.status}
             inGroup={props.result?.inGroup}
           />
