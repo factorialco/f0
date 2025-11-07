@@ -69,7 +69,7 @@ export const AssistantMessage = ({
     >
       {isLoading && !subComponent && (
         <div className="min-h-[20px]">
-          <ChatSpinner />
+          <ChatSpinner /> Thinking...
         </div>
       )}
       {message && (
