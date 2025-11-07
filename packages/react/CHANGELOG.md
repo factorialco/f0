@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.257.0](https://github.com/factorialco/f0/compare/f0-react-v1.256.0...f0-react-v1.257.0) (2025-11-07)
+
+
+### Features
+
+* use oneellipsis component for the text ([#2921](https://github.com/factorialco/f0/issues/2921)) ([25c7548](https://github.com/factorialco/f0/commit/25c75487421c0793323c677003638e5c2f91e91c))
+
 ## [1.256.0](https://github.com/factorialco/f0/compare/f0-react-v1.255.1...f0-react-v1.256.0) (2025-11-06)
 
 
