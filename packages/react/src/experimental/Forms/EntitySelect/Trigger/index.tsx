@@ -1,3 +1,4 @@
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { Arrow } from "@/experimental/Forms/Fields/Select/components/Arrow"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
@@ -140,11 +141,13 @@ export const Trigger = ({
             : "pl-2"
         )}
       >
-        {flattenedList.length === 0
-          ? placeholder
-          : flattenedList.length === 1
-            ? flattenedList[0].subItem.subName
-            : flattenedList.length + " " + selected}
+        <OneEllipsis tag="span">
+          {flattenedList.length === 0
+            ? (placeholder ?? "")
+            : flattenedList.length === 1
+              ? flattenedList[0].subItem.subName
+              : `${flattenedList.length} ${selected}`}
+        </OneEllipsis>
       </span>
     </InputField>
   )
