@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import {
   Add,
   Briefcase,
@@ -27,7 +28,16 @@ import { DropLaneReorder } from "./DropLaneReorder"
 const SlotComponent = () => {
   return (
     <div className="w-full rounded border-2 border-dashed border-f1-border-info bg-f1-background-info p-5 text-center font-medium text-f1-foreground-info">
-      This is a slot (children)
+      <p>This is a slot (children)</p>
+      <F0Button
+        onClick={(e) => {
+          console.log("button clicked", e)
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        label="Click me"
+        size="sm"
+      />
     </div>
   )
 }
@@ -38,6 +48,24 @@ const meta = {
   parameters: {
     docs: {
       story: { inline: false, height: "320px" },
+      description: {
+        component: [
+          "A card component that displays a title, description, and actions.",
+          "The card can use value display and also have children that are displayed inside the card.",
+        ]
+          .map((line) => `<p>${line}</p>`)
+          .join("\n"),
+      },
+    },
+  },
+  argTypes: {
+    link: {
+      control: "text",
+      description:
+        "The link to navigate to when the card is clicked. (href). NOTE: When the card has a link, the elements inside the card will have `pointer-events: none` so will not be clickable.",
+    },
+    onClick: {
+      description: "The function to trigger when the card is clicked.",
     },
   },
   tags: ["autodocs", "stable"],
@@ -196,6 +224,19 @@ export const Selectable: Story = {
 export const WithChildren: Story = {
   args: {
     title: "Card with children",
+    children: <SlotComponent />,
+  },
+}
+
+export const WithChildrenAndLink: Story = {
+  args: {
+    ...WithChildren.args,
+    link: "/test-link",
+    primaryAction: {
+      label: "Click me",
+      icon: Envelope,
+      onClick: fn(),
+    },
     children: <SlotComponent />,
   },
 }

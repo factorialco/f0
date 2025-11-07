@@ -207,7 +207,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         <div className="flex grow flex-col gap-2">
           <div className="flex flex-row items-start justify-between gap-1">
             <CardHeader
-              {...(!disableOverlayLink
+              {...(!disableOverlayLink && link
                 ? {
                     onClick: (e) => {
                       emulateLinkClick(e)
@@ -265,7 +265,11 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           </div>
           {(metadata || children) && (
-            <CardContent className="pointer-events-none">
+            <CardContent
+              className={cn(
+                (disableOverlayLink || link) && "pointer-events-none"
+              )}
+            >
               {metadata && (
                 <div
                   className={cn(
