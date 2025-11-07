@@ -68,8 +68,9 @@ export const AssistantMessage = ({
       onMouseLeave={handleMouseLeave}
     >
       {isLoading && !subComponent && (
-        <div className="min-h-[20px]">
-          <ChatSpinner /> Thinking...
+        <div className="flex min-h-[20px] items-start gap-1">
+          <ChatSpinner />
+          <p className="text-pretty">{translations.ai.thinking}</p>
         </div>
       )}
       {message && (
