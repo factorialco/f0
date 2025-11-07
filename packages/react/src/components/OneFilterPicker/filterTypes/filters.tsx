@@ -64,9 +64,12 @@ export type BaseFilterDefinition<T extends FilterTypeKey> = {
  * Union of all available filter types.
  * Used to define possible filter configurations in a collection.
  * @template T - Type of values for the InFilterDefinition
+ * @template R - RecordType for the InFilterDefinition
  */
-export type FilterDefinition =
-  FilterDefinitionsByType[keyof FilterDefinitionsByType]
+export type FilterDefinition<
+  T = unknown,
+  R extends RecordType = RecordType,
+> = FilterDefinitionsByType<T, R>[keyof FilterDefinitionsByType]
 
 // This type ensures each filter follows FilterTypeDefinition while preserving its specific type
 type ValidateFilterType<T> = T extends {
