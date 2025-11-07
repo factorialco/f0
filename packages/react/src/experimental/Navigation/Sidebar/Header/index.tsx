@@ -9,6 +9,7 @@ export function SidebarHeader({
   onChange,
   withNotification = false,
   additionalOptions,
+  isLoading = false,
 }: SidebarHeaderProps) {
   return (
     <div className="flex h-[72px] w-full flex-1 items-center justify-between gap-3 px-3">
@@ -16,6 +17,7 @@ export function SidebarHeader({
         companies={companies}
         selected={selected}
         onChange={onChange}
+        isLoading={isLoading}
         withNotification={withNotification}
         additionalOptions={additionalOptions}
       />

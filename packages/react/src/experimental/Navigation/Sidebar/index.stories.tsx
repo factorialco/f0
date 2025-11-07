@@ -11,14 +11,24 @@ import { SearchBar } from "./Searchbar"
 import * as SearchBarStories from "./Searchbar/index.stories"
 import { Sidebar } from "./Sidebar"
 
-const Header = ({ defaultSelected }: { defaultSelected: string }) => {
+const Header = ({
+  defaultSelected,
+  companies,
+  loading = false,
+}: {
+  defaultSelected: string
+  companies?: { id: string; name: string; logo?: string }[]
+  loading?: boolean
+}) => {
   const [selected, setSelected] = useState(defaultSelected)
   return (
     <>
       <SidebarHeader
         {...SidebarHeaderStories.Default.args}
+        companies={companies ?? SidebarHeaderStories.Default.args.companies}
         selected={selected}
         onChange={setSelected}
+        isLoading={loading}
       />
       <SearchBar {...SearchBarStories.Default.args} />
     </>
@@ -75,8 +85,23 @@ export const Snapshot: Story = {
     const snapshotVariants = [
       { ...Default.args },
       { ...Default.args, header: <Header defaultSelected="2" /> },
-      { ...Default.args, header: <Header defaultSelected="3" /> },
       { ...Default.args, header: <Header defaultSelected="4" /> },
+      { ...Default.args, header: <Header defaultSelected="4" loading /> },
+      {
+        ...Default.args,
+        header: (
+          <Header
+            defaultSelected="4"
+            companies={[
+              {
+                id: "4",
+                name: "HSP Projektmanagement und Beratung GmbH",
+                logo: "/avatars/company04.jpg",
+              },
+            ]}
+          />
+        ),
+      },
     ]
     return (
       <div className="relative isolate flex gap-10">
