@@ -700,7 +700,7 @@ declare type CardCollectionProps<Record extends RecordType, Filters extends Filt
 
 export declare interface CardHoverAction {
     label?: string;
-    icon?: React.ReactNode;
+    icon?: IconType;
     onClick: () => void;
 }
 
