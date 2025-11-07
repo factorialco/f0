@@ -23,6 +23,12 @@ import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import { type CardMetadata as CardMetadataType } from "./types"
 
+export interface CardHoverAction {
+  label?: string
+  icon?: React.ReactNode
+  onClick: () => void
+}
+
 export interface CardInternalProps {
   /**
    * Whether the card has a compact layout
@@ -115,6 +121,11 @@ export interface CardInternalProps {
    * can manage drag-and-drop while still allowing click navigation via onClick
    */
   disableOverlayLink?: boolean
+
+  /**
+   * Action to display on hover at the bottom of the card
+   */
+  hoverAction?: CardHoverAction
 }
 
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
@@ -138,6 +149,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       forceVerticalMetadata = false,
       fullHeight = false,
       disableOverlayLink = false,
+      hoverAction,
     },
     ref
   ) {
@@ -288,6 +300,21 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           secondaryActions={secondaryActions}
           compact={compact}
         />
+        {hoverAction && (
+          <div className="absolute bottom-3 left-3 right-3 z-10 translate-y-2 opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                hoverAction.onClick()
+              }}
+              className="bg-f1-primary text-white hover:bg-f1-primary-hover flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium shadow-lg"
+              aria-label={hoverAction.label || "Action"}
+            >
+              {hoverAction.icon}
+              {hoverAction.label && <span>{hoverAction.label}</span>}
+            </button>
+          </div>
+        )}
       </Card>
     )
   }
