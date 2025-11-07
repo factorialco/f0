@@ -1,7 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
-import { motion } from "motion/react"
 import { ChatSpinner } from "./components/ChatSpinner"
 
 export interface ActionItemProps {
@@ -37,21 +36,7 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
           />
         </div>
       )}
-      <motion.p
-        key={title}
-        initial={{ opacity: 0, x: 100 }}
-        animate={{
-          opacity: 1,
-          x: 0,
-        }}
-        transition={{
-          ease: "easeOut",
-          duration: 0.3,
-        }}
-        className="text-pretty"
-      >
-        {title}
-      </motion.p>
+      <p className="text-pretty">{title}</p>
     </div>
   )
 }
