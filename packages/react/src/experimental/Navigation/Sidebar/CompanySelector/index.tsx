@@ -1,12 +1,14 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0Icon, IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
+import { Select } from "@/experimental/Forms/Fields/Select"
 import { ChevronDown, Circle } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { motion } from "motion/react"
 import { ReactNode, useMemo, useState } from "react"
-import { Select } from "../../../Forms/Fields/Select"
 
 interface Company {
   id: string
@@ -63,17 +65,19 @@ export function CompanySelector({
   }
 
   return (
-    <Selector
-      companies={companies}
-      selected={selectedCompany}
-      onChange={onChange}
-      additionalOptions={additionalOptions}
-    >
-      <SelectedCompanyLabel
-        company={selectedCompany}
-        withNotification={withNotification}
-      />
-    </Selector>
+    <div className="min-w-0 flex-1">
+      <Selector
+        companies={companies}
+        selected={selectedCompany}
+        onChange={onChange}
+        additionalOptions={additionalOptions}
+      >
+        <SelectedCompanyLabel
+          company={selectedCompany}
+          withNotification={withNotification}
+        />
+      </Selector>
+    </div>
   )
 }
 
@@ -90,6 +94,7 @@ const Selector = ({
   children: ReactNode
   additionalOptions?: CompanySelectorProps["additionalOptions"]
 }) => {
+  const i18n = useI18n()
   const [open, setOpen] = useState(false)
   const options = useMemo(
     () => [
@@ -120,12 +125,12 @@ const Selector = ({
 
   return (
     <Select
-      label="Select a company"
+      label={i18n.navigation.sidebar.companySelector.label}
       hideLabel
       options={options}
       value={selected.id}
       onChange={handleChange}
-      placeholder="Select a company"
+      placeholder={i18n.navigation.sidebar.companySelector.placeholder}
       open={open}
       onOpenChange={setOpen}
     >
@@ -134,6 +139,7 @@ const Selector = ({
           "group flex w-fit max-w-full flex-nowrap items-center justify-center gap-1 rounded p-1.5 text-f1-foreground transition-colors hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover",
           focusRing()
         )}
+        data-testid="company-selector-button"
         tabIndex={0}
         title={selected?.name}
       >
@@ -164,7 +170,7 @@ const SelectedCompanyLabel = ({
   return (
     <div
       className={cn(
-        "flex w-fit min-w-0 max-w-full items-center gap-2 rounded text-lg font-semibold text-f1-foreground transition-colors"
+        "flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden rounded text-lg font-semibold text-f1-foreground transition-colors"
       )}
     >
       <F0AvatarCompany
@@ -175,9 +181,7 @@ const SelectedCompanyLabel = ({
           withNotification ? { icon: Circle, type: "highlight" } : undefined
         }
       />
-      <div className="min-w-0 flex-1">
-        <span className="line-clamp-1">{company?.name}</span>
-      </div>
+      <OneEllipsis tag="span">{company?.name}</OneEllipsis>
     </div>
   )
 }

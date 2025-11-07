@@ -13,7 +13,13 @@ export const defaultTranslations = {
     },
   },
   navigation: {
-    sidebar: "Main navigation",
+    sidebar: {
+      label: "Main navigation",
+      companySelector: {
+        label: "Select a company",
+        placeholder: "Select a company",
+      },
+    },
     previous: "Previous",
     next: "Next",
   },
