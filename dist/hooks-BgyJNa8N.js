@@ -54180,7 +54180,7 @@ const BVe = re(function({ compact: t = !1, avatar: n, image: r, title: a, descri
         onClick: (E) => {
           E.stopPropagation(), x.onClick();
         },
-        className: "flex items-center justify-center gap-2 rounded-lg border border-f1-border bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg hover:bg-f1-background-hover",
+        className: "flex items-center justify-center gap-2 rounded-lg border border-f1-border bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg hover:border-f1-border-hover",
         "aria-label": x.label || "Action",
         children: [x.icon && l(x.icon, {
           className: "h-5 w-5",
