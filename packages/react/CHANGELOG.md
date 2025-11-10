@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
+
+
+### Features
+
+* **RichTextEditor:** fix full screen mode on modals ([#2955](https://github.com/factorialco/f0/issues/2955)) ([ff68ad3](https://github.com/factorialco/f0/commit/ff68ad3cd699a158c07f52583716ea25d083f230))
+
 ## [1.260.0](https://github.com/factorialco/f0/compare/f0-react-v1.259.1...f0-react-v1.260.0) (2025-11-10)
 
 
