@@ -188,7 +188,7 @@ const SelectComponent = forwardRef(function Select<
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
-  type Value = T extends string ? string : string[]
+  type ValueString = T extends string ? string : string[]
 
   const [openLocal, setOpenLocal] = useState(open)
 
@@ -369,19 +369,19 @@ const SelectComponent = forwardRef(function Select<
       )
     )
 
-    const values = toValueType(
-      foundOptions.map((option) => option.value),
-      multiple
-    )
-
-    onChange?.(
-      values,
-      toValueType(
-        foundOptions.map((option) => option.item),
-        multiple
-      ),
-      toValueType(foundOptions, multiple)
-    )
+    // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
+    if (multiple) {
+      const values = foundOptions.map((option) => option.value)
+      const items = foundOptions
+        .map((option) => option.item)
+        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+      onChange?.(values, items, foundOptions)
+    } else {
+      const value = foundOptions[0]?.value
+      const item = foundOptions[0]?.item
+      const option = foundOptions[0]
+      onChange?.(value, item, option)
+    }
   }
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
@@ -458,15 +458,19 @@ const SelectComponent = forwardRef(function Select<
 
   const i18n = useI18n()
 
+  const primitiveValue = useMemo(() => {
+    if (multiple) {
+      return (localValue ?? []).map((value) => String(value))
+    }
+    return (localValue ?? [])[0] as string | undefined
+  }, [localValue, multiple])
+
   return (
     <>
       <SelectPrimitive
         onItemCheckChange={onItemCheckChange}
         onValueChange={handleLocalValueChange}
-        value={toValueType(
-          (localValue ?? []).map((value) => String(value)),
-          multiple
-        )}
+        value={primitiveValue}
         disabled={disabled}
         open={openLocal}
         multiple={multiple}
