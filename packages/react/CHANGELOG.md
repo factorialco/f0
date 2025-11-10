@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.260.0](https://github.com/factorialco/f0/compare/f0-react-v1.259.1...f0-react-v1.260.0) (2025-11-10)
+
+
+### Features
+
+* add tooltip on F0Icon and CardMetadata ([#2947](https://github.com/factorialco/f0/issues/2947)) ([878de24](https://github.com/factorialco/f0/commit/878de2423ab10cf73c41fe2d5d16d39e15e82800))
+
 ## [1.259.1](https://github.com/factorialco/f0/compare/f0-react-v1.259.0...f0-react-v1.259.1) (2025-11-10)
 
 
