@@ -181,7 +181,7 @@ const SelectedCompanyLabel = ({
           withNotification ? { icon: Circle, type: "highlight" } : undefined
         }
       />
-      <OneEllipsis tag="span">{company?.name}</OneEllipsis>
+      <OneEllipsis tag="span">{company?.name ?? ""}</OneEllipsis>
     </div>
   )
 }
