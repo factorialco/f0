@@ -110,7 +110,9 @@ const SelectContent = forwardRef<
     // Get the value and the open status from the select context
     const { value, open, as: asSelectProp } = useContext(SelectContext)
 
-    const asList = asSelectProp === "list"
+    const asList =
+      asSelectProp === "list" || asSelectProp === "list-with-scroll"
+    const asListWithScroll = asSelectProp === "list-with-scroll"
 
     const valueArray = useMemo(
       () =>
@@ -250,7 +252,7 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList
+                asList && !asListWithScroll
                   ? "max-h-full"
                   : taller
                     ? "max-h-[440px]"
