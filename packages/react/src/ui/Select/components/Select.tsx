@@ -1,3 +1,4 @@
+import { toArray } from "@/lib/toArray.ts"
 import { useEffect, useState } from "react"
 import { SelectContext, SelectContextType } from "../SelectContext.tsx"
 import * as SelectPrimitive from "./radix-ui"
@@ -37,13 +38,6 @@ const Select = <T extends string = string>(props: SelectProps<T>) => {
 
     // Call the onOpenChange prop if provided
     props.onOpenChange?.(open)
-  }
-
-  const toArray = (value: T | T[] | undefined) => {
-    if (value === undefined) {
-      return []
-    }
-    return Array.isArray(value) ? value : [value]
   }
 
   const [localValue, setLocalValue] = useState(toArray(props.value))

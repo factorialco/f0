@@ -20,6 +20,7 @@ import {
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { toArray } from "@/lib/toArray"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
@@ -49,16 +50,9 @@ export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
  *
  */
 export type SelectProps<T extends string, R = unknown> = {
-  onChange: (
-    value: T,
-    originalItem?: ResolvedRecordType<R>,
-    option?: SelectItemObject<T, ResolvedRecordType<R>>
-  ) => void
   onChangeSelectedOption?: (
     option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => void
-  value?: T
-  defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
   children?: React.ReactNode
   open?: boolean
   showSearchBox?: boolean
@@ -72,27 +66,49 @@ export type SelectProps<T extends string, R = unknown> = {
   actions?: Action[]
 } & (
   | {
-      source: DataSourceDefinition<
-        ResolvedRecordType<R>,
-        FiltersDefinition,
-        SortingsDefinition,
-        GroupingDefinition<ResolvedRecordType<R>>
-      >
-      mapOptions: (
-        item: ResolvedRecordType<R>
-      ) => SelectItemProps<T, ResolvedRecordType<R>>
-      options?: never
+      multiple?: false
+      value?: T
+      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
+      onChange: (
+        value: T,
+        originalItem?: ResolvedRecordType<R>,
+        option?: SelectItemObject<T, ResolvedRecordType<R>>
+      ) => void
     }
   | {
-      source?: never
-      mapOptions?: never
-      searchFn?: (
-        option: SelectItemProps<T, unknown>,
-        search?: string
-      ) => boolean | undefined
-      options: SelectItemProps<T, unknown>[]
+      multiple: true
+      value?: T[]
+      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>[]
+      onChange: (
+        value: T[],
+        originalItems?: ResolvedRecordType<R>[],
+        options?: SelectItemObject<T, ResolvedRecordType<R>>[]
+      ) => void
     }
 ) &
+  (
+    | {
+        source: DataSourceDefinition<
+          ResolvedRecordType<R>,
+          FiltersDefinition,
+          SortingsDefinition,
+          GroupingDefinition<ResolvedRecordType<R>>
+        >
+        mapOptions: (
+          item: ResolvedRecordType<R>
+        ) => SelectItemProps<T, ResolvedRecordType<R>>
+        options?: never
+      }
+    | {
+        source?: never
+        mapOptions?: never
+        searchFn?: (
+          option: SelectItemProps<T, unknown>,
+          search?: string
+        ) => boolean | undefined
+        options: SelectItemProps<T, unknown>[]
+      }
+  ) &
   Pick<
     InputFieldProps<T>,
     | "required"
@@ -171,6 +187,19 @@ const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
   )
 }
 
+/**
+ * Converts an array of values to a single value or an array of values depending on the multiple prop
+ * @param value - The array of values to convert
+ * @param multiple - Whether the select is multiple
+ * @returns The single value or the array of values
+ */
+const arrayToValue = <T extends string, M extends boolean | undefined>(
+  value: T[],
+  multiple: M
+): M extends true ? T[] : T | undefined => {
+  return multiple ? value : (value[0] ?? undefined)
+}
+
 const SelectComponent = forwardRef(function Select<
   T extends string,
   R = unknown,
@@ -205,21 +234,35 @@ const SelectComponent = forwardRef(function Select<
     status,
     hint,
     required,
+    multiple,
     ...props
   }: SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
+  type Value = T extends string ? string : string[]
 
   const [openLocal, setOpenLocal] = useState(open)
 
-  const [localValue, setLocalValue] = useState(
-    value || props.defaultItem?.value
+  const defaultItems = toArray(props.defaultItem).filter(
+    (item): item is SelectItemObject<T, ResolvedRecordType<R>> =>
+      item !== undefined
   )
+
+  const defaultValues = useMemo(
+    () =>
+      arrayToValue(
+        defaultItems.map((item) => item.value),
+        multiple
+      ),
+    [defaultItems, multiple]
+  )
+
+  const [localValue, setLocalValue] = useState(value || defaultValues)
 
   useEffect(() => {
     if (value !== localValue) {
-      setLocalValue(value || props.defaultItem?.value)
+      setLocalValue(value || defaultValues)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, props.defaultItem])
@@ -357,10 +400,11 @@ const SelectComponent = forwardRef(function Select<
     [setCurrentSearch, onSearchChange]
   )
 
-  const handleLocalValueChange = (changedValue: string | undefined) => {
+  const handleLocalValueChange = (changedValue: string[] | undefined) => {
+    console.log("changedValue", changedValue)
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
-    setLocalValue(changedValue as T)
+    setLocalValue(changedValue as T[])
 
     const foundOption = findOption(changedValue)
 
@@ -452,6 +496,7 @@ const SelectComponent = forwardRef(function Select<
         }
         disabled={disabled}
         open={openLocal}
+        multiple={multiple}
         onOpenChange={handleChangeOpenLocal}
         {...props}
       >
