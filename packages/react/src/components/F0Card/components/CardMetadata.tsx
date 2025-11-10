@@ -51,7 +51,12 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
   return (
     <div className="flex h-8 items-center gap-1.5">
       {"icon" in metadata && (
-        <F0Icon icon={metadata.icon} color="default" size="md" />
+        <F0Icon
+          icon={metadata.icon}
+          color="default"
+          size="md"
+          tooltip={metadata.tooltip}
+        />
       )}
       {typedRenderer(value, { visualization: "card" })}
     </div>
