@@ -25,6 +25,9 @@ export const F0ButtonToggle = forwardRef<
     const singleIcon = !Array.isArray(icon)
     const [iconOff, iconOn] = singleIcon ? [icon, icon] : icon
 
+    const singleLabel = !Array.isArray(label)
+    const [labelOff, labelOn] = singleLabel ? [label, label] : label
+
     const sizeClass = {
       sm: "h-6",
       md: "h-8",
@@ -59,14 +62,16 @@ export const F0ButtonToggle = forwardRef<
       // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when the selected prop changes
     }, [selected])
 
+    const localLabel = localSelected ? labelOn : labelOff
+
     return (
       <TogglePrimitive.Root
         ref={ref}
         pressed={localSelected}
         onPressedChange={handleChange}
         disabled={disabled}
-        aria-label={label}
-        title={label}
+        aria-label={localLabel}
+        title={localLabel}
         className={cn(
           "aspect-square px-0",
           "flex items-center justify-center",
