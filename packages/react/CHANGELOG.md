@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.259.0](https://github.com/factorialco/f0/compare/f0-react-v1.258.0...f0-react-v1.259.0) (2025-11-10)
+
+
+### Features
+
+* input password visibility ([#2936](https://github.com/factorialco/f0/issues/2936)) ([be2c4fc](https://github.com/factorialco/f0/commit/be2c4fc955f5be1cb738960ed7b8133e4a825322))
+
 ## [1.258.0](https://github.com/factorialco/f0/compare/f0-react-v1.257.0...f0-react-v1.258.0) (2025-11-10)
 
 
