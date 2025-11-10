@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.258.0](https://github.com/factorialco/f0/compare/f0-react-v1.257.0...f0-react-v1.258.0) (2025-11-10)
+
+
+### Features
+
+* **WelcomeScreen:** enhance WelcomeScreen with prompt and message  ([#2924](https://github.com/factorialco/f0/issues/2924)) ([1079fb2](https://github.com/factorialco/f0/commit/1079fb22dd1bff405d215781b95f8c6b41dac7c9))
+
 ## [1.257.0](https://github.com/factorialco/f0/compare/f0-react-v1.256.0...f0-react-v1.257.0) (2025-11-07)
 
 
