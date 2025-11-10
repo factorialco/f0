@@ -25,12 +25,11 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
-import { useDeepCompareEffect } from "@reactuses/core"
 import { isEqual } from "lodash"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
-import { SelectValue } from "./components/SelectedValue"
+import { SelectedItems } from "./components/SelectedItems"
 import { SelectItem } from "./components/SelectItem"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
@@ -49,7 +48,8 @@ export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
  */
 export type SelectProps<T extends string, R = unknown> = {
   onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
+    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined,
+    checked: boolean
   ) => void
   children?: React.ReactNode
   open?: boolean
@@ -68,7 +68,7 @@ export type SelectProps<T extends string, R = unknown> = {
       value?: T
       defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
       onChange: (
-        value: T,
+        value: T | undefined,
         originalItem?: ResolvedRecordType<R>,
         option?: SelectItemObject<T, ResolvedRecordType<R>>
       ) => void
@@ -139,7 +139,7 @@ const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
  * @param multiple - Whether the select is multiple
  * @returns The single value or the array of values
  */
-const toArrayOrSingle = <T, M extends boolean | undefined>(
+const toValueType = <T, M extends boolean | undefined>(
   items: T[],
   multiple: M
 ): M extends true ? T[] : T | undefined => {
@@ -202,14 +202,21 @@ const SelectComponent = forwardRef(function Select<
     [defaultItems]
   )
 
-  const [localValue, setLocalValue] = useState(toArray(value) || defaultValues)
+  const [localValue, setLocalValue] = useState(
+    toArray(value) ?? defaultValues ?? []
+  )
 
   useEffect(() => {
-    if (!isEqual(toArray(value), localValue)) {
-      setLocalValue(toArray(value) || defaultValues)
+    if (
+      !isEqual(
+        toArray(value) ?? [],
+        localValue?.map((item) => String(item)) ?? []
+      )
+    ) {
+      setLocalValue(toArray(value) ?? defaultValues ?? [])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, defaultItems])
+  }, [value])
 
   const dataSource = useMemo(() => {
     if (
@@ -288,10 +295,6 @@ const SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
-  const [selectedOptions, setSelectedOptions] = useState<
-    SelectItemObject<T, ActualRecordType>[]
-  >([])
-
   /**
    * Finds an option in the data records by value and returns the mapped option
    * @param value - The value to find
@@ -301,12 +304,8 @@ const SelectComponent = forwardRef(function Select<
     (
       values: (string | T)[] | undefined
     ): SelectItemObject<T, ActualRecordType>[] => {
-      if (value === undefined) {
+      if (values === undefined) {
         return []
-      }
-
-      if (values === defaultValues) {
-        return defaultItems
       }
 
       if (isEqual(values, defaultValues)) {
@@ -329,12 +328,10 @@ const SelectComponent = forwardRef(function Select<
     [data.records, optionMapper, defaultItems, defaultValues]
   )
 
-  useDeepCompareEffect(() => {
-    const foundOptions = findOptionsByValue(localValue)
-
-    // onChangeSelectedOption?.(toArrayOrSingle(foundOptions, multiple))
-    setSelectedOptions(foundOptions)
-  }, [localValue, multiple])
+  const selectedItems = useMemo(() => {
+    return findOptionsByValue(localValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the localValue changes
+  }, [localValue])
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
@@ -344,23 +341,46 @@ const SelectComponent = forwardRef(function Select<
     [setCurrentSearch, onSearchChange]
   )
 
+  const onItemCheckChange = useCallback(
+    (value: string, checked: boolean) => {
+      const foundOption = findOptionsByValue([value])[0]
+      if (foundOption) {
+        onChangeSelectedOption?.(foundOption, checked)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
+    [onChangeSelectedOption]
+  )
+
   const handleLocalValueChange = (changedValue: string[] | undefined) => {
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
-    setLocalValue(changedValue as T[])
+    setLocalValue((toArray(changedValue) ?? []) as T[])
 
-    const foundOptions = findOptionsByValue(changedValue)
+    const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
 
-    onChange?.(
-      toArrayOrSingle(
+    console.log(
+      "foundOptions2",
+      foundOptions,
+      multiple,
+      toValueType(
         foundOptions.map((option) => option.value),
         multiple
-      ),
-      toArrayOrSingle(
+      )
+    )
+
+    const values = toValueType(
+      foundOptions.map((option) => option.value),
+      multiple
+    )
+
+    onChange?.(
+      values,
+      toValueType(
         foundOptions.map((option) => option.item),
         multiple
       ),
-      toArrayOrSingle(foundOptions, multiple)
+      toValueType(foundOptions, multiple)
     )
   }
 
@@ -441,12 +461,12 @@ const SelectComponent = forwardRef(function Select<
   return (
     <>
       <SelectPrimitive
+        onItemCheckChange={onItemCheckChange}
         onValueChange={handleLocalValueChange}
-        // value={
-        //   localValue !== undefined && localValue !== null
-        //     ? toArrayOrSingle(localValue, multiple)
-        //     : undefined
-        // }
+        value={toValueType(
+          (localValue ?? []).map((value) => String(value)),
+          multiple
+        )}
         disabled={disabled}
         open={openLocal}
         multiple={multiple}
@@ -471,8 +491,9 @@ const SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              // value={localValue as string}
-              // onChange={(value) => handleLocalValueChange(value)}
+              value={localValue.join(",")}
+              isEmpty={(value) => value?.length === 0}
+              onClear={() => handleLocalValueChange([])}
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
@@ -497,10 +518,10 @@ const SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectedOptions && (
-                  <SelectValue
+                {selectedItems && (
+                  <SelectedItems
                     multiple={multiple}
-                    selection={selectedOptions}
+                    selection={selectedItems}
                   />
                 )}
               </button>

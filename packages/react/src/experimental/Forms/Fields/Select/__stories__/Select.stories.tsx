@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { Select, SelectItemObject, SelectProps, selectSizes } from "../index"
+import { Select, SelectItemObject, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
@@ -15,47 +15,6 @@ import {
   mockNonPaginatedSource,
   mockPaginatedSource,
 } from "./mocks"
-
-// Wraps the Select component with a hook to show the selected value
-const SelectWithHooks = (props: SelectProps<string>) => {
-  const { label, ...restProps } = props
-  const [localValue, setLocalValue] = useState(props.value)
-  const [searchValue, setSearchValue] = useState("")
-  // Sets a click handler to change the label's value
-  const handleOnChange = (
-    value: string,
-    item?: unknown,
-    option?: SelectItemObject<string>
-  ) => {
-    setLocalValue(value)
-    console.log(
-      "selected value:",
-      value,
-      "- original item:",
-      item,
-      "- selection option:",
-      option
-    )
-  }
-
-  const handleOnSearchChange = (value: string) => {
-    setSearchValue(value)
-    console.log("searchValue", value)
-  }
-
-  return (
-    <div className="w-48">
-      <Select
-        label={label ?? "The label"}
-        {...restProps}
-        value={localValue}
-        onChange={handleOnChange}
-        searchValue={searchValue}
-        onSearchChange={handleOnSearchChange}
-      />
-    </div>
-  )
-}
 
 const icons: Record<string, IconType> = {
   light: Circle,
@@ -85,7 +44,7 @@ const items = [
 
 const meta: Meta = {
   title: "Input/Select",
-  component: SelectWithHooks,
+  component: Select,
   parameters: {
     a11y: {
       skipCi: true,
@@ -244,6 +203,47 @@ const meta: Meta = {
     showSearchBox: false,
   },
   decorators: [
+    (Story, { args }) => {
+      // Wraps the Select component with a hook to show the selected value
+      const [localValue, setLocalValue] = useState(args.value)
+      const [searchValue, setSearchValue] = useState("")
+      // Sets a click handler to change the label's value
+      const handleOnChange = (
+        value: string,
+        item?: unknown,
+        option?: SelectItemObject<string>
+      ) => {
+        setLocalValue(value)
+        console.log(
+          "selected value:",
+          value,
+          "- original item:",
+          item,
+          "- selection option:",
+          option
+        )
+      }
+
+      const handleOnSearchChange = (value: string) => {
+        setSearchValue(value)
+        console.log("searchValue", value)
+      }
+
+      return (
+        <div className="w-48">
+          <Story
+            args={{
+              ...args,
+              value: localValue,
+              onChange: handleOnChange,
+              searchValue: searchValue,
+              onSearchChange: handleOnSearchChange,
+            }}
+          />
+          <div>Selected: {JSON.stringify(localValue, null, 2)}</div>
+        </div>
+      )
+    },
     (Story) => (
       <div
         className="w-[350px]"
@@ -256,7 +256,7 @@ const meta: Meta = {
     ),
   ],
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof SelectWithHooks>
+} satisfies Meta<typeof Select>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -547,6 +547,8 @@ export const WithDataSourceGrouping: Story = {
 export const MultipleNotPaginated: Story = {
   args: {
     multiple: true,
+    value: "option-2",
+    clearable: true,
     source: mockNonPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
