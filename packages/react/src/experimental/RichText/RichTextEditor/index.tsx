@@ -64,6 +64,7 @@ interface RichTextEditorProps {
   errorConfig?: errorConfig
   height?: heightType
   plainHtmlMode?: boolean
+  fullScreenMode?: boolean
 }
 
 type RichTextEditorHandle = {
@@ -93,6 +94,7 @@ const RichTextEditorComponent = forwardRef<
     errorConfig,
     height = "auto",
     plainHtmlMode = false,
+    fullScreenMode = true,
   },
   ref
 ) {
@@ -155,50 +157,31 @@ const RichTextEditorComponent = forwardRef<
   }, [isLoadingEnhance])
 
   const handleToggleFullscreen = () => {
-    if (editor) {
-      // Save the current editor state in json format, cause it's easier to handle for tiptap all the states and we can keep all the states
-      setEditorState({
-        ...editorState,
-        json: editor.getJSON(),
-      })
-    }
     setIsFullscreen((prev) => !prev)
   }
 
   const disableAllButtons = !!(isAcceptChangesOpen || isLoadingEnhance || error)
 
-  const editor = useEditor(
-    {
-      extensions: ExtensionsConfiguration({
-        mentionsConfig,
-        mentionSuggestions,
-        setMentionSuggestions,
-        placeholder,
-        maxCharacters,
-        plainHtmlMode,
-      }),
-      content: editorState.json || editorState.html,
-      onUpdate: ({ editor }: { editor: Editor }) => {
-        handleEditorUpdate({ editor, onChange, setEditorState })
-      },
+  const editor = useEditor({
+    extensions: ExtensionsConfiguration({
+      mentionsConfig,
+      mentionSuggestions,
+      setMentionSuggestions,
+      placeholder,
+      maxCharacters,
+      plainHtmlMode,
+    }),
+    content: editorState.html,
+    onUpdate: ({ editor }: { editor: Editor }) => {
+      handleEditorUpdate({ editor, onChange, setEditorState })
     },
-    [isFullscreen]
-  )
+  })
 
   useEffect(() => {
     if (error && editor) {
       editor.setEditable(false)
     }
   }, [error, editor])
-
-  useEffect(() => {
-    if (editor && editorState.json) {
-      setEditorState({
-        ...editorState,
-        json: null,
-      })
-    }
-  }, [editor, editorState])
 
   useImperativeHandle(ref, () => ({
     clear: () => editor?.commands.clearContent(),
@@ -220,10 +203,6 @@ const RichTextEditorComponent = forwardRef<
     setContent: (content: string) => {
       if (editor) {
         setEditorContent({ editor, content })
-        setEditorState({
-          html: content,
-          json: null,
-        })
       }
     },
   }))
@@ -258,13 +237,18 @@ const RichTextEditorComponent = forwardRef<
       ref={containerRef}
       id={editorId}
       className={cn(
-        "rich-text-editor-container flex flex-col bg-f1-background",
+        "rich-text-editor-container pointer-events-auto flex flex-col bg-f1-background",
         isFullscreen
           ? "fixed inset-0 z-50"
           : "relative w-full rounded-xl border border-solid border-f1-border"
       )}
     >
+      {isFullscreen && (
+        <div className="pointer-events-auto fixed inset-0 z-40" />
+      )}
+
       <Head
+        fullScreenMode={fullScreenMode}
         isFullscreen={isFullscreen}
         handleToggleFullscreen={handleToggleFullscreen}
         disableAllButtons={disableAllButtons}
@@ -272,7 +256,7 @@ const RichTextEditorComponent = forwardRef<
       />
 
       <div
-        className="relative w-full flex-grow overflow-hidden"
+        className="relative z-50 w-full flex-grow overflow-hidden"
         onClick={() => editor?.commands.focus()}
       >
         <div
@@ -323,7 +307,7 @@ const RichTextEditorComponent = forwardRef<
 
       <div
         className={cn(
-          "rounded-b-lg bg-f1-background px-3",
+          "relative z-40 rounded-b-lg bg-f1-background px-3",
           hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
         )}
       >
