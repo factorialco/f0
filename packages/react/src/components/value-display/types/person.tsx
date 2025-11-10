@@ -37,7 +37,7 @@ export const PersonCell = (
           lastName: args.lastName.toString(),
           src: args.src,
           badge: args.badge,
-          deactivated: args.deactivated
+          deactivated: args.deactivated,
         }}
         size="xs"
       />
