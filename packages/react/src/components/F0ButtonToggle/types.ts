@@ -15,7 +15,7 @@ export interface F0ButtonToggleProps {
   /**
    * The accessible label for the button.
    */
-  label: string
+  label: string | [string, string]
   /**
    * Whether the button is disabled.
    */

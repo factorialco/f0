@@ -1,3 +1,4 @@
+import * as Icons from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Placeholder } from "@/icons/app"
@@ -29,6 +30,13 @@ const meta = {
       options: inputFieldStatus,
       defaultValue: "default",
     },
+    icon: {
+      description:
+        "Icon to display inside the input (NOTE: When the type is password, the icon will be overridden with the lock icon)",
+      control: "select",
+      mapping: { "-- None --": undefined, ...Icons },
+      options: ["-- None --", ...Object.keys(Icons)],
+    },
     hint: {
       description:
         "Hint to display below the input, This is a shortcut for status.type = 'default'. Error status overwrites hint",
@@ -54,6 +62,13 @@ const meta = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="max-w-96">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof Input>
 
 export default meta
@@ -191,6 +206,8 @@ export const Snapshot: Story = {
       { ...base, maxLength: 10, value: "Value" },
       { ...base, hideLabel: true },
       { ...base, error: true },
+      { ...base, icon: Placeholder },
+      { ...base, icon: Placeholder, type: "password" },
       { ...base, status: { type: "error" as const, message: "Error message" } },
       {
         ...base,

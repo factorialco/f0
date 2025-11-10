@@ -27,16 +27,9 @@ const meta: Meta<typeof ApplicationFrame> = {
       welcomeScreenSuggestions: [
         {
           icon: Lightbulb,
-          message: "Get access at no additional cost",
-        },
-        {
-          icon: Lightbulb,
-          message: "Explore key features early",
-        },
-        {
-          icon: Lightbulb,
-          message:
-            "Share feedback and help shape One y ademas este mensaje va a desbordar y va a hacer que todo se vaya a la siguiente linea",
+          message: "Share feedback",
+          prompt:
+            "Share feedback and help shape One with your feedback in the next message (optional)",
         },
       ],
     },

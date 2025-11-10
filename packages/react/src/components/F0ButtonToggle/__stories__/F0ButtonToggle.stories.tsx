@@ -24,7 +24,7 @@ const meta = {
     onSelectedChange: (selected) => {
       console.log("Button toggle clicked", selected)
     },
-    label: "Toggle me",
+    label: ["Toggle me", "Toggle me again"],
     size: "md",
     selected: false,
     disabled: false,
@@ -46,7 +46,12 @@ const meta = {
     label: {
       control: "text",
       description:
-        "The accessible label for the button. Required for accessibility.",
+        "The accessible label for the button. Required for accessibility. Can be a single string or an array of two strings for the selected and unselected states.",
+      table: {
+        type: {
+          summary: "string | [string, string]",
+        },
+      },
     },
     icon: {
       table: {
