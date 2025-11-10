@@ -1,8 +1,3 @@
-import { F0Avatar } from "@/components/avatars/F0Avatar"
-import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
-import { F0TagRaw } from "@/components/tags/F0TagRaw"
-
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -25,15 +20,18 @@ import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import {
   SelectContent,
-  SelectItem as SelectItemPrimitive,
   Select as SelectPrimitive,
   SelectSeparator,
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
+import { useDeepCompareEffect } from "@reactuses/core"
+import { isEqual } from "lodash"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
+import { SelectValue } from "./components/SelectedValue"
+import { SelectItem } from "./components/SelectItem"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
 import type { SelectItemObject, SelectItemProps } from "./types"
@@ -126,58 +124,6 @@ export type SelectProps<T extends string, R = unknown> = {
     | "status"
     | "hint"
   >
-const SelectItem = <T extends string, R>({
-  item,
-}: {
-  item: SelectItemObject<T, R>
-}) => {
-  return (
-    <SelectItemPrimitive value={item.value} disabled={item.disabled}>
-      <div className="flex w-full items-start gap-1.5">
-        {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-        {item.icon && (
-          <div className="shrink-0 text-f1-icon">
-            <F0Icon icon={item.icon} />
-          </div>
-        )}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <OneEllipsis lines={2} className="font-medium">
-            {item.label}
-          </OneEllipsis>
-          {item.description && (
-            <OneEllipsis lines={2} className="text-f1-foreground-secondary">
-              {item.description}
-            </OneEllipsis>
-          )}
-        </div>
-        {item.tag && (
-          <div className="self-center">
-            <F0TagRaw text={item.tag} />
-          </div>
-        )}
-      </div>
-    </SelectItemPrimitive>
-  )
-}
-
-const SelectValue = forwardRef<
-  HTMLDivElement,
-  { item: SelectItemObject<string> }
->(function SelectValue({ item }, ref) {
-  return (
-    <div
-      className="flex min-w-0 flex-1 items-center justify-start gap-1.5"
-      ref={ref}
-    >
-      {item.icon && (
-        <div className="h-5 shrink-0 text-f1-icon">
-          <F0Icon icon={item.icon} />
-        </div>
-      )}
-      <OneEllipsis tag="span">{item.label}</OneEllipsis>
-    </div>
-  )
-})
 
 const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
   return (
@@ -189,15 +135,17 @@ const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
 
 /**
  * Converts an array of values to a single value or an array of values depending on the multiple prop
- * @param value - The array of values to convert
+ * @param items - The array of values to convert
  * @param multiple - Whether the select is multiple
  * @returns The single value or the array of values
  */
-const arrayToValue = <T extends string, M extends boolean | undefined>(
-  value: T[],
+const toArrayOrSingle = <T, M extends boolean | undefined>(
+  items: T[],
   multiple: M
 ): M extends true ? T[] : T | undefined => {
-  return multiple ? value : (value[0] ?? undefined)
+  return (multiple ? items : (items[0] ?? undefined)) as M extends true
+    ? T[]
+    : T | undefined
 }
 
 const SelectComponent = forwardRef(function Select<
@@ -250,22 +198,18 @@ const SelectComponent = forwardRef(function Select<
   )
 
   const defaultValues = useMemo(
-    () =>
-      arrayToValue(
-        defaultItems.map((item) => item.value),
-        multiple
-      ),
-    [defaultItems, multiple]
+    () => defaultItems.map((item) => item.value),
+    [defaultItems]
   )
 
-  const [localValue, setLocalValue] = useState(value || defaultValues)
+  const [localValue, setLocalValue] = useState(toArray(value) || defaultValues)
 
   useEffect(() => {
-    if (value !== localValue) {
-      setLocalValue(value || defaultValues)
+    if (!isEqual(toArray(value), localValue)) {
+      setLocalValue(toArray(value) || defaultValues)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, props.defaultItem])
+  }, [value, defaultItems])
 
   const dataSource = useMemo(() => {
     if (
@@ -344,53 +288,53 @@ const SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
-  const [selectedOption, setSelectedOption] = useState<
-    SelectItemObject<T, ActualRecordType> | undefined
-  >(undefined)
+  const [selectedOptions, setSelectedOptions] = useState<
+    SelectItemObject<T, ActualRecordType>[]
+  >([])
 
   /**
    * Finds an option in the data records by value and returns the mapped option
    * @param value - The value to find
    * @returns The option if found, undefined otherwise
    */
-  const findOption = useCallback(
+  const findOptionsByValue = useCallback(
     (
-      value: string | T | undefined
-    ): SelectItemObject<T, ActualRecordType> | undefined => {
+      values: (string | T)[] | undefined
+    ): SelectItemObject<T, ActualRecordType>[] => {
       if (value === undefined) {
-        return undefined
+        return []
       }
 
-      if (value === props.defaultItem?.value) {
-        return props.defaultItem
+      if (values === defaultValues) {
+        return defaultItems
       }
 
+      if (isEqual(values, defaultValues)) {
+        return defaultItems
+      }
+
+      const res = []
       for (const option of data.records) {
         const mappedOption = optionMapper(option)
+
         if (
           mappedOption.type !== "separator" &&
-          String(mappedOption.value) === value
+          values?.includes(String(mappedOption.value))
         ) {
-          return mappedOption
+          res.push(mappedOption)
         }
       }
-      return undefined
+      return res
     },
-    [data.records, optionMapper, props.defaultItem]
+    [data.records, optionMapper, defaultItems, defaultValues]
   )
 
-  useEffect(() => {
-    const foundOption = findOption(localValue)
+  useDeepCompareEffect(() => {
+    const foundOptions = findOptionsByValue(localValue)
 
-    onChangeSelectedOption?.(foundOption)
-    setSelectedOption(foundOption)
-  }, [
-    data.records,
-    localValue,
-    optionMapper,
-    findOption,
-    onChangeSelectedOption,
-  ])
+    // onChangeSelectedOption?.(toArrayOrSingle(foundOptions, multiple))
+    setSelectedOptions(foundOptions)
+  }, [localValue, multiple])
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
@@ -401,14 +345,23 @@ const SelectComponent = forwardRef(function Select<
   )
 
   const handleLocalValueChange = (changedValue: string[] | undefined) => {
-    console.log("changedValue", changedValue)
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
     setLocalValue(changedValue as T[])
 
-    const foundOption = findOption(changedValue)
+    const foundOptions = findOptionsByValue(changedValue)
 
-    onChange?.(changedValue as T, foundOption?.item, foundOption)
+    onChange?.(
+      toArrayOrSingle(
+        foundOptions.map((option) => option.value),
+        multiple
+      ),
+      toArrayOrSingle(
+        foundOptions.map((option) => option.item),
+        multiple
+      ),
+      toArrayOrSingle(foundOptions, multiple)
+    )
   }
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
@@ -489,11 +442,11 @@ const SelectComponent = forwardRef(function Select<
     <>
       <SelectPrimitive
         onValueChange={handleLocalValueChange}
-        value={
-          localValue !== undefined && localValue !== null
-            ? String(localValue)
-            : undefined
-        }
+        // value={
+        //   localValue !== undefined && localValue !== null
+        //     ? toArrayOrSingle(localValue, multiple)
+        //     : undefined
+        // }
         disabled={disabled}
         open={openLocal}
         multiple={multiple}
@@ -518,8 +471,8 @@ const SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              value={localValue as string}
-              onChange={(value) => handleLocalValueChange(value)}
+              // value={localValue as string}
+              // onChange={(value) => handleLocalValueChange(value)}
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
@@ -544,7 +497,12 @@ const SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectedOption && <SelectValue item={selectedOption} />}
+                {selectedOptions && (
+                  <SelectValue
+                    multiple={multiple}
+                    selection={selectedOptions}
+                  />
+                )}
               </button>
             </InputField>
           )}

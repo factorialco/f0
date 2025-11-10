@@ -19,7 +19,7 @@ export const mockItems = Array.from({ length: 10000 }, (_, i) => ({
 
 export type MockItem = (typeof mockItems)[number]
 
-export const mockSource = createDataSourceDefinition<MockItem>({
+export const mockPaginatedSource = createDataSourceDefinition<MockItem>({
   filters: {
     status: {
       type: "in",
@@ -96,6 +96,27 @@ export const mockSource = createDataSourceDefinition<MockItem>({
           },
           1000 + Math.random() * 500
         )
+      })
+    },
+  },
+})
+
+export const mockNonPaginatedSource = createDataSourceDefinition<MockItem>({
+  dataAdapter: {
+    fetchData: (options) => {
+      const { search } = options
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const results = mockItems.filter(
+            (item) =>
+              !search || item.label.toLowerCase().includes(search.toLowerCase())
+          )
+
+          const res = {
+            records: results,
+          }
+          resolve(res)
+        }, 100)
       })
     },
   },

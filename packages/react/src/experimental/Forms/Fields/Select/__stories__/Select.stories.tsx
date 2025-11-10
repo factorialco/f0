@@ -9,7 +9,12 @@ import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
-import { MockItem, mockItems, mockSource } from "./mocks"
+import {
+  MockItem,
+  mockItems,
+  mockNonPaginatedSource,
+  mockPaginatedSource,
+} from "./mocks"
 
 // Wraps the Select component with a hook to show the selected value
 const SelectWithHooks = (props: SelectProps<string>) => {
@@ -432,28 +437,8 @@ export const WithDataSourceNotPaginated: Story = {
     showSearchBox: true,
     onChange: fn(),
     value: "option-2",
-    source: createDataSourceDefinition<MockItem>({
-      dataAdapter: {
-        fetchData: (options) => {
-          const { search } = options
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              const results = mockItems.filter(
-                (item) =>
-                  !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
-              )
-
-              const res = {
-                records: results,
-              }
-              resolve(res)
-            }, 100)
-          })
-        },
-      },
-    }),
-    mapOptions: (item: (typeof mockItems)[number]) => ({
+    source: mockNonPaginatedSource,
+    mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
       icon: item.icon,
@@ -468,7 +453,7 @@ export const WithDataSourcePaginated: Story = {
     showSearchBox: true,
     onChange: fn(),
     value: "option-2",
-    source: mockSource,
+    source: mockPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
@@ -559,10 +544,10 @@ export const WithDataSourceGrouping: Story = {
   },
 }
 
-export const Multiple: Story = {
+export const MultipleNotPaginated: Story = {
   args: {
     multiple: true,
-    source: mockSource,
+    source: mockNonPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
