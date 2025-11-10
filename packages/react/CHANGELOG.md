@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.259.1](https://github.com/factorialco/f0/compare/f0-react-v1.259.0...f0-react-v1.259.1) (2025-11-10)
+
+
+### Bug Fixes
+
+* **sidebar:** company selector ([#2946](https://github.com/factorialco/f0/issues/2946)) ([4c255e7](https://github.com/factorialco/f0/commit/4c255e71e44ca0eab156259e0e4794e4e2ee2fe9))
+
 ## [1.259.0](https://github.com/factorialco/f0/compare/f0-react-v1.258.0...f0-react-v1.259.0) (2025-11-10)
 
 
