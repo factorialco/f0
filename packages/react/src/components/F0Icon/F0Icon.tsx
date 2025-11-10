@@ -77,7 +77,7 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
   ref
 ) {
   if (!icon) return null
-  let Component = icon
+  const Component = icon
   const isAnimated = icon.displayName?.includes("Animated")
 
   const isHexColor = color.startsWith("#")
