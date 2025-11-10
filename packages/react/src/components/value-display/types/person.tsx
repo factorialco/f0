@@ -13,6 +13,7 @@ interface PersonValue {
   firstName: string
   lastName: string
   src?: string
+  deactivated?: boolean
 }
 
 export type PersonCellValue = WithAvatarBadge<PersonValue>
@@ -36,6 +37,7 @@ export const PersonCell = (
           lastName: args.lastName.toString(),
           src: args.src,
           badge: args.badge,
+          deactivated: args.deactivated
         }}
         size="xs"
       />
