@@ -46,7 +46,7 @@ const SelectWithHooks = (props: SelectProps<string>) => {
   }
 
   return (
-    <div className="w-48">
+    <div className="w-[450px]">
       <Select
         label={label ?? "The label"}
         {...restProps}
@@ -486,6 +486,7 @@ export const WithDataSourcePaginated: Story = {
     showSearchBox: true,
     onChange: fn(),
     value: "option-2",
+    as: "list-with-scroll",
     source: createDataSourceDefinition<MockItem>({
       filters: {
         status: {

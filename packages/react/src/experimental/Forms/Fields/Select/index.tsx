@@ -58,6 +58,7 @@ export type SelectProps<T extends string, R = unknown> = {
     option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => void
   value?: T
+  as?: "list" | "list-with-scroll"
   defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
   children?: React.ReactNode
   open?: boolean
@@ -211,7 +212,9 @@ const SelectComponent = forwardRef(function Select<
 ) {
   type ActualRecordType = ResolvedRecordType<R>
 
-  const [openLocal, setOpenLocal] = useState(open)
+  const [openLocal, setOpenLocal] = useState(
+    open || props.as === "list" || props.as === "list-with-scroll"
+  )
 
   const [localValue, setLocalValue] = useState(
     value || props.defaultItem?.value
