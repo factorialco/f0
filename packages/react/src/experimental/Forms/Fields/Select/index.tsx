@@ -30,14 +30,7 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { Action, SelectBottomActions } from "./SelectBottomActions"
@@ -127,16 +120,18 @@ const SelectItem = <T extends string, R>({
       <div className="flex w-full items-start gap-1.5">
         {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
         {item.icon && (
-          <div className="text-f1-icon">
+          <div className="shrink-0 text-f1-icon">
             <F0Icon icon={item.icon} />
           </div>
         )}
-        <div className="flex flex-1 flex-col">
-          <span className="line-clamp-2 font-medium">{item.label}</span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <OneEllipsis lines={2} className="font-medium">
+            {item.label}
+          </OneEllipsis>
           {item.description && (
-            <div className="line-clamp-2 text-f1-foreground-secondary">
+            <OneEllipsis lines={2} className="text-f1-foreground-secondary">
               {item.description}
-            </div>
+            </OneEllipsis>
           )}
         </div>
         {item.tag && (
@@ -154,7 +149,10 @@ const SelectValue = forwardRef<
   { item: SelectItemObject<string> }
 >(function SelectValue({ item }, ref) {
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-1.5" ref={ref}>
+    <div
+      className="flex min-w-0 flex-1 items-center justify-start gap-1.5"
+      ref={ref}
+    >
       {item.icon && (
         <div className="h-5 shrink-0 text-f1-icon">
           <F0Icon icon={item.icon} />
@@ -212,7 +210,6 @@ const SelectComponent = forwardRef(function Select<
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
-  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [openLocal, setOpenLocal] = useState(open)
 
@@ -352,12 +349,6 @@ const SelectComponent = forwardRef(function Select<
     onChangeSelectedOption,
   ])
 
-  useEffect(() => {
-    if (open) {
-      searchInputRef.current?.focus()
-    }
-  }, [open])
-
   const onSearchChangeLocal = useCallback(
     (value: string) => {
       setCurrentSearch(value)
@@ -448,44 +439,6 @@ const SelectComponent = forwardRef(function Select<
     loadMore()
   }
 
-  const isLoadingOrLoadingMore = loading || isLoading || isLoadingMore
-
-  const loadingFocusInterval = useRef<NodeJS.Timeout | null>(null)
-  const clearLoadingFocusInterval = useCallback(() => {
-    if (loadingFocusInterval.current) {
-      clearInterval(loadingFocusInterval.current)
-      loadingFocusInterval.current = null
-    }
-  }, [loadingFocusInterval])
-
-  // Focus the search input when the data is loaded or loading
-
-  useEffect(() => {
-    if (!openLocal) {
-      clearLoadingFocusInterval()
-      return
-    }
-
-    requestAnimationFrame(() => {
-      searchInputRef.current?.focus()
-    })
-
-    // When is loading we need to focus the search repeatedly until the data is loaded
-    if (isLoadingOrLoadingMore && !loadingFocusInterval.current) {
-      loadingFocusInterval.current = setInterval(() => {
-        searchInputRef.current?.focus()
-      }, 100)
-    } else if (!isLoadingOrLoadingMore && loadingFocusInterval.current) {
-      clearLoadingFocusInterval()
-    }
-  }, [data, isLoadingOrLoadingMore, openLocal, clearLoadingFocusInterval])
-
-  useEffect(() => {
-    setInterval(() => {
-      searchInputRef.current?.focus()
-    }, 100)
-  }, [openLocal])
-
   const i18n = useI18n()
 
   return (
@@ -560,7 +513,6 @@ const SelectComponent = forwardRef(function Select<
             bottom={<SelectBottomActions actions={actions} />}
             top={
               <SelectTopActions
-                searchInputRef={searchInputRef}
                 searchValue={currentSearch}
                 onSearchChange={onSearchChangeLocal}
                 searchBoxPlaceholder={searchBoxPlaceholder}

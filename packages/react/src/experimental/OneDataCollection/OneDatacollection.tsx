@@ -45,6 +45,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
@@ -113,7 +114,9 @@ export type OneDataCollectionProps<
   fullHeight?: boolean
 
   /** Function to handle state change */
-  onStateChange?: (state: DataCollectionStatusComplete) => void
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<Filters>>
+  ) => void
 
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
@@ -525,7 +528,7 @@ const OneDataCollectionComp = <
   })
 
   /** State */
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     onStateChange?.({
       filters: currentFilters,
       sortings: currentSortings as SortingsState<SortingsDefinition>,
@@ -536,7 +539,6 @@ const OneDataCollectionComp = <
       settings: settings,
     })
   }, [
-    onStateChange,
     currentFilters,
     currentSearch,
     currentNavigationFilters,
@@ -552,10 +554,22 @@ const OneDataCollectionComp = <
     const groupByOptions = grouping
       ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
       : 0
+
+    const tableVisualization = Object.values(visualizations).find(
+      (visualization) => visualization.type === "table"
+    )
+
+    // Show table settings if the table visualization is defined and the allowColumnHiding or allowColumnReordering options are true
+    const showTableSettings =
+      !!tableVisualization &&
+      (!!tableVisualization.options?.allowColumnHiding ||
+        !!tableVisualization.options?.allowColumnReordering)
+
     return (
       (visualizations && visualizations.length > 1) ||
       (groupByOptions > 0 && !grouping?.hideSelector) ||
-      (sortings && Object.keys(sortings).length > 0)
+      (sortings && Object.keys(sortings).length > 0) ||
+      showTableSettings
     )
   }, [visualizations, grouping, sortings])
 

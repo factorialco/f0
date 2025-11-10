@@ -72,7 +72,11 @@ const ButtonInternal = forwardRef<
   },
   ref
 ) {
-  useTextFormatEnforcer(label, { disallowEmpty: true, disallowEmojis: true })
+  useTextFormatEnforcer(
+    label,
+    { disallowEmpty: true, disallowEmojis: true },
+    { warn: true, componentName: "F0Button" }
+  )
 
   const [loading, setLoading] = useState(false)
 

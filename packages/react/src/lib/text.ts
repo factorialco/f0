@@ -17,32 +17,62 @@ const containsEmojis = (text: string): boolean => {
   return emojiEntities.length > 0
 }
 
-const textFormatEnforcer = (text: string, rules: Rules) => {
+const textFormatEnforcer = (
+  text: string,
+  rules: Rules,
+  warn: boolean = false,
+  componentName: string = ""
+) => {
   if (rules.disallowEmpty && text.length === 0) {
-    throw Error("You need to provide some text that is not empty")
+    const errorMessage = `${componentName}: You need to provide some text that is not empty`
+    if (warn) {
+      console.warn(errorMessage)
+    } else {
+      throw Error(errorMessage)
+    }
   }
 
   if (rules.maxLength !== undefined && text.length > rules.maxLength) {
-    throw Error(
-      `"${text}" should have no more than ${rules.maxLength} characters`
-    )
+    const errorMessage = `${componentName}: "${text}" should have no more than ${rules.maxLength} characters`
+    if (warn) {
+      console.warn(errorMessage)
+    } else {
+      throw Error(errorMessage)
+    }
   }
 
   if (rules.minLength !== undefined && text.length < rules.minLength) {
-    throw Error(`"${text}" should have at least ${rules.minLength} characters`)
+    const errorMessage = `${componentName}: "${text}" should have at least ${rules.minLength} characters`
+    if (warn) {
+      console.warn(errorMessage)
+    } else {
+      throw Error(errorMessage)
+    }
   }
 
   if (rules.disallowEmojis && containsEmojis(text)) {
-    throw Error(`Emojis are not allowed here: "${text}"`)
+    const errorMessage = `${componentName}: Emojis are not allowed here: "${text}"`
+    if (warn) {
+      console.warn(errorMessage)
+    } else {
+      throw Error(errorMessage)
+    }
   }
 }
 
-export const useTextFormatEnforcer = (text?: string, rules?: Rules) => {
+export const useTextFormatEnforcer = (
+  text?: string,
+  rules?: Rules,
+  options: { warn: boolean; componentName: string } = {
+    warn: false,
+    componentName: "",
+  }
+) => {
   useEffect(() => {
     if (text !== undefined && rules) {
-      textFormatEnforcer(text, rules)
+      textFormatEnforcer(text, rules, options.warn, options.componentName)
     }
-  }, [text, rules])
+  }, [text, rules, options])
 }
 
 export { containsEmojis }

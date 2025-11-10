@@ -3,7 +3,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { Toolbar, ToolbarLabels } from "@/experimental/RichText/CoreEditor"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { Handle, Plus } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
@@ -23,9 +22,9 @@ import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
 import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
 import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
-import "../index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
+import "./index.css"
 import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
 
 interface NotesTextEditorProps {
@@ -63,7 +62,7 @@ const NotesTextEditorComponent = forwardRef<
     onTitleChange,
     actions,
     metadata,
-    withPadding = false,
+    withPadding: _withPadding = false,
   },
   ref
 ) {
@@ -217,6 +216,10 @@ const NotesTextEditorComponent = forwardRef<
     }
   }, [editor])
 
+  const showHeader =
+    (actions && actions.length > 0) || (metadata && metadata.length > 0)
+  const showTitle = onTitleChange || title
+
   if (!editor) return null
 
   return (
@@ -225,39 +228,32 @@ const NotesTextEditorComponent = forwardRef<
       ref={containerRef}
       id={editorId}
     >
-      {((actions && actions.length > 0) ||
-        (metadata && metadata.length > 0)) && (
-        <Header actions={actions} metadata={metadata} />
+      {showHeader && <Header actions={actions} metadata={metadata} />}
+      {!readonly && (
+        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+          <Toolbar
+            labels={toolbarLabels}
+            editor={editor}
+            disableButtons={false}
+            showEmojiPicker={false}
+            plainHtmlMode={false}
+          />
+        </div>
       )}
-      <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
-        <Toolbar
-          labels={toolbarLabels}
-          editor={editor}
-          disableButtons={false}
-          showEmojiPicker={false}
-          plainHtmlMode={false}
-        />
-      </div>
-
       <ScrollArea className="h-full gap-6">
-        {(onTitleChange || title) && (
-          <div
-            className={cn(
-              "flex flex-col pb-5 pt-5 transition-all duration-300",
-              withPadding ? "px-32" : "px-14"
-            )}
-          >
+        {showTitle && (
+          <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-4 pt-5 transition-all duration-300">
             <input
-              disabled={!onTitleChange}
+              disabled={!onTitleChange || readonly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={labels.titlePlaceholder || ""}
-              className="text-3xl font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
+              className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>
         )}
         <div
-          className="basic-text-editor-container h-full"
+          className="notes-text-editor h-full"
           onClick={() => editor.commands.focus()}
         >
           <DragHandle
@@ -289,10 +285,7 @@ const NotesTextEditorComponent = forwardRef<
 
           <EditorContent
             editor={editor}
-            className={cn(
-              "pb-28 [&>div]:w-full [&>div]:transition-[padding] [&>div]:duration-300",
-              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
-            )}
+            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14 [&>div]:transition-[padding] [&>div]:duration-300"
           />
         </div>
       </ScrollArea>
@@ -309,7 +302,7 @@ interface NotesTextEditorSkeletonProps {
 export const NotesTextEditorSkeleton = ({
   withHeader = false,
   withTitle = true,
-  withPadding = false,
+  withPadding: _withPadding = false,
 }: NotesTextEditorSkeletonProps) => {
   return (
     <div
@@ -356,23 +349,13 @@ export const NotesTextEditorSkeleton = ({
 
       <ScrollArea className="h-full gap-6">
         {withTitle && (
-          <div
-            className={cn(
-              "flex flex-col pb-5 pt-5",
-              withPadding ? "px-32" : "px-14"
-            )}
-          >
+          <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-5 pt-5">
             <Skeleton className="h-8 w-80 rounded-md" />
           </div>
         )}
 
         <div className="h-full">
-          <div
-            className={cn(
-              "pb-28 [&>div]:w-full",
-              withPadding ? "[&>div]:px-32" : "[&>div]:px-14"
-            )}
-          >
+          <div className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14">
             {/* Content skeleton */}
             <div className="flex flex-col gap-2">
               <Skeleton className="h-5 w-full rounded-md" />

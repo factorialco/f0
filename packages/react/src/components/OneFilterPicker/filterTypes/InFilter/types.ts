@@ -1,3 +1,10 @@
+import {
+  DataSourceDefinition,
+  FiltersDefinition,
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { FilterTypeComponentProps } from "../types"
 
 /**
@@ -16,14 +23,26 @@ export type InFilterOptionItem<T = unknown> = {
  * Represents the options for the InFilter component.
  * @template T - Type of the underlying value
  */
-export type InFilterOptions<T> = {
+export type InFilterOptions<T, R extends RecordType = RecordType> = {
   cache?: boolean
-  options:
-    | Array<InFilterOptionItem<T>>
-    | (() =>
+} & (
+  | {
+      options:
         | Array<InFilterOptionItem<T>>
-        | Promise<Array<InFilterOptionItem<T>>>)
-}
+        | (() =>
+            | Array<InFilterOptionItem<T>>
+            | Promise<Array<InFilterOptionItem<T>>>)
+    }
+  | {
+      source: DataSourceDefinition<
+        R,
+        FiltersDefinition,
+        SortingsDefinition,
+        GroupingDefinition<R>
+      >
+      mapOptions: (item: R) => InFilterOptionItem<T>
+    }
+)
 
 /**
  * Represents the component props for the InFilter component.

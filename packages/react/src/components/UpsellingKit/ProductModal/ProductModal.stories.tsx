@@ -153,6 +153,10 @@ export const Default: Story = {
       label: "Upgrade",
       icon: UpsellIcon,
     },
+    promoTag: {
+      label: "50% off",
+      variant: "warning",
+    },
     closeLabel: "Close",
   },
   render: (args) => <ProductModal {...args} />,

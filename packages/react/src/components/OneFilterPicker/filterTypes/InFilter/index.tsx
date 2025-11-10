@@ -1,3 +1,4 @@
+import { RecordType } from "@/hooks/datasource"
 import type { BaseFilterDefinition } from ".."
 import { FilterTypeDefinition } from "../types"
 import { InFilter } from "./InFilter"
@@ -13,9 +14,13 @@ export const inFilter: FilterTypeDefinition<
   render: (props) => <InFilter {...props} />,
   chipLabel: async (value, { schema }) => {
     const cacheKey = getCacheKey(schema)
+
+    const optionsProp =
+      "options" in schema.options ? schema.options.options : []
+
     const options = await loadOptions(
       cacheKey,
-      schema.options.options,
+      optionsProp,
       schema.options.cache
     )
 
@@ -36,6 +41,9 @@ export const inFilter: FilterTypeDefinition<
 
 export default inFilter
 
-export type InFilterDefinition<T = unknown> = BaseFilterDefinition<"in"> & {
-  options: InFilterOptions<T>
+export type InFilterDefinition<
+  T = unknown,
+  R extends RecordType = RecordType,
+> = BaseFilterDefinition<"in"> & {
+  options: InFilterOptions<T, R>
 }

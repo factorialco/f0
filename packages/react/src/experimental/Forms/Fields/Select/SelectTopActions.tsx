@@ -8,6 +8,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { useState } from "react"
 import { F1SearchBox } from "../F1SearchBox"
 
 interface SelectTopActionsProps<
@@ -22,7 +23,6 @@ interface SelectTopActionsProps<
   searchBoxPlaceholder?: string
   onSearchChange: (value: string) => void
   searchValue?: string
-  searchInputRef: React.RefObject<HTMLInputElement>
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (grouping: GroupingState<R, Grouping>) => void
@@ -33,7 +33,6 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   searchBoxPlaceholder,
   onSearchChange,
   searchValue,
-  searchInputRef,
   grouping,
   currentGrouping,
   onGroupingChange,
@@ -42,6 +41,8 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   onFiltersChange,
 }: SelectTopActionsProps<R>) => {
   const i18n = useI18n()
+
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   if (!showSearchBox) return null
   return (
@@ -52,8 +53,8 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             placeholder={searchBoxPlaceholder ?? i18n.toc.search}
             onChange={onSearchChange}
             value={searchValue}
-            key="search-input"
-            ref={searchInputRef}
+            debounceTime={400}
+            autoFocus={!isFiltersOpen}
             clearable
           />
         </div>
@@ -63,6 +64,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             value={currentFilters}
             onChange={onFiltersChange}
             mode="compact"
+            onOpenChange={setIsFiltersOpen}
           />
         )}
       </div>

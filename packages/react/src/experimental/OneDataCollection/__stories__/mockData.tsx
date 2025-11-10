@@ -31,6 +31,7 @@ import {
   PaginationType,
   RecordType,
   SelectedItemsState,
+  SortingsState,
 } from "@/hooks/datasource/types"
 import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
@@ -205,6 +206,7 @@ export const getMockVisualizations = (options?: {
     frozenColumns?: 0 | 1 | 2
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
+    noSorting?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -238,20 +240,20 @@ export const getMockVisualizations = (options?: {
             },
           }),
           id: "name",
-          sorting: "name",
+          sorting: options?.table?.noSorting ? undefined : "name",
           hidden: options?.table?.allowColumnHiding ? true : undefined,
           order: options?.table?.allowColumnReordering ? 3 : undefined,
         },
         {
           label: "Email",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
           id: "email",
         },
         {
           label: "Role",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
           id: "role",
           order: options?.table?.allowColumnReordering ? 2 : undefined,
           noHiding: options?.table?.allowColumnHiding,
@@ -260,57 +262,57 @@ export const getMockVisualizations = (options?: {
           id: "department",
           label: "Department",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
           order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
         {
           id: "email2",
           label: "Email 2",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
           order: options?.table?.allowColumnReordering ? 1 : undefined,
         },
         {
           id: "role2",
           label: "Role 2",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
         },
         {
           id: "department2",
           label: "Department 2",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
           order: options?.table?.allowColumnReordering ? 10 : undefined,
         },
         {
           id: "email3",
           label: "Email 3",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
         },
         {
           id: "role3",
           label: "Role 3",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
         },
         {
           label: "Department 3",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
           id: "department3",
         },
         {
           label: "Email 4",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
           id: "email4",
         },
         {
           label: "Role 4",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
           id: "role4",
         },
         {
@@ -334,7 +336,7 @@ export const getMockVisualizations = (options?: {
             ]
               .filter(Boolean)
               .join(", "),
-          sorting: "permissions.read",
+          sorting: options?.table?.noSorting ? undefined : "permissions.read",
           id: "permissions",
           order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
@@ -356,6 +358,7 @@ export const getMockVisualizations = (options?: {
         {
           label: "Email",
           icon: Envelope,
+          tooltip: "Email",
           render: (item) => item.email,
           hide: (item) => !item.email,
         },
@@ -553,7 +556,11 @@ export const getMockVisualizations = (options?: {
         lastName: u.name.split(" ")[1] ?? "",
       }),
       metadata: (u) => [
-        { icon: Envelope, property: { type: "text", value: u.email } },
+        {
+          icon: Envelope,
+          tooltip: "Email",
+          property: { type: "text", value: u.email },
+        },
         { icon: Building, property: { type: "text", value: u.department } },
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },
@@ -850,7 +857,10 @@ export const ExampleComponent = ({
   defaultSelectedItems,
   bulkActions,
   currentGrouping,
+  currentSortings,
+  currentNavigationFilters,
   grouping,
+  noSorting = false,
   navigationFilters,
   totalItemSummary,
   visualizations,
@@ -867,6 +877,7 @@ export const ExampleComponent = ({
   tableAllowColumnReordering = false,
   tableAllowColumnHiding = false,
   onStateChange,
+  currentFilters,
   /**
    * Enable Apollo-like cache behavior for testing optimistic updates
    */
@@ -906,15 +917,21 @@ export const ExampleComponent = ({
   totalItemSummary?: true | ((totalItems: number) => string)
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
+  noSorting?: boolean
   paginationType?: PaginationType
   primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
-  onStateChange?: (state: DataCollectionStatusComplete) => void
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<typeof filters>>
+  ) => void
   enableCache?: boolean
   hideFilters?: boolean
+  currentFilters?: FiltersState<FiltersType>
+  currentSortings?: SortingsState<typeof sortings>
+  currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -969,13 +986,17 @@ export const ExampleComponent = ({
   const dataSource = useDataCollectionSource(
     {
       filters: hideFilters ? undefined : filters,
+      currentFilters,
+      currentSortings,
       navigationFilters,
+      currentNavigationFilters,
       presets: usePresets ? filterPresets : undefined,
-      sortings,
+      sortings: noSorting ? undefined : sortings,
       grouping,
       currentGrouping: currentGrouping,
       primaryActions,
       secondaryActions,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
       itemUrl: (item) => `/users/${item.id}`,
       itemActions: (item) => [
         {

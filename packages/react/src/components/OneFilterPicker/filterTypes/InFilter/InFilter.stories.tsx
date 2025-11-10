@@ -1,8 +1,13 @@
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import {
+  generateMockUsers,
+  MockUser,
+} from "@/experimental/OneDataCollection/__stories__/mockData"
+import { createDataSourceDefinition } from "@/hooks/datasource"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
 import { InFilter } from "./InFilter"
-import type { InFilterOptionItem } from "./types"
+import type { InFilterOptionItem, InFilterOptions } from "./types"
 
 const meta = {
   title: "FilterPicker/Filters/InFilter",
@@ -334,6 +339,56 @@ export const SyncFunctionOptions: Story = {
           { value: "low", label: "Low" },
         ],
       },
+    },
+    value: [],
+    onChange: () => {},
+  },
+}
+
+const mockUsers: MockUser[] = generateMockUsers(30)
+
+const DataSourceFilterOptions: InFilterOptions<string, MockUser> = {
+  source: createDataSourceDefinition({
+    dataAdapter: {
+      fetchData: async ({ pagination, search }) => {
+        const { cursor, perPage = 10 } = pagination
+        const startIndex = cursor ? parseInt(cursor) : 0
+        const endIndex = startIndex + perPage
+
+        const users = search
+          ? mockUsers.filter((user) =>
+              user.name.toLowerCase().includes(search.toLowerCase())
+            )
+          : mockUsers
+
+        const paginatedUsers = users.slice(startIndex, endIndex)
+        const hasMore = endIndex < users.length
+        const nextCursor = hasMore ? endIndex.toString() : null
+
+        return {
+          records: paginatedUsers,
+          total: users.length,
+          perPage,
+          type: "infinite-scroll",
+          cursor: nextCursor,
+          hasMore,
+        }
+      },
+      paginationType: "infinite-scroll",
+      perPage: 10,
+    },
+  }),
+  mapOptions: (item: MockUser) => ({
+    value: item.id,
+    label: item.name,
+  }),
+}
+
+export const WithDataSource: Story = {
+  args: {
+    schema: {
+      label: "Countries",
+      options: DataSourceFilterOptions as unknown as InFilterOptions<string>,
     },
     value: [],
     onChange: () => {},

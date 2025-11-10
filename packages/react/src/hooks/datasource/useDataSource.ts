@@ -1,3 +1,4 @@
+import { useDeepCompareEffect } from "@reactuses/core"
 import type { Dispatch, SetStateAction } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
@@ -90,20 +91,24 @@ export function useDataSource<
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
 >(
   {
-    currentFilters: initialCurrentFilters = {},
-    currentGrouping: initialCurrentGrouping,
+    defaultFilters = {},
+    currentFilters: externalCurrentFilters,
+    defaultGrouping: externalDefaultGrouping,
+    currentGrouping: externalCurrentGrouping,
     filters,
     search,
-    defaultSorting,
+    defaultSortings,
+    currentSortings: externalCurrentSortings,
     dataAdapter,
     grouping,
     ...rest
   }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>,
   deps: ReadonlyArray<unknown> = []
 ): DataSource<R, FiltersSchema, Sortings, Grouping> {
+  /******************* FILTERS STATE***************************************************/
   const [currentFilters, _setCurrentFilters] = useState<
     FiltersState<FiltersSchema>
-  >(initialCurrentFilters)
+  >(externalCurrentFilters ?? defaultFilters ?? {})
 
   const setCurrentFilters: Dispatch<
     SetStateAction<FiltersState<FiltersSchema>>
@@ -125,9 +130,22 @@ export function useDataSource<
     }
   }
 
-  const [currentSortings, setCurrentSortings] =
-    useState<SortingsState<Sortings> | null>(defaultSorting || null)
+  useDeepCompareEffect(() => {
+    if (!externalCurrentFilters) return
+    setCurrentFilters(externalCurrentFilters)
+  }, [externalCurrentFilters])
 
+  /******************* SORTINGS ***************************************************/
+  const [currentSortings, setCurrentSortings] =
+    useState<SortingsState<Sortings> | null>(
+      externalCurrentSortings ?? defaultSortings ?? null
+    )
+
+  useDeepCompareEffect(() => {
+    if (!externalCurrentSortings) return
+    setCurrentSortings(externalCurrentSortings)
+  }, [externalCurrentSortings])
+  /******************* SEARCH ***************************************************/
   const searchOptions = {
     enabled: false,
     sync: false,
@@ -145,31 +163,50 @@ export function useDataSource<
     setDebouncedCurrentSearch(currentSearch)
   }, [currentSearch, searchOptions.sync, setDebouncedCurrentSearch])
 
+  /******************* FILTERS ***************************************************/
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedFilters = useMemo(() => filters, deps)
 
+  /******************* LOADING & DATA ADAPTER ***************************************************/
   const [isLoading, setIsLoading] = useState(false)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedDataAdapter = useMemo(() => dataAdapter, deps)
+  /******************************************************************* */
 
-  const defaultGrouping = grouping?.mandatory
-    ? {
-        field: Object.keys(
-          grouping.groupBy
-        )[0] as keyof typeof grouping.groupBy,
-        order: "asc" as const,
-      }
-    : undefined
+  /******************* GROUPING ***************************************************/
+  const defaultGrouping = useMemo(
+    () =>
+      grouping?.mandatory
+        ? {
+            field: Object.keys(
+              grouping.groupBy
+            )[0] as keyof typeof grouping.groupBy,
+            order: "asc" as const,
+          }
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(grouping)]
+  )
 
   const [currentGrouping, setCurrentGrouping] = useState<
     GroupingState<R, Grouping>
-  >(initialCurrentGrouping ?? defaultGrouping)
+  >(externalCurrentGrouping ?? externalDefaultGrouping ?? defaultGrouping)
 
-  // For mandatory grouping, ensure we have a valid grouping state
-  if (grouping?.mandatory && !currentGrouping?.field) {
-    throw new Error("Grouping is mandatory but no grouping state is set")
-  }
+  useEffect(() => {
+    if (grouping?.mandatory && !currentGrouping?.field) {
+      setCurrentGrouping(
+        externalCurrentGrouping ?? externalDefaultGrouping ?? defaultGrouping
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grouping?.mandatory, currentGrouping?.field, defaultGrouping])
+
+  useDeepCompareEffect(() => {
+    setCurrentGrouping(externalCurrentGrouping)
+  }, [externalCurrentGrouping])
+  /******************************************************************* */
 
   return {
     ...rest,

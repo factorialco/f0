@@ -2,6 +2,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
 import { Fragment } from "react"
 import { actionType, MetadataItemValue } from "../types"
 
@@ -37,11 +38,13 @@ const buildMetadataItems = ({ items }: { items: MetadataItemValue[] }) =>
 
 const Header = ({ actions, metadata }: HeaderProps) => {
   return (
-    <div className="flex items-center justify-between px-6 py-3">
-      <div className="flex flex-row items-center gap-2">
-        {buildMetadataItems({ items: metadata || [] })}
-      </div>
-      <div className="flex flex-row gap-2">
+    <div className="flex items-center justify-between gap-2 px-6 py-3">
+      <ScrollArea>
+        <div className="flex flex-row items-center gap-2">
+          {buildMetadataItems({ items: metadata || [] })}
+        </div>
+      </ScrollArea>
+      <div className="flex flex-shrink-0 flex-row gap-2">
         {actions?.map((action, index) => (
           <F0Button
             key={index}

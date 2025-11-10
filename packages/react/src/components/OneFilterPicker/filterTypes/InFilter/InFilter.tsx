@@ -5,9 +5,10 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { Spinner } from "@/experimental/Information/Spinner"
+import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
 import { useLoadOptions } from "./useLoadOptions"
@@ -16,10 +17,10 @@ import { useLoadOptions } from "./useLoadOptions"
  * Props for the InFilter component.
  * @template T - The type of values that can be selected
  */
-type InFilterComponentProps<T = unknown> = FilterTypeComponentProps<
-  T[],
-  InFilterOptions<T>
->
+type InFilterComponentProps<
+  T = unknown,
+  R extends RecordType = RecordType,
+> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>
 
 /**
  * A multi-select filter component that allows users to select multiple options from a predefined list.
@@ -69,32 +70,56 @@ type InFilterComponentProps<T = unknown> = FilterTypeComponentProps<
  * />
  * ```
  */
-export function InFilter<T extends string>({
+export function InFilter<T extends string, R extends RecordType = RecordType>({
   schema,
   value,
   onChange,
   isCompactMode,
-}: InFilterComponentProps<T>) {
+}: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
   const [searchTerm, setSearchTerm] = useState("")
 
-  const { options, isLoading, error, loadOptions } = useLoadOptions({
-    ...schema,
-    type: "in",
+  const canLoadMore = useRef(true)
+
+  const { options, isLoading, error, loadOptions, loadMore } = useLoadOptions({
+    schema: {
+      ...schema,
+      type: "in",
+    },
+    search: searchTerm,
   })
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout
+    if (isLoading) {
+      canLoadMore.current = false
+    } else {
+      timeout = setTimeout(() => {
+        canLoadMore.current = true
+      }, 1000)
+    }
+
+    return () => clearTimeout(timeout)
+  }, [isLoading])
+
+  const hasSource = "source" in schema.options
 
   useEffect(() => {
     setSearchTerm("")
   }, [schema])
 
-  const filteredOptions = useMemo(() => {
-    return options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [options, searchTerm])
+  const filteredOptions = useMemo(
+    () =>
+      hasSource
+        ? options
+        : options.filter((option) =>
+            option.label.toLowerCase().includes(searchTerm.toLowerCase())
+          ),
+    [hasSource, options, searchTerm]
+  )
 
-  if (isLoading) {
+  if (isLoading && !options.length) {
     return (
       <div className="flex w-full items-center justify-center py-4">
         <Spinner size="small" />
@@ -132,7 +157,7 @@ export function InFilter<T extends string>({
 
   // Determine if we should show the search input
   // Show search when we have loaded options (regardless of whether they came from static or async source)
-  const showSearch = options.length > 0 && !isLoading
+  const showSearch = options.length > 0
 
   const handleSelectAll = () => {
     const allValues = filteredOptions.map((option) => option.value)
@@ -158,6 +183,16 @@ export function InFilter<T extends string>({
 
   const handleClear = () => {
     onChange([])
+  }
+
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    // Prevent multiple simultaneous calls
+    if (isLoading || !loadMore || !canLoadMore.current) return
+
+    const target = event.target as HTMLDivElement
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
+      loadMore()
+    }
   }
 
   const selectedText = `${value.length} ${
@@ -187,16 +222,14 @@ export function InFilter<T extends string>({
       )}
       <div
         className={cn(
-          "max-h-[350px] overflow-y-scroll px-2",
-          isCompactMode && "px-1"
+          "overflow-y-scroll px-2",
+          isCompactMode && "px-1",
+          isCompactMode ? "max-h-[360px]" : "h-full"
         )}
+        onScroll={handleScroll}
       >
         {isCompactMode && (
-          <div
-            className={cn(
-              "flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1"
-            )}
-          >
+          <div className="sticky bottom-0 left-0 right-0 flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1">
             <span className="max-w-[250px] flex-1 whitespace-nowrap">
               <OneEllipsis className="text-f1-foreground-secondary">
                 {selectedText}
@@ -245,6 +278,11 @@ export function InFilter<T extends string>({
             </div>
           )
         })}
+        {isLoading && (
+          <div className="flex w-full items-center justify-center py-4">
+            <Spinner size="small" />
+          </div>
+        )}
       </div>
       {!isCompactMode && (
         <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">

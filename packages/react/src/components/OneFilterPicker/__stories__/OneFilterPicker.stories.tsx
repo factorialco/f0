@@ -21,6 +21,7 @@ import {
   generateCountries,
   getPresetMock,
   samplePresets,
+  sourceBasedDefinition,
 } from "./mockData"
 
 const meta = {
@@ -28,6 +29,27 @@ const meta = {
   component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
     return <OneFilterPickerComponent {...props} />
   },
+  decorators: [
+    (Story, { args }) => {
+      const [filters, setFilters] = useState<
+        FiltersState<typeof filterDefinition>
+      >(args?.value as FiltersState<typeof filterDefinition>)
+
+      return (
+        <>
+          <div className="mb-10 w-[800px]">
+            <Story args={{ ...args, value: filters, onChange: setFilters }} />
+          </div>
+          <p>
+            Filters:
+            <pre className="font-mono text-sm">
+              {JSON.stringify(filters, null, 2)}
+            </pre>
+          </p>
+        </>
+      )
+    },
+  ],
 } satisfies Meta
 
 export default meta
@@ -461,4 +483,41 @@ export const WithLargeAsyncOptions: Story = {
 
 export const WithLargeAsyncOptionsWithCache: Story = {
   render: () => <LargeAsyncOptionsComponent cache={true} />,
+}
+
+// Example with source-based pagination
+const SourceBasedPaginationComponent = () => {
+  const [filters, setFilters] = useState<
+    FiltersState<typeof sourceBasedDefinition>
+  >({})
+
+  return (
+    <div className="w-96">
+      <OneFilterPickerComponent
+        filters={sourceBasedDefinition}
+        value={filters}
+        onChange={setFilters}
+      />
+    </div>
+  )
+}
+
+export const WithSourceBasedPagination: Story = {
+  render: () => <SourceBasedPaginationComponent />,
+}
+
+export const WithNumberFilter: Story = {
+  args: {
+    filters: {
+      number: {
+        type: "number",
+        label: "Number",
+        options: {
+          min: 0,
+          max: 100,
+        },
+      },
+    },
+    onChange: (value) => console.log("Number filter changed", value),
+  },
 }

@@ -1,6 +1,5 @@
 import { Spinner } from "@/experimental/Information/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useVirtualizer } from "@tanstack/react-virtual"
@@ -85,6 +84,7 @@ const SelectContent = forwardRef<
       scrollMargin,
       forceMinHeight,
       showLoadingIndicator,
+      asChild,
       ...props
     },
     ref
@@ -93,8 +93,6 @@ const SelectContent = forwardRef<
     // The scrollable element for your list
     const parentRef = useRef(null)
     const isVirtual = Array.isArray(items)
-
-    const i18n = useI18n()
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
@@ -110,7 +108,9 @@ const SelectContent = forwardRef<
     const [animationStarted, setAnimationStarted] = useState(false)
 
     // Get the value and the open status from the select context
-    const { value, open, asList } = useContext(SelectContext)
+    const { value, open, as: asSelectProp } = useContext(SelectContext)
+
+    const asList = asSelectProp === "list"
 
     const valueArray = useMemo(
       () =>
@@ -188,8 +188,8 @@ const SelectContent = forwardRef<
               tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
-                <div className="h-10 w-full py-2 text-center">
-                  {i18n.select.loadingMore}
+                <div className="flex w-full items-center justify-center py-4">
+                  <Spinner size="small" />
                 </div>
               ) : (
                 items[virtualItem.index].item
@@ -206,8 +206,8 @@ const SelectContent = forwardRef<
 
     const content = (
       <SelectPrimitive.Content
-        asChild={asList}
         ref={ref}
+        asChild={asChild || asSelectProp === "list"}
         className={cn(
           "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
           !asList &&
@@ -215,11 +215,15 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          !asList &&
+            position === "popper" &&
+            "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),450px)]",
           className,
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0"
         )}
         position={asList ? "item-aligned" : position}
+        collisionPadding={16}
         {...props}
         onAnimationStart={() => {
           // Set the animation state to started as the elements are visible
@@ -250,8 +254,10 @@ const SelectContent = forwardRef<
                   ? "max-h-full"
                   : taller
                     ? "max-h-[440px]"
-                    : "max-h-[300px]",
-                loadingNewContent && "select-none opacity-10 transition-opacity"
+                    : "max-h-[320px]",
+                loadingNewContent &&
+                  "select-none opacity-10 transition-opacity",
+                forceMinHeight && "min-h-[450px]"
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
@@ -266,7 +272,7 @@ const SelectContent = forwardRef<
                     "p-1",
                     !asList &&
                       position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]"
+                      "h-[var(--radix-select-trigger-height)] w-full"
                   )}
                 >
                   {viewportContent}

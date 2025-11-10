@@ -12,6 +12,7 @@ import {
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import {
   FiltersDefinition,
+  FiltersState,
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
@@ -84,7 +85,9 @@ export const useDataCollectionStorage = <
             )
           ) {
             const featureValue =
-              status[featureName as keyof DataCollectionStatus]
+              status[
+                featureName as keyof DataCollectionStatus<FiltersState<Filters>>
+              ]
             if (featureValue) {
               ;(featureProvider.setValue as (value: unknown) => void)(
                 featureValue

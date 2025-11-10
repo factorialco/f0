@@ -1,4 +1,5 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { Select } from "@/experimental/Forms/Fields/Select"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
@@ -287,5 +288,63 @@ export const WithFewItems: Story = {
         </OneModal.Footer>
       </>
     ),
+  },
+}
+
+// Long text options for testing overflow and wrapping
+const longTextOptions = [
+  {
+    value: "very-long-option-1",
+    label:
+      "This is an extremely long option text that should test if the dropdown properly expands and wraps within modal boundaries in different languages",
+    description:
+      "Additionally, this option has a very long description that should also wrap properly and not overflow the container boundaries",
+  },
+  {
+    value: "very-long-option-2",
+    label:
+      "This is another extremely long option text that should test if the dropdown properly expands and wraps within modal boundaries when the content is very lengthy",
+    description:
+      "Additionally, this second option has a very long description that should also wrap properly and not overflow the container boundaries when displayed in a modal",
+  },
+  {
+    value: "short-option",
+    label: "Short",
+  },
+]
+
+export const WithSelectInput: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    position: "center",
+    children: (
+      <>
+        <OneModal.Header title="Select Component Example" />
+        <OneModal.Content withPadding>
+          <div className="space-y-4">
+            <p className="text-sm text-f1-foreground-secondary">
+              This demonstrates the Select component inside a modal with long
+              text options.
+            </p>
+            <Select
+              label="Choose an option (long text test)"
+              placeholder="Select an option"
+              showSearchBox
+              options={longTextOptions}
+              onChange={() => {}}
+            />
+          </div>
+        </OneModal.Content>
+      </>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "This story demonstrates the Select component inside a OneModal with very long text options in multiple languages. The dropdown should expand to fit content while staying within modal boundaries and properly wrapping long text.",
+      },
+    },
   },
 }

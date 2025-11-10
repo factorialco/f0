@@ -6,7 +6,11 @@ import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import OneIcon from "../OneIcon"
 
-export type WelcomeScreenSuggestion = { icon: IconType; message: string }
+export type WelcomeScreenSuggestion = {
+  icon: IconType
+  message: string
+  prompt?: string
+}
 
 const MAX_SUGGESTIONS = 3
 
@@ -34,7 +38,7 @@ export const WelcomeScreen = ({
     <AnimatePresence mode="popLayout">
       <motion.div
         key="welcome"
-        className="flex flex-1 flex-col justify-end gap-4"
+        className="flex w-full flex-1 flex-col justify-end gap-4"
         initial={{ opacity: 1 }}
       >
         <div className="px-2">
@@ -91,6 +95,7 @@ export const WelcomeScreen = ({
         <div className="-ml-2 flex flex-col items-start gap-[6px]">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
+              className="w-full"
               key={index}
               initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
@@ -113,7 +118,7 @@ export const WelcomeScreen = ({
               }}
             >
               <ButtonInternal
-                className="font-medium"
+                className="w-full items-start justify-start overflow-x-hidden"
                 variant="ghost"
                 label={suggestion.message}
                 icon={suggestion.icon}
@@ -121,7 +126,7 @@ export const WelcomeScreen = ({
                   sendMessage({
                     id: randomId(),
                     role: "user",
-                    content: suggestion.message,
+                    content: suggestion.prompt || suggestion.message,
                   })
                 }
               />

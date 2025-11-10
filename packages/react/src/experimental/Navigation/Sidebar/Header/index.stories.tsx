@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 import { Image } from "../../../../icons/app"
 import { SidebarHeader } from "./index"
 
@@ -6,6 +7,12 @@ const meta = {
   title: "Sidebar/Header",
   component: SidebarHeader,
   tags: ["autodocs", "experimental", "no-sidebar"],
+  decorators: [
+    (Story) => {
+      const [selected, setSelected] = useState("1")
+      return <Story selected={selected} onChange={setSelected} />
+    },
+  ],
 } satisfies Meta<typeof SidebarHeader>
 
 export default meta
@@ -21,6 +28,7 @@ export const Default: Story = {
       },
       { id: "2", name: "Dazlog", logo: "/avatars/company02.jpg" },
       { id: "3", name: "Acme Corp" },
+      { id: "4", name: "HSP Projektmanagement und Beratung GmbH" },
     ],
     selected: "1",
     onChange: (company) => console.log("Selected company:", company),

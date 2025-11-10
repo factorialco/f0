@@ -29,14 +29,25 @@ export const TableFrozenCols: Story = {
 }
 
 export const TableColumnOrderingAndHidden: Story = {
-  render: () => (
-    <ExampleComponent
-      frozenColumns={2}
-      tableAllowColumnReordering
-      tableAllowColumnHiding
-      id="employees/v1"
-    />
-  ),
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+      },
+    })
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        noSorting
+        visualizations={[mockVisualizations.table]}
+        id="employees/v1"
+      />
+    )
+  },
 }
 
 export const TableColumnOrdering: Story = {

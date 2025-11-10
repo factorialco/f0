@@ -1,3 +1,4 @@
+import { RecordType, useData, useDataSource } from "@/hooks/datasource"
 import { useCallback, useEffect, useState } from "react"
 import { InFilterDefinition } from "."
 import { FilterTypeSchema } from "../types"
@@ -5,8 +6,8 @@ import { InFilterOptionItem, InFilterOptions } from "./types"
 
 const optionsCache = new Map<string, InFilterOptionItem<unknown>[]>()
 
-export function getCacheKey<T>(
-  schema: FilterTypeSchema<InFilterOptions<T>>
+export function getCacheKey<T, R extends RecordType = RecordType>(
+  schema: FilterTypeSchema<InFilterOptions<T, R>>
 ): string {
   return JSON.stringify(schema)
 }
@@ -33,7 +34,13 @@ export async function loadOptions<T>(
   return options
 }
 
-export function useLoadOptions<T>(schema: InFilterDefinition<T>) {
+export function useLoadOptions<T, R extends RecordType = RecordType>({
+  schema,
+  search,
+}: {
+  schema: InFilterDefinition<T, R>
+  search: string | undefined
+}) {
   const cacheKey = getCacheKey(schema)
 
   // Only use state for async options
@@ -41,8 +48,38 @@ export function useLoadOptions<T>(schema: InFilterDefinition<T>) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
+  const optionsProp =
+    "options" in schema.options ? schema.options.options : undefined
+  const source = "source" in schema.options ? schema.options.source : undefined
+
+  const dataSource = useDataSource(
+    source
+      ? {
+          ...source,
+          search: {
+            enabled: true,
+            sync: true,
+          },
+        }
+      : {
+          dataAdapter: {
+            fetchData: async () => ({
+              records: [],
+            }),
+          },
+        },
+    [source]
+  )
+
+  const { data, isInitialLoading, loadMore, isLoadingMore, paginationInfo } =
+    useData({ ...dataSource, currentSearch: search }, {}, [source])
+
   const materializeOptions = useCallback(
     async (clearCache = false) => {
+      if (!optionsProp) {
+        return
+      }
+
       if (clearCache) {
         optionsCache.delete(cacheKey)
       }
@@ -51,7 +88,7 @@ export function useLoadOptions<T>(schema: InFilterDefinition<T>) {
         setError(null)
         const result = await loadOptions(
           cacheKey,
-          schema.options.options,
+          optionsProp,
           schema.options.cache
         )
         setOptions(result)
@@ -68,14 +105,43 @@ export function useLoadOptions<T>(schema: InFilterDefinition<T>) {
   )
 
   useEffect(() => {
-    materializeOptions()
-  }, [materializeOptions])
+    if ("source" in schema.options && schema.options.mapOptions) {
+      try {
+        setIsLoading(false)
+        setError(null)
+        const mappedOptions = data.records.map(schema.options.mapOptions)
+        setOptions(mappedOptions)
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to map options from source")
+        )
+      }
+    }
+  }, [data.records, schema.options])
+
+  useEffect(() => {
+    if (!source) {
+      materializeOptions()
+    }
+  }, [materializeOptions, source])
+
+  const isActuallyLoading = source
+    ? isInitialLoading || isLoadingMore
+    : isLoading
 
   return {
     options,
-    isLoading,
+    isLoading: isActuallyLoading,
     error,
     setOptions,
     loadOptions: materializeOptions,
+    loadMore: source ? loadMore : undefined,
+    hasMore: source
+      ? paginationInfo?.type === "infinite-scroll" &&
+        "hasMore" in paginationInfo &&
+        paginationInfo.hasMore
+      : false,
   }
 }

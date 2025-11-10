@@ -73,7 +73,9 @@ export function CardOptions({
               size="sm"
               hideLabel
               pressed={isOpen}
+              compact
               data-testid="card-options-dropdown"
+              onClick={(e) => e.stopPropagation()}
             />
           </Dropdown>
         </div>
