@@ -25,6 +25,7 @@ import { CollectionProps } from "../../../types"
 
 export type CardPropertyDefinition<T> = PropertyDefinition<T> & {
   icon?: IconType
+  tooltip?: string
 }
 
 export type CardVisualizationOptions<
@@ -163,6 +164,7 @@ const GroupCards = <
 
         return {
           icon: property.icon ?? Placeholder,
+          tooltip: property.tooltip,
           property: cardProperty,
         }
       })
