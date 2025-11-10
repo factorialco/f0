@@ -92,10 +92,14 @@ export const KanbanCollection = <
   }, [lanesSignature])
 
   const toCardMetadata = (
-    items: ReadonlyArray<{ icon: IconType; property: CardMetadataProperty }>
+    items: ReadonlyArray<{
+      icon: IconType
+      tooltip?: string
+      property: CardMetadataProperty
+    }>
   ): CardMetadata[] =>
-    items.map(({ icon, property }) =>
-      property.type === "file" ? { property } : { icon, property }
+    items.map(({ icon, tooltip, property }) =>
+      property.type === "file" ? { property } : { icon, tooltip, property }
     )
 
   const isInfiniteScrollPaginationInfo = (

@@ -358,6 +358,7 @@ export const getMockVisualizations = (options?: {
         {
           label: "Email",
           icon: Envelope,
+          tooltip: "Email",
           render: (item) => item.email,
           hide: (item) => !item.email,
         },
@@ -555,7 +556,11 @@ export const getMockVisualizations = (options?: {
         lastName: u.name.split(" ")[1] ?? "",
       }),
       metadata: (u) => [
-        { icon: Envelope, property: { type: "text", value: u.email } },
+        {
+          icon: Envelope,
+          tooltip: "Email",
+          property: { type: "text", value: u.email },
+        },
         { icon: Building, property: { type: "text", value: u.department } },
         { icon: Briefcase, property: { type: "text", value: u.role } },
         { icon: Star, property: { type: "text", value: u.id } },

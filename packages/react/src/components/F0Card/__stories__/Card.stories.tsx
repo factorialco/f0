@@ -73,6 +73,7 @@ export const Default: Story = {
     metadata: [
       {
         icon: Briefcase,
+        tooltip: "Job title",
         property: {
           type: "text",
           value: "Design Engineer",
@@ -80,6 +81,7 @@ export const Default: Story = {
       },
       {
         icon: CalendarArrowRight,
+        tooltip: "Date",
         property: {
           type: "text",
           value: "3 years ago",
@@ -87,6 +89,7 @@ export const Default: Story = {
       },
       {
         icon: Star,
+        tooltip: "Status",
         property: {
           type: "status",
           value: {
@@ -97,6 +100,7 @@ export const Default: Story = {
       },
       {
         icon: Link,
+        tooltip: "Link",
         property: {
           type: "text",
           value:
