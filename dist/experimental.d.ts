@@ -505,7 +505,7 @@ declare interface AiPromotionChatState {
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
-    variant?: "info" | "warning" | "positive" | "destructive" | undefined;
+    variant?: "info" | "positive" | "warning" | "destructive" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -524,7 +524,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "critical" | "warning" | "positive" | undefined;
+    type?: "info" | "positive" | "critical" | "warning" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -556,7 +556,7 @@ export declare const AlertTitle: React_2.ForwardRefExoticComponent<React_2.HTMLA
 declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 declare const alertVariants: (props?: ({
-    variant?: "info" | "critical" | "warning" | "positive" | "neutral" | undefined;
+    variant?: "info" | "positive" | "critical" | "warning" | "neutral" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -653,7 +653,7 @@ export declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -1183,6 +1183,7 @@ declare type CardMetadataProperty = {
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
+    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -1309,9 +1310,9 @@ declare type ChartItem<K extends ChartConfig> = {
     };
 };
 
-export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>;
+export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
 
-export declare type ChatWidgetEmptyStateProps = Props_5;
+export declare type ChatWidgetEmptyStateProps = Props_4;
 
 export declare function ClockInControls({ trackedMinutes, remainingMinutes, data, labels, locationId, locations, canShowLocation, locationSelectorDisabled, onClockIn, onClockOut, onBreak, breakTypes, onChangeBreakTypeId, canShowBreakButton, canSeeGraph, canSeeRemainingTime, onChangeLocationId, canShowProject, projectSelectorElement, breakTypeName, }: ClockInControlsProps): JSX_2.Element;
 
@@ -1531,7 +1532,7 @@ declare type CounterProps = {
 
 declare const counterVariants: (props?: ({
     size?: "md" | "sm" | undefined;
-    type?: "bold" | "default" | "selected" | undefined;
+    type?: "bold" | "selected" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -2199,17 +2200,17 @@ description: string;
 actions?: {
 primary: {
 label: string;
-icon?: IconType_2 | undefined;
 onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 disabled?: boolean | undefined;
+icon?: IconType_2 | undefined;
 } & {
 variant?: "default" | "critical" | "neutral";
 };
 secondary: {
 label: string;
-icon?: IconType_2 | undefined;
 onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 disabled?: boolean | undefined;
+icon?: IconType_2 | undefined;
 };
 };
 open?: boolean;
@@ -2550,11 +2551,16 @@ export declare type F0CalloutProps = CalloutInternalProps;
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
+    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ * @deprecated This is an experimental component use it at your own risk
+ */
 declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
     ref?: React.Ref<HTMLButtonElement>;
 }) => React.ReactElement;
@@ -2634,16 +2640,33 @@ export { F0SelectProps as SelectProps }
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 
-declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTMLDivElement>>;
+declare const F0TagAlert: ForwardRefExoticComponent<Props_7 & RefAttributes<HTMLDivElement>>;
 
-declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
+declare const F0TagRaw: ForwardRefExoticComponent<F0TagRawProps & RefAttributes<HTMLDivElement>>;
+
+declare type F0TagRawProps = {
+    /**
+     * The label to display in the tag or used for accessible text
+     */
+    text: string;
+    /**
+     * Additional accessible text to display in the tag
+     */
+    additionalAccessibleText?: string;
+} & ({
+    icon: IconType;
+    onlyIcon: true;
+} | {
+    icon?: IconType;
+    onlyIcon?: boolean;
+});
 
 export declare const F1SearchBox: ForwardRefExoticComponent<    {
 value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "disabled" | "placeholder" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "onFocus" | "onBlur" | "name" | "disabled" | "placeholder" | "size" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -3130,7 +3153,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>({ type, ...props }: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "disabled" | "maxLength" | "required" | "size" | "loading" | "status" | "error" | "icon" | "hideLabel" | "append" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -3292,7 +3315,9 @@ export declare type lastIntentType = {
     customIntent?: string;
 } | null;
 
-declare type Level = "info" | "warning" | "critical" | "positive";
+declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: LineChartProps;
@@ -3670,7 +3695,7 @@ declare type NestedKeyOf<T> = {
     } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
 }[keyof T & string];
 
-declare type NewColor = Extract<BaseColor, "viridian" | "malibu" | "yellow" | "purple" | "lilac" | "barbie" | "smoke" | "army" | "flubber" | "indigo" | "camel">;
+declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
 
 declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
 
@@ -4033,7 +4058,7 @@ export declare type OnePersonListItemProps = {
         avatarBadge?: AvatarBadge;
     };
     description?: string;
-    bottomTags: Omit<Props_4, "noBorder">[];
+    bottomTags: Omit<F0TagRawProps, "noBorder">[];
     rightTag?: Props_3;
     actions?: {
         primary?: {
@@ -4391,14 +4416,6 @@ declare type PropertyDefinition_2<T> = {
 
 declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status">;
 
-declare type Props_10<Id extends string | number = string | number> = {
-    items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
-    minSize?: number;
-    gap?: number;
-    onClickItem?: (id: Id) => void;
-    showAllItems?: boolean;
-};
-
 declare type Props_2 = {
     /** Main heading text */
     title: string;
@@ -4427,14 +4444,6 @@ declare type Props_3 = {
 });
 
 declare interface Props_4 {
-    text?: string;
-    additionalAccesibleText?: string;
-    icon?: IconType;
-    noBorder?: boolean;
-    className?: string;
-}
-
-declare interface Props_5 {
     title: string;
     content: string;
     buttonLabel?: string;
@@ -4443,7 +4452,7 @@ declare interface Props_5 {
     type: Type;
 }
 
-declare type Props_6 = {
+declare type Props_5 = {
     label: string;
     icon: IconType;
     iconClassName?: string;
@@ -4451,7 +4460,7 @@ declare type Props_6 = {
     onClick?: () => void;
 };
 
-declare type Props_7<Id extends string | number = string | number> = {
+declare type Props_6<Id extends string | number = string | number> = {
     id: Id;
     module?: ModuleId;
     title: string;
@@ -4459,17 +4468,25 @@ declare type Props_7<Id extends string | number = string | number> = {
     onClick?: (id: Id) => void;
 };
 
-declare type Props_8<Text extends string = string> = {
+declare type Props_7<Text extends string = string> = {
     text: Text extends "" ? never : Text;
     level: Level;
 };
 
-declare type Props_9<Id extends string | number = string | number> = {
+declare type Props_8<Id extends string | number = string | number> = {
     items: Omit<WidgetInboxListItemProps<Id>, "onClick">[];
     minSize?: number;
     onClickItem?: (id: Id) => void;
     showAllItems?: boolean;
 } & Pick<ComponentProps<typeof VerticalOverflowList>, "onVisibleItemsChange">;
+
+declare type Props_9<Id extends string | number = string | number> = {
+    items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
+    minSize?: number;
+    gap?: number;
+    onClickItem?: (id: Id) => void;
+    showAllItems?: boolean;
+};
 
 declare type Pulse = (typeof pulses)[number];
 
@@ -4583,6 +4600,7 @@ export declare interface RichTextEditorProps {
     errorConfig?: errorConfig;
     height?: heightType;
     plainHtmlMode?: boolean;
+    fullScreenMode?: boolean;
 }
 
 declare interface RichTextEditorSkeletonProps {
@@ -4866,6 +4884,8 @@ className?: ClassValue;
 
 declare type Status = "waiting" | "pending" | "approved" | "rejected";
 
+declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
 declare type StatusVariant = Variant;
 
 declare interface StepItemProps {
@@ -5085,6 +5105,8 @@ declare type Tag = {
     description?: string;
 };
 
+declare const tagDotColors: ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
+
 declare interface Task {
     id: number | string;
     text: string;
@@ -5127,7 +5149,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "maxLength" | "placeholder" | "status" | "error" | "icon" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
@@ -5193,7 +5215,7 @@ declare type toggleActionType = {
 
 export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<ToggleGroupPrimitive.ToggleGroupSingleProps & React_2.RefAttributes<HTMLDivElement>, "ref"> | Omit<ToggleGroupPrimitive.ToggleGroupMultipleProps & React_2.RefAttributes<HTMLDivElement>, "ref">) & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
-    size?: "lg" | "sm" | "default" | undefined;
+    size?: "default" | "lg" | "sm" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -5204,7 +5226,7 @@ export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<Toggl
 
 export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<ToggleGroupPrimitive.ToggleGroupItemProps & React_2.RefAttributes<HTMLButtonElement>, "ref"> & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
-    size?: "lg" | "sm" | "default" | undefined;
+    size?: "default" | "lg" | "sm" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -5457,7 +5479,7 @@ declare const valueDisplayRenderers: {
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
-declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
+declare type Variant = (typeof statuses)[number];
 
 declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
 
@@ -5583,15 +5605,15 @@ export declare type WidgetEmptyStateProps = {
     actions?: Action_2[];
 };
 
-export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_6): JSX_2.Element;
+export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_5): JSX_2.Element;
 
-export declare function WidgetInboxList({ items, minSize, onClickItem, showAllItems, onVisibleItemsChange, }: Props_9): JSX_2.Element;
+export declare function WidgetInboxList({ items, minSize, onClickItem, showAllItems, onVisibleItemsChange, }: Props_8): JSX_2.Element;
 
-export declare function WidgetInboxListItem({ id, title, subtitle, onClick, module, }: Props_7): JSX_2.Element;
+export declare function WidgetInboxListItem({ id, title, subtitle, onClick, module, }: Props_6): JSX_2.Element;
 
-export declare type WidgetInboxListItemProps<Id extends string | number = string | number> = Props_7<Id>;
+export declare type WidgetInboxListItemProps<Id extends string | number = string | number> = Props_6<Id>;
 
-export declare type WidgetInboxListProps = Props_9;
+export declare type WidgetInboxListProps = Props_8;
 
 export declare interface WidgetProps {
     header?: {
@@ -5629,7 +5651,7 @@ children?: ReactNode | undefined;
 title?: string;
 } & RefAttributes<HTMLDivElement>>;
 
-export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_10): JSX_2.Element;
+export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_9): JSX_2.Element;
 
 export declare function WidgetSimpleListItem({ id, title, alert, rawTag, count, icon, rightIcon, iconClassName, rightIconClassName, onClick, }: WidgetSimpleListItemProps): JSX_2.Element;
 
@@ -5646,7 +5668,7 @@ export declare type WidgetSimpleListItemProps<Id extends string | number = strin
     onClick?: (id: Id) => void;
 };
 
-export declare type WidgetSimpleListProps = Props_10;
+export declare type WidgetSimpleListProps = Props_9;
 
 export declare type WidgetSkeletonProps = {
     header?: {

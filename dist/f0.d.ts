@@ -216,7 +216,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "critical" | "warning" | "positive" | undefined;
+    type?: "info" | "positive" | "critical" | "warning" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -334,7 +334,7 @@ declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -786,6 +786,7 @@ declare interface CardInternalProps {
 
 declare type CardMetadata = {
     icon: IconType;
+    tooltip?: string;
     property: Exclude<CardMetadataProperty, {
         type: "file";
     }>;
@@ -814,6 +815,7 @@ declare interface CardPrimaryAction {
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
+    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -932,7 +934,7 @@ declare type ChipVariants = {
 };
 
 declare const chipVariants: (props?: ({
-    variant?: "default" | "selected" | undefined;
+    variant?: "selected" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -2041,6 +2043,7 @@ export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps_2, 
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
+    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -2071,6 +2074,10 @@ export declare const F0Provider: React.FC<{
     dataCollectionStorageHandler?: DataCollectionStorageHandler;
 }>;
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ * @deprecated This is an experimental component use it at your own risk
+ */
 export declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
     ref?: React.Ref<HTMLButtonElement>;
 }) => React.ReactElement;
@@ -2149,11 +2156,16 @@ export declare const F0TagCompany: ForwardRefExoticComponent<TagCompanyProps & R
 export declare const F0TagDot: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLDivElement>>;
 
 export declare const F0TagList: {
-    <T extends TagType>({ type, tags, max, remainingCount: initialRemainingCount, layout, }: TagListProps<T>): JSX_2.Element;
+    <T extends TagType>({ type, tags, max, remainingCount: initialRemainingCount, }: TagListProps<T>): JSX_2.Element;
     displayName: string;
 };
 
-export declare const F0TagPerson: ForwardRefExoticComponent<TagPersonProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>;
+
+export declare type F0TagPersonProps = {
+    src?: string;
+    name: string;
+};
 
 export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
 
@@ -2652,7 +2664,9 @@ declare const layoutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare type Level = "info" | "warning" | "critical" | "positive";
+export declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
@@ -2813,7 +2827,7 @@ declare type NestedKeyOf<T> = {
     } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
 }[keyof T & string];
 
-export declare type NewColor = Extract<BaseColor, "viridian" | "malibu" | "yellow" | "purple" | "lilac" | "barbie" | "smoke" | "army" | "flubber" | "indigo" | "camel">;
+export declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
 
 export declare interface NextStepsProps {
     title: string;
@@ -2829,6 +2843,14 @@ declare type NumberFilterOptions_2 = {
     max?: number;
     modes?: ("range" | "single")[];
 };
+
+declare interface NumericValue {
+    number: number;
+    units?: string;
+    unitsPosition?: "left" | "right";
+    decimalPlaces?: number | undefined;
+    locale?: string;
+}
 
 declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
@@ -3326,7 +3348,11 @@ export declare interface StandardLayoutProps extends VariantProps<typeof layoutV
     children?: default_2.ReactNode;
 }
 
-export declare type Status = "positive" | "neutral" | "negative";
+export declare type Status = (typeof statuses_2)[number];
+
+declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
+declare const statuses_2: readonly ["positive", "neutral", "negative"];
 
 export declare type StatusVariant = Variant;
 
@@ -3460,20 +3486,45 @@ declare type TableVisualizationSettings = {
     hidden: ColId[];
 };
 
+export declare const Tag: ({ tag }: {
+    tag: TagVariant;
+}) => ReactNode;
+
 export declare type TagAlertProps<Text extends string = string> = {
     text: Text extends "" ? never : Text;
     level: Level;
 };
 
-export declare interface TagBalanceProps {
-    text: string;
-    status: Status;
-}
+export declare type TagBalanceProps = {
+    /**
+     * Inverts the balance status color. Is useful when a negative percent mean something positive.
+     */
+    invertStatus?: boolean;
+    /**
+     * Hint text to display next to the tag (This text is not displayed when the balance is null or undefined)
+     */
+    hint?: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+    /**
+     * Text to display when the balance is null or undefined
+     */
+    nullText?: string;
+    /**
+     * Amount to display next to the tag
+     */
+    amount?: number | NumericValue | null;
+} & ({
+    percentage: number | Omit<NumericValue, "units" | "unitsPosition">;
+} | {
+    percentage?: null;
+});
 
 export declare interface TagCompanyProps {
-    companyName: string;
-    companyImageUrl: string;
-    onClick?: () => void;
+    name: string;
+    src?: string;
 }
 
 export declare const TagCounter: {
@@ -3487,7 +3538,7 @@ declare type TagDataType<T extends string> = Omit<Extract<TagVariant, {
     type: T;
 }>, "type" | "description">;
 
-export declare const tagDotColors: NewColor[];
+export declare const tagDotColors: ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
 export declare type TagDotProps = {
     text: string;
@@ -3505,7 +3556,7 @@ export declare type TagListProps<T extends TagType> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T] & WithTooltipDescription_2>;
+    tags: Array<TagTypeMapping[T]>;
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -3515,28 +3566,24 @@ export declare type TagListProps<T extends TagType> = {
      * The remaining number to display.
      */
     remainingCount?: number;
-    /**
-     * The layout of the tag list.
-     * - "fill" - Tags will expand to fill the available width, with overflow items shown in a counter
-     * - "compact" - Tags will be stacked together up to the max limit, with remaining shown in counter
-     * @default "compact"
-     */
-    layout?: "fill" | "compact";
 };
 
-export declare interface TagPersonProps {
-    name: string;
-    avatarUrl: string;
-    onClick?: () => void;
-}
-
-export declare interface TagRawProps {
-    text?: string;
-    additionalAccesibleText?: string;
+export declare type TagRawProps = {
+    /**
+     * The label to display in the tag or used for accessible text
+     */
+    text: string;
+    /**
+     * Additional accessible text to display in the tag
+     */
+    additionalAccessibleText?: string;
+} & ({
+    icon: IconType;
+    onlyIcon: true;
+} | {
     icon?: IconType;
-    noBorder?: boolean;
-    className?: string;
-}
+    onlyIcon?: boolean;
+});
 
 export declare interface TagStatusProps {
     text: string;
@@ -3545,16 +3592,15 @@ export declare interface TagStatusProps {
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
      */
-    additionalAccesibleText?: string;
+    additionalAccessibleText?: string;
 }
 
 export declare interface TagTeamProps {
-    teamName: string;
-    teamImageUrl: string;
-    onClick?: () => void;
+    name: string;
+    src?: string;
 }
 
-export declare type TagType = keyof TagTypeMapping;
+export declare type TagType = (typeof tagTypes)[number];
 
 declare type TagTypeMapping = {
     dot: TagDataType<"dot">;
@@ -3567,7 +3613,9 @@ declare type TagTypeMapping = {
     raw: TagDataType<"raw">;
 };
 
-declare type TagVariant = BaseTag<{
+declare const tagTypes: readonly ["dot", "person", "team", "company", "alert", "status", "balance", "raw"];
+
+export declare type TagVariant = BaseTag<{
     type: "dot";
 } & TagDotProps> | BaseTag<{
     type: "person";
@@ -3950,7 +3998,7 @@ declare const valueDisplayRenderers: {
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
-export declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
+export declare type Variant = (typeof statuses)[number];
 
 export declare const VerticalBarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
@@ -3999,10 +4047,6 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
-
-declare type WithTooltipDescription_2 = {
-    description?: string;
-};
 
 export { }
 
