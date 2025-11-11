@@ -114,7 +114,7 @@ const Selector = ({
     [companies, additionalOptions]
   )
 
-  const handleChange = (value: string) => {
+  const handleChange = (value?: string) => {
     const option = additionalOptions?.find((opt) => opt.value === value)
     if (option?.onClick) {
       option.onClick()

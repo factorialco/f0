@@ -36,41 +36,40 @@ export type SelectProps<T extends string, R = unknown> = {
   className?: string
   selectContentClassName?: string
   actions?: Action[]
-} & (
-  | ({
-      multiple?: false | never
+} & ( // Single select not clearable
+  | {
+      multiple?: false | undefined
       value?: T
       defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
-    } & (
-      | {
-          // if its clearable, should emit a value
-          clearable: true
-          onChange: (
-            value: T,
-            originalItem: ResolvedRecordType<R> | undefined,
-            option: SelectItemObject<T, ResolvedRecordType<R>>
-          ) => void
-        }
-      | {
-          // if its not clearable, can emit undefined
-          clearable?: false | never
-          onChange: (
-            value: T | undefined,
-            originalItem?: ResolvedRecordType<R> | undefined,
-            option?: SelectItemObject<T, ResolvedRecordType<R>>
-          ) => void
-        }
-    ))
+      clearable?: false | undefined
+      onChange: (
+        value: T,
+        originalItem?: ResolvedRecordType<R> | undefined,
+        option?: SelectItemObject<T, ResolvedRecordType<R>>
+      ) => void
+    }
+  // Single select clearable
   | {
-      // if its multiple can emit an empty array if its clea
+      multiple?: false | undefined
+      value?: T
+      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
+      clearable: true
+      onChange: (
+        value: T,
+        originalItem?: ResolvedRecordType<R> | undefined,
+        option?: SelectItemObject<T, ResolvedRecordType<R>>
+      ) => void
+    }
+  // Multiple select
+  | {
       multiple: true
       clearable?: boolean
       value?: T[]
       defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>[]
       onChange: (
         value: T[],
-        originalItems?: ResolvedRecordType<R>[],
-        options?: SelectItemObject<T, ResolvedRecordType<R>>[]
+        originalItems: ResolvedRecordType<R>[],
+        options: SelectItemObject<T, ResolvedRecordType<R>>[]
       ) => void
     }
 ) &

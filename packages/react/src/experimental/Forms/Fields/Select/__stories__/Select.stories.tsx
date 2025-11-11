@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 import { Select, SelectItemObject, selectSizes } from "../index"
 
@@ -203,9 +203,12 @@ const meta: Meta = {
     showSearchBox: false,
   },
   decorators: [
-    (Story, { args }) => {
+    ((Story, { args }) => {
       // Wraps the Select component with a hook to show the selected value
-      const [localValue, setLocalValue] = useState(args.value)
+      // This decorator is for single-select stories only
+      const [localValue, setLocalValue] = useState(
+        args.value as string | undefined
+      )
       const [searchValue, setSearchValue] = useState("")
       // Sets a click handler to change the label's value
       const handleOnChange = (
@@ -232,18 +235,20 @@ const meta: Meta = {
       return (
         <div className="w-48">
           <Story
-            args={{
-              ...args,
-              value: localValue,
-              onChange: handleOnChange,
-              searchValue: searchValue,
-              onSearchChange: handleOnSearchChange,
-            }}
+            args={
+              {
+                ...args,
+                value: localValue,
+                onChange: handleOnChange,
+                searchValue: searchValue,
+                onSearchChange: handleOnSearchChange,
+              } as typeof args
+            }
           />
           <div>Selected: {JSON.stringify(localValue, null, 2)}</div>
         </div>
       )
-    },
+    }) satisfies Decorator,
     (Story) => (
       <div
         className="w-[350px]"
@@ -547,7 +552,7 @@ export const WithDataSourceGrouping: Story = {
 export const MultipleNotPaginated: Story = {
   args: {
     multiple: true,
-    value: "option-2",
+    value: ["option-2"],
     clearable: true,
     source: mockNonPaginatedSource,
     mapOptions: (item: MockItem) => ({
@@ -557,6 +562,7 @@ export const MultipleNotPaginated: Story = {
       description: item.description,
     }),
   },
+  decorators: [],
 }
 
 export const WithCustomTrigger: Story = {
@@ -594,6 +600,7 @@ export const Snapshot: Story = {
   },
   render: () => {
     const base = {
+      multiple: false as const,
       clearable: true,
       icon: Placeholder,
       labelIcon: Placeholder,
