@@ -227,7 +227,7 @@ const SelectComponent = forwardRef(function Select<
   const selectedItems = useMemo(() => {
     return findOptionsByValue(localValue)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the localValue changes
-  }, [localValue])
+  }, [localValue, data.records])
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
