@@ -1,6 +1,6 @@
 import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -14,7 +14,7 @@ export type BaseScoreQuestionOnChangeParams = BaseQuestionOnChangeParams & {
 
 export type BaseScoreQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
-    value: number
+    value?: number
     options: { value: number; label: string }[]
     onChange?: (params: BaseScoreQuestionOnChangeParams) => void
   }
@@ -24,21 +24,26 @@ const ScoreOption = ({
   label,
   selected,
   onClick,
+  disabled,
 }: {
   value: number
   label: string
   selected: boolean
   onClick: (value: number) => void
+  disabled?: boolean
 }) => {
   const handleClick = () => {
+    if (disabled) return
+
     onClick(value)
   }
 
   return (
     <div
       className={cn(
-        "flex h-10 min-w-20 flex-1 cursor-pointer items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
-        selected && "border-f1-border-selected-bold"
+        "flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+        selected && "border-f1-border-selected-bold",
+        !disabled ? "cursor-pointer" : "cursor-default"
       )}
       onClick={handleClick}
     >
@@ -54,6 +59,7 @@ export const BaseScoreQuestion = ({
   options,
   value,
   onChange,
+  disabled,
 }: BaseScoreQuestionProps) => {
   const [internalValue, setInternalValue] = useState(value)
 
@@ -61,23 +67,26 @@ export const BaseScoreQuestion = ({
     setInternalValue(value)
   }, [value])
 
-  const handleChange = (params: BaseQuestionOnChangeParams) => {
-    onChange?.({
-      ...params,
-      type: "score",
-      value: internalValue,
-    })
-  }
+  const handleChange = useCallback(
+    (params: BaseQuestionOnChangeParams) => {
+      if (internalValue === undefined) return
+
+      onChange?.({
+        ...params,
+        type: "score",
+        value: internalValue,
+      })
+    },
+    [internalValue, onChange]
+  )
 
   useEffect(() => {
-    onChange?.({
+    handleChange({
       id,
       title,
       description,
-      type: "score",
-      value: internalValue,
     })
-  }, [id, title, description, onChange, internalValue])
+  }, [id, title, description, handleChange])
 
   return (
     <BaseQuestion
@@ -94,6 +103,7 @@ export const BaseScoreQuestion = ({
             label={option.label}
             selected={internalValue === option.value}
             onClick={setInternalValue}
+            disabled={disabled}
           />
         ))}
       </div>

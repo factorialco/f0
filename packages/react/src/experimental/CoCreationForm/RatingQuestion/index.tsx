@@ -9,7 +9,7 @@ type OnChangeParams = BaseScoreQuestionOnChangeParams
 
 export type RatingQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
-    value: number
+    value?: number
     onChange?: (params: OnChangeParams) => void
   } & (
       | { range: { min: number; max: number } }
@@ -22,6 +22,7 @@ export const RatingQuestion = ({
   description,
   value,
   onChange,
+  disabled,
   ...props
 }: RatingQuestionProps) => {
   const options = useMemo(() => {
@@ -46,6 +47,7 @@ export const RatingQuestion = ({
       value={value}
       options={options}
       onChange={onChange}
+      disabled={disabled}
     />
   )
 }

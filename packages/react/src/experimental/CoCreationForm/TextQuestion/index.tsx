@@ -25,6 +25,7 @@ export const TextQuestion = ({
   text: textProp,
   type,
   onChange,
+  disabled,
 }: TextQuestionProps) => {
   const [text, setText] = useState(textProp)
 
@@ -34,6 +35,11 @@ export const TextQuestion = ({
       text,
       type,
     })
+  }
+
+  const handleChangeText = (value: string) => {
+    if (disabled) return
+    setText(value)
   }
 
   useEffect(() => {
@@ -46,6 +52,8 @@ export const TextQuestion = ({
     })
   }, [id, title, description, onChange, text])
 
+  const placeholder = "Respondent’s answer"
+
   return (
     <BaseQuestion
       id={id}
@@ -57,19 +65,22 @@ export const TextQuestion = ({
         {type === "text" && (
           <Input
             type="text"
-            value={text}
-            onChange={setText}
-            placeholder="Respondent’s answer"
-            label=""
+            size="md"
+            value={disabled ? placeholder : text}
+            onChange={handleChangeText}
+            placeholder={placeholder}
+            disabled={disabled}
+            label="Answer"
             hideLabel
           />
         )}
         {type === "longText" && (
           <Textarea
-            value={text}
-            onChange={setText}
-            placeholder="Respondent’s answer"
-            label=""
+            value={disabled ? placeholder : text}
+            onChange={handleChangeText}
+            placeholder={placeholder}
+            disabled={disabled}
+            label="Answer"
             rows={4}
             hideLabel
           />

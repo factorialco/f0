@@ -61,3 +61,14 @@ export const WithEmojiOptions = {
     ],
   },
 }
+
+export const Disabled: Story = {
+  args: {
+    id: "question-5",
+    title: "Satisfaction level",
+    description: "Rate from 1 to 10",
+    value: 0,
+    range: { min: 1, max: 10 },
+    disabled: true,
+  },
+}

@@ -7,6 +7,7 @@ export type BaseQuestionProps = {
   description?: string
   children: React.ReactNode
   onChange?: (params: BaseQuestionOnChangeParams) => void
+  disabled?: boolean
 }
 
 export type BaseQuestionPropsForOtherQuestionComponents = Omit<
