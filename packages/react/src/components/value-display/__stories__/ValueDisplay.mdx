@@ -494,6 +494,7 @@ type value = {
     lastName: string
     src?: string // the avatar image
     badge?: AvatarBadge
+    deactivated?: boolean
 }
 
 type AvatarBadge = ({
@@ -518,6 +519,25 @@ render: (item) => ({
         firstName: 'John',
         lastName: 'Doe',
         src: '/pth/to/the/avatar.png'
+    }
+})
+`,
+  }}
+/>
+
+**For deactivated person**
+
+<Canvas
+  of={ValueDisplayStories.PersonType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'person'
+    value: {
+        firstName: 'John',
+        lastName: 'Doe',
+        src: '/pth/to/the/avatar.png',
+        deactivated: true
     }
 })
 `,
