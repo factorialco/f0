@@ -66,10 +66,10 @@ export const F0Chart = ({
   // Set theme
   const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
   function updateDarkMode() {
-    const isDarkMode = darkModeMediaQuery.matches
-    console.log("isDarkMode", isDarkMode)
     chart.current?.setTheme("f0.light")
-    //isDarkMode ? "f0.dark" : "f0.light")
+    // TODO: Implement dark mode theme switching
+    // const isDarkMode = darkModeMediaQuery.matches
+    // chart.current?.setTheme(isDarkMode ? "f0.dark" : "f0.light")
   }
 
   darkModeMediaQuery.addEventListener("change", () => {
