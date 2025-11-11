@@ -25,6 +25,7 @@ import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag.tsx';
 import { F0IconProps as F0IconProps_2 } from './F0Icon';
+import { F0SelectProps as F0SelectProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FileCellValue } from '../../value-display/types/file';
 import { FileCellValue as FileCellValue_2 } from './types/file.tsx';
@@ -76,6 +77,14 @@ import { VariantProps } from 'cva';
 export declare type Action = UpsellAction | RegularAction;
 
 declare type Action_2 = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    variant?: F0ButtonProps["variant"];
+    disabled?: boolean;
+};
+
+declare type Action_3 = {
     label: string;
     onClick: () => void;
     icon?: IconType;
@@ -2062,6 +2071,75 @@ export declare const F0Provider: React.FC<{
     dataCollectionStorageHandler?: DataCollectionStorageHandler;
 }>;
 
+export declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
+    ref?: React.Ref<HTMLButtonElement>;
+}) => React.ReactElement;
+
+export declare type F0SelectItemObject<T, R = unknown> = {
+    type?: "item";
+    value: T;
+    label: string;
+    description?: string;
+    avatar?: AvatarVariant;
+    tag?: string;
+    icon?: IconType;
+    item?: R;
+    disabled?: boolean;
+};
+
+export declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R> | {
+    type: "separator";
+};
+
+/**
+ * Select component for choosing from a list of options.
+ *
+ * @template T - The type of the emitted  value
+ * @template R - The type of the record/item data (used with data source)
+ *
+ */
+export declare type F0SelectProps<T extends string, R = unknown> = {
+    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
+    children?: React.ReactNode;
+    open?: boolean;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    onSearchChange?: (value: string) => void;
+    searchValue?: string;
+    onOpenChange?: (open: boolean) => void;
+    searchEmptyMessage?: string;
+    className?: string;
+    selectContentClassName?: string;
+    actions?: Action_2[];
+} & ({
+    clearable?: false;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+} | {
+    clearable: true;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+} | {
+    multiple: true;
+    clearable?: boolean;
+    value?: T[];
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[];
+    onChange?: (value: T[], originalItems: ResolvedRecordType<R>[], options: F0SelectItemObject<T, ResolvedRecordType<R>>[]) => void;
+}) & ({
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
+    options?: never;
+} | {
+    source?: never;
+    mapOptions?: never;
+    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T, unknown>[];
+}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
 export declare const F0TagAlert: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLDivElement>>;
 
 export declare const F0TagBalance: ForwardRefExoticComponent<TagBalanceProps & RefAttributes<HTMLDivElement>>;
@@ -3003,8 +3081,8 @@ declare type ProductModalProps = {
         label: string;
         variant?: Variant;
     };
-    primaryAction?: Action_2;
-    secondaryAction?: Action_2;
+    primaryAction?: Action_3;
+    secondaryAction?: Action_3;
     portalContainer?: HTMLElement | null;
     showResponseDialog?: boolean;
 };
@@ -3143,6 +3221,8 @@ declare type RegularAction = BaseAction & {
 
 declare type RendererDefinition = ValueDisplayRendererDefinition;
 
+export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
+
 declare type SearchFilterDefinition = BaseFilterDefinition<"search">;
 
 declare type SearchOptions = {
@@ -3206,6 +3286,8 @@ export declare type SelectedItemsState = {
         checked: boolean;
     }>;
 };
+
+export declare const selectSizes: readonly ["sm", "md"];
 
 /**
  * Response structure for non-paginated data

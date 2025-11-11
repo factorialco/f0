@@ -30,6 +30,7 @@ import { DotTagCellValue } from './types/dotTag.tsx';
 import { DotTagCellValue as DotTagCellValue_2 } from '../../value-display/types/dotTag';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
+import { F0SelectProps as F0SelectProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FieldPath } from 'react-hook-form';
@@ -215,7 +216,9 @@ declare type ActionLinkProps = ActionBaseProps & {
     className?: string;
 };
 
-declare type ActionProps = {
+declare type ActionProps = ActionLinkProps | ActionButtonProps;
+
+declare type ActionProps_2 = {
     buttonType: "gradient" | "internal";
     label: string;
     onClick: () => void;
@@ -223,8 +226,6 @@ declare type ActionProps = {
     buttonVariant?: ButtonVariant;
     icon?: IconType;
 };
-
-declare type ActionProps_2 = ActionLinkProps | ActionButtonProps;
 
 declare type ActionProps_3 = {
     /**
@@ -461,7 +462,7 @@ export declare type AiPromotionChatProviderProps = {
         noBoldText: string;
         boldText: string;
     }[];
-    actions?: ActionProps[];
+    actions?: ActionProps_2[];
     onShow?: () => void;
     onHide?: () => void;
     children: React.ReactNode;
@@ -498,7 +499,7 @@ declare interface AiPromotionChatState {
         noBoldText: string;
         boldText: string;
     }[];
-    actions?: ActionProps[];
+    actions?: ActionProps_2[];
     onShow?: () => void;
     onHide?: () => void;
 }
@@ -897,18 +898,18 @@ export declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
     externalSearch?: boolean;
     onChange: BreadcrumbSelectProps<string, RecordType>["onChange"];
     value?: string;
-    defaultItem?: SelectItemObject<string, RecordType>;
+    defaultItem?: F0SelectItemObject<string, RecordType>;
 } & ({
     source: DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>;
-    mapOptions: (item: RecordType) => SelectItemProps<string>;
+    mapOptions: (item: RecordType) => F0SelectItemProps<string>;
     options?: never;
 } | {
     source?: never;
     mapOptions?: never;
-    options: SelectItemProps<string, RecordType>[];
+    options: F0SelectItemProps<string, RecordType>[];
 });
 
-export declare type BreadcrumbSelectProps<T extends string, R = unknown> = SelectProps<T, R> & {
+export declare type BreadcrumbSelectProps<T extends string, R = unknown> = F0SelectProps<T, R> & {
     multiple?: false;
 };
 
@@ -999,7 +1000,7 @@ declare type ButtonDropdownItem<T = string> = {
     description?: string;
 };
 
-declare type ButtonInternalProps = Pick<ActionProps_2, "size" | "disabled" | "className" | "pressed" | "compact" | "variant" | "tooltip"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "variant" | "tooltip"> & DataAttributes & {
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
@@ -2553,6 +2554,83 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
+
+declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
+    ref?: React.Ref<HTMLButtonElement>;
+}) => React.ReactElement;
+export { F0Select }
+export { F0Select as Select }
+
+declare type F0SelectItemObject<T, R = unknown> = {
+    type?: "item";
+    value: T;
+    label: string;
+    description?: string;
+    avatar?: AvatarVariant;
+    tag?: string;
+    icon?: IconType;
+    item?: R;
+    disabled?: boolean;
+};
+export { F0SelectItemObject }
+export { F0SelectItemObject as SelectItemObject }
+
+declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R> | {
+    type: "separator";
+};
+export { F0SelectItemProps }
+export { F0SelectItemProps as SelectItemProps }
+
+/**
+ * Select component for choosing from a list of options.
+ *
+ * @template T - The type of the emitted  value
+ * @template R - The type of the record/item data (used with data source)
+ *
+ */
+declare type F0SelectProps<T extends string, R = unknown> = {
+    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
+    children?: React.ReactNode;
+    open?: boolean;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    onSearchChange?: (value: string) => void;
+    searchValue?: string;
+    onOpenChange?: (open: boolean) => void;
+    searchEmptyMessage?: string;
+    className?: string;
+    selectContentClassName?: string;
+    actions?: Action[];
+} & ({
+    clearable?: false;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+} | {
+    clearable: true;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+} | {
+    multiple: true;
+    clearable?: boolean;
+    value?: T[];
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[];
+    onChange?: (value: T[], originalItems: ResolvedRecordType<R>[], options: F0SelectItemObject<T, ResolvedRecordType<R>>[]) => void;
+}) & ({
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
+    options?: never;
+} | {
+    source?: never;
+    mapOptions?: never;
+    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T, unknown>[];
+}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+export { F0SelectProps }
+export { F0SelectProps as SelectProps }
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 
@@ -4579,10 +4657,6 @@ declare type SectionProps = {
     onItemVisible?: (id: string) => void;
 };
 
-export declare const Select: <T extends string = string, R = unknown>(props: SelectProps<T, R> & {
-    ref?: React.Ref<HTMLButtonElement>;
-}) => React.ReactElement;
-
 /**
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
@@ -4614,71 +4688,6 @@ export declare type SelectedItemsState = {
         checked: boolean;
     }>;
 };
-
-export declare type SelectItemObject<T, R = unknown> = {
-    type?: "item";
-    value: T;
-    label: string;
-    description?: string;
-    avatar?: AvatarVariant;
-    tag?: string;
-    icon?: IconType;
-    item?: R;
-    disabled?: boolean;
-};
-
-export declare type SelectItemProps<T, R = unknown> = SelectItemObject<T, R> | {
-    type: "separator";
-};
-
-/**
- * Select component for choosing from a list of options.
- *
- * @template T - The type of the emitted  value
- * @template R - The type of the record/item data (used with data source)
- *
- */
-export declare type SelectProps<T extends string, R = unknown> = {
-    onChangeSelectedOption?: (option: SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
-    children?: React.ReactNode;
-    open?: boolean;
-    showSearchBox?: boolean;
-    searchBoxPlaceholder?: string;
-    onSearchChange?: (value: string) => void;
-    searchValue?: string;
-    onOpenChange?: (open: boolean) => void;
-    searchEmptyMessage?: string;
-    className?: string;
-    selectContentClassName?: string;
-    actions?: Action[];
-} & ({
-    clearable?: false;
-    multiple?: false;
-    value?: T;
-    defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: SelectItemObject<T, ResolvedRecordType<R>>) => void;
-} | {
-    clearable: true;
-    multiple?: false;
-    value?: T;
-    defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: SelectItemObject<T, ResolvedRecordType<R>>) => void;
-} | {
-    multiple: true;
-    clearable?: boolean;
-    value?: T[];
-    defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>[];
-    onChange?: (value: T[], originalItems: ResolvedRecordType<R>[], options: SelectItemObject<T, ResolvedRecordType<R>>[]) => void;
-}) & ({
-    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
-    mapOptions: (item: ResolvedRecordType<R>) => SelectItemProps<T, ResolvedRecordType<R>>;
-    options?: never;
-} | {
-    source?: never;
-    mapOptions?: never;
-    searchFn?: (option: SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 export declare const selectSizes: readonly ["sm", "md"];
 
