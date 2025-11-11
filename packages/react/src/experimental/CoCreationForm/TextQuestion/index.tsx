@@ -16,7 +16,6 @@ export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   type: "text" | "longText"
   text: string
   onChange?: (params: OnChangeParams) => void
-  isLongText?: boolean
 }
 
 export const TextQuestion = ({
@@ -71,6 +70,7 @@ export const TextQuestion = ({
             onChange={setText}
             placeholder="Respondent’s answer"
             label=""
+            rows={4}
             hideLabel
           />
         )}

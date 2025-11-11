@@ -34,10 +34,12 @@ export const WithInitialText: Story = {
   },
 }
 
-export const WithoutDescription: Story = {
+export const LongText: Story = {
   args: {
-    id: "question-3",
+    id: "question-4",
     title: "What would you like to share?",
+    description: "Share as much detail as you can",
     text: "",
+    type: "longText",
   },
 }
