@@ -10,7 +10,6 @@ type OnChangeParams = BaseScoreQuestionOnChangeParams
 export type RatingQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     value: number
-
     onChange?: (params: OnChangeParams) => void
   } & (
       | { range: { min: number; max: number } }

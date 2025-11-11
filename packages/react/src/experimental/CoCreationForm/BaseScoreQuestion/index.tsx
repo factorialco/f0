@@ -1,3 +1,4 @@
+import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import {
@@ -36,12 +37,12 @@ const ScoreOption = ({
   return (
     <div
       className={cn(
-        "flex h-10 min-w-20 flex-1 cursor-pointer items-center justify-center rounded-md border border-solid border-f1-border-secondary",
+        "flex h-10 min-w-20 flex-1 cursor-pointer items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
         selected && "border-f1-border-selected-bold"
       )}
       onClick={handleClick}
     >
-      <span className="text-center font-medium">{label}</span>
+      <EmojiImage emoji={label} size="sm" />
     </div>
   )
 }
