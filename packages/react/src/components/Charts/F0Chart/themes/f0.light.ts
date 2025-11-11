@@ -55,7 +55,6 @@ export const theme = {
       color: chartColor(baseColors.grey[80]),
       fontSize: 12,
     },
-    trigger: "item",
     position: function (
       point: [number, number],
       _params: unknown,
@@ -90,6 +89,10 @@ export const theme = {
 
   grid: {
     borderWidth: 0,
+    left: 10,
+    right: 10,
+    top: 10,
+    bottom: 10,
   },
 
   categoryAxis: {
@@ -107,6 +110,9 @@ export const theme = {
       color: chartColor(baseColors.grey[50]),
       fontSize: 12,
       fontWeight: "medium",
+      formatter: (value: string) => {
+        return value.slice(0, 3)
+      },
     },
   },
 
@@ -116,21 +122,15 @@ export const theme = {
       fontSize: 12,
       fontWeight: "medium",
     },
-    nameTruncate: {
-      maxWidth: 48,
-    },
-    nameGap: 10,
     axisLine: {
-      // Coordinate axis
       lineStyle: {
-        // Property 'lineStyle' controls line styles
         color: chartColor(baseColors.grey[10]),
+        type: "dashed",
+        dashOffset: 4,
       },
     },
     splitLine: {
-      // Separation line
       lineStyle: {
-        // Property 'lineStyle' (see lineStyle) controls line styles
         color: chartColor(baseColors.grey[10]),
       },
     },
@@ -222,6 +222,30 @@ export const theme = {
     },
   },
 
+  pie: {
+    emphasis: {
+      scale: false,
+    },
+    labelLine: {
+      smooth: true,
+      lineStyle: {
+        color: chartColor(baseColors.grey[30]),
+      },
+    },
+  },
+
+  funnel: {
+    orient: "horizontal",
+    gap: 0,
+    minSize: "1%",
+    label: {
+      show: false,
+    },
+    emphasis: {
+      disabled: true,
+    },
+  },
+
   legend: {
     selectedMode: false,
     textStyle: {
@@ -230,6 +254,7 @@ export const theme = {
       fontWeight: "medium",
     },
   },
+  animation: false,
 }
 
 registerTheme("f0.light", theme)

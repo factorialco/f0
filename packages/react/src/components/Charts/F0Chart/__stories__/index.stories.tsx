@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0Chart } from "../index"
+import { ChartDecorator } from "./decorators"
 
 const meta = {
   component: F0Chart,
   title: "Charts/F0Chart",
   tags: ["autodocs", "experimental"],
   parameters: {
-    layout: "centered",
     docs: {
       description: {
         component:
@@ -14,13 +14,7 @@ const meta = {
       },
     },
   },
-  decorators: [
-    (Story) => (
-      <div className="h-96 w-[640px]">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [ChartDecorator],
 } satisfies Meta<typeof F0Chart>
 
 export default meta
@@ -30,12 +24,6 @@ export const Default: Story = {
   render: (args) => <F0Chart {...args} />,
   args: {
     options: {
-      title: {
-        text: "Monthly Performance Review vs. Average",
-      },
-      tooltip: {
-        trigger: "axis",
-      },
       legend: {
         data: ["Employee", "Average"],
       },
@@ -58,7 +46,6 @@ export const Default: Story = {
       },
       yAxis: {
         type: "value",
-        name: "Performance Score",
       },
       series: [
         {
@@ -82,6 +69,33 @@ export const Default: Story = {
 
 export const WithCustomSize: Story = {
   ...Default,
+  args: {
+    options: {
+      ...Default.args?.options,
+      xAxis: {
+        type: "category",
+        data: [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ],
+        axisLabel: {
+          formatter: (value: string | number, _index: number) => {
+            return String(value).slice(0, 5)
+          },
+        },
+      },
+    },
+  },
   decorators: [
     (Story) => (
       <div className="h-64 w-full max-w-2xl">

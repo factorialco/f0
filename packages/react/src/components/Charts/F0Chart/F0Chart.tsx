@@ -6,7 +6,15 @@ import "./themes/f0.light"
 // @ts-expect-error - Duplicate echarts types in dependency tree
 echarts.use(AriaComponent)
 
-export const F0Chart = ({ options }: { options: echarts.EChartsOption }) => {
+interface F0ChartProps {
+  showLegend?: boolean
+  options?: Partial<Omit<echarts.EChartsOption, "grid" | "emphasis">>
+}
+
+export const F0Chart = ({
+  showLegend = true,
+  options: customOptions = {},
+}: F0ChartProps) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const chart = useRef<echarts.ECharts | null>(null)
@@ -17,25 +25,38 @@ export const F0Chart = ({ options }: { options: echarts.EChartsOption }) => {
   }, [ref])
 
   const optionsWithDefaults = useMemo(() => {
-    const optionsDefaults = {
-      aria: {
-        role: "img",
-        labelledby: "chart-title",
-      },
+    const baseOptions: echarts.EChartsOption = {
+      legend: showLegend
+        ? {
+            show: true,
+            bottom: "5%",
+            left: "center",
+          }
+        : undefined,
       grid: {
-        left: 10,
-        right: 20,
-        top: "title" in options ? 50 : 10,
-        bottom: "legend" in options ? 70 : 10,
+        bottom: showLegend ? 70 : 10,
       },
-      legend: {
-        ...options.legend,
-        show: options.legend ? true : false,
+      emphasis: {
+        label: {
+          show: false,
+        },
+        itemStyle: {
+          shadowBlur: 0,
+          shadowOffsetX: 0,
+          shadowColor: "transparent",
+        },
+      },
+      tooltip: {
+        trigger:
+          Array.isArray(customOptions.series) &&
+          customOptions.series[0]?.type === "pie"
+            ? "item"
+            : "axis",
       },
     }
 
-    return Object.assign({}, optionsDefaults, options)
-  }, [options])
+    return Object.assign({}, baseOptions, customOptions)
+  }, [showLegend, customOptions])
 
   useEffect(() => {
     chart.current?.setOption(optionsWithDefaults)
@@ -55,11 +76,5 @@ export const F0Chart = ({ options }: { options: echarts.EChartsOption }) => {
   })
   updateDarkMode()
 
-  return (
-    <div
-      ref={ref}
-      className="h-full w-full"
-      style={{ border: "1px solid red" }}
-    />
-  )
+  return <div ref={ref} className="h-full w-full" />
 }
