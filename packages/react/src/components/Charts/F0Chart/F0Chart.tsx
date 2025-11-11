@@ -20,7 +20,7 @@ export const F0Chart = ({
   const chart = useRef<echarts.ECharts | null>(null)
   useEffect(() => {
     if (ref.current) {
-      chart.current = echarts.init(ref.current)
+      chart.current = echarts.init(ref.current, "f0.light")
     }
   }, [ref])
 
@@ -63,19 +63,16 @@ export const F0Chart = ({
     chart.current?.setOption(optionsWithDefaults)
   }, [optionsWithDefaults, chart])
 
-  // Set theme
-  const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-  function updateDarkMode() {
-    chart.current?.setTheme("f0.light")
-    // TODO: Implement dark mode theme switching
-    // const isDarkMode = darkModeMediaQuery.matches
-    // chart.current?.setTheme(isDarkMode ? "f0.dark" : "f0.light")
-  }
-
-  darkModeMediaQuery.addEventListener("change", () => {
-    updateDarkMode()
-  })
-  updateDarkMode()
+  // TODO: Implement dark mode theme switching
+  // const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+  // function updateDarkMode() {
+  //   const isDarkMode = darkModeMediaQuery.matches
+  //   chart.current?.setTheme(isDarkMode ? "f0.dark" : "f0.light")
+  // }
+  // darkModeMediaQuery.addEventListener("change", () => {
+  //   updateDarkMode()
+  // })
+  // updateDarkMode()
 
   return <div ref={ref} className="h-full w-full" />
 }
