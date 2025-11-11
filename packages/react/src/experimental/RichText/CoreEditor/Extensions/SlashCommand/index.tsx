@@ -3,7 +3,6 @@ import { Editor, Extension, ReactRenderer } from "@tiptap/react"
 import { Suggestion } from "@tiptap/suggestion"
 import React from "react"
 import { createRoot, Root } from "react-dom/client"
-import { ToolbarLabels } from "../../Toolbar/types"
 import {
   AIBlockConfig,
   availableCommands,
@@ -14,7 +13,7 @@ import {
 import { CommandList } from "./CommandList"
 
 const createSlashCommandExtension = (
-  labels: ToolbarLabels,
+  labels: Record<string, string>,
   groupLabels?: SlashCommandGroupLabels,
   aiBlockConfig?: AIBlockConfig
 ) =>

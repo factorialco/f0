@@ -23,6 +23,7 @@ import {
   Strikethrough,
   Underline,
 } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Editor } from "@tiptap/react"
 import { compact } from "lodash"
@@ -47,11 +48,12 @@ export const Toolbar = ({
   disableButtons,
   onClose,
   animationComplete = true,
-  labels,
   darkMode = false,
   showEmojiPicker = true,
   plainHtmlMode = false,
 }: ToolbarProps) => {
+  const translations = useI18n()
+
   // Format buttons configuration
   const formatButtons: ButtonConfig[] = [
     {
@@ -60,7 +62,7 @@ export const Toolbar = ({
       active: (editor) => editor.isActive("bold"),
       onClick: (editor) => editor.chain().focus().toggleBold().run(),
       tooltip: {
-        label: `**${labels.bold}**`,
+        label: `**${translations.richTextEditor.bold}**`,
         shortcut: ["cmd", "b"],
       },
     },
@@ -70,7 +72,7 @@ export const Toolbar = ({
       active: (editor) => editor.isActive("italic"),
       onClick: (editor) => editor.chain().focus().toggleItalic().run(),
       tooltip: {
-        label: `*${labels.italic}*`,
+        label: `*${translations.richTextEditor.italic}*`,
         shortcut: ["cmd", "i"],
       },
     },
@@ -80,7 +82,7 @@ export const Toolbar = ({
       active: (editor) => editor.isActive("underline"),
       onClick: (editor) => editor.chain().focus().toggleUnderline().run(),
       tooltip: {
-        label: `_${labels.underline}_`,
+        label: `_${translations.richTextEditor.underline}_`,
         shortcut: ["cmd", "u"],
       },
     },
@@ -90,7 +92,7 @@ export const Toolbar = ({
       active: (editor) => editor.isActive("strike"),
       onClick: (editor) => editor.chain().focus().toggleStrike().run(),
       tooltip: {
-        label: `~${labels.strike}~`,
+        label: `~${translations.richTextEditor.strike}~`,
         shortcut: ["cmd", "shift", "s"],
       },
     },
@@ -105,7 +107,7 @@ export const Toolbar = ({
       onClick: (editor) =>
         editor.chain().focus().toggleHeading({ level: 1 }).run(),
       tooltip: {
-        label: `# ${labels.heading1}`,
+        label: `# ${translations.richTextEditor.heading1}`,
         shortcut: ["cmd", "1"],
       },
     },
@@ -116,7 +118,7 @@ export const Toolbar = ({
       onClick: (editor) =>
         editor.chain().focus().toggleHeading({ level: 2 }).run(),
       tooltip: {
-        label: `## ${labels.heading2}`,
+        label: `## ${translations.richTextEditor.heading2}`,
         shortcut: ["cmd", "2"],
       },
     },
@@ -127,7 +129,7 @@ export const Toolbar = ({
       onClick: (editor) =>
         editor.chain().focus().toggleHeading({ level: 3 }).run(),
       tooltip: {
-        label: `### ${labels.heading3}`,
+        label: `### ${translations.richTextEditor.heading3}`,
         shortcut: ["cmd", "3"],
       },
     },
@@ -141,7 +143,7 @@ export const Toolbar = ({
       active: (editor) => editor.isActive("bulletList"),
       onClick: (editor) => editor.chain().focus().toggleBulletList().run(),
       tooltip: {
-        label: `- ${labels.bulletList}`,
+        label: `- ${translations.richTextEditor.bulletList}`,
         shortcut: ["cmd", "alt", "8"],
       },
     },
@@ -151,7 +153,7 @@ export const Toolbar = ({
       active: (editor) => editor.isActive("orderedList"),
       onClick: (editor) => editor.chain().focus().toggleOrderedList().run(),
       tooltip: {
-        label: `1. ${labels.orderedList}`,
+        label: `1. ${translations.richTextEditor.orderedList}`,
         shortcut: ["cmd", "alt", "7"],
       },
     },
@@ -164,7 +166,7 @@ export const Toolbar = ({
             onClick: (editor: Editor) =>
               editor.chain().focus().toggleTaskList().run(),
             tooltip: {
-              label: `[ ] ${labels.taskList}`,
+              label: `[ ] ${translations.richTextEditor.taskList}`,
               shortcut: ["cmd", "alt", "t"],
             },
           },
@@ -175,7 +177,7 @@ export const Toolbar = ({
             onClick: (editor: Editor) =>
               editor.chain().focus().toggleHighlight().run(),
             tooltip: {
-              label: `==${labels.highlight}==`,
+              label: `==${translations.richTextEditor.highlight}==`,
               shortcut: ["cmd", "alt", "h"],
             },
           },
@@ -189,7 +191,11 @@ export const Toolbar = ({
       {configs.map((config) => (
         <F0ButtonToggle
           key={config.key}
-          label={labels[config.key as keyof typeof labels]}
+          label={
+            translations.richTextEditor[
+              config.key as keyof typeof translations.richTextEditor
+            ]
+          }
           icon={config.icon}
           selected={config.active(editor)}
           disabled={disableButtons}
@@ -208,7 +214,7 @@ export const Toolbar = ({
         darkMode={darkMode}
         items={[
           {
-            label: labels.left,
+            label: translations.richTextEditor.left,
             icon: AlignTextLeft,
             onClick: () => editor.chain().focus().setTextAlign("left").run(),
             isActive:
@@ -218,19 +224,19 @@ export const Toolbar = ({
                 !editor.isActive({ textAlign: "right" })),
           },
           {
-            label: labels.center,
+            label: translations.richTextEditor.center,
             icon: AlignTextCenter,
             onClick: () => editor.chain().focus().setTextAlign("center").run(),
             isActive: editor.isActive({ textAlign: "center" }),
           },
           {
-            label: labels.right,
+            label: translations.richTextEditor.right,
             icon: AlignTextRight,
             onClick: () => editor.chain().focus().setTextAlign("right").run(),
             isActive: editor.isActive({ textAlign: "right" }),
           },
           {
-            label: labels.justify,
+            label: translations.richTextEditor.justify,
             icon: AlignTextJustify,
             onClick: () => editor.chain().focus().setTextAlign("justify").run(),
             isActive: editor.isActive({ textAlign: "justify" }),
@@ -251,26 +257,26 @@ export const Toolbar = ({
         items={[
           {
             icon: Code,
-            label: labels.codeBlock,
+            label: translations.richTextEditor.codeBlock,
             onClick: () => editor.chain().focus().toggleCodeBlock().run(),
             isActive: editor.isActive("codeBlock"),
           },
           {
             icon: Minus,
-            label: labels.divider,
+            label: translations.richTextEditor.divider,
             onClick: () => editor.chain().focus().setHorizontalRule().run(),
             isActive: editor.isActive("horizontalRule"),
           },
           {
             icon: Quote,
-            label: labels.quote,
+            label: translations.richTextEditor.quote,
             onClick: () => editor.chain().focus().toggleBlockquote().run(),
             isActive: editor.isActive("blockquote"),
           },
         ]}
         disabled={disableButtons}
         activator={{
-          label: labels.moreOptions,
+          label: translations.richTextEditor.moreOptions,
           icon: Ellipsis,
         }}
       />
@@ -278,12 +284,7 @@ export const Toolbar = ({
   )
 
   const linkGroup = [
-    <LinkPopup
-      key="link-popup"
-      editor={editor}
-      disabled={disableButtons}
-      labels={labels}
-    />,
+    <LinkPopup key="link-popup" editor={editor} disabled={disableButtons} />,
   ]
 
   const emojiGroup = (
@@ -315,7 +316,7 @@ export const Toolbar = ({
           size="md"
           disabled={disableButtons}
           hideLabel
-          label={labels.close}
+          label={translations.richTextEditor.close}
           icon={Cross}
         />
       )}
@@ -338,4 +339,4 @@ export { LinkPopup } from "./LinkPopup"
 export { ToolbarButton } from "./ToolbarButton"
 export { ToolbarDivider } from "./ToolbarDivider"
 export { ToolbarDropdown } from "./ToolbarDropdown"
-export type { ButtonConfig, ToolbarLabels, ToolbarProps } from "./types"
+export type { ButtonConfig, ToolbarProps } from "./types"

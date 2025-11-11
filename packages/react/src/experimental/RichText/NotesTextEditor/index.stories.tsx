@@ -12,38 +12,6 @@ const meta: Meta<typeof NotesTextEditor> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const defaultToolbarLabels = {
-  bold: "Bold",
-  italic: "Italic",
-  underline: "Underline",
-  strike: "Strikethrough",
-  highlight: "Highlight",
-  heading1: "Heading 1",
-  heading2: "Heading 2",
-  heading3: "Heading 3",
-  left: "Left",
-  center: "Center",
-  right: "Right",
-  justify: "Justify",
-  bulletList: "Bullet List",
-  orderedList: "Ordered List",
-  taskList: "Task List",
-  codeBlock: "Code Block",
-  horizontalRule: "Horizontal Rule",
-  quote: "Quote",
-  moreOptions: "More Options",
-  code: "Code",
-  divider: "Divider",
-  bullet: "Bullet",
-  ordered: "Ordered",
-  task: "Task",
-  details: "drop-down",
-  linkPlaceholder: "Enter URL...",
-  linkLabel: "Link",
-  linkPaste: "Paste",
-  close: "Close",
-}
-
 const defaultSlashCommandGroupLabels = {
   textStyles: "Text Styles",
   lists: "Lists",
@@ -129,7 +97,6 @@ export const Default: Story = {
   args: {
     placeholder: "Enter '/' to open the command palette...",
     labels: {
-      toolbarLabels: defaultToolbarLabels,
       slashCommandGroupLabels: defaultSlashCommandGroupLabels,
       aiBlockLabels: defaultAIBlockLabels,
       moodTrackerLabels: defaultMoodTrackerLabels,

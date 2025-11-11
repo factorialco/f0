@@ -15,7 +15,6 @@ import {
   TaskListExtension,
   TextAlignExtension,
   TextStyleExtension,
-  ToolbarLabels,
   TypographyExtension,
   UnderlineExtension,
 } from "@/experimental/RichText/CoreEditor"
@@ -37,7 +36,7 @@ import {
 
 export const createAIBlockEditorExtensions = (
   placeholder: string,
-  toolbarLabels: ToolbarLabels,
+  toolbarLabels: Record<string, string>,
   groupLabels?: SlashCommandGroupLabels,
   moodTrackerLabels?: MoodTrackerLabels,
   liveCompanionLabels?: LiveCompanionLabels,

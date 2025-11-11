@@ -2,7 +2,6 @@ import {
   EditorBubbleMenu,
   MentionedUser,
   MentionsConfig,
-  ToolbarLabels,
 } from "@/experimental/RichText/CoreEditor"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
@@ -60,7 +59,6 @@ interface RichTextEditorProps {
     content?: string
     files?: File[]
   }
-  toolbarLabels: ToolbarLabels
   title: string
   errorConfig?: errorConfig
   height?: heightType
@@ -90,7 +88,6 @@ const RichTextEditorComponent = forwardRef<
     initialEditorState,
     onChange,
     placeholder,
-    toolbarLabels,
     title,
     errorConfig,
     height = "auto",
@@ -370,7 +367,6 @@ const RichTextEditorComponent = forwardRef<
             isFullscreen={isFullscreen}
             onEnhanceWithAI={handleEnhanceWithAI}
             setLastIntent={setLastIntent}
-            toolbarLabels={toolbarLabels}
             setIsToolbarOpen={setIsToolbarOpen}
             isToolbarOpen={isToolbarOpen}
             plainHtmlMode={plainHtmlMode}
@@ -380,7 +376,6 @@ const RichTextEditorComponent = forwardRef<
             editorId={editorId}
             editor={editor}
             disableButtons={disableAllButtons}
-            toolbarLabels={toolbarLabels}
             isToolbarOpen={isToolbarOpen}
             isFullscreen={isFullscreen}
             plainHtmlMode={plainHtmlMode}

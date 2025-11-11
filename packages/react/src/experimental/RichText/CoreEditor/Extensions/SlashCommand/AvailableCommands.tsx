@@ -12,7 +12,6 @@ import {
   Quote,
 } from "@/icons/app"
 import { Editor } from "@tiptap/react"
-import { ToolbarLabels } from "../../Toolbar/types"
 import { AIBlockConfig } from "../AIBlock"
 
 interface CommandItem {
@@ -35,7 +34,7 @@ interface SlashCommandGroupLabels {
 }
 
 const availableCommands = (
-  labels: ToolbarLabels,
+  labels: Record<string, string>,
   aiBlockConfig?: AIBlockConfig
 ): CommandItem[] => {
   // Get grouped commands and flatten them for backward compatibility
@@ -49,7 +48,7 @@ const availableCommands = (
 }
 
 const getGroupedCommands = (
-  labels: ToolbarLabels,
+  labels: Record<string, string>,
   groupLabels: SlashCommandGroupLabels,
   aiBlockConfig?: AIBlockConfig
 ): CommandGroup[] => [

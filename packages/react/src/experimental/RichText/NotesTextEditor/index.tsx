@@ -1,8 +1,9 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { Toolbar, ToolbarLabels } from "@/experimental/RichText/CoreEditor"
+import { Toolbar } from "@/experimental/RichText/CoreEditor"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { Handle, Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
@@ -35,7 +36,6 @@ interface NotesTextEditorProps {
   aiBlockConfig?: AIBlockConfig
   onTitleChange?: (title: string) => void
   labels: {
-    toolbarLabels: ToolbarLabels
     slashCommandGroupLabels?: SlashCommandGroupLabels
     aiBlockLabels?: AIBlockLabels
     moodTrackerLabels?: MoodTrackerLabels
@@ -66,8 +66,10 @@ const NotesTextEditorComponent = forwardRef<
   },
   ref
 ) {
+  const translations = useI18n()
+  const toolbarLabels = translations.richTextEditor
+
   const {
-    toolbarLabels,
     slashCommandGroupLabels,
     aiBlockLabels,
     moodTrackerLabels,
@@ -232,7 +234,6 @@ const NotesTextEditorComponent = forwardRef<
       {!readonly && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
           <Toolbar
-            labels={toolbarLabels}
             editor={editor}
             disableButtons={false}
             showEmojiPicker={false}

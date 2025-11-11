@@ -5,7 +5,6 @@ import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensio
 import { MoodTrackerLabels } from "@/experimental/RichText/CoreEditor/Extensions/MoodTracker"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { TranscriptLabels } from "@/experimental/RichText/CoreEditor/Extensions/Transcript"
-import { ToolbarLabels } from "@/experimental/RichText/CoreEditor/Toolbar/types"
 import { Skeleton } from "@/ui/skeleton"
 import { JSONContent, Node } from "@tiptap/core"
 import {
@@ -43,7 +42,7 @@ export interface AIBlockConfig {
 
 export interface AIBlockConfigWithLabels extends AIBlockConfig {
   labels?: AIBlockLabels
-  toolbarLabels: ToolbarLabels
+  toolbarLabels: Record<string, string>
   slashCommandGroupLabels?: SlashCommandGroupLabels
   moodTrackerLabels?: MoodTrackerLabels
   liveCompanionLabels?: LiveCompanionLabels

@@ -3,38 +3,6 @@ import { Shortcut } from "@/experimental/Information/Shortcut"
 import { Editor } from "@tiptap/react"
 import { ComponentProps } from "react"
 
-export interface ToolbarLabels {
-  bold: string
-  italic: string
-  underline: string
-  strike: string
-  highlight: string
-  heading1: string
-  heading2: string
-  heading3: string
-  left: string
-  center: string
-  right: string
-  justify: string
-  bulletList: string
-  orderedList: string
-  taskList: string
-  codeBlock: string
-  horizontalRule: string
-  quote: string
-  moreOptions: string
-  code: string
-  divider: string
-  bullet: string
-  ordered: string
-  task: string
-  linkPlaceholder: string
-  linkLabel: string
-  linkPaste: string
-  close: string
-  [key: string]: string
-}
-
 export interface ButtonConfig {
   key: string
   icon: IconType
@@ -73,7 +41,6 @@ export interface ToolbarProps {
   disableButtons: boolean
   onClose?: () => void
   animationComplete?: boolean
-  labels: ToolbarLabels
   darkMode?: boolean
   showEmojiPicker?: boolean
   plainHtmlMode?: boolean
