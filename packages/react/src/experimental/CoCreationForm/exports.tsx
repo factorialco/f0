@@ -1,1 +1,1 @@
-export * from "./TextQuestion"
+export * from "./Question"

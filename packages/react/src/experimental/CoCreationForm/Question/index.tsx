@@ -1,30 +1,37 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
+import { RatingQuestion, RatingQuestionProps } from "../RatingQuestion"
 import { TextQuestion, TextQuestionProps } from "../TextQuestion"
 
 export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &
-  TextQuestionProps
+  (TextQuestionProps | (RatingQuestionProps & { type: "rating" }))
 
 export const Question = ({
   id,
   title,
   description,
-  onChange,
-  type,
   ...props
 }: QuestionProps) => {
   const baseQuestionProps = {
     id,
     title,
     description,
-    onChange,
   }
 
-  if (type === "text" || type === "longText") {
+  if (props.type === "text" || props.type === "longText") {
     return (
       <TextQuestion
         {...baseQuestionProps}
-        type={type}
-        onChange={onChange}
+        onChange={props.onChange}
+        {...props}
+      />
+    )
+  }
+
+  if (props.type === "rating") {
+    return (
+      <RatingQuestion
+        {...baseQuestionProps}
+        onChange={props.onChange}
         {...props}
       />
     )
