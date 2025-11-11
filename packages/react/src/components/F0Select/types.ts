@@ -20,9 +20,9 @@ export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
  * @template R - The type of the record/item data (used with data source)
  *
  */
-export type SelectProps<T extends string, R = unknown> = {
+export type F0SelectProps<T extends string, R = unknown> = {
   onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined,
+    option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean
   ) => void
   children?: React.ReactNode
@@ -41,11 +41,11 @@ export type SelectProps<T extends string, R = unknown> = {
       clearable?: false
       multiple?: false
       value?: T
-      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
+      defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
       onChange?: (
         value: T,
         originalItem?: ResolvedRecordType<R> | undefined,
-        option?: SelectItemObject<T, ResolvedRecordType<R>>
+        option?: F0SelectItemObject<T, ResolvedRecordType<R>>
       ) => void
     }
   // Single select clearable
@@ -53,11 +53,11 @@ export type SelectProps<T extends string, R = unknown> = {
       clearable: true
       multiple?: false
       value?: T
-      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
+      defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
       onChange?: (
         value: T,
         originalItem?: ResolvedRecordType<R> | undefined,
-        option?: SelectItemObject<T, ResolvedRecordType<R>>
+        option?: F0SelectItemObject<T, ResolvedRecordType<R>>
       ) => void
     }
   // Multiple select
@@ -65,11 +65,11 @@ export type SelectProps<T extends string, R = unknown> = {
       multiple: true
       clearable?: boolean
       value?: T[]
-      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>[]
+      defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[]
       onChange?: (
         value: T[],
         originalItems: ResolvedRecordType<R>[],
-        options: SelectItemObject<T, ResolvedRecordType<R>>[]
+        options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
       ) => void
     }
 ) &
@@ -83,17 +83,17 @@ export type SelectProps<T extends string, R = unknown> = {
         >
         mapOptions: (
           item: ResolvedRecordType<R>
-        ) => SelectItemProps<T, ResolvedRecordType<R>>
+        ) => F0SelectItemProps<T, ResolvedRecordType<R>>
         options?: never
       }
     | {
         source?: never
         mapOptions?: never
         searchFn?: (
-          option: SelectItemProps<T, unknown>,
+          option: F0SelectItemProps<T, unknown>,
           search?: string
         ) => boolean | undefined
-        options: SelectItemProps<T, unknown>[]
+        options: F0SelectItemProps<T, unknown>[]
       }
   ) &
   Pick<
@@ -113,7 +113,7 @@ export type SelectProps<T extends string, R = unknown> = {
     | "hint"
   >
 
-export type SelectItemObject<T, R = unknown> = {
+export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
   value: T
   label: string
@@ -125,8 +125,8 @@ export type SelectItemObject<T, R = unknown> = {
   disabled?: boolean
 }
 
-export type SelectItemProps<T, R = unknown> =
-  | SelectItemObject<T, R>
+export type F0SelectItemProps<T, R = unknown> =
+  | F0SelectItemObject<T, R>
   | { type: "separator" }
 
 export const selectSizes = INPUTFIELD_SIZES

@@ -2,10 +2,10 @@ import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagList } from "@/components/tags/F0TagList"
 import { forwardRef } from "react"
-import type { SelectItemObject } from "../types"
+import type { F0SelectItemObject } from "../types"
 
 type SelectValueProps = {
-  selection: SelectItemObject<string>[]
+  selection: F0SelectItemObject<string>[]
   multiple?: boolean
 }
 

@@ -4,11 +4,11 @@ import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Search } from "../../../../../icons/app"
+import { Search } from "../../../icons/app"
 import { Select } from "../index"
-import type { SelectItemProps } from "../types"
+import type { F0SelectItemProps } from "../types"
 
-const mockOptions: SelectItemProps<string, RecordType>[] = [
+const mockOptions: F0SelectItemProps<string, RecordType>[] = [
   {
     value: "option1",
     label: "Option 1",
@@ -317,7 +317,7 @@ describe("Select", () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
-    const mockOptions: SelectItemProps<string>[] = [
+    const mockOptions: F0SelectItemProps<string>[] = [
       {
         value: "option1",
         label: "Option 1",

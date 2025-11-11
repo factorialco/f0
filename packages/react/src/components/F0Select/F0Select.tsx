@@ -30,14 +30,17 @@ import { SelectItem } from "./components/SelectItem"
 import { SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
 import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+  F0SelectProps,
   ResolvedRecordType,
-  SelectItemObject,
-  SelectItemProps,
-  SelectProps,
 } from "./types"
 export * from "./types"
 
-const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
+const defaultSearchFn = (
+  option: F0SelectItemProps<string>,
+  search?: string
+) => {
   return (
     option.type === "separator" ||
     !search ||
@@ -45,7 +48,7 @@ const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
   )
 }
 
-const SelectComponent = forwardRef(function Select<
+const F0SelectComponent = forwardRef(function Select<
   T extends string,
   R = unknown,
 >(
@@ -81,7 +84,7 @@ const SelectComponent = forwardRef(function Select<
     required,
     multiple,
     ...props
-  }: SelectProps<T, R>,
+  }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
@@ -89,7 +92,7 @@ const SelectComponent = forwardRef(function Select<
   const [openLocal, setOpenLocal] = useState(open)
 
   const defaultItems = toArray(props.defaultItem).filter(
-    (item): item is SelectItemObject<T, ResolvedRecordType<R>> =>
+    (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
       item !== undefined
   )
 
@@ -173,7 +176,7 @@ const SelectComponent = forwardRef(function Select<
    * Maps an item to a SelectItemProps<T, ActualRecordType>
    */
   const optionMapper = useCallback(
-    (item: ActualRecordType): SelectItemProps<T, ActualRecordType> => {
+    (item: ActualRecordType): F0SelectItemProps<T, ActualRecordType> => {
       if (source) {
         if (!mapOptions) {
           throw new Error("mapOptions is required when using a source")
@@ -181,7 +184,7 @@ const SelectComponent = forwardRef(function Select<
         return mapOptions(item)
       }
       // At this point, we are sure that options is an array of SelectItemProps<T, ActualRecordType>
-      return item as unknown as SelectItemProps<T, ActualRecordType>
+      return item as unknown as F0SelectItemProps<T, ActualRecordType>
     },
     [mapOptions, source]
   )
@@ -199,7 +202,7 @@ const SelectComponent = forwardRef(function Select<
   const findOptionsByValue = useCallback(
     (
       values: (string | T)[] | undefined
-    ): SelectItemObject<T, ActualRecordType>[] => {
+    ): F0SelectItemObject<T, ActualRecordType>[] => {
       if (values === undefined) {
         return []
       }
@@ -461,9 +464,9 @@ const SelectComponent = forwardRef(function Select<
   )
 })
 
-export const Select = SelectComponent as <
+export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
+  props: F0SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
 ) => React.ReactElement

@@ -5,11 +5,11 @@ import {
   getMockValue,
 } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Search } from "../../../../../../icons/app"
 import {
-  SelectItemObject,
-  SelectItemProps,
-} from "../../../../../Forms/Fields/Select"
+  F0SelectItemObject,
+  F0SelectItemProps,
+} from "../../../../../../components/F0Select"
+import { Search } from "../../../../../../icons/app"
 import { BreadcrumbSelect } from "./index"
 const meta: Meta<typeof BreadcrumbSelect> = {
   title: "Navigation/BreadcrumbSelect",
@@ -57,7 +57,7 @@ export const WithSearchbox: Story = {
     onChange: (
       value: string,
       item?: unknown,
-      option?: SelectItemObject<string, unknown>
+      option?: F0SelectItemObject<string, unknown>
     ) => {
       console.log("onChange BreadcrumbSelect", value, item, option)
     },
@@ -118,7 +118,7 @@ export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
         },
       },
     },
-    mapOptions: (item: MockItem): SelectItemProps<string, MockItem> => ({
+    mapOptions: (item: MockItem): F0SelectItemProps<string, MockItem> => ({
       value: item.value,
       label: item.label,
       icon: item.icon,
@@ -193,7 +193,7 @@ export const AsyncDataWithLargeDataset: StoryObj<
     },
     mapOptions: (
       item: MockItemLargeDataSet
-    ): SelectItemProps<string, MockItemLargeDataSet> => ({
+    ): F0SelectItemProps<string, MockItemLargeDataSet> => ({
       value: item.value,
       label: item.label,
       icon: item.icon,

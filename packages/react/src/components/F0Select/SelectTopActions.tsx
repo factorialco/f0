@@ -9,7 +9,7 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { useState } from "react"
-import { F1SearchBox } from "../F1SearchBox"
+import { F1SearchBox } from "../../experimental/Forms/Fields/F1SearchBox"
 
 interface SelectTopActionsProps<
   R extends RecordType = RecordType,

@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { Select, SelectItemObject, selectSizes } from "../index"
+import { F0SelectItemObject, Select, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
@@ -214,7 +214,7 @@ const meta: Meta = {
       const handleOnChange = (
         value: string,
         item?: unknown,
-        option?: SelectItemObject<string>
+        option?: F0SelectItemObject<string>
       ) => {
         setLocalValue(value)
         console.log(

@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import { Select } from "@/experimental/Forms/Fields/Select"
+import { Select } from "@/components/F0Select"
 import {
   GroupingDefinition,
   GroupingState,

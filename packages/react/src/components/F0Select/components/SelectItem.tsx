@@ -4,12 +4,12 @@ import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
-import { SelectItemObject } from "../types"
+import { F0SelectItemObject } from "../types"
 
 export const SelectItem = <T extends string, R>({
   item,
 }: {
-  item: SelectItemObject<T, R>
+  item: F0SelectItemObject<T, R>
 }) => {
   return (
     <SelectItemPrimitive value={item.value} disabled={item.disabled}>

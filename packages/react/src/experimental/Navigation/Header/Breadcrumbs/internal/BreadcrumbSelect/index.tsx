@@ -1,18 +1,18 @@
 import { F0Icon } from "@/components/F0Icon"
 import {
+  F0SelectItemObject,
+  F0SelectProps,
   ResolvedRecordType,
   Select,
-  SelectItemObject,
-  SelectProps,
-} from "@/experimental/Forms/Fields/Select"
+} from "@/components/F0Select"
 import { ChevronDown } from "@/icons/app"
 import { motion } from "motion/react"
 import { useState } from "react"
 
-export type BreadcrumbSelectProps<T extends string, R = unknown> = SelectProps<
-  T,
-  R
-> & { multiple?: false }
+export type BreadcrumbSelectProps<
+  T extends string,
+  R = unknown,
+> = F0SelectProps<T, R> & { multiple?: false }
 
 export function BreadcrumbSelect<T extends string, R = unknown>({
   ...props
@@ -31,13 +31,13 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
   const handleChange = (
     value: T,
     item?: ResolvedRecordType<R>,
-    option?: SelectItemObject<T, ResolvedRecordType<R>>
+    option?: F0SelectItemObject<T, ResolvedRecordType<R>>
   ) => {
     props.onChange?.(value, item, option)
   }
 
   const handleChangeSelectedOption = (
-    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
+    option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => {
     setSelectedLabel(option?.label || "")
   }

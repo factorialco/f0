@@ -1,10 +1,10 @@
 import { VirtualItem } from "@tanstack/react-virtual"
 import React, { useCallback, useMemo } from "react"
+import { Select } from "../../../../../components/F0Select"
+import { Action } from "../../../../../components/F0Select/SelectBottomActions"
 import { cn } from "../../../../../lib/utils"
 import { Spinner } from "../../../../Information/Spinner"
 import { VirtualList } from "../../../../Navigation/VirtualList"
-import { Select } from "../../../Fields/Select"
-import { Action } from "../../../Fields/Select/SelectBottomActions"
 import { CreateItem } from "../../CreateItem"
 import { EntitySelectListItem } from "../../ListItem"
 import {
