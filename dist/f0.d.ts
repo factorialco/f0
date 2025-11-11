@@ -2156,7 +2156,7 @@ export declare const F0TagCompany: ForwardRefExoticComponent<TagCompanyProps & R
 export declare const F0TagDot: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLDivElement>>;
 
 export declare const F0TagList: {
-    <T extends TagType>({ type, tags, max, remainingCount: initialRemainingCount, }: TagListProps<T>): JSX_2.Element;
+    <T extends TagType>({ type, tags, max, min, remainingCount: initialRemainingCount, }: TagListProps<T>): JSX_2.Element;
     displayName: string;
 };
 
@@ -3563,6 +3563,11 @@ export declare type TagListProps<T extends TagType> = {
      */
     max?: number;
     /**
+     * The minimum number of tags to display.
+     * @default 0
+     */
+    min?: number;
+    /**
      * The remaining number to display.
      */
     remainingCount?: number;
@@ -4088,15 +4093,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

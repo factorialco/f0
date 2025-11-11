@@ -23150,9 +23150,12 @@ function bde(e, t, n) {
         if (x > v) break;
         b = x, y++;
       }
-      return Math.min(y, (n == null ? void 0 : n.max) ?? e.length);
+      return Math.max(
+        (n == null ? void 0 : n.min) ?? 0,
+        Math.min(y, (n == null ? void 0 : n.max) ?? e.length)
+      ) + (n != null && n.fluidItems ? 1 : 0);
     },
-    [n == null ? void 0 : n.max, e.length]
+    [n == null ? void 0 : n.max, n == null ? void 0 : n.min, e.length]
   ), g = Ct(() => {
     var k, E;
     if (!r.current || e.length === 0) return;
@@ -23180,75 +23183,77 @@ function bde(e, t, n) {
     isInitialized: u
   };
 }
-const Q4 = function({ items: t, renderListItem: n, renderDropdownItem: r, overflowIndicatorWithPopover: a = !0, renderOverflowIndicator: i, forceShowingOverflowIndicator: o = !1, className: s = "", gap: l = 8, max: u, itemsWidth: d }) {
-  const [f, m] = Le(!1), g = Ct((_) => {
-    m(_);
-  }, []), { containerRef: C, overflowButtonRef: v, customOverflowIndicatorRef: y, measurementContainerRef: b, visibleItems: w, overflowItems: x, isInitialized: L } = bde(t, l, {
+const Q4 = function({ items: t, renderListItem: n, renderDropdownItem: r, overflowIndicatorWithPopover: a = !0, renderOverflowIndicator: i, forceShowingOverflowIndicator: o = !1, className: s = "", gap: l = 8, max: u, min: d = 0, itemsWidth: f }) {
+  const [m, g] = Le(!1), C = Ct((H) => {
+    g(H);
+  }, []), { containerRef: v, overflowButtonRef: y, customOverflowIndicatorRef: b, measurementContainerRef: w, visibleItems: x, overflowItems: L, isInitialized: M } = bde(t, l, {
     max: u,
-    itemsWidth: d
-  }), M = Re(() => c(vI, {
+    min: d,
+    itemsWidth: f
+  }), k = Re(() => c(vI, {
     totalItemsCount: t.length,
-    isOpen: f,
-    count: x.length
-  }), [t.length, f, x.length]), k = Re(() => L ? null : t.map((_, A) => c(Dn, {
+    isOpen: m,
+    count: L.length
+  }), [t.length, m, L.length]), E = Re(() => M ? null : t.map((H, Z) => c(Dn, {
     className: "h-2 w-20 rounded-md"
-  }, `placeholder-${A}`)), [t, L]), E = o || x.length > 0;
+  }, `placeholder-${Z}`)), [t, M]), _ = o || L.length > 0, A = "flex min-w-0 flex-1 items-center justify-start whitespace-nowrap", W = "min-w-[40px]";
   return T("div", {
-    ref: C,
+    ref: v,
     className: oe("relative flex items-center", s),
     style: {
       gap: l > 0 ? `${l}px` : void 0,
       marginLeft: l < 0 ? `${-l}px` : void 0
     },
-    children: [!d && c("div", {
-      ref: b,
+    children: [!f && c("div", {
+      ref: w,
       "aria-hidden": "true",
-      className: "pointer-events-none invisible absolute left-0 top-0 flex opacity-0",
+      className: oe("pointer-events-none invisible absolute left-0 top-0 opacity-0", A),
       style: {
         gap: l > 0 ? `${l}px` : void 0
       },
-      children: t.map((_, A) => c("div", {
+      children: t.map((H, Z) => c("div", {
+        className: W,
         style: {
           marginLeft: l < 0 ? `${l}px` : void 0
         },
-        children: n(_, A, !1)
-      }, `measure-${A}`))
+        children: n(H, Z, !1)
+      }, `measure-${Z}`))
     }), T("div", {
-      className: "flex items-center whitespace-nowrap",
+      className: A,
       style: {
         gap: l > 0 ? `${l}px` : void 0
       },
-      children: [L && w.map((_, A) => c("div", {
-        className: "transition-all duration-150",
+      children: [M && x.map((H, Z) => c("div", {
+        className: oe(W, "transition-all duration-150"),
         style: {
           marginLeft: l < 0 ? `${l}px` : void 0
         },
-        children: n(_, A, !0)
-      }, `item-${A}`)), k]
-    }), E && c(at, {
+        children: n(H, Z, !0)
+      }, `item-${Z}`)), E]
+    }), _ && c(at, {
       children: a ? T(ow, {
-        open: f,
-        onOpenChange: g,
+        open: m,
+        onOpenChange: C,
         children: [c(sw, {
           asChild: !0,
           children: c("button", {
-            ref: v,
+            ref: y,
             className: oe("inline-flex flex-shrink-0 items-center", gr()),
-            children: (i == null ? void 0 : i(x.length, f)) ?? M
+            children: (i == null ? void 0 : i(L.length, m)) ?? k
           })
         }), c(R7, {
           className: "rounded-md border border-solid border-f1-border-secondary p-1 shadow-md",
           align: "end",
           children: c("div", {
             className: "flex flex-col",
-            children: x.map((_, A) => c("div", {
-              children: r(_, A)
-            }, `overflow-item-${A}`))
+            children: L.map((H, Z) => c("div", {
+              children: r(H, Z)
+            }, `overflow-item-${Z}`))
           })
         })]
       }) : c("div", {
-        ref: y,
-        children: (i == null ? void 0 : i(x.length, !1)) ?? M
+        ref: b,
+        children: (i == null ? void 0 : i(L.length, !1)) ?? k
       })
     })]
   });
@@ -52201,22 +52206,24 @@ const THe = (e) => {
   }) : n;
 };
 lG.displayName = "TagCounter";
-const YM = ({ type: e, tags: t, max: n = 4, remainingCount: r }) => {
-  const a = t.map((i) => ({
+const YM = ({ type: e, tags: t, max: n = 4, min: r = 0, remainingCount: a }) => {
+  const i = t.map((o) => ({
     type: e,
-    ...i
+    ...o
   }));
   return c(Q4, {
-    items: a,
+    items: i,
     max: n,
-    renderListItem: (i) => c(ty, {
-      tag: i
+    min: r,
+    fluidItems: !0,
+    renderListItem: (o) => c(ty, {
+      tag: o
     }),
     renderDropdownItem: () => null,
-    forceShowingOverflowIndicator: r !== void 0,
-    renderOverflowIndicator: (i) => c(lG, {
-      count: (r ?? 0) + i,
-      list: r ? void 0 : a.slice(a.length - i)
+    forceShowingOverflowIndicator: a !== void 0,
+    renderOverflowIndicator: (o) => c(lG, {
+      count: (a ?? 0) + o,
+      list: a ? void 0 : i.slice(i.length - o)
     }),
     overflowIndicatorWithPopover: !1,
     className: "flex-1"
