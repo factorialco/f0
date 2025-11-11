@@ -5,7 +5,7 @@ import { forwardRef } from "react"
 import type { F0TagStatusProps } from "./types"
 
 export const F0TagStatus = forwardRef<HTMLDivElement, F0TagStatusProps>(
-  ({ text, additionalAccesibleText, variant }, ref) => {
+  ({ text, additionalAccessibleText, variant }, ref) => {
     useTextFormatEnforcer(text, { disallowEmpty: true })
 
     return (
@@ -35,7 +35,7 @@ export const F0TagStatus = forwardRef<HTMLDivElement, F0TagStatusProps>(
             aria-hidden
           />
         }
-        additionalAccesibleText={additionalAccesibleText}
+        additionalAccessibleText={additionalAccessibleText}
         text={text}
       />
     )

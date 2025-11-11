@@ -52,7 +52,7 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
   ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
     let text = ""
     let icon = null
-    let additionalAccesibleText = ""
+    let additionalAccessibleText = ""
     let status: BalanceStatus | "null" = "null"
     let hintText: string | undefined = hint
     if (percentage === null || percentage === undefined) {
@@ -74,7 +74,7 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
       const amountText = numericFormatter(amountDef, true)
 
       text = [perventageText, amountText].filter(Boolean).join(" · ")
-      additionalAccesibleText = `${status} balance`
+      additionalAccessibleText = `${status} balance`
 
       icon =
         status === "neutral" ? null : (
@@ -106,7 +106,7 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
         info={info}
         hint={hintText}
         left={icon}
-        additionalAccesibleText={additionalAccesibleText}
+        additionalAccessibleText={additionalAccessibleText}
         text={text}
       />
     )

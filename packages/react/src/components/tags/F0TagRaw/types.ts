@@ -8,7 +8,7 @@ export type F0TagRawProps = {
   /**
    * Additional accessible text to display in the tag
    */
-  additionalAccesibleText?: string
+  additionalAccessibleText?: string
 } & (
   | {
       icon: IconType
