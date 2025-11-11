@@ -12,7 +12,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          "This is a component that is used to display a dot tag. They should be uses to display categories, but not for statuses. Use the `TagStatus` component instead.",
+          "This is a component that is used to display a dot tag. They should be used to display categories, but not for statuses. Use the `TagStatus` component instead.",
       },
     },
   },

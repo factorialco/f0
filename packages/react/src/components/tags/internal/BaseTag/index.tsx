@@ -8,9 +8,9 @@ import { forwardRef, ReactNode } from "react"
 type BaseTagProps = {
   /**
    * Sometimes you need to clarify the status for screen reader users
-   * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
+   * E.g., when showing a tooltip for sighted user, provide the tooltip text to this prop because tooltips aren't accessible
    */
-  additionalAccesibleText?: string
+  additionalAccessibleText?: string
   className?: string
   // Hint text
   hint?: string
@@ -41,7 +41,7 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
       left,
       text,
       right,
-      additionalAccesibleText,
+      additionalAccessibleText,
       className,
       hint,
       info,
@@ -50,8 +50,8 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
     },
     ref
   ) => {
-    additionalAccesibleText =
-      additionalAccesibleText || (hideLabel ? text : undefined)
+    additionalAccessibleText =
+      additionalAccessibleText || (hideLabel ? text : undefined)
     return (
       <div className="flex w-fit max-w-full flex-row items-center justify-start gap-1">
         <div
@@ -71,8 +71,8 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
               {text}
             </OneEllipsis>
           )}
-          {additionalAccesibleText && (
-            <span className="sr-only">{additionalAccesibleText}</span>
+          {additionalAccessibleText && (
+            <span className="sr-only">{additionalAccessibleText}</span>
           )}
           {right}
         </div>

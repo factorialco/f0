@@ -59,18 +59,18 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
       text = nullText ?? "N/A"
       hintText = undefined
     } else {
-      const perventageDef = toNumericValue(percentage, 2, "%", "right")!
+      const percentageDef = toNumericValue(percentage, 2, "%", "right")!
       const amountDef = toNumericValue(amount, 2, "", "right")!
 
-      const sign = Math.sign(perventageDef.number).toString()
+      const sign = Math.sign(percentageDef.number).toString()
       status =
         statusMap[
           Math.sign(
-            perventageDef.number * (invertStatus ? -1 : 1)
+            percentageDef.number * (invertStatus ? -1 : 1)
           ).toString() as "-1" | "0" | "1"
         ]
 
-      const perventageText = numericFormatter(perventageDef, false)
+      const perventageText = numericFormatter(percentageDef, false)
       const amountText = numericFormatter(amountDef, true)
 
       text = [perventageText, amountText].filter(Boolean).join(" · ")

@@ -14,7 +14,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          "This is a component that is used to display a simpliest tag. with an icon and a label. or just a label or icon",
+          "This is a component that is used to display a simplest tag. with an icon and a label. or just a label or icon",
       },
     },
   },
@@ -55,7 +55,7 @@ export const NoIconTag: Story = {
 export const IconTag: Story = {
   args: {
     hideLabel: true,
-    text: undefined,
+    text: "Icon",
   },
 }
 

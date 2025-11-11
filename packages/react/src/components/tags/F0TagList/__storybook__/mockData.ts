@@ -1,3 +1,4 @@
+import { mockImage } from "@/testing/mocks/images"
 import { Settings } from "lucide-react"
 
 // Sample dot tags
@@ -28,11 +29,11 @@ const dotTags = [
 const personTags = [
   {
     name: "John Doe",
-    avatarUrl: "/avatars/person01.jpg",
+    src: mockImage("person", 0),
   },
   {
     name: "Jane Smith",
-    avatarUrl: "/avatars/person02.jpg",
+    src: mockImage("person", 1),
   },
   {
     name: "Bob Johnson",

@@ -76,7 +76,6 @@ export const Snapshot: Story = {
       ))}
 
       <F0TagStatus
-        key={status}
         text="This is a long label text that should be truncated but should have an ellipsis and a tooltip"
         variant="critical"
       />
