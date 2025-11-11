@@ -1,4 +1,5 @@
 import { F0Button } from "@/components/F0Button"
+import { F0Select } from "@/components/F0Select"
 import {
   GranularityDefinitionKey,
   OneCalendar,
@@ -9,7 +10,6 @@ import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useEffect, useMemo, useState } from "react"
-import { Select } from "../../components/F0Select"
 import { getCompareToValue } from "./compareTo"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
@@ -268,7 +268,7 @@ export function DatePickerPopup({
                   <div className="text-gray-500 text-sm">
                     {i18n.date.compareTo}
                   </div>
-                  <Select
+                  <F0Select
                     label={i18n.date.compareTo}
                     hideLabel
                     placeholder={i18n.date.compareTo}

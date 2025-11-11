@@ -5,7 +5,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Search } from "../../../icons/app"
-import { Select } from "../index"
+import { F0Select } from "../index"
 import type { F0SelectItemProps } from "../types"
 
 const mockOptions: F0SelectItemProps<string, RecordType>[] = [
@@ -100,7 +100,7 @@ describe("Select", () => {
 
   it("renders with placeholder", async () => {
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         multiple={false}
         clearable={false}
@@ -117,7 +117,7 @@ describe("Select", () => {
   it("shows options when clicked", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -134,7 +134,7 @@ describe("Select", () => {
 
   it("should display selected value", async () => {
     render(
-      <Select {...defaultSelectProps} options={mockOptions} value="option1" />
+      <F0Select {...defaultSelectProps} options={mockOptions} value="option1" />
     )
 
     await waitFor(() => {
@@ -145,7 +145,7 @@ describe("Select", () => {
   it("renders search box when showSearchBox is true", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -162,7 +162,7 @@ describe("Select", () => {
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -182,7 +182,7 @@ describe("Select", () => {
   it("should not lose the focus when the search input is focused and the list changes", async () => {
     const user = userEvent.setup({ delay: 100 })
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -202,7 +202,7 @@ describe("Select", () => {
   it("shows empty message when no options match search", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -226,7 +226,7 @@ describe("Select", () => {
     const handleSearchChange = vi.fn()
 
     render(
-      <Select
+      <F0Select
         options={mockOptions}
         onChange={() => {}}
         showSearchBox
@@ -260,7 +260,7 @@ describe("Select", () => {
 
   it("disables select when disabled prop is true", async () => {
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -275,9 +275,13 @@ describe("Select", () => {
 
   it("renders with custom trigger", () => {
     render(
-      <Select {...defaultSelectProps} options={mockOptions} onChange={() => {}}>
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      >
         <button>Custom Trigger</button>
-      </Select>
+      </F0Select>
     )
 
     expect(screen.getByText("Custom Trigger")).toBeInTheDocument()
@@ -288,7 +292,7 @@ describe("Select", () => {
     const user = userEvent.setup()
 
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
@@ -334,7 +338,7 @@ describe("Select", () => {
     ]
 
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
@@ -360,7 +364,7 @@ describe("Select", () => {
     const user = userEvent.setup()
 
     const { container } = render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}

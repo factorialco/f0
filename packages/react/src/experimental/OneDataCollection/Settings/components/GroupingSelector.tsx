@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import { Select } from "@/components/F0Select"
+import { F0Select } from "@/components/F0Select"
 import {
   GroupingDefinition,
   GroupingState,
@@ -66,7 +66,7 @@ export const GroupingSelector = <
     <div className="flex flex-col">
       <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
-          <Select
+          <F0Select
             label={i18n.collections.grouping.groupBy}
             options={groupingOptions}
             hideLabel={hideLabel}

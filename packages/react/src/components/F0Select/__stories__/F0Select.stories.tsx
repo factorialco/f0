@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { F0SelectItemObject, Select, selectSizes } from "../index"
+import { F0Select, F0SelectItemObject, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
@@ -44,7 +44,7 @@ const items = [
 
 const meta: Meta = {
   title: "Input/Select",
-  component: Select,
+  component: F0Select,
   parameters: {
     a11y: {
       skipCi: true,
@@ -261,7 +261,7 @@ const meta: Meta = {
     ),
   ],
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof Select>
+} satisfies Meta<typeof F0Select>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -387,7 +387,7 @@ export const WithSearchBox: Story = {
   render: (args) => {
     return (
       <>
-        <Select
+        <F0Select
           showSearchBox
           label="Select a theme"
           onChange={fn()}
@@ -579,7 +579,7 @@ export const WithCustomTrigger: Story = {
     ],
   },
   render: ({ value, options, placeholder, onChange, ...args }) => (
-    <Select
+    <F0Select
       label="Choose a color"
       value={value}
       options={options}
@@ -590,7 +590,7 @@ export const WithCustomTrigger: Story = {
       <div className="flex h-24 w-24 items-center rounded-md border border-solid border-f1-border bg-f1-background-secondary p-2 text-center transition-colors hover:bg-f1-background-secondary-hover">
         {placeholder}
       </div>
-    </Select>
+    </F0Select>
   ),
 }
 
@@ -629,14 +629,14 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <Select
+              <F0Select
                 size={size}
                 label="Label text here"
                 onChange={fn()}
                 options={[]}
               />
               {snapshotVariants.map((variant, index) => (
-                <Select
+                <F0Select
                   key={`${size}-${index}`}
                   size={size}
                   {...variant}

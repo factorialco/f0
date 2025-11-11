@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { Select } from "@/components/F0Select"
+import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { motion } from "motion/react"
@@ -205,7 +205,7 @@ export function ClockInControls({
                   {canShowBreakButton && (
                     <>
                       {breakTypeOptions.length > 1 && onChangeBreakTypeId ? (
-                        <Select
+                        <F0Select
                           label={labels.break}
                           hideLabel
                           value=""
@@ -223,7 +223,7 @@ export function ClockInControls({
                               hideLabel
                             />
                           </div>
-                        </Select>
+                        </F0Select>
                       ) : (
                         <F0Button
                           onClick={handleClickBreakButton}
@@ -272,7 +272,7 @@ export function ClockInControls({
         <div className="mt-6 flex flex-row flex-wrap items-center justify-center gap-2 @xs:justify-start">
           {canSelectLocation ? (
             <>
-              <Select
+              <F0Select
                 label={labels.selectLocation}
                 hideLabel
                 value={locationId}
@@ -289,7 +289,7 @@ export function ClockInControls({
                     icon={location?.icon}
                   />
                 </div>
-              </Select>
+              </F0Select>
               {canShowProject && projectSelectorElement}
             </>
           ) : (

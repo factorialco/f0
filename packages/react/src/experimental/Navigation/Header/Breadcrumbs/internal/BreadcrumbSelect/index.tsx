@@ -1,9 +1,9 @@
 import { F0Icon } from "@/components/F0Icon"
 import {
+  F0Select,
   F0SelectItemObject,
   F0SelectProps,
   ResolvedRecordType,
-  Select,
 } from "@/components/F0Select"
 import { ChevronDown } from "@/icons/app"
 import { motion } from "motion/react"
@@ -43,7 +43,7 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
   }
 
   return (
-    <Select<T, R>
+    <F0Select<T, R>
       {...props}
       onOpenChange={onOpenChangeLocal}
       onChange={handleChange}
@@ -66,6 +66,6 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
           </motion.div>
         </div>
       </button>
-    </Select>
+    </F0Select>
   )
 }
