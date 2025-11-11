@@ -95,7 +95,7 @@ describe("Select", () => {
     fireEvent.animationStart(teaser)
   }
 
-  it("renders with placeholder", () => {
+  it("renders with placeholder", async () => {
     render(
       <Select
         {...defaultSelectProps}
@@ -104,7 +104,10 @@ describe("Select", () => {
         placeholder="Select an option"
       />
     )
-    expect(screen.getByText("Select an option")).toBeInTheDocument()
+    await waitFor(async () => {
+      const placeholder = await screen.findByText("Select an option")
+      expect(placeholder).toBeInTheDocument()
+    })
   })
 
   it("shows options when clicked", async () => {
@@ -212,7 +215,10 @@ describe("Select", () => {
     await openSelect(user)
     await user.type(screen.getByRole("searchbox"), "xyz")
 
-    expect(screen.getByText("No results found")).toBeInTheDocument()
+    await waitFor(async () => {
+      const emptyMessage = await screen.findByText("No results found")
+      expect(emptyMessage).toBeInTheDocument()
+    })
   })
 
   // TODO: Fix this test

@@ -861,6 +861,62 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("column visibility", () => {
+    it("hides columns with hidden: true on first render", async () => {
+      const columnsWithHidden = [
+        {
+          label: "Visible Column",
+          render: (item: Person) => item.name,
+        },
+        {
+          label: "Hidden Column",
+          hidden: true,
+          render: (item: Person) => item.email,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithHidden}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          allowColumnHiding={true}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Verify visible column header is present
+      const headers = screen.getAllByRole("columnheader")
+      expect(
+        headers.some((h) => h.textContent?.includes("Visible Column"))
+      ).toBe(true)
+
+      // Verify hidden column header is NOT present
+      expect(
+        headers.some((h) => h.textContent?.includes("Hidden Column"))
+      ).toBe(false)
+
+      // Verify data from visible column is shown
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+
+      // Verify data from hidden column is NOT shown
+      expect(screen.queryByText(testData[0].email)).not.toBeInTheDocument()
+    })
+  })
+
   describe("Item Actions", () => {
     const testPersonWithActions = {
       id: 1,

@@ -145,7 +145,7 @@ export const AssistantMessage = ({
           </div>
         </>
       )}
-      {!!subComponent && <div>{subComponent}</div>}
+      {!!subComponent && <div className="w-full">{subComponent}</div>}
     </div>
   )
 }

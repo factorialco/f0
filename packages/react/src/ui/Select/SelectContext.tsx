@@ -2,7 +2,7 @@ import { createContext, useContext } from "react"
 
 export type SelectContextType = {
   open?: boolean
-  as?: "list" | "list-with-scroll"
+  as?: "list"
   multiple?: boolean
   value: string[] | string
 }

@@ -12,6 +12,7 @@ import {
   useDataSource,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../../item-actions"
 import { navigationFilterTypes } from "../../navigationFilters"
@@ -52,7 +53,11 @@ export const useDataCollectionSource = <
   Grouping
 > => {
   const i18n = useI18n()
-  const { navigationFilters, summaries } = source
+  const {
+    navigationFilters,
+    summaries,
+    currentNavigationFilters: externalCurrentNavigationFilters,
+  } = source
 
   const datasource = useDataSource<R, FiltersSchema, Sortings, Grouping>(
     {
@@ -81,6 +86,11 @@ export const useDataCollectionSource = <
       })
     ) as NavigationFiltersState<NavigationFilters>
   })
+
+  useDeepCompareEffect(() => {
+    if (!externalCurrentNavigationFilters) return
+    setCurrentNavigationFilters(externalCurrentNavigationFilters)
+  }, [externalCurrentNavigationFilters])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedSummaries = useMemo(() => summaries, deps)

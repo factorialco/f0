@@ -23,8 +23,6 @@ type FilterContentProps<Definition extends FiltersDefinition> = {
   onFilterChange: (key: keyof Definition, value: unknown) => void
   /** Tells us if we are in compact mode */
   isCompactMode?: boolean
-  top?: React.ReactNode
-  bottom?: React.ReactNode
 }
 
 /**
@@ -49,8 +47,6 @@ export function FilterContent<Definition extends FiltersDefinition>({
   tempFilters,
   onFilterChange,
   isCompactMode,
-  top,
-  bottom,
 }: FilterContentProps<Definition>) {
   if (!selectedFilterKey) return null
 
@@ -71,14 +67,10 @@ export function FilterContent<Definition extends FiltersDefinition>({
     schema,
     value,
     onChange,
-    top,
-    bottom,
   }: {
     schema: T
     value: FilterValue<T>
     onChange: (v: FilterValue<T>) => void
-    top?: React.ReactNode
-    bottom?: React.ReactNode
   }): React.ReactNode {
     // double-cast to resolve overload union into a single callable signature
     const filterType = getFilterType(schema.type)
@@ -88,10 +80,8 @@ export function FilterContent<Definition extends FiltersDefinition>({
         value: FilterValue<T>
         onChange: (v: FilterValue<T>) => void
         isCompactMode?: boolean
-        top?: React.ReactNode
-        bottom?: React.ReactNode
       }) => React.ReactNode
-    )({ schema, value, onChange, isCompactMode, top, bottom })
+    )({ schema, value, onChange, isCompactMode })
   }
 
   return (
@@ -101,8 +91,6 @@ export function FilterContent<Definition extends FiltersDefinition>({
           schema: filter,
           value: currentValue,
           onChange: (value) => onFilterChange(selectedFilterKey, value),
-          top,
-          bottom,
         })}
       </div>
     </div>

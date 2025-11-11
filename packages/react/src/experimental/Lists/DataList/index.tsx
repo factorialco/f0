@@ -56,7 +56,10 @@ export type ItemProps = {
   action?: ActionType
 }
 
-export type ActionType = CopyActionType | NavigateActionType
+export type ActionType =
+  | CopyActionType
+  | NavigateActionType
+  | OpenLinkActionType
 
 export type CopyActionType = {
   type: "copy"
@@ -65,6 +68,11 @@ export type CopyActionType = {
 
 export type NavigateActionType = {
   type: "navigate"
+  href: string
+}
+
+export type OpenLinkActionType = {
+  type: "open-link"
   href: string
 }
 

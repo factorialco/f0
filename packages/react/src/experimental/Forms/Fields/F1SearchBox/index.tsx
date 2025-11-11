@@ -44,16 +44,27 @@ const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
   ) => {
     const input = useRef<HTMLInputElement>(null)
 
+    const interval = useRef<NodeJS.Timeout | null>(null)
+
     useImperativeHandle(ref, () => input.current as HTMLInputElement)
 
     useEffect(() => {
-      if (!props.autoFocus) return
+      if (!props.autoFocus) {
+        if (interval.current) {
+          clearInterval(interval.current)
+        }
+        return
+      }
 
-      const interval = setInterval(() => {
+      interval.current = setInterval(() => {
         input.current?.focus()
       }, 50)
 
-      return () => clearInterval(interval)
+      return () => {
+        if (interval.current) {
+          clearInterval(interval.current)
+        }
+      }
     }, [props.autoFocus])
 
     const valueToEmitRef = useRef<string | undefined>(undefined)

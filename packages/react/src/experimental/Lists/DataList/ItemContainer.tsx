@@ -3,6 +3,7 @@ import { F0Icon, IconType } from "../../../components/F0Icon"
 import { cn } from "../../../lib/utils"
 import { CopyAction } from "./actions/CopyAction"
 import { NavigateAction } from "./actions/NavigateAction"
+import { OpenLinkAction } from "./actions/OpenLinkAction"
 
 type ItemContainerProps = {
   leftIcon?: IconType | (() => ReactElement)
@@ -15,6 +16,7 @@ type ItemContainerProps = {
 export type InternalActionType =
   | InternalCopyActionType
   | InternalNavigateActionType
+  | InternalOpenLinkActionType
   | InternalNoopActionType
 
 export type InternalCopyActionType = {
@@ -24,6 +26,11 @@ export type InternalCopyActionType = {
 
 export type InternalNavigateActionType = {
   type: "navigate"
+  href: string
+}
+
+export type InternalOpenLinkActionType = {
+  type: "open-link"
   href: string
 }
 
@@ -87,6 +94,12 @@ const Action = ({
         <NavigateAction {...action} {...props}>
           {children}
         </NavigateAction>
+      )
+    case "open-link":
+      return (
+        <OpenLinkAction {...action} {...props}>
+          {children}
+        </OpenLinkAction>
       )
     case "noop":
       return <div {...props}>{children}</div>

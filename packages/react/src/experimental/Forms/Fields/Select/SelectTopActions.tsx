@@ -53,6 +53,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             placeholder={searchBoxPlaceholder ?? i18n.toc.search}
             onChange={onSearchChange}
             value={searchValue}
+            debounceTime={400}
             autoFocus={!isFiltersOpen}
             clearable
           />

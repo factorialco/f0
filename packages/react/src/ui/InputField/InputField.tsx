@@ -507,7 +507,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {(clearable || append || appendTag || loading) && (
               <div
                 className={cn(
-                  "flex h-fit items-center gap-1.5 self-center pr-[3px]",
+                  "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
                   size === "md" && "pr-[7px]",
                   "relative"
                 )}

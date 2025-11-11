@@ -631,11 +631,34 @@ const SelectContentImpl = React.forwardRef<
   const getItems = useCollection(__scopeSelect)
   const [isPositioned, setIsPositioned] = React.useState(false)
   const firstValidItemFoundRef = React.useRef(false)
+  const hideOthersCleanupRef = React.useRef<(() => void) | null>(null)
 
   // aria-hide everything except the content (better supported equivalent to setting aria-modal)
+  // Only hide others when the select is open and in popper mode (not list mode) to avoid blocking aria-hidden on focused elements
+  // Skip hideOthers in list mode (item-aligned) since the content is part of the page, not a modal
   React.useEffect(() => {
-    if (content) return hideOthers(content)
-  }, [content])
+    if (!content) return
+
+    // Clean up any previous hideOthers call
+    if (hideOthersCleanupRef.current) {
+      hideOthersCleanupRef.current()
+      hideOthersCleanupRef.current = null
+    }
+
+    // Only use hideOthers when open and in popper mode (modal-like behavior)
+    // Skip in item-aligned mode (list mode) where content is always visible
+    if (context.open && position === "popper") {
+      // Only hide others when open and ensure cleanup runs properly
+      const cleanup = hideOthers(content)
+      hideOthersCleanupRef.current = cleanup
+      return () => {
+        if (cleanup) {
+          cleanup()
+        }
+        hideOthersCleanupRef.current = null
+      }
+    }
+  }, [content, context.open, position])
 
   // Make sure the whole tree has focus guards as our `Select` may be
   // the last element in the DOM (because of the `Portal`)

@@ -18,6 +18,7 @@ import {
   ChatHeader,
   ChatTextarea,
   ChatWindow,
+  MessageSources,
   MessagesContainer,
   SuggestionsList,
   UserMessage,
@@ -130,6 +131,40 @@ const AiChatCmp = () => {
           />
         </div>
       )
+    },
+  })
+
+  useCopilotAction({
+    name: "messageSources",
+    description:
+      "Attach information sources to the assistant's response. Use this to show where the AI got its information from.",
+    parameters: [
+      {
+        name: "sources",
+        type: "object[]",
+        description:
+          "Array of source objects with title and link properties. Example: [{title: 'Documentation', link: 'https://example.com'}]",
+        required: true,
+        attributes: [
+          {
+            name: "title",
+            type: "string",
+            description: "The title or name of the source",
+            required: true,
+          },
+          {
+            name: "link",
+            type: "string",
+            description: "The URL link to the source",
+            required: true,
+          },
+        ],
+      },
+    ],
+    // render only when backend wants to attach sources
+    available: "disabled",
+    render: (props) => {
+      return <MessageSources sources={props.args.sources || []} />
     },
   })
 

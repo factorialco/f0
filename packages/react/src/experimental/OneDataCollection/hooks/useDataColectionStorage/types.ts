@@ -16,16 +16,20 @@ import {
 /**
  * The status of the data collection
  */
-export type DataCollectionStatus = {
+export type DataCollectionStatus<
+  CurrentFiltersState extends FiltersState<FiltersDefinition>,
+> = {
   grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>
   sortings?: SortingsState<SortingsDefinition>
-  filters?: FiltersState<FiltersDefinition>
+  filters?: CurrentFiltersState
   search?: string | undefined
   navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   visualization?: number
 }
 
-export type DataCollectionStatusComplete = DataCollectionStatus & {
+export type DataCollectionStatusComplete<
+  CurrentFiltersState extends FiltersState<FiltersDefinition>,
+> = DataCollectionStatus<CurrentFiltersState> & {
   settings?: DataCollectionSettings
 }
 

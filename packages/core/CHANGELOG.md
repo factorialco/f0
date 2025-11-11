@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.34.0](https://github.com/factorialco/f0/compare/f0-core-v1.33.0...f0-core-v1.34.0) (2025-11-06)
+
+
+### Features
+
+* **icons:** add group icon ([#2928](https://github.com/factorialco/f0/issues/2928)) ([5da9d30](https://github.com/factorialco/f0/commit/5da9d304a4955ac5a75841307ee5649ca9fb1ed1))
+
 ## [1.33.0](https://github.com/factorialco/f0/compare/f0-core-v1.32.0...f0-core-v1.33.0) (2025-10-24)
 
 

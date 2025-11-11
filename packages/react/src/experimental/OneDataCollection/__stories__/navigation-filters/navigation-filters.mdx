@@ -12,7 +12,7 @@ import * as DataCollectionNavigationFiltersStories from "./navigation-filters.st
 ### Definition
 
 Navigation filters are filters that are used to filter the data in correlative
-chunksin the collection but they are not the same as the filters. Opposite to
+chunks in the collection but they are not the same as the filters. Opposite to
 the filters those are not mandatory, navigation filters are mandatory (data
 always must be filtered by the navigation filter value(s)). Navigation filters
 also allow to navigate to the next or previous chunk of data.
@@ -68,14 +68,14 @@ The DateNavigation filter is a navigation filter that allows you to filter the
 data by date defining a granularity (day, week, month, year) or a custom range
 of dates.
 
-Except for a custom range of dates, user is choosing the minimun date chuck the
+Except for a custom range of dates, user is choosing the minimum date chunk the
 granularity represents, but this can be translated into a range of dates
 (datetimes).
 
-With this criteria, a week is a range of 7 days (staring on the first day of the
-week at 00:00:00 and ending on the last day of the week at 23:59:59), a month is
-a range of 30 days (staring on the first day of the month at 00:00:00 and ending
-on the last day of the month at 23:59:59), etc.
+With this criteria, a week is a range of 7 days (starting on the first day of
+the week at 00:00:00 and ending on the last day of the week at 23:59:59), a
+month is a range of 30 days (starting on the first day of the month at 00:00:00
+and ending on the last day of the month at 23:59:59), etc.
 
 ### Options
 
@@ -176,7 +176,8 @@ definition in the `granularityDefinitions` object in the file
 
 ### Adding a new navigation filter
 
-> Remember navigation fitler need always a value can not be empty by definition
+> Remember navigation filters always need a value and cannot be empty by
+> definition.
 
 To add a new navigation filter, you need to create a folder in
 `OneDataCollection/navigationFilters/filterTypes/[your navigation filter name]`
@@ -195,7 +196,7 @@ export const MyFilterDefinition: NavigationFilter<
 >  = {
   valueConverter: (value, filterDef) => {
     // return the value converted to the type of the filter
-    // This is usefull if you want to accept a value and convert it to the internal state and providing a default value
+    // This is useful if you want to accept a value and convert it to the internal state and providing a default value
   },
   // The component of the filter
   render: (props) => <MyComponent {...props} />,

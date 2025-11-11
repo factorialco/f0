@@ -74,7 +74,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
   useEffect(() => {
     const getFirstFilterNotEmpty = () => {
-      return Object.entries(localFiltersValue).find(([key, value]) => {
+      return Object.entries(localFiltersValue || {}).find(([key, value]) => {
         // TODO: Make this type better
         const filterType = getFilterType(filters[key].type) as unknown as {
           isEmpty: (value: unknown, context: FilterTypeContext) => boolean
@@ -138,9 +138,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       </>
     )
 
-    const isInFilterSelected =
-      selectedFilterKey && filters?.[selectedFilterKey].type === "in"
-
     return (
       <div className="flex items-center gap-2">
         <div className="relative">
@@ -167,7 +164,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
               <div className="flex h-full flex-col transition-all">
-                {!isInFilterSelected && BackButton}
+                {BackButton}
                 <div className="flex flex-1">
                   {selectedFilterKey ? (
                     <motion.div
@@ -183,8 +180,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                         definition={filters}
                         tempFilters={localFiltersValue}
                         onFilterChange={updateFilterValue}
-                        top={BackButton}
-                        bottom={ApplySelectionButton}
                         isCompactMode
                       />
                     </motion.div>
@@ -210,7 +205,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     </motion.div>
                   )}
                 </div>
-                {!isInFilterSelected && ApplySelectionButton}
+                {ApplySelectionButton}
               </div>
             </motion.div>
           )}

@@ -101,7 +101,8 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
           return <span ref={ref} aria-disabled={true} {...spanProps} />
         }
 
-        if (!component) {
+        // For external links or links with target="_blank", always use native <a>
+        if (props.target === "_blank" || !component) {
           return <a ref={ref} {...props} />
         }
 
