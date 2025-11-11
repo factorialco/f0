@@ -89,7 +89,6 @@ const OverflowList = function OverflowList<T>({
   gap = 8,
   max,
   min = 0,
-  fluidItems = false,
   itemsWidth,
 }: OverflowListProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
@@ -110,7 +109,6 @@ const OverflowList = function OverflowList<T>({
     max,
     min,
     itemsWidth,
-    fluidItems,
   })
 
   const DefaultOverflowIndicator = useMemo(
@@ -135,6 +133,11 @@ const OverflowList = function OverflowList<T>({
 
   const showOverflow = forceShowingOverflowIndicator || overflowItems.length > 0
 
+  // Common classes in the measurement and visible containers
+  const itemsWrapperClasses =
+    "flex min-w-0 flex-1 items-center justify-start whitespace-nowrap"
+  const itemClasses = "min-w-[40px]"
+
   return (
     <div
       ref={containerRef}
@@ -148,7 +151,10 @@ const OverflowList = function OverflowList<T>({
         <div
           ref={measurementContainerRef}
           aria-hidden="true"
-          className="pointer-events-none invisible absolute left-0 top-0 flex min-w-0 flex-1 opacity-0"
+          className={cn(
+            "pointer-events-none invisible absolute left-0 top-0 opacity-0",
+            itemsWrapperClasses
+          )}
           style={{ gap: gap > 0 ? `${gap}px` : undefined }}
           data-testid="overflow-measurement-container"
         >
@@ -156,7 +162,7 @@ const OverflowList = function OverflowList<T>({
             <div
               key={`measure-${index}`}
               data-testid="overflow-measurement-item"
-              className="min-w-0 flex-1"
+              className={itemClasses}
               style={{ marginLeft: gap < 0 ? `${gap}px` : undefined }}
             >
               {renderListItem(item, index, false)}
@@ -166,7 +172,7 @@ const OverflowList = function OverflowList<T>({
       )}
 
       <div
-        className="flex min-w-0 flex-1 items-center justify-start whitespace-nowrap"
+        className={itemsWrapperClasses}
         style={{
           gap: gap > 0 ? `${gap}px` : undefined,
         }}
@@ -176,7 +182,7 @@ const OverflowList = function OverflowList<T>({
           visibleItems.map((item, index) => (
             <div
               key={`item-${index}`}
-              className="min-w-[40px] transition-all duration-150"
+              className={cn(itemClasses, "transition-all duration-150")}
               data-testid="overflow-visible-item"
               style={{
                 marginLeft: gap < 0 ? `${gap}px` : undefined,
