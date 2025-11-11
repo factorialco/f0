@@ -1,3 +1,4 @@
+import { forwardRef } from "react"
 import { useShowExperimentalWarnings } from "./providers/user-platafform/UserPlatformProvider"
 
 const reported: Record<string, { uses: number; usesReported: number }> = {}
@@ -39,6 +40,44 @@ export const experimentalComponent = <T extends (...args: any[]) => any>(
     }
   }
 
+  // Check if the component is a forwardRef component
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isForwardRef =
+    (component as any).$$typeof === Symbol.for("react.forward_ref")
+
+  if (isForwardRef) {
+    // For forwardRef components, we need to wrap the render function
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const originalRender = (component as any).render
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const WrappedComponent = forwardRef((props: any, ref: any) => {
+      const showExperimentalWarnings = useShowExperimentalWarnings()
+      if (showExperimentalWarnings) {
+        initReporting()
+
+        if (!reported[name]) {
+          reported[name] = {
+            uses: 0,
+            usesReported: -1,
+          }
+        }
+
+        reported[name] = {
+          ...reported[name],
+          uses: (reported[name]?.uses ?? 0) + 1,
+        }
+      }
+
+      return originalRender(props, ref)
+    })
+
+    WrappedComponent.displayName = `Experimental(${name})`
+
+    return WrappedComponent as unknown as T
+  }
+
+  // For regular components
   return ((...args: Parameters<T>): ReturnType<T> => {
     const showExperimentalWarnings = useShowExperimentalWarnings()
     if (showExperimentalWarnings) {

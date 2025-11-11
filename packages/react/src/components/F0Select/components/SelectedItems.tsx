@@ -19,7 +19,6 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
         <div className="w-full">
           {selection.length > 0 && (
             <F0TagList
-              layout="fill"
               type="raw"
               tags={selection.map((i) => ({
                 text: i.label,
