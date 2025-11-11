@@ -38,11 +38,11 @@ export type SelectProps<T extends string, R = unknown> = {
   actions?: Action[]
 } & ( // Single select not clearable
   | {
-      multiple?: false | undefined
+      clearable?: false
+      multiple?: false
       value?: T
       defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
-      clearable?: false | undefined
-      onChange: (
+      onChange?: (
         value: T,
         originalItem?: ResolvedRecordType<R> | undefined,
         option?: SelectItemObject<T, ResolvedRecordType<R>>
@@ -50,11 +50,11 @@ export type SelectProps<T extends string, R = unknown> = {
     }
   // Single select clearable
   | {
-      multiple?: false | undefined
+      clearable: true
+      multiple?: false
       value?: T
       defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
-      clearable: true
-      onChange: (
+      onChange?: (
         value: T,
         originalItem?: ResolvedRecordType<R> | undefined,
         option?: SelectItemObject<T, ResolvedRecordType<R>>
@@ -66,7 +66,7 @@ export type SelectProps<T extends string, R = unknown> = {
       clearable?: boolean
       value?: T[]
       defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>[]
-      onChange: (
+      onChange?: (
         value: T[],
         originalItems: ResolvedRecordType<R>[],
         options: SelectItemObject<T, ResolvedRecordType<R>>[]

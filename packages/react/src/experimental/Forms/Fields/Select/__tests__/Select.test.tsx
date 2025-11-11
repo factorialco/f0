@@ -54,6 +54,9 @@ const defaultSelectProps = {
   placeholder: "",
   label: "Pick an option",
   hideLabel: false,
+  onChange: (value: string) => {
+    console.log(value)
+  },
 }
 
 describe("Select", () => {
@@ -99,8 +102,9 @@ describe("Select", () => {
     render(
       <Select
         {...defaultSelectProps}
+        multiple={false}
+        clearable={false}
         options={mockOptions}
-        onChange={() => {}}
         placeholder="Select an option"
       />
     )
@@ -128,14 +132,9 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
-  it("displays selected value", async () => {
+  it("should display selected value", async () => {
     render(
-      <Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-        value="option1"
-      />
+      <Select {...defaultSelectProps} options={mockOptions} value="option1" />
     )
 
     await waitFor(() => {

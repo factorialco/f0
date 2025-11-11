@@ -374,6 +374,7 @@ export const WithHint: Story = {
 export const Clearable: Story = {
   args: {
     label: "Select a theme",
+    value: "dark",
     clearable: true,
   },
 }
