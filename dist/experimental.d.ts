@@ -5135,7 +5135,6 @@ export declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionCompone
     type: "text" | "longText";
     text: string;
     onChange?: (params: OnChangeParams) => void;
-    isLongText?: boolean;
 };
 
 declare const THEMES: {

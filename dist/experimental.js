@@ -18371,6 +18371,7 @@ const sj = qn({
         onChange: a,
         placeholder: "Respondent’s answer",
         label: "",
+        rows: 4,
         hideLabel: !0
       })]
     })
