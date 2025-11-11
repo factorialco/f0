@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.263.0](https://github.com/factorialco/f0/compare/f0-react-v1.262.0...f0-react-v1.263.0) (2025-11-11)
+
+
+### Features
+
+* list icon avatar ([#2953](https://github.com/factorialco/f0/issues/2953)) ([efa338e](https://github.com/factorialco/f0/commit/efa338e5e4e35d6138f2be25a793434b93d04865))
+
 ## [1.262.0](https://github.com/factorialco/f0/compare/f0-react-v1.261.0...f0-react-v1.262.0) (2025-11-11)
 
 
