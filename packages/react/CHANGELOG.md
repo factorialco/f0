@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.264.0](https://github.com/factorialco/f0/compare/f0-react-v1.263.0...f0-react-v1.264.0) (2025-11-11)
+
+
+### Features
+
+* **RichTextEditor:** add secondary actions and person metadata support ([#2940](https://github.com/factorialco/f0/issues/2940)) ([d223a6a](https://github.com/factorialco/f0/commit/d223a6a6f9af6d80745af5635744133dfae520d3))
+
 ## [1.263.0](https://github.com/factorialco/f0/compare/f0-react-v1.262.0...f0-react-v1.263.0) (2025-11-11)
 
 
