@@ -102,7 +102,6 @@ export const SelectQuestion = ({
       const newValue = internalValue.includes(optionValue)
         ? internalValue.filter((value) => value !== optionValue)
         : [...internalValue, optionValue]
-      console.log({ newValue })
       setInternalValue(newValue)
     }
   }
