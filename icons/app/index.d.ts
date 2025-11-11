@@ -95,6 +95,7 @@ export { default as Folder } from "./Folder";
 export { default as Folders } from "./Folders";
 export { default as Globe } from "./Globe";
 export { default as Graph } from "./Graph";
+export { default as Group } from "./Group";
 export { default as GroupBy } from "./GroupBy";
 export { default as Handle } from "./Handle";
 export { default as Handshake } from "./Handshake";
