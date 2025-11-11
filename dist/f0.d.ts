@@ -3490,7 +3490,7 @@ export declare type TagRawProps = {
     /**
      * Additional accessible text to display in the tag
      */
-    additionalAccesibleText?: string;
+    additionalAccessibleText?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -3506,7 +3506,7 @@ export declare interface TagStatusProps {
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
      */
-    additionalAccesibleText?: string;
+    additionalAccessibleText?: string;
 }
 
 export declare interface TagTeamProps {

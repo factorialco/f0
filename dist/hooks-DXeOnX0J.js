@@ -51578,7 +51578,7 @@ function sHe({ avatar: e, overlay: t = !1, compact: n = !1 }) {
     })
   });
 }
-const l3 = re(({ left: e, text: t, right: n, additionalAccesibleText: r, className: a, hint: i, info: o, shape: s = "rounded", hideLabel: l }, u) => (r = r || (l ? t : void 0), T("div", {
+const l3 = re(({ left: e, text: t, right: n, additionalAccessibleText: r, className: a, hint: i, info: o, shape: s = "rounded", hideLabel: l }, u) => (r = r || (l ? t : void 0), T("div", {
   className: "flex w-fit max-w-full flex-row items-center justify-start gap-1",
   children: [T("div", {
     ref: u,
@@ -51978,7 +51978,7 @@ const gHe = (e) => c("div", {
       children: n
     })]
   });
-}, qM = re(({ text: e, additionalAccesibleText: t, variant: n }, r) => (d5(e, {
+}, qM = re(({ text: e, additionalAccessibleText: t, variant: n }, r) => (d5(e, {
   disallowEmpty: !0
 }), c(l3, {
   ref: r,
@@ -51999,7 +51999,7 @@ const gHe = (e) => c("div", {
     }[n]),
     "aria-hidden": !0
   }),
-  additionalAccesibleText: t,
+  additionalAccessibleText: t,
   text: e
 })));
 qM.displayName = "F0TagStatus";
@@ -52009,7 +52009,7 @@ const LHe = (e) => c("div", {
     variant: e.status,
     text: e.label
   })
-}), Ec = re(({ text: e, additionalAccesibleText: t, icon: n, onlyIcon: r }, a) => (d5(e, {
+}), Ec = re(({ text: e, additionalAccessibleText: t, icon: n, onlyIcon: r }, a) => (d5(e, {
   disallowEmpty: !0
 }), c(l3, {
   ref: a,
@@ -52022,7 +52022,7 @@ const LHe = (e) => c("div", {
   }) : null,
   hideLabel: r,
   text: e,
-  additionalAccesibleText: t
+  additionalAccessibleText: t
 })));
 Ec.displayName = "F0TagRaw";
 const kHe = (e) => c("div", {
@@ -52088,7 +52088,7 @@ const kHe = (e) => c("div", {
     info: r,
     hint: f,
     left: l,
-    additionalAccesibleText: u,
+    additionalAccessibleText: u,
     text: s
   });
 });
