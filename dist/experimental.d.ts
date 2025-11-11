@@ -839,6 +839,7 @@ declare type BaseQuestionProps = {
     description?: string;
     children: React.ReactNode;
     onChange?: (params: BaseQuestionOnChangeParams) => void;
+    disabled?: boolean;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -4449,7 +4450,7 @@ export declare type RadarChartProps<K extends ChartConfig> = {
 export declare const rangeSeparator = "\u2192";
 
 declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    value: number;
+    value?: number;
     onChange?: (params: OnChangeParams_2) => void;
 } & ({
     range: {
@@ -5755,15 +5756,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
