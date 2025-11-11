@@ -413,7 +413,7 @@ describe("Select", () => {
 
     // Verify that onChange is called with empty string and onChangeSelectedOption with undefined
     await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledWith("", undefined, undefined)
+      expect(handleChange).toHaveBeenCalledWith(undefined, undefined, undefined)
     })
     await waitFor(() => {
       expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined)
