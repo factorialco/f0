@@ -93,6 +93,8 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
         <F0AvatarIcon
           icon={avatar.icon}
           size={size as ComponentProps<typeof F0AvatarIcon>["size"]}
+          aria-label={avatar["aria-label"]}
+          aria-labelledby={avatar["aria-labelledby"]}
         />
       )
   }
