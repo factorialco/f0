@@ -16,6 +16,7 @@ export type CardMetadataProperty = {
 export type CardMetadata =
   | {
       icon: IconType
+      tooltip?: string
       property: Exclude<CardMetadataProperty, { type: "file" }>
     }
   | {

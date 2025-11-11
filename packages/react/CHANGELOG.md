@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
+
+
+### Features
+
+* **RichTextEditor:** fix full screen mode on modals ([#2955](https://github.com/factorialco/f0/issues/2955)) ([ff68ad3](https://github.com/factorialco/f0/commit/ff68ad3cd699a158c07f52583716ea25d083f230))
+
+## [1.260.0](https://github.com/factorialco/f0/compare/f0-react-v1.259.1...f0-react-v1.260.0) (2025-11-10)
+
+
+### Features
+
+* add tooltip on F0Icon and CardMetadata ([#2947](https://github.com/factorialco/f0/issues/2947)) ([878de24](https://github.com/factorialco/f0/commit/878de2423ab10cf73c41fe2d5d16d39e15e82800))
+
+## [1.259.1](https://github.com/factorialco/f0/compare/f0-react-v1.259.0...f0-react-v1.259.1) (2025-11-10)
+
+
+### Bug Fixes
+
+* **sidebar:** company selector ([#2946](https://github.com/factorialco/f0/issues/2946)) ([4c255e7](https://github.com/factorialco/f0/commit/4c255e71e44ca0eab156259e0e4794e4e2ee2fe9))
+
 ## [1.259.0](https://github.com/factorialco/f0/compare/f0-react-v1.258.0...f0-react-v1.259.0) (2025-11-10)
 
 
