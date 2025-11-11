@@ -233,7 +233,7 @@ const meta: Meta = {
       }
 
       return (
-        <div className="w-48">
+        <>
           <Story
             args={
               {
@@ -245,13 +245,15 @@ const meta: Meta = {
               } as typeof args
             }
           />
-          <div>Selected: {JSON.stringify(localValue, null, 2)}</div>
-        </div>
+          <div className="mt-20">
+            Selected: {JSON.stringify(localValue, null, 2)}
+          </div>
+        </>
       )
     }) satisfies Decorator,
     (Story) => (
       <div
-        className="w-[350px]"
+        className="w-[330px]"
         onClick={() => {
           console.log("click was received in elements below the select")
         }}

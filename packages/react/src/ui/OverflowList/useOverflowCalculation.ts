@@ -20,6 +20,12 @@ export function useOverflowCalculation<T>(
   gap: number,
   options?: {
     max?: number
+    min?: number
+    /*
+     * Means the items can change their width dynamically, for example when they have ellipsis
+     * @default false
+     */
+    fluidItems?: boolean
     itemsWidth?: number | number[]
   }
 ) {
@@ -87,9 +93,14 @@ export function useOverflowCalculation<T>(
       }
 
       // Return the actual count without enforcing a minimum of 1
-      return Math.min(visibleCount, options?.max ?? items.length)
+      return (
+        Math.max(
+          options?.min ?? 0,
+          Math.min(visibleCount, options?.max ?? items.length)
+        ) + (options?.fluidItems ? 1 : 0)
+      )
     },
-    [options?.max, items.length]
+    [options?.max, options?.min, items.length]
   )
 
   // Calculate which items should be visible and which should overflow

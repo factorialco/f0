@@ -49,6 +49,12 @@ export type F0TagListProps<T extends TagType> = {
   max?: number
 
   /**
+   * The minimum number of tags to display.
+   * @default 0
+   */
+  min?: number
+
+  /**
    * The remaining number to display.
    */
   remainingCount?: number

@@ -7,6 +7,7 @@ export const F0TagList = <T extends TagType>({
   type,
   tags,
   max = 4,
+  min = 0,
   remainingCount: initialRemainingCount,
 }: F0TagListProps<T>) => {
   // Convert tags to TagVariant
@@ -18,6 +19,8 @@ export const F0TagList = <T extends TagType>({
     <OverflowList
       items={tagVariants}
       max={max}
+      min={min}
+      fluidItems
       renderListItem={(tag) => <Tag tag={tag} />}
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}
