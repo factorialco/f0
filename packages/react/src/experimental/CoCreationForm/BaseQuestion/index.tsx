@@ -1,26 +1,36 @@
 import { useEffect, useState } from "react"
-
-type OnChangeParams = {
-  id: string
-  title: string
-  description?: string
-}
+import { BaseQuestionOnChangeParams } from "../types"
 
 export type BaseQuestionProps = {
   id: string
   title: string
   description?: string
-  onChange?: (params: OnChangeParams) => void
+  children: React.ReactNode
+  onChange?: (params: BaseQuestionOnChangeParams) => void
 }
+
+export type BaseQuestionPropsForOtherQuestionComponents = Omit<
+  BaseQuestionProps,
+  "children" | "onChange"
+>
 
 export const BaseQuestion = ({
   id,
   title: titleProp,
   description: descriptionProp,
   onChange,
+  children,
 }: BaseQuestionProps) => {
   const [title, setTitle] = useState(titleProp)
   const [description, setDescription] = useState(descriptionProp)
+
+  useEffect(() => {
+    setTitle(titleProp)
+  }, [titleProp])
+
+  useEffect(() => {
+    setDescription(descriptionProp)
+  }, [descriptionProp])
 
   const handleChangeTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -54,6 +64,7 @@ export const BaseQuestion = ({
           className="w-full shrink px-2 text-f1-foreground-secondary disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
         />
       </div>
+      {children}
     </div>
   )
 }
