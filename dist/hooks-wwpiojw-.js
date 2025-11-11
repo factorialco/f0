@@ -23153,7 +23153,7 @@ function bde(e, t, n) {
       return Math.max(
         (n == null ? void 0 : n.min) ?? 0,
         Math.min(y, (n == null ? void 0 : n.max) ?? e.length)
-      ) + (n != null && n.fluidItems ? 1 : 0);
+      );
     },
     [n == null ? void 0 : n.max, n == null ? void 0 : n.min, e.length]
   ), g = Ct(() => {
@@ -52347,7 +52347,10 @@ const Ia = {}, cG = (e, t) => {
         r && clearTimeout(r);
       };
   };
-  if (t.$$typeof === Symbol.for("react.forward_ref")) {
+  if (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    t.$$typeof === Symbol.for("react.forward_ref")
+  ) {
     const o = t.render, s = re((l, u) => {
       var f;
       return Kk() && (a(), Ia[e] || (Ia[e] = {
