@@ -827,6 +827,22 @@ export declare type BasePaginatedResponse<R> = BaseResponse<R> & {
     perPage: number;
 };
 
+declare type BaseQuestionOnChangeParams = {
+    id: string;
+    title: string;
+    description?: string;
+};
+
+declare type BaseQuestionProps = {
+    id: string;
+    title: string;
+    description?: string;
+    children: React.ReactNode;
+    onChange?: (params: BaseQuestionOnChangeParams) => void;
+};
+
+declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
+
 /**
  * Base response type for collection data
  * @template R - The type of records in the collection
@@ -3683,6 +3699,11 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
+declare type OnChangeParams = BaseQuestionOnChangeParams & {
+    type: "text" | "longText";
+    text: string;
+};
+
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
@@ -5107,6 +5128,15 @@ declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.Textare
 } & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "maxLength" | "placeholder" | "status" | "error" | "icon" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
+
+export declare const TextQuestion: ({ id, title, description, text: textProp, type, onChange, }: TextQuestionProps) => JSX_2.Element;
+
+export declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "text" | "longText";
+    text: string;
+    onChange?: (params: OnChangeParams) => void;
+    isLongText?: boolean;
+};
 
 declare const THEMES: {
     readonly light: "";
