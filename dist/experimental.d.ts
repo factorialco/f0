@@ -855,6 +855,11 @@ export declare type BaseResponse<R> = {
     summaries?: R;
 };
 
+declare type BaseScoreQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+    type: "score";
+    value: number;
+};
+
 export declare const BaseTabs: React.FC<TabsProps>;
 
 declare interface BaseTOCItem {
@@ -3704,6 +3709,8 @@ declare type OnChangeParams = BaseQuestionOnChangeParams & {
     text: string;
 };
 
+declare type OnChangeParams_2 = BaseScoreQuestionOnChangeParams;
+
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
@@ -4418,6 +4425,12 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
+export declare const Question: ({ id, title, description, ...props }: QuestionProps) => JSX_2.Element | undefined;
+
+export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents & (TextQuestionProps | (RatingQuestionProps & {
+    type: "rating";
+}));
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -4434,6 +4447,21 @@ export declare type RadarChartProps<K extends ChartConfig> = {
 };
 
 export declare const rangeSeparator = "\u2192";
+
+declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    value: number;
+    onChange?: (params: OnChangeParams_2) => void;
+} & ({
+    range: {
+        min: number;
+        max: number;
+    };
+} | {
+    options: {
+        value: number;
+        label: string;
+    }[];
+});
 
 declare interface ReactionProps {
     emoji: string;
@@ -5129,9 +5157,7 @@ declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.Textare
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
-export declare const TextQuestion: ({ id, title, description, text: textProp, type, onChange, }: TextQuestionProps) => JSX_2.Element;
-
-export declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
     text: string;
     onChange?: (params: OnChangeParams) => void;
@@ -5729,15 +5755,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
