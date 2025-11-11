@@ -41,8 +41,9 @@ export const experimentalComponent = <T extends (...args: any[]) => any>(
   }
 
   // Check if the component is a forwardRef component
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const isForwardRef =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).$$typeof === Symbol.for("react.forward_ref")
 
   if (isForwardRef) {
