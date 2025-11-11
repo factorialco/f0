@@ -12,7 +12,7 @@ import { useState } from "react"
 export type BreadcrumbSelectProps<T extends string, R = unknown> = SelectProps<
   T,
   R
->
+> & { multiple?: false }
 
 export function BreadcrumbSelect<T extends string, R = unknown>({
   ...props
