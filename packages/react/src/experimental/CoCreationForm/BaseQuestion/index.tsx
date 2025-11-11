@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback } from "react"
 import { BaseQuestionOnChangeParams } from "../types"
 
 export type BaseQuestionProps = {
@@ -17,40 +17,35 @@ export type BaseQuestionPropsForOtherQuestionComponents = Omit<
 
 export const BaseQuestion = ({
   id,
-  title: titleProp,
-  description: descriptionProp,
+  title,
+  description,
   onChange,
   children,
 }: BaseQuestionProps) => {
-  const [title, setTitle] = useState(titleProp)
-  const [description, setDescription] = useState(descriptionProp)
+  const handleChangeTitle = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange?.({
+        id,
+        title: e.target.value,
+        description,
+      })
+    },
+    [id, description, onChange]
+  )
 
-  useEffect(() => {
-    setTitle(titleProp)
-  }, [titleProp])
-
-  useEffect(() => {
-    setDescription(descriptionProp)
-  }, [descriptionProp])
-
-  const handleChangeTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value)
-  }
-
-  const handleChangeDescription = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDescription(e.target.value)
-  }
-
-  useEffect(() => {
-    onChange?.({
-      id,
-      title,
-      description,
-    })
-  }, [id, title, description, onChange])
+  const handleChangeDescription = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange?.({
+        id,
+        title,
+        description: e.target.value,
+      })
+    },
+    [id, title, onChange]
+  )
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary p-4">
+    <div className="flex flex-col gap-4 rounded-xl border-2 border-solid border-f1-border-secondary p-4">
       <div className="flex flex-col gap-0.5">
         <input
           type="text"

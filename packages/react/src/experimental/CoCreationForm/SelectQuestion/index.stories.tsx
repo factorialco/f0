@@ -82,3 +82,21 @@ export const MultiSelect: Story = {
     ],
   },
 }
+
+export const MultiselectDisabled: Story = {
+  args: {
+    id: "question-5",
+    title: "What are your primary concerns?",
+    description: "Select one or more options",
+    type: "multi-select",
+    value: [],
+    options: [
+      { value: "communication", label: "Communication" },
+      { value: "feedback", label: "Feedback and recognition" },
+      { value: "growth", label: "Career growth opportunities" },
+      { value: "workload", label: "Workload management" },
+      { value: "team-dynamics", label: "Team dynamics" },
+    ],
+    disabled: true,
+  },
+}

@@ -1,6 +1,6 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { Textarea } from "@/experimental/Forms/Fields/TextArea"
-import { useEffect, useState } from "react"
+import { useCallback } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -22,35 +22,36 @@ export const TextQuestion = ({
   id,
   title,
   description,
-  text: textProp,
+  text,
   type,
   onChange,
   disabled,
 }: TextQuestionProps) => {
-  const [text, setText] = useState(textProp)
+  const handleChange = useCallback(
+    (params: BaseQuestionOnChangeParams) => {
+      onChange?.({
+        ...params,
+        text,
+        type,
+      })
+    },
+    [onChange, text, type]
+  )
 
-  const handleChange = (params: BaseQuestionOnChangeParams) => {
-    onChange?.({
-      ...params,
-      text,
-      type,
-    })
-  }
+  const handleChangeText = useCallback(
+    (value: string) => {
+      if (disabled) return
 
-  const handleChangeText = (value: string) => {
-    if (disabled) return
-    setText(value)
-  }
-
-  useEffect(() => {
-    onChange?.({
-      id,
-      title,
-      description,
-      text,
-      type: "text",
-    })
-  }, [id, title, description, onChange, text])
+      onChange?.({
+        id,
+        title,
+        description,
+        text: value,
+        type,
+      })
+    },
+    [id, title, description, onChange, type, disabled]
+  )
 
   const placeholder = "Respondent’s answer"
 

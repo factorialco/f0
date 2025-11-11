@@ -1,6 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { Add } from "@/icons/app"
+import { Add, CheckCircleLine, Delete } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import {
   BaseQuestion,
@@ -40,27 +41,43 @@ const SelectOption = ({
   label,
   selected,
   onClick,
+  disabled,
 }: {
   value: string
   label: string
   selected: boolean
   onClick: (value: string) => void
+  disabled?: boolean
 }) => {
   const handleClick = () => {
+    if (disabled) return
     onClick(value)
   }
 
   return (
     <div
-      className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 hover:bg-f1-background-hover"
+      className={cn(
+        "group flex items-center gap-3 rounded-md py-1 pl-2 pr-1 hover:bg-f1-background-hover",
+        !disabled && "cursor-pointer"
+      )}
       onClick={handleClick}
     >
       <F0Checkbox
         checked={selected}
-        onCheckedChange={() => onClick(value)}
+        onCheckedChange={handleClick}
+        disabled={disabled}
         hideLabel
       />
       <input type="text" value={label} className="flex-1 font-medium" />
+      <div className="flex-row items-center gap-1 opacity-0 group-hover:opacity-100">
+        <F0Button
+          label="Mark as correct"
+          variant="ghost"
+          icon={CheckCircleLine}
+          hideLabel
+        />
+        <F0Button label="Remove" variant="ghost" icon={Delete} hideLabel />
+      </div>
     </div>
   )
 }
@@ -70,6 +87,7 @@ export const SelectQuestion = ({
   title,
   description,
   options,
+  disabled,
   ...props
 }: SelectQuestionProps) => {
   const [internalValue, setInternalValue] = useState(props.value)
@@ -133,7 +151,7 @@ export const SelectQuestion = ({
       description={description}
       onChange={handleChange}
     >
-      <div className="-mx-2 flex flex-col items-start">
+      <div className="-mx-0.5 flex flex-col items-start">
         {options.map((option) => (
           <div className="w-full" key={option.value}>
             <SelectOption
@@ -145,6 +163,7 @@ export const SelectQuestion = ({
                   : internalValue === option.value
               }
               onClick={handleOptionClick}
+              disabled={disabled}
             />
           </div>
         ))}
