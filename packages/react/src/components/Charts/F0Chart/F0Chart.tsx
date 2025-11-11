@@ -49,7 +49,8 @@ export const F0Chart = ({
       tooltip: {
         trigger:
           Array.isArray(customOptions.series) &&
-          customOptions.series[0]?.type === "pie"
+          (customOptions.series[0]?.type === "pie" ||
+            customOptions.series[0]?.type === "radar")
             ? "item"
             : "axis",
       },
