@@ -17,7 +17,6 @@ import {
   TaskListExtension,
   TextAlignExtension,
   TextStyleExtension,
-  ToolbarLabels,
   TypographyExtension,
   UnderlineExtension,
 } from "@/experimental/RichText/CoreEditor"
@@ -48,7 +47,7 @@ import {
 
 export const createNotesTextEditorExtensions = (
   placeholder: string,
-  toolbarLabels: ToolbarLabels,
+  toolbarLabels: Record<string, string>,
   groupLabels?: SlashCommandGroupLabels,
   aiBlockConfig?: AIBlockConfigWithLabels,
   aiBlockLabels?: AIBlockLabels,

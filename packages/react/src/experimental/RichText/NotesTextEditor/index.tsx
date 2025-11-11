@@ -1,3 +1,14 @@
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import {
+  EditorBubbleMenu,
+  Toolbar,
+} from "@/experimental/RichText/CoreEditor"
+import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
+import { Handle, Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -12,20 +23,6 @@ import {
   useState,
 } from "react"
 
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import {
-  EditorBubbleMenu,
-  Toolbar,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import { Handle, Plus } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 
 import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
 import {
@@ -45,6 +42,7 @@ import {
   NotesTextEditorHandle,
   secondaryActionsType,
 } from "./types"
+import { F0AvatarAlert, F0Button } from "@/f0"
 
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
@@ -55,7 +53,6 @@ interface NotesTextEditorProps {
   imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
   labels: {
-    toolbarLabels: ToolbarLabels
     slashCommandGroupLabels?: SlashCommandGroupLabels
     aiBlockLabels?: AIBlockLabels
     moodTrackerLabels?: MoodTrackerLabels
@@ -91,8 +88,10 @@ const NotesTextEditorComponent = forwardRef<
   },
   ref
 ) {
+  const translations = useI18n()
+  const toolbarLabels = translations.richTextEditor
+
   const {
-    toolbarLabels,
     slashCommandGroupLabels,
     aiBlockLabels,
     moodTrackerLabels,
@@ -321,7 +320,6 @@ const NotesTextEditorComponent = forwardRef<
       {!readonly && !showBubbleMenu && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
           <Toolbar
-            labels={toolbarLabels}
             editor={editor}
             disableButtons={false}
             showEmojiPicker={false}
@@ -387,7 +385,6 @@ const NotesTextEditorComponent = forwardRef<
           editorId={editorId}
           editor={editor}
           disableButtons={false}
-          toolbarLabels={toolbarLabels}
           isToolbarOpen={!showBubbleMenu}
           isFullscreen={false}
           plainHtmlMode={false}

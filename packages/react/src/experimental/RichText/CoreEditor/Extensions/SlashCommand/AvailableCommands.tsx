@@ -63,7 +63,7 @@ const availableCommands = (
 }
 
 const getGroupedCommands = (
-  labels: ToolbarLabels,
+  labels: Record<string, string>,
   groupLabels: SlashCommandGroupLabels,
   aiBlockConfig?: AIBlockConfig,
   imageUploadConfig?: ImageUploadConfig
