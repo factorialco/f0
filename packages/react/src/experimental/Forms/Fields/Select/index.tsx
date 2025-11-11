@@ -1,14 +1,10 @@
 import {
   BaseFetchOptions,
   BaseResponse,
-  DataSourceDefinition,
   FiltersDefinition,
   getDataSourcePaginationType,
-  GroupingDefinition,
   PaginatedDataAdapter,
   PromiseOrObservable,
-  RecordType,
-  SortingsDefinition,
   useData,
   useDataSource,
   useGroups,
@@ -17,7 +13,7 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { GroupHeader } from "@/ui/GroupHeader/index"
-import { InputField, InputFieldProps } from "@/ui/InputField"
+import { InputField } from "@/ui/InputField"
 import {
   SelectContent,
   Select as SelectPrimitive,
@@ -31,99 +27,15 @@ import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { SelectedItems } from "./components/SelectedItems"
 import { SelectItem } from "./components/SelectItem"
-import { Action, SelectBottomActions } from "./SelectBottomActions"
+import { SelectBottomActions } from "./SelectBottomActions"
 import { SelectTopActions } from "./SelectTopActions"
-import type { SelectItemObject, SelectItemProps } from "./types"
+import type {
+  ResolvedRecordType,
+  SelectItemObject,
+  SelectItemProps,
+  SelectProps,
+} from "./types"
 export * from "./types"
-
-// Helper type to resolve the actual record type
-export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
-
-/**
- * Select component for choosing from a list of options.
- *
- * @template T - The type of the emitted  value
- * @template R - The type of the record/item data (used with data source)
- *
- */
-export type SelectProps<T extends string, R = unknown> = {
-  onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined,
-    checked: boolean
-  ) => void
-  children?: React.ReactNode
-  open?: boolean
-  showSearchBox?: boolean
-  searchBoxPlaceholder?: string
-  onSearchChange?: (value: string) => void
-  searchValue?: string
-  onOpenChange?: (open: boolean) => void
-  searchEmptyMessage?: string
-  className?: string
-  selectContentClassName?: string
-  actions?: Action[]
-} & (
-  | {
-      multiple?: false
-      value?: T
-      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
-      onChange: (
-        value: T | undefined,
-        originalItem?: ResolvedRecordType<R>,
-        option?: SelectItemObject<T, ResolvedRecordType<R>>
-      ) => void
-    }
-  | {
-      multiple: true
-      value?: T[]
-      defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>[]
-      onChange: (
-        value: T[],
-        originalItems?: ResolvedRecordType<R>[],
-        options?: SelectItemObject<T, ResolvedRecordType<R>>[]
-      ) => void
-    }
-) &
-  (
-    | {
-        source: DataSourceDefinition<
-          ResolvedRecordType<R>,
-          FiltersDefinition,
-          SortingsDefinition,
-          GroupingDefinition<ResolvedRecordType<R>>
-        >
-        mapOptions: (
-          item: ResolvedRecordType<R>
-        ) => SelectItemProps<T, ResolvedRecordType<R>>
-        options?: never
-      }
-    | {
-        source?: never
-        mapOptions?: never
-        searchFn?: (
-          option: SelectItemProps<T, unknown>,
-          search?: string
-        ) => boolean | undefined
-        options: SelectItemProps<T, unknown>[]
-      }
-  ) &
-  Pick<
-    InputFieldProps<T>,
-    | "required"
-    | "loading"
-    | "hideLabel"
-    | "clearable"
-    | "labelIcon"
-    | "size"
-    | "label"
-    | "icon"
-    | "placeholder"
-    | "disabled"
-    | "name"
-    | "error"
-    | "status"
-    | "hint"
-  >
 
 const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
   return (
@@ -131,21 +43,6 @@ const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
     !search ||
     option.label.toLowerCase().includes(search.toLowerCase())
   )
-}
-
-/**
- * Converts an array of values to a single value or an array of values depending on the multiple prop
- * @param items - The array of values to convert
- * @param multiple - Whether the select is multiple
- * @returns The single value or the array of values
- */
-const toValueType = <T, M extends boolean | undefined>(
-  items: T[],
-  multiple: M
-): M extends true ? T[] : T | undefined => {
-  return (multiple ? items : (items[0] ?? undefined)) as M extends true
-    ? T[]
-    : T | undefined
 }
 
 const SelectComponent = forwardRef(function Select<
@@ -188,7 +85,6 @@ const SelectComponent = forwardRef(function Select<
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
-  type ValueString = T extends string ? string : string[]
 
   const [openLocal, setOpenLocal] = useState(open)
 
@@ -352,22 +248,14 @@ const SelectComponent = forwardRef(function Select<
     [onChangeSelectedOption]
   )
 
-  const handleLocalValueChange = (changedValue: string[] | undefined) => {
+  const handleLocalValueChange = (
+    changedValue: string | string[] | undefined
+  ) => {
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
     setLocalValue((toArray(changedValue) ?? []) as T[])
 
     const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
-
-    console.log(
-      "foundOptions2",
-      foundOptions,
-      multiple,
-      toValueType(
-        foundOptions.map((option) => option.value),
-        multiple
-      )
-    )
 
     // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
     if (multiple) {
@@ -375,11 +263,13 @@ const SelectComponent = forwardRef(function Select<
       const items = foundOptions
         .map((option) => option.item)
         .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+
       onChange?.(values, items, foundOptions)
     } else {
       const value = foundOptions[0]?.value
       const item = foundOptions[0]?.item
       const option = foundOptions[0]
+
       onChange?.(value, item, option)
     }
   }
@@ -458,25 +348,30 @@ const SelectComponent = forwardRef(function Select<
 
   const i18n = useI18n()
 
-  const primitiveValue = useMemo(() => {
-    if (multiple) {
-      return (localValue ?? []).map((value) => String(value))
-    }
-    return (localValue ?? [])[0] as string | undefined
-  }, [localValue, multiple])
+  const commonProps = {
+    ...props,
+    onItemCheckChange,
+    disabled,
+    open: openLocal,
+    onOpenChange: handleChangeOpenLocal,
+    onValueChange: handleLocalValueChange,
+  }
+
+  const selectPrimitiveProps = multiple
+    ? ({
+        ...commonProps,
+        value: localValue as string[],
+        multiple: true as const,
+      } as const)
+    : ({
+        ...commonProps,
+        value: localValue[0] as string | undefined,
+        multiple: false as const,
+      } as const)
 
   return (
     <>
-      <SelectPrimitive
-        onItemCheckChange={onItemCheckChange}
-        onValueChange={handleLocalValueChange}
-        value={primitiveValue}
-        disabled={disabled}
-        open={openLocal}
-        multiple={multiple}
-        onOpenChange={handleChangeOpenLocal}
-        {...props}
-      >
+      <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
             <div
