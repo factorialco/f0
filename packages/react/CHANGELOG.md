@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.262.0](https://github.com/factorialco/f0/compare/f0-react-v1.261.0...f0-react-v1.262.0) (2025-11-11)
+
+
+### Features
+
+* Display deactivated persons in OneDataCollection tables ([#2952](https://github.com/factorialco/f0/issues/2952)) ([0d1eb2b](https://github.com/factorialco/f0/commit/0d1eb2b7d055c48316f15a978bcd18004d3d42f2))
+
 ## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
 
 
