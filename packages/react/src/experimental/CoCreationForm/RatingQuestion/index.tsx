@@ -23,6 +23,7 @@ export const RatingQuestion = ({
   value,
   onChange,
   disabled,
+  required,
   ...props
 }: RatingQuestionProps) => {
   const options = useMemo(() => {
@@ -48,6 +49,7 @@ export const RatingQuestion = ({
       options={options}
       onChange={onChange}
       disabled={disabled}
+      required={required}
     />
   )
 }

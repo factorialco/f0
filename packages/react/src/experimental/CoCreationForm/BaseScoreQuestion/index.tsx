@@ -60,6 +60,7 @@ export const BaseScoreQuestion = ({
   value,
   onChange,
   disabled,
+  required,
 }: BaseScoreQuestionProps) => {
   const [internalValue, setInternalValue] = useState(value)
 
@@ -94,6 +95,7 @@ export const BaseScoreQuestion = ({
       title={title}
       description={description}
       onChange={handleChange}
+      required={required}
     >
       <div className="flex flex-row gap-3">
         {options.map((option) => (

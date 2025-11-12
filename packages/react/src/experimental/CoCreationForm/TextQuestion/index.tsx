@@ -26,6 +26,7 @@ export const TextQuestion = ({
   type,
   onChange,
   disabled,
+  required,
 }: TextQuestionProps) => {
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
@@ -60,10 +61,11 @@ export const TextQuestion = ({
   const commonInputProps = {
     value: inputValue,
     onChange: handleChangeText,
-    placeholder: placeholder,
-    disabled: disabled,
+    placeholder,
+    disabled,
     label: "Answer",
     hideLabel: true,
+    required,
   }
 
   return (
@@ -72,6 +74,7 @@ export const TextQuestion = ({
       title={title}
       description={description}
       onChange={handleChange}
+      required={required}
     >
       <div className="px-2">
         {type === "text" && (

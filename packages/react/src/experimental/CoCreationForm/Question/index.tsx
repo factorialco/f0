@@ -1,4 +1,5 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
+import { LinkQuestion, LinkQuestionProps } from "../LinkQuestion"
 import { NumericQuestion, NumericQuestionProps } from "../NumericQuestion"
 import { RatingQuestion, RatingQuestionProps } from "../RatingQuestion"
 import { SelectQuestion, SelectQuestionProps } from "../SelectQuestion"
@@ -10,6 +11,7 @@ export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &
     | (RatingQuestionProps & { type: "rating" })
     | (SelectQuestionProps & { type: "select" | "multi-select" })
     | (NumericQuestionProps & { type: "numeric" })
+    | (LinkQuestionProps & { type: "link" })
   )
 
 export const Question = ({
@@ -57,6 +59,16 @@ export const Question = ({
   if (props.type === "numeric") {
     return (
       <NumericQuestion
+        {...baseQuestionProps}
+        onChange={props.onChange}
+        {...props}
+      />
+    )
+  }
+
+  if (props.type === "link") {
+    return (
+      <LinkQuestion
         {...baseQuestionProps}
         onChange={props.onChange}
         {...props}

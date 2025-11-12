@@ -52,6 +52,7 @@ export const SelectQuestion = ({
   description,
   options,
   disabled,
+  required,
   ...props
 }: SelectQuestionProps) => {
   const baseOnChangeParams = {
@@ -146,6 +147,7 @@ export const SelectQuestion = ({
       title={title}
       description={description}
       onChange={handleChange}
+      required={required}
     >
       <div className="-mx-0.5 flex flex-col items-start">
         {options.map((option, index) => (

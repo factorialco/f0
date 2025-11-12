@@ -1,4 +1,4 @@
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { Input } from "@/experimental/Forms/Fields/Input"
 import { useCallback } from "react"
 import {
   BaseQuestion,
@@ -6,17 +6,16 @@ import {
 } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams } from "../types"
 
-export type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-  value?: number | null
+export type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+  value?: string | null
 }
 
-export type NumericQuestionProps =
-  BaseQuestionPropsForOtherQuestionComponents & {
-    value?: number | null
-    onChange?: (params: NumericQuestionOnChangeParams) => void
-  }
+export type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+  value?: string | null
+  onChange?: (params: LinkQuestionOnChangeParams) => void
+}
 
-export const NumericQuestion = ({
+export const LinkQuestion = ({
   id,
   title,
   description,
@@ -24,7 +23,7 @@ export const NumericQuestion = ({
   onChange,
   disabled,
   required,
-}: NumericQuestionProps) => {
+}: LinkQuestionProps) => {
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
       onChange?.({
@@ -36,7 +35,7 @@ export const NumericQuestion = ({
   )
 
   const handleChangeText = useCallback(
-    (newValue: number | null) => {
+    (newValue: string | null) => {
       if (disabled) return
 
       onChange?.({
@@ -44,10 +43,9 @@ export const NumericQuestion = ({
         title,
         description,
         value: newValue,
-        required,
       })
     },
-    [id, title, description, onChange, disabled, required]
+    [id, title, description, onChange, disabled]
   )
 
   return (
@@ -59,10 +57,10 @@ export const NumericQuestion = ({
       required={required}
     >
       <div className="px-2">
-        <NumberInput
-          locale="en-US"
+        <Input
+          type="url"
           size="md"
-          value={value}
+          value={value ?? undefined}
           onChange={handleChangeText}
           disabled={disabled}
           label="Answer"
