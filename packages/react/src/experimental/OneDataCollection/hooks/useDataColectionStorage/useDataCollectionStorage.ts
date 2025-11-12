@@ -147,6 +147,7 @@ export const useDataCollectionStorage = <
       )
       // If no features to save, we don't need to save anything
       if (Object.keys(featuresToSave).length === 0) {
+        storageProvider.set(key!, {})
         return
       }
       storageProvider.set(key!, featuresToSave)
