@@ -9,12 +9,12 @@ import { BaseQuestionOnChangeParams } from "../types"
 
 export type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   type: "text" | "longText"
-  text: string
+  value?: string | null
 }
 
 export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   type: "text" | "longText"
-  text: string
+  value?: string | null
   onChange?: (params: TextQuestionOnChangeParams) => void
 }
 
@@ -22,7 +22,7 @@ export const TextQuestion = ({
   id,
   title,
   description,
-  text,
+  value,
   type,
   onChange,
   disabled,
@@ -31,22 +31,22 @@ export const TextQuestion = ({
     (params: BaseQuestionOnChangeParams) => {
       onChange?.({
         ...params,
-        text,
+        value,
         type,
       })
     },
-    [onChange, text, type]
+    [onChange, value, type]
   )
 
   const handleChangeText = useCallback(
-    (value: string) => {
+    (newValue: string) => {
       if (disabled) return
 
       onChange?.({
         id,
         title,
         description,
-        text: value,
+        value: newValue,
         type,
       })
     },
@@ -54,6 +54,17 @@ export const TextQuestion = ({
   )
 
   const placeholder = "Respondent’s answer"
+
+  const inputValue = disabled ? placeholder : (value ?? undefined)
+
+  const commonInputProps = {
+    value: inputValue,
+    onChange: handleChangeText,
+    placeholder: placeholder,
+    disabled: disabled,
+    label: "Answer",
+    hideLabel: true,
+  }
 
   return (
     <BaseQuestion
@@ -64,28 +75,9 @@ export const TextQuestion = ({
     >
       <div className="px-2">
         {type === "text" && (
-          <Input
-            type="text"
-            size="md"
-            value={disabled ? placeholder : text}
-            onChange={handleChangeText}
-            placeholder={placeholder}
-            disabled={disabled}
-            label="Answer"
-            hideLabel
-          />
+          <Input type="text" size="md" {...commonInputProps} />
         )}
-        {type === "longText" && (
-          <Textarea
-            value={disabled ? placeholder : text}
-            onChange={handleChangeText}
-            placeholder={placeholder}
-            disabled={disabled}
-            label="Answer"
-            rows={4}
-            hideLabel
-          />
-        )}
+        {type === "longText" && <Textarea rows={4} {...commonInputProps} />}
       </div>
     </BaseQuestion>
   )

@@ -84,6 +84,7 @@ export const SelectOption = ({
       {disabled ? (
         <input
           type="text"
+          placeholder="Type anything you want here..."
           value={label}
           onChange={handleChangeLabel}
           className="flex-1 font-medium"

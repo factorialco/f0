@@ -22,7 +22,7 @@ export const Default: Story = {
     title: "Tell us more about your idea",
     description: "Please provide a detailed description",
     type: "text",
-    text: "",
+    value: "",
   },
 }
 
@@ -32,7 +32,7 @@ export const WithInitialText: Story = {
     title: "Describe your project",
     description: "Share as much detail as you can",
     type: "text",
-    text: "This is my initial response...",
+    value: "This is my initial response...",
   },
 }
 
@@ -41,7 +41,6 @@ export const LongText: Story = {
     id: "question-4",
     title: "What would you like to share?",
     description: "Share as much detail as you can",
-    text: "",
     type: "longText",
   },
 }
@@ -51,7 +50,6 @@ export const DisabledText: Story = {
     id: "question-5",
     title: "What would you like to share?",
     description: "Share as much detail as you can",
-    text: "",
     type: "text",
     disabled: true,
   },
@@ -62,7 +60,6 @@ export const DisabledLongText: Story = {
     id: "question-6",
     title: "What would you like to share?",
     description: "Share as much detail as you can",
-    text: "",
     type: "longText",
     disabled: true,
   },
