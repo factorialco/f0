@@ -18326,7 +18326,7 @@ const Ode = xt(Wv, lj), cj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
     onClick: () => m("numeric")
   }], [m]);
   return k("div", {
-    className: "group/question relative flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary p-4 hover:border-f1-border-hover",
+    className: "group/question relative flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary px-3 py-4 hover:border-f1-border-hover",
     children: [k("div", {
       className: "flex flex-col gap-0.5",
       children: [d("div", {
@@ -18380,7 +18380,8 @@ const Ode = xt(Wv, lj), cj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
         disabled: n.disabled,
         label: "Answer",
         hideLabel: !0,
-        required: n.required
+        required: n.required,
+        clearable: !n.required
       })
     })
   });
@@ -18453,7 +18454,7 @@ const Ode = xt(Wv, lj), cj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
     onChange: f,
     required: l,
     children: d("div", {
-      className: "flex flex-row gap-3",
+      className: "grid grid-cols-3 gap-3 md:grid-cols-5",
       children: r.map((h) => d(uj, {
         value: h.value,
         label: h.label,
@@ -18707,6 +18708,7 @@ const yj = qn({
       children: [e === "text" && d(Nm, {
         type: "text",
         size: "md",
+        clearable: !i.required,
         ...l
       }), e === "longText" && d(yj, {
         rows: 4,
