@@ -1,25 +1,25 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
-import { useCallback } from "react"
+import { DatePickerValue, F0DatePicker } from "@/components/F0DatePicker"
+import { useCallback, useMemo } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams } from "../types"
 
-export type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-  value?: string | null
+export type DateQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+  value?: Date | null
 }
 
-export type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-  value?: string | null
-  onChange?: (params: LinkQuestionOnChangeParams) => void
+export type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+  value?: Date | null
+  onChange?: (params: DateQuestionOnChangeParams) => void
 }
 
-export const LinkQuestion = ({
+export const DateQuestion = ({
   value,
   onChange,
   ...baseQuestionComponentProps
-}: LinkQuestionProps) => {
+}: DateQuestionProps) => {
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
       onChange?.({
@@ -30,30 +30,41 @@ export const LinkQuestion = ({
     [onChange, value]
   )
 
-  const handleChangeText = useCallback(
-    (newValue: string | null) => {
+  const handleChangeDate = useCallback(
+    (newValue: DatePickerValue | undefined) => {
       if (baseQuestionComponentProps.disabled) return
 
       onChange?.({
         ...baseQuestionComponentProps,
-        value: newValue,
+        value: newValue?.value?.from,
       })
     },
     [baseQuestionComponentProps, onChange]
   )
 
+  const datePickerValue = useMemo(
+    () =>
+      value
+        ? {
+            granularity: "day" as const,
+            value: { from: value, to: value },
+          }
+        : undefined,
+    [value]
+  )
+
   return (
     <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
       <div className="px-2">
-        <Input
-          type="url"
+        <F0DatePicker
           size="md"
-          value={value ?? undefined}
-          onChange={handleChangeText}
+          value={datePickerValue}
+          onChange={handleChangeDate}
           disabled={baseQuestionComponentProps.disabled}
           label="Answer"
           hideLabel={true}
           required={baseQuestionComponentProps.required}
+          readonly={baseQuestionComponentProps.disabled}
           clearable={!baseQuestionComponentProps.required}
         />
       </div>

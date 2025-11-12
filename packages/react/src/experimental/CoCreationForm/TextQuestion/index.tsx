@@ -68,7 +68,12 @@ export const TextQuestion = ({
     <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
       <div className="px-2">
         {type === "text" && (
-          <Input type="text" size="md" {...commonInputProps} />
+          <Input
+            type="text"
+            size="md"
+            clearable={!baseQuestionComponentProps.required}
+            {...commonInputProps}
+          />
         )}
         {type === "longText" && <Textarea rows={4} {...commonInputProps} />}
       </div>

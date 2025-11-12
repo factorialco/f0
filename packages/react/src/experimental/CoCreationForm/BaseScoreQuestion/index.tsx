@@ -105,7 +105,7 @@ export const BaseScoreQuestion = ({
       onChange={handleChange}
       required={required}
     >
-      <div className="flex flex-row gap-3">
+      <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
         {options.map((option) => (
           <ScoreOption
             key={option.value}
