@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.265.0](https://github.com/factorialco/f0/compare/f0-react-v1.264.1...f0-react-v1.265.0) (2025-11-12)
+
+
+### Features
+
+* **RichTextEditor:** add BlockIdExtension  ([#2964](https://github.com/factorialco/f0/issues/2964)) ([805493c](https://github.com/factorialco/f0/commit/805493cf4154d3e555844300b91305b12c25977f))
+
 ## [1.264.1](https://github.com/factorialco/f0/compare/f0-react-v1.264.0...f0-react-v1.264.1) (2025-11-12)
 
 
