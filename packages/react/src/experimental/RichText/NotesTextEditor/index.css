@@ -1,5 +1,10 @@
-.preserved-selection {
-  @apply bg-f1-background-selected-bold/20;
+.preserved-selection,
+.notes-text-editor-title::selection {
+  @apply bg-f1-background-selected-hover;
+}
+
+.notes-text-editor *::selection {
+  background-color: transparent !important;
 }
 
 .notes-text-editor p {

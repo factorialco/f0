@@ -263,7 +263,7 @@ const NotesTextEditorComponent = forwardRef<
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={labels.titlePlaceholder || ""}
-              className="text-[39px] font-semibold tracking-[-0.78px] text-f1-foreground placeholder-f1-foreground-tertiary"
+              className="notes-text-editor-title text-[39px] font-semibold tracking-[-0.78px] text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>
         )}
