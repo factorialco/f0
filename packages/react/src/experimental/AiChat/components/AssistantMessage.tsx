@@ -11,8 +11,8 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
+import { ActionItem } from "../ActionItem"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
-import { ChatSpinner } from "./ChatSpinner"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
@@ -68,9 +68,7 @@ export const AssistantMessage = ({
       onMouseLeave={handleMouseLeave}
     >
       {isLoading && !subComponent && (
-        <div className="min-h-[20px]">
-          <ChatSpinner />
-        </div>
+        <ActionItem title={translations.ai.thinking} status="executing" />
       )}
       {message && (
         <>

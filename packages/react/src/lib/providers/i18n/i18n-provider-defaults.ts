@@ -214,6 +214,7 @@ export const defaultTranslations = {
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
+    thinking: "Thinking...",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",

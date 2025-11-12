@@ -9,6 +9,7 @@ export type Source = {
   title: string
   link: string
   icon?: string // we need to support string because in mastra we don't have the IconType because the icons are not imported
+  targetBlank?: boolean
 }
 
 // Helper function to get icon component from string name
@@ -47,7 +48,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
               aria-label={source.title}
               href={source.link}
               size="md"
-              target="_blank"
+              target={source.targetBlank ? "_blank" : "_self"}
               variant="ghost"
               className="justify-start truncate hover:bg-f1-background-hover"
               compact
