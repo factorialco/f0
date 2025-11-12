@@ -59,119 +59,16 @@ const getGroupedCommands = (
         {
           title: aiBlockConfig.title,
           commands: [
-            // Add individual commands for each AI button using emoji
             ...aiBlockConfig.buttons.map((button) => ({
               title: button.label,
-              command: async (editor: Editor) => {
-                // Insert AI block with the specific action already loading
+              command: (editor: Editor) => {
                 editor
                   .chain()
                   .focus()
-                  .insertContent([
-                    {
-                      type: "aiBlock",
-                      attrs: {
-                        data: {
-                          content: null,
-                          selectedAction: button.type,
-                        },
-                        config: aiBlockConfig,
-                      },
-                    },
-                    {
-                      type: "paragraph",
-                    },
-                  ])
+                  .executeAIAction(button.type, aiBlockConfig)
                   .run()
-
-                // Execute the AI action with a small delay to ensure the component is mounted
-                setTimeout(async () => {
-                  try {
-                    const content = await aiBlockConfig.onClick(button.type)
-
-                    // Find the AIBlock we just inserted and update it with the result
-                    setTimeout(() => {
-                      const { state } = editor
-                      const { doc } = state
-                      let lastAIBlockPos = null
-
-                      // Find the last AIBlock (which should be the one we just inserted)
-                      doc.descendants((node, pos) => {
-                        if (
-                          node.type.name === "aiBlock" &&
-                          node.attrs.data?.selectedAction === button.type &&
-                          !node.attrs.data?.content
-                        ) {
-                          lastAIBlockPos = pos
-                        }
-                      })
-
-                      if (lastAIBlockPos !== null) {
-                        // Update the specific AIBlock with the generated content
-                        const tr = state.tr.setNodeMarkup(
-                          lastAIBlockPos,
-                          undefined,
-                          {
-                            data: {
-                              selectedAction: button.type,
-                              content: content,
-                            },
-                            config: aiBlockConfig,
-                          }
-                        )
-                        editor.view.dispatch(tr)
-
-                        // Position cursor in the paragraph after the AIBlock
-                        const node = doc.nodeAt(lastAIBlockPos)
-                        if (node) {
-                          const paragraphPos =
-                            lastAIBlockPos + node.nodeSize + 1
-                          editor
-                            .chain()
-                            .focus()
-                            .setTextSelection(paragraphPos)
-                            .run()
-                        }
-                      }
-                    }, 50)
-                  } catch (error) {
-                    console.error("AI action error:", error)
-                    // Update the AIBlock to show error state
-                    setTimeout(() => {
-                      const { state } = editor
-                      const { doc } = state
-                      let lastAIBlockPos = null
-
-                      // Find the last AIBlock that matches our criteria
-                      doc.descendants((node, pos) => {
-                        if (
-                          node.type.name === "aiBlock" &&
-                          node.attrs.data?.selectedAction === button.type &&
-                          !node.attrs.data?.content
-                        ) {
-                          lastAIBlockPos = pos
-                        }
-                      })
-
-                      if (lastAIBlockPos !== null) {
-                        const tr = state.tr.setNodeMarkup(
-                          lastAIBlockPos,
-                          undefined,
-                          {
-                            data: {
-                              selectedAction: button.type,
-                              content: null,
-                            },
-                            config: aiBlockConfig,
-                          }
-                        )
-                        editor.view.dispatch(tr)
-                      }
-                    }, 50)
-                  }
-                }, 100) // Small delay to ensure component is mounted and can detect loading state
               },
-              emoji: button.emoji, // Use emoji instead of icon
+              icon: button.icon,
             })),
           ],
         },

@@ -103,13 +103,7 @@ const NotesTextEditorComponent = forwardRef<
       aiBlockConfig
         ? {
             ...aiBlockConfig,
-            toolbarLabels,
-            slashCommandGroupLabels,
-            moodTrackerLabels,
-            liveCompanionLabels,
-            transcriptLabels,
             labels: aiBlockLabels,
-            placeholder,
           }
         : undefined,
       aiBlockLabels,
