@@ -4446,7 +4446,7 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
-export declare const Question: ({ id, title, description, ...props }: QuestionProps) => JSX_2.Element | undefined;
+export declare const Question: ({ ...props }: QuestionProps) => JSX_2.Element;
 
 export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents & (TextQuestionProps | (RatingQuestionProps & {
     type: "rating";
@@ -5818,15 +5818,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
