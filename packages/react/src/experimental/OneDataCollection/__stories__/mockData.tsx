@@ -895,9 +895,11 @@ export const ExampleComponent = ({
     >
   >
   id?: string
-  storage?: {
-    features?: DataCollectionStorageFeaturesDefinition
-  }
+  storage?:
+    | false
+    | {
+        features?: DataCollectionStorageFeaturesDefinition
+      }
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,

@@ -46,7 +46,8 @@ export const useDataCollectionStorage = <
     Sortings,
     Filters,
     NavigationFilters
-  >
+  >,
+  disabled?: boolean
 ): UseDataCollectionStorage => {
   const [storageReady, setStorageReady] = useState(false)
 
@@ -68,15 +69,19 @@ export const useDataCollectionStorage = <
     [JSON.stringify(featuresDef)]
   )
 
+  const active = useMemo(() => {
+    return !disabled && !!key
+  }, [disabled, key])
+
   /** Gets the settings in storage when the key and features change */
   useEffect(() => {
-    if (!key) {
+    if (!active) {
       // If no key, we consider the storage ready
       setStorageReady(true)
       return
     }
 
-    storageProvider.get(key).then((status) => {
+    storageProvider.get(key!).then((status) => {
       Object.entries(featureProviders).forEach(
         ([featureName, featureProvider]) => {
           if (
@@ -125,7 +130,7 @@ export const useDataCollectionStorage = <
         NavigationFilters
       >
     ) => {
-      if (!key || !storageReady) {
+      if (!active || !storageReady) {
         return
       }
 
@@ -140,7 +145,11 @@ export const useDataCollectionStorage = <
           })
           .filter(([_, value]) => value !== undefined)
       )
-      storageProvider.set(key, featuresToSave)
+      // If no features to save, we don't need to save anything
+      if (Object.keys(featuresToSave).length === 0) {
+        return
+      }
+      storageProvider.set(key!, featuresToSave)
     },
     200
   )

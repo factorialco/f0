@@ -50,6 +50,29 @@ export const TableColumnOrderingAndHidden: Story = {
   },
 }
 
+export const TableColumnOrderingAndHiddenNoPersistentStorage: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+      },
+    })
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        noSorting
+        storage={false}
+        visualizations={[mockVisualizations.table]}
+        id="employees/v1"
+      />
+    )
+  },
+}
+
 export const TableColumnOrdering: Story = {
   render: () => (
     <ExampleComponent frozenColumns={2} tableAllowColumnReordering />

@@ -122,21 +122,23 @@ export type OneDataCollectionProps<
    */
   id?: string
 
-  /** Storage for the data collection settings and state */
-  storage?: {
-    /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
-     * You can use "*" for all features and ! to disable a feature
-     *
-     * For example:
-     * - "*" - will use all storage features (empty "" means all)
-     * - "filters" - will use only the storage for the data collection filters state
-     * - "filters, sortings" - will use the storage for the data collection filters and sortings state
-     * - "*, !filters" - will not use the storage for the data collection filters state
-     * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
-     *
-     */
-    features?: DataCollectionStorageFeaturesDefinition
-  }
+  /** Storage for the data collection settings and state: use false to disable the storage */
+  storage?:
+    | false
+    | {
+        /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
+         * You can use "*" for all features and ! to disable a feature
+         *
+         * For example:
+         * - "*" - will use all storage features (empty "" means all)
+         * - "filters" - will use only the storage for the data collection filters state
+         * - "filters, sortings" - will use the storage for the data collection filters and sortings state
+         * - "*, !filters" - will not use the storage for the data collection filters state
+         * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
+         *
+         */
+        features?: DataCollectionStorageFeaturesDefinition
+      }
 }
 
 const OneDataCollectionComp = <
@@ -489,7 +491,7 @@ const OneDataCollectionComp = <
 
   const { storageReady } = useDataCollectionStorage(
     id,
-    storage?.features ?? ["*"],
+    typeof storage === "object" ? (storage?.features ?? ["*"]) : ["*"],
     {
       settings: {
         value: settings,
@@ -519,7 +521,8 @@ const OneDataCollectionComp = <
         value: currentFilters,
         setValue: setCurrentFilters,
       },
-    }
+    },
+    storage === false
   )
 
   const showTotalItemSummarySkeleton = useDebounceBoolean({
