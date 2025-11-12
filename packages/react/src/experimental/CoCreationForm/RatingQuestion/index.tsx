@@ -18,6 +18,7 @@ export type RatingQuestionProps =
 
 export const RatingQuestion = ({
   id,
+  index,
   title,
   description,
   value,
@@ -43,6 +44,7 @@ export const RatingQuestion = ({
   return (
     <BaseScoreQuestion
       id={id}
+      index={index}
       title={title}
       description={description}
       value={value}

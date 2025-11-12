@@ -1,6 +1,6 @@
 import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useMemo } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -54,6 +54,7 @@ const ScoreOption = ({
 
 export const BaseScoreQuestion = ({
   id,
+  index,
   title,
   description,
   options,
@@ -62,36 +63,42 @@ export const BaseScoreQuestion = ({
   disabled,
   required,
 }: BaseScoreQuestionProps) => {
-  const [internalValue, setInternalValue] = useState(value)
-
-  useEffect(() => {
-    setInternalValue(value)
-  }, [value])
-
-  const handleChange = useCallback(
-    (params: BaseQuestionOnChangeParams) => {
-      if (internalValue === undefined) return
-
-      onChange?.({
-        ...params,
-        type: "score",
-        value: internalValue,
-      })
-    },
-    [internalValue, onChange]
-  )
-
-  useEffect(() => {
-    handleChange({
+  const baseOnChangeParams: BaseScoreQuestionOnChangeParams = useMemo(
+    () => ({
       id,
       title,
       description,
-    })
-  }, [id, title, description, handleChange])
+      value: value ?? 0,
+      type: "score",
+    }),
+    [id, title, description, value]
+  )
+
+  const handleChange = useCallback(
+    (params: BaseQuestionOnChangeParams) => {
+      onChange?.({
+        ...params,
+        value: value ?? 0,
+        type: "score",
+      })
+    },
+    [value, onChange]
+  )
+
+  const handleChangeValue = useCallback(
+    (newValue: number) => {
+      onChange?.({
+        ...baseOnChangeParams,
+        value: newValue,
+      })
+    },
+    [baseOnChangeParams, onChange]
+  )
 
   return (
     <BaseQuestion
       id={id}
+      index={index}
       title={title}
       description={description}
       onChange={handleChange}
@@ -103,8 +110,8 @@ export const BaseScoreQuestion = ({
             key={option.value}
             value={option.value}
             label={option.label}
-            selected={internalValue === option.value}
-            onClick={setInternalValue}
+            selected={value === option.value}
+            onClick={handleChangeValue}
             disabled={disabled}
           />
         ))}

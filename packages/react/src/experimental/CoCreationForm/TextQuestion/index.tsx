@@ -20,6 +20,7 @@ export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
 
 export const TextQuestion = ({
   id,
+  index,
   title,
   description,
   value,
@@ -71,6 +72,7 @@ export const TextQuestion = ({
   return (
     <BaseQuestion
       id={id}
+      index={index}
       title={title}
       description={description}
       onChange={handleChange}

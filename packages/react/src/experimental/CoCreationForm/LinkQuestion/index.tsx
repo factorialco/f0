@@ -17,6 +17,7 @@ export type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
 
 export const LinkQuestion = ({
   id,
+  index,
   title,
   description,
   value,
@@ -51,6 +52,7 @@ export const LinkQuestion = ({
   return (
     <BaseQuestion
       id={id}
+      index={index}
       title={title}
       description={description}
       onChange={handleChange}

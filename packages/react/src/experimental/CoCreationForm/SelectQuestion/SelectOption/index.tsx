@@ -57,7 +57,8 @@ export const SelectOption = ({
 
   const handleChangeLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newLabel = event.target.value
-    onChangeLabel({ value, index, newLabel })
+    const newValue = `${newLabel.trim().toLowerCase().replace(/ /g, "-")}-${index + 1}`
+    onChangeLabel({ value: newValue, index, newLabel })
   }
 
   return (

@@ -18,6 +18,7 @@ export type NumericQuestionProps =
 
 export const NumericQuestion = ({
   id,
+  index,
   title,
   description,
   value,
@@ -53,6 +54,7 @@ export const NumericQuestion = ({
   return (
     <BaseQuestion
       id={id}
+      index={index}
       title={title}
       description={description}
       onChange={handleChange}

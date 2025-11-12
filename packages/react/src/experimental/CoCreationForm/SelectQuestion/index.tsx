@@ -48,6 +48,7 @@ export type SelectQuestionProps =
 
 export const SelectQuestion = ({
   id,
+  index,
   title,
   description,
   options,
@@ -121,9 +122,14 @@ export const SelectQuestion = ({
   }
 
   const handleChangeLabel = (params: OnChangeLabelParams) => {
-    const newOptions = options.map((option) => ({
+    const newOptions = options.map((option, index) => ({
       ...option,
-      label: option.value === params.value ? params.newLabel : option.label,
+      ...(index === params.index
+        ? {
+            value: params.value,
+            label: params.newLabel,
+          }
+        : {}),
     }))
     props.onChange?.({
       ...baseOnChangeParams,
@@ -132,18 +138,21 @@ export const SelectQuestion = ({
   }
 
   const handleAddOption = () => {
+    const optionsLength = options.length
+    const newOption = {
+      value: `new-option-${optionsLength + 1}`,
+      label: `New option ${optionsLength + 1}`,
+    }
     props.onChange?.({
       ...baseOnChangeParams,
-      options: [
-        ...options,
-        { value: `new-option-${options.length + 1}`, label: "" },
-      ],
+      options: [...options, newOption],
     })
   }
 
   return (
     <BaseQuestion
       id={id}
+      index={index}
       title={title}
       description={description}
       onChange={handleChange}
@@ -169,14 +178,16 @@ export const SelectQuestion = ({
             />
           </div>
         ))}
-        <div className="opacity-50">
-          <F0Button
-            label="Add option"
-            variant="ghost"
-            icon={Add}
-            onClick={handleAddOption}
-          />
-        </div>
+        {disabled && (
+          <div className="opacity-50">
+            <F0Button
+              label="Add option"
+              variant="ghost"
+              icon={Add}
+              onClick={handleAddOption}
+            />
+          </div>
+        )}
       </div>
     </BaseQuestion>
   )
