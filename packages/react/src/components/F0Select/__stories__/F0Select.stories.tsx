@@ -575,6 +575,22 @@ export const MultipleNotPaginated: Story = {
   },
 }
 
+export const MultiplePaginated: Story = {
+  args: {
+    multiple: true,
+    value: ["option-2"],
+    clearable: true,
+    source: mockNonPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+  decorators: [],
+}
+
 export const WithCustomTrigger: Story = {
   args: {
     label: "With Custom Trigger",
