@@ -48,7 +48,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
               aria-label={source.title}
               href={source.link}
               size="md"
-              target={source.targetBlank ? "_blank" : "_self"}
+              {...(source.targetBlank && { target: "_blank" })}
               variant="ghost"
               className="justify-start truncate hover:bg-f1-background-hover"
               compact
