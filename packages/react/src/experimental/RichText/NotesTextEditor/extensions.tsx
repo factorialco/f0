@@ -1,4 +1,5 @@
 import {
+  BlockIdExtension,
   createAccessibilityExtension,
   createPlaceholderExtension,
   createSlashCommandExtension,
@@ -94,6 +95,7 @@ export const createNotesTextEditorExtensions = (
     AIBlockExtension.configure({
       currentConfig: enhancedAIBlockConfig,
     }),
+    BlockIdExtension, // Automatically add unique IDs to all block nodes
     PersistSelection,
     createPlaceholderExtension(placeholder),
     createAccessibilityExtension(placeholder),
