@@ -831,6 +831,7 @@ declare type BaseQuestionOnChangeParams = {
     id: string;
     title: string;
     description?: string;
+    required?: boolean;
 };
 
 declare type BaseQuestionProps = {
@@ -840,6 +841,7 @@ declare type BaseQuestionProps = {
     children: React.ReactNode;
     onChange?: (params: BaseQuestionOnChangeParams) => void;
     disabled?: boolean;
+    required?: boolean;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -3247,6 +3249,15 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     disabled?: boolean;
 };
 
+declare type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+    value?: string | null;
+};
+
+declare type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    value?: string | null;
+    onChange?: (params: LinkQuestionOnChangeParams) => void;
+};
+
 /**
  * Group List: Renders the list for a group
  */
@@ -4436,6 +4447,8 @@ export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents 
     type: "select" | "multi-select";
 }) | (NumericQuestionProps & {
     type: "numeric";
+}) | (LinkQuestionProps & {
+    type: "link";
 }));
 
 /**
