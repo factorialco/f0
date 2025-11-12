@@ -51608,29 +51608,33 @@ const lHe = {
   warning: nb,
   critical: Qy,
   positive: L7
-}, zM = re(({ text: e, level: t }, n) => (d5(e, {
-  disallowEmpty: !0
-}), c(l3, {
-  ref: n,
-  className: oe("pl-0.5", {
-    info: "bg-f1-background-info text-f1-foreground-info",
-    warning: "bg-f1-background-warning text-f1-foreground-warning",
-    critical: "bg-f1-background-critical text-f1-foreground-critical",
-    positive: "bg-f1-background-positive text-f1-foreground-positive"
-  }[t]),
-  left: c(dt, {
-    icon: lHe[t],
-    size: "md",
-    "aria-hidden": !0,
-    className: oe({
-      info: "text-f1-icon-info",
-      warning: "text-f1-icon-warning",
-      critical: "text-f1-icon-critical",
-      positive: "text-f1-icon-positive"
-    }[t])
-  }),
-  text: e
-})));
+}, zM = re(({ text: e, level: t }, n) => {
+  d5(e, {
+    disallowEmpty: !0
+  });
+  const a = {
+    info: "info",
+    warning: "warning",
+    critical: "critical",
+    positive: "positive"
+  }[t];
+  return c(l3, {
+    ref: n,
+    className: oe("pl-0.5", {
+      info: "bg-f1-background-info text-f1-foreground-info",
+      warning: "bg-f1-background-warning text-f1-foreground-warning",
+      critical: "bg-f1-background-critical text-f1-foreground-critical",
+      positive: "bg-f1-background-positive text-f1-foreground-positive"
+    }[t]),
+    left: c(dt, {
+      icon: lHe[t],
+      size: "md",
+      "aria-hidden": !0,
+      color: a
+    }),
+    text: e
+  });
+});
 zM.displayName = "F0TagAlert";
 const cHe = (e) => c("div", {
   "data-cell-type": "alert-tag",
@@ -91821,7 +91825,7 @@ const jwt = ({ text: e }) => c("div", {
         })]
       })
     }), c("div", {
-      className: oe("relative h-fit transition-all", "border-[1px] border-solid border-f1-border-secondary bg-f1-background", !ne && !t && "hover:border-f1-border-hover", "group focus-within:border-f1-border-hover focus-within:ring-1 focus-within:ring-f1-border-hover", "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover", "focus-within:outline-none focus-within:ring-1 focus-within:ring-offset-1", Gwt({
+      className: oe("relative h-fit transition-all", "border-[1px] border-solid border-f1-border bg-f1-background", !ne && !t && "hover:border-f1-border-hover", "group focus-within:border-f1-border-hover focus-within:ring-1 focus-within:ring-f1-border-hover", "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover", "focus-within:outline-none focus-within:ring-1 focus-within:ring-offset-1", Gwt({
         status: (u == null ? void 0 : u.type) ?? "default",
         disabled: t || n
       }), n && "border-f1-border-secondary bg-f1-background-secondary", t && "cursor-not-allowed", qwt({
