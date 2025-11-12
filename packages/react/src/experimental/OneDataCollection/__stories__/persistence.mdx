@@ -161,8 +161,7 @@ If the id is not provided, the data collection will not be persisted.
 />
 ```
 
-But you can also disable the persistence by passing `storage={false}` to use the
-rest of features related to the ID like the columns configuration, etc.
+But you can also disable persistence by passing `storage={false}`; the component will still use the ID for other purposes (like column configuration keys), but won't persist state to storage.
 
 ## Implementation Example
 
