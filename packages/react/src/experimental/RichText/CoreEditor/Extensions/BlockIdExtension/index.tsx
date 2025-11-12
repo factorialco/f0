@@ -17,6 +17,8 @@ const BLOCK_NODE_TYPES = [
   "details",
 ] as const
 
+const BLOCK_NODE_TYPES_SET = new Set<string>(BLOCK_NODE_TYPES)
+
 export const BlockIdExtension = Extension.create({
   name: "blockId",
 
@@ -51,7 +53,7 @@ export const BlockIdExtension = Extension.create({
     return [
       new Plugin({
         key: new PluginKey("blockIdPlugin"),
-        appendTransaction: (transactions, _oldState, newState) => {
+        appendTransaction: (transactions, oldState, newState) => {
           // Skip if document hasn't changed
           const docChanged = transactions.some((tr) => tr.docChanged)
           if (!docChanged) {
@@ -61,16 +63,25 @@ export const BlockIdExtension = Extension.create({
           const tr = newState.tr
           let modified = false
 
-          // Traverse all nodes in the document
-          newState.doc.descendants((node, pos) => {
-            // Check if this node type should have an ID
-            if (
-              BLOCK_NODE_TYPES.includes(
-                node.type.name as (typeof BLOCK_NODE_TYPES)[number]
-              )
-            ) {
-              // Only add ID if the node doesn't already have one
-              if (!node.attrs.id) {
+          // Calculate affected ranges from all transactions
+          const affectedRanges: Array<{ from: number; to: number }> = []
+
+          transactions.forEach((transaction) => {
+            if (!transaction.docChanged) return
+
+            transaction.steps.forEach((_, index) => {
+              const map = transaction.mapping.slice(index, index + 1)
+              const from = map.map(0, -1)
+              const to = map.map(oldState.doc.content.size, 1)
+              affectedRanges.push({ from, to })
+            })
+          })
+
+          // If no specific ranges affected, fall back to checking whole document
+          // (e.g., initial load or paste operations)
+          if (affectedRanges.length === 0) {
+            newState.doc.descendants((node, pos) => {
+              if (BLOCK_NODE_TYPES_SET.has(node.type.name) && !node.attrs.id) {
                 const id = nanoid(5)
                 tr.setNodeMarkup(pos, undefined, {
                   ...node.attrs,
@@ -78,9 +89,26 @@ export const BlockIdExtension = Extension.create({
                 })
                 modified = true
               }
-            }
-            return true // Continue traversing
-          })
+              return true
+            })
+          } else {
+            // Only check nodes within affected ranges
+            affectedRanges.forEach(({ from, to }) => {
+              newState.doc.nodesBetween(from, to, (node, pos) => {
+                if (
+                  BLOCK_NODE_TYPES_SET.has(node.type.name) &&
+                  !node.attrs.id
+                ) {
+                  const id = nanoid(5)
+                  tr.setNodeMarkup(pos, undefined, {
+                    ...node.attrs,
+                    id,
+                  })
+                  modified = true
+                }
+              })
+            })
+          }
 
           // Return the transaction only if we made changes
           return modified ? tr : null
@@ -125,12 +153,7 @@ export const getAllBlockIds = (editor: Editor): string[] => {
   const blockIds: string[] = []
 
   editor.state.doc.descendants((node: ProseMirrorNode) => {
-    if (
-      node.attrs.id &&
-      BLOCK_NODE_TYPES.includes(
-        node.type.name as (typeof BLOCK_NODE_TYPES)[number]
-      )
-    ) {
+    if (node.attrs.id && BLOCK_NODE_TYPES_SET.has(node.type.name)) {
       blockIds.push(node.attrs.id)
     }
     return true
