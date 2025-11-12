@@ -5,12 +5,12 @@ import {
   BaseScoreQuestionOnChangeParams,
 } from "../BaseScoreQuestion"
 
-type OnChangeParams = BaseScoreQuestionOnChangeParams
+export type RatingQuestionOnChangeParams = BaseScoreQuestionOnChangeParams
 
 export type RatingQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     value?: number
-    onChange?: (params: OnChangeParams) => void
+    onChange?: (params: RatingQuestionOnChangeParams) => void
   } & (
       | { range: { min: number; max: number } }
       | { options: { value: number; label: string }[] }

@@ -1,5 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
+import { useEffect } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -17,31 +18,31 @@ type SelectQuestionOption = {
   correct?: boolean
 }
 
-type OnChangeParams = BaseQuestionOnChangeParams & {
+export type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   options: SelectQuestionOption[]
 } & (
     | {
         type: "select"
-        value: string | null
+        value?: string | null
       }
     | {
         type: "multi-select"
-        value: string[]
+        value?: string[] | null
       }
   )
 
 export type SelectQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     options: SelectQuestionOption[]
-    onChange?: (params: OnChangeParams) => void
+    onChange?: (params: SelectQuestionOnChangeParams) => void
   } & (
       | {
           type: "select"
-          value: string | null
+          value?: string | null
         }
       | {
           type: "multi-select"
-          value: string[]
+          value?: string[] | null
         }
     )
 
@@ -62,6 +63,14 @@ export const SelectQuestion = ({
       ? { type: props.type, value: props.value }
       : { type: props.type, value: props.value }),
   }
+
+  useEffect(() => {
+    const someValuesEqual =
+      new Set(options.map((option) => option.value)).size !== options.length
+    if (someValuesEqual) {
+      throw new Error("Options must have unique values")
+    }
+  }, [options])
 
   const handleChange = (params: BaseQuestionOnChangeParams) => {
     props.onChange?.({
@@ -124,7 +133,10 @@ export const SelectQuestion = ({
   const handleAddOption = () => {
     props.onChange?.({
       ...baseOnChangeParams,
-      options: [...options, { value: "new-option", label: "" }],
+      options: [
+        ...options,
+        { value: `new-option-${options.length + 1}`, label: "" },
+      ],
     })
   }
 

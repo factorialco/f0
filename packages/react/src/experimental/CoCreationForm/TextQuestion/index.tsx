@@ -7,7 +7,7 @@ import {
 } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams } from "../types"
 
-type OnChangeParams = BaseQuestionOnChangeParams & {
+export type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   type: "text" | "longText"
   text: string
 }
@@ -15,7 +15,7 @@ type OnChangeParams = BaseQuestionOnChangeParams & {
 export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   type: "text" | "longText"
   text: string
-  onChange?: (params: OnChangeParams) => void
+  onChange?: (params: TextQuestionOnChangeParams) => void
 }
 
 export const TextQuestion = ({
