@@ -3712,6 +3712,16 @@ declare type OnChangeParams = BaseQuestionOnChangeParams & {
 
 declare type OnChangeParams_2 = BaseScoreQuestionOnChangeParams;
 
+declare type OnChangeParams_3 = BaseQuestionOnChangeParams & {
+    options: SelectQuestionOption[];
+} & ({
+    type: "select";
+    value: string | null;
+} | {
+    type: "multi-select";
+    value: string[];
+});
+
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
@@ -4430,6 +4440,8 @@ export declare const Question: ({ id, title, description, ...props }: QuestionPr
 
 export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents & (TextQuestionProps | (RatingQuestionProps & {
     type: "rating";
+}) | (SelectQuestionProps & {
+    type: "select" | "multi-select";
 }));
 
 /**
@@ -4715,6 +4727,23 @@ export declare type SelectProps<T extends string, R = unknown> = {
     searchFn?: (option: SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
     options: SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+declare type SelectQuestionOption = {
+    value: string;
+    label: string;
+    correct?: boolean;
+};
+
+declare type SelectQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    options: SelectQuestionOption[];
+    onChange?: (params: OnChangeParams_3) => void;
+} & ({
+    type: "select";
+    value: string | null;
+} | {
+    type: "multi-select";
+    value: string[];
+});
 
 export declare const selectSizes: readonly ["sm", "md"];
 
