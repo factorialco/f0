@@ -13,14 +13,8 @@ const BLOCK_NODE_TYPES = [
   "bulletList",
   "orderedList",
   "listItem",
-  "horizontalRule",
   "table",
-  "tableRow",
-  "tableCell",
-  "tableHeader",
   "details",
-  "detailsSummary",
-  "detailsContent",
 ] as const
 
 export const BlockIdExtension = Extension.create({
