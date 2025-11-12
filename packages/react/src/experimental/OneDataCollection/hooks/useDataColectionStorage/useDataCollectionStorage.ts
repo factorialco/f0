@@ -76,7 +76,7 @@ export const useDataCollectionStorage = <
   /** Gets the settings in storage when the key and features change */
   useEffect(() => {
     if (!active) {
-      // If no key, we consider the storage ready
+      // If storage is disabled or no key provided, we consider the storage ready
       setStorageReady(true)
       return
     }
