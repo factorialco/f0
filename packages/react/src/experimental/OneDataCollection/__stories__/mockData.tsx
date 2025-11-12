@@ -2,9 +2,17 @@ import { PromiseState } from "@/lib/promise-to-observable"
 import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
+import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { cn } from "@/lib/utils"
-import { generateMockUsers, MockUser } from "@/mocks"
+import {
+  COMPANY_NAMES_MOCK,
+  generateMockUsers,
+  getMockValue,
+  MOCK_ICONS,
+  MockUser,
+  TEAMS_MOCK,
+} from "@/mocks"
 export { generateMockUsers, type MockUser }
 
 import {
@@ -48,6 +56,7 @@ import {
   Upload,
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
+import { mockImage } from "@/testing/mocks/images"
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
@@ -430,20 +439,44 @@ export const getMockVisualizations = (options?: {
   list: {
     type: "list",
     options: {
-      itemDefinition: (item) => ({
-        title: item.name,
-        description: [item.email, item.role],
-        avatar: {
-          type: "person",
-          firstName: item.name.split(" ")[0],
-          lastName: item.name.split(" ")[1],
-          badge: {
-            type: "module",
-            module: "inbox",
-            tooltip: "Inbox",
-          },
-        },
-      }),
+      itemDefinition: (item) => {
+        const getMockAvatar = (index: number): AvatarVariant => {
+          const avatars = [
+            {
+              type: "person" as const,
+              firstName: item.name.split(" ")[0],
+              lastName: item.name.split(" ")[1],
+              badge: {
+                type: "module" as const,
+                module: "inbox" as const,
+                tooltip: "Inbox",
+              },
+              src: mockImage("person", index),
+            },
+            {
+              type: "company" as const,
+              name: getMockValue(COMPANY_NAMES_MOCK, item.index),
+              src: mockImage("company", index),
+            },
+            {
+              type: "team" as const,
+              name: getMockValue(TEAMS_MOCK, item.index),
+              src: mockImage("team", index),
+            },
+            {
+              type: "icon" as const,
+              icon: getMockValue(MOCK_ICONS, item.index),
+            },
+          ]
+
+          return avatars[index % avatars.length]
+        }
+        return {
+          title: item.name,
+          description: [item.email, item.role],
+          avatar: getMockAvatar(item.index),
+        }
+      },
       fields: [
         {
           label: "Email",

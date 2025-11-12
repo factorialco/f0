@@ -78,7 +78,6 @@ export const BlockIdExtension = Extension.create({
               // Only add ID if the node doesn't already have one
               if (!node.attrs.id) {
                 const id = nanoid(5)
-                console.log("id", id)
                 tr.setNodeMarkup(pos, undefined, {
                   ...node.attrs,
                   id,

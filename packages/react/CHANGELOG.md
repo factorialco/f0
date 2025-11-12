@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.264.0](https://github.com/factorialco/f0/compare/f0-react-v1.263.0...f0-react-v1.264.0) (2025-11-11)
+
+
+### Features
+
+* **RichTextEditor:** add secondary actions and person metadata support ([#2940](https://github.com/factorialco/f0/issues/2940)) ([d223a6a](https://github.com/factorialco/f0/commit/d223a6a6f9af6d80745af5635744133dfae520d3))
+
+## [1.263.0](https://github.com/factorialco/f0/compare/f0-react-v1.262.0...f0-react-v1.263.0) (2025-11-11)
+
+
+### Features
+
+* list icon avatar ([#2953](https://github.com/factorialco/f0/issues/2953)) ([efa338e](https://github.com/factorialco/f0/commit/efa338e5e4e35d6138f2be25a793434b93d04865))
+
+## [1.262.0](https://github.com/factorialco/f0/compare/f0-react-v1.261.0...f0-react-v1.262.0) (2025-11-11)
+
+
+### Features
+
+* Display deactivated persons in OneDataCollection tables ([#2952](https://github.com/factorialco/f0/issues/2952)) ([0d1eb2b](https://github.com/factorialco/f0/commit/0d1eb2b7d055c48316f15a978bcd18004d3d42f2))
+
 ## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
 
 
