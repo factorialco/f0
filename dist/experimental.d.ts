@@ -836,12 +836,14 @@ declare type BaseQuestionOnChangeParams = {
 
 declare type BaseQuestionProps = {
     id: string;
+    index: number;
     title: string;
     description?: string;
     children: React.ReactNode;
     onChange?: (params: BaseQuestionOnChangeParams) => void;
     disabled?: boolean;
     required?: boolean;
+    onAddNewQuestion?: (params: OnAddNewQuestionParams) => void;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -2261,7 +2263,7 @@ declare type DropdownInternalProps = {
     icon?: IconType;
     size?: F0ButtonProps["size"];
     children?: default_2.ReactNode;
-    align?: "start" | "end";
+    align?: "start" | "end" | "center";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & DataAttributes_2;
@@ -3720,6 +3722,11 @@ declare interface OmniButtonProps {
     hasNewUpdate?: boolean;
 }
 
+declare type OnAddNewQuestionParams = {
+    type: QuestionType;
+    index: number;
+};
+
 export declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
@@ -4450,6 +4457,8 @@ export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents 
 }) | (LinkQuestionProps & {
     type: "link";
 }));
+
+declare type QuestionType = "section" | "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link";
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5809,15 +5818,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

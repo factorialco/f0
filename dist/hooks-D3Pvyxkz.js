@@ -54018,7 +54018,7 @@ const zVe = [], BVe = (e) => {
     ...a,
     open: t,
     onOpenChange: n,
-    align: "end"
+    align: e.align || "end"
   });
 }, k_t = ({ items: e, children: t }) => {
   const [n, r] = Pe(!1);
