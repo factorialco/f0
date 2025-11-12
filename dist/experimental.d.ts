@@ -3705,23 +3705,6 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
-declare type OnChangeParams = BaseQuestionOnChangeParams & {
-    type: "text" | "longText";
-    text: string;
-};
-
-declare type OnChangeParams_2 = BaseScoreQuestionOnChangeParams;
-
-declare type OnChangeParams_3 = BaseQuestionOnChangeParams & {
-    options: SelectQuestionOption[];
-} & ({
-    type: "select";
-    value: string | null;
-} | {
-    type: "multi-select";
-    value: string[];
-});
-
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
@@ -4461,9 +4444,11 @@ export declare type RadarChartProps<K extends ChartConfig> = {
 
 export declare const rangeSeparator = "\u2192";
 
+declare type RatingQuestionOnChangeParams = BaseScoreQuestionOnChangeParams;
+
 declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: number;
-    onChange?: (params: OnChangeParams_2) => void;
+    onChange?: (params: RatingQuestionOnChangeParams) => void;
 } & ({
     range: {
         min: number;
@@ -4728,6 +4713,16 @@ export declare type SelectProps<T extends string, R = unknown> = {
     options: SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
+declare type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+    options: SelectQuestionOption[];
+} & ({
+    type: "select";
+    value?: string | null;
+} | {
+    type: "multi-select";
+    value?: string[] | null;
+});
+
 declare type SelectQuestionOption = {
     value: string;
     label: string;
@@ -4736,13 +4731,13 @@ declare type SelectQuestionOption = {
 
 declare type SelectQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     options: SelectQuestionOption[];
-    onChange?: (params: OnChangeParams_3) => void;
+    onChange?: (params: SelectQuestionOnChangeParams) => void;
 } & ({
     type: "select";
-    value: string | null;
+    value?: string | null;
 } | {
     type: "multi-select";
-    value: string[];
+    value?: string[] | null;
 });
 
 export declare const selectSizes: readonly ["sm", "md"];
@@ -5187,10 +5182,15 @@ declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.Textare
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
+declare type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+    type: "text" | "longText";
+    text: string;
+};
+
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
     text: string;
-    onChange?: (params: OnChangeParams) => void;
+    onChange?: (params: TextQuestionOnChangeParams) => void;
 };
 
 declare const THEMES: {
@@ -5769,8 +5769,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
     }
 }
@@ -5778,8 +5778,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }

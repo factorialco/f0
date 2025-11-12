@@ -4,7 +4,7 @@ import { jsxs as k, jsx as d, Fragment as De } from "react/jsx-runtime";
 import { useCopilotChatInternal as Kf, useCopilotContext as eE, useCopilotAction as J3, CopilotKit as tE } from "@copilotkit/react-core";
 import { Markdown as nE, useChatContext as iE, CopilotSidebar as rE } from "@copilotkit/react-ui";
 import * as ie from "react";
-import ee, { forwardRef as O, createContext as Un, useRef as ue, useState as H, useCallback as Te, useContext as An, useMemo as ce, useEffect as ae, PureComponent as oE, useId as Kr, useTransition as sE, useLayoutEffect as Zf, memo as Jf, Fragment as Hr, isValidElement as X8, cloneElement as Kp, useDebugValue as ey, createRef as aE, createElement as lE, version as Y3, useImperativeHandle as Yf, Children as ty } from "react";
+import ee, { forwardRef as O, createContext as Un, useRef as ue, useState as H, useCallback as Te, useContext as An, useMemo as ce, useEffect as se, PureComponent as oE, useId as Kr, useTransition as sE, useLayoutEffect as Zf, memo as Jf, Fragment as Hr, isValidElement as X8, cloneElement as Kp, useDebugValue as ey, createRef as aE, createElement as lE, version as Y3, useImperativeHandle as Yf, Children as ty } from "react";
 import Qf from "react-dom";
 import { randomId as cE } from "@copilotkit/shared";
 import './experimental.css';const dE = (t, e) => k("svg", {
@@ -4468,7 +4468,7 @@ function zy(t) {
   const e = Cl(() => Q_(t)), { isStatic: n } = An(X_);
   if (n) {
     const [, i] = H(t);
-    ae(() => e.on("change", i), []);
+    se(() => e.on("change", i), []);
   }
   return e;
 }
@@ -4572,7 +4572,7 @@ function kI({ children: t, as: e = "ul", axis: n = "y", onReorder: i, values: r,
       l !== m && (c.current = !0, i(m.map(bI).filter((g) => r.indexOf(g) !== -1)));
     }
   };
-  return ae(() => {
+  return se(() => {
     c.current = !1;
   }), d(a, { ...o, ref: s, ignoreStrict: !0, children: d(Hy.Provider, { value: f, children: t }) });
 }
@@ -5589,7 +5589,7 @@ const xm = dD, fD = Zy, Cm = Jy, Yy = ({ icon: t, title: e, children: n }) => {
   ease: "easeOut"
 }, _m = O(({ valueToCopy: t, onCopy: e, copyTooltipLabel: n, copiedTooltipLabel: i, variant: r = "neutral", size: o = "sm", ...s }, a) => {
   const [l, c] = H(!1), f = $e(), u = n ?? f.actions.copy, p = l ? i ?? "Copied" : u;
-  return ae(() => {
+  return se(() => {
     let g = null;
     return l && (g = setTimeout(() => c(!1), 1e3)), () => {
       g && clearTimeout(g);
@@ -5853,9 +5853,9 @@ const pD = {
   }, E = () => {
     C.current && C.current();
   };
-  return ae(() => {
+  return se(() => {
     c(e);
-  }, [e]), ae(() => {
+  }, [e]), se(() => {
     if (!f) {
       const S = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       p(!S);
@@ -5931,7 +5931,7 @@ const bD = (t) => {
   });
 }, wD = ({ inProgress: t, onSend: e, onStop: n }) => {
   const [i, r] = H(""), [o, s] = H(!1), a = ue(null), l = ue(null), c = $e(), f = i.trim().length > 0;
-  ae(() => {
+  se(() => {
     if (l.current && i.length > 0) {
       const { scrollHeight: p } = l.current;
       s(p > 240);
@@ -6031,7 +6031,7 @@ const bD = (t) => {
   isOpen: n
 }) => {
   const i = ue(null);
-  ae(() => (n ? i.current && (clearTimeout(i.current), i.current = null) : t !== null && (i.current = setTimeout(
+  se(() => (n ? i.current && (clearTimeout(i.current), i.current = null) : t !== null && (i.current = setTimeout(
     () => {
       e();
     },
@@ -6142,7 +6142,7 @@ const SD = ({ value: t, onChange: e }) => {
   initializeWithValue: !1
 }), LD = ({ asBottomSheetInMobile: t = !0, position: e = "center", onClose: n, isOpen: i, contentPadding: r = "md", children: o }) => {
   const [s, a] = H(i);
-  ae(() => {
+  se(() => {
     a(i);
   }, [i]);
   const l = (p) => {
@@ -6847,7 +6847,7 @@ const QD = gn({
   })
 }), ya = xt(XD, eR), tR = ({ tabs: t, activeTabId: e, setActiveTabId: n, secondary: i = !1, embedded: r = !1 }) => {
   const o = t[0], [s, a] = H(e ?? ("id" in o ? o.id : void 0));
-  ae(() => {
+  se(() => {
     s && (n == null || n(s));
   }, [n, s]);
   const { isActive: l } = $f(), c = r ? [t[0]] : t, u = [...c].sort((h, p) => h.index ? 1 : p.index ? -1 : 0).find((h) => "href" in h ? l(h.href) : s === h.id);
@@ -7183,11 +7183,11 @@ function hR({ children: t }) {
   }, [a, f, l, c, u]), g = Te((v) => {
     a || (v.clientX < 32 && u(!0), v.clientX > 280 && u(!1));
   }, [a, u]), y = ce(() => a ? f ? "unlocked" : "hidden" : !l && !f ? "hidden" : !l && f ? "unlocked" : "locked", [a, f, l]);
-  return ae(() => {
+  return se(() => {
     u(!1);
-  }, [e]), ae(() => {
+  }, [e]), se(() => {
     r && localStorage.setItem(f4, l ? "1" : "");
-  }, [l, r]), ae(() => () => {
+  }, [l, r]), se(() => () => {
     p(y);
   }, [y]), d(x7.Provider, {
     value: {
@@ -7550,9 +7550,9 @@ const pR = gn({
   }, m = () => {
     h.current && h.current();
   };
-  return ae(() => {
+  return se(() => {
     o(e);
-  }, [e]), ae(() => {
+  }, [e]), se(() => {
     if (s && (n == null || n()), !s) {
       const g = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       c(!g);
@@ -7712,7 +7712,7 @@ const E7 = ({ className: t, disabled: e }) => {
 }, onItemClick: l = () => {
 }, hasUnread: c = !1, crossSelling: f }) => {
   const [u, h] = H("idle"), [p, m] = H(null), [g, ...y] = p ?? [], [v, w] = H(!1);
-  ae(() => {
+  se(() => {
     m(null), h("idle");
   }, [t]);
   const x = Te(async () => {
@@ -7971,7 +7971,7 @@ const E7 = ({ className: t, disabled: e }) => {
   className: T("size-2 rounded bg-f1-background-selected-bold", t)
 }), MR = ({ isVisible: t, onClose: e, crossSelling: n, onDropdownClose: i }) => {
   const [r, o] = H(t);
-  ae(() => {
+  se(() => {
     o(t);
   }, [t]);
   const s = () => {
@@ -8349,7 +8349,7 @@ const OR = ({ onClose: t, onSubmit: e, reactionType: n, message: i }) => {
   }, [r, i, e]), u = () => {
     t(i);
   };
-  return ae(() => {
+  return se(() => {
     const h = (p) => {
       p.key === "Enter" && (p.preventDefault(), f());
     };
@@ -8704,7 +8704,7 @@ function $R() {
     }
     a(), l();
   }, []);
-  return DS("scroll", c, e), ae(() => {
+  return DS("scroll", c, e), se(() => {
     const f = e.current;
     if (!f)
       return;
@@ -8799,7 +8799,7 @@ const jR = (t) => {
   }, i))
 }), UR = ({ message: t, ImageRenderer: e }) => {
   const n = t && "image" in t && t.image, i = ue(null);
-  if (ae(() => {
+  if (se(() => {
     i.current && i.current.scrollIntoView({
       behavior: "smooth"
     });
@@ -8840,7 +8840,7 @@ const jR = (t) => {
   });
 }, ZR = () => {
   const { setClearFunction: t } = Zr(), { reset: e } = Kf();
-  return ae(() => (t(e), () => {
+  return se(() => (t(e), () => {
     t(null);
   }), [t, e]), null;
 }, JR = () => {
@@ -8947,7 +8947,7 @@ const jR = (t) => {
   isOpen: n
 }) => {
   const i = ue(null);
-  ae(() => (n ? i.current && (clearTimeout(i.current), i.current = null) : t !== null && (i.current = setTimeout(
+  se(() => (n ? i.current && (clearTimeout(i.current), i.current = null) : t !== null && (i.current = setTimeout(
     () => {
     },
     t * 60 * 1e3
@@ -9197,7 +9197,7 @@ In.prototype.property = "";
 In.prototype.spaceSeparated = !1;
 In.prototype.space = void 0;
 let lF = 0;
-const Ve = $o(), Ot = $o(), Vh = $o(), se = $o(), ft = $o(), ls = $o(), Pn = $o();
+const Ve = $o(), Ot = $o(), Vh = $o(), ae = $o(), ft = $o(), ls = $o(), Pn = $o();
 function $o() {
   return 2 ** ++lF;
 }
@@ -9207,7 +9207,7 @@ const jh = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   booleanish: Ot,
   commaOrSpaceSeparated: Pn,
   commaSeparated: ls,
-  number: se,
+  number: ae,
   overloadedBoolean: Vh,
   spaceSeparated: ft
 }, Symbol.toStringTag, { value: "Module" })), nu = (
@@ -9261,9 +9261,9 @@ const O7 = Qs({
     ariaAutoComplete: null,
     ariaBusy: Ot,
     ariaChecked: Ot,
-    ariaColCount: se,
-    ariaColIndex: se,
-    ariaColSpan: se,
+    ariaColCount: ae,
+    ariaColIndex: ae,
+    ariaColSpan: ae,
     ariaControls: ft,
     ariaCurrent: null,
     ariaDescribedBy: ft,
@@ -9280,7 +9280,7 @@ const O7 = Qs({
     ariaKeyShortcuts: null,
     ariaLabel: null,
     ariaLabelledBy: ft,
-    ariaLevel: se,
+    ariaLevel: ae,
     ariaLive: null,
     ariaModal: Ot,
     ariaMultiLine: Ot,
@@ -9288,21 +9288,21 @@ const O7 = Qs({
     ariaOrientation: null,
     ariaOwns: ft,
     ariaPlaceholder: null,
-    ariaPosInSet: se,
+    ariaPosInSet: ae,
     ariaPressed: Ot,
     ariaReadOnly: Ot,
     ariaRelevant: null,
     ariaRequired: Ot,
     ariaRoleDescription: ft,
-    ariaRowCount: se,
-    ariaRowIndex: se,
-    ariaRowSpan: se,
+    ariaRowCount: ae,
+    ariaRowIndex: ae,
+    ariaRowSpan: ae,
     ariaSelected: Ot,
-    ariaSetSize: se,
+    ariaSetSize: ae,
     ariaSort: null,
-    ariaValueMax: se,
-    ariaValueMin: se,
-    ariaValueNow: se,
+    ariaValueMax: ae,
+    ariaValueMin: ae,
+    ariaValueNow: ae,
     ariaValueText: null,
     role: null
   },
@@ -9348,13 +9348,13 @@ const cF = Qs({
     checked: Ve,
     cite: null,
     className: ft,
-    cols: se,
+    cols: ae,
     colSpan: null,
     content: null,
     contentEditable: Ot,
     controls: Ve,
     controlsList: ft,
-    coords: se | ls,
+    coords: ae | ls,
     crossOrigin: null,
     data: null,
     dateTime: null,
@@ -9376,9 +9376,9 @@ const cF = Qs({
     formNoValidate: Ve,
     formTarget: null,
     headers: ft,
-    height: se,
+    height: ae,
     hidden: Vh,
-    high: se,
+    high: ae,
     href: null,
     hrefLang: null,
     htmlFor: ft,
@@ -9403,14 +9403,14 @@ const cF = Qs({
     list: null,
     loading: null,
     loop: Ve,
-    low: se,
+    low: ae,
     manifest: null,
     max: null,
-    maxLength: se,
+    maxLength: ae,
     media: null,
     method: null,
     min: null,
-    minLength: se,
+    minLength: ae,
     multiple: Ve,
     muted: Ve,
     name: null,
@@ -9506,7 +9506,7 @@ const cF = Qs({
     onWaiting: null,
     onWheel: null,
     open: Ve,
-    optimum: se,
+    optimum: ae,
     pattern: null,
     ping: ft,
     placeholder: null,
@@ -9521,8 +9521,8 @@ const cF = Qs({
     rel: ft,
     required: Ve,
     reversed: Ve,
-    rows: se,
-    rowSpan: se,
+    rows: ae,
+    rowSpan: ae,
     sandbox: ft,
     scope: null,
     scoped: Ve,
@@ -9532,19 +9532,19 @@ const cF = Qs({
     shadowRootDelegatesFocus: Ve,
     shadowRootMode: null,
     shape: null,
-    size: se,
+    size: ae,
     sizes: null,
     slot: null,
-    span: se,
+    span: ae,
     spellCheck: Ot,
     src: null,
     srcDoc: null,
     srcLang: null,
     srcSet: null,
-    start: se,
+    start: ae,
     step: null,
     style: null,
-    tabIndex: se,
+    tabIndex: ae,
     target: null,
     title: null,
     translate: null,
@@ -9552,7 +9552,7 @@ const cF = Qs({
     typeMustMatch: Ve,
     useMap: null,
     value: Ot,
-    width: se,
+    width: ae,
     wrap: null,
     writingSuggestions: null,
     // Legacy.
@@ -9569,11 +9569,11 @@ const cF = Qs({
     // `<body>`. Use CSS `background-image` instead
     bgColor: null,
     // `<body>` and table elements. Use CSS `background-color` instead
-    border: se,
+    border: ae,
     // `<table>`. Use CSS `border-width` instead,
     borderColor: null,
     // `<table>`. Use CSS `border-color` instead,
-    bottomMargin: se,
+    bottomMargin: ae,
     // `<body>`
     cellPadding: null,
     // `<table>`
@@ -9607,9 +9607,9 @@ const cF = Qs({
     // `<table>`
     frameBorder: null,
     // `<iframe>`. Use CSS `border` instead
-    hSpace: se,
+    hSpace: ae,
     // `<img>` and `<object>`
-    leftMargin: se,
+    leftMargin: ae,
     // `<body>`
     link: null,
     // `<body>`. Use CSS `a:link {color: *}` instead
@@ -9617,9 +9617,9 @@ const cF = Qs({
     // `<frame>`, `<iframe>`, and `<img>`. Use an `<a>`
     lowSrc: null,
     // `<img>`. Use a `<picture>`
-    marginHeight: se,
+    marginHeight: ae,
     // `<body>`
-    marginWidth: se,
+    marginWidth: ae,
     // `<body>`
     noResize: Ve,
     // `<frame>`
@@ -9637,7 +9637,7 @@ const cF = Qs({
     // `<isindex>`
     rev: null,
     // `<link>`
-    rightMargin: se,
+    rightMargin: ae,
     // `<body>`
     rules: null,
     // `<table>`
@@ -9651,7 +9651,7 @@ const cF = Qs({
     // `<table>`
     text: null,
     // `<body>`. Use CSS `color` instead
-    topMargin: se,
+    topMargin: ae,
     // `<body>`
     valueType: null,
     // `<param>`
@@ -9661,7 +9661,7 @@ const cF = Qs({
     // Several. Use CSS `vertical-align` instead
     vLink: null,
     // `<body>`. Use CSS `a:visited {color}` instead
-    vSpace: se,
+    vSpace: ae,
     // `<img>` and `<object>`
     // Non-standard Properties.
     allowTransparency: null,
@@ -9671,7 +9671,7 @@ const cF = Qs({
     disableRemotePlayback: Ve,
     prefix: null,
     property: null,
-    results: se,
+    results: ae,
     security: null,
     unselectable: null
   },
@@ -9855,27 +9855,27 @@ const cF = Qs({
   },
   properties: {
     about: Pn,
-    accentHeight: se,
+    accentHeight: ae,
     accumulate: null,
     additive: null,
     alignmentBaseline: null,
-    alphabetic: se,
-    amplitude: se,
+    alphabetic: ae,
+    amplitude: ae,
     arabicForm: null,
-    ascent: se,
+    ascent: ae,
     attributeName: null,
     attributeType: null,
-    azimuth: se,
+    azimuth: ae,
     bandwidth: null,
     baselineShift: null,
     baseFrequency: null,
     baseProfile: null,
     bbox: null,
     begin: null,
-    bias: se,
+    bias: ae,
     by: null,
     calcMode: null,
-    capHeight: se,
+    capHeight: ae,
     className: ft,
     clip: null,
     clipPath: null,
@@ -9896,26 +9896,26 @@ const cF = Qs({
     d: null,
     dataType: null,
     defaultAction: null,
-    descent: se,
-    diffuseConstant: se,
+    descent: ae,
+    diffuseConstant: ae,
     direction: null,
     display: null,
     dur: null,
-    divisor: se,
+    divisor: ae,
     dominantBaseline: null,
     download: Ve,
     dx: null,
     dy: null,
     edgeMode: null,
     editable: null,
-    elevation: se,
+    elevation: ae,
     enableBackground: null,
     end: null,
     event: null,
-    exponent: se,
+    exponent: ae,
     externalResourcesRequired: null,
     fill: null,
-    fillOpacity: se,
+    fillOpacity: ae,
     fillRule: null,
     filter: null,
     filterRes: null,
@@ -9945,27 +9945,27 @@ const cF = Qs({
     gradientTransform: null,
     gradientUnits: null,
     handler: null,
-    hanging: se,
+    hanging: ae,
     hatchContentUnits: null,
     hatchUnits: null,
     height: null,
     href: null,
     hrefLang: null,
-    horizAdvX: se,
-    horizOriginX: se,
-    horizOriginY: se,
+    horizAdvX: ae,
+    horizOriginX: ae,
+    horizOriginY: ae,
     id: null,
-    ideographic: se,
+    ideographic: ae,
     imageRendering: null,
     initialVisibility: null,
     in: null,
     in2: null,
-    intercept: se,
-    k: se,
-    k1: se,
-    k2: se,
-    k3: se,
-    k4: se,
+    intercept: ae,
+    k: ae,
+    k1: ae,
+    k2: ae,
+    k3: ae,
+    k4: ae,
     kernelMatrix: Pn,
     kernelUnitLength: null,
     keyPoints: null,
@@ -9979,7 +9979,7 @@ const cF = Qs({
     lengthAdjust: null,
     letterSpacing: null,
     lightingColor: null,
-    limitingConeAngle: se,
+    limitingConeAngle: ae,
     local: null,
     markerEnd: null,
     markerMid: null,
@@ -9995,7 +9995,7 @@ const cF = Qs({
     media: null,
     mediaCharacterEncoding: null,
     mediaContentEncodings: null,
-    mediaSize: se,
+    mediaSize: ae,
     mediaTime: null,
     method: null,
     min: null,
@@ -10101,12 +10101,12 @@ const cF = Qs({
     origin: null,
     overflow: null,
     overlay: null,
-    overlinePosition: se,
-    overlineThickness: se,
+    overlinePosition: ae,
+    overlineThickness: ae,
     paintOrder: null,
     panose1: null,
     path: null,
-    pathLength: se,
+    pathLength: ae,
     patternContentUnits: null,
     patternTransform: null,
     patternUnits: null,
@@ -10116,9 +10116,9 @@ const cF = Qs({
     playbackOrder: null,
     pointerEvents: null,
     points: null,
-    pointsAtX: se,
-    pointsAtY: se,
-    pointsAtZ: se,
+    pointsAtX: ae,
+    pointsAtY: ae,
+    pointsAtZ: ae,
     preserveAlpha: null,
     preserveAspectRatio: null,
     primitiveUnits: null,
@@ -10150,8 +10150,8 @@ const cF = Qs({
     side: null,
     slope: null,
     snapshotTime: null,
-    specularConstant: se,
-    specularExponent: se,
+    specularConstant: ae,
+    specularExponent: ae,
     spreadMethod: null,
     spacing: null,
     startOffset: null,
@@ -10161,30 +10161,30 @@ const cF = Qs({
     stitchTiles: null,
     stopColor: null,
     stopOpacity: null,
-    strikethroughPosition: se,
-    strikethroughThickness: se,
+    strikethroughPosition: ae,
+    strikethroughThickness: ae,
     string: null,
     stroke: null,
     strokeDashArray: Pn,
     strokeDashOffset: null,
     strokeLineCap: null,
     strokeLineJoin: null,
-    strokeMiterLimit: se,
-    strokeOpacity: se,
+    strokeMiterLimit: ae,
+    strokeOpacity: ae,
     strokeWidth: null,
     style: null,
-    surfaceScale: se,
+    surfaceScale: ae,
     syncBehavior: null,
     syncBehaviorDefault: null,
     syncMaster: null,
     syncTolerance: null,
     syncToleranceDefault: null,
     systemLanguage: Pn,
-    tabIndex: se,
+    tabIndex: ae,
     tableValues: null,
     target: null,
-    targetX: se,
-    targetY: se,
+    targetX: ae,
+    targetY: ae,
     textAnchor: null,
     textDecoration: null,
     textRendering: null,
@@ -10199,22 +10199,22 @@ const cF = Qs({
     transformOrigin: null,
     u1: null,
     u2: null,
-    underlinePosition: se,
-    underlineThickness: se,
+    underlinePosition: ae,
+    underlineThickness: ae,
     unicode: null,
     unicodeBidi: null,
     unicodeRange: null,
-    unitsPerEm: se,
+    unitsPerEm: ae,
     values: null,
-    vAlphabetic: se,
-    vMathematical: se,
+    vAlphabetic: ae,
+    vMathematical: ae,
     vectorEffect: null,
-    vHanging: se,
-    vIdeographic: se,
+    vHanging: ae,
+    vIdeographic: ae,
     version: null,
-    vertAdvY: se,
-    vertOriginX: se,
-    vertOriginY: se,
+    vertAdvY: ae,
+    vertOriginX: ae,
+    vertOriginY: ae,
     viewBox: null,
     viewTarget: null,
     visibility: null,
@@ -10226,7 +10226,7 @@ const cF = Qs({
     x1: null,
     x2: null,
     xChannelSelector: null,
-    xHeight: se,
+    xHeight: ae,
     y: null,
     y1: null,
     y2: null,
@@ -18316,7 +18316,7 @@ const Ede = xt($v, oj), sj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
   });
 }, lj = ({ id: t, title: e, description: n, options: i, value: r, onChange: o, disabled: s }) => {
   const [a, l] = H(r);
-  ae(() => {
+  se(() => {
     l(r);
   }, [r]);
   const c = Te((f) => {
@@ -18326,7 +18326,7 @@ const Ede = xt($v, oj), sj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
       value: a
     }));
   }, [a, o]);
-  return ae(() => {
+  return se(() => {
     c({
       id: t,
       title: e,
@@ -18445,7 +18445,12 @@ const Ede = xt($v, oj), sj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
       type: o.type,
       value: o.value
     }
-  }, a = (h) => {
+  };
+  se(() => {
+    if (new Set(i.map((p) => p.value)).size !== i.length)
+      throw new Error("Options must have unique values");
+  }, [i]);
+  const a = (h) => {
     var p;
     (p = o.onChange) == null || p.call(o, {
       ...s,
@@ -18492,7 +18497,7 @@ const Ede = xt($v, oj), sj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
     (h = o.onChange) == null || h.call(o, {
       ...s,
       options: [...i, {
-        value: "new-option",
+        value: `new-option-${i.length + 1}`,
         label: ""
       }]
     });
@@ -19372,7 +19377,7 @@ const s5 = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
     var L;
     n(A), (L = t.onOpenChange) == null || L.call(t, A);
   };
-  ae(() => {
+  se(() => {
     var A;
     t.defaultOpen && e && ((A = t.onOpenChange) == null || A.call(t, !0));
   }, [t.defaultOpen]);
@@ -19525,7 +19530,7 @@ const s5 = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
       expanded: !A.expanded
     } : E));
   };
-  ae(() => {
+  se(() => {
     if (!l) {
       o(t.entities);
       return;
@@ -24253,7 +24258,7 @@ button {
 `;
 function iq(t) {
   const e = ue(null), n = ue(null);
-  return n.current && n.current.update(t), ae(() => (n.current = new a2({
+  return n.current && n.current.update(t), se(() => (n.current = new a2({
     ...t,
     ref: e
   }), () => {
@@ -24399,7 +24404,7 @@ function fq(t) {
 }
 const uq = ({ link: t, firstName: e, lastName: n, src: i, onClick: r, canReact: o = !0, lastEmojiReaction: s, onReactionSelect: a, type: l, typeLabel: c, date: f }) => {
   const [u, h] = H(s), p = ue(null);
-  ae(() => {
+  se(() => {
     h(s);
   }, [s]);
   const m = (b) => {
@@ -24906,7 +24911,7 @@ const G5 = (t) => {
   }), c = od({
     ref: a
   });
-  return ae(() => {
+  return se(() => {
     c.height && l.height && r(c.height > l.height);
   }, [c.height, l.height]), k("div", {
     className: "flex max-w-[640px] flex-col gap-1",
@@ -25374,7 +25379,7 @@ const jde = ({ avatar: t, title: e, description: n, primaryAction: i, secondaryA
   });
 }), Oq = 750, Iq = ({ text: t, children: e }) => {
   const [n, i] = H(!1);
-  ae(() => {
+  se(() => {
     if (n) {
       const o = setTimeout(() => i(!1), Oq);
       return () => clearTimeout(o);
@@ -25759,7 +25764,7 @@ function zq(t, e, n) {
 }
 function $q(t, e) {
   const { sidebarState: n, toggleSidebar: i } = Ys(), r = ue(t);
-  ae(() => {
+  se(() => {
     e && zq(t, r.current, n) && i({
       isInvokedByUser: !1
     }), r.current = t;
@@ -25769,9 +25774,9 @@ function Hq({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
   const { sidebarState: o, toggleSidebar: s, isSmallScreen: a, setForceFloat: l } = Ys(), c = Ws(), { open: f } = Zr(), { open: u } = t1(), h = Ip(`(max-width: ${Sh.xl}px)`, {
     initializeWithValue: !0
   });
-  return ae(() => {
+  return se(() => {
     l(f);
-  }, [f, l]), ae(() => {
+  }, [f, l]), se(() => {
     l(u);
   }, [u, l]), $q(f, h), d(De, {
     children: d(H8, {
@@ -26449,7 +26454,7 @@ function Jq({ title: t, items: e, className: n, activeItem: i, collapsible: r = 
   const f = $e(), [u, h] = H(""), p = (E) => {
     h(E);
   }, m = ce(() => Q5(e, u), [e, u]), [g, y] = H(Zq(e, i)), [v, w] = H(e);
-  ae(() => {
+  se(() => {
     w(e);
   }, [e]);
   const x = ue(null), b = Te((E) => E.map((S) => ({
@@ -26744,7 +26749,7 @@ function tU({ isExpanded: t }) {
 }
 function nU() {
   const { prevSidebarState: t, sidebarState: e, toggleSidebar: n, isSmallScreen: i } = Ys(), r = ue(null);
-  return ae(() => {
+  return se(() => {
     var o;
     t === "hidden" && e === "locked" && ((o = r.current) == null || o.focus());
   }, [t, e]), k(zo, {
@@ -26789,7 +26794,7 @@ function Yde({ companies: t, selected: e, onChange: n, withNotification: i = !1,
 }
 function iU() {
   const [t, e] = H(!1);
-  return ae(() => {
+  return se(() => {
     e(window.matchMedia("(pointer: coarse)").matches);
   }, []), t;
 }
@@ -27083,7 +27088,7 @@ function Qde({ tree: t, onCollapse: e, onSort: n, onFavoritesChange: i, favorite
 }
 function lU({ nonSortableItems: t, sortableItems: e, setSortableItems: n, containerRef: i, onCollapse: r, onDragEnd: o, favorites: s = [], onFavoritesChange: a, forceUpdate: l, disableDragging: c = !1 }) {
   const f = $e(), { isDragging: u } = d2(), h = t.some((R) => R.isRoot), p = t.filter((R) => !R.isRoot).length > 0, m = e.length > 0, g = ue(null), [y, v] = H(s), w = s.length > 0;
-  ae(() => {
+  se(() => {
     JSON.stringify(s) !== JSON.stringify(y) && v(s);
   }, [s]);
   const x = (R) => {
@@ -27096,9 +27101,9 @@ function lU({ nonSortableItems: t, sortableItems: e, setSortableItems: n, contai
     const V = [...y], [U] = V.splice(R, 1);
     V.splice(B, 0, U), v(V), a == null || a(V);
   }, [y, a]), [C, A] = H(!1), L = ue(null);
-  ae(() => {
+  se(() => {
     e.length > 0 && !C && (n([...e]), A(!0));
-  }, [e, n, C]), ae(() => {
+  }, [e, n, C]), se(() => {
     const R = () => {
       L.current !== null && window.clearTimeout(L.current), L.current = window.setTimeout(() => {
         i.current && e.length > 0 && l();
@@ -28126,7 +28131,7 @@ const f2 = ({ paginationInfo: t, setPage: e, className: n }) => {
       c(E);
     }
   });
-  ae(() => {
+  se(() => {
     l({
       totalItems: (h == null ? void 0 : h.total) || u.records.length,
       filters: s.currentFilters,
@@ -28230,7 +28235,7 @@ const DU = ({ source: t, lane: e, onError: n, onHookUpdate: i }) => {
     filters: r,
     onError: n
   });
-  return ae(() => {
+  return se(() => {
     i == null || i(o);
   }, [o]), null;
 };
@@ -28284,7 +28289,7 @@ const FU = (t) => {
     records: [],
     groups: []
   }, t.paginationInfo, t.source, t.onSelectItems, t.source.defaultSelectedItems);
-  return ae(() => {
+  return se(() => {
     t.onHookUpdate(e);
   }, [e]), null;
 }, BU = (t, e, n) => {
@@ -28294,7 +28299,7 @@ const FU = (t) => {
   }), a = Te(() => {
     o.clearCallback.forEach((c) => c());
   }, [o.clearCallback]);
-  ae(() => {
+  se(() => {
     const c = Object.fromEntries(o.selectItemsStatus);
     n == null || n({
       ...FU(o.selectItemsStatus),
@@ -28429,7 +28434,7 @@ function YU({ drag: t, id: e, index: n, total: i, laneId: r, draggable: o = !1, 
       id: t.id,
       data: t.data
     }
-  }), ae(() => {
+  }), se(() => {
     if (f.current)
       return Nh({
         element: f.current,
@@ -28504,7 +28509,7 @@ function YU({ drag: t, id: e, index: n, total: i, laneId: r, draggable: o = !1, 
 }
 const u2 = (t, e, n, i) => {
   const r = ue(null);
-  return ae(() => {
+  return se(() => {
     if (!cd(t) || !t.hasMore)
       return;
     const o = r.current;
@@ -28714,7 +28719,7 @@ function oG({ id: t, getLaneResourceIndexById: e, onMove: n, ...i }) {
     ref: r,
     id: t,
     accepts: ["list-card"]
-  } : void 0), ae(() => {
+  } : void 0), se(() => {
     const F = () => {
       const M = performance.now(), D = y.current ?? M, R = (M - D) / 1e3;
       y.current = M;
@@ -28728,7 +28733,7 @@ function oG({ id: t, getLaneResourceIndexById: e, onMove: n, ...i }) {
     return m.current == null && v && g.current !== 0 && (y.current = null, m.current = window.requestAnimationFrame(F)), () => {
       m.current != null && (window.cancelAnimationFrame(m.current), m.current = null), y.current = null, g.current = 0;
     };
-  }, [v]), ae(() => {
+  }, [v]), se(() => {
     if (!t) return;
     const F = () => {
       m.current == null && g.current !== 0 && (y.current = null, m.current = window.requestAnimationFrame(() => {
@@ -28854,7 +28859,7 @@ function oG({ id: t, getLaneResourceIndexById: e, onMove: n, ...i }) {
         }
       }
     });
-  }, [t, e, n, v, i.items, i.getKey, x, _]), ae(() => {
+  }, [t, e, n, v, i.items, i.getKey, x, _]), se(() => {
     const F = () => {
       const R = r.current;
       return R ? (p.current = R.querySelector("[data-scroll-container]"), p.current) : null;
@@ -28871,7 +28876,7 @@ function oG({ id: t, getLaneResourceIndexById: e, onMove: n, ...i }) {
     }), () => D.disconnect();
   }, [t]), q8(({ phase: F }) => {
     F === "start" && w(!0), (F === "drop" || F === "cancel") && (w(!1), L(!1), b(null), C(null), S(-1));
-  }), ae(() => {
+  }), se(() => {
     const F = (M) => {
       if (!t) return;
       const D = M.detail;
@@ -28946,7 +28951,7 @@ function oG({ id: t, getLaneResourceIndexById: e, onMove: n, ...i }) {
 }
 function ag(t) {
   const { lanes: e, renderCard: n, getKey: i, className: r, dnd: o, loading: s, onCreate: a } = t, [l, c] = H(() => e), f = ue(""), u = ue(null);
-  ae(() => {
+  se(() => {
     const C = e.map((A) => `${A.id}:[${A.items.map((L, E) => i(L, E, A.id)).join(",")}]`).join("|");
     if (u.current !== null)
       if (C === u.current)
@@ -28958,7 +28963,7 @@ function ag(t) {
   const [h, p] = H(!1), m = ue(null), g = ue(null), y = ue(null), v = ue(null), w = ue(0), x = ue(null);
   q8(({ phase: C }) => {
     C === "start" && p(!0), (C === "drop" || C === "cancel") && p(!1);
-  }), ae(() => {
+  }), se(() => {
     const C = () => {
       const S = performance.now(), F = x.current ?? S, M = (S - F) / 1e3;
       x.current = S;
@@ -29203,7 +29208,7 @@ const sG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
     const M = Object.values(h);
     return M.length === 0 ? !0 : M.some((D) => D.isInitialLoading);
   }, [h]);
-  ae(() => {
+  se(() => {
     f({
       totalItems: _,
       filters: a.currentFilters,
@@ -29260,7 +29265,7 @@ const sG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
   delay: e
 }) => {
   const [n, i] = H(!1);
-  return ae(() => {
+  return se(() => {
     let r;
     return t ? r = setTimeout(() => {
       i(t);
@@ -29550,7 +29555,7 @@ const sG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
       o(S);
     }
   });
-  ae(() => {
+  se(() => {
     r({
       totalItems: (a == null ? void 0 : a.total) || s.records.length,
       filters: n.currentFilters,
@@ -29708,9 +29713,9 @@ const sG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
   ), [a, l] = H(
     (i ? n == null ? void 0 : n.order : void 0) ?? mG(t)
   );
-  ae(() => {
+  se(() => {
     n != null && n.hidden && s(n.hidden);
-  }, [JSON.stringify(n == null ? void 0 : n.hidden)]), ae(() => {
+  }, [JSON.stringify(n == null ? void 0 : n.hidden)]), se(() => {
     n != null && n.order && l(n.order);
   }, [JSON.stringify(n == null ? void 0 : n.order)]);
   const c = ce(() => {
@@ -30111,7 +30116,7 @@ const Ar = O(({ children: t, selected: e, className: n, sticky: i }, r) => d(Ab,
 Ar.displayName = "TableRow";
 function _G({ children: t, loading: e = !1 }) {
   const [n, i] = H(!1), [r, o] = H(!1), s = ue(null);
-  return ae(() => {
+  return se(() => {
     const a = s.current;
     if (!a) return;
     const l = () => {
@@ -30278,7 +30283,7 @@ const Pb = (t, e, n) => {
       o($);
     }
   }), { currentSortings: x, setCurrentSortings: b, isLoading: _ } = e, { loadingIndicatorRef: C } = u2(p, _, y, v);
-  ae(() => {
+  se(() => {
     r({
       totalItems: (p == null ? void 0 : p.total) || h.records.length,
       filters: e.currentFilters,
@@ -30555,7 +30560,7 @@ const Pb = (t, e, n) => {
     label: c.label,
     value: l
   }))], [o, s] = H(t);
-  ae(() => {
+  se(() => {
     s(t || {
       field: ac,
       order: "asc"
@@ -30738,7 +30743,7 @@ const Pb = (t, e, n) => {
     if (u.maxDate)
       return (L = c == null ? void 0 : c.toRange(u.maxDate)) == null ? void 0 : L.to;
   }, [u.maxDate, c]), [x, b] = H(null);
-  ae(() => {
+  se(() => {
     b((c == null ? void 0 : c.toRange(/* @__PURE__ */ new Date())) ?? null);
     const L = () => {
       const S = (c == null ? void 0 : c.toRange(/* @__PURE__ */ new Date())) ?? null;
@@ -30802,7 +30807,7 @@ const Pb = (t, e, n) => {
 zb.displayName = "DatePickerTrigger";
 function FG({ onSelect: t, defaultValue: e, presets: n = [], granularities: i = ["day"], hideNavigation: r = !1, hideGoToCurrent: o = !1, compareTo: s, defaultCompareTo: a, onCompareToChange: l, value: c, ...f }) {
   const [u, h] = H(e ?? c);
-  ae(() => {
+  se(() => {
     SL(c, u) || h(c || e);
   }, [c, e]);
   const [p, m] = H(), [g, y] = H(!1), v = ce(() => qp[(u == null ? void 0 : u.granularity) ?? "day"], [u == null ? void 0 : u.granularity]), w = (_) => {
@@ -30942,7 +30947,7 @@ const BG = (t) => "date" in t, zG = {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
     [JSON.stringify(e)]
   );
-  ae(() => {
+  se(() => {
     if (!t) {
       r(!0);
       return;
@@ -30983,7 +30988,7 @@ const BG = (t) => "date" in t, zG = {
     },
     200
   );
-  return ae(() => {
+  return se(() => {
     l(n);
   }, [
     t,
@@ -30998,7 +31003,7 @@ const BG = (t) => "date" in t, zG = {
   const { filters: c, currentFilters: f, setCurrentFilters: u, presets: h, presetsLoading: p, currentNavigationFilters: m, navigationFilters: g, setCurrentNavigationFilters: y, search: v, currentSearch: w, setCurrentSearch: x, isLoading: b, primaryActions: _, secondaryActions: C, totalItemSummary: A, currentGrouping: L, setCurrentGrouping: E, grouping: S, currentSortings: F, setCurrentSortings: M, sortings: D } = t, [R, B] = H(0), V = ue(F), { emitSortingChange: U } = AL({
     defaultSorting: V.current
   });
-  ae(() => {
+  se(() => {
     U(F);
   }, [U, F]);
   const X = ce(() => bU(_), [_]), te = ce(() => SU(_U(C)), [C]), N = ce(() => Math.min(C && "expanded" in C && C.expanded || 0, wU), [C]), xe = ce(() => {
@@ -31068,7 +31073,7 @@ const BG = (t) => "date" in t, zG = {
     value: !!p,
     delay: 100
   });
-  ae(() => {
+  se(() => {
     ke(!1);
   }, [f, w, m, t.dataAdapter]);
   const ze = ce(() => vt !== void 0, [vt]), Ke = vt === void 0 ? null : P !== void 0 ? vt(P) : null, { settings: Et, setSettings: Rn } = g1(), { storageReady: Zt } = jG(l, (a == null ? void 0 : a.features) ?? ["*"], {
@@ -45868,7 +45873,7 @@ function Tee() {
 }
 process.env.NODE_ENV === "production" ? $0.exports = Aee() : $0.exports = Tee();
 var Oee = $0.exports;
-const Iee = typeof window < "u" ? Zf : ae;
+const Iee = typeof window < "u" ? Zf : se;
 class Dee {
   constructor(e) {
     this.transactionNumber = 0, this.lastTransactionNumber = 0, this.subscribers = /* @__PURE__ */ new Set(), this.editor = e, this.lastSnapshot = { editor: e, transactionNumber: 0 }, this.getSnapshot = this.getSnapshot.bind(this), this.getServerSnapshot = this.getServerSnapshot.bind(this), this.watch = this.watch.bind(this), this.subscribe = this.subscribe.bind(this);
@@ -46054,7 +46059,7 @@ function J2(t = {}, e = []) {
   const n = ue(t);
   n.current = t;
   const [i] = H(() => new Z2(n)), r = I1.useSyncExternalStore(i.subscribe, i.getEditor, i.getServerSnapshot);
-  return ey(r), ae(i.onRender(e)), Ree({
+  return ey(r), se(i.onRender(e)), Ree({
     editor: r,
     selector: ({ transactionNumber: o }) => t.shouldRerenderOnTransaction === !1 ? null : t.immediatelyRender && o === 0 ? 0 : o + 1
   }), r;
@@ -46065,7 +46070,7 @@ const Jx = Un({
 Jx.Consumer;
 const Pee = () => An(Jx), Bee = (t) => {
   const [e, n] = H(null), { editor: i } = Pee();
-  return ae(() => {
+  return se(() => {
     var r;
     if (!e || !((r = t.editor) === null || r === void 0) && r.isDestroyed || i != null && i.isDestroyed)
       return;
@@ -52441,7 +52446,7 @@ const xre = ({ item: t, selected: e }) => k("div", {
   }, [t.length]), c = Te(() => {
     s(r);
   }, [r, s]);
-  return ae(() => {
+  return se(() => {
     o(0);
   }, [t]), Yf(i, () => ({
     onKeyDown: ({ event: f }) => f.key === "ArrowUp" ? (a(), !0) : f.key === "ArrowDown" ? (l(), !0) : f.key === "Enter" ? (c(), !0) : !1
@@ -53060,7 +53065,7 @@ const _re = bre.extend({
     },
     onUpdate: a
   }, [n]);
-  return ae(() => {
+  return se(() => {
     if (l && (t != null && t.content)) {
       const { from: c, to: f } = l.state.selection, u = c !== f;
       l.commands.setContent(t.content), t != null && t.isEditable && setTimeout(() => l.commands.focus(), 10), u && l.isFocused && setTimeout(() => l.commands.setTextSelection({
@@ -53068,12 +53073,12 @@ const _re = bre.extend({
         to: f
       }), 10);
     }
-  }, [l, t == null ? void 0 : t.content, t == null ? void 0 : t.isEditable]), ae(() => () => {
+  }, [l, t == null ? void 0 : t.content, t == null ? void 0 : t.isEditable]), se(() => () => {
     s.current && clearTimeout(s.current);
   }, []), l;
 }, Ire = (t) => {
   const [e, n] = H(!1);
-  return ae(() => {
+  return se(() => {
     const i = (t == null ? void 0 : t.selectedAction) && !(t != null && t.content), r = (t == null ? void 0 : t.content) && e;
     i && !e ? n(!0) : r && n(!1);
   }, [t == null ? void 0 : t.selectedAction, t == null ? void 0 : t.content, e]), {
@@ -53115,14 +53120,14 @@ const _re = bre.extend({
 }, Fre = ({ node: t, updateAttributes: e, deleteNode: n, extension: i, editor: r, getPos: o }) => {
   var x;
   const s = t.attrs.data, a = i.options.currentConfig || t.attrs.config, l = ue(Math.random().toString(36).substr(2, 9)).current, { isLoading: c, setIsLoading: f } = Ire(s), { title: u, emoji: h } = Dre(s, a), p = Ore(s, c, l, e, a);
-  ae(() => {
+  se(() => {
     if (s != null && s.content && (s != null && s.isEditable) && r && o) {
       const b = o();
       b !== void 0 && (n(), setTimeout(() => {
         s.content && r.chain().focus().setTextSelection(b).insertContent(s.content).run();
       }, 10));
     }
-  }, [s == null ? void 0 : s.content, s == null ? void 0 : s.isEditable, r, o, t.nodeSize, n]), ae(() => {
+  }, [s == null ? void 0 : s.content, s == null ? void 0 : s.isEditable, r, o, t.nodeSize, n]), se(() => {
     if (s != null && s.selectedAction && (a != null && a.buttons) && (!(s != null && s.selectedTitle) || !(s != null && s.selectedEmoji) || (s == null ? void 0 : s.isEditable) === void 0)) {
       const _ = a.buttons.find((C) => C.type === s.selectedAction);
       _ && e({
@@ -53642,9 +53647,9 @@ const _re = bre.extend({
   }, [c.length]), m = Te(() => {
     f(r);
   }, [r, f]);
-  ae(() => {
+  se(() => {
     a.current && u(a.current);
-  }, [r, u]), ae(() => {
+  }, [r, u]), se(() => {
     o(0);
   }, [t.length]), Yf(i, () => ({
     onKeyDown: ({ event: y }) => y.key === "ArrowUp" ? (y.preventDefault(), h(), !0) : y.key === "ArrowDown" ? (y.preventDefault(), p(), !0) : y.key === "Enter" ? (y.preventDefault(), m(), !0) : !1
@@ -61169,7 +61174,7 @@ st.create({
 });
 const hle = (t) => {
   const { className: e = "drag-handle", children: n, editor: i, pluginKey: r = B_, onNodeChange: o, tippyOptions: s } = t, [a, l] = H(null), c = ue(null);
-  return ae(() => a ? i.isDestroyed ? () => {
+  return se(() => a ? i.isDestroyed ? () => {
     c.current = null;
   } : (c.current || (c.current = z_({
     editor: i,
@@ -61249,7 +61254,7 @@ const hle = (t) => {
   })]
 }), cfe = O(function({ onChange: e, placeholder: n, initialEditorState: i, readonly: r = !1, labels: o, aiBlockConfig: s, onTitleChange: a, actions: l, metadata: c, withPadding: f = !1 }, u) {
   const { toolbarLabels: h, slashCommandGroupLabels: p, aiBlockLabels: m, moodTrackerLabels: g, liveCompanionLabels: y, transcriptLabels: v } = o, w = ue(null), x = ue(null), b = Kr(), [_] = H(() => (i == null ? void 0 : i.content) || ""), [C, A] = H((i == null ? void 0 : i.title) || "");
-  ae(() => {
+  se(() => {
     a && a(C);
   }, [C, a]);
   const L = J2({
@@ -61680,9 +61685,9 @@ const hle = (t) => {
   })]
 }), _le = ({ onSelect: t, onClose: e, enhancementOptions: n, inputPlaceholder: i }) => {
   const [r, o] = H(null), [s, a] = H(""), l = ue(null), c = ue(null), f = ue(null);
-  ae(() => {
+  se(() => {
     l.current && l.current.focus();
-  }, []), ae(() => {
+  }, []), se(() => {
     const g = (y) => {
       var b, _;
       if (!r || !(y.target instanceof Element)) return;
@@ -61966,7 +61971,7 @@ const hle = (t) => {
   });
 }, Ole = ({ editor: t, maxCharacters: e, secondaryAction: n, primaryAction: i, fileInputRef: r, canUseFiles: o, onEnhanceWithAI: s, isLoadingEnhance: a, enhanceConfig: l, isFullscreen: c, setLastIntent: f, toolbarLabels: u, disableButtons: h, setIsToolbarOpen: p, isToolbarOpen: m, plainHtmlMode: g }) => {
   const [y, v] = H(!1), w = ue(null), [x, b] = H(0);
-  ae(() => {
+  se(() => {
     w.current && b(w.current.offsetWidth);
     const C = () => {
       w.current && b(w.current.offsetWidth);
@@ -62219,9 +62224,9 @@ const zle = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: 
     html: (a == null ? void 0 : a.content) || "",
     json: null
   });
-  ae(() => (F ? document.body.style.overflow = "hidden" : document.body.style.overflow = "", () => {
+  se(() => (F ? document.body.style.overflow = "hidden" : document.body.style.overflow = "", () => {
     document.body.style.overflow = "";
-  }), [F]), ae(() => {
+  }), [F]), se(() => {
     const Ne = F ? window.innerHeight : Hle(p);
     return jle({
       containerRef: b,
@@ -62229,7 +62234,7 @@ const zle = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: 
       onScrollChange: L,
       heightThreshold: Ne
     });
-  }, [p, F]), ae(() => {
+  }, [p, F]), se(() => {
     if (E && b.current) {
       const Ne = b.current.getBoundingClientRect().height;
       V(Ne < 64);
@@ -62256,7 +62261,7 @@ const zle = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: 
       });
     }
   });
-  ae(() => {
+  se(() => {
     U && ve && ve.setEditable(!1);
   }, [U, ve]), Yf(y, () => ({
     clear: () => ve == null ? void 0 : ve.commands.clearContent(),
@@ -62691,7 +62696,7 @@ const zle = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: 
   className: "min-h-[0.15rem] min-w-[0.15rem] rounded-full bg-f1-foreground-secondary"
 }), ice = O(function({ header: e, children: n, action: i, summaries: r, alert: o, status: s, fullHeight: a = !1 }, l) {
   const { enabled: c, toggle: f } = Z8();
-  ae(() => {
+  se(() => {
     if (o && s)
       throw Error("You cannot pass both alert and status at the same time to this component");
   }, [o, s]);
@@ -63244,7 +63249,7 @@ function wce(t, e) {
       overflowItems: t.slice(h)
     });
   }, [t, a, l]);
-  return ae(() => {
+  return se(() => {
     c();
   }, [c]), {
     containerRef: n,
@@ -63255,7 +63260,7 @@ function wce(t, e) {
 }
 const Z1 = function({ items: e, renderListItem: n, className: i, gap: r = 0, minSize: o, onVisibleItemsChange: s }) {
   const { containerRef: a, measurementContainerRef: l, visibleItems: c } = wce(e, r);
-  return ae(() => {
+  return se(() => {
     s == null || s(c);
   }, [s, c]), k("div", {
     ref: a,
@@ -64062,7 +64067,7 @@ var ede = ({ stones: t, containerSize: e }) => {
   return e.push({ width: i.width, height: i.height }), e;
 }, []), nde = ({ boxesRefs: t, wrapperRef: e, children: n, windowWidth: i, wrapperWidth: r }) => {
   let [{ positions: o, containerHeight: s, stones: a, availableSpots: l }, c] = H({ positions: [], containerHeight: null, stones: [], availableSpots: [] });
-  return ae(() => {
+  return se(() => {
     var f, u;
     let h = tde(t.current), p = (u = (f = e.current) == null ? void 0 : f.offsetWidth) != null ? u : 0;
     if (p === null) return;
@@ -64087,7 +64092,7 @@ function ade(t, e, n) {
 }
 var lde = () => {
   let [t, e] = H(), n = ue(ade(e, 300));
-  return ae(() => {
+  return se(() => {
     let i = () => {
       n.current(window.innerWidth);
     };
@@ -64097,7 +64102,7 @@ var lde = () => {
   }, []), t;
 }, cde = (t) => {
   let [e, n] = H(null);
-  return ae(() => {
+  return se(() => {
     let i = new ResizeObserver((r) => {
       for (let o of r) n(o.contentRect.width);
     });
@@ -64120,7 +64125,7 @@ const fde = {
   lg: 640
 }, d8 = O(function({ children: e, widgetWidth: n = "sm" }, i) {
   const r = fde[n], [o, s] = H(), a = ty.toArray(e), l = ue(null);
-  return ae(() => {
+  return se(() => {
     const c = () => {
       var u;
       const f = (u = l.current) == null ? void 0 : u.offsetWidth;
