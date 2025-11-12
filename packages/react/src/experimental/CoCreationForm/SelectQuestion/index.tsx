@@ -1,16 +1,25 @@
 import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
-import { Add, CheckCircleLine, Delete } from "@/icons/app"
-import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { Add } from "@/icons/app"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams } from "../types"
+import {
+  OnChangeLabelParams,
+  OnClickOptionActionParams,
+  SelectOption,
+} from "./SelectOption"
 
-type OnChangeParams = BaseQuestionOnChangeParams &
-  (
+type SelectQuestionOption = {
+  value: string
+  label: string
+  correct?: boolean
+}
+
+type OnChangeParams = BaseQuestionOnChangeParams & {
+  options: SelectQuestionOption[]
+} & (
     | {
         type: "select"
         value: string | null
@@ -23,7 +32,7 @@ type OnChangeParams = BaseQuestionOnChangeParams &
 
 export type SelectQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
-    options: { value: string; label: string }[]
+    options: SelectQuestionOption[]
     onChange?: (params: OnChangeParams) => void
   } & (
       | {
@@ -36,52 +45,6 @@ export type SelectQuestionProps =
         }
     )
 
-const SelectOption = ({
-  value,
-  label,
-  selected,
-  onClick,
-  disabled,
-}: {
-  value: string
-  label: string
-  selected: boolean
-  onClick: (value: string) => void
-  disabled?: boolean
-}) => {
-  const handleClick = () => {
-    if (disabled) return
-    onClick(value)
-  }
-
-  return (
-    <div
-      className={cn(
-        "group flex items-center gap-3 rounded-md py-1 pl-2 pr-1 hover:bg-f1-background-hover",
-        !disabled && "cursor-pointer"
-      )}
-      onClick={handleClick}
-    >
-      <F0Checkbox
-        checked={selected}
-        onCheckedChange={handleClick}
-        disabled={disabled}
-        hideLabel
-      />
-      <input type="text" value={label} className="flex-1 font-medium" />
-      <div className="flex-row items-center gap-1 opacity-0 group-hover:opacity-100">
-        <F0Button
-          label="Mark as correct"
-          variant="ghost"
-          icon={CheckCircleLine}
-          hideLabel
-        />
-        <F0Button label="Remove" variant="ghost" icon={Delete} hideLabel />
-      </div>
-    </div>
-  )
-}
-
 export const SelectQuestion = ({
   id,
   title,
@@ -90,59 +53,80 @@ export const SelectQuestion = ({
   disabled,
   ...props
 }: SelectQuestionProps) => {
-  const [internalValue, setInternalValue] = useState(props.value)
-
-  useEffect(() => {
-    setInternalValue(props.value)
-  }, [props.value])
+  const baseOnChangeParams = {
+    id,
+    title,
+    description,
+    options,
+    ...(props.type === "select"
+      ? { type: props.type, value: props.value }
+      : { type: props.type, value: props.value }),
+  }
 
   const handleChange = (params: BaseQuestionOnChangeParams) => {
-    if (props.type === "select") {
-      props.onChange?.({
-        ...params,
-        type: props.type,
-        value: internalValue as string | null,
-      })
-    } else {
-      props.onChange?.({
-        ...params,
-        type: props.type,
-        value: internalValue as string[],
-      })
+    props.onChange?.({
+      ...baseOnChangeParams,
+      ...params,
+    })
+  }
+
+  const handleClickOptionAction = (params: OnClickOptionActionParams) => {
+    let newOptions = options
+
+    if (params.action === "remove") {
+      newOptions = options.filter((option) => option.value !== params.value)
     }
+
+    if (params.action === "mark-as-correct") {
+      newOptions = options.map((option) => ({
+        ...option,
+        correct: option.value === params.value,
+      }))
+    }
+
+    props.onChange?.({
+      ...baseOnChangeParams,
+      options: newOptions,
+    })
   }
 
   const handleOptionClick = (optionValue: string) => {
     if (props.type === "select") {
-      const newValue = internalValue === optionValue ? null : optionValue
-      setInternalValue(newValue)
-    } else if (props.type === "multi-select" && Array.isArray(internalValue)) {
-      const newValue = internalValue.includes(optionValue)
-        ? internalValue.filter((value) => value !== optionValue)
-        : [...internalValue, optionValue]
-      setInternalValue(newValue)
+      props.onChange?.({
+        ...baseOnChangeParams,
+        type: props.type,
+        value: optionValue,
+      })
+    } else if (props.type === "multi-select" && Array.isArray(props.value)) {
+      const newValue = props.value.includes(optionValue)
+        ? props.value.filter((value) => value !== optionValue)
+        : [...props.value, optionValue]
+
+      props.onChange?.({
+        ...baseOnChangeParams,
+        type: props.type,
+        value: newValue,
+      })
     }
   }
 
-  useEffect(() => {
-    if (props.type === "select") {
-      props.onChange?.({
-        id,
-        title,
-        description,
-        type: props.type,
-        value: internalValue as string | null,
-      })
-    } else {
-      props.onChange?.({
-        id,
-        title,
-        description,
-        type: props.type,
-        value: internalValue as string[],
-      })
-    }
-  }, [id, title, description, props, internalValue])
+  const handleChangeLabel = (params: OnChangeLabelParams) => {
+    const newOptions = options.map((option) => ({
+      ...option,
+      label: option.value === params.value ? params.newLabel : option.label,
+    }))
+    props.onChange?.({
+      ...baseOnChangeParams,
+      options: newOptions,
+    })
+  }
+
+  const handleAddOption = () => {
+    props.onChange?.({
+      ...baseOnChangeParams,
+      options: [...options, { value: "new-option", label: "" }],
+    })
+  }
 
   return (
     <BaseQuestion
@@ -152,23 +136,32 @@ export const SelectQuestion = ({
       onChange={handleChange}
     >
       <div className="-mx-0.5 flex flex-col items-start">
-        {options.map((option) => (
+        {options.map((option, index) => (
           <div className="w-full" key={option.value}>
             <SelectOption
               value={option.value}
+              index={index}
               label={option.label}
+              correct={option.correct}
               selected={
-                Array.isArray(internalValue)
-                  ? internalValue.includes(option.value)
-                  : internalValue === option.value
+                Array.isArray(props.value)
+                  ? props.value.includes(option.value)
+                  : props.value === option.value
               }
               onClick={handleOptionClick}
+              onClickAction={handleClickOptionAction}
+              onChangeLabel={handleChangeLabel}
               disabled={disabled}
             />
           </div>
         ))}
         <div className="opacity-50">
-          <F0Button label="Add question" variant="ghost" icon={Add} />
+          <F0Button
+            label="Add option"
+            variant="ghost"
+            icon={Add}
+            onClick={handleAddOption}
+          />
         </div>
       </div>
     </BaseQuestion>
