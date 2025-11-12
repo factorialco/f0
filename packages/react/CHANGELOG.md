@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.266.0](https://github.com/factorialco/f0/compare/f0-react-v1.265.0...f0-react-v1.266.0) (2025-11-12)
+
+
+### Features
+
+* datacollection allow to disable persistence ([#2968](https://github.com/factorialco/f0/issues/2968)) ([1e5f973](https://github.com/factorialco/f0/commit/1e5f973cf52c459ca8f26f81395171b585e7d676))
+
 ## [1.265.0](https://github.com/factorialco/f0/compare/f0-react-v1.264.1...f0-react-v1.265.0) (2025-11-12)
 
 
