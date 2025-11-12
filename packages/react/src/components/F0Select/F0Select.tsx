@@ -25,10 +25,11 @@ import { isEqual } from "lodash"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
+import { SelectAll } from "./components/SelectAll"
+import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
 import { SelectItem } from "./components/SelectItem"
-import { SelectBottomActions } from "./SelectBottomActions"
-import { SelectTopActions } from "./SelectTopActions"
+import { SelectTopActions } from "./components/SelectTopActions"
 import type {
   F0SelectItemObject,
   F0SelectItemProps,
@@ -348,8 +349,42 @@ const F0SelectComponent = forwardRef(function Select<
   const handleScrollBottom = () => {
     loadMore()
   }
-
   const i18n = useI18n()
+
+  const [selectAll, setSelectAll] = useState(false)
+
+  const handleSelectAll = (value: boolean) => {
+    if (multiple) {
+      console.log("handleSelectAll", value, items.length)
+      setSelectAll(value)
+      handleLocalValueChange(
+        value
+          ? items
+              .map((item) => item.value?.toString())
+              .filter((value) => value !== undefined)
+          : []
+      )
+    }
+  }
+
+  // TODO USE DATA SOURCE SELECTABLE
+  useEffect(() => {
+    if (multiple) {
+      if (selectedItems.length === items.length && !selectAll) {
+        setSelectAll(true)
+      }
+      if (selectedItems.length === 0) {
+        setSelectAll(false)
+      }
+    }
+  }, [selectedItems, items, multiple, selectAll])
+
+  const isPartiallySelected = useMemo(() => {
+    if (multiple) {
+      return selectedItems.length > 0 && selectedItems.length < items.length
+    }
+    return false
+  }, [selectedItems, items, multiple])
 
   const commonProps = {
     ...props,
@@ -438,18 +473,28 @@ const F0SelectComponent = forwardRef(function Select<
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
             top={
-              <SelectTopActions
-                searchValue={currentSearch}
-                onSearchChange={onSearchChangeLocal}
-                searchBoxPlaceholder={searchBoxPlaceholder}
-                showSearchBox={showSearchBox}
-                grouping={localSource.grouping}
-                currentGrouping={localSource.currentGrouping}
-                onGroupingChange={localSource.setCurrentGrouping}
-                filters={localSource.filters}
-                currentFilters={localSource.currentFilters}
-                onFiltersChange={localSource.setCurrentFilters}
-              />
+              <>
+                <SelectTopActions
+                  searchValue={currentSearch}
+                  onSearchChange={onSearchChangeLocal}
+                  searchBoxPlaceholder={searchBoxPlaceholder}
+                  showSearchBox={showSearchBox}
+                  grouping={localSource.grouping}
+                  currentGrouping={localSource.currentGrouping}
+                  onGroupingChange={localSource.setCurrentGrouping}
+                  filters={localSource.filters}
+                  currentFilters={localSource.currentFilters}
+                  onFiltersChange={localSource.setCurrentFilters}
+                />
+                {multiple && (
+                  <SelectAll
+                    selectedCount={selectedItems.length}
+                    indeterminate={isPartiallySelected}
+                    value={selectAll}
+                    onChange={handleSelectAll}
+                  />
+                )}
+              </>
             }
             forceMinHeight={!!localSource.filters}
             onScrollBottom={handleScrollBottom}

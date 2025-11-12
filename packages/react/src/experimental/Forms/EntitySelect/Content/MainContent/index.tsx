@@ -1,7 +1,7 @@
 import { F0Select } from "@/components/F0Select"
 import { VirtualItem } from "@tanstack/react-virtual"
 import React, { useCallback, useMemo } from "react"
-import { Action } from "../../../../../components/F0Select/SelectBottomActions"
+import { Action } from "../../../../../components/F0Select/components/SelectBottomActions"
 import { cn } from "../../../../../lib/utils"
 import { Spinner } from "../../../../Information/Spinner"
 import { VirtualList } from "../../../../Navigation/VirtualList"

@@ -1,6 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { F0TagList } from "@/components/tags/F0TagList"
 import { forwardRef } from "react"
 import type { F0SelectItemObject } from "../types"
 
@@ -18,15 +17,16 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
       return (
         <div className="w-full">
           {selection.length > 0 && (
-            <F0TagList
-              type="raw"
-              tags={selection.map((i) => ({
-                text: i.label,
-                type: i.avatar ? "avatar" : "raw",
-                icon: i.icon,
-                avatar: i.avatar,
-              }))}
-            />
+            <>{selection.length} items selected</>
+            // <F0TagList
+            //   type="raw"
+            //   tags={selection.map((i) => ({
+            //     text: i.label,
+            //     type: i.avatar ? "avatar" : "raw",
+            //     icon: i.icon,
+            //     avatar: i.avatar,
+            //   }))}
+            // />
           )}
         </div>
       )

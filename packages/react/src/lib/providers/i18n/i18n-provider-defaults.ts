@@ -52,6 +52,7 @@ export const defaultTranslations = {
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
+    selectAll: "Select all",
   },
   status: {
     selected: {

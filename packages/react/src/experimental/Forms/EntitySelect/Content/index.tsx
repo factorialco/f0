@@ -1,4 +1,4 @@
-import { Action } from "../../../../components/F0Select/SelectBottomActions"
+import { Action } from "../../../../components/F0Select/components/SelectBottomActions"
 import {
   EntitySelectEntity,
   EntitySelectNamedGroup,

@@ -110,6 +110,7 @@ export const Snapshot: Story = {
   render: () => {
     const demo = [
       { title: "positive", percentage: 10, amount: 1000 },
+      { title: "positive", percentage: 10, amount: 1000 },
       { title: "neutral", percentage: 0, amount: 0 },
       { title: "negative", percentage: -10, amount: -1000 },
       { title: "null", percentage: null, amount: null },

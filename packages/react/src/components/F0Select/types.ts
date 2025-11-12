@@ -8,7 +8,7 @@ import type {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField"
-import { Action } from "./SelectBottomActions"
+import { Action } from "./components/SelectBottomActions"
 
 // Helper type to resolve the actual record type
 export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType

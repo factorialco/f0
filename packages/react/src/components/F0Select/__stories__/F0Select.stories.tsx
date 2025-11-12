@@ -43,7 +43,7 @@ const items = [
 ]
 
 const meta: Meta = {
-  title: "Input/Select",
+  title: "Select",
   component: F0Select,
   parameters: {
     a11y: {
@@ -232,6 +232,8 @@ const meta: Meta = {
         console.log("searchValue", value)
       }
 
+      const truncatedValue = (localValue || []).slice(0, 50)
+
       return (
         <>
           <Story
@@ -246,7 +248,8 @@ const meta: Meta = {
             }
           />
           <div className="mt-20">
-            Selected: {JSON.stringify(localValue, null, 2)}
+            Selected: {JSON.stringify(truncatedValue, null, 2)} - Total:{" "}
+            {localValue?.length}
           </div>
         </>
       )
@@ -416,6 +419,7 @@ export const WithActions: Story = {
     showSearchBox: true,
     searchEmptyMessage: "No results found",
     searchBoxPlaceholder: "Search for a theme",
+    label: "Select a theme",
     actions: [
       {
         label: "Create new option",
@@ -457,6 +461,7 @@ export const WithDataSourceNotPaginated: Story = {
 
 export const WithDataSourcePaginated: Story = {
   args: {
+    label: "Data Source Paginated",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
@@ -473,6 +478,7 @@ export const WithDataSourcePaginated: Story = {
 
 export const WithDataSourceGrouping: Story = {
   args: {
+    label: "Data Source Grouping",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
@@ -554,8 +560,9 @@ export const WithDataSourceGrouping: Story = {
 
 export const MultipleNotPaginated: Story = {
   args: {
+    label: "Multiple Not Paginated",
     multiple: true,
-    value: ["option-2"],
+    value: mockItems.map((item) => item.value),
     clearable: true,
     source: mockNonPaginatedSource,
     mapOptions: (item: MockItem) => ({
@@ -570,6 +577,7 @@ export const MultipleNotPaginated: Story = {
 
 export const WithCustomTrigger: Story = {
   args: {
+    label: "With Custom Trigger",
     placeholder: "Choose a color",
     onChange: fn(),
     value: "red",

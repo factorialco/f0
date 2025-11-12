@@ -118,10 +118,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
         <F0Button
           label="Back"
           icon={ArrowLeft}
+          hideLabel
           variant="ghost"
           size="sm"
           onClick={handleGoBack}
         />
+        / Filtered by{" "}
+        {selectedFilterKey ? filters[selectedFilterKey].label : ""}
       </div>
     )
 

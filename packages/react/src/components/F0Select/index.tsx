@@ -5,7 +5,6 @@ export * from "./types"
 
 /**
  * @experimental This is an experimental component use it at your own risk
- * @deprecated This is an experimental component use it at your own risk
  */
 const F0Select = experimentalComponent("F0Select", F0SelectComponent)
 
