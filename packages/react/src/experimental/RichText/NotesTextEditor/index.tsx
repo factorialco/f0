@@ -1,7 +1,6 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Toolbar } from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { Handle, Plus } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
@@ -19,10 +18,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
-import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
-import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
-import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
+import { AIBlockConfig } from "../CoreEditor/Extensions/AIBlock"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import "./index.css"
@@ -35,14 +31,7 @@ interface NotesTextEditorProps {
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
   onTitleChange?: (title: string) => void
-  labels: {
-    slashCommandGroupLabels?: SlashCommandGroupLabels
-    aiBlockLabels?: AIBlockLabels
-    moodTrackerLabels?: MoodTrackerLabels
-    liveCompanionLabels?: LiveCompanionLabels
-    transcriptLabels?: TranscriptLabels
-    titlePlaceholder?: string
-  }
+  titlePlaceholder?: string
   actions?: actionType[]
   metadata?: MetadataItemValue[]
   withPadding?: boolean
@@ -57,25 +46,16 @@ const NotesTextEditorComponent = forwardRef<
     placeholder,
     initialEditorState,
     readonly = false,
-    labels,
     aiBlockConfig,
     onTitleChange,
     actions,
     metadata,
+    titlePlaceholder,
     withPadding: _withPadding = false,
   },
   ref
 ) {
   const translations = useI18n()
-  const toolbarLabels = translations.richTextEditor
-
-  const {
-    slashCommandGroupLabels,
-    aiBlockLabels,
-    moodTrackerLabels,
-    liveCompanionLabels,
-    transcriptLabels,
-  } = labels
 
   const containerRef = useRef<HTMLDivElement>(null)
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
@@ -91,27 +71,11 @@ const NotesTextEditorComponent = forwardRef<
   }, [title, onTitleChange])
 
   const editor = useEditor({
-    extensions: createNotesTextEditorExtensions(
+    extensions: createNotesTextEditorExtensions({
       placeholder,
-      toolbarLabels,
-      slashCommandGroupLabels,
-      aiBlockConfig
-        ? {
-            ...aiBlockConfig,
-            toolbarLabels,
-            slashCommandGroupLabels,
-            moodTrackerLabels,
-            liveCompanionLabels,
-            transcriptLabels,
-            labels: aiBlockLabels,
-            placeholder,
-          }
-        : undefined,
-      aiBlockLabels,
-      moodTrackerLabels,
-      liveCompanionLabels,
-      transcriptLabels
-    ),
+      translations,
+      aiBlockConfig,
+    }),
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
       onChange(
@@ -129,9 +93,6 @@ const NotesTextEditorComponent = forwardRef<
     setContent: (content) => editor?.commands.setContent(content),
     insertAIBlock: () => {
       if (!editor || !aiBlockConfig) return
-      const cfg = aiBlockLabels
-        ? { ...aiBlockConfig, labels: aiBlockLabels }
-        : undefined
       editor
         .chain()
         .focus()
@@ -140,7 +101,7 @@ const NotesTextEditorComponent = forwardRef<
             type: "aiBlock",
             attrs: {
               data: { content: null, selectedAction: undefined },
-              config: cfg,
+              config: aiBlockConfig,
               isCollapsed: false,
             },
           },
@@ -150,7 +111,6 @@ const NotesTextEditorComponent = forwardRef<
     },
     insertTranscript: (title, users, messages) => {
       if (!editor) return
-      const cfg = transcriptLabels ? { labels: transcriptLabels } : undefined
       editor
         .chain()
         .focus()
@@ -159,7 +119,6 @@ const NotesTextEditorComponent = forwardRef<
             type: "transcript",
             attrs: {
               data: { title, users, messages },
-              config: cfg,
               isOpen: false,
             },
           },
@@ -248,7 +207,7 @@ const NotesTextEditorComponent = forwardRef<
               disabled={!onTitleChange || readonly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={labels.titlePlaceholder || ""}
+              placeholder={titlePlaceholder || ""}
               className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>

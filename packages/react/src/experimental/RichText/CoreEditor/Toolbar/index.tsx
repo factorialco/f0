@@ -59,6 +59,7 @@ export const Toolbar = ({
     {
       key: "bold",
       icon: Bold,
+      label: translations.richTextEditor.bold,
       active: (editor) => editor.isActive("bold"),
       onClick: (editor) => editor.chain().focus().toggleBold().run(),
       tooltip: {
@@ -69,6 +70,7 @@ export const Toolbar = ({
     {
       key: "italic",
       icon: Italic,
+      label: translations.richTextEditor.italic,
       active: (editor) => editor.isActive("italic"),
       onClick: (editor) => editor.chain().focus().toggleItalic().run(),
       tooltip: {
@@ -79,6 +81,7 @@ export const Toolbar = ({
     {
       key: "underline",
       icon: Underline,
+      label: translations.richTextEditor.underline,
       active: (editor) => editor.isActive("underline"),
       onClick: (editor) => editor.chain().focus().toggleUnderline().run(),
       tooltip: {
@@ -89,6 +92,7 @@ export const Toolbar = ({
     {
       key: "strike",
       icon: Strikethrough,
+      label: translations.richTextEditor.strike,
       active: (editor) => editor.isActive("strike"),
       onClick: (editor) => editor.chain().focus().toggleStrike().run(),
       tooltip: {
@@ -103,6 +107,7 @@ export const Toolbar = ({
     {
       key: "heading1",
       icon: Heading1,
+      label: translations.richTextEditor.heading1,
       active: (editor) => editor.isActive("heading", { level: 1 }),
       onClick: (editor) =>
         editor.chain().focus().toggleHeading({ level: 1 }).run(),
@@ -114,6 +119,7 @@ export const Toolbar = ({
     {
       key: "heading2",
       icon: Heading2,
+      label: translations.richTextEditor.heading2,
       active: (editor) => editor.isActive("heading", { level: 2 }),
       onClick: (editor) =>
         editor.chain().focus().toggleHeading({ level: 2 }).run(),
@@ -125,6 +131,7 @@ export const Toolbar = ({
     {
       key: "heading3",
       icon: Heading3,
+      label: translations.richTextEditor.heading3,
       active: (editor) => editor.isActive("heading", { level: 3 }),
       onClick: (editor) =>
         editor.chain().focus().toggleHeading({ level: 3 }).run(),
@@ -140,6 +147,7 @@ export const Toolbar = ({
     {
       key: "bulletList",
       icon: List,
+      label: translations.richTextEditor.bulletList,
       active: (editor) => editor.isActive("bulletList"),
       onClick: (editor) => editor.chain().focus().toggleBulletList().run(),
       tooltip: {
@@ -150,6 +158,7 @@ export const Toolbar = ({
     {
       key: "orderedList",
       icon: OlList,
+      label: translations.richTextEditor.orderedList,
       active: (editor) => editor.isActive("orderedList"),
       onClick: (editor) => editor.chain().focus().toggleOrderedList().run(),
       tooltip: {
@@ -162,6 +171,7 @@ export const Toolbar = ({
           {
             key: "taskList",
             icon: CheckDouble,
+            label: translations.richTextEditor.taskList,
             active: (editor: Editor) => editor.isActive("taskList"),
             onClick: (editor: Editor) =>
               editor.chain().focus().toggleTaskList().run(),
@@ -173,6 +183,7 @@ export const Toolbar = ({
           {
             key: "highlight",
             icon: Pencil,
+            label: translations.richTextEditor.highlight,
             active: (editor: Editor) => editor.isActive("highlight"),
             onClick: (editor: Editor) =>
               editor.chain().focus().toggleHighlight().run(),
@@ -191,11 +202,7 @@ export const Toolbar = ({
       {configs.map((config) => (
         <F0ButtonToggle
           key={config.key}
-          label={
-            translations.richTextEditor[
-              config.key as keyof typeof translations.richTextEditor
-            ]
-          }
+          label={config.label}
           icon={config.icon}
           selected={config.active(editor)}
           disabled={disableButtons}

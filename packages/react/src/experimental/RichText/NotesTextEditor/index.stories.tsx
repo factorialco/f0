@@ -12,42 +12,6 @@ const meta: Meta<typeof NotesTextEditor> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const defaultSlashCommandGroupLabels = {
-  textStyles: "Text Styles",
-  lists: "Lists",
-  blocks: "Blocks",
-}
-
-const defaultAIBlockLabels = {
-  reset: "Reset",
-  resetDescription: "Clear content and start over",
-  deleteBlock: "Delete",
-  expand: "Expand",
-  collapse: "Collapse",
-}
-
-const defaultMoodTrackerLabels = {
-  deleteBlock: "Delete",
-  expand: "Expand",
-  collapse: "Collapse",
-}
-
-const defaultLiveCompanionLabels = {
-  deleteBlock: "Delete",
-  expand: "Expand",
-  collapse: "Collapse",
-  oneTopicWithCommentary: "topic with commentary",
-  multipleTopicsWithCommentary: "topics with commentary",
-}
-
-const defaultTranscriptLabels = {
-  deleteBlock: "Delete",
-  expand: "Expand",
-  collapse: "Collapse",
-  messagesCount: "messages",
-  messagesCountSingular: "message",
-}
-
 const initialContent = {
   type: "doc",
   content: [
@@ -96,14 +60,7 @@ const initialContent = {
 export const Default: Story = {
   args: {
     placeholder: "Enter '/' to open the command palette...",
-    labels: {
-      slashCommandGroupLabels: defaultSlashCommandGroupLabels,
-      aiBlockLabels: defaultAIBlockLabels,
-      moodTrackerLabels: defaultMoodTrackerLabels,
-      liveCompanionLabels: defaultLiveCompanionLabels,
-      transcriptLabels: defaultTranscriptLabels,
-      titlePlaceholder: "Enter a title for the meeting",
-    },
+    titlePlaceholder: "Enter a title for the meeting",
     onTitleChange: (title) => {
       console.log("Title changed:", title)
     },
