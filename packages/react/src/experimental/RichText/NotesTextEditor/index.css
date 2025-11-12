@@ -1,5 +1,10 @@
-.preserved-selection {
-  @apply bg-f1-background-selected-bold/20;
+.preserved-selection,
+.notes-text-editor-title::selection {
+  @apply bg-f1-background-selected-hover;
+}
+
+.notes-text-editor *::selection {
+  background-color: transparent !important;
 }
 
 .notes-text-editor p {
@@ -7,7 +12,7 @@
 }
 
 .notes-text-editor p:last-child {
-  margin-bottom: 0;
+  @apply mb-0;
 }
 
 .notes-text-editor h1 {
@@ -23,8 +28,7 @@
 }
 
 .notes-text-editor ul {
-  @apply m-0 mb-2;
-  list-style: disc;
+  @apply m-0 mb-2 list-disc;
 }
 
 .notes-text-editor ol {
@@ -104,10 +108,6 @@
 
 .notes-text-editor ul[data-type="taskList"] {
   @apply pl-0;
-}
-
-.shadow-editor-tools {
-  box-shadow: 0px -4px 20px 0px #0d162514;
 }
 
 .f1-task-item {
