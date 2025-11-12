@@ -916,6 +916,7 @@ export const ExampleComponent = ({
    */
   enableCache = true,
   hideFilters,
+  tmpFullWidth,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -967,6 +968,7 @@ export const ExampleComponent = ({
   currentFilters?: FiltersState<FiltersType>
   currentSortings?: SortingsState<typeof sortings>
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
+  tmpFullWidth?: boolean
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -1095,6 +1097,7 @@ export const ExampleComponent = ({
       className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
+        tmpFullWidth={tmpFullWidth}
         id={id}
         storage={storage}
         fullHeight={fullHeight}

@@ -49,6 +49,7 @@ export const VisualizationRenderer = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  tmpFullWidth,
 }: {
   visualization: Visualization<
     R,
@@ -72,6 +73,7 @@ export const VisualizationRenderer = <
   onLoadData: OnLoadDataCallback<R, Filters>
   onLoadError: OnLoadErrorCallback
   clearSelectedItems?: () => void
+  tmpFullWidth?: boolean
 }): JSX.Element => {
   if (visualization.type === "custom") {
     return visualization.component({
@@ -107,5 +109,6 @@ export const VisualizationRenderer = <
     onSelectItems,
     onLoadData,
     onLoadError,
+    tmpFullWidth,
   })
 }

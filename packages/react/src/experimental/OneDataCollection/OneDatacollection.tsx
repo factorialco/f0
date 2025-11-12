@@ -159,6 +159,7 @@ const OneDataCollectionComp = <
   fullHeight,
   storage,
   id,
+  tmpFullWidth,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -627,7 +628,8 @@ const OneDataCollectionComp = <
         fullHeight && "h-full flex-1"
       )}
       style={{
-        width: layout === "standard" ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout
+        width:
+          layout === "standard" && !tmpFullWidth ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout,
       }}
     >
       {showTopToolbar && (
@@ -651,7 +653,11 @@ const OneDataCollectionComp = <
       )}
       {showBottomToolbar && (
         <div
-          className={cn("flex flex-row gap-4 px-4", fullHeight && "max-h-full")}
+          className={cn(
+            "flex flex-row gap-4 px-4",
+            fullHeight && "max-h-full",
+            tmpFullWidth && "px-0"
+          )}
         >
           {totalItemSummaryPosition === "bottom" && (
             <TotalItemsSummary
@@ -731,6 +737,7 @@ const OneDataCollectionComp = <
           onSelectItems={onSelectItemsLocal}
           onLoadData={onLoadData}
           onLoadError={onLoadError}
+          tmpFullWidth={tmpFullWidth}
         />
       </div>
       {emptyState ? (

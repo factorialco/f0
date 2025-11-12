@@ -96,4 +96,10 @@ export type CollectionProps<
   /** Function to handle data load */
   onLoadData: OnLoadDataCallback<Record, Filters>
   onLoadError: OnLoadErrorCallback
+
+  /**
+   * @deprecated This will be removed in the next major version
+   * Temporary prop to force the full width of the data collection (removes the X padding)
+   */
+  tmpFullWidth?: boolean
 } & VisualizationOptions
