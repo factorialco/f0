@@ -53,7 +53,7 @@ export const BlockIdExtension = Extension.create({
     return [
       new Plugin({
         key: new PluginKey("blockIdPlugin"),
-        appendTransaction: (transactions, oldState, newState) => {
+        appendTransaction: (transactions, _oldState, newState) => {
           // Skip if document hasn't changed
           const docChanged = transactions.some((tr) => tr.docChanged)
           if (!docChanged) {
@@ -63,23 +63,61 @@ export const BlockIdExtension = Extension.create({
           const tr = newState.tr
           let modified = false
 
-          // Calculate affected ranges from all transactions
+          // Collect affected ranges from all transactions
           const affectedRanges: Array<{ from: number; to: number }> = []
 
           transactions.forEach((transaction) => {
             if (!transaction.docChanged) return
 
-            transaction.steps.forEach((_, index) => {
-              const map = transaction.mapping.slice(index, index + 1)
-              const from = map.map(0, -1)
-              const to = map.map(oldState.doc.content.size, 1)
-              affectedRanges.push({ from, to })
+            // Get the mapping from old to new state
+            transaction.steps.forEach((step) => {
+              const stepResult = step.getMap()
+              // Iterate over changed ranges in this step
+              stepResult.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
+                // Map the positions to the new document state
+                const mappedFrom = transaction.mapping.map(newStart)
+                const mappedTo = transaction.mapping.map(newEnd)
+
+                // Ensure positions are valid and within document bounds
+                const from = Math.max(
+                  0,
+                  Math.min(mappedFrom, newState.doc.content.size)
+                )
+                const to = Math.max(
+                  0,
+                  Math.min(mappedTo, newState.doc.content.size)
+                )
+
+                if (from < to) {
+                  affectedRanges.push({ from, to })
+                }
+              })
             })
           })
 
-          // If no specific ranges affected, fall back to checking whole document
-          // (e.g., initial load or paste operations)
-          if (affectedRanges.length === 0) {
+          // If we have specific affected ranges, only check those
+          if (affectedRanges.length > 0) {
+            affectedRanges.forEach(({ from, to }) => {
+              // Add safety check for valid range
+              if (from >= 0 && to <= newState.doc.content.size && from < to) {
+                newState.doc.nodesBetween(from, to, (node, pos) => {
+                  if (
+                    BLOCK_NODE_TYPES_SET.has(node.type.name) &&
+                    !node.attrs.id
+                  ) {
+                    const id = nanoid(5)
+                    tr.setNodeMarkup(pos, undefined, {
+                      ...node.attrs,
+                      id,
+                    })
+                    modified = true
+                  }
+                })
+              }
+            })
+          } else {
+            // Fallback: check whole document
+            // (e.g., initial load or operations without clear ranges)
             newState.doc.descendants((node, pos) => {
               if (BLOCK_NODE_TYPES_SET.has(node.type.name) && !node.attrs.id) {
                 const id = nanoid(5)
@@ -90,23 +128,6 @@ export const BlockIdExtension = Extension.create({
                 modified = true
               }
               return true
-            })
-          } else {
-            // Only check nodes within affected ranges
-            affectedRanges.forEach(({ from, to }) => {
-              newState.doc.nodesBetween(from, to, (node, pos) => {
-                if (
-                  BLOCK_NODE_TYPES_SET.has(node.type.name) &&
-                  !node.attrs.id
-                ) {
-                  const id = nanoid(5)
-                  tr.setNodeMarkup(pos, undefined, {
-                    ...node.attrs,
-                    id,
-                  })
-                  modified = true
-                }
-              })
             })
           }
 
