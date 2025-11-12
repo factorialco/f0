@@ -12,6 +12,7 @@ import {
   AlignTextRight,
   Bold,
   CheckDouble,
+  ChevronDown,
   Code,
   Cross,
   Ellipsis,
@@ -282,6 +283,12 @@ export const Toolbar = ({
             onClick: () => editor.chain().focus().toggleBlockquote().run(),
             isActive: editor.isActive("blockquote"),
           },
+          {
+            icon: ChevronDown,
+            label: translations.richTextEditor.details,
+            onClick: () => editor.chain().focus().setDetails().run(),
+            isActive: editor.isActive("details"),
+          },
         ]}
         disabled={disableButtons}
         activator={{
@@ -325,7 +332,7 @@ export const Toolbar = ({
           size="md"
           disabled={disableButtons}
           hideLabel
-          label={translations.richTextEditor.close}
+          label={translations.actions.close}
           icon={Cross}
         />
       )}
@@ -345,7 +352,6 @@ export const Toolbar = ({
 
 // Export all toolbar components
 export { LinkPopup } from "./LinkPopup"
-export { ToolbarButton } from "./ToolbarButton"
 export { ToolbarDivider } from "./ToolbarDivider"
 export { ToolbarDropdown } from "./ToolbarDropdown"
 export type { ButtonConfig, ToolbarProps } from "./types"

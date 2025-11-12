@@ -86,7 +86,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
       <Popover.Trigger asChild>
         <F0ButtonToggle
           selected={editor.isActive("link") || openLinkPopover}
-          label={translations.richTextEditor.linkLabel}
+          label={translations.richTextEditor.link}
           icon={LinkIcon}
           disabled={disabled}
           onSelectedChange={() => handleLinkButtonClick()}
@@ -186,7 +186,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                       type="button"
                       size="sm"
                       onClick={handlePaste}
-                      label={translations.richTextEditor.linkPaste}
+                      label={translations.actions.paste}
                     ></F0Button>
                   </div>
                   <F0Button
