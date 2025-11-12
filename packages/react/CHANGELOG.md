@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.264.1](https://github.com/factorialco/f0/compare/f0-react-v1.264.0...f0-react-v1.264.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* **AiChat:** targetBlank to MessageSources and consistency in loading states ([#2944](https://github.com/factorialco/f0/issues/2944)) ([d562d4c](https://github.com/factorialco/f0/commit/d562d4c499c80ac1bec98621b65f6c56330e0e81))
+
 ## [1.264.0](https://github.com/factorialco/f0/compare/f0-react-v1.263.0...f0-react-v1.264.0) (2025-11-11)
 
 
