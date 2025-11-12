@@ -2,12 +2,7 @@ import { Extension } from "@tiptap/core"
 import { Node as ProseMirrorNode } from "@tiptap/pm/model"
 import { Plugin, PluginKey } from "@tiptap/pm/state"
 import { Editor } from "@tiptap/react"
-
-const generateBlockId = (): string => {
-  const timestamp = Date.now().toString(36)
-  const randomPart = Math.random().toString(36).substring(2, 9)
-  return `block-${timestamp}-${randomPart}`
-}
+import { nanoid } from "nanoid"
 
 // Block types that will be assigned an ID
 const BLOCK_NODE_TYPES = [
@@ -50,9 +45,8 @@ export const BlockIdExtension = Extension.create({
                 "data-id": attributes.id,
               }
             },
-            // Keep the attribute when content is being copied/pasted
-            // Set to false if you want to generate new IDs on paste
-            keepOnSplit: true,
+            // Don't keep the ID when splitting blocks - generate a new one
+            keepOnSplit: false,
           },
         },
       },
@@ -83,7 +77,8 @@ export const BlockIdExtension = Extension.create({
             ) {
               // Only add ID if the node doesn't already have one
               if (!node.attrs.id) {
-                const id = generateBlockId()
+                const id = nanoid(5)
+                console.log("id", id)
                 tr.setNodeMarkup(pos, undefined, {
                   ...node.attrs,
                   id,
