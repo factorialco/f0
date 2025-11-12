@@ -3692,6 +3692,15 @@ export declare type NumberInputProps = Omit<InputProps<string>, "value" | "type"
     units?: string;
 };
 
+declare type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+    value?: number | null;
+};
+
+declare type NumericQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    value?: number | null;
+    onChange?: (params: NumericQuestionOnChangeParams) => void;
+};
+
 export declare function OmniButton({ label, options, hasNewUpdate }: OmniButtonProps): JSX_2.Element;
 
 declare interface OmniButtonProps {
@@ -4425,6 +4434,8 @@ export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents 
     type: "rating";
 }) | (SelectQuestionProps & {
     type: "select" | "multi-select";
+}) | (NumericQuestionProps & {
+    type: "numeric";
 }));
 
 /**
@@ -5184,12 +5195,12 @@ export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "dis
 
 declare type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
     type: "text" | "longText";
-    text: string;
+    value?: string | null;
 };
 
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
-    text: string;
+    value?: string | null;
     onChange?: (params: TextQuestionOnChangeParams) => void;
 };
 
@@ -5769,8 +5780,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -5778,8 +5789,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
     }
 }
