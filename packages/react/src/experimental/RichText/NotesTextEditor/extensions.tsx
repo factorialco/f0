@@ -1,5 +1,7 @@
 import {
   BlockIdExtension,
+  AIBlockConfig,
+  AIBlockExtension,
   createAccessibilityExtension,
   createPlaceholderExtension,
   createSlashCommandExtension,
@@ -17,63 +19,28 @@ import {
   TaskListExtension,
   TextAlignExtension,
   TextStyleExtension,
+  TranscriptExtension,
   TypographyExtension,
   UnderlineExtension,
-} from "@/experimental/RichText/CoreEditor"
-import {
-  AIBlockConfigWithLabels,
-  AIBlockExtension,
-  AIBlockLabels,
-} from "@/experimental/RichText/CoreEditor/Extensions/AIBlock"
-import {
-  createFileHandlerExtension,
   ImageUploadConfig,
-} from "@/experimental/RichText/CoreEditor/Extensions/Image"
-import {
-  LiveCompanionConfig,
-  LiveCompanionExtension,
-  LiveCompanionLabels,
-} from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
-import {
-  MoodTrackerConfig,
-  MoodTrackerLabels,
-} from "@/experimental/RichText/CoreEditor/Extensions/MoodTracker"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import {
-  TranscriptConfig,
-  TranscriptExtension,
-  TranscriptLabels,
-} from "@/experimental/RichText/CoreEditor/Extensions/Transcript"
+  createFileHandlerExtension,
+} from "@/experimental/RichText/CoreEditor"
 
-export const createNotesTextEditorExtensions = (
-  placeholder: string,
-  toolbarLabels: Record<string, string>,
-  groupLabels?: SlashCommandGroupLabels,
-  aiBlockConfig?: AIBlockConfigWithLabels,
-  aiBlockLabels?: AIBlockLabels,
-  moodTrackerLabels?: MoodTrackerLabels,
-  liveCompanionLabels?: LiveCompanionLabels,
-  transcriptLabels?: TranscriptLabels,
+import { I18nContextType } from "@/lib/providers/i18n"
+
+interface CreateNotesTextEditorExtensionsProps {
+  placeholder: string
+  translations: I18nContextType
+  aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
-) => {
-  // Create enhanced config with labels if both are provided
-  const enhancedAIBlockConfig =
-    aiBlockConfig && aiBlockLabels
-      ? { ...aiBlockConfig, labels: aiBlockLabels }
-      : aiBlockConfig
+}
 
-  // Create enhanced MoodTracker config with labels
-  const enhancedMoodTrackerConfig: MoodTrackerConfig | undefined =
-    moodTrackerLabels ? { labels: moodTrackerLabels } : undefined
-
-  // Create enhanced LiveCompanion config with labels
-  const enhancedLiveCompanionConfig: LiveCompanionConfig | undefined =
-    liveCompanionLabels ? { labels: liveCompanionLabels } : undefined
-
-  // Create enhanced Transcript config with labels
-  const enhancedTranscriptConfig: TranscriptConfig | undefined =
-    transcriptLabels ? { labels: transcriptLabels } : undefined
-
+export const createNotesTextEditorExtensions = ({
+  placeholder,
+  translations,
+  aiBlockConfig,
+  imageUploadConfig,
+}: CreateNotesTextEditorExtensionsProps) => {
   return [
     StarterKitExtension,
     UnderlineExtension,
@@ -88,17 +55,10 @@ export const createNotesTextEditorExtensions = (
     DetailsSummaryExtension,
     DetailsContentExtension,
     TableExtension,
-    MoodTrackerExtension.configure({
-      currentConfig: enhancedMoodTrackerConfig,
-    }),
-    LiveCompanionExtension.configure({
-      currentConfig: enhancedLiveCompanionConfig,
-    }),
-    TranscriptExtension.configure({
-      currentConfig: enhancedTranscriptConfig,
-    }),
+    MoodTrackerExtension,
+    TranscriptExtension,
     AIBlockExtension.configure({
-      currentConfig: enhancedAIBlockConfig,
+      currentConfig: aiBlockConfig,
     }),
     ImageExtension,
     ...(imageUploadConfig
@@ -108,11 +68,11 @@ export const createNotesTextEditorExtensions = (
     PersistSelection,
     createPlaceholderExtension(placeholder),
     createAccessibilityExtension(placeholder),
-    createSlashCommandExtension(
-      toolbarLabels,
-      groupLabels,
-      enhancedAIBlockConfig,
-      imageUploadConfig
-    ),
+
+    createSlashCommandExtension({
+      aiBlockConfig,
+      translations,
+      imageUploadConfig,
+    }),
   ]
 }

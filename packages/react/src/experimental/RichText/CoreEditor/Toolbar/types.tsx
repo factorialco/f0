@@ -41,6 +41,7 @@ export interface ButtonConfig {
   icon: IconType
   active: (editor: Editor) => boolean
   onClick: (editor: Editor) => void
+  label: string
   tooltip: {
     label: string
     shortcut: string[]

@@ -38,8 +38,11 @@ export const defaultTranslations = {
     save: "Save",
     send: "Send",
     cancel: "Cancel",
+    delete: "Delete",
     copy: "Copy",
     close: "Close",
+    collapse: "Collapse",
+    expand: "Expand",
     showAll: "Show all",
     showLess: "Show less",
     skipToContent: "Skip to content",
@@ -373,6 +376,11 @@ export const defaultTranslations = {
     linkLabel: "Link Label",
     linkPaste: "Link Paste",
     close: "Close",
+    groups: {
+      textStyles: "Text Styles",
+      lists: "Lists",
+      blocks: "Blocks",
+    },
   },
 } as const
 

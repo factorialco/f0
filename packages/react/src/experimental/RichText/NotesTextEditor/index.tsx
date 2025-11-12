@@ -2,9 +2,8 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import {
   EditorBubbleMenu,
-  Toolbar,
 } from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
+import { Toolbar } from "@/experimental/RichText/CoreEditor"
 import { Handle, Plus } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
@@ -24,15 +23,12 @@ import {
 } from "react"
 
 
-import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
+import { AIBlockConfig } from "../CoreEditor/Extensions/AIBlock"
 import {
   ImageUploadConfig,
   ImageUploadErrorType,
   insertImageFromFile,
 } from "../CoreEditor/Extensions/Image"
-import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
-import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
-import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import "./index.css"
@@ -52,14 +48,7 @@ interface NotesTextEditorProps {
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
-  labels: {
-    slashCommandGroupLabels?: SlashCommandGroupLabels
-    aiBlockLabels?: AIBlockLabels
-    moodTrackerLabels?: MoodTrackerLabels
-    liveCompanionLabels?: LiveCompanionLabels
-    transcriptLabels?: TranscriptLabels
-    titlePlaceholder?: string
-  }
+  titlePlaceholder?: string
   actions?: actionType[]
   secondaryActions?: secondaryActionsType[]
   metadata?: MetadataItemValue[]
@@ -76,7 +65,6 @@ const NotesTextEditorComponent = forwardRef<
     placeholder,
     initialEditorState,
     readonly = false,
-    labels,
     aiBlockConfig,
     imageUploadConfig,
     onTitleChange,
@@ -85,20 +73,12 @@ const NotesTextEditorComponent = forwardRef<
     metadata,
     withPadding = true,
     showBubbleMenu = false,
+    titlePlaceholder,
   },
   ref
 ) {
   const translations = useI18n()
-  const toolbarLabels = translations.richTextEditor
 
-  const {
-    slashCommandGroupLabels,
-    aiBlockLabels,
-    moodTrackerLabels,
-    liveCompanionLabels,
-    transcriptLabels,
-  } = labels
-  const i18n = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
   const editorId = useId()
@@ -110,13 +90,13 @@ const NotesTextEditorComponent = forwardRef<
   const getErrorMessage = (errorType: ImageUploadErrorType) => {
     switch (errorType) {
       case "file-too-large":
-        return i18n.imageUpload.errors.fileTooLarge
+        return translations.imageUpload.errors.fileTooLarge
       case "invalid-type":
-        return i18n.imageUpload.errors.invalidType
+        return translations.imageUpload.errors.invalidType
       case "upload-failed":
-        return i18n.imageUpload.errors.uploadFailed
+        return translations.imageUpload.errors.uploadFailed
       default:
-        return i18n.imageUpload.errors.uploadFailed
+        return translations.imageUpload.errors.uploadFailed
     }
   }
 
@@ -127,35 +107,19 @@ const NotesTextEditorComponent = forwardRef<
   }, [title, onTitleChange])
 
   const editor = useEditor({
-    extensions: createNotesTextEditorExtensions(
+    extensions: createNotesTextEditorExtensions({
       placeholder,
-      toolbarLabels,
-      slashCommandGroupLabels,
-      aiBlockConfig
-        ? {
-            ...aiBlockConfig,
-            toolbarLabels,
-            slashCommandGroupLabels,
-            moodTrackerLabels,
-            liveCompanionLabels,
-            transcriptLabels,
-            labels: aiBlockLabels,
-            placeholder,
-          }
-        : undefined,
-      aiBlockLabels,
-      moodTrackerLabels,
-      liveCompanionLabels,
-      transcriptLabels,
-      imageUploadConfig
+      translations,
+      aiBlockConfig,
+      imageUploadConfig: imageUploadConfig
         ? {
             ...imageUploadConfig,
             onError: (errorType: ImageUploadErrorType) => {
               setError(errorType)
             },
           }
-        : undefined
-    ),
+        : undefined,
+    }),
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
       onChange(
@@ -173,9 +137,6 @@ const NotesTextEditorComponent = forwardRef<
     setContent: (content) => editor?.commands.setContent(content),
     insertAIBlock: () => {
       if (!editor || !aiBlockConfig) return
-      const cfg = aiBlockLabels
-        ? { ...aiBlockConfig, labels: aiBlockLabels }
-        : undefined
       editor
         .chain()
         .focus()
@@ -184,7 +145,7 @@ const NotesTextEditorComponent = forwardRef<
             type: "aiBlock",
             attrs: {
               data: { content: null, selectedAction: undefined },
-              config: cfg,
+              config: aiBlockConfig,
               isCollapsed: false,
             },
           },
@@ -194,7 +155,6 @@ const NotesTextEditorComponent = forwardRef<
     },
     insertTranscript: (title, users, messages) => {
       if (!editor) return
-      const cfg = transcriptLabels ? { labels: transcriptLabels } : undefined
       editor
         .chain()
         .focus()
@@ -203,7 +163,6 @@ const NotesTextEditorComponent = forwardRef<
             type: "transcript",
             attrs: {
               data: { title, users, messages },
-              config: cfg,
               isOpen: false,
             },
           },
@@ -310,7 +269,7 @@ const NotesTextEditorComponent = forwardRef<
               <F0Button
                 variant="outline"
                 onClick={() => setError(null)}
-                label={i18n.imageUpload.errors.dismiss}
+                label={translations.imageUpload.errors.dismiss}
                 size="sm"
               />
             </div>
@@ -336,8 +295,8 @@ const NotesTextEditorComponent = forwardRef<
               disabled={!onTitleChange || readonly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={labels.titlePlaceholder || ""}
-              className="notes-text-editor-title text-[39px] font-semibold tracking-[-0.78px] text-f1-foreground placeholder-f1-foreground-tertiary"
+              placeholder={titlePlaceholder || ""}
+              className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>
         )}
@@ -404,7 +363,6 @@ interface NotesTextEditorSkeletonProps {
 export const NotesTextEditorSkeleton = ({
   withHeader = false,
   withTitle = true,
-  withPadding: _withPadding = false,
   withToolbar = true,
 }: NotesTextEditorSkeletonProps) => {
   return (

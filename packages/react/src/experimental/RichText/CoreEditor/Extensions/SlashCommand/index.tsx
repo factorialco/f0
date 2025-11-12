@@ -1,3 +1,4 @@
+import { I18nContextType } from "@/lib/providers/i18n"
 import * as Popover from "@radix-ui/react-popover"
 import { Editor, Extension, ReactRenderer } from "@tiptap/react"
 import { Suggestion } from "@tiptap/suggestion"
@@ -10,16 +11,20 @@ import {
   availableCommands,
   CommandItem,
   getGroupedCommands,
-  SlashCommandGroupLabels,
 } from "./AvailableCommands"
 import { CommandList } from "./CommandList"
 
-const createSlashCommandExtension = (
-  labels: Record<string, string>,
-  groupLabels?: SlashCommandGroupLabels,
-  aiBlockConfig?: AIBlockConfig,
+interface CreateSlashCommandExtensionProps {
+  aiBlockConfig?: AIBlockConfig
+  translations: I18nContextType
   imageUploadConfig?: ImageUploadConfig
-) =>
+}
+
+const createSlashCommandExtension = ({
+  aiBlockConfig,
+  translations,
+  imageUploadConfig,
+}: CreateSlashCommandExtensionProps) =>
   Extension.create({
     name: "slashCommand",
 
@@ -80,13 +85,6 @@ const createSlashCommandExtension = (
     },
 
     addProseMirrorPlugins() {
-      // Use provided group labels or defaults
-      const finalGroupLabels: SlashCommandGroupLabels = groupLabels || {
-        textStyles: "Text Styles",
-        lists: "Lists",
-        blocks: "Blocks",
-      }
-
       return [
         Suggestion({
           editor: this.editor,
@@ -94,10 +92,12 @@ const createSlashCommandExtension = (
           items: ({ query }: { query: string }) => {
             // Exact search: the query with spaces must match exactly
             const normalizedQuery = query.toLowerCase().trim()
-            const results = availableCommands(
+         
+            const results = availableCommands({
+              translations,
               aiBlockConfig,
-              imageUploadConfig
-            ).filter((item: CommandItem) => {
+              imageUploadConfig,
+            }).filter((item: CommandItem) => {
               const normalizedTitle = item.title.toLowerCase()
               // If query is empty, show all commands
               if (!normalizedQuery) return true
@@ -189,13 +189,12 @@ const createSlashCommandExtension = (
               }) => {
                 if (props.items.length === 0) return
 
-                // Get grouped commands for better organization
-                const groupedCommands = getGroupedCommands(
-                  labels,
-                  finalGroupLabels,
+              
+                const groupedCommands = getGroupedCommands({
                   aiBlockConfig,
-                  imageUploadConfig
-                )
+                  translations,
+                  imageUploadConfig,
+                })
 
                 // Filter groups based on query if available
                 let filteredGroups = groupedCommands
@@ -253,12 +252,12 @@ const createSlashCommandExtension = (
                 if (!component || !container || !popoverRoot) return
 
                 // Get filtered groups for update
-                const groupedCommands = getGroupedCommands(
-                  labels,
-                  finalGroupLabels,
+                const groupedCommands = getGroupedCommands({ 
                   aiBlockConfig,
+                  translations,
                   imageUploadConfig
-                )
+                })
+                
                 let filteredGroups = groupedCommands
                 if (props.query && props.query.trim()) {
                   const normalizedQuery = props.query.toLowerCase().trim()
@@ -341,4 +340,3 @@ const createSlashCommandExtension = (
   })
 
 export { createSlashCommandExtension }
-export type { SlashCommandGroupLabels }
