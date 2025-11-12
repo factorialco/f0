@@ -90,6 +90,7 @@ export const BaseScoreQuestion = ({
       onChange?.({
         ...baseOnChangeParams,
         value: newValue,
+        type: "score",
       })
     },
     [baseOnChangeParams, onChange]

@@ -48,6 +48,7 @@ export const BaseQuestion = ({
   onChange,
   children,
   required,
+  disabled,
   onAddNewQuestion,
 }: BaseQuestionProps) => {
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
@@ -138,7 +139,7 @@ export const BaseQuestion = ({
   )
 
   return (
-    <div className="group relative flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary p-4 hover:border-f1-border-hover">
+    <div className="group/question relative flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary p-4 hover:border-f1-border-hover">
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
           <textarea
@@ -156,21 +157,23 @@ export const BaseQuestion = ({
         />
       </div>
       {children}
-      <div
-        className={cn(
-          "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover:opacity-100",
-          isNewQuestionDropdownOpen && "opacity-100"
-        )}
-      >
-        <Dropdown
-          items={newQuestionDropdownItems}
-          icon={Add}
-          size="sm"
-          open={isNewQuestionDropdownOpen}
-          onOpenChange={setIsNewQuestionDropdownOpen}
-          align="center"
-        />
-      </div>
+      {disabled && (
+        <div
+          className={cn(
+            "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",
+            isNewQuestionDropdownOpen && "opacity-100"
+          )}
+        >
+          <Dropdown
+            items={newQuestionDropdownItems}
+            icon={Add}
+            size="sm"
+            open={isNewQuestionDropdownOpen}
+            onOpenChange={setIsNewQuestionDropdownOpen}
+            align="center"
+          />
+        </div>
+      )}
     </div>
   )
 }

@@ -19,15 +19,10 @@ export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
 }
 
 export const TextQuestion = ({
-  id,
-  index,
-  title,
-  description,
   value,
   type,
   onChange,
-  disabled,
-  required,
+  ...baseQuestionComponentProps
 }: TextQuestionProps) => {
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
@@ -42,42 +37,35 @@ export const TextQuestion = ({
 
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (disabled) return
+      if (baseQuestionComponentProps.disabled) return
 
       onChange?.({
-        id,
-        title,
-        description,
+        ...baseQuestionComponentProps,
         value: newValue,
         type,
       })
     },
-    [id, title, description, onChange, type, disabled]
+    [baseQuestionComponentProps, onChange, type]
   )
 
   const placeholder = "Respondent’s answer"
 
-  const inputValue = disabled ? placeholder : (value ?? undefined)
+  const inputValue = baseQuestionComponentProps.disabled
+    ? placeholder
+    : (value ?? undefined)
 
   const commonInputProps = {
     value: inputValue,
     onChange: handleChangeText,
     placeholder,
-    disabled,
+    disabled: baseQuestionComponentProps.disabled,
     label: "Answer",
     hideLabel: true,
-    required,
+    required: baseQuestionComponentProps.required,
   }
 
   return (
-    <BaseQuestion
-      id={id}
-      index={index}
-      title={title}
-      description={description}
-      onChange={handleChange}
-      required={required}
-    >
+    <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
       <div className="px-2">
         {type === "text" && (
           <Input type="text" size="md" {...commonInputProps} />

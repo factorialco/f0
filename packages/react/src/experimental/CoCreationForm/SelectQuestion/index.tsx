@@ -46,20 +46,9 @@ export type SelectQuestionProps =
         }
     )
 
-export const SelectQuestion = ({
-  id,
-  index,
-  title,
-  description,
-  options,
-  disabled,
-  required,
-  ...props
-}: SelectQuestionProps) => {
+export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
   const baseOnChangeParams = {
-    id,
-    title,
-    description,
+    ...props,
     options,
     ...(props.type === "select"
       ? { type: props.type, value: props.value }
@@ -150,14 +139,7 @@ export const SelectQuestion = ({
   }
 
   return (
-    <BaseQuestion
-      id={id}
-      index={index}
-      title={title}
-      description={description}
-      onChange={handleChange}
-      required={required}
-    >
+    <BaseQuestion {...props} onChange={handleChange}>
       <div className="-mx-0.5 flex flex-col items-start">
         {options.map((option, index) => (
           <div className="w-full" key={option.value}>
@@ -174,11 +156,11 @@ export const SelectQuestion = ({
               onClick={handleOptionClick}
               onClickAction={handleClickOptionAction}
               onChangeLabel={handleChangeLabel}
-              disabled={disabled}
+              disabled={props.disabled}
             />
           </div>
         ))}
-        {disabled && (
+        {props.disabled && (
           <div className="opacity-50">
             <F0Button
               label="Add option"

@@ -4,6 +4,10 @@ import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { CheckCircleLine, Delete, Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
+const TEXT_AREA_STYLE: object = {
+  fieldSizing: "content",
+}
+
 export type OnClickOptionActionParams = {
   value: string
   index: number
@@ -55,9 +59,9 @@ export const SelectOption = ({
     handleClickAction("remove")
   }
 
-  const handleChangeLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeLabel = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newLabel = event.target.value
-    const newValue = `${newLabel.trim().toLowerCase().replace(/ /g, "-")}-${index + 1}`
+    const newValue = `item-${index + 1}`
     onChangeLabel({ value: newValue, index, newLabel })
   }
 
@@ -83,12 +87,12 @@ export const SelectOption = ({
         </div>
       </div>
       {disabled ? (
-        <input
-          type="text"
+        <textarea
           placeholder="Type anything you want here..."
           value={label}
           onChange={handleChangeLabel}
-          className="flex-1 font-medium"
+          className="flex-1 resize-none font-medium"
+          style={TEXT_AREA_STYLE}
         />
       ) : (
         <p className="flex-1 font-medium">{label}</p>

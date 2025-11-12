@@ -16,14 +16,9 @@ export type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
 }
 
 export const LinkQuestion = ({
-  id,
-  index,
-  title,
-  description,
   value,
   onChange,
-  disabled,
-  required,
+  ...baseQuestionComponentProps
 }: LinkQuestionProps) => {
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
@@ -37,37 +32,28 @@ export const LinkQuestion = ({
 
   const handleChangeText = useCallback(
     (newValue: string | null) => {
-      if (disabled) return
+      if (baseQuestionComponentProps.disabled) return
 
       onChange?.({
-        id,
-        title,
-        description,
+        ...baseQuestionComponentProps,
         value: newValue,
       })
     },
-    [id, title, description, onChange, disabled]
+    [baseQuestionComponentProps, onChange]
   )
 
   return (
-    <BaseQuestion
-      id={id}
-      index={index}
-      title={title}
-      description={description}
-      onChange={handleChange}
-      required={required}
-    >
+    <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
       <div className="px-2">
         <Input
           type="url"
           size="md"
           value={value ?? undefined}
           onChange={handleChangeText}
-          disabled={disabled}
+          disabled={baseQuestionComponentProps.disabled}
           label="Answer"
           hideLabel={true}
-          required={required}
+          required={baseQuestionComponentProps.required}
         />
       </div>
     </BaseQuestion>

@@ -16,17 +16,7 @@ export type RatingQuestionProps =
       | { options: { value: number; label: string }[] }
     )
 
-export const RatingQuestion = ({
-  id,
-  index,
-  title,
-  description,
-  value,
-  onChange,
-  disabled,
-  required,
-  ...props
-}: RatingQuestionProps) => {
+export const RatingQuestion = (props: RatingQuestionProps) => {
   const options = useMemo(() => {
     if ("range" in props) {
       return Array.from(
@@ -41,17 +31,5 @@ export const RatingQuestion = ({
     return props.options
   }, [props])
 
-  return (
-    <BaseScoreQuestion
-      id={id}
-      index={index}
-      title={title}
-      description={description}
-      value={value}
-      options={options}
-      onChange={onChange}
-      disabled={disabled}
-      required={required}
-    />
-  )
+  return <BaseScoreQuestion {...props} options={options} />
 }
