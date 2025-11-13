@@ -102,6 +102,7 @@ export const BaseQuestion = ({
         label: "Delete question",
         icon: Delete,
         onClick: () => handleAction("delete"),
+        critical: true,
       },
     ],
     [handleAction]
