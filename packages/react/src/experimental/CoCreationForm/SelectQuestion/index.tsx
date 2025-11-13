@@ -131,13 +131,13 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
                   onClick={handleOptionClick}
                   onClickAction={handleClickOptionAction}
                   onChangeLabel={handleChangeLabel}
-                  disabled={props.disabled}
+                  disabled={props.isEditMode}
                 />
               </div>
             ))}
           </Reorder.Group>
         </DragProvider>
-        {props.disabled && (
+        {props.isEditMode && (
           <div className="opacity-50">
             <F0Button
               label="Add option"

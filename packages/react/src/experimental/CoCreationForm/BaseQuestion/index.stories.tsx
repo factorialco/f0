@@ -11,6 +11,13 @@ const meta: Meta = {
       console.log("Question changed:", params)
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="w-[500px]">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof BaseQuestion>
 
 export default meta

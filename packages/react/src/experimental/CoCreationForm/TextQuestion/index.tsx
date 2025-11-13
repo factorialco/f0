@@ -37,7 +37,7 @@ export const TextQuestion = ({
 
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (baseQuestionComponentProps.disabled) return
+      if (baseQuestionComponentProps.isEditMode) return
 
       onChange?.({
         ...baseQuestionComponentProps,
@@ -50,7 +50,7 @@ export const TextQuestion = ({
 
   const placeholder = "Respondent’s answer"
 
-  const inputValue = baseQuestionComponentProps.disabled
+  const inputValue = baseQuestionComponentProps.isEditMode
     ? placeholder
     : (value ?? undefined)
 
@@ -58,7 +58,7 @@ export const TextQuestion = ({
     value: inputValue,
     onChange: handleChangeText,
     placeholder,
-    disabled: baseQuestionComponentProps.disabled,
+    disabled: baseQuestionComponentProps.isEditMode,
     label: "Answer",
     hideLabel: true,
     required: baseQuestionComponentProps.required,

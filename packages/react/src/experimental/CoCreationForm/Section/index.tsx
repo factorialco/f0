@@ -1,23 +1,25 @@
-import { useCallback, useMemo } from "react"
-
-type OnChangeSectionParams = {
-  id: string
-  title: string
-  description?: string
-}
-
-export type SectionProps = {
-  id: string
-  title: string
-  description?: string
-  onChange?: (params: OnChangeSectionParams) => void
-}
+import { F0Button } from "@/components/F0Button"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { Delete, Ellipsis, LayersFront } from "@/icons/app"
+import { cn } from "@/lib/utils"
+import { useCallback, useMemo, useState } from "react"
+import { ActionType, OnChangeSectionParams, SectionProps } from "./types"
 
 const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
 }
 
-export const Section = ({ id, title, description, onChange }: SectionProps) => {
+export const Section = ({
+  id,
+  index,
+  title,
+  description,
+  onChange,
+  isEditMode,
+  onAction,
+}: SectionProps) => {
+  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
+
   const baseOnChangeParams: OnChangeSectionParams = useMemo(
     () => ({
       id,
@@ -41,19 +43,72 @@ export const Section = ({ id, title, description, onChange }: SectionProps) => {
     [baseOnChangeParams, onChange]
   )
 
+  const handleAction = useCallback(
+    (type: ActionType) => {
+      onAction?.({ sectionId: id, type, index })
+    },
+    [id, onAction, index]
+  )
+
+  const actions = useMemo(
+    () => [
+      {
+        label: "Duplicate section",
+        icon: LayersFront,
+        onClick: () => handleAction("duplicate"),
+      },
+      {
+        label: "Delete section",
+        icon: Delete,
+        onClick: () => handleAction("delete"),
+        critical: true,
+      },
+    ],
+    [handleAction]
+  )
+
   return (
-    <div className="flex flex-col gap-1 px-5 py-1">
-      <input
-        type="text"
-        value={title}
-        onChange={handleChangeTitle}
-        className="w-full text-lg font-semibold disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
-      />
+    <div className="group/section flex flex-col gap-1 px-5 py-1">
+      <div className="flex flex-row">
+        <input
+          type="text"
+          value={title}
+          onChange={handleChangeTitle}
+          disabled={!isEditMode}
+          className="w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
+        />
+        {isEditMode && (
+          <div
+            className={cn(
+              "opacity-0 group-hover/section:opacity-100",
+              actionsDropdownOpen && "opacity-100"
+            )}
+          >
+            <Dropdown
+              items={actions}
+              icon={Ellipsis}
+              open={actionsDropdownOpen}
+              onOpenChange={setActionsDropdownOpen}
+              align="start"
+            >
+              <F0Button
+                icon={Ellipsis}
+                label="Actions"
+                size="md"
+                variant="ghost"
+                tooltip={false}
+                hideLabel
+              />
+            </Dropdown>
+          </div>
+        )}
+      </div>
       <textarea
         value={description}
         onChange={handleChangeDescription}
+        disabled={!isEditMode}
         style={TEXT_AREA_STYLE}
-        className="w-full resize-none text-f1-foreground-secondary disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
+        className="w-full resize-none text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
       />
     </div>
   )

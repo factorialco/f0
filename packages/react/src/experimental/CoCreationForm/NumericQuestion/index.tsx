@@ -33,7 +33,7 @@ export const NumericQuestion = ({
 
   const handleChangeText = useCallback(
     (newValue: number | null) => {
-      if (baseQuestionComponentProps.disabled) return
+      if (baseQuestionComponentProps.isEditMode) return
 
       onChange?.({
         ...baseQuestionComponentProps,
@@ -51,7 +51,7 @@ export const NumericQuestion = ({
           size="md"
           value={value}
           onChange={handleChangeText}
-          disabled={baseQuestionComponentProps.disabled}
+          disabled={baseQuestionComponentProps.isEditMode}
           label="Answer"
           hideLabel={true}
           required={baseQuestionComponentProps.required}

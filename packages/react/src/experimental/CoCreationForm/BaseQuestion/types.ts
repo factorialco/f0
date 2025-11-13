@@ -2,7 +2,7 @@ import { BaseQuestionOnChangeParams, QuestionType } from "../types"
 
 export type ActionType = "duplicate" | "delete"
 
-export type ActionParams = {
+export type QuestionActionParams = {
   questionId: string
   type: ActionType
   index: number
@@ -20,10 +20,10 @@ export type BaseQuestionProps = {
   description?: string
   children: React.ReactNode
   onChange?: (params: BaseQuestionOnChangeParams) => void
-  disabled?: boolean
+  isEditMode?: boolean
   required?: boolean
   onAddNewQuestion?: (params: OnAddNewQuestionParams) => void
-  onAction?: (params: ActionParams) => void
+  onAction?: (params: QuestionActionParams) => void
 }
 
 export type BaseQuestionPropsForOtherQuestionComponents = Omit<

@@ -32,7 +32,7 @@ export const LinkQuestion = ({
 
   const handleChangeText = useCallback(
     (newValue: string | null) => {
-      if (baseQuestionComponentProps.disabled) return
+      if (baseQuestionComponentProps.isEditMode) return
 
       onChange?.({
         ...baseQuestionComponentProps,
@@ -50,7 +50,7 @@ export const LinkQuestion = ({
           size="md"
           value={value ?? undefined}
           onChange={handleChangeText}
-          disabled={baseQuestionComponentProps.disabled}
+          disabled={baseQuestionComponentProps.isEditMode}
           label="Answer"
           hideLabel={true}
           required={baseQuestionComponentProps.required}

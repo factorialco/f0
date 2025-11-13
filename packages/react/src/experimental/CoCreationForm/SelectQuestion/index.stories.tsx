@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import {
-  SelectQuestion,
-  SelectQuestionOnChangeParams,
-  SelectQuestionProps,
-} from "."
+import { SelectQuestion } from "."
+import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 
 const meta: Meta<typeof SelectQuestion> = {
   title: "CoCreationForm/SelectQuestion",
@@ -125,7 +122,7 @@ export const MultiSelect: Story = {
   },
 }
 
-export const MultiselectDisabled: Story = {
+export const MultiSelectInEditMode: Story = {
   args: {
     id: "question-5",
     title: "What are your primary concerns?",
@@ -139,6 +136,6 @@ export const MultiselectDisabled: Story = {
       { value: "workload", label: "Workload management" },
       { value: "team-dynamics", label: "Team dynamics" },
     ],
-    disabled: true,
+    isEditMode: true,
   },
 }

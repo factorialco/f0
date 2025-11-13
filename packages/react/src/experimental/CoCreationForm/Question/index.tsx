@@ -3,7 +3,8 @@ import { DateQuestion, DateQuestionProps } from "../DateQuestion"
 import { LinkQuestion, LinkQuestionProps } from "../LinkQuestion"
 import { NumericQuestion, NumericQuestionProps } from "../NumericQuestion"
 import { RatingQuestion, RatingQuestionProps } from "../RatingQuestion"
-import { SelectQuestion, SelectQuestionProps } from "../SelectQuestion"
+import { SelectQuestion } from "../SelectQuestion"
+import { SelectQuestionProps } from "../SelectQuestion/types"
 import { TextQuestion, TextQuestionProps } from "../TextQuestion"
 
 export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &

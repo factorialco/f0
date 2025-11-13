@@ -33,7 +33,7 @@ export const BaseQuestion = ({
   onChange,
   children,
   required,
-  disabled,
+  isEditMode,
   onAddNewQuestion,
   onAction,
 }: BaseQuestionProps) => {
@@ -160,7 +160,8 @@ export const BaseQuestion = ({
           <textarea
             value={title}
             onChange={handleChangeTitle}
-            className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
+            disabled={!isEditMode}
+            className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
             style={TEXT_AREA_STYLE}
           />
           <div
@@ -190,12 +191,13 @@ export const BaseQuestion = ({
         <textarea
           value={description}
           onChange={handleChangeDescription}
-          className="w-full resize-none px-2 text-f1-foreground-secondary disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
+          disabled={!isEditMode}
+          className="w-full resize-none px-2 text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
           style={TEXT_AREA_STYLE}
         />
       </div>
       {children}
-      {disabled && (
+      {isEditMode && (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",

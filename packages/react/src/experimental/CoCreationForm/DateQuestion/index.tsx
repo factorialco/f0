@@ -32,7 +32,7 @@ export const DateQuestion = ({
 
   const handleChangeDate = useCallback(
     (newValue: DatePickerValue | undefined) => {
-      if (baseQuestionComponentProps.disabled) return
+      if (baseQuestionComponentProps.isEditMode) return
 
       onChange?.({
         ...baseQuestionComponentProps,
@@ -60,11 +60,11 @@ export const DateQuestion = ({
           size="md"
           value={datePickerValue}
           onChange={handleChangeDate}
-          disabled={baseQuestionComponentProps.disabled}
+          disabled={baseQuestionComponentProps.isEditMode}
           label="Answer"
           hideLabel={true}
           required={baseQuestionComponentProps.required}
-          readonly={baseQuestionComponentProps.disabled}
+          readonly={baseQuestionComponentProps.isEditMode}
           clearable={!baseQuestionComponentProps.required}
         />
       </div>

@@ -1,3 +1,6 @@
-export type { ActionParams, OnAddNewQuestionParams } from "./BaseQuestion/types"
+export type {
+  OnAddNewQuestionParams,
+  QuestionActionParams,
+} from "./BaseQuestion/types"
 export * from "./Question"
 export * from "./Section"
