@@ -687,10 +687,12 @@ const SelectContentImpl = React.forwardRef<
     [getItems, viewport]
   )
 
-  const focusSelectedItem = React.useCallback(
-    () => focusFirst([selectedItem, content]),
-    [focusFirst, selectedItem, content]
-  )
+  const focusSelectedItem = React.useCallback(() => {
+    if (!context.multiple) {
+      focusFirst([selectedItem, content])
+      return
+    }
+  }, [focusFirst, selectedItem, content, context.multiple])
 
   // Since this is not dependent on layout, we want to ensure this runs at the same time as
   // other effects across components. Hence why we don't call `focusSelectedItem` inside `position`.

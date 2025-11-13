@@ -183,7 +183,7 @@ const SelectContent = forwardRef<
               key={virtualItem.key}
               data-index={virtualItem.index}
               ref={virtualizer.measureElement}
-              // tabIndex={virtualItem.index === positionIndex ? 0 : -1}
+              tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
                 <div className="flex w-full items-center justify-center py-4">

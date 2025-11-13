@@ -572,7 +572,6 @@ export const MultipleNotPaginated: Story = {
       description: item.description,
     }),
   },
-  decorators: [],
 }
 
 export const WithCustomTrigger: Story = {

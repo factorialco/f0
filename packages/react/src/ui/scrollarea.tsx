@@ -45,7 +45,6 @@ const ScrollArea = forwardRef<
         const target = e.target as HTMLElement
         const { scrollTop, scrollHeight, clientHeight } = target
 
-        console.log("scrollTop", scrollTop)
         // Check if scrolled to top
         if (scrollTop - scrollMargin <= 0 && onScrollTop) {
           onScrollTop()
