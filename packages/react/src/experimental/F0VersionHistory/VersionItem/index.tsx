@@ -20,7 +20,7 @@ export function VersionItem({
   return (
     <div
       className={cn(
-        "flex flex-col gap-[6px] rounded-md p-[6px] pl-[6px] pr-2 transition-colors",
+        "flex flex-col gap-[6px] rounded-md px-2 py-[6px] transition-colors",
         isActive && "bg-f1-background-tertiary",
         onClick && "cursor-pointer hover:bg-f1-background-hover"
       )}

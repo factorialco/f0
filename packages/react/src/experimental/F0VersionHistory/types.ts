@@ -1,5 +1,3 @@
-import { IconType } from "@/components/F0Icon"
-
 export interface VersionAuthor {
   firstName: string
   lastName: string
@@ -25,9 +23,4 @@ export interface F0VersionHistoryProps {
   title: string
   versions: Version[]
   currentVersion?: CurrentVersion
-  action?: {
-    label: string
-    onClick: () => void
-    icon: IconType
-  }
 }

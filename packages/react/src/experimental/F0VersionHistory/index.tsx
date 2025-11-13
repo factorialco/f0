@@ -1,6 +1,5 @@
 "use client"
 
-import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { ScrollArea } from "@/ui/scrollarea"
 import { CurrentVersionIndicator } from "./CurrentVersionIndicator"
@@ -11,32 +10,19 @@ export function F0VersionHistory({
   title = "Version history",
   versions,
   currentVersion,
-  action,
 }: F0VersionHistoryProps) {
   return (
     <nav
       className="flex h-full w-[320px] flex-col overflow-hidden px-3 pb-3 pt-[6px]"
       aria-label="Version history"
     >
-      <div className="flex flex-shrink-0 flex-row items-center justify-between px-[6px] pb-3 pt-3">
-        <OneEllipsis
-          tag="h2"
-          lines={1}
-          className="text-[16px] font-semibold text-f1-foreground"
-        >
-          {title}
-        </OneEllipsis>
-        {action && (
-          <F0Button
-            label={action.label}
-            onClick={action.onClick}
-            icon={action.icon}
-            variant="outline"
-            size="sm"
-            hideLabel
-          />
-        )}
-      </div>
+      <OneEllipsis
+        tag="h2"
+        lines={1}
+        className="px-2 pb-3 pt-4 text-lg font-semibold text-f1-foreground"
+      >
+        {title}
+      </OneEllipsis>
 
       <ScrollArea className="h-full min-h-0">
         <div className="flex flex-col gap-1">

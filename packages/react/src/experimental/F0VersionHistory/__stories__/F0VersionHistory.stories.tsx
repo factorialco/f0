@@ -1,4 +1,3 @@
-import { Cross } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { F0VersionHistory } from "../index"
@@ -86,13 +85,6 @@ const meta: Meta<typeof F0VersionHistory> = {
         - title?: Custom title (defaults to 'Current version')
         - onClick?: Callback when clicked`,
     },
-    action: {
-      control: false,
-      description: `Object to configure the action button. If undefined, the button won't be shown.
-        - label: string
-        - onClick: () => void
-        - icon: IconType`,
-    },
   },
   decorators: [
     (Story) => (
@@ -131,11 +123,6 @@ export const Default: Story = {
           isActive: activeId === "current",
         }}
         versions={versionsWithHandlers.reverse()}
-        action={{
-          label: "Create new version",
-          onClick: () => console.log("Create new version clicked!"),
-          icon: Cross,
-        }}
       />
     )
   },

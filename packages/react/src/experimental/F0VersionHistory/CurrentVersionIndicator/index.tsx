@@ -17,7 +17,7 @@ export function CurrentVersionIndicator({
   return (
     <div
       className={cn(
-        "flex flex-row items-center gap-[6px] rounded-md p-[6px] pl-[6px] pr-2 transition-colors",
+        "flex flex-row items-center gap-[6px] rounded-md p-[6px] pl-[4px] pr-2 transition-colors",
         isActive && "bg-f1-background-tertiary",
         onClick && "cursor-pointer hover:bg-f1-background-hover"
       )}
