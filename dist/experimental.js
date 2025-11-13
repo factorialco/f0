@@ -18307,7 +18307,8 @@ const Rde = xt(jv, lj), cj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
   }, {
     label: "Delete question",
     icon: Ho,
-    onClick: () => y("delete")
+    onClick: () => y("delete"),
+    critical: !0
   }], [y]), w = re(() => [{
     label: "Section",
     icon: ay,
