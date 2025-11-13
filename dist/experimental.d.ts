@@ -4668,16 +4668,15 @@ export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
 };
 
-export declare const Section: ({ id, title, description, onChange, children, }: SectionProps) => JSX_2.Element;
+export declare const Section: ({ id, title, description, onChange }: SectionProps) => JSX_2.Element;
 
 export declare const SectionHeader: ({ title, description, action, link, separator, }: Props_2) => JSX_2.Element;
 
-declare type SectionProps = {
+export declare type SectionProps = {
     id: string;
     title: string;
     description?: string;
     onChange?: (params: OnChangeSectionParams) => void;
-    children: React.ReactNode;
 };
 
 declare type SectionProps_2 = {
@@ -5845,15 +5844,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
