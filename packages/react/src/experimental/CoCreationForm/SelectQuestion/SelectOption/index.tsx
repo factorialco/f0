@@ -3,45 +3,30 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { CheckCircleLine, Delete, Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { Reorder } from "motion/react"
+import { useDragContext } from "../DragContext"
+import { OnClickOptionActionParams, SelectOptionProps } from "./types"
 
 const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
 }
 
-export type OnClickOptionActionParams = {
-  value: string
-  index: number
-  action: "remove" | "mark-as-correct"
-}
-
-export type OnChangeLabelParams = {
-  value: string
-  index: number
-  newLabel: string
-}
-
-type SelectOptionProps = {
-  value: string
-  label: string
-  selected: boolean
-  onClick: (value: string) => void
-  index: number
-  onChangeLabel: (params: OnChangeLabelParams) => void
-  onClickAction: (params: OnClickOptionActionParams) => void
-  disabled?: boolean
-  correct?: boolean
-}
-
 export const SelectOption = ({
-  value,
-  label,
+  index,
+  option,
   selected,
   onClick,
   onClickAction,
   onChangeLabel,
-  index,
   disabled,
 }: SelectOptionProps) => {
+  const { value, label } = option
+
+  const { isDragging, setIsDragging, setDraggedItemId, draggedItemId } =
+    useDragContext()
+
+  const isDraggingThisItem = isDragging && draggedItemId === value
+
   const handleClick = () => {
     if (disabled) return
     onClick(value)
@@ -65,58 +50,90 @@ export const SelectOption = ({
     onChangeLabel({ value: newValue, index, newLabel })
   }
 
+  const handleDragStart = () => {
+    setIsDragging(true)
+    setDraggedItemId(value)
+  }
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    setDraggedItemId(null)
+  }
+
+  const shouldToggleLeft = isDragging ? isDraggingThisItem : disabled
+
   return (
-    <div
-      className={cn(
-        "group relative flex items-center gap-3 rounded-md py-1 pl-2 pr-1 hover:bg-f1-background-hover",
-        !disabled && "cursor-pointer"
-      )}
-      onClick={handleClick}
+    <Reorder.Item
+      value={option}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      as="div"
     >
-      <div className={cn("block", disabled && "group-hover:hidden")}>
-        <F0Checkbox
-          checked={selected}
-          onCheckedChange={handleClick}
-          disabled={disabled}
-          hideLabel
-        />
-      </div>
-      <div className={cn("hidden scale-75", disabled && "group-hover:block")}>
-        <div className="flex aspect-square w-6 items-center justify-center">
-          <F0Icon icon={Handle} size="sm" />
-        </div>
-      </div>
-      {disabled ? (
-        <textarea
-          placeholder="Type anything you want here..."
-          value={label}
-          onChange={handleChangeLabel}
-          className="flex-1 resize-none font-medium"
-          style={TEXT_AREA_STYLE}
-        />
-      ) : (
-        <p className="flex-1 font-medium">{label}</p>
-      )}
-      {disabled ? (
-        <div className="flex-row items-center gap-1 opacity-0 group-hover:opacity-100">
-          <F0Button
-            label="Mark as correct"
-            variant="ghost"
-            icon={CheckCircleLine}
-            onClick={handleClickMarkAsCorrect}
+      <div
+        className={cn(
+          "group relative flex items-center gap-3 rounded-md py-1 pl-2 pr-1 hover:bg-f1-background-hover",
+          !disabled && "cursor-pointer",
+          isDragging && "!cursor-grabbing active:!cursor-grabbing"
+        )}
+        onClick={handleClick}
+      >
+        <div
+          className={cn(
+            "block",
+            shouldToggleLeft ? "group-hover:hidden" : "cursor-default",
+            isDragging && "cursor-grabbing [&_button]:cursor-grabbing"
+          )}
+        >
+          <F0Checkbox
+            checked={selected}
+            onCheckedChange={handleClick}
+            disabled={disabled}
             hideLabel
           />
-          <F0Button
-            label="Remove"
-            variant="ghost"
-            icon={Delete}
-            hideLabel
-            onClick={handleClickRemove}
-          />
         </div>
-      ) : (
-        <div className="min-h-8" />
-      )}
-    </div>
+        <div
+          className={cn(
+            "hidden scale-75 cursor-grab active:cursor-grabbing",
+            shouldToggleLeft && "group-hover:block",
+            isDragging && "!cursor-grabbing"
+          )}
+        >
+          <div className="flex aspect-square w-6 scale-90 items-center justify-center">
+            <F0Icon icon={Handle} size="sm" />
+          </div>
+        </div>
+        {disabled ? (
+          <textarea
+            placeholder="Type anything you want here..."
+            value={label}
+            onChange={handleChangeLabel}
+            className="flex-1 resize-none font-medium"
+            style={TEXT_AREA_STYLE}
+          />
+        ) : (
+          <p className="flex-1 font-medium">{label}</p>
+        )}
+        {disabled ? (
+          <div className="flex-row items-center gap-1 opacity-0 group-hover:opacity-100">
+            <F0Button
+              label="Mark as correct"
+              variant="ghost"
+              icon={CheckCircleLine}
+              onClick={handleClickMarkAsCorrect}
+              hideLabel
+            />
+            <F0Button
+              label="Remove"
+              variant="ghost"
+              icon={Delete}
+              hideLabel
+              onClick={handleClickRemove}
+            />
+          </div>
+        ) : (
+          <div className="min-h-8" />
+        )}
+      </div>
+    </Reorder.Item>
   )
 }

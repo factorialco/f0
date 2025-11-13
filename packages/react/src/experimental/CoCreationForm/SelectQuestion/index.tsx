@@ -1,52 +1,21 @@
 import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
-import { useEffect } from "react"
-import {
-  BaseQuestion,
-  BaseQuestionPropsForOtherQuestionComponents,
-} from "../BaseQuestion"
+import { Reorder } from "motion/react"
+import { useEffect, useState } from "react"
+import { BaseQuestion } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams } from "../types"
+import { DragProvider } from "./DragContext"
+import { SelectOption } from "./SelectOption"
 import {
   OnChangeLabelParams,
   OnClickOptionActionParams,
-  SelectOption,
-} from "./SelectOption"
-
-type SelectQuestionOption = {
-  value: string
-  label: string
-  correct?: boolean
-}
-
-export type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-  options: SelectQuestionOption[]
-} & (
-    | {
-        type: "select"
-        value?: string | null
-      }
-    | {
-        type: "multi-select"
-        value?: string[] | null
-      }
-  )
-
-export type SelectQuestionProps =
-  BaseQuestionPropsForOtherQuestionComponents & {
-    options: SelectQuestionOption[]
-    onChange?: (params: SelectQuestionOnChangeParams) => void
-  } & (
-      | {
-          type: "select"
-          value?: string | null
-        }
-      | {
-          type: "multi-select"
-          value?: string[] | null
-        }
-    )
+} from "./SelectOption/types"
+import { SelectQuestionOption, SelectQuestionProps } from "./types"
 
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
+  const [internalOptions, setInternalOptions] =
+    useState<SelectQuestionOption[]>(options)
+
   const baseOnChangeParams = {
     ...props,
     options,
@@ -140,26 +109,34 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   return (
     <BaseQuestion {...props} onChange={handleChange}>
-      <div className="-mx-0.5 flex flex-col items-start">
-        {options.map((option, index) => (
-          <div className="w-full" key={option.value}>
-            <SelectOption
-              value={option.value}
-              index={index}
-              label={option.label}
-              correct={option.correct}
-              selected={
-                Array.isArray(props.value)
-                  ? props.value.includes(option.value)
-                  : props.value === option.value
-              }
-              onClick={handleOptionClick}
-              onClickAction={handleClickOptionAction}
-              onChangeLabel={handleChangeLabel}
-              disabled={props.disabled}
-            />
-          </div>
-        ))}
+      <div className="-mx-0.5 flex flex-col items-start [&>div]:w-full">
+        <DragProvider>
+          <Reorder.Group
+            axis="y"
+            values={internalOptions}
+            onReorder={setInternalOptions}
+            as="div"
+          >
+            {internalOptions.map((option, index) => (
+              <div className="w-full [&>div]:w-full" key={option.value}>
+                <SelectOption
+                  index={index}
+                  option={option}
+                  correct={option.correct}
+                  selected={
+                    Array.isArray(props.value)
+                      ? props.value.includes(option.value)
+                      : props.value === option.value
+                  }
+                  onClick={handleOptionClick}
+                  onClickAction={handleClickOptionAction}
+                  onChangeLabel={handleChangeLabel}
+                  disabled={props.disabled}
+                />
+              </div>
+            ))}
+          </Reorder.Group>
+        </DragProvider>
         {props.disabled && (
           <div className="opacity-50">
             <F0Button

@@ -2,13 +2,13 @@ import { BaseQuestionOnChangeParams, QuestionType } from "../types"
 
 export type ActionType = "duplicate" | "delete"
 
-type ActionParams = {
+export type ActionParams = {
   questionId: string
   type: ActionType
   index: number
 }
 
-type OnAddNewQuestionParams = {
+export type OnAddNewQuestionParams = {
   type: QuestionType
   index: number
 }
