@@ -353,13 +353,11 @@ export const CardCollection = <
     groupAllSelectedStatus,
     handleSelectItemChange,
     handleSelectGroupChange,
-  } = useSelectable(
-    data,
-    paginationInfo,
-    source,
+  } = useSelectable(data, paginationInfo, source, {
     onSelectItems,
-    source.defaultSelectedItems
-  )
+    selectionMode: "multi",
+    defaultSelectedItems: source.defaultSelectedItems,
+  })
 
   /**
    * Groups

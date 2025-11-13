@@ -149,13 +149,11 @@ export const TableCollection = <
     handleSelectItemChange,
     handleSelectAll,
     handleSelectGroupChange,
-  } = useSelectable(
-    data,
-    paginationInfo,
-    source,
+  } = useSelectable(data, paginationInfo, source, {
     onSelectItems,
-    source.defaultSelectedItems
-  )
+    selectionMode: "multi",
+    defaultSelectedItems: source.defaultSelectedItems,
+  })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 

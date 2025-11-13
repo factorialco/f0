@@ -107,7 +107,11 @@ const {
   handleSelectItemChange,
   handleSelectAll,
   isAllSelected,
-} = useSelectable(data, paginationInfo, dataSource, onSelectItems)
+} = useSelectable(data, paginationInfo, dataSource, {
+  onSelectItems,
+  selectionMode: "multi",
+  defaultSelectedItems: [],
+})
 ```
 
 ### [useGroups](/?path=/docs/hooks-datasource-usegroups--docs)

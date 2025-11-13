@@ -61,11 +61,23 @@ export function useSelectable<
   data: Data<R>,
   paginationInfo: PaginationInfo | null,
   source: DataSourceDefinition<R, Filters, Sortings, Grouping>,
-  onSelectItems: OnSelectItemsCallback<R, Filters> | undefined,
-  defaultSelectedItems?: SelectedItemsState | undefined
+  options?: {
+    onSelectItems?: OnSelectItemsCallback<R, Filters>
+    selectionMode?: "multi" | "single"
+    defaultSelectedItems?: SelectedItemsState
+  }
 ): UseSelectable<R, Filters> {
+  // Options with default values
+  options = {
+    selectionMode: "multi",
+    ...options,
+  }
   const isGrouped = data.type === "grouped"
   const isPaginated = paginationInfo !== null
+  const isMultiSelection = options.selectionMode === "multi"
+  const defaultSelectedItems = options.defaultSelectedItems
+  const onSelectItems = options.onSelectItems
+
   /**
    * Items state and list of selected and unselected items
    */
@@ -274,37 +286,62 @@ export function useSelectable<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSelectAll is a stable function
   }, [])
 
-  const handleSelectItemChange = (
-    item: R | readonly R[],
-    checked: boolean,
-    // Only applies the checked state if the item has no state set yet
-    onlyIfNotSelected: boolean = false
-  ) => {
-    const items = Array.isArray(item) ? item : [item]
+  const handleSelectItemChange = useCallback(
+    (
+      item: R | readonly R[],
+      checked: boolean,
+      // Only applies the checked state if the item has no state set yet
+      onlyIfNotPreviousState: boolean = false
+    ) => {
+      // If is not multi selection, we only select the first item
+      const items = (Array.isArray(item) ? item : [item]).slice(
+        0,
+        isMultiSelection ? undefined : 1
+      )
 
-    let updated = 0
-    for (const item of items) {
-      const id = source.selectable && source.selectable(item)
+      console.log("items", items)
 
-      if (id === undefined) {
+      const newItemsState = new Map(itemsState)
+      let updated = 0
+      for (const item of items) {
+        const id = source.selectable && source.selectable(item)
+
+        if (id === undefined) {
+          return
+        }
+
+        // If the item is already selected, we don't need to update the state if onlyIfNotSelected is true
+        if (onlyIfNotPreviousState && newItemsState.has(id)) {
+          return
+        }
+
+        updated++
+        newItemsState.set(id, { item, checked })
+      }
+
+      console.log("newItemsState", newItemsState)
+
+      // Single selection, we just set the state
+      if (!isMultiSelection) {
+        console.log("setting single selection state", newItemsState)
+        setItemsState(newItemsState)
         return
       }
 
-      // If the item is already selected, we don't need to update the state if onlyIfNotSelected is true
-      if (onlyIfNotSelected && itemsState.has(id)) {
-        return
+      // Multi selection, we add the new items to the state
+      if (updated > 0) {
+        console.log("setting multi selection state", newItemsState)
+        setItemsState((current) => new Map([...current, ...newItemsState]))
       }
-
-      updated++
-      itemsState.set(id, { item, checked })
-    }
-
-    if (updated > 0) {
-      setItemsState(new Map(itemsState))
-    }
-  }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [itemsState]
+  )
 
   const handleSelectAll = (checked: boolean) => {
+    if (!isMultiSelection) {
+      return
+    }
     setAllSelectedCheck(checked)
     if (isGrouped) {
       handleSelectGroupChange(
@@ -382,11 +419,13 @@ export function useSelectable<
     if (areAllKnownItemsSelected) {
       setAllSelectedCheck(true)
     }
+  }, [areAllKnownItemsSelected])
 
+  useEffect(() => {
     if (checkedCount === 0) {
       setAllSelectedCheck(false)
     }
-  }, [areAllKnownItemsSelected, checkedCount])
+  }, [checkedCount])
 
   const selectedItemsCount = useMemo(() => {
     if (isGrouped) {

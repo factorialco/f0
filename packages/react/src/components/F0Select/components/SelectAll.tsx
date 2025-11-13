@@ -19,6 +19,14 @@ export const SelectAll = ({
 }: SelectAllProps) => {
   const i18n = useI18n()
 
+  const handleChange = (checked: boolean) => {
+    if (indeterminate) {
+      onChange(true)
+    } else {
+      onChange(checked)
+    }
+  }
+
   return (
     <div className="flex items-center gap-2 p-1 pl-4 pr-3">
       <div className="flex-1 whitespace-nowrap">
@@ -43,7 +51,7 @@ export const SelectAll = ({
           title={i18n.actions.selectAll}
           checked={value}
           indeterminate={indeterminate}
-          onCheckedChange={onChange}
+          onCheckedChange={handleChange}
           presentational
           hideLabel
         />

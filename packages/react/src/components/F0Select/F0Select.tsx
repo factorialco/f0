@@ -220,7 +220,7 @@ const F0SelectComponent = forwardRef(function Select<
           const mappedOption = optionMapper(record)
           return mappedOption.type === "separator"
             ? [undefined]
-            : [mappedOption.value, { item: record }]
+            : [mappedOption.value, { item: record, option: mappedOption }]
         })
         .filter(([value]) => value !== undefined)
     )
@@ -268,12 +268,10 @@ const F0SelectComponent = forwardRef(function Select<
     handleSelectItemChange,
     selectedItems,
     selectionStatus,
-  } = useSelectable(data, paginationInfo, localSource, onSelectItems)
-
-  // const selectedItems = useMemo(() => {
-  //   return findOptionsByValue(localValue)
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the localValue changes
-  // }, [localValue, data.records])
+  } = useSelectable(data, paginationInfo, localSource, {
+    onSelectItems,
+    selectionMode: multiple ? "multi" : "single",
+  })
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
@@ -289,14 +287,8 @@ const F0SelectComponent = forwardRef(function Select<
       if (!item) {
         return
       }
-
-      console.log("item.item", item.item)
       handleSelectItemChange(item.item, checked)
-
-      const foundOption = findOptionsByValue([value])[0]
-      if (foundOption) {
-        onChangeSelectedOption?.(foundOption, checked)
-      }
+      onChangeSelectedOption?.(item.option, checked)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
     [onChangeSelectedOption, itemsByValue]
@@ -330,7 +322,6 @@ const F0SelectComponent = forwardRef(function Select<
         checkedItemsOptions[0]
       )
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the selectionStatus changes
   }, [selectionStatus])
 
   const handleLocalValueChange = (

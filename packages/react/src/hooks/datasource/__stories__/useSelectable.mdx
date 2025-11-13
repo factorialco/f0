@@ -276,13 +276,10 @@ function UserListWithDefaults() {
   const { data, paginationInfo } = useData(dataSource)
 
   const { selectedItems, handleSelectItemChange, handleSelectAll } =
-    useSelectable(
-      data,
-      paginationInfo,
-      dataSource,
-      undefined,
-      dataSource.defaultSelectedItems
-    )
+    useSelectable(data, paginationInfo, dataSource, {
+      selectionMode: "multi",
+      defaultSelectedItems: dataSource.defaultSelectedItems,
+    })
 
   return (
     <div>
@@ -341,7 +338,9 @@ function UserListWithCallback() {
   )
 
   const { selectedItems, handleSelectItemChange, handleSelectAll } =
-    useSelectable(data, paginationInfo, dataSource, handleSelectionChange)
+    useSelectable(data, paginationInfo, dataSource, {
+      onSelectItems: handleSelectionChange,
+    })
 
   return (
     <div>
