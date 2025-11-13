@@ -18273,7 +18273,7 @@ const Sde = xt(zv, aj), lj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
 }, Lde = RS(qs("RadarChart", lj));
 function cj({ title: t, isActive: e = !1, onClick: n }) {
   return k("div", {
-    className: T("flex flex-row items-center gap-[6px] rounded-md p-[6px] pl-[4px] pr-2 transition-colors", e && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover"),
+    className: T("flex flex-row items-center gap-[6px] rounded-md p-[6px] pr-2 transition-colors", e && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover"),
     onClick: n,
     children: [d(xe, {
       icon: sy,
