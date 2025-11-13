@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Placeholder } from "@/lib/storybook-utils/placeholder"
 import { Section } from "."
 
 const meta: Meta = {
@@ -23,6 +22,5 @@ export const Default: Story = {
     title: "Teamwork",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque a ipsum tortor. Integer vel nibh vel ex sollicitudin aliquet at eu risus. Nulla in lectus eget mauris vehicula faucibus. ",
-    children: <Placeholder className="h-24" />,
   },
 }

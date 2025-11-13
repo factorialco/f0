@@ -24,7 +24,6 @@ export const Question = ({ ...props }: QuestionProps) => {
     case "rating":
       return <RatingQuestion onChange={props.onChange} {...props} />
     case "select":
-      return <SelectQuestion onChange={props.onChange} {...props} />
     case "multi-select":
       return <SelectQuestion onChange={props.onChange} {...props} />
     case "numeric":
