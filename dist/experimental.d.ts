@@ -1902,6 +1902,15 @@ export declare interface DatePreset {
     value: DateRange | (() => DateRange);
 }
 
+declare type DateQuestionOnChangeParams = BaseQuestionOnChangeParams & {
+    value?: Date | null;
+};
+
+declare type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    value?: Date | null;
+    onChange?: (params: DateQuestionOnChangeParams) => void;
+};
+
 export declare type DateRange = {
     from: Date;
     to?: Date;
@@ -4456,6 +4465,8 @@ export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents 
     type: "numeric";
 }) | (LinkQuestionProps & {
     type: "link";
+}) | (DateQuestionProps & {
+    type: "date";
 }));
 
 declare type QuestionType = "section" | "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link";
@@ -5802,6 +5813,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         liveCompanion: {
             insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
@@ -5811,8 +5831,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
 }
@@ -5820,13 +5840,4 @@ declare module "@tiptap/core" {
 
 declare namespace Calendar {
     var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
-        };
-    }
 }
