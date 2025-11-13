@@ -309,7 +309,7 @@ export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem,
     Skeleton: () => default_2.JSX.Element;
 };
 
-export declare type ActivityItemListProps = Pick<SectionProps, "items" | "onClickItem"> & {
+export declare type ActivityItemListProps = Pick<SectionProps_2, "items" | "onClickItem"> & {
     onEndReached?: () => void;
     onEndReachedItemsThreshold?: number;
     loadingMoreItems?: boolean;
@@ -3741,6 +3741,12 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
+declare type OnChangeSectionParams = {
+    id: string;
+    title: string;
+    description?: string;
+};
+
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
@@ -4662,9 +4668,19 @@ export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
 };
 
+export declare const Section: ({ id, title, description, onChange, children, }: SectionProps) => JSX_2.Element;
+
 export declare const SectionHeader: ({ title, description, action, link, separator, }: Props_2) => JSX_2.Element;
 
 declare type SectionProps = {
+    id: string;
+    title: string;
+    description?: string;
+    onChange?: (params: OnChangeSectionParams) => void;
+    children: React.ReactNode;
+};
+
+declare type SectionProps_2 = {
     title: string;
     items: Omit<ActivityItemProps, "onClick">[];
     onClickItem: (id: string) => void;
@@ -5813,15 +5829,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         liveCompanion: {
             insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
@@ -5831,8 +5838,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
     }
 }
@@ -5840,4 +5847,13 @@ declare module "@tiptap/core" {
 
 declare namespace Calendar {
     var displayName: string;
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+        };
+    }
 }
