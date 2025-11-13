@@ -139,6 +139,10 @@ export type OneDataCollectionProps<
          */
         features?: DataCollectionStorageFeaturesDefinition
       }
+  /**
+   * @deprecated removes the horizontal padding from the data collection
+   */
+  tmpFullWidth?: boolean
 }
 
 const OneDataCollectionComp = <
