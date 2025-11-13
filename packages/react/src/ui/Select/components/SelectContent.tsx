@@ -112,15 +112,13 @@ const SelectContent = forwardRef<
 
     const asList = asSelectProp === "list"
 
-    const valueArray = useMemo(
-      () =>
-        new Set(
-          (Array.isArray(value) ? value : [value]).filter(
-            (item) => item !== undefined
-          )
-        ),
-      [value]
-    )
+    const valueArray = useMemo(() => {
+      return new Set(
+        (Array.isArray(value) ? value : [value]).filter(
+          (item) => item !== undefined
+        )
+      )
+    }, [value])
 
     const positionIndex = useMemo(() => {
       return (

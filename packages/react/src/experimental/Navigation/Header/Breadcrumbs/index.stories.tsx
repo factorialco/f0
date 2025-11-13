@@ -1,7 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
+import { F0SelectItemProps } from "@/components/F0Select/types"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
-import { SelectItemProps } from "@/experimental/Forms/Fields/Select/types"
 import { PaginatedFetchOptions } from "@/hooks/datasource"
 import {
   FIRST_NAMES_MOCK,
@@ -177,7 +177,7 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
             source: source as any,
             mapOptions: (
               item
-            ): SelectItemProps<string, MockItemLargeDataset> => ({
+            ): F0SelectItemProps<string, MockItemLargeDataset> => ({
               value: item.value as string,
               label: item.label as string,
               icon: item.icon as IconType,

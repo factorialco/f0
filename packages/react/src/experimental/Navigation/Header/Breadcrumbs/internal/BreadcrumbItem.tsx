@@ -90,6 +90,7 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               mapOptions={item.mapOptions as any}
               defaultItem={item.defaultItem}
+              clearable={false}
               onChange={item.onChange}
               value={item.value}
               showSearchBox={item.searchbox}

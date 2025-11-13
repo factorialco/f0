@@ -21,7 +21,7 @@ export const Arrow = ({
         !disabled && "cursor-pointer",
         "origin-center transition-transform duration-200",
         "flex items-center justify-center",
-        open && "rotate-180",
+        !open && "rotate-180",
         size === "md" && "scale-110",
         className
       )}
@@ -30,15 +30,7 @@ export const Arrow = ({
         onChange?.(!open)
       }}
     >
-      <F0Icon
-        icon={DropdownOpen}
-        size="lg"
-        className={cn(
-          "rounded-2xs bg-f1-background-secondary p-0.5 transition-transform duration-200",
-          open && "rotate-180",
-          !disabled && "cursor-pointer"
-        )}
-      />
+      <F0Icon icon={DropdownOpen} size="lg" />
     </div>
   )
 }

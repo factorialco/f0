@@ -1,5 +1,5 @@
+import { Arrow } from "@/components/F0Select/components/Arrow"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { Arrow } from "@/experimental/Forms/Fields/Select/components/Arrow"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
