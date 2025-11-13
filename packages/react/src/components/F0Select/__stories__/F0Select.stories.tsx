@@ -563,7 +563,7 @@ export const MultipleNotPaginated: Story = {
   args: {
     label: "Multiple Not Paginated",
     multiple: true,
-    value: mockItems.map((item) => item.value),
+    value: ["option-2", "option-3", "option-1000"],
     clearable: true,
     source: mockNonPaginatedSource,
     mapOptions: (item: MockItem) => ({
@@ -577,10 +577,11 @@ export const MultipleNotPaginated: Story = {
 
 export const MultiplePaginated: Story = {
   args: {
+    label: "Multiple Paginated",
     multiple: true,
-    value: ["option-2"],
+    value: ["option-2", "option-3"],
     clearable: true,
-    source: mockNonPaginatedSource,
+    source: mockPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,

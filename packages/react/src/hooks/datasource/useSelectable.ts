@@ -1,4 +1,5 @@
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   DataSourceDefinition,
@@ -219,6 +220,7 @@ export function useSelectable<
                     ? knownItemsCount
                     : knownItemsCount - groupUnselectedItemCount,
                 unselectedCount: groupUnselectedItemCount,
+                knownItemsCount,
               },
             ] as const
           })
@@ -295,20 +297,21 @@ export function useSelectable<
     }
   }
 
+  const totalKnownItemsCount = useMemo(() => {
+    return paginationInfo ? paginationInfo.total : data.records?.length
+  }, [paginationInfo, data.records?.length])
+
   // Try to determine if all items are selected when we select one by one
   // If there is pagination, we need to check if the selected items are less than the total number of items
   // If there is no pagination, we need to check if the selected items are less than the total number of items
   const areAllKnownItemsSelected = useMemo(
-    () =>
-      (paginationInfo && selectedCount === paginationInfo.total) ||
-      (!paginationInfo && selectedCount === data.records?.length),
-    [paginationInfo, selectedCount, data.records?.length]
+    () => selectedCount === totalKnownItemsCount,
+    [totalKnownItemsCount, selectedCount]
   )
 
-  const isAllSelected = useMemo(
-    () => (allSelectedCheck || areAllKnownItemsSelected) && selectedCount > 0,
-    [allSelectedCheck, areAllKnownItemsSelected, selectedCount]
-  )
+  const isAllSelected = useMemo(() => {
+    return (allSelectedCheck || areAllKnownItemsSelected) && selectedCount > 0
+  }, [allSelectedCheck, areAllKnownItemsSelected, selectedCount])
 
   const isPartiallySelected = useMemo(
     () =>
@@ -326,7 +329,7 @@ export function useSelectable<
   /**
    * Handle the data changes to update the selected items status
    */
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     if (isGrouped) {
       for (const group of data.groups) {
         // If the group was loaded before, we can't change the state
@@ -364,6 +367,17 @@ export function useSelectable<
     }
   }, [areAllKnownItemsSelected, selectedCount])
 
+  const selectedItemsCount = useMemo(() => {
+    if (isGrouped) {
+      return Object.values(groupAllSelectedStatus).reduce(
+        (acc, curr) => acc + (curr.selectedCount || 0),
+        0
+      )
+    } else {
+      return totalKnownItemsCount - unselectedCount
+    }
+  }, [groupAllSelectedStatus, totalKnownItemsCount, unselectedCount, isGrouped])
+
   useEffect(() => {
     // Notify the parent component about the selected items
     onSelectItems?.(
@@ -382,7 +396,7 @@ export function useSelectable<
           ])
         ),
         filters: source.currentFilters || {},
-        selectedCount,
+        selectedCount: selectedItemsCount,
       },
       clearSelectedItems
     )
@@ -402,7 +416,7 @@ export function useSelectable<
     allSelectedStatus: {
       checked: allSelectedCheck || isPartiallySelected,
       indeterminate: isPartiallySelected,
-      selectedCount,
+      selectedCount: selectedItemsCount,
       unselectedCount,
     },
     isAllSelected,

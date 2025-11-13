@@ -5,9 +5,11 @@ import {
   getDataSourcePaginationType,
   PaginatedDataAdapter,
   PromiseOrObservable,
+  SelectedItemsState,
   useData,
   useDataSource,
   useGroups,
+  useSelectable,
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
@@ -163,6 +165,12 @@ const F0SelectComponent = forwardRef(function Select<
   const localSource = useDataSource(
     {
       ...dataSource,
+      selectable: (item) => {
+        const mappedOption = optionMapper(item)
+        return mappedOption.type !== "separator"
+          ? mappedOption.value
+          : undefined
+      },
       search: showSearchBox
         ? {
             enabled: showSearchBox,
@@ -190,8 +198,14 @@ const F0SelectComponent = forwardRef(function Select<
     [mapOptions, source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore, isLoading } =
-    useData<ActualRecordType>(localSource)
+  const {
+    data,
+    isInitialLoading,
+    loadMore,
+    isLoadingMore,
+    isLoading,
+    paginationInfo,
+  } = useData<ActualRecordType>(localSource)
 
   const { currentSearch, setCurrentSearch } = localSource
 
@@ -226,6 +240,17 @@ const F0SelectComponent = forwardRef(function Select<
       return res
     },
     [data.records, optionMapper, defaultItems, defaultValues]
+  )
+
+  const onSelectItems = useCallback((items: SelectedItemsState) => {
+    console.log("onSelectItems", items)
+  }, [])
+
+  const { allSelectedStatus, handleSelectAll } = useSelectable(
+    data,
+    paginationInfo,
+    localSource,
+    onSelectItems
   )
 
   const selectedItems = useMemo(() => {
@@ -351,41 +376,6 @@ const F0SelectComponent = forwardRef(function Select<
   }
   const i18n = useI18n()
 
-  const [selectAll, setSelectAll] = useState(false)
-
-  const handleSelectAll = (value: boolean) => {
-    if (multiple) {
-      console.log("handleSelectAll", value, items.length)
-      setSelectAll(value)
-      handleLocalValueChange(
-        value
-          ? items
-              .map((item) => item.value?.toString())
-              .filter((value) => value !== undefined)
-          : []
-      )
-    }
-  }
-
-  // TODO USE DATA SOURCE SELECTABLE
-  useEffect(() => {
-    if (multiple) {
-      if (selectedItems.length === items.length && !selectAll) {
-        setSelectAll(true)
-      }
-      if (selectedItems.length === 0) {
-        setSelectAll(false)
-      }
-    }
-  }, [selectedItems, items, multiple, selectAll])
-
-  const isPartiallySelected = useMemo(() => {
-    if (multiple) {
-      return selectedItems.length > 0 && selectedItems.length < items.length
-    }
-    return false
-  }, [selectedItems, items, multiple])
-
   const commonProps = {
     ...props,
     onItemCheckChange,
@@ -409,6 +399,8 @@ const F0SelectComponent = forwardRef(function Select<
 
   return (
     <>
+      <p>{allSelectedStatus.selectedCount.toString()}</p>
+      <p>{allSelectedStatus.unselectedCount.toString()}</p>
       <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
@@ -488,9 +480,9 @@ const F0SelectComponent = forwardRef(function Select<
                 />
                 {multiple && (
                   <SelectAll
-                    selectedCount={selectedItems.length}
-                    indeterminate={isPartiallySelected}
-                    value={selectAll}
+                    selectedCount={allSelectedStatus.selectedCount}
+                    indeterminate={allSelectedStatus.indeterminate}
+                    value={allSelectedStatus.checked}
                     onChange={handleSelectAll}
                   />
                 )}
