@@ -39,6 +39,7 @@ export const BaseQuestion = ({
 }: BaseQuestionProps) => {
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
+  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
 
   const baseOnChangeParams: BaseQuestionOnChangeParams = useMemo(
     () => ({
@@ -162,13 +163,25 @@ export const BaseQuestion = ({
             className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
             style={TEXT_AREA_STYLE}
           />
-          <div className="opacity-0 group-hover/question:opacity-100">
-            <Dropdown items={actions} icon={Ellipsis} align="end">
+          <div
+            className={cn(
+              "opacity-0 group-hover/question:opacity-100",
+              actionsDropdownOpen && "opacity-100"
+            )}
+          >
+            <Dropdown
+              items={actions}
+              icon={Ellipsis}
+              open={actionsDropdownOpen}
+              onOpenChange={setActionsDropdownOpen}
+              align="start"
+            >
               <F0Button
                 icon={Ellipsis}
                 label="Actions"
                 size="md"
                 variant="ghost"
+                tooltip={false}
                 hideLabel
               />
             </Dropdown>

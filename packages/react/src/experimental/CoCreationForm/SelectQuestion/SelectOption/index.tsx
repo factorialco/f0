@@ -19,6 +19,7 @@ export const SelectOption = ({
   onClickAction,
   onChangeLabel,
   disabled,
+  correct,
 }: SelectOptionProps) => {
   const { value, label } = option
 
@@ -71,7 +72,7 @@ export const SelectOption = ({
     >
       <div
         className={cn(
-          "group relative flex items-center gap-3 rounded-md py-1 pl-2 pr-1 hover:bg-f1-background-hover",
+          "group relative flex min-h-9 items-center gap-3 rounded-md py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover",
           !disabled && "cursor-pointer",
           isDragging && "!cursor-grabbing active:!cursor-grabbing"
         )}
@@ -113,8 +114,13 @@ export const SelectOption = ({
         ) : (
           <p className="flex-1 font-medium">{label}</p>
         )}
+        {disabled && correct && (
+          <span className="text-sm font-medium text-f1-foreground-positive">
+            Correct
+          </span>
+        )}
         {disabled ? (
-          <div className="flex-row items-center gap-1 opacity-0 group-hover:opacity-100">
+          <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button
               label="Mark as correct"
               variant="ghost"
