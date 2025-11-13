@@ -5,28 +5,16 @@ import { Version } from "../types"
 
 const mockVersions: Version[] = [
   {
-    id: "1",
+    id: "4",
     author: {
       firstName: "Raul",
       lastName: "Sigüenza",
       src: "/avatars/person04.jpg",
     },
-    date: "Yesterday",
-    time: "3:15PM",
+    date: "November 6, 2023",
+    time: "12:00PM",
     isActive: false,
-    onClick: () => console.log("Version 1 clicked!"),
-  },
-  {
-    id: "2",
-    author: {
-      firstName: "Eleanor",
-      lastName: "Roosevelt",
-      src: "/avatars/person05.jpg",
-    },
-    date: "Last week",
-    time: "1:30PM",
-    isActive: false,
-    onClick: () => console.log("Version 2 clicked!"),
+    onClick: () => console.log("Version 4 clicked!"),
   },
   {
     id: "3",
@@ -41,16 +29,28 @@ const mockVersions: Version[] = [
     onClick: () => console.log("Version 3 clicked!"),
   },
   {
-    id: "4",
+    id: "2",
+    author: {
+      firstName: "Eleanor",
+      lastName: "Roosevelt",
+      src: "/avatars/person05.jpg",
+    },
+    date: "Last week",
+    time: "1:30PM",
+    isActive: false,
+    onClick: () => console.log("Version 2 clicked!"),
+  },
+  {
+    id: "1",
     author: {
       firstName: "Raul",
       lastName: "Sigüenza",
       src: "/avatars/person04.jpg",
     },
-    date: "November 6, 2023",
-    time: "12:00PM",
+    date: "Yesterday",
+    time: "3:15PM",
     isActive: false,
-    onClick: () => console.log("Version 4 clicked!"),
+    onClick: () => console.log("Version 1 clicked!"),
   },
 ]
 
