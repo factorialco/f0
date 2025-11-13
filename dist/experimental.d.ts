@@ -215,6 +215,12 @@ declare type ActionLinkProps = ActionBaseProps & {
     className?: string;
 };
 
+declare type ActionParams = {
+    questionId: string;
+    type: ActionType;
+    index: number;
+};
+
 declare type ActionProps = {
     buttonType: "gradient" | "internal";
     label: string;
@@ -282,7 +288,7 @@ declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
-declare type ActionType = CopyActionType | NavigateActionType | OpenLinkActionType;
+declare type ActionType = "duplicate" | "delete";
 
 export declare type actionType = {
     label: string;
@@ -291,6 +297,8 @@ export declare type actionType = {
     variant: "default" | "outline" | "neutral" | undefined;
     icon?: IconType;
 };
+
+declare type ActionType_2 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type actionType_2 = {
     label: string;
@@ -844,6 +852,7 @@ declare type BaseQuestionProps = {
     disabled?: boolean;
     required?: boolean;
     onAddNewQuestion?: (params: OnAddNewQuestionParams) => void;
+    onAction?: (params: ActionParams) => void;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -1495,7 +1504,7 @@ declare const CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttri
 declare type CompanyItemProps = {
     name: string;
     avatarUrl?: URL_2;
-    action?: ActionType;
+    action?: ActionType_2;
 };
 
 export declare function CompanySelector({ companies, selected, onChange, isLoading, withNotification, additionalOptions, }: CompanySelectorProps): JSX_2.Element;
@@ -2314,7 +2323,7 @@ declare type EmployeeItemProps = {
     firstName: string;
     lastName: string;
     avatarUrl?: URL_2;
-    action?: ActionType;
+    action?: ActionType_2;
 };
 
 declare type EmptyState = {
@@ -3198,7 +3207,7 @@ declare type ItemDefinition = {
 declare type ItemProps = {
     text: string;
     icon?: IconType;
-    action?: ActionType;
+    action?: ActionType_2;
 };
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
@@ -5230,7 +5239,7 @@ declare const TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<
 
 declare type TeamItemProps = {
     name: string;
-    action?: ActionType;
+    action?: ActionType_2;
 };
 
 export declare const Textarea: React.FC<TextareaProps>;
@@ -5844,15 +5853,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
