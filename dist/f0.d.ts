@@ -1421,6 +1421,7 @@ export declare const defaultTranslations: {
         readonly other: "Other actions";
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
+        readonly selectAll: "Select all";
     };
     readonly status: {
         readonly selected: {
@@ -1429,6 +1430,13 @@ export declare const defaultTranslations: {
         };
     };
     readonly filters: {
+        readonly searchPlaceholder: "Search filters...";
+        readonly inFilter: {
+            readonly searchPlaceholder: "Search options...";
+        };
+        readonly activeFilters: "Active filters: {{filters}}";
+        readonly filteringBy: "Filtering by {{label}}";
+        readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
         readonly applySelection: "Apply selection";
@@ -2076,7 +2084,6 @@ export declare const F0Provider: React.FC<{
 
 /**
  * @experimental This is an experimental component use it at your own risk
- * @deprecated This is an experimental component use it at your own risk
  */
 export declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
     ref?: React.Ref<HTMLButtonElement>;
@@ -4068,8 +4075,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
@@ -4077,8 +4084,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -4093,15 +4100,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
