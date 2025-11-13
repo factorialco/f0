@@ -1,4 +1,7 @@
-import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/components/OneFilterPicker/types"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
@@ -19,7 +22,24 @@ export type AllSelectionStatus = {
   unselectedCount: number
 }
 
-export type UseSelectable<R extends RecordType> = {
+export type SelectionStatus<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+> = {
+  allChecked: boolean | "indeterminate"
+  itemsStatus: ReadonlyArray<{ item: R; checked: boolean }>
+  checkedItems: ReadonlyArray<R>
+  uncheckedItems: ReadonlyArray<R>
+  groupsStatus: Record<string, boolean>
+  filters: FiltersState<Filters>
+  selectedCount: number
+  totalKnownItemsCount: number
+}
+
+export type UseSelectable<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+> = {
   isAllSelected: boolean
   selectedItems: Map<number | string, R>
   selectedGroups: Map<string, GroupRecord<R>>
@@ -29,6 +49,7 @@ export type UseSelectable<R extends RecordType> = {
   handleSelectGroupChange: (group: GroupRecord<R>, checked: boolean) => void
   groupAllSelectedStatus: Record<string, AllSelectionStatus>
   allSelectedStatus: AllSelectionStatus
+  selectionStatus: SelectionStatus<R, Filters>
 }
 
 export function useSelectable<
@@ -42,7 +63,7 @@ export function useSelectable<
   source: DataSourceDefinition<R, Filters, Sortings, Grouping>,
   onSelectItems: OnSelectItemsCallback<R, Filters> | undefined,
   defaultSelectedItems?: SelectedItemsState | undefined
-): UseSelectable<R> {
+): UseSelectable<R, Filters> {
   const isGrouped = data.type === "grouped"
   const isPaginated = paginationInfo !== null
   /**
@@ -89,7 +110,7 @@ export function useSelectable<
   /**
    * Get the list of selected and unselected items from the itemsState for performance reasons
    */
-  const [selectedItems, unselectedItems] = useMemo(() => {
+  const [checkedItems, uncheckedItems] = useMemo(() => {
     const selected = new Map()
     const unselected = new Map()
     for (const [id, value] of itemsState.entries()) {
@@ -109,18 +130,18 @@ export function useSelectable<
     Map<string, { group: GroupRecord<R>; checked: boolean }>
   >(new Map())
 
-  const [selectedGroups] = useMemo(() => {
-    const selected = new Map()
-    const unselected = new Map()
+  const [checkedGroups] = useMemo(() => {
+    const checked = new Map()
+    const unchecked = new Map()
 
     for (const [id, value] of groupsState.entries()) {
       if (value.checked) {
-        selected.set(id, value.group)
+        checked.set(id, value.group)
       } else {
-        unselected.set(id, value.group)
+        unchecked.set(id, value.group)
       }
     }
-    return [selected, unselected]
+    return [checked, unchecked]
   }, [groupsState])
 
   /**
@@ -236,10 +257,10 @@ export function useSelectable<
   }, [isGrouped, isGrouped && data.groups, groupsState, itemsState])
 
   /**
-   * Selected items count
+   * Checked items count
    */
-  const selectedCount = selectedItems.size
-  const unselectedCount = unselectedItems.size
+  const checkedCount = checkedItems.size
+  const uncheckedCount = uncheckedItems.size
 
   /**
    * All selected check
@@ -264,6 +285,7 @@ export function useSelectable<
     let updated = 0
     for (const item of items) {
       const id = source.selectable && source.selectable(item)
+
       if (id === undefined) {
         return
       }
@@ -278,7 +300,7 @@ export function useSelectable<
     }
 
     if (updated > 0) {
-      setItemsState((current) => new Map(current))
+      setItemsState(new Map(itemsState))
     }
   }
 
@@ -305,19 +327,19 @@ export function useSelectable<
   // If there is pagination, we need to check if the selected items are less than the total number of items
   // If there is no pagination, we need to check if the selected items are less than the total number of items
   const areAllKnownItemsSelected = useMemo(
-    () => selectedCount === totalKnownItemsCount,
-    [totalKnownItemsCount, selectedCount]
+    () => checkedCount === totalKnownItemsCount,
+    [totalKnownItemsCount, checkedCount]
   )
 
   const isAllSelected = useMemo(() => {
-    return (allSelectedCheck || areAllKnownItemsSelected) && selectedCount > 0
-  }, [allSelectedCheck, areAllKnownItemsSelected, selectedCount])
+    return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
+  }, [allSelectedCheck, areAllKnownItemsSelected, checkedCount])
 
   const isPartiallySelected = useMemo(
     () =>
-      (selectedCount > 0 && !isAllSelected) ||
-      (isAllSelected && unselectedCount > 0),
-    [selectedCount, isAllSelected, unselectedCount]
+      (checkedCount > 0 && !isAllSelected) ||
+      (isAllSelected && uncheckedCount > 0),
+    [checkedCount, isAllSelected, uncheckedCount]
   )
 
   // If the filters change, we need to reset the selected items
@@ -350,7 +372,6 @@ export function useSelectable<
       // For the flattened data, we need to check if the item was loaded before
       handleSelectItemChange(data.records, isAllSelected, true)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleItemStateChange is a stable function
   }, [data, isAllSelected, isGrouped])
 
   // Control the allSelectedCheck state
@@ -362,10 +383,10 @@ export function useSelectable<
       setAllSelectedCheck(true)
     }
 
-    if (selectedCount === 0) {
+    if (checkedCount === 0) {
       setAllSelectedCheck(false)
     }
-  }, [areAllKnownItemsSelected, selectedCount])
+  }, [areAllKnownItemsSelected, checkedCount])
 
   const selectedItemsCount = useMemo(() => {
     if (isGrouped) {
@@ -374,16 +395,25 @@ export function useSelectable<
         0
       )
     } else {
-      return totalKnownItemsCount - unselectedCount
+      return allSelectedCheck
+        ? totalKnownItemsCount - uncheckedCount
+        : checkedCount
     }
-  }, [groupAllSelectedStatus, totalKnownItemsCount, unselectedCount, isGrouped])
+  }, [
+    groupAllSelectedStatus,
+    totalKnownItemsCount,
+    uncheckedCount,
+    checkedCount,
+    isGrouped,
+    allSelectedCheck,
+  ])
 
   useEffect(() => {
     // Notify the parent component about the selected items
     onSelectItems?.(
       {
         allSelected:
-          unselectedCount === 0
+          uncheckedCount === 0
             ? allSelectedCheck
             : allSelectedCheck
               ? "indeterminate"
@@ -410,14 +440,42 @@ export function useSelectable<
     data.records?.length,
   ])
 
+  const selectionStatus = useMemo((): SelectionStatus<R, Filters> => {
+    return {
+      allChecked: isPartiallySelected ? "indeterminate" : allSelectedCheck,
+      itemsStatus: Array.from(itemsState.values()),
+      checkedItems: Array.from(checkedItems.values()),
+      uncheckedItems: Array.from(uncheckedItems.values()),
+      groupsStatus: Object.fromEntries(
+        Array.from(groupsState.values()).map(({ group, checked }) => [
+          group.key,
+          !!checked,
+        ])
+      ),
+      filters: source.currentFilters || {},
+      selectedCount: selectedItemsCount,
+      totalKnownItemsCount: totalKnownItemsCount,
+    }
+  }, [
+    allSelectedCheck,
+    itemsState,
+    groupsState,
+    isPartiallySelected,
+    selectedItemsCount,
+    totalKnownItemsCount,
+    source.currentFilters,
+    checkedItems,
+    uncheckedItems,
+  ])
+
   return {
-    selectedItems,
-    selectedGroups,
+    selectedItems: checkedItems,
+    selectedGroups: checkedGroups,
     allSelectedStatus: {
       checked: allSelectedCheck || isPartiallySelected,
       indeterminate: isPartiallySelected,
       selectedCount: selectedItemsCount,
-      unselectedCount,
+      unselectedCount: uncheckedCount,
     },
     isAllSelected,
     isPartiallySelected,
@@ -425,5 +483,6 @@ export function useSelectable<
     handleSelectAll,
     handleSelectGroupChange,
     groupAllSelectedStatus,
+    selectionStatus,
   }
 }

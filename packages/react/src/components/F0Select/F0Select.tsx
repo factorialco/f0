@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { isEqual } from "lodash"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
@@ -166,6 +167,9 @@ const F0SelectComponent = forwardRef(function Select<
     {
       ...dataSource,
       selectable: (item) => {
+        if (!item) {
+          return undefined
+        }
         const mappedOption = optionMapper(item)
         return mappedOption.type !== "separator"
           ? mappedOption.value
@@ -209,6 +213,19 @@ const F0SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
+  const itemsByValue = useMemo(() => {
+    return Object.fromEntries(
+      data.records
+        .map((record) => {
+          const mappedOption = optionMapper(record)
+          return mappedOption.type === "separator"
+            ? [undefined]
+            : [mappedOption.value, { item: record }]
+        })
+        .filter(([value]) => value !== undefined)
+    )
+  }, [data, optionMapper])
+
   /**
    * Finds an option in the data records by value and returns the mapped option
    * @param value - The value to find
@@ -246,17 +263,17 @@ const F0SelectComponent = forwardRef(function Select<
     console.log("onSelectItems", items)
   }, [])
 
-  const { allSelectedStatus, handleSelectAll } = useSelectable(
-    data,
-    paginationInfo,
-    localSource,
-    onSelectItems
-  )
+  const {
+    handleSelectAll,
+    handleSelectItemChange,
+    selectedItems,
+    selectionStatus,
+  } = useSelectable(data, paginationInfo, localSource, onSelectItems)
 
-  const selectedItems = useMemo(() => {
-    return findOptionsByValue(localValue)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the localValue changes
-  }, [localValue, data.records])
+  // const selectedItems = useMemo(() => {
+  //   return findOptionsByValue(localValue)
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the localValue changes
+  // }, [localValue, data.records])
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
@@ -268,14 +285,53 @@ const F0SelectComponent = forwardRef(function Select<
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
+      const item = itemsByValue[value]
+      if (!item) {
+        return
+      }
+
+      console.log("item.item", item.item)
+      handleSelectItemChange(item.item, checked)
+
       const foundOption = findOptionsByValue([value])[0]
       if (foundOption) {
         onChangeSelectedOption?.(foundOption, checked)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
-    [onChangeSelectedOption]
+    [onChangeSelectedOption, itemsByValue]
   )
+
+  /**
+   * Emit the value change. The type depends on the multiple prop and async.
+   */
+  useDeepCompareEffect(() => {
+    const checkedItems = selectionStatus.checkedItems
+
+    const checkedItemsValues = checkedItems.map(
+      (item) => String(item.value) as T
+    )
+    const checkedItemsOriginalItems = checkedItems.map((item) => item)
+    const checkedItemsOptions = checkedItems.map(
+      (item) =>
+        optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
+    )
+    if (multiple) {
+      // Non paginated
+      onChange?.(
+        checkedItemsValues,
+        checkedItemsOriginalItems,
+        checkedItemsOptions
+      )
+    } else {
+      onChange?.(
+        checkedItemsValues[0],
+        checkedItemsOriginalItems[0],
+        checkedItemsOptions[0]
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the selectionStatus changes
+  }, [selectionStatus])
 
   const handleLocalValueChange = (
     changedValue: string | string[] | undefined
@@ -284,6 +340,7 @@ const F0SelectComponent = forwardRef(function Select<
     setCurrentSearch(undefined)
     setLocalValue((toArray(changedValue) ?? []) as T[])
 
+    console.log("changedValue", changedValue)
     const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
 
     // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
@@ -376,31 +433,35 @@ const F0SelectComponent = forwardRef(function Select<
   }
   const i18n = useI18n()
 
+  const selectedItemsValues = useMemo(() => {
+    return Array.from(selectedItems.keys()).map((key) => String(key))
+  }, [selectedItems])
+
   const commonProps = {
     ...props,
     onItemCheckChange,
     disabled,
     open: openLocal,
     onOpenChange: handleChangeOpenLocal,
-    onValueChange: handleLocalValueChange,
+    // onValueChange: handleLocalValueChange,
   }
 
   const selectPrimitiveProps = multiple
     ? ({
         ...commonProps,
-        value: localValue as string[],
+        value: selectedItemsValues,
+        //value: localValue as string[],
         multiple: true as const,
       } as const)
     : ({
         ...commonProps,
-        value: localValue[0] as string | undefined,
+        //value: localValue[0] as string | undefined,
+        value: selectedItemsValues[0],
         multiple: false as const,
       } as const)
 
   return (
     <>
-      <p>{allSelectedStatus.selectedCount.toString()}</p>
-      <p>{allSelectedStatus.unselectedCount.toString()}</p>
       <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
@@ -450,7 +511,13 @@ const F0SelectComponent = forwardRef(function Select<
                 {selectedItems && (
                   <SelectedItems
                     multiple={multiple}
-                    selection={selectedItems}
+                    selection={Array.from(selectedItems.values()).map(
+                      (item) =>
+                        optionMapper(item) as F0SelectItemObject<
+                          T,
+                          ResolvedRecordType<R>
+                        >
+                    )}
                   />
                 )}
               </button>
@@ -480,9 +547,11 @@ const F0SelectComponent = forwardRef(function Select<
                 />
                 {multiple && (
                   <SelectAll
-                    selectedCount={allSelectedStatus.selectedCount}
-                    indeterminate={allSelectedStatus.indeterminate}
-                    value={allSelectedStatus.checked}
+                    selectedCount={selectionStatus.selectedCount}
+                    indeterminate={
+                      selectionStatus.allChecked === "indeterminate"
+                    }
+                    value={!!selectionStatus.allChecked}
                     onChange={handleSelectAll}
                   />
                 )}
