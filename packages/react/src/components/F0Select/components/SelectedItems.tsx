@@ -15,19 +15,14 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
   function SelectValue({ selection, multiple }, ref) {
     if (multiple) {
       return (
-        <div className="w-full">
-          {selection.length > 0 && (
-            <>{selection.length} items selected</>
-            // <F0TagList
-            //   type="raw"
-            //   tags={selection.map((i) => ({
-            //     text: i.label,
-            //     type: i.avatar ? "avatar" : "raw",
-            //     icon: i.icon,
-            //     avatar: i.avatar,
-            //   }))}
-            // />
-          )}
+        <div className="flex w-full items-center gap-1 text-left">
+          <OneEllipsis className="min-w-0 flex-1">
+            {selection
+              .slice(0, 2)
+              .map((item) => item.label)
+              .join(", ")}
+          </OneEllipsis>
+          {selection.length > 2 && <div>+{selection.length - 2}</div>}
         </div>
       )
     }

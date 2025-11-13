@@ -445,6 +445,7 @@ export const LargeList: Story = {
 
 export const WithDataSourceNotPaginated: Story = {
   args: {
+    label: "Select label",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),

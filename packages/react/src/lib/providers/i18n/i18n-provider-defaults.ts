@@ -61,6 +61,13 @@ export const defaultTranslations = {
     },
   },
   filters: {
+    searchPlaceholder: "Search filters...",
+    inFilter: {
+      searchPlaceholder: "Search options...",
+    },
+    activeFilters: "Active filters: {{filters}}",
+    filteringBy: "Filtering by {{label}}",
+    availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
     applySelection: "Apply selection",

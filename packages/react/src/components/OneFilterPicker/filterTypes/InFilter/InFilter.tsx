@@ -210,7 +210,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
-            placeholder={i18n.toc.search}
+            placeholder={i18n.filters.inFilter.searchPlaceholder}
             value={searchTerm}
             onChange={setSearchTerm}
             clearable
