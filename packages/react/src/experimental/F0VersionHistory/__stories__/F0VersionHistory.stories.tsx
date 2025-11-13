@@ -88,7 +88,7 @@ const meta: Meta<typeof F0VersionHistory> = {
   },
   decorators: [
     (Story) => (
-      <div className="h-[600px] w-fit border border-solid border-f1-border">
+      <div className="h-[600px] w-fit rounded-md border border-solid border-f1-border-secondary">
         <Story />
       </div>
     ),
