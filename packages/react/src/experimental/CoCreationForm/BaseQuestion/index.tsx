@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import {
@@ -5,6 +6,9 @@ import {
   Add,
   Check,
   CheckDouble,
+  Delete,
+  Ellipsis,
+  LayersFront,
   List,
   Numbers,
   Star,
@@ -13,28 +17,9 @@ import {
 import { cn } from "@/lib/utils"
 import { useCallback, useMemo, useState } from "react"
 import { BaseQuestionOnChangeParams, QuestionType } from "../types"
+import { ActionType, BaseQuestionProps } from "./types"
 
-type OnAddNewQuestionParams = {
-  type: QuestionType
-  index: number
-}
-
-export type BaseQuestionProps = {
-  id: string
-  index: number
-  title: string
-  description?: string
-  children: React.ReactNode
-  onChange?: (params: BaseQuestionOnChangeParams) => void
-  disabled?: boolean
-  required?: boolean
-  onAddNewQuestion?: (params: OnAddNewQuestionParams) => void
-}
-
-export type BaseQuestionPropsForOtherQuestionComponents = Omit<
-  BaseQuestionProps,
-  "children" | "onChange"
->
+export type { BaseQuestionPropsForOtherQuestionComponents } from "./types"
 
 const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
@@ -50,6 +35,7 @@ export const BaseQuestion = ({
   required,
   disabled,
   onAddNewQuestion,
+  onAction,
 }: BaseQuestionProps) => {
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
@@ -92,6 +78,33 @@ export const BaseQuestion = ({
       })
     },
     [onAddNewQuestion, index]
+  )
+
+  const handleAction = useCallback(
+    (type: ActionType) => {
+      onAction?.({
+        questionId: id,
+        type,
+        index,
+      })
+    },
+    [onAction, id, index]
+  )
+
+  const actions = useMemo(
+    () => [
+      {
+        label: "Duplicate question",
+        icon: LayersFront,
+        onClick: () => handleAction("duplicate"),
+      },
+      {
+        label: "Delete question",
+        icon: Delete,
+        onClick: () => handleAction("delete"),
+      },
+    ],
+    [handleAction]
   )
 
   const newQuestionDropdownItems = useMemo<DropdownInternalProps["items"]>(
@@ -148,6 +161,17 @@ export const BaseQuestion = ({
             className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:cursor-not-allowed [&::-webkit-search-cancel-button]:hidden"
             style={TEXT_AREA_STYLE}
           />
+          <div className="opacity-0 group-hover/question:opacity-100">
+            <Dropdown items={actions} icon={Ellipsis} align="end">
+              <F0Button
+                icon={Ellipsis}
+                label="Actions"
+                size="md"
+                variant="ghost"
+                hideLabel
+              />
+            </Dropdown>
+          </div>
         </div>
         <textarea
           value={description}
