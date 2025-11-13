@@ -18273,7 +18273,7 @@ const Sde = xt(zv, aj), lj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
 }, Lde = RS(qs("RadarChart", lj));
 function cj({ title: t, isActive: e = !1, onClick: n }) {
   return k("div", {
-    className: T("flex flex-row items-center gap-[6px] rounded-md p-[6px] pl-[6px] pr-2 transition-colors", e && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover"),
+    className: T("flex flex-row items-center gap-[6px] rounded-md p-[6px] pl-[4px] pr-2 transition-colors", e && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover"),
     onClick: n,
     children: [d(xe, {
       icon: sy,
@@ -18288,7 +18288,7 @@ function cj({ title: t, isActive: e = !1, onClick: n }) {
 }
 function dj({ author: t, date: e, time: n, onClick: i, isActive: r }) {
   return k("div", {
-    className: T("flex flex-col gap-[6px] rounded-md p-[6px] pl-[6px] pr-2 transition-colors", r && "bg-f1-background-tertiary", i && "cursor-pointer hover:bg-f1-background-hover"),
+    className: T("flex flex-col gap-[6px] rounded-md px-2 py-[6px] transition-colors", r && "bg-f1-background-tertiary", i && "cursor-pointer hover:bg-f1-background-hover"),
     onClick: i,
     children: [d(pn, {
       lines: 1,
@@ -18309,25 +18309,15 @@ function dj({ author: t, date: e, time: n, onClick: i, isActive: r }) {
     })]
   });
 }
-function Ede({ title: t = "Version history", versions: e, currentVersion: n, action: i }) {
+function Ede({ title: t = "Version history", versions: e, currentVersion: n }) {
   return k("nav", {
     className: "flex h-full w-[320px] flex-col overflow-hidden px-3 pb-3 pt-[6px]",
     "aria-label": "Version history",
-    children: [k("div", {
-      className: "flex flex-shrink-0 flex-row items-center justify-between px-[6px] pb-3 pt-3",
-      children: [d(pn, {
-        tag: "h2",
-        lines: 1,
-        className: "text-[16px] font-semibold text-f1-foreground",
-        children: t
-      }), i && d(he, {
-        label: i.label,
-        onClick: i.onClick,
-        icon: i.icon,
-        variant: "outline",
-        size: "sm",
-        hideLabel: !0
-      })]
+    children: [d(pn, {
+      tag: "h2",
+      lines: 1,
+      className: "px-2 pb-3 pt-4 text-lg font-semibold text-f1-foreground",
+      children: t
     }), d(Wn, {
       className: "h-full min-h-0",
       children: k("div", {
@@ -18336,13 +18326,13 @@ function Ede({ title: t = "Version history", versions: e, currentVersion: n, act
           title: n.title,
           onClick: n.onClick,
           isActive: n.isActive
-        }), e.map((r, o) => d(dj, {
-          author: r.author,
-          date: r.date,
-          time: r.time,
-          onClick: r.onClick,
-          isActive: r.isActive
-        }, o))]
+        }), e.map((i, r) => d(dj, {
+          author: i.author,
+          date: i.date,
+          time: i.time,
+          onClick: i.onClick,
+          isActive: i.isActive
+        }, r))]
       })
     })]
   });

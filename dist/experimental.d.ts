@@ -2576,17 +2576,12 @@ declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTML
 
 declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
 
-export declare function F0VersionHistory({ title, versions, currentVersion, action, }: F0VersionHistoryProps): JSX_2.Element;
+export declare function F0VersionHistory({ title, versions, currentVersion, }: F0VersionHistoryProps): JSX_2.Element;
 
 export declare interface F0VersionHistoryProps {
     title: string;
     versions: Version[];
     currentVersion?: CurrentVersion;
-    action?: {
-        label: string;
-        onClick: () => void;
-        icon: IconType;
-    };
 }
 
 export declare const F1SearchBox: ForwardRefExoticComponent<    {
@@ -5735,8 +5730,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
@@ -5744,8 +5739,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -5760,15 +5755,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
