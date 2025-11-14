@@ -20,7 +20,7 @@ export function VersionItem({
 }: VersionItemProps) {
   const { locale: localeKey } = useL10n()
   const locale = getLocale(localeKey)
-  const formattedDateTime = format(timestamp, "PPp", { locale })
+  const formattedDateTime = format(timestamp, "PPPp", { locale })
 
   const authorName = `${author.firstName} ${author.lastName}`
 
