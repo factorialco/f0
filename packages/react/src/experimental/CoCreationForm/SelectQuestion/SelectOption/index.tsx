@@ -18,7 +18,7 @@ export const SelectOption = ({
   onClick,
   onClickAction,
   onChangeLabel,
-  disabled,
+  isEditMode,
   correct,
 }: SelectOptionProps) => {
   const { value, label } = option
@@ -29,7 +29,7 @@ export const SelectOption = ({
   const isDraggingThisItem = isDragging && draggedItemId === value
 
   const handleClick = () => {
-    if (disabled) return
+    if (isEditMode) return
     onClick(value)
   }
 
@@ -61,19 +61,20 @@ export const SelectOption = ({
     setDraggedItemId(null)
   }
 
-  const shouldToggleLeft = isDragging ? isDraggingThisItem : disabled
+  const shouldToggleLeft = isDragging ? isDraggingThisItem : isEditMode
 
   return (
     <Reorder.Item
       value={option}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      dragListener={!!isEditMode}
       as="div"
     >
       <div
         className={cn(
-          "group relative flex min-h-9 items-center gap-3 rounded-md py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover",
-          !disabled && "cursor-pointer",
+          "group relative flex min-h-9 items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover",
+          !isEditMode && "cursor-pointer",
           isDragging && "!cursor-grabbing active:!cursor-grabbing"
         )}
         onClick={handleClick}
@@ -86,9 +87,9 @@ export const SelectOption = ({
           )}
         >
           <F0Checkbox
-            checked={selected}
+            checked={!!(selected && !isEditMode)}
             onCheckedChange={handleClick}
-            disabled={disabled}
+            disabled={isEditMode}
             hideLabel
           />
         </div>
@@ -103,7 +104,7 @@ export const SelectOption = ({
             <F0Icon icon={Handle} size="sm" />
           </div>
         </div>
-        {disabled ? (
+        {isEditMode ? (
           <textarea
             placeholder="Type anything you want here..."
             value={label}
@@ -114,12 +115,12 @@ export const SelectOption = ({
         ) : (
           <p className="flex-1 font-medium">{label}</p>
         )}
-        {disabled && correct && (
+        {isEditMode && correct && (
           <span className="text-sm font-medium text-f1-foreground-positive">
             Correct
           </span>
         )}
-        {disabled ? (
+        {isEditMode ? (
           <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button
               label="Mark as correct"

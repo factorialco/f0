@@ -68,7 +68,7 @@ export const Section = ({
   )
 
   return (
-    <div className="group/section flex flex-col gap-1 px-5 py-1">
+    <div className="group/section flex w-full flex-col gap-1 bg-f1-background px-5 py-1">
       <div className="flex flex-row">
         <input
           type="text"

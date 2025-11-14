@@ -131,7 +131,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
                   onClick={handleOptionClick}
                   onClickAction={handleClickOptionAction}
                   onChangeLabel={handleChangeLabel}
-                  disabled={props.isEditMode}
+                  isEditMode={props.isEditMode}
                 />
               </div>
             ))}

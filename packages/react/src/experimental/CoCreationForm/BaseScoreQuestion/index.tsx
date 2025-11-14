@@ -60,7 +60,7 @@ export const BaseScoreQuestion = ({
   options,
   value,
   onChange,
-  disabled,
+  isEditMode,
   required,
 }: BaseScoreQuestionProps) => {
   const baseOnChangeParams: BaseScoreQuestionOnChangeParams = useMemo(
@@ -113,7 +113,7 @@ export const BaseScoreQuestion = ({
             label={option.label}
             selected={value === option.value}
             onClick={handleChangeValue}
-            disabled={disabled}
+            disabled={isEditMode}
           />
         ))}
       </div>

@@ -55,7 +55,7 @@ export const DateQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
-      <div className="px-2">
+      <div className="px-0.5">
         <F0DatePicker
           size="md"
           value={datePickerValue}

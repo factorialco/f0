@@ -8,7 +8,7 @@ export type QuestionActionParams = {
   index: number
 }
 
-export type OnAddNewQuestionParams = {
+export type OnAddNewElementParams = {
   type: QuestionType
   index: number
 }
@@ -22,7 +22,7 @@ export type BaseQuestionProps = {
   onChange?: (params: BaseQuestionOnChangeParams) => void
   isEditMode?: boolean
   required?: boolean
-  onAddNewQuestion?: (params: OnAddNewQuestionParams) => void
+  onAddNewElement?: (params: OnAddNewElementParams) => void
   onAction?: (params: QuestionActionParams) => void
 }
 

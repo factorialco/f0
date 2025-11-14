@@ -44,7 +44,7 @@ export const LinkQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
-      <div className="px-2">
+      <div className="px-0.5">
         <Input
           type="url"
           size="md"

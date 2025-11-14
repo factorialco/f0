@@ -45,7 +45,7 @@ export const NumericQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
-      <div className="px-2">
+      <div className="px-0.5">
         <NumberInput
           locale="en-US"
           size="md"

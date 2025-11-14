@@ -19,6 +19,6 @@ export type SelectOptionProps = {
   index: number
   onChangeLabel: (params: OnChangeLabelParams) => void
   onClickAction: (params: OnClickOptionActionParams) => void
-  disabled?: boolean
+  isEditMode?: boolean
   correct?: boolean
 }
