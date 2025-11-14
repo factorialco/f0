@@ -42,6 +42,70 @@ export function useSelectable<
     SelectedItemsState<R>
   >(parseSelectedState(selectedState))
 
+  const totalKnownItemsCount = useMemo(() => {
+    return paginationInfo ? paginationInfo.total : data.records?.length
+  }, [paginationInfo, data.records?.length])
+
+  /**
+   * Get the list of selected and unselected items from the itemsState for performance reasons
+   */
+  const [checkedItems, uncheckedItems] = useMemo(() => {
+    const selected = new Map()
+    const unselected = new Map()
+    console.log("localSelectedState.items", localSelectedState.items)
+    for (const [id, value] of localSelectedState.items?.entries() || []) {
+      console.log("value", value)
+      if (value.checked) {
+        selected.set(id, value.item)
+      } else {
+        unselected.set(id, value.item)
+      }
+    }
+    return [selected, unselected]
+  }, [localSelectedState.items])
+
+  /**
+   * Checked items count
+   */
+  const checkedCount = checkedItems.size
+  const uncheckedCount = uncheckedItems.size
+  /**
+   * Try to determine if all items are selected when we select one by one
+   * If there is pagination, we need to check if the selected items are less than the total number of items
+   */
+  const areAllKnownItemsSelected = useMemo(
+    () => checkedCount === totalKnownItemsCount,
+    [totalKnownItemsCount, checkedCount]
+  )
+
+  const [allSelectedCheck, setAllSelectedCheck] = useState(false)
+
+  /**
+   * Determine the status of the all selected checkbox
+   */
+  const isAllSelected = useMemo(() => {
+    return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
+  }, [allSelectedCheck, areAllKnownItemsSelected, checkedCount])
+
+  const allSelectedState = useMemo(() => {
+    const isPartiallySelected =
+      (checkedCount > 0 && !isAllSelected) ||
+      (isAllSelected && uncheckedCount > 0)
+
+    return isAllSelected
+      ? isPartiallySelected
+        ? "indeterminate"
+        : true
+      : false
+  }, [isAllSelected, checkedCount, uncheckedCount])
+
+  useEffect(() => {
+    setLocalSelectedState((current) => ({
+      ...current,
+      allSelected: allSelectedState,
+    }))
+  }, [allSelectedState])
+
   /**
    * Update the local selected state
    */
@@ -68,6 +132,16 @@ export function useSelectable<
             }),
         })
       }
+      for (const record of data.records) {
+        const id = source.selectable && source.selectable(record)
+        if (id && !mergedItems.has(id)) {
+          mergedItems.set(id, {
+            id,
+            checked: false,
+            item: record,
+          })
+        }
+      }
 
       const mergedGroups = new Map<string, SelectedItemState<R>>()
       for (const [groupId, groupState] of newSelectedState.groups?.entries() ||
@@ -78,6 +152,8 @@ export function useSelectable<
         })
       }
 
+      newSelectedState.allSelected = allSelectedState
+
       setLocalSelectedState(() => ({
         allSelected: newSelectedState.allSelected,
         items: mergedItems,
@@ -85,7 +161,7 @@ export function useSelectable<
       }))
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.records, source.selectable, localSelectedState]
+    [data.records, source.selectable, localSelectedState, allSelectedState]
   )
 
   useDeepCompareEffect(() => {
@@ -142,23 +218,6 @@ export function useSelectable<
   //   }
   //   setItemsState(newItemsState)
   // }, [selectionStateMap, data.records])
-
-  /**
-   * Get the list of selected and unselected items from the itemsState for performance reasons
-   */
-  const [checkedItems, uncheckedItems] = useMemo(() => {
-    const selected = new Map()
-    const unselected = new Map()
-    for (const [id, value] of localSelectedState.items?.entries() || []) {
-      console.log("value", value)
-      if (value.checked) {
-        selected.set(id, value.item)
-      } else {
-        unselected.set(id, value.item)
-      }
-    }
-    return [selected, unselected]
-  }, [JSON.stringify(localSelectedState.items)])
 
   /**
    * Groups state and list of selected and unselected groups
@@ -312,17 +371,6 @@ export function useSelectable<
   //   localSelectedState.items,
   // ])
 
-  /**
-   * Checked items count
-   */
-  const checkedCount = checkedItems.size
-  const uncheckedCount = uncheckedItems.size
-
-  /**
-   * All selected check
-   */
-  const [allSelectedCheck, setAllSelectedCheck] = useState(false)
-
   const handleSelectItemChange = (
     itemId: SelectionId | readonly SelectionId[],
     checked: boolean,
@@ -387,29 +435,6 @@ export function useSelectable<
     }
   }
 
-  const totalKnownItemsCount = useMemo(() => {
-    return paginationInfo ? paginationInfo.total : data.records?.length
-  }, [paginationInfo, data.records?.length])
-
-  // Try to determine if all items are selected when we select one by one
-  // If there is pagination, we need to check if the selected items are less than the total number of items
-  // If there is no pagination, we need to check if the selected items are less than the total number of items
-  const areAllKnownItemsSelected = useMemo(
-    () => checkedCount === totalKnownItemsCount,
-    [totalKnownItemsCount, checkedCount]
-  )
-
-  const isAllSelected = useMemo(() => {
-    return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
-  }, [allSelectedCheck, areAllKnownItemsSelected, checkedCount])
-
-  const isPartiallySelected = useMemo(
-    () =>
-      (checkedCount > 0 && !isAllSelected) ||
-      (isAllSelected && uncheckedCount > 0),
-    [checkedCount, isAllSelected, uncheckedCount]
-  )
-
   // If the filters change, we need to reset the selected items
   useEffect(() => {
     clearSelectedItems()
@@ -447,7 +472,8 @@ export function useSelectable<
         .filter((id) => id !== undefined)
       handleSelectItemChange(itemIds, isAllSelected, true)
     }
-  }, [data, isAllSelected, isGrouped])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, isGrouped])
 
   // Control the allSelectedCheck state
   // If all items are selected, we need to set the allSelectedCheck state to true
@@ -540,7 +566,6 @@ export function useSelectable<
     allSelectedCheck,
     localSelectedState,
     groupsState,
-    isPartiallySelected,
     selectedItemsCount,
     totalKnownItemsCount,
     source.currentFilters,
@@ -548,20 +573,27 @@ export function useSelectable<
     uncheckedItems,
   ])
 
+  console.log("checkedItems ***", Array.from(checkedItems.values()))
+  console.log("uncheckedItems ***", Array.from(uncheckedItems.values()))
   return {
     selectedItems: checkedItems,
     selectedGroups: checkedGroups,
-    allSelectedStatus: {
-      checked: allSelectedCheck || isPartiallySelected,
-      indeterminate: isPartiallySelected,
-      selectedCount: selectedItemsCount,
-      unselectedCount: uncheckedCount,
-    },
-    isAllSelected,
-    isPartiallySelected,
+    // allSelectedStatus: {
+    //   //checked: allSelectedCheck || isPartiallySelected,
+    //   //indeterminate: isPartiallySelected,
+    //   selectedCount: selectedItemsCount,
+    //   unselectedCount: uncheckedCount,
+    // },
+    clearSelection: clearSelectedItems,
     handleSelectItemChange,
     handleSelectAll,
     handleSelectGroupChange,
+    selectionMeta: {
+      selectedItemsCount,
+      totalKnownItemsCount,
+      checkedItems: Array.from(checkedItems.values()),
+      uncheckedItems: Array.from(uncheckedItems.values()),
+    },
     groupAllSelectedStatus,
     selectionStatus,
     selectedState: localSelectedState,

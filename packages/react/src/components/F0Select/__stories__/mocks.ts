@@ -148,10 +148,13 @@ export const mockNonPaginatedSource = createDataSourceDefinition<MockItem>({
       const { search } = options
       return new Promise((resolve) => {
         setTimeout(() => {
-          const results = mockItems.filter(
-            (item) =>
-              !search || item.label.toLowerCase().includes(search.toLowerCase())
-          )
+          const results = mockItems
+            .slice(0, 100)
+            .filter(
+              (item) =>
+                !search ||
+                item.label.toLowerCase().includes(search.toLowerCase())
+            )
 
           const res = {
             records: results,

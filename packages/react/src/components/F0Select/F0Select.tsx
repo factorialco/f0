@@ -278,7 +278,8 @@ const F0SelectComponent = forwardRef(function Select<
     handleSelectAll,
     handleSelectItemChange,
     selectedState,
-    selectionStatus,
+    clearSelection,
+    selectionMeta,
   } = useSelectable({
     data,
     paginationInfo,
@@ -312,7 +313,10 @@ const F0SelectComponent = forwardRef(function Select<
    * Emit the value change. The type depends on the multiple prop and async.
    */
   useDeepCompareEffect(() => {
-    const checkedItems = selectionStatus.checkedItems
+    const checkedItems = selectionMeta.checkedItems.filter(
+      (item) => item !== undefined
+    )
+    console.log("selectionMeta", selectionMeta)
     console.log("checkedItems", checkedItems)
 
     const checkedItemsValues = checkedItems.map(
@@ -336,7 +340,7 @@ const F0SelectComponent = forwardRef(function Select<
         checkedItemsOptions[0]
       )
     }
-  }, [selectionStatus])
+  }, [selectionMeta.checkedItems])
 
   // Handle change
 
@@ -482,7 +486,10 @@ const F0SelectComponent = forwardRef(function Select<
   const i18n = useI18n()
 
   const selectedItemsValues = useMemo(() => {
-    return Array.from(selectedState.items.keys()).map((key) => String(key))
+    return Array.from(selectedState.items.values())
+      .filter((item) => item.checked)
+      .map((item) => String(item.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the selectedState.items changes
   }, [selectedState.items])
 
   const commonProps = {
@@ -529,9 +536,9 @@ const F0SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              value={localValue.join(",")}
-              isEmpty={(value) => value?.length === 0}
-              onClear={() => handleLocalValueChange([])}
+              value={selectionMeta.selectedItemsCount.toString()}
+              isEmpty={(value) => +(value ?? 0) === 0}
+              onClear={() => clearSelection()}
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
@@ -556,12 +563,10 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectionStatus.checkedItems && (
+                {selectionMeta.checkedItems && (
                   <SelectedItems
                     multiple={multiple}
-                    selection={Array.from(
-                      selectionStatus.checkedItems.values()
-                    ).map((item) => {
+                    selection={selectionMeta.checkedItems.map((item) => {
                       console.log("item ---------------->", item)
                       if (item?.item) {
                         return optionMapper(item) as F0SelectItemObject<
@@ -604,11 +609,11 @@ const F0SelectComponent = forwardRef(function Select<
                 />
                 {multiple && (
                   <SelectAll
-                    selectedCount={selectionStatus.selectedCount}
+                    selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={
-                      selectionStatus.allChecked === "indeterminate"
+                      selectedState.allSelected === "indeterminate"
                     }
-                    value={!!selectionStatus.allChecked}
+                    value={!!selectedState.allSelected}
                     onChange={handleSelectAll}
                   />
                 )}
