@@ -40,7 +40,7 @@ export const Dropdown = (props: DropdownProps) => {
       {...publicProps}
       open={open}
       onOpenChange={onOpenChange}
-      align="end"
+      align={props.align || "end"}
     />
   )
 }
