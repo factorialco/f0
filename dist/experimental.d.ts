@@ -1557,7 +1557,6 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
 export declare interface CurrentVersion {
     title: string;
     onClick?: () => void;
-    isActive?: boolean;
 }
 
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
@@ -2576,12 +2575,13 @@ declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTML
 
 declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
 
-export declare function F0VersionHistory({ title, versions, currentVersion, }: F0VersionHistoryProps): JSX_2.Element;
+export declare function F0VersionHistory({ title, versions, currentVersion, activeVersionId, }: F0VersionHistoryProps): JSX_2.Element;
 
 export declare interface F0VersionHistoryProps {
     title: string;
     versions: Version[];
     currentVersion?: CurrentVersion;
+    activeVersionId?: string | "current";
 }
 
 export declare const F1SearchBox: ForwardRefExoticComponent<    {
@@ -5493,7 +5493,6 @@ export declare interface Version {
     author: VersionAuthor;
     timestamp: Date;
     onClick?: () => void;
-    isActive?: boolean;
 }
 
 export declare interface VersionAuthor {
@@ -5754,15 +5753,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

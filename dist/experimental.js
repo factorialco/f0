@@ -18326,7 +18326,7 @@ function uj({ author: t, timestamp: e, onClick: n, isActive: i }) {
     })]
   });
 }
-function Nde({ title: t = "Version history", versions: e, currentVersion: n }) {
+function Nde({ title: t = "Version history", versions: e, currentVersion: n, activeVersionId: i }) {
   return k("nav", {
     className: "flex h-full w-[320px] flex-col overflow-hidden px-3 pb-3 pt-[6px]",
     "aria-label": "Version history",
@@ -18342,13 +18342,13 @@ function Nde({ title: t = "Version history", versions: e, currentVersion: n }) {
         children: [n && d(fj, {
           title: n.title,
           onClick: n.onClick,
-          isActive: n.isActive
-        }), e.map((i, r) => d(uj, {
-          author: i.author,
-          timestamp: i.timestamp,
-          onClick: i.onClick,
-          isActive: i.isActive
-        }, r))]
+          isActive: i === "current"
+        }), e.map((r) => d(uj, {
+          author: r.author,
+          timestamp: r.timestamp,
+          onClick: r.onClick,
+          isActive: i === r.id
+        }, r.id))]
       })
     })]
   });
