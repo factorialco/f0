@@ -10,6 +10,7 @@ export function F0VersionHistory({
   title = "Version history",
   versions,
   currentVersion,
+  activeVersionId,
 }: F0VersionHistoryProps) {
   return (
     <nav
@@ -30,16 +31,16 @@ export function F0VersionHistory({
             <CurrentVersionIndicator
               title={currentVersion.title}
               onClick={currentVersion.onClick}
-              isActive={currentVersion.isActive}
+              isActive={activeVersionId === "current"}
             />
           )}
-          {versions.map((version, index) => (
+          {versions.map((version) => (
             <VersionItem
-              key={index}
+              key={version.id}
               author={version.author}
               timestamp={version.timestamp}
               onClick={version.onClick}
-              isActive={version.isActive}
+              isActive={activeVersionId === version.id}
             />
           ))}
         </div>

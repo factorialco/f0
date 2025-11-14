@@ -12,8 +12,6 @@ const mockVersions: Version[] = [
       src: "/avatars/person04.jpg",
     },
     timestamp: new Date("2023-11-06T12:00:00"),
-    isActive: false,
-    onClick: () => console.log("Version 4 clicked!"),
   },
   {
     id: "3",
@@ -23,8 +21,6 @@ const mockVersions: Version[] = [
       src: "/storybook-assets/avatar.jpeg",
     },
     timestamp: new Date("2024-10-04T08:30:00"),
-    isActive: true,
-    onClick: () => console.log("Version 3 clicked!"),
   },
   {
     id: "2",
@@ -34,8 +30,6 @@ const mockVersions: Version[] = [
       src: "/avatars/person05.jpg",
     },
     timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-    isActive: false,
-    onClick: () => console.log("Version 2 clicked!"),
   },
   {
     id: "1",
@@ -45,8 +39,6 @@ const mockVersions: Version[] = [
       src: "/avatars/person04.jpg",
     },
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
-    isActive: false,
-    onClick: () => console.log("Version 1 clicked!"),
   },
 ]
 
@@ -70,10 +62,14 @@ const meta: Meta<typeof F0VersionHistory> = {
     versions: {
       control: false,
       description: `Array of versions with the following structure:
+        - id: Unique identifier for the version
         - author: { firstName, lastName, src? }
         - timestamp: Date object
-        - onClick: Optional callback when version is clicked
-        - isActive: Whether this is the currently viewed version`,
+        - onClick: Optional callback when version is clicked`,
+    },
+    activeVersionId: {
+      control: "text",
+      description: `ID of the currently active version. Use "current" for the current version indicator, or the version's ID string.`,
     },
     currentVersion: {
       control: false,
@@ -100,7 +96,6 @@ export const Default: Story = {
 
     const versionsWithHandlers = mockVersions.map((version) => ({
       ...version,
-      isActive: activeId === version.id,
       onClick: () => {
         setActiveId(version.id)
         console.log(`Version ${version.id} clicked!`)
@@ -116,9 +111,9 @@ export const Default: Story = {
             setActiveId("current")
             console.log("Current version clicked!")
           },
-          isActive: activeId === "current",
         }}
         versions={versionsWithHandlers.reverse()}
+        activeVersionId={activeId}
       />
     )
   },
@@ -135,6 +130,7 @@ export const WithClickableCurrentVersion: Story = {
       ...v,
       onClick: () => console.log(`Version ${i + 1} clicked!`),
     })),
+    activeVersionId: "3",
   },
   parameters: {
     docs: {
@@ -150,6 +146,7 @@ export const WithoutCurrentVersion: Story = {
   args: {
     title: "Version history",
     versions: mockVersions.reverse(),
+    activeVersionId: "2",
   },
   parameters: {
     docs: {

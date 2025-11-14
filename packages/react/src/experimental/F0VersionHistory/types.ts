@@ -9,17 +9,16 @@ export interface Version {
   author: VersionAuthor
   timestamp: Date
   onClick?: () => void
-  isActive?: boolean
 }
 
 export interface CurrentVersion {
   title: string
   onClick?: () => void
-  isActive?: boolean
 }
 
 export interface F0VersionHistoryProps {
   title: string
   versions: Version[]
   currentVersion?: CurrentVersion
+  activeVersionId?: string | "current"
 }
