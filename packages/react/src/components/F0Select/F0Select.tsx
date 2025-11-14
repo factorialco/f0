@@ -268,9 +268,12 @@ const F0SelectComponent = forwardRef(function Select<
     handleSelectItemChange,
     selectedItems,
     selectionStatus,
-  } = useSelectable(data, paginationInfo, localSource, {
-    onSelectItems,
+  } = useSelectable({
+    data,
+    paginationInfo,
+    source: localSource,
     selectionMode: multiple ? "multi" : "single",
+    onSelectItems,
   })
 
   const onSearchChangeLocal = useCallback(

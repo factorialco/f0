@@ -36,7 +36,21 @@ export type SelectionStatus<
   totalKnownItemsCount: number
 }
 
-export type UseSelectable<
+export type UseSelectableProps<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Grouping extends GroupingDefinition<R>,
+> = {
+  data: Data<R>
+  paginationInfo: PaginationInfo | null
+  source: DataSourceDefinition<R, Filters, Sortings, Grouping>
+  onSelectItems?: OnSelectItemsCallback<R, Filters>
+  selectionMode?: "multi" | "single"
+  defaultSelectedItems?: SelectedItemsState
+}
+
+export type UseSelectableReturn<
   R extends RecordType,
   Filters extends FiltersDefinition,
 > = {
@@ -57,26 +71,20 @@ export function useSelectable<
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
   Grouping extends GroupingDefinition<R>,
->(
-  data: Data<R>,
-  paginationInfo: PaginationInfo | null,
-  source: DataSourceDefinition<R, Filters, Sortings, Grouping>,
-  options?: {
-    onSelectItems?: OnSelectItemsCallback<R, Filters>
-    selectionMode?: "multi" | "single"
-    defaultSelectedItems?: SelectedItemsState
-  }
-): UseSelectable<R, Filters> {
-  // Options with default values
-  options = {
-    selectionMode: "multi",
-    ...options,
-  }
+>({
+  data,
+  paginationInfo,
+  source,
+  selectionMode = "multi",
+  defaultSelectedItems,
+  onSelectItems,
+}: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
+  R,
+  Filters
+> {
   const isGrouped = data.type === "grouped"
   const isPaginated = paginationInfo !== null
-  const isMultiSelection = options.selectionMode === "multi"
-  const defaultSelectedItems = options.defaultSelectedItems
-  const onSelectItems = options.onSelectItems
+  const isMultiSelection = selectionMode === "multi"
 
   /**
    * Items state and list of selected and unselected items

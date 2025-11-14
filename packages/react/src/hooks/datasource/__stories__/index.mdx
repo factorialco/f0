@@ -107,7 +107,10 @@ const {
   handleSelectItemChange,
   handleSelectAll,
   isAllSelected,
-} = useSelectable(data, paginationInfo, dataSource, {
+} = useSelectable({
+  data,
+  paginationInfo,
+  dataSource,
   onSelectItems,
   selectionMode: "multi",
   defaultSelectedItems: [],

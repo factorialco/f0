@@ -6,7 +6,7 @@ import {
   PaginationInfo,
   RecordType,
   SortingsDefinition,
-  UseSelectable,
+  UseSelectableReturn,
   useSelectable,
 } from "@/hooks/datasource"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -36,7 +36,7 @@ type LaneSelectProviderProps<
   >
   data: Data<R>
   paginationInfo: PaginationInfo | null
-  onHookUpdate: (hook: UseSelectable<R>) => void
+  onHookUpdate: (hook: UseSelectableReturn<R, Filters>) => void
   onSelectItems: OnSelectItemsCallback<R, Filters>
 }
 
@@ -62,13 +62,13 @@ const LaneSelectProvider = <
     Grouping
   >
 ) => {
-  const hook = useSelectable<R, Filters, Sortings, Grouping>(
-    props.data || { type: "flat", records: [], groups: [] },
-    props.paginationInfo,
-    props.source,
-    props.onSelectItems,
-    props.source.defaultSelectedItems
-  )
+  const hook = useSelectable<R, Filters, Sortings, Grouping>({
+    data: props.data || { type: "flat", records: [], groups: [] },
+    paginationInfo: props.paginationInfo,
+    source: props.source,
+    onSelectItems: props.onSelectItems,
+    defaultSelectedItems: props.source.defaultSelectedItems,
+  })
 
   useEffect(() => {
     props.onHookUpdate(hook)
@@ -110,7 +110,7 @@ export const useSelectableLanes = <
   onSelectItems?: OnSelectItemsCallback<R, Filters>
 ) => {
   const [lanesUseSelectable, setLanesUseSelectable] = useState<
-    Map<string, UseSelectable<R>>
+    Map<string, UseSelectableReturn<R, Filters>>
   >(new Map())
 
   const [selectItemsCallbackResult, setSelectItemsCallbackResult] = useState<{

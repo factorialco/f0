@@ -138,7 +138,7 @@ function SelectableUserList() {
     handleSelectAll,
     isAllSelected,
     isPartiallySelected,
-  } = useSelectable(data, paginationInfo, dataSource)
+  } = useSelectable({ data, paginationInfo, source: dataSource })
 
   return (
     <div>
@@ -201,7 +201,7 @@ function GroupedSelectableUserList() {
     handleSelectItemChange,
     handleSelectGroupChange,
     groupAllSelectedStatus,
-  } = useSelectable(data, paginationInfo, dataSource)
+  } = useSelectable({ data, paginationInfo, source: dataSource })
 
   if (data.type !== "grouped") return null
 
@@ -276,7 +276,10 @@ function UserListWithDefaults() {
   const { data, paginationInfo } = useData(dataSource)
 
   const { selectedItems, handleSelectItemChange, handleSelectAll } =
-    useSelectable(data, paginationInfo, dataSource, {
+    useSelectable({
+      data,
+      paginationInfo,
+      source: dataSource,
       selectionMode: "multi",
       defaultSelectedItems: dataSource.defaultSelectedItems,
     })
@@ -338,7 +341,10 @@ function UserListWithCallback() {
   )
 
   const { selectedItems, handleSelectItemChange, handleSelectAll } =
-    useSelectable(data, paginationInfo, dataSource, {
+    useSelectable({
+      data,
+      paginationInfo,
+      source: dataSource,
       onSelectItems: handleSelectionChange,
     })
 
@@ -382,7 +388,7 @@ function PaginatedSelectableUserList() {
     handleSelectItemChange,
     handleSelectAll,
     allSelectedStatus,
-  } = useSelectable(data, paginationInfo, dataSource)
+  } = useSelectable({ data, paginationInfo, source: dataSource })
 
   return (
     <div>

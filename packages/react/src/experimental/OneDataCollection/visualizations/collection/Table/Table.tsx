@@ -149,7 +149,10 @@ export const TableCollection = <
     handleSelectItemChange,
     handleSelectAll,
     handleSelectGroupChange,
-  } = useSelectable(data, paginationInfo, source, {
+  } = useSelectable({
+    data,
+    paginationInfo,
+    source,
     onSelectItems,
     selectionMode: "multi",
     defaultSelectedItems: source.defaultSelectedItems,

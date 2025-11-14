@@ -55,7 +55,10 @@ describe("useSelectable", () => {
 
     it("should handle item selection", async () => {
       const { result } = renderHook(() =>
-        useSelectable(mockData, null, mockSource, {
+        useSelectable({
+          data: mockData,
+          paginationInfo: null,
+          source: mockSource,
           onSelectItems: vi.fn(),
           selectionMode: "multi",
         })
@@ -120,7 +123,10 @@ describe("useSelectable", () => {
 
     it("should handle group selection", async () => {
       const { result } = renderHook(() =>
-        useSelectable(mockGroupedData, null, mockSource, {
+        useSelectable({
+          data: mockGroupedData,
+          paginationInfo: null,
+          source: mockSource,
           onSelectItems: vi.fn(),
           selectionMode: "multi",
         })
@@ -141,7 +147,10 @@ describe("useSelectable", () => {
 
     it("should handle select all in grouped data", async () => {
       const { result } = renderHook(() =>
-        useSelectable(mockGroupedData, null, mockSource, {
+        useSelectable({
+          data: mockGroupedData,
+          paginationInfo: null,
+          source: mockSource,
           onSelectItems: vi.fn(),
           selectionMode: "multi",
         })
@@ -195,7 +204,10 @@ describe("useSelectable", () => {
 
       const { result, rerender } = renderHook(
         ({ data }) =>
-          useSelectable(data, paginationInfo, mockSource, {
+          useSelectable({
+            data,
+            paginationInfo,
+            source: mockSource,
             onSelectItems: vi.fn(),
             selectionMode: "multi",
           }),

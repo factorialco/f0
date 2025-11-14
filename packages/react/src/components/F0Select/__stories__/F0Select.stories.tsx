@@ -248,8 +248,12 @@ const meta: Meta = {
             }
           />
           <div className="mt-20">
-            Selected: {JSON.stringify(truncatedValue, null, 2)} - Total:{" "}
-            {localValue?.length}
+            Selected: {JSON.stringify(truncatedValue, null, 2)}
+            <>
+              {args.multiple && (
+                <span> - Total: {localValue?.length ?? 0}</span>
+              )}
+            </>
           </div>
         </>
       )
