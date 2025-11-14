@@ -7,8 +7,7 @@ export interface VersionAuthor {
 export interface Version {
   id: string
   author: VersionAuthor
-  date: string
-  time: string
+  timestamp: Date
   onClick?: () => void
   isActive?: boolean
 }

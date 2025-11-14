@@ -37,8 +37,7 @@ export function F0VersionHistory({
             <VersionItem
               key={index}
               author={version.author}
-              date={version.date}
-              time={version.time}
+              timestamp={version.timestamp}
               onClick={version.onClick}
               isActive={version.isActive}
             />

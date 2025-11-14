@@ -11,8 +11,7 @@ const mockVersions: Version[] = [
       lastName: "Sigüenza",
       src: "/avatars/person04.jpg",
     },
-    date: "November 6, 2023",
-    time: "12:00PM",
+    timestamp: new Date("2023-11-06T12:00:00"),
     isActive: false,
     onClick: () => console.log("Version 4 clicked!"),
   },
@@ -21,10 +20,9 @@ const mockVersions: Version[] = [
     author: {
       firstName: "Alan",
       lastName: "Kay",
-      src: "storybook-assets/avatar.jpeg",
+      src: "/storybook-assets/avatar.jpeg",
     },
-    date: "October 4",
-    time: "8:30AM",
+    timestamp: new Date("2024-10-04T08:30:00"),
     isActive: true,
     onClick: () => console.log("Version 3 clicked!"),
   },
@@ -35,8 +33,7 @@ const mockVersions: Version[] = [
       lastName: "Roosevelt",
       src: "/avatars/person05.jpg",
     },
-    date: "Last week",
-    time: "1:30PM",
+    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
     isActive: false,
     onClick: () => console.log("Version 2 clicked!"),
   },
@@ -47,8 +44,7 @@ const mockVersions: Version[] = [
       lastName: "Sigüenza",
       src: "/avatars/person04.jpg",
     },
-    date: "Yesterday",
-    time: "3:15PM",
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
     isActive: false,
     onClick: () => console.log("Version 1 clicked!"),
   },
@@ -75,7 +71,7 @@ const meta: Meta<typeof F0VersionHistory> = {
       control: false,
       description: `Array of versions with the following structure:
         - author: { firstName, lastName, src? }
-        - dateTime: ISO date string
+        - timestamp: Date object
         - onClick: Optional callback when version is clicked
         - isActive: Whether this is the currently viewed version`,
     },

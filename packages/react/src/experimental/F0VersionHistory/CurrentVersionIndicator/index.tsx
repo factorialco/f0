@@ -1,7 +1,7 @@
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { Bullet } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 interface CurrentVersionIndicatorProps {
   title: string
@@ -16,12 +16,23 @@ export function CurrentVersionIndicator({
 }: CurrentVersionIndicatorProps) {
   return (
     <div
+      role="button"
+      tabIndex={onClick ? 0 : undefined}
       className={cn(
         "flex flex-row items-center gap-[6px] rounded-md p-[6px] pr-2 transition-colors",
         isActive && "bg-f1-background-tertiary",
-        onClick && "cursor-pointer hover:bg-f1-background-hover"
+        onClick && "cursor-pointer hover:bg-f1-background-hover",
+        focusRing("focus-visible:ring-inset")
       )}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault()
+          onClick()
+        }
+      }}
+      aria-label={`${title}${isActive ? " (selected)" : ""}`}
+      aria-pressed={onClick ? isActive : undefined}
     >
       <F0Icon icon={Bullet} size="md" color="selected" />
       <OneEllipsis
