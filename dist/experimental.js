@@ -18272,14 +18272,11 @@ const Ede = xt(zv, cj), dj = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i
   });
 }, Mde = FS(qs("RadarChart", dj));
 function fj({ title: t, isActive: e = !1, onClick: n }) {
-  return k("div", {
-    role: "button",
-    tabIndex: n ? 0 : void 0,
-    className: T("flex flex-row items-center gap-[6px] rounded-md p-[6px] pr-2 transition-colors", e && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover", gt("focus-visible:ring-inset")),
+  return k("button", {
+    type: "button",
+    className: T("flex w-full flex-row items-center gap-[6px] rounded-md p-[6px] pr-2 text-left transition-colors", e && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover", gt("focus-visible:ring-inset")),
     onClick: n,
-    onKeyDown: (i) => {
-      n && (i.key === "Enter" || i.key === " ") && (i.preventDefault(), n());
-    },
+    disabled: !n,
     "aria-label": `${t}${e ? " (selected)" : ""}`,
     "aria-pressed": n ? e : void 0,
     children: [d(xe, {
@@ -18297,14 +18294,11 @@ function uj({ author: t, timestamp: e, onClick: n, isActive: i }) {
   const { locale: r } = VS(), o = jS(r), s = D8(e, "PPPp", {
     locale: o
   }), a = `${t.firstName} ${t.lastName}`;
-  return k("div", {
-    role: "button",
-    tabIndex: n ? 0 : void 0,
-    className: T("flex flex-col gap-[6px] rounded-md px-2 py-[6px] transition-colors", i && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover", gt("focus-visible:ring-inset")),
+  return k("button", {
+    type: "button",
+    className: T("flex w-full flex-col gap-[6px] rounded-md px-2 py-[6px] text-left transition-colors", i && "bg-f1-background-tertiary", n && "cursor-pointer hover:bg-f1-background-hover", gt("focus-visible:ring-inset")),
     onClick: n,
-    onKeyDown: (l) => {
-      n && (l.key === "Enter" || l.key === " ") && (l.preventDefault(), n());
-    },
+    disabled: !n,
     "aria-label": `Version ${s} by ${a}${i ? " (selected)" : ""}`,
     "aria-pressed": n ? i : void 0,
     children: [d(pn, {
