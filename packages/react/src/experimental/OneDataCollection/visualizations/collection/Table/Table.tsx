@@ -155,7 +155,7 @@ export const TableCollection = <
     source,
     onSelectItems,
     selectionMode: "multi",
-    defaultSelectedItems: source.defaultSelectedItems,
+    selectedState: source.defaultSelectedItems,
   })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available

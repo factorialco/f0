@@ -259,14 +259,25 @@ const F0SelectComponent = forwardRef(function Select<
     [data.records, optionMapper, defaultItems, defaultValues]
   )
 
-  const onSelectItems = useCallback((items: SelectedItemsState) => {
-    console.log("onSelectItems", items)
-  }, [])
+  const onSelectItems = useCallback(
+    (items: SelectedItemsState<ActualRecordType>) => {
+      console.log("onSelectItems", items)
+    },
+    []
+  )
+
+  // const selectedState = useMemo(() => {
+  //   console.log("selectedState", localValue)
+  //   return {
+  //     allSelected: false,
+  //     items: localValue.map((value) => ({ id: value, checked: true })),
+  //   }
+  // }, [localValue])
 
   const {
     handleSelectAll,
     handleSelectItemChange,
-    selectedItems,
+    selectedState,
     selectionStatus,
   } = useSelectable({
     data,
@@ -290,7 +301,7 @@ const F0SelectComponent = forwardRef(function Select<
       if (!item) {
         return
       }
-      handleSelectItemChange(item.item, checked)
+      handleSelectItemChange(value, checked)
       onChangeSelectedOption?.(item.option, checked)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
@@ -302,15 +313,15 @@ const F0SelectComponent = forwardRef(function Select<
    */
   useDeepCompareEffect(() => {
     const checkedItems = selectionStatus.checkedItems
+    console.log("checkedItems", checkedItems)
 
     const checkedItemsValues = checkedItems.map(
       (item) => String(item.value) as T
     )
     const checkedItemsOriginalItems = checkedItems.map((item) => item)
-    const checkedItemsOptions = checkedItems.map(
-      (item) =>
-        optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
-    )
+    const checkedItemsOptions = checkedItems.map((item) => {
+      return optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
+    })
     if (multiple) {
       // Non paginated
       onChange?.(
@@ -327,32 +338,75 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [selectionStatus])
 
-  const handleLocalValueChange = (
-    changedValue: string | string[] | undefined
-  ) => {
+  // Handle change
+
+  useDeepCompareEffect(() => {
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
-    setLocalValue((toArray(changedValue) ?? []) as T[])
 
-    console.log("changedValue", changedValue)
-    const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
-
+    console.log("selectedState", selectedState)
+    const checkedItems = Array.from(selectedState.items.values() || []).filter(
+      (item) => item.checked
+    )
     // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
     if (multiple) {
-      const values = foundOptions.map((option) => option.value)
-      const items = foundOptions
-        .map((option) => option.item)
-        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+      const values = checkedItems.map((item) => String(item.id) as T)
+      const items = checkedItems
+        .map((item) => item.item)
+        .filter(
+          (item): item is WithGroupId<ResolvedRecordType<R>> =>
+            item !== undefined
+        )
+      const options = items.map((item) => {
+        return optionMapper(item) as F0SelectItemObject<
+          T,
+          ResolvedRecordType<R>
+        >
+      })
 
-      onChange?.(values, items, foundOptions)
+      onChange?.(values, items, options)
     } else {
-      const value = foundOptions[0]?.value
-      const item = foundOptions[0]?.item
-      const option = foundOptions[0]
-
+      const selectedItem = checkedItems[0]
+      const value = String(selectedItem?.id) as T
+      const item = selectedItem?.item as ResolvedRecordType<R> | undefined
+      const option =
+        selectedItem?.item &&
+        (optionMapper(selectedItem.item) as F0SelectItemObject<
+          T,
+          ResolvedRecordType<R>
+        >)
+      console.log("selectedItem", selectedItem)
       onChange?.(value, item, option)
     }
-  }
+  }, [selectedState])
+
+  // const handleLocalValueChange = (
+  //   changedValue: string | string[] | undefined
+  // ) => {
+  //   // Resets the search value when the option is selected
+  //   setCurrentSearch(undefined)
+  //   setLocalValue((toArray(changedValue) ?? []) as T[])
+
+  //   console.log("changedValue", changedValue)
+  //   const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
+
+  //   // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
+  //   if (multiple) {
+  //     const values = foundOptions.map((option) => option.value)
+  //     const items = foundOptions
+  //       .map((option) => option.item)
+  //       .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+
+  //     onChange?.(values, items, foundOptions)
+  //   } else {
+  //     console.log("foundOptions", foundOptions)
+  //     const value = foundOptions[0]?.value
+  //     const item = foundOptions[0]?.item
+  //     const option = foundOptions[0]
+
+  //     onChange?.(value, item, option)
+  //   }
+  // }
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
     (open: boolean) => {
@@ -428,8 +482,8 @@ const F0SelectComponent = forwardRef(function Select<
   const i18n = useI18n()
 
   const selectedItemsValues = useMemo(() => {
-    return Array.from(selectedItems.keys()).map((key) => String(key))
-  }, [selectedItems])
+    return Array.from(selectedState.items.keys()).map((key) => String(key))
+  }, [selectedState.items])
 
   const commonProps = {
     ...props,
@@ -502,16 +556,25 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectedItems && (
+                {selectionStatus.checkedItems && (
                   <SelectedItems
                     multiple={multiple}
-                    selection={Array.from(selectedItems.values()).map(
-                      (item) =>
-                        optionMapper(item) as F0SelectItemObject<
+                    selection={Array.from(
+                      selectionStatus.checkedItems.values()
+                    ).map((item) => {
+                      console.log("item ---------------->", item)
+                      if (item?.item) {
+                        return optionMapper(item) as F0SelectItemObject<
                           T,
                           ResolvedRecordType<R>
                         >
-                    )}
+                      }
+                      return {
+                        value: "test" as T,
+                        label: "test",
+                        description: "test",
+                      }
+                    })}
                   />
                 )}
               </button>

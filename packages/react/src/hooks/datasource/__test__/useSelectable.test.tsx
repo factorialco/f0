@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { DataSourceDefinition, PaginationInfo } from "../types"
 import { Data, GROUP_ID_SYMBOL } from "../useData"
-import { useSelectable } from "../useSelectable"
+import { useSelectable } from "../useSelectable/useSelectable"
 
 type TestRecord = {
   id: number

@@ -67,7 +67,7 @@ const LaneSelectProvider = <
     paginationInfo: props.paginationInfo,
     source: props.source,
     onSelectItems: props.onSelectItems,
-    defaultSelectedItems: props.source.defaultSelectedItems,
+    selectedState: props.source.defaultSelectedItems,
   })
 
   useEffect(() => {

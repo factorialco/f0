@@ -9,7 +9,7 @@ import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/na
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
-import { useSelectable } from "@/hooks/datasource/useSelectable"
+import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
@@ -359,7 +359,7 @@ export const CardCollection = <
     source,
     onSelectItems,
     selectionMode: "multi",
-    defaultSelectedItems: source.defaultSelectedItems,
+    selectedState: source.defaultSelectedItems,
   })
 
   /**

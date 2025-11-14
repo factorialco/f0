@@ -2,15 +2,26 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/components/OneFilterPicker/types"
+import { WithGroupId } from "../useData"
 import { RecordType } from "./records.typings"
 
+export type SelectionId = number | string
+
+export type SelectedState = {
+  id: SelectionId
+  checked: boolean
+}
+
+export type SelectedItemState<R extends RecordType> = SelectedState & {
+  item?: WithGroupId<R>
+}
 /**
  * Represents the selected items by id
  */
-export type SelectedItemsState = {
-  allSelected?: boolean | "indeterminate"
-  items?: ReadonlyArray<{ id: string; checked: boolean }>
-  groups?: ReadonlyArray<{ groupId: string; checked: boolean }>
+export type SelectedItemsState<R extends RecordType> = {
+  allSelected: boolean | "indeterminate"
+  items: Map<SelectedItemState<R>["id"], SelectedItemState<R>>
+  groups: Map<SelectedState["id"], SelectedState>
 }
 
 export type SelectedItemsDetailedStatus<

@@ -125,7 +125,7 @@ export const ListCollection = <
     source,
     onSelectItems,
     selectionMode: "multi",
-    defaultSelectedItems: source.defaultSelectedItems,
+    selectedState: source.defaultSelectedItems,
   })
 
   /*
