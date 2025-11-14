@@ -25,22 +25,16 @@ export function VersionItem({
   const authorName = `${author.firstName} ${author.lastName}`
 
   return (
-    <div
-      role="button"
-      tabIndex={onClick ? 0 : undefined}
+    <button
+      type="button"
       className={cn(
-        "flex flex-col gap-[6px] rounded-md px-2 py-[6px] transition-colors",
+        "flex w-full flex-col gap-[6px] rounded-md px-2 py-[6px] text-left transition-colors",
         isActive && "bg-f1-background-tertiary",
         onClick && "cursor-pointer hover:bg-f1-background-hover",
         focusRing("focus-visible:ring-inset")
       )}
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (onClick && (e.key === "Enter" || e.key === " ")) {
-          e.preventDefault()
-          onClick()
-        }
-      }}
+      disabled={!onClick}
       aria-label={`Version ${formattedDateTime} by ${authorName}${isActive ? " (selected)" : ""}`}
       aria-pressed={onClick ? isActive : undefined}
     >
@@ -63,6 +57,6 @@ export function VersionItem({
           {authorName}
         </OneEllipsis>
       </div>
-    </div>
+    </button>
   )
 }
