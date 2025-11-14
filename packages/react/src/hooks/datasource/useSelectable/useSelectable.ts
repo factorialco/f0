@@ -47,21 +47,35 @@ export function useSelectable<
   }, [paginationInfo, data.records?.length])
 
   /**
+   * Get the item by id from the local selected state or the data records
+   * @param id
+   * @returns
+   */
+  const getItemById = (id: SelectionId) => {
+    const item =
+      localSelectedState.items?.get(id)?.item ??
+      data.records.find((record) => {
+        const itemId = source.selectable && source.selectable(record)
+        return itemId && itemId === id
+      })
+    return item
+  }
+
+  /**
    * Get the list of selected and unselected items from the itemsState for performance reasons
    */
   const [checkedItems, uncheckedItems] = useMemo(() => {
-    const selected = new Map()
-    const unselected = new Map()
-    console.log("localSelectedState.items", localSelectedState.items)
+    const checked = new Map()
+    const unchecked = new Map()
     for (const [id, value] of localSelectedState.items?.entries() || []) {
-      console.log("value", value)
       if (value.checked) {
-        selected.set(id, value.item)
+        checked.set(id, value.item)
       } else {
-        unselected.set(id, value.item)
+        unchecked.set(id, value.item)
       }
     }
-    return [selected, unselected]
+
+    return [checked, unchecked]
   }, [localSelectedState.items])
 
   /**
@@ -121,23 +135,23 @@ export function useSelectable<
         itemStateId,
         itemState,
       ] of newSelectedState.items?.entries() || []) {
+        // Try to get the item from the local selected state if not found, try to get it from the data records
+        const item = getItemById(itemStateId)
         mergedItems.set(itemStateId, {
           id: itemStateId,
           checked: itemState.checked,
-          item:
-            localSelectedState.items?.get(itemStateId)?.item ??
-            data.records.find((record) => {
-              const id = source.selectable && source.selectable(record)
-              return id && id === itemStateId
-            }),
+          item,
         })
       }
+      //Add the missing records as false
       for (const record of data.records) {
         const id = source.selectable && source.selectable(record)
+        // Get the status from the upper level
+        const checked = allSelectedCheck
         if (id && !mergedItems.has(id)) {
           mergedItems.set(id, {
             id,
-            checked: false,
+            checked,
             item: record,
           })
         }
@@ -392,7 +406,7 @@ export function useSelectable<
       }
 
       updated++
-      newItemsState.set(id, { id, checked })
+      newItemsState.set(id, { id, checked, item: getItemById(id) })
     }
 
     // Single selection, we just set the state
@@ -401,19 +415,20 @@ export function useSelectable<
         ...current,
         items: newItemsState,
       }))
-
       return
     }
 
     // Multi selection, we add the new items to the state
     if (updated > 0) {
-      setLocalSelectedState((current) => ({
-        ...current,
-        items: new Map([
-          ...(current.items?.entries() || []),
-          ...(newItemsState.entries() || []),
-        ]),
-      }))
+      setLocalSelectedState((current) => {
+        return {
+          ...current,
+          items: new Map([
+            ...(current.items?.entries() || []),
+            ...(newItemsState.entries() || []),
+          ]),
+        }
+      })
     }
   }
 
@@ -441,7 +456,7 @@ export function useSelectable<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- clearSelected is a stable function
   }, [source.currentFilters])
 
-  /**
+  /**f0
    * Handle the data changes to update the selected items status
    */
   useDeepCompareEffect(() => {
@@ -573,8 +588,6 @@ export function useSelectable<
     uncheckedItems,
   ])
 
-  console.log("checkedItems ***", Array.from(checkedItems.values()))
-  console.log("uncheckedItems ***", Array.from(uncheckedItems.values()))
   return {
     selectedItems: checkedItems,
     selectedGroups: checkedGroups,

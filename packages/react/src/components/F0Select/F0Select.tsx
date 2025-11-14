@@ -567,8 +567,7 @@ const F0SelectComponent = forwardRef(function Select<
                   <SelectedItems
                     multiple={multiple}
                     selection={selectionMeta.checkedItems.map((item) => {
-                      console.log("item ---------------->", item)
-                      if (item?.item) {
+                      if (item) {
                         return optionMapper(item) as F0SelectItemObject<
                           T,
                           ResolvedRecordType<R>
