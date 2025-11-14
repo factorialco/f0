@@ -1,11 +1,11 @@
-import { BaseTag } from "@/components/tags/BaseTag"
+import { BaseTag } from "@/components/tags/internal/BaseTag"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
-import type { Props } from "./types"
+import type { F0TagStatusProps } from "./types"
 
-export const F0TagStatus = forwardRef<HTMLDivElement, Props>(
-  ({ text, additionalAccesibleText, variant }, ref) => {
+export const F0TagStatus = forwardRef<HTMLDivElement, F0TagStatusProps>(
+  ({ text, additionalAccessibleText, variant }, ref) => {
     useTextFormatEnforcer(text, { disallowEmpty: true })
 
     return (
@@ -35,7 +35,7 @@ export const F0TagStatus = forwardRef<HTMLDivElement, Props>(
             aria-hidden
           />
         }
-        additionalAccesibleText={additionalAccesibleText}
+        additionalAccessibleText={additionalAccessibleText}
         text={text}
       />
     )
