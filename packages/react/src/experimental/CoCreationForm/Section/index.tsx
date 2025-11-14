@@ -2,7 +2,11 @@ import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Delete, Ellipsis, LayersFront } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { Reorder } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
+import { DragProvider } from "../SelectQuestion/DragContext"
+import { QuestionElement } from "../types"
+import { Item } from "./Item"
 import { ActionType, OnChangeSectionParams, SectionProps } from "./types"
 
 const TEXT_AREA_STYLE: object = {
@@ -17,7 +21,12 @@ export const Section = ({
   onChange,
   isEditMode,
   onAction,
+  questions,
 }: SectionProps) => {
+  const [internalQuestions, setInternalQuestions] = useState<QuestionElement[]>(
+    questions ?? []
+  )
+
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
 
   const baseOnChangeParams: OnChangeSectionParams = useMemo(
@@ -68,48 +77,64 @@ export const Section = ({
   )
 
   return (
-    <div className="group/section flex w-full flex-col gap-1 bg-f1-background px-5 py-1">
-      <div className="flex flex-row">
-        <input
-          type="text"
-          value={title}
-          onChange={handleChangeTitle}
-          disabled={!isEditMode}
-          className="w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
-        />
-        {isEditMode && (
-          <div
-            className={cn(
-              "opacity-0 group-hover/section:opacity-100",
-              actionsDropdownOpen && "opacity-100"
-            )}
-          >
-            <Dropdown
-              items={actions}
-              icon={Ellipsis}
-              open={actionsDropdownOpen}
-              onOpenChange={setActionsDropdownOpen}
-              align="start"
+    <div className="group/section flex w-full flex-col gap-1 bg-f1-background">
+      <div className="py-1 pl-5 pr-3">
+        <div className="flex flex-row">
+          <input
+            type="text"
+            value={title}
+            onChange={handleChangeTitle}
+            disabled={!isEditMode}
+            className="w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
+          />
+          {isEditMode && (
+            <div
+              className={cn(
+                "opacity-0 group-hover/section:opacity-100",
+                actionsDropdownOpen && "opacity-100"
+              )}
             >
-              <F0Button
+              <Dropdown
+                items={actions}
                 icon={Ellipsis}
-                label="Actions"
-                size="md"
-                variant="ghost"
-                tooltip={false}
-                hideLabel
-              />
-            </Dropdown>
-          </div>
-        )}
+                open={actionsDropdownOpen}
+                onOpenChange={setActionsDropdownOpen}
+                align="start"
+              >
+                <F0Button
+                  icon={Ellipsis}
+                  label="Actions"
+                  size="md"
+                  variant="ghost"
+                  tooltip={false}
+                  hideLabel
+                />
+              </Dropdown>
+            </div>
+          )}
+        </div>
+        <textarea
+          value={description}
+          onChange={handleChangeDescription}
+          disabled={!isEditMode}
+          style={TEXT_AREA_STYLE}
+          className="w-full resize-none text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
+        />
       </div>
-      <textarea
-        value={description}
-        onChange={handleChangeDescription}
-        disabled={!isEditMode}
-        style={TEXT_AREA_STYLE}
-        className="w-full resize-none text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
-      />
+      <DragProvider>
+        <Reorder.Group
+          axis="y"
+          values={internalQuestions}
+          onReorder={setInternalQuestions}
+          as="div"
+        >
+          <div className="group/section-list flex flex-col gap-4">
+            {internalQuestions?.map((question) => (
+              <Item key={question.id} question={question} />
+            ))}
+          </div>
+        </Reorder.Group>
+      </DragProvider>
     </div>
   )
 }

@@ -1,3 +1,5 @@
+import { QuestionElement } from "../types"
+
 export type ActionType = "duplicate" | "delete"
 
 export type SectionActionParams = {
@@ -20,4 +22,5 @@ export type SectionProps = {
   onChange?: (params: OnChangeSectionParams) => void
   isEditMode?: boolean
   onAction?: (params: SectionActionParams) => void
+  questions?: QuestionElement[]
 }

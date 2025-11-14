@@ -19,15 +19,6 @@ export const Default: Story = {
     isEditMode: true,
     elements: [
       {
-        type: "section",
-        section: {
-          id: "section-1",
-          index: 0,
-          title: "Section 1",
-          description: "Section 1 description",
-        },
-      },
-      {
         type: "question",
         question: {
           id: "question-1",
@@ -37,18 +28,32 @@ export const Default: Story = {
         },
       },
       {
-        type: "question",
-        question: {
-          id: "question-2",
-          index: 2,
-          title: "Question 2",
-          type: "select" as const,
-          value: "option-1",
-          options: [
-            { value: "option-1", label: "Option 1" },
-            { value: "option-2", label: "Option 2" },
-            { value: "option-3", label: "Option 3" },
-            { value: "option-4", label: "Option 4" },
+        type: "section",
+        section: {
+          id: "section-1",
+          index: 0,
+          title: "Section 1",
+          description: "Section 1 description",
+          questions: [
+            {
+              id: "question-1",
+              index: 1,
+              title: "Question 1",
+              type: "text" as const,
+            },
+            {
+              id: "question-2",
+              index: 2,
+              title: "Question 2",
+              type: "select" as const,
+              value: "option-1",
+              options: [
+                { value: "option-1", label: "Option 1" },
+                { value: "option-2", label: "Option 2" },
+                { value: "option-3", label: "Option 3" },
+                { value: "option-4", label: "Option 4" },
+              ],
+            },
           ],
         },
       },

@@ -16,6 +16,7 @@ import {
 } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { useCallback, useMemo, useState } from "react"
+import { useDragContext } from "../SelectQuestion/DragContext"
 import { BaseQuestionOnChangeParams, QuestionType } from "../types"
 import { ActionType, BaseQuestionProps } from "./types"
 
@@ -40,6 +41,8 @@ export const BaseQuestion = ({
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
+
+  const { isDragging } = useDragContext()
 
   const baseOnChangeParams: BaseQuestionOnChangeParams = useMemo(
     () => ({
@@ -154,7 +157,12 @@ export const BaseQuestion = ({
   )
 
   return (
-    <div className="group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4 hover:border-f1-border-hover">
+    <div
+      className={cn(
+        "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
+        !isDragging && "hover:border-f1-border-hover"
+      )}
+    >
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
           <textarea
