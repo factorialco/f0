@@ -18294,7 +18294,7 @@ function fj({ title: t, isActive: e = !1, onClick: n }) {
   });
 }
 function uj({ author: t, timestamp: e, onClick: n, isActive: i }) {
-  const { locale: r } = VS(), o = jS(r), s = D8(e, "PPp", {
+  const { locale: r } = VS(), o = jS(r), s = D8(e, "PPPp", {
     locale: o
   }), a = `${t.firstName} ${t.lastName}`;
   return k("div", {
