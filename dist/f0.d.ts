@@ -207,7 +207,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "critical" | "warning" | "positive" | undefined;
+    type?: "info" | "positive" | "critical" | "warning" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -288,7 +288,9 @@ export declare type AvatarVariant = DistributiveOmit<({
     type: "file";
 } & F0AvatarFileProps) | ({
     type: "flag";
-} & F0AvatarFlagProps), "size">;
+} & F0AvatarFlagProps) | ({
+    type: "icon";
+} & F0AvatarIconProps), "size">;
 
 declare type AvatarVariant_2 = ({
     type: "person";
@@ -302,7 +304,9 @@ declare type AvatarVariant_2 = ({
     type: "flag";
 } & Omit<F0AvatarFlagProps, "size">) | ({
     type: "emoji";
-} & Omit<F0AvatarEmojiProps, "size">);
+} & Omit<F0AvatarEmojiProps, "size">) | ({
+    type: "icon";
+} & Omit<F0AvatarIconProps, "size">);
 
 export declare type AvatarVariants = (typeof avatarVariants)[number];
 
@@ -325,7 +329,7 @@ declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -787,6 +791,7 @@ declare interface CardInternalProps {
 
 declare type CardMetadata = {
     icon: IconType;
+    tooltip?: string;
     property: Exclude<CardMetadataProperty, {
         type: "file";
     }>;
@@ -815,6 +820,7 @@ declare interface CardPrimaryAction {
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
+    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -933,7 +939,7 @@ declare type ChipVariants = {
 };
 
 declare const chipVariants: (props?: ({
-    variant?: "default" | "selected" | undefined;
+    variant?: "selected" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -1381,9 +1387,21 @@ export declare const defaultTranslations: {
         };
     };
     readonly navigation: {
-        readonly sidebar: "Main navigation";
+        readonly sidebar: {
+            readonly label: "Main navigation";
+            readonly companySelector: {
+                readonly label: "Select a company";
+                readonly placeholder: "Select a company";
+            };
+        };
         readonly previous: "Previous";
         readonly next: "Next";
+    };
+    readonly inputs: {
+        readonly password: {
+            readonly show: "Show password";
+            readonly hide: "Hide password";
+        };
     };
     readonly actions: {
         readonly add: "Add";
@@ -1570,6 +1588,7 @@ export declare const defaultTranslations: {
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
+        readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -1777,7 +1796,7 @@ export declare const F0AvatarIcon: {
     displayName: string;
 };
 
-declare type F0AvatarIconProps = {
+export declare type F0AvatarIconProps = {
     icon: IconType;
     size?: (typeof avatarIconSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
@@ -1963,7 +1982,7 @@ export declare interface F0ButtonToggleProps {
     /**
      * The accessible label for the button.
      */
-    label: string;
+    label: string | [string, string];
     /**
      * Whether the button is disabled.
      */
@@ -2030,6 +2049,7 @@ export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps_2, 
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
+    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -2316,6 +2336,10 @@ declare interface I18nProviderProps {
     children: ReactNode;
     translations: TranslationsType;
 }
+
+export declare type IconAvatarVariant = Extract<AvatarVariant, {
+    type: "icon";
+}>;
 
 declare const iconSizes: {
     readonly xs: "xs";
@@ -3960,15 +3984,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

@@ -1,8 +1,8 @@
-import { S as xe, a as mt, f as ne, L as K, b as ht, A as vt, i as J, c as yt, d as Te, E as bt, g as X, e as gt, h as xt, C as wt, j as Pt, k as $, l as Fe, u as St, G as Ct, m as Nt, n as we, o as At, p as Ie, q as Ot, B as _e, X as Ee, Y as le, r as kt, s as je, t as Lt, v as Dt, w as Tt, x as Ft, y as It, z as _t, D as Et, F as jt, H as Pe, I as $t, J as W, K as oe, M as Bt, N as Mt, O as Rt, P as $e, Q as E, R as I, T as zt, U as Kt, V as Wt, W as qt, Z as Gt, _ as Vt, $ as Yt, a0 as Be, a1 as Ut, a2 as Z, a3 as Me, a4 as Re, a5 as Ht, a6 as ze, a7 as Ke, a8 as We, a9 as qe, aa as Jt, ab as Ge, ac as Xt, ad as Zt, ae as Qt, af as Se, ag as ie, ah as ea, ai as ta, aj as Ve, ak as aa, al as ra, am as Ye, an as na, ao as oa, ap as ia, aq as sa, ar as la, as as ca, at as ua, au as da, av as Ue, aw as M, ax as He, ay as fa, az as pa, aA as Ce, aB as ma, aC as Je, aD as ha, aE as va, aF as ya, aG as ba, aH as ga, aI as xa, aJ as wa, aK as Pa, aL as Sa, aM as Ca, aN as Na, aO as Aa } from "./hooks-BgyJNa8N.js";
-import { bp as tn, br as an, bA as rn, aP as nn, aQ as on, aR as sn, aS as ln, aT as cn, aU as un, aV as dn, aW as fn, aY as pn, aZ as mn, a_ as hn, a$ as vn, b0 as yn, b1 as bn, bw as gn, b3 as xn, b5 as wn, b6 as Pn, b7 as Sn, b8 as Cn, bb as Nn, bc as An, bd as On, bf as kn, b4 as Ln, be as Dn, ba as Tn, bx as Fn, bq as In, bk as _n, bn as En, bj as jn, bB as $n, bi as Bn, bh as Mn, aX as Rn, b2 as zn, b9 as Kn, bg as Wn, bl as qn, bs as Gn, bt as Vn, bu as Yn, bC as Un, bm as Hn, bv as Jn, bz as Xn, bo as Zn, by as Qn } from "./hooks-BgyJNa8N.js";
+import { S as xe, a as mt, f as ne, L as K, b as ht, A as vt, i as J, c as yt, d as De, E as bt, g as X, e as gt, h as xt, C as wt, j as Pt, k as $, l as Fe, u as St, G as Ct, m as Nt, n as we, o as At, p as Ie, q as Ot, B as _e, X as Ee, Y as le, r as kt, s as je, t as Lt, v as Tt, w as Dt, x as Ft, y as It, z as _t, D as Et, F as jt, H as Pe, I as $t, J as W, K as oe, M as Bt, N as Mt, O as Rt, P as $e, Q as E, R as I, T as zt, U as Kt, V as Wt, W as qt, Z as Gt, _ as Vt, $ as Yt, a0 as Be, a1 as Ht, a2 as Z, a3 as Me, a4 as Re, a5 as Ut, a6 as ze, a7 as Ke, a8 as We, a9 as qe, aa as Jt, ab as Ge, ac as Xt, ad as Zt, ae as Qt, af as Se, ag as ie, ah as ea, ai as ta, aj as Ve, ak as aa, al as ra, am as Ye, an as na, ao as oa, ap as ia, aq as sa, ar as la, as as ca, at as ua, au as da, av as He, aw as M, ax as Ue, ay as fa, az as pa, aA as Ce, aB as ma, aC as Je, aD as ha, aE as va, aF as ya, aG as ba, aH as ga, aI as xa, aJ as wa, aK as Pa, aL as Sa, aM as Ca, aN as Na, aO as Aa } from "./hooks-CCGeE9E2.js";
+import { bp as tn, br as an, bA as rn, aP as nn, aQ as on, aR as sn, aS as ln, aT as cn, aU as un, aV as dn, aW as fn, aY as pn, aZ as mn, a_ as hn, a$ as vn, b0 as yn, b1 as bn, bw as gn, b3 as xn, b5 as wn, b6 as Pn, b7 as Sn, b8 as Cn, bb as Nn, bc as An, bd as On, bf as kn, b4 as Ln, be as Tn, ba as Dn, bx as Fn, bq as In, bk as _n, bn as En, bj as jn, bB as $n, bi as Bn, bh as Mn, aX as Rn, b2 as zn, b9 as Kn, bg as Wn, bl as qn, bs as Gn, bt as Vn, bu as Yn, bC as Hn, bm as Un, bv as Jn, bz as Xn, bo as Zn, by as Qn } from "./hooks-CCGeE9E2.js";
 import { jsx as n, jsxs as C, Fragment as ae } from "react/jsx-runtime";
 import * as fe from "react";
-import k, { PureComponent as Oa, useState as D, forwardRef as V, useEffect as B, useMemo as se, useCallback as Ne, useRef as pe, useImperativeHandle as ka, Children as La, createContext as Da } from "react";
+import k, { PureComponent as Oa, useState as T, forwardRef as V, useEffect as B, useMemo as se, useCallback as Ne, useRef as pe, useImperativeHandle as ka, Children as La, createContext as Ta } from "react";
 const Ar = {
   approvals: {
     history: "Approval history",
@@ -18,9 +18,21 @@ const Ar = {
     }
   },
   navigation: {
-    sidebar: "Main navigation",
+    sidebar: {
+      label: "Main navigation",
+      companySelector: {
+        label: "Select a company",
+        placeholder: "Select a company"
+      }
+    },
     previous: "Previous",
     next: "Next"
+  },
+  inputs: {
+    password: {
+      show: "Show password",
+      hide: "Hide password"
+    }
   },
   actions: {
     add: "Add",
@@ -207,6 +219,7 @@ const Ar = {
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
+    thinking: "Thinking...",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -244,7 +257,7 @@ function R(e) {
     return t && typeof Symbol == "function" && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t;
   }, R(e);
 }
-function Ta(e, t) {
+function Da(e, t) {
   if (!(e instanceof t))
     throw new TypeError("Cannot call a class as a function");
 }
@@ -316,7 +329,7 @@ function Ba(e, t) {
 }
 var re = /* @__PURE__ */ function(e) {
   function t() {
-    return Ta(this, t), _a(this, t, arguments);
+    return Da(this, t), _a(this, t, arguments);
   }
   return $a(t, e), Ia(t, [{
     key: "render",
@@ -459,7 +472,7 @@ function ee(e) {
     return r.__proto__ || Object.getPrototypeOf(r);
   }, ee(e);
 }
-function Ua(e, t) {
+function Ha(e, t) {
   if (typeof t != "function" && t !== null)
     throw new TypeError("Super expression must either be null or a function");
   e.prototype = Object.create(t && t.prototype, { constructor: { value: e, writable: !0, configurable: !0 } }), Object.defineProperty(e, "prototype", { writable: !1 }), t && ue(e, t);
@@ -473,10 +486,10 @@ function j(e, t, r) {
   return t = tt(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
 }
 function tt(e) {
-  var t = Ha(e, "string");
+  var t = Ua(e, "string");
   return z(t) == "symbol" ? t : t + "";
 }
-function Ha(e, t) {
+function Ua(e, t) {
   if (z(e) != "object" || !e) return e;
   var r = e[Symbol.toPrimitive];
   if (r !== void 0) {
@@ -504,7 +517,7 @@ var Y = /* @__PURE__ */ function(e) {
       });
     }), j(r, "id", St("recharts-scatter-")), r;
   }
-  return Ua(t, e), qa(t, [{
+  return Ha(t, e), qa(t, [{
     key: "renderSymbolsStatically",
     value: function(a) {
       var o = this, s = this.props, l = s.shape, d = s.activeShape, i = s.activeIndex, m = ne(this.props, !1);
@@ -571,7 +584,7 @@ var Y = /* @__PURE__ */ function(e) {
       var a = this.props.isAnimationActive;
       if (a && !this.state.isAnimationFinished)
         return null;
-      var o = this.props, s = o.points, l = o.xAxis, d = o.yAxis, i = o.children, m = Te(i, bt);
+      var o = this.props, s = o.points, l = o.xAxis, d = o.yAxis, i = o.children, m = De(i, bt);
       return m ? m.map(function(c, f) {
         var h = c.props, u = h.direction, g = h.dataKey;
         return /* @__PURE__ */ k.cloneElement(c, {
@@ -678,7 +691,7 @@ j(Y, "defaultProps", {
   animationEasing: "linear"
 });
 j(Y, "getComposedData", function(e) {
-  var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, d = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = Te(o.props.children, Nt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, g = a ? a.range : re.defaultProps.range, N = g && g[0], A = t.scale.bandwidth ? t.scale.bandwidth() : 0, O = r.scale.bandwidth ? r.scale.bandwidth() : 0, x = s.map(function(b, w) {
+  var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, d = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = De(o.props.children, Nt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, g = a ? a.range : re.defaultProps.range, N = g && g[0], A = t.scale.bandwidth ? t.scale.bandwidth() : 0, O = r.scale.bandwidth ? r.scale.bandwidth() : 0, x = s.map(function(b, w) {
     var P = X(b, f), y = X(b, h), v = !$(u) && X(b, u) || "-", L = [{
       name: $(t.dataKey) ? o.props.name : t.name || t.dataKey,
       unit: t.unit || "",
@@ -702,7 +715,7 @@ j(Y, "getComposedData", function(e) {
       dataKey: u,
       type: m
     });
-    var T = we({
+    var D = we({
       axis: t,
       ticks: l,
       bandSize: A,
@@ -718,9 +731,9 @@ j(Y, "getComposedData", function(e) {
       dataKey: h
     }), p = v !== "-" ? a.scale(v) : N, S = Math.sqrt(Math.max(p, 0) / Math.PI);
     return F(F({}, b), {}, {
-      cx: T,
+      cx: D,
       cy: _,
-      x: T - S,
+      x: D - S,
       y: _ - S,
       xAxis: t,
       yAxis: r,
@@ -735,7 +748,7 @@ j(Y, "getComposedData", function(e) {
       },
       tooltipPayload: L,
       tooltipPosition: {
-        x: T,
+        x: D,
         y: _
       },
       payload: b
@@ -787,9 +800,9 @@ const Xa = (e) => {
 }, Za = ({ dataConfig: e, data: t, xAxis: r, yAxis: a = {
   hide: !0
 }, label: o = !1, hideTooltip: s = !1, hideGrid: l = !1, aspect: d, legend: i, showValueUnderLabel: m = !1, bar: c, line: f, scatter: h, onClick: u }, g) => {
-  var v, L, T, _;
-  const N = Lt(t), A = c != null && c.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], O = f != null && f.categories ? Array.isArray(f.categories) ? f.categories : [f.categories] : [], x = h != null && h.categories ? Array.isArray(h.categories) ? h.categories : [h.categories] : [], b = [...A, ...O, ...x], w = Math.max(...N.flatMap((p) => b.map((S) => Dt(a != null && a.tickFormatter ? a.tickFormatter(`${p[S]}`) : `${p[S]}`)))), P = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "left"), y = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "right");
-  return n(Tt, {
+  var v, L, D, _;
+  const N = Lt(t), A = c != null && c.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], O = f != null && f.categories ? Array.isArray(f.categories) ? f.categories : [f.categories] : [], x = h != null && h.categories ? Array.isArray(h.categories) ? h.categories : [h.categories] : [], b = [...A, ...O, ...x], w = Math.max(...N.flatMap((p) => b.map((S) => Tt(a != null && a.tickFormatter ? a.tickFormatter(`${p[S]}`) : `${p[S]}`)))), P = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "left"), y = [c, f, h].filter((p) => (p == null ? void 0 : p.axisPosition) === "right");
+  return n(Dt, {
     config: e,
     ref: g,
     aspect: d,
@@ -810,8 +823,8 @@ const Xa = (e) => {
           label: p.activeLabel,
           values: {}
         };
-        for (const U of p.activePayload)
-          S.values[U.name] = U.value;
+        for (const H of p.activePayload)
+          S.values[H.name] = H.value;
         u(S);
       },
       children: [!s && n(Ft, {
@@ -836,7 +849,7 @@ const Xa = (e) => {
         yAxisId: "right",
         orientation: "right",
         tick: !0,
-        width: a.width ?? w + 20 + (P.length > 0 && ((T = y[0]) != null && T.axisLabel) ? 20 : 0),
+        width: a.width ?? w + 20 + (P.length > 0 && ((D = y[0]) != null && D.axisLabel) ? 20 : 0),
         hide: a.hide || y.some((p) => p == null ? void 0 : p.hideAxis),
         label: (_ = y[0]) != null && _.axisLabel ? {
           value: y[0].axisLabel,
@@ -848,9 +861,9 @@ const Xa = (e) => {
         hide: r == null ? void 0 : r.hide,
         tick: m ? (p) => {
           var be, ge;
-          const { x: S, y: U, payload: ve } = p, ye = ((be = t.find((pt) => pt.label === ve.value)) == null ? void 0 : be.values) || "", H = Object.keys(ye).length === 1 ? (ge = Object.values(ye)) == null ? void 0 : ge[0] : void 0, ft = H !== void 0 && a.tickFormatter ? a.tickFormatter(`${H}`) : H.toLocaleString();
+          const { x: S, y: H, payload: ve } = p, ye = ((be = t.find((pt) => pt.label === ve.value)) == null ? void 0 : be.values) || "", U = Object.keys(ye).length === 1 ? (ge = Object.values(ye)) == null ? void 0 : ge[0] : void 0, ft = U !== void 0 && a.tickFormatter ? a.tickFormatter(`${U}`) : U.toLocaleString();
           return C("g", {
-            transform: `translate(${S},${U})`,
+            transform: `translate(${S},${H})`,
             children: [n("text", {
               x: 0,
               y: 0,
@@ -858,7 +871,7 @@ const Xa = (e) => {
               textAnchor: "middle",
               className: "text-sm font-medium !text-f1-foreground-secondary",
               children: ve.value
-            }), !!H && n("text", {
+            }), !!U && n("text", {
               x: 0,
               y: 0,
               dy: 28,
@@ -1021,13 +1034,13 @@ const sr = ({ value: e, max: t = 100, label: r, color: a }, o) => {
     type: "info"
   },
   Vt
-), Dr = I(
+), Tr = I(
   {
     name: "BarChart",
     type: "info"
   },
   zt
-), Tr = I(
+), Dr = I(
   {
     name: "CategoryBarChart",
     type: "info"
@@ -1063,8 +1076,8 @@ const sr = ({ value: e, max: t = 100, label: r, color: a }, o) => {
     type: "info"
   },
   Qa
-), $r = Yt, Br = Be, Mr = ["default", "outline", "neutral"], Rr = Be, zr = ["sm", "md", "lg"], Kr = Ut, de = ({ count: e, list: t }) => {
-  const [r, a] = D(!1), o = n(Z, {
+), $r = Yt, Br = Be, Mr = ["default", "outline", "neutral"], Rr = Be, zr = ["sm", "md", "lg"], Kr = Ht, de = ({ count: e, list: t }) => {
+  const [r, a] = T(!1), o = n(Z, {
     label: `+${e}`
   });
   return t != null && t.length ? C(Me, {
@@ -1073,7 +1086,7 @@ const sr = ({ value: e, max: t = 100, label: r, color: a }, o) => {
     children: [n(Re, {
       asChild: !0,
       children: n("button", {
-        className: Ht("inline-flex flex-shrink-0 items-center"),
+        className: Ut("inline-flex flex-shrink-0 items-center"),
         children: o
       })
     }), n(ze, {
@@ -1124,7 +1137,7 @@ const lt = ({ chips: e, max: t = 4, remainingCount: r, layout: a = "compact" }) 
 };
 lt.displayName = "F0ChipList";
 const Wr = qe("F0ChipList", lt), ct = V(({ value: e, onDateChange: t, granularity: r, onOpenChange: a, minDate: o, maxDate: s, onClear: l, ...d }, i) => {
-  const [m, c] = D(""), [f, h] = D(!1), u = Ge();
+  const [m, c] = T(""), [f, h] = T(!1), u = Ge();
   B(() => {
     c(r.toString(e == null ? void 0 : e.value, u));
   }, [e, r, u]);
@@ -1172,7 +1185,7 @@ const Wr = qe("F0ChipList", lt), ct = V(({ value: e, onDateChange: t, granularit
 });
 ct.displayName = "DateInput";
 function cr({ onChange: e, value: t, presets: r = [], granularities: a = ["day"], minDate: o, maxDate: s, open: l = !1, ...d }) {
-  const [i, m] = D(), [c, f] = D(l);
+  const [i, m] = T(), [c, f] = T(l);
   B(() => {
     f(l);
   }, [l]);
@@ -1199,8 +1212,8 @@ function cr({ onChange: e, value: t, presets: r = [], granularities: a = ["day"]
     ie(i, y) || m(y);
   }, [t]);
   const O = (y) => {
-    const v = N(y), T = g(v == null ? void 0 : v.granularity).calendarMode !== "range" && (v == null ? void 0 : v.granularity) === (i == null ? void 0 : i.granularity) && !ie(v, i);
-    x(v), T && f(!1);
+    const v = N(y), D = g(v == null ? void 0 : v.granularity).calendarMode !== "range" && (v == null ? void 0 : v.granularity) === (i == null ? void 0 : i.granularity) && !ie(v, i);
+    x(v), D && f(!1);
   }, x = (y) => {
     const v = N(y);
     if (m(v), !ie(v, i)) {
@@ -1327,7 +1340,7 @@ const Vr = I({
 }, ut), Yr = I({
   name: "TwoColumnLayout",
   type: "layout"
-}, fr), Ur = I({
+}, fr), Hr = I({
   name: "HomeLayout",
   type: "layout"
 }, dr), hr = ({ benefits: e }) => n("div", {
@@ -1392,7 +1405,7 @@ const Vr = I({
 }));
 dt.displayName = "ProductBlankslate";
 function yr({ isOpen: e, onClose: t, title: r, children: a, module: o, portalContainer: s }) {
-  const [l, d] = D(e);
+  const [l, d] = T(e);
   return B(() => {
     d(e);
   }, [e]), n(la, {
@@ -1414,7 +1427,7 @@ function yr({ isOpen: e, onClose: t, title: r, children: a, module: o, portalCon
           }), r]
         }), n(da, {
           variant: "outline",
-          icon: Ue,
+          icon: He,
           onClick: t,
           label: "Close modal",
           hideLabel: !0
@@ -1429,8 +1442,8 @@ function yr({ isOpen: e, onClose: t, title: r, children: a, module: o, portalCon
     })
   });
 }
-function Hr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessage: s, successMessage: l, loadingState: d, nextSteps: i, closeLabel: m, primaryAction: c, modalTitle: f, modalModule: h, secondaryAction: u, portalContainer: g, tag: N, promoTag: A, showResponseDialog: O = !0 }) {
-  const [x, b] = D(e), [w, P] = D(null), [y, v] = D(!1), L = async () => {
+function Ur({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessage: s, successMessage: l, loadingState: d, nextSteps: i, closeLabel: m, primaryAction: c, modalTitle: f, modalModule: h, secondaryAction: u, portalContainer: g, tag: N, promoTag: A, showResponseDialog: O = !0 }) {
+  const [x, b] = T(e), [w, P] = T(null), [y, v] = T(!1), L = async () => {
     if (c != null && c.onClick) {
       v(!0);
       try {
@@ -1441,13 +1454,13 @@ function Hr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
         v(!1);
       }
     }
-  }, T = () => {
+  }, D = () => {
     b(!1), t == null || t();
   }, _ = y;
   return C(ae, {
     children: [n(yr, {
       isOpen: x,
-      onClose: T,
+      onClose: D,
       title: f,
       module: h,
       portalContainer: g,
@@ -1479,10 +1492,10 @@ function Hr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
           })
         })
       })
-    }), w && O && n(He, {
+    }), w && O && n(Ue, {
       open: !0,
       onClose: () => {
-        T(), P(null);
+        D(), P(null);
       },
       success: w === "success",
       errorMessage: s,
@@ -1494,7 +1507,7 @@ function Hr({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
   });
 }
 function br({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o, width: s, trackVisibility: l, actions: d, showConfirmation: i = !0 }) {
-  const [m, c] = D(!1), f = () => {
+  const [m, c] = T(!1), f = () => {
     c(!0), a && a();
   };
   B(() => {
@@ -1512,7 +1525,7 @@ function br({ mediaUrl: e, title: t, description: r, onClose: a, dismissible: o,
           className: "absolute right-2 top-2 z-10",
           children: n(M, {
             variant: "ghost",
-            icon: Ue,
+            icon: He,
             size: "sm",
             hideLabel: !0,
             onClick: f,
@@ -1595,7 +1608,7 @@ const gr = V(function({ primaryAction: t, secondaryAction: r, ...a }, o) {
 });
 gr.displayName = "UpsellingBanner";
 function Jr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o = "md", showIcon: s = !0, side: l = "right", align: d = "center", icon: i = va, mediaUrl: m, title: c, description: f, width: h = "300px", trackVisibility: u, actions: g, onClick: N, hideLabel: A = !1 }) {
-  const [O, x] = D(!1), [b, w] = D(null), [P, y] = D(null), v = (S) => {
+  const [O, x] = T(!1), [b, w] = T(null), [P, y] = T(null), v = (S) => {
     t(S), N && N();
   }, L = async (S) => {
     if (S.type === "upsell") {
@@ -1606,7 +1619,7 @@ function Jr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o
         x(!0), w("error");
       }
     }
-  }, T = () => {
+  }, D = () => {
     w(null), x(!1), y(null), t(!1);
   }, _ = e && !O, p = g == null ? void 0 : g.map((S) => S.type === "upsell" ? {
     ...S,
@@ -1642,9 +1655,9 @@ function Jr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o
           showConfirmation: !1
         })
       })]
-    }), (P == null ? void 0 : P.type) === "upsell" && P.showConfirmation && b && n(He, {
+    }), (P == null ? void 0 : P.type) === "upsell" && P.showConfirmation && b && n(Ue, {
       open: !0,
-      onClose: T,
+      onClose: D,
       success: b === "success",
       errorMessage: P.errorMessage,
       successMessage: P.successMessage,
@@ -1654,8 +1667,8 @@ function Jr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o
     })]
   });
 }
-const xr = Da(null), wr = ({ children: e, fullScreen: t = !0 }) => {
-  const r = pe(null), [a, o] = D(r.current);
+const xr = Ta(null), wr = ({ children: e, fullScreen: t = !0 }) => {
+  const r = pe(null), [a, o] = T(r.current);
   return Aa(() => {
     o(r.current);
   }, []), n(xr.Provider, {
@@ -1703,19 +1716,19 @@ const xr = Da(null), wr = ({ children: e, fullScreen: t = !0 }) => {
       })
     })
   })
-}), De = (e) => `datacollection-${e}`, Zr = {
+}), Te = (e) => `datacollection-${e}`, Zr = {
   get: async (e) => JSON.parse(
-    localStorage.getItem(De(e)) ?? "{}"
+    localStorage.getItem(Te(e)) ?? "{}"
   ),
   set: async (e, t) => {
-    localStorage.setItem(De(e), JSON.stringify(t));
+    localStorage.setItem(Te(e), JSON.stringify(t));
   }
 };
 export {
   Lr as AreaChart,
   tn as Await,
-  Dr as BarChart,
-  Tr as CategoryBarChart,
+  Tr as BarChart,
+  Dr as CategoryBarChart,
   jr as ComboChart,
   an as DndProvider,
   rn as EmojiImage,
@@ -1751,20 +1764,20 @@ export {
   oa as F0TagStatus,
   On as F0TagTeam,
   kn as GROUP_ID_SYMBOL,
-  Ur as HomeLayout,
+  Hr as HomeLayout,
   Fr as LineChart,
   Ln as OneFilterPicker,
   Ir as PieChart,
   Pa as PrivacyModeProvider,
   dt as ProductBlankslate,
-  Dn as ProductCard,
-  Hr as ProductModal,
+  Tn as ProductCard,
+  Ur as ProductModal,
   br as ProductWidget,
   Er as ProgressBarChart,
   Vr as StandardLayout,
-  Tn as TagCounter,
+  Dn as TagCounter,
   Yr as TwoColumnLayout,
-  He as UpsellRequestResponseDialog,
+  Ue as UpsellRequestResponseDialog,
   gr as UpsellingBanner,
   Je as UpsellingButton,
   Jr as UpsellingPopover,
@@ -1796,8 +1809,8 @@ export {
   Gn as useDndEvents,
   Vn as useDraggable,
   Yn as useDroppableList,
-  Un as useEmojiConfetti,
-  Hn as useGroups,
+  Hn as useEmojiConfetti,
+  Un as useGroups,
   Jn as usePrivacyMode,
   Xn as useReducedMotion,
   Zn as useSelectable,
