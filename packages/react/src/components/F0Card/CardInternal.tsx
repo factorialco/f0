@@ -1,3 +1,4 @@
+import { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -22,6 +23,12 @@ import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import { type CardMetadata as CardMetadataType } from "./types"
+
+export interface CardHoverAction {
+  label?: string
+  icon?: IconType
+  onClick: () => void
+}
 
 export interface CardInternalProps {
   /**
@@ -115,6 +122,11 @@ export interface CardInternalProps {
    * can manage drag-and-drop while still allowing click navigation via onClick
    */
   disableOverlayLink?: boolean
+
+  /**
+   * Action to display on hover at the bottom of the card
+   */
+  hoverAction?: CardHoverAction
 }
 
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
@@ -138,6 +150,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       forceVerticalMetadata = false,
       fullHeight = false,
       disableOverlayLink = false,
+      hoverAction,
     },
     ref
   ) {
@@ -288,6 +301,23 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           secondaryActions={secondaryActions}
           compact={compact}
         />
+        {hoverAction && (
+          <div className="absolute bottom-0 left-1/2 z-10 flex -translate-x-1/2 translate-y-1/2 justify-center opacity-0 transition-all group-hover:opacity-100">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                hoverAction.onClick()
+              }}
+              className="flex items-center justify-center gap-2 rounded-lg border border-f1-border bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg hover:border-f1-border-hover"
+              aria-label={hoverAction.label || "Action"}
+            >
+              {hoverAction.icon && (
+                <hoverAction.icon className="h-5 w-5" aria-hidden="true" />
+              )}
+              {hoverAction.label && <span>{hoverAction.label}</span>}
+            </button>
+          </div>
+        )}
       </Card>
     )
   }
