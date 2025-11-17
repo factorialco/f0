@@ -91883,6 +91883,7 @@ const jwt = ({ text: e }) => c("div", {
                 duration: 0.2
               },
               className: oe("flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0", or()),
+              "aria-label": "Clear",
               type: "button",
               tabIndex: 0,
               onClick: ($e) => {
