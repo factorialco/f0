@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
 import { useCoCreationFormContext } from "../../Context"
 import { useDragContext } from "../../DragContext"
-import { Question } from "../../Question"
+import { Question, QuestionProps } from "../../Question"
 import { QuestionElement } from "../../types"
 
 type ItemProps = {
@@ -50,7 +50,12 @@ export const Item = ({ question }: ItemProps) => {
             <F0Icon icon={Handle} size="sm" />
           </div>
         )}
-        <Question {...question} isEditMode={isEditMode} />
+        <Question
+          {...({
+            ...question,
+          } as QuestionProps)}
+          isEditMode={isEditMode}
+        />
       </div>
     </Reorder.Item>
   )
