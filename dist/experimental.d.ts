@@ -4527,7 +4527,17 @@ export declare type QuestionActionParams = {
     index: number;
 };
 
-declare type QuestionElement = Omit<QuestionProps, "onAction" | "onChange" | "onAddNewElement">;
+declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmit> | Omit<RatingQuestionProps & {
+    type: "rating";
+}, QuestionPropsToOmit> | Omit<SelectQuestionProps & {
+    type: "select" | "multi-select";
+}, QuestionPropsToOmit> | Omit<NumericQuestionProps & {
+    type: "numeric";
+}, QuestionPropsToOmit> | Omit<LinkQuestionProps & {
+    type: "link";
+}, QuestionPropsToOmit> | Omit<DateQuestionProps & {
+    type: "date";
+}, QuestionPropsToOmit>;
 
 export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents & (TextQuestionProps | (RatingQuestionProps & {
     type: "rating";
@@ -4540,6 +4550,8 @@ export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents 
 }) | (DateQuestionProps & {
     type: "date";
 }));
+
+declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
 declare type QuestionType = "section" | "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link";
 
