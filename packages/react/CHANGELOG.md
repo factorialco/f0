@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.270.0](https://github.com/factorialco/f0/compare/f0-react-v1.269.0...f0-react-v1.270.0) (2025-11-17)
+
+
+### Features
+
+* **F0VersionHistory:** add version history component ([#2972](https://github.com/factorialco/f0/issues/2972)) ([e4a828b](https://github.com/factorialco/f0/commit/e4a828bd4809a2370b1bdfd493f88124e0ad4bef))
+
+## [1.269.0](https://github.com/factorialco/f0/compare/f0-react-v1.268.2...f0-react-v1.269.0) (2025-11-17)
+
+
+### Features
+
+* **tooltip:** add instant prop for immediate tooltip interaction ([#2981](https://github.com/factorialco/f0/issues/2981)) ([46a5e07](https://github.com/factorialco/f0/commit/46a5e079c2fdcae134b0a3f7862ec2d79903bdd6))
+
+## [1.268.2](https://github.com/factorialco/f0/compare/f0-react-v1.268.1...f0-react-v1.268.2) (2025-11-17)
+
+
+### Bug Fixes
+
+* **tooltip:** add pointer-events-none to prevent tooltip interference ([#2979](https://github.com/factorialco/f0/issues/2979)) ([696e558](https://github.com/factorialco/f0/commit/696e5583b003a81ed9c6fe951adea306d30133ac))
+
 ## [1.268.1](https://github.com/factorialco/f0/compare/f0-react-v1.268.0...f0-react-v1.268.1) (2025-11-17)
 
 
