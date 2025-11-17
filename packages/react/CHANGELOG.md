@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.270.1](https://github.com/factorialco/f0/compare/f0-react-v1.270.0...f0-react-v1.270.1) (2025-11-17)
+
+
+### Bug Fixes
+
+* number filter range ([#2978](https://github.com/factorialco/f0/issues/2978)) ([4e13663](https://github.com/factorialco/f0/commit/4e13663315f3f245ce34d17d0a31a426fed2b6a3))
+
 ## [1.270.0](https://github.com/factorialco/f0/compare/f0-react-v1.269.0...f0-react-v1.270.0) (2025-11-17)
 
 
