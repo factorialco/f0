@@ -1,10 +1,10 @@
+import { F0Select } from "@/components/F0Select"
 import { VirtualItem } from "@tanstack/react-virtual"
 import React, { useCallback, useMemo } from "react"
+import { Action } from "../../../../../components/F0Select/components/SelectBottomActions"
 import { cn } from "../../../../../lib/utils"
 import { Spinner } from "../../../../Information/Spinner"
 import { VirtualList } from "../../../../Navigation/VirtualList"
-import { Select } from "../../../Fields/Select"
-import { Action } from "../../../Fields/Select/SelectBottomActions"
 import { CreateItem } from "../../CreateItem"
 import { EntitySelectListItem } from "../../ListItem"
 import {
@@ -459,7 +459,7 @@ export const MainContent: React.FC<MainContentProps> = ({
         </div>
         {groups && groups.length > 1 && (
           <div className="flex-1">
-            <Select
+            <F0Select
               label="Group"
               hideLabel
               disabled={loading}

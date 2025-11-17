@@ -24,7 +24,9 @@ const Tags = ({ tags, right }: { tags: Tag[]; right?: boolean }) => (
         <div>
           <F0TagRaw
             icon={tag.icon}
-            additionalAccesibleText={`${tag.label}: ${tag.description}`}
+            text={tag.label ?? (tag.description || "")}
+            onlyIcon
+            additionalAccessibleText={`${tag.label}: ${tag.description}`}
           />
         </div>
       )

@@ -8,6 +8,7 @@ import { useEffect, useId, useMemo, useState } from "react"
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
+import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
@@ -110,18 +111,44 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   }, [filters])
   const id = useId()
 
+  const activeFilters = useMemo(
+    () => getActiveFilterKeys(filters, localFiltersValue, i18n),
+    [filters, localFiltersValue, i18n]
+  )
+
+  const activeFiltersTooltip = useMemo(() => {
+    return activeFilters.length > 0
+      ? i18n.t("filters.activeFilters", {
+          filters: activeFilters
+            .map((key) => {
+              return filters[key].label
+            })
+            .join(", "),
+        })
+      : undefined
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the active filters change
+  }, [activeFilters, filters])
+
   if (mode === "compact") {
     const hasFiltersApplied = !!Object.values(localFiltersValue).length
 
-    const BackButton = (
-      <div className="pl-1.5 pt-1.5">
+    const navHeaderTitle = selectedFilterKey
+      ? i18n.t("filters.filteringBy", {
+          label: filters[selectedFilterKey].label,
+        })
+      : i18n.t("filters.availableFilters")
+
+    const NavHeader = (
+      <div className="flex items-center gap-2 pl-1.5 pt-1.5">
         <F0Button
           label="Back"
           icon={ArrowLeft}
+          hideLabel
           variant="ghost"
           size="sm"
           onClick={handleGoBack}
         />
+        {navHeaderTitle}
       </div>
     )
 
@@ -149,7 +176,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             onClick={() => onOpenChange(!isOpen)}
             aria-controls={isOpen ? id : undefined}
             hideLabel
+            tooltip={activeFiltersTooltip}
           />
+
           {hasFiltersApplied && (
             <div className="absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold" />
           )}
@@ -164,7 +193,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
               <div className="flex h-full flex-col transition-all">
-                {BackButton}
+                {NavHeader}
                 <div className="flex flex-1">
                   {selectedFilterKey ? (
                     <motion.div
