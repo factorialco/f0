@@ -12,6 +12,7 @@ type TooltipInternalProps = {
   children: React.ReactNode
   shortcut?: ComponentProps<typeof Shortcut>["keys"]
   delay?: number
+  instant?: boolean
 } & (
   | {
       label: string
@@ -28,17 +29,25 @@ export function TooltipInternal({
   description,
   children,
   shortcut,
+  instant = false,
   delay = 700,
 }: TooltipInternalProps) {
   return (
     <>
-      <TooltipProvider delayDuration={delay}>
+      <TooltipProvider
+        delayDuration={instant ? 100 : delay}
+        disableHoverableContent={instant}
+      >
         <TooltipPrimitive>
           <TooltipTrigger asChild className="pointer-events-auto">
             {children}
           </TooltipTrigger>
           <TooltipContent
-            className={cn("pointer-events-none max-w-xs", shortcut && "pr-1.5")}
+            className={cn(
+              "max-w-xs",
+              shortcut && "pr-1.5",
+              instant && "pointer-events-none"
+            )}
           >
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">

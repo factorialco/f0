@@ -594,9 +594,17 @@ export const getMockVisualizations = (options?: {
           tooltip: "Email",
           property: { type: "text", value: u.email },
         },
-        { icon: Building, property: { type: "text", value: u.department } },
-        { icon: Briefcase, property: { type: "text", value: u.role } },
-        { icon: Star, property: { type: "text", value: u.id } },
+        {
+          icon: Building,
+          tooltip: "Department",
+          property: { type: "text", value: u.department },
+        },
+        {
+          icon: Briefcase,
+          tooltip: "Role",
+          property: { type: "text", value: u.role },
+        },
+        { icon: Star, tooltip: "ID", property: { type: "text", value: u.id } },
       ],
       onMove: options?.cache
         ? async (
