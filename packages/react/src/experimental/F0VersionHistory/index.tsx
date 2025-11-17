@@ -14,7 +14,7 @@ export function F0VersionHistory({
 }: F0VersionHistoryProps) {
   return (
     <nav
-      className="flex h-full w-[320px] flex-col overflow-hidden px-3 pb-3 pt-[6px]"
+      className="flex h-full w-full min-w-[320px] max-w-[380px] flex-col overflow-hidden px-3 pb-3 pt-[6px]"
       aria-label={title}
     >
       <OneEllipsis
