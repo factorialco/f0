@@ -169,6 +169,7 @@ export const BaseQuestion = ({
         <div className="flex flex-row gap-2">
           <textarea
             value={title}
+            aria-label="Title"
             onChange={handleChangeTitle}
             disabled={!isEditMode}
             className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
@@ -200,6 +201,7 @@ export const BaseQuestion = ({
         </div>
         <textarea
           value={description}
+          aria-label="Description"
           onChange={handleChangeDescription}
           disabled={!isEditMode}
           className="w-full resize-none px-2 text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
