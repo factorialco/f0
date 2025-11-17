@@ -2,8 +2,12 @@ import { DropdownItemObject } from "@/experimental/Navigation/Dropdown/internal.
 
 export type PrimaryActionItemDefinition = Pick<
   DropdownItemObject,
-  "onClick" | "label" | "icon"
->
+  "label" | "icon"
+> & {
+  loading?: boolean
+  onClick?: () => void | Promise<void>
+  disabled?: boolean
+}
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
@@ -37,10 +41,13 @@ export const getPrimaryActions = (
  */
 export type SecondaryActionItem = Pick<
   DropdownItemObject,
-  "label" | "icon" | "description" | "critical" | "onClick"
+  "label" | "icon" | "description" | "critical"
 > & {
   enabled?: boolean
   hideLabelWhenExpanded?: boolean
+  loading?: boolean
+  disabled?: boolean
+  onClick?: () => void | Promise<void>
 }
 
 export type SecondaryActionGroup = {

@@ -1526,11 +1526,15 @@ export const buildSecondaryActions = (): SecondaryActionItem[] => {
       icon: Pencil,
       onClick: () => console.log(`Another user action`),
       description: "User actions",
+      loading: true,
     },
     {
       label: "Export",
       icon: Upload,
-      onClick: () => console.log(`Downloading users`),
+      onClick: () =>
+        new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
+          console.log(`Downloading users`)
+        ),
       description: "Download users",
     },
     {
@@ -1538,6 +1542,14 @@ export const buildSecondaryActions = (): SecondaryActionItem[] => {
       icon: Download,
       onClick: () => console.log(`Importing users`),
       description: "Import users",
+      loading: true,
+    },
+    {
+      label: "Disabled",
+      icon: Download,
+      onClick: () => console.log(`Should not be shown`),
+      description: "Import users",
+      disabled: true,
     },
   ]
 }

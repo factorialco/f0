@@ -59,6 +59,8 @@ export const CollectionActions = ({
           icon={primaryActionsButtons[0].icon}
           variant="default"
           label={primaryActionsButtons[0].label}
+          loading={primaryActionsButtons[0].loading}
+          disabled={primaryActionsButtons[0].disabled}
         />
       ) : (
         primaryActionsButtons.length > 1 && (
@@ -85,6 +87,8 @@ export const CollectionActions = ({
           variant="outline"
           hideLabel={action.hideLabelWhenExpanded}
           label={action.label}
+          disabled={action.disabled}
+          loading={action.loading}
         />
       ))}
 
