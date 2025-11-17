@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.268.0](https://github.com/factorialco/f0/compare/f0-react-v1.267.0...f0-react-v1.268.0) (2025-11-17)
+
+
+### Features
+
+* loading and disable in datacollection actions ([#2974](https://github.com/factorialco/f0/issues/2974)) ([af1bdd6](https://github.com/factorialco/f0/commit/af1bdd657d65ae3de676ee16154d2bb43d792397))
+
 ## [1.267.0](https://github.com/factorialco/f0/compare/f0-react-v1.266.0...f0-react-v1.267.0) (2025-11-17)
 
 
