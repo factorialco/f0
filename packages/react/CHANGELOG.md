@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.267.0](https://github.com/factorialco/f0/compare/f0-react-v1.266.0...f0-react-v1.267.0) (2025-11-17)
+
+
+### Features
+
+* datacollection temp fullWith ([#2970](https://github.com/factorialco/f0/issues/2970)) ([efe153b](https://github.com/factorialco/f0/commit/efe153b957561e37f6f5c98b70fdfddd6d5870e2))
+
 ## [1.266.0](https://github.com/factorialco/f0/compare/f0-react-v1.265.0...f0-react-v1.266.0) (2025-11-12)
 
 
