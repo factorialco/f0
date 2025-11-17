@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.268.1](https://github.com/factorialco/f0/compare/f0-react-v1.268.0...f0-react-v1.268.1) (2025-11-17)
+
+
+### Bug Fixes
+
+* solve issue with Select used inside modal ([#2976](https://github.com/factorialco/f0/issues/2976)) ([4515d04](https://github.com/factorialco/f0/commit/4515d0497b285bb95ba234ef8e0989046b8deebf))
+
 ## [1.268.0](https://github.com/factorialco/f0/compare/f0-react-v1.267.0...f0-react-v1.268.0) (2025-11-17)
 
 
