@@ -59,7 +59,7 @@ export function NumberFilter({
     options.modes === undefined || options.modes?.length > 1
 
   const modeFromValue = useCallback((value: NumberFilterValue) => {
-    if (value.mode === "range") {
+    if (value?.mode === "range") {
       return "range"
     }
     return "single"
@@ -73,7 +73,7 @@ export function NumberFilter({
 
   useEffect(() => {
     setLocalValue(
-      value.mode === "range"
+      value?.mode === "range"
         ? [value?.value?.[0], value?.value?.[1]]
         : [value?.value, undefined]
     )

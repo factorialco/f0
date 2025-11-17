@@ -46,6 +46,7 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
     }
 
     updateLabel()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, filterType, filter])
 
   return (
