@@ -84,6 +84,7 @@ export const Section = ({
         <div className="flex flex-row">
           <input
             type="text"
+            aria-label="Title"
             value={title}
             onChange={handleChangeTitle}
             disabled={!isEditMode}
@@ -117,6 +118,7 @@ export const Section = ({
         </div>
         <textarea
           value={description}
+          aria-label="Description"
           onChange={handleChangeDescription}
           disabled={!isEditMode}
           style={TEXT_AREA_STYLE}
