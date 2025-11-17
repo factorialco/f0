@@ -1,5 +1,11 @@
+import { DateQuestionProps } from "./DateQuestion"
+import { LinkQuestionProps } from "./LinkQuestion"
+import { NumericQuestionProps } from "./NumericQuestion"
 import { QuestionProps } from "./Question"
+import { RatingQuestionProps } from "./RatingQuestion"
 import { SectionProps } from "./Section/types"
+import { SelectQuestionProps } from "./SelectQuestion/types"
+import { TextQuestionProps } from "./TextQuestion"
 
 export type QuestionType =
   | "section"
@@ -19,10 +25,19 @@ export type BaseQuestionOnChangeParams = {
 }
 
 export type SectionElement = Omit<SectionProps, "onAction" | "onChange">
-export type QuestionElement = Omit<
-  QuestionProps,
-  "onAction" | "onChange" | "onAddNewElement"
->
+
+type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement"
+
+export type QuestionElement =
+  | Omit<TextQuestionProps, QuestionPropsToOmit>
+  | Omit<RatingQuestionProps & { type: "rating" }, QuestionPropsToOmit>
+  | Omit<
+      SelectQuestionProps & { type: "select" | "multi-select" },
+      QuestionPropsToOmit
+    >
+  | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
+  | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
+  | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
 
 export type CoCreationFormElement =
   | { type: "section"; section: SectionElement }
