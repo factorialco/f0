@@ -49,8 +49,12 @@ const dataSource = useDataCollectionSource({
     label: "Action 1",
     // The icon of the action
     icon: <Icon />,
-    // The onClick handler of the action
+    // The onClick handler of the action (it can be a promise, and the button will be disabled and show a loading state until the promise resolves)
     onClick: () => console.log("Action 1"),
+    // The loading state of the action
+    loading: true,
+    // The disabled state of the action
+    disabled: false,
   }),
 })
 ```
@@ -58,7 +62,7 @@ const dataSource = useDataCollectionSource({
 You can also pass an array of actions and they will be rendered as a
 F0ButtonDropdown, with the first action as main action.
 
-````tsx
+```tsx
 const dataSource = useDataCollectionSource({
   primaryActions: () => [
     {
@@ -78,7 +82,11 @@ const dataSource = useDataCollectionSource({
     },
   ],
 })
+```
 
+> ⚠️ The disabled or loading state of the action is not supported in the
+> F0ButtonDropdown component yet so this only works when the actions is a single
+> action.
 
 - **Secondary actions**: Are an array of actions and by defualt are displayed a
   dropdown. But you can define the number of actions to display as a secondary
@@ -107,7 +115,7 @@ const dataSource = useDataCollectionSource({
     ],
   },
 })
-````
+```
 
 Or as array of actions
 
@@ -129,6 +137,9 @@ const dataSource = useDataCollectionSource({
   ],
 })
 ```
+
+> ⚠️ The disabled or loadings tate of the action is not supported in the
+> F0Dropdown component yet so this only works for the expanded actions.
 
 ### Examples
 
