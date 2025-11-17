@@ -831,7 +831,7 @@ export declare type BasePaginatedResponse<R> = BaseResponse<R> & {
     perPage: number;
 };
 
-declare type BaseQuestionOnChangeParams = {
+export declare type BaseQuestionOnChangeParams = {
     id: string;
     title: string;
     description?: string;
@@ -1406,7 +1406,7 @@ declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
 export declare const CoCreationForm: ({ elements, isEditMode, ...callbacks }: CoCreationFormProps) => JSX_2.Element;
 
-declare type CoCreationFormCallbacks = {
+export declare type CoCreationFormCallbacks = {
     onQuestionAction?: QuestionProps["onAction"];
     onSectionAction?: SectionProps["onAction"];
     onQuestionChange?: QuestionProps["onChange"];
@@ -1414,7 +1414,7 @@ declare type CoCreationFormCallbacks = {
     onAddNewElement?: QuestionProps["onAddNewElement"];
 };
 
-declare type CoCreationFormElement = {
+export declare type CoCreationFormElement = {
     type: "section";
     section: SectionElement;
 } | {
@@ -1422,7 +1422,7 @@ declare type CoCreationFormElement = {
     question: QuestionElement;
 };
 
-declare type CoCreationFormProps = {
+export declare type CoCreationFormProps = {
     elements: CoCreationFormElement[];
     isEditMode?: boolean;
 } & CoCreationFormCallbacks;
@@ -4527,7 +4527,7 @@ export declare type QuestionActionParams = {
     index: number;
 };
 
-declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmit> | Omit<RatingQuestionProps & {
+export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmit> | Omit<RatingQuestionProps & {
     type: "rating";
 }, QuestionPropsToOmit> | Omit<SelectQuestionProps & {
     type: "select" | "multi-select";
@@ -4553,7 +4553,7 @@ export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents 
 
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-declare type QuestionType = "section" | "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link";
+export declare type QuestionType = "section" | "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link";
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -4754,7 +4754,7 @@ declare type SectionActionParams = {
     index: number;
 };
 
-declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">;
+export declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">;
 
 export declare const SectionHeader: ({ title, description, action, link, separator, }: Props_2) => JSX_2.Element;
 
@@ -5934,15 +5934,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
