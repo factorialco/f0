@@ -1,5 +1,6 @@
 "use client"
 
+import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 import { motion } from "motion/react"
 import { ReactElement, useEffect, useState } from "react"
@@ -25,6 +26,8 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
 
   const filterType = getFilterType(filter.type)
 
+  const i18n = useI18n()
+
   const [label, setLabel] = useState<string>("")
 
   useEffect(() => {
@@ -35,9 +38,9 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
       setIsLoading(true)
       const labelRenderer = filterType.chipLabel as unknown as (
         value: FilterValue<Definition[keyof Definition]>,
-        context: { schema: Definition[keyof Definition] }
+        context: { schema: Definition[keyof Definition]; i18n: I18nContextType }
       ) => Promise<string>
-      const label = await labelRenderer(value, { schema: filter })
+      const label = await labelRenderer(value, { schema: filter, i18n })
       setLabel(`${filter.label}: ${label}`)
       setIsLoading(false)
     }

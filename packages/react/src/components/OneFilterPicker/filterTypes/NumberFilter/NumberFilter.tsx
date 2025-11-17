@@ -5,7 +5,7 @@ import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 
 export type NumberFilterOptions = {
@@ -15,8 +15,14 @@ export type NumberFilterOptions = {
 }
 
 export type NumberFilterValue =
-  | [number | undefined, number | undefined]
-  | undefined
+  | {
+      mode: "single"
+      value: number | undefined
+    }
+  | {
+      mode: "range"
+      value: [number | undefined, number | undefined] | undefined
+    }
 
 export type NumberFilterComponentProps = FilterTypeComponentProps<
   NumberFilterValue,
@@ -43,39 +49,56 @@ export function NumberFilter({
   const l10n = useL10n()
 
   const clear = () => {
-    onChange([undefined, undefined])
+    onChange({
+      mode: options.mode,
+      value: undefined,
+    })
   }
 
   const showModeSwitch =
     options.modes === undefined || options.modes?.length > 1
 
   const modeFromValue = useCallback((value: NumberFilterValue) => {
-    if (value?.[0] !== undefined && value?.[1] !== undefined) {
+    if (value.mode === "range") {
       return "range"
-    }
-    if (value?.[0] !== undefined) {
-      return "single"
     }
     return "single"
   }, [])
 
   const [selectionMode, setSelectionMode] = useState(modeFromValue(value))
 
+  const [localValue, setLocalValue] = useState<
+    [number | undefined, number | undefined]
+  >([undefined, undefined])
+
+  useEffect(() => {
+    setLocalValue(
+      value.mode === "range"
+        ? [value?.value?.[0], value?.value?.[1]]
+        : [value?.value, undefined]
+    )
+  }, [value])
+
   const handleModeChange = (checked: boolean) => {
     setSelectionMode(checked ? "range" : "single")
     if (!checked) {
-      onChange([value?.[0], undefined])
+      onChange({ mode: "single", value: localValue?.[0] })
+    } else {
+      onChange({ mode: "range", value: [localValue?.[0], localValue?.[1]] })
     }
   }
 
   const handleChange = (inputValue: number | null, index: "from" | "to") => {
     if (selectionMode === "range") {
-      onChange([
-        index === "from" ? (inputValue ?? undefined) : value?.[0],
-        index === "to" ? (inputValue ?? undefined) : value?.[1],
-      ])
+      onChange({
+        mode: "range",
+        value: [
+          index === "from" ? (inputValue ?? undefined) : localValue?.[0],
+          index === "to" ? (inputValue ?? undefined) : localValue?.[1],
+        ],
+      })
     } else {
-      onChange([inputValue ?? undefined, undefined])
+      onChange({ mode: "single", value: inputValue ?? undefined })
     }
   }
 
@@ -87,11 +110,11 @@ export function NumberFilter({
             <NumberInput
               label={
                 selectionMode === "range"
-                  ? i18n.filters.aboveOrEqual
-                  : i18n.filters.value
+                  ? i18n.filters.number.greaterOrEqual
+                  : i18n.filters.number.value
               }
               locale={l10n.locale}
-              value={value?.[0]}
+              value={localValue?.[0]}
               onChange={(inputValue) => handleChange(inputValue, "from")}
               max={options.max}
               min={options.min}
@@ -102,9 +125,9 @@ export function NumberFilter({
               <div className="flex items-center justify-center">-</div>
               <div className="flex-1">
                 <NumberInput
-                  label={i18n.filters.belowOrEqual}
+                  label={i18n.filters.number.lessOrEqual}
                   locale={l10n.locale}
-                  value={value?.[1]}
+                  value={localValue?.[1]}
                   onChange={(inputValue) => handleChange(inputValue, "to")}
                   max={options.max}
                   min={options.min}
@@ -115,7 +138,7 @@ export function NumberFilter({
         </div>
         {showModeSwitch && (
           <Switch
-            title={i18n.filters.range_title}
+            title={i18n.filters.number.rangeTitle}
             checked={selectionMode === "range"}
             onCheckedChange={handleModeChange}
           />

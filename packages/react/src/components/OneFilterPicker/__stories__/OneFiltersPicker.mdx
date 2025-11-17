@@ -162,7 +162,7 @@ allows limit user select to a min and max number.
 - `modes?`: The modes of the number filter, can be `range` (default) or/and
   `single`.
 
-````tsx
+```tsx
 const filters: FiltersDefinition<typeof mockUsers> = {
   number: {
     type: "number",
@@ -172,6 +172,35 @@ const filters: FiltersDefinition<typeof mockUsers> = {
       max: 100,
     },
   },
+}
+```
+
+The filter returns the selection type and the value.
+
+```tsx
+{
+  mode: "single",
+  value: 100, // Means = 100
+}
+// or
+{
+  mode: "range",
+  value: [0, 100], // Means >= 0 and <= 100
+}
+// or
+{
+  mode: "range",
+  value: [0, undefined], // Means >= 0
+}
+// or
+{
+  mode: "range",
+  value: [undefined, 100], // Means <= 100
+}
+// or
+{
+  mode: "range",
+  value: [undefined, undefined], // Means no range
 }
 ```
 
@@ -200,7 +229,7 @@ export const myFilter: FilterTypeDefinition<number> = {
 }
 
 export type MyFilterDefinition = BaseFilterDefinition<"myFilter">
-````
+```
 
 3. Import the new filter type in the `OneFiltersPicker/filters/filters.ts` file
    and add it to the `filterTypes` object.
