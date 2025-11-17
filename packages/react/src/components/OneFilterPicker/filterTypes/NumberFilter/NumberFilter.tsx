@@ -15,14 +15,8 @@ export type NumberFilterOptions = {
 }
 
 export type NumberFilterValue =
-  | {
-      mode: "single"
-      value: number | undefined
-    }
-  | {
-      mode: "range"
-      value: [number | undefined, number | undefined] | undefined
-    }
+  | [number | undefined, number | undefined]
+  | undefined
 
 export type NumberFilterComponentProps = FilterTypeComponentProps<
   NumberFilterValue,
@@ -49,20 +43,18 @@ export function NumberFilter({
   const l10n = useL10n()
 
   const clear = () => {
-    onChange({
-      mode: options.mode,
-      value: undefined,
-    })
+    onChange(undefined)
   }
 
   const showModeSwitch =
     options.modes === undefined || options.modes?.length > 1
 
   const modeFromValue = useCallback((value: NumberFilterValue) => {
-    if (value?.mode === "range") {
-      return "range"
+    if (value?.[0] === value?.[1]) {
+      return "single"
     }
-    return "single"
+
+    return "range"
   }, [])
 
   const [selectionMode, setSelectionMode] = useState(modeFromValue(value))
@@ -72,33 +64,26 @@ export function NumberFilter({
   >([undefined, undefined])
 
   useEffect(() => {
-    setLocalValue(
-      value?.mode === "range"
-        ? [value?.value?.[0], value?.value?.[1]]
-        : [value?.value, undefined]
-    )
+    setLocalValue([value?.[0], value?.[1]])
   }, [value])
 
   const handleModeChange = (checked: boolean) => {
     setSelectionMode(checked ? "range" : "single")
     if (!checked) {
-      onChange({ mode: "single", value: localValue?.[0] })
+      onChange([localValue?.[0], localValue?.[0]])
     } else {
-      onChange({ mode: "range", value: [localValue?.[0], localValue?.[1]] })
+      onChange([localValue?.[0], localValue?.[1]])
     }
   }
 
   const handleChange = (inputValue: number | null, index: "from" | "to") => {
     if (selectionMode === "range") {
-      onChange({
-        mode: "range",
-        value: [
-          index === "from" ? (inputValue ?? undefined) : localValue?.[0],
-          index === "to" ? (inputValue ?? undefined) : localValue?.[1],
-        ],
-      })
+      onChange([
+        index === "from" ? (inputValue ?? undefined) : localValue?.[0],
+        index === "to" ? (inputValue ?? undefined) : localValue?.[1],
+      ])
     } else {
-      onChange({ mode: "single", value: inputValue ?? undefined })
+      onChange([inputValue ?? undefined, inputValue ?? undefined])
     }
   }
 

@@ -34,8 +34,7 @@ export const Default: Story = {
   },
 }
 
-// With selected values
-export const WithSelectedValues: Story = {
+export const SingleWithSelectedValues: Story = {
   args: {
     schema: {
       label: "Department",
@@ -44,7 +43,21 @@ export const WithSelectedValues: Story = {
         max: 100,
       },
     },
-    value: { mode: "range", value: [0, 100] },
+    value: [100, 100],
+    onChange: () => {},
+  },
+}
+
+export const RangeWithSelectedValues: Story = {
+  args: {
+    schema: {
+      label: "Department",
+      options: {
+        min: 0,
+        max: 100,
+      },
+    },
+    value: [0, 100],
     onChange: () => {},
   },
 }

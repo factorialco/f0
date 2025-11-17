@@ -175,33 +175,20 @@ const filters: FiltersDefinition<typeof mockUsers> = {
 }
 ```
 
-The filter returns the selection type and the value.
+The filter returns always a tuple of two numbers, the first one is the minimum
+value and the second one is the maximum value. If the mode is `single` the
+second value is the same as the first one.
 
 ```tsx
-{
-  mode: "single",
-  value: 100, // Means = 100
-}
+[100, 100], // Means = 100
 // or
-{
-  mode: "range",
-  value: [0, 100], // Means >= 0 and <= 100
-}
+[0, 100], // Means >= 0 and <= 100
 // or
-{
-  mode: "range",
-  value: [0, undefined], // Means >= 0
-}
+[0, undefined], // Means >= 0
 // or
-{
-  mode: "range",
-  value: [undefined, 100], // Means <= 100
-}
+[undefined, 100], // Means <= 100
 // or
-{
-  mode: "range",
-  value: [undefined, undefined], // Means no range
-}
+[undefined, undefined], // Means no range
 ```
 
 ## Adding a new filter type
