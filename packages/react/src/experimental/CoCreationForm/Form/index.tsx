@@ -5,7 +5,7 @@ import { Reorder } from "motion/react"
 import { useState } from "react"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
 import { DragProvider, useDragContext } from "../DragContext"
-import { Question as QuestionComponent } from "../Question"
+import { Question as QuestionComponent, QuestionProps } from "../Question"
 import { Section as SectionComponent } from "../Section"
 import { CoCreationFormElement, CoCreationFormProps } from "../types"
 
@@ -72,11 +72,13 @@ const Item = ({ element }: ItemProps) => {
           )}
           {element.type === "question" && (
             <QuestionComponent
-              {...element.question}
-              isEditMode={isEditMode}
-              onAction={onQuestionAction}
-              onChange={onQuestionChange}
-              onAddNewElement={onAddNewElement}
+              {...({
+                ...element.question,
+                isEditMode,
+                onAction: onQuestionAction,
+                onChange: onQuestionChange,
+                onAddNewElement,
+              } as QuestionProps)}
             />
           )}
         </div>
