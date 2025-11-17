@@ -70,6 +70,7 @@ export type SelectProps<T extends string, R = unknown> = {
   className?: string
   selectContentClassName?: string
   actions?: Action[]
+  disablePortal?: boolean
 } & (
   | {
       source: DataSourceDefinition<
@@ -205,6 +206,7 @@ const SelectComponent = forwardRef(function Select<
     status,
     hint,
     required,
+    disablePortal,
     ...props
   }: SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -531,6 +533,7 @@ const SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
+            disablePortal={disablePortal}
           />
         )}
       </SelectPrimitive>

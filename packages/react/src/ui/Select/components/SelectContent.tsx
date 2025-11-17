@@ -64,6 +64,7 @@ type SelectContentProps = (
   forceMinHeight?: boolean
   scrollMargin?: number
   taller?: boolean
+  disablePortal?: boolean
 }
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
@@ -85,6 +86,7 @@ const SelectContent = forwardRef<
       forceMinHeight,
       showLoadingIndicator,
       asChild,
+      disablePortal = false,
       ...props
     },
     ref
@@ -285,9 +287,13 @@ const SelectContent = forwardRef<
       </SelectPrimitive.Content>
     )
 
-    return asList ? (
-      content
-    ) : (
+    // If asList is true or portal is disabled, render without portal
+    if (asList || disablePortal) {
+      return content
+    }
+
+    // Otherwise, render with portal
+    return (
       <SelectPrimitive.Portal>
         <>
           {/* Overlay to prevent clicks on the content */}
