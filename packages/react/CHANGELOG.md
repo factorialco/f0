@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.268.2](https://github.com/factorialco/f0/compare/f0-react-v1.268.1...f0-react-v1.268.2) (2025-11-17)
+
+
+### Bug Fixes
+
+* **tooltip:** add pointer-events-none to prevent tooltip interference ([#2979](https://github.com/factorialco/f0/issues/2979)) ([696e558](https://github.com/factorialco/f0/commit/696e5583b003a81ed9c6fe951adea306d30133ac))
+
 ## [1.268.1](https://github.com/factorialco/f0/compare/f0-react-v1.268.0...f0-react-v1.268.1) (2025-11-17)
 
 
