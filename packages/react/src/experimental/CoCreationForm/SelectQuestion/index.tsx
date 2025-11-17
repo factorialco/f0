@@ -1,10 +1,11 @@
 import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { Reorder } from "motion/react"
 import { useEffect, useState } from "react"
 import { BaseQuestion } from "../BaseQuestion"
+import { DragProvider } from "../DragContext"
 import { BaseQuestionOnChangeParams } from "../types"
-import { DragProvider } from "./DragContext"
 import { SelectOption } from "./SelectOption"
 import {
   OnChangeLabelParams,
@@ -15,6 +16,7 @@ import { SelectQuestionOption, SelectQuestionProps } from "./types"
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
   const [internalOptions, setInternalOptions] =
     useState<SelectQuestionOption[]>(options)
+  const { t } = useI18n()
 
   const baseOnChangeParams = {
     ...props,
@@ -99,7 +101,9 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     const optionsLength = options.length
     const newOption = {
       value: `new-option-${optionsLength + 1}`,
-      label: `New option ${optionsLength + 1}`,
+      label: t("coCreationForm.selectQuestion.newOption", {
+        number: optionsLength + 1,
+      }),
     }
     props.onChange?.({
       ...baseOnChangeParams,
@@ -140,7 +144,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
         {props.isEditMode && (
           <div className="opacity-50">
             <F0Button
-              label="Add option"
+              label={t("coCreationForm.selectQuestion.addOption")}
               variant="ghost"
               icon={Add}
               onClick={handleAddOption}

@@ -2,9 +2,10 @@ import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { CheckCircleLine, Delete, Handle } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
-import { useDragContext } from "../DragContext"
+import { useDragContext } from "../../DragContext"
 import { OnClickOptionActionParams, SelectOptionProps } from "./types"
 
 const TEXT_AREA_STYLE: object = {
@@ -25,6 +26,7 @@ export const SelectOption = ({
 
   const { isDragging, setIsDragging, setDraggedItemId, draggedItemId } =
     useDragContext()
+  const { t } = useI18n()
 
   const isDraggingThisItem = isDragging && draggedItemId === value
 
@@ -106,7 +108,7 @@ export const SelectOption = ({
         </div>
         {isEditMode ? (
           <textarea
-            placeholder="Type anything you want here..."
+            placeholder={t("coCreationForm.selectQuestion.optionPlaceholder")}
             value={label}
             onChange={handleChangeLabel}
             className="flex-1 resize-none font-medium"
@@ -117,20 +119,20 @@ export const SelectOption = ({
         )}
         {isEditMode && correct && (
           <span className="text-sm font-medium text-f1-foreground-positive">
-            Correct
+            {t("coCreationForm.selectQuestion.correct")}
           </span>
         )}
         {isEditMode ? (
           <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button
-              label="Mark as correct"
+              label={t("coCreationForm.selectQuestion.markAsCorrect")}
               variant="ghost"
               icon={CheckCircleLine}
               onClick={handleClickMarkAsCorrect}
               hideLabel
             />
             <F0Button
-              label="Remove"
+              label={t("coCreationForm.selectQuestion.remove")}
               variant="ghost"
               icon={Delete}
               hideLabel

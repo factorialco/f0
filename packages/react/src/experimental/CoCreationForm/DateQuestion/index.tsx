@@ -1,4 +1,5 @@
 import { DatePickerValue, F0DatePicker } from "@/components/F0DatePicker"
+import { useI18n } from "@/lib/providers/i18n"
 import { useCallback, useMemo } from "react"
 import {
   BaseQuestion,
@@ -20,6 +21,8 @@ export const DateQuestion = ({
   onChange,
   ...baseQuestionComponentProps
 }: DateQuestionProps) => {
+  const { t } = useI18n()
+
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
       onChange?.({
@@ -61,7 +64,7 @@ export const DateQuestion = ({
           value={datePickerValue}
           onChange={handleChangeDate}
           disabled={baseQuestionComponentProps.isEditMode}
-          label="Answer"
+          label={t("coCreationForm.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}
           readonly={baseQuestionComponentProps.isEditMode}

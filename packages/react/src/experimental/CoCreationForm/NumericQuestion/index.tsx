@@ -1,4 +1,5 @@
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { useI18n } from "@/lib/providers/i18n"
 import { useCallback } from "react"
 import {
   BaseQuestion,
@@ -21,6 +22,8 @@ export const NumericQuestion = ({
   onChange,
   ...baseQuestionComponentProps
 }: NumericQuestionProps) => {
+  const { t } = useI18n()
+
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
       onChange?.({
@@ -52,7 +55,7 @@ export const NumericQuestion = ({
           value={value}
           onChange={handleChangeText}
           disabled={baseQuestionComponentProps.isEditMode}
-          label="Answer"
+          label={t("coCreationForm.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}
         />

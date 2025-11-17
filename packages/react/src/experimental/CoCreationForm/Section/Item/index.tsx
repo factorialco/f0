@@ -3,8 +3,8 @@ import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
 import { useCoCreationFormContext } from "../../Context"
+import { useDragContext } from "../../DragContext"
 import { Question } from "../../Question"
-import { useDragContext } from "../../SelectQuestion/DragContext"
 import { QuestionElement } from "../../types"
 
 type ItemProps = {
@@ -15,8 +15,6 @@ export const Item = ({ question }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
   const { isEditMode } = useCoCreationFormContext()
-
-  console.log({ isDragging })
 
   const handleDragStart = () => {
     setIsDragging(true)

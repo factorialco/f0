@@ -6,9 +6,7 @@ const meta: Meta<typeof CoCreationForm> = {
   title: "CoCreationForm/CoCreationForm",
   component: CoCreationForm,
   tags: ["autodocs", "experimental"],
-  render: (args) => {
-    return <CoCreationForm {...args} />
-  },
+  render: (args) => <CoCreationForm {...args} />,
 }
 
 export default meta

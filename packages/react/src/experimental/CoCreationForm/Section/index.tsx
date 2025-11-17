@@ -1,10 +1,11 @@
 import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Delete, Ellipsis, LayersFront } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
-import { DragProvider } from "../SelectQuestion/DragContext"
+import { DragProvider } from "../DragContext"
 import { QuestionElement } from "../types"
 import { Item } from "./Item"
 import { ActionType, OnChangeSectionParams, SectionProps } from "./types"
@@ -28,6 +29,7 @@ export const Section = ({
   )
 
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
+  const { t } = useI18n()
 
   const baseOnChangeParams: OnChangeSectionParams = useMemo(
     () => ({
@@ -62,18 +64,18 @@ export const Section = ({
   const actions = useMemo(
     () => [
       {
-        label: "Duplicate section",
+        label: t("coCreationForm.actions.duplicateSection"),
         icon: LayersFront,
         onClick: () => handleAction("duplicate"),
       },
       {
-        label: "Delete section",
+        label: t("coCreationForm.actions.deleteSection"),
         icon: Delete,
         onClick: () => handleAction("delete"),
         critical: true,
       },
     ],
-    [handleAction]
+    [handleAction, t]
   )
 
   return (
@@ -103,7 +105,7 @@ export const Section = ({
               >
                 <F0Button
                   icon={Ellipsis}
-                  label="Actions"
+                  label={t("coCreationForm.actions.actions")}
                   size="md"
                   variant="ghost"
                   tooltip={false}

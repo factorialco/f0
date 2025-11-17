@@ -23,8 +23,15 @@ export function DragProvider({ children }: { children: React.ReactNode }) {
 
 export function useDragContext() {
   const context = useContext(DragContext)
+
   if (!context) {
-    throw new Error("useDragContext must be used within a DragProvider")
+    return {
+      isDragging: false,
+      setIsDragging: () => {},
+      draggedItemId: null,
+      setDraggedItemId: () => {},
+    }
   }
+
   return context
 }

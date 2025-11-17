@@ -236,6 +236,36 @@ export const defaultTranslations = {
     greaterThan: "Greater than {{min}}",
     lessThan: "Less than {{max}}",
   },
+  coCreationForm: {
+    actions: {
+      actions: "Actions",
+      duplicateQuestion: "Duplicate question",
+      deleteQuestion: "Delete question",
+      duplicateSection: "Duplicate section",
+      deleteSection: "Delete section",
+    },
+    questionTypes: {
+      section: "Section",
+      rating: "Rating",
+      multipleChoice: "Multiple choice",
+      singleChoice: "Single choice",
+      text: "Text",
+      longText: "Long text",
+      numeric: "Numeric",
+    },
+    selectQuestion: {
+      addOption: "Add option",
+      newOption: "New option {{number}}",
+      markAsCorrect: "Mark as correct",
+      remove: "Remove",
+      correct: "Correct",
+      optionPlaceholder: "Type anything you want here...",
+    },
+    answer: {
+      label: "Answer",
+      placeholder: "Respondent's answer",
+    },
+  },
 } as const
 
 type TranslationShape<T> = {

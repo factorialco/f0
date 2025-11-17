@@ -3,18 +3,17 @@ import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
 import { useState } from "react"
-import { CoCreationFormProvider, useCoCreationFormContext } from "./Context"
-import { Question as QuestionComponent } from "./Question"
-import { Section as SectionComponent } from "./Section"
-import { DragProvider, useDragContext } from "./SelectQuestion/DragContext"
-import { CoCreationFormElement, CoCreationFormProps } from "./types"
+import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
+import { DragProvider, useDragContext } from "../DragContext"
+import { Question as QuestionComponent } from "../Question"
+import { Section as SectionComponent } from "../Section"
+import { CoCreationFormElement, CoCreationFormProps } from "../types"
 
 type ItemProps = {
   element: CoCreationFormElement
-  index: number
 }
 
-const Item = ({ element, index }: ItemProps) => {
+const Item = ({ element }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
   const {
@@ -104,14 +103,13 @@ export const CoCreationForm = ({
           as="div"
         >
           <div className="flex flex-col gap-8">
-            {internalElements.map((element, index) => (
+            {internalElements.map((element) => (
               <Item
                 key={
                   element.type === "section"
                     ? element.section.id
                     : element.question.id
                 }
-                index={index}
                 element={element}
               />
             ))}

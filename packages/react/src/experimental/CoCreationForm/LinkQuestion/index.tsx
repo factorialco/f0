@@ -1,4 +1,5 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
+import { useI18n } from "@/lib/providers/i18n"
 import { useCallback } from "react"
 import {
   BaseQuestion,
@@ -20,6 +21,8 @@ export const LinkQuestion = ({
   onChange,
   ...baseQuestionComponentProps
 }: LinkQuestionProps) => {
+  const { t } = useI18n()
+
   const handleChange = useCallback(
     (params: BaseQuestionOnChangeParams) => {
       onChange?.({
@@ -51,7 +54,7 @@ export const LinkQuestion = ({
           value={value ?? undefined}
           onChange={handleChangeText}
           disabled={baseQuestionComponentProps.isEditMode}
-          label="Answer"
+          label={t("coCreationForm.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}
           clearable={!baseQuestionComponentProps.required}

@@ -14,9 +14,10 @@ import {
   Star,
   TextSize,
 } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useCallback, useMemo, useState } from "react"
-import { useDragContext } from "../SelectQuestion/DragContext"
+import { useDragContext } from "../DragContext"
 import { BaseQuestionOnChangeParams, QuestionType } from "../types"
 import { ActionType, BaseQuestionProps } from "./types"
 
@@ -43,6 +44,7 @@ export const BaseQuestion = ({
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
 
   const { isDragging } = useDragContext()
+  const { t } = useI18n()
 
   const baseOnChangeParams: BaseQuestionOnChangeParams = useMemo(
     () => ({
@@ -98,24 +100,24 @@ export const BaseQuestion = ({
   const actions = useMemo(
     () => [
       {
-        label: "Duplicate question",
+        label: t("coCreationForm.actions.duplicateQuestion"),
         icon: LayersFront,
         onClick: () => handleAction("duplicate"),
       },
       {
-        label: "Delete question",
+        label: t("coCreationForm.actions.deleteQuestion"),
         icon: Delete,
         onClick: () => handleAction("delete"),
         critical: true,
       },
     ],
-    [handleAction]
+    [handleAction, t]
   )
 
   const newQuestionDropdownItems = useMemo<DropdownInternalProps["items"]>(
     () => [
       {
-        label: "Section",
+        label: t("coCreationForm.questionTypes.section"),
         icon: AcademicCap,
         onClick: () => handleAddNewQuestion("section"),
       },
@@ -123,37 +125,37 @@ export const BaseQuestion = ({
         type: "separator",
       },
       {
-        label: "Rating",
+        label: t("coCreationForm.questionTypes.rating"),
         icon: Star,
         onClick: () => handleAddNewQuestion("rating"),
       },
       {
-        label: "Multiple choice",
+        label: t("coCreationForm.questionTypes.multipleChoice"),
         icon: CheckDouble,
         onClick: () => handleAddNewQuestion("select"),
       },
       {
-        label: "Single choice",
+        label: t("coCreationForm.questionTypes.singleChoice"),
         icon: Check,
         onClick: () => handleAddNewQuestion("select"),
       },
       {
-        label: "Text",
+        label: t("coCreationForm.questionTypes.text"),
         icon: TextSize,
         onClick: () => handleAddNewQuestion("text"),
       },
       {
-        label: "Long text",
+        label: t("coCreationForm.questionTypes.longText"),
         icon: List,
         onClick: () => handleAddNewQuestion("text"),
       },
       {
-        label: "Numeric",
+        label: t("coCreationForm.questionTypes.numeric"),
         icon: Numbers,
         onClick: () => handleAddNewQuestion("numeric"),
       },
     ],
-    [handleAddNewQuestion]
+    [handleAddNewQuestion, t]
   )
 
   return (
@@ -187,7 +189,7 @@ export const BaseQuestion = ({
             >
               <F0Button
                 icon={Ellipsis}
-                label="Actions"
+                label={t("coCreationForm.actions.actions")}
                 size="md"
                 variant="ghost"
                 tooltip={false}
