@@ -1559,6 +1559,11 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
     [Key in K]?: FilterValue<F["fields"][Key]>;
 } : Record<string, never>;
 
+export declare interface CurrentVersion {
+    title: string;
+    onClick?: () => void;
+}
+
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
 
 export declare type CustomVisualizationProps<Source extends {
@@ -2581,6 +2586,15 @@ export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTMLDivElement>>;
 
 declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
+
+export declare function F0VersionHistory({ title, versions, currentVersion, activeVersionId, }: F0VersionHistoryProps): JSX_2.Element;
+
+export declare interface F0VersionHistoryProps {
+    title: string;
+    versions: Version[];
+    currentVersion?: CurrentVersion;
+    activeVersionId?: string | "current";
+}
 
 export declare const F1SearchBox: ForwardRefExoticComponent<    {
 value?: string;
@@ -5311,6 +5325,7 @@ declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
     delay?: number;
+    instant?: boolean;
 } & ({
     label: string;
     description?: string;
@@ -5497,6 +5512,19 @@ declare const variants_2: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare interface Version {
+    id: string;
+    author: VersionAuthor;
+    timestamp: Date;
+    onClick?: () => void;
+}
+
+export declare interface VersionAuthor {
+    firstName: string;
+    lastName: string;
+    src?: string;
+}
 
 export declare const VerticalBarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: VerticalBarChartProps;
