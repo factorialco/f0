@@ -226,53 +226,12 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }, [data, optionMapper])
 
-  /**
-   * Finds an option in the data records by value and returns the mapped option
-   * @param value - The value to find
-   * @returns The option if found, undefined otherwise
-   */
-  const findOptionsByValue = useCallback(
-    (
-      values: (string | T)[] | undefined
-    ): F0SelectItemObject<T, ActualRecordType>[] => {
-      if (values === undefined) {
-        return []
-      }
-
-      if (isEqual(values, defaultValues)) {
-        return defaultItems
-      }
-
-      const res = []
-      for (const option of data.records) {
-        const mappedOption = optionMapper(option)
-
-        if (
-          mappedOption.type !== "separator" &&
-          values?.includes(String(mappedOption.value))
-        ) {
-          res.push(mappedOption)
-        }
-      }
-      return res
-    },
-    [data.records, optionMapper, defaultItems, defaultValues]
-  )
-
   const onSelectItems = useCallback(
     (items: SelectedItemsState<ActualRecordType>) => {
       console.log("onSelectItems", items)
     },
     []
   )
-
-  // const selectedState = useMemo(() => {
-  //   console.log("selectedState", localValue)
-  //   return {
-  //     allSelected: false,
-  //     items: localValue.map((value) => ({ id: value, checked: true })),
-  //   }
-  // }, [localValue])
 
   const {
     handleSelectAll,
@@ -485,6 +444,9 @@ const F0SelectComponent = forwardRef(function Select<
   }
   const i18n = useI18n()
 
+  /**
+   * Get the values of the selected items from the state to pass to the select primitive
+   */
   const selectedItemsValues = useMemo(() => {
     return Array.from(selectedState.items.values())
       .filter((item) => item.checked)
@@ -492,6 +454,9 @@ const F0SelectComponent = forwardRef(function Select<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the selectedState.items changes
   }, [selectedState.items])
 
+  /**
+   * Common props for the select primitive
+   */
   const commonProps = {
     ...props,
     onItemCheckChange,

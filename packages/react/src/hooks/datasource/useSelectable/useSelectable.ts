@@ -179,6 +179,7 @@ export function useSelectable<
   )
 
   useDeepCompareEffect(() => {
+    console.log("selectedState ******************2", selectedState)
     updateLocalSelectedState(selectedState)
 
     // if (isGrouped) {
