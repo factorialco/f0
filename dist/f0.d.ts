@@ -1596,6 +1596,36 @@ export declare const defaultTranslations: {
         readonly greaterThan: "Greater than {{min}}";
         readonly lessThan: "Less than {{max}}";
     };
+    readonly coCreationForm: {
+        readonly actions: {
+            readonly actions: "Actions";
+            readonly duplicateQuestion: "Duplicate question";
+            readonly deleteQuestion: "Delete question";
+            readonly duplicateSection: "Duplicate section";
+            readonly deleteSection: "Delete section";
+        };
+        readonly questionTypes: {
+            readonly section: "Section";
+            readonly rating: "Rating";
+            readonly multipleChoice: "Multiple choice";
+            readonly singleChoice: "Single choice";
+            readonly text: "Text";
+            readonly longText: "Long text";
+            readonly numeric: "Numeric";
+        };
+        readonly selectQuestion: {
+            readonly addOption: "Add option";
+            readonly newOption: "New option {{number}}";
+            readonly markAsCorrect: "Mark as correct";
+            readonly remove: "Remove";
+            readonly correct: "Correct";
+            readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly answer: {
+            readonly label: "Answer";
+            readonly placeholder: "Respondent's answer";
+        };
+    };
 };
 
 /**

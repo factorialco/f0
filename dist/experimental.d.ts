@@ -215,12 +215,6 @@ declare type ActionLinkProps = ActionBaseProps & {
     className?: string;
 };
 
-declare type ActionParams = {
-    questionId: string;
-    type: ActionType;
-    index: number;
-};
-
 declare type ActionProps = {
     buttonType: "gradient" | "internal";
     label: string;
@@ -298,7 +292,7 @@ export declare type actionType = {
     icon?: IconType;
 };
 
-declare type ActionType_2 = CopyActionType | NavigateActionType | OpenLinkActionType;
+declare type ActionType_2 = "duplicate" | "delete";
 
 declare type actionType_2 = {
     label: string;
@@ -308,6 +302,8 @@ declare type actionType_2 = {
     hideLabel?: boolean;
     variant?: "default" | "outline" | "neutral";
 };
+
+declare type ActionType_3 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
 
@@ -849,10 +845,10 @@ declare type BaseQuestionProps = {
     description?: string;
     children: React.ReactNode;
     onChange?: (params: BaseQuestionOnChangeParams) => void;
-    disabled?: boolean;
+    isEditMode?: boolean;
     required?: boolean;
-    onAddNewQuestion?: (params: OnAddNewQuestionParams) => void;
-    onAction?: (params: ActionParams) => void;
+    onAddNewElement?: (params: OnAddNewElementParams) => void;
+    onAction?: (params: QuestionActionParams) => void;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -1408,6 +1404,29 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
+export declare const CoCreationForm: ({ elements, isEditMode, ...callbacks }: CoCreationFormProps) => JSX_2.Element;
+
+declare type CoCreationFormCallbacks = {
+    onQuestionAction?: QuestionProps["onAction"];
+    onSectionAction?: SectionProps["onAction"];
+    onQuestionChange?: QuestionProps["onChange"];
+    onSectionChange?: SectionProps["onChange"];
+    onAddNewElement?: QuestionProps["onAddNewElement"];
+};
+
+declare type CoCreationFormElement = {
+    type: "section";
+    section: SectionElement;
+} | {
+    type: "question";
+    question: QuestionElement;
+};
+
+declare type CoCreationFormProps = {
+    elements: CoCreationFormElement[];
+    isEditMode?: boolean;
+} & CoCreationFormCallbacks;
+
 declare type ColId = string;
 
 /**
@@ -1504,7 +1523,7 @@ declare const CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttri
 declare type CompanyItemProps = {
     name: string;
     avatarUrl?: URL_2;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 export declare function CompanySelector({ companies, selected, onChange, isLoading, withNotification, additionalOptions, }: CompanySelectorProps): JSX_2.Element;
@@ -2213,6 +2232,36 @@ declare const defaultTranslations: {
         readonly greaterThan: "Greater than {{min}}";
         readonly lessThan: "Less than {{max}}";
     };
+    readonly coCreationForm: {
+        readonly actions: {
+            readonly actions: "Actions";
+            readonly duplicateQuestion: "Duplicate question";
+            readonly deleteQuestion: "Delete question";
+            readonly duplicateSection: "Duplicate section";
+            readonly deleteSection: "Delete section";
+        };
+        readonly questionTypes: {
+            readonly section: "Section";
+            readonly rating: "Rating";
+            readonly multipleChoice: "Multiple choice";
+            readonly singleChoice: "Single choice";
+            readonly text: "Text";
+            readonly longText: "Long text";
+            readonly numeric: "Numeric";
+        };
+        readonly selectQuestion: {
+            readonly addOption: "Add option";
+            readonly newOption: "New option {{number}}";
+            readonly markAsCorrect: "Mark as correct";
+            readonly remove: "Remove";
+            readonly correct: "Correct";
+            readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly answer: {
+            readonly label: "Answer";
+            readonly placeholder: "Respondent's answer";
+        };
+    };
 };
 
 export declare const DetailsItem: ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>;
@@ -2323,7 +2372,7 @@ declare type EmployeeItemProps = {
     firstName: string;
     lastName: string;
     avatarUrl?: URL_2;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 declare type EmptyState = {
@@ -3207,7 +3256,7 @@ declare type ItemDefinition = {
 declare type ItemProps = {
     text: string;
     icon?: IconType;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
@@ -3740,7 +3789,7 @@ declare interface OmniButtonProps {
     hasNewUpdate?: boolean;
 }
 
-declare type OnAddNewQuestionParams = {
+export declare type OnAddNewElementParams = {
     type: QuestionType;
     index: number;
 };
@@ -4472,6 +4521,14 @@ declare const pulses: readonly ["superNegative", "negative", "neutral", "positiv
 
 export declare const Question: ({ ...props }: QuestionProps) => JSX_2.Element;
 
+export declare type QuestionActionParams = {
+    questionId: string;
+    type: ActionType;
+    index: number;
+};
+
+declare type QuestionElement = Omit<QuestionProps, "onAction" | "onChange" | "onAddNewElement">;
+
 export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents & (TextQuestionProps | (RatingQuestionProps & {
     type: "rating";
 }) | (SelectQuestionProps & {
@@ -4677,15 +4734,27 @@ export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
 };
 
-export declare const Section: ({ id, title, description, onChange }: SectionProps) => JSX_2.Element;
+export declare const Section: ({ id, index, title, description, onChange, isEditMode, onAction, questions, }: SectionProps) => JSX_2.Element;
+
+declare type SectionActionParams = {
+    sectionId: string;
+    type: ActionType_2;
+    index: number;
+};
+
+declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">;
 
 export declare const SectionHeader: ({ title, description, action, link, separator, }: Props_2) => JSX_2.Element;
 
-export declare type SectionProps = {
+declare type SectionProps = {
     id: string;
+    index: number;
     title: string;
     description?: string;
     onChange?: (params: OnChangeSectionParams) => void;
+    isEditMode?: boolean;
+    onAction?: (params: SectionActionParams) => void;
+    questions?: QuestionElement[];
 };
 
 declare type SectionProps_2 = {
@@ -5239,7 +5308,7 @@ declare const TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<
 
 declare type TeamItemProps = {
     name: string;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 export declare const Textarea: React.FC<TextareaProps>;

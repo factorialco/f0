@@ -91958,7 +91958,7 @@ const G1 = S.forwardRef(({ className: e, type: t, label: n, labelIcon: r, icon: 
     type: t,
     ...q,
     onKeyDown: H,
-    className: oe("[&::-webkit-search-cancel-button]:hidden", "w-full shrink disabled:cursor-not-allowed")
+    className: oe("[&::-webkit-search-cancel-button]:hidden", "w-full shrink placeholder:-z-10 disabled:cursor-not-allowed")
   })
 }));
 G1.displayName = "Input";
