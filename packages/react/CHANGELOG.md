@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.268.0](https://github.com/factorialco/f0/compare/f0-react-v1.267.0...f0-react-v1.268.0) (2025-11-17)
+
+
+### Features
+
+* loading and disable in datacollection actions ([#2974](https://github.com/factorialco/f0/issues/2974)) ([af1bdd6](https://github.com/factorialco/f0/commit/af1bdd657d65ae3de676ee16154d2bb43d792397))
+
+## [1.267.0](https://github.com/factorialco/f0/compare/f0-react-v1.266.0...f0-react-v1.267.0) (2025-11-17)
+
+
+### Features
+
+* datacollection temp fullWith ([#2970](https://github.com/factorialco/f0/issues/2970)) ([efe153b](https://github.com/factorialco/f0/commit/efe153b957561e37f6f5c98b70fdfddd6d5870e2))
+
+## [1.266.0](https://github.com/factorialco/f0/compare/f0-react-v1.265.0...f0-react-v1.266.0) (2025-11-12)
+
+
+### Features
+
+* datacollection allow to disable persistence ([#2968](https://github.com/factorialco/f0/issues/2968)) ([1e5f973](https://github.com/factorialco/f0/commit/1e5f973cf52c459ca8f26f81395171b585e7d676))
+
+## [1.265.0](https://github.com/factorialco/f0/compare/f0-react-v1.264.1...f0-react-v1.265.0) (2025-11-12)
+
+
+### Features
+
+* **RichTextEditor:** add BlockIdExtension  ([#2964](https://github.com/factorialco/f0/issues/2964)) ([805493c](https://github.com/factorialco/f0/commit/805493cf4154d3e555844300b91305b12c25977f))
+
+## [1.264.1](https://github.com/factorialco/f0/compare/f0-react-v1.264.0...f0-react-v1.264.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* **AiChat:** targetBlank to MessageSources and consistency in loading states ([#2944](https://github.com/factorialco/f0/issues/2944)) ([d562d4c](https://github.com/factorialco/f0/commit/d562d4c499c80ac1bec98621b65f6c56330e0e81))
+
+## [1.264.0](https://github.com/factorialco/f0/compare/f0-react-v1.263.0...f0-react-v1.264.0) (2025-11-11)
+
+
+### Features
+
+* **RichTextEditor:** add secondary actions and person metadata support ([#2940](https://github.com/factorialco/f0/issues/2940)) ([d223a6a](https://github.com/factorialco/f0/commit/d223a6a6f9af6d80745af5635744133dfae520d3))
+
+## [1.263.0](https://github.com/factorialco/f0/compare/f0-react-v1.262.0...f0-react-v1.263.0) (2025-11-11)
+
+
+### Features
+
+* list icon avatar ([#2953](https://github.com/factorialco/f0/issues/2953)) ([efa338e](https://github.com/factorialco/f0/commit/efa338e5e4e35d6138f2be25a793434b93d04865))
+
+## [1.262.0](https://github.com/factorialco/f0/compare/f0-react-v1.261.0...f0-react-v1.262.0) (2025-11-11)
+
+
+### Features
+
+* Display deactivated persons in OneDataCollection tables ([#2952](https://github.com/factorialco/f0/issues/2952)) ([0d1eb2b](https://github.com/factorialco/f0/commit/0d1eb2b7d055c48316f15a978bcd18004d3d42f2))
+
 ## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
 
 

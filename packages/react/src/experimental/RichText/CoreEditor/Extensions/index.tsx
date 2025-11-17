@@ -24,6 +24,7 @@ export * from "./Placeholder"
 
 // Custom extensions
 export * from "./AIBlock"
+export * from "./BlockIdExtension"
 export * from "./CustomTask"
 export * from "./MoodTracker"
 export * from "./PersistSelection"
