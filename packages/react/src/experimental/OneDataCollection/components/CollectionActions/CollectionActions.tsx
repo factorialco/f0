@@ -70,8 +70,6 @@ export const CollectionActions = ({
               label: action.label,
               icon: action.icon,
               value: index.toString(),
-              loading: action.loading,
-              disabled: action.disabled,
             }))}
             onClick={(value) => {
               primaryActionsButtons[Number(value)]?.onClick?.()
