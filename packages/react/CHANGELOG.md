@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.269.0](https://github.com/factorialco/f0/compare/f0-react-v1.268.2...f0-react-v1.269.0) (2025-11-17)
+
+
+### Features
+
+* **tooltip:** add instant prop for immediate tooltip interaction ([#2981](https://github.com/factorialco/f0/issues/2981)) ([46a5e07](https://github.com/factorialco/f0/commit/46a5e079c2fdcae134b0a3f7862ec2d79903bdd6))
+
 ## [1.268.2](https://github.com/factorialco/f0/compare/f0-react-v1.268.1...f0-react-v1.268.2) (2025-11-17)
 
 
