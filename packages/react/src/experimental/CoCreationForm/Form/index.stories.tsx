@@ -7,6 +7,13 @@ const meta: Meta<typeof CoCreationForm> = {
   component: CoCreationForm,
   tags: ["autodocs", "experimental"],
   render: (args) => <CoCreationForm {...args} />,
+  decorators: [
+    (Story) => (
+      <div className="w-[500px]">
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export default meta

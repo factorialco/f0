@@ -18,10 +18,12 @@ export type BaseQuestionProps = {
   index: number
   title: string
   description?: string
+  type: QuestionType
   children: React.ReactNode
   onChange?: (params: BaseQuestionOnChangeParams) => void
   isEditMode?: boolean
   required?: boolean
+  descriptionVisible?: boolean
   onAddNewElement?: (params: OnAddNewElementParams) => void
   onAction?: (params: QuestionActionParams) => void
 }

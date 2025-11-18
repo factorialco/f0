@@ -11,14 +11,18 @@ import {
   OnChangeLabelParams,
   OnClickOptionActionParams,
 } from "./SelectOption/types"
-import { SelectQuestionOption, SelectQuestionProps } from "./types"
+import {
+  SelectQuestionOnChangeParams,
+  SelectQuestionOption,
+  SelectQuestionProps,
+} from "./types"
 
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
   const [internalOptions, setInternalOptions] =
     useState<SelectQuestionOption[]>(options)
   const { t } = useI18n()
 
-  const baseOnChangeParams = {
+  const baseOnChangeParams: SelectQuestionOnChangeParams = {
     ...props,
     options,
     ...(props.type === "select"

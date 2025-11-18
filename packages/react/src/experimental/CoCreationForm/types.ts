@@ -16,11 +16,14 @@ export type QuestionType =
   | "longText"
   | "numeric"
   | "link"
+  | "date"
 
 export type BaseQuestionOnChangeParams = {
   id: string
   title: string
   description?: string
+  descriptionVisible?: boolean
+  type: QuestionType
   required?: boolean
 }
 

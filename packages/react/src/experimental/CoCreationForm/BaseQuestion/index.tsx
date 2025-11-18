@@ -1,25 +1,14 @@
-import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
-import {
-  AcademicCap,
-  Add,
-  Check,
-  CheckDouble,
-  Delete,
-  Ellipsis,
-  LayersFront,
-  List,
-  Numbers,
-  Star,
-  TextSize,
-} from "@/icons/app"
+import { AcademicCap, Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useCallback, useMemo, useState } from "react"
+import { useQuestionTypes } from "../constants"
 import { useDragContext } from "../DragContext"
 import { BaseQuestionOnChangeParams, QuestionType } from "../types"
-import { ActionType, BaseQuestionProps } from "./types"
+import { ActionsMenu } from "./ActionsMenu"
+import { BaseQuestionProps } from "./types"
 
 export type { BaseQuestionPropsForOtherQuestionComponents } from "./types"
 
@@ -35,9 +24,10 @@ export const BaseQuestion = ({
   onChange,
   children,
   required,
+  descriptionVisible,
+  type: questionType,
   isEditMode,
   onAddNewElement,
-  onAction,
 }: BaseQuestionProps) => {
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
@@ -52,8 +42,10 @@ export const BaseQuestion = ({
       title,
       description,
       required,
+      type: questionType,
+      descriptionVisible,
     }),
-    [id, title, description, required]
+    [id, title, description, required, questionType, descriptionVisible]
   )
 
   const handleChangeTitle = useCallback(
@@ -86,33 +78,7 @@ export const BaseQuestion = ({
     [onAddNewElement, index]
   )
 
-  const handleAction = useCallback(
-    (type: ActionType) => {
-      onAction?.({
-        questionId: id,
-        type,
-        index,
-      })
-    },
-    [onAction, id, index]
-  )
-
-  const actions = useMemo(
-    () => [
-      {
-        label: t("coCreationForm.actions.duplicateQuestion"),
-        icon: LayersFront,
-        onClick: () => handleAction("duplicate"),
-      },
-      {
-        label: t("coCreationForm.actions.deleteQuestion"),
-        icon: Delete,
-        onClick: () => handleAction("delete"),
-        critical: true,
-      },
-    ],
-    [handleAction, t]
-  )
+  const questionTypes = useQuestionTypes()
 
   const newQuestionDropdownItems = useMemo<DropdownInternalProps["items"]>(
     () => [
@@ -124,38 +90,12 @@ export const BaseQuestion = ({
       {
         type: "separator",
       },
-      {
-        label: t("coCreationForm.questionTypes.rating"),
-        icon: Star,
-        onClick: () => handleAddNewQuestion("rating"),
-      },
-      {
-        label: t("coCreationForm.questionTypes.multipleChoice"),
-        icon: CheckDouble,
-        onClick: () => handleAddNewQuestion("select"),
-      },
-      {
-        label: t("coCreationForm.questionTypes.singleChoice"),
-        icon: Check,
-        onClick: () => handleAddNewQuestion("select"),
-      },
-      {
-        label: t("coCreationForm.questionTypes.text"),
-        icon: TextSize,
-        onClick: () => handleAddNewQuestion("text"),
-      },
-      {
-        label: t("coCreationForm.questionTypes.longText"),
-        icon: List,
-        onClick: () => handleAddNewQuestion("text"),
-      },
-      {
-        label: t("coCreationForm.questionTypes.numeric"),
-        icon: Numbers,
-        onClick: () => handleAddNewQuestion("numeric"),
-      },
+      ...questionTypes.map((questionType) => ({
+        ...questionType,
+        onClick: () => handleAddNewQuestion(questionType.questionType),
+      })),
     ],
-    [handleAddNewQuestion, t]
+    [handleAddNewQuestion, questionTypes, t]
   )
 
   return (
@@ -181,22 +121,12 @@ export const BaseQuestion = ({
               actionsDropdownOpen && "opacity-100"
             )}
           >
-            <Dropdown
-              items={actions}
-              icon={Ellipsis}
+            <ActionsMenu
               open={actionsDropdownOpen}
-              onOpenChange={setActionsDropdownOpen}
-              align="start"
-            >
-              <F0Button
-                icon={Ellipsis}
-                label={t("coCreationForm.actions.actions")}
-                size="md"
-                variant="ghost"
-                tooltip={false}
-                hideLabel
-              />
-            </Dropdown>
+              setOpen={setActionsDropdownOpen}
+              onChange={onChange}
+              onChangeParams={baseOnChangeParams}
+            />
           </div>
         </div>
         <textarea

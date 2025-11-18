@@ -21,7 +21,6 @@ export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
 
 export const TextQuestion = ({
   value,
-  type,
   onChange,
   ...baseQuestionComponentProps
 }: TextQuestionProps) => {
@@ -32,10 +31,10 @@ export const TextQuestion = ({
       onChange?.({
         ...params,
         value,
-        type,
-      })
+        type: baseQuestionComponentProps.type,
+      } as TextQuestionOnChangeParams)
     },
-    [onChange, value, type]
+    [onChange, value, baseQuestionComponentProps.type]
   )
 
   const handleChangeText = useCallback(
@@ -45,10 +44,9 @@ export const TextQuestion = ({
       onChange?.({
         ...baseQuestionComponentProps,
         value: newValue,
-        type,
       })
     },
-    [baseQuestionComponentProps, onChange, type]
+    [baseQuestionComponentProps, onChange]
   )
 
   const placeholder = t("coCreationForm.answer.placeholder")
@@ -70,7 +68,7 @@ export const TextQuestion = ({
   return (
     <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
       <div className="px-0.5">
-        {type === "text" && (
+        {baseQuestionComponentProps.type === "text" && (
           <Input
             type="text"
             size="md"
@@ -78,7 +76,9 @@ export const TextQuestion = ({
             {...commonInputProps}
           />
         )}
-        {type === "longText" && <Textarea rows={4} {...commonInputProps} />}
+        {baseQuestionComponentProps.type === "longText" && (
+          <Textarea rows={4} {...commonInputProps} />
+        )}
       </div>
     </BaseQuestion>
   )
