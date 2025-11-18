@@ -6,6 +6,8 @@ import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { ComponentProps } from "react"
+import { GridGroup } from "../../groups/GridGroup"
+import { PageLayoutBlock } from "../components/PageLayoutBlock"
 import { PageLayoutContentBlock } from "../components/PageLayoutContentBlock"
 import { PageLayout } from "../index"
 
@@ -169,5 +171,81 @@ export const WithContentBlocks: Story = {
           "Example showing multiple PageLayoutContentBlock components with different configurations - titles, descriptions, and content types.",
       },
     },
+  },
+}
+
+export const WithGridGroupLayout: Story = {
+  args: {
+    ...Default.args,
+    children: (
+      <>
+        <PageLayoutContentBlock
+          title="Grid Group Layout example"
+          description="This is an example of a Grid Group Layout."
+          variant="default"
+        >
+          The content above is a `GridGroupLayout`
+        </PageLayoutContentBlock>
+        <GridGroup
+          sortable={true}
+          onSort={(items: React.ReactNode[]) => console.log(items)}
+          blocks={[
+            {
+              render: (
+                <PageLayoutContentBlock
+                  className="bg-[#ff000030]"
+                  title="Quick Actions"
+                  description="Frequently used actions and shortcuts"
+                  titleLevel="h3"
+                  variant="full-width"
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    <button className="rounded border bg-f1-background-secondary p-4">
+                      Action 1
+                    </button>
+                    <button className="rounded border bg-f1-background-secondary p-4">
+                      Action 2
+                    </button>
+                  </div>
+                </PageLayoutContentBlock>
+              ),
+            },
+            {
+              render: (
+                <PageLayoutContentBlock
+                  title="System Status"
+                  titleLevel="h4"
+                  className="bg-[#ff000030]"
+                >
+                  <div className="text-sm text-f1-foreground-secondary">
+                    Block 2
+                  </div>
+                </PageLayoutContentBlock>
+              ),
+            },
+            {
+              render: (
+                <PageLayoutContentBlock
+                  title="System Status"
+                  titleLevel="h4"
+                  className="bg-[#ff000030]"
+                >
+                  <div className="text-sm text-f1-foreground-secondary">
+                    Block 3
+                  </div>
+                </PageLayoutContentBlock>
+              ),
+            },
+            ...Array.from({ length: 10 }).map((_, index) => ({
+              render: (
+                <PageLayoutBlock className="bg-[#ff000030]">
+                  Block {index + 4}
+                </PageLayoutBlock>
+              ),
+            })),
+          ]}
+        />
+      </>
+    ),
   },
 }
