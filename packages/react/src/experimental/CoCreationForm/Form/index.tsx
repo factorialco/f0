@@ -2,7 +2,6 @@ import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
-import { useState } from "react"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
 import { DragProvider, useDragContext } from "../DragContext"
 import { Question as QuestionComponent, QuestionProps } from "../Question"
@@ -16,14 +15,7 @@ type ItemProps = {
 const Item = ({ element }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
-  const {
-    onQuestionAction,
-    onSectionAction,
-    onQuestionChange,
-    onSectionChange,
-    onAddNewElement,
-    isEditMode,
-  } = useCoCreationFormContext()
+  const { isEditMode } = useCoCreationFormContext()
 
   const handleDragStart = () => {
     setIsDragging(true)
@@ -63,21 +55,12 @@ const Item = ({ element }: ItemProps) => {
             </div>
           )}
           {element.type === "section" && (
-            <SectionComponent
-              {...element.section}
-              isEditMode={isEditMode}
-              onAction={onSectionAction}
-              onChange={onSectionChange}
-            />
+            <SectionComponent {...element.section} />
           )}
           {element.type === "question" && (
             <QuestionComponent
               {...({
                 ...element.question,
-                isEditMode,
-                onAction: onQuestionAction,
-                onChange: onQuestionChange,
-                onAddNewElement,
               } as QuestionProps)}
             />
           )}
@@ -90,34 +73,28 @@ const Item = ({ element }: ItemProps) => {
 export const CoCreationForm = ({
   elements,
   isEditMode,
-  ...callbacks
-}: CoCreationFormProps) => {
-  const [internalElements, setInternalElements] =
-    useState<CoCreationFormElement[]>(elements)
-
-  return (
-    <CoCreationFormProvider isEditMode={isEditMode} {...callbacks}>
-      <DragProvider>
-        <Reorder.Group
-          axis="y"
-          values={internalElements}
-          onReorder={setInternalElements}
-          as="div"
-        >
-          <div className="flex flex-col gap-8">
-            {internalElements.map((element) => (
-              <Item
-                key={
-                  element.type === "section"
-                    ? element.section.id
-                    : element.question.id
-                }
-                element={element}
-              />
-            ))}
-          </div>
-        </Reorder.Group>
-      </DragProvider>
-    </CoCreationFormProvider>
-  )
-}
+  onChange,
+}: CoCreationFormProps) => (
+  <CoCreationFormProvider
+    isEditMode={isEditMode}
+    elements={elements}
+    onChange={onChange}
+  >
+    <DragProvider>
+      <Reorder.Group axis="y" values={elements} onReorder={onChange} as="div">
+        <div className="flex flex-col gap-8">
+          {elements.map((element) => (
+            <Item
+              key={
+                element.type === "section"
+                  ? element.section.id
+                  : element.question.id
+              }
+              element={element}
+            />
+          ))}
+        </div>
+      </Reorder.Group>
+    </DragProvider>
+  </CoCreationFormProvider>
+)

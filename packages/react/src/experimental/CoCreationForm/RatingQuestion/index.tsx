@@ -1,16 +1,10 @@
 import { useMemo } from "react"
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
-import {
-  BaseScoreQuestion,
-  BaseScoreQuestionOnChangeParams,
-} from "../BaseScoreQuestion"
-
-export type RatingQuestionOnChangeParams = BaseScoreQuestionOnChangeParams
+import { BaseScoreQuestion } from "../BaseScoreQuestion"
 
 export type RatingQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     value?: number
-    onChange?: (params: RatingQuestionOnChangeParams) => void
   } & (
       | { range: { min: number; max: number } }
       | { options: { value: number; label: string }[] }

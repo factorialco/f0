@@ -5,6 +5,7 @@ import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
+import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
 export type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -13,47 +14,38 @@ export type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
 
 export type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   value?: string | null
-  onChange?: (params: LinkQuestionOnChangeParams) => void
 }
 
 export const LinkQuestion = ({
   value,
-  onChange,
   ...baseQuestionComponentProps
 }: LinkQuestionProps) => {
   const { t } = useI18n()
 
-  const handleChange = useCallback(
-    (params: BaseQuestionOnChangeParams) => {
-      onChange?.({
-        ...params,
-        value,
-      })
-    },
-    [onChange, value]
-  )
+  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
   const handleChangeText = useCallback(
     (newValue: string | null) => {
-      if (baseQuestionComponentProps.isEditMode) return
+      if (isEditMode) return
 
-      onChange?.({
+      onQuestionChange?.({
         ...baseQuestionComponentProps,
+        type: "link",
         value: newValue,
       })
     },
-    [baseQuestionComponentProps, onChange]
+    [baseQuestionComponentProps, isEditMode, onQuestionChange]
   )
 
   return (
-    <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
+    <BaseQuestion {...baseQuestionComponentProps}>
       <div className="px-0.5">
         <Input
           type="url"
           size="md"
           value={value ?? undefined}
           onChange={handleChangeText}
-          disabled={baseQuestionComponentProps.isEditMode}
+          disabled={isEditMode}
           label={t("coCreationForm.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}

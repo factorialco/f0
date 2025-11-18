@@ -5,6 +5,7 @@ import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
+import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
 export type DateQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -13,36 +14,27 @@ export type DateQuestionOnChangeParams = BaseQuestionOnChangeParams & {
 
 export type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   value?: Date | null
-  onChange?: (params: DateQuestionOnChangeParams) => void
 }
 
 export const DateQuestion = ({
   value,
-  onChange,
   ...baseQuestionComponentProps
 }: DateQuestionProps) => {
-  const { t } = useI18n()
+  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
-  const handleChange = useCallback(
-    (params: BaseQuestionOnChangeParams) => {
-      onChange?.({
-        ...params,
-        value,
-      })
-    },
-    [onChange, value]
-  )
+  const { t } = useI18n()
 
   const handleChangeDate = useCallback(
     (newValue: DatePickerValue | undefined) => {
-      if (baseQuestionComponentProps.isEditMode) return
+      if (isEditMode) return
 
-      onChange?.({
+      onQuestionChange?.({
         ...baseQuestionComponentProps,
+        type: "date",
         value: newValue?.value?.from,
       })
     },
-    [baseQuestionComponentProps, onChange]
+    [baseQuestionComponentProps, isEditMode, onQuestionChange]
   )
 
   const datePickerValue = useMemo(
@@ -57,17 +49,17 @@ export const DateQuestion = ({
   )
 
   return (
-    <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
+    <BaseQuestion {...baseQuestionComponentProps}>
       <div className="px-0.5">
         <F0DatePicker
           size="md"
           value={datePickerValue}
           onChange={handleChangeDate}
-          disabled={baseQuestionComponentProps.isEditMode}
+          disabled={isEditMode}
           label={t("coCreationForm.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}
-          readonly={baseQuestionComponentProps.isEditMode}
+          readonly={isEditMode}
           clearable={!baseQuestionComponentProps.required}
         />
       </div>

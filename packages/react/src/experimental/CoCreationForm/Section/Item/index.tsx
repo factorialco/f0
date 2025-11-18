@@ -54,7 +54,6 @@ export const Item = ({ question }: ItemProps) => {
           {...({
             ...question,
           } as QuestionProps)}
-          isEditMode={isEditMode}
         />
       </div>
     </Reorder.Item>

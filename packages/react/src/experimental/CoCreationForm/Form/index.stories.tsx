@@ -1,15 +1,25 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useState } from "react"
 import { CoCreationForm } from "."
+import { CoCreationFormElement } from "../types"
 
 const meta: Meta<typeof CoCreationForm> = {
   title: "CoCreationForm/CoCreationForm",
   component: CoCreationForm,
   tags: ["autodocs", "experimental"],
-  render: (args) => <CoCreationForm {...args} />,
+  render: (args) => {
+    const [elements, setElements] = useState<CoCreationFormElement[]>(
+      args.elements
+    )
+
+    return (
+      <CoCreationForm {...args} elements={elements} onChange={setElements} />
+    )
+  },
   decorators: [
     (Story) => (
-      <div className="w-[500px]">
+      <div className="w-[750px]">
         <Story />
       </div>
     ),
@@ -41,13 +51,13 @@ export const Default: Story = {
           description: "Section 1 description",
           questions: [
             {
-              id: "question-1",
+              id: "question-2",
               index: 1,
               title: "Question 1",
               type: "text" as const,
             },
             {
-              id: "question-2",
+              id: "question-3",
               index: 2,
               title: "Question 2",
               type: "select" as const,

@@ -6,6 +6,7 @@ import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
+import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
 export type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -16,57 +17,44 @@ export type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
 export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   type: "text" | "longText"
   value?: string | null
-  onChange?: (params: TextQuestionOnChangeParams) => void
 }
 
 export const TextQuestion = ({
   value,
-  onChange,
   ...baseQuestionComponentProps
 }: TextQuestionProps) => {
-  const { t } = useI18n()
+  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
-  const handleChange = useCallback(
-    (params: BaseQuestionOnChangeParams) => {
-      onChange?.({
-        ...params,
-        value,
-        type: baseQuestionComponentProps.type,
-      } as TextQuestionOnChangeParams)
-    },
-    [onChange, value, baseQuestionComponentProps.type]
-  )
+  const { t } = useI18n()
 
   const handleChangeText = useCallback(
     (newValue: string) => {
-      if (baseQuestionComponentProps.isEditMode) return
+      if (isEditMode) return
 
-      onChange?.({
+      onQuestionChange?.({
         ...baseQuestionComponentProps,
         value: newValue,
       })
     },
-    [baseQuestionComponentProps, onChange]
+    [isEditMode, baseQuestionComponentProps, onQuestionChange]
   )
 
   const placeholder = t("coCreationForm.answer.placeholder")
 
-  const inputValue = baseQuestionComponentProps.isEditMode
-    ? placeholder
-    : (value ?? undefined)
+  const inputValue = isEditMode ? placeholder : (value ?? undefined)
 
   const commonInputProps = {
     value: inputValue,
     onChange: handleChangeText,
     placeholder,
-    disabled: baseQuestionComponentProps.isEditMode,
+    disabled: isEditMode,
     label: t("coCreationForm.answer.label"),
     hideLabel: true,
     required: baseQuestionComponentProps.required,
   }
 
   return (
-    <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
+    <BaseQuestion {...baseQuestionComponentProps}>
       <div className="px-0.5">
         {baseQuestionComponentProps.type === "text" && (
           <Input

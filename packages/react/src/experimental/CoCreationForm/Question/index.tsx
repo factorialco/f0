@@ -21,18 +21,18 @@ export const Question = ({ ...props }: QuestionProps) => {
   switch (props.type) {
     case "text":
     case "longText":
-      return <TextQuestion onChange={props.onChange} {...props} />
+      return <TextQuestion {...props} />
     case "rating":
-      return <RatingQuestion onChange={props.onChange} {...props} />
+      return <RatingQuestion {...props} />
     case "select":
     case "multi-select":
-      return <SelectQuestion onChange={props.onChange} {...props} />
+      return <SelectQuestion {...props} />
     case "numeric":
-      return <NumericQuestion onChange={props.onChange} {...props} />
+      return <NumericQuestion {...props} />
     case "link":
-      return <LinkQuestion onChange={props.onChange} {...props} />
+      return <LinkQuestion {...props} />
     case "date":
-      return <DateQuestion onChange={props.onChange} {...props} />
+      return <DateQuestion {...props} />
     default:
       throw new Error("Invalid question type provided")
   }

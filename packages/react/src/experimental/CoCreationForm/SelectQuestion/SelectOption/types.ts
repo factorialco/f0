@@ -1,4 +1,4 @@
-import { SelectQuestionOption } from "../types"
+import { SelectQuestionOption } from "../../types"
 
 export type OnClickOptionActionParams = {
   value: string

@@ -5,18 +5,12 @@ import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
-import { BaseQuestionOnChangeParams } from "../types"
-
-export type BaseScoreQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-  type: "score"
-  value: number
-}
+import { useCoCreationFormContext } from "../Context"
 
 export type BaseScoreQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     value?: number
     options: { value: number; label: string }[]
-    onChange?: (params: BaseScoreQuestionOnChangeParams) => void
   }
 
 const ScoreOption = ({
@@ -59,11 +53,11 @@ export const BaseScoreQuestion = ({
   description,
   options,
   value,
-  onChange,
-  isEditMode,
   required,
 }: BaseScoreQuestionProps) => {
-  const baseOnChangeParams: BaseScoreQuestionOnChangeParams = useMemo(
+  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
+
+  const baseOnChangeParams = useMemo(
     () => ({
       id,
       title,
@@ -74,35 +68,24 @@ export const BaseScoreQuestion = ({
     [id, title, description, value]
   )
 
-  const handleChange = useCallback(
-    (params: BaseQuestionOnChangeParams) => {
-      onChange?.({
-        ...params,
-        value: value ?? 0,
-        type: "score",
-      })
-    },
-    [value, onChange]
-  )
-
   const handleChangeValue = useCallback(
     (newValue: number) => {
-      onChange?.({
+      onQuestionChange?.({
         ...baseOnChangeParams,
         value: newValue,
-        type: "score",
+        type: "rating",
       })
     },
-    [baseOnChangeParams, onChange]
+    [baseOnChangeParams, onQuestionChange]
   )
 
   return (
     <BaseQuestion
       id={id}
+      type="rating"
       index={index}
       title={title}
       description={description}
-      onChange={handleChange}
       required={required}
     >
       <div className="grid grid-cols-3 gap-3 md:grid-cols-5">

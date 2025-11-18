@@ -5,6 +5,7 @@ import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
+import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
 export type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -14,47 +15,38 @@ export type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
 export type NumericQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     value?: number | null
-    onChange?: (params: NumericQuestionOnChangeParams) => void
   }
 
 export const NumericQuestion = ({
   value,
-  onChange,
   ...baseQuestionComponentProps
 }: NumericQuestionProps) => {
   const { t } = useI18n()
 
-  const handleChange = useCallback(
-    (params: BaseQuestionOnChangeParams) => {
-      onChange?.({
-        ...params,
-        value,
-      })
-    },
-    [onChange, value]
-  )
+  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
   const handleChangeText = useCallback(
     (newValue: number | null) => {
-      if (baseQuestionComponentProps.isEditMode) return
+      if (isEditMode) return
 
-      onChange?.({
+      onQuestionChange?.({
         ...baseQuestionComponentProps,
+        type: "numeric",
         value: newValue,
       })
     },
-    [baseQuestionComponentProps, onChange]
+    [baseQuestionComponentProps, isEditMode, onQuestionChange]
   )
 
   return (
-    <BaseQuestion {...baseQuestionComponentProps} onChange={handleChange}>
+    <BaseQuestion {...baseQuestionComponentProps}>
       <div className="px-0.5">
         <NumberInput
           locale="en-US"
           size="md"
           value={value}
           onChange={handleChangeText}
-          disabled={baseQuestionComponentProps.isEditMode}
+          disabled={isEditMode}
           label={t("coCreationForm.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}

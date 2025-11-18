@@ -5,8 +5,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useQuestionTypes } from "../constants"
+import { useCoCreationFormContext } from "../Context"
 import { useDragContext } from "../DragContext"
-import { BaseQuestionOnChangeParams, QuestionType } from "../types"
+import { CoCreationFormCallbacks, QuestionType } from "../types"
 import { ActionsMenu } from "./ActionsMenu"
 import { BaseQuestionProps } from "./types"
 
@@ -21,14 +22,14 @@ export const BaseQuestion = ({
   index,
   title,
   description,
-  onChange,
   children,
-  required,
+  // required,
   descriptionVisible,
   type: questionType,
-  isEditMode,
-  onAddNewElement,
 }: BaseQuestionProps) => {
+  const { onQuestionChange, onAddNewElement, isEditMode } =
+    useCoCreationFormContext()
+
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
@@ -36,36 +37,30 @@ export const BaseQuestion = ({
   const { isDragging } = useDragContext()
   const { t } = useI18n()
 
-  const baseOnChangeParams: BaseQuestionOnChangeParams = useMemo(
-    () => ({
-      id,
-      title,
-      description,
-      required,
-      type: questionType,
-      descriptionVisible,
-    }),
-    [id, title, description, required, questionType, descriptionVisible]
-  )
-
   const handleChangeTitle = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onChange?.({
-        ...baseOnChangeParams,
+      onQuestionChange?.({
+        id,
+        type: questionType,
         title: e.target.value,
-      })
+      } as Parameters<
+        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+      >[0])
     },
-    [baseOnChangeParams, onChange]
+    [id, questionType, onQuestionChange]
   )
 
   const handleChangeDescription = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onChange?.({
-        ...baseOnChangeParams,
+      onQuestionChange?.({
+        id,
+        type: questionType,
         description: e.target.value,
-      })
+      } as Parameters<
+        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+      >[0])
     },
-    [baseOnChangeParams, onChange]
+    [id, questionType, onQuestionChange]
   )
 
   const handleAddNewQuestion = useCallback(
@@ -78,6 +73,13 @@ export const BaseQuestion = ({
     [onAddNewElement, index]
   )
 
+  const handleAddNewSection = useCallback(() => {
+    onAddNewElement?.({
+      type: "section",
+      index,
+    })
+  }, [onAddNewElement, index])
+
   const questionTypes = useQuestionTypes()
 
   const newQuestionDropdownItems = useMemo<DropdownInternalProps["items"]>(
@@ -85,7 +87,7 @@ export const BaseQuestion = ({
       {
         label: t("coCreationForm.questionTypes.section"),
         icon: AcademicCap,
-        onClick: () => handleAddNewQuestion("section"),
+        onClick: handleAddNewSection,
       },
       {
         type: "separator",
@@ -95,7 +97,7 @@ export const BaseQuestion = ({
         onClick: () => handleAddNewQuestion(questionType.questionType),
       })),
     ],
-    [handleAddNewQuestion, questionTypes, t]
+    [handleAddNewQuestion, handleAddNewSection, questionTypes, t]
   )
 
   return (
@@ -124,19 +126,21 @@ export const BaseQuestion = ({
             <ActionsMenu
               open={actionsDropdownOpen}
               setOpen={setActionsDropdownOpen}
-              onChange={onChange}
-              onChangeParams={baseOnChangeParams}
+              questionId={id}
+              questionType={questionType}
             />
           </div>
         </div>
-        <textarea
-          value={description}
-          aria-label="Description"
-          onChange={handleChangeDescription}
-          disabled={!isEditMode}
-          className="w-full resize-none px-2 text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
-          style={TEXT_AREA_STYLE}
-        />
+        {descriptionVisible && (
+          <textarea
+            value={description}
+            aria-label="Description"
+            onChange={handleChangeDescription}
+            disabled={!isEditMode}
+            className="w-full resize-none px-2 text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
+            style={TEXT_AREA_STYLE}
+          />
+        )}
       </div>
       {children}
       {isEditMode && (

@@ -26,7 +26,8 @@ import {
 } from "@/ui/dropdown-menu"
 import { Dispatch, SetStateAction, useCallback } from "react"
 import { useQuestionTypes } from "../../constants"
-import { BaseQuestionOnChangeParams, QuestionType } from "../../types"
+import { useCoCreationFormContext } from "../../Context"
+import { CoCreationFormCallbacks, QuestionType } from "../../types"
 
 const ToggleItem = ({
   label,
@@ -117,54 +118,58 @@ const SimpleItem = ({ label, icon }: { label: string; icon: IconType }) => (
 type ActionsMenuProps = {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  onChangeParams: BaseQuestionOnChangeParams
-  onChange?: (params: BaseQuestionOnChangeParams) => void
+  questionId: string
+  questionType: QuestionType
 }
 
 export function ActionsMenu({
   open,
   setOpen,
-  onChange,
-  onChangeParams,
+  questionId,
+  questionType,
 }: ActionsMenuProps) {
   const { t } = useI18n()
+
+  const { onQuestionChange } = useCoCreationFormContext()
 
   const questionTypes = useQuestionTypes()
 
   const handleChangeRequired = useCallback(
     (checked: boolean) => {
-      if (!onChangeParams) return
-
-      onChange?.({
-        ...onChangeParams,
+      onQuestionChange?.({
+        id: questionId,
+        type: questionType,
         required: checked,
-      })
+      } as Parameters<
+        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+      >[0])
     },
-    [onChange, onChangeParams]
+    [questionId, questionType, onQuestionChange]
   )
 
   const handleChangeDescriptionVisible = useCallback(
     (checked: boolean) => {
-      if (!onChangeParams) return
-
-      onChange?.({
-        ...onChangeParams,
+      onQuestionChange?.({
+        id: questionId,
+        type: questionType,
         descriptionVisible: checked,
-      })
+      } as Parameters<
+        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+      >[0])
     },
-    [onChange, onChangeParams]
+    [questionId, questionType, onQuestionChange]
   )
 
   const handleSelectQuestionType = useCallback(
     (newQuestionType: QuestionType) => {
-      if (!onChangeParams) return
-
-      onChange?.({
-        ...onChangeParams,
+      onQuestionChange?.({
+        id: questionId,
         type: newQuestionType,
-      })
+      } as Parameters<
+        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+      >[0])
     },
-    [onChange, onChangeParams]
+    [questionId, onQuestionChange]
   )
 
   return (
@@ -200,7 +205,7 @@ export function ActionsMenu({
         <DropdownMenuGroup>
           <SubMenuItem<QuestionType>
             label="Question type"
-            value={onChangeParams?.type}
+            value={questionType}
             options={questionTypes.map((questionType) => ({
               label: questionType.label,
               value: questionType.questionType,

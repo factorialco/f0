@@ -1,11 +1,5 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
-import { BaseQuestionOnChangeParams } from "../types"
-
-export type SelectQuestionOption = {
-  value: string
-  label: string
-  correct?: boolean
-}
+import { BaseQuestionOnChangeParams, SelectQuestionOption } from "../types"
 
 export type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   options: SelectQuestionOption[]
@@ -23,7 +17,6 @@ export type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
 export type SelectQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     options: SelectQuestionOption[]
-    onChange?: (params: SelectQuestionOnChangeParams) => void
   } & (
       | {
           type: "select"

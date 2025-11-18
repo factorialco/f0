@@ -6,11 +6,6 @@ const meta: Meta = {
   title: "CoCreationForm/BaseQuestion",
   component: BaseQuestion,
   tags: ["autodocs", "experimental"],
-  args: {
-    onChange: (params) => {
-      console.log("Question changed:", params)
-    },
-  },
   decorators: [
     (Story) => (
       <div className="w-[500px]">

@@ -4,20 +4,19 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Reorder } from "motion/react"
 import { useEffect, useState } from "react"
 import { BaseQuestion } from "../BaseQuestion"
+import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
-import { BaseQuestionOnChangeParams } from "../types"
+import { SelectQuestionOption } from "../types"
 import { SelectOption } from "./SelectOption"
 import {
   OnChangeLabelParams,
   OnClickOptionActionParams,
 } from "./SelectOption/types"
-import {
-  SelectQuestionOnChangeParams,
-  SelectQuestionOption,
-  SelectQuestionProps,
-} from "./types"
+import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
+  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
+
   const [internalOptions, setInternalOptions] =
     useState<SelectQuestionOption[]>(options)
   const { t } = useI18n()
@@ -38,13 +37,6 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     }
   }, [options])
 
-  const handleChange = (params: BaseQuestionOnChangeParams) => {
-    props.onChange?.({
-      ...baseOnChangeParams,
-      ...params,
-    })
-  }
-
   const handleClickOptionAction = (params: OnClickOptionActionParams) => {
     let newOptions = options
 
@@ -59,7 +51,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
       }))
     }
 
-    props.onChange?.({
+    onQuestionChange?.({
       ...baseOnChangeParams,
       options: newOptions,
     })
@@ -67,7 +59,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   const handleOptionClick = (optionValue: string) => {
     if (props.type === "select") {
-      props.onChange?.({
+      onQuestionChange?.({
         ...baseOnChangeParams,
         type: props.type,
         value: optionValue,
@@ -77,7 +69,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
         ? props.value.filter((value) => value !== optionValue)
         : [...props.value, optionValue]
 
-      props.onChange?.({
+      onQuestionChange?.({
         ...baseOnChangeParams,
         type: props.type,
         value: newValue,
@@ -95,7 +87,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
           }
         : {}),
     }))
-    props.onChange?.({
+    onQuestionChange?.({
       ...baseOnChangeParams,
       options: newOptions,
     })
@@ -109,14 +101,14 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
         number: optionsLength + 1,
       }),
     }
-    props.onChange?.({
+    onQuestionChange?.({
       ...baseOnChangeParams,
       options: [...options, newOption],
     })
   }
 
   return (
-    <BaseQuestion {...props} onChange={handleChange}>
+    <BaseQuestion {...props}>
       <div className="-mx-0.5 flex flex-col items-start [&>div]:w-full">
         <DragProvider>
           <Reorder.Group
@@ -139,13 +131,13 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
                   onClick={handleOptionClick}
                   onClickAction={handleClickOptionAction}
                   onChangeLabel={handleChangeLabel}
-                  isEditMode={props.isEditMode}
+                  isEditMode={isEditMode}
                 />
               </div>
             ))}
           </Reorder.Group>
         </DragProvider>
-        {props.isEditMode && (
+        {isEditMode && (
           <div className="opacity-50">
             <F0Button
               label={t("coCreationForm.selectQuestion.addOption")}

@@ -1,14 +1,12 @@
 import { DateQuestionProps } from "./DateQuestion"
 import { LinkQuestionProps } from "./LinkQuestion"
 import { NumericQuestionProps } from "./NumericQuestion"
-import { QuestionProps } from "./Question"
 import { RatingQuestionProps } from "./RatingQuestion"
 import { SectionProps } from "./Section/types"
 import { SelectQuestionProps } from "./SelectQuestion/types"
 import { TextQuestionProps } from "./TextQuestion"
 
 export type QuestionType =
-  | "section"
   | "rating"
   | "select"
   | "multi-select"
@@ -18,12 +16,13 @@ export type QuestionType =
   | "link"
   | "date"
 
+export type ElementType = QuestionType | "section"
+
 export type BaseQuestionOnChangeParams = {
   id: string
-  title: string
+  title?: string
   description?: string
   descriptionVisible?: boolean
-  type: QuestionType
   required?: boolean
 }
 
@@ -46,15 +45,82 @@ export type CoCreationFormElement =
   | { type: "section"; section: SectionElement }
   | { type: "question"; question: QuestionElement }
 
+export type ActionType = "duplicate" | "delete"
+
+export type SectionActionParams = {
+  sectionId: string
+  type: ActionType
+  index: number
+}
+
+export type OnChangeSectionParams = {
+  id: string
+  title: string
+  description?: string
+  questions?: QuestionElement[]
+}
+
+export type SelectQuestionOption = {
+  value: string
+  label: string
+  correct?: boolean
+}
+
+type OnChangeQuestionParams = BaseQuestionOnChangeParams &
+  (
+    | {
+        type: "text" | "longText"
+        value?: string | null
+      }
+    | {
+        type: "rating"
+        value: number
+      }
+    | {
+        type: "select"
+        value?: string | null
+        options: SelectQuestionOption[]
+      }
+    | {
+        type: "multi-select"
+        value?: string[] | null
+        options: SelectQuestionOption[]
+      }
+    | {
+        type: "numeric"
+        value?: number | null
+      }
+    | {
+        type: "link"
+        value?: string | null
+      }
+    | {
+        type: "date"
+        value?: Date | null
+      }
+  )
+
+export type QuestionActionParams = {
+  questionId: string
+  type: ActionType
+  index: number
+}
+
+export type OnAddNewElementParams = {
+  type: ElementType
+  index: number
+}
+
 export type CoCreationFormCallbacks = {
-  onQuestionAction?: QuestionProps["onAction"]
-  onSectionAction?: SectionProps["onAction"]
-  onQuestionChange?: QuestionProps["onChange"]
-  onSectionChange?: SectionProps["onChange"]
-  onAddNewElement?: QuestionProps["onAddNewElement"]
+  onQuestionAction?: (params: QuestionActionParams) => void
+  onSectionAction?: (params: SectionActionParams) => void
+  onQuestionChange?: (params: OnChangeQuestionParams) => void
+  onSectionChange?: (params: OnChangeSectionParams) => void
+  onAddNewElement?: (params: OnAddNewElementParams) => void
 }
 
 export type CoCreationFormProps = {
   elements: CoCreationFormElement[]
+  onChange: (elements: CoCreationFormElement[]) => void
   isEditMode?: boolean
-} & CoCreationFormCallbacks
+}

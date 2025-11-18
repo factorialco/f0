@@ -5,10 +5,11 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
+import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
-import { QuestionElement } from "../types"
+import { ActionType, OnChangeSectionParams, QuestionElement } from "../types"
 import { Item } from "./Item"
-import { ActionType, OnChangeSectionParams, SectionProps } from "./types"
+import { SectionProps } from "./types"
 
 const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
@@ -19,14 +20,10 @@ export const Section = ({
   index,
   title,
   description,
-  onChange,
-  isEditMode,
-  onAction,
-  questions,
+  questions = [],
 }: SectionProps) => {
-  const [internalQuestions, setInternalQuestions] = useState<QuestionElement[]>(
-    questions ?? []
-  )
+  const { onSectionChange, onSectionAction, isEditMode } =
+    useCoCreationFormContext()
 
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
   const { t } = useI18n()
@@ -42,23 +39,33 @@ export const Section = ({
 
   const handleChangeTitle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange?.({ ...baseOnChangeParams, title: event.target.value })
+      onSectionChange?.({ ...baseOnChangeParams, title: event.target.value })
     },
-    [baseOnChangeParams, onChange]
+    [baseOnChangeParams, onSectionChange]
   )
 
   const handleChangeDescription = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onChange?.({ ...baseOnChangeParams, description: event.target.value })
+      onSectionChange?.({
+        ...baseOnChangeParams,
+        description: event.target.value,
+      })
     },
-    [baseOnChangeParams, onChange]
+    [baseOnChangeParams, onSectionChange]
+  )
+
+  const handleReorderQuestions = useCallback(
+    (newQuestions: QuestionElement[]) => {
+      onSectionChange?.({ ...baseOnChangeParams, questions: newQuestions })
+    },
+    [baseOnChangeParams, onSectionChange]
   )
 
   const handleAction = useCallback(
     (type: ActionType) => {
-      onAction?.({ sectionId: id, type, index })
+      onSectionAction?.({ sectionId: id, type, index })
     },
-    [id, onAction, index]
+    [id, onSectionAction, index]
   )
 
   const actions = useMemo(
@@ -128,12 +135,12 @@ export const Section = ({
       <DragProvider>
         <Reorder.Group
           axis="y"
-          values={internalQuestions}
-          onReorder={setInternalQuestions}
+          values={questions}
+          onReorder={handleReorderQuestions}
           as="div"
         >
           <div className="group/section-list flex flex-col gap-4">
-            {internalQuestions?.map((question) => (
+            {questions.map((question) => (
               <Item key={question.id} question={question} />
             ))}
           </div>
