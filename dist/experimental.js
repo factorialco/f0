@@ -26998,10 +26998,8 @@ const oU = yn({
     const c = s.current;
     if (!c) return;
     const f = new ResizeObserver((u) => {
-      for (const h of u) {
-        const p = h.contentRect.width;
-        l(p < 640);
-      }
+      const h = u[0].contentRect.width;
+      l(h < 640);
     });
     return f.observe(c), () => {
       f.disconnect();
