@@ -3,6 +3,7 @@ import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
 import { cn } from "@/lib/utils"
 import { ChatSpinner } from "./components/ChatSpinner"
+import "./styles.css"
 
 export interface ActionItemProps {
   title: string
