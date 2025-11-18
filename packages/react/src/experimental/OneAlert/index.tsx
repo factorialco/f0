@@ -73,10 +73,8 @@ export const OneAlert = ({
     if (!container) return
 
     const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const width = entry.contentRect.width
-        setIsNarrow(width < 640)
-      }
+      const width = entries[0].contentRect.width
+      setIsNarrow(width < 640)
     })
 
     resizeObserver.observe(container)
