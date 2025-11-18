@@ -230,6 +230,10 @@ export const TableCollection = <
     !!source.selectable
   )
 
+  const tableWithChildren = data?.records.some((item) =>
+    source.itemsWithChildren?.(item)
+  )
+
   /*
    * Initial loading
    */
@@ -403,6 +407,7 @@ export const TableCollection = <
                   columns={columns}
                   frozenColumnsLeft={frozenColumnsLeft}
                   checkColumnWidth={checkColumnWidth}
+                  tableWithChildren={tableWithChildren}
                 />
               )
             })}

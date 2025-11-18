@@ -46,6 +46,13 @@ type DataCollectionExtendFetchOptions<
   navigationFilters: NavigationFiltersState<NavigationFilters>
 }
 
+type ChildrenResponseType = "basic" | "detailed"
+
+export type ChildrenResponse<R extends RecordType> =
+  | BaseResponse<R>
+  | R[]
+  | { records: R[] & { type?: ChildrenResponseType } }
+
 export type DataCollectionBaseFetchOptions<
   Filters extends FiltersDefinition,
   NavigationFilters extends NavigationFiltersDefinition,
@@ -118,10 +125,17 @@ export type DataCollectionSourceDefinition<
 
   currentNavigationFilters?: NavigationFiltersState<NavigationFilters>
 
+  /** Function to fetch children for an item */
+  fetchChildren?: (
+    item: R,
+    filters?: FiltersState<FiltersDefinition>
+  ) => Promise<ChildrenResponse<R>>
   /** URL for a single item in the collection */
   itemUrl?: (item: R) => string | undefined
   /** Click handler for a single item in the collection */
   itemOnClick?: (item: R) => () => void
+  /** Function to determine if an item has children */
+  itemsWithChildren?: (item: R) => boolean
   /** Available actions that can be performed on records */
   itemActions?: ItemActions
   /** Available primary actions that can be performed on the collection */
