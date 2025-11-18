@@ -10,7 +10,7 @@ import {
 } from "./types"
 
 const variants = cva({
-  base: "flex w-full flex-col p-4",
+  base: "flex h-full w-full flex-col p-4",
   variants: {
     variant: {
       default: "",

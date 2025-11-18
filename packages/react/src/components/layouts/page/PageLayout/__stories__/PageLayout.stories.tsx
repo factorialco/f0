@@ -191,9 +191,10 @@ export const WithGridGroupLayout: Story = {
           onSort={(items: React.ReactNode[]) => console.log(items)}
           blocks={[
             {
+              id: "0",
               render: (
                 <PageLayoutContentBlock
-                  className="bg-[#ff000030]"
+                  className="min-w-[500px] bg-[#ff000030]"
                   title="Quick Actions"
                   description="Frequently used actions and shortcuts"
                   titleLevel="h3"
@@ -211,24 +212,26 @@ export const WithGridGroupLayout: Story = {
               ),
             },
             {
+              id: "1",
               render: (
                 <PageLayoutContentBlock
                   title="System Status"
                   titleLevel="h4"
-                  className="bg-[#ff000030]"
+                  className="w-100 min-w-full bg-[#00ff0030]"
                 >
                   <div className="text-sm text-f1-foreground-secondary">
-                    Block 2
+                    Block 2 (full width)
                   </div>
                 </PageLayoutContentBlock>
               ),
             },
             {
+              id: "2",
               render: (
                 <PageLayoutContentBlock
                   title="System Status"
                   titleLevel="h4"
-                  className="bg-[#ff000030]"
+                  className="min-w-[100px] bg-[#0000ff30]"
                 >
                   <div className="text-sm text-f1-foreground-secondary">
                     Block 3
@@ -237,8 +240,14 @@ export const WithGridGroupLayout: Story = {
               ),
             },
             ...Array.from({ length: 10 }).map((_, index) => ({
+              id: `block-${index}`,
               render: (
-                <PageLayoutBlock className="bg-[#ff000030]">
+                <PageLayoutBlock
+                  className="min-w-[250px]"
+                  style={{
+                    backgroundColor: `rgb(${(index * 53) % 255}, ${(index * 113) % 255}, ${(index * 197) % 255}, 0.18)`,
+                  }}
+                >
                   Block {index + 4}
                 </PageLayoutBlock>
               ),

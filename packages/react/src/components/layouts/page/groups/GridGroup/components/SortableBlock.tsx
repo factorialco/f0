@@ -14,6 +14,9 @@ export const SortableBlock = ({ id, children }: SortableBlockProps) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    flex: "1 1",
+    display: "flex",
+    flexDirection: "column" as const,
   }
 
   return (

@@ -1,49 +1,87 @@
 import {
   DndContext,
+  DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
   UniqueIdentifier,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core"
-import { SortableContext } from "@dnd-kit/sortable"
-import { useMemo, useState } from "react"
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable"
+import { useDeepCompareEffect } from "@reactuses/core"
+import { useState } from "react"
 import { SortableBlock } from "./components/SortableBlock"
 
+interface SortableBlockItem {
+  id: string
+  render: React.ReactNode
+}
+
 export interface GridGroupProps {
-  blocks: {
-    id?: string
-    render: React.ReactNode
-  }[]
+  blocks: SortableBlockItem[]
   sortable?: boolean
   onSort?: (items: React.ReactNode[]) => void
 }
 
 export const GridGroup = ({
   blocks,
-  sortable = false,
-  onSort = () => {},
+  sortable: _sortable = false,
+  onSort: _onSort = () => {},
 }: GridGroupProps) => {
-  const localBlocks = useMemo(() => {
-    return blocks.map((block, index) => ({
-      id: index.toString(),
-      ...block,
-    }))
+  const [items, setItems] = useState<SortableBlockItem[]>([])
+
+  useDeepCompareEffect(() => {
+    setItems(
+      blocks.map((block, index) => ({
+        id: block.id ?? index.toString(),
+        render: block.render,
+      }))
+    )
   }, [blocks])
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id)
   }
 
-  const handleDragEnd = () => {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    console.log(over)
     setActiveId(null)
+
+    if (over && active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.findIndex((block) => block.id === active.id)
+        const newIndex = items.findIndex((block) => block.id === over.id)
+
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <SortableContext items={localBlocks.map((block) => block.id)}>
-          {localBlocks.map((block) => (
+    <div className="flex flex-wrap items-stretch gap-4">
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={items}>
+          {items.map((block) => (
             <SortableBlock key={block.id} id={block.id}>
               {block.render}
             </SortableBlock>
@@ -53,7 +91,7 @@ export const GridGroup = ({
         <DragOverlay>
           {activeId ? (
             <SortableBlock id={activeId}>
-              {localBlocks.find((block) => block.id === activeId)?.render}
+              {items.find((block) => block.id === activeId)?.render}
             </SortableBlock>
           ) : null}
         </DragOverlay>
