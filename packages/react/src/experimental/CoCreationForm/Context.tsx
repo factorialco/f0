@@ -1,3 +1,4 @@
+import flatten from "lodash/flatten"
 import React, { createContext, useCallback, useContext, useMemo } from "react"
 import {
   CoCreationFormCallbacks,
@@ -8,6 +9,8 @@ import {
 
 type CoCreationFormContextType = CoCreationFormCallbacks & {
   isEditMode?: boolean
+  getQuestionById: (questionId: string) => QuestionElement | undefined
+  deleteElement: (elementId: string) => void
 }
 
 const CoCreationFormContext = createContext<
@@ -31,7 +34,6 @@ export function CoCreationFormProvider({
     (params) => {
       const questionId = params.id
 
-      console.log("questionId", questionId)
       const newElements = elements.map((element) => {
         if (element.type === "question") {
           if (element.question.id === questionId) {
@@ -73,8 +75,6 @@ export function CoCreationFormProvider({
         return element
       })
 
-      console.log("newElements", newElements)
-
       onChange(newElements)
     },
     [elements, onChange]
@@ -107,26 +107,83 @@ export function CoCreationFormProvider({
   const handleAddNewElement = useCallback<
     NonNullable<CoCreationFormCallbacks["onAddNewElement"]>
   >(
-    (params) => {
+    ({ type, afterId }) => {
       const newElements = elements
 
-      if (params.type === "section") {
-        newElements.push({
-          type: "section",
-          section: {
-            ...params,
-            id: crypto.randomUUID(),
-            title: `Section ${newElements.length + 1}`,
-          },
+      const newElementId = crypto.randomUUID()
+
+      const newElement: CoCreationFormElement =
+        type === "section"
+          ? {
+              type: "section" as const,
+              section: {
+                id: newElementId,
+                title: "New Section",
+                questions: [],
+              },
+            }
+          : {
+              type: "question" as const,
+              question: {
+                id: newElementId,
+                title: "New Question",
+                ...(type === "rating" && { type, value: 0 }),
+                ...((type === "select" || type === "multi-select") && {
+                  type,
+                  options: [],
+                }),
+                ...((type === "text" || type === "longText") && {
+                  type,
+                  value: "",
+                }),
+                ...(type === "numeric" && { type, value: 0 }),
+                ...(type === "link" && { type, value: "" }),
+                ...(type === "date" && { type, value: new Date() }),
+              },
+            }
+
+      // if adding a new section, it can only be added on the first level
+      if (type === "section") {
+        newElements.forEach((element) => {
+          if (element.type === "section" && element.section.id === afterId) {
+            newElements.splice(newElements.indexOf(element) + 1, 0, newElement)
+          }
+          if (element.type === "question" && element.question.id === afterId) {
+            newElements.splice(newElements.indexOf(element) + 1, 0, newElement)
+          }
         })
       } else {
-        newElements.push({
-          type: "question",
-          question: {
-            ...params,
-            id: crypto.randomUUID(),
-            title: `Question ${newElements.length + 1}`,
-          } as QuestionElement,
+        newElements.forEach((element) => {
+          if (element.type === "section") {
+            if (element.section.id === afterId) {
+              newElements.splice(
+                newElements.indexOf(element) + 1,
+                0,
+                newElement
+              )
+            } else {
+              const newQuestions = element.section.questions ?? []
+              newQuestions?.forEach((question) => {
+                if (question.id === afterId) {
+                  newQuestions.splice(
+                    newQuestions.indexOf(question) + 1,
+                    0,
+                    newElement
+                  )
+                }
+              })
+              newElements.splice(newElements.indexOf(element) + 1, 0, {
+                ...element,
+                section: {
+                  ...element.section,
+                  questions: newQuestions,
+                },
+              })
+            }
+          }
+          if (element.type === "question" && element.question.id === afterId) {
+            newElements.splice(newElements.indexOf(element) + 1, 0, newElement)
+          }
         })
       }
 
@@ -140,14 +197,62 @@ export function CoCreationFormProvider({
       onQuestionChange: handleQuestionChange,
       onSectionChange: handleSectionChange,
       onAddNewElement: handleAddNewElement,
-      onQuestionAction: () => {},
-      onSectionAction: () => {},
     }),
     [handleQuestionChange, handleSectionChange, handleAddNewElement]
   )
 
+  const getQuestionById = useCallback(
+    (questionId: string) => {
+      const questions = flatten(
+        elements.map((element) =>
+          element.type === "question"
+            ? [element.question]
+            : element.section.questions
+        )
+      )
+      return questions.find((question) => question?.id === questionId)
+    },
+    [elements]
+  ) as (questionId: string) => QuestionElement | undefined
+
+  const deleteElement = useCallback(
+    (elementId: string) => {
+      let newElements = elements.filter((element) => {
+        if (element.type === "section") {
+          return element.section.id !== elementId
+        }
+        if (element.type === "question") {
+          return element.question.id !== elementId
+        }
+        return true
+      })
+
+      if (newElements.length === elements.length) {
+        newElements = newElements.map((element) => {
+          if (element.type === "section") {
+            return {
+              ...element,
+              section: {
+                ...element.section,
+                questions: element.section.questions?.filter(
+                  (question) => question.id !== elementId
+                ),
+              },
+            }
+          }
+          return element
+        })
+      }
+
+      onChange(newElements)
+    },
+    [elements, onChange]
+  )
+
   return (
-    <CoCreationFormContext.Provider value={{ ...callbacks, isEditMode }}>
+    <CoCreationFormContext.Provider
+      value={{ ...callbacks, isEditMode, getQuestionById, deleteElement }}
+    >
       {children}
     </CoCreationFormContext.Provider>
   )

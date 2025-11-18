@@ -108,11 +108,10 @@ export type QuestionActionParams = {
 
 export type OnAddNewElementParams = {
   type: ElementType
-  index: number
+  afterId: string
 }
 
 export type CoCreationFormCallbacks = {
-  onQuestionAction?: (params: QuestionActionParams) => void
   onSectionAction?: (params: SectionActionParams) => void
   onQuestionChange?: (params: OnChangeQuestionParams) => void
   onSectionChange?: (params: OnChangeSectionParams) => void

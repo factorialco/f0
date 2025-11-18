@@ -19,7 +19,6 @@ const TEXT_AREA_STYLE: object = {
 
 export const BaseQuestion = ({
   id,
-  index,
   title,
   description,
   children,
@@ -67,18 +66,18 @@ export const BaseQuestion = ({
     (type: QuestionType) => {
       onAddNewElement?.({
         type,
-        index,
+        afterId: id,
       })
     },
-    [onAddNewElement, index]
+    [onAddNewElement, id]
   )
 
   const handleAddNewSection = useCallback(() => {
     onAddNewElement?.({
       type: "section",
-      index,
+      afterId: id,
     })
-  }, [onAddNewElement, index])
+  }, [onAddNewElement, id])
 
   const questionTypes = useQuestionTypes()
 

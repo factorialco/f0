@@ -48,7 +48,6 @@ const ScoreOption = ({
 
 export const BaseScoreQuestion = ({
   id,
-  index,
   title,
   description,
   options,
@@ -60,12 +59,9 @@ export const BaseScoreQuestion = ({
   const baseOnChangeParams = useMemo(
     () => ({
       id,
-      title,
-      description,
-      value: value ?? 0,
       type: "score",
     }),
-    [id, title, description, value]
+    [id]
   )
 
   const handleChangeValue = useCallback(
@@ -83,7 +79,6 @@ export const BaseScoreQuestion = ({
     <BaseQuestion
       id={id}
       type="rating"
-      index={index}
       title={title}
       description={description}
       required={required}

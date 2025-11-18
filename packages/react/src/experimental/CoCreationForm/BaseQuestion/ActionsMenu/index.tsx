@@ -24,7 +24,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-import { Dispatch, SetStateAction, useCallback } from "react"
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react"
 import { useQuestionTypes } from "../../constants"
 import { useCoCreationFormContext } from "../../Context"
 import { CoCreationFormCallbacks, QuestionType } from "../../types"
@@ -40,7 +40,13 @@ const ToggleItem = ({
   checked: boolean
   onChange: (checked: boolean) => void
 }) => (
-  <DropdownMenuItem className="pr-3">
+  <DropdownMenuItem
+    className="pr-3"
+    onClick={(e) => {
+      e.preventDefault()
+      onChange(!checked)
+    }}
+  >
     <div className="flex w-full flex-row items-center gap-2">
       <F0Icon icon={icon} color="default" />
       <span className="flex-1">{label}</span>
@@ -106,8 +112,16 @@ const SubMenuItem = <Value extends string>({
   )
 }
 
-const SimpleItem = ({ label, icon }: { label: string; icon: IconType }) => (
-  <DropdownMenuItem>
+const SimpleItem = ({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string
+  icon: IconType
+  onClick: () => void
+}) => (
+  <DropdownMenuItem onClick={onClick}>
     <div className="flex w-full flex-row items-center gap-2">
       <F0Icon icon={icon} color="default" />
       <span className="flex-1">{label}</span>
@@ -130,7 +144,13 @@ export function ActionsMenu({
 }: ActionsMenuProps) {
   const { t } = useI18n()
 
-  const { onQuestionChange } = useCoCreationFormContext()
+  const { onQuestionChange, getQuestionById, deleteElement } =
+    useCoCreationFormContext()
+
+  const question = useMemo(
+    () => getQuestionById(questionId),
+    [questionId, getQuestionById]
+  )
 
   const questionTypes = useQuestionTypes()
 
@@ -172,6 +192,12 @@ export function ActionsMenu({
     [questionId, onQuestionChange]
   )
 
+  const handleDuplicateQuestion = useCallback(() => {}, [])
+
+  const handleDeleteQuestion = useCallback(() => {
+    deleteElement(questionId)
+  }, [questionId, deleteElement])
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -192,13 +218,13 @@ export function ActionsMenu({
           <ToggleItem
             label="Required"
             icon={AlertCircleLine}
-            checked={false}
+            checked={!!question?.required}
             onChange={handleChangeRequired}
           />
           <ToggleItem
             label="Description"
             icon={AlignTextLeft}
-            checked={false}
+            checked={!!question?.descriptionVisible}
             onChange={handleChangeDescriptionVisible}
           />
         </DropdownMenuGroup>
@@ -220,10 +246,12 @@ export function ActionsMenu({
           <SimpleItem
             label={t("coCreationForm.actions.duplicateQuestion")}
             icon={LayersFront}
+            onClick={handleDuplicateQuestion}
           />
           <SimpleItem
             label={t("coCreationForm.actions.deleteQuestion")}
             icon={Delete}
+            onClick={handleDeleteQuestion}
           />
         </DropdownMenuGroup>
       </DropdownMenuContent>

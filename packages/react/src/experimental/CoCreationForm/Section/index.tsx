@@ -7,7 +7,7 @@ import { Reorder } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
 import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
-import { ActionType, OnChangeSectionParams, QuestionElement } from "../types"
+import { OnChangeSectionParams, QuestionElement } from "../types"
 import { Item } from "./Item"
 import { SectionProps } from "./types"
 
@@ -17,12 +17,11 @@ const TEXT_AREA_STYLE: object = {
 
 export const Section = ({
   id,
-  index,
   title,
   description,
   questions = [],
 }: SectionProps) => {
-  const { onSectionChange, onSectionAction, isEditMode } =
+  const { onSectionChange, isEditMode, deleteElement } =
     useCoCreationFormContext()
 
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
@@ -61,28 +60,29 @@ export const Section = ({
     [baseOnChangeParams, onSectionChange]
   )
 
-  const handleAction = useCallback(
-    (type: ActionType) => {
-      onSectionAction?.({ sectionId: id, type, index })
-    },
-    [id, onSectionAction, index]
-  )
+  const handleDuplicateSection = useCallback(() => {
+    // onAddNewElement?.({ type: "section", afterId: id })
+  }, [])
+
+  const handleDeleteSection = useCallback(() => {
+    deleteElement(id)
+  }, [id, deleteElement])
 
   const actions = useMemo(
     () => [
       {
         label: t("coCreationForm.actions.duplicateSection"),
         icon: LayersFront,
-        onClick: () => handleAction("duplicate"),
+        onClick: handleDuplicateSection,
       },
       {
         label: t("coCreationForm.actions.deleteSection"),
         icon: Delete,
-        onClick: () => handleAction("delete"),
+        onClick: handleDeleteSection,
         critical: true,
       },
     ],
-    [handleAction, t]
+    [handleDeleteSection, handleDuplicateSection, t]
   )
 
   return (

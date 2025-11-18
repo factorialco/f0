@@ -2,7 +2,6 @@ import { QuestionType } from "../types"
 
 export type BaseQuestionProps = {
   id: string
-  index: number
   title: string
   description?: string
   type: QuestionType

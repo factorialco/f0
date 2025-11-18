@@ -2,7 +2,7 @@ import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Reorder } from "motion/react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { BaseQuestion } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
@@ -17,16 +17,12 @@ import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
-  const [internalOptions, setInternalOptions] =
-    useState<SelectQuestionOption[]>(options)
   const { t } = useI18n()
 
   const baseOnChangeParams: SelectQuestionOnChangeParams = {
-    ...props,
+    id: props.id,
+    type: props.type,
     options,
-    ...(props.type === "select"
-      ? { type: props.type, value: props.value }
-      : { type: props.type, value: props.value }),
   }
 
   useEffect(() => {
@@ -107,17 +103,24 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     })
   }
 
+  const handleReorderOptions = (newOptions: SelectQuestionOption[]) => {
+    onQuestionChange?.({
+      ...baseOnChangeParams,
+      options: newOptions,
+    })
+  }
+
   return (
     <BaseQuestion {...props}>
       <div className="-mx-0.5 flex flex-col items-start [&>div]:w-full">
         <DragProvider>
           <Reorder.Group
             axis="y"
-            values={internalOptions}
-            onReorder={setInternalOptions}
+            values={options}
+            onReorder={handleReorderOptions}
             as="div"
           >
-            {internalOptions.map((option, index) => (
+            {options.map((option, index) => (
               <div className="w-full [&>div]:w-full" key={option.value}>
                 <SelectOption
                   index={index}

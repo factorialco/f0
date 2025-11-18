@@ -37,7 +37,6 @@ export const Default: Story = {
         type: "question",
         question: {
           id: "question-1",
-          index: 1,
           title: "Question 1",
           type: "text" as const,
         },
@@ -46,19 +45,16 @@ export const Default: Story = {
         type: "section",
         section: {
           id: "section-1",
-          index: 0,
           title: "Section 1",
           description: "Section 1 description",
           questions: [
             {
               id: "question-2",
-              index: 1,
               title: "Question 1",
               type: "text" as const,
             },
             {
               id: "question-3",
-              index: 2,
               title: "Question 2",
               type: "select" as const,
               value: "option-1",
