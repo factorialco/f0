@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.271.0](https://github.com/factorialco/f0/compare/f0-react-v1.270.1...f0-react-v1.271.0) (2025-11-18)
+
+
+### Features
+
+* **ActionItem:** add shine effect to executing status ([#2986](https://github.com/factorialco/f0/issues/2986)) ([ae0f1ee](https://github.com/factorialco/f0/commit/ae0f1ee85c77fad27c7f836eb59142cc63a56b80))
+
 ## [1.270.1](https://github.com/factorialco/f0/compare/f0-react-v1.270.0...f0-react-v1.270.1) (2025-11-17)
 
 
