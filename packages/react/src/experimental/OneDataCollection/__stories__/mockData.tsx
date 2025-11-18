@@ -235,12 +235,11 @@ export const getMockVisualizations = (options?: {
     options: {
       allowColumnHiding: options?.table?.allowColumnHiding,
       allowColumnReordering: options?.table?.allowColumnReordering,
-      frozenColumns:
-        options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
+      frozenColumns: 1,
       columns: [
         {
           label: "Name",
-          width: 140,
+          width: 500,
           render: (item) => ({
             type: "person",
             value: {
@@ -324,17 +323,17 @@ export const getMockVisualizations = (options?: {
           sorting: options?.table?.noSorting ? undefined : "role",
           id: "role4",
         },
-        {
-          label: "Long",
-          render: () => ({
-            type: "longText",
-            value: {
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
-              lines: 4,
-            },
-          }),
-          id: "longText",
-        },
+        // {
+        //   label: "Long",
+        //   render: () => ({
+        //     type: "longText",
+        //     value: {
+        //       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+        //       lines: 4,
+        //     },
+        //   }),
+        //   id: "longText",
+        // },
         {
           label: "Permissions",
           render: (item) =>
@@ -878,7 +877,71 @@ export const createPromiseDataFetch = (
         }
 
         resolve({
-          records: filteredData,
+          records: filteredData.map((user, index) => ({
+            ...user,
+            ...(index % 2 === 0
+              ? {
+                  children: [
+                    {
+                      ...user,
+                    },
+                  ],
+                }
+              : {}),
+            ...(index === 1
+              ? {
+                  children: [
+                    {
+                      ...user,
+                      children: [
+                        {
+                          ...user,
+                          children: [
+                            {
+                              ...user,
+                              children: [
+                                {
+                                  ...user,
+                                  children: [
+                                    {
+                                      ...user,
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                            {
+                              ...user,
+                              children: [
+                                {
+                                  ...user,
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      ...user,
+                    },
+                    {
+                      ...user,
+                      children: [
+                        {
+                          ...user,
+                          children: [
+                            {
+                              ...user,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                }
+              : {}),
+          })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
         })
       }, delay)
@@ -1090,6 +1153,11 @@ export const ExampleComponent = ({
             ? searchBar
             : undefined,
       dataAdapter: dataAdapterMemoized,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      fetchChildren: async (item) => {
+        await new Promise((resolve) => setTimeout(resolve, 1300))
+        return item.children ?? []
+      },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
         { id: "prod", filters: { department: ["Product"] } },
