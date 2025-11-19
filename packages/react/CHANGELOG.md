@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.273.1](https://github.com/factorialco/f0/compare/f0-react-v1.273.0...f0-react-v1.273.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **OneModal:** fix state management ([#2995](https://github.com/factorialco/f0/issues/2995)) ([6412784](https://github.com/factorialco/f0/commit/6412784da32b42f0a0ba29e78c5321359aeff5db))
+
 ## [1.273.0](https://github.com/factorialco/f0/compare/f0-react-v1.272.1...f0-react-v1.273.0) (2025-11-19)
 
 
