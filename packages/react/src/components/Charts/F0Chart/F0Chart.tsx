@@ -1,7 +1,7 @@
 import * as echarts from "echarts"
 import { AriaComponent } from "echarts/components"
 import { useEffect, useMemo, useRef } from "react"
-import "./themes/f0.light"
+import { theme as f0LightTheme } from "./themes/f0.light"
 
 // @ts-expect-error - Duplicate echarts types in dependency tree
 echarts.use(AriaComponent)
@@ -20,7 +20,7 @@ export const F0Chart = ({
   const chart = useRef<echarts.ECharts | null>(null)
   useEffect(() => {
     if (ref.current) {
-      chart.current = echarts.init(ref.current, "f0.light")
+      chart.current = echarts.init(ref.current, f0LightTheme)
     }
   }, [ref])
 
