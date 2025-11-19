@@ -112,7 +112,6 @@ export type OnAddNewElementParams = {
 }
 
 export type CoCreationFormCallbacks = {
-  onSectionAction?: (params: SectionActionParams) => void
   onQuestionChange?: (params: OnChangeQuestionParams) => void
   onSectionChange?: (params: OnChangeSectionParams) => void
   onAddNewElement?: (params: OnAddNewElementParams) => void

@@ -11,6 +11,7 @@ import {
   LayersFront,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ import {
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react"
 import { useQuestionTypes } from "../../constants"
 import { useCoCreationFormContext } from "../../Context"
+import { getDefaultParamsForQuestionType } from "../../lib"
 import { CoCreationFormCallbacks, QuestionType } from "../../types"
 
 const ToggleItem = ({
@@ -116,14 +118,22 @@ const SimpleItem = ({
   label,
   icon,
   onClick,
+  critical,
 }: {
   label: string
   icon: IconType
   onClick: () => void
+  critical?: boolean
 }) => (
-  <DropdownMenuItem onClick={onClick}>
+  <DropdownMenuItem
+    onClick={onClick}
+    className={cn(critical ? "text-f1-foreground-critical" : undefined)}
+  >
     <div className="flex w-full flex-row items-center gap-2">
-      <F0Icon icon={icon} color="default" />
+      <F0Icon
+        icon={icon}
+        color={critical ? "foreground-critical" : "default"}
+      />
       <span className="flex-1">{label}</span>
     </div>
   </DropdownMenuItem>
@@ -185,6 +195,7 @@ export function ActionsMenu({
       onQuestionChange?.({
         id: questionId,
         type: newQuestionType,
+        ...getDefaultParamsForQuestionType(newQuestionType),
       } as Parameters<
         NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
       >[0])
@@ -252,6 +263,7 @@ export function ActionsMenu({
             label={t("coCreationForm.actions.deleteQuestion")}
             icon={Delete}
             onClick={handleDeleteQuestion}
+            critical
           />
         </DropdownMenuGroup>
       </DropdownMenuContent>

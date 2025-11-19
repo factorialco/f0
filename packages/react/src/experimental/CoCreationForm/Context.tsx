@@ -1,6 +1,7 @@
 import { useI18n } from "@/lib/providers/i18n"
 import flatten from "lodash/flatten"
 import React, { createContext, useCallback, useContext, useMemo } from "react"
+import { getDefaultParamsForQuestionType } from "./lib"
 import {
   CoCreationFormCallbacks,
   CoCreationFormElement,
@@ -131,25 +132,7 @@ export function CoCreationFormProvider({
                 id: newElementId,
                 title: t("coCreationForm.defaults.newQuestion"),
                 type,
-                ...(type === "rating" && {
-                  value: 0,
-                  type: "rating",
-                  range: { min: 1, max: 5 },
-                }),
-                ...((type === "select" || type === "multi-select") && {
-                  options: [
-                    {
-                      value: "option-1",
-                      label: "New option 1",
-                    },
-                  ],
-                }),
-                ...((type === "text" || type === "longText") && {
-                  value: "",
-                }),
-                ...(type === "numeric" && { value: 0 }),
-                ...(type === "link" && { value: "" }),
-                ...(type === "date" && { value: new Date() }),
+                ...getDefaultParamsForQuestionType(type),
               } as QuestionElement,
             }
 
