@@ -1,5 +1,5 @@
-import { S as ve, a as st, f as ae, L as z, b as lt, A as ct, i as H, c as ut, d as Oe, E as dt, g as U, e as pt, h as ft, C as mt, j as ht, k as $, l as Ne, u as vt, G as gt, m as bt, n as ge, o as yt, p as Ae, q as xt, B as Le, X as Te, Y as ne, r as wt, s as ke, t as Ct, v as Pt, w as St, x as Ot, y as Nt, z as At, D as Lt, F as Tt, H as be, I as kt, J as q, K as re, M as Dt, N as Ft, O as Et, P as De, Q as j, R as D, T as _t, U as jt, V as It, W as $t, Z as Mt, _ as Bt, $ as Rt, a0 as Fe, a1 as zt, a2 as J, a3 as Ee, a4 as _e, a5 as qt, a6 as je, a7 as Ie, a8 as $e, a9 as Kt, aa as Vt, ab as Wt, ac as Me, ad as Gt, ae as Yt, af as Be, ag as Ht, ah as Ut, ai as Jt, aj as Qt, ak as Xt, al as Zt, am as ea, an as ta, ao as Re, ap as M, aq as ze, ar as aa, as as ra, at as ye, au as na, av as qe, aw as oa, ax as ia, ay as sa, az as la, aA as ca, aB as ua, aC as da, aD as pa, aE as fa, aF as ma, aG as ha, aH as va } from "./hooks-DkO7-GEC.js";
-import { bj as Kr, bl as Vr, bu as Wr, aI as Gr, aJ as Yr, aK as Hr, aL as Ur, aM as Jr, aN as Qr, aO as Xr, aP as Zr, aR as en, aS as tn, aT as an, aU as rn, aV as nn, aW as on, aX as sn, bq as ln, aZ as cn, a$ as un, b0 as dn, b1 as pn, b2 as fn, b5 as mn, b6 as hn, b7 as vn, b9 as gn, a_ as bn, b8 as yn, b4 as xn, br as wn, bk as Cn, be as Pn, bh as Sn, bd as On, bv as Nn, bc as An, bb as Ln, aQ as Tn, aY as kn, b3 as Dn, ba as Fn, bf as En, bm as _n, bn as jn, bo as In, bw as $n, bg as Mn, bp as Bn, bt as Rn, bi as zn, bs as qn } from "./hooks-DkO7-GEC.js";
+import { S as ve, a as st, f as ae, L as z, b as lt, A as ct, i as H, c as ut, d as Oe, E as dt, g as Q, e as pt, h as ft, C as mt, j as ht, k as $, l as Ne, u as vt, G as gt, m as bt, n as ge, o as yt, p as Ae, q as xt, B as Le, X as Te, Y as ne, r as wt, s as ke, t as Ct, v as Pt, w as St, x as Ot, y as Nt, z as At, D as Lt, F as Tt, H as be, I as kt, J as q, K as re, M as Dt, N as Ft, O as Et, P as De, Q as j, R as D, T as _t, U as jt, V as It, W as $t, Z as Mt, _ as Bt, $ as Rt, a0 as Fe, a1 as zt, a2 as U, a3 as Ee, a4 as _e, a5 as qt, a6 as je, a7 as Ie, a8 as $e, a9 as Kt, aa as Vt, ab as Wt, ac as Me, ad as Gt, ae as Yt, af as Be, ag as Ht, ah as Qt, ai as Ut, aj as Jt, ak as Xt, al as Zt, am as ea, an as ta, ao as Re, ap as M, aq as ze, ar as aa, as as ra, at as ye, au as na, av as qe, aw as oa, ax as ia, ay as sa, az as la, aA as ca, aB as ua, aC as da, aD as pa, aE as fa, aF as ma, aG as ha, aH as va } from "./hooks-CcrUYPRb.js";
+import { bj as Kr, bl as Vr, bu as Wr, aI as Gr, aJ as Yr, aK as Hr, aL as Qr, aM as Ur, aN as Jr, aO as Xr, aP as Zr, aR as en, aS as tn, aT as an, aU as rn, aV as nn, aW as on, aX as sn, bq as ln, aZ as cn, a$ as un, b0 as dn, b1 as pn, b2 as fn, b5 as mn, b6 as hn, b7 as vn, b9 as gn, a_ as bn, b8 as yn, b4 as xn, br as wn, bk as Cn, be as Pn, bh as Sn, bd as On, bv as Nn, bc as An, bb as Ln, aQ as Tn, aY as kn, b3 as Dn, ba as Fn, bf as En, bm as _n, bn as jn, bo as In, bw as $n, bg as Mn, bp as Bn, bt as Rn, bi as zn, bs as qn } from "./hooks-CcrUYPRb.js";
 import { jsx as n, jsxs as g, Fragment as le } from "react/jsx-runtime";
 import * as ce from "react";
 import N, { PureComponent as ga, useState as E, forwardRef as ee, useRef as Ke, useImperativeHandle as ba, Children as ya, useEffect as Ve, createContext as xa } from "react";
@@ -286,11 +286,13 @@ const hr = {
       required: "Required",
       questionType: "Question type",
       questionOptions: "Question options",
-      actions: "Actions"
+      actions: "Actions",
+      sectionTitlePlaceholder: "Section title"
     },
     defaults: {
       newSection: "New Section",
-      newQuestion: "New Question"
+      newQuestion: "New Question",
+      newQuestionDescription: "New question description"
     }
   }
 }, vr = [
@@ -322,7 +324,7 @@ function Pa(e, t, r) {
   return t && Ca(e.prototype, t), Object.defineProperty(e, "prototype", { writable: !1 }), e;
 }
 function Sa(e, t, r) {
-  return t = Q(t), Oa(e, We() ? Reflect.construct(t, r || [], Q(e).constructor) : t.apply(e, r));
+  return t = J(t), Oa(e, We() ? Reflect.construct(t, r || [], J(e).constructor) : t.apply(e, r));
 }
 function Oa(e, t) {
   if (t && (B(t) === "object" || typeof t == "function"))
@@ -346,10 +348,10 @@ function We() {
     return !!e;
   })();
 }
-function Q(e) {
-  return Q = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function(r) {
+function J(e) {
+  return J = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function(r) {
     return r.__proto__ || Object.getPrototypeOf(r);
-  }, Q(e);
+  }, J(e);
 }
 function Aa(e, t) {
   if (typeof t != "function" && t !== null)
@@ -487,7 +489,7 @@ function Ea(e, t) {
 function we(e, t) {
   for (var r = 0; r < t.length; r++) {
     var a = t[r];
-    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Ue(a.key), a);
+    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Qe(a.key), a);
   }
 }
 function _a(e, t, r) {
@@ -534,9 +536,9 @@ function ie(e, t) {
   }, ie(e, t);
 }
 function I(e, t, r) {
-  return t = Ue(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
+  return t = Qe(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
 }
-function Ue(e) {
+function Qe(e) {
   var t = Ba(e, "string");
   return R(t) == "symbol" ? t : t + "";
 }
@@ -649,7 +651,7 @@ var W = /* @__PURE__ */ function(e) {
               x: C.cx,
               y: C.cy,
               value: u === "x" ? +C.node.x : +C.node.y,
-              errorVal: U(C, w)
+              errorVal: Q(C, w)
             };
           }
         });
@@ -743,7 +745,7 @@ I(W, "defaultProps", {
 });
 I(W, "getComposedData", function(e) {
   var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, p = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = Oe(o.props.children, bt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, x = a ? a.range : te.defaultProps.range, P = x && x[0], C = t.scale.bandwidth ? t.scale.bandwidth() : 0, w = r.scale.bandwidth ? r.scale.bandwidth() : 0, S = s.map(function(b, O) {
-    var y = U(b, f), A = U(b, h), L = !$(u) && U(b, u) || "-", _ = [{
+    var y = Q(b, f), A = Q(b, h), L = !$(u) && Q(b, u) || "-", _ = [{
       name: $(t.dataKey) ? o.props.name : t.name || t.dataKey,
       unit: t.unit || "",
       value: y,
@@ -971,7 +973,7 @@ const za = (e) => {
     })
   });
 }, Ka = ke(qa);
-var ue = "Progress", de = 100, [Va, gr] = Et(ue), [Wa, Ga] = Va(ue), Je = ce.forwardRef(
+var ue = "Progress", de = 100, [Va, gr] = Et(ue), [Wa, Ga] = Va(ue), Ue = ce.forwardRef(
   (e, t) => {
     const {
       __scopeProgress: r,
@@ -982,7 +984,7 @@ var ue = "Progress", de = 100, [Va, gr] = Et(ue), [Wa, Ga] = Va(ue), Je = ce.for
     } = e;
     (o || o === 0) && !Ce(o) && console.error(Ha(`${o}`, "Progress"));
     const p = Ce(o) ? o : de;
-    a !== null && !Pe(a, p) && console.error(Ua(`${a}`, "Progress"));
+    a !== null && !Pe(a, p) && console.error(Qa(`${a}`, "Progress"));
     const i = Pe(a, p) ? a : null, m = Z(i) ? s(i, p) : void 0;
     return /* @__PURE__ */ n(Wa, { scope: r, value: i, max: p, children: /* @__PURE__ */ n(
       De.div,
@@ -1001,10 +1003,10 @@ var ue = "Progress", de = 100, [Va, gr] = Et(ue), [Wa, Ga] = Va(ue), Je = ce.for
     ) });
   }
 );
-Je.displayName = ue;
-var Qe = "ProgressIndicator", Xe = ce.forwardRef(
+Ue.displayName = ue;
+var Je = "ProgressIndicator", Xe = ce.forwardRef(
   (e, t) => {
-    const { __scopeProgress: r, ...a } = e, o = Ga(Qe, r);
+    const { __scopeProgress: r, ...a } = e, o = Ga(Je, r);
     return /* @__PURE__ */ n(
       De.div,
       {
@@ -1017,7 +1019,7 @@ var Qe = "ProgressIndicator", Xe = ce.forwardRef(
     );
   }
 );
-Xe.displayName = Qe;
+Xe.displayName = Je;
 function Ya(e, t) {
   return `${Math.round(e / t * 100)}%`;
 }
@@ -1036,7 +1038,7 @@ function Pe(e, t) {
 function Ha(e, t) {
   return `Invalid prop \`max\` of value \`${e}\` supplied to \`${t}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${de}\`.`;
 }
-function Ua(e, t) {
+function Qa(e, t) {
   return `Invalid prop \`value\` of value \`${e}\` supplied to \`${t}\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${de} if no \`max\` prop is set)
@@ -1044,12 +1046,12 @@ function Ua(e, t) {
 
 Defaulting to \`null\`.`;
 }
-var et = Je, Ja = Xe;
+var et = Ue, Ua = Xe;
 const tt = ce.forwardRef(({ className: e, value: t, ...r }, a) => n(et, {
   ref: a,
   className: j("relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary", e),
   ...r,
-  children: n(Ja, {
+  children: n(Ua, {
     className: "h-full w-full flex-1 transition-all",
     style: {
       backgroundColor: r.color,
@@ -1058,7 +1060,7 @@ const tt = ce.forwardRef(({ className: e, value: t, ...r }, a) => n(et, {
   })
 }));
 tt.displayName = et.displayName;
-const Qa = ({ value: e, max: t = 100, label: r, color: a }, o) => {
+const Ja = ({ value: e, max: t = 100, label: r, color: a }, o) => {
   const s = a ? q(a) : q("categorical-1"), l = e / t * 100;
   return g("div", {
     className: "flex items-center space-x-2",
@@ -1079,7 +1081,7 @@ const Qa = ({ value: e, max: t = 100, label: r, color: a }, o) => {
       children: r
     })]
   });
-}, Xa = ke(Qa), br = D(
+}, Xa = ke(Ja), br = D(
   {
     name: "AreaChart",
     type: "info"
@@ -1128,7 +1130,7 @@ const Qa = ({ value: e, max: t = 100, label: r, color: a }, o) => {
   },
   Ka
 ), Nr = Rt, Ar = Fe, Lr = ["default", "outline", "neutral"], Tr = Fe, kr = ["sm", "md", "lg"], Dr = zt, se = ({ count: e, list: t }) => {
-  const [r, a] = E(!1), o = n(J, {
+  const [r, a] = E(!1), o = n(U, {
     label: `+${e}`
   });
   return t != null && t.length ? g(Ee, {
@@ -1147,7 +1149,7 @@ const Qa = ({ value: e, max: t = 100, label: r, color: a }, o) => {
         className: "[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col",
         children: [t.map((s, l) => n("div", {
           className: "flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
-          children: n(J, {
+          children: n(U, {
             ...s
           })
         }, l)), n($e, {
@@ -1163,7 +1165,7 @@ const at = ({ chips: e, max: t = 4, remainingCount: r, layout: a = "compact" }) 
   if (a === "fill")
     return n(Vt, {
       items: e,
-      renderListItem: (i) => n(J, {
+      renderListItem: (i) => n(U, {
         ...i
       }),
       renderDropdownItem: () => null,
@@ -1178,7 +1180,7 @@ const at = ({ chips: e, max: t = 4, remainingCount: r, layout: a = "compact" }) 
   const o = e.slice(0, t), s = e.slice(t), l = r ?? e.length - t, p = l > 0;
   return g("div", {
     className: "flex items-center gap-2",
-    children: [o.map((i, m) => n(J, {
+    children: [o.map((i, m) => n(U, {
       ...i
     }, m)), p && n(se, {
       count: l,
@@ -1285,8 +1287,8 @@ const _r = D({
   }, r))
 }), or = ({ text: e }) => g("div", {
   className: "flex flex-row items-start gap-2",
-  children: [n(Jt, {
-    icon: Qt,
+  children: [n(Ut, {
+    icon: Jt,
     size: "md",
     className: "text-f1-icon-positive"
   }), n("span", {
@@ -1321,7 +1323,7 @@ const _r = D({
           children: [p && n(Ht, {
             icon: p.icon,
             text: p.label
-          }), i && n(Ut, {
+          }), i && n(Qt, {
             variant: i.variant || "positive",
             text: i.label
           })]
@@ -1670,9 +1672,9 @@ export {
   Gr as F0Avatar,
   Yr as F0AvatarAlert,
   Hr as F0AvatarCompany,
-  Ur as F0AvatarDate,
-  Jr as F0AvatarEmoji,
-  Qr as F0AvatarFile,
+  Qr as F0AvatarDate,
+  Ur as F0AvatarEmoji,
+  Jr as F0AvatarFile,
   Xr as F0AvatarIcon,
   Zr as F0AvatarList,
   Be as F0AvatarModule,
@@ -1686,7 +1688,7 @@ export {
   Fr as F0ChipList,
   sn as F0DatePicker,
   ln as F0EventCatcherProvider,
-  Jt as F0Icon,
+  Ut as F0Icon,
   cn as F0Link,
   Br as F0Provider,
   un as F0TagAlert,
@@ -1696,7 +1698,7 @@ export {
   mn as F0TagList,
   hn as F0TagPerson,
   Ht as F0TagRaw,
-  Ut as F0TagStatus,
+  Qt as F0TagStatus,
   vn as F0TagTeam,
   gn as GROUP_ID_SYMBOL,
   Ir as HomeLayout,

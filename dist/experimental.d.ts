@@ -1402,10 +1402,10 @@ declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 export declare const CoCreationForm: ({ elements, isEditMode, onChange, }: CoCreationFormProps) => JSX_2.Element;
 
 export declare type CoCreationFormCallbacks = {
-    onSectionAction?: (params: SectionActionParams) => void;
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
     onSectionChange?: (params: OnChangeSectionParams) => void;
     onAddNewElement?: (params: OnAddNewElementParams) => void;
+    onDuplicateElement?: (params: OnDuplicateElementParams) => void;
 };
 
 export declare type CoCreationFormElement = {
@@ -2278,10 +2278,12 @@ declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly sectionTitlePlaceholder: "Section title";
         };
         readonly defaults: {
             readonly newSection: "New Section";
             readonly newQuestion: "New Question";
+            readonly newQuestionDescription: "New question description";
         };
     };
 };
@@ -3867,6 +3869,11 @@ export declare type OnChangeSectionParams = {
     questions?: QuestionElement[];
 };
 
+export declare type OnDuplicateElementParams = {
+    elementId: string;
+    type: ElementType;
+};
+
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
 
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
@@ -4922,6 +4929,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 export declare type SelectQuestionOption = {
+    id?: string;
     value: string;
     label: string;
     correct?: boolean;

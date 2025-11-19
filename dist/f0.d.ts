@@ -1651,10 +1651,12 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly sectionTitlePlaceholder: "Section title";
         };
         readonly defaults: {
             readonly newSection: "New Section";
             readonly newQuestion: "New Question";
+            readonly newQuestionDescription: "New question description";
         };
     };
 };
