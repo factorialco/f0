@@ -18322,7 +18322,7 @@ function Rj({ elements: t, children: e, isEditMode: n, onChange: i }) {
     } : m);
     i(p);
   }, [t, i]), a = ve(({ type: u, afterId: h }) => {
-    const p = t, m = crypto.randomUUID(), g = u === "section" ? {
+    const p = t, m = `new-${u}-${Date.now()}`, g = u === "section" ? {
       type: "section",
       section: {
         id: m,
@@ -18336,10 +18336,18 @@ function Rj({ elements: t, children: e, isEditMode: n, onChange: i }) {
         title: r("coCreationForm.defaults.newQuestion"),
         type: u,
         ...u === "rating" && {
-          value: 0
+          value: 0,
+          type: "rating",
+          range: {
+            min: 1,
+            max: 5
+          }
         },
         ...(u === "select" || u === "multi-select") && {
-          options: []
+          options: [{
+            value: "option-1",
+            label: "New option 1"
+          }]
         },
         ...(u === "text" || u === "longText") && {
           value: ""
@@ -18355,25 +18363,25 @@ function Rj({ elements: t, children: e, isEditMode: n, onChange: i }) {
         }
       }
     };
-    u === "section" ? p.forEach((y) => {
-      y.type === "section" && y.section.id === h && p.splice(p.indexOf(y) + 1, 0, g), y.type === "question" && y.question.id === h && p.splice(p.indexOf(y) + 1, 0, g);
-    }) : p.forEach((y) => {
+    u === "section" ? p.forEach((y, v) => {
+      y.type === "section" && y.section.id === h && p.splice(v + 1, 0, g), y.type === "question" && y.question.id === h && p.splice(v + 1, 0, g);
+    }) : p.forEach((y, v) => {
       if (y.type === "section")
         if (y.section.id === h)
-          p.splice(p.indexOf(y) + 1, 0, g);
+          p.splice(v + 1, 0, g);
         else {
-          const v = y.section.questions ?? [], w = g.question;
-          v == null || v.forEach((x) => {
-            x.id === h && v.splice(v.indexOf(x) + 1, 0, w);
-          }), p.splice(p.indexOf(y) + 1, 0, {
+          const w = y.section.questions ?? [], x = g.question;
+          w == null || w.forEach((b, _) => {
+            b.id === h && w.splice(_ + 1, 0, x);
+          }), p.splice(v + 1, 0, {
             ...y,
             section: {
               ...y.section,
-              questions: v
+              questions: w
             }
           });
         }
-      y.type === "question" && y.question.id === h && p.splice(p.indexOf(y) + 1, 0, g);
+      y.type === "question" && y.question.id === h && p.splice(v + 1, 0, g);
     }), i(p);
   }, [t, i, r]), l = te(() => ({
     onQuestionChange: o,
