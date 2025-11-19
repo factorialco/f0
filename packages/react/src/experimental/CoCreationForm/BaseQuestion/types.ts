@@ -8,6 +8,7 @@ export type BaseQuestionProps = {
   children: React.ReactNode
   required?: boolean
   descriptionVisible?: boolean
+  isWithinSection?: boolean
 }
 
 export type BaseQuestionPropsForOtherQuestionComponents = Omit<

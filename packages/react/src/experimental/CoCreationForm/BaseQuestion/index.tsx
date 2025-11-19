@@ -25,6 +25,7 @@ export const BaseQuestion = ({
   // required,
   descriptionVisible,
   type: questionType,
+  isWithinSection,
 }: BaseQuestionProps) => {
   const { onQuestionChange, onAddNewElement, isEditMode } =
     useCoCreationFormContext()
@@ -75,14 +76,18 @@ export const BaseQuestion = ({
   const questionTypes = useQuestionTypes()
 
   const newQuestionDropdownItems: DropdownInternalProps["items"] = [
-    {
-      label: t("coCreationForm.questionTypes.section"),
-      icon: AcademicCap,
-      onClick: handleAddNewSection,
-    },
-    {
-      type: "separator",
-    },
+    ...(!isWithinSection
+      ? [
+          {
+            label: t("coCreationForm.questionTypes.section"),
+            icon: AcademicCap,
+            onClick: handleAddNewSection,
+          },
+          {
+            type: "separator" as const,
+          },
+        ]
+      : []),
     ...questionTypes.map((questionType) => ({
       ...questionType,
       onClick: () => handleAddNewQuestion(questionType.questionType),

@@ -54,6 +54,7 @@ export const Item = ({ question }: ItemProps) => {
           {...({
             ...question,
           } as QuestionProps)}
+          isWithinSection
         />
       </div>
     </Reorder.Item>
