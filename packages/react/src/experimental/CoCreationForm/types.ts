@@ -112,10 +112,16 @@ export type OnAddNewElementParams = {
   afterId: string
 }
 
+export type OnDuplicateElementParams = {
+  elementId: string
+  type: ElementType
+}
+
 export type CoCreationFormCallbacks = {
   onQuestionChange?: (params: OnChangeQuestionParams) => void
   onSectionChange?: (params: OnChangeSectionParams) => void
   onAddNewElement?: (params: OnAddNewElementParams) => void
+  onDuplicateElement?: (params: OnDuplicateElementParams) => void
 }
 
 export type CoCreationFormProps = {

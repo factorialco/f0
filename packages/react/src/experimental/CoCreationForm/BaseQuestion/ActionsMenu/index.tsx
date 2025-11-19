@@ -154,8 +154,12 @@ export function ActionsMenu({
 }: ActionsMenuProps) {
   const { t } = useI18n()
 
-  const { onQuestionChange, getQuestionById, deleteElement } =
-    useCoCreationFormContext()
+  const {
+    onQuestionChange,
+    getQuestionById,
+    deleteElement,
+    onDuplicateElement,
+  } = useCoCreationFormContext()
 
   const question = useMemo(
     () => getQuestionById(questionId),
@@ -203,7 +207,9 @@ export function ActionsMenu({
     [questionId, onQuestionChange]
   )
 
-  const handleDuplicateQuestion = useCallback(() => {}, [])
+  const handleDuplicateQuestion = useCallback(() => {
+    onDuplicateElement?.({ elementId: questionId, type: questionType })
+  }, [questionId, questionType, onDuplicateElement])
 
   const handleDeleteQuestion = useCallback(() => {
     deleteElement(questionId)

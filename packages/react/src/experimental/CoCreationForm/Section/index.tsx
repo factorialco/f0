@@ -21,7 +21,7 @@ export const Section = ({
   description,
   questions = [],
 }: SectionProps) => {
-  const { onSectionChange, isEditMode, deleteElement } =
+  const { onSectionChange, isEditMode, deleteElement, onDuplicateElement } =
     useCoCreationFormContext()
 
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
@@ -61,8 +61,8 @@ export const Section = ({
   )
 
   const handleDuplicateSection = useCallback(() => {
-    // onAddNewElement?.({ type: "section", afterId: id })
-  }, [])
+    onDuplicateElement?.({ elementId: id, type: "section" })
+  }, [id, onDuplicateElement])
 
   const handleDeleteSection = useCallback(() => {
     deleteElement(id)

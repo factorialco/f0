@@ -38,3 +38,6 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       throw new Error(`Unsupported question type: ${questionType}`)
   }
 }
+
+export const getNewElementId = (type: "section" | "question") =>
+  `new-${type}-${Date.now()}`

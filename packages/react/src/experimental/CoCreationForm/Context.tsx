@@ -1,7 +1,7 @@
 import { useI18n } from "@/lib/providers/i18n"
 import flatten from "lodash/flatten"
 import React, { createContext, useCallback, useContext, useMemo } from "react"
-import { getDefaultParamsForQuestionType } from "./lib"
+import { getDefaultParamsForQuestionType, getNewElementId } from "./lib"
 import {
   CoCreationFormCallbacks,
   CoCreationFormElement,
@@ -108,13 +108,74 @@ export function CoCreationFormProvider({
     [elements, onChange]
   )
 
+  const handleAddElement = useCallback(
+    ({
+      element,
+      afterId,
+    }: {
+      element: CoCreationFormElement
+      afterId: string
+    }) => {
+      const newElements = [...elements]
+
+      const addNewElementAfterIdOnFirstLevel = (afterId: string) => {
+        newElements.forEach((currentElement, index) => {
+          if (
+            currentElement.type === "section" &&
+            currentElement.section.id === afterId
+          ) {
+            newElements.splice(index + 1, 0, element)
+          }
+          if (
+            currentElement.type === "question" &&
+            currentElement.question.id === afterId
+          ) {
+            newElements.splice(index + 1, 0, element)
+          }
+        })
+      }
+
+      addNewElementAfterIdOnFirstLevel(afterId)
+
+      if (
+        element.type === "question" &&
+        newElements.length === elements.length
+      ) {
+        newElements.forEach((currentElement, index) => {
+          if (currentElement.type !== "section") {
+            return
+          }
+
+          const newQuestions = [...(currentElement.section.questions ?? [])]
+
+          newQuestions?.forEach((question, questionIndex) => {
+            if (question.id === afterId) {
+              newQuestions.splice(questionIndex + 1, 0, element.question)
+            }
+          })
+
+          newElements.splice(index, 1, {
+            ...currentElement,
+            section: {
+              ...currentElement.section,
+              questions: newQuestions,
+            },
+          })
+        })
+      }
+
+      onChange(newElements)
+    },
+    [elements, onChange]
+  )
+
   const handleAddNewElement = useCallback<
     NonNullable<CoCreationFormCallbacks["onAddNewElement"]>
   >(
     ({ type, afterId }) => {
-      const newElements = [...elements]
-
-      const newElementId = `new-${type}-${Date.now()}`
+      const newElementId = getNewElementId(
+        type === "section" ? "section" : "question"
+      )
 
       const newElement: CoCreationFormElement =
         type === "section"
@@ -136,54 +197,53 @@ export function CoCreationFormProvider({
               } as QuestionElement,
             }
 
-      const addNewElementAfterIdOnFirstLevel = (afterId: string) => {
-        newElements.forEach((element, index) => {
-          if (element.type === "section" && element.section.id === afterId) {
-            newElements.splice(index + 1, 0, newElement)
-          }
-          if (element.type === "question" && element.question.id === afterId) {
-            newElements.splice(index + 1, 0, newElement)
-          }
-        })
-      }
-
-      addNewElementAfterIdOnFirstLevel(afterId)
-
-      console.log({
-        newElements: newElements.length,
-        elements: elements.length,
-      })
-
-      if (
-        newElement.type === "question" &&
-        newElements.length === elements.length
-      ) {
-        newElements.forEach((element, index) => {
-          if (element.type !== "section") {
-            return
-          }
-
-          const newQuestions = [...(element.section.questions ?? [])]
-
-          newQuestions?.forEach((question, questionIndex) => {
-            if (question.id === afterId) {
-              newQuestions.splice(questionIndex + 1, 0, newElement.question)
-            }
-          })
-
-          newElements.splice(index, 1, {
-            ...element,
-            section: {
-              ...element.section,
-              questions: newQuestions,
-            },
-          })
-        })
-      }
-
-      onChange(newElements)
+      handleAddElement({ element: newElement, afterId })
     },
-    [elements, onChange, t]
+    [handleAddElement, t]
+  )
+
+  const handleDuplicateElement = useCallback<
+    NonNullable<CoCreationFormCallbacks["onDuplicateElement"]>
+  >(
+    ({ elementId }) => {
+      const flattenedElements = flatten(
+        elements.map((element) =>
+          element.type === "section"
+            ? [element, ...(element.section.questions ?? [])]
+            : [element.question]
+        )
+      )
+
+      const element = flattenedElements.find((element) =>
+        element.type === "section"
+          ? element.section.id === elementId
+          : element.id === elementId
+      )
+
+      let newElement: CoCreationFormElement | undefined = undefined
+      if (element) {
+        newElement =
+          element.type === "section"
+            ? {
+                ...element,
+                section: {
+                  ...element.section,
+                  id: getNewElementId("section"),
+                },
+              }
+            : {
+                type: "question" as const,
+                question: { ...element, id: getNewElementId("question") },
+              }
+      }
+
+      if (!newElement) {
+        return
+      }
+
+      handleAddElement({ element: newElement, afterId: elementId })
+    },
+    [elements, handleAddElement]
   )
 
   const callbacks: CoCreationFormCallbacks = useMemo(
@@ -191,8 +251,14 @@ export function CoCreationFormProvider({
       onQuestionChange: handleQuestionChange,
       onSectionChange: handleSectionChange,
       onAddNewElement: handleAddNewElement,
+      onDuplicateElement: handleDuplicateElement,
     }),
-    [handleQuestionChange, handleSectionChange, handleAddNewElement]
+    [
+      handleQuestionChange,
+      handleSectionChange,
+      handleAddNewElement,
+      handleDuplicateElement,
+    ]
   )
 
   const getQuestionById = useCallback(
