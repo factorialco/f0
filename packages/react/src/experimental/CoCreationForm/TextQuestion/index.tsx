@@ -1,7 +1,6 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { Textarea } from "@/experimental/Forms/Fields/TextArea"
 import { useI18n } from "@/lib/providers/i18n"
-import { useCallback } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -27,17 +26,14 @@ export const TextQuestion = ({
 
   const { t } = useI18n()
 
-  const handleChangeText = useCallback(
-    (newValue: string) => {
-      if (isEditMode) return
+  const handleChangeText = (newValue: string) => {
+    if (isEditMode) return
 
-      onQuestionChange?.({
-        ...baseQuestionComponentProps,
-        value: newValue,
-      })
-    },
-    [isEditMode, baseQuestionComponentProps, onQuestionChange]
-  )
+    onQuestionChange?.({
+      ...baseQuestionComponentProps,
+      value: newValue,
+    })
+  }
 
   const placeholder = t("coCreationForm.answer.placeholder")
 

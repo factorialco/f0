@@ -1,6 +1,5 @@
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { useI18n } from "@/lib/providers/i18n"
-import { useCallback } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -25,18 +24,15 @@ export const NumericQuestion = ({
 
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
-  const handleChangeText = useCallback(
-    (newValue: number | null) => {
-      if (isEditMode) return
+  const handleChangeText = (newValue: number | null) => {
+    if (isEditMode) return
 
-      onQuestionChange?.({
-        ...baseQuestionComponentProps,
-        type: "numeric",
-        value: newValue,
-      })
-    },
-    [baseQuestionComponentProps, isEditMode, onQuestionChange]
-  )
+    onQuestionChange?.({
+      ...baseQuestionComponentProps,
+      type: "numeric",
+      value: newValue,
+    })
+  }
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>

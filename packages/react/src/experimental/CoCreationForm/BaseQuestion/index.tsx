@@ -3,7 +3,7 @@ import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/intern
 import { AcademicCap, Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { useCallback, useMemo, useState } from "react"
+import { useState } from "react"
 import { useQuestionTypes } from "../constants"
 import { useCoCreationFormContext } from "../Context"
 import { useDragContext } from "../DragContext"
@@ -36,68 +36,58 @@ export const BaseQuestion = ({
   const { isDragging } = useDragContext()
   const { t } = useI18n()
 
-  const handleChangeTitle = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onQuestionChange?.({
-        id,
-        type: questionType,
-        title: e.target.value,
-      } as Parameters<
-        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-      >[0])
-    },
-    [id, questionType, onQuestionChange]
-  )
+  const handleChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onQuestionChange?.({
+      id,
+      type: questionType,
+      title: e.target.value,
+    } as Parameters<
+      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+    >[0])
+  }
 
-  const handleChangeDescription = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onQuestionChange?.({
-        id,
-        type: questionType,
-        description: e.target.value,
-      } as Parameters<
-        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-      >[0])
-    },
-    [id, questionType, onQuestionChange]
-  )
+  const handleChangeDescription = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    onQuestionChange?.({
+      id,
+      type: questionType,
+      description: e.target.value,
+    } as Parameters<
+      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+    >[0])
+  }
 
-  const handleAddNewQuestion = useCallback(
-    (type: QuestionType) => {
-      onAddNewElement?.({
-        type,
-        afterId: id,
-      })
-    },
-    [onAddNewElement, id]
-  )
+  const handleAddNewQuestion = (type: QuestionType) => {
+    onAddNewElement?.({
+      type,
+      afterId: id,
+    })
+  }
 
-  const handleAddNewSection = useCallback(() => {
+  const handleAddNewSection = () => {
     onAddNewElement?.({
       type: "section",
       afterId: id,
     })
-  }, [onAddNewElement, id])
+  }
 
   const questionTypes = useQuestionTypes()
 
-  const newQuestionDropdownItems = useMemo<DropdownInternalProps["items"]>(
-    () => [
-      {
-        label: t("coCreationForm.questionTypes.section"),
-        icon: AcademicCap,
-        onClick: handleAddNewSection,
-      },
-      {
-        type: "separator",
-      },
-      ...questionTypes.map((questionType) => ({
-        ...questionType,
-        onClick: () => handleAddNewQuestion(questionType.questionType),
-      })),
-    ],
-    [handleAddNewQuestion, handleAddNewSection, questionTypes, t]
-  )
+  const newQuestionDropdownItems: DropdownInternalProps["items"] = [
+    {
+      label: t("coCreationForm.questionTypes.section"),
+      icon: AcademicCap,
+      onClick: handleAddNewSection,
+    },
+    {
+      type: "separator",
+    },
+    ...questionTypes.map((questionType) => ({
+      ...questionType,
+      onClick: () => handleAddNewQuestion(questionType.questionType),
+    })),
+  ]
 
   return (
     <div

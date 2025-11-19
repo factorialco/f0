@@ -1,16 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { LinkQuestion } from "."
+import { CoCreationFormProvider } from "../Context"
 
 const meta: Meta = {
   title: "CoCreationForm/LinkQuestion",
   component: LinkQuestion,
   tags: ["autodocs", "experimental"],
-  args: {
-    onChange: (params) => {
-      console.log("Question changed:", params)
-    },
-  },
+  decorators: [
+    (Story) => (
+      <div className="max-w-[750px]">
+        <CoCreationFormProvider elements={[]} onChange={() => {}}>
+          <Story />
+        </CoCreationFormProvider>
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof LinkQuestion>
 
 export default meta

@@ -1,11 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { RatingQuestion } from "."
+import { CoCreationFormProvider } from "../Context"
 
 const meta: Meta = {
   title: "CoCreationForm/RatingQuestion",
   component: RatingQuestion,
   tags: ["autodocs", "experimental"],
+  decorators: [
+    (Story) => (
+      <div className="max-w-[750px]">
+        <CoCreationFormProvider elements={[]} onChange={() => {}}>
+          <Story />
+        </CoCreationFormProvider>
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof RatingQuestion>
 
 export default meta

@@ -25,7 +25,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-import { Dispatch, SetStateAction, useCallback, useMemo } from "react"
+import { Dispatch, SetStateAction, useMemo } from "react"
 import { useQuestionTypes } from "../../constants"
 import { useCoCreationFormContext } from "../../Context"
 import { getDefaultParamsForQuestionType } from "../../lib"
@@ -168,66 +168,54 @@ export function ActionsMenu({
 
   const questionTypes = useQuestionTypes()
 
-  const handleChangeRequired = useCallback(
-    (checked: boolean) => {
-      onQuestionChange?.({
-        id: questionId,
-        type: questionType,
-        required: checked,
-      } as Parameters<
-        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-      >[0])
-    },
-    [questionId, questionType, onQuestionChange]
-  )
+  const handleChangeRequired = (checked: boolean) => {
+    onQuestionChange?.({
+      id: questionId,
+      type: questionType,
+      required: checked,
+    } as Parameters<
+      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+    >[0])
+  }
 
-  const handleChangeDescriptionVisible = useCallback(
-    (checked: boolean) => {
-      onQuestionChange?.({
-        id: questionId,
-        type: questionType,
-        descriptionVisible: checked,
-      } as Parameters<
-        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-      >[0])
-    },
-    [questionId, questionType, onQuestionChange]
-  )
+  const handleChangeDescriptionVisible = (checked: boolean) => {
+    onQuestionChange?.({
+      id: questionId,
+      type: questionType,
+      descriptionVisible: checked,
+    } as Parameters<
+      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+    >[0])
+  }
 
-  const handleSelectQuestionType = useCallback(
-    (newQuestionType: QuestionType) => {
-      const changingType =
-        newQuestionType !== questionType &&
-        !(
-          (newQuestionType === "select" ||
-            newQuestionType === "multi-select") &&
-          question &&
-          "options" in question &&
-          !!question.options.length
-        )
+  const handleSelectQuestionType = (newQuestionType: QuestionType) => {
+    const changingType =
+      newQuestionType !== questionType &&
+      !(
+        (newQuestionType === "select" || newQuestionType === "multi-select") &&
+        question &&
+        "options" in question &&
+        !!question.options.length
+      )
 
-      console.log({ changingType })
+    onQuestionChange?.({
+      id: questionId,
+      type: newQuestionType,
+      ...(changingType && {
+        ...getDefaultParamsForQuestionType(newQuestionType),
+      }),
+    } as Parameters<
+      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+    >[0])
+  }
 
-      onQuestionChange?.({
-        id: questionId,
-        type: newQuestionType,
-        ...(changingType && {
-          ...getDefaultParamsForQuestionType(newQuestionType),
-        }),
-      } as Parameters<
-        NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-      >[0])
-    },
-    [questionId, onQuestionChange, question, questionType]
-  )
-
-  const handleDuplicateQuestion = useCallback(() => {
+  const handleDuplicateQuestion = () => {
     onDuplicateElement?.({ elementId: questionId, type: questionType })
-  }, [questionId, questionType, onDuplicateElement])
+  }
 
-  const handleDeleteQuestion = useCallback(() => {
+  const handleDeleteQuestion = () => {
     deleteElement(questionId)
-  }, [questionId, deleteElement])
+  }
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

@@ -1,6 +1,5 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
-import { useCallback } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -24,18 +23,15 @@ export const LinkQuestion = ({
 
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
-  const handleChangeText = useCallback(
-    (newValue: string | null) => {
-      if (isEditMode) return
+  const handleChangeText = (newValue: string | null) => {
+    if (isEditMode) return
 
-      onQuestionChange?.({
-        ...baseQuestionComponentProps,
-        type: "link",
-        value: newValue,
-      })
-    },
-    [baseQuestionComponentProps, isEditMode, onQuestionChange]
-  )
+    onQuestionChange?.({
+      ...baseQuestionComponentProps,
+      type: "link",
+      value: newValue,
+    })
+  }
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>

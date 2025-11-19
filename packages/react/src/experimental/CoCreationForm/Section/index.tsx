@@ -4,7 +4,7 @@ import { Delete, Ellipsis, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
 import { OnChangeSectionParams, QuestionElement } from "../types"
@@ -36,54 +36,44 @@ export const Section = ({
     [id, title, description]
   )
 
-  const handleChangeTitle = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onSectionChange?.({ ...baseOnChangeParams, title: event.target.value })
-    },
-    [baseOnChangeParams, onSectionChange]
-  )
+  const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSectionChange?.({ ...baseOnChangeParams, title: event.target.value })
+  }
 
-  const handleChangeDescription = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onSectionChange?.({
-        ...baseOnChangeParams,
-        description: event.target.value,
-      })
-    },
-    [baseOnChangeParams, onSectionChange]
-  )
+  const handleChangeDescription = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    onSectionChange?.({
+      ...baseOnChangeParams,
+      description: event.target.value,
+    })
+  }
 
-  const handleReorderQuestions = useCallback(
-    (newQuestions: QuestionElement[]) => {
-      onSectionChange?.({ ...baseOnChangeParams, questions: newQuestions })
-    },
-    [baseOnChangeParams, onSectionChange]
-  )
+  const handleReorderQuestions = (newQuestions: QuestionElement[]) => {
+    onSectionChange?.({ ...baseOnChangeParams, questions: newQuestions })
+  }
 
-  const handleDuplicateSection = useCallback(() => {
+  const handleDuplicateSection = () => {
     onDuplicateElement?.({ elementId: id, type: "section" })
-  }, [id, onDuplicateElement])
+  }
 
-  const handleDeleteSection = useCallback(() => {
+  const handleDeleteSection = () => {
     deleteElement(id)
-  }, [id, deleteElement])
+  }
 
-  const actions = useMemo(
-    () => [
-      {
-        label: t("coCreationForm.actions.duplicateSection"),
-        icon: LayersFront,
-        onClick: handleDuplicateSection,
-      },
-      {
-        label: t("coCreationForm.actions.deleteSection"),
-        icon: Delete,
-        onClick: handleDeleteSection,
-        critical: true,
-      },
-    ],
-    [handleDeleteSection, handleDuplicateSection, t]
-  )
+  const actions = [
+    {
+      label: t("coCreationForm.actions.duplicateSection"),
+      icon: LayersFront,
+      onClick: handleDuplicateSection,
+    },
+    {
+      label: t("coCreationForm.actions.deleteSection"),
+      icon: Delete,
+      onClick: handleDeleteSection,
+      critical: true,
+    },
+  ]
 
   return (
     <div className="group/section flex w-full flex-col gap-1 bg-f1-background">

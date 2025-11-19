@@ -1,13 +1,33 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useState } from "react"
 import { SelectQuestion } from "."
+import { CoCreationFormProvider } from "../Context"
+import { CoCreationFormElement } from "../types"
 
 const meta: Meta<typeof SelectQuestion> = {
   title: "CoCreationForm/SelectQuestion",
   component: SelectQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {
-    return <SelectQuestion {...args} />
+    const [elements, setElements] = useState<CoCreationFormElement[]>([
+      { type: "question" as const, question: args },
+    ])
+
+    const question =
+      elements[0] && "question" in elements[0] ? elements[0].question : {}
+
+    return (
+      <div className="max-w-[750px]">
+        <CoCreationFormProvider
+          elements={elements}
+          onChange={setElements}
+          isEditMode
+        >
+          <SelectQuestion {...args} {...question} />
+        </CoCreationFormProvider>
+      </div>
+    )
   },
 }
 
@@ -67,23 +87,6 @@ export const ManyOptions: Story = {
 export const MultiSelect: Story = {
   args: {
     id: "question-4",
-    title: "What are your primary concerns?",
-    description: "Select one or more options",
-    type: "multi-select",
-    value: [],
-    options: [
-      { value: "communication", label: "Communication" },
-      { value: "feedback", label: "Feedback and recognition" },
-      { value: "growth", label: "Career growth opportunities" },
-      { value: "workload", label: "Workload management" },
-      { value: "team-dynamics", label: "Team dynamics" },
-    ],
-  },
-}
-
-export const MultiSelectInEditMode: Story = {
-  args: {
-    id: "question-5",
     title: "What are your primary concerns?",
     description: "Select one or more options",
     type: "multi-select",

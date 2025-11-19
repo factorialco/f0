@@ -1,6 +1,5 @@
 import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
-import { useCallback, useMemo } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -53,24 +52,13 @@ export const BaseScoreQuestion = ({
 }: BaseScoreQuestionProps) => {
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
-  const baseOnChangeParams = useMemo(
-    () => ({
+  const handleChangeValue = (newValue: number) => {
+    onQuestionChange?.({
       id: baseQuestionComponentProps.id,
-      type: "score",
-    }),
-    [baseQuestionComponentProps]
-  )
-
-  const handleChangeValue = useCallback(
-    (newValue: number) => {
-      onQuestionChange?.({
-        ...baseOnChangeParams,
-        value: newValue,
-        type: "rating",
-      })
-    },
-    [baseOnChangeParams, onQuestionChange]
-  )
+      value: newValue,
+      type: "rating",
+    })
+  }
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>

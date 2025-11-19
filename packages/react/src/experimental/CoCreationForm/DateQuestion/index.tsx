@@ -1,6 +1,6 @@
 import { DatePickerValue, F0DatePicker } from "@/components/F0DatePicker"
 import { useI18n } from "@/lib/providers/i18n"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -24,18 +24,15 @@ export const DateQuestion = ({
 
   const { t } = useI18n()
 
-  const handleChangeDate = useCallback(
-    (newValue: DatePickerValue | undefined) => {
-      if (isEditMode) return
+  const handleChangeDate = (newValue: DatePickerValue | undefined) => {
+    if (isEditMode) return
 
-      onQuestionChange?.({
-        ...baseQuestionComponentProps,
-        type: "date",
-        value: newValue?.value?.from,
-      })
-    },
-    [baseQuestionComponentProps, isEditMode, onQuestionChange]
-  )
+    onQuestionChange?.({
+      ...baseQuestionComponentProps,
+      type: "date",
+      value: newValue?.value?.from,
+    })
+  }
 
   const datePickerValue = useMemo(
     () =>
