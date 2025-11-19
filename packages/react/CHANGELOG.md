@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.272.1](https://github.com/factorialco/f0/compare/f0-react-v1.272.0...f0-react-v1.272.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* echarts theme on build ([#2990](https://github.com/factorialco/f0/issues/2990)) ([27dbc71](https://github.com/factorialco/f0/commit/27dbc714dc9c96995d0a4553ab7745b3f519f9f9))
+
 ## [1.272.0](https://github.com/factorialco/f0/compare/f0-react-v1.271.0...f0-react-v1.272.0) (2025-11-19)
 
 
