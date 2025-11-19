@@ -136,8 +136,7 @@ export function CoCreationFormProvider({
               } as QuestionElement,
             }
 
-      // if adding a new section, it can only be added on the first level
-      if (type === "section") {
+      const addNewElementAfterIdOnFirstLevel = (afterId: string) => {
         newElements.forEach((element, index) => {
           if (element.type === "section" && element.section.id === afterId) {
             newElements.splice(index + 1, 0, newElement)
@@ -146,34 +145,39 @@ export function CoCreationFormProvider({
             newElements.splice(index + 1, 0, newElement)
           }
         })
-      } else {
+      }
+
+      addNewElementAfterIdOnFirstLevel(afterId)
+
+      console.log({
+        newElements: newElements.length,
+        elements: elements.length,
+      })
+
+      if (
+        newElement.type === "question" &&
+        newElements.length === elements.length
+      ) {
         newElements.forEach((element, index) => {
-          if (element.type === "section") {
-            if (element.section.id === afterId) {
-              newElements.splice(index + 1, 0, newElement)
-            } else {
-              const newQuestions = element.section.questions ?? []
-              // In this branch, type !== "section", so newElement must be a question
-              const questionElement = (
-                newElement as { type: "question"; question: QuestionElement }
-              ).question
-              newQuestions?.forEach((question, questionIndex) => {
-                if (question.id === afterId) {
-                  newQuestions.splice(questionIndex + 1, 0, questionElement)
-                }
-              })
-              newElements.splice(index + 1, 0, {
-                ...element,
-                section: {
-                  ...element.section,
-                  questions: newQuestions,
-                },
-              })
+          if (element.type !== "section") {
+            return
+          }
+
+          const newQuestions = [...(element.section.questions ?? [])]
+
+          newQuestions?.forEach((question, questionIndex) => {
+            if (question.id === afterId) {
+              newQuestions.splice(questionIndex + 1, 0, newElement.question)
             }
-          }
-          if (element.type === "question" && element.question.id === afterId) {
-            newElements.splice(index + 1, 0, newElement)
-          }
+          })
+
+          newElements.splice(index, 1, {
+            ...element,
+            section: {
+              ...element.section,
+              questions: newQuestions,
+            },
+          })
         })
       }
 

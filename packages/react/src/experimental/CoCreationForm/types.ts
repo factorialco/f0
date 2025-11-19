@@ -61,6 +61,7 @@ export type OnChangeSectionParams = {
 }
 
 export type SelectQuestionOption = {
+  id?: string
   value: string
   label: string
   correct?: boolean
