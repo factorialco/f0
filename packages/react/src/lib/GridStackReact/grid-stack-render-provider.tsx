@@ -59,7 +59,6 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
     }
     return null
   }, [renderCBFn])
-
   useLayoutEffect(() => {
     if (!isEqual(initialOptions, optionsRef.current) && gridStack) {
       try {

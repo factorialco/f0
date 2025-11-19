@@ -11,12 +11,14 @@ interface GridStackProviderProps {
   children: React.ReactNode
   initialOptions: GridStackOptions
   onResizeStop: (event: Event, el: GridItemHTMLElement) => void
+  onChange: (layout: GridStackWidget[] | GridStackOptions) => void
 }
 
 export function GridStackProvider({
   children,
   initialOptions,
   onResizeStop,
+  onChange,
 }: PropsWithChildren<GridStackProviderProps>) {
   const [gridStack, setGridStack] = useState<GridStack | null>(null)
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
@@ -42,8 +44,12 @@ export function GridStackProvider({
       gridStack.on("resizestop", (event: Event, el: GridItemHTMLElement) => {
         onResizeStop?.(event, el)
       })
+      gridStack.on("change", () => {
+        const layout = gridStack.save()
+        onChange?.(layout)
+      })
     }
-  }, [gridStack, onResizeStop])
+  }, [gridStack, onResizeStop, onChange])
 
   const addWidget = useCallback(
     (widget: GridStackWidget & { id: Required<GridStackWidget>["id"] }) => {
