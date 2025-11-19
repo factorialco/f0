@@ -4638,17 +4638,12 @@ export declare const rangeSeparator = "\u2192";
 
 declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: number;
-} & ({
-    range: {
-        min: number;
-        max: number;
-    };
-} | {
+} & {
     options: {
         value: number;
         label: string;
     }[];
-});
+};
 
 declare interface ReactionProps {
     emoji: string;
@@ -5999,15 +5994,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

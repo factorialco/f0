@@ -4,7 +4,7 @@ import { jsxs as k, jsx as d, Fragment as Re } from "react/jsx-runtime";
 import { useCopilotChatInternal as t1, useCopilotContext as IE, useCopilotAction as f4, CopilotKit as DE } from "@copilotkit/react-core";
 import { Markdown as RE, useChatContext as FE, CopilotSidebar as PE } from "@copilotkit/react-ui";
 import * as ne from "react";
-import ee, { forwardRef as O, createContext as Cn, useRef as ue, useState as H, useCallback as Be, useContext as ln, useMemo as se, useEffect as le, PureComponent as BE, useId as Qr, useTransition as zE, useLayoutEffect as n1, memo as i1, Fragment as qr, isValidElement as _y, cloneElement as sm, useDebugValue as Sy, createRef as $E, createElement as HE, version as u4, useImperativeHandle as r1, Children as Ly } from "react";
+import ee, { forwardRef as O, createContext as Cn, useRef as ue, useState as H, useCallback as Be, useContext as ln, useMemo as ae, useEffect as le, PureComponent as BE, useId as Qr, useTransition as zE, useLayoutEffect as n1, memo as i1, Fragment as qr, isValidElement as _y, cloneElement as sm, useDebugValue as Sy, createRef as $E, createElement as HE, version as u4, useImperativeHandle as r1, Children as Ly } from "react";
 import o1 from "react-dom";
 import { randomId as VE } from "@copilotkit/shared";
 import './experimental.css';const jE = (t, e) => k("svg", {
@@ -4461,7 +4461,7 @@ const f7 = (t) => t === !0, $I = (t) => f7(t === !0) || t === "id", ta = ({ chil
     id: e,
     group: f7(n) && i.group || h4()
   });
-  const c = se(() => ({ ...a.current, forceRender: o }), [s]);
+  const c = ae(() => ({ ...a.current, forceRender: o }), [s]);
   return d(n4.Provider, { value: c, children: t });
 };
 function u7(t) {
@@ -6103,7 +6103,7 @@ const eR = ({ value: t, onChange: e }) => {
     }
   });
 }, Bm = ({ type: t, ...e }) => {
-  const [n, i] = H(!1), r = se(() => t === "password" ? n ? "text" : "password" : t, [n, t]), o = se(() => t === "password" ? bm : e.icon, [t, e.icon]);
+  const [n, i] = H(!1), r = ae(() => t === "password" ? n ? "text" : "password" : t, [n, t]), o = ae(() => t === "password" ? bm : e.icon, [t, e.icon]);
   return d($8, {
     ...e,
     type: r,
@@ -6148,7 +6148,7 @@ const eR = ({ value: t, onChange: e }) => {
     a(p), p || n();
   }, c = () => {
     a(!1), n();
-  }, f = N7(), u = e === "left" || e === "right", h = se(() => f && t ? "max-h-[95vh] bg-f1-background" : u ? M("w-full overflow-x-hidden flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary", e === "left" && "left-3", e === "right" && "left-auto right-3") : e === "fullscreen" ? "w-[calc(100%-48px)] h-[calc(100%-48px)] overflow-x-hidden" : "flex flex-col max-h-[620px] max-w-[680px] overflow-hidden", [e, f, t, u]);
+  }, f = N7(), u = e === "left" || e === "right", h = ae(() => f && t ? "max-h-[95vh] bg-f1-background" : u ? M("w-full overflow-x-hidden flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary", e === "left" && "left-3", e === "right" && "left-auto right-3") : e === "fullscreen" ? "w-[calc(100%-48px)] h-[calc(100%-48px)] overflow-x-hidden" : "flex flex-col max-h-[620px] max-w-[680px] overflow-hidden", [e, f, t, u]);
   return f && t ? d(C4, {
     isOpen: s,
     onClose: c,
@@ -7181,7 +7181,7 @@ function VR({ children: t }) {
     o(v ?? !0), a && u(!f), c(!l);
   }, [a, f, l, c, u]), g = Be((v) => {
     a || (v.clientX < 32 && u(!0), v.clientX > 280 && u(!1));
-  }, [a, u]), y = se(() => a ? f ? "unlocked" : "hidden" : !l && !f ? "hidden" : !l && f ? "unlocked" : "locked", [a, f, l]);
+  }, [a, u]), y = ae(() => a ? f ? "unlocked" : "hidden" : !l && !f ? "hidden" : !l && f ? "unlocked" : "locked", [a, f, l]);
   return le(() => {
     u(!1);
   }, [e]), le(() => {
@@ -8569,10 +8569,10 @@ const fF = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
     ...t
   })
 }), hF = ({ inProgress: t, children: e, RenderMessage: n, AssistantMessage: i, UserMessage: r, ImageRenderer: o, onRegenerate: s, onCopy: a, markdownTagRenderers: l }) => {
-  const c = ue(null), { messages: f, interrupt: u } = t1(), { threadId: h } = IE(), { close: p, currentReaction: m, currentMessage: g, isOpen: y } = L7(), v = Oe(), { greeting: w, initialMessage: x, welcomeScreenSuggestions: b, onThumbsUp: _, onThumbsDown: C } = to(), A = se(() => pF(x || v.ai.defaultInitialMessage), [x, v.ai.defaultInitialMessage]), T = f.length == 0 && (w || A.length > 0), { messagesContainerRef: L, messagesEndRef: S, showScrollToBottom: D, scrollToBottom: E } = mF(), { height: R = 0 } = hd({
+  const c = ue(null), { messages: f, interrupt: u } = t1(), { threadId: h } = IE(), { close: p, currentReaction: m, currentMessage: g, isOpen: y } = L7(), v = Oe(), { greeting: w, initialMessage: x, welcomeScreenSuggestions: b, onThumbsUp: _, onThumbsDown: C } = to(), A = ae(() => pF(x || v.ai.defaultInitialMessage), [x, v.ai.defaultInitialMessage]), T = f.length == 0 && (w || A.length > 0), { messagesContainerRef: L, messagesEndRef: S, showScrollToBottom: D, scrollToBottom: E } = mF(), { height: R = 0 } = hd({
     ref: L,
     box: "border-box"
-  }), B = se(() => gF(f), [f]);
+  }), B = ae(() => gF(f), [f]);
   return k(Re, {
     children: [k(te.div, {
       layout: !0,
@@ -9207,7 +9207,7 @@ Pn.prototype.property = "";
 Pn.prototype.spaceSeparated = !1;
 Pn.prototype.space = void 0;
 let PF = 0;
-const He = Ko(), It = Ko(), Xh = Ko(), ae = Ko(), ht = Ko(), gs = Ko(), zn = Ko();
+const He = Ko(), It = Ko(), Xh = Ko(), se = Ko(), ht = Ko(), gs = Ko(), zn = Ko();
 function Ko() {
   return 2 ** ++PF;
 }
@@ -9217,7 +9217,7 @@ const Qh = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   booleanish: It,
   commaOrSpaceSeparated: zn,
   commaSeparated: gs,
-  number: ae,
+  number: se,
   overloadedBoolean: Xh,
   spaceSeparated: ht
 }, Symbol.toStringTag, { value: "Module" })), fu = (
@@ -9271,9 +9271,9 @@ const rv = ra({
     ariaAutoComplete: null,
     ariaBusy: It,
     ariaChecked: It,
-    ariaColCount: ae,
-    ariaColIndex: ae,
-    ariaColSpan: ae,
+    ariaColCount: se,
+    ariaColIndex: se,
+    ariaColSpan: se,
     ariaControls: ht,
     ariaCurrent: null,
     ariaDescribedBy: ht,
@@ -9290,7 +9290,7 @@ const rv = ra({
     ariaKeyShortcuts: null,
     ariaLabel: null,
     ariaLabelledBy: ht,
-    ariaLevel: ae,
+    ariaLevel: se,
     ariaLive: null,
     ariaModal: It,
     ariaMultiLine: It,
@@ -9298,21 +9298,21 @@ const rv = ra({
     ariaOrientation: null,
     ariaOwns: ht,
     ariaPlaceholder: null,
-    ariaPosInSet: ae,
+    ariaPosInSet: se,
     ariaPressed: It,
     ariaReadOnly: It,
     ariaRelevant: null,
     ariaRequired: It,
     ariaRoleDescription: ht,
-    ariaRowCount: ae,
-    ariaRowIndex: ae,
-    ariaRowSpan: ae,
+    ariaRowCount: se,
+    ariaRowIndex: se,
+    ariaRowSpan: se,
     ariaSelected: It,
-    ariaSetSize: ae,
+    ariaSetSize: se,
     ariaSort: null,
-    ariaValueMax: ae,
-    ariaValueMin: ae,
-    ariaValueNow: ae,
+    ariaValueMax: se,
+    ariaValueMin: se,
+    ariaValueNow: se,
     ariaValueText: null,
     role: null
   },
@@ -9358,13 +9358,13 @@ const BF = ra({
     checked: He,
     cite: null,
     className: ht,
-    cols: ae,
+    cols: se,
     colSpan: null,
     content: null,
     contentEditable: It,
     controls: He,
     controlsList: ht,
-    coords: ae | gs,
+    coords: se | gs,
     crossOrigin: null,
     data: null,
     dateTime: null,
@@ -9386,9 +9386,9 @@ const BF = ra({
     formNoValidate: He,
     formTarget: null,
     headers: ht,
-    height: ae,
+    height: se,
     hidden: Xh,
-    high: ae,
+    high: se,
     href: null,
     hrefLang: null,
     htmlFor: ht,
@@ -9413,14 +9413,14 @@ const BF = ra({
     list: null,
     loading: null,
     loop: He,
-    low: ae,
+    low: se,
     manifest: null,
     max: null,
-    maxLength: ae,
+    maxLength: se,
     media: null,
     method: null,
     min: null,
-    minLength: ae,
+    minLength: se,
     multiple: He,
     muted: He,
     name: null,
@@ -9516,7 +9516,7 @@ const BF = ra({
     onWaiting: null,
     onWheel: null,
     open: He,
-    optimum: ae,
+    optimum: se,
     pattern: null,
     ping: ht,
     placeholder: null,
@@ -9531,8 +9531,8 @@ const BF = ra({
     rel: ht,
     required: He,
     reversed: He,
-    rows: ae,
-    rowSpan: ae,
+    rows: se,
+    rowSpan: se,
     sandbox: ht,
     scope: null,
     scoped: He,
@@ -9542,19 +9542,19 @@ const BF = ra({
     shadowRootDelegatesFocus: He,
     shadowRootMode: null,
     shape: null,
-    size: ae,
+    size: se,
     sizes: null,
     slot: null,
-    span: ae,
+    span: se,
     spellCheck: It,
     src: null,
     srcDoc: null,
     srcLang: null,
     srcSet: null,
-    start: ae,
+    start: se,
     step: null,
     style: null,
-    tabIndex: ae,
+    tabIndex: se,
     target: null,
     title: null,
     translate: null,
@@ -9562,7 +9562,7 @@ const BF = ra({
     typeMustMatch: He,
     useMap: null,
     value: It,
-    width: ae,
+    width: se,
     wrap: null,
     writingSuggestions: null,
     // Legacy.
@@ -9579,11 +9579,11 @@ const BF = ra({
     // `<body>`. Use CSS `background-image` instead
     bgColor: null,
     // `<body>` and table elements. Use CSS `background-color` instead
-    border: ae,
+    border: se,
     // `<table>`. Use CSS `border-width` instead,
     borderColor: null,
     // `<table>`. Use CSS `border-color` instead,
-    bottomMargin: ae,
+    bottomMargin: se,
     // `<body>`
     cellPadding: null,
     // `<table>`
@@ -9617,9 +9617,9 @@ const BF = ra({
     // `<table>`
     frameBorder: null,
     // `<iframe>`. Use CSS `border` instead
-    hSpace: ae,
+    hSpace: se,
     // `<img>` and `<object>`
-    leftMargin: ae,
+    leftMargin: se,
     // `<body>`
     link: null,
     // `<body>`. Use CSS `a:link {color: *}` instead
@@ -9627,9 +9627,9 @@ const BF = ra({
     // `<frame>`, `<iframe>`, and `<img>`. Use an `<a>`
     lowSrc: null,
     // `<img>`. Use a `<picture>`
-    marginHeight: ae,
+    marginHeight: se,
     // `<body>`
-    marginWidth: ae,
+    marginWidth: se,
     // `<body>`
     noResize: He,
     // `<frame>`
@@ -9647,7 +9647,7 @@ const BF = ra({
     // `<isindex>`
     rev: null,
     // `<link>`
-    rightMargin: ae,
+    rightMargin: se,
     // `<body>`
     rules: null,
     // `<table>`
@@ -9661,7 +9661,7 @@ const BF = ra({
     // `<table>`
     text: null,
     // `<body>`. Use CSS `color` instead
-    topMargin: ae,
+    topMargin: se,
     // `<body>`
     valueType: null,
     // `<param>`
@@ -9671,7 +9671,7 @@ const BF = ra({
     // Several. Use CSS `vertical-align` instead
     vLink: null,
     // `<body>`. Use CSS `a:visited {color}` instead
-    vSpace: ae,
+    vSpace: se,
     // `<img>` and `<object>`
     // Non-standard Properties.
     allowTransparency: null,
@@ -9681,7 +9681,7 @@ const BF = ra({
     disableRemotePlayback: He,
     prefix: null,
     property: null,
-    results: ae,
+    results: se,
     security: null,
     unselectable: null
   },
@@ -9865,27 +9865,27 @@ const BF = ra({
   },
   properties: {
     about: zn,
-    accentHeight: ae,
+    accentHeight: se,
     accumulate: null,
     additive: null,
     alignmentBaseline: null,
-    alphabetic: ae,
-    amplitude: ae,
+    alphabetic: se,
+    amplitude: se,
     arabicForm: null,
-    ascent: ae,
+    ascent: se,
     attributeName: null,
     attributeType: null,
-    azimuth: ae,
+    azimuth: se,
     bandwidth: null,
     baselineShift: null,
     baseFrequency: null,
     baseProfile: null,
     bbox: null,
     begin: null,
-    bias: ae,
+    bias: se,
     by: null,
     calcMode: null,
-    capHeight: ae,
+    capHeight: se,
     className: ht,
     clip: null,
     clipPath: null,
@@ -9906,26 +9906,26 @@ const BF = ra({
     d: null,
     dataType: null,
     defaultAction: null,
-    descent: ae,
-    diffuseConstant: ae,
+    descent: se,
+    diffuseConstant: se,
     direction: null,
     display: null,
     dur: null,
-    divisor: ae,
+    divisor: se,
     dominantBaseline: null,
     download: He,
     dx: null,
     dy: null,
     edgeMode: null,
     editable: null,
-    elevation: ae,
+    elevation: se,
     enableBackground: null,
     end: null,
     event: null,
-    exponent: ae,
+    exponent: se,
     externalResourcesRequired: null,
     fill: null,
-    fillOpacity: ae,
+    fillOpacity: se,
     fillRule: null,
     filter: null,
     filterRes: null,
@@ -9955,27 +9955,27 @@ const BF = ra({
     gradientTransform: null,
     gradientUnits: null,
     handler: null,
-    hanging: ae,
+    hanging: se,
     hatchContentUnits: null,
     hatchUnits: null,
     height: null,
     href: null,
     hrefLang: null,
-    horizAdvX: ae,
-    horizOriginX: ae,
-    horizOriginY: ae,
+    horizAdvX: se,
+    horizOriginX: se,
+    horizOriginY: se,
     id: null,
-    ideographic: ae,
+    ideographic: se,
     imageRendering: null,
     initialVisibility: null,
     in: null,
     in2: null,
-    intercept: ae,
-    k: ae,
-    k1: ae,
-    k2: ae,
-    k3: ae,
-    k4: ae,
+    intercept: se,
+    k: se,
+    k1: se,
+    k2: se,
+    k3: se,
+    k4: se,
     kernelMatrix: zn,
     kernelUnitLength: null,
     keyPoints: null,
@@ -9989,7 +9989,7 @@ const BF = ra({
     lengthAdjust: null,
     letterSpacing: null,
     lightingColor: null,
-    limitingConeAngle: ae,
+    limitingConeAngle: se,
     local: null,
     markerEnd: null,
     markerMid: null,
@@ -10005,7 +10005,7 @@ const BF = ra({
     media: null,
     mediaCharacterEncoding: null,
     mediaContentEncodings: null,
-    mediaSize: ae,
+    mediaSize: se,
     mediaTime: null,
     method: null,
     min: null,
@@ -10111,12 +10111,12 @@ const BF = ra({
     origin: null,
     overflow: null,
     overlay: null,
-    overlinePosition: ae,
-    overlineThickness: ae,
+    overlinePosition: se,
+    overlineThickness: se,
     paintOrder: null,
     panose1: null,
     path: null,
-    pathLength: ae,
+    pathLength: se,
     patternContentUnits: null,
     patternTransform: null,
     patternUnits: null,
@@ -10126,9 +10126,9 @@ const BF = ra({
     playbackOrder: null,
     pointerEvents: null,
     points: null,
-    pointsAtX: ae,
-    pointsAtY: ae,
-    pointsAtZ: ae,
+    pointsAtX: se,
+    pointsAtY: se,
+    pointsAtZ: se,
     preserveAlpha: null,
     preserveAspectRatio: null,
     primitiveUnits: null,
@@ -10160,8 +10160,8 @@ const BF = ra({
     side: null,
     slope: null,
     snapshotTime: null,
-    specularConstant: ae,
-    specularExponent: ae,
+    specularConstant: se,
+    specularExponent: se,
     spreadMethod: null,
     spacing: null,
     startOffset: null,
@@ -10171,30 +10171,30 @@ const BF = ra({
     stitchTiles: null,
     stopColor: null,
     stopOpacity: null,
-    strikethroughPosition: ae,
-    strikethroughThickness: ae,
+    strikethroughPosition: se,
+    strikethroughThickness: se,
     string: null,
     stroke: null,
     strokeDashArray: zn,
     strokeDashOffset: null,
     strokeLineCap: null,
     strokeLineJoin: null,
-    strokeMiterLimit: ae,
-    strokeOpacity: ae,
+    strokeMiterLimit: se,
+    strokeOpacity: se,
     strokeWidth: null,
     style: null,
-    surfaceScale: ae,
+    surfaceScale: se,
     syncBehavior: null,
     syncBehaviorDefault: null,
     syncMaster: null,
     syncTolerance: null,
     syncToleranceDefault: null,
     systemLanguage: zn,
-    tabIndex: ae,
+    tabIndex: se,
     tableValues: null,
     target: null,
-    targetX: ae,
-    targetY: ae,
+    targetX: se,
+    targetY: se,
     textAnchor: null,
     textDecoration: null,
     textRendering: null,
@@ -10209,22 +10209,22 @@ const BF = ra({
     transformOrigin: null,
     u1: null,
     u2: null,
-    underlinePosition: ae,
-    underlineThickness: ae,
+    underlinePosition: se,
+    underlineThickness: se,
     unicode: null,
     unicodeBidi: null,
     unicodeRange: null,
-    unitsPerEm: ae,
+    unitsPerEm: se,
     values: null,
-    vAlphabetic: ae,
-    vMathematical: ae,
+    vAlphabetic: se,
+    vMathematical: se,
     vectorEffect: null,
-    vHanging: ae,
-    vIdeographic: ae,
+    vHanging: se,
+    vIdeographic: se,
     version: null,
-    vertAdvY: ae,
-    vertOriginX: ae,
-    vertOriginY: ae,
+    vertAdvY: se,
+    vertOriginX: se,
+    vertOriginY: se,
     viewBox: null,
     viewTarget: null,
     visibility: null,
@@ -10236,7 +10236,7 @@ const BF = ra({
     x1: null,
     x2: null,
     xChannelSelector: null,
-    xHeight: ae,
+    xHeight: se,
     y: null,
     y1: null,
     y2: null,
@@ -18033,7 +18033,7 @@ function Lj(t) {
   return !!(t && typeof t == "object" && "byteLength" in t && "byteOffset" in t);
 }
 const Ej = Cj().use(yV).use($H).use(rj).use(XP), Mj = O(function({ content: e, className: n, format: i = "html", ...r }, o) {
-  const s = se(() => iy.sanitize(i === "markdown" ? String(Ej.processSync(e)) : e, {
+  const s = ae(() => iy.sanitize(i === "markdown" ? String(Ej.processSync(e)) : e, {
     ADD_ATTR: ["target"],
     ALLOWED_ATTR: ["href", "target", "rel", "class"]
   }), [i, e]), a = /<[^>]*>/.test(s);
@@ -18288,7 +18288,13 @@ const xg = /* @__PURE__ */ Hp(Fj), hk = (t) => {
     case "rating":
       return {
         value: 0,
-        range: { min: 1, max: 5 }
+        options: [
+          { value: 1, label: "1" },
+          { value: 2, label: "2" },
+          { value: 3, label: "3" },
+          { value: 4, label: "4" },
+          { value: 5, label: "5" }
+        ]
       };
     case "select":
     case "multi-select":
@@ -18592,7 +18598,7 @@ const gk = () => {
   })
 });
 function zj({ open: t, setOpen: e, questionId: n, questionType: i }) {
-  const { t: r } = Oe(), { onQuestionChange: o, getQuestionById: s, deleteElement: a, onDuplicateElement: l } = Si(), c = se(() => s(n), [n, s]), f = gk(), u = (y) => {
+  const { t: r } = Oe(), { onQuestionChange: o, getQuestionById: s, deleteElement: a, onDuplicateElement: l } = Si(), c = ae(() => s(n), [n, s]), f = gk(), u = (y) => {
     o == null || o({
       id: n,
       type: i,
@@ -18763,7 +18769,7 @@ const Sg = {
       type: "date",
       value: (l = a == null ? void 0 : a.value) == null ? void 0 : l.from
     });
-  }, s = se(() => t ? {
+  }, s = ae(() => t ? {
     granularity: "day",
     value: {
       from: t,
@@ -18869,18 +18875,9 @@ const Sg = {
       }, s.value))
     })
   });
-}, qj = (t) => {
-  const e = se(() => "range" in t ? Array.from({
-    length: t.range.max - t.range.min + 1
-  }, (n, i) => ({
-    value: t.range.min + i,
-    label: String(t.range.min + i)
-  })) : t.options, [t]);
-  return d(Wj, {
-    ...t,
-    options: e
-  });
-}, Uj = {
+}, qj = (t) => d(Wj, {
+  ...t
+}), Uj = {
   fieldSizing: "content"
 }, Gj = ({ index: t, option: e, selected: n, onClick: i, onClickAction: r, onChangeLabel: o, isEditMode: s, correct: a }) => {
   const { value: l, label: c } = e, { isDragging: f, setIsDragging: u, setDraggedItemId: h, draggedItemId: p } = h1(), { t: m } = Oe(), g = f && p === l, y = () => {
@@ -19186,7 +19183,7 @@ const Zj = Kn({
 }, Xj = {
   fieldSizing: "content"
 }, Qj = ({ id: t, title: e, description: n, questions: i = [] }) => {
-  const { onSectionChange: r, isEditMode: o, deleteElement: s, onDuplicateElement: a } = Si(), [l, c] = H(!1), { t: f } = Oe(), u = se(() => ({
+  const { onSectionChange: r, isEditMode: o, deleteElement: s, onDuplicateElement: a } = Si(), [l, c] = H(!1), { t: f } = Oe(), u = ae(() => ({
     id: t,
     title: e,
     description: n
@@ -19715,7 +19712,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
     })]
   });
 }, Nu = 384, Tu = 36, sW = 37, Eg = 1, Mg = 200, Ng = '[data-avatarname-navigator-element="true"]', aW = ({ groupView: t, entities: e, groups: n, selectedGroup: i, search: r, onSelect: o, onRemove: s, onSubItemRemove: a, onSubItemSelect: l, onClear: c, onSelectAll: f, onSearch: u, selectedEntities: h = [], onGroupChange: p, onToggleExpand: m, searchPlaceholder: g, selectAllLabel: y, clearLabel: v, notFoundTitle: w, notFoundSubtitle: x, className: b, actions: _, onCreate: C, onCreateLabel: A, singleSelector: T = !1, loading: L = !1, disabled: S = !1, hiddenAvatar: D = !1 }) => {
-  const E = ee.useRef(null), R = se(() => t ? e.reduce((V, G) => {
+  const E = ee.useRef(null), R = ae(() => t ? e.reduce((V, G) => {
     var me;
     return V + (((me = G.subItems) == null ? void 0 : me.length) ?? 0);
   }, 0) : e.length, [e, t]), B = Be(() => {
@@ -19739,7 +19736,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
       const V = Array.from(document.querySelectorAll(Ng));
       (G = V[V.length - 1]) == null || G.focus();
     }, Mg);
-  }, []), $ = se(() => new Map(h.map((V) => [V.id, V])), [h]), U = Be((V) => {
+  }, []), $ = ae(() => new Map(h.map((V) => [V.id, V])), [h]), U = Be((V) => {
     var Qe;
     const G = $.get(V.id);
     if (!t)
@@ -19781,7 +19778,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
       disabled: S,
       hiddenAvatar: D
     }, me.id);
-  }, [C, A, S, e, U, B, F, t, n, D, s, o, m, r, i, T]), ie = se(() => t ? e.flatMap((V) => {
+  }, [C, A, S, e, U, B, F, t, n, D, s, o, m, r, i, T]), ie = ae(() => t ? e.flatMap((V) => {
     const G = hc(h ?? [], V.id);
     return [{
       parent: null,
@@ -19880,7 +19877,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
       isChild: !0,
       hiddenAvatar: D
     });
-  }, [ie, h, r, T, B, F, o, s, n, S, m, i, l, a, D, C, A]), [be, fe] = se(() => {
+  }, [ie, h, r, T, B, F, o, s, n, S, m, i, l, a, D, C, A]), [be, fe] = ae(() => {
     if (!e.length)
       return [!1, !1];
     let V = 0, G = 0;
@@ -19997,7 +19994,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
     text: t.subName
   })
 }), dW = ({ groupView: t, onSubItemRemove: e, onRemove: n, selectedEntities: i, selectedLabel: r, disabled: o = !1, hiddenAvatar: s = !1 }) => {
-  const a = se(() => {
+  const a = ae(() => {
     const c = t ? i.flatMap((u) => (u.subItems ?? []).map((h) => ({
       parent: u,
       subItem: h
@@ -20089,7 +20086,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
     })]
   });
 }, uW = ({ placeholder: t, selected: e, selectedEntities: n, disabled: i = !1, hiddenAvatar: r = !1, label: o, labelIcon: s, icon: a, error: l, status: c, hint: f, onClickContent: u, hideLabel: h = !1, maxLength: p, loading: m = !1, required: g = !1, readonly: y = !1, append: v, size: w = "sm", open: x }) => {
-  const b = se(() => n.some((T) => T.subItems && T.subItems.length > 0), [n]), _ = se(() => b ? n.flatMap((T) => (T.subItems ?? []).map((L) => ({
+  const b = ae(() => n.some((T) => T.subItems && T.subItems.length > 0), [n]), _ = ae(() => b ? n.flatMap((T) => (T.subItems ?? []).map((L) => ({
     parent: T,
     subItem: L
   }))) : n.map((T) => ({
@@ -20152,7 +20149,7 @@ const Lg = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => d("div", {
     var A;
     t.defaultOpen && e && ((A = t.onOpenChange) == null || A.call(t, !0));
   }, [t.defaultOpen]);
-  const [r, o] = H(t.entities), [s, a] = H(""), [l, c] = SL("", 300), f = se(() => t.entities.some((A) => A.subItems && A.subItems.length > 0), [t.entities]);
+  const [r, o] = H(t.entities), [s, a] = H(""), [l, c] = SL("", 300), f = ae(() => t.entities.some((A) => A.subItems && A.subItems.length > 0), [t.entities]);
   function u(A) {
     if (t.singleSelector) {
       t.onSelect(A), n(!1);
@@ -27224,7 +27221,7 @@ function Hd(t, e, n, i, r, o, s, a, l) {
 function zU({ title: t, items: e, className: n, activeItem: i, collapsible: r = !1, sortable: o = !1, showSearchBox: s = !1, searchPlaceholder: a, onReorder: l, hideChildrenCounter: c = !1 }) {
   const f = Oe(), [u, h] = H(""), p = (L) => {
     h(L);
-  }, m = se(() => v5(e, u), [e, u]), [g, y] = H(BU(e, i)), [v, w] = H(e);
+  }, m = ae(() => v5(e, u), [e, u]), [g, y] = H(BU(e, i)), [v, w] = H(e);
   le(() => {
     w(e);
   }, [e]);
@@ -27246,7 +27243,7 @@ function zU({ title: t, items: e, className: n, activeItem: i, collapsible: r = 
       children: D(B.children)
     } : B), E = D(v);
     w(E), l && l(b(E));
-  }, [v, l, b]), T = se(() => v5(v, u), [v, u]);
+  }, [v, l, b]), T = ae(() => v5(v, u), [v, u]);
   return k("nav", {
     className: M("flex h-full w-[248px] flex-col overflow-hidden", n),
     "aria-label": t,
@@ -27338,7 +27335,7 @@ function HU({ children: t, header: e, embedded: n = !1 }) {
 }
 HU.displayName = "Page";
 function VU({ companies: t, selected: e, onChange: n, isLoading: i = !1, withNotification: r = !1, additionalOptions: o = [] }) {
-  const s = se(() => t.find((a) => a.id === e) || t[0], [t, e]);
+  const s = ae(() => t.find((a) => a.id === e) || t[0], [t, e]);
   return i ? k("div", {
     className: "flex w-fit items-center gap-2 p-1.5",
     children: [d(X, {
@@ -27370,7 +27367,7 @@ function VU({ companies: t, selected: e, onChange: n, isLoading: i = !1, withNot
   });
 }
 const jU = ({ companies: t, selected: e, onChange: n, children: i, additionalOptions: r = [] }) => {
-  const o = Oe(), [s, a] = H(!1), l = se(() => [...t.map((f) => ({
+  const o = Oe(), [s, a] = H(!1), l = ae(() => [...t.map((f) => ({
     value: f.id,
     label: f.name,
     avatar: {
@@ -27619,7 +27616,7 @@ const KU = ({ item: t, active: e }) => k("div", {
 }, JU = ({ item: t, tooltip: e, dragConstraints: n, onRemove: i, index: r, total: o, onMove: s, onReorderFinish: a, isSortable: l = !0 }) => {
   const c = Oe(), { isDragging: f, setIsDragging: u, draggedItemId: h, setDraggedItemId: p } = _2(), { isActive: m } = Gf(), g = m(t.href, {
     exact: t.exactMatch
-  }), y = ue(!1), [v, w] = H(!1), x = r === 0, b = r === o - 1, _ = o === 1, C = se(() => {
+  }), y = ue(!1), [v, w] = H(!1), x = r === 0, b = r === o - 1, _ = o === 1, C = ae(() => {
     const E = [];
     return !_ && !x && E.push({
       label: c.actions.moveUp,
@@ -27643,7 +27640,7 @@ const KU = ({ item: t, active: e }) => k("div", {
     u(!1), p(null), a(), setTimeout(() => {
       y.current = !1;
     }, 0);
-  }, L = f && h === t.href, S = se(() => M("group relative cursor-pointer select-none list-none rounded backdrop-blur-sm active:cursor-grabbing", l && "touch-none", g ? "bg-f1-background-secondary text-f1-foreground" : "hover:bg-f1-background-secondary", v && "bg-f1-background-secondary", L && "bg-f1-background-secondary"), [g, v, L, l]), D = se(() => k(Re, {
+  }, L = f && h === t.href, S = ae(() => M("group relative cursor-pointer select-none list-none rounded backdrop-blur-sm active:cursor-grabbing", l && "touch-none", g ? "bg-f1-background-secondary text-f1-foreground" : "hover:bg-f1-background-secondary", v && "bg-f1-background-secondary", L && "bg-f1-background-secondary"), [g, v, L, l]), D = ae(() => k(Re, {
     children: [d("div", {
       className: "flex w-full items-center justify-between px-1.5 py-1.5",
       children: d(XU, {
@@ -27884,7 +27881,7 @@ function YU({ nonSortableItems: t, sortableItems: e, setSortableItems: n, contai
       window.removeEventListener("resize", B), T.current !== null && window.clearTimeout(T.current);
     };
   }, [i, e, l]);
-  const L = "flex flex-col gap-0.5", S = se(() => y.reduce((B, F, $) => (F.label in B || (B[F.label] = []), B[F.label].push($), B), {}), [y]), D = se(() => w && y.map((B, F) => d(JU, {
+  const L = "flex flex-col gap-0.5", S = ae(() => y.reduce((B, F, $) => (F.label in B || (B[F.label] = []), B[F.label].push($), B), {}), [y]), D = ae(() => w && y.map((B, F) => d(JU, {
     isSortable: !c,
     tooltip: (S[B.label] ?? []).length > 1 ? B.tooltip : void 0,
     item: B,
@@ -27896,7 +27893,7 @@ function YU({ nonSortableItems: t, sortableItems: e, setSortableItems: n, contai
     onReorderFinish: () => {
       a == null || a(y);
     }
-  }, `${B.href}-${B.label}`)), [w, y, S, b, _, a, c]), E = "flex flex-col gap-3", R = se(() => e.map((B) => d($u, {
+  }, `${B.href}-${B.label}`)), [w, y, S, b, _, a, c]), E = "flex flex-col gap-3", R = ae(() => e.map((B) => d($u, {
     category: B,
     isSortable: !c,
     dragConstraints: i,
@@ -28167,7 +28164,7 @@ function x5(t) {
   return iG[t ?? "neutral"] ?? 0;
 }
 const oG = ({ title: t, approvalsRequired: e = 1, status: n, approvers: i }) => {
-  const r = Oe(), o = e === 1 ? r.approvals.requiredNumbers.one : r.approvals.requiredNumbers.other.replace("{{count}}", e.toString()), s = r.approvals.statuses[n], a = se(() => i.map((l) => {
+  const r = Oe(), o = e === 1 ? r.approvals.requiredNumbers.one : r.approvals.requiredNumbers.other.replace("{{count}}", e.toString()), s = r.approvals.statuses[n], a = ae(() => i.map((l) => {
     const c = rG(l.status);
     return {
       firstName: l.firstName,
@@ -28298,7 +28295,7 @@ const aG = (t) => Array.isArray(t) ? t.every((e) => sG(e)) ? t : [{
   const s = Oe(), a = n === 1 ? s.status.selected.singular : s.status.selected.plural, l = e.slice(0, 2), c = e.slice(2).map((m) => ({
     ...m,
     critical: m.critical || !1
-  })), f = se(() => aG(o.primaryActions ?? []), [o.primaryActions]), u = se(() => f.map((m) => ({
+  })), f = ae(() => aG(o.primaryActions ?? []), [o.primaryActions]), u = ae(() => f.map((m) => ({
     ...m,
     items: m.items.map((g) => ({
       value: g.label,
@@ -28308,7 +28305,7 @@ const aG = (t) => Array.isArray(t) ? t.every((e) => sG(e)) ? t : [{
       description: g.description,
       disabled: g.disabled
     }))
-  })), [f]), h = se(() => f.length === 1 && f[0].items.length === 1 ? f[0].items[0] : null, [f]), p = Be((m) => f.flatMap((g) => g.items).find((g) => g.label === m), [f]);
+  })), [f]), h = ae(() => f.length === 1 && f[0].items.length === 1 ? f[0].items[0] : null, [f]), p = Be((m) => f.flatMap((g) => g.items).find((g) => g.label === m), [f]);
   return d(Je, {
     children: t && k(te.div, {
       initial: {
@@ -28421,7 +28418,7 @@ const aG = (t) => Array.isArray(t) ? t.every((e) => sG(e)) ? t : [{
   ...e,
   items: e.items.filter((n) => n.enabled === void 0 || n.enabled)
 })), mG = ({ primaryActions: t, secondaryActions: e, otherActions: n }) => {
-  const i = (Array.isArray(t) ? t : [t]).filter((l) => l !== void 0), r = e || [], o = se(() => (n || []).map((l) => l.items).reduce((l, c) => (l.length > 0 && l.push({
+  const i = (Array.isArray(t) ? t : [t]).filter((l) => l !== void 0), r = e || [], o = ae(() => (n || []).map((l) => l.items).reduce((l, c) => (l.length > 0 && l.push({
     type: "separator"
   }), l.push(...c), l), []), [n]), [s, a] = H(!1);
   return i.length === 0 && r.length === 0 && o.length === 0 ? null : k("div", {
@@ -28739,7 +28736,7 @@ Gb.displayName = "PaginationEllipsis";
 function kG({ totalPages: t, currentPage: e = 1, onPageChange: n, showControls: i = !0, ariaLabel: r = "Page navigation", visibleRange: o = 3, hasNextPage: s = !0, disabled: a = !1 }) {
   const l = t === 0, c = Be((u) => {
     n && (l || u >= 1 && u <= t) && n(u);
-  }, [n, t, l]), f = se(() => {
+  }, [n, t, l]), f = ae(() => {
     if (l) return [];
     const u = [];
     if (t <= 5)
@@ -28890,7 +28887,7 @@ const S2 = ({ paginationInfo: t, setPage: e, className: n }) => {
   });
 }, wG = ({ cardProperties: t, title: e, description: n, avatar: i, image: r, compact: o, source: s, onSelectItems: a, onLoadData: l, onLoadError: c, tmpFullWidth: f }) => {
   var T, L;
-  const u = se(() => {
+  const u = ae(() => {
     if (s.dataAdapter.paginationType === "pages") {
       const S = s.dataAdapter.perPage, D = bG(S ?? 24);
       return {
@@ -29010,7 +29007,7 @@ function xG(t, e) {
   return n;
 }
 const CG = ({ source: t, lane: e, onError: n, onHookUpdate: i }) => {
-  const r = se(() => xG(t.currentFilters, e.filters), [t.currentFilters, e.filters]), o = w1(t, {
+  const r = ae(() => xG(t.currentFilters, e.filters), [t.currentFilters, e.filters]), o = w1(t, {
     filters: r,
     onError: n
   });
@@ -29020,16 +29017,16 @@ const CG = ({ source: t, lane: e, onError: n, onHookUpdate: i }) => {
 };
 function _G(t, e = {}) {
   const { lanes: n } = t;
-  if (!se(() => n && n.length > 0, [n]))
+  if (!ae(() => n && n.length > 0, [n]))
     throw new Error("Lanes has not been configured on data source");
   const [r, o] = H({}), s = Be((y, v) => {
     o((w) => ({
       ...w,
       [y]: v
     }));
-  }, []), a = se(() => JSON.stringify(n), [n]), l = se(() => JSON.stringify(t.currentFilters), [t.currentFilters]), c = se(() => JSON.stringify(t.currentNavigationFilters), [t.currentNavigationFilters]), f = se(() => JSON.stringify(t.currentSortings), [t.currentSortings]), u = se(() => JSON.stringify(t.currentGrouping), [t.currentGrouping]), h = se(() => JSON.stringify(t.currentSearch), [t.currentSearch]), p = se(() => JSON.stringify(t.grouping), [t.grouping]), m = se(() => JSON.stringify(t.dataAdapter), [t.dataAdapter]);
+  }, []), a = ae(() => JSON.stringify(n), [n]), l = ae(() => JSON.stringify(t.currentFilters), [t.currentFilters]), c = ae(() => JSON.stringify(t.currentNavigationFilters), [t.currentNavigationFilters]), f = ae(() => JSON.stringify(t.currentSortings), [t.currentSortings]), u = ae(() => JSON.stringify(t.currentGrouping), [t.currentGrouping]), h = ae(() => JSON.stringify(t.currentSearch), [t.currentSearch]), p = ae(() => JSON.stringify(t.grouping), [t.grouping]), m = ae(() => JSON.stringify(t.dataAdapter), [t.dataAdapter]);
   return {
-    lanesProvider: se(() => (n || []).map((y) => d(CG, {
+    lanesProvider: ae(() => (n || []).map((y) => d(CG, {
       lane: y,
       onError: e.onError,
       source: t,
@@ -29085,7 +29082,7 @@ const SG = (t) => {
       byLane: c
     }, a);
   }, [o]);
-  const l = se(() => (t || []).map((c) => d(LG, {
+  const l = ae(() => (t || []).map((c) => d(LG, {
     source: e,
     data: c.data || {
       type: "flat",
@@ -29908,7 +29905,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
   }), p = XL();
   if (a.currentGrouping && p)
     throw new Error("Grouping is not supported in Kanban yet");
-  const [m] = H(() => Symbol("kanban-visualization")), g = a.idProvider, y = se(() => JSON.stringify(Object.values(h).map((E) => E.data)), [h]), v = se(() => t.map((E) => {
+  const [m] = H(() => Symbol("kanban-visualization")), g = a.idProvider, y = ae(() => JSON.stringify(Object.values(h).map((E) => E.data)), [h]), v = ae(() => t.map((E) => {
     var R, B;
     return {
       ...E,
@@ -29975,7 +29972,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
       }, $);
     },
     onCreate: s
-  }, _ = se(() => {
+  }, _ = ae(() => {
     const E = Object.values(h);
     if (E.length !== 0)
       return E.reduce((R, B) => {
@@ -29983,7 +29980,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
         const F = (($ = B.paginationInfo) == null ? void 0 : $.total) ?? B.data.records.length;
         return R + (typeof F == "number" ? F : 0);
       }, 0);
-  }, [h]), C = se(() => {
+  }, [h]), C = ae(() => {
     const E = Object.values(h);
     return E.length === 0 ? !0 : E.some((R) => R.isInitialLoading);
   }, [h]);
@@ -29996,7 +29993,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
       data: Object.values(h).flatMap((E) => E.data.records)
     });
   }, [_, C]);
-  const A = a.currentSortings === null, T = se(() => {
+  const A = a.currentSortings === null, T = ae(() => {
     const E = /* @__PURE__ */ new Map();
     return v.forEach((R) => {
       const B = /* @__PURE__ */ new Map();
@@ -30015,7 +30012,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
     },
     onMove: o
   };
-  const L = se(() => t.map((E) => {
+  const L = ae(() => t.map((E) => {
     var R, B;
     return {
       id: E.id,
@@ -30497,7 +30494,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
   }, [JSON.stringify(n == null ? void 0 : n.hidden)]), le(() => {
     n != null && n.order && l(n.order);
   }, [JSON.stringify(n == null ? void 0 : n.order)]);
-  const c = se(() => {
+  const c = ae(() => {
     const u = [...t], h = e || 1;
     return [
       // Frozen columns can not be hidden even if the id is in status
@@ -30535,7 +30532,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
     r
   ]);
   return {
-    columns: se(() => c.filter((u) => u.visible).map((u) => u.column), [c]),
+    columns: ae(() => c.filter((u) => u.visible).map((u) => u.column), [c]),
     columnsWithStatus: c,
     colsHidden: o,
     setColsHidden: s,
@@ -30611,7 +30608,7 @@ const ZG = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
     }, s.id))
   });
 }, lK = ({ columns: t, frozenColumns: e, allowSorting: n, allowHiding: i }) => {
-  const { settings: r, setVisualizationSettings: o } = C1(), { columnsWithStatus: s } = iw(t, e, r.visualization.table, n, i), a = se(() => s.filter((c) => i || c.visible).map((c) => ({
+  const { settings: r, setVisualizationSettings: o } = C1(), { columnsWithStatus: s } = iw(t, e, r.visualization.table, n, i), a = ae(() => s.filter((c) => i || c.visible).map((c) => ({
     id: c.column.id,
     label: c.column.label,
     sortable: c.sortable,
@@ -31071,7 +31068,7 @@ const pw = (t, e, n) => {
       data: h.records
     });
   }, [p == null ? void 0 : p.total, h.records]);
-  const A = se(() => n, [n]), { selectedItems: T, allSelectedStatus: L, groupAllSelectedStatus: S, handleSelectItemChange: D, handleSelectAll: E, handleSelectGroupChange: R } = Jf(h, p, e, i, e.defaultSelectedItems), B = se(() => {
+  const A = ae(() => n, [n]), { selectedItems: T, allSelectedStatus: L, groupAllSelectedStatus: S, handleSelectItemChange: D, handleSelectAll: E, handleSelectGroupChange: R } = Jf(h, p, e, i, e.defaultSelectedItems), B = ae(() => {
     var V;
     return !w || !e.summaries ? null : {
       data: w,
@@ -31428,9 +31425,9 @@ const pw = (t, e, n) => {
     h(!1), n(T);
   }, m = (T) => {
     o(T);
-  }, g = t && t.length > 1, y = i && f > 0, v = s && Object.keys(s).length > 0, w = se(() => t[e], [e]), x = se(() => d(CK, {
+  }, g = t && t.length > 1, y = i && f > 0, v = s && Object.keys(s).length > 0, w = ae(() => t[e], [e]), x = ae(() => d(CK, {
     visualization: w
-  }, "visualization-settings"), [w]), b = se(() => xK(w), [w]), _ = se(() => {
+  }, "visualization-settings"), [w]), b = ae(() => xK(w), [w]), _ = ae(() => {
     var S;
     const T = (S = t[e]) == null ? void 0 : S.type;
     if (!T) return "-";
@@ -31507,18 +31504,18 @@ const pw = (t, e, n) => {
   });
 }, gw = O(({ value: t, compareToValue: e, onDateChange: n, disabled: i, error: r, className: o, highlighted: s, onClick: a, navigation: l, granularity: c, hideGoToCurrent: f, ...u }, h) => {
   var A;
-  const p = Oe(), m = se(() => {
+  const p = Oe(), m = ae(() => {
     if (!t || !t.value)
       return [p.date.selectDate];
     const T = im[t.granularity];
     return [t.value, Array.isArray(e) ? e[0] : e].filter((S) => S !== void 0).sort((S, D) => (S == null ? void 0 : S.from.getTime()) - (D == null ? void 0 : D.from.getTime())).map((S) => T.toString(S, p, "long"));
-  }, [t, p, e]), g = se(() => Object.values(m).join(" ⸱ "), [m]), y = (T) => {
+  }, [t, p, e]), g = ae(() => Object.values(m).join(" ⸱ "), [m]), y = (T) => {
     T && (n == null || n(T));
-  }, v = se(() => {
+  }, v = ae(() => {
     var T;
     if (u.minDate)
       return (T = c == null ? void 0 : c.toRange(u.minDate)) == null ? void 0 : T.from;
-  }, [u.minDate, c]), w = se(() => {
+  }, [u.minDate, c]), w = ae(() => {
     var T;
     if (u.maxDate)
       return (T = c == null ? void 0 : c.toRange(u.maxDate)) == null ? void 0 : T.to;
@@ -31590,7 +31587,7 @@ function SK({ onSelect: t, defaultValue: e, presets: n = [], granularities: i = 
   le(() => {
     oE(c, u) || h(c || e);
   }, [c, e]);
-  const [p, m] = H(), [g, y] = H(!1), v = se(() => im[(u == null ? void 0 : u.granularity) ?? "day"], [u == null ? void 0 : u.granularity]), w = (_) => {
+  const [p, m] = H(), [g, y] = H(!1), v = ae(() => im[(u == null ? void 0 : u.granularity) ?? "day"], [u == null ? void 0 : u.granularity]), w = (_) => {
     h(_), t == null || t(_);
   }, x = (_) => {
     m(_), l == null || l(_);
@@ -31721,12 +31718,12 @@ const EK = (t) => "date" in t, MK = {
   t && !AK(t) && console.error(
     `Invalid storage key format: "${t}". Key must follow the format "name/version" where name can be a path (e.g., "employees/list/") and version must start with "v" (e.g., "v1", "v2.1").`
   );
-  const a = se(
+  const a = ae(
     // Settings is always included
     () => [...TK(e), "settings"],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
     [JSON.stringify(e)]
-  ), l = se(() => !i && !!t, [i, t]);
+  ), l = ae(() => !i && !!t, [i, t]);
   le(() => {
     if (!l) {
       o(!0);
@@ -31747,7 +31744,7 @@ const EK = (t) => "date" in t, MK = {
       );
     }), o(!0);
   }, [t, l]);
-  const c = se(
+  const c = ae(
     () => JSON.stringify(
       Object.entries(n).map(
         ([u, h]) => [
@@ -31790,10 +31787,10 @@ const EK = (t) => "date" in t, MK = {
   le(() => {
     Q(E);
   }, [Q, E]);
-  const ie = se(() => cG(C), [C]), N = se(() => pG(hG(A)), [A]), be = se(() => Math.min(A && "expanded" in A && A.expanded || 0, dG), [A]), fe = se(() => {
+  const ie = ae(() => cG(C), [C]), N = ae(() => pG(hG(A)), [A]), be = ae(() => Math.min(A && "expanded" in A && A.expanded || 0, dG), [A]), fe = ae(() => {
     var qe;
     return ((qe = N[0]) == null ? void 0 : qe.items.slice(0, be)) || [];
-  }, [N, be]), I = se(() => {
+  }, [N, be]), I = ae(() => {
     var qe;
     return [{
       ...N[0],
@@ -31811,7 +31808,7 @@ const EK = (t) => "date" in t, MK = {
     return st.length > 0 && ut.push({
       items: st
     }), ut;
-  }, []), ge = se(() => {
+  }, []), ge = ae(() => {
     if (G)
       return "warningMessage" in G ? {
         warningMessage: G.warningMessage
@@ -31819,7 +31816,7 @@ const EK = (t) => "date" in t, MK = {
         primary: ke(G.primary ?? []),
         secondary: ((G == null ? void 0 : G.secondary) ?? []).filter((qe) => !("type" in qe && qe.type === "separator"))
       };
-  }, [G, ke]), [Qe, ot] = H(!1), [Ne, wt] = H(0), Ct = Oe(), ft = se(() => T === !0 ? (qe) => qe !== void 0 ? `${qe} ${Ct.collections.itemsCount}` : null : T || void 0, [T, Ct]), P = (qe, ut) => {
+  }, [G, ke]), [Qe, ot] = H(!1), [Ne, wt] = H(0), Ct = Oe(), ft = ae(() => T === !0 ? (qe) => qe !== void 0 ? `${qe} ${Ct.collections.itemsCount}` : null : T || void 0, [T, Ct]), P = (qe, ut) => {
     n == null || n(qe, ut), ot(!!qe.allSelected || qe.itemsStatus.some((un) => un.checked)), wt(qe.selectedCount), Le(() => ut);
     const st = t.bulkActions ? t.bulkActions(qe) : void 0, Yt = (un) => {
       if ("type" in un && un.type === "separator")
@@ -31840,7 +31837,7 @@ const EK = (t) => "date" in t, MK = {
     }) : "warningMessage" in st && me({
       warningMessage: st.warningMessage
     }));
-  }, [z, W] = H(void 0), [oe, ce] = H(!0), Y = se(() => [w == null ? void 0 : w.enabled, e.length > 1].some(Boolean), [w, e]), { emptyState: ve, setEmptyStateType: Te } = yG(o, {
+  }, [z, W] = H(void 0), [oe, ce] = H(!0), Y = ae(() => [w == null ? void 0 : w.enabled, e.length > 1].some(Boolean), [w, e]), { emptyState: ve, setEmptyStateType: Te } = yG(o, {
     retry: () => {
       Te(!1), h({
         ...u
@@ -31860,7 +31857,7 @@ const EK = (t) => "date" in t, MK = {
   le(() => {
     Te(!1);
   }, [u, x, g, t.dataAdapter]);
-  const Ke = se(() => ft !== void 0, [ft]), Ot = ft === void 0 ? null : z !== void 0 ? ft(z) : null, { settings: fn, setSettings: Jt } = C1(), { storageReady: q } = OK(l, typeof a == "object" ? (a == null ? void 0 : a.features) ?? ["*"] : ["*"], {
+  const Ke = ae(() => ft !== void 0, [ft]), Ot = ft === void 0 ? null : z !== void 0 ? ft(z) : null, { settings: fn, setSettings: Jt } = C1(), { storageReady: q } = OK(l, typeof a == "object" ? (a == null ? void 0 : a.features) ?? ["*"] : ["*"], {
     settings: {
       value: fn,
       setValue: Jt
@@ -31904,11 +31901,11 @@ const EK = (t) => "date" in t, MK = {
       settings: fn
     });
   }, [u, x, g, E, F, L, fn]);
-  const Ce = se(() => {
+  const Ce = ae(() => {
     var Yt, un;
     const qe = D ? Object.keys(D.groupBy).length + (D.mandatory ? 1 : 0) : 0, ut = Object.values(e).find((ao) => ao.type === "table"), st = !!ut && (!!((Yt = ut.options) != null && Yt.allowColumnHiding) || !!((un = ut.options) != null && un.allowColumnReordering));
     return e && e.length > 1 || qe > 0 && !(D != null && D.hideSelector) || B && Object.keys(B).length > 0 || st;
-  }, [e, D, B]), $e = se(() => Y || we || Ce || w && w.enabled, [Y, we, Ce, w]), Pe = se(() => Ke ? f ? "top" : "bottom" : !1, [f, Ke]), _t = se(() => y ? $e ? "top" : "bottom" : !1, [y, $e]), _n = se(() => Pe === "top" || _t === "top", [Pe, _t]), wr = se(() => f || $e || _t === "bottom" || Pe === "bottom", [f, $e, _t, Pe]);
+  }, [e, D, B]), $e = ae(() => Y || we || Ce || w && w.enabled, [Y, we, Ce, w]), Pe = ae(() => Ke ? f ? "top" : "bottom" : !1, [f, Ke]), _t = ae(() => y ? $e ? "top" : "bottom" : !1, [y, $e]), _n = ae(() => Pe === "top" || _t === "top", [Pe, _t]), wr = ae(() => f || $e || _t === "bottom" || Pe === "bottom", [f, $e, _t, Pe]);
   return k("div", {
     className: M("flex flex-col gap-4", V === "standard" && "-mx-6", s && "h-full flex-1"),
     style: {
@@ -32038,7 +32035,7 @@ const EK = (t) => "date" in t, MK = {
   vy(() => {
     o && l(o);
   }, [o]);
-  const c = se(() => r, e);
+  const c = ae(() => r, e);
   return {
     ...s,
     summaries: c,
@@ -53814,7 +53811,7 @@ const hoe = coe.extend({
     currentConfig: l
   }), R3, D3(t), I3(t), u_(e, n)];
 }, woe = (t, e, n, i, r) => {
-  const o = se(() => boe(r.placeholder || "", r.toolbarLabels, r.slashCommandGroupLabels, r.moodTrackerLabels, r.liveCompanionLabels, r.transcriptLabels), [r]), s = ue(null), a = Be(({ editor: c }) => {
+  const o = ae(() => boe(r.placeholder || "", r.toolbarLabels, r.slashCommandGroupLabels, r.moodTrackerLabels, r.liveCompanionLabels, r.transcriptLabels), [r]), s = ue(null), a = Be(({ editor: c }) => {
     s.current && clearTimeout(s.current), s.current = setTimeout(() => {
       const { from: f, to: u } = c.state.selection, h = c.isEmpty;
       h && (t != null && t.selectedAction) && !e ? i({
@@ -53870,7 +53867,7 @@ const hoe = coe.extend({
     isLoading: e,
     setIsLoading: n
   };
-}, Coe = (t, e) => se(() => {
+}, Coe = (t, e) => ae(() => {
   var i;
   if (t != null && t.selectedTitle || t != null && t.selectedEmoji)
     return {
@@ -62197,7 +62194,7 @@ const ice = (t) => {
       L && L.chain().focus().insertContentAt(L.state.doc.content.size, F).run();
     }
   }));
-  const S = se(() => ({
+  const S = ae(() => ({
     offset: [0, 5]
   }), []), D = Be(({ node: F, pos: $ }) => {
     b.current = F ? {
@@ -64769,7 +64766,7 @@ function Cde({ task: t, status: e, onClick: n, hideIcon: i = !1 }) {
   var s;
   const r = () => {
     n == null || n(t);
-  }, o = se(() => {
+  }, o = ae(() => {
     if (!i) {
       if (e === "todo")
         return Rp;
