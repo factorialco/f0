@@ -220,6 +220,13 @@ export const theme = {
     itemStyle: {
       borderRadius: 6,
     },
+    label: {
+      show: true,
+      color: chartColor(baseColors.grey[50]),
+      fontSize: 12,
+      fontWeight: "bold",
+      position: "top",
+    },
   },
 
   pie: {
@@ -243,6 +250,16 @@ export const theme = {
     },
     emphasis: {
       disabled: true,
+    },
+  },
+
+  line: {
+    label: {
+      show: true,
+      color: chartColor(baseColors.grey[50]),
+      fontSize: 12,
+      fontWeight: "regular",
+      position: "top",
     },
   },
 
