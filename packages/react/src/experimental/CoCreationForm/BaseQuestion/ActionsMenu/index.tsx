@@ -203,7 +203,7 @@ export function ActionsMenu({
       <DropdownMenuTrigger asChild>
         <F0Button
           icon={Ellipsis}
-          label="Actions"
+          label={t("coCreationForm.labels.actions")}
           size="md"
           variant="ghost"
           tooltip={false}
@@ -212,17 +212,17 @@ export function ActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80" align="start">
         <DropdownMenuLabel className="p-4 pb-2 font-medium text-f1-foreground-secondary">
-          Question options
+          {t("coCreationForm.labels.questionOptions")}
         </DropdownMenuLabel>
         <DropdownMenuGroup>
           <ToggleItem
-            label="Required"
+            label={t("coCreationForm.labels.required")}
             icon={AlertCircleLine}
             checked={!!question?.required}
             onChange={handleChangeRequired}
           />
           <ToggleItem
-            label="Description"
+            label={t("coCreationForm.labels.description")}
             icon={AlignTextLeft}
             checked={!!question?.descriptionVisible}
             onChange={handleChangeDescriptionVisible}
@@ -230,7 +230,7 @@ export function ActionsMenu({
         </DropdownMenuGroup>
         <DropdownMenuGroup>
           <SubMenuItem<QuestionType>
-            label="Question type"
+            label={t("coCreationForm.labels.questionType")}
             value={questionType}
             options={questionTypes.map((questionType) => ({
               label: questionType.label,

@@ -260,6 +260,8 @@ export const defaultTranslations = {
       text: "Text",
       longText: "Long text",
       numeric: "Numeric",
+      link: "Link",
+      date: "Date",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -272,6 +274,18 @@ export const defaultTranslations = {
     answer: {
       label: "Answer",
       placeholder: "Respondent's answer",
+    },
+    labels: {
+      title: "Title",
+      description: "Description",
+      required: "Required",
+      questionType: "Question type",
+      questionOptions: "Question options",
+      actions: "Actions",
+    },
+    defaults: {
+      newSection: "New Section",
+      newQuestion: "New Question",
     },
   },
 } as const

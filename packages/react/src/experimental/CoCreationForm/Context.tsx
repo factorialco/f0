@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/providers/i18n"
 import flatten from "lodash/flatten"
 import React, { createContext, useCallback, useContext, useMemo } from "react"
 import {
@@ -28,6 +29,7 @@ export function CoCreationFormProvider({
   elements: CoCreationFormElement[]
   onChange: (elements: CoCreationFormElement[]) => void
 }) {
+  const { t } = useI18n()
   const handleQuestionChange = useCallback<
     NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
   >(
@@ -118,7 +120,7 @@ export function CoCreationFormProvider({
               type: "section" as const,
               section: {
                 id: newElementId,
-                title: "New Section",
+                title: t("coCreationForm.defaults.newSection"),
                 questions: [],
               },
             }
@@ -126,20 +128,19 @@ export function CoCreationFormProvider({
               type: "question" as const,
               question: {
                 id: newElementId,
-                title: "New Question",
-                ...(type === "rating" && { type, value: 0 }),
+                title: t("coCreationForm.defaults.newQuestion"),
+                type,
+                ...(type === "rating" && { value: 0 }),
                 ...((type === "select" || type === "multi-select") && {
-                  type,
                   options: [],
                 }),
                 ...((type === "text" || type === "longText") && {
-                  type,
                   value: "",
                 }),
-                ...(type === "numeric" && { type, value: 0 }),
-                ...(type === "link" && { type, value: "" }),
-                ...(type === "date" && { type, value: new Date() }),
-              },
+                ...(type === "numeric" && { value: 0 }),
+                ...(type === "link" && { value: "" }),
+                ...(type === "date" && { value: new Date() }),
+              } as QuestionElement,
             }
 
       // if adding a new section, it can only be added on the first level
@@ -163,12 +164,16 @@ export function CoCreationFormProvider({
               )
             } else {
               const newQuestions = element.section.questions ?? []
+              // In this branch, type !== "section", so newElement must be a question
+              const questionElement = (
+                newElement as { type: "question"; question: QuestionElement }
+              ).question
               newQuestions?.forEach((question) => {
                 if (question.id === afterId) {
                   newQuestions.splice(
                     newQuestions.indexOf(question) + 1,
                     0,
-                    newElement
+                    questionElement
                   )
                 }
               })
@@ -189,7 +194,7 @@ export function CoCreationFormProvider({
 
       onChange(newElements)
     },
-    [elements, onChange]
+    [elements, onChange, t]
   )
 
   const callbacks: CoCreationFormCallbacks = useMemo(

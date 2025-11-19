@@ -91,7 +91,7 @@ export const Section = ({
         <div className="flex flex-row">
           <input
             type="text"
-            aria-label="Title"
+            aria-label={t("coCreationForm.labels.title")}
             value={title}
             onChange={handleChangeTitle}
             disabled={!isEditMode}
@@ -125,7 +125,7 @@ export const Section = ({
         </div>
         <textarea
           value={description}
-          aria-label="Description"
+          aria-label={t("coCreationForm.labels.description")}
           onChange={handleChangeDescription}
           disabled={!isEditMode}
           style={TEXT_AREA_STYLE}
