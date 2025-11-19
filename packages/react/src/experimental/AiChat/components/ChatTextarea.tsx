@@ -1,7 +1,9 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { FileItem } from "@/experimental/RichText/FileItem"
+import { ArrowUp, CrossedCircle, Paperclip, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
@@ -139,6 +141,11 @@ const TypewriterPlaceholder = ({
   )
 }
 
+export type AttachedFile = {
+  file: File
+  id: string
+}
+
 type ChatTextareaProps = InputProps & {
   submitLabel?: string
 }
@@ -150,23 +157,152 @@ export const ChatTextarea = ({
   onStop,
 }: ChatTextareaProps) => {
   const [inputValue, setInputValue] = useState("")
+  const [hasScrollbar, setHasScrollbar] = useState(false)
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const translation = useI18n()
   const { placeholders } = useAiChat()
 
-  const hasDataToSend = inputValue.trim().length > 0
+  const hasDataToSend = inputValue.trim().length > 0 || attachedFiles.length > 0
+  const multiplePlaceholders = placeholders.length > 1
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (textareaRef.current && inputValue.length > 0) {
+      const { scrollHeight } = textareaRef.current
+      const maxHeight = 240
+      setHasScrollbar(scrollHeight > maxHeight)
+    } else {
+      setHasScrollbar(false)
+    }
+  }, [inputValue])
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+
+    // Limit file size to 2MB per file to avoid performance issues
+    const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+    const rejectedFiles: string[] = []
+    const validFiles = files.filter((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        rejectedFiles.push(file.name)
+        return false
+      }
+      return true
+    })
+
+    // Show warning if any files were rejected
+    if (rejectedFiles.length > 0) {
+      const maxSizeMB = MAX_FILE_SIZE / 1024 / 1024
+      const message =
+        rejectedFiles.length === 1
+          ? translation.ai.fileTooLarge
+              .replace("{fileName}", rejectedFiles[0])
+              .replace("{maxSize}", maxSizeMB.toString())
+          : translation.ai.filesTooLarge
+              .replace("{count}", rejectedFiles.length.toString())
+              .replace("{maxSize}", maxSizeMB.toString())
+
+      // Show a user-friendly error message
+      // TODO: Replace with a proper toast notification when available
+      alert(message)
+    }
+
+    if (validFiles.length > 0) {
+      const newFiles: AttachedFile[] = validFiles.map((file) => ({
+        file,
+        id: Math.random().toString(36).substring(7),
+      }))
+
+      setAttachedFiles((prev) => [...prev, ...newFiles])
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const removeFile = (id: string) => {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== id))
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (inProgress) {
       onStop?.()
     } else if (hasDataToSend) {
-      onSend(inputValue.trim())
+      let messageContent = inputValue.trim()
+
+      if (attachedFiles.length > 0) {
+        // Generate unique message ID
+        const messageId = `msg-${Date.now()}-${Math.random().toString(36).substring(7)}`
+
+        const filesList = attachedFiles
+          .map((f) => `[File: ${f.file.name}]`)
+          .join("\n")
+        messageContent = messageContent
+          ? `${messageContent}\n\n[MessageId: ${messageId}]\n${filesList}`
+          : `[MessageId: ${messageId}]\n${filesList}`
+
+        // Convert files to base64 for Mastra - do this asynchronously to avoid blocking UI
+        const filesDataPromise = Promise.all(
+          attachedFiles.map(async (attachedFile) => {
+            const base64 = await fileToBase64(attachedFile.file)
+            return {
+              name: attachedFile.file.name,
+              type: attachedFile.file.type,
+              size: attachedFile.file.size,
+              data: base64,
+            }
+          })
+        )
+
+        // Initialize storage if needed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!(window as any).__copilot_message_files_map__) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(window as any).__copilot_message_files_map__ = new Map()
+        }
+
+        // Store the promise initially, then resolve it
+        const filesData = await filesDataPromise
+
+        // Store files data for backend (via headers)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(window as any).__copilot_files__ = filesData
+
+        // Store files data for frontend (to display in UserMessage)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(window as any).__copilot_message_files_map__.set(messageId, filesData)
+
+        // Clean up files data for headers after a short delay
+        setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          delete (window as any).__copilot_files__
+        }, 1000)
+      }
+
+      onSend(messageContent)
       setInputValue("")
+      setAttachedFiles([])
     }
 
     textareaRef.current?.focus()
+  }
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        const result = reader.result as string
+        // Remove the data URL prefix (e.g., "data:image/png;base64,")
+        const base64 = result.split(",")[1]
+        resolve(base64)
+      }
+      reader.onerror = (error) => reject(error)
+    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -178,27 +314,30 @@ export const ChatTextarea = ({
     }
   }
 
-  const multiplePlaceholders = placeholders.length > 1
-
   return (
     <motion.form
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-3 mt-2 flex flex-row items-end gap-2 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text sm:flex-col sm:items-stretch sm:gap-3",
+        "relative isolate m-3 mt-2 flex flex-col items-stretch gap-3 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-        "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']",
-        "py-1 pl-3 pr-1 sm:p-0"
+        "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']"
       )}
       animate={{
         "--gradient-angle": ["0deg", "360deg"],
       }}
       transition={{
-        duration: 6,
-        ease: "linear",
-        repeat: Infinity,
+        default: {
+          duration: 6,
+          ease: "linear",
+          repeat: Infinity,
+        },
+        layout: {
+          duration: 0.2,
+          ease: [0.4, 0, 0.2, 1],
+        },
       }}
       style={
         {
@@ -210,10 +349,56 @@ export const ChatTextarea = ({
       }}
       onSubmit={handleSubmit}
     >
-      <div className="grid min-h-[40px] flex-1 grid-cols-1 grid-rows-1">
+      <AnimatePresence>
+        {attachedFiles.length > 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+              opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+            }}
+            className="overflow-hidden"
+          >
+            <ScrollArea className="px-3 py-3">
+              <div className="flex w-full flex-row gap-2">
+                <AnimatePresence initial={false}>
+                  {attachedFiles.map((attachedFile) => (
+                    <motion.div
+                      key={attachedFile.id}
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                      className="flex-1"
+                    >
+                      <FileItem
+                        file={attachedFile.file}
+                        actions={[
+                          {
+                            icon: CrossedCircle,
+                            label: translation.ai.removeFile,
+                            onClick: () => removeFile(attachedFile.id),
+                          },
+                        ]}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </ScrollArea>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-1 grid-rows-1">
         <div
           aria-hidden={true}
-          className="pointer-events-none invisible col-start-1 row-start-1 max-h-[120px] min-h-[40px] whitespace-pre-wrap break-words text-[16px] leading-[40px] text-f1-foreground sm:mt-3 sm:max-h-[240px] sm:px-3 sm:text-base"
+          className="pointer-events-none invisible col-start-1 row-start-1 max-h-[240px] min-h-[40px] whitespace-pre-wrap break-words px-3 text-base"
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
         </div>
@@ -227,21 +412,19 @@ export const ChatTextarea = ({
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder={translation.ai.inputPlaceholder}
+          placeholder={multiplePlaceholders ? "" : translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
-            "max-h-[120px] min-h-[40px] resize-none px-3 py-0 outline-none transition-all sm:h-auto sm:max-h-[240px]",
+            "mb-0 max-h-[240px] flex-1 resize-none px-3 outline-none transition-all",
             "whitespace-pre-wrap break-words",
             "text-f1-foreground placeholder:text-f1-foreground-secondary",
-            "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "m-0 px-0 sm:mt-3 sm:px-3",
-            "text-[16px] leading-[40px] sm:text-base",
+            hasScrollbar
+              ? "scrollbar-macos overflow-y-scroll"
+              : "overflow-y-hidden",
+            attachedFiles.length === 0 ? "mt-3" : "mt-0",
             inputValue || !multiplePlaceholders
               ? "caret-f1-foreground"
-              : "caret-transparent",
-            multiplePlaceholders
-              ? "placeholder:text-transparent"
-              : "placeholder:text-f1-foreground-secondary"
+              : "caret-transparent"
           )}
         />
         {multiplePlaceholders && (
@@ -254,25 +437,44 @@ export const ChatTextarea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-row-reverse sm:p-3 sm:pt-0 p-1">
-        {inProgress ? (
-          <ButtonInternal
-            type="submit"
-            variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
-            icon={SolidStop}
-            hideLabel
-          />
-        ) : (
-          <ButtonInternal
-            type="submit"
-            disabled={!hasDataToSend}
-            variant={hasDataToSend ? "default" : "neutral"}
-            label={submitLabel || translation.ai.sendMessage}
-            icon={submitLabel ? undefined : ArrowUp}
-            hideLabel={!submitLabel}
-          />
-        )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        onChange={handleFileSelect}
+        className="hidden"
+        aria-label={translation.ai.attachFiles}
+      />
+
+      <div className="flex items-center justify-between p-3 pt-0">
+        <ButtonInternal
+          type="button"
+          variant="outline"
+          label={translation.ai.attachFiles}
+          icon={Paperclip}
+          hideLabel
+          onClick={() => fileInputRef.current?.click()}
+        />
+        <div className="flex gap-2">
+          {inProgress ? (
+            <ButtonInternal
+              type="submit"
+              variant="neutral"
+              label={translation.ai.stopAnswerGeneration}
+              icon={SolidStop}
+              hideLabel
+            />
+          ) : (
+            <ButtonInternal
+              type="submit"
+              disabled={!hasDataToSend}
+              variant={hasDataToSend ? "default" : "neutral"}
+              label={submitLabel || translation.ai.sendMessage}
+              icon={submitLabel ? undefined : ArrowUp}
+              hideLabel={!submitLabel}
+            />
+          )}
+        </div>
       </div>
     </motion.form>
   )

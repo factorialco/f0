@@ -1,5 +1,7 @@
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
-import { F0Icon, IconType } from "@/components/F0Icon"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import {
   DropdownInternal,
   DropdownItem,
@@ -20,10 +22,14 @@ interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
   file: File
   actions?: FileAction[]
   disabled?: boolean
+  size?: "sm" | "md"
 }
 
 const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
-  ({ file, actions = [], disabled = false, className, ...props }, ref) => {
+  (
+    { file, actions = [], disabled = false, className, size = "sm", ...props },
+    ref
+  ) => {
     const hasActions = actions.length > 0
     const singleAction = actions.length === 1 ? actions[0] : null
 
@@ -38,31 +44,41 @@ const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
       <div
         ref={ref}
         className={cn(
-          "flex w-fit max-w-40 flex-row items-center gap-2 overflow-hidden rounded-md bg-f1-background-tertiary p-0.5 pr-2",
+          "flex w-full max-w-40 flex-row items-center gap-2 overflow-hidden rounded-[10px] bg-f1-background-tertiary p-0.5",
           className
         )}
         {...props}
       >
-        <F0AvatarFile file={file} />
+        <F0AvatarFile file={file} size={size} />
         <Tooltip label={file.name}>
-          <p className="text-neutral-1000 grow overflow-hidden truncate text-ellipsis text-sm font-medium">
+          <OneEllipsis
+            lines={1}
+            className={cn(
+              "text-sm font-medium text-f1-foreground",
+              size === "sm" ? "text-sm" : "text-base"
+            )}
+          >
             {file.name}
-          </p>
+          </OneEllipsis>
         </Tooltip>
         {hasActions &&
           (singleAction ? (
-            <F0Icon
-              size="md"
+            <ButtonInternal
+              hideLabel
+              variant="ghost"
+              size={size}
+              type="button"
+              label={singleAction.label}
               icon={singleAction.icon ?? CrossedCircle}
-              className={cn(
-                "cursor-pointer text-f1-icon",
-                disabled ? "cursor-not-allowed" : "hover:text-f1-icon-bold",
-                singleAction.critical && "text-f1-foreground-critical"
-              )}
               onClick={disabled ? undefined : singleAction.onClick}
+              className="text-f1-foreground-secondary"
             />
           ) : (
-            <DropdownInternal items={dropdownItems} icon={Ellipsis} size="sm" />
+            <DropdownInternal
+              items={dropdownItems}
+              icon={Ellipsis}
+              size={size}
+            />
           ))}
       </div>
     )
