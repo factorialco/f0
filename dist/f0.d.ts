@@ -288,7 +288,9 @@ export declare type AvatarVariant = DistributiveOmit<({
     type: "file";
 } & F0AvatarFileProps) | ({
     type: "flag";
-} & F0AvatarFlagProps), "size">;
+} & F0AvatarFlagProps) | ({
+    type: "icon";
+} & F0AvatarIconProps), "size">;
 
 declare type AvatarVariant_2 = ({
     type: "person";
@@ -302,7 +304,9 @@ declare type AvatarVariant_2 = ({
     type: "flag";
 } & Omit<F0AvatarFlagProps, "size">) | ({
     type: "emoji";
-} & Omit<F0AvatarEmojiProps, "size">);
+} & Omit<F0AvatarEmojiProps, "size">) | ({
+    type: "icon";
+} & Omit<F0AvatarIconProps, "size">);
 
 export declare type AvatarVariants = (typeof avatarVariants)[number];
 
@@ -951,6 +955,11 @@ declare type CollectionProps<Record extends RecordType, Filters extends FiltersD
     /** Function to handle data load */
     onLoadData: OnLoadDataCallback<Record, Filters>;
     onLoadError: OnLoadErrorCallback;
+    /**
+     * @deprecated This will be removed in the next major version
+     * Temporary prop to force the full width of the data collection (removes the X padding)
+     */
+    tmpFullWidth?: boolean;
 } & VisualizationOptions;
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
@@ -1426,11 +1435,18 @@ export declare const defaultTranslations: {
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
-        readonly aboveOrEqual: "Above or equal to";
-        readonly value: "Value";
-        readonly belowOrEqual: "Below or equal to";
-        readonly range_title: "Use range";
-        readonly range: "Between {{min}} and {{max}}";
+        readonly number: {
+            readonly value: "Value";
+            readonly equal: "Equal to";
+            readonly equalTo: "Equal to {{value}}";
+            readonly lessOrEqual: "Less or equal to";
+            readonly greaterOrEqual: "Greater or equal to";
+            readonly equalShort: "= {{value}}";
+            readonly greaterThanOrEqualShort: ">= {{value}}";
+            readonly lessThanOrEqualShort: "<= {{value}}";
+            readonly rangeTitle: "Use range";
+            readonly range: "Between {{min}} and {{max}}";
+        };
     };
     readonly toc: {
         readonly search: "Search...";
@@ -1574,6 +1590,7 @@ export declare const defaultTranslations: {
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
+        readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -1592,9 +1609,9 @@ export declare const defaultTranslations: {
         readonly loadingMore: "Loading...";
     };
     readonly numberInput: {
-        readonly between: "Between {{min}} and {{max}}";
-        readonly greaterThan: "Greater than {{min}}";
-        readonly lessThan: "Less than {{max}}";
+        readonly between: "It should be between {{min}} and {{max}}";
+        readonly greaterThan: "It should be greater than {{min}}";
+        readonly lessThan: "It should be less than {{max}}";
     };
     readonly coCreationForm: {
         readonly actions: {
@@ -1612,6 +1629,8 @@ export declare const defaultTranslations: {
             readonly text: "Text";
             readonly longText: "Long text";
             readonly numeric: "Numeric";
+            readonly link: "Link";
+            readonly date: "Date";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -1624,6 +1643,18 @@ export declare const defaultTranslations: {
         readonly answer: {
             readonly label: "Answer";
             readonly placeholder: "Respondent's answer";
+        };
+        readonly labels: {
+            readonly title: "Title";
+            readonly description: "Description";
+            readonly required: "Required";
+            readonly questionType: "Question type";
+            readonly questionOptions: "Question options";
+            readonly actions: "Actions";
+        };
+        readonly defaults: {
+            readonly newSection: "New Section";
+            readonly newQuestion: "New Question";
         };
     };
 };
@@ -1811,7 +1842,7 @@ export declare const F0AvatarIcon: {
     displayName: string;
 };
 
-declare type F0AvatarIconProps = {
+export declare type F0AvatarIconProps = {
     icon: IconType;
     size?: (typeof avatarIconSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
@@ -2351,6 +2382,10 @@ declare interface I18nProviderProps {
     children: ReactNode;
     translations: TranslationsType;
 }
+
+export declare type IconAvatarVariant = Extract<AvatarVariant, {
+    type: "icon";
+}>;
 
 declare const iconSizes: {
     readonly xs: "xs";
@@ -2941,7 +2976,11 @@ declare type PrevNextDateNavigation = {
     next: DateRange | false;
 };
 
-declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon"> & {
+    loading?: boolean;
+    onClick?: () => void | Promise<void>;
+    disabled?: boolean;
+};
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
@@ -3196,9 +3235,12 @@ declare type SecondaryActionGroup = {
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
+declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    onClick?: () => void | Promise<void>;
 };
 
 declare type SecondaryActionsDefinition = {
@@ -3995,15 +4037,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

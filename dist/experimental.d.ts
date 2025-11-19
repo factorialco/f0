@@ -282,7 +282,7 @@ declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
-declare type ActionType = "duplicate" | "delete";
+export declare type ActionType = "duplicate" | "delete";
 
 export declare type actionType = {
     label: string;
@@ -292,7 +292,7 @@ export declare type actionType = {
     icon?: IconType;
 };
 
-declare type ActionType_2 = "duplicate" | "delete";
+declare type ActionType_2 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type actionType_2 = {
     label: string;
@@ -302,8 +302,6 @@ declare type actionType_2 = {
     hideLabel?: boolean;
     variant?: "default" | "outline" | "neutral";
 };
-
-declare type ActionType_3 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
 
@@ -629,6 +627,8 @@ declare type AvatarFileSize = (typeof avatarFileSizes)[number];
 
 declare const avatarFileSizes: readonly ["xs", "sm", "md", "lg"];
 
+declare const avatarIconSizes: readonly ["sm", "md", "lg"];
+
 declare type AvatarSize = (typeof avatarSizes)[number];
 
 declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
@@ -645,7 +645,9 @@ declare type AvatarVariant = DistributiveOmit<({
     type: "file";
 } & F0AvatarFileProps) | ({
     type: "flag";
-} & F0AvatarFlagProps), "size">;
+} & F0AvatarFlagProps) | ({
+    type: "icon";
+} & F0AvatarIconProps), "size">;
 
 export declare const Badge: ({ type, size, icon }: BadgeProps) => JSX_2.Element;
 
@@ -833,22 +835,20 @@ export declare type BasePaginatedResponse<R> = BaseResponse<R> & {
 
 export declare type BaseQuestionOnChangeParams = {
     id: string;
-    title: string;
+    title?: string;
     description?: string;
+    descriptionVisible?: boolean;
     required?: boolean;
 };
 
 declare type BaseQuestionProps = {
     id: string;
-    index: number;
     title: string;
     description?: string;
+    type: QuestionType;
     children: React.ReactNode;
-    onChange?: (params: BaseQuestionOnChangeParams) => void;
-    isEditMode?: boolean;
     required?: boolean;
-    onAddNewElement?: (params: OnAddNewElementParams) => void;
-    onAction?: (params: QuestionActionParams) => void;
+    descriptionVisible?: boolean;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -863,11 +863,6 @@ declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProp
 export declare type BaseResponse<R> = {
     records: R[];
     summaries?: R;
-};
-
-declare type BaseScoreQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-    type: "score";
-    value: number;
 };
 
 export declare const BaseTabs: React.FC<TabsProps>;
@@ -1404,14 +1399,13 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
-export declare const CoCreationForm: ({ elements, isEditMode, ...callbacks }: CoCreationFormProps) => JSX_2.Element;
+export declare const CoCreationForm: ({ elements, isEditMode, onChange, }: CoCreationFormProps) => JSX_2.Element;
 
 export declare type CoCreationFormCallbacks = {
-    onQuestionAction?: QuestionProps["onAction"];
-    onSectionAction?: SectionProps["onAction"];
-    onQuestionChange?: QuestionProps["onChange"];
-    onSectionChange?: SectionProps["onChange"];
-    onAddNewElement?: QuestionProps["onAddNewElement"];
+    onSectionAction?: (params: SectionActionParams) => void;
+    onQuestionChange?: (params: OnChangeQuestionParams) => void;
+    onSectionChange?: (params: OnChangeSectionParams) => void;
+    onAddNewElement?: (params: OnAddNewElementParams) => void;
 };
 
 export declare type CoCreationFormElement = {
@@ -1424,8 +1418,9 @@ export declare type CoCreationFormElement = {
 
 export declare type CoCreationFormProps = {
     elements: CoCreationFormElement[];
+    onChange: (elements: CoCreationFormElement[]) => void;
     isEditMode?: boolean;
-} & CoCreationFormCallbacks;
+};
 
 declare type ColId = string;
 
@@ -1444,6 +1439,11 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     /** Function to handle data load */
     onLoadData: OnLoadDataCallback<Record, Filters>;
     onLoadError: OnLoadErrorCallback;
+    /**
+     * @deprecated This will be removed in the next major version
+     * Temporary prop to force the full width of the data collection (removes the X padding)
+     */
+    tmpFullWidth?: boolean;
 } & VisualizationOptions;
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
@@ -1523,7 +1523,7 @@ declare const CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttri
 declare type CompanyItemProps = {
     name: string;
     avatarUrl?: URL_2;
-    action?: ActionType_3;
+    action?: ActionType_2;
 };
 
 export declare function CompanySelector({ companies, selected, onChange, isLoading, withNotification, additionalOptions, }: CompanySelectorProps): JSX_2.Element;
@@ -1603,6 +1603,11 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
 } ? {
     [Key in K]?: FilterValue<F["fields"][Key]>;
 } : Record<string, never>;
+
+export declare interface CurrentVersion {
+    title: string;
+    onClick?: () => void;
+}
 
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
 
@@ -1930,13 +1935,8 @@ export declare interface DatePreset {
     value: DateRange | (() => DateRange);
 }
 
-declare type DateQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-    value?: Date | null;
-};
-
 declare type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: Date | null;
-    onChange?: (params: DateQuestionOnChangeParams) => void;
 };
 
 export declare type DateRange = {
@@ -2062,11 +2062,18 @@ declare const defaultTranslations: {
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
-        readonly aboveOrEqual: "Above or equal to";
-        readonly value: "Value";
-        readonly belowOrEqual: "Below or equal to";
-        readonly range_title: "Use range";
-        readonly range: "Between {{min}} and {{max}}";
+        readonly number: {
+            readonly value: "Value";
+            readonly equal: "Equal to";
+            readonly equalTo: "Equal to {{value}}";
+            readonly lessOrEqual: "Less or equal to";
+            readonly greaterOrEqual: "Greater or equal to";
+            readonly equalShort: "= {{value}}";
+            readonly greaterThanOrEqualShort: ">= {{value}}";
+            readonly lessThanOrEqualShort: "<= {{value}}";
+            readonly rangeTitle: "Use range";
+            readonly range: "Between {{min}} and {{max}}";
+        };
     };
     readonly toc: {
         readonly search: "Search...";
@@ -2210,6 +2217,7 @@ declare const defaultTranslations: {
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
+        readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -2228,9 +2236,9 @@ declare const defaultTranslations: {
         readonly loadingMore: "Loading...";
     };
     readonly numberInput: {
-        readonly between: "Between {{min}} and {{max}}";
-        readonly greaterThan: "Greater than {{min}}";
-        readonly lessThan: "Less than {{max}}";
+        readonly between: "It should be between {{min}} and {{max}}";
+        readonly greaterThan: "It should be greater than {{min}}";
+        readonly lessThan: "It should be less than {{max}}";
     };
     readonly coCreationForm: {
         readonly actions: {
@@ -2248,6 +2256,8 @@ declare const defaultTranslations: {
             readonly text: "Text";
             readonly longText: "Long text";
             readonly numeric: "Numeric";
+            readonly link: "Link";
+            readonly date: "Date";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -2260,6 +2270,18 @@ declare const defaultTranslations: {
         readonly answer: {
             readonly label: "Answer";
             readonly placeholder: "Respondent's answer";
+        };
+        readonly labels: {
+            readonly title: "Title";
+            readonly description: "Description";
+            readonly required: "Required";
+            readonly questionType: "Question type";
+            readonly questionOptions: "Question options";
+            readonly actions: "Actions";
+        };
+        readonly defaults: {
+            readonly newSection: "New Section";
+            readonly newQuestion: "New Question";
         };
     };
 };
@@ -2368,11 +2390,13 @@ export declare type editorStateType = {
     json: JSONContent | null;
 };
 
+export declare type ElementType = QuestionType | "section";
+
 declare type EmployeeItemProps = {
     firstName: string;
     lastName: string;
     avatarUrl?: URL_2;
-    action?: ActionType_3;
+    action?: ActionType_2;
 };
 
 declare type EmptyState = {
@@ -2545,6 +2569,11 @@ declare type F0AvatarFlagProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+declare type F0AvatarIconProps = {
+    icon: IconType;
+    size?: (typeof avatarIconSizes)[number];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
 /**
  * Module avatar
  * @description A component that displays a module avatar
@@ -2652,6 +2681,15 @@ export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTMLDivElement>>;
 
 declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
+
+export declare function F0VersionHistory({ title, versions, currentVersion, activeVersionId, }: F0VersionHistoryProps): JSX_2.Element;
+
+export declare interface F0VersionHistoryProps {
+    title: string;
+    versions: Version[];
+    currentVersion?: CurrentVersion;
+    activeVersionId?: string | "current";
+}
 
 export declare const F1SearchBox: ForwardRefExoticComponent<    {
 value?: string;
@@ -3256,7 +3294,7 @@ declare type ItemDefinition = {
 declare type ItemProps = {
     text: string;
     icon?: IconType;
-    action?: ActionType_3;
+    action?: ActionType_2;
 };
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
@@ -3318,13 +3356,8 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     disabled?: boolean;
 };
 
-declare type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-    value?: string | null;
-};
-
 declare type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: string | null;
-    onChange?: (params: LinkQuestionOnChangeParams) => void;
 };
 
 /**
@@ -3502,6 +3535,12 @@ declare type MetadataItemValue_2 = {
     type: "tag";
     label: string;
     icon?: IconType;
+} | {
+    type: "person";
+    label: string;
+    firstName: string;
+    lastName: string;
+    src?: string;
 };
 
 declare interface MetadataProps {
@@ -3737,16 +3776,18 @@ export declare interface NotesTextEditorProps {
         titlePlaceholder?: string;
     };
     actions?: actionType_2[];
+    secondaryActions?: secondaryActionsType_2[];
     metadata?: MetadataItemValue_2[];
     withPadding?: boolean;
 }
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
 
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
     withTitle?: boolean;
     withPadding?: boolean;
+    withToolbar?: boolean;
 }
 
 declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
@@ -3772,13 +3813,8 @@ export declare type NumberInputProps = Omit<InputProps<string>, "value" | "type"
     units?: string;
 };
 
-declare type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-    value?: number | null;
-};
-
 declare type NumericQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: number | null;
-    onChange?: (params: NumericQuestionOnChangeParams) => void;
 };
 
 export declare function OmniButton({ label, options, hasNewUpdate }: OmniButtonProps): JSX_2.Element;
@@ -3790,8 +3826,8 @@ declare interface OmniButtonProps {
 }
 
 export declare type OnAddNewElementParams = {
-    type: QuestionType;
-    index: number;
+    type: ElementType;
+    afterId: string;
 };
 
 export declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
@@ -3799,10 +3835,36 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
-declare type OnChangeSectionParams = {
+declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
+    type: "text" | "longText";
+    value?: string | null;
+} | {
+    type: "rating";
+    value: number;
+} | {
+    type: "select";
+    value?: string | null;
+    options: SelectQuestionOption[];
+} | {
+    type: "multi-select";
+    value?: string[] | null;
+    options: SelectQuestionOption[];
+} | {
+    type: "numeric";
+    value?: number | null;
+} | {
+    type: "link";
+    value?: string | null;
+} | {
+    type: "date";
+    value?: Date | null;
+});
+
+export declare type OnChangeSectionParams = {
     id: string;
     title: string;
     description?: string;
+    questions?: QuestionElement[];
 };
 
 export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
@@ -3875,8 +3937,8 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
      */
     id?: string;
-    /** Storage for the data collection settings and state */
-    storage?: {
+    /** Storage for the data collection settings and state: use false to disable the storage */
+    storage?: false | {
         /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
          * You can use "*" for all features and ! to disable a feature
          *
@@ -3890,6 +3952,10 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
          */
         features?: DataCollectionStorageFeaturesDefinition;
     };
+    /**
+     * @deprecated removes the horizontal padding from the data collection
+     */
+    tmpFullWidth?: boolean;
 };
 
 export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, ...props }: OneDatePickerProps): JSX_2.Element;
@@ -4312,7 +4378,11 @@ declare interface PrimaryActionButton extends PrimaryAction {
     onClick: () => void;
 }
 
-export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon"> & {
+    loading?: boolean;
+    onClick?: () => void | Promise<void>;
+    disabled?: boolean;
+};
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
@@ -4519,8 +4589,6 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
-export declare const Question: ({ ...props }: QuestionProps) => JSX_2.Element;
-
 export declare type QuestionActionParams = {
     questionId: string;
     type: ActionType;
@@ -4539,21 +4607,9 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "date";
 }, QuestionPropsToOmit>;
 
-export declare type QuestionProps = BaseQuestionPropsForOtherQuestionComponents & (TextQuestionProps | (RatingQuestionProps & {
-    type: "rating";
-}) | (SelectQuestionProps & {
-    type: "select" | "multi-select";
-}) | (NumericQuestionProps & {
-    type: "numeric";
-}) | (LinkQuestionProps & {
-    type: "link";
-}) | (DateQuestionProps & {
-    type: "date";
-}));
-
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-export declare type QuestionType = "section" | "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link";
+export declare type QuestionType = "rating" | "select" | "multi-select" | "text" | "longText" | "numeric" | "link" | "date";
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -4572,11 +4628,8 @@ export declare type RadarChartProps<K extends ChartConfig> = {
 
 export declare const rangeSeparator = "\u2192";
 
-declare type RatingQuestionOnChangeParams = BaseScoreQuestionOnChangeParams;
-
 declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: number;
-    onChange?: (params: RatingQuestionOnChangeParams) => void;
 } & ({
     range: {
         min: number;
@@ -4728,9 +4781,12 @@ export declare type SecondaryActionGroup = {
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
+export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    onClick?: () => void | Promise<void>;
 };
 
 export declare type SecondaryActionsDefinition = {
@@ -4742,15 +4798,21 @@ export declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryAct
 
 export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
 
+declare type secondaryActionsType_2 = {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+    icon?: IconType;
+    critical?: boolean;
+};
+
 export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
 };
 
-export declare const Section: ({ id, index, title, description, onChange, isEditMode, onAction, questions, }: SectionProps) => JSX_2.Element;
-
-declare type SectionActionParams = {
+export declare type SectionActionParams = {
     sectionId: string;
-    type: ActionType_2;
+    type: ActionType;
     index: number;
 };
 
@@ -4760,12 +4822,8 @@ export declare const SectionHeader: ({ title, description, action, link, separat
 
 declare type SectionProps = {
     id: string;
-    index: number;
     title: string;
     description?: string;
-    onChange?: (params: OnChangeSectionParams) => void;
-    isEditMode?: boolean;
-    onAction?: (params: SectionActionParams) => void;
     questions?: QuestionElement[];
 };
 
@@ -4851,6 +4909,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
     className?: string;
     selectContentClassName?: string;
     actions?: Action[];
+    portalContainer?: HTMLElement | null;
 } & ({
     source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
     mapOptions: (item: ResolvedRecordType<R>) => SelectItemProps<T, ResolvedRecordType<R>>;
@@ -4862,17 +4921,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
     options: SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "clearable" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
-declare type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-    options: SelectQuestionOption[];
-} & ({
-    type: "select";
-    value?: string | null;
-} | {
-    type: "multi-select";
-    value?: string[] | null;
-});
-
-declare type SelectQuestionOption = {
+export declare type SelectQuestionOption = {
     value: string;
     label: string;
     correct?: boolean;
@@ -4880,7 +4929,6 @@ declare type SelectQuestionOption = {
 
 declare type SelectQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     options: SelectQuestionOption[];
-    onChange?: (params: SelectQuestionOnChangeParams) => void;
 } & ({
     type: "select";
     value?: string | null;
@@ -5320,7 +5368,7 @@ declare const TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<
 
 declare type TeamItemProps = {
     name: string;
-    action?: ActionType_3;
+    action?: ActionType_2;
 };
 
 export declare const Textarea: React.FC<TextareaProps>;
@@ -5331,15 +5379,9 @@ declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.Textare
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
-declare type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-    type: "text" | "longText";
-    value?: string | null;
-};
-
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
     value?: string | null;
-    onChange?: (params: TextQuestionOnChangeParams) => void;
 };
 
 declare const THEMES: {
@@ -5495,6 +5537,7 @@ declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
     delay?: number;
+    instant?: boolean;
 } & ({
     label: string;
     description?: string;
@@ -5681,6 +5724,19 @@ declare const variants_2: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare interface Version {
+    id: string;
+    author: VersionAuthor;
+    timestamp: Date;
+    onClick?: () => void;
+}
+
+export declare interface VersionAuthor {
+    firstName: string;
+    lastName: string;
+    src?: string;
+}
 
 export declare const VerticalBarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: VerticalBarChartProps;
@@ -5934,15 +5990,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
