@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "storybook/internal/preview-api"
+import { useState } from "react"
 import { TextQuestion } from "."
 import { CoCreationFormProvider } from "../Context"
 import { CoCreationFormElement } from "../types"
 
-const meta: Meta = {
+const meta: Meta<typeof TextQuestion> = {
   title: "CoCreationForm/TextQuestion",
   component: TextQuestion,
   tags: ["autodocs", "experimental"],
@@ -60,25 +60,5 @@ export const LongText: Story = {
     title: "What would you like to share?",
     description: "Share as much detail as you can",
     type: "longText",
-  },
-}
-
-export const DisabledText: Story = {
-  args: {
-    id: "question-5",
-    title: "What would you like to share?",
-    description: "Share as much detail as you can",
-    type: "text",
-    disabled: true,
-  },
-}
-
-export const DisabledLongText: Story = {
-  args: {
-    id: "question-6",
-    title: "What would you like to share?",
-    description: "Share as much detail as you can",
-    type: "longText",
-    disabled: true,
   },
 }
