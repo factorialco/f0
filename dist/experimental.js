@@ -18893,9 +18893,9 @@ const Sg = {
   }, x = () => {
     v("remove");
   }, b = (T) => {
-    const L = T.target.value, S = `item-${t + 1}`;
+    const L = T.target.value;
     o({
-      value: S,
+      value: l,
       index: t,
       newLabel: L
     });
@@ -18916,9 +18916,11 @@ const Sg = {
       children: [d("div", {
         className: M("block", A ? "group-hover:hidden" : "cursor-default", f && "cursor-grabbing [&_button]:cursor-grabbing"),
         children: d(pd, {
+          title: c,
           checked: !!(n && !s),
           onCheckedChange: y,
           disabled: s,
+          presentational: s,
           hideLabel: !0
         })
       }), d("div", {
