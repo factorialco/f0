@@ -10,8 +10,8 @@ import { GridStackContext } from "./grid-stack-context"
 interface GridStackProviderProps {
   children: React.ReactNode
   initialOptions: GridStackOptions
-  onResizeStop: (event: Event, el: GridItemHTMLElement) => void
-  onChange: (layout: GridStackWidget[] | GridStackOptions) => void
+  onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
+  onChange?: (layout: GridStackWidget[] | GridStackOptions) => void
 }
 
 export function GridStackProvider({
