@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.272.0](https://github.com/factorialco/f0/compare/f0-react-v1.271.0...f0-react-v1.272.0) (2025-11-19)
+
+
+### Features
+
+* **Charts:** F0Chart component ([#2961](https://github.com/factorialco/f0/issues/2961)) ([fc77088](https://github.com/factorialco/f0/commit/fc77088d861c417144fb1cff971bdec9536dd3f8))
+
 ## [1.271.0](https://github.com/factorialco/f0/compare/f0-react-v1.270.1...f0-react-v1.271.0) (2025-11-18)
 
 
