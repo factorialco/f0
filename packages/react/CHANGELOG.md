@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.273.0](https://github.com/factorialco/f0/compare/f0-react-v1.272.1...f0-react-v1.273.0) (2025-11-19)
+
+
+### Features
+
+* **Charts:** visible label for Bar, Area and Line ([#2992](https://github.com/factorialco/f0/issues/2992)) ([1286fb2](https://github.com/factorialco/f0/commit/1286fb2e22f24ec160c260c9da23ad653b3b74cd))
+
 ## [1.272.1](https://github.com/factorialco/f0/compare/f0-react-v1.272.0...f0-react-v1.272.1) (2025-11-19)
 
 
