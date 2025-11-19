@@ -30,6 +30,7 @@ export function CoCreationFormProvider({
   onChange: (elements: CoCreationFormElement[]) => void
 }) {
   const { t } = useI18n()
+
   const handleQuestionChange = useCallback<
     NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
   >(
@@ -112,7 +113,7 @@ export function CoCreationFormProvider({
     ({ type, afterId }) => {
       const newElements = elements
 
-      const newElementId = crypto.randomUUID()
+      const newElementId = `new-${type}-${Date.now()}`
 
       const newElement: CoCreationFormElement =
         type === "section"
@@ -130,9 +131,18 @@ export function CoCreationFormProvider({
                 id: newElementId,
                 title: t("coCreationForm.defaults.newQuestion"),
                 type,
-                ...(type === "rating" && { value: 0 }),
+                ...(type === "rating" && {
+                  value: 0,
+                  type: "rating",
+                  range: { min: 1, max: 5 },
+                }),
                 ...((type === "select" || type === "multi-select") && {
-                  options: [],
+                  options: [
+                    {
+                      value: "option-1",
+                      label: "New option 1",
+                    },
+                  ],
                 }),
                 ...((type === "text" || type === "longText") && {
                   value: "",
@@ -145,39 +155,31 @@ export function CoCreationFormProvider({
 
       // if adding a new section, it can only be added on the first level
       if (type === "section") {
-        newElements.forEach((element) => {
+        newElements.forEach((element, index) => {
           if (element.type === "section" && element.section.id === afterId) {
-            newElements.splice(newElements.indexOf(element) + 1, 0, newElement)
+            newElements.splice(index + 1, 0, newElement)
           }
           if (element.type === "question" && element.question.id === afterId) {
-            newElements.splice(newElements.indexOf(element) + 1, 0, newElement)
+            newElements.splice(index + 1, 0, newElement)
           }
         })
       } else {
-        newElements.forEach((element) => {
+        newElements.forEach((element, index) => {
           if (element.type === "section") {
             if (element.section.id === afterId) {
-              newElements.splice(
-                newElements.indexOf(element) + 1,
-                0,
-                newElement
-              )
+              newElements.splice(index + 1, 0, newElement)
             } else {
               const newQuestions = element.section.questions ?? []
               // In this branch, type !== "section", so newElement must be a question
               const questionElement = (
                 newElement as { type: "question"; question: QuestionElement }
               ).question
-              newQuestions?.forEach((question) => {
+              newQuestions?.forEach((question, questionIndex) => {
                 if (question.id === afterId) {
-                  newQuestions.splice(
-                    newQuestions.indexOf(question) + 1,
-                    0,
-                    questionElement
-                  )
+                  newQuestions.splice(questionIndex + 1, 0, questionElement)
                 }
               })
-              newElements.splice(newElements.indexOf(element) + 1, 0, {
+              newElements.splice(index + 1, 0, {
                 ...element,
                 section: {
                   ...element.section,
@@ -187,7 +189,7 @@ export function CoCreationFormProvider({
             }
           }
           if (element.type === "question" && element.question.id === afterId) {
-            newElements.splice(newElements.indexOf(element) + 1, 0, newElement)
+            newElements.splice(index + 1, 0, newElement)
           }
         })
       }
