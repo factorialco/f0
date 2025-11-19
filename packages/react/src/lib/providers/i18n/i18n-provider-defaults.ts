@@ -222,6 +222,12 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    removeFile: "Remove file",
+    attachFiles: "Attach files",
+    fileTooLarge:
+      "The file '{fileName}' is too large. Maximum size is {maxSize}MB.",
+    filesTooLarge:
+      "{count} files exceed the maximum size of {maxSize}MB and were not added.",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
