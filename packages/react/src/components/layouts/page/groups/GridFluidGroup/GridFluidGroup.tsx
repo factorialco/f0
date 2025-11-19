@@ -29,7 +29,7 @@ export interface GridGroupProps {
   onSort?: (items: React.ReactNode[]) => void
 }
 
-export const GridGroup = ({
+export const GridFluidGroup = ({
   blocks,
   sortable: _sortable = false,
   onSort: _onSort = () => {},

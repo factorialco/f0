@@ -12,12 +12,14 @@ export const SortableBlock = ({ id, children }: SortableBlockProps) => {
     useSortable({ id })
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
     flex: "1 1",
     display: "flex",
     flexDirection: "column" as const,
   }
+
+  console.log(style)
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>

@@ -4,9 +4,12 @@ import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
 import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/index.stories"
 import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
+
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
+import { cn } from "@/lib/utils"
 import { ComponentProps } from "react"
-import { GridGroup } from "../../groups/GridGroup"
+import { GridFixedGroup } from "../../groups/GridFixedGroup"
+import { GridFluidGroup } from "../../groups/GridFluidGroup"
 import { PageLayoutBlock } from "../components/PageLayoutBlock"
 import { PageLayoutContentBlock } from "../components/PageLayoutContentBlock"
 import { PageLayout } from "../index"
@@ -54,6 +57,7 @@ const meta = {
     ),
   },
   parameters: {
+    layout: "fullscreen",
     a11y: {
       config: {
         rules: [{ id: "svg-img-alt", enabled: false }],
@@ -174,19 +178,19 @@ export const WithContentBlocks: Story = {
   },
 }
 
-export const WithGridGroupLayout: Story = {
+export const WithFluidGridGroupLayout: Story = {
   args: {
     ...Default.args,
     children: (
       <>
         <PageLayoutContentBlock
-          title="Grid Group Layout example"
-          description="This is an example of a Grid Group Layout."
+          title="Fluid Grid Group Layout example"
+          description="This is an example of a Fluid Grid Group Layout."
           variant="default"
         >
           The content above is a `GridGroupLayout`
         </PageLayoutContentBlock>
-        <GridGroup
+        <GridFluidGroup
           sortable={true}
           onSort={(items: React.ReactNode[]) => console.log(items)}
           blocks={[
@@ -243,16 +247,70 @@ export const WithGridGroupLayout: Story = {
               id: `block-${index}`,
               render: (
                 <PageLayoutBlock
-                  className="min-w-[250px]"
-                  style={{
-                    backgroundColor: `rgb(${(index * 53) % 255}, ${(index * 113) % 255}, ${(index * 197) % 255}, 0.18)`,
-                  }}
+                  className={`bg-[rgb(${(index * 53) % 255}, ${(index * 113) % 255}, ${(index * 197) % 255}, 0.18)]`}
                 >
                   Block {index + 4}
                 </PageLayoutBlock>
               ),
             })),
           ]}
+        />
+      </>
+    ),
+  },
+}
+
+const getMockAllowedSizes = (index: number) => {
+  return [
+    { w: 1, h: 1 },
+    { w: 2, h: 2 },
+    { w: 4, h: 2 },
+  ].slice(index % 3)
+}
+
+export const WithFixedGridGroupLayout: Story = {
+  args: {
+    ...Default.args,
+    children: (
+      <>
+        <PageLayoutContentBlock
+          title="Fixed Grid Group Layout example"
+          description="This is an example of a Grid Group Layout."
+          variant="default"
+        >
+          The content above is a `GridGroupLayout`{" "}
+        </PageLayoutContentBlock>
+        <GridFixedGroup
+          sortable={true}
+          onSort={(items: React.ReactNode[]) => console.log(items)}
+          blocks={Array.from({ length: 22 }).map((_, index) => {
+            return {
+              id: `block-${index}`,
+              size: getMockAllowedSizes(index)[0],
+              availableSizes: getMockAllowedSizes(index),
+              render: (
+                <PageLayoutBlock
+                  actions={[
+                    {
+                      items: [
+                        {
+                          label: "Action 1",
+                          onClick: () => console.log("Action 1"),
+                        },
+                      ],
+                    },
+                  ]}
+                  className={cn(
+                    "rounded-md",
+                    `bg-f1-background`,
+                    "border-[1px] border-solid border-f1-border"
+                  )}
+                >
+                  Block {index + 4}
+                </PageLayoutBlock>
+              ),
+            }
+          })}
         />
       </>
     ),
