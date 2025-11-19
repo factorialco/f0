@@ -38,8 +38,6 @@ export function CoCreationFormProvider({
     (params) => {
       const questionId = params.id
 
-      console.log({ params })
-
       const newElements = elements.map((element) => {
         if (element.type === "question") {
           if (element.question.id === questionId) {
@@ -97,7 +95,7 @@ export function CoCreationFormProvider({
 
       onChange(newElements)
     },
-    [elements, onChange]
+    [elements, onChange, t]
   )
 
   const handleSectionChange = useCallback<

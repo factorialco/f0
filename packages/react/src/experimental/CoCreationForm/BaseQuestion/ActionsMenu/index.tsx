@@ -196,15 +196,29 @@ export function ActionsMenu({
 
   const handleSelectQuestionType = useCallback(
     (newQuestionType: QuestionType) => {
+      const changingType =
+        newQuestionType !== questionType &&
+        !(
+          (newQuestionType === "select" ||
+            newQuestionType === "multi-select") &&
+          question &&
+          "options" in question &&
+          !!question.options.length
+        )
+
+      console.log({ changingType })
+
       onQuestionChange?.({
         id: questionId,
         type: newQuestionType,
-        ...getDefaultParamsForQuestionType(newQuestionType),
+        ...(changingType && {
+          ...getDefaultParamsForQuestionType(newQuestionType),
+        }),
       } as Parameters<
         NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
       >[0])
     },
-    [questionId, onQuestionChange]
+    [questionId, onQuestionChange, question, questionType]
   )
 
   const handleDuplicateQuestion = useCallback(() => {
