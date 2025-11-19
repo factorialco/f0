@@ -1,54 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
 import { SelectQuestion } from "."
-import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 
 const meta: Meta<typeof SelectQuestion> = {
   title: "CoCreationForm/SelectQuestion",
   component: SelectQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {
-    const [title, setTitle] = useState(args.title)
-    const [description, setDescription] = useState(args.description)
-    const [singleValue, setSingleValue] = useState<string | undefined | null>(
-      args.type === "select" ? args.value : undefined
-    )
-    const [multiValue, setMultiValue] = useState<string[] | undefined | null>(
-      args.type === "multi-select" ? args.value : undefined
-    )
-    const [options, setOptions] = useState<SelectQuestionProps["options"]>(
-      args.options
-    )
-
-    const handleChange = (params: SelectQuestionOnChangeParams) => {
-      setTitle(params.title)
-      setDescription(params.description)
-      if (params.type === "select") {
-        setSingleValue(params.value)
-      } else {
-        setMultiValue(params.value)
-      }
-      setOptions(params.options)
-    }
-
-    return (
-      <SelectQuestion
-        {...args}
-        {...(args.type === "select"
-          ? { type: "select", value: singleValue }
-          : { type: "multi-select", value: multiValue })}
-        title={title}
-        description={description}
-        options={options}
-        onChange={handleChange}
-      />
-    )
-  },
-  args: {
-    onChange: (params) => {
-      console.log("Question changed:", params)
-    },
+    return <SelectQuestion {...args} />
   },
 }
 
@@ -136,6 +95,5 @@ export const MultiSelectInEditMode: Story = {
       { value: "workload", label: "Workload management" },
       { value: "team-dynamics", label: "Team dynamics" },
     ],
-    isEditMode: true,
   },
 }

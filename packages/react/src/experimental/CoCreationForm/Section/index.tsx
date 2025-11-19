@@ -93,6 +93,7 @@ export const Section = ({
             type="text"
             aria-label={t("coCreationForm.labels.title")}
             value={title}
+            placeholder={t("coCreationForm.labels.sectionTitlePlaceholder")}
             onChange={handleChangeTitle}
             disabled={!isEditMode}
             className="w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"

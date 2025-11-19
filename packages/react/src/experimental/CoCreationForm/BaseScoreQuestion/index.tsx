@@ -47,21 +47,18 @@ const ScoreOption = ({
 }
 
 export const BaseScoreQuestion = ({
-  id,
-  title,
-  description,
   options,
   value,
-  required,
+  ...baseQuestionComponentProps
 }: BaseScoreQuestionProps) => {
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
   const baseOnChangeParams = useMemo(
     () => ({
-      id,
+      id: baseQuestionComponentProps.id,
       type: "score",
     }),
-    [id]
+    [baseQuestionComponentProps]
   )
 
   const handleChangeValue = useCallback(
@@ -76,13 +73,7 @@ export const BaseScoreQuestion = ({
   )
 
   return (
-    <BaseQuestion
-      id={id}
-      type="rating"
-      title={title}
-      description={description}
-      required={required}
-    >
+    <BaseQuestion {...baseQuestionComponentProps}>
       <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
         {options.map((option) => (
           <ScoreOption

@@ -43,7 +43,8 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     if (params.action === "mark-as-correct") {
       newOptions = options.map((option) => ({
         ...option,
-        correct: option.value === params.value,
+        correct:
+          option.value === params.value ? !option.correct : option.correct,
       }))
     }
 

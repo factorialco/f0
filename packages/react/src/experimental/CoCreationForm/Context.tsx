@@ -38,6 +38,8 @@ export function CoCreationFormProvider({
     (params) => {
       const questionId = params.id
 
+      console.log({ params })
+
       const newElements = elements.map((element) => {
         if (element.type === "question") {
           if (element.question.id === questionId) {
@@ -46,6 +48,13 @@ export function CoCreationFormProvider({
               question: {
                 ...element.question,
                 ...params,
+                ...(!params.description &&
+                  params.descriptionVisible && {
+                    description:
+                      !element.question?.description && !params.description
+                        ? t("coCreationForm.defaults.newQuestionDescription")
+                        : element.question?.description,
+                  }),
               } as QuestionElement,
             }
           }
@@ -60,6 +69,13 @@ export function CoCreationFormProvider({
                 return {
                   ...question,
                   ...params,
+                  ...(!params.description &&
+                    params.descriptionVisible && {
+                      description:
+                        !question?.description && !params.description
+                          ? t("coCreationForm.defaults.newQuestionDescription")
+                          : question?.description,
+                    }),
                 } as QuestionElement
               }
 
@@ -192,7 +208,12 @@ export function CoCreationFormProvider({
               question: {
                 id: newElementId,
                 title: t("coCreationForm.defaults.newQuestion"),
+                description: t(
+                  "coCreationForm.defaults.newQuestionDescription"
+                ),
                 type,
+                descriptionVisible: true,
+                required: true,
                 ...getDefaultParamsForQuestionType(type),
               } as QuestionElement,
             }

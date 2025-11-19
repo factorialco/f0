@@ -6,11 +6,6 @@ const meta: Meta = {
   title: "CoCreationForm/RatingQuestion",
   component: RatingQuestion,
   tags: ["autodocs", "experimental"],
-  args: {
-    onChange: (params) => {
-      console.log("Question changed:", params)
-    },
-  },
 } satisfies Meta<typeof RatingQuestion>
 
 export default meta

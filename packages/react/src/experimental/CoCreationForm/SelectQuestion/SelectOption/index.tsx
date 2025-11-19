@@ -1,7 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
-import { CheckCircleLine, Delete, Handle } from "@/icons/app"
+import { CheckCircleLine, Cross, Delete, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
@@ -127,7 +127,7 @@ export const SelectOption = ({
             <F0Button
               label={t("coCreationForm.selectQuestion.markAsCorrect")}
               variant="ghost"
-              icon={CheckCircleLine}
+              icon={correct ? Cross : CheckCircleLine}
               onClick={handleClickMarkAsCorrect}
               hideLabel
             />
