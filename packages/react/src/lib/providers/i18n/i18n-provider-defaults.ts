@@ -66,11 +66,18 @@ export const defaultTranslations = {
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
-    aboveOrEqual: "Above or equal to",
-    value: "Value",
-    belowOrEqual: "Below or equal to",
-    range_title: "Use range",
-    range: "Between {{min}} and {{max}}",
+    number: {
+      value: "Value",
+      equal: "Equal to",
+      equalTo: "Equal to {{value}}",
+      lessOrEqual: "Less or equal to",
+      greaterOrEqual: "Greater or equal to",
+      equalShort: "= {{value}}",
+      greaterThanOrEqualShort: ">= {{value}}",
+      lessThanOrEqualShort: "<= {{value}}",
+      rangeTitle: "Use range",
+      range: "Between {{min}} and {{max}}",
+    },
   },
   toc: {
     search: "Search...",
@@ -214,6 +221,7 @@ export const defaultTranslations = {
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
+    thinking: "Thinking...",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -232,9 +240,9 @@ export const defaultTranslations = {
     loadingMore: "Loading...",
   },
   numberInput: {
-    between: "Between {{min}} and {{max}}",
-    greaterThan: "Greater than {{min}}",
-    lessThan: "Less than {{max}}",
+    between: "It should be between {{min}} and {{max}}",
+    greaterThan: "It should be greater than {{min}}",
+    lessThan: "It should be less than {{max}}",
   },
   coCreationForm: {
     actions: {

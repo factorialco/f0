@@ -5,6 +5,7 @@ import { F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFileProps } from "../F0AvatarFile"
 import { F0AvatarFlagProps } from "../F0AvatarFlag"
+import { F0AvatarIconProps } from "../F0AvatarIcon"
 import { F0AvatarPersonProps } from "../F0AvatarPerson"
 import { F0AvatarTeamProps } from "../F0AvatarTeam"
 
@@ -37,7 +38,8 @@ export type AvatarVariant = DistributiveOmit<
   | ({ type: "team" } & F0AvatarTeamProps)
   | ({ type: "company" } & F0AvatarCompanyProps)
   | ({ type: "file" } & F0AvatarFileProps)
-  | ({ type: "flag" } & F0AvatarFlagProps),
+  | ({ type: "flag" } & F0AvatarFlagProps)
+  | ({ type: "icon" } & F0AvatarIconProps),
   "size"
 >
 
@@ -47,3 +49,4 @@ export type TeamAvatarVariant = Extract<AvatarVariant, { type: "team" }>
 export type CompanyAvatarVariant = Extract<AvatarVariant, { type: "company" }>
 export type FileAvatarVariant = Extract<AvatarVariant, { type: "file" }>
 export type FlagAvatarVariant = Extract<AvatarVariant, { type: "flag" }>
+export type IconAvatarVariant = Extract<AvatarVariant, { type: "icon" }>

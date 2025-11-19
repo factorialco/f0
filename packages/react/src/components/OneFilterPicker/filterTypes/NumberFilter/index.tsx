@@ -7,8 +7,8 @@ import {
   NumberFilterValue,
 } from "./NumberFilter"
 
-const isEmpty = (value: NumberFilterValue): value is undefined => {
-  return !value || (value[0] === undefined && value[1] === undefined)
+const isEmpty = (value: NumberFilterValue | undefined): value is undefined => {
+  return !value || (value?.[0] === value?.[1] && value?.[0] === undefined)
 }
 
 const defaults: NumberFilterOptions = {
@@ -20,7 +20,7 @@ export const numberFilter: FilterTypeDefinition<
   NumberFilterValue,
   NumberFilterOptions
 > = {
-  emptyValue: [undefined, undefined],
+  emptyValue: undefined,
   render: (props) => {
     const options = getOptionsWithDefaults(props.schema.options, defaults)
     return <NumberFilter {...props} schema={{ ...props.schema, options }} />
@@ -28,16 +28,36 @@ export const numberFilter: FilterTypeDefinition<
   isEmpty,
   chipLabel: (value, context) => {
     const i18n = context.i18n
+
+    const mode = value?.[0] === value?.[1] ? "single" : "range"
+    // Single value
+    if (mode === "single") {
+      if (value?.[0] === undefined) {
+        return ""
+      }
+      return i18n.t("filters.number.equalShort", {
+        value: value?.[0]?.toString(),
+      })
+    }
+
+    // Range value
     if (value?.[0] !== undefined && value?.[1] !== undefined) {
-      return i18n.t("filters.range", { min: value?.[0], max: value?.[1] })
+      return i18n.t("filters.number.range", {
+        min: value?.[0],
+        max: value?.[1],
+      })
     }
 
     if (value?.[1] !== undefined) {
-      return `<= ${value?.[1]}`
+      return i18n.t("filters.number.lessThanOrEqualShort", {
+        value: value?.[1],
+      })
     }
 
     if (value?.[0] !== undefined) {
-      return `>= ${value?.[0]}`
+      return i18n.t("filters.number.greaterThanOrEqualShort", {
+        value: value?.[0],
+      })
     }
 
     return ""

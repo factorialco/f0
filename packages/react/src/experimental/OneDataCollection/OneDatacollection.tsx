@@ -122,21 +122,27 @@ export type OneDataCollectionProps<
    */
   id?: string
 
-  /** Storage for the data collection settings and state */
-  storage?: {
-    /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
-     * You can use "*" for all features and ! to disable a feature
-     *
-     * For example:
-     * - "*" - will use all storage features (empty "" means all)
-     * - "filters" - will use only the storage for the data collection filters state
-     * - "filters, sortings" - will use the storage for the data collection filters and sortings state
-     * - "*, !filters" - will not use the storage for the data collection filters state
-     * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
-     *
-     */
-    features?: DataCollectionStorageFeaturesDefinition
-  }
+  /** Storage for the data collection settings and state: use false to disable the storage */
+  storage?:
+    | false
+    | {
+        /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
+         * You can use "*" for all features and ! to disable a feature
+         *
+         * For example:
+         * - "*" - will use all storage features (empty "" means all)
+         * - "filters" - will use only the storage for the data collection filters state
+         * - "filters, sortings" - will use the storage for the data collection filters and sortings state
+         * - "*, !filters" - will not use the storage for the data collection filters state
+         * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
+         *
+         */
+        features?: DataCollectionStorageFeaturesDefinition
+      }
+  /**
+   * @deprecated removes the horizontal padding from the data collection
+   */
+  tmpFullWidth?: boolean
 }
 
 const OneDataCollectionComp = <
@@ -157,6 +163,7 @@ const OneDataCollectionComp = <
   fullHeight,
   storage,
   id,
+  tmpFullWidth,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -489,7 +496,7 @@ const OneDataCollectionComp = <
 
   const { storageReady } = useDataCollectionStorage(
     id,
-    storage?.features ?? ["*"],
+    typeof storage === "object" ? (storage?.features ?? ["*"]) : ["*"],
     {
       settings: {
         value: settings,
@@ -519,7 +526,8 @@ const OneDataCollectionComp = <
         value: currentFilters,
         setValue: setCurrentFilters,
       },
-    }
+    },
+    storage === false
   )
 
   const showTotalItemSummarySkeleton = useDebounceBoolean({
@@ -624,7 +632,8 @@ const OneDataCollectionComp = <
         fullHeight && "h-full flex-1"
       )}
       style={{
-        width: layout === "standard" ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout
+        width:
+          layout === "standard" && !tmpFullWidth ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout,
       }}
     >
       {showTopToolbar && (
@@ -648,7 +657,11 @@ const OneDataCollectionComp = <
       )}
       {showBottomToolbar && (
         <div
-          className={cn("flex flex-row gap-4 px-4", fullHeight && "max-h-full")}
+          className={cn(
+            "flex flex-row gap-4 px-4",
+            fullHeight && "max-h-full",
+            tmpFullWidth && "px-0"
+          )}
         >
           {totalItemSummaryPosition === "bottom" && (
             <TotalItemsSummary
@@ -728,6 +741,7 @@ const OneDataCollectionComp = <
           onSelectItems={onSelectItemsLocal}
           onLoadData={onLoadData}
           onLoadError={onLoadError}
+          tmpFullWidth={tmpFullWidth}
         />
       </div>
       {emptyState ? (

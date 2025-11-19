@@ -21,10 +21,30 @@ type actionType = {
   variant?: "default" | "outline" | "neutral"
 }
 
+type secondaryActionsType = {
+  label: string
+  onClick: () => void
+  disabled?: boolean
+  icon?: IconType
+  critical?: boolean
+}
+
 type MetadataItemValue =
   | { type: "text"; content: string; label: string }
   | { type: "status"; label: string; variant: StatusVariant }
   | { type: "dot-tag"; label: string; color: NewColor }
   | { type: "tag"; label: string; icon?: IconType }
+  | {
+      type: "person"
+      label: string
+      firstName: string
+      lastName: string
+      src?: string
+    }
 
-export type { actionType, MetadataItemValue, NotesTextEditorHandle }
+export type {
+  actionType,
+  MetadataItemValue,
+  NotesTextEditorHandle,
+  secondaryActionsType,
+}

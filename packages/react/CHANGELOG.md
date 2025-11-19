@@ -1,5 +1,103 @@
 # Changelog
 
+## [1.271.0](https://github.com/factorialco/f0/compare/f0-react-v1.270.1...f0-react-v1.271.0) (2025-11-18)
+
+
+### Features
+
+* **ActionItem:** add shine effect to executing status ([#2986](https://github.com/factorialco/f0/issues/2986)) ([ae0f1ee](https://github.com/factorialco/f0/commit/ae0f1ee85c77fad27c7f836eb59142cc63a56b80))
+
+## [1.270.1](https://github.com/factorialco/f0/compare/f0-react-v1.270.0...f0-react-v1.270.1) (2025-11-17)
+
+
+### Bug Fixes
+
+* number filter range ([#2978](https://github.com/factorialco/f0/issues/2978)) ([4e13663](https://github.com/factorialco/f0/commit/4e13663315f3f245ce34d17d0a31a426fed2b6a3))
+
+## [1.270.0](https://github.com/factorialco/f0/compare/f0-react-v1.269.0...f0-react-v1.270.0) (2025-11-17)
+
+
+### Features
+
+* **F0VersionHistory:** add version history component ([#2972](https://github.com/factorialco/f0/issues/2972)) ([e4a828b](https://github.com/factorialco/f0/commit/e4a828bd4809a2370b1bdfd493f88124e0ad4bef))
+
+## [1.269.0](https://github.com/factorialco/f0/compare/f0-react-v1.268.2...f0-react-v1.269.0) (2025-11-17)
+
+
+### Features
+
+* **tooltip:** add instant prop for immediate tooltip interaction ([#2981](https://github.com/factorialco/f0/issues/2981)) ([46a5e07](https://github.com/factorialco/f0/commit/46a5e079c2fdcae134b0a3f7862ec2d79903bdd6))
+
+## [1.268.2](https://github.com/factorialco/f0/compare/f0-react-v1.268.1...f0-react-v1.268.2) (2025-11-17)
+
+
+### Bug Fixes
+
+* **tooltip:** add pointer-events-none to prevent tooltip interference ([#2979](https://github.com/factorialco/f0/issues/2979)) ([696e558](https://github.com/factorialco/f0/commit/696e5583b003a81ed9c6fe951adea306d30133ac))
+
+## [1.268.1](https://github.com/factorialco/f0/compare/f0-react-v1.268.0...f0-react-v1.268.1) (2025-11-17)
+
+
+### Bug Fixes
+
+* solve issue with Select used inside modal ([#2976](https://github.com/factorialco/f0/issues/2976)) ([4515d04](https://github.com/factorialco/f0/commit/4515d0497b285bb95ba234ef8e0989046b8deebf))
+
+## [1.268.0](https://github.com/factorialco/f0/compare/f0-react-v1.267.0...f0-react-v1.268.0) (2025-11-17)
+
+
+### Features
+
+* loading and disable in datacollection actions ([#2974](https://github.com/factorialco/f0/issues/2974)) ([af1bdd6](https://github.com/factorialco/f0/commit/af1bdd657d65ae3de676ee16154d2bb43d792397))
+
+## [1.267.0](https://github.com/factorialco/f0/compare/f0-react-v1.266.0...f0-react-v1.267.0) (2025-11-17)
+
+
+### Features
+
+* datacollection temp fullWith ([#2970](https://github.com/factorialco/f0/issues/2970)) ([efe153b](https://github.com/factorialco/f0/commit/efe153b957561e37f6f5c98b70fdfddd6d5870e2))
+
+## [1.266.0](https://github.com/factorialco/f0/compare/f0-react-v1.265.0...f0-react-v1.266.0) (2025-11-12)
+
+
+### Features
+
+* datacollection allow to disable persistence ([#2968](https://github.com/factorialco/f0/issues/2968)) ([1e5f973](https://github.com/factorialco/f0/commit/1e5f973cf52c459ca8f26f81395171b585e7d676))
+
+## [1.265.0](https://github.com/factorialco/f0/compare/f0-react-v1.264.1...f0-react-v1.265.0) (2025-11-12)
+
+
+### Features
+
+* **RichTextEditor:** add BlockIdExtension  ([#2964](https://github.com/factorialco/f0/issues/2964)) ([805493c](https://github.com/factorialco/f0/commit/805493cf4154d3e555844300b91305b12c25977f))
+
+## [1.264.1](https://github.com/factorialco/f0/compare/f0-react-v1.264.0...f0-react-v1.264.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* **AiChat:** targetBlank to MessageSources and consistency in loading states ([#2944](https://github.com/factorialco/f0/issues/2944)) ([d562d4c](https://github.com/factorialco/f0/commit/d562d4c499c80ac1bec98621b65f6c56330e0e81))
+
+## [1.264.0](https://github.com/factorialco/f0/compare/f0-react-v1.263.0...f0-react-v1.264.0) (2025-11-11)
+
+
+### Features
+
+* **RichTextEditor:** add secondary actions and person metadata support ([#2940](https://github.com/factorialco/f0/issues/2940)) ([d223a6a](https://github.com/factorialco/f0/commit/d223a6a6f9af6d80745af5635744133dfae520d3))
+
+## [1.263.0](https://github.com/factorialco/f0/compare/f0-react-v1.262.0...f0-react-v1.263.0) (2025-11-11)
+
+
+### Features
+
+* list icon avatar ([#2953](https://github.com/factorialco/f0/issues/2953)) ([efa338e](https://github.com/factorialco/f0/commit/efa338e5e4e35d6138f2be25a793434b93d04865))
+
+## [1.262.0](https://github.com/factorialco/f0/compare/f0-react-v1.261.0...f0-react-v1.262.0) (2025-11-11)
+
+
+### Features
+
+* Display deactivated persons in OneDataCollection tables ([#2952](https://github.com/factorialco/f0/issues/2952)) ([0d1eb2b](https://github.com/factorialco/f0/commit/0d1eb2b7d055c48316f15a978bcd18004d3d42f2))
+
 ## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
 
 

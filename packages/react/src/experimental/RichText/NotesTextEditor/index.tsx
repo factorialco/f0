@@ -25,7 +25,12 @@ import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import "./index.css"
-import { actionType, MetadataItemValue, NotesTextEditorHandle } from "./types"
+import {
+  actionType,
+  MetadataItemValue,
+  NotesTextEditorHandle,
+  secondaryActionsType,
+} from "./types"
 
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
@@ -44,6 +49,7 @@ interface NotesTextEditorProps {
     titlePlaceholder?: string
   }
   actions?: actionType[]
+  secondaryActions?: secondaryActionsType[]
   metadata?: MetadataItemValue[]
   withPadding?: boolean
 }
@@ -61,6 +67,7 @@ const NotesTextEditorComponent = forwardRef<
     aiBlockConfig,
     onTitleChange,
     actions,
+    secondaryActions,
     metadata,
     withPadding: _withPadding = false,
   },
@@ -217,7 +224,9 @@ const NotesTextEditorComponent = forwardRef<
   }, [editor])
 
   const showHeader =
-    (actions && actions.length > 0) || (metadata && metadata.length > 0)
+    (actions && actions.length > 0) ||
+    (metadata && metadata.length > 0) ||
+    (secondaryActions && secondaryActions.length > 0)
   const showTitle = onTitleChange || title
 
   if (!editor) return null
@@ -228,7 +237,13 @@ const NotesTextEditorComponent = forwardRef<
       ref={containerRef}
       id={editorId}
     >
-      {showHeader && <Header actions={actions} metadata={metadata} />}
+      {showHeader && (
+        <Header
+          actions={actions}
+          metadata={metadata}
+          secondaryActions={secondaryActions}
+        />
+      )}
       {!readonly && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
           <Toolbar
@@ -248,7 +263,7 @@ const NotesTextEditorComponent = forwardRef<
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={labels.titlePlaceholder || ""}
-              className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
+              className="notes-text-editor-title text-[39px] font-semibold tracking-[-0.78px] text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>
         )}
@@ -256,32 +271,34 @@ const NotesTextEditorComponent = forwardRef<
           className="notes-text-editor h-full"
           onClick={() => editor.commands.focus()}
         >
-          <DragHandle
-            editor={editor}
-            tippyOptions={tippyOptions}
-            onNodeChange={handleNodeChange}
-          >
-            <div className="flex flex-row">
-              <ButtonInternal
-                compact
-                variant="ghost"
-                size="sm"
-                className="text-f1-foreground-tertiary"
-                onClick={handlePlusClick}
-                label="Add paragraph"
-                hideLabel
-                icon={Plus}
-              ></ButtonInternal>
+          {!readonly && (
+            <DragHandle
+              editor={editor}
+              tippyOptions={tippyOptions}
+              onNodeChange={handleNodeChange}
+            >
+              <div className="flex flex-row">
+                <ButtonInternal
+                  compact
+                  variant="ghost"
+                  size="sm"
+                  className="text-f1-foreground-tertiary"
+                  onClick={handlePlusClick}
+                  label="Add paragraph"
+                  hideLabel
+                  icon={Plus}
+                ></ButtonInternal>
 
-              <div
-                className="flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary"
-                draggable
-                data-drag-handle
-              >
-                <F0Icon icon={Handle} size="xs" />
+                <div
+                  className="flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary"
+                  draggable
+                  data-drag-handle
+                >
+                  <F0Icon icon={Handle} size="xs" />
+                </div>
               </div>
-            </div>
-          </DragHandle>
+            </DragHandle>
+          )}
 
           <EditorContent
             editor={editor}
@@ -297,12 +314,14 @@ interface NotesTextEditorSkeletonProps {
   withHeader?: boolean
   withTitle?: boolean
   withPadding?: boolean
+  withToolbar?: boolean
 }
 
 export const NotesTextEditorSkeleton = ({
   withHeader = false,
   withTitle = true,
   withPadding: _withPadding = false,
+  withToolbar = true,
 }: NotesTextEditorSkeletonProps) => {
   return (
     <div
@@ -323,30 +342,30 @@ export const NotesTextEditorSkeleton = ({
         </div>
       )}
 
-      {/* Toolbar skeleton */}
-      <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
-        <Skeleton className="h-8 w-8 rounded" />
-        <div className="flex items-center gap-0.5">
+      {withToolbar && (
+        <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
           <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
+          <div className="flex items-center gap-0.5">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
         </div>
-        <div className="flex items-center gap-0.5">
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-        </div>
-        <div className="flex items-center gap-0.5">
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-          <Skeleton className="h-8 w-8 rounded" />
-        </div>
-      </div>
-
+      )}
       <ScrollArea className="h-full gap-6">
         {withTitle && (
           <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-5 pt-5">
@@ -356,7 +375,6 @@ export const NotesTextEditorSkeleton = ({
 
         <div className="h-full">
           <div className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14">
-            {/* Content skeleton */}
             <div className="flex flex-col gap-2">
               <Skeleton className="h-5 w-full rounded-md" />
               <Skeleton className="h-5 w-4/5 rounded-md" />
