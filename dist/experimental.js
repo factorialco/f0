@@ -18322,7 +18322,7 @@ function Rj({ elements: t, children: e, isEditMode: n, onChange: i }) {
     } : m);
     i(p);
   }, [t, i]), a = ve(({ type: u, afterId: h }) => {
-    const p = t, m = `new-${u}-${Date.now()}`, g = u === "section" ? {
+    const p = [...t], m = `new-${u}-${Date.now()}`, g = u === "section" ? {
       type: "section",
       section: {
         id: m,
