@@ -258,7 +258,7 @@ export const theme = {
       show: true,
       color: chartColor(baseColors.grey[50]),
       fontSize: 12,
-      fontWeight: "regular",
+      fontWeight: "bold",
       position: "top",
     },
   },

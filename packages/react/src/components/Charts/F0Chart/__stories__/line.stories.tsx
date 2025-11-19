@@ -39,7 +39,7 @@ export const LineChart: Story = {
         {
           name: "Time to hire",
           type: "line",
-          data: [24, 17, 25, 30, 10, 26],
+          data: [24, 17, 25, 27, 10, 26],
           smooth: false,
         },
       ],
