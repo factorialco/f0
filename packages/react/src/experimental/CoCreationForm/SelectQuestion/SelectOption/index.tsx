@@ -49,8 +49,7 @@ export const SelectOption = ({
 
   const handleChangeLabel = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newLabel = event.target.value
-    const newValue = `item-${index + 1}`
-    onChangeLabel({ value: newValue, index, newLabel })
+    onChangeLabel({ value, index, newLabel })
   }
 
   const handleDragStart = () => {
@@ -89,9 +88,11 @@ export const SelectOption = ({
           )}
         >
           <F0Checkbox
+            title={label}
             checked={!!(selected && !isEditMode)}
             onCheckedChange={handleClick}
             disabled={isEditMode}
+            presentational={isEditMode}
             hideLabel
           />
         </div>
