@@ -111,7 +111,7 @@ export function CoCreationFormProvider({
     NonNullable<CoCreationFormCallbacks["onAddNewElement"]>
   >(
     ({ type, afterId }) => {
-      const newElements = elements
+      const newElements = [...elements]
 
       const newElementId = `new-${type}-${Date.now()}`
 
