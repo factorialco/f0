@@ -1,5 +1,5 @@
-import { S as ve, a as st, f as ae, L as z, b as lt, A as ct, i as H, c as ut, d as Oe, E as dt, g as Q, e as pt, h as ft, C as mt, j as ht, k as $, l as Ne, u as vt, G as gt, m as bt, n as ge, o as yt, p as Ae, q as xt, B as Le, X as Te, Y as ne, r as wt, s as ke, t as Ct, v as Pt, w as St, x as Ot, y as Nt, z as At, D as Lt, F as Tt, H as be, I as kt, J as q, K as re, M as Dt, N as Ft, O as Et, P as De, Q as j, R as D, T as _t, U as jt, V as It, W as $t, Z as Mt, _ as Bt, $ as Rt, a0 as Fe, a1 as zt, a2 as U, a3 as Ee, a4 as _e, a5 as qt, a6 as je, a7 as Ie, a8 as $e, a9 as Kt, aa as Vt, ab as Wt, ac as Me, ad as Gt, ae as Yt, af as Be, ag as Ht, ah as Qt, ai as Ut, aj as Jt, ak as Xt, al as Zt, am as ea, an as ta, ao as Re, ap as M, aq as ze, ar as aa, as as ra, at as ye, au as na, av as qe, aw as oa, ax as ia, ay as sa, az as la, aA as ca, aB as ua, aC as da, aD as pa, aE as fa, aF as ma, aG as ha, aH as va } from "./hooks-CcrUYPRb.js";
-import { bj as Kr, bl as Vr, bu as Wr, aI as Gr, aJ as Yr, aK as Hr, aL as Qr, aM as Ur, aN as Jr, aO as Xr, aP as Zr, aR as en, aS as tn, aT as an, aU as rn, aV as nn, aW as on, aX as sn, bq as ln, aZ as cn, a$ as un, b0 as dn, b1 as pn, b2 as fn, b5 as mn, b6 as hn, b7 as vn, b9 as gn, a_ as bn, b8 as yn, b4 as xn, br as wn, bk as Cn, be as Pn, bh as Sn, bd as On, bv as Nn, bc as An, bb as Ln, aQ as Tn, aY as kn, b3 as Dn, ba as Fn, bf as En, bm as _n, bn as jn, bo as In, bw as $n, bg as Mn, bp as Bn, bt as Rn, bi as zn, bs as qn } from "./hooks-CcrUYPRb.js";
+import { S as ve, a as st, f as ae, L as z, b as lt, A as ct, i as Y, c as ut, d as Oe, E as dt, g as H, e as pt, h as ft, C as mt, j as ht, k as $, l as Ne, u as vt, G as gt, m as bt, n as ge, o as yt, p as Ae, q as xt, B as Le, X as Te, Y as ne, r as wt, s as ke, t as Pt, v as Ct, w as St, x as Ot, y as Nt, z as At, D as Lt, F as Tt, H as be, I as kt, J as q, K as re, M as Dt, N as Ft, O as Et, P as De, Q as j, R as D, T as _t, U as jt, V as It, W as $t, Z as Mt, _ as Bt, $ as Rt, a0 as Fe, a1 as zt, a2 as U, a3 as Ee, a4 as _e, a5 as qt, a6 as je, a7 as Ie, a8 as $e, a9 as Kt, aa as Vt, ab as Wt, ac as Me, ad as Gt, ae as Qt, af as Be, ag as Yt, ah as Ht, ai as Ut, aj as Jt, ak as Xt, al as Zt, am as ea, an as ta, ao as Re, ap as M, aq as ze, ar as aa, as as ra, at as ye, au as na, av as qe, aw as oa, ax as ia, ay as sa, az as la, aA as ca, aB as ua, aC as da, aD as pa, aE as fa, aF as ma, aG as ha, aH as va } from "./hooks-DkO7-GEC.js";
+import { bj as Kr, bl as Vr, bu as Wr, aI as Gr, aJ as Qr, aK as Yr, aL as Hr, aM as Ur, aN as Jr, aO as Xr, aP as Zr, aR as en, aS as tn, aT as an, aU as rn, aV as nn, aW as on, aX as sn, bq as ln, aZ as cn, a$ as un, b0 as dn, b1 as pn, b2 as fn, b5 as mn, b6 as hn, b7 as vn, b9 as gn, a_ as bn, b8 as yn, b4 as xn, br as wn, bk as Pn, be as Cn, bh as Sn, bd as On, bv as Nn, bc as An, bb as Ln, aQ as Tn, aY as kn, b3 as Dn, ba as Fn, bf as En, bm as _n, bn as jn, bo as In, bw as $n, bg as Mn, bp as Bn, bt as Rn, bi as zn, bs as qn } from "./hooks-DkO7-GEC.js";
 import { jsx as n, jsxs as g, Fragment as le } from "react/jsx-runtime";
 import * as ce from "react";
 import N, { PureComponent as ga, useState as E, forwardRef as ee, useRef as Ke, useImperativeHandle as ba, Children as ya, useEffect as Ve, createContext as xa } from "react";
@@ -282,8 +282,10 @@ const hr = {
     },
     labels: {
       title: "Title",
+      titlePlaceholder: "Question title",
       description: "Description",
-      descriptionPlaceholder: "Describe the question in a few words",
+      questionDescriptionPlaceholder: "Describe the question in a few words",
+      sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
       questionType: "Question type",
       questionOptions: "Question options",
@@ -315,14 +317,14 @@ function wa(e, t) {
   if (!(e instanceof t))
     throw new TypeError("Cannot call a class as a function");
 }
-function Ca(e, t) {
+function Pa(e, t) {
   for (var r = 0; r < t.length; r++) {
     var a = t[r];
-    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Ye(a.key), a);
+    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Qe(a.key), a);
   }
 }
-function Pa(e, t, r) {
-  return t && Ca(e.prototype, t), Object.defineProperty(e, "prototype", { writable: !1 }), e;
+function Ca(e, t, r) {
+  return t && Pa(e.prototype, t), Object.defineProperty(e, "prototype", { writable: !1 }), e;
 }
 function Sa(e, t, r) {
   return t = J(t), Oa(e, We() ? Reflect.construct(t, r || [], J(e).constructor) : t.apply(e, r));
@@ -365,9 +367,9 @@ function oe(e, t) {
   }, oe(e, t);
 }
 function Ge(e, t, r) {
-  return t = Ye(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
+  return t = Qe(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
 }
-function Ye(e) {
+function Qe(e) {
   var t = La(e, "string");
   return B(t) == "symbol" ? t : t + "";
 }
@@ -385,7 +387,7 @@ var te = /* @__PURE__ */ function(e) {
   function t() {
     return wa(this, t), Sa(this, t, arguments);
   }
-  return Aa(t, e), Pa(t, [{
+  return Aa(t, e), Ca(t, [{
     key: "render",
     value: function() {
       return null;
@@ -490,14 +492,14 @@ function Ea(e, t) {
 function we(e, t) {
   for (var r = 0; r < t.length; r++) {
     var a = t[r];
-    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, Qe(a.key), a);
+    a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), Object.defineProperty(e, He(a.key), a);
   }
 }
 function _a(e, t, r) {
   return t && we(e.prototype, t), r && we(e, r), Object.defineProperty(e, "prototype", { writable: !1 }), e;
 }
 function ja(e, t, r) {
-  return t = X(t), Ia(e, He() ? Reflect.construct(t, r || [], X(e).constructor) : t.apply(e, r));
+  return t = X(t), Ia(e, Ye() ? Reflect.construct(t, r || [], X(e).constructor) : t.apply(e, r));
 }
 function Ia(e, t) {
   if (t && (R(t) === "object" || typeof t == "function"))
@@ -511,13 +513,13 @@ function $a(e) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
 }
-function He() {
+function Ye() {
   try {
     var e = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
     }));
   } catch {
   }
-  return (He = function() {
+  return (Ye = function() {
     return !!e;
   })();
 }
@@ -537,9 +539,9 @@ function ie(e, t) {
   }, ie(e, t);
 }
 function I(e, t, r) {
-  return t = Qe(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
+  return t = He(t), t in e ? Object.defineProperty(e, t, { value: r, enumerable: !0, configurable: !0, writable: !0 }) : e[t] = r, e;
 }
-function Qe(e) {
+function He(e) {
   var t = Ba(e, "string");
   return R(t) == "symbol" ? t : t + "";
 }
@@ -608,18 +610,18 @@ var W = /* @__PURE__ */ function(e) {
         onAnimationEnd: this.handleAnimationEnd,
         onAnimationStart: this.handleAnimationStart
       }, function(h) {
-        var u = h.t, x = s.map(function(P, C) {
-          var w = f && f[C];
+        var u = h.t, x = s.map(function(C, P) {
+          var w = f && f[P];
           if (w) {
-            var S = H(w.cx, P.cx), b = H(w.cy, P.cy), O = H(w.size, P.size);
-            return T(T({}, P), {}, {
+            var S = Y(w.cx, C.cx), b = Y(w.cy, C.cy), O = Y(w.size, C.size);
+            return T(T({}, C), {}, {
               cx: S(u),
               cy: b(u),
               size: O(u)
             });
           }
-          var y = H(0, P.size);
-          return T(T({}, P), {}, {
+          var y = Y(0, C.size);
+          return T(T({}, C), {}, {
             size: y(u)
           });
         });
@@ -647,12 +649,12 @@ var W = /* @__PURE__ */ function(e) {
           xAxis: l,
           yAxis: p,
           layout: u === "x" ? "vertical" : "horizontal",
-          dataPointFormatter: function(C, w) {
+          dataPointFormatter: function(P, w) {
             return {
-              x: C.cx,
-              y: C.cy,
-              value: u === "x" ? +C.node.x : +C.node.y,
-              errorVal: Q(C, w)
+              x: P.cx,
+              y: P.cy,
+              value: u === "x" ? +P.node.x : +P.node.y,
+              errorVal: H(P, w)
             };
           }
         });
@@ -670,8 +672,8 @@ var W = /* @__PURE__ */ function(e) {
           };
         });
       else if (l === "fitting") {
-        var h = pt(o), u = h.xmin, x = h.xmax, P = h.a, C = h.b, w = function(O) {
-          return P * O + C;
+        var h = pt(o), u = h.xmin, x = h.xmax, C = h.a, P = h.b, w = function(O) {
+          return C * O + P;
         };
         c = [{
           x: u,
@@ -697,10 +699,10 @@ var W = /* @__PURE__ */ function(e) {
   }, {
     key: "render",
     value: function() {
-      var a = this.props, o = a.hide, s = a.points, l = a.line, p = a.className, i = a.xAxis, m = a.yAxis, c = a.left, f = a.top, h = a.width, u = a.height, x = a.id, P = a.isAnimationActive;
+      var a = this.props, o = a.hide, s = a.points, l = a.line, p = a.className, i = a.xAxis, m = a.yAxis, c = a.left, f = a.top, h = a.width, u = a.height, x = a.id, C = a.isAnimationActive;
       if (o || !s || !s.length)
         return null;
-      var C = this.state.isAnimationFinished, w = ht("recharts-scatter", p), S = i && i.allowDataOverflow, b = m && m.allowDataOverflow, O = S || b, y = $(x) ? this.id : x;
+      var P = this.state.isAnimationFinished, w = ht("recharts-scatter", p), S = i && i.allowDataOverflow, b = m && m.allowDataOverflow, O = S || b, y = $(x) ? this.id : x;
       return /* @__PURE__ */ N.createElement(z, {
         className: w,
         clipPath: O ? "url(#clipPath-".concat(y, ")") : null
@@ -713,7 +715,7 @@ var W = /* @__PURE__ */ function(e) {
         height: b ? u : u * 2
       }))) : null, l && this.renderLine(), this.renderErrorBar(), /* @__PURE__ */ N.createElement(z, {
         key: "recharts-scatter-symbols"
-      }, this.renderSymbols()), (!P || C) && Ne.renderCallByParent(this.props, s));
+      }, this.renderSymbols()), (!C || P) && Ne.renderCallByParent(this.props, s));
     }
   }], [{
     key: "getDerivedStateFromProps",
@@ -745,8 +747,8 @@ I(W, "defaultProps", {
   animationEasing: "linear"
 });
 I(W, "getComposedData", function(e) {
-  var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, p = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = Oe(o.props.children, bt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, x = a ? a.range : te.defaultProps.range, P = x && x[0], C = t.scale.bandwidth ? t.scale.bandwidth() : 0, w = r.scale.bandwidth ? r.scale.bandwidth() : 0, S = s.map(function(b, O) {
-    var y = Q(b, f), A = Q(b, h), L = !$(u) && Q(b, u) || "-", _ = [{
+  var t = e.xAxis, r = e.yAxis, a = e.zAxis, o = e.item, s = e.displayedData, l = e.xAxisTicks, p = e.yAxisTicks, i = e.offset, m = o.props.tooltipType, c = Oe(o.props.children, bt), f = $(t.dataKey) ? o.props.dataKey : t.dataKey, h = $(r.dataKey) ? o.props.dataKey : r.dataKey, u = a && a.dataKey, x = a ? a.range : te.defaultProps.range, C = x && x[0], P = t.scale.bandwidth ? t.scale.bandwidth() : 0, w = r.scale.bandwidth ? r.scale.bandwidth() : 0, S = s.map(function(b, O) {
+    var y = H(b, f), A = H(b, h), L = !$(u) && H(b, u) || "-", _ = [{
       name: $(t.dataKey) ? o.props.name : t.name || t.dataKey,
       unit: t.unit || "",
       value: y,
@@ -772,7 +774,7 @@ I(W, "getComposedData", function(e) {
     var k = ge({
       axis: t,
       ticks: l,
-      bandSize: C,
+      bandSize: P,
       entry: b,
       index: O,
       dataKey: f
@@ -783,7 +785,7 @@ I(W, "getComposedData", function(e) {
       entry: b,
       index: O,
       dataKey: h
-    }), d = L !== "-" ? a.scale(L) : P, v = Math.sqrt(Math.max(d, 0) / Math.PI);
+    }), d = L !== "-" ? a.scale(L) : C, v = Math.sqrt(Math.max(d, 0) / Math.PI);
     return T(T({}, b), {}, {
       cx: k,
       cy: F,
@@ -855,14 +857,14 @@ const za = (e) => {
   hide: !0
 }, label: o = !1, hideTooltip: s = !1, hideGrid: l = !1, aspect: p, legend: i, showValueUnderLabel: m = !1, bar: c, line: f, scatter: h, onClick: u }, x) => {
   var L, _, k, F;
-  const P = Ct(t), C = c != null && c.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], w = f != null && f.categories ? Array.isArray(f.categories) ? f.categories : [f.categories] : [], S = h != null && h.categories ? Array.isArray(h.categories) ? h.categories : [h.categories] : [], b = [...C, ...w, ...S], O = Math.max(...P.flatMap((d) => b.map((v) => Pt(a != null && a.tickFormatter ? a.tickFormatter(`${d[v]}`) : `${d[v]}`)))), y = [c, f, h].filter((d) => (d == null ? void 0 : d.axisPosition) === "left"), A = [c, f, h].filter((d) => (d == null ? void 0 : d.axisPosition) === "right");
+  const C = Pt(t), P = c != null && c.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], w = f != null && f.categories ? Array.isArray(f.categories) ? f.categories : [f.categories] : [], S = h != null && h.categories ? Array.isArray(h.categories) ? h.categories : [h.categories] : [], b = [...P, ...w, ...S], O = Math.max(...C.flatMap((d) => b.map((v) => Ct(a != null && a.tickFormatter ? a.tickFormatter(`${d[v]}`) : `${d[v]}`)))), y = [c, f, h].filter((d) => (d == null ? void 0 : d.axisPosition) === "left"), A = [c, f, h].filter((d) => (d == null ? void 0 : d.axisPosition) === "right");
   return n(St, {
     config: e,
     ref: x,
     aspect: p,
     children: g(Ra, {
       accessibilityLayer: !0,
-      data: P,
+      data: C,
       margin: {
         left: a && !a.hide ? 0 : 12,
         right: 12,
@@ -915,7 +917,7 @@ const za = (e) => {
         hide: r == null ? void 0 : r.hide,
         tick: m ? (d) => {
           var me, he;
-          const { x: v, y: G, payload: pe } = d, fe = ((me = t.find((it) => it.label === pe.value)) == null ? void 0 : me.values) || "", Y = Object.keys(fe).length === 1 ? (he = Object.values(fe)) == null ? void 0 : he[0] : void 0, ot = Y !== void 0 && a.tickFormatter ? a.tickFormatter(`${Y}`) : Y.toLocaleString();
+          const { x: v, y: G, payload: pe } = d, fe = ((me = t.find((it) => it.label === pe.value)) == null ? void 0 : me.values) || "", Q = Object.keys(fe).length === 1 ? (he = Object.values(fe)) == null ? void 0 : he[0] : void 0, ot = Q !== void 0 && a.tickFormatter ? a.tickFormatter(`${Q}`) : Q.toLocaleString();
           return g("g", {
             transform: `translate(${v},${G})`,
             children: [n("text", {
@@ -925,7 +927,7 @@ const za = (e) => {
               textAnchor: "middle",
               className: "text-sm font-medium !text-f1-foreground-secondary",
               children: pe.value
-            }), !!Y && n("text", {
+            }), !!Q && n("text", {
               x: 0,
               y: 0,
               dy: 28,
@@ -935,7 +937,7 @@ const za = (e) => {
             })]
           });
         } : void 0
-      }), C.map((d, v) => n(Le, {
+      }), P.map((d, v) => n(Le, {
         isAnimationActive: !1,
         dataKey: String(d),
         fill: e[d].color ? q(e[d].color) : re(v),
@@ -950,14 +952,14 @@ const za = (e) => {
       }, `bar-${String(d)}`)), w.map((d, v) => n(Ae, {
         type: (f == null ? void 0 : f.lineType) ?? "natural",
         dataKey: String(d),
-        stroke: e[d].color ? q(e[d].color) : re(C.length + v),
+        stroke: e[d].color ? q(e[d].color) : re(P.length + v),
         strokeWidth: 2,
         dot: (f == null ? void 0 : f.dot) ?? !1,
         isAnimationActive: !1,
         yAxisId: (f == null ? void 0 : f.axisPosition) === "right" ? "right" : void 0
       }, `line-${String(d)}`)), S.map((d, v) => n(W, {
         dataKey: String(d),
-        fill: e[d].color ? q(e[d].color) : re(C.length + w.length + v),
+        fill: e[d].color ? q(e[d].color) : re(P.length + w.length + v),
         r: 4,
         isAnimationActive: !1,
         yAxisId: (h == null ? void 0 : h.axisPosition) === "right" ? "right" : void 0,
@@ -980,13 +982,13 @@ var ue = "Progress", de = 100, [Va, gr] = Et(ue), [Wa, Ga] = Va(ue), Ue = ce.for
       __scopeProgress: r,
       value: a = null,
       max: o,
-      getValueLabel: s = Ya,
+      getValueLabel: s = Qa,
       ...l
     } = e;
-    (o || o === 0) && !Ce(o) && console.error(Ha(`${o}`, "Progress"));
-    const p = Ce(o) ? o : de;
-    a !== null && !Pe(a, p) && console.error(Qa(`${a}`, "Progress"));
-    const i = Pe(a, p) ? a : null, m = Z(i) ? s(i, p) : void 0;
+    (o || o === 0) && !Pe(o) && console.error(Ya(`${o}`, "Progress"));
+    const p = Pe(o) ? o : de;
+    a !== null && !Ce(a, p) && console.error(Ha(`${a}`, "Progress"));
+    const i = Ce(a, p) ? a : null, m = Z(i) ? s(i, p) : void 0;
     return /* @__PURE__ */ n(Wa, { scope: r, value: i, max: p, children: /* @__PURE__ */ n(
       De.div,
       {
@@ -1021,7 +1023,7 @@ var Je = "ProgressIndicator", Xe = ce.forwardRef(
   }
 );
 Xe.displayName = Je;
-function Ya(e, t) {
+function Qa(e, t) {
   return `${Math.round(e / t * 100)}%`;
 }
 function Ze(e, t) {
@@ -1030,16 +1032,16 @@ function Ze(e, t) {
 function Z(e) {
   return typeof e == "number";
 }
-function Ce(e) {
+function Pe(e) {
   return Z(e) && !isNaN(e) && e > 0;
 }
-function Pe(e, t) {
+function Ce(e, t) {
   return Z(e) && !isNaN(e) && e <= t && e >= 0;
 }
-function Ha(e, t) {
+function Ya(e, t) {
   return `Invalid prop \`max\` of value \`${e}\` supplied to \`${t}\`. Only numbers greater than 0 are valid max values. Defaulting to \`${de}\`.`;
 }
-function Qa(e, t) {
+function Ha(e, t) {
   return `Invalid prop \`value\` of value \`${e}\` supplied to \`${t}\`. The \`value\` prop must be:
   - a positive number
   - less than the value passed to \`max\` (or ${de} if no \`max\` prop is set)
@@ -1106,13 +1108,13 @@ const Ja = ({ value: e, max: t = 100, label: r, color: a }, o) => {
     type: "info"
   },
   It
-), Cr = D(
+), Pr = D(
   {
     name: "PieChart",
     type: "info"
   },
   $t
-), Pr = D(
+), Cr = D(
   {
     name: "VerticalBarChart",
     type: "info"
@@ -1250,7 +1252,7 @@ const Fr = Kt("F0ChipList", at), Er = Wt, Za = {
 }), ar = ({ children: e, className: t }) => n("aside", {
   className: j("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", t),
   children: e
-}), rr = Yt({
+}), rr = Qt({
   base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
@@ -1321,10 +1323,10 @@ const _r = D({
           })]
         }), (p || i) && g("div", {
           className: "flex justify-start gap-2",
-          children: [p && n(Ht, {
+          children: [p && n(Yt, {
             icon: p.icon,
             text: p.label
-          }), i && n(Qt, {
+          }), i && n(Ht, {
             variant: i.variant || "positive",
             text: i.label
           })]
@@ -1380,7 +1382,7 @@ function ir({ isOpen: e, onClose: t, title: r, children: a, module: o, portalCon
     })
   });
 }
-function $r({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessage: s, successMessage: l, loadingState: p, nextSteps: i, closeLabel: m, primaryAction: c, modalTitle: f, modalModule: h, secondaryAction: u, portalContainer: x, tag: P, promoTag: C, showResponseDialog: w = !0 }) {
+function $r({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessage: s, successMessage: l, loadingState: p, nextSteps: i, closeLabel: m, primaryAction: c, modalTitle: f, modalModule: h, secondaryAction: u, portalContainer: x, tag: C, promoTag: P, showResponseDialog: w = !0 }) {
   const [S, b] = E(e), [O, y] = E(null), [A, L] = E(!1), _ = async () => {
     if (c != null && c.onClick) {
       L(!0);
@@ -1409,8 +1411,8 @@ function $r({ isOpen: e, onClose: t, title: r, image: a, benefits: o, errorMessa
           image: a,
           benefits: o,
           withShadow: !1,
-          tag: P,
-          promoTag: C,
+          tag: C,
+          promoTag: P,
           actions: g("div", {
             className: "flex gap-3",
             children: [c && n(M, {
@@ -1545,9 +1547,9 @@ const lr = ee(function({ primaryAction: t, secondaryAction: r, ...a }, o) {
   });
 });
 lr.displayName = "UpsellingBanner";
-function Mr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o = "md", showIcon: s = !0, side: l = "right", align: p = "center", icon: i = ia, mediaUrl: m, title: c, description: f, width: h = "300px", trackVisibility: u, actions: x, onClick: P, hideLabel: C = !1 }) {
+function Mr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o = "md", showIcon: s = !0, side: l = "right", align: p = "center", icon: i = ia, mediaUrl: m, title: c, description: f, width: h = "300px", trackVisibility: u, actions: x, onClick: C, hideLabel: P = !1 }) {
   const [w, S] = E(!1), [b, O] = E(null), [y, A] = E(null), L = (v) => {
-    t(v), P && P();
+    t(v), C && C();
   }, _ = async (v) => {
     if (v.type === "upsell") {
       A(v);
@@ -1575,7 +1577,7 @@ function Mr({ isOpen: e, setIsOpen: t, label: r, variant: a = "promote", size: o
           size: o,
           icon: s ? i : void 0,
           onClick: () => t(e),
-          hideLabel: C
+          hideLabel: P
         })
       }), n(je, {
         side: l,
@@ -1671,9 +1673,9 @@ export {
   Vr as DndProvider,
   Wr as EmojiImage,
   Gr as F0Avatar,
-  Yr as F0AvatarAlert,
-  Hr as F0AvatarCompany,
-  Qr as F0AvatarDate,
+  Qr as F0AvatarAlert,
+  Yr as F0AvatarCompany,
+  Hr as F0AvatarDate,
   Ur as F0AvatarEmoji,
   Jr as F0AvatarFile,
   Xr as F0AvatarIcon,
@@ -1698,14 +1700,14 @@ export {
   fn as F0TagDot,
   mn as F0TagList,
   hn as F0TagPerson,
-  Ht as F0TagRaw,
-  Qt as F0TagStatus,
+  Yt as F0TagRaw,
+  Ht as F0TagStatus,
   vn as F0TagTeam,
   gn as GROUP_ID_SYMBOL,
   Ir as HomeLayout,
   wr as LineChart,
   bn as OneFilterPicker,
-  Cr as PieChart,
+  Pr as PieChart,
   pa as PrivacyModeProvider,
   nt as ProductBlankslate,
   yn as ProductCard,
@@ -1719,7 +1721,7 @@ export {
   lr as UpsellingBanner,
   qe as UpsellingButton,
   Mr as UpsellingPopover,
-  Pr as VerticalBarChart,
+  Cr as VerticalBarChart,
   vr as avatarVariants,
   wn as buildTranslations,
   Tr as buttonDropdownSizes,
@@ -1727,8 +1729,8 @@ export {
   Ar as buttonSizes,
   kr as buttonToggleSizes,
   Nr as buttonVariants,
-  Cn as createAtlaskitDriver,
-  Pn as createDataSourceDefinition,
+  Pn as createAtlaskitDriver,
+  Cn as createDataSourceDefinition,
   Rr as dataCollectionLocalStorageHandler,
   Er as datepickerSizes,
   hr as defaultTranslations,

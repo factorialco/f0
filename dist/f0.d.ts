@@ -1646,8 +1646,10 @@ export declare const defaultTranslations: {
         };
         readonly labels: {
             readonly title: "Title";
+            readonly titlePlaceholder: "Question title";
             readonly description: "Description";
-            readonly descriptionPlaceholder: "Describe the question in a few words";
+            readonly questionDescriptionPlaceholder: "Describe the question in a few words";
+            readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
