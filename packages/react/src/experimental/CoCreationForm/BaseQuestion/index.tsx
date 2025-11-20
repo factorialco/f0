@@ -105,6 +105,7 @@ export const BaseQuestion = ({
           <textarea
             value={title}
             aria-label={t("coCreationForm.labels.title")}
+            placeholder={t("coCreationForm.labels.titlePlaceholder")}
             onChange={handleChangeTitle}
             disabled={!isEditMode}
             className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
@@ -127,7 +128,9 @@ export const BaseQuestion = ({
         <textarea
           value={description}
           aria-label={t("coCreationForm.labels.description")}
-          placeholder={t("coCreationForm.labels.descriptionPlaceholder")}
+          placeholder={t(
+            "coCreationForm.labels.questionDescriptionPlaceholder"
+          )}
           onChange={handleChangeDescription}
           disabled={!isEditMode}
           className="w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"

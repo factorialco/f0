@@ -277,8 +277,10 @@ export const defaultTranslations = {
     },
     labels: {
       title: "Title",
+      titlePlaceholder: "Question title",
       description: "Description",
-      descriptionPlaceholder: "Describe the question in a few words",
+      questionDescriptionPlaceholder: "Describe the question in a few words",
+      sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
       questionType: "Question type",
       questionOptions: "Question options",

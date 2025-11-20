@@ -117,10 +117,11 @@ export const Section = ({
         <textarea
           value={description}
           aria-label={t("coCreationForm.labels.description")}
+          placeholder={t("coCreationForm.labels.sectionDescriptionPlaceholder")}
           onChange={handleChangeDescription}
           disabled={!isEditMode}
           style={TEXT_AREA_STYLE}
-          className="w-full resize-none text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
+          className="w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
         />
       </div>
       <DragProvider>
