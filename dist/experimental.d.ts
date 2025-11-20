@@ -4847,7 +4847,7 @@ export declare type SortOrder = "asc" | "desc";
 
 declare type Source = {
     title: string;
-    link: string;
+    link?: string;
     icon?: string;
     targetBlank?: boolean;
 };
