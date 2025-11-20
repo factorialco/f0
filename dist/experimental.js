@@ -18893,6 +18893,7 @@ const _g = {
     onDragStart: _,
     onDragEnd: C,
     dragListener: !!s,
+    layout: "position",
     as: "div",
     children: k("div", {
       className: M("group relative flex min-h-9 items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover", !s && "cursor-pointer", f && "!cursor-grabbing active:!cursor-grabbing"),
@@ -19149,6 +19150,7 @@ const Zj = Kn({
     onDragEnd: () => {
       n(!1), i(null);
     },
+    layout: "position",
     children: k("div", {
       className: M("group/question-element flex cursor-grab flex-row items-start gap-1", e && "cursor-grabbing"),
       style: {
@@ -19272,6 +19274,7 @@ const Zj = Kn({
       n(!1), i(null);
     },
     dragListener: !!r,
+    layout: "position",
     as: "div",
     children: d("div", {
       className: "w-full",
