@@ -7,21 +7,24 @@ import { AiCollapsibleMessage } from "./AiCollapsibleMessage"
 
 export type Source = {
   title: string
-  link: string
+  link?: string
   icon?: string // we need to support string because in mastra we don't have the IconType because the icons are not imported
   targetBlank?: boolean
 }
 
-// Helper function to get icon component from string name
 const getIconComponent = (iconName: string): IconType => {
-  // Check if the icon exists in the Icons object
-  const IconComponent = (Icons as Record<string, IconType>)[iconName]
+  const IconFromName = (Icons as Record<string, IconType>)[iconName]
+  return IconFromName || ExternalLink
+}
 
-  if (!IconComponent) {
-    return ExternalLink
-  }
+const SourceIcon = ({ iconName }: { iconName?: string }) => {
+  if (!iconName) return null
 
-  return IconComponent
+  return (
+    <div className="mr-1 flex items-center justify-center">
+      <F0Icon icon={getIconComponent(iconName)} size="md" color="default" />
+    </div>
+  )
 }
 
 export type MessageSourcesProps = {
@@ -31,7 +34,7 @@ export type MessageSourcesProps = {
 export const MessageSources = ({ sources }: MessageSourcesProps) => {
   const translations = useI18n()
 
-  if (!sources || sources.length === 0 || !Array.isArray(sources)) {
+  if (!sources?.length || !Array.isArray(sources)) {
     return null
   }
 
@@ -42,6 +45,20 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
     >
       <div className="flex flex-col gap-1 rounded-lg border border-solid border-f1-border-secondary p-2">
         {sources.map((source, index) => {
+          const sourceIcon = <SourceIcon iconName={source.icon} />
+
+          if (!source.link) {
+            return (
+              <div
+                key={index}
+                className="flex min-w-0 flex-1 items-center gap-1 px-[6px] py-1.5 font-medium text-f1-foreground"
+              >
+                {sourceIcon}
+                {source.title}
+              </div>
+            )
+          }
+
           return (
             <Action
               key={index}
@@ -52,17 +69,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
               variant="ghost"
               className="justify-start truncate hover:bg-f1-background-hover"
               compact
-              prepend={
-                source.icon && (
-                  <div className="mr-1 flex items-center justify-center">
-                    <F0Icon
-                      icon={getIconComponent(source.icon)}
-                      size="md"
-                      color="default"
-                    />
-                  </div>
-                )
-              }
+              prepend={sourceIcon}
             >
               <div className="flex w-full items-start">{source.title}</div>
             </Action>
