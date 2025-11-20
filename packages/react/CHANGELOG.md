@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.275.0](https://github.com/factorialco/f0/compare/f0-react-v1.274.0...f0-react-v1.275.0) (2025-11-20)
+
+
+### Features
+
+* **Datacollection:** add hide show all columns toggle ([#2999](https://github.com/factorialco/f0/issues/2999)) ([f1261f4](https://github.com/factorialco/f0/commit/f1261f4453390192b80df2e5a5684bda435376cb))
+
 ## [1.274.0](https://github.com/factorialco/f0/compare/f0-react-v1.273.1...f0-react-v1.274.0) (2025-11-20)
 
 
