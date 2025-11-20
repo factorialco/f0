@@ -1,24 +1,23 @@
 import type { GridStack, GridStackOptions, GridStackWidget } from "gridstack"
 import { createContext, useContext } from "react"
+import "./types"
+
+export type GridStackWidgetWithRequiredId = GridStackWidget & {
+  id: Required<GridStackWidget>["id"]
+}
 
 export const GridStackContext = createContext<{
   initialOptions: GridStackOptions
   gridStack: GridStack | null
-  addWidget: (
-    widget: GridStackWidget & { id: Required<GridStackWidget>["id"] }
-  ) => void
+  addWidget: (widget: GridStackWidgetWithRequiredId) => void
   removeWidget: (id: string) => void
   addSubGrid: (
-    subGrid: GridStackWidget & {
-      id: Required<GridStackWidget>["id"]
+    subGrid: GridStackWidgetWithRequiredId & {
       subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-        children: Array<
-          GridStackWidget & { id: Required<GridStackWidget>["id"] }
-        >
+        children: Array<GridStackWidgetWithRequiredId>
       }
     }
   ) => void
-  saveOptions: () => GridStackOptions | GridStackWidget[] | undefined
   removeAll: () => void
 
   _gridStack: {

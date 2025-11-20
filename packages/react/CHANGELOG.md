@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.273.0](https://github.com/factorialco/f0/compare/f0-react-v1.272.1...f0-react-v1.273.0) (2025-11-19)
+
+
+### Features
+
+* **Charts:** visible label for Bar, Area and Line ([#2992](https://github.com/factorialco/f0/issues/2992)) ([1286fb2](https://github.com/factorialco/f0/commit/1286fb2e22f24ec160c260c9da23ad653b3b74cd))
+
+## [1.272.1](https://github.com/factorialco/f0/compare/f0-react-v1.272.0...f0-react-v1.272.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* echarts theme on build ([#2990](https://github.com/factorialco/f0/issues/2990)) ([27dbc71](https://github.com/factorialco/f0/commit/27dbc714dc9c96995d0a4553ab7745b3f519f9f9))
+
+## [1.272.0](https://github.com/factorialco/f0/compare/f0-react-v1.271.0...f0-react-v1.272.0) (2025-11-19)
+
+
+### Features
+
+* **Charts:** F0Chart component ([#2961](https://github.com/factorialco/f0/issues/2961)) ([fc77088](https://github.com/factorialco/f0/commit/fc77088d861c417144fb1cff971bdec9536dd3f8))
+
+## [1.271.0](https://github.com/factorialco/f0/compare/f0-react-v1.270.1...f0-react-v1.271.0) (2025-11-18)
+
+
+### Features
+
+* **ActionItem:** add shine effect to executing status ([#2986](https://github.com/factorialco/f0/issues/2986)) ([ae0f1ee](https://github.com/factorialco/f0/commit/ae0f1ee85c77fad27c7f836eb59142cc63a56b80))
+
 ## [1.270.1](https://github.com/factorialco/f0/compare/f0-react-v1.270.0...f0-react-v1.270.1) (2025-11-17)
 
 

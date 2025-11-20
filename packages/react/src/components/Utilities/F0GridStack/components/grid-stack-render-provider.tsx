@@ -46,19 +46,12 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
 
   const initGrid = useCallback(() => {
     if (containerRef.current) {
-      console.log("initializing grid", optionsRef.current)
       GridStack.renderCB = renderCBFn
       return GridStack.init(optionsRef.current, containerRef.current)
-      // ! Change event not firing on nested grids (resize, move...) https://github.com/gridstack/gridstack.js/issues/2671
-      // .on("change", () => {
-      //   console.log("changed");
-      // })
-      // .on("resize", () => {
-      //   console.log("resize");
-      // })
     }
     return null
   }, [renderCBFn])
+
   useLayoutEffect(() => {
     if (!isEqual(initialOptions, optionsRef.current) && gridStack) {
       try {
