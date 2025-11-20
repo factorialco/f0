@@ -3,7 +3,7 @@ import "@testing-library/jest-dom/vitest"
 import type { GridItemHTMLElement, GridStackWidget } from "gridstack"
 import React, { type ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { GridStackReactNode } from "../F0GridStack"
+import type { GridStackReactWidget } from "../F0GridStack"
 import { F0GridStack } from "../F0GridStack"
 
 // Prevent organize imports from removing React (needed for JSX in mocks)
@@ -23,6 +23,26 @@ vi.mock("gridstack", () => ({
     })),
     renderCB: null,
   },
+}))
+
+// Mock the context hook
+vi.mock("../components/grid-stack-context", () => ({
+  useGridStackContext: vi.fn(() => ({
+    initialOptions: {},
+    gridStack: null,
+    addWidget: vi.fn(),
+    removeWidget: vi.fn(),
+    addSubGrid: vi.fn(),
+    removeAll: vi.fn(),
+    _gridStack: {
+      value: null,
+      set: vi.fn(),
+    },
+    _rawWidgetMetaMap: {
+      value: new Map(),
+      set: vi.fn(),
+    },
+  })),
 }))
 
 // Mock the sub-components
@@ -59,14 +79,14 @@ vi.mock("../components/grid-stack-render", () => ({
 }))
 
 describe("F0GridStack", () => {
-  const mockNodes: GridStackReactNode[] = [
+  const mockWidgets: GridStackReactWidget[] = [
     {
       id: "node-1",
       x: 0,
       y: 0,
       w: 2,
       h: 2,
-      render: <div>Node 1</div>,
+      renderFn: () => <div>Widget 1</div>,
     },
     {
       id: "node-2",
@@ -74,7 +94,7 @@ describe("F0GridStack", () => {
       y: 0,
       w: 3,
       h: 1,
-      render: <div>Node 2</div>,
+      renderFn: () => <div>Widget 2</div>,
       allowedSizes: [
         { w: 2, h: 1 },
         { w: 3, h: 1 },
@@ -87,7 +107,7 @@ describe("F0GridStack", () => {
       y: 2,
       w: 1,
       h: 1,
-      render: <div>Node 3</div>,
+      renderFn: () => <div>Widget 3</div>,
     },
   ]
 
@@ -104,7 +124,7 @@ describe("F0GridStack", () => {
   describe("Component Rendering", () => {
     it("should render without crashing", () => {
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={mockNodes} />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
@@ -114,7 +134,7 @@ describe("F0GridStack", () => {
 
     it("should render with empty nodes array", () => {
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={[]} />
+        <F0GridStack options={mockOptions} widgets={[]} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
@@ -123,7 +143,7 @@ describe("F0GridStack", () => {
     it("should render with minimal options", () => {
       const minimalOptions = { column: 6 }
       const { getByTestId } = zeroRender(
-        <F0GridStack options={minimalOptions} nodes={mockNodes} />
+        <F0GridStack options={minimalOptions} widgets={mockWidgets} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
@@ -133,25 +153,25 @@ describe("F0GridStack", () => {
   describe("Nodes Handling", () => {
     it("should pass nodes as children in grid options", () => {
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={mockNodes} />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
     })
 
     it("should handle nodes with different configurations", () => {
-      const diverseNodes: GridStackReactNode[] = [
+      const diverseWidgets: GridStackReactWidget[] = [
         {
           id: "small-node",
           w: 1,
           h: 1,
-          render: <span>Small</span>,
+          renderFn: () => <span>Small</span>,
         },
         {
           id: "large-node",
           w: 6,
           h: 4,
-          render: <div>Large</div>,
+          renderFn: () => <div>Large</div>,
         },
         {
           id: "positioned-node",
@@ -159,19 +179,19 @@ describe("F0GridStack", () => {
           y: 5,
           w: 2,
           h: 2,
-          render: <p>Positioned</p>,
+          renderFn: () => <p>Positioned</p>,
         },
       ]
 
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={diverseNodes} />
+        <F0GridStack options={mockOptions} widgets={diverseWidgets} />
       )
 
       expect(getByTestId("grid-stack-render")).toBeTruthy()
     })
 
     it("should handle nodes with allowedSizes", () => {
-      const nodesWithAllowedSizes: GridStackReactNode[] = [
+      const nodesWithAllowedSizes: GridStackReactWidget[] = [
         {
           id: "constrained-node",
           w: 2,
@@ -180,12 +200,12 @@ describe("F0GridStack", () => {
             { w: 2, h: 2 },
             { w: 4, h: 4 },
           ],
-          render: <div>Constrained</div>,
+          renderFn: () => <div>Constrained</div>,
         },
       ]
 
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={nodesWithAllowedSizes} />
+        <F0GridStack options={mockOptions} widgets={nodesWithAllowedSizes} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
@@ -198,7 +218,7 @@ describe("F0GridStack", () => {
       const { getByTestId } = zeroRender(
         <F0GridStack
           options={mockOptions}
-          nodes={mockNodes}
+          widgets={mockWidgets}
           onChange={onChange}
         />
       )
@@ -209,7 +229,7 @@ describe("F0GridStack", () => {
 
     it("should work without onChange callback", () => {
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={mockNodes} />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} />
       )
 
       const provider = getByTestId("grid-stack-provider")
@@ -218,7 +238,7 @@ describe("F0GridStack", () => {
 
     it("should pass onResizeStop callback to provider", () => {
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={mockNodes} />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} />
       )
 
       const provider = getByTestId("grid-stack-provider")
@@ -384,7 +404,7 @@ describe("F0GridStack", () => {
       }
 
       const { getByTestId } = zeroRender(
-        <F0GridStack options={customOptions} nodes={mockNodes} />
+        <F0GridStack options={customOptions} widgets={mockWidgets} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
@@ -392,13 +412,13 @@ describe("F0GridStack", () => {
 
     it("should handle options updates", () => {
       const { rerender, getByTestId } = zeroRender(
-        <F0GridStack options={{ column: 12 }} nodes={mockNodes} />
+        <F0GridStack options={{ column: 12 }} widgets={mockWidgets} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
 
       // Rerender with updated options
-      rerender(<F0GridStack options={{ column: 6 }} nodes={mockNodes} />)
+      rerender(<F0GridStack options={{ column: 6 }} widgets={mockWidgets} />)
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
     })
@@ -406,7 +426,7 @@ describe("F0GridStack", () => {
 
   describe("Edge Cases", () => {
     it("should handle nodes without render property", () => {
-      const nodesWithoutRender: GridStackReactNode[] = [
+      const nodesWithoutRender: GridStackReactWidget[] = [
         {
           id: "no-render",
           w: 2,
@@ -415,23 +435,24 @@ describe("F0GridStack", () => {
       ]
 
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={nodesWithoutRender} />
+        <F0GridStack options={mockOptions} widgets={nodesWithoutRender} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
     })
 
     it("should handle nodes without id", () => {
-      const nodesWithoutId: GridStackReactNode[] = [
+      const nodesWithoutId: GridStackReactWidget[] = [
         {
+          id: "no-id",
           w: 2,
           h: 2,
-          render: <div>No ID</div>,
+          renderFn: () => <div>No ID</div>,
         },
       ]
 
       const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={nodesWithoutId} />
+        <F0GridStack options={mockOptions} widgets={nodesWithoutId} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
@@ -512,22 +533,22 @@ describe("F0GridStack", () => {
   describe("Component Re-rendering", () => {
     it("should handle node updates", () => {
       const { rerender, getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} nodes={mockNodes} />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} />
       )
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
 
-      const updatedNodes = [
-        ...mockNodes,
+      const updatedWidgets = [
+        ...mockWidgets,
         {
           id: "node-4",
           w: 2,
           h: 2,
-          render: <div>New Node</div>,
+          renderFn: () => <div>New Node</div>,
         },
       ]
 
-      rerender(<F0GridStack options={mockOptions} nodes={updatedNodes} />)
+      rerender(<F0GridStack options={mockOptions} widgets={updatedWidgets} />)
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
     })
@@ -537,7 +558,7 @@ describe("F0GridStack", () => {
       const { rerender, getByTestId } = zeroRender(
         <F0GridStack
           options={mockOptions}
-          nodes={mockNodes}
+          widgets={mockWidgets}
           onChange={onChange1}
         />
       )
@@ -550,7 +571,7 @@ describe("F0GridStack", () => {
       rerender(
         <F0GridStack
           options={mockOptions}
-          nodes={mockNodes}
+          widgets={mockWidgets}
           onChange={onChange2}
         />
       )

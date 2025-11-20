@@ -5,13 +5,15 @@ import type {
   GridStackWidget,
 } from "gridstack"
 import { type PropsWithChildren, useCallback, useEffect, useState } from "react"
+import { GridStackWidgetPosition } from "../F0GridStack"
 import { GridStackContext } from "./grid-stack-context"
+import "./types"
 
 interface GridStackProviderProps {
   children: React.ReactNode
   initialOptions: GridStackOptions
   onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
-  onChange?: (layout: GridStackWidget[] | GridStackOptions) => void
+  onChange?: (layout: GridStackWidgetPosition[]) => void
 }
 
 export function GridStackProvider({
@@ -24,9 +26,10 @@ export function GridStackProvider({
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
     const deepFindNodeWithContent = (obj: GridStackWidget) => {
-      if (obj.id && obj.render) {
+      if (obj.id && obj.renderFn?.()) {
         map.set(obj.id, obj)
       }
+
       if (obj.subGridOpts?.children) {
         obj.subGridOpts.children.forEach((child: GridStackWidget) => {
           deepFindNodeWithContent(child)
@@ -39,20 +42,56 @@ export function GridStackProvider({
     return map
   })
 
-  useEffect(() => {
-    if (gridStack) {
-      gridStack.on("resizestop", (event: Event, el: GridItemHTMLElement) => {
-        onResizeStop?.(event, el)
-      })
-      gridStack.on("change", () => {
-        const layout = gridStack.save()
-        onChange?.(layout)
-      })
+  const emitChange = useCallback(() => {
+    if (!gridStack) {
+      return
     }
-  }, [gridStack, onResizeStop, onChange])
+
+    const layout = gridStack.save()
+
+    if (Array.isArray(layout)) {
+      onChange?.(
+        layout.map((item) => ({
+          id: item.id ?? "",
+          meta: item.meta,
+          w: item.w ?? 1,
+          h: item.h ?? 1,
+          x: item.x ?? 0,
+          y: item.y ?? 0,
+        }))
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridStack])
+
+  useEffect(() => {
+    if (!gridStack) return
+
+    const handleResizeStop = (event: Event, el: GridItemHTMLElement) => {
+      onResizeStop?.(event, el)
+    }
+
+    gridStack.on("resizestop", handleResizeStop)
+    gridStack.on("change added removed", emitChange)
+
+    return () => {
+      gridStack.off("resizestop")
+      gridStack.off("change added removed")
+    }
+  }, [gridStack, onResizeStop, emitChange])
+
+  useEffect(() => {
+    if (!gridStack) return
+    emitChange()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridStack])
 
   const addWidget = useCallback(
-    (widget: GridStackWidget & { id: Required<GridStackWidget>["id"] }) => {
+    (
+      widget: GridStackWidget & {
+        id: Required<GridStackWidget>["id"]
+      }
+    ) => {
       gridStack?.addWidget(widget)
       setRawWidgetMetaMap((prev) => {
         const newMap = new Map<string, GridStackWidget>(prev)
@@ -79,7 +118,11 @@ export function GridStackProvider({
       setRawWidgetMetaMap((prev) => {
         const newMap = new Map<string, GridStackWidget>(prev)
         subGrid.subGridOpts?.children?.forEach(
-          (meta: GridStackWidget & { id: Required<GridStackWidget>["id"] }) => {
+          (
+            meta: GridStackWidget & {
+              id: Required<GridStackWidget>["id"]
+            }
+          ) => {
             newMap.set(meta.id, meta)
           }
         )
@@ -105,10 +148,6 @@ export function GridStackProvider({
     [gridStack]
   )
 
-  const saveOptions = useCallback(() => {
-    return gridStack?.save(true, true, (_, widget) => widget)
-  }, [gridStack])
-
   const removeAll = useCallback(() => {
     gridStack?.removeAll()
     setRawWidgetMetaMap(new Map<string, GridStackWidget>())
@@ -123,7 +162,6 @@ export function GridStackProvider({
         addWidget,
         removeWidget,
         addSubGrid,
-        saveOptions,
         removeAll,
 
         _gridStack: {

@@ -22,14 +22,12 @@ export function GridStackRender() {
         const widgetContainer = getWidgetContainer(id)
 
         if (!widgetContainer) {
-          console.warn("Widget container not found for id: ", id)
           return null
-          throw new Error(`Widget container not found for id: ${id}`)
         }
 
         return (
           <GridStackWidgetContext.Provider key={id} value={{ widget: { id } }}>
-            {createPortal(meta.render, widgetContainer)}
+            {createPortal(meta.renderFn?.(), widgetContainer)}
           </GridStackWidgetContext.Provider>
         )
       })}
