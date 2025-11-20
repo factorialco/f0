@@ -288,7 +288,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
           <F0Button
             variant="outline"
-            label="Select all"
+            label={i18n.filters.selectAll}
             onClick={handleSelectAll}
             disabled={
               filteredOptions.length === 0 ||
@@ -298,7 +298,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           />
           <F0Button
             variant="ghost"
-            label="Clear"
+            label={i18n.filters.clear}
             onClick={handleClear}
             disabled={!Array.isArray(value) || value.length === 0}
             size="sm"
