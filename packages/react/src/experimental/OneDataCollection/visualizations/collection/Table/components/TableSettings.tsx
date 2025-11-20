@@ -56,12 +56,11 @@ export const TableSettings = ({
     })
   }
 
-  const toggleAllColumns = () => {
-    const allVisible = items.every((item) => !item.canHide || item.visible)
+  const toggleAllColumns = (visible: boolean) => {
     onChangeSettings(
       items.map((item) => ({
         ...item,
-        visible: item.canHide ? !allVisible : item.visible,
+        visible: item.canHide ? visible : item.visible,
       }))
     )
   }
@@ -78,19 +77,28 @@ export const TableSettings = ({
           allowSorting={allowSorting}
           allowHiding={allowHiding}
         />
+        {showHideToggleAllColumns && (
+          <div className="sticky bottom-0 flex justify-between bg-f1-background/80 p-2 pl-0 backdrop-blur-sm">
+            <F0Button
+              variant="outline"
+              size="sm"
+              label={i18n.collections.table.settings.showAllColumns}
+              onClick={() => {
+                toggleAllColumns(true)
+              }}
+            />
+
+            <F0Button
+              variant="ghost"
+              size="sm"
+              label={i18n.collections.table.settings.hideAllColumns}
+              onClick={() => {
+                toggleAllColumns(false)
+              }}
+            />
+          </div>
+        )}
       </ScrollArea>
-      {showHideToggleAllColumns && (
-        <div className="flex justify-end">
-          <F0Button
-            variant="outline"
-            size="sm"
-            label={i18n.collections.table.settings.showHideAllColumns}
-            onClick={() => {
-              toggleAllColumns()
-            }}
-          />
-        </div>
-      )}
     </div>
   )
 }

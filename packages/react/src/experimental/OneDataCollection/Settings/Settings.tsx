@@ -213,31 +213,26 @@ export const Settings = <
               </div>
             ),
             hasVisualizacionSettings && (
-              <section key="visualization-settings" className="p-3">
+              <section key="visualization-settings" className="p-3 pb-0">
                 <h3 className="mb-2 text-sm font-medium text-f1-foreground-secondary">
                   {settingsTitle}
                 </h3>
                 {visualizacionSettings}
               </section>
             ),
-            <section key="reset" className="p-3">
+            <section
+              key="reset"
+              className="border-0 border-t border-solid border-t-f1-border p-3"
+            >
               <F0Button
+                size="sm"
                 variant="ghost"
                 icon={Reset}
                 label={i18n.collections.visualizations.reset}
                 onClick={onResetSettings}
               />
             </section>,
-          ]
-            .filter(Boolean)
-            .map((block, index, array) => (
-              <div key={index}>
-                {block}
-                {index < array.length - 1 && (
-                  <div className="h-px w-full bg-f1-border-secondary" />
-                )}
-              </div>
-            ))}
+          ]}
         </PopoverContent>
       </Popover>
     </div>

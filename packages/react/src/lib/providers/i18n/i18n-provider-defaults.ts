@@ -111,7 +111,8 @@ export const defaultTranslations = {
     },
     table: {
       settings: {
-        showHideAllColumns: "Show/Hide all columns",
+        showAllColumns: "Show all",
+        hideAllColumns: "Hide all",
       },
     },
     itemsCount: "items",
