@@ -10,25 +10,15 @@ import * as GridStackStories from "./GridStackReact.stories"
 
 ### Definition
 
-<<<<<<< Updated upstream
-F0GridStack is a React wrapper for the GridStack library that enables the creation of resizable and draggable grid layouts. It provides a flexible, interactive grid system where widgets can be dynamically arranged, resized, and repositioned by users or programmatically through ref methods.
-=======
 F0GridStack is a React wrapper for the GridStack library that enables the
 creation of resizable and draggable grid layouts. It provides a flexible,
 interactive grid system where widgets can be dynamically arranged, resized, and
 repositioned by users or programmatically through ref methods.
->>>>>>> Stashed changes
 
 ### Purpose
 
 The purpose of F0GridStack in our design system is as follows:
 
-<<<<<<< Updated upstream
-- **Interactive Layouts**: Enables users to customize their dashboard or workspace layouts by dragging and resizing widgets
-- **Dynamic Content Management**: Allows programmatic addition and removal of widgets at runtime
-- **Responsive Grid System**: Provides a flexible grid that adapts to different screen sizes and widget configurations
-- **Layout Persistence**: Supports saving and restoring widget positions and sizes through the onChange callback
-=======
 - **Interactive Layouts**: Enables users to customize their dashboard or
   workspace layouts by dragging and resizing widgets
 - **Dynamic Content Management**: Allows programmatic addition and removal of
@@ -37,30 +27,18 @@ The purpose of F0GridStack in our design system is as follows:
   screen sizes and widget configurations
 - **Layout Persistence**: Supports saving and restoring widget positions and
   sizes through the onChange callback
->>>>>>> Stashed changes
 - **Nested Grids**: Supports sub-grids for complex, hierarchical layouts
 
 ## Basic Usage
 
-<<<<<<< Updated upstream
-The default GridStack configuration demonstrates a simple grid layout with multiple widgets that can be dragged and resized.
-=======
 The default GridStack configuration demonstrates a simple grid layout with
 multiple widgets that can be dragged and resized.
->>>>>>> Stashed changes
 
 <Canvas of={GridStackStories.Default} />
 <Controls of={GridStackStories.Default} />
 
 ## Programmatic Control with Ref Methods
 
-<<<<<<< Updated upstream
-F0GridStack exposes several methods through a ref that allow you to programmatically control the grid layout. This is useful for dynamic widget management, such as adding or removing widgets based on user actions or application state.
-
-### Accessing Ref Methods
-
-To use the ref methods, create a ref using `useRef<F0GridStackRef>(null)` and attach it to the `F0GridStack` component:
-=======
 F0GridStack exposes several methods through a ref that allow you to
 programmatically control the grid layout. This is useful for dynamic widget
 management, such as adding or removing widgets based on user actions or
@@ -70,7 +48,6 @@ application state.
 
 To use the ref methods, create a ref using `useRef<F0GridStackRef>(null)` and
 attach it to the `F0GridStack` component:
->>>>>>> Stashed changes
 
 ```tsx
 import { useRef } from "react"
@@ -88,10 +65,7 @@ const gridRef = useRef<F0GridStackRef>(null)
 Adds a new widget to the grid programmatically.
 
 **Parameters:**
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 - `widget`: A `GridStackReactWidget` object with the following properties:
   - `id`: Unique identifier for the widget (required)
   - `w`: Width in grid columns
@@ -113,15 +87,6 @@ gridRef.current?.addWidget({
   h: 2,
   meta: {
     title: "New Widget",
-<<<<<<< Updated upstream
-    type: "chart"
-  },
-  renderFn: () => (
-    <div className="h-full rounded-md bg-f1-background-secondary p-4">
-      New Widget Content
-    </div>
-  )
-=======
     type: "chart",
   },
   renderFn: () => (
@@ -129,7 +94,6 @@ gridRef.current?.addWidget({
       New Widget Content
     </div>
   ),
->>>>>>> Stashed changes
 })
 ```
 
@@ -138,10 +102,7 @@ gridRef.current?.addWidget({
 Removes a widget from the grid by its ID.
 
 **Parameters:**
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 - `id`: The unique identifier of the widget to remove (string)
 
 **Example:**
@@ -152,12 +113,6 @@ gridRef.current?.removeWidget("widget-1")
 
 #### `addSubGrid`
 
-<<<<<<< Updated upstream
-Adds a nested grid (sub-grid) to the main grid. This is useful for creating hierarchical layouts where widgets can be grouped within a parent widget.
-
-**Parameters:**
-- `subGrid`: A `GridStackReactWidget` with additional `subGridOpts` property containing:
-=======
 Adds a nested grid (sub-grid) to the main grid. This is useful for creating
 hierarchical layouts where widgets can be grouped within a parent widget.
 
@@ -165,7 +120,6 @@ hierarchical layouts where widgets can be grouped within a parent widget.
 
 - `subGrid`: A `GridStackReactWidget` with additional `subGridOpts` property
   containing:
->>>>>>> Stashed changes
   - `children`: Array of widgets that will be placed inside the sub-grid
 
 **Example:**
@@ -182,29 +136,17 @@ gridRef.current?.addSubGrid({
         id: "nested-widget-1",
         w: 2,
         h: 2,
-<<<<<<< Updated upstream
-        renderFn: () => <div>Nested Widget 1</div>
-=======
         renderFn: () => <div>Nested Widget 1</div>,
->>>>>>> Stashed changes
       },
       {
         id: "nested-widget-2",
         w: 2,
         h: 2,
-<<<<<<< Updated upstream
-        renderFn: () => <div>Nested Widget 2</div>
-      }
-    ]
-  },
-  renderFn: () => <div>Sub-grid Container</div>
-=======
         renderFn: () => <div>Nested Widget 2</div>,
       },
     ],
   },
   renderFn: () => <div>Sub-grid Container</div>,
->>>>>>> Stashed changes
 })
 ```
 
@@ -225,24 +167,13 @@ The following example demonstrates all ref methods in action:
 <Canvas of={GridStackStories.WithRefMethods} />
 
 This example shows:
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 - **Add Widget**: Dynamically adds new widgets to the grid
 - **Remove Last Widget**: Removes the most recently added widget
 - **Remove All**: Clears all widgets from the grid
 
 ## Best Practices
 
-<<<<<<< Updated upstream
-1. **Widget IDs**: Always use unique, stable IDs for widgets to ensure proper tracking and removal
-2. **Layout Persistence**: Use the `onChange` callback to save widget positions and restore them on component mount
-3. **Performance**: For large numbers of widgets, consider debouncing the `onChange` callback
-4. **Responsive Design**: Configure appropriate column counts for different screen sizes using the `options.column` property
-5. **Widget Constraints**: Use `allowedSizes` to restrict widget dimensions to specific size combinations
-6. **Metadata**: Store widget-specific data in the `meta` property for easy retrieval and persistence
-=======
 1. **Widget IDs**: Always use unique, stable IDs for widgets to ensure proper
    tracking and removal
 2. **Layout Persistence**: Use the `onChange` callback to save widget positions
@@ -255,7 +186,6 @@ This example shows:
    specific size combinations
 6. **Metadata**: Store widget-specific data in the `meta` property for easy
    retrieval and persistence
->>>>>>> Stashed changes
 
 ## Props
 
@@ -267,18 +197,6 @@ Configuration object for the grid layout.
 - `row`: Number of rows in the grid (optional)
 - `margin`: Margin between widgets in pixels (optional)
 - `draggable`: Whether widgets can be dragged (default: true)
-<<<<<<< Updated upstream
-- `acceptWidgets`: Whether the grid can accept widgets from other grids (default: false)
-
-### `widgets`
-
-Array of initial widgets to render in the grid. Each widget follows the `GridStackReactWidget` interface.
-
-### `onChange`
-
-Callback function that is called whenever the layout changes (widget moved, resized, added, or removed). Receives an array of `GridStackWidgetPosition` objects containing the current state of all widgets.
-
-=======
 - `acceptWidgets`: Whether the grid can accept widgets from other grids
   (default: false)
 
@@ -292,4 +210,3 @@ Array of initial widgets to render in the grid. Each widget follows the
 Callback function that is called whenever the layout changes (widget moved,
 resized, added, or removed). Receives an array of `GridStackWidgetPosition`
 objects containing the current state of all widgets.
->>>>>>> Stashed changes
