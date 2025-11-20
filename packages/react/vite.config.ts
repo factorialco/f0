@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react"
 import { consola } from "consola"
 import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
-import { copyFileSync } from "node:fs"
+import { copyFileSync, existsSync } from "node:fs"
 import path, { resolve } from "path"
 import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
@@ -29,19 +29,16 @@ if (buildTailwind) {
 }
 
 /* Build sync */
-const defaultCoderWorkspaceFolder =
-  "/home/factorial/workspace/factorial/frontend/node_modules/@factorialco/f0-react"
-
 const buildSyncArg = process.argv.find((arg) => arg.startsWith("--buildSync"))
 const buildSync = !!buildSyncArg
 const buildSyncValue = buildSyncArg
-  ? buildSyncArg.split("=")[1] || process.env.CODER_REMOTE
+  ? buildSyncArg.split("=")[1] || process.env.F0_REMOTE_SYNC
   : null
 
 if (buildSync) {
   if (!buildSyncValue) {
     consola.error(
-      "The buildSync flag must remote target or you can set it in the env variable CODER_REMOTE in the `.env.local` file"
+      "The buildSync flag must remote target or you can set it in the env variable F0_REMOTE_SYNC in the `.env.local` file"
     )
     process.exit(1)
   }
@@ -49,14 +46,21 @@ if (buildSync) {
   const [remote, remoteFolder] = buildSyncValue.split(":")
 
   const target = buildSyncValue.includes(":")
-    ? [remote, remoteFolder || defaultCoderWorkspaceFolder]
-        .filter(Boolean)
-        .join(":")
+    ? [remote, remoteFolder].filter(Boolean).join(":")
     : buildSyncValue
+
+  const targetFolder = `${target}/node_modules/@factorialco/f0-react/dist`
+
+  if (!existsSync(targetFolder)) {
+    consola.error(
+      "The target folder does not exist. Please check the target folder and try again."
+    )
+    process.exit(1)
+  }
 
   extraPlugins.push(
     buildSyncPlugin({
-      target,
+      target: targetFolder,
     })
   )
 }
