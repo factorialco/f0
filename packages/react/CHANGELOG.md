@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.274.0](https://github.com/factorialco/f0/compare/f0-react-v1.273.1...f0-react-v1.274.0) (2025-11-20)
+
+
+### Features
+
+* ellipsis in F0Buttons ([#2997](https://github.com/factorialco/f0/issues/2997)) ([353f0cf](https://github.com/factorialco/f0/commit/353f0cfbf07f199231089a61111a14ef68cc7a35))
+
 ## [1.273.1](https://github.com/factorialco/f0/compare/f0-react-v1.273.0...f0-react-v1.273.1) (2025-11-19)
 
 
