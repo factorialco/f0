@@ -76,7 +76,7 @@ const meta = {
       },
     },
     onChange: {
-      description: "the callback function to when the layout changes",
+      description: "the callback function to run when the layout changes.",
     },
   },
   decorators: [
