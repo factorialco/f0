@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.276.0](https://github.com/factorialco/f0/compare/f0-react-v1.275.0...f0-react-v1.276.0) (2025-11-20)
+
+
+### Features
+
+* add F0GridStack component ([#2994](https://github.com/factorialco/f0/issues/2994)) ([c1e7853](https://github.com/factorialco/f0/commit/c1e78533e42693bd4e9cecc93b25d6029ee50933))
+
 ## [1.275.0](https://github.com/factorialco/f0/compare/f0-react-v1.274.0...f0-react-v1.275.0) (2025-11-20)
 
 
