@@ -1,4 +1,6 @@
+import { F0Button } from "@/components/F0Button"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
+import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useMemo } from "react"
 import { useColumns } from "../hooks/useColums"
@@ -20,6 +22,7 @@ export const TableSettings = ({
   allowSorting,
   allowHiding,
 }: TableSettingsProps) => {
+  const i18n = useI18n()
   const { settings, setVisualizationSettings } = useDataCollectionSettings()
 
   const { columnsWithStatus } = useColumns(
@@ -53,8 +56,21 @@ export const TableSettings = ({
     })
   }
 
+  const toggleAllColumns = () => {
+    const allVisible = items.every((item) => !item.canHide || item.visible)
+    onChangeSettings(
+      items.map((item) => ({
+        ...item,
+        visible: item.canHide ? !allVisible : item.visible,
+      }))
+    )
+  }
+
+  const showHideToggleAllColumns =
+    allowHiding && items.filter((item) => item.canHide).length > 1
+
   return (
-    <div className="relative -mr-2 flex h-[200px] flex-col">
+    <div className="relative -mr-2 flex h-[200px] flex-col gap-2">
       <ScrollArea className="h-[200px]">
         <SortAndHideList
           items={items}
@@ -63,6 +79,18 @@ export const TableSettings = ({
           allowHiding={allowHiding}
         />
       </ScrollArea>
+      {showHideToggleAllColumns && (
+        <div className="flex justify-end">
+          <F0Button
+            variant="outline"
+            size="sm"
+            label={i18n.collections.table.settings.showHideAllColumns}
+            onClick={() => {
+              toggleAllColumns()
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

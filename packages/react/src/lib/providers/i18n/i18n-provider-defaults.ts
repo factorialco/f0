@@ -78,6 +78,8 @@ export const defaultTranslations = {
       rangeTitle: "Use range",
       range: "Between {{min}} and {{max}}",
     },
+    selectAll: "Select all",
+    clear: "Clear",
   },
   toc: {
     search: "Search...",
@@ -106,6 +108,11 @@ export const defaultTranslations = {
       },
       settings: "{{visualizationName}} settings",
       reset: "Reset to default",
+    },
+    table: {
+      settings: {
+        showHideAllColumns: "Show/Hide all columns",
+      },
     },
     itemsCount: "items",
     emptyStates: {
