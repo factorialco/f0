@@ -8759,7 +8759,7 @@ const GR = (t) => dI[t] || Ep, KR = ({ iconName: t }) => t ? d("div", {
   })
 }) : null, ZR = ({ sources: t }) => {
   const e = Be();
-  return !(t != null && t.length) || !Array.isArray(t) ? null : d(Qy, {
+  return !t || t.length === 0 || !Array.isArray(t) ? null : d(Qy, {
     icon: Pf,
     title: e.ai.resourcesGroupTitle,
     children: d("div", {
