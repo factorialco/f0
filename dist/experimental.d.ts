@@ -504,7 +504,7 @@ declare interface AiPromotionChatState {
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
-    variant?: "info" | "warning" | "positive" | "destructive" | undefined;
+    variant?: "info" | "positive" | "warning" | "destructive" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -523,7 +523,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "critical" | "warning" | "positive" | undefined;
+    type?: "info" | "positive" | "critical" | "warning" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -555,7 +555,7 @@ export declare const AlertTitle: React_2.ForwardRefExoticComponent<React_2.HTMLA
 declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 declare const alertVariants: (props?: ({
-    variant?: "info" | "critical" | "warning" | "positive" | "neutral" | undefined;
+    variant?: "info" | "positive" | "critical" | "warning" | "neutral" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -625,6 +625,8 @@ declare type AvatarFileSize = (typeof avatarFileSizes)[number];
 
 declare const avatarFileSizes: readonly ["xs", "sm", "md", "lg"];
 
+declare const avatarIconSizes: readonly ["sm", "md", "lg"];
+
 declare type AvatarSize = (typeof avatarSizes)[number];
 
 declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
@@ -641,7 +643,9 @@ declare type AvatarVariant = DistributiveOmit<({
     type: "file";
 } & F0AvatarFileProps) | ({
     type: "flag";
-} & F0AvatarFlagProps), "size">;
+} & F0AvatarFlagProps) | ({
+    type: "icon";
+} & F0AvatarIconProps), "size">;
 
 export declare const Badge: ({ type, size, icon }: BadgeProps) => JSX_2.Element;
 
@@ -652,7 +656,7 @@ export declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -1180,6 +1184,7 @@ declare type CardMetadataProperty = {
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
+    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -1389,6 +1394,11 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     /** Function to handle data load */
     onLoadData: OnLoadDataCallback<Record, Filters>;
     onLoadError: OnLoadErrorCallback;
+    /**
+     * @deprecated This will be removed in the next major version
+     * Temporary prop to force the full width of the data collection (removes the X padding)
+     */
+    tmpFullWidth?: boolean;
 } & VisualizationOptions;
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
@@ -1528,7 +1538,7 @@ declare type CounterProps = {
 
 declare const counterVariants: (props?: ({
     size?: "md" | "sm" | undefined;
-    type?: "bold" | "default" | "selected" | undefined;
+    type?: "bold" | "selected" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -1548,6 +1558,11 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
 } ? {
     [Key in K]?: FilterValue<F["fields"][Key]>;
 } : Record<string, never>;
+
+export declare interface CurrentVersion {
+    title: string;
+    onClick?: () => void;
+}
 
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
 
@@ -1945,7 +1960,13 @@ declare const defaultTranslations: {
         };
     };
     readonly navigation: {
-        readonly sidebar: "Main navigation";
+        readonly sidebar: {
+            readonly label: "Main navigation";
+            readonly companySelector: {
+                readonly label: "Select a company";
+                readonly placeholder: "Select a company";
+            };
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -1992,11 +2013,20 @@ declare const defaultTranslations: {
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
-        readonly aboveOrEqual: "Above or equal to";
-        readonly value: "Value";
-        readonly belowOrEqual: "Below or equal to";
-        readonly range_title: "Use range";
-        readonly range: "Between {{min}} and {{max}}";
+        readonly number: {
+            readonly value: "Value";
+            readonly equal: "Equal to";
+            readonly equalTo: "Equal to {{value}}";
+            readonly lessOrEqual: "Less or equal to";
+            readonly greaterOrEqual: "Greater or equal to";
+            readonly equalShort: "= {{value}}";
+            readonly greaterThanOrEqualShort: ">= {{value}}";
+            readonly lessThanOrEqualShort: "<= {{value}}";
+            readonly rangeTitle: "Use range";
+            readonly range: "Between {{min}} and {{max}}";
+        };
+        readonly selectAll: "Select all";
+        readonly clear: "Clear";
     };
     readonly toc: {
         readonly search: "Search...";
@@ -2025,6 +2055,12 @@ declare const defaultTranslations: {
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+        };
+        readonly table: {
+            readonly settings: {
+                readonly showAllColumns: "Show all";
+                readonly hideAllColumns: "Hide all";
+            };
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -2140,6 +2176,7 @@ declare const defaultTranslations: {
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
+        readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -2158,9 +2195,9 @@ declare const defaultTranslations: {
         readonly loadingMore: "Loading...";
     };
     readonly numberInput: {
-        readonly between: "Between {{min}} and {{max}}";
-        readonly greaterThan: "Greater than {{min}}";
-        readonly lessThan: "Less than {{max}}";
+        readonly between: "It should be between {{min}} and {{max}}";
+        readonly greaterThan: "It should be greater than {{min}}";
+        readonly lessThan: "It should be less than {{max}}";
     };
 };
 
@@ -2190,17 +2227,17 @@ description: string;
 actions?: {
 primary: {
 label: string;
-icon?: IconType_2 | undefined;
 onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 disabled?: boolean | undefined;
+icon?: IconType_2 | undefined;
 } & {
 variant?: "default" | "critical" | "neutral";
 };
 secondary: {
 label: string;
-icon?: IconType_2 | undefined;
 onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 disabled?: boolean | undefined;
+icon?: IconType_2 | undefined;
 };
 };
 open?: boolean;
@@ -2445,6 +2482,11 @@ declare type F0AvatarFlagProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+declare type F0AvatarIconProps = {
+    icon: IconType;
+    size?: (typeof avatarIconSizes)[number];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
 /**
  * Module avatar
  * @description A component that displays a module avatar
@@ -2541,6 +2583,7 @@ export declare type F0CalloutProps = CalloutInternalProps;
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
+    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -2552,12 +2595,21 @@ declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTML
 
 declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
 
+export declare function F0VersionHistory({ title, versions, currentVersion, activeVersionId, }: F0VersionHistoryProps): JSX_2.Element;
+
+export declare interface F0VersionHistoryProps {
+    title: string;
+    versions: Version[];
+    currentVersion?: CurrentVersion;
+    activeVersionId?: string | "current";
+}
+
 export declare const F1SearchBox: ForwardRefExoticComponent<    {
 value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "disabled" | "placeholder" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "onFocus" | "onBlur" | "name" | "disabled" | "placeholder" | "size" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -3044,7 +3096,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string = string>({ type, ...props }: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "loading" | "error" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "disabled" | "maxLength" | "required" | "size" | "loading" | "status" | "error" | "icon" | "hideLabel" | "append" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -3392,6 +3444,12 @@ declare type MetadataItemValue_2 = {
     type: "tag";
     label: string;
     icon?: IconType;
+} | {
+    type: "person";
+    label: string;
+    firstName: string;
+    lastName: string;
+    src?: string;
 };
 
 declare interface MetadataProps {
@@ -3627,16 +3685,18 @@ export declare interface NotesTextEditorProps {
         titlePlaceholder?: string;
     };
     actions?: actionType_2[];
+    secondaryActions?: secondaryActionsType_2[];
     metadata?: MetadataItemValue_2[];
     withPadding?: boolean;
 }
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
 
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
     withTitle?: boolean;
     withPadding?: boolean;
+    withToolbar?: boolean;
 }
 
 declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
@@ -3745,8 +3805,8 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
      */
     id?: string;
-    /** Storage for the data collection settings and state */
-    storage?: {
+    /** Storage for the data collection settings and state: use false to disable the storage */
+    storage?: false | {
         /** Features for the data collection storage , for example you can disable the storage for the data collection filters state
          * You can use "*" for all features and ! to disable a feature
          *
@@ -3760,6 +3820,10 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
          */
         features?: DataCollectionStorageFeaturesDefinition;
     };
+    /**
+     * @deprecated removes the horizontal padding from the data collection
+     */
+    tmpFullWidth?: boolean;
 };
 
 export declare function OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, ...props }: OneDatePickerProps): JSX_2.Element;
@@ -3841,7 +3905,7 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
 
 export declare const OneModal: OneModalComponent;
 
-declare const OneModal_2: default_2.FC<OneModalProps>;
+declare const OneModal_2: FC<OneModalProps>;
 
 declare type OneModalComponent = typeof OneModal_2 & {
     Header: typeof OneModalHeader;
@@ -3889,7 +3953,7 @@ declare type OneModalProps = {
     contentPadding?: ContentPadding;
     position?: ModalPosition;
     /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
-    children: default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>> | default_2.ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[];
+    children: ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>> | ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[];
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
 
 export declare function OnePagination({ totalPages, currentPage, onPageChange, showControls, ariaLabel, visibleRange, hasNextPage, disabled, }: OnePaginationProps): JSX_2.Element;
@@ -4182,7 +4246,11 @@ declare interface PrimaryActionButton extends PrimaryAction {
     onClick: () => void;
 }
 
-export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon"> & {
+    loading?: boolean;
+    onClick?: () => void | Promise<void>;
+    disabled?: boolean;
+};
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
@@ -4497,6 +4565,7 @@ export declare interface RichTextEditorProps {
     errorConfig?: errorConfig;
     height?: heightType;
     plainHtmlMode?: boolean;
+    fullScreenMode?: boolean;
 }
 
 declare interface RichTextEditorSkeletonProps {
@@ -4544,9 +4613,12 @@ export declare type SecondaryActionGroup = {
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
+export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    onClick?: () => void | Promise<void>;
 };
 
 export declare type SecondaryActionsDefinition = {
@@ -4557,6 +4629,14 @@ export declare type SecondaryActionsDefinition = {
 export declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
 
 export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
+
+declare type secondaryActionsType_2 = {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+    icon?: IconType;
+    critical?: boolean;
+};
 
 export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
@@ -4646,6 +4726,7 @@ export declare type SelectProps<T extends string, R = unknown> = {
     className?: string;
     selectContentClassName?: string;
     actions?: Action[];
+    portalContainer?: HTMLElement | null;
 } & ({
     source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
     mapOptions: (item: ResolvedRecordType<R>) => SelectItemProps<T, ResolvedRecordType<R>>;
@@ -4693,7 +4774,7 @@ declare interface SidebarFooterProps {
     options: DropdownItem[];
 }
 
-export declare function SidebarHeader({ companies, selected, onChange, withNotification, additionalOptions, }: SidebarHeaderProps): JSX_2.Element;
+export declare function SidebarHeader({ companies, selected, onChange, withNotification, additionalOptions, isLoading, }: SidebarHeaderProps): JSX_2.Element;
 
 export declare type SidebarHeaderProps = CompanySelectorProps & SidebarIconProps;
 
@@ -5095,7 +5176,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "maxLength" | "placeholder" | "status" | "error" | "icon" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
@@ -5161,7 +5242,7 @@ declare type toggleActionType = {
 
 export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<ToggleGroupPrimitive.ToggleGroupSingleProps & React_2.RefAttributes<HTMLDivElement>, "ref"> | Omit<ToggleGroupPrimitive.ToggleGroupMultipleProps & React_2.RefAttributes<HTMLDivElement>, "ref">) & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
-    size?: "lg" | "sm" | "default" | undefined;
+    size?: "default" | "lg" | "sm" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -5172,7 +5253,7 @@ export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<Toggl
 
 export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<ToggleGroupPrimitive.ToggleGroupItemProps & React_2.RefAttributes<HTMLButtonElement>, "ref"> & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
-    size?: "lg" | "sm" | "default" | undefined;
+    size?: "default" | "lg" | "sm" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -5252,6 +5333,7 @@ declare type TooltipInternalProps = {
     children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
     delay?: number;
+    instant?: boolean;
 } & ({
     label: string;
     description?: string;
@@ -5438,6 +5520,19 @@ declare const variants_2: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare interface Version {
+    id: string;
+    author: VersionAuthor;
+    timestamp: Date;
+    onClick?: () => void;
+}
+
+export declare interface VersionAuthor {
+    firstName: string;
+    lastName: string;
+    src?: string;
+}
 
 export declare const VerticalBarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: VerticalBarChartProps;
@@ -5691,15 +5786,40 @@ declare module "@tiptap/core" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
-        };
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        renderFn?: () => React.ReactElement | null;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        id?: string;
+        w?: number;
+        h?: number;
+        x?: number;
+        y?: number;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        renderFn?: () => React.ReactElement | null;
     }
 }
 
 
 declare namespace Calendar {
     var displayName: string;
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+        };
+    }
 }

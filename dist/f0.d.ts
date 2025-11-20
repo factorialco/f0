@@ -24,6 +24,8 @@ import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag.tsx';
+import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
+import { F0GridStackRef as F0GridStackRef_2 } from './F0GridStack';
 import { F0IconProps as F0IconProps_2 } from './F0Icon';
 import { f1Colors } from '@factorialco/f0-core';
 import { FileCellValue } from '../../value-display/types/file';
@@ -32,6 +34,8 @@ import { FolderCellValue } from '../../value-display/types/folder';
 import { FolderCellValue as FolderCellValue_2 } from './types/folder.tsx';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { GridStackOptions } from 'gridstack';
+import { GridStackWidget } from 'gridstack';
 import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon.tsx';
@@ -207,7 +211,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "critical" | "warning" | "positive" | undefined;
+    type?: "info" | "positive" | "critical" | "warning" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -288,7 +292,9 @@ export declare type AvatarVariant = DistributiveOmit<({
     type: "file";
 } & F0AvatarFileProps) | ({
     type: "flag";
-} & F0AvatarFlagProps), "size">;
+} & F0AvatarFlagProps) | ({
+    type: "icon";
+} & F0AvatarIconProps), "size">;
 
 declare type AvatarVariant_2 = ({
     type: "person";
@@ -302,7 +308,9 @@ declare type AvatarVariant_2 = ({
     type: "flag";
 } & Omit<F0AvatarFlagProps, "size">) | ({
     type: "emoji";
-} & Omit<F0AvatarEmojiProps, "size">);
+} & Omit<F0AvatarEmojiProps, "size">) | ({
+    type: "icon";
+} & Omit<F0AvatarIconProps, "size">);
 
 export declare type AvatarVariants = (typeof avatarVariants)[number];
 
@@ -325,7 +333,7 @@ declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -777,6 +785,7 @@ declare interface CardInternalProps {
 
 declare type CardMetadata = {
     icon: IconType;
+    tooltip?: string;
     property: Exclude<CardMetadataProperty, {
         type: "file";
     }>;
@@ -805,6 +814,7 @@ declare interface CardPrimaryAction {
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
+    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -923,7 +933,7 @@ declare type ChipVariants = {
 };
 
 declare const chipVariants: (props?: ({
-    variant?: "default" | "selected" | undefined;
+    variant?: "selected" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -949,6 +959,11 @@ declare type CollectionProps<Record extends RecordType, Filters extends FiltersD
     /** Function to handle data load */
     onLoadData: OnLoadDataCallback<Record, Filters>;
     onLoadError: OnLoadErrorCallback;
+    /**
+     * @deprecated This will be removed in the next major version
+     * Temporary prop to force the full width of the data collection (removes the X padding)
+     */
+    tmpFullWidth?: boolean;
 } & VisualizationOptions;
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
@@ -1371,7 +1386,13 @@ export declare const defaultTranslations: {
         };
     };
     readonly navigation: {
-        readonly sidebar: "Main navigation";
+        readonly sidebar: {
+            readonly label: "Main navigation";
+            readonly companySelector: {
+                readonly label: "Select a company";
+                readonly placeholder: "Select a company";
+            };
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -1418,11 +1439,20 @@ export declare const defaultTranslations: {
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
         readonly retry: "Retry";
-        readonly aboveOrEqual: "Above or equal to";
-        readonly value: "Value";
-        readonly belowOrEqual: "Below or equal to";
-        readonly range_title: "Use range";
-        readonly range: "Between {{min}} and {{max}}";
+        readonly number: {
+            readonly value: "Value";
+            readonly equal: "Equal to";
+            readonly equalTo: "Equal to {{value}}";
+            readonly lessOrEqual: "Less or equal to";
+            readonly greaterOrEqual: "Greater or equal to";
+            readonly equalShort: "= {{value}}";
+            readonly greaterThanOrEqualShort: ">= {{value}}";
+            readonly lessThanOrEqualShort: "<= {{value}}";
+            readonly rangeTitle: "Use range";
+            readonly range: "Between {{min}} and {{max}}";
+        };
+        readonly selectAll: "Select all";
+        readonly clear: "Clear";
     };
     readonly toc: {
         readonly search: "Search...";
@@ -1451,6 +1481,12 @@ export declare const defaultTranslations: {
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+        };
+        readonly table: {
+            readonly settings: {
+                readonly showAllColumns: "Show all";
+                readonly hideAllColumns: "Hide all";
+            };
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -1566,6 +1602,7 @@ export declare const defaultTranslations: {
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
+        readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -1584,9 +1621,9 @@ export declare const defaultTranslations: {
         readonly loadingMore: "Loading...";
     };
     readonly numberInput: {
-        readonly between: "Between {{min}} and {{max}}";
-        readonly greaterThan: "Greater than {{min}}";
-        readonly lessThan: "Less than {{max}}";
+        readonly between: "It should be between {{min}} and {{max}}";
+        readonly greaterThan: "It should be greater than {{min}}";
+        readonly lessThan: "It should be less than {{max}}";
     };
 };
 
@@ -1773,7 +1810,7 @@ export declare const F0AvatarIcon: {
     displayName: string;
 };
 
-declare type F0AvatarIconProps = {
+export declare type F0AvatarIconProps = {
     icon: IconType;
     size?: (typeof avatarIconSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
@@ -2022,10 +2059,60 @@ export declare type F0DropdownButtonProps<T = string> = {
 
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
+export declare const F0GridStack: ForwardRefExoticComponent<F0GridStackProps_2 & RefAttributes<F0GridStackRef_2>>;
+
+export declare interface F0GridStackProps {
+    options: GridStackReactOptions;
+    widgets: GridStackReactWidget[];
+    onChange?: (layout: GridStackWidgetPosition[]) => void;
+}
+
+/**
+ * Methods exposed via ref to control the grid programmatically.
+ * @example
+ * ```tsx
+ * const gridRef = useRef<F0GridStackRef>(null)
+ *
+ * // Add a widget
+ * gridRef.current?.addWidget({
+ *   id: 'new-widget',
+ *   w: 2,
+ *   h: 2,
+ *   renderFn: () => <div>Content</div>
+ *   meta: {
+ *     // Your metadata associated with the widget
+ *   }
+ * })
+ *
+ * // Remove a widget
+ * gridRef.current?.removeWidget('widget-id')
+ *
+ * // Remove all widgets
+ * gridRef.current?.removeAll()
+ *
+ * // Save current layout
+ * const layout = gridRef.current?.saveOptions()
+ * ```
+ */
+export declare interface F0GridStackRef {
+    addWidget: (widget: GridStackReactWidget) => void;
+    removeWidget: (id: string) => void;
+    addSubGrid: (subGrid: GridStackReactWidget & {
+        id: Required<GridStackWidget>["id"];
+        subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
+            children: Array<GridStackWidget & {
+                id: Required<GridStackWidget>["id"];
+            }>;
+        };
+    }) => void;
+    removeAll: () => void;
+}
+
 export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps_2, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
+    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -2250,6 +2337,31 @@ declare type GranularityDefinitionKey = keyof typeof granularityDefinitions;
 
 declare const granularityDefinitions: Record<string, GranularityDefinition>;
 
+export declare type GridStackReactOptions = Omit<GridStackOptions, "children">;
+
+export declare type GridStackReactSize = {
+    w: number;
+    h: number;
+};
+
+export declare interface GridStackReactWidget extends GridStackWidget {
+    id: Required<GridStackWidget>["id"];
+    allowedSizes?: GridStackReactSize[];
+    renderFn?: () => React.ReactElement;
+}
+
+/**
+ * Represents a node in the grid layout.
+ */
+export declare interface GridStackWidgetPosition {
+    id: string;
+    w: number;
+    h: number;
+    x: number;
+    y: number;
+    meta?: Record<string, unknown>;
+}
+
 /**
  * Symbol used to identify the groupId in the data
  */
@@ -2312,6 +2424,10 @@ declare interface I18nProviderProps {
     children: ReactNode;
     translations: TranslationsType;
 }
+
+export declare type IconAvatarVariant = Extract<AvatarVariant, {
+    type: "icon";
+}>;
 
 declare const iconSizes: {
     readonly xs: "xs";
@@ -2902,7 +3018,11 @@ declare type PrevNextDateNavigation = {
     next: DateRange | false;
 };
 
-declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "onClick" | "label" | "icon">;
+declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon"> & {
+    loading?: boolean;
+    onClick?: () => void | Promise<void>;
+    disabled?: boolean;
+};
 
 /**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
@@ -3157,9 +3277,12 @@ declare type SecondaryActionGroup = {
  * Defines the structure and configuration of secondary actions that can be performed on a collection.
  * @returns An array of actions
  */
-declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical" | "onClick"> & {
+declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     enabled?: boolean;
     hideLabelWhenExpanded?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    onClick?: () => void | Promise<void>;
 };
 
 declare type SecondaryActionsDefinition = {
@@ -3956,15 +4079,40 @@ declare module "@tiptap/core" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
-        };
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        renderFn?: () => React.ReactElement | null;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        id?: string;
+        w?: number;
+        h?: number;
+        x?: number;
+        y?: number;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        renderFn?: () => React.ReactElement | null;
     }
 }
 
 
 declare namespace Calendar {
     var displayName: string;
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+        };
+    }
 }
