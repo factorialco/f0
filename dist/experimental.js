@@ -8776,7 +8776,10 @@ const GR = (t) => {
             color: "default"
           })
         }),
-        children: n.title
+        children: d("div", {
+          className: "flex w-full items-start",
+          children: n.title
+        })
       }, i))
     })
   });
