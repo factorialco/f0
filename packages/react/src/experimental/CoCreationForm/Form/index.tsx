@@ -35,6 +35,7 @@ const Item = ({ element }: ItemProps) => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       dragListener={!!isEditMode}
+      layout="position"
       as="div"
     >
       <div className="w-full">

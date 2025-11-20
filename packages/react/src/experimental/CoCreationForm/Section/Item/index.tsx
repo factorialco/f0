@@ -32,6 +32,7 @@ export const Item = ({ question }: ItemProps) => {
       as="div"
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      layout="position"
     >
       <div
         className={cn(
