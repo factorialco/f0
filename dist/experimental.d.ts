@@ -837,7 +837,6 @@ export declare type BaseQuestionOnChangeParams = {
     id: string;
     title?: string;
     description?: string;
-    descriptionVisible?: boolean;
     required?: boolean;
 };
 
@@ -848,7 +847,6 @@ declare type BaseQuestionProps = {
     type: QuestionType;
     children: React.ReactNode;
     required?: boolean;
-    descriptionVisible?: boolean;
     isWithinSection?: boolean;
 };
 
@@ -2275,6 +2273,7 @@ declare const defaultTranslations: {
         readonly labels: {
             readonly title: "Title";
             readonly description: "Description";
+            readonly descriptionPlaceholder: "Describe the question in a few words";
             readonly required: "Required";
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
