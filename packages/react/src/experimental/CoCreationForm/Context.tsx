@@ -45,13 +45,6 @@ export function CoCreationFormProvider({
             question: {
               ...element.question,
               ...params,
-              ...(!params.description &&
-                params.descriptionVisible && {
-                  description:
-                    !element.question?.description && !params.description
-                      ? t("coCreationForm.defaults.newQuestionDescription")
-                      : element.question?.description,
-                }),
             } as QuestionElement,
           }
         }
@@ -66,13 +59,6 @@ export function CoCreationFormProvider({
               return {
                 ...question,
                 ...params,
-                ...(!params.description &&
-                  params.descriptionVisible && {
-                    description:
-                      !question?.description && !params.description
-                        ? t("coCreationForm.defaults.newQuestionDescription")
-                        : question?.description,
-                  }),
               } as QuestionElement
             }
 
@@ -195,7 +181,6 @@ export function CoCreationFormProvider({
               title: t("coCreationForm.defaults.newQuestion"),
               description: t("coCreationForm.defaults.newQuestionDescription"),
               type,
-              descriptionVisible: true,
               required: true,
               ...getDefaultParamsForQuestionType(type),
             } as QuestionElement,

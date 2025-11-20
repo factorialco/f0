@@ -3,7 +3,6 @@ import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import {
   AlertCircleLine,
-  AlignTextLeft,
   Check,
   Delete,
   Ellipsis,
@@ -175,16 +174,6 @@ export function ActionsMenu({
     >[0])
   }
 
-  const handleChangeDescriptionVisible = (checked: boolean) => {
-    onQuestionChange?.({
-      id: questionId,
-      type: questionType,
-      descriptionVisible: checked,
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
-  }
-
   const handleSelectQuestionType = (newQuestionType: QuestionType) => {
     const changingType =
       newQuestionType !== questionType &&
@@ -236,12 +225,6 @@ export function ActionsMenu({
             icon={AlertCircleLine}
             checked={!!question?.required}
             onChange={handleChangeRequired}
-          />
-          <ToggleItem
-            label={t("coCreationForm.labels.description")}
-            icon={AlignTextLeft}
-            checked={!!question?.descriptionVisible}
-            onChange={handleChangeDescriptionVisible}
           />
         </DropdownMenuGroup>
         <DropdownMenuGroup>

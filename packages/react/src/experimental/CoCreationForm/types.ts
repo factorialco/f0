@@ -22,7 +22,6 @@ export type BaseQuestionOnChangeParams = {
   id: string
   title?: string
   description?: string
-  descriptionVisible?: boolean
   required?: boolean
 }
 

@@ -23,7 +23,6 @@ export const BaseQuestion = ({
   description,
   children,
   // required,
-  descriptionVisible,
   type: questionType,
   isWithinSection,
 }: BaseQuestionProps) => {
@@ -125,16 +124,15 @@ export const BaseQuestion = ({
             />
           </div>
         </div>
-        {descriptionVisible && (
-          <textarea
-            value={description}
-            aria-label={t("coCreationForm.labels.description")}
-            onChange={handleChangeDescription}
-            disabled={!isEditMode}
-            className="w-full resize-none px-2 text-f1-foreground-secondary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
-            style={TEXT_AREA_STYLE}
-          />
-        )}
+        <textarea
+          value={description}
+          aria-label={t("coCreationForm.labels.description")}
+          placeholder={t("coCreationForm.labels.descriptionPlaceholder")}
+          onChange={handleChangeDescription}
+          disabled={!isEditMode}
+          className="w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
+          style={TEXT_AREA_STYLE}
+        />
       </div>
       {children}
       {isEditMode && (

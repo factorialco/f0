@@ -278,6 +278,7 @@ export const defaultTranslations = {
     labels: {
       title: "Title",
       description: "Description",
+      descriptionPlaceholder: "Describe the question in a few words",
       required: "Required",
       questionType: "Question type",
       questionOptions: "Question options",

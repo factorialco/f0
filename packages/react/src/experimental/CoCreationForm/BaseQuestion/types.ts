@@ -7,7 +7,6 @@ export type BaseQuestionProps = {
   type: QuestionType
   children: React.ReactNode
   required?: boolean
-  descriptionVisible?: boolean
   isWithinSection?: boolean
 }
 
