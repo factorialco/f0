@@ -1,3 +1,4 @@
+import type { GridStack } from "gridstack"
 import { beforeEach, describe, expect, it } from "vitest"
 import { gridWidgetContainersMap } from "../grid-stack-render-provider"
 
@@ -7,6 +8,11 @@ class MockGridStack {
   constructor() {
     this.el = document.createElement("div")
   }
+}
+
+interface TestWidget {
+  id: string
+  grid: GridStack
 }
 
 describe("GridStackRenderProvider", () => {
@@ -19,15 +25,15 @@ describe("GridStackRenderProvider", () => {
 
   it("should store widget containers in WeakMap for each grid instance", () => {
     // Mock grid instances
-    const grid1 = new MockGridStack() as any
-    const grid2 = new MockGridStack() as any
-    const widget1 = { id: "1", grid: grid1 }
-    const widget2 = { id: "2", grid: grid2 }
+    const grid1 = new MockGridStack() as unknown as GridStack
+    const grid2 = new MockGridStack() as unknown as GridStack
+    const widget1: TestWidget = { id: "1", grid: grid1 }
+    const widget2: TestWidget = { id: "2", grid: grid2 }
     const element1 = document.createElement("div")
     const element2 = document.createElement("div")
 
     // Simulate renderCB
-    const renderCB = (element, widget) => {
+    const renderCB = (element: HTMLElement, widget: TestWidget) => {
       if (widget.id && widget.grid) {
         // Get or create the widget container map for this grid instance
         let containers = gridWidgetContainersMap.get(widget.grid)
@@ -50,17 +56,17 @@ describe("GridStackRenderProvider", () => {
   })
 
   it("should not have containers for different grid instances mixed up", () => {
-    const grid1 = new MockGridStack() as any
-    const grid2 = new MockGridStack() as any
-    const widget1 = { id: "1", grid: grid1 }
-    const widget2 = { id: "2", grid: grid1 }
-    const widget3 = { id: "3", grid: grid2 }
+    const grid1 = new MockGridStack() as unknown as GridStack
+    const grid2 = new MockGridStack() as unknown as GridStack
+    const widget1: TestWidget = { id: "1", grid: grid1 }
+    const widget2: TestWidget = { id: "2", grid: grid1 }
+    const widget3: TestWidget = { id: "3", grid: grid2 }
     const element1 = document.createElement("div")
     const element2 = document.createElement("div")
     const element3 = document.createElement("div")
 
     // Simulate renderCB
-    const renderCB = (element: HTMLElement, widget: any) => {
+    const renderCB = (element: HTMLElement, widget: TestWidget) => {
       if (widget.id && widget.grid) {
         let containers = gridWidgetContainersMap.get(widget.grid)
         if (!containers) {
@@ -92,8 +98,8 @@ describe("GridStackRenderProvider", () => {
   })
 
   it("should clean up when grid instance is deleted from WeakMap", () => {
-    const grid = new MockGridStack() as any
-    const widget = { id: "1", grid }
+    const grid = new MockGridStack() as unknown as GridStack
+    const widget: TestWidget = { id: "1", grid }
     const element = document.createElement("div")
 
     // Add to WeakMap
@@ -112,8 +118,8 @@ describe("GridStackRenderProvider", () => {
   })
 
   it("should handle multiple widgets in the same grid", () => {
-    const grid = new MockGridStack() as any
-    const widgets = [
+    const grid = new MockGridStack() as unknown as GridStack
+    const widgets: TestWidget[] = [
       { id: "1", grid },
       { id: "2", grid },
       { id: "3", grid },

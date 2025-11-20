@@ -1,16 +1,7 @@
-import { ComponentType } from "react"
 import { createPortal } from "react-dom"
 import { useGridStackContext } from "./grid-stack-context"
 import { useGridStackRenderContext } from "./grid-stack-render-context"
 import { GridStackWidgetContext } from "./grid-stack-widget-context"
-
-export interface ComponentDataType<T = object> {
-  name: string
-  props: T
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ComponentMap = Record<string, ComponentType<any>>
 
 export function GridStackRender() {
   const { _rawWidgetMetaMap } = useGridStackContext()
