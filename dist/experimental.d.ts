@@ -3357,6 +3357,12 @@ export declare interface Message {
     dateTime: string;
 }
 
+export declare const MessageSources: ({ sources }: MessageSourcesProps) => JSX_2.Element | null;
+
+export declare type MessageSourcesProps = {
+    sources: Source[];
+};
+
 declare type MetadataAction = {
     icon: IconType;
     label: string;
@@ -4838,6 +4844,13 @@ export declare type SortingsStateMultiple = {
 }[];
 
 export declare type SortOrder = "asc" | "desc";
+
+declare type Source = {
+    title: string;
+    link: string;
+    icon?: string;
+    targetBlank?: boolean;
+};
 
 export declare function Spinner({ size, className }: SpinnerProps): JSX_2.Element;
 
