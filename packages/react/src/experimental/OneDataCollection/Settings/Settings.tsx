@@ -232,7 +232,7 @@ export const Settings = <
                 onClick={onResetSettings}
               />
             </section>,
-          ]}
+          ].filter(Boolean)}
         </PopoverContent>
       </Popover>
     </div>
