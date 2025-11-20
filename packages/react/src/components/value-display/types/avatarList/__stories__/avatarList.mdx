@@ -1,0 +1,32 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### avatarList
+
+Renders a list of avatars
+
+#### Value type
+
+```
+type value = {
+    avatarList: AvatarVariant[]
+    max?: number // Max avatars to render
+    type?: "person" | "team" | "company"
+}
+```
+
+<Canvas
+  of={ValueDisplayStories.AvatarListType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'avatarList'
+    value: {
+        avatarList: [],
+        max: 3
+    }
+})
+`,
+  }}
+/>
+

@@ -1,0 +1,30 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### tag
+
+Renders a tag
+
+#### Value type
+
+```
+
+type value = { label: string icon?: IconType }
+
+```
+
+<Canvas
+  of={ValueDisplayStories.TagType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'tag'
+    value: {
+        name: 'Factorial'
+        src: '/pth/to/the/avatar.png'
+    }
+})
+`,
+  }}
+/>
+

@@ -1,0 +1,64 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### date
+
+Renders a date
+
+#### Value type
+
+```
+type value = Date | undefined
+// or
+type value = {
+    date: Date | undefined
+    placeholder?: string
+}
+```
+
+#### DateInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.DateInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'date'
+    value: new Date()
+})
+`,
+  }}
+/>
+
+#### DateValueInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.DateValueInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'date'
+    value: {
+      date: new Date()
+    }
+})
+`,
+  }}
+/>
+
+#### With placeholder
+
+<Canvas
+  of={ValueDisplayStories.DateWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'date'
+    value: {
+      date: undefined
+      placeholder: 'Some placeholder'
+    }
+})`,
+  }}
+/>
+

@@ -1,0 +1,38 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### tagList
+
+Renders a list of tags of any type. This provides a unified way to display
+multiple tags of the same type with automatic overflow handling.
+
+#### Value type
+
+```
+type value = {
+  type: TagType,
+  tags: Array<TagVariant>,
+  max?: number
+}
+```
+
+<Canvas
+  of={ValueDisplayStories.TagArrayType}
+  source={{
+    code: `
+// Example with dot tags
+render: (item) => ({
+    type: 'tagList',
+    value: {
+        type: 'dot',
+        tags: item.skills.map(skill => ({
+            text: skill.label,
+            color: skill.color
+        })),
+        max: 3
+    }
+})
+`,
+  }}
+/>
+

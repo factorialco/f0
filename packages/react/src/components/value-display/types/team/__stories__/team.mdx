@@ -1,0 +1,36 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### team
+
+Renders a team avatar. It supports the same badge as the person type (check it
+for more details).
+
+#### Value type
+
+```
+type value = {
+    name: string
+    src?: string // the avatar image
+    badge?: AvatarBadge
+}
+// Check PersonType for the AvatarBadge type
+```
+
+Example:
+
+<Canvas
+  of={ValueDisplayStories.TeamType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'team'
+    value: {
+        name: 'Factorial'
+        src: '/pth/to/the/avatar.png'
+    }
+})
+`,
+  }}
+/>
+

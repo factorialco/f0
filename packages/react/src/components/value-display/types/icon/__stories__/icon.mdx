@@ -1,0 +1,29 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### icon
+
+Renders an icon with a label
+
+#### Value type
+
+```
+type value = { icon: IconType, label: string }
+```
+
+<Canvas
+  of={ValueDisplayStories.IconType}
+  source={{
+    code: `
+// Example with dot tags
+render: (item) => ({
+    type: 'icon',
+    value: {
+        icon: Placeholder,
+        label: 'Icon'
+    }
+})
+`,
+  }}
+/>
+

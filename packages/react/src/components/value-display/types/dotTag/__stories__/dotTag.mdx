@@ -1,0 +1,28 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### dotTag
+
+Renders a dot tag
+
+#### Value type
+
+```
+type value = { label: string, color: NewColor }
+```
+
+<Canvas
+  of={ValueDisplayStories.DotTagType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'dotTag'
+    value: {
+        label: 'Engineer',
+        color: 'viridian'
+    }
+})
+`,
+  }}
+/>
+

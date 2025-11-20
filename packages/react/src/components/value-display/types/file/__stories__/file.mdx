@@ -1,0 +1,38 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### file
+
+Renders a file avatar (for file type) and file name
+
+#### Value type
+
+```
+type FileDef = {
+  name: string; // file name
+  type: string; // mime type
+}
+
+type value = { file: File } | { file: FileDef }
+```
+
+<Canvas
+  of={ValueDisplayStories.FileType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'file',
+    value: {
+        file: new File(['file'], 'file.pdf', { type: 'application/pdf' })
+        // or 
+        file: {
+            name: 'file.pdf',
+            type: 'application/pdf',
+            size: 1000
+        }
+    }
+})
+`,
+  }}
+/>
+

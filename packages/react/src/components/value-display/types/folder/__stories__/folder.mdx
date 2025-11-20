@@ -1,0 +1,32 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### folder
+
+Renders a folder with a name
+
+#### Value type
+
+```
+type value = { name: string }
+```
+
+<Canvas
+  of={ValueDisplayStories.FolderType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'file',
+    // With File
+    value: new File(['file'], 'file.pdf', { type: 'application/pdf' })
+    // or with FileDef
+    value: {
+      name: 'file.pdf',
+      type: 'application/pdf',
+    } 
+  }
+})
+`,
+  }}
+/>
+

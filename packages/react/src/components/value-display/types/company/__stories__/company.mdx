@@ -1,0 +1,34 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### company
+
+Renders a company avatar. It supports the same badge as the person type (check
+it for more details).
+
+#### Value type
+
+```
+type value = {
+    name: string
+    src?: string // the avatar image
+    badge?: AvatarBadge
+}
+// Check PersonType for the AvatarBadge type
+```
+
+<Canvas
+  of={ValueDisplayStories.CompanyType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'company'
+    value: {
+        name: 'Factorial'
+        src: '/pth/to/the/avatar.png'
+    }
+})
+`,
+  }}
+/>
+

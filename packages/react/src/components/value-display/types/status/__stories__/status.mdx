@@ -1,0 +1,31 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### status
+
+Renders a status tag
+
+#### Value type
+
+```
+type value = {
+    status: StatusVariant
+    label: string
+}
+```
+
+<Canvas
+  of={ValueDisplayStories.StatusType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'status'
+    value: {
+        status: 'active',
+        label: item.name
+    }
+})
+`,
+  }}
+/>
+

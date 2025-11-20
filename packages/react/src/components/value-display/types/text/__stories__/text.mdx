@@ -1,0 +1,70 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### text
+
+Renders a text This type's render function can be used as a shortcut returning
+just a string.
+
+```
+type value = string | number | undefined
+// or
+type value = {
+    text: string | number | undefined
+    placeholder?: string
+}
+```
+
+<Canvas
+  of={ValueDisplayStories.TextType}
+  source={{
+    code: `
+    render: (item) => 'John Doe'
+    `,
+  }}
+/>
+
+#### TextInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.TextInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'text',
+    value: 'John Doe'
+})`,
+  }}
+/>
+
+#### TextValueInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.TextValueInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'text',
+    value: {
+      text: 'John Doe'
+    }
+})`,
+  }}
+/>
+
+#### With placeholder
+
+<Canvas
+  of={ValueDisplayStories.TextWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'text'
+    value: {
+      text: undefined
+      placeholder: 'Some placeholder'
+    }
+})`,
+  }}
+/>
+

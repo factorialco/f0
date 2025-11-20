@@ -1,0 +1,81 @@
+import { Canvas } from "@storybook/addon-docs/blocks"
+import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+
+### percentage
+
+Renders a percentage with a chart
+
+#### Value type
+
+```
+type value = number | undefined
+// or
+type value = {
+    percentage: number | undefined
+    label?: string
+    placeholder?: string
+}
+```
+
+#### PercentageInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.PercentageInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage',
+    value: 42
+})
+`,
+  }}
+/>
+
+#### PercentageValueInputAsObject
+
+<Canvas
+  of={ValueDisplayStories.PercentageValueInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage'
+    value: {
+      percentage: 42
+    }
+})
+`,
+  }}
+/>
+
+#### With label
+
+<Canvas
+  of={ValueDisplayStories.PercentageWithLabel}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage'
+    value: {
+      percentage: 75,
+      label: '324 out of 432'
+    }
+})`,
+  }}
+/>
+
+#### With placeholder
+
+<Canvas
+  of={ValueDisplayStories.PercentageWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'percentage'
+    value: {
+      percentage: undefined,
+      placeholder: 'There is no data yet'
+    }
+})`,
+  }}
+/>
+
