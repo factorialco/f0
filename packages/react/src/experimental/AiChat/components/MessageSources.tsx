@@ -64,7 +64,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
                 )
               }
             >
-              {source.title}
+              <div className="flex w-full items-start">{source.title}</div>
             </Action>
           )
         })}
