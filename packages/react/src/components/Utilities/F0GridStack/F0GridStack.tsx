@@ -140,7 +140,7 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
         return
       }
 
-      const target = closestAllowed(node.w ?? 1, node.h ?? 1, allowed ?? [])
+      const target = closestAllowed(node.w ?? 1, node.h ?? 1, allowed)
 
       if (node.w !== target.w || node.h !== target.h) {
         // update will reposition if necessary
