@@ -1,7 +1,7 @@
 import {
   F0GridStack,
-  GridStackReactNode,
   GridStackReactOptions,
+  GridStackWidgetPosition,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
 import { useMemo } from "react"
@@ -45,20 +45,19 @@ export const GridFixedGroup = ({
     []
   )
 
-  const onChange = (layout: GridStackReactNode[]) => {
-    console.log("layout", layout)
+  const onChange = (positions: GridStackWidgetPosition[]) => {
+    console.log("positions", positions)
   }
 
-  const nodes = useMemo(() => {
+  const widgets = useMemo(() => {
     return blocks.map((block) => ({
       id: block.id,
       h: block.size.h ?? 1,
       w: block.size.w ?? 1,
       allowResize: true,
       allowMove: true,
-
       allowedSizes: block.availableSizes,
-      render: block.render,
+      renderFn: () => <>{block.render}</>,
     }))
   }, [blocks])
 
@@ -66,7 +65,7 @@ export const GridFixedGroup = ({
     <F0GridStack
       options={gridOptions}
       onChange={onChange}
-      nodes={nodes}
+      widgets={widgets}
     ></F0GridStack>
     // <>
 
