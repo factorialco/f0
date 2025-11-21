@@ -80,6 +80,9 @@ export const filters = {
   search: {
     type: "search",
     label: "Search",
+    options: {
+      strictToggle: true,
+    },
   },
   department: {
     type: "in",

@@ -26,7 +26,9 @@ export const Default: Story = {
     schema: {
       label: "Search",
     },
-    onChange: () => {},
+    onChange: (value) => {
+      console.log("onChange", value)
+    },
   },
 }
 
@@ -37,6 +39,9 @@ export const WithStrictToggle: Story = {
       options: {
         strictToggle: true,
       },
+    },
+    onChange: (value) => {
+      console.log("onChange", value)
     },
   },
 }

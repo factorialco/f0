@@ -4,20 +4,26 @@ import { Input } from "@/ui/input"
 
 import { Placeholder, Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useMemo, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 
-export type SearchFilterOptions = {
-  /**
-   * Shows a strict toggle button to clear the search value
-   **/
-  strictToggle?: boolean
-}
+export type SearchFilterOptions =
+  | {
+      /**
+       * Shows a strict toggle button to clear the search value
+       **/
+      strictToggle?: false
+    }
+  | {
+      strictToggle: true
+      defaultStrict?: boolean
+    }
 
 /**
  * Props for the SearchFilter component.
  */
 export type SearchFilterComponentProps = FilterTypeComponentProps<
-  string,
+  string | { value: string; strict: boolean },
   SearchFilterOptions,
   true
 >
@@ -40,19 +46,48 @@ export function SearchFilter({
   value,
   onChange,
 }: SearchFilterComponentProps) {
+  const userOptions = "options" in schema ? schema.options : undefined
+  const defaultStrict =
+    (userOptions &&
+      "defaultStrict" in userOptions &&
+      userOptions.defaultStrict) ??
+    false
+
   const options = {
-    strictToggle: schema.options?.strictToggle ?? false,
+    strictToggle: userOptions ? userOptions.strictToggle : false,
+    defaultStrict: userOptions ? defaultStrict : false,
     ...schema.options,
   }
   const i18n = useI18n()
+
+  const handleChange = (value: string) => {
+    if (options.strictToggle) {
+      onChange({
+        value,
+        strict: isStrict,
+      })
+    } else {
+      onChange(value)
+    }
+  }
+
+  const [isStrict, setIsStrict] = useState(options.defaultStrict)
+
+  const localValue = useMemo(() => {
+    if (typeof value === "object" && "value" in value) {
+      return value.value
+    }
+    return value ?? ""
+  }, [value])
+
   return (
     <div className="space-y-4 p-3">
       <Input
         label={`Search ${schema.label.toLowerCase()}...`}
         hideLabel
         placeholder={`Search ${schema.label.toLowerCase()}...`}
-        value={value}
-        onChange={onChange}
+        value={localValue}
+        onChange={handleChange}
         clearable
         buttonToggle={
           options.strictToggle
@@ -62,8 +97,8 @@ export function SearchFilter({
                   i18n.filters.search.strict,
                 ],
                 icon: [Search, Placeholder],
-                selected: false,
-                onChange: () => onChange(""),
+                selected: isStrict,
+                onChange: setIsStrict,
               }
             : undefined
         }
