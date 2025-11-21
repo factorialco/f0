@@ -81,6 +81,13 @@ export const filters = {
     type: "search",
     label: "Search",
   },
+  searchStrict: {
+    type: "search",
+    label: "Search with strict toggle example",
+    options: {
+      strictToggle: true,
+    },
+  },
   department: {
     type: "in",
     label: "Department",

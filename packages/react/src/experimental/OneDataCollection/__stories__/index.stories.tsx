@@ -197,6 +197,7 @@ export const BasicTableView: Story = {
       },
       dataAdapter: {
         fetchData: ({ filters, sortings, search }) => {
+          console.log("filters", filters)
           filters.department?.map((department) => {
             console.log("department", department)
           })

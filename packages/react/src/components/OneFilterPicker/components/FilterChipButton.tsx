@@ -5,7 +5,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { motion } from "motion/react"
 import { ReactElement, useEffect, useState } from "react"
 import { Chip } from "../../../experimental/OneChip"
-import { getFilterType } from "../filterTypes"
+import { ChipLabel, getFilterType } from "../filterTypes"
 import type { FilterValue, FiltersDefinition } from "../types"
 
 /**
@@ -28,7 +28,9 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
 
   const i18n = useI18n()
 
-  const [label, setLabel] = useState<string>("")
+  const [chipLabel, setChipLabel] = useState<ChipLabel>({
+    label: "",
+  })
 
   useEffect(() => {
     const updateLabel = async () => {
@@ -41,7 +43,12 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
         context: { schema: Definition[keyof Definition]; i18n: I18nContextType }
       ) => Promise<string>
       const label = await labelRenderer(value, { schema: filter, i18n })
-      setLabel(`${filter.label}: ${label}`)
+
+      if (typeof label === "object") {
+        setChipLabel(label)
+      } else {
+        setChipLabel({ label: label, icon: undefined, avatar: undefined })
+      }
       setIsLoading(false)
     }
 
@@ -62,7 +69,9 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
       ) : (
         <Chip
           variant="selected"
-          label={label}
+          label={chipLabel.label}
+          icon={chipLabel.icon}
+          avatar={chipLabel.avatar}
           onClose={onRemove}
           onClick={onSelect}
         />
