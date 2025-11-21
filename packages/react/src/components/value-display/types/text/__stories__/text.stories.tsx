@@ -1,6 +1,22 @@
-import { StoryObj } from "@storybook/react-vite"
-import { mockItem } from "../../../__stories__/shared"
-import { meta } from "../../../__stories__/ValueDisplay.stories"
+import { Meta, StoryObj } from "@storybook/react-vite"
+import { Cell, mockItem } from "../../../__stories__/shared"
+
+const meta = {
+  title: "Value Display/Text",
+  component: Cell,
+  parameters: {
+    layout: "padded",
+    docs: {
+      description: {
+        component:
+          "Renders text or number values. Supports placeholder states and can be used as a shortcut returning just a string.",
+      },
+      source: {
+        code: null,
+      },
+    },
+  },
+} satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>

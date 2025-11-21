@@ -1,6 +1,22 @@
-import { StoryObj } from "@storybook/react-vite"
-import { mockItem } from "../../../__stories__/shared"
-import { meta } from "../../../__stories__/ValueDisplay.stories"
+import { Meta, StoryObj } from "@storybook/react-vite"
+import { Cell, mockItem } from "../../../__stories__/shared"
+
+const meta = {
+  title: "Value Display/Percentage",
+  component: Cell,
+  parameters: {
+    layout: "padded",
+    docs: {
+      description: {
+        component:
+          "Renders a percentage value with a circular chart visualization. Supports custom labels and placeholder states.",
+      },
+      source: {
+        code: null,
+      },
+    },
+  },
+} satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
