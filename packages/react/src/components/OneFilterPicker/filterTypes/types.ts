@@ -1,15 +1,26 @@
 import { I18nContextType } from "@/lib/providers/i18n"
 
-export type FilterTypeSchema<Options extends object = never> = {
-  options: Options extends never ? never : Options
+export type FilterTypeSchema<
+  Options extends object = never,
+  OptionalOptions extends boolean = false,
+> = {
   label: string
-}
+} & (Options extends never
+  ? {}
+  : OptionalOptions extends true
+    ? {
+        options?: Options
+      }
+    : {
+        options: Options
+      })
 
 export type FilterTypeComponentProps<
   Value = unknown,
   Options extends object = never,
+  OptionalOptions extends boolean = false,
 > = {
-  schema: FilterTypeSchema<Options>
+  schema: FilterTypeSchema<Options, OptionalOptions>
   value: Value
   onChange: (value: Value) => void
   isCompactMode?: boolean
