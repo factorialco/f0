@@ -42,7 +42,7 @@ export type InputInternalProps<T extends string> = Pick<
 const InputInternal = <T extends string = string>({
   type,
   ...props
-}: InputProps<T>) => {
+}: InputInternalProps<T>) => {
   const [showPassword, setShowPassword] = useState(false)
 
   const localType = useMemo(() => {
@@ -56,7 +56,7 @@ const InputInternal = <T extends string = string>({
   const i18n = useI18n()
   const buttonToggle: InputFieldProps<T>["buttonToggle"] = useMemo(() => {
     if (type !== "password") {
-      return undefined
+      return props.buttonToggle
     }
     return {
       label: [i18n.inputs.password.show, i18n.inputs.password.hide],
@@ -65,7 +65,7 @@ const InputInternal = <T extends string = string>({
       onChange: setShowPassword,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPassword, type])
+  }, [showPassword, type, props.buttonToggle])
 
   return (
     <ShadcnInput
