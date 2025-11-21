@@ -23,7 +23,7 @@ export type InFilterOptionItem<T = unknown> = {
  * Represents the options for the InFilter component.
  * @template T - Type of the underlying value
  */
-export type InFilterOptions<T, R extends RecordType = RecordType> = {
+export type InFilterOptions<T, _R extends RecordType = RecordType> = {
   cache?: boolean
 } & (
   | {
@@ -34,13 +34,18 @@ export type InFilterOptions<T, R extends RecordType = RecordType> = {
             | Promise<Array<InFilterOptionItem<T>>>)
     }
   | {
+      // Accept any DataSourceDefinition with any record type
+      // The mapOptions function will handle the mapping from the specific record type
       source: DataSourceDefinition<
-        R,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- We need to accept any record type here
+        any,
         FiltersDefinition,
         SortingsDefinition,
-        GroupingDefinition<R>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        GroupingDefinition<any>
       >
-      mapOptions: (item: R) => InFilterOptionItem<T>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- The item type comes from the source's record type
+      mapOptions: (item: any) => InFilterOptionItem<T>
     }
 )
 
