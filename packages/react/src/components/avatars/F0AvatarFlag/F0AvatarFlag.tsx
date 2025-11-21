@@ -1,4 +1,5 @@
 import { getFlag } from "@/flags/flagsMap.tsx"
+import { useI18n } from "@/lib/providers/i18n"
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarFlagProps } from "./types"
 
@@ -11,10 +12,14 @@ export const F0AvatarFlag = ({
 }: F0AvatarFlagProps) => {
   const FlagComponent = getFlag(flag) as React.ComponentType | undefined
 
+  const i18n = useI18n()
+
+  const countryName = i18n.countries[flag] ?? flag
+
   return (
     <BaseAvatar
       type="base"
-      name="flag"
+      name={countryName}
       flag={FlagComponent ? <FlagComponent /> : undefined}
       size={size}
       color="viridian"

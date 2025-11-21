@@ -1,0 +1,95 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as AmountStories from "./amount.stories"
+
+<Meta of={AmountStories} />
+
+### amount
+
+Renders a monetary number (right align on table visualizacion)
+
+#### Value type
+
+```
+type value = number | undefined
+// or
+type value = {
+    amount: number | undefined
+    placeholder?: string
+    currency?: CurrencyDef
+}
+
+type CurrencyDef = {
+  symbol: string
+  symbolPosition?: "left" | "right"
+  decimalPlaces: number
+}
+```
+
+#### AmountInputAsObject
+
+<Canvas
+  of={AmountStories.AmountInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'amount'
+    value: 1234
+})
+`,
+  }}
+/>
+
+#### AmountValueInputAsObject
+
+<Canvas
+  of={AmountStories.AmountValueInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'amount'
+    value: { amount: 1234 },
+})
+`,
+  }}
+/>
+
+#### AmountWithCurrency
+
+<Canvas
+of={AmountStories.AmountWithCurrency} source={{
+    code: `
+render: (item) => ({
+    type: 'amount'
+    value: { amount: 1234.56789, currency: { symbol: '$', symbolPosition: 'left', decimalPlaces: 2 } },
+  }
+})
+`,
+  }} />
+
+  <Canvas
+
+of={AmountStories.AmountWithCurrencyEuro} source={{
+    code: `
+render: (item) => ({
+    type: 'amount'
+    value: { amount: 1234.56789, currency: { symbol: 'EUR', decimalPlaces: 2 } },
+  }
+})
+`,
+  }} />
+
+#### With placeholder
+
+<Canvas
+  of={AmountStories.AmountWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'text'
+    value: {
+      amount: undefined
+      placeholder: 'Some placeholder'
+    }
+})`,
+  }}
+/>
