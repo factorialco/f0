@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.276.3](https://github.com/factorialco/f0/compare/f0-react-v1.276.2...f0-react-v1.276.3) (2025-11-21)
+
+
+### Bug Fixes
+
+* typing issue for multiple employee filters ([#3006](https://github.com/factorialco/f0/issues/3006)) ([77aca10](https://github.com/factorialco/f0/commit/77aca10c5ba67b3bfed44362d0c73650af88bcfb))
+
 ## [1.276.2](https://github.com/factorialco/f0/compare/f0-react-v1.276.1...f0-react-v1.276.2) (2025-11-21)
 
 
