@@ -524,6 +524,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
+                        aria-label="Clear"
                         type="button"
                         tabIndex={0}
                         data-testid="clear-button"

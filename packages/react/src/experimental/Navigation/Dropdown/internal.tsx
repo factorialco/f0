@@ -35,7 +35,7 @@ export type DropdownInternalProps = {
   icon?: IconType
   size?: F0ButtonProps["size"]
   children?: React.ReactNode
-  align?: "start" | "end"
+  align?: "start" | "end" | "center"
   open?: boolean
   onOpenChange?: (open: boolean) => void
 } & DataAttributes
