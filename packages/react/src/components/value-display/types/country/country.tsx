@@ -3,6 +3,7 @@
  * Used for showing alerts on items in data collections.
  */
 import { F0AvatarFlag } from "@/components/avatars/F0AvatarFlag"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { CountryCode } from "@/lib/countries"
 import { ValueDisplayRendererContext } from "../../renderers"
 
@@ -20,9 +21,11 @@ export const CountryCell = (
     args.label ?? context.i18n.countries[args.code] ?? args.code
 
   return (
-    <div data-cell-type="country">
-      <F0AvatarFlag flag={args.code} aria-label={countryName} />{" "}
-      {countryName ?? args.label}
+    <div data-cell-type="country" className="flex items-center gap-2">
+      <F0AvatarFlag size="sm" flag={args.code} aria-label={countryName} />{" "}
+      <OneEllipsis className="min-w-0 flex-1 text-f1-foreground" tag="span">
+        {countryName ?? args.label}
+      </OneEllipsis>
     </div>
   )
 }

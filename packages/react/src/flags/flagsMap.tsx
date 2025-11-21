@@ -216,12 +216,14 @@ export const flagsMap: Record<CountryCode, FlagComponent> = {
 }
 
 // Helper function to get a flag component by its lowercase code
-export const getFlag = (code: string): FlagComponent | ReactElement => {
-  const FlagComponent = flagsMap[code.toLowerCase()]
+export const getFlag = (
+  code: string
+): FlagComponent | ReactElement | undefined => {
+  const FlagComponent = flagsMap[code.toLowerCase() as CountryCode]
 
   if (!FlagComponent) {
     console.warn(`Flag component for code "${code}" not found`)
-    return <div />
+    return undefined
   }
 
   return FlagComponent

@@ -1,33 +1,52 @@
 import { Canvas, Meta } from "@storybook/addon-docs/blocks"
-import * as AlertTagStories from "./country.stories"
+import * as CountryStories from "./country.stories"
 
-<Meta of={AlertTagStories} />
+<Meta of={CountryStories} />
 
-### alertTag
+### country
 
-Renders an alert tag with different levels to indicate alert states on items in data collections.
+Renders a country flag avatar with the country name. The country name is
+automatically translated based on the i18n context, or can be provided via the
+label property.
 
 #### Value type
 
 ```
 type value = {
-    level: AlertLevel
-    label: string
+    code: CountryCode
+    label?: string
 }
 ```
 
+#### CountryType
+
 <Canvas
-  of={AlertTagStories.AlertTagType}
+  of={CountryStories.CountryType}
   source={{
     code: `
 render: () => ({
-    type: 'alertTag',
+    type: 'country',
     value: {
-        level: 'critical',
-        label: 'Critical'
+        code: 'es'
     }
 })
 `,
   }}
 />
 
+#### CountryTypeWithLabel
+
+<Canvas
+  of={CountryStories.CountryTypeWithLabel}
+  source={{
+    code: `
+render: () => ({
+    type: 'country',
+    value: {
+        code: 'gb',
+        label: 'Custom label for GB'
+    }
+})
+`,
+  }}
+/>
