@@ -1,5 +1,19 @@
-import { FilterDefinition, FilterValue } from "./filterTypes"
-export type { FilterDefinition, FilterValue }
+import {
+  DateFilterDefinition,
+  FilterDefinition,
+  FilterValue,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+} from "./filterTypes"
+export type {
+  DateFilterDefinition,
+  FilterDefinition,
+  FilterValue,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+}
 
 /**
  * Extracts the value type for a specific filter key from a FiltersDefinition.
