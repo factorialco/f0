@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as LongTextStories from "./longText.stories"
+
+<Meta of={LongTextStories} />
 
 ### longText
 
@@ -34,7 +36,7 @@ type value = {
 #### LongTextType
 
 <Canvas
-  of={ValueDisplayStories.LongTextType}
+  of={LongTextStories.LongTextType}
   source={{
     code: `
 render: (item) => ({
@@ -47,7 +49,7 @@ render: (item) => ({
 #### LongText With custom lines number
 
 <Canvas
-  of={ValueDisplayStories.LongTextWithLines}
+  of={LongTextStories.LongTextWithLines}
   source={{
     code: `
 render: (item) => ({
@@ -63,7 +65,7 @@ render: (item) => ({
 #### LongTextWithPlaceholder
 
 <Canvas
-  of={ValueDisplayStories.LongTextWithPlaceholder}
+  of={LongTextStories.LongTextWithPlaceholder}
   source={{
     code: `
 render: (item) => ({
@@ -75,4 +77,3 @@ render: (item) => ({
 })`,
   }}
 />
-

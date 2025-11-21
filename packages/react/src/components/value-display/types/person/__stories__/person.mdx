@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as PersonStories from "./person.stories"
+
+<Meta of={PersonStories} />
 
 ### person
 
@@ -30,7 +32,7 @@ type AvatarBadge = ({
 ```
 
 <Canvas
-  of={ValueDisplayStories.PersonType}
+  of={PersonStories.PersonType}
   source={{
     code: `
 render: (item) => ({
@@ -48,7 +50,7 @@ render: (item) => ({
 **For deactivated person**
 
 <Canvas
-  of={ValueDisplayStories.PersonType}
+  of={PersonStories.PersonType}
   source={{
     code: `
 render: (item) => ({
@@ -67,8 +69,8 @@ render: (item) => ({
 **With badge and badgetooltip**
 
 <Canvas
-  of={ValueDisplayStories.PersonTypeWithBadge}
-  meta={ValueDisplayStories}
+  of={PersonStories.PersonTypeWithBadge}
+  meta={PersonStories}
   source={{
     code: `
 render: (item) => ({
@@ -91,8 +93,8 @@ render: (item) => ({
 **With module badge**
 
 <Canvas
-  of={ValueDisplayStories.PersonTypeWithModuleBadge}
-  meta={ValueDisplayStories}
+  of={PersonStories.PersonTypeWithModuleBadge}
+  meta={PersonStories}
   source={{
     code: `
 render: (item) => ({
@@ -110,4 +112,3 @@ render: (item) => ({
 `,
   }}
 />
-

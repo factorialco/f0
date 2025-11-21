@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as FolderStories from "./folder.stories"
+
+<Meta of={FolderStories} />
 
 ### folder
 
@@ -12,7 +14,7 @@ type value = { name: string }
 ```
 
 <Canvas
-  of={ValueDisplayStories.FolderType}
+  of={FolderStories.FolderType}
   source={{
     code: `
 render: (item) => ({
@@ -29,4 +31,3 @@ render: (item) => ({
 `,
   }}
 />
-

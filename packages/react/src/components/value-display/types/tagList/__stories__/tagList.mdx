@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as TagListStories from "./tagList.stories"
+
+<Meta of={TagListStories} />
 
 ### tagList
 
@@ -17,7 +19,7 @@ type value = {
 ```
 
 <Canvas
-  of={ValueDisplayStories.TagArrayType}
+  of={TagListStories.TagArrayType}
   source={{
     code: `
 // Example with dot tags
@@ -35,4 +37,3 @@ render: (item) => ({
 `,
   }}
 />
-

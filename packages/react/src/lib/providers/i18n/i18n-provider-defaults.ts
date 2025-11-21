@@ -1,4 +1,7 @@
+import { i18nCountries } from "./partials/countries"
+
 export const defaultTranslations = {
+  countries: i18nCountries,
   approvals: {
     history: "Approval history",
     statuses: {

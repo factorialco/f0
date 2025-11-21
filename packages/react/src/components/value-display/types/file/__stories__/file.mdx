@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as FileStories from "./file.stories"
+
+<Meta of={FileStories} />
 
 ### file
 
@@ -17,7 +19,7 @@ type value = { file: File } | { file: FileDef }
 ```
 
 <Canvas
-  of={ValueDisplayStories.FileType}
+  of={FileStories.FileType}
   source={{
     code: `
 render: (item) => ({
@@ -35,4 +37,3 @@ render: (item) => ({
 `,
   }}
 />
-

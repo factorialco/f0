@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as DotTagStories from "./dotTag.stories"
+
+<Meta of={DotTagStories} />
 
 ### dotTag
 
@@ -12,7 +14,7 @@ type value = { label: string, color: NewColor }
 ```
 
 <Canvas
-  of={ValueDisplayStories.DotTagType}
+  of={DotTagStories.DotTagType}
   source={{
     code: `
 render: (item) => ({
@@ -25,4 +27,3 @@ render: (item) => ({
 `,
   }}
 />
-

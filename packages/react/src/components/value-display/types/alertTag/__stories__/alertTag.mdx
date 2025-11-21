@@ -1,0 +1,33 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as AlertTagStories from "./alertTag.stories"
+
+<Meta of={AlertTagStories} />
+
+### alertTag
+
+Renders an alert tag with different levels to indicate alert states on items in data collections.
+
+#### Value type
+
+```
+type value = {
+    level: AlertLevel
+    label: string
+}
+```
+
+<Canvas
+  of={AlertTagStories.AlertTagType}
+  source={{
+    code: `
+render: () => ({
+    type: 'alertTag',
+    value: {
+        level: 'critical',
+        label: 'Critical'
+    }
+})
+`,
+  }}
+/>
+

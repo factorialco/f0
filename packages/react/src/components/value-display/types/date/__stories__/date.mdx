@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as DateStories from "./date.stories"
+
+<Meta of={DateStories} />
 
 ### date
 
@@ -19,7 +21,7 @@ type value = {
 #### DateInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.DateInputAsObject}
+  of={DateStories.DateInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -33,7 +35,7 @@ render: (item) => ({
 #### DateValueInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.DateValueInputAsObject}
+  of={DateStories.DateValueInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -49,7 +51,7 @@ render: (item) => ({
 #### With placeholder
 
 <Canvas
-  of={ValueDisplayStories.DateWithPlaceholder}
+  of={DateStories.DateWithPlaceholder}
   source={{
     code: `
 render: (item) => ({
@@ -61,4 +63,3 @@ render: (item) => ({
 })`,
   }}
 />
-

@@ -3,6 +3,7 @@ import {
   PropertyDefinition,
   renderProperty,
 } from "@/experimental/OneDataCollection/property-render"
+import { useI18n } from "@/lib/providers/i18n"
 
 export const mockItem = {
   id: "1",
@@ -73,5 +74,6 @@ export function Cell({
   item: typeof mockItem
   property: PropertyDefinition<typeof mockItem>
 }) {
-  return renderProperty(item, property, "table")
+  const i18n = useI18n()
+  return renderProperty(item, property, "table", i18n)
 }

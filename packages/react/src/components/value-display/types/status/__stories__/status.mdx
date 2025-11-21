@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as StatusStories from "./status.stories"
+
+<Meta of={StatusStories} />
 
 ### status
 
@@ -15,7 +17,7 @@ type value = {
 ```
 
 <Canvas
-  of={ValueDisplayStories.StatusType}
+  of={StatusStories.StatusType}
   source={{
     code: `
 render: (item) => ({
@@ -28,4 +30,3 @@ render: (item) => ({
 `,
   }}
 />
-

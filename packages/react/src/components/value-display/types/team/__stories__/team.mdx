@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as TeamStories from "./team.stories"
+
+<Meta of={TeamStories} />
 
 ### team
 
@@ -20,7 +22,7 @@ type value = {
 Example:
 
 <Canvas
-  of={ValueDisplayStories.TeamType}
+  of={TeamStories.TeamType}
   source={{
     code: `
 render: (item) => ({
@@ -33,4 +35,3 @@ render: (item) => ({
 `,
   }}
 />
-

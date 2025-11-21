@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as IconStories from "./icon.stories"
+
+<Meta of={IconStories} />
 
 ### icon
 
@@ -12,7 +14,7 @@ type value = { icon: IconType, label: string }
 ```
 
 <Canvas
-  of={ValueDisplayStories.IconType}
+  of={IconStories.IconType}
   source={{
     code: `
 // Example with dot tags
@@ -26,4 +28,3 @@ render: (item) => ({
 `,
   }}
 />
-

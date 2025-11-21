@@ -1,9 +1,11 @@
+import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults.ts"
 import { ReactNode } from "react"
 import { ValueDisplayVisualizationType } from "./types.ts"
 import { AlertTagCell } from "./types/alertTag"
 import { AmountCell } from "./types/amount"
 import { AvatarListCell } from "./types/avatarList"
 import { CompanyCell } from "./types/company"
+import { CountryCell } from "./types/country"
 import { DateCell } from "./types/date"
 import { DotTagCell } from "./types/dotTag"
 import { FileCell } from "./types/file"
@@ -21,6 +23,7 @@ import { TextCell } from "./types/text"
 
 export type ValueDisplayRendererContext = {
   visualization: ValueDisplayVisualizationType
+  i18n: TranslationsType
 }
 
 /**
@@ -52,6 +55,7 @@ export const valueDisplayRenderers = {
   icon: IconCell,
   file: FileCell,
   folder: FolderCell,
+  country: CountryCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**
@@ -119,5 +123,6 @@ export const metadataRenderer: ValueDisplayRenderer = (
 
   return renderer(value, {
     visualization: context.visualization,
+    i18n: context.i18n,
   })
 }

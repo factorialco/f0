@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as NumberStories from "./number.stories"
+
+<Meta of={NumberStories} />
 
 ### number
 
@@ -24,7 +26,7 @@ type value = {
 #### NumberInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.NumberInputAsObject}
+  of={NumberStories.NumberInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -38,7 +40,7 @@ render: (item) => ({
 #### NumberValueInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.NumberValueInputAsObject}
+  of={NumberStories.NumberValueInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -54,7 +56,7 @@ render: (item) => ({
 #### With decimal places
 
 <Canvas
-  of={ValueDisplayStories.NumberValueInputAsObjectWithDecimals}
+  of={NumberStories.NumberValueInputAsObjectWithDecimals}
   source={{
     code: `
 render: (item) => ({
@@ -71,7 +73,7 @@ render: (item) => ({
 #### With units
 
 <Canvas
-  of={ValueDisplayStories.NumberValueInputAsObjectWithUnits}
+  of={NumberStories.NumberValueInputAsObjectWithUnits}
   source={{
     code: `
 render: (item) => ({
@@ -89,7 +91,7 @@ render: (item) => ({
 #### With placeholder
 
 <Canvas
-  of={ValueDisplayStories.NumberWithPlaceholder}
+  of={NumberStories.NumberWithPlaceholder}
   source={{
     code: `
 render: (item) => ({
@@ -101,4 +103,3 @@ render: (item) => ({
 })`,
   }}
 />
-

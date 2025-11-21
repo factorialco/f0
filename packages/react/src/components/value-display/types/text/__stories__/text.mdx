@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as TextStories from "./text.stories"
+
+<Meta of={TextStories} />
 
 ### text
 
@@ -16,7 +18,7 @@ type value = {
 ```
 
 <Canvas
-  of={ValueDisplayStories.TextType}
+  of={TextStories.TextType}
   source={{
     code: `
     render: (item) => 'John Doe'
@@ -27,7 +29,7 @@ type value = {
 #### TextInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.TextInputAsObject}
+  of={TextStories.TextInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -40,7 +42,7 @@ render: (item) => ({
 #### TextValueInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.TextValueInputAsObject}
+  of={TextStories.TextValueInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -55,7 +57,7 @@ render: (item) => ({
 #### With placeholder
 
 <Canvas
-  of={ValueDisplayStories.TextWithPlaceholder}
+  of={TextStories.TextWithPlaceholder}
   source={{
     code: `
 render: (item) => ({
@@ -67,4 +69,3 @@ render: (item) => ({
 })`,
   }}
 />
-

@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as AmountStories from "./amount.stories"
+
+<Meta of={AmountStories} />
 
 ### amount
 
@@ -26,7 +28,7 @@ type CurrencyDef = {
 #### AmountInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.AmountInputAsObject}
+  of={AmountStories.AmountInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -40,7 +42,7 @@ render: (item) => ({
 #### AmountValueInputAsObject
 
 <Canvas
-  of={ValueDisplayStories.AmountValueInputAsObject}
+  of={AmountStories.AmountValueInputAsObject}
   source={{
     code: `
 render: (item) => ({
@@ -54,8 +56,7 @@ render: (item) => ({
 #### AmountWithCurrency
 
 <Canvas
-
-of={ValueDisplayStories.AmountWithCurrency} source={{
+of={AmountStories.AmountWithCurrency} source={{
     code: `
 render: (item) => ({
     type: 'amount'
@@ -67,7 +68,7 @@ render: (item) => ({
 
   <Canvas
 
-of={ValueDisplayStories.AmountWithCurrencyEuro} source={{
+of={AmountStories.AmountWithCurrencyEuro} source={{
     code: `
 render: (item) => ({
     type: 'amount'
@@ -80,7 +81,7 @@ render: (item) => ({
 #### With placeholder
 
 <Canvas
-  of={ValueDisplayStories.AmountWithPlaceholder}
+  of={AmountStories.AmountWithPlaceholder}
   source={{
     code: `
 render: (item) => ({
@@ -92,4 +93,3 @@ render: (item) => ({
 })`,
   }}
 />
-

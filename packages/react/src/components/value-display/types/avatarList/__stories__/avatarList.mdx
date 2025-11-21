@@ -1,5 +1,7 @@
-import { Canvas } from "@storybook/addon-docs/blocks"
-import * as ValueDisplayStories from "../../../__stories__/ValueDisplay.stories"
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as AvatarListStories from "./avatarList.stories"
+
+<Meta of={AvatarListStories} />
 
 ### avatarList
 
@@ -16,7 +18,7 @@ type value = {
 ```
 
 <Canvas
-  of={ValueDisplayStories.AvatarListType}
+  of={AvatarListStories.AvatarListType}
   source={{
     code: `
 render: (item) => ({
@@ -29,4 +31,3 @@ render: (item) => ({
 `,
   }}
 />
-
