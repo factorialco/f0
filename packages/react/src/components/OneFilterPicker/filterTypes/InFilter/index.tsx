@@ -42,7 +42,7 @@ export const inFilter: FilterTypeDefinition<
 export default inFilter
 
 export type InFilterDefinition<
-  T = unknown,
+  T = string | number,
   R extends RecordType = RecordType,
 > = BaseFilterDefinition<"in"> & {
   options: InFilterOptions<T, R>
