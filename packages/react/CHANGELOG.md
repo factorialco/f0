@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.276.2](https://github.com/factorialco/f0/compare/f0-react-v1.276.1...f0-react-v1.276.2) (2025-11-21)
+
+
+### Bug Fixes
+
+* **AvatarPerson:** change icon size for sm size ([#3005](https://github.com/factorialco/f0/issues/3005)) ([2b85c06](https://github.com/factorialco/f0/commit/2b85c0625e7c70c6b91ecaa6dd7122309785976c))
+
+## [1.276.1](https://github.com/factorialco/f0/compare/f0-react-v1.276.0...f0-react-v1.276.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* select when search ([#3003](https://github.com/factorialco/f0/issues/3003)) ([5d12f5a](https://github.com/factorialco/f0/commit/5d12f5a10d7f0da74ee67b7a319d2c6061614a36))
+
+## [1.276.0](https://github.com/factorialco/f0/compare/f0-react-v1.275.0...f0-react-v1.276.0) (2025-11-20)
+
+
+### Features
+
+* add F0GridStack component ([#2994](https://github.com/factorialco/f0/issues/2994)) ([c1e7853](https://github.com/factorialco/f0/commit/c1e78533e42693bd4e9cecc93b25d6029ee50933))
+
+## [1.275.0](https://github.com/factorialco/f0/compare/f0-react-v1.274.0...f0-react-v1.275.0) (2025-11-20)
+
+
+### Features
+
+* **Datacollection:** add hide show all columns toggle ([#2999](https://github.com/factorialco/f0/issues/2999)) ([f1261f4](https://github.com/factorialco/f0/commit/f1261f4453390192b80df2e5a5684bda435376cb))
+
+## [1.274.0](https://github.com/factorialco/f0/compare/f0-react-v1.273.1...f0-react-v1.274.0) (2025-11-20)
+
+
+### Features
+
+* ellipsis in F0Buttons ([#2997](https://github.com/factorialco/f0/issues/2997)) ([353f0cf](https://github.com/factorialco/f0/commit/353f0cfbf07f199231089a61111a14ef68cc7a35))
+
+## [1.273.1](https://github.com/factorialco/f0/compare/f0-react-v1.273.0...f0-react-v1.273.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **OneModal:** fix state management ([#2995](https://github.com/factorialco/f0/issues/2995)) ([6412784](https://github.com/factorialco/f0/commit/6412784da32b42f0a0ba29e78c5321359aeff5db))
+
 ## [1.273.0](https://github.com/factorialco/f0/compare/f0-react-v1.272.1...f0-react-v1.273.0) (2025-11-19)
 
 

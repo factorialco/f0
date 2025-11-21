@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { cva } from "cva"
 import { forwardRef, useState } from "react"
+import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 
 const iconVariants = cva({
@@ -109,7 +110,7 @@ const ButtonInternal = forwardRef<
       tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
       onClick={handleClick}
       loading={isLoading}
-      className={className}
+      className={cn("max-w-full", className)}
       mode={hideLabel ? "only" : "default"}
       aria-label={ariaLabel || props.title || label}
       title={
@@ -117,7 +118,12 @@ const ButtonInternal = forwardRef<
       }
       compact={!!shouldHideLabel}
     >
-      <div className={cn(isLoading && "invisible", "flex items-center gap-1")}>
+      <div
+        className={cn(
+          isLoading && "invisible",
+          "flex min-w-0 flex-1 items-center gap-1"
+        )}
+      >
         {icon && (
           <F0Icon
             size={size === "sm" ? "sm" : "md"}
@@ -136,7 +142,13 @@ const ButtonInternal = forwardRef<
             alt={""}
           />
         )}
-        <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
+        {!shouldHideLabel ? (
+          <OneEllipsis className={cn(shouldHideLabel && "sr-only")} tag="span">
+            {label.toString()}
+          </OneEllipsis>
+        ) : (
+          <span className="sr-only">{label.toString()}</span>
+        )}
         {append}
       </div>
     </Action>
