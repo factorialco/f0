@@ -5,7 +5,9 @@ import { SearchFilter, SearchFilterOptions } from "./SearchFilter"
 
 export const searchFilter: FilterTypeDefinition<
   string | { value: string; strict: boolean },
-  SearchFilterOptions
+  SearchFilterOptions,
+  string | { value: string; strict: boolean },
+  true
 > = {
   emptyValue: "",
   defaultOptions: {
