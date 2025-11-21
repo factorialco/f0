@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.277.1](https://github.com/factorialco/f0/compare/f0-react-v1.277.0...f0-react-v1.277.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* **button:** when label is undefined ([#3013](https://github.com/factorialco/f0/issues/3013)) ([ef16474](https://github.com/factorialco/f0/commit/ef16474e972b79c8e57916c32c2743d2c748219e))
+
 ## [1.277.0](https://github.com/factorialco/f0/compare/f0-react-v1.276.3...f0-react-v1.277.0) (2025-11-21)
 
 
