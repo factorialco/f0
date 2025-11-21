@@ -1,12 +1,16 @@
-import { Search } from "@/icons/app"
+import { AlertCircle } from "@/icons/app"
 import type { BaseFilterDefinition } from ".."
 import { FilterTypeDefinition } from "../types"
-import { SearchFilter } from "./SearchFilter"
+import { SearchFilter, SearchFilterOptions } from "./SearchFilter"
 
 export const searchFilter: FilterTypeDefinition<
-  string | { value: string; strict: boolean }
+  string | { value: string; strict: boolean },
+  SearchFilterOptions
 > = {
   emptyValue: "",
+  defaultOptions: {
+    strictToggle: false,
+  },
   render: (props) => <SearchFilter {...props} />,
   isEmpty: (value) => {
     if (typeof value === "object" && "value" in value) {
@@ -18,7 +22,8 @@ export const searchFilter: FilterTypeDefinition<
     if (typeof value === "object" && "value" in value) {
       return {
         label: value.value,
-        icon: value.strict ? Search : undefined,
+        icon: value.strict ? AlertCircle : undefined,
+        avatar: undefined,
       }
     }
     return value ?? ""
