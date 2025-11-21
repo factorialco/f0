@@ -2,6 +2,7 @@
 import type { ComponentType, ReactElement } from "react"
 
 // Import all flags
+import { CountryCode } from "@/lib/countries"
 import Ad from "./Ad"
 import Ae from "./Ae"
 import Af from "./Af"
@@ -109,7 +110,7 @@ import Ke from "./Ke"
 export type FlagComponent = ComponentType<React.SVGProps<SVGSVGElement>>
 
 // Create the mapping from lowercase country code to flag component
-export const flagsMap: Record<string, FlagComponent> = {
+export const flagsMap: Record<CountryCode, FlagComponent> = {
   ad: Ad,
   ae: Ae,
   af: Af,

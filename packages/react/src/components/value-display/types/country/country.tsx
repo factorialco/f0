@@ -3,11 +3,11 @@
  * Used for showing alerts on items in data collections.
  */
 import { F0AvatarFlag } from "@/components/avatars/F0AvatarFlag"
-import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
+import { CountryCode } from "@/lib/countries"
 import { ValueDisplayRendererContext } from "../../renderers"
 
 interface CountryValue {
-  code: keyof TranslationsType["countries"]
+  code: CountryCode
   label?: string
 }
 export type CountryCellValue = CountryValue
