@@ -24,7 +24,7 @@ export const CountryCell = (
     <div data-cell-type="country" className="flex items-center gap-2">
       <F0AvatarFlag size="sm" flag={args.code} aria-label={countryName} />{" "}
       <OneEllipsis className="min-w-0 flex-1 text-f1-foreground" tag="span">
-        {countryName ?? args.label}
+        {countryName}
       </OneEllipsis>
     </div>
   )
