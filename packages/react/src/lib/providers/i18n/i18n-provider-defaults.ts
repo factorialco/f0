@@ -81,6 +81,10 @@ export const defaultTranslations = {
       rangeTitle: "Use range",
       range: "Between {{min}} and {{max}}",
     },
+    search: {
+      relaxed: "Relaxed",
+      strict: "Strict",
+    },
     selectAll: "Select all",
     clear: "Clear",
   },
