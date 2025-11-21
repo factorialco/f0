@@ -4,7 +4,7 @@ import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { cva } from "cva"
-import { forwardRef, useMemo, useState } from "react"
+import { forwardRef, useState } from "react"
 import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 
@@ -100,9 +100,8 @@ const ButtonInternal = forwardRef<
   const isLoading = forceLoading || loading
   const shouldHideLabel = hideLabel || emoji
 
-  const buttonLabel = useMemo(() => {
-    return (label ?? "").toString()
-  }, [label])
+  const buttonLabel = (label ?? "").toString()
+
   return (
     <Action
       variant={variant}
