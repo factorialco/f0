@@ -23,7 +23,8 @@ export type SearchFilterOptions =
  */
 export type SearchFilterComponentProps = FilterTypeComponentProps<
   string | { value: string; strict: boolean },
-  SearchFilterOptions
+  SearchFilterOptions,
+  true
 >
 
 /**
