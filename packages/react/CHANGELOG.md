@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.276.2](https://github.com/factorialco/f0/compare/f0-react-v1.276.1...f0-react-v1.276.2) (2025-11-21)
+
+
+### Bug Fixes
+
+* **AvatarPerson:** change icon size for sm size ([#3005](https://github.com/factorialco/f0/issues/3005)) ([2b85c06](https://github.com/factorialco/f0/commit/2b85c0625e7c70c6b91ecaa6dd7122309785976c))
+
 ## [1.276.1](https://github.com/factorialco/f0/compare/f0-react-v1.276.0...f0-react-v1.276.1) (2025-11-21)
 
 
