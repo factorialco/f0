@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.277.0](https://github.com/factorialco/f0/compare/f0-react-v1.276.3...f0-react-v1.277.0) (2025-11-21)
+
+
+### Features
+
+* country value-display ([#3009](https://github.com/factorialco/f0/issues/3009)) ([decce16](https://github.com/factorialco/f0/commit/decce169cec00dac4e2ad8282f5936e9f1715915))
+
 ## [1.276.3](https://github.com/factorialco/f0/compare/f0-react-v1.276.2...f0-react-v1.276.3) (2025-11-21)
 
 
