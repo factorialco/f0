@@ -3,7 +3,7 @@ import { Input } from "@/ui/input"
 import { forwardRef, useEffect, useMemo, useState } from "react"
 import { F0Icon } from "../../../../components/F0Icon"
 import { ChevronDown, ChevronUp } from "../../../../icons/app"
-import { InputProps } from "../Input"
+import { InputInternalProps } from "../Input/internal"
 import { extractNumber } from "./internal/extractNumber"
 
 const formatValue = (value: number, locale: string, maxDecimals?: number) =>
@@ -13,7 +13,7 @@ const formatValue = (value: number, locale: string, maxDecimals?: number) =>
   }).format(value)
 
 export type NumberInputProps = Omit<
-  InputProps<string>,
+  InputInternalProps<string>,
   "value" | "type" | "onChange"
 > & {
   locale: string

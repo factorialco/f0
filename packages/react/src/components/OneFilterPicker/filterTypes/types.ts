@@ -1,28 +1,16 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar/F0Avatar"
-import { IconType } from "@/components/F0Icon/types"
+import { IconType } from "@/components/F0Icon"
 import { I18nContextType } from "@/lib/providers/i18n"
 
-export type FilterTypeSchema<
-  Options extends object = never,
-  OptionalOptions extends boolean = false,
-> = {
+export type FilterTypeSchema<Options extends object = never> = {
   label: string
-} & (Options extends never
-  ? {}
-  : OptionalOptions extends true
-    ? {
-        options?: Options
-      }
-    : {
-        options: Options
-      })
-
+  options: Options extends never ? never : Options
+}
 export type FilterTypeComponentProps<
   Value = unknown,
   Options extends object = never,
-  OptionalOptions extends boolean = false,
 > = {
-  schema: FilterTypeSchema<Options, OptionalOptions>
+  schema: FilterTypeSchema<Options>
   value: Value
   onChange: (value: Value) => void
   isCompactMode?: boolean
@@ -55,8 +43,8 @@ export type FilterTypeDefinition<
   Options extends object = never,
   EmptyValue = Value,
 > = {
-  /** Check if the value is empty */
   emptyValue: EmptyValue
+  /** Check if the value is empty */
   isEmpty: (
     value: Value | undefined,
     context: FilterTypeContext<Options>
