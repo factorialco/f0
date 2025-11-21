@@ -100,6 +100,8 @@ const ButtonInternal = forwardRef<
   const isLoading = forceLoading || loading
   const shouldHideLabel = hideLabel || emoji
 
+  const buttonLabel = (label ?? "").toString()
+
   return (
     <Action
       variant={variant}
@@ -112,9 +114,11 @@ const ButtonInternal = forwardRef<
       loading={isLoading}
       className={cn("max-w-full", className)}
       mode={hideLabel ? "only" : "default"}
-      aria-label={ariaLabel || props.title || label}
+      aria-label={ariaLabel || props.title || buttonLabel}
       title={
-        noTitle ? undefined : props.title || (hideLabel ? label : undefined)
+        noTitle
+          ? undefined
+          : props.title || (hideLabel ? buttonLabel : undefined)
       }
       compact={!!shouldHideLabel}
     >
@@ -144,10 +148,10 @@ const ButtonInternal = forwardRef<
         )}
         {!shouldHideLabel ? (
           <OneEllipsis className={cn(shouldHideLabel && "sr-only")} tag="span">
-            {label.toString()}
+            {buttonLabel}
           </OneEllipsis>
         ) : (
-          <span className="sr-only">{label.toString()}</span>
+          <span className="sr-only">{buttonLabel}</span>
         )}
         {append}
       </div>
