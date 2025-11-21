@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.276.1](https://github.com/factorialco/f0/compare/f0-react-v1.276.0...f0-react-v1.276.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* select when search ([#3003](https://github.com/factorialco/f0/issues/3003)) ([5d12f5a](https://github.com/factorialco/f0/commit/5d12f5a10d7f0da74ee67b7a319d2c6061614a36))
+
 ## [1.276.0](https://github.com/factorialco/f0/compare/f0-react-v1.275.0...f0-react-v1.276.0) (2025-11-20)
 
 
