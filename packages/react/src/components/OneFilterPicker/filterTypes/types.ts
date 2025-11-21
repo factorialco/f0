@@ -1,3 +1,5 @@
+import { AvatarVariant } from "@/components/avatars/F0Avatar/F0Avatar"
+import { IconType } from "@/components/F0Icon/types"
 import { I18nContextType } from "@/lib/providers/i18n"
 
 export type FilterTypeSchema<
@@ -31,6 +33,23 @@ export type FilterTypeContext<Options extends object = never> = {
   i18n: I18nContextType
 }
 
+export type ChipLabel = {
+  label: string
+} & (
+  | {
+      icon: IconType
+      avatar?: never
+    }
+  | {
+      icon?: never
+      avatar: AvatarVariant
+    }
+  | {
+      icon?: never
+      avatar?: never
+    }
+)
+
 export type FilterTypeDefinition<
   Value = unknown,
   Options extends object = never,
@@ -55,7 +74,7 @@ export type FilterTypeDefinition<
   chipLabel: (
     value: Value,
     context: FilterTypeContext<Options>
-  ) => string | Promise<string>
+  ) => string | ChipLabel | Promise<string | ChipLabel>
 
   /**
    * The default options to render a filter of this type, for example max and min date for a date filter, the list of options for an in filter, etc
