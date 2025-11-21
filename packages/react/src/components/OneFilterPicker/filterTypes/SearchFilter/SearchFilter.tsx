@@ -1,8 +1,7 @@
 "use client"
 
-import { Input } from "@/ui/input"
-
-import { Placeholder, Search } from "@/icons/app"
+import { InputInternal } from "@/experimental/Forms/Fields/Input/internal"
+import { AlertCircle, AlertCircleLine } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useMemo, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
@@ -82,7 +81,7 @@ export function SearchFilter({
 
   return (
     <div className="space-y-4 p-3">
-      <Input
+      <InputInternal
         label={`Search ${schema.label.toLowerCase()}...`}
         hideLabel
         placeholder={`Search ${schema.label.toLowerCase()}...`}
@@ -96,7 +95,7 @@ export function SearchFilter({
                   i18n.filters.search.relaxed,
                   i18n.filters.search.strict,
                 ],
-                icon: [Search, Placeholder],
+                icon: [AlertCircle, AlertCircleLine],
                 selected: isStrict,
                 onChange: setIsStrict,
               }
