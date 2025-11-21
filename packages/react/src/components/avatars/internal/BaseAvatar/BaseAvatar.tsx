@@ -22,7 +22,7 @@ const DEFAULT_SIZE = "md"
 
 const iconSize: Record<AvatarSize, F0IconProps["size"]> = {
   xs: "xs",
-  sm: "xs",
+  sm: "sm",
   md: "md",
   lg: "md",
   xl: "lg",
