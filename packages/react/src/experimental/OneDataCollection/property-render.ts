@@ -3,6 +3,7 @@ import {
   ValueDisplayRendererDefinition,
 } from "@/components/value-display"
 import { RecordType } from "@/hooks/datasource"
+import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { ReactNode } from "react"
 import { VisualizationType } from "./visualizations/collection/types"
 
@@ -52,7 +53,8 @@ const undefinedValueByVisualization: Partial<
 export const renderProperty = <R extends RecordType>(
   item: R,
   property: PropertyDefinition<R>,
-  visualization: VisualizationType
+  visualization: VisualizationType,
+  i18n: TranslationsType
 ): ReactNode => {
   const renderDefinition = property.render(item)
 
@@ -65,6 +67,7 @@ export const renderProperty = <R extends RecordType>(
     renderDefinition as ValueDisplayRendererDefinition,
     {
       visualization,
+      i18n,
     },
     undefinedValue
   )
