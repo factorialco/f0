@@ -224,6 +224,7 @@ export const defaultTranslations = {
   ai: {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
+    startNewChat: "Start new chat",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
