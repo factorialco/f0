@@ -240,7 +240,7 @@ export const getMockVisualizations = (options?: {
       columns: [
         {
           label: "Name",
-          width: 140,
+          width: 250,
           render: (item) => ({
             type: "person",
             value: {
@@ -878,7 +878,9 @@ export const createPromiseDataFetch = (
         }
 
         resolve({
-          records: filteredData,
+          records: filteredData.map((user) => ({
+            ...user,
+          })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
         })
       }, delay)
@@ -1090,6 +1092,11 @@ export const ExampleComponent = ({
             ? searchBar
             : undefined,
       dataAdapter: dataAdapterMemoized,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      fetchChildren: async (item) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return item.children ?? []
+      },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
         { id: "prod", filters: { department: ["Product"] } },
