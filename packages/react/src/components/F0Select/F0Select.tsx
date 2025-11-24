@@ -196,6 +196,10 @@ const F0SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
+  const [selectedItems, setSelectedItems] = useState<
+    F0SelectItemObject<T, ActualRecordType>[]
+  >([])
+
   /**
    * Finds an option in the data records by value and returns the mapped option
    * @param value - The value to find
@@ -230,21 +234,19 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   useEffect(() => {
-    const foundOption = findOption(localValue)
+    const foundOptions = findOptionsByValue(localValue)
 
-    if (foundOption) {
-      onChangeSelectedOption?.(foundOption)
-      setSelectedOption(foundOption)
+    if (foundOptions.length > 0) {
+      setSelectedItems(foundOptions)
     }
     if (!localValue) {
-      onChangeSelectedOption?.(undefined)
-      setSelectedOption(undefined)
+      setSelectedItems([])
     }
   }, [
     data.records,
     localValue,
     optionMapper,
-    findOption,
+    findOptionsByValue,
     onChangeSelectedOption,
   ])
 
@@ -370,7 +372,6 @@ const F0SelectComponent = forwardRef(function Select<
 
   const handleSelectAll = (value: boolean) => {
     if (multiple) {
-      console.log("handleSelectAll", value, items.length)
       setSelectAll(value)
       handleLocalValueChange(
         value

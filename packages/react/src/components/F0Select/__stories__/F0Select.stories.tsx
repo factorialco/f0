@@ -229,7 +229,6 @@ const meta: Meta = {
 
       const handleOnSearchChange = (value: string) => {
         setSearchValue(value)
-        console.log("searchValue", value)
       }
 
       const truncatedValue = (localValue || []).slice(0, 50)
