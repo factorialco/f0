@@ -138,6 +138,13 @@ export const Section = ({
           </div>
         </Reorder.Group>
       </DragProvider>
+      <div className="mt-8 flex flex-row items-center gap-4">
+        <div className="h-px flex-1 bg-f1-border-secondary" />
+        <span className="text-base font-medium text-f1-foreground-tertiary">
+          {t("coCreationForm.labels.endOfSection")}
+        </span>
+        <div className="h-px flex-1 bg-f1-border-secondary" />
+      </div>
     </div>
   )
 }

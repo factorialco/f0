@@ -287,6 +287,7 @@ export const defaultTranslations = {
       placeholder: "Respondent's answer",
     },
     labels: {
+      endOfSection: "End of section",
       title: "Title",
       titlePlaceholder: "Question title",
       description: "Description",
