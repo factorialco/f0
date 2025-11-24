@@ -22,7 +22,7 @@ export const BaseQuestion = ({
   title,
   description,
   children,
-  // required,
+  required,
   locked: questionLocked,
   type: questionType,
 }: BaseQuestionProps) => {
@@ -117,18 +117,36 @@ export const BaseQuestion = ({
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
-          <textarea
-            value={title}
-            aria-label={t("coCreationForm.labels.title")}
-            placeholder={t("coCreationForm.labels.titlePlaceholder")}
-            onChange={handleChangeTitle}
-            disabled={inputDisabled}
-            className={cn(
-              "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
-              inputDisabled && "cursor-not-allowed"
-            )}
-            style={TEXT_AREA_STYLE}
-          />
+          <div className="relative w-full">
+            <textarea
+              value={title}
+              aria-label={t("coCreationForm.labels.title")}
+              placeholder={t("coCreationForm.labels.titlePlaceholder")}
+              onChange={handleChangeTitle}
+              disabled={inputDisabled}
+              className={cn(
+                "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                inputDisabled && "cursor-not-allowed"
+              )}
+              style={TEXT_AREA_STYLE}
+            />
+            <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
+              <span className="opacity-0">
+                {title || t("coCreationForm.labels.titlePlaceholder")}
+              </span>
+              {required && (
+                <span
+                  className={cn(
+                    "text-f1-foreground-critical",
+                    !title && "text-f1-foreground-secondary"
+                  )}
+                >
+                  {" "}
+                  *
+                </span>
+              )}
+            </div>
+          </div>
           {isEditMode && !locked && (
             <div
               className={cn(
