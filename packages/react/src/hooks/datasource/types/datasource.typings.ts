@@ -5,6 +5,7 @@ import {
 } from "@/components/OneFilterPicker/types"
 import { DataAdapter } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
+import { ChildrenResponse } from "./nested.typings"
 import { RecordType } from "./records.typings"
 import { SearchOptions } from "./search.typings"
 import { SelectedItemsState } from "./selection.typings"
@@ -72,6 +73,16 @@ export type DataSourceDefinition<
   /** Current state of applied grouping */
   currentGrouping?: GroupingState<R, Grouping>
   /*******************************************************/
+
+  /***** NESTED RECORDS ***************************************************/
+  fetchChildren?: (
+    item: R,
+    filters?: FiltersState<FiltersDefinition>
+  ) => Promise<ChildrenResponse<R>>
+  /** Function to determine if an item has children */
+  itemsWithChildren?: (item: R) => boolean
+  /** Function to get the number of children for an item */
+  childrenCount?: (item: R) => number | undefined
 }
 
 /**
