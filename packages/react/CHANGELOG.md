@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.281.0](https://github.com/factorialco/f0/compare/f0-react-v1.280.0...f0-react-v1.281.0) (2025-11-24)
+
+
+### Features
+
+* create all needed components for new co-creation form ([#2958](https://github.com/factorialco/f0/issues/2958)) ([ac0e3e8](https://github.com/factorialco/f0/commit/ac0e3e85652c3cdc4479e90c87c4911a355dbf21))
+
 ## [1.280.0](https://github.com/factorialco/f0/compare/f0-react-v1.279.2...f0-react-v1.280.0) (2025-11-24)
 
 
