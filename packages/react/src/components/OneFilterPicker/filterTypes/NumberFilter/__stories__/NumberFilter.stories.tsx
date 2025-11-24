@@ -64,25 +64,25 @@ export const RangeWithSelectedValues: Story = {
       mode: "range",
       from: {
         value: 0,
-        strict: true,
+        closed: true,
       },
       to: {
         value: 100,
-        strict: true,
+        closed: true,
       },
     },
     onChange: () => {},
   },
 }
 
-export const RangeWithStrictToggle: Story = {
+export const RangeWithOpenCloseToggle: Story = {
   args: {
     schema: {
       label: "Department",
       options: {
         min: 0,
         max: 100,
-        strictToggle: true,
+        openCloseToggle: true,
       },
     },
     onChange: () => {},

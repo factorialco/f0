@@ -13,8 +13,8 @@ import { FilterTypeComponentProps } from "../types"
 export type NumberFilterOptions = {
   min?: number
   max?: number
-  modes?: ("range" | "single")[]
-  strictToggle?: boolean
+  modes?: readonly ("range" | "single")[]
+  openCloseToggle?: boolean
 }
 
 export type NumberFilterValue =
@@ -26,11 +26,11 @@ export type NumberFilterValue =
       mode: "range"
       from: {
         value: number | undefined
-        strict: boolean
+        closed: boolean
       }
       to: {
         value: number | undefined
-        strict: boolean
+        closed: boolean
       }
     }
   | undefined
@@ -86,14 +86,14 @@ export function NumberFilter({
             localValue?.mode === "single"
               ? localValue?.value
               : localValue?.from?.value,
-          strict: true,
+          closed: true,
         },
         to: {
           value:
             localValue?.mode === "single"
               ? localValue?.value
               : localValue?.to?.value,
-          strict: true,
+          closed: true,
         },
       })
     } else {
@@ -149,11 +149,11 @@ export function NumberFilter({
         mode: "range",
         from: {
           value: localValue?.from?.value,
-          strict: localValue?.from?.strict ?? true,
+          closed: localValue?.from?.closed ?? true,
         },
         to: {
           value: localValue?.to?.value,
-          strict: localValue?.to?.strict ?? true,
+          closed: localValue?.to?.closed ?? true,
         },
       })
     } else {
@@ -171,14 +171,14 @@ export function NumberFilter({
           localValue?.mode === "range"
             ? localValue?.from?.value
             : localValue?.value,
-        strict: localValue?.mode === "range" ? localValue?.from?.strict : true,
+        closed: localValue?.mode === "range" ? localValue?.from?.closed : true,
       },
       to: {
         value:
           localValue?.mode === "range"
             ? localValue?.to?.value
             : localValue?.value,
-        strict: localValue?.mode === "range" ? localValue?.to?.strict : true,
+        closed: localValue?.mode === "range" ? localValue?.to?.closed : true,
       },
     }
   }, [localValue])
@@ -191,7 +191,7 @@ export function NumberFilter({
             <NumberInputInternal
               label={
                 localValue?.mode === "range"
-                  ? localValue?.from?.strict
+                  ? localValue?.from?.closed
                     ? i18n.filters.number.greaterOrEqual
                     : i18n.filters.number.greaterThan
                   : i18n.filters.number.value
@@ -202,14 +202,14 @@ export function NumberFilter({
               max={options.max}
               min={options.min}
               buttonToggle={
-                localValue?.mode === "range" && options.strictToggle
+                localValue?.mode === "range" && options.openCloseToggle
                   ? {
                       label: [
                         i18n.filters.number.greaterThan,
                         i18n.filters.number.greaterOrEqual,
                       ],
                       icon: [Greater, EqualGreater],
-                      selected: valueAsRange.from.strict,
+                      selected: valueAsRange.from.closed,
                       onChange: (checked: boolean) =>
                         handleStrictChange("from", checked),
                     }
@@ -227,14 +227,14 @@ export function NumberFilter({
                 max={options.max}
                 min={options.min}
                 buttonToggle={
-                  localValue?.mode === "range" && options.strictToggle
+                  localValue?.mode === "range" && options.openCloseToggle
                     ? {
                         label: [
                           i18n.filters.number.lessThan,
                           i18n.filters.number.lessOrEqual,
                         ],
                         icon: [Less, EqualLess],
-                        selected: valueAsRange.to.strict,
+                        selected: valueAsRange.to.closed,
                         onChange: (checked: boolean) =>
                           handleStrictChange("to", checked),
                       }

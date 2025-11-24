@@ -145,7 +145,7 @@ export const filterDefinition: FiltersDefinition = {
     options: {
       modes: ["range", "single"],
       min: 0,
-      strictToggle: true,
+      openCloseToggle: true,
     },
   },
 }

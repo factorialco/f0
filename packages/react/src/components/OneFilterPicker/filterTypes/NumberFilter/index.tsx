@@ -51,13 +51,13 @@ export const numberFilter: FilterTypeDefinition<
         return i18n.t("filters.number.range", {
           min: value?.from?.value,
           max: value?.to?.value,
-          minStrict: !value?.from?.strict ? ">" : "≥",
-          maxStrict: !value?.to?.strict ? "<" : "≤",
+          minStrict: !value?.from?.closed ? ">" : "≥",
+          maxStrict: !value?.to?.closed ? "<" : "≤",
         })
       }
 
       if (value?.to?.value !== undefined) {
-        if (value?.to?.strict) {
+        if (value?.to?.closed) {
           return i18n.t("filters.number.lessThanOrEqualShort", {
             value: value?.to?.value,
           })
@@ -69,7 +69,7 @@ export const numberFilter: FilterTypeDefinition<
       }
 
       if (value?.from?.value !== undefined) {
-        if (value?.from?.strict) {
+        if (value?.from?.closed) {
           return i18n.t("filters.number.greaterThanOrEqualShort", {
             value: value?.from?.value,
           })

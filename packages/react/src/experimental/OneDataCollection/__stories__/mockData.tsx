@@ -101,7 +101,7 @@ export const filters = {
     options: {
       modes: ["range", "single"],
       min: 0,
-      strictToggle: true,
+      openCloseToggle: true,
     },
   },
 } as const
@@ -777,8 +777,16 @@ export const filterUsers = (
     filteredUsers = filteredUsers.filter((user) => {
       if (salaryFilterValues?.mode === "range") {
         return (
-          user.salary >= salaryFilterValues.from &&
-          user.salary <= salaryFilterValues.to
+          user.salary &&
+          salaryFilterValues.from.value !== undefined &&
+          (salaryFilterValues.from.closed
+            ? user.salary >= salaryFilterValues.from.value
+            : user.salary > salaryFilterValues.from.value) &&
+          user.salary &&
+          salaryFilterValues.to.value !== undefined &&
+          (salaryFilterValues.to.closed
+            ? user.salary <= salaryFilterValues.to.value
+            : user.salary < salaryFilterValues.to.value)
         )
       }
       return user.salary === salaryFilterValues.value
@@ -878,6 +886,8 @@ export const createPromiseDataFetch = (
       search,
       navigationFilters,
     } = options
+
+    console.log("filters", filters)
 
     return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
