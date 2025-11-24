@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.280.0](https://github.com/factorialco/f0/compare/f0-react-v1.279.2...f0-react-v1.280.0) (2025-11-24)
+
+
+### Features
+
+* add F0Text and F0Heading components ([#2408](https://github.com/factorialco/f0/issues/2408)) ([63b6f42](https://github.com/factorialco/f0/commit/63b6f42040fd4283580c35d30fe4ca71f404a108))
+
 ## [1.279.2](https://github.com/factorialco/f0/compare/f0-react-v1.279.1...f0-react-v1.279.2) (2025-11-24)
 
 
