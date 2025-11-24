@@ -8,7 +8,13 @@ import {
 } from "./NumberFilter"
 
 const isEmpty = (value: NumberFilterValue | undefined): value is undefined => {
-  return !value || (value?.[0] === value?.[1] && value?.[0] === undefined)
+  return (
+    !value ||
+    (value?.mode === "range" &&
+      value?.from?.value === value?.to?.value &&
+      value?.from?.value === undefined) ||
+    (value?.mode === "single" && value?.value === undefined)
+  )
 }
 
 const defaults: NumberFilterOptions = {
@@ -29,35 +35,50 @@ export const numberFilter: FilterTypeDefinition<
   chipLabel: (value, context) => {
     const i18n = context.i18n
 
-    const mode = value?.[0] === value?.[1] ? "single" : "range"
     // Single value
-    if (mode === "single") {
-      if (value?.[0] === undefined) {
+    if (value?.mode === "single" || value?.mode === undefined) {
+      if (value?.value === undefined) {
         return ""
       }
       return i18n.t("filters.number.equalShort", {
-        value: value?.[0]?.toString(),
+        value: value?.value?.toString(),
       })
     }
 
-    // Range value
-    if (value?.[0] !== undefined && value?.[1] !== undefined) {
-      return i18n.t("filters.number.range", {
-        min: value?.[0],
-        max: value?.[1],
-      })
-    }
+    if (value?.mode === "range") {
+      // Range value
+      if (value?.from?.value !== undefined && value?.to?.value !== undefined) {
+        return i18n.t("filters.number.range", {
+          min: value?.from?.value,
+          max: value?.to?.value,
+          minStrict: !value?.from?.strict ? ">" : "≥",
+          maxStrict: !value?.to?.strict ? "<" : "≤",
+        })
+      }
 
-    if (value?.[1] !== undefined) {
-      return i18n.t("filters.number.lessThanOrEqualShort", {
-        value: value?.[1],
-      })
-    }
+      if (value?.to?.value !== undefined) {
+        if (value?.to?.strict) {
+          return i18n.t("filters.number.lessThanOrEqualShort", {
+            value: value?.to?.value,
+          })
+        } else {
+          return i18n.t("filters.number.lessThanShort", {
+            value: value?.to?.value,
+          })
+        }
+      }
 
-    if (value?.[0] !== undefined) {
-      return i18n.t("filters.number.greaterThanOrEqualShort", {
-        value: value?.[0],
-      })
+      if (value?.from?.value !== undefined) {
+        if (value?.from?.strict) {
+          return i18n.t("filters.number.greaterThanOrEqualShort", {
+            value: value?.from?.value,
+          })
+        } else {
+          return i18n.t("filters.number.greaterThanShort", {
+            value: value?.from?.value,
+          })
+        }
+      }
     }
 
     return ""

@@ -83,7 +83,7 @@ export const defaultTranslations = {
       lessThanOrEqualShort: "<= {{value}}",
       lessThanShort: "< {{value}}",
       rangeTitle: "Use range",
-      range: "Between {{min}} and {{max}}",
+      range: "{{minStrict}} {{min}} and {{maxStrict}} {{max}}",
     },
     search: {
       relaxed: "Relaxed",

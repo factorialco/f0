@@ -95,6 +95,15 @@ export const filters = {
       options: DEPARTMENTS_MOCK.map((value) => ({ value, label: value })),
     },
   },
+  salary: {
+    type: "number",
+    label: "Salary",
+    options: {
+      modes: ["range", "single"],
+      min: 0,
+      strictToggle: true,
+    },
+  },
 } as const
 
 // Define presets for the filters
@@ -761,6 +770,19 @@ export const filterUsers = (
     filteredUsers = filteredUsers.filter((user) =>
       departmentFilterValues.some((d) => d === user.department)
     )
+  }
+
+  const salaryFilterValues = filterValues.salary
+  if (salaryFilterValues) {
+    filteredUsers = filteredUsers.filter((user) => {
+      if (salaryFilterValues?.mode === "range") {
+        return (
+          user.salary >= salaryFilterValues.from &&
+          user.salary <= salaryFilterValues.to
+        )
+      }
+      return user.salary === salaryFilterValues.value
+    })
   }
 
   if (search) {
