@@ -9,7 +9,7 @@ type SelectOption = {
 }
 
 export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
-  as?: "list"
+  as?: "list" | "list-with-scroll"
   placeholder?: string
   options?: SelectOption[]
 }
@@ -20,16 +20,22 @@ export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
 
 const Select = <T extends string = string>(props: SelectProps<T>) => {
   type Value = NonNullable<typeof props.value>
-  const [internalOpen, setInternalOpen] = useState(!!(props.as === "list"))
+  const [internalOpen, setInternalOpen] = useState(
+    props.as === "list" || props.as === "list-with-scroll"
+  )
 
   const isOpen =
-    props.as === "list"
+    props.as === "list" || props.as === "list-with-scroll"
       ? true
       : props.open !== undefined
         ? props.open
         : internalOpen
 
   const handleOpenChange = (open: boolean) => {
+    if (props.as === "list" || props.as === "list-with-scroll") {
+      return
+    }
+
     // Update internal state if we're not in controlled mode
     if (props.open === undefined) {
       setInternalOpen(open)
