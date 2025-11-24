@@ -3,7 +3,7 @@
 import { F0Button } from "@/components/F0Button"
 import { NumberInputInternal } from "@/experimental/Forms/Fields/NumberInput/internal"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
-import { LockLocked, LockUnlocked } from "@/icons/app"
+import { EqualGreater, EqualLess, Greater, Less } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { useDeepCompareEffect } from "@reactuses/core"
@@ -208,7 +208,7 @@ export function NumberFilter({
                         i18n.filters.number.greaterThan,
                         i18n.filters.number.greaterOrEqual,
                       ],
-                      icon: [LockLocked, LockUnlocked],
+                      icon: [Greater, EqualGreater],
                       selected: valueAsRange.from.strict,
                       onChange: (checked: boolean) =>
                         handleStrictChange("from", checked),
@@ -233,7 +233,7 @@ export function NumberFilter({
                           i18n.filters.number.lessThan,
                           i18n.filters.number.lessOrEqual,
                         ],
-                        icon: [LockLocked, LockUnlocked],
+                        icon: [Less, EqualLess],
                         selected: valueAsRange.to.strict,
                         onChange: (checked: boolean) =>
                           handleStrictChange("to", checked),
