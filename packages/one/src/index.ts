@@ -5,5 +5,12 @@
  * It exports all components that are available for both web and expo platforms.
  */
 
-// Main exports will be added here as components are migrated
-export {}
+// Test components (temporary for build verification)
+export {
+  TestExpoComponent,
+  type TestExpoComponentProps,
+} from "./components/TestExpoComponent"
+export {
+  TestWebComponent,
+  type TestWebComponentProps,
+} from "./components/TestWebComponent"

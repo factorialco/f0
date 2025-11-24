@@ -6,5 +6,8 @@
  * tree-shaking only includes web-compatible code.
  */
 
-// Web-specific exports will be added here as components are migrated
-export {}
+// Test component (temporary for build verification)
+export {
+  TestWebComponent,
+  type TestWebComponentProps,
+} from "./components/TestWebComponent"

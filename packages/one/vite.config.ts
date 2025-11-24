@@ -71,6 +71,7 @@ export default defineConfig({
         "react/jsx-runtime",
         "react",
         "react-dom",
+        "react-native",
         /@copilotkit\/.*/,
         "motion",
         "clsx",

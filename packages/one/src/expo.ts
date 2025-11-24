@@ -6,5 +6,8 @@
  * and optimal tree-shaking.
  */
 
-// Expo-specific exports will be added here as components are migrated
-export {}
+// Test component (temporary for build verification)
+export {
+  TestExpoComponent,
+  type TestExpoComponentProps,
+} from "./components/TestExpoComponent"
