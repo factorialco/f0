@@ -1,0 +1,101 @@
+{
+  "name": "@factorialco/one",
+  "version": "0.1.0",
+  "description": "ONE web/expo components library",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "private": false,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "import": "./dist/web.js",
+      "require": "./dist/web.js"
+    },
+    "./expo": {
+      "types": "./dist/expo.d.ts",
+      "import": "./dist/expo.js",
+      "require": "./dist/expo.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc --project ./tsconfig-build.json && BUILD_TYPES=true vite build",
+    "build:watch": "pnpm build --watch",
+    "dev": "vite build --watch",
+    "start": "pnpm run dev",
+    "preview": "vite preview",
+    "lint": "eslint -c eslint.config.mjs src/**/*.{ts,tsx} --report-unused-disable-directives --max-warnings 0",
+    "lint-fix": "eslint -c eslint.config.mjs src/**/*.{ts,tsx} --fix --report-unused-disable-directives --max-warnings 0",
+    "prettier:format": "prettier --write \"src/**/*.{ts,tsx,js,md,mdx,css}\"",
+    "prettier:check:ci": "prettier --check \"src/**/*.{ts,tsx,js,md,mdx,css}\"",
+    "tsc": "tsc --noEmit",
+    "vitest": "vitest",
+    "vitest:ui": "vitest --ui",
+    "vitest:watch": "vitest dev",
+    "vitest:ci": "pnpm run vitest --reporter=dot"
+  },
+  "peerDependencies": {
+    "@copilotkit/react-core": "^1.10.6",
+    "@copilotkit/react-ui": "^1.10.6",
+    "@copilotkit/runtime": "^1.10.6",
+    "@copilotkit/shared": "^1.10.6",
+    "clsx": "^2.1.1",
+    "motion": "^12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.7.2",
+    "usehooks-ts": "^3.1.1"
+  },
+  "devDependencies": {
+    "@eslint/compat": "^1.2.9",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.27.0",
+    "@factorialco/f0-core": "workspace:*",
+    "@types/node": "^22.13.9",
+    "@types/react": "^18.3.18",
+    "@testing-library/react": "^16.1.0",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "3.0.7",
+    "eslint": "^9.27.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "autoprefixer": "^10.4.21",
+    "globals": "^16.0.0",
+    "jsdom": "^26.0.0",
+    "postcss": "^8.5.3",
+    "postcss-import": "^16.1.0",
+    "prettier": "^3.5.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-tailwindcss": "^0.6.10",
+    "rollup-plugin-jsx-remove-attributes": "^3.1.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.3.5",
+    "user-agent-data-types": "^0.4.2",
+    "vite-plugin-dts": "4.3.0",
+    "vite-plugin-lib-inject-css": "^2.2.1",
+    "vitest": "^3.0.7"
+  },
+  "dependencies": {
+    "@factorialco/f0-core": "workspace:*"
+  }
+}
