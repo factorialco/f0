@@ -23,6 +23,7 @@ export const BaseQuestion = ({
   description,
   children,
   // required,
+  locked: questionLocked,
   type: questionType,
 }: BaseQuestionProps) => {
   const {
@@ -30,10 +31,14 @@ export const BaseQuestion = ({
     onAddNewElement,
     isEditMode,
     getIsSingleQuestionInSection,
-    getIsQuestionWithinSection,
+    getSectionContainingQuestion,
   } = useCoCreationFormContext()
 
-  const isWithinSection = getIsQuestionWithinSection(id)
+  const containingSection = getSectionContainingQuestion(id)
+
+  const locked = containingSection?.locked || questionLocked
+
+  const isWithinSection = !!containingSection
 
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
@@ -101,6 +106,8 @@ export const BaseQuestion = ({
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
+  const inputDisabled = !isEditMode || locked
+
   return (
     <div
       className={cn(
@@ -115,11 +122,14 @@ export const BaseQuestion = ({
             aria-label={t("coCreationForm.labels.title")}
             placeholder={t("coCreationForm.labels.titlePlaceholder")}
             onChange={handleChangeTitle}
-            disabled={!isEditMode}
-            className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
+            disabled={inputDisabled}
+            className={cn(
+              "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+              inputDisabled && "cursor-not-allowed"
+            )}
             style={TEXT_AREA_STYLE}
           />
-          {isEditMode && (
+          {isEditMode && !locked && (
             <div
               className={cn(
                 "opacity-0 group-hover/question:opacity-100",
@@ -145,8 +155,11 @@ export const BaseQuestion = ({
             "coCreationForm.labels.questionDescriptionPlaceholder"
           )}
           onChange={handleChangeDescription}
-          disabled={!isEditMode}
-          className="w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
+          disabled={inputDisabled}
+          className={cn(
+            "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+            inputDisabled && "cursor-not-allowed"
+          )}
           style={TEXT_AREA_STYLE}
         />
       </div>

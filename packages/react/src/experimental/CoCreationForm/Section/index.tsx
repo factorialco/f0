@@ -20,6 +20,7 @@ export const Section = ({
   title,
   description,
   questions = [],
+  locked,
 }: SectionProps) => {
   const { onSectionChange, isEditMode, deleteElement, onDuplicateElement } =
     useCoCreationFormContext()
@@ -75,6 +76,8 @@ export const Section = ({
     },
   ]
 
+  const inputDisabled = !isEditMode || locked
+
   return (
     <div className="group/section flex w-full flex-col gap-1 bg-f1-background">
       <div className="py-1 pl-5 pr-3">
@@ -85,10 +88,13 @@ export const Section = ({
             value={title}
             placeholder={t("coCreationForm.labels.sectionTitlePlaceholder")}
             onChange={handleChangeTitle}
-            disabled={!isEditMode}
-            className="w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
+            disabled={inputDisabled}
+            className={cn(
+              "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+              inputDisabled && "cursor-not-allowed"
+            )}
           />
-          {isEditMode && (
+          {isEditMode && !locked && (
             <div
               className={cn(
                 "opacity-0 group-hover/section:opacity-100",
@@ -119,9 +125,12 @@ export const Section = ({
           aria-label={t("coCreationForm.labels.description")}
           placeholder={t("coCreationForm.labels.sectionDescriptionPlaceholder")}
           onChange={handleChangeDescription}
-          disabled={!isEditMode}
+          disabled={inputDisabled}
           style={TEXT_AREA_STYLE}
-          className="w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden"
+          className={cn(
+            "w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+            inputDisabled && "cursor-not-allowed"
+          )}
         />
       </div>
       <DragProvider>

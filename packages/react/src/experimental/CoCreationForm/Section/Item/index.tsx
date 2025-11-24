@@ -14,7 +14,10 @@ type ItemProps = {
 export const Item = ({ question }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
-  const { isEditMode } = useCoCreationFormContext()
+  const { isEditMode, getSectionContainingQuestion } =
+    useCoCreationFormContext()
+
+  const containingSection = getSectionContainingQuestion(question.id)
 
   const handleDragStart = () => {
     setIsDragging(true)
@@ -26,18 +29,24 @@ export const Item = ({ question }: ItemProps) => {
     setDraggedItemId(null)
   }
 
+  const questionLocked = question.locked || containingSection?.locked
+
+  const dragEnabled = !!isEditMode && !questionLocked
+
   return (
     <Reorder.Item
       value={question}
       as="div"
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      dragListener={dragEnabled}
       layout="position"
     >
       <div
         className={cn(
           "group/question-element flex cursor-grab flex-row items-start gap-1",
-          isDragging && "cursor-grabbing"
+          isDragging && "cursor-grabbing",
+          !dragEnabled && "cursor-not-allowed"
         )}
         style={{ marginLeft: isEditMode ? -27 : 0 }}
       >
@@ -45,7 +54,8 @@ export const Item = ({ question }: ItemProps) => {
           <div
             className={cn(
               "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/question-element:opacity-40",
-              !isDragging && "cursor-grab"
+              !isDragging && "cursor-grab",
+              !dragEnabled && "cursor-not-allowed"
             )}
           >
             <F0Icon icon={Handle} size="sm" />

@@ -16,7 +16,13 @@ type ItemProps = {
 const Item = ({ element }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
-  const { isEditMode } = useCoCreationFormContext()
+  const { isEditMode, getSectionContainingQuestion } =
+    useCoCreationFormContext()
+
+  const containingSection =
+    element.type === "question"
+      ? getSectionContainingQuestion(element.question.id)
+      : undefined
 
   const handleDragStart = () => {
     setIsDragging(true)
@@ -30,12 +36,19 @@ const Item = ({ element }: ItemProps) => {
     setDraggedItemId(null)
   }
 
+  const elementLocked =
+    element.type === "section"
+      ? element.section.locked
+      : element.question.locked || containingSection?.locked
+
+  const dragEnabled = !!isEditMode && !elementLocked
+
   return (
     <Reorder.Item
       value={element}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      dragListener={!!isEditMode}
+      dragListener={!!isEditMode && !elementLocked}
       layout="position"
       as="div"
     >
@@ -43,14 +56,16 @@ const Item = ({ element }: ItemProps) => {
         <div
           className={cn(
             "group/element flex flex-row items-start gap-1",
-            isDragging && "cursor-grabbing"
+            isDragging && "cursor-grabbing",
+            !dragEnabled && "cursor-not-allowed"
           )}
         >
           {!!isEditMode && (
             <div
               className={cn(
                 "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/element:opacity-40",
-                !isDragging && "cursor-grab"
+                !isDragging && "cursor-grab",
+                !dragEnabled && "cursor-not-allowed"
               )}
             >
               <F0Icon icon={Handle} size="sm" />

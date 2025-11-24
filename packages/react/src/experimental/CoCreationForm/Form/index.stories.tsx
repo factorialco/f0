@@ -47,6 +47,7 @@ export const Default: Story = {
           id: "section-1",
           title: "Section 1",
           description: "Section 1 description",
+          locked: true,
           questions: [
             {
               id: "question-2",
