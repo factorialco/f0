@@ -11,7 +11,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
-import { useLoadOptions } from "./useLoadOptions"
+import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
 
 /**
  * Props for the InFilter component.
@@ -90,6 +90,8 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     search: searchTerm,
   })
 
+  const cacheKey = getCacheKey(schema)
+
   useEffect(() => {
     let timeout: NodeJS.Timeout
     if (isLoading) {
@@ -160,13 +162,14 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   const showSearch = options.length > 0
 
   const handleSelectAll = () => {
-    const allValues = filteredOptions.map((option) => option.value)
     const currentValues = value ?? []
     const newValues = [...currentValues]
 
-    allValues.forEach((value) => {
-      if (!newValues.includes(value)) {
-        newValues.push(value)
+    filteredOptions.forEach((option) => {
+      if (!newValues.includes(option.value)) {
+        newValues.push(option.value)
+        // Cache the label when selecting all
+        cacheLabel(cacheKey, option.value, option.label)
       }
     })
 
@@ -258,6 +261,10 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 focusRing()
               )}
               onClick={() => {
+                if (!isSelected) {
+                  // Cache the label when selecting an option
+                  cacheLabel(cacheKey, option.value, option.label)
+                }
                 onChange(
                   isSelected
                     ? value.filter((v) => v !== option.value)
