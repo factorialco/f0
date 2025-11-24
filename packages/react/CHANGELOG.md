@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.283.0](https://github.com/factorialco/f0/compare/f0-react-v1.282.0...f0-react-v1.283.0) (2025-11-24)
+
+
+### Features
+
+* **OneAlert:** enhance responsiveness ([#2983](https://github.com/factorialco/f0/issues/2983)) ([8cf4f67](https://github.com/factorialco/f0/commit/8cf4f67332b611725dc3b36d2056c099a7fce809))
+
 ## [1.282.0](https://github.com/factorialco/f0/compare/f0-react-v1.281.0...f0-react-v1.282.0) (2025-11-24)
 
 
