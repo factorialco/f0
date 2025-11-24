@@ -5,9 +5,8 @@ import type { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { breakpoints } from "@factorialco/f0-core"
 import { cva, type VariantProps } from "cva"
-import { useEffect, useRef, useState } from "react"
+import { useRef } from "react"
 
 type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive"
 
@@ -67,33 +66,13 @@ export const OneAlert = ({
   variant = "neutral",
 }: AlertProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isNarrow, setIsNarrow] = useState(false)
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width
-      setIsNarrow(width < breakpoints.sm)
-    })
-
-    resizeObserver.observe(container)
-
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [])
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="@container">
       <div className={alertVariants({ variant })}>
         <div
           className={cn(
-            "flex gap-3",
-            isNarrow
-              ? "flex-col items-start"
-              : "flex-row items-center justify-between"
+            "flex flex-col items-start gap-3 @sm:flex-row @sm:items-center @sm:justify-between"
           )}
         >
           <div className="flex flex-row gap-2">
@@ -114,8 +93,7 @@ export const OneAlert = ({
           {(action || link) && (
             <div
               className={cn(
-                "flex flex-shrink-0 flex-row items-center gap-3",
-                isNarrow && "pl-8"
+                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0"
               )}
             >
               {link && (

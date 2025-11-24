@@ -55,7 +55,7 @@ export const Default: Story = {
     variant: "info",
   },
   render: (args) => (
-    <div className="w-[600px]">
+    <div className="w-[640px]">
       <OneAlert {...args} />
     </div>
   ),
