@@ -4,7 +4,7 @@ import { Dashboard } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0GridStackRef } from "@/components/Utilities/F0GridStack/F0GridStack"
-import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
+import { PageLayout } from "@/layouts/page/PageLayout"
 import { useRef } from "react"
 
 const meta = {
@@ -12,7 +12,6 @@ const meta = {
   component: Dashboard,
   tags: ["autodocs", "experimental"],
   decorators: [
-    PageDecorator,
     (Story, { args }) => {
       const ref = useRef<F0GridStackRef>(null)
 
@@ -27,20 +26,20 @@ const meta = {
 
       return (
         <>
-          <div className="flex flex-col gap-4">
-            <F0Button
-              label="Add widget"
-              onClick={handleAddWidget}
-              variant="outline"
+          <PageLayout
+            aside={
+              <>
+                <F0Button label="Add widget" onClick={handleAddWidget} />
+              </>
+            }
+          >
+            <Story
+              args={{
+                ...args,
+                ref: ref,
+              }}
             />
-          </div>
-          <p>Dashboard example</p>
-          <Story
-            args={{
-              ...args,
-              ref: ref,
-            }}
-          />
+          </PageLayout>
         </>
       )
     },

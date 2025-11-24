@@ -111,6 +111,15 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
       [widgets]
     )
 
+    console.log(gridOptions)
+
+    /**
+     * Finds the closest allowed size to the given width and height.
+     * @param w - The width of the widget
+     * @param h - The height of the widget
+     * @param allowed - The allowed sizes of the widget
+     * @returns The closest allowed size
+     */
     const closestAllowed = (
       w: number,
       h: number,
