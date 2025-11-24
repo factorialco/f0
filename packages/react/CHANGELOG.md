@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.279.1](https://github.com/factorialco/f0/compare/f0-react-v1.279.0...f0-react-v1.279.1) (2025-11-24)
+
+
+### Bug Fixes
+
+* add support to get selected label from datasource options ([#3019](https://github.com/factorialco/f0/issues/3019)) ([584f67f](https://github.com/factorialco/f0/commit/584f67f7c80dfcf35a7708b3ce9f857b8200ca20))
+
+## [1.279.0](https://github.com/factorialco/f0/compare/f0-react-v1.278.0...f0-react-v1.279.0) (2025-11-24)
+
+
+### Features
+
+* **Table:** enhance row rendering with nested children support and u… ([#3010](https://github.com/factorialco/f0/issues/3010)) ([0efc63b](https://github.com/factorialco/f0/commit/0efc63bcacc5191a1f2628e7ac597404c86736d9))
+
 ## [1.278.0](https://github.com/factorialco/f0/compare/f0-react-v1.277.1...f0-react-v1.278.0) (2025-11-24)
 
 

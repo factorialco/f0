@@ -6,10 +6,46 @@ import { InFilterOptionItem, InFilterOptions } from "./types"
 
 const optionsCache = new Map<string, InFilterOptionItem<unknown>[]>()
 
+// Label cache: stores value -> label mappings per schema
+// Key format: `${cacheKey}:${value}`
+const labelCache = new Map<string, string>()
+
 export function getCacheKey<T, R extends RecordType = RecordType>(
   schema: FilterTypeSchema<InFilterOptions<T, R>>
 ): string {
   return JSON.stringify(schema)
+}
+
+/**
+ * Cache a label for a specific value in a schema
+ */
+export function cacheLabel<T>(cacheKey: string, value: T, label: string): void {
+  const labelKey = `${cacheKey}:${String(value)}`
+  labelCache.set(labelKey, label)
+}
+
+/**
+ * Get a cached label for a specific value in a schema
+ */
+export function getCachedLabel<T>(
+  cacheKey: string,
+  value: T
+): string | undefined {
+  const labelKey = `${cacheKey}:${String(value)}`
+  return labelCache.get(labelKey)
+}
+
+/**
+ * Clear cached labels for a schema (useful when schema changes)
+ */
+export function clearLabelCache(cacheKey: string): void {
+  const keysToDelete: string[] = []
+  for (const key of labelCache.keys()) {
+    if (key.startsWith(`${cacheKey}:`)) {
+      keysToDelete.push(key)
+    }
+  }
+  keysToDelete.forEach((key) => labelCache.delete(key))
 }
 
 export async function loadOptions<T>(
