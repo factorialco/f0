@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.278.0](https://github.com/factorialco/f0/compare/f0-react-v1.277.1...f0-react-v1.278.0) (2025-11-24)
+
+
+### Features
+
+* **Icons:** math icons (greater, less...) ([#3016](https://github.com/factorialco/f0/issues/3016)) ([49571e1](https://github.com/factorialco/f0/commit/49571e12ecc1dcade7b496cd4a70c8b753f62cb9))
+
 ## [1.277.1](https://github.com/factorialco/f0/compare/f0-react-v1.277.0...f0-react-v1.277.1) (2025-11-21)
 
 
