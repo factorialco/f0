@@ -260,6 +260,78 @@ export const Sizes: Story = {
   ),
 }
 
+export const Ellipsis: Story = {
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "A button that will truncate the label if it is too long, to allow for better readability and usability.",
+      },
+    },
+  }),
+  render: (args) => (
+    <div
+      className="flex max-w-[120px] flex-col items-center gap-4 p-3"
+      style={{ border: "1px dotted #333" }}
+    >
+      <F0Button
+        {...args}
+        size="lg"
+        label="Large label that will be truncated"
+      />
+      <F0Button
+        {...args}
+        size="md"
+        label="Medium label that will be truncated"
+      />
+      <F0Button
+        {...args}
+        size="sm"
+        label="Small label that will be truncated"
+      />
+      <F0Button
+        icon={Add}
+        {...args}
+        size="lg"
+        label="Large label that will be truncated"
+      />
+      <F0Button
+        icon={Add}
+        {...args}
+        size="md"
+        label="Medium label that will be truncated"
+      />
+      <F0Button
+        icon={Add}
+        {...args}
+        size="sm"
+        label="Small label that will be truncated"
+      />
+      <F0Button
+        icon={Add}
+        {...args}
+        hideLabel
+        size="lg"
+        label="Large label that will be truncated"
+      />
+      <F0Button
+        icon={Add}
+        loading
+        {...args}
+        size="md"
+        label="Medium label that will be truncated"
+      />
+      <F0Button
+        hideLabel
+        icon={Add}
+        {...args}
+        size="sm"
+        label="Small label that will be truncated"
+      />
+    </div>
+  ),
+}
+
 export const Disabled: Story = {
   args: {
     disabled: true,

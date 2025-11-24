@@ -216,6 +216,7 @@ export const getMockVisualizations = (options?: {
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
     noSorting?: boolean
+    nestedRecords?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -833,7 +834,8 @@ export const createObservableDataFetch = (delay = 0) => {
 
 export const createPromiseDataFetch = (
   delay = 500,
-  cache?: MockDataCache<MockUser>
+  cache?: MockDataCache<MockUser>,
+  nestedRecords = false
 ) => {
   return (
     options: DataCollectionBaseFetchOptions<
@@ -878,7 +880,13 @@ export const createPromiseDataFetch = (
         }
 
         resolve({
-          records: filteredData,
+          records: filteredData.map((user, index) => ({
+            ...user,
+            children:
+              index % 2 === 0 && nestedRecords
+                ? [{ ...user }, { ...user }]
+                : undefined,
+          })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
         })
       }, delay)
@@ -925,6 +933,7 @@ export const ExampleComponent = ({
   enableCache = true,
   hideFilters,
   tmpFullWidth,
+  nestedRecords = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -977,6 +986,7 @@ export const ExampleComponent = ({
   currentSortings?: SortingsState<typeof sortings>
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   tmpFullWidth?: boolean
+  nestedRecords?: boolean
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -1022,11 +1032,11 @@ export const ExampleComponent = ({
     return {
       fetchData: useObservable
         ? createObservableDataFetch()
-        : createPromiseDataFetch(100, cache),
+        : createPromiseDataFetch(100, cache, nestedRecords),
       // Include cacheVersion as a property so dataAdapter reference changes
       _cacheVersion: cacheVersion,
     }
-  }, [dataAdapter, useObservable, cache, cacheVersion])
+  }, [dataAdapter, useObservable, cache, cacheVersion, nestedRecords])
 
   const dataSource = useDataCollectionSource(
     {
@@ -1090,6 +1100,12 @@ export const ExampleComponent = ({
             ? searchBar
             : undefined,
       dataAdapter: dataAdapterMemoized,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      childrenCount: (item) => item?.children?.length,
+      fetchChildren: async (item) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return item.children ?? []
+      },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
         { id: "prod", filters: { department: ["Product"] } },
