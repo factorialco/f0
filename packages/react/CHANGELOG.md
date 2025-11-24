@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.279.2](https://github.com/factorialco/f0/compare/f0-react-v1.279.1...f0-react-v1.279.2) (2025-11-24)
+
+
+### Bug Fixes
+
+* make more permissive flag code prop type to allow any string ([#3020](https://github.com/factorialco/f0/issues/3020)) ([d5d61ff](https://github.com/factorialco/f0/commit/d5d61ffe046ba27441591d24bd9750b312cf12e8))
+
 ## [1.279.1](https://github.com/factorialco/f0/compare/f0-react-v1.279.0...f0-react-v1.279.1) (2025-11-24)
 
 
