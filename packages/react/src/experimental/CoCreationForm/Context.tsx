@@ -171,7 +171,18 @@ export function CoCreationFormProvider({
             section: {
               id: newElementId,
               title: t("coCreationForm.defaults.newSection"),
-              questions: [],
+              questions: [
+                {
+                  id: getNewElementId("question"),
+                  title: t("coCreationForm.defaults.newQuestion"),
+                  description: t(
+                    "coCreationForm.defaults.newQuestionDescription"
+                  ),
+                  type: "text",
+                  required: true,
+                  ...getDefaultParamsForQuestionType("text"),
+                } as QuestionElement,
+              ],
             },
           }
         : {
