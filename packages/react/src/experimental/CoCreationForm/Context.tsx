@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/providers/i18n"
 import flatten from "lodash/flatten"
-import React, { createContext, useContext } from "react"
+import React, { createContext, useContext, useMemo } from "react"
 import { getDefaultParamsForQuestionType, getNewElementId } from "./lib"
 import {
   CoCreationFormCallbacks,
@@ -11,6 +11,7 @@ import {
 
 type CoCreationFormContextType = CoCreationFormCallbacks & {
   isEditMode?: boolean
+  lastElementId: string | undefined
   getQuestionById: (questionId: string) => QuestionElement | undefined
   deleteElement: (elementId: string) => void
 }
@@ -31,6 +32,15 @@ export function CoCreationFormProvider({
   onChange: (elements: CoCreationFormElement[]) => void
 }) {
   const { t } = useI18n()
+
+  const lastElementId = useMemo(() => {
+    const lastElement = elements[elements.length - 1]
+    if (!lastElement) return undefined
+
+    return lastElement.type === "section"
+      ? lastElement.section.id
+      : lastElement.question.id
+  }, [elements])
 
   const handleQuestionChange: NonNullable<
     CoCreationFormCallbacks["onQuestionChange"]
@@ -107,11 +117,17 @@ export function CoCreationFormProvider({
     afterId,
   }: {
     element: CoCreationFormElement
-    afterId: string
+    afterId?: string
   }) => {
     const newElements = [...elements]
 
-    const addNewElementAfterIdOnFirstLevel = (afterId: string) => {
+    if (!afterId) {
+      newElements.push(element)
+      onChange(newElements)
+      return
+    }
+
+    const addNewElementAfterIdOnFirstLevel = (afterId?: string) => {
       newElements.forEach((currentElement, index) => {
         if (
           currentElement.type === "section" &&
@@ -293,6 +309,7 @@ export function CoCreationFormProvider({
         isEditMode,
         getQuestionById,
         deleteElement,
+        lastElementId,
       }}
     >
       {children}

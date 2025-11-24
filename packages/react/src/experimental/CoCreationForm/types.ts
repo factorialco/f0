@@ -108,7 +108,7 @@ export type QuestionActionParams = {
 
 export type OnAddNewElementParams = {
   type: ElementType
-  afterId: string
+  afterId?: string
 }
 
 export type OnDuplicateElementParams = {

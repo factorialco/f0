@@ -7,6 +7,7 @@ import { DragProvider, useDragContext } from "../DragContext"
 import { Question as QuestionComponent, QuestionProps } from "../Question"
 import { Section as SectionComponent } from "../Section"
 import { CoCreationFormElement, CoCreationFormProps } from "../types"
+import { AddButton } from "./AddButton"
 
 type ItemProps = {
   element: CoCreationFormElement
@@ -81,21 +82,24 @@ export const CoCreationForm = ({
     elements={elements}
     onChange={onChange}
   >
-    <DragProvider>
-      <Reorder.Group axis="y" values={elements} onReorder={onChange} as="div">
-        <div className="flex flex-col gap-8">
-          {elements.map((element) => (
-            <Item
-              key={
-                element.type === "section"
-                  ? element.section.id
-                  : element.question.id
-              }
-              element={element}
-            />
-          ))}
-        </div>
-      </Reorder.Group>
-    </DragProvider>
+    <div className="flex flex-col gap-6">
+      <DragProvider>
+        <Reorder.Group axis="y" values={elements} onReorder={onChange} as="div">
+          <div className="flex flex-col gap-8">
+            {elements.map((element) => (
+              <Item
+                key={
+                  element.type === "section"
+                    ? element.section.id
+                    : element.question.id
+                }
+                element={element}
+              />
+            ))}
+          </div>
+        </Reorder.Group>
+      </DragProvider>
+      <AddButton />
+    </div>
   </CoCreationFormProvider>
 )
