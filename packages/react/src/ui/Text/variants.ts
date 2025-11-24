@@ -1,5 +1,5 @@
-import { cva } from "cva"
-import { type AsAllowedList, type TextVariant } from "./types"
+import { cva, type VariantProps } from "cva"
+import { type AsAllowedList } from "./types"
 
 export const textVariants = cva({
   base: "text-base text-f1-foreground",
@@ -48,6 +48,9 @@ export const textVariants = cva({
     align: "left",
   },
 })
+
+export type TextVariants = VariantProps<typeof textVariants>
+export type TextVariant = NonNullable<TextVariants["variant"]>
 
 export const defaultTag: Record<TextVariant, AsAllowedList> = {
   "heading-large": "h1",

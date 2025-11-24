@@ -1,27 +1,65 @@
 import { zeroRender as render, screen } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
 import { describe, expect, it } from "vitest"
-import { F0Text } from "../Text"
+import { F0Text } from "../F0Text"
 
 describe("F0Text Component", () => {
-  it("renders a title", () => {
-    render(<F0Text variant="heading">Test Heading</F0Text>)
+  describe("Allowed Variants", () => {
+    it("renders body variant", () => {
+      render(<F0Text variant="body" content="Body" />)
+      expect(screen.getByText("Body")).toBeInTheDocument()
+    })
 
-    expect(screen.getByText("Test Heading")).toBeInTheDocument()
-    expect(screen.getByText("Test Heading").tagName).toBe("H2")
+    it("renders description variant", () => {
+      render(<F0Text variant="description" content="Description" />)
+      expect(screen.getByText("Description")).toBeInTheDocument()
+    })
+
+    it("renders small variant", () => {
+      render(<F0Text variant="small" content="Small" />)
+      expect(screen.getByText("Small")).toBeInTheDocument()
+    })
+
+    it("renders inverse variant", () => {
+      render(<F0Text variant="inverse" content="Inverse" />)
+      expect(screen.getByText("Inverse")).toBeInTheDocument()
+    })
+
+    it("renders code variant", () => {
+      render(<F0Text variant="code" content="Code" />)
+      expect(screen.getByText("Code")).toBeInTheDocument()
+    })
+
+    it("renders label variant", () => {
+      render(<F0Text variant="label" content="Label" />)
+      expect(screen.getByText("Label")).toBeInTheDocument()
+    })
   })
 
-  it("renders a centered text", () => {
-    render(<F0Text align="center">Centered</F0Text>)
+  describe("Allowed HTML Tags", () => {
+    it("renders as p tag", () => {
+      render(<F0Text as="p" content="Paragraph" />)
+      expect(screen.getByText("Paragraph").tagName).toBe("P")
+    })
 
-    expect(screen.getByText("Centered")).toBeInTheDocument()
-    expect(screen.getByText("Centered")).toHaveClass("text-center")
-  })
+    it("renders as span tag", () => {
+      render(<F0Text as="span" content="Span" />)
+      expect(screen.getByText("Span").tagName).toBe("SPAN")
+    })
 
-  it("renders a small text", () => {
-    render(<F0Text variant="small">Small</F0Text>)
+    it("renders as div tag", () => {
+      render(<F0Text as="div" content="Div" />)
+      expect(screen.getByText("Div").tagName).toBe("DIV")
+    })
 
-    expect(screen.getByText("Small")).toBeInTheDocument()
-    expect(screen.getByText("Small")).toHaveClass("text-sm")
+    it("renders as label tag", () => {
+      render(<F0Text as="label" content="Label" />)
+      expect(screen.getByText("Label").tagName).toBe("LABEL")
+    })
+
+    it("renders as code tag", () => {
+      render(<F0Text as="code" content="Code" />)
+      expect(screen.getByText("Code").tagName).toBe("CODE")
+    })
   })
 })

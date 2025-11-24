@@ -1,1 +1,1 @@
-export * from "./Text"
+export * from "./F0Text"

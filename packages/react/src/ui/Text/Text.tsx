@@ -1,21 +1,23 @@
+import { OneEllipsis } from "@/components/OneEllipsis"
+import { parseMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import type React from "react"
-import { createElement, forwardRef, type ReactNode } from "react"
-import { OneEllipsis } from "../OneEllipsis"
+import { createElement, forwardRef } from "react"
+import { type AsAllowedList } from "./types"
 import {
-  type AsAllowedList,
+  defaultTag,
+  textVariants,
   type TextVariant,
   type TextVariants,
-} from "./types"
-import { defaultTag, textVariants } from "./variants"
+} from "./variants"
 
-export interface TextInternalProps
+export interface TextProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "className">,
     React.RefAttributes<HTMLElement> {
   /**
    * Content to be rendered
    */
-  children?: ReactNode
+  content: string
 
   /**
    * The text variant to render. Determines styling and default semantic element.
@@ -55,21 +57,28 @@ export interface TextInternalProps
    * @default false
    */
   noEllipsisTooltip?: boolean
+
+  /**
+   * Enable markdown parsing for content
+   * @default false
+   */
+  markdown?: boolean
 }
 
 /**
  * Text component for consistent typography across the application.
  */
-export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
+export const Text = forwardRef<HTMLElement, TextProps>(
   (
     {
-      children,
+      content,
       variant,
       align,
       className,
       as,
       ellipsis,
       noEllipsisTooltip,
+      markdown,
       ...htmlProps
     },
     forwardedRef
@@ -77,6 +86,7 @@ export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
     const asTag = as ?? defaultTag[variant ?? "body"]
 
     // If ellipsis is enabled, wrap with the ellipsis component
+    // Note: markdown is disabled when ellipsis is enabled since OneEllipsis only accepts string children
     if (ellipsis !== undefined) {
       const lines = typeof ellipsis === "number" ? ellipsis : 1
 
@@ -87,13 +97,27 @@ export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
           noTooltip={noEllipsisTooltip}
           tag={asTag}
           className={cn(textVariants({ variant, align }), className)}
+          markdown={markdown}
           {...htmlProps}
         >
-          {children as string}
+          {content}
         </OneEllipsis>
       )
     }
 
+    // If markdown is enabled, parse and render as HTML
+    if (markdown) {
+      const html = parseMarkdown(content)
+
+      return createElement(asTag, {
+        ...htmlProps,
+        className: cn(textVariants({ variant, align }), className),
+        ref: forwardedRef,
+        dangerouslySetInnerHTML: { __html: html },
+      })
+    }
+
+    // Default: render as plain text
     return createElement(
       asTag,
       {
@@ -101,9 +125,9 @@ export const TextInternal = forwardRef<HTMLElement, TextInternalProps>(
         className: cn(textVariants({ variant, align }), className),
         ref: forwardedRef,
       },
-      children
+      content
     )
   }
 )
 
-TextInternal.displayName = "TextInternal"
+Text.displayName = "Text"
