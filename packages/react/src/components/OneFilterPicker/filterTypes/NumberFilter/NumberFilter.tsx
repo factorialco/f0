@@ -1,21 +1,38 @@
 "use client"
 
 import { F0Button } from "@/components/F0Button"
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { NumberInputInternal } from "@/experimental/Forms/Fields/NumberInput/internal"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
+import { LockLocked, LockUnlocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
-import { useCallback, useEffect, useState } from "react"
+import { useDeepCompareEffect } from "@reactuses/core"
+import { useMemo, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 
 export type NumberFilterOptions = {
   min?: number
   max?: number
   modes?: ("range" | "single")[]
+  strictToggle?: boolean
 }
 
 export type NumberFilterValue =
-  | [number | undefined, number | undefined]
+  | {
+      mode: "single"
+      value: number | undefined
+    }
+  | {
+      mode: "range"
+      from: {
+        value: number | undefined
+        strict: boolean
+      }
+      to: {
+        value: number | undefined
+        strict: boolean
+      }
+    }
   | undefined
 
 export type NumberFilterComponentProps = FilterTypeComponentProps<
@@ -49,73 +66,176 @@ export function NumberFilter({
   const showModeSwitch =
     options.modes === undefined || options.modes?.length > 1
 
-  const modeFromValue = useCallback((value: NumberFilterValue) => {
-    if (value?.[0] === value?.[1]) {
-      return "single"
+  const [localValue, setLocalValue] = useState<NumberFilterValue>(
+    value ?? {
+      mode: "single",
+      value: undefined,
     }
+  )
 
-    return "range"
-  }, [])
-
-  const [selectionMode, setSelectionMode] = useState(modeFromValue(value))
-
-  const [localValue, setLocalValue] = useState<
-    [number | undefined, number | undefined]
-  >([undefined, undefined])
-
-  useEffect(() => {
-    setLocalValue([value?.[0], value?.[1]])
+  useDeepCompareEffect(() => {
+    setLocalValue(value)
   }, [value])
 
   const handleModeChange = (checked: boolean) => {
-    setSelectionMode(checked ? "range" : "single")
-    if (!checked) {
-      onChange([localValue?.[0], localValue?.[0]])
+    if (checked) {
+      setLocalValue({
+        mode: "range",
+        from: {
+          value:
+            localValue?.mode === "single"
+              ? localValue?.value
+              : localValue?.from?.value,
+          strict: true,
+        },
+        to: {
+          value:
+            localValue?.mode === "single"
+              ? localValue?.value
+              : localValue?.to?.value,
+          strict: true,
+        },
+      })
     } else {
-      onChange([localValue?.[0], localValue?.[1]])
+      setLocalValue({
+        mode: "single",
+        value:
+          localValue?.mode === "single"
+            ? localValue?.value
+            : localValue?.from?.value,
+      })
+    }
+  }
+
+  const handleStrictChange = (index: "from" | "to", checked: boolean) => {
+    if (localValue?.mode === "range") {
+      setLocalValue({
+        ...localValue,
+        [index]: {
+          ...localValue?.[index],
+          strict: checked,
+        },
+      })
     }
   }
 
   const handleChange = (inputValue: number | null, index: "from" | "to") => {
-    if (selectionMode === "range") {
-      onChange([
-        index === "from" ? (inputValue ?? undefined) : localValue?.[0],
-        index === "to" ? (inputValue ?? undefined) : localValue?.[1],
-      ])
-    } else {
-      onChange([inputValue ?? undefined, inputValue ?? undefined])
-    }
+    setLocalValue((prev) => {
+      if (localValue?.mode === "range") {
+        return {
+          ...(prev ?? {}),
+          [index]: {
+            ...(prev?.[index] ?? {}),
+            value: inputValue ?? undefined,
+          },
+        }
+      }
+      return {
+        ...prev,
+        value: inputValue ?? undefined,
+      }
+    })
   }
+
+  useDeepCompareEffect(() => {
+    if (localValue?.mode === "range") {
+      onChange({
+        mode: "range",
+        from: {
+          value: localValue?.from?.value,
+          strict: localValue?.from?.strict ?? true,
+        },
+        to: {
+          value: localValue?.to?.value,
+          strict: localValue?.to?.strict ?? true,
+        },
+      })
+    } else {
+      onChange({
+        mode: "single",
+        value: localValue?.value,
+      })
+    }
+  }, [localValue])
+
+  const valueAsRange = useMemo(() => {
+    return {
+      from: {
+        value:
+          localValue?.mode === "range"
+            ? localValue?.from?.value
+            : localValue?.value,
+        strict: localValue?.mode === "range" ? localValue?.from?.strict : true,
+      },
+      to: {
+        value:
+          localValue?.mode === "range"
+            ? localValue?.to?.value
+            : localValue?.value,
+        strict: localValue?.mode === "range" ? localValue?.to?.strict : true,
+      },
+    }
+  }, [localValue])
 
   return (
     <>
       <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-6">
         <div className="flex flex-row gap-2">
           <div className="flex-1">
-            <NumberInput
+            <NumberInputInternal
               label={
-                selectionMode === "range"
-                  ? i18n.filters.number.greaterOrEqual
+                localValue?.mode === "range"
+                  ? localValue?.from?.strict
+                    ? i18n.filters.number.greaterOrEqual
+                    : i18n.filters.number.greaterThan
                   : i18n.filters.number.value
               }
               locale={l10n.locale}
-              value={localValue?.[0]}
+              value={valueAsRange.from.value}
               onChange={(inputValue) => handleChange(inputValue, "from")}
               max={options.max}
               min={options.min}
+              buttonToggle={
+                localValue?.mode === "range" && options.strictToggle
+                  ? {
+                      label: [
+                        i18n.filters.number.greaterThan,
+                        i18n.filters.number.lessThan,
+                      ],
+                      icon: [LockLocked, LockUnlocked],
+                      selected: valueAsRange.from.strict,
+                      onChange: (checked: boolean) =>
+                        handleStrictChange("from", checked),
+                    }
+                  : undefined
+              }
             />
           </div>
-          {selectionMode === "range" && (
+          {localValue?.mode === "range" && (
             <>
               <div className="flex items-center justify-center">-</div>
               <div className="flex-1">
-                <NumberInput
+                <NumberInputInternal
                   label={i18n.filters.number.lessOrEqual}
                   locale={l10n.locale}
-                  value={localValue?.[1]}
+                  value={valueAsRange.to.value}
                   onChange={(inputValue) => handleChange(inputValue, "to")}
                   max={options.max}
                   min={options.min}
+                  buttonToggle={
+                    localValue?.mode === "range" && options.strictToggle
+                      ? {
+                          label: [
+                            i18n.filters.number.lessOrEqual,
+                            i18n.filters.number.lessThan,
+                          ],
+                          icon: [LockLocked, LockUnlocked],
+                          selected: valueAsRange.to.strict,
+                          onChange: (checked: boolean) =>
+                            handleStrictChange("to", checked),
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </>
@@ -124,7 +244,7 @@ export function NumberFilter({
         {showModeSwitch && (
           <Switch
             title={i18n.filters.number.rangeTitle}
-            checked={selectionMode === "range"}
+            checked={localValue?.mode === "range"}
             onCheckedChange={handleModeChange}
           />
         )}

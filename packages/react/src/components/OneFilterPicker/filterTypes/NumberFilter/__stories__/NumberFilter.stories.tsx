@@ -43,7 +43,10 @@ export const SingleWithSelectedValues: Story = {
         max: 100,
       },
     },
-    value: [100, 100],
+    value: {
+      mode: "single",
+      value: 100,
+    },
     onChange: () => {},
   },
 }
@@ -57,7 +60,31 @@ export const RangeWithSelectedValues: Story = {
         max: 100,
       },
     },
-    value: [0, 100],
+    value: {
+      mode: "range",
+      from: {
+        value: 0,
+        strict: true,
+      },
+      to: {
+        value: 100,
+        strict: true,
+      },
+    },
+    onChange: () => {},
+  },
+}
+
+export const RangeWithStrictToggle: Story = {
+  args: {
+    schema: {
+      label: "Department",
+      options: {
+        min: 0,
+        max: 100,
+        strictToggle: true,
+      },
+    },
     onChange: () => {},
   },
 }
