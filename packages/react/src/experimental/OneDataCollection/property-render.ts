@@ -3,6 +3,7 @@ import {
   ValueDisplayRendererDefinition,
 } from "@/components/value-display"
 import { RecordType } from "@/hooks/datasource"
+import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { ReactNode } from "react"
 import { VisualizationType } from "./visualizations/collection/types"
 
@@ -42,18 +43,32 @@ export type PropertyDefinition<T> = {
   hide?: (item: T) => boolean
 }
 
+const undefinedValueByVisualization: Partial<
+  Record<VisualizationType, string | undefined> & { default: string }
+> = {
+  default: "-",
+  list: undefined,
+}
+
 export const renderProperty = <R extends RecordType>(
   item: R,
   property: PropertyDefinition<R>,
-  visualization: VisualizationType
+  visualization: VisualizationType,
+  i18n: TranslationsType
 ): ReactNode => {
   const renderDefinition = property.render(item)
+
+  const undefinedValue =
+    visualization in undefinedValueByVisualization
+      ? undefinedValueByVisualization[visualization]
+      : undefinedValueByVisualization.default
 
   return metadataRenderer(
     renderDefinition as ValueDisplayRendererDefinition,
     {
       visualization,
+      i18n,
     },
-    "-"
+    undefinedValue
   )
 }

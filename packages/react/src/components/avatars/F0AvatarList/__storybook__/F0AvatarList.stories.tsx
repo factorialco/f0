@@ -2,6 +2,7 @@ import {
   avatarVariants,
   CompanyAvatarVariant,
   FileAvatarVariant,
+  FlagAvatarVariant,
   PersonAvatarVariant,
   TeamAvatarVariant,
 } from "@/components/avatars/F0Avatar"
@@ -36,6 +37,7 @@ const dummyPeople = [
     firstName: "Hellen",
     lastName: "Fernández",
     src: "/avatars/person04.jpg",
+    deactivated: true,
   },
 ]
 
@@ -64,8 +66,13 @@ const dummyFiles = [
   { file: { name: "image.jpg", type: "image/jpeg" } },
 ]
 
+const dummyFlags = [
+  { name: "flag", flag: "es" },
+  { name: "flag", flag: "fr" },
+]
+
 function getDummyAvatar<
-  T extends "person" | "company" | "team" | "file" = "person",
+  T extends "person" | "company" | "team" | "flag" | "file" = "person",
 >(
   type: T,
   index: number
@@ -75,14 +82,17 @@ function getDummyAvatar<
     ? CompanyAvatarVariant
     : T extends "team"
       ? TeamAvatarVariant
-      : T extends "file"
-        ? FileAvatarVariant
-        : never {
+      : T extends "flag"
+        ? FlagAvatarVariant
+        : T extends "file"
+          ? FileAvatarVariant
+          : never {
   const sourceData = {
     person: dummyPeople,
     company: dummyCompanies,
     team: dummyTeams,
     file: dummyFiles,
+    flag: dummyFlags,
   }
 
   const mockItem = sourceData[type][index % sourceData[type].length]
@@ -99,13 +109,15 @@ function getDummyAvatar<
       ? CompanyAvatarVariant
       : T extends "team"
         ? TeamAvatarVariant
-        : T extends "file"
-          ? FileAvatarVariant
-          : never
+        : T extends "flag"
+          ? FlagAvatarVariant
+          : T extends "file"
+            ? FileAvatarVariant
+            : never
 }
 
 function getDummyAvatars<
-  T extends "person" | "company" | "team" | "file" = "person",
+  T extends "person" | "company" | "team" | "flag" | "file" = "person",
 >(
   count: number,
   type: T
@@ -115,9 +127,11 @@ function getDummyAvatars<
     ? CompanyAvatarVariant[]
     : T extends "team"
       ? TeamAvatarVariant[]
-      : T extends "file"
-        ? FileAvatarVariant[]
-        : never {
+      : T extends "flag"
+        ? FlagAvatarVariant[]
+        : T extends "file"
+          ? FileAvatarVariant[]
+          : never {
   const mockList = Array.from({ length: count }, (_, index) =>
     getDummyAvatar(type, index)
   )
@@ -128,9 +142,11 @@ function getDummyAvatars<
       ? CompanyAvatarVariant[]
       : T extends "team"
         ? TeamAvatarVariant[]
-        : T extends "file"
-          ? FileAvatarVariant[]
-          : never
+        : T extends "flag"
+          ? FlagAvatarVariant[]
+          : T extends "file"
+            ? FileAvatarVariant[]
+            : never
 }
 
 const meta: Meta<typeof F0AvatarList> = {

@@ -1,5 +1,14 @@
 import NumberFlow from "@number-flow/react"
-import { addMonths, addYears, endOfMonth, parse, startOfMonth } from "date-fns"
+import {
+  addMonths,
+  addYears,
+  endOfMonth,
+  formatDate,
+  isSameMonth,
+  isSameYear,
+  parse,
+  startOfMonth,
+} from "date-fns"
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
@@ -9,7 +18,8 @@ import {
   toDateRangeString,
   toGranularityDateRange,
 } from "../../utils"
-import { GranularityDefinition } from "../types"
+import { rangeSeparator } from "../consts"
+import { DateStringFormat, GranularityDefinition } from "../types"
 import { MonthView } from "./MonthView"
 
 export function toMonthGranularityDateRange<
@@ -23,6 +33,29 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
     from: startOfMonth(addMonths(date.from, delta)),
     to: endOfMonth(addMonths(date.to, delta)),
   }
+}
+
+const formatMonthShort = (date: Date | DateRange | undefined | null) => {
+  return formatDateToString(date, "MM/yyyy")
+}
+
+const formatMonthLong = (date: Date | DateRange | undefined | null) => {
+  const dateRange = toMonthGranularityDateRange(date)
+  if (!dateRange) {
+    return ""
+  }
+  // Single date
+  if (!dateRange.to || isSameMonth(dateRange.from, dateRange.to)) {
+    return formatDate(dateRange.from, "MMM yyyy")
+  }
+
+  // Range
+  if (isSameYear(dateRange.from, dateRange.to)) {
+    return `${formatDate(dateRange.from, "MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+  }
+
+  // Different month and year
+  return `${formatDate(dateRange.from, "MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
 }
 
 export const monthGranularity: GranularityDefinition = {
@@ -52,7 +85,14 @@ export const monthGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => formatDateRange(date, "MM/yyyy"),
   toRange: (date) => toMonthGranularityDateRange(date),
-  toString: (date) => formatDateToString(date, "MM/yyyy"),
+  toString: (date, _, format = "default") => {
+    const formats: Record<DateStringFormat, string> = {
+      default: formatMonthShort(date),
+      long: formatMonthLong(date),
+    }
+    return formats[format] ?? formats.default
+  },
+  toStringMaxWidth: () => 140,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
@@ -113,6 +153,7 @@ export const monthGranularity: GranularityDefinition = {
         motionDirection={renderProps.motionDirection}
         minDate={minDate ? minDate.from : undefined}
         maxDate={maxDate ? maxDate.to : undefined}
+        compact={renderProps.compact}
       />
     )
   },

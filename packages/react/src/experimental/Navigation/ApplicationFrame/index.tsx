@@ -9,12 +9,22 @@ import { cn, focusRing } from "../../../lib/utils"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 
-import { Fragment } from "react"
+import {
+  AiPromotionChat,
+  AiPromotionChatProvider,
+  AiPromotionChatProviderProps,
+} from "@/experimental/AiPromotionChat"
+import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
+import { breakpoints } from "@factorialco/f0-core"
+import { Fragment, useEffect, useRef } from "react"
+import { useMediaQuery } from "usehooks-ts"
 import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
-import { FrameProvider, useSidebar } from "./FrameProvider"
+import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
+import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
-interface ApplicationFrameProps {
+export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
+  aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
   banner?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
@@ -25,12 +35,28 @@ export function ApplicationFrame({
   sidebar,
   banner,
   ai,
+  aiPromotion,
 }: ApplicationFrameProps) {
-  const AiProvider = ai ? AiChatProvider : Fragment
+  const AiProvider = ai?.enabled
+    ? AiChatProvider
+    : aiPromotion?.enabled
+      ? AiPromotionChatProvider
+      : Fragment
+  const aiProps = ai?.enabled
+    ? ai
+    : aiPromotion?.enabled
+      ? aiPromotion
+      : undefined
+
   return (
     <FrameProvider>
-      <AiProvider {...ai}>
-        <ApplicationFrameContent sidebar={sidebar} banner={banner}>
+      <AiProvider {...aiProps}>
+        <ApplicationFrameContent
+          ai={ai}
+          aiPromotion={aiPromotion}
+          sidebar={sidebar}
+          banner={banner}
+        >
           {children}
         </ApplicationFrameContent>
       </AiProvider>
@@ -52,13 +78,78 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   )
 }
 
+function shouldToggleSidebar(
+  isChatOpen: boolean,
+  previousIsChatOpen: boolean,
+  sidebarState: SidebarState
+): boolean {
+  const isChatOpening = !previousIsChatOpen && isChatOpen
+  if (isChatOpening) {
+    return sidebarState === "hidden"
+  }
+
+  const isChatClosing = previousIsChatOpen && !isChatOpen
+  if (isChatClosing) {
+    return sidebarState !== "hidden"
+  }
+
+  return false
+}
+
+/**
+ * Custom hook to automatically close sidebar when AI chat opens on smaller screens
+ */
+function useAutoCloseSidebar(
+  isAiChatOpen: boolean,
+  shouldAutoCloseSidebar: boolean
+) {
+  const { sidebarState, toggleSidebar } = useSidebar()
+  const previousAiChatOpenRef = useRef(isAiChatOpen)
+
+  useEffect(() => {
+    if (
+      shouldAutoCloseSidebar &&
+      shouldToggleSidebar(
+        isAiChatOpen,
+        previousAiChatOpenRef.current,
+        sidebarState
+      )
+    ) {
+      toggleSidebar({ isInvokedByUser: false })
+    }
+
+    previousAiChatOpenRef.current = isAiChatOpen
+  }, [isAiChatOpen, shouldAutoCloseSidebar, sidebarState, toggleSidebar])
+}
+
 function ApplicationFrameContent({
+  ai,
+  aiPromotion,
   children,
   sidebar,
   banner,
 }: ApplicationFrameProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+  const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
+    useSidebar()
   const shouldReduceMotion = useReducedMotion()
+  const { open: isAiChatOpen } = useAiChat()
+  const { open: isAiPromotionChatOpen } = useAiPromotionChat()
+  const shouldAutoCloseSidebar = useMediaQuery(
+    `(max-width: ${breakpoints.xl}px)`,
+    {
+      initializeWithValue: true,
+    }
+  )
+
+  useEffect(() => {
+    setForceFloat(isAiChatOpen)
+  }, [isAiChatOpen, setForceFloat])
+
+  useEffect(() => {
+    setForceFloat(isAiPromotionChatOpen)
+  }, [isAiPromotionChatOpen, setForceFloat])
+
+  useAutoCloseSidebar(isAiChatOpen, shouldAutoCloseSidebar)
 
   return (
     <>
@@ -86,7 +177,7 @@ function ApplicationFrameContent({
                     animate={{ opacity: 0.1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                    onClick={toggleSidebar}
+                    onClick={() => toggleSidebar()}
                   />
                 )}
               </AnimatePresence>
@@ -129,7 +220,8 @@ function ApplicationFrameContent({
                   {children}
                 </motion.div>
               </motion.main>
-              <AiChat />
+              {ai && ai.enabled && <AiChat />}
+              {aiPromotion && aiPromotion.enabled && <AiPromotionChat />}
             </div>
           </LayoutGroup>
         </div>

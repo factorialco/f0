@@ -1,6 +1,12 @@
 import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/ui/InputField/InputField"
-import { forwardRef, useRef } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react"
 import { Search } from "../../../../icons/app"
 
 type F1SearchBoxProps = {
@@ -36,31 +42,62 @@ const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
     },
     ref
   ) => {
+    const input = useRef<HTMLInputElement>(null)
+
+    const interval = useRef<NodeJS.Timeout | null>(null)
+
+    useImperativeHandle(ref, () => input.current as HTMLInputElement)
+
+    useEffect(() => {
+      if (!props.autoFocus) {
+        if (interval.current) {
+          clearInterval(interval.current)
+        }
+        return
+      }
+
+      interval.current = setInterval(() => {
+        input.current?.focus()
+      }, 50)
+
+      return () => {
+        if (interval.current) {
+          clearInterval(interval.current)
+        }
+      }
+    }, [props.autoFocus])
+
     const valueToEmitRef = useRef<string | undefined>(undefined)
 
-    const onChangeLocal = (value: string) => {
-      if (
-        onChange &&
-        // It should emit the change when the user clears the field
-        (value.length >= threshold || value.length === 0)
-      ) {
-        // Debounces the onChange callback
-        if (valueToEmitRef.current === undefined) {
-          setTimeout(() => {
-            if (valueToEmitRef.current !== undefined) {
-              onChange(valueToEmitRef.current)
-            }
-            valueToEmitRef.current = undefined
-          }, debounceTime)
+    const onChangeLocal = useCallback(
+      (value: string) => {
+        if (
+          onChange &&
+          // It should emit the change when the user clears the field
+          (value.length >= threshold || value.length === 0)
+        ) {
+          // Debounces the onChange callback
+          if (valueToEmitRef.current === undefined) {
+            setTimeout(() => {
+              if (valueToEmitRef.current !== undefined) {
+                onChange(valueToEmitRef.current)
+                input.current?.focus()
+              }
+              valueToEmitRef.current = undefined
+            }, debounceTime)
+          }
+          valueToEmitRef.current = value
         }
-        valueToEmitRef.current = value
-      }
-    }
+      },
+      [onChange, threshold, debounceTime]
+    )
 
     return (
       <Input
-        ref={ref}
+        key="search-input"
+        ref={input}
         type="search"
+        tabIndex={-1}
         icon={Search}
         value={value}
         label={props.placeholder ?? "Search"}

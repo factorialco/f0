@@ -17,6 +17,11 @@ const ScrollArea = forwardRef<
     viewportRef?: React.RefObject<HTMLDivElement>
     onScrollTop?: () => void
     onScrollBottom?: () => void
+    /**
+     * The margin to add to the scroll area when the user is at the top or bottom of the scroll area.
+     * @default 0
+     */
+    scrollMargin?: number
   }
 >(
   (
@@ -27,6 +32,7 @@ const ScrollArea = forwardRef<
       viewportRef,
       onScrollTop,
       onScrollBottom,
+      scrollMargin = 0,
       ...props
     },
     ref
@@ -40,12 +46,15 @@ const ScrollArea = forwardRef<
         const { scrollTop, scrollHeight, clientHeight } = target
 
         // Check if scrolled to top
-        if (scrollTop === 0 && onScrollTop) {
+        if (scrollTop - scrollMargin <= 0 && onScrollTop) {
           onScrollTop()
         }
 
         // Check if scrolled to bottom
-        if (scrollTop + clientHeight >= scrollHeight && onScrollBottom) {
+        if (
+          scrollTop + clientHeight + scrollMargin >= scrollHeight &&
+          onScrollBottom
+        ) {
           onScrollBottom()
         }
       }

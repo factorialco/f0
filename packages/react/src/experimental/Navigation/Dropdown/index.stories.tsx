@@ -22,7 +22,6 @@ export const Default: Story = {
         onClick: () => console.log("Create clicked"),
         icon: Icons.Add,
         description: "New creation process",
-        "data-test": "foo",
       },
       {
         label: "Edit",
@@ -62,7 +61,6 @@ export const PlayTest: Story = {
         onClick: () => console.log("Create clicked"),
         icon: Icons.Add,
         description: "New creation process",
-        "data-test": "foo",
       },
       {
         label: "Edit",
@@ -93,12 +91,12 @@ export const PlayTest: Story = {
 
     const openButton = page.getByRole("button")
     await userEvent.click(openButton)
-    const menuItems = await page.findAllByRole("menuitem")
-    const itemWithDataset = menuItems.filter(
-      (item) => item.dataset.test === "foo"
-    )
-    await expect(itemWithDataset).toHaveLength(1)
-    await userEvent.click(itemWithDataset[0])
+    console.log(page.getByText("Create"))
+
+    const itemWithDataset = page.getByText("Create")
+
+    await expect(itemWithDataset).toBeInTheDocument()
+    await userEvent.click(itemWithDataset)
   },
 }
 

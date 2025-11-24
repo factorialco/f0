@@ -21,6 +21,8 @@ type FilterContentProps<Definition extends FiltersDefinition> = {
   tempFilters: FiltersState<Definition>
   /** Callback fired when a filter value changes */
   onFilterChange: (key: keyof Definition, value: unknown) => void
+  /** Tells us if we are in compact mode */
+  isCompactMode?: boolean
 }
 
 /**
@@ -44,6 +46,7 @@ export function FilterContent<Definition extends FiltersDefinition>({
   definition,
   tempFilters,
   onFilterChange,
+  isCompactMode,
 }: FilterContentProps<Definition>) {
   if (!selectedFilterKey) return null
 
@@ -60,11 +63,15 @@ export function FilterContent<Definition extends FiltersDefinition>({
   const currentValue = (tempFilters[selectedFilterKey] ||
     filterType.emptyValue) as FilterValue<FilterType>
 
-  function renderFilterForm<T extends FilterDefinition>(
-    schema: T,
-    value: FilterValue<T>,
+  function renderFilterForm<T extends FilterDefinition>({
+    schema,
+    value,
+    onChange,
+  }: {
+    schema: T
+    value: FilterValue<T>
     onChange: (v: FilterValue<T>) => void
-  ): React.ReactNode {
+  }): React.ReactNode {
     // double-cast to resolve overload union into a single callable signature
     const filterType = getFilterType(schema.type)
     return (
@@ -72,16 +79,19 @@ export function FilterContent<Definition extends FiltersDefinition>({
         schema: T
         value: FilterValue<T>
         onChange: (v: FilterValue<T>) => void
+        isCompactMode?: boolean
       }) => React.ReactNode
-    )({ schema, value, onChange })
+    )({ schema, value, onChange, isCompactMode })
   }
 
   return (
-    <div className="relative flex w-full flex-col gap-1">
+    <div className="relative flex h-full w-full flex-col gap-1">
       <div className="relative flex h-full flex-col justify-between overflow-y-auto">
-        {renderFilterForm(filter, currentValue, (value) =>
-          onFilterChange(selectedFilterKey, value)
-        )}
+        {renderFilterForm({
+          schema: filter,
+          value: currentValue,
+          onChange: (value) => onFilterChange(selectedFilterKey, value),
+        })}
       </div>
     </div>
   )

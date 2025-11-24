@@ -1,25 +1,26 @@
 "use client"
 
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { Spinner } from "@/experimental/Information/Spinner"
+import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
-import { useLoadOptions } from "./useLoadOptions"
+import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
 
 /**
  * Props for the InFilter component.
  * @template T - The type of values that can be selected
  */
-type InFilterComponentProps<T = unknown> = FilterTypeComponentProps<
-  T[],
-  InFilterOptions<T>
->
+type InFilterComponentProps<
+  T = unknown,
+  R extends RecordType = RecordType,
+> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>
 
 /**
  * A multi-select filter component that allows users to select multiple options from a predefined list.
@@ -69,31 +70,58 @@ type InFilterComponentProps<T = unknown> = FilterTypeComponentProps<
  * />
  * ```
  */
-export function InFilter<T extends string>({
+export function InFilter<T extends string, R extends RecordType = RecordType>({
   schema,
   value,
   onChange,
-}: InFilterComponentProps<T>) {
+  isCompactMode,
+}: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
   const [searchTerm, setSearchTerm] = useState("")
 
-  const { options, isLoading, error, loadOptions } = useLoadOptions({
-    ...schema,
-    type: "in",
+  const canLoadMore = useRef(true)
+
+  const { options, isLoading, error, loadOptions, loadMore } = useLoadOptions({
+    schema: {
+      ...schema,
+      type: "in",
+    },
+    search: searchTerm,
   })
+
+  const cacheKey = getCacheKey(schema)
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout
+    if (isLoading) {
+      canLoadMore.current = false
+    } else {
+      timeout = setTimeout(() => {
+        canLoadMore.current = true
+      }, 1000)
+    }
+
+    return () => clearTimeout(timeout)
+  }, [isLoading])
+
+  const hasSource = "source" in schema.options
 
   useEffect(() => {
     setSearchTerm("")
   }, [schema])
 
-  const filteredOptions = useMemo(() => {
-    return options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [options, searchTerm])
+  const filteredOptions = useMemo(
+    () =>
+      hasSource
+        ? options
+        : options.filter((option) =>
+            option.label.toLowerCase().includes(searchTerm.toLowerCase())
+          ),
+    [hasSource, options, searchTerm]
+  )
 
-  if (isLoading) {
+  if (isLoading && !options.length) {
     return (
       <div className="flex w-full items-center justify-center py-4">
         <Spinner size="small" />
@@ -131,25 +159,50 @@ export function InFilter<T extends string>({
 
   // Determine if we should show the search input
   // Show search when we have loaded options (regardless of whether they came from static or async source)
-  const showSearch = options.length > 0 && !isLoading
+  const showSearch = options.length > 0
 
   const handleSelectAll = () => {
-    const allValues = filteredOptions.map((option) => option.value)
     const currentValues = value ?? []
     const newValues = [...currentValues]
 
-    allValues.forEach((value) => {
-      if (!newValues.includes(value)) {
-        newValues.push(value)
+    filteredOptions.forEach((option) => {
+      if (!newValues.includes(option.value)) {
+        newValues.push(option.value)
+        // Cache the label when selecting all
+        cacheLabel(cacheKey, option.value, option.label)
       }
     })
 
     onChange(newValues)
   }
 
+  const handleCheckSelectAll = (checked: boolean) => {
+    if (checked) {
+      handleSelectAll()
+    } else {
+      onChange([])
+    }
+  }
+
   const handleClear = () => {
     onChange([])
   }
+
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    // Prevent multiple simultaneous calls
+    if (isLoading || !loadMore || !canLoadMore.current) return
+
+    const target = event.target as HTMLDivElement
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
+      loadMore()
+    }
+  }
+
+  const selectedText = `${value.length} ${
+    value.length === 1
+      ? i18n.status.selected.singular
+      : i18n.status.selected.plural
+  }`.toLowerCase()
 
   return (
     <div
@@ -160,14 +213,41 @@ export function InFilter<T extends string>({
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
-            placeholder="Search..."
+            placeholder={i18n.toc.search}
             value={searchTerm}
             onChange={setSearchTerm}
             clearable
           />
         </div>
       )}
-      <div className="flex-1 overflow-y-auto px-2">
+      {isCompactMode && (
+        <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
+      )}
+      <div
+        className={cn(
+          "overflow-y-scroll px-2",
+          isCompactMode && "px-1",
+          isCompactMode ? "max-h-[360px]" : "h-full"
+        )}
+        onScroll={handleScroll}
+      >
+        {isCompactMode && (
+          <div className="sticky bottom-0 left-0 right-0 flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1">
+            <span className="max-w-[250px] flex-1 whitespace-nowrap">
+              <OneEllipsis className="text-f1-foreground-secondary">
+                {selectedText}
+              </OneEllipsis>
+            </span>
+            <F0Checkbox
+              id="select-all"
+              title="Select all"
+              checked={value.length === filteredOptions.length}
+              onCheckedChange={handleCheckSelectAll}
+              presentational
+              hideLabel
+            />
+          </div>
+        )}
         {filteredOptions.map((option) => {
           const isSelected = value.includes(option.value)
           const optionId = `option-${String(option.value)}`
@@ -177,9 +257,14 @@ export function InFilter<T extends string>({
               key={String(option.value)}
               className={cn(
                 "flex w-full flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded p-2 font-medium transition-colors hover:bg-f1-background-secondary",
+                isCompactMode && "py-1 pr-1",
                 focusRing()
               )}
               onClick={() => {
+                if (!isSelected) {
+                  // Cache the label when selecting an option
+                  cacheLabel(cacheKey, option.value, option.label)
+                }
                 onChange(
                   isSelected
                     ? value.filter((v) => v !== option.value)
@@ -200,26 +285,33 @@ export function InFilter<T extends string>({
             </div>
           )
         })}
+        {isLoading && (
+          <div className="flex w-full items-center justify-center py-4">
+            <Spinner size="small" />
+          </div>
+        )}
       </div>
-      <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-        <Button
-          variant="outline"
-          label="Select all"
-          onClick={handleSelectAll}
-          disabled={
-            filteredOptions.length === 0 ||
-            (Array.isArray(value) && value.length === filteredOptions.length)
-          }
-          size="sm"
-        />
-        <Button
-          variant="ghost"
-          label="Clear"
-          onClick={handleClear}
-          disabled={!Array.isArray(value) || value.length === 0}
-          size="sm"
-        />
-      </div>
+      {!isCompactMode && (
+        <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
+          <F0Button
+            variant="outline"
+            label={i18n.filters.selectAll}
+            onClick={handleSelectAll}
+            disabled={
+              filteredOptions.length === 0 ||
+              (Array.isArray(value) && value.length === filteredOptions.length)
+            }
+            size="sm"
+          />
+          <F0Button
+            variant="ghost"
+            label={i18n.filters.clear}
+            onClick={handleClear}
+            disabled={!Array.isArray(value) || value.length === 0}
+            size="sm"
+          />
+        </div>
+      )}
     </div>
   )
 }

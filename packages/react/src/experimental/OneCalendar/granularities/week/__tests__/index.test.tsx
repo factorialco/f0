@@ -11,7 +11,9 @@ describe("weekGranularity", () => {
     date: {
       granularities: {
         week: {
-          long: "Week of %{day} %{month} %{year}",
+          long: "Week of {{day}} {{month}} {{year}}",
+          longSingular: "Week of {{date}}",
+          longPlural: "Weeks of {{date}}",
         },
       },
     },
@@ -89,7 +91,61 @@ describe("weekGranularity", () => {
         },
         i18n
       )
-      expect(result).toBe("W3 2024 → W4 2024")
+      expect(result).toBe("W3 → W4 2024")
+    })
+
+    it("formats a week range in same year correctly with long format", () => {
+      const result = weekGranularity.toString(
+        {
+          from: baseDate, // W3 2024
+          to: new Date(2024, 7, 8),
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Weeks of 15 Jan → Week of 5 Aug 2024")
+    })
+
+    it("formats a week range across years correctly with long format", () => {
+      const result = weekGranularity.toString(
+        {
+          from: new Date(2023, 11, 25), // W52 2023 (week starting December 25, 2023)
+          to: new Date(2024, 0, 8), // W2 2024 (week starting January 8, 2024)
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Weeks of 25 Dec 2023 → Week of 8 Jan 2024")
+    })
+
+    it("formats a long week range in same year correctly with long format", () => {
+      const result = weekGranularity.toString(
+        {
+          from: new Date(2024, 0, 8), // W2 2024
+          to: new Date(2024, 2, 4), // W10 2024
+        },
+        i18n,
+        "long"
+      )
+      expect(result).toBe("Weeks of 8 Jan → Week of 4 Mar 2024")
+    })
+
+    it("formats first week of year correctly with long format", () => {
+      const result = weekGranularity.toString(
+        new Date(2024, 0, 1),
+        i18n,
+        "long"
+      ) // January 1, 2024 (W1)
+      expect(result).toBe("Week of 1 Jan 2024")
+    })
+
+    it("formats last week of year correctly with long format", () => {
+      const result = weekGranularity.toString(
+        new Date(2024, 11, 30),
+        i18n,
+        "long"
+      ) // December 30, 2024
+      expect(result).toBe("Week of 30 Dec 2024")
     })
   })
 

@@ -2,7 +2,7 @@ import { EmojiImage, EmojiImageProps } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
 import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
 
-export const avatarEmojiSizes = ["sm", "md", "lg"] as const
+export const avatarEmojiSizes = ["sm", "md", "lg", "xl"] as const
 export type F0AvatarEmojiProps = {
   emoji: string
   size?: (typeof avatarEmojiSizes)[number]
@@ -12,6 +12,7 @@ const sizes = {
   sm: "w-6 h-6 rounded-sm",
   md: "w-9 h-9 rounded",
   lg: "w-10 h-10 rounded-md",
+  xl: "w-14 h-14 rounded-lg",
 }
 
 const imageSizes: Record<
@@ -21,6 +22,7 @@ const imageSizes: Record<
   sm: "xs",
   md: "sm",
   lg: "md",
+  xl: "lg",
 } as const
 
 export const F0AvatarEmoji = ({

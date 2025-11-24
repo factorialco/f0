@@ -1,3 +1,5 @@
+import { Lightbulb } from "@/icons/app"
+import ExternalLink from "@/icons/app/ExternalLink"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
@@ -22,6 +24,51 @@ const meta: Meta<typeof ApplicationFrame> = {
       showDevConsole: false,
       enabled: true,
       greeting: "Hello, John",
+      welcomeScreenSuggestions: [
+        {
+          icon: Lightbulb,
+          message: "Share feedback",
+          prompt:
+            "Share feedback and help shape One with your feedback in the next message (optional)",
+        },
+      ],
+    },
+    aiPromotion: {
+      enabled: false,
+      greeting: "Hey Hellen,",
+      title: "Meet One, your AI agent",
+      description:
+        "One simplifies your daily tasks so you can focus on what really matters. Join the waitlist (open until November 30, 2025) to:",
+      benefits: [
+        {
+          noBoldText: "Get access at",
+          boldText: "no additional cost",
+        },
+        {
+          noBoldText: "Explore key features",
+          boldText: "early",
+        },
+        {
+          noBoldText: "Share feedback and",
+          boldText: "help shape One",
+        },
+      ],
+      actions: [
+        {
+          label: "Join the waitlist",
+          onClick: () => {},
+          buttonType: "gradient",
+          isLoading: false,
+        },
+        {
+          label: "Learn more",
+          onClick: () => {},
+          buttonType: "internal",
+          buttonVariant: "ghost",
+          isLoading: false,
+          icon: ExternalLink,
+        },
+      ],
     },
     sidebar: <Sidebar {...SidebarStories.default.args} />,
     children: <Page {...PageStories.Default.args} />,
@@ -38,6 +85,7 @@ const DefaultStoryComponent = (
   return (
     <ApplicationFrame
       ai={args.ai}
+      aiPromotion={args.aiPromotion}
       sidebar={<Sidebar {...SidebarStories.default.args} />}
     >
       <Page {...PageStories.Default.args} />

@@ -12,6 +12,7 @@ export * from "./DetailsContent"
 export * from "./DetailsSummary"
 export * from "./Link"
 export * from "./StarterKit"
+export * from "./Table"
 export * from "./TaskList"
 export * from "./TextAlign"
 
@@ -23,6 +24,7 @@ export * from "./Placeholder"
 
 // Custom extensions
 export * from "./AIBlock"
+export * from "./BlockIdExtension"
 export * from "./CustomTask"
 export * from "./MoodTracker"
 export * from "./PersistSelection"

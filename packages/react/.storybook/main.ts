@@ -1,15 +1,15 @@
 import type { StorybookConfig } from "@storybook/react-vite"
-import { createRequire } from "node:module"
-import { dirname, join } from "node:path"
+import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import remarkGfm from "remark-gfm"
-
-const require = createRequire(import.meta.url)
 
 // We should add the STORYBOOK_ prefix to make sure that the environment variables are in browser mode (for example manager.ts file)
 if (process.env.PUBLIC_BUILD) {
   process.env.STORYBOOK_PUBLIC_BUILD = process.env.PUBLIC_BUILD
 }
+
+// Mark that we're building for Storybook to preserve data-testid attributes
+process.env.STORYBOOK_BUILD = "true"
 
 const config: StorybookConfig = {
   stories: [
@@ -42,8 +42,8 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-a11y"),
     getAbsolutePath("@storybook/addon-themes"),
     getAbsolutePath("@vueless/storybook-dark-mode"),
+    // getAbsolutePath("storybook-addon-tag-badges"),
     getAbsolutePath("@chromatic-com/storybook"),
-    getAbsolutePath("storybook-addon-tag-badges"),
     {
       name: getAbsolutePath("@storybook/addon-docs"),
       options: {
@@ -54,6 +54,7 @@ const config: StorybookConfig = {
         },
       },
     },
+    getAbsolutePath("@storybook/addon-designs"),
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
@@ -71,6 +72,15 @@ const config: StorybookConfig = {
     reactDocgenTypescriptOptions: {
       tsconfigPath: "../tsconfig.json",
     },
+  },
+  viteFinal: (config) => {
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": resolve(__dirname, "../src"),
+      "~": resolve(__dirname, "../"),
+    }
+    return config
   },
 }
 export default config

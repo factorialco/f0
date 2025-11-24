@@ -43,6 +43,8 @@ export interface GranularityDefinition {
     i18n: TranslationsType,
     format?: DateStringFormat
   ) => string
+  // Calculate the maximum width of the string representation of the date
+  toStringMaxWidth: () => number
   // Parse the date range string to a date range
   fromString: (
     dateStr: string | DateRangeString,
@@ -66,6 +68,7 @@ export interface GranularityDefinition {
     maxDate?: Date
     setViewDate: (date: Date) => void
     viewDate: Date
+    compact?: boolean
   }) => ReactNode
   // Adds a delta to a date range
   add: (date: DateRangeComplete, delta: number) => DateRangeComplete

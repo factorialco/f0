@@ -1,6 +1,7 @@
-import { F0Card } from "@/components/F0Card"
+import { CardInternal } from "@/components/F0Card/CardInternal"
+import { F0Link } from "@/components/F0Link"
 import { useDraggable } from "@/lib/dnd/hooks"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import {
   attachClosestEdge,
   extractClosestEdge,
@@ -11,6 +12,14 @@ import { useEffect, useRef, useState } from "react"
 
 export type DragConfig<T = unknown> = { id: string; type?: string; data?: T }
 
+const INTERACTIVE_SELECTOR =
+  'button, a[href], input, select, textarea, [role="button"], [role="checkbox"], [role="menuitem"], [role="option"], [role="radio"], [role="switch"]'
+
+const isInteractiveElement = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(target.closest(INTERACTIVE_SELECTOR))
+}
+
 export function KanbanCard<T = unknown>({
   drag,
   id,
@@ -19,6 +28,8 @@ export function KanbanCard<T = unknown>({
   laneId,
   draggable = false,
   showIndicator = true,
+  disabledEdges = [],
+  forcedEdge = null,
   ...props
 }: {
   drag: DragConfig<T>
@@ -28,8 +39,11 @@ export function KanbanCard<T = unknown>({
   laneId?: string
   draggable?: boolean
   showIndicator?: boolean
-} & React.ComponentProps<typeof F0Card>) {
+  disabledEdges?: Array<"top" | "bottom">
+  forcedEdge?: "top" | "bottom" | null
+} & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
+  const linkRef = useRef<HTMLAnchorElement | null>(null)
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
   useDraggable<T>({
@@ -74,6 +88,25 @@ export function KanbanCard<T = unknown>({
   const isFirst = index === 0
   const isLast = index === total - 1
 
+  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    if (!draggable) return
+    // Don't intercept clicks on interactive elements (checkboxes, buttons, etc.)
+    if (isInteractiveElement(e.target)) {
+      return
+    }
+    if (props.onClick) {
+      props.onClick()
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    if (linkRef.current) {
+      linkRef.current.click()
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
   return (
     <div
       ref={ref}
@@ -83,10 +116,40 @@ export function KanbanCard<T = unknown>({
         isFirst && "mt-1.5",
         isLast && "mb-1.5"
       )}
+      data-kanban-card="true"
+      data-index={index}
+      data-lane-id={laneId}
+      onClick={handleClick}
     >
-      <F0Card {...props} />
-      {showIndicator && overEdge && (
-        <DropIndicator edge={overEdge} type="terminal-no-bleed" gap="4px" />
+      <CardInternal {...props} disableOverlayLink={draggable} />
+      {props.link && (
+        <F0Link
+          ref={linkRef}
+          href={props.link}
+          className={cn(
+            "!z-1 pointer-events-none absolute inset-0 block rounded-xl",
+            focusRing()
+          )}
+          aria-label={props.title}
+        >
+          &nbsp;
+        </F0Link>
+      )}
+      {showIndicator && (forcedEdge ?? overEdge) && (
+        <>
+          {(() => {
+            const activeEdge = (forcedEdge ?? overEdge) as "top" | "bottom"
+            const isEdgeDisabled = disabledEdges.includes(activeEdge)
+            if (isEdgeDisabled) return null
+            return (
+              <DropIndicator
+                edge={activeEdge}
+                type="terminal-no-bleed"
+                gap="4px"
+              />
+            )
+          })()}
+        </>
       )}
     </div>
   )

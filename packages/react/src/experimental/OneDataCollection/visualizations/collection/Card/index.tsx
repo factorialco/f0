@@ -3,7 +3,6 @@ import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetadata"
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
-import { GroupHeader } from "@/experimental/OneDataCollection/components/GroupHeader/GroupHeader"
 import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
@@ -12,7 +11,9 @@ import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
 import { useSelectable } from "@/hooks/datasource/useSelectable"
 import { Placeholder } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
+import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
@@ -25,6 +26,7 @@ import { CollectionProps } from "../../../types"
 
 export type CardPropertyDefinition<T> = PropertyDefinition<T> & {
   icon?: IconType
+  tooltip?: string
 }
 
 export type CardVisualizationOptions<
@@ -47,9 +49,20 @@ const findNextMultiple = (n: number): number => {
   return Math.ceil(n / lcm) * lcm
 }
 
-const CardGrid = ({ children }: { children: React.ReactNode }) => {
+const CardGrid = ({
+  children,
+  tmpFullWidth,
+}: {
+  children: React.ReactNode
+  tmpFullWidth?: boolean
+}) => {
   return (
-    <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+        tmpFullWidth && "px-0"
+      )}
+    >
       {children}
     </div>
   )
@@ -109,6 +122,7 @@ type GroupCardsProps<
   avatar?: (record: Record) => CardAvatarVariant
   image?: (record: Record) => string
   compact?: boolean
+  tmpFullWidth?: boolean
 }
 
 const GroupCards = <
@@ -130,6 +144,7 @@ const GroupCards = <
   avatar,
   image,
   compact,
+  tmpFullWidth,
 }: GroupCardsProps<
   Record,
   Filters,
@@ -163,6 +178,7 @@ const GroupCards = <
 
         return {
           icon: property.icon ?? Placeholder,
+          tooltip: property.tooltip,
           property: cardProperty,
         }
       })
@@ -199,7 +215,7 @@ const GroupCards = <
   }
 
   return (
-    <CardGrid>
+    <CardGrid tmpFullWidth={tmpFullWidth}>
       {items.map((item, index) => {
         const id = source.selectable ? source.selectable(item) : undefined
         const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
@@ -287,6 +303,7 @@ export const CardCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  tmpFullWidth,
 }: CollectionProps<
   Record,
   Filters,
@@ -370,10 +387,10 @@ export const CardCollection = <
   )
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-4">
       <div className="overflow-auto">
         {isInitialLoading ? (
-          <CardGrid>
+          <CardGrid tmpFullWidth={tmpFullWidth}>
             {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i}>
                 <CardHeader>
@@ -431,6 +448,7 @@ export const CardCollection = <
                           avatar={avatar}
                           image={image}
                           compact={compact}
+                          tmpFullWidth={tmpFullWidth}
                         />
                       )}
                     </AnimatePresence>
@@ -450,6 +468,7 @@ export const CardCollection = <
                 avatar={avatar}
                 image={image}
                 compact={compact}
+                tmpFullWidth={tmpFullWidth}
               />
             )}
           </>

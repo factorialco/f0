@@ -56,7 +56,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    maxHeight: 600,
     title: "In Progress",
     items: mockTasks,
     getKey: (task: RecordType) => (task as MockTask).id,
@@ -120,7 +119,6 @@ export const WithFetchMore: Story = {
     },
   },
   args: {
-    maxHeight: 600,
     title: "Tasks - Infinite Scroll",
     items: mockTasks,
     getKey: (task: RecordType) => (task as MockTask).id,
@@ -189,7 +187,7 @@ export const WithFetchMore: Story = {
     return (
       <div
         className={
-          "relative flex min-h-56 w-fit flex-col gap-0 rounded-xl border transition-colors"
+          "relative flex h-full w-fit flex-col gap-0 rounded-xl border transition-colors"
         }
         style={{
           backgroundColor: "hsla(210, 91%, 22%, 0.02)",

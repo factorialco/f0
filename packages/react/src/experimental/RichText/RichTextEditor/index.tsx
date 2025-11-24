@@ -7,6 +7,7 @@ import {
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
+import { FocusScope } from "@radix-ui/react-focus-scope"
 import { Editor, EditorContent, useEditor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import {
@@ -64,6 +65,7 @@ interface RichTextEditorProps {
   errorConfig?: errorConfig
   height?: heightType
   plainHtmlMode?: boolean
+  fullScreenMode?: boolean
 }
 
 type RichTextEditorHandle = {
@@ -93,6 +95,7 @@ const RichTextEditorComponent = forwardRef<
     errorConfig,
     height = "auto",
     plainHtmlMode = false,
+    fullScreenMode = true,
   },
   ref
 ) {
@@ -155,50 +158,31 @@ const RichTextEditorComponent = forwardRef<
   }, [isLoadingEnhance])
 
   const handleToggleFullscreen = () => {
-    if (editor) {
-      // Save the current editor state in json format, cause it's easier to handle for tiptap all the states and we can keep all the states
-      setEditorState({
-        ...editorState,
-        json: editor.getJSON(),
-      })
-    }
     setIsFullscreen((prev) => !prev)
   }
 
   const disableAllButtons = !!(isAcceptChangesOpen || isLoadingEnhance || error)
 
-  const editor = useEditor(
-    {
-      extensions: ExtensionsConfiguration({
-        mentionsConfig,
-        mentionSuggestions,
-        setMentionSuggestions,
-        placeholder,
-        maxCharacters,
-        plainHtmlMode,
-      }),
-      content: editorState.json || editorState.html,
-      onUpdate: ({ editor }: { editor: Editor }) => {
-        handleEditorUpdate({ editor, onChange, setEditorState })
-      },
+  const editor = useEditor({
+    extensions: ExtensionsConfiguration({
+      mentionsConfig,
+      mentionSuggestions,
+      setMentionSuggestions,
+      placeholder,
+      maxCharacters,
+      plainHtmlMode,
+    }),
+    content: editorState.html,
+    onUpdate: ({ editor }: { editor: Editor }) => {
+      handleEditorUpdate({ editor, onChange, setEditorState })
     },
-    [isFullscreen]
-  )
+  })
 
   useEffect(() => {
     if (error && editor) {
       editor.setEditable(false)
     }
   }, [error, editor])
-
-  useEffect(() => {
-    if (editor && editorState.json) {
-      setEditorState({
-        ...editorState,
-        json: null,
-      })
-    }
-  }, [editor, editorState])
 
   useImperativeHandle(ref, () => ({
     clear: () => editor?.commands.clearContent(),
@@ -220,10 +204,6 @@ const RichTextEditorComponent = forwardRef<
     setContent: (content: string) => {
       if (editor) {
         setEditorContent({ editor, content })
-        setEditorState({
-          html: content,
-          json: null,
-        })
       }
     },
   }))
@@ -254,150 +234,160 @@ const RichTextEditorComponent = forwardRef<
   if (!editor) return null
 
   const editorContent = (
-    <div
-      ref={containerRef}
-      id={editorId}
-      className={cn(
-        "rich-text-editor-container flex flex-col bg-f1-background",
-        isFullscreen
-          ? "fixed inset-0 z-50"
-          : "relative w-full rounded-xl border border-solid border-f1-border"
-      )}
-    >
-      <Head
-        isFullscreen={isFullscreen}
-        handleToggleFullscreen={handleToggleFullscreen}
-        disableAllButtons={disableAllButtons}
-        title={title}
-      />
-
+    <FocusScope trapped={isFullscreen}>
       <div
-        className="relative w-full flex-grow overflow-hidden"
-        onClick={() => editor?.commands.focus()}
-      >
-        <div
-          ref={editorContentContainerRef}
-          className={cn(
-            "scrollbar-macos relative flex w-full items-start justify-center overflow-y-auto pb-1 pl-3 pr-10 pt-3",
-            isFullscreen ? "h-full" : getHeight(height)
-          )}
-        >
-          <motion.div
-            className={cn(
-              "w-full overflow-hidden",
-              isFullscreen && "max-w-4xl"
-            )}
-            initial={false}
-            animate={{
-              minHeight: needsMinHeight ? "4rem" : "auto",
-              opacity: needsMinHeight ? 0.8 : 1,
-              scale: needsMinHeight ? 0.98 : 1,
-            }}
-            transition={{
-              duration: 0.4,
-              ease: [0.04, 0.62, 0.23, 0.98],
-            }}
-          >
-            <EditorContent editor={editor} />
-          </motion.div>
-        </div>
-
-        <AnimatePresence>
-          {isLoadingEnhance && (
-            <motion.div
-              key="loading-enhance"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="absolute inset-0"
-            >
-              <LoadingEnhance
-                isFullscreen={isFullscreen}
-                label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div
+        ref={containerRef}
+        id={editorId}
         className={cn(
-          "rounded-b-lg bg-f1-background px-3",
-          hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
+          "rich-text-editor-container pointer-events-auto flex flex-col bg-f1-background",
+          isFullscreen
+            ? "fixed inset-0 z-50"
+            : "relative w-full rounded-xl border border-solid border-f1-border"
         )}
       >
-        <AnimatePresence>
-          {(isAcceptChangesOpen || error) && (
+        {isFullscreen && (
+          <div className="pointer-events-auto fixed inset-0 z-40" />
+        )}
+
+        <Head
+          fullScreenMode={fullScreenMode}
+          isFullscreen={isFullscreen}
+          handleToggleFullscreen={handleToggleFullscreen}
+          disableAllButtons={disableAllButtons}
+          title={title}
+        />
+
+        <div
+          className="relative z-50 w-full flex-grow overflow-hidden"
+          onClick={(e) => {
+            e?.preventDefault()
+            editor?.commands.focus()
+          }}
+        >
+          <div
+            ref={editorContentContainerRef}
+            className={cn(
+              "scrollbar-macos relative flex w-full items-start justify-center overflow-y-auto pb-1 pl-3 pr-10 pt-3",
+              isFullscreen ? "h-full" : getHeight(height)
+            )}
+          >
             <motion.div
-              key="accordion"
-              initial={{ height: 0, opacity: 0, y: -20 }}
-              animate={{ height: "auto", opacity: 1, y: 0 }}
-              exit={{ height: 0, opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="flex w-full items-center justify-center pt-2"
+              className={cn(
+                "w-full overflow-hidden",
+                isFullscreen && "max-w-4xl"
+              )}
+              initial={false}
+              animate={{
+                minHeight: needsMinHeight ? "4rem" : "auto",
+                opacity: needsMinHeight ? 0.8 : 1,
+                scale: needsMinHeight ? 0.98 : 1,
+              }}
+              transition={{
+                duration: 0.4,
+                ease: [0.04, 0.62, 0.23, 0.98],
+              }}
             >
-              {isAcceptChangesOpen && (
-                <AcceptChanges
-                  labels={enhanceConfig?.enhanceLabels}
-                  setLastIntent={setLastIntent}
-                  setIsAcceptChangesOpen={setIsAcceptChangesOpen}
-                  editor={editor}
-                  handleEnhanceWithAI={handleEnhanceWithAI}
-                  lastIntent={lastIntent}
-                />
-              )}
-              {error && (
-                <Error
-                  error={error}
-                  setError={setError}
-                  editor={editor}
-                  errorConfig={errorConfig}
-                  closeErrorButtonLabel={errorConfig?.closeErrorButtonLabel}
-                />
-              )}
+              <EditorContent editor={editor} />
             </motion.div>
+          </div>
+
+          <AnimatePresence>
+            {isLoadingEnhance && (
+              <motion.div
+                key="loading-enhance"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="absolute inset-0"
+              >
+                <LoadingEnhance
+                  isFullscreen={isFullscreen}
+                  label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div
+          className={cn(
+            "relative z-40 rounded-b-lg bg-f1-background px-3",
+            hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
           )}
-        </AnimatePresence>
+        >
+          <AnimatePresence>
+            {(isAcceptChangesOpen || error) && (
+              <motion.div
+                key="accordion"
+                initial={{ height: 0, opacity: 0, y: -20 }}
+                animate={{ height: "auto", opacity: 1, y: 0 }}
+                exit={{ height: 0, opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex w-full items-center justify-center pt-2"
+              >
+                {isAcceptChangesOpen && (
+                  <AcceptChanges
+                    labels={enhanceConfig?.enhanceLabels}
+                    setLastIntent={setLastIntent}
+                    setIsAcceptChangesOpen={setIsAcceptChangesOpen}
+                    editor={editor}
+                    handleEnhanceWithAI={handleEnhanceWithAI}
+                    lastIntent={lastIntent}
+                  />
+                )}
+                {error && (
+                  <Error
+                    error={error}
+                    setError={setError}
+                    editor={editor}
+                    errorConfig={errorConfig}
+                    closeErrorButtonLabel={errorConfig?.closeErrorButtonLabel}
+                  />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <FileList
-          files={files}
-          disabled={disableAllButtons}
-          filesConfig={filesConfig}
-          setFiles={setFiles}
-          fileInputRef={fileInputRef}
-        />
+          <FileList
+            files={files}
+            disabled={disableAllButtons}
+            filesConfig={filesConfig}
+            setFiles={setFiles}
+            fileInputRef={fileInputRef}
+          />
 
-        <Footer
-          editor={editor}
-          maxCharacters={maxCharacters}
-          secondaryAction={secondaryAction}
-          primaryAction={primaryAction}
-          fileInputRef={fileInputRef}
-          canUseFiles={filesConfig ? true : false}
-          isLoadingEnhance={isLoadingEnhance}
-          disableButtons={disableAllButtons}
-          enhanceConfig={enhanceConfig}
-          isFullscreen={isFullscreen}
-          onEnhanceWithAI={handleEnhanceWithAI}
-          setLastIntent={setLastIntent}
-          toolbarLabels={toolbarLabels}
-          setIsToolbarOpen={setIsToolbarOpen}
-          isToolbarOpen={isToolbarOpen}
-          plainHtmlMode={plainHtmlMode}
-        />
+          <Footer
+            editor={editor}
+            maxCharacters={maxCharacters}
+            secondaryAction={secondaryAction}
+            primaryAction={primaryAction}
+            fileInputRef={fileInputRef}
+            canUseFiles={filesConfig ? true : false}
+            isLoadingEnhance={isLoadingEnhance}
+            disableButtons={disableAllButtons}
+            enhanceConfig={enhanceConfig}
+            isFullscreen={isFullscreen}
+            onEnhanceWithAI={handleEnhanceWithAI}
+            setLastIntent={setLastIntent}
+            toolbarLabels={toolbarLabels}
+            setIsToolbarOpen={setIsToolbarOpen}
+            isToolbarOpen={isToolbarOpen}
+            plainHtmlMode={plainHtmlMode}
+          />
 
-        <EditorBubbleMenu
-          editorId={editorId}
-          editor={editor}
-          disableButtons={disableAllButtons}
-          toolbarLabels={toolbarLabels}
-          isToolbarOpen={isToolbarOpen}
-          isFullscreen={isFullscreen}
-          plainHtmlMode={plainHtmlMode}
-        />
+          <EditorBubbleMenu
+            editorId={editorId}
+            editor={editor}
+            disableButtons={disableAllButtons}
+            toolbarLabels={toolbarLabels}
+            isToolbarOpen={isToolbarOpen}
+            isFullscreen={isFullscreen}
+            plainHtmlMode={plainHtmlMode}
+          />
+        </div>
       </div>
-    </div>
+    </FocusScope>
   )
 
   return isFullscreen

@@ -8,7 +8,7 @@ import {
   OctagonX,
   TriangleAlert,
 } from "lucide-react"
-import { Component } from "../../../lib/component"
+import { Component } from "../../../lib/component/component"
 import { cn } from "../../../lib/utils"
 
 type Variants = "destructive" | "positive" | "warning" | "info"

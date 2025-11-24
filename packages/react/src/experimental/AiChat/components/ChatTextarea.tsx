@@ -1,5 +1,6 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
@@ -10,13 +11,15 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const translation = useI18n()
 
   const hasDataToSend = inputValue.trim().length > 0
 
   useEffect(() => {
     if (textareaRef.current && inputValue.length > 0) {
-      const { scrollHeight, clientHeight } = textareaRef.current
-      setHasScrollbar(scrollHeight > clientHeight)
+      const { scrollHeight } = textareaRef.current
+      const maxHeight = 240
+      setHasScrollbar(scrollHeight > maxHeight)
     } else {
       setHasScrollbar(false)
     }
@@ -49,7 +52,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border hover:cursor-text",
+        "relative isolate m-3 mt-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border hover:cursor-text",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
@@ -81,7 +84,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
       <div className="grid grid-cols-1 grid-rows-1">
         <div
           aria-hidden={true}
-          className="pointer-events-none invisible col-start-1 row-start-1 mx-3 mb-0 mt-3 max-h-36 whitespace-pre-wrap"
+          className="pointer-events-none invisible col-start-1 row-start-1 mb-0 mt-3 max-h-[240px] whitespace-pre-wrap break-words px-3 text-f1-foreground"
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
         </div>
@@ -108,12 +111,15 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Write something here.."
+          placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
-            "mx-3 mb-0 max-h-36 flex-1 resize-none overflow-y-scroll outline-none transition-all",
-            "bg-f1-background text-f1-foreground placeholder:text-f1-foreground-secondary",
-            !hasScrollbar && "mt-3"
+            "mb-0 mt-3 max-h-[240px] flex-1 resize-none px-3 outline-none transition-all",
+            "whitespace-pre-wrap break-words",
+            "text-f1-foreground placeholder:text-f1-foreground-secondary",
+            hasScrollbar
+              ? "scrollbar-macos overflow-y-scroll"
+              : "overflow-y-hidden"
           )}
         />
       </div>
@@ -123,20 +129,18 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           <ButtonInternal
             type="submit"
             variant="neutral"
-            label="Stop generating"
+            label={translation.ai.stopAnswerGeneration}
             icon={SolidStop}
             hideLabel
-            round
           />
         ) : (
           <ButtonInternal
             type="submit"
             disabled={!hasDataToSend}
             variant={hasDataToSend ? "default" : "neutral"}
-            label="Send message"
+            label={translation.ai.sendMessage}
             icon={ArrowUp}
             hideLabel
-            round
           />
         )}
       </div>

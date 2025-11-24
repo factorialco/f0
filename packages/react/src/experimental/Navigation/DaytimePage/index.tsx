@@ -1,7 +1,8 @@
-import { Button } from "@/components/Actions/Button"
+import { F0Button } from "@/components/F0Button"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
 import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
+import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"
 import { cn } from "@/lib/utils"
@@ -59,13 +60,12 @@ export function DaytimePage({
         <div className="flex flex-row items-center justify-between pr-6 @container">
           <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-6">
             {(isSmallScreen || sidebarState === "hidden") && (
-              <Button
+              <F0Button
                 variant="ghost"
-                onClick={toggleSidebar}
+                onClick={() => toggleSidebar()}
                 label="Open main menu"
                 icon={Menu}
                 hideLabel
-                round
               />
             )}
             <div
@@ -121,6 +121,7 @@ export function DaytimePage({
           </div>
           <div>
             <OneSwitch />
+            <OnePromotionSwitch />
           </div>
         </div>
       )}

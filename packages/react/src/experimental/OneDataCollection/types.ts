@@ -31,6 +31,9 @@ export type BulkActionDefinition = {
   icon?: IconType
   id: string
   keepSelection?: boolean // If true, the selection will not be cleared after the action is performed (false by default)
+  critical?: boolean
+  description?: string
+  disabled?: boolean
 }
 
 /**
@@ -93,4 +96,10 @@ export type CollectionProps<
   /** Function to handle data load */
   onLoadData: OnLoadDataCallback<Record, Filters>
   onLoadError: OnLoadErrorCallback
+
+  /**
+   * @deprecated This will be removed in the next major version
+   * Temporary prop to force the full width of the data collection (removes the X padding)
+   */
+  tmpFullWidth?: boolean
 } & VisualizationOptions

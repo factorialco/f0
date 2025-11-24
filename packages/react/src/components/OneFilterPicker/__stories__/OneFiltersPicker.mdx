@@ -150,6 +150,47 @@ const filters: FiltersDefinition<typeof mockUsers> = {
 }
 ```
 
+### Number
+
+The `number` filter is used to filter the data by a number value. The filter
+allows limit user select to a min and max number.
+
+#### Options
+
+- `min?`: The minimum number that the user can select.
+- `max?`: The maximum number that the user can select.
+- `modes?`: The modes of the number filter, can be `range` (default) or/and
+  `single`.
+
+```tsx
+const filters: FiltersDefinition<typeof mockUsers> = {
+  number: {
+    type: "number",
+    label: "Number",
+    options: {
+      min: 0,
+      max: 100,
+    },
+  },
+}
+```
+
+The filter returns always a tuple of two numbers, the first one is the minimum
+value and the second one is the maximum value. If the mode is `single` the
+second value is the same as the first one.
+
+```tsx
+[100, 100], // Means = 100
+// or
+[0, 100], // Means >= 0 and <= 100
+// or
+[0, undefined], // Means >= 0
+// or
+[undefined, 100], // Means <= 100
+// or
+[undefined, undefined], // Means no range
+```
+
 ## Adding a new filter type
 
 FiltersPicker provides a modular system to add new filter types easily.

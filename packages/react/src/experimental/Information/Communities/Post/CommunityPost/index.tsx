@@ -1,4 +1,4 @@
-import { Link } from "@/components/Actions/Link"
+import { F0Link } from "@/components/F0Link"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"
@@ -101,13 +101,17 @@ export const BaseCommunityPost = ({
     >
       <div className="hidden md:block">
         {author ? (
-          <Link href={author.url} title={authorFullName} stopPropagation>
+          <F0Link
+            href={author.url || "#"}
+            title={authorFullName}
+            stopPropagation
+          >
             <F0AvatarPerson
               firstName={author.firstName}
               lastName={author.lastName}
               src={author.avatarUrl}
             />
-          </Link>
+          </F0Link>
         ) : (
           <F0AvatarIcon icon={PersonIcon} />
         )}
@@ -118,7 +122,7 @@ export const BaseCommunityPost = ({
             <div className="flex flex-1 flex-row flex-wrap items-center gap-1">
               {author ? (
                 <>
-                  <Link
+                  <F0Link
                     href={author.url}
                     className="block md:hidden"
                     title={authorFullName}
@@ -132,15 +136,15 @@ export const BaseCommunityPost = ({
                         size="xs"
                       />
                     </span>
-                  </Link>
-                  <Link
+                  </F0Link>
+                  <F0Link
                     href={author.url}
                     title={authorFullName}
                     className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
                     stopPropagation
                   >
                     {authorFullName}
-                  </Link>
+                  </F0Link>
                 </>
               ) : (
                 <div className="block md:hidden">
@@ -155,14 +159,15 @@ export const BaseCommunityPost = ({
               >
                 {inLabel}
               </span>
-              <Link
+              <F0Link
                 onClick={group.onClick}
                 title={group.title}
                 className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
                 stopPropagation
+                href="#"
               >
                 {group.title}
-              </Link>
+              </F0Link>
               <span className="hidden text-f1-foreground-secondary md:inline">
                 ·
               </span>
@@ -227,19 +232,17 @@ export const BaseCommunityPost = ({
           </div>
         )}
         <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        <Reactions
-          items={reactions?.items ?? []}
-          onInteraction={reactions?.onInteraction}
-          action={
-            !noReactionsButton
-              ? {
-                  label: comment.label,
-                  onClick: comment.onClick,
-                  icon: CommentIcon,
-                }
-              : undefined
-          }
-        />
+        {!noReactionsButton && (
+          <Reactions
+            items={reactions?.items ?? []}
+            onInteraction={reactions?.onInteraction}
+            action={{
+              label: comment.label,
+              onClick: comment.onClick,
+              icon: CommentIcon,
+            }}
+          />
+        )}
       </div>
     </div>
   )

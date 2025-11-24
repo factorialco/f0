@@ -15,11 +15,13 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-import { TableColumnDefinition } from ".."
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { TableColumnDefinition } from "../types"
 import { useSticky } from "../useSticky"
+import { NestedRow } from "./NestedRow"
 
 export type RowProps<
   R extends RecordType,
@@ -47,6 +49,13 @@ export type RowProps<
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
   checkColumnWidth: number
+  tableWithChildren: boolean
+  depth?: number
+  hasLoadedChildren?: boolean
+  noBorder?: boolean
+  expandedLevels?: number
+  onExpand?: () => void
+  loading?: boolean
 }
 
 const RowComponentInner = <
@@ -68,6 +77,13 @@ const RowComponentInner = <
     checkColumnWidth,
     index,
     groupIndex,
+    tableWithChildren,
+    hasLoadedChildren,
+    depth = 0,
+    noBorder = false,
+    expandedLevels = 0,
+    onExpand,
+    loading = false,
   }: RowProps<
     R,
     Filters,
@@ -82,12 +98,15 @@ const RowComponentInner = <
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const id = source.selectable ? source.selectable(item) : undefined
+  const rowWithChildren = !!source.itemsWithChildren?.(item)
+
+  const i18n = useI18n()
 
   const renderCell = (
     item: R,
     column: TableColumnDefinition<R, Sortings, Summaries>
   ) => {
-    return renderProperty(item, column, "table")
+    return renderProperty(item, column, "table", i18n)
   }
 
   const key = `table-row-${groupIndex}-${index}`
@@ -106,17 +125,43 @@ const RowComponentInner = <
     dropDownOpen,
   } = useItemActions({ source, item })
 
+  const hasChildrenLoaded = hasLoadedChildren === undefined || hasLoadedChildren
+
+  if (rowWithChildren && hasChildrenLoaded) {
+    return (
+      <NestedRow
+        source={source}
+        item={item}
+        onCheckedChange={onCheckedChange}
+        selectedItems={selectedItems}
+        columns={columns}
+        frozenColumnsLeft={frozenColumnsLeft}
+        checkColumnWidth={checkColumnWidth}
+        index={index}
+        groupIndex={groupIndex}
+        tableWithChildren={tableWithChildren}
+        key={key}
+        ref={ref}
+      />
+    )
+  }
+
   return (
     <TableRow
       ref={ref}
       key={key}
       className={cn(
         "group transition-colors hover:bg-f1-background-hover",
-        "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']"
+        "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
+        noBorder && "after:bg-white-100"
       )}
     >
       {source.selectable && (
-        <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
+        <TableCell
+          width={checkColumnWidth}
+          sticky={{ left: 0 }}
+          loading={loading}
+        >
           {id !== undefined && (
             <div className="pointer-events-auto flex items-center justify-end">
               <Checkbox
@@ -129,6 +174,7 @@ const RowComponentInner = <
           )}
         </TableCell>
       )}
+
       {columns.map((column, cellIndex) => (
         <TableCell
           key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
@@ -137,6 +183,12 @@ const RowComponentInner = <
           onClick={itemOnClick}
           width={column.width}
           sticky={getStickyPosition(cellIndex)}
+          hasChildren={rowWithChildren}
+          tableWithChildren={tableWithChildren}
+          depth={depth}
+          expandedLevels={expandedLevels}
+          onExpand={onExpand}
+          loading={loading}
         >
           <div
             className={cn(
@@ -149,8 +201,7 @@ const RowComponentInner = <
         </TableCell>
       ))}
 
-      {/** Mobile item actions */}
-      {source.itemActions && (
+      {source.itemActions && !loading && (
         <>
           {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
           <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
@@ -162,7 +213,7 @@ const RowComponentInner = <
               />
             </ItemActionsRowContainer>
           </td>
-
+          {/** Mobile item actions */}
           <TableCell
             key={`table-cell-${groupIndex}-${index}-actions`}
             width={68}
@@ -171,6 +222,7 @@ const RowComponentInner = <
             }}
             href={itemHref}
             className="table-cell md:hidden"
+            loading={loading}
           >
             <ItemActionsMobile
               items={mobileDropdownItemActions}

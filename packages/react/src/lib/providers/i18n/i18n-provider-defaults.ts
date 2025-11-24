@@ -1,4 +1,7 @@
+import { i18nCountries } from "./partials/countries"
+
 export const defaultTranslations = {
+  countries: i18nCountries,
   approvals: {
     history: "Approval history",
     statuses: {
@@ -13,14 +16,27 @@ export const defaultTranslations = {
     },
   },
   navigation: {
-    sidebar: "Main navigation",
+    sidebar: {
+      label: "Main navigation",
+      companySelector: {
+        label: "Select a company",
+        placeholder: "Select a company",
+      },
+    },
     previous: "Previous",
     next: "Next",
+  },
+  inputs: {
+    password: {
+      show: "Show password",
+      hide: "Hide password",
+    },
   },
   actions: {
     add: "Add",
     edit: "Edit",
     save: "Save",
+    send: "Send",
     cancel: "Cancel",
     copy: "Copy",
     close: "Close",
@@ -38,6 +54,7 @@ export const defaultTranslations = {
     thumbsDown: "Dislike",
     other: "Other actions",
     toggle: "Toggle",
+    toggleDropdownMenu: "Toggle dropdown menu",
   },
   status: {
     selected: {
@@ -48,9 +65,27 @@ export const defaultTranslations = {
   filters: {
     label: "Filters",
     applyFilters: "Apply filters",
+    applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
+    number: {
+      value: "Value",
+      equal: "Equal to",
+      equalTo: "Equal to {{value}}",
+      lessOrEqual: "Less or equal to",
+      greaterOrEqual: "Greater or equal to",
+      equalShort: "= {{value}}",
+      greaterThanOrEqualShort: ">= {{value}}",
+      lessThanOrEqualShort: "<= {{value}}",
+      rangeTitle: "Use range",
+      range: "Between {{min}} and {{max}}",
+    },
+    selectAll: "Select all",
+    clear: "Clear",
+  },
+  toc: {
+    search: "Search...",
   },
   collections: {
     sorting: {
@@ -73,6 +108,14 @@ export const defaultTranslations = {
       kanban: "Kanban view",
       pagination: {
         of: "of",
+      },
+      settings: "{{visualizationName}} settings",
+      reset: "Reset to default",
+    },
+    table: {
+      settings: {
+        showAllColumns: "Show all",
+        hideAllColumns: "Hide all",
       },
     },
     itemsCount: "items",
@@ -133,7 +176,9 @@ export const defaultTranslations = {
       week: {
         currentDate: "This week",
         label: "Week",
-        long: "Week of %{day} %{month} %{year}",
+        long: "Week of {{day}} {{month}} {{year}}",
+        longSingular: "Week of {{date}}",
+        longPlural: "Weeks of {{date}}",
       },
       month: {
         currentDate: "This month",
@@ -180,8 +225,35 @@ export const defaultTranslations = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     scrollToBottom: "Scroll to bottom",
-    welcome: "I'm One. Ask or make anything.",
-    initialMessage: "How can I help you today?",
+    welcome: "Ask or create with One",
+    defaultInitialMessage: "How can I help you today?",
+    inputPlaceholder: "Ask about time, people, or company info…",
+    stopAnswerGeneration: "Stop generating",
+    sendMessage: "Send message",
+    thoughtsGroupTitle: "Reflection",
+    resourcesGroupTitle: "Resources",
+    thinking: "Thinking...",
+    feedbackModal: {
+      positive: {
+        title: "What did you like about this response?",
+        label: "Your feedback helps us make Factorial AI better",
+        placeholder: "Share what worked well",
+      },
+      negative: {
+        title: "What could have been better?",
+        label: "Your feedback helps us improve future answers",
+        placeholder: "Share what didn’t work",
+      },
+    },
+  },
+  select: {
+    noResults: "No results found",
+    loadingMore: "Loading...",
+  },
+  numberInput: {
+    between: "It should be between {{min}} and {{max}}",
+    greaterThan: "It should be greater than {{min}}",
+    lessThan: "It should be less than {{max}}",
   },
 } as const
 
@@ -192,5 +264,27 @@ type TranslationShape<T> = {
       ? TranslationShape<T[K]>
       : never
 }
+
+// Utility type to generate all possible dot-separated paths from nested object
+type PathsToStringProps<T> = T extends string
+  ? []
+  : {
+      [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>]
+    }[Extract<keyof T, string>]
+
+type Join<T extends string[], D extends string> = T extends []
+  ? never
+  : T extends [infer F]
+    ? F
+    : T extends [infer F, ...infer R]
+      ? F extends string
+        ? `${F}${D}${Join<Extract<R, string[]>, D>}`
+        : never
+      : string
+
+export type TranslationKey = Join<
+  PathsToStringProps<typeof defaultTranslations>,
+  "."
+>
 
 export type TranslationsType = TranslationShape<typeof defaultTranslations>

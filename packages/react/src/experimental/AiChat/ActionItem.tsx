@@ -1,24 +1,46 @@
 import { F0Icon } from "@/components/F0Icon"
-import CheckCircle from "@/icons/animated/CheckCircle"
+import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
-import { Spinner } from "../Information/Spinner"
+import { cn } from "@/lib/utils"
+import { ChatSpinner } from "./components/ChatSpinner"
+import "./styles.css"
 
 export interface ActionItemProps {
   title: string
-  status: "inProgress" | "executing" | "completed"
+  status?: "inProgress" | "executing" | "completed"
+  inGroup?: boolean
 }
 
-export const ActionItem = ({ title, status }: ActionItemProps) => {
+export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
   return (
-    <div className="flex items-center gap-1 text-f1-foreground-secondary">
+    <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
       {status === "inProgress" && (
-        <F0Icon state="animate" size="lg" icon={DottedCircle} />
+        <div className="-mt-[2px] *:block">
+          <F0Icon
+            state="animate"
+            size={inGroup ? "md" : "lg"}
+            icon={DottedCircle}
+          />
+        </div>
       )}
-      {status === "executing" && <Spinner className="h-6 w-6" />}
+      {status === "executing" && (
+        <div className="-mt-[2px] grid h-6 w-6 shrink-0 items-center justify-items-center">
+          <ChatSpinner />
+        </div>
+      )}
       {status === "completed" && (
-        <F0Icon state="animate" size="lg" icon={CheckCircle} />
+        <div className="-mt-[2px] *:block">
+          <F0Icon
+            color="secondary"
+            state="animate"
+            size={inGroup ? "md" : "lg"}
+            icon={OutlineCircle}
+          />
+        </div>
       )}
-      <p>{title}</p>
+      <p className={cn("text-pretty", status === "executing" && "shine-text")}>
+        {title}
+      </p>
     </div>
   )
 }

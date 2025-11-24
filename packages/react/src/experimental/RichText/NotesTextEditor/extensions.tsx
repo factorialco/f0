@@ -1,5 +1,5 @@
 import {
-  ColorExtension,
+  BlockIdExtension,
   createAccessibilityExtension,
   createPlaceholderExtension,
   createSlashCommandExtension,
@@ -12,6 +12,7 @@ import {
   MoodTrackerExtension,
   PersistSelection,
   StarterKitExtension,
+  TableExtension,
   TaskListExtension,
   TextAlignExtension,
   TextStyleExtension,
@@ -72,7 +73,6 @@ export const createNotesTextEditorExtensions = (
     StarterKitExtension,
     UnderlineExtension,
     TextStyleExtension,
-    ColorExtension,
     TypographyExtension,
     TaskListExtension,
     CustomTaskExtension,
@@ -82,6 +82,7 @@ export const createNotesTextEditorExtensions = (
     DetailsExtension,
     DetailsSummaryExtension,
     DetailsContentExtension,
+    TableExtension,
     MoodTrackerExtension.configure({
       currentConfig: enhancedMoodTrackerConfig,
     }),
@@ -94,6 +95,7 @@ export const createNotesTextEditorExtensions = (
     AIBlockExtension.configure({
       currentConfig: enhancedAIBlockConfig,
     }),
+    BlockIdExtension, // Automatically add unique IDs to all block nodes
     PersistSelection,
     createPlaceholderExtension(placeholder),
     createAccessibilityExtension(placeholder),

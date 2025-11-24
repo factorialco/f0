@@ -1,5 +1,6 @@
-import { Button, CopyButton } from "@/components/Actions/Button"
-import { Spinner } from "@/experimental"
+import { F0Button } from "@/components/F0Button"
+import { ButtonCopy } from "@/ui/ButtonCopy"
+
 import {
   ThumbsDown,
   ThumbsDownFilled,
@@ -10,7 +11,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
+import { ActionItem } from "../ActionItem"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
+import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
   isGenerating,
@@ -18,17 +21,25 @@ export const AssistantMessage = ({
   markdownTagRenderers,
   message,
   onCopy,
-  onThumbsDown,
-  onThumbsUp,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
-  const subComponent = message?.generativeUI?.()
+  const isThinkingTool =
+    message?.role === "assistant" &&
+    message.toolCalls?.find(
+      (tool) => tool.function.name === "orchestratorThinking"
+    )
+  const subComponent = message?.generativeUI?.(
+    isThinkingTool
+      ? {
+          status: isLoading ? "executing" : "completed",
+        }
+      : undefined
+  )
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
-  const [reactionValue, setReactionValue] = useState<"like" | "dislike" | null>(
-    null
-  )
+  const { open: openFeedbackModal } = useFeedbackModal()
+  const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
   const [isHovered, setIsHovered] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
   const handleMouseEnter = useCallback(() => {
@@ -52,14 +63,12 @@ export const AssistantMessage = ({
 
   return (
     <div
-      className="relative isolate flex w-full flex-col items-start justify-center last:mb-8"
+      className="relative isolate flex w-full flex-col items-start justify-center"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {isLoading && (
-        <div className="min-h-[20px]">
-          <Spinner size="small" className="text-f1-foreground" />
-        </div>
+      {isLoading && !subComponent && (
+        <ActionItem title={translations.ai.thinking} status="executing" />
       )}
       {message && (
         <>
@@ -81,7 +90,7 @@ export const AssistantMessage = ({
           >
             <div className="flex gap-1">
               <div>
-                <CopyButton
+                <ButtonCopy
                   variant="ghost"
                   valueToCopy={content}
                   disabled={isGenerating}
@@ -92,7 +101,7 @@ export const AssistantMessage = ({
                 />
               </div>
               <div>
-                <Button
+                <F0Button
                   variant="ghost"
                   size="sm"
                   label={translations.actions.thumbsUp}
@@ -100,14 +109,17 @@ export const AssistantMessage = ({
                   hideLabel
                   disabled={isGenerating}
                   onClick={(e) => {
-                    setReactionValue((val) => (val === "like" ? null : "like"))
-                    onThumbsUp?.(message)
+                    const newValue = reactionValue === "like" ? null : "like"
+                    if (newValue) {
+                      openFeedbackModal(newValue, message)
+                    }
+                    setReactionValue(newValue)
                     e.currentTarget.blur()
                   }}
                 />
               </div>
               <div>
-                <Button
+                <F0Button
                   variant="ghost"
                   size="sm"
                   label={translations.actions.thumbsDown}
@@ -117,10 +129,12 @@ export const AssistantMessage = ({
                   hideLabel
                   disabled={isGenerating}
                   onClick={(e) => {
-                    setReactionValue((val) =>
-                      val === "dislike" ? null : "dislike"
-                    )
-                    onThumbsDown?.(message)
+                    const newValue =
+                      reactionValue === "dislike" ? null : "dislike"
+                    if (newValue) {
+                      openFeedbackModal(newValue, message)
+                    }
+                    setReactionValue(newValue)
                     e.currentTarget.blur()
                   }}
                 />
@@ -129,7 +143,7 @@ export const AssistantMessage = ({
           </div>
         </>
       )}
-      {!!subComponent && <div>{subComponent}</div>}
+      {!!subComponent && <div className="w-full">{subComponent}</div>}
     </div>
   )
 }

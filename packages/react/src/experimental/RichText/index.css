@@ -12,13 +12,11 @@
 }
 
 /* Make all selections transparent */
-.rich-text-editor-container *::selection,
-.basic-text-editor-container *::selection {
+.rich-text-editor-container *::selection {
   background-color: transparent !important;
 }
 
-.rich-text-editor-container::selection,
-.basic-text-editor-container::selection {
+.rich-text-editor-container::selection {
   background-color: transparent !important;
 }
 
@@ -26,97 +24,113 @@
   tiptap styles
   **********/
 
-.ProseMirror p,
+.rich-text-editor-container p,
 .rich-text-display-container p {
   @apply relative m-0 mb-2;
 }
 
-.ProseMirror p:last-child,
+.rich-text-editor-container p:last-child,
 .rich-text-display-container p:last-child {
   margin-bottom: 0;
 }
 
-.ProseMirror h1,
+.rich-text-editor-container h1,
 .rich-text-display-container h1 {
   @apply m-0 mb-3 p-0 text-3xl font-semibold;
 }
 
-.ProseMirror h2,
+.rich-text-editor-container h2,
 .rich-text-display-container h2 {
   @apply m-0 mb-2.5 p-0 text-2xl font-medium;
 }
 
-.ProseMirror h3,
+.rich-text-editor-container h3,
 .rich-text-display-container h3 {
   @apply m-0 mb-2.5 p-0 text-lg font-medium;
 }
 
-.ProseMirror a,
+.rich-text-editor-container h4,
+.rich-text-display-container h4 {
+  @apply m-0 mb-2.5 p-0 text-lg font-medium;
+}
+
+.rich-text-editor-container ul,
+.rich-text-display-container ul {
+  @apply m-0 mb-2.5;
+  list-style: disc;
+}
+
+.rich-text-editor-container ol,
+.rich-text-display-container ol {
+  @apply m-0 mb-2.5 list-decimal;
+}
+
+.rich-text-editor-container a,
 .rich-text-display-container a {
   @apply cursor-pointer font-medium text-f1-foreground-accent no-underline;
 }
 
-.ProseMirror strong,
+.rich-text-editor-container strong,
 .rich-text-display-container strong {
   @apply font-semibold;
 }
 
-.ProseMirror em,
+.rich-text-editor-container em,
 .rich-text-display-container em {
   @apply italic;
 }
 
-.ProseMirror u,
+.rich-text-editor-container u,
 .rich-text-display-container u {
   @apply underline;
 }
 
-.ProseMirror s,
+.rich-text-editor-container s,
 .rich-text-display-container s {
   @apply line-through;
 }
 
-.ProseMirror .f1-bullet-list,
+.rich-text-editor-container .f1-bullet-list,
 .rich-text-display-container .f1-bullet-list {
   @apply list-disc;
 }
 
-.ProseMirror .f1-ordered-list,
+.rich-text-editor-container .f1-ordered-list,
 .rich-text-display-container .f1-ordered-list {
   @apply list-decimal;
 }
 
-.ProseMirror ul,
-.ProseMirror ol,
+.rich-text-editor-container ul,
+.rich-text-editor-container ol,
 .rich-text-display-container ul,
 .rich-text-display-container ol {
   @apply pl-5;
 }
 
-.ProseMirror .f1-ordered-list p,
+.rich-text-editor-container .f1-ordered-list p,
 .rich-text-display-container .f1-ordered-list p,
-.ProseMirror .f1-bullet-list p,
+.rich-text-editor-container .f1-bullet-list p,
 .rich-text-display-container .f1-bullet-list p {
   @apply ml-2;
 }
 
-.ProseMirror li,
+.rich-text-editor-container li,
 .rich-text-display-container li {
   @apply mb-2;
 }
 
-.ProseMirror pre,
+.rich-text-editor-container pre,
 .rich-text-display-container pre {
   @apply relative mx-0 my-4 overflow-x-auto whitespace-pre-wrap rounded-md bg-f1-background-secondary p-2;
 }
 
-.ProseMirror code,
+.rich-text-editor-container code,
 .rich-text-display-container code {
   @apply text-sm;
   font-family: Menlo, Consolas, Monaco, monospace;
 }
 
-.ProseMirror blockquote,
+.rich-text-editor-container blockquote,
 .rich-text-display-container blockquote {
   @apply m-0 mb-2.5 border-0 border-l-4 border-solid border-f1-border pl-4;
 }
@@ -126,22 +140,22 @@
   @apply outline-none;
 }
 
-.ProseMirror hr,
+.rich-text-editor-container hr,
 .rich-text-display-container hr {
   @apply my-3 border-0 border-t border-f1-border;
 }
 
-.ProseMirror mark,
+.rich-text-editor-container mark,
 .rich-text-display-container mark {
   @apply rounded-xs bg-f1-background-promote p-0.5 text-f1-foreground;
 }
 
-.ProseMirror p:empty::before,
+.rich-text-editor-container p:empty::before,
 .rich-text-display-container p:empty::before {
   content: "\00a0";
 }
 
-.ProseMirror ul[data-type="taskList"],
+.rich-text-editor-container ul[data-type="taskList"],
 .rich-text-display-container ul[data-type="taskList"] {
   @apply pl-0;
 }

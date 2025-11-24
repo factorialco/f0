@@ -1,5 +1,42 @@
-import { FilterDefinition, FilterValue } from "./filterTypes"
-export type { FilterDefinition, FilterValue }
+import {
+  DateFilterDefinition,
+  FilterDefinition,
+  FilterValue,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+} from "./filterTypes"
+export type {
+  DateFilterDefinition,
+  FilterDefinition,
+  FilterValue,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+}
+
+/**
+ * Extracts the value type for a specific filter key from a FiltersDefinition.
+ * This helper type allows for type-safe access to filter values when you know the specific filter key.
+ *
+ * @example
+ * ```ts
+ * type MyFilters = {
+ *   department: InFilterDefinition<string>
+ *   search: SearchFilterDefinition
+ * }
+ *
+ * type DepartmentValue = FilterValueByKey<MyFilters, 'department'> // string[]
+ * type SearchValue = FilterValueByKey<MyFilters, 'search'> // string
+ * ```
+ *
+ * @template Definition - The FiltersDefinition type
+ * @template Key - The specific filter key to extract the value type for
+ */
+export type FilterValueByKey<
+  Definition extends Record<string, FilterDefinition>,
+  Key extends keyof Definition,
+> = FilterValue<Definition[Key]>
 
 /**
  * Current state of all filters in a collection.
@@ -11,6 +48,8 @@ export type FiltersState<Definition extends Record<string, FilterDefinition>> =
   {
     [K in keyof Definition]?: FilterValue<Definition[K]>
   }
+
+export type FiltersMode = "default" | "compact"
 
 /**
  * Record of filter definitions for a collection.

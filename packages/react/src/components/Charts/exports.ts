@@ -1,8 +1,9 @@
-import { Component } from "../../lib/component"
+import { Component } from "../../lib/component/component"
 
 import { AreaChart as AreaChartComponent } from "./AreaChart"
 import { BarChart as BarChartComponent } from "./BarChart"
 import { CategoryBarChart as CategoryBarChartComponent } from "./CategoryBarChart"
+import { ComboChart as ComboChartComponent } from "./ComboChart"
 import { LineChart as LineChartComponent } from "./LineChart"
 import { PieChart as PieChartComponent } from "./PieChart"
 import { ProgressBar as ProgressBarComponent } from "./ProgressChart"
@@ -62,4 +63,12 @@ export const ProgressBarChart = Component(
     type: "info",
   },
   ProgressBarComponent
+)
+
+export const ComboChart = Component(
+  {
+    name: "ComboChart",
+    type: "info",
+  },
+  ComboChartComponent
 )

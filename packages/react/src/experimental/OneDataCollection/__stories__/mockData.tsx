@@ -1,9 +1,18 @@
 import { PromiseState } from "@/lib/promise-to-observable"
+import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
+import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { cn } from "@/lib/utils"
-import { generateMockUsers, MockUser } from "@/mocks"
+import {
+  COMPANY_NAMES_MOCK,
+  generateMockUsers,
+  getMockValue,
+  MOCK_ICONS,
+  MockUser,
+  TEAMS_MOCK,
+} from "@/mocks"
 export { generateMockUsers, type MockUser }
 
 import {
@@ -30,7 +39,9 @@ import {
   PaginationType,
   RecordType,
   SelectedItemsState,
+  SortingsState,
 } from "@/hooks/datasource/types"
+import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import {
   Ai,
   Briefcase,
@@ -45,12 +56,17 @@ import {
   Upload,
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
+import { mockImage } from "@/testing/mocks/images"
 import { OneDataCollection } from ".."
 import {
-  PrimaryActionsDefinition,
+  PrimaryActionsDefinitionFn,
+  SecondaryActionItem,
   SecondaryActionsDefinition,
-  SecondaryActionsItemDefinition,
 } from "../actions"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "../hooks/useDataColectionStorage/types"
 import { ItemActionsDefinition } from "../item-actions"
 import {
   NavigationFiltersDefinition,
@@ -102,11 +118,107 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
   },
 ]
 
+/**
+ * MockDataCache - Simulates Apollo cache behavior with observable pattern
+ * Updates data mutations and notifies subscribers when data changes
+ *
+ * @example
+ * const cache = new MockDataCache(mockUsers)
+ * cache.subscribe(() => console.log('Data changed!'))
+ * cache.updateItemDepartment('user-1', 'Engineering')
+ *
+ * KNOWN ISSUE - Selection State Not Preserved Across Lane Moves:
+ * ==============================================================
+ * When moving items between Kanban lanes, selection state is lost.
+ *
+ * Root Cause:
+ * - Each lane has its own independent `useSelectable` instance
+ * - Selection state is stored per-lane in `itemsState` Map
+ * - When an item moves from Lane A → Lane B:
+ *   * Lane A: Has the item selected in its local state
+ *   * Lane B: Has no knowledge of the selection (empty state for that item)
+ * - No mechanism exists to sync selection state between lanes
+ *
+ * Why This Happens with Apollo Too:
+ * - Apollo cache preserves object references but doesn't automatically
+ *   sync React component state (which is what `useSelectable` manages)
+ * - The issue is architectural: selection state needs to be global,
+ *   not scoped per-lane
+ *
+ * Potential Solutions (for future PR):
+ * 1. Make selection state global at DataCollection level
+ * 2. Sync selection state between lanes when items move
+ * 3. Use defaultSelectedItems to persist state across lane changes
+ *
+ * This mock correctly simulates Apollo cache behavior. The selection
+ * issue is a system design limitation that also exists in production.
+ */
+export class MockDataCache<T extends MockUser> {
+  // Map of id -> object for efficient updates
+  private dataMap: Map<string, T>
+  private subscribers: Set<() => void> = new Set()
+
+  constructor(initialData: T[]) {
+    // Initialize cache with data
+    this.dataMap = new Map(initialData.map((item) => [item.id, item]))
+  }
+
+  getData(): T[] {
+    // Return array of objects from cache
+    return Array.from(this.dataMap.values())
+  }
+
+  /**
+   * Subscribe to cache changes - simulates Apollo's cache.watch
+   * Returns unsubscribe function
+   */
+  subscribe(callback: () => void): () => void {
+    this.subscribers.add(callback)
+    return () => {
+      this.subscribers.delete(callback)
+    }
+  }
+
+  /**
+   * Notify all subscribers that data has changed
+   */
+  private notify() {
+    this.subscribers.forEach((callback) => callback())
+  }
+
+  updateItemDepartment(itemId: string, newDepartment: string): T | null {
+    const item = this.dataMap.get(itemId)
+    if (!item) return null
+
+    // Update the cached object
+    item.department = newDepartment as (typeof DEPARTMENTS_MOCK)[number]
+
+    // Notify subscribers that cache has changed (simulates Apollo)
+    this.notify()
+
+    return item
+  }
+
+  reset(newData: T[]) {
+    this.dataMap = new Map(newData.map((item) => [item.id, item]))
+    this.notify()
+  }
+}
+
 // Mock data
 export const mockUsers = generateMockUsers(10)
 
 export const getMockVisualizations = (options?: {
+  // @deprecated
   frozenColumns?: 0 | 1 | 2
+  table?: {
+    frozenColumns?: 0 | 1 | 2
+    allowColumnHiding?: boolean
+    allowColumnReordering?: boolean
+    noSorting?: boolean
+    nestedRecords?: boolean
+  }
+  cache?: MockDataCache<MockUser>
 }): Record<
   Exclude<VisualizationType, "custom">,
   Visualization<
@@ -122,7 +234,10 @@ export const getMockVisualizations = (options?: {
   table: {
     type: "table",
     options: {
-      frozenColumns: options?.frozenColumns,
+      allowColumnHiding: options?.table?.allowColumnHiding,
+      allowColumnReordering: options?.table?.allowColumnReordering,
+      frozenColumns:
+        options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
       columns: [
         {
           label: "Name",
@@ -134,67 +249,92 @@ export const getMockVisualizations = (options?: {
               lastName: item.name.split(" ")[1],
             },
           }),
-          sorting: "name",
+          id: "name",
+          sorting: options?.table?.noSorting ? undefined : "name",
+          hidden: options?.table?.allowColumnHiding ? true : undefined,
+          order: options?.table?.allowColumnReordering ? 3 : undefined,
         },
         {
           label: "Email",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
+          id: "email",
         },
         {
           label: "Role",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
+          id: "role",
+          order: options?.table?.allowColumnReordering ? 2 : undefined,
+          noHiding: options?.table?.allowColumnHiding,
         },
         {
+          id: "department",
           label: "Department",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
+          order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
         {
+          id: "email2",
           label: "Email 2",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
+          order: options?.table?.allowColumnReordering ? 1 : undefined,
         },
         {
+          id: "role2",
           label: "Role 2",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
         },
         {
+          id: "department2",
           label: "Department 2",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
+          order: options?.table?.allowColumnReordering ? 10 : undefined,
         },
         {
+          id: "email3",
           label: "Email 3",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
         },
         {
+          id: "role3",
           label: "Role 3",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
         },
         {
           label: "Department 3",
           render: (item) => item.department,
-          sorting: "department",
+          sorting: options?.table?.noSorting ? undefined : "department",
+          id: "department3",
         },
         {
           label: "Email 4",
           render: (item) => item.email,
-          sorting: "email",
+          sorting: options?.table?.noSorting ? undefined : "email",
+          id: "email4",
         },
         {
           label: "Role 4",
           render: (item) => item.role,
-          sorting: "role",
+          sorting: options?.table?.noSorting ? undefined : "role",
+          id: "role4",
         },
         {
-          label: "Department 4",
-          render: (item) => item.department,
-          sorting: "department",
+          label: "Long",
+          render: () => ({
+            type: "longText",
+            value: {
+              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+              lines: 4,
+            },
+          }),
+          id: "longText",
         },
         {
           label: "Permissions",
@@ -206,7 +346,9 @@ export const getMockVisualizations = (options?: {
             ]
               .filter(Boolean)
               .join(", "),
-          sorting: "permissions.read",
+          sorting: options?.table?.noSorting ? undefined : "permissions.read",
+          id: "permissions",
+          order: options?.table?.allowColumnReordering ? 4 : undefined,
         },
       ],
     },
@@ -226,7 +368,9 @@ export const getMockVisualizations = (options?: {
         {
           label: "Email",
           icon: Envelope,
+          tooltip: "Email",
           render: (item) => item.email,
+          hide: (item) => !item.email,
         },
         {
           label: "Role",
@@ -296,20 +440,44 @@ export const getMockVisualizations = (options?: {
   list: {
     type: "list",
     options: {
-      itemDefinition: (item) => ({
-        title: item.name,
-        description: [item.email, item.role],
-        avatar: {
-          type: "person",
-          firstName: item.name.split(" ")[0],
-          lastName: item.name.split(" ")[1],
-          badge: {
-            type: "module",
-            module: "inbox",
-            tooltip: "Inbox",
-          },
-        },
-      }),
+      itemDefinition: (item) => {
+        const getMockAvatar = (index: number): AvatarVariant => {
+          const avatars = [
+            {
+              type: "person" as const,
+              firstName: item.name.split(" ")[0],
+              lastName: item.name.split(" ")[1],
+              badge: {
+                type: "module" as const,
+                module: "inbox" as const,
+                tooltip: "Inbox",
+              },
+              src: mockImage("person", index),
+            },
+            {
+              type: "company" as const,
+              name: getMockValue(COMPANY_NAMES_MOCK, item.index),
+              src: mockImage("company", index),
+            },
+            {
+              type: "team" as const,
+              name: getMockValue(TEAMS_MOCK, item.index),
+              src: mockImage("team", index),
+            },
+            {
+              type: "icon" as const,
+              icon: getMockValue(MOCK_ICONS, item.index),
+            },
+          ]
+
+          return avatars[index % avatars.length]
+        }
+        return {
+          title: item.name,
+          description: [item.email, item.role],
+          avatar: getMockAvatar(item.index),
+        }
+      },
       fields: [
         {
           label: "Email",
@@ -319,6 +487,36 @@ export const getMockVisualizations = (options?: {
         {
           label: "Role",
           render: (item) => item.role,
+          sorting: "role",
+        },
+        {
+          label: "Teammates",
+          render: (item) => ({
+            type: "avatarList",
+            value: {
+              max: 1,
+              avatarList: [
+                {
+                  type: "person",
+                  firstName: item.name,
+                  lastName: "Doe",
+                  src: "/avatars/person01.jpg",
+                },
+                {
+                  type: "person",
+                  firstName: "Dani",
+                  lastName: "Moreno",
+                  src: "/avatars/person04.jpg",
+                },
+                {
+                  type: "person",
+                  firstName: "Sergio",
+                  lastName: "Carracedo",
+                  src: "/avatars/person05.jpg",
+                },
+              ],
+            },
+          }),
           sorting: "role",
         },
         {
@@ -342,6 +540,7 @@ export const getMockVisualizations = (options?: {
           }),
           hide: (item) => item.name.startsWith("D"),
         },
+
         {
           label: "Department",
           render: (item) => ({
@@ -358,6 +557,9 @@ export const getMockVisualizations = (options?: {
   kanban: {
     type: "kanban",
     options: {
+      onCreate: (a) => {
+        console.log("onCreate", a)
+      },
       lanes: [
         {
           id: "eng",
@@ -388,21 +590,71 @@ export const getMockVisualizations = (options?: {
         lastName: u.name.split(" ")[1] ?? "",
       }),
       metadata: (u) => [
-        { icon: Envelope, property: { type: "text", value: u.email } },
-        { icon: Building, property: { type: "text", value: u.department } },
-        { icon: Briefcase, property: { type: "text", value: u.role } },
-        { icon: Star, property: { type: "text", value: u.id } },
+        {
+          icon: Envelope,
+          tooltip: "Email",
+          property: { type: "text", value: u.email },
+        },
+        {
+          icon: Building,
+          tooltip: "Department",
+          property: { type: "text", value: u.department },
+        },
+        {
+          icon: Briefcase,
+          tooltip: "Role",
+          property: { type: "text", value: u.role },
+        },
+        { icon: Star, tooltip: "ID", property: { type: "text", value: u.id } },
       ],
-      onMove: async (): Promise<MockUser> => {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+      onMove: options?.cache
+        ? async (
+            _fromLaneId: string,
+            toLaneId: string,
+            sourceRecord: MockUser,
+            _destinyRecord: {
+              record: MockUser
+              position: "above" | "below"
+            } | null
+          ): Promise<MockUser> => {
+            // Map lane ID to department
+            console.log(
+              "onMove",
+              _fromLaneId,
+              toLaneId,
+              sourceRecord,
+              _destinyRecord
+            )
 
-        // Simulate success/error randomly for testing
-        if (Math.random() > 0.7) {
-          throw new Error("Simulated move error")
-        }
-        return mockUsers[0]
-      },
+            const laneToDepartment: Record<string, string> = {
+              eng: "Engineering",
+              prod: "Product",
+              design: "Design",
+              other: "Marketing",
+            }
+
+            const newDepartment = laneToDepartment[toLaneId]
+
+            // Update cache IMMEDIATELY (before async delay) - simulates Apollo Optimistic Response
+            if (newDepartment && options.cache) {
+              options.cache.updateItemDepartment(sourceRecord.id, newDepartment)
+            }
+
+            // Simulate API call delay AFTER cache update (very short for better UX)
+            await new Promise((resolve) => setTimeout(resolve, 50))
+
+            if (newDepartment) {
+              // Return the updated record
+              return {
+                ...sourceRecord,
+                department: newDepartment as (typeof DEPARTMENTS_MOCK)[number],
+              }
+            }
+
+            // Fallback if no cache
+            return sourceRecord
+          }
+        : undefined,
     },
   },
 })
@@ -580,7 +832,11 @@ export const createObservableDataFetch = (delay = 0) => {
     })
 }
 
-export const createPromiseDataFetch = (delay = 500) => {
+export const createPromiseDataFetch = (
+  delay = 500,
+  cache?: MockDataCache<MockUser>,
+  nestedRecords = false
+) => {
   return (
     options: DataCollectionBaseFetchOptions<
       FiltersType,
@@ -596,8 +852,10 @@ export const createPromiseDataFetch = (delay = 500) => {
 
     return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
+        // Use cache if provided, otherwise use static mockUsers
+        const sourceData = cache ? cache.getData() : mockUsers
         const filteredData = filterUsers(
-          mockUsers,
+          sourceData,
           filters,
           sortingsState,
           navigationFilters,
@@ -622,7 +880,13 @@ export const createPromiseDataFetch = (delay = 500) => {
         }
 
         resolve({
-          records: filteredData,
+          records: filteredData.map((user, index) => ({
+            ...user,
+            children:
+              index % 2 === 0 && nestedRecords
+                ? [{ ...user }, { ...user }]
+                : undefined,
+          })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
         })
       }, delay)
@@ -642,7 +906,10 @@ export const ExampleComponent = ({
   defaultSelectedItems,
   bulkActions,
   currentGrouping,
+  currentSortings,
+  currentNavigationFilters,
   grouping,
+  noSorting = false,
   navigationFilters,
   totalItemSummary,
   visualizations,
@@ -651,6 +918,22 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  id,
+  storage,
+  /**
+   * mocks the table column ordering and hidding
+   */
+  tableAllowColumnReordering = false,
+  tableAllowColumnHiding = false,
+  onStateChange,
+  currentFilters,
+  /**
+   * Enable Apollo-like cache behavior for testing optimistic updates
+   */
+  enableCache = true,
+  hideFilters,
+  tmpFullWidth,
+  nestedRecords = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -667,6 +950,12 @@ export const ExampleComponent = ({
       GroupingDefinition<MockUser>
     >
   >
+  id?: string
+  storage?:
+    | false
+    | {
+        features?: DataCollectionStorageFeaturesDefinition
+      }
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,
@@ -678,92 +967,169 @@ export const ExampleComponent = ({
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
-  totalItemSummary?: (totalItems: number) => string
+  totalItemSummary?: true | ((totalItems: number) => string)
   grouping?: GroupingDefinition<MockUser> | undefined
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
+  noSorting?: boolean
   paginationType?: PaginationType
-  primaryActions?: PrimaryActionsDefinition
+  primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
-  searchBar?: boolean
+  searchBar?: boolean | SearchOptions
+  tableAllowColumnReordering?: boolean
+  tableAllowColumnHiding?: boolean
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<typeof filters>>
+  ) => void
+  enableCache?: boolean
+  hideFilters?: boolean
+  currentFilters?: FiltersState<FiltersType>
+  currentSortings?: SortingsState<typeof sortings>
+  currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
+  tmpFullWidth?: boolean
+  nestedRecords?: boolean
 }) => {
+  // Create a cache instance to simulate Apollo cache behavior
+  const cache = useMemo(() => {
+    const c = enableCache ? new MockDataCache(mockUsers) : undefined
+    console.log(
+      "[ExampleComponent] Cache created:",
+      !!c,
+      "with",
+      mockUsers.length,
+      "users"
+    )
+    return c
+  }, [enableCache])
+
+  // Subscribe to cache changes and force refetch (simulates Apollo cache.watch)
+  const [cacheVersion, setCacheVersion] = useState(0)
+
+  useEffect(() => {
+    if (!cache) return
+
+    const unsubscribe = cache.subscribe(() => {
+      setCacheVersion((v) => v + 1)
+    })
+
+    return unsubscribe
+  }, [cache])
+
   const mockVisualizations = getMockVisualizations({
-    frozenColumns,
+    table: {
+      frozenColumns,
+      allowColumnHiding: tableAllowColumnHiding,
+      allowColumnReordering: tableAllowColumnReordering,
+    },
+    cache,
   })
 
-  const dataSource = useDataCollectionSource({
-    filters,
-    navigationFilters,
-    presets: usePresets ? filterPresets : undefined,
-    sortings,
-    grouping,
-    currentGrouping: currentGrouping,
-    primaryActions,
-    secondaryActions,
-    itemActions: (item) => [
-      {
-        label: "Edit",
-        icon: Pencil,
-        onClick: () => console.log(`Editing ${item.name}`),
-        description: "Modify user information",
-        type: "primary",
-      },
-      {
-        label: "View Profile",
-        icon: Ai,
-        onClick: () => console.log(`Viewing ${item.name}'s profile`),
-      },
-      { type: "separator" },
-      {
-        label: item.isStarred ? "Remove Star" : "Star User",
-        icon: Star,
-        onClick: () => console.log(`Toggling star for ${item.name}`),
-        description: item.isStarred
-          ? "Remove from favorites"
-          : "Add to favorites",
-      },
-      {
-        label: "Delete",
-        icon: Delete,
-        onClick: () => console.log(`Deleting ${item.name}`),
-        critical: true,
-        description: "Permanently remove user",
-        enabled: item.department === "Engineering" && item.status === "active",
-      },
-    ],
-    selectable,
-    defaultSelectedItems,
-    bulkActions,
-    totalItemSummary,
-    search: searchBar
-      ? {
-          enabled: true,
-          sync: true,
-          debounceTime: 300,
-        }
-      : undefined,
-    dataAdapter: dataAdapter ?? {
+  // Create dataAdapter that responds to cache changes
+  // By including cacheVersion in the useMemo deps and in the returned object,
+  // we ensure that useData detects the change and triggers a refetch
+  const dataAdapterMemoized = useMemo(() => {
+    if (dataAdapter) return dataAdapter
+
+    return {
       fetchData: useObservable
         ? createObservableDataFetch()
-        : createPromiseDataFetch(),
+        : createPromiseDataFetch(100, cache, nestedRecords),
+      // Include cacheVersion as a property so dataAdapter reference changes
+      _cacheVersion: cacheVersion,
+    }
+  }, [dataAdapter, useObservable, cache, cacheVersion, nestedRecords])
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: hideFilters ? undefined : filters,
+      currentFilters,
+      currentSortings,
+      navigationFilters,
+      currentNavigationFilters,
+      presets: usePresets ? filterPresets : undefined,
+      sortings: noSorting ? undefined : sortings,
+      grouping,
+      currentGrouping: currentGrouping,
+      primaryActions,
+      secondaryActions,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
+      itemUrl: (item) => `/users/${item.id}`,
+      itemActions: (item) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          onClick: () => console.log(`Editing ${item.name}`),
+          description: "Modify user information",
+          type: "primary",
+        },
+        {
+          label: "View Profile",
+          icon: Ai,
+          onClick: () => console.log(`Viewing ${item.name}'s profile`),
+        },
+        { type: "separator" },
+        {
+          label: item.isStarred ? "Remove Star" : "Star User",
+          icon: Star,
+          onClick: () => console.log(`Toggling star for ${item.name}`),
+          description: item.isStarred
+            ? "Remove from favorites"
+            : "Add to favorites",
+        },
+        {
+          label: "Delete",
+          icon: Delete,
+          onClick: () => console.log(`Deleting ${item.name}`),
+          critical: true,
+          description: "Permanently remove user",
+          enabled:
+            item.department === "Engineering" && item.status === "active",
+        },
+      ],
+      selectable,
+      defaultSelectedItems,
+      bulkActions,
+      totalItemSummary,
+      search:
+        searchBar === true
+          ? {
+              enabled: true,
+              sync: true,
+              debounceTime: 300,
+            }
+          : typeof searchBar === "object"
+            ? searchBar
+            : undefined,
+      dataAdapter: dataAdapterMemoized,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      childrenCount: (item) => item?.children?.length,
+      fetchChildren: async (item) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return item.children ?? []
+      },
+      lanes: [
+        { id: "eng", filters: { department: ["Engineering"] } },
+        { id: "prod", filters: { department: ["Product"] } },
+        { id: "design", filters: { department: ["Design"] } },
+        { id: "other", filters: { department: ["Marketing"] } },
+      ],
     },
-    lanes: [
-      { id: "eng", filters: { department: ["Engineering"] } },
-      { id: "prod", filters: { department: ["Product"] } },
-      { id: "design", filters: { department: ["Design"] } },
-      { id: "other", filters: { department: ["Marketing"] } },
-    ],
-  })
+    [cacheVersion]
+  ) // Pass cacheVersion as dependency to force refetch on cache changes
 
   return (
     <div
-      className={cn(
-        "space-y-4",
-        fullHeight && "max-h-full max-w-full bg-[#fff]"
-      )}
+      className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
+        tmpFullWidth={tmpFullWidth}
+        id={id}
+        storage={storage}
         fullHeight={fullHeight}
         source={dataSource}
+        onStateChange={(state) => {
+          console.log("State changed", "->", state)
+          onStateChange?.(state)
+        }}
         onSelectItems={(selectedItems) =>
           console.log("Selected items", "->", selectedItems)
         }
@@ -1176,7 +1542,7 @@ export function createDataAdapter<
 }
 
 // Example of a comprehensive actions definition with various types of actions
-export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
+export const buildSecondaryActions = (): SecondaryActionItem[] => {
   return [
     // Action with description
     {
@@ -1184,14 +1550,15 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       icon: Pencil,
       onClick: () => console.log(`Another user action`),
       description: "User actions",
+      loading: true,
     },
-
-    // Separator between action groups
-    { type: "separator" },
     {
       label: "Export",
       icon: Upload,
-      onClick: () => console.log(`Downloading users`),
+      onClick: () =>
+        new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
+          console.log(`Downloading users`)
+        ),
       description: "Download users",
     },
     {
@@ -1199,6 +1566,34 @@ export const buildSecondaryActions = (): SecondaryActionsItemDefinition[] => {
       icon: Download,
       onClick: () => console.log(`Importing users`),
       description: "Import users",
+      loading: true,
+    },
+    {
+      label: "Disabled",
+      icon: Download,
+      onClick: () => console.log(`Should not be shown`),
+      description: "Import users",
+      disabled: true,
     },
   ]
+}
+
+export const getMockVisualizationsWithCreate = (
+  params: { onCreate: (laneId: string) => void } & Parameters<
+    typeof getMockVisualizations
+  >[0]
+) => {
+  const { onCreate, ...rest } = params
+  const base = getMockVisualizations(rest)
+
+  return {
+    ...base,
+    kanban: {
+      type: "kanban" as const,
+      options: {
+        ...(base.kanban.type === "kanban" ? base.kanban.options : {}),
+        onCreate,
+      },
+    },
+  }
 }

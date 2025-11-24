@@ -14,8 +14,6 @@ export type KanbanLaneAttributes<TRecord extends RecordType> = {
   loadingMore?: boolean
   hasMore?: boolean
   fetchMore?: () => void
-  /** Optional layout per-lane */
-  maxHeight?: number
   /** Visual variant to mirror project status */
   variant?: Variant
   /** Total number of items in the lane (for display in header) */
@@ -30,9 +28,6 @@ export interface KanbanProps<TRecord extends RecordType> {
    * carries its concrete items so we can iterate visually.
    */
   lanes: ReadonlyArray<KanbanLaneAttributes<TRecord>>
-
-  /** The maximum height of the kanban in pixels */
-  maxHeight?: number
 
   /** Whether the kanban is in loading state */
   loading?: boolean
@@ -51,6 +46,9 @@ export interface KanbanProps<TRecord extends RecordType> {
   /** Optional CSS classes for root */
   className?: string
 
+  /** Optional callback triggered when requesting a new record in a lane */
+  onCreate?: KanbanOnCreate
+
   /** Optional DnD configuration to enable droppable lanes */
   dnd?: {
     instanceId: symbol
@@ -58,6 +56,8 @@ export interface KanbanProps<TRecord extends RecordType> {
     onMove?: KanbanOnMove<TRecord>
   }
 }
+
+export type KanbanOnCreate = (laneId: string) => void | Promise<void>
 
 export type KanbanOnMove<TRecord extends RecordType> = (
   fromLaneId: string,

@@ -1,6 +1,7 @@
-import { Link } from "@/components/Actions/Link"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Link } from "@/components/F0Link"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRow } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/experimental/OneDataCollection/components/itemActions/useItemActions"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
@@ -12,7 +13,6 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
@@ -72,14 +72,14 @@ export const Row = <
   NavigationFilters,
   Grouping
 >) => {
+  const i18n = useI18n()
+  const { actions } = i18n
   const renderCell = (
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "table")
+    return renderProperty(item, property, "list", i18n)
   }
-
-  const { actions } = useI18n()
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
@@ -97,14 +97,19 @@ export const Row = <
   return (
     <div
       className={cn(
-        "relative flex w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:p-2 md:pl-3 md:pr-4",
+        "relative flex min-h-[64px] w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:p-2 md:pl-3 md:pr-4",
         "group after:absolute after:inset-y-0 after:-right-px after:z-10 after:hidden after:h-full after:w-10 after:bg-gradient-to-r after:from-transparent after:via-f1-background after:via-75% after:to-f1-background after:transition-all after:content-[''] hover:after:via-[#F5F6F8] hover:after:to-[#F5F6F8] dark:hover:after:via-[#192231] dark:hover:after:to-[#192231] md:after:block hover:md:bg-f1-background-hover"
       )}
     >
-      <div className="flex flex-1 flex-row items-center gap-2">
+      {/* This div is a click capture layer get the clicks in the row */}
+      <div
+        onClick={itemOnClick}
+        className="pointer-events-auto absolute inset-0"
+      ></div>
+      <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
         {source.selectable && id !== undefined && (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
-          <div className="z-10 hidden items-center justify-end md:flex">
+          <div className="pointer-events-auto z-10 hidden items-center justify-end md:flex">
             <F0Checkbox
               checked={selectedItems.has(id)}
               onCheckedChange={(checked) =>
@@ -116,9 +121,15 @@ export const Row = <
           </div>
         )}
         {itemHref && (
-          <Link href={itemHref} className="absolute inset-0 block" tabIndex={0}>
+          <F0Link
+            href={itemHref}
+            className="pointer-events-auto absolute inset-0 block"
+            tabIndex={0}
+            // onClick is needed here as the click event is not propagate to the fake click layer
+            onClick={itemOnClick}
+          >
             <span className="sr-only">{actions.view}</span>
-          </Link>
+          </F0Link>
         )}
         <ItemTeaser
           title={itemDef.title}
@@ -129,19 +140,25 @@ export const Row = <
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
         {(fields || [])
           .filter((field) => !field.hide?.(item))
-          .map((field) => (
-            <div key={String(field.label)} onClick={itemOnClick}>
-              <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
-                {renderCell(item, field)}
+          .map((field) => {
+            const content = renderCell(item, field)
+
+            if (!content) return null
+
+            return (
+              <div key={String(field.label)}>
+                <div className="flex items-center justify-center px-0 py-1 md:p-3 [&>span]:whitespace-nowrap">
+                  {content}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
       </div>
       {source.itemActions && (
         <>
           <ItemActionsRowContainer
             dropDownOpen={dropDownOpen}
-            className="hidden md:flex"
+            className="pointer-events-auto hidden md:flex"
           >
             <ItemActionsRow
               primaryItemActions={primaryItemActions}
@@ -160,7 +177,7 @@ export const Row = <
       {source.selectable && id !== undefined && (
         <div
           className={cn(
-            "absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
+            "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
             source.itemActions && "right-12"
           )}
         >

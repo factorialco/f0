@@ -4,6 +4,7 @@ import { useState } from "react"
 import * as AnimatedIcons from "@/icons/animated"
 import * as Icons from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
+import * as SpecialIcons from "@/icons/special"
 import { ComponentProps } from "react"
 import { F0Icon } from "../index"
 
@@ -87,5 +88,30 @@ export const Animated: Story = {
         />
       </div>
     )
+  },
+}
+
+export const Special: Story = {
+  args: {
+    size: "md",
+    icon: SpecialIcons.One,
+  },
+  argTypes: {
+    icon: {
+      control: "select",
+      options: Object.keys(SpecialIcons),
+      mapping: SpecialIcons,
+    },
+    color: {
+      control: { type: "color" },
+    },
+  },
+}
+
+export const WithTooltip: Story = {
+  args: {
+    size: "md",
+    icon: Icons.ChartLine,
+    tooltip: "Tooltip",
   },
 }

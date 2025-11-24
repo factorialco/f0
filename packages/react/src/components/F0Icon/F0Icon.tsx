@@ -1,3 +1,4 @@
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 import { f1Colors } from "@factorialco/f0-core"
 import { cva, type VariantProps } from "cva"
@@ -44,6 +45,7 @@ export interface F0IconProps
   extends SVGProps<SVGSVGElement>,
     VariantProps<typeof iconVariants> {
   icon: IconType
+  tooltip?: string
   size?: "lg" | "md" | "sm" | "xs"
   state?: "normal" | "animate"
   color?:
@@ -60,8 +62,22 @@ export type IconType = ForwardRefExoticComponent<
     }
 >
 
+const TooltipWrapper: React.FC<{
+  tooltip?: string
+  children: React.ReactNode
+}> = ({ tooltip, children }) => {
+  if (tooltip) {
+    return (
+      <TooltipInternal label={tooltip} instant>
+        {children}
+      </TooltipInternal>
+    )
+  }
+  return children
+}
+
 export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
-  { size, icon, state = "normal", color = "currentColor", ...props },
+  { size, icon, state = "normal", color = "currentColor", tooltip, ...props },
   ref
 ) {
   if (!icon) return null
@@ -82,22 +98,26 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
 
   if (isAnimated) {
     return (
-      <Component
-        ref={ref}
-        {...props}
-        animate={state}
-        className={cn(iconVariants({ size }), "select-none", colorClass)}
-        style={colorStyle}
-      />
+      <TooltipWrapper tooltip={tooltip}>
+        <Component
+          ref={ref}
+          {...props}
+          animate={state}
+          className={cn(iconVariants({ size }), "select-none", colorClass)}
+          style={colorStyle}
+        />
+      </TooltipWrapper>
     )
   }
 
   return (
-    <Component
-      ref={ref}
-      {...props}
-      className={cn("aspect-square", iconVariants({ size }), colorClass)}
-      style={colorStyle}
-    />
+    <TooltipWrapper tooltip={tooltip}>
+      <Component
+        ref={ref}
+        {...props}
+        className={cn("aspect-square", iconVariants({ size }), colorClass)}
+        style={colorStyle}
+      />
+    </TooltipWrapper>
   )
 })

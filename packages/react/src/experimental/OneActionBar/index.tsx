@@ -1,16 +1,16 @@
-import { Button } from "@/components/Actions/Button"
-import { OneDropdownButton } from "@/components/Actions/OneDropdownButton"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { IconType } from "@/components/F0Icon"
+import { F0Button } from "@/components/F0Button"
 import {
-  Dropdown,
-  DropdownItem,
-  MobileDropdown,
-} from "@/experimental/Navigation/Dropdown"
+  ButtonDropdownGroup,
+  F0ButtonDropdown,
+} from "@/components/F0ButtonDropdown"
+import { IconType } from "@/components/F0Icon"
+import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import NumberFlow from "@number-flow/react"
 import { AnimatePresence, motion } from "motion/react"
+import { Fragment, useCallback, useMemo } from "react"
 
 type ActionType = {
   label: string
@@ -18,6 +18,44 @@ type ActionType = {
   onClick?: () => void
   disabled?: boolean
   critical?: boolean
+  description?: string
+}
+
+export type ActionBarGroup = {
+  label?: string
+  items: ActionBarItem[]
+}
+
+export type ActionBarItem = ActionType
+
+function isActionGroup(
+  item: ActionBarItem | ActionBarGroup
+): item is ActionBarGroup {
+  return "items" in item
+}
+
+/**
+ * Normalize the items to an array of DropdownButtonGroup
+ */
+const normalizeItems = (
+  items: ActionType[] | ActionBarGroup[] | ActionBarGroup
+): ActionBarGroup[] => {
+  if (Array.isArray(items)) {
+    if (items.every((item) => isActionGroup(item))) {
+      // ActionBarGroup[]
+      return items
+    } else {
+      // ActionType[]
+      return [
+        {
+          items: items,
+        },
+      ]
+    }
+  } else {
+    // ActionBarGroup
+    return [items]
+  }
 }
 
 interface OneActionBarProps {
@@ -29,12 +67,12 @@ interface OneActionBarProps {
   /**
    * The primary action
    */
-  primaryActions?: ActionType[]
+  primaryActions?: ActionBarItem[] | ActionBarGroup[] | ActionBarGroup
 
   /**
    * The secondary actions
    */
-  secondaryActions?: ActionType[]
+  secondaryActions?: ActionBarItem[]
 
   /**
    * The number of selected items. If not defined, the action bar will not show the selected items count and the unselect button.
@@ -64,11 +102,11 @@ const Alert = ({ message }: { message: string }) => {
 
 export const OneActionBar = ({
   isOpen,
-  primaryActions = [],
   secondaryActions = [],
   selectedNumber = undefined,
   onUnselect,
   warningMessage,
+  ...props
 }: OneActionBarProps) => {
   const i18n = useI18n()
 
@@ -81,7 +119,50 @@ export const OneActionBar = ({
   const dropdownActions = secondaryActions.slice(2).map((action) => ({
     ...action,
     critical: action.critical || false,
-  })) as DropdownItem[]
+  }))
+
+  /**
+   * Normalize the primary actions to be a list of groups
+   */
+  const primaryActions = useMemo(
+    () => normalizeItems(props.primaryActions ?? []),
+    [props.primaryActions]
+  )
+
+  /**
+   * Transforms the normalized primary actions into a format suitable for dropdown components.
+   * Each action group and its items are mapped to the expected dropdown item structure.
+   */
+  const primaryActionsDropdownItems = useMemo<ButtonDropdownGroup[]>(() => {
+    {
+      return primaryActions.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          value: item.label,
+          label: item.label,
+          icon: item.icon,
+          critical: item.critical,
+          description: item.description,
+          disabled: item.disabled,
+        })),
+      }))
+    }
+  }, [primaryActions])
+
+  const singlePrimaryAction = useMemo(() => {
+    return primaryActions.length === 1 && primaryActions[0].items.length === 1
+      ? primaryActions[0].items[0]
+      : null
+  }, [primaryActions])
+
+  const getActionByValue = useCallback(
+    (value: string) => {
+      return primaryActions
+        .flatMap((group) => group.items)
+        .find((item) => item.label === value)
+    },
+    [primaryActions]
+  )
 
   return (
     <AnimatePresence>
@@ -108,7 +189,7 @@ export const OneActionBar = ({
                 />
                 <span> {selectedText}</span>
               </span>
-              <Button
+              <F0Button
                 variant="outline"
                 size="sm"
                 label={i18n.actions.unselect}
@@ -126,41 +207,34 @@ export const OneActionBar = ({
               {warningMessage ? (
                 <Alert message={warningMessage} />
               ) : (
-                <>
+                <Fragment key="mobile-actions">
                   <MobileDropdown items={secondaryActions} />
-                  {primaryActions.length > 1 ? (
-                    <OneDropdownButton
-                      items={primaryActions.map((action) => ({
-                        value: action.label,
-                        label: action.label,
-                        icon: action.icon,
-                        critical: action.critical,
-                      }))}
+                  {!singlePrimaryAction ? (
+                    <F0ButtonDropdown
+                      items={primaryActionsDropdownItems}
                       onClick={(value) => {
-                        const action = primaryActions.find(
-                          (a) => a.label === value
-                        )
-                        action?.onClick?.()
+                        const action = getActionByValue(value)
+                        ;(action as ActionType)?.onClick?.()
                       }}
                       size="lg"
                     />
-                  ) : primaryActions.length === 1 ? (
-                    <Button
-                      label={primaryActions[0].label}
-                      icon={primaryActions[0].icon}
-                      onClick={primaryActions[0].onClick}
-                      disabled={primaryActions[0].disabled}
+                  ) : (
+                    <F0Button
+                      label={singlePrimaryAction.label}
+                      icon={singlePrimaryAction.icon}
+                      onClick={singlePrimaryAction.onClick}
+                      disabled={singlePrimaryAction.disabled}
                       size="lg"
                     />
-                  ) : null}
-                </>
+                  )}
+                </Fragment>
               )}
             </div>
             <div className="hidden items-center gap-2 sm:flex">
               {warningMessage ? (
                 <Alert message={warningMessage} />
               ) : (
-                <>
+                <Fragment key="desktop-actions">
                   {dropdownActions.length > 0 && (
                     <Dropdown items={dropdownActions} />
                   )}
@@ -168,7 +242,7 @@ export const OneActionBar = ({
                     .slice()
                     .reverse()
                     .map((action) => (
-                      <Button
+                      <F0Button
                         variant={action.critical ? "critical" : "outline"}
                         key={action.label}
                         label={action.label}
@@ -177,30 +251,25 @@ export const OneActionBar = ({
                         disabled={action.disabled}
                       />
                     ))}
-                  {primaryActions.length > 1 ? (
-                    <OneDropdownButton
-                      items={primaryActions.map((action) => ({
-                        value: action.label,
-                        label: action.label,
-                        icon: action.icon,
-                        critical: action.critical,
-                      }))}
-                      onClick={(value) => {
-                        const action = primaryActions.find(
-                          (a) => a.label === value
-                        )
-                        action?.onClick?.()
-                      }}
+                  {!singlePrimaryAction ? (
+                    <>
+                      <F0ButtonDropdown
+                        items={primaryActionsDropdownItems}
+                        onClick={(value) => {
+                          const action = getActionByValue(value)
+                          ;(action as ActionType)?.onClick?.()
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <F0Button
+                      label={singlePrimaryAction.label}
+                      icon={singlePrimaryAction.icon}
+                      onClick={singlePrimaryAction.onClick}
+                      disabled={singlePrimaryAction.disabled}
                     />
-                  ) : primaryActions.length === 1 ? (
-                    <Button
-                      label={primaryActions[0].label}
-                      icon={primaryActions[0].icon}
-                      onClick={primaryActions[0].onClick}
-                      disabled={primaryActions[0].disabled}
-                    />
-                  ) : null}
-                </>
+                  )}
+                </Fragment>
               )}
             </div>
           </div>

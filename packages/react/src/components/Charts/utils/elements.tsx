@@ -44,3 +44,11 @@ export const cartesianGridProps = () => ({
   vertical: false,
   strokeDasharray: "4",
 })
+
+export const chartTooltipProps = (horizontal: boolean = false) => ({
+  cursor: true,
+  offset: horizontal ? 0 : 20,
+  position: { y: horizontal ? undefined : 0, x: horizontal ? 120 : undefined },
+  animationDuration: 100,
+  isAnimationActive: true,
+})

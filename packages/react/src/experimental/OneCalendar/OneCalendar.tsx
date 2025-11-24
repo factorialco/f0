@@ -1,9 +1,10 @@
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
+import { F0Button } from "@/components/F0Button"
+import { useI18n } from "@/lib/providers/i18n"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Button } from "../../components/Actions/Button"
-import { useI18n } from "../../lib/providers/i18n"
 import {
   GranularityDefinition,
   GranularityDefinitionKey,
@@ -11,9 +12,11 @@ import {
   GranularityDefinitionSimple,
 } from "./granularities/index"
 import { CalendarMode, CalendarView, DateRange, DateRangeString } from "./types"
-import { isValidDate, toDateRange } from "./utils"
+import { isActiveDate, toDateRange } from "./utils"
 
-export interface OneCalendarProps {
+const privateProps = ["compact"] as const
+
+interface OneCalendarInternalProps {
   mode: CalendarMode
   view: CalendarView
   onSelect?: (date: Date | DateRange | null) => void
@@ -23,7 +26,13 @@ export interface OneCalendarProps {
   showInput?: boolean
   minDate?: Date
   maxDate?: Date
+  compact?: boolean
 }
+
+export type OneCalendarProps = Omit<
+  OneCalendarInternalProps,
+  (typeof privateProps)[number]
+>
 
 export const getGranularitySimpleDefinition = (
   granularityKey: GranularityDefinitionKey
@@ -50,7 +59,7 @@ export const getGranularityDefinition = (
   return granularity
 }
 
-export function OneCalendar({
+const OneCalendarInternal = ({
   mode = "single",
   view = "month",
   onSelect,
@@ -60,7 +69,8 @@ export function OneCalendar({
   showInput = false,
   minDate,
   maxDate,
-}: OneCalendarProps) {
+  compact = false,
+}: OneCalendarInternalProps) => {
   const i18n = useI18n()
 
   const [viewDate, setViewDate] = useState<Date>(defaultMonth)
@@ -94,11 +104,8 @@ export function OneCalendar({
 
   useEffect(() => {
     setSelected(defaultSelected)
-  }, [defaultSelected, setSelected])
-
-  useEffect(() => {
-    // setSelected(defaultSelected)
-  }, [defaultSelected, setSelected])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be run when the defaultSelected changes
+  }, [defaultSelected])
 
   // Handle ui view navigation
   const navigate = (direction: -1 | 1) => {
@@ -137,21 +144,55 @@ export function OneCalendar({
     setSelectFromInput(input, inputValue)
   }
 
+  const isSelectableDate = useCallback(
+    (date: Date | undefined | null) => {
+      if (!date) {
+        return false
+      }
+
+      return isActiveDate(date, granularity, {
+        minDate,
+        maxDate,
+      })
+    },
+    [granularity, minDate, maxDate]
+  )
+
   const setSelectFromInput = (
     input: "from" | "to",
     inputValue: DateRangeString
   ) => {
     const newDate = granularity.fromString(inputValue, i18n)
-    const error = newDate && newDate[input] && !isValidDate(newDate[input])
+    const error = !isSelectableDate(newDate?.[input])
+
     setInputError((prev) => ({
       ...prev,
       [input]: error,
     }))
 
     if (!error) {
-      setSelected(newDate)
+      handleSelect(newDate)
     }
   }
+
+  // When the granularity changes, the range to the correct granularity
+  useEffect(
+    () => {
+      const range = toDateRange(selected)
+      if (!range) return
+
+      // Convert the range to the correct granularity reducing the range to the correct granularity
+      const newRange =
+        mode === "range"
+          ? granularity.toRange(range)
+          : granularity.toRange(range.from)
+
+      handleSelect(newRange)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the granularity changes
+    [granularity]
+  )
+
   useEffect(() => {
     const range = toDateRange(selected)
 
@@ -174,13 +215,13 @@ export function OneCalendar({
       ? granularity.navigate(currentDate.from, direction)
       : undefined
 
-    if (isValidDate(newDate)) {
+    if (isSelectableDate(newDate)) {
       const newInputValue = {
         ...inputValue,
         [input]: granularity.toRangeString(newDate, i18n).from,
       }
-      setInputValue(newInputValue)
       setSelectFromInput(input, newInputValue)
+      setInputValue(newInputValue)
     }
   }
 
@@ -229,26 +270,34 @@ export function OneCalendar({
         </div>
       )}
       {showNavigation && (
-        <div className="flex items-center justify-between pb-3">
-          <div className="text-lg font-medium text-f1-foreground">
+        <div
+          className={cn(
+            "flex items-center justify-between",
+            compact ? "mx-2 pb-2" : "pb-3"
+          )}
+        >
+          <div
+            className={cn(
+              "font-medium text-f1-foreground",
+              compact ? "text-md" : "text-lg"
+            )}
+          >
             {getHeaderLabel()}
           </div>
           <div className="flex items-center gap-2">
-            <Button
+            <F0Button
               onClick={() => navigate(-1)}
               variant="outline"
               label={i18n.navigation.previous}
               hideLabel
-              round
               icon={ChevronLeft}
               size="sm"
             />
-            <Button
+            <F0Button
               onClick={() => navigate(1)}
               variant="outline"
               label={i18n.navigation.next}
               hideLabel
-              round
               icon={ChevronRight}
               size="sm"
             />
@@ -267,8 +316,25 @@ export function OneCalendar({
           viewDate,
           minDate,
           maxDate,
+          compact,
         })}
       </div>
     </div>
   )
 }
+
+const OneCalendarBase = (props: OneCalendarProps) => {
+  const publicProps = privateProps.reduce((acc, key) => {
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as OneCalendarInternalProps)
+
+  return <OneCalendarInternal {...publicProps} />
+}
+
+OneCalendarBase.displayName = "OneCalendar"
+
+export const OneCalendar = OneCalendarBase
+
+// Export internal component and types for advanced usage
+export { OneCalendarInternal, type OneCalendarInternalProps }

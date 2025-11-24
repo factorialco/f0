@@ -280,7 +280,6 @@ export const WithProductUpdate: Story = {
             onClose: () => {
               alert("onClose")
             },
-            module: "discover",
             dismissable: false,
             trackVisibility: (open) => {
               console.log("trackOpenChange", open)

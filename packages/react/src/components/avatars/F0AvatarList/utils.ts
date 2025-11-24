@@ -17,7 +17,11 @@ export function getAvatarDisplayName(
   avatar: Omit<Extract<AvatarVariant, { type: "file" }>, "type">
 ): string
 export function getAvatarDisplayName(
-  avatarType: "person" | "team" | "company" | "file",
+  avatarType: "flag",
+  avatar: Omit<Extract<AvatarVariant, { type: "flag" }>, "type">
+): string
+export function getAvatarDisplayName(
+  avatarType: "person" | "team" | "company" | "file" | "flag",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- this is functionn overload to waranty the avatar type
   avatar: any
 ): string
@@ -32,6 +36,8 @@ export function getAvatarDisplayName(avatarType: string, avatar: any): string {
       return avatar.name
     case "file":
       return avatar.file.name
+    case "flag":
+      return avatar.name
     default:
       return ""
   }

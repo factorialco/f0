@@ -1,14 +1,16 @@
 import {
-  OneDatePickerPopup,
-  OneDatePickerPopupProps,
-} from "@/ui/DatePickerPopup/OneDatePickerPopup"
-import { useMemo, useState } from "react"
+  DatePickerPopup,
+  DatePickerPopupProps,
+} from "@/ui/DatePickerPopup/DatePickerPopup"
+import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
+import { useEffect, useMemo, useState } from "react"
 import { granularityDefinitions } from "../OneCalendar"
 import { DateRange, DateRangeComplete } from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
+
 export interface OneDatePickerProps
-  extends Omit<OneDatePickerPopupProps, "children"> {
+  extends Omit<DatePickerPopupProps, "children"> {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }
@@ -23,20 +25,32 @@ export function OneDateNavigator({
   compareTo,
   defaultCompareTo,
   onCompareToChange,
+  value,
   ...props
 }: OneDatePickerProps) {
-  const [value, setValue] = useState<DatePickerValue | undefined>(defaultValue)
+  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
+    defaultValue ?? value
+  )
+
+  useEffect(() => {
+    if (isSameDatePickerValue(value, localValue)) {
+      return
+    }
+    setLocalValue(value || defaultValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
+  }, [value, defaultValue])
+
   const [compareToValue, setCompareToValue] = useState<
     DateRangeComplete | DateRangeComplete[] | undefined
   >()
   const [isOpen, setIsOpen] = useState(false)
 
   const granularityDefinition = useMemo(() => {
-    return granularityDefinitions[value?.granularity ?? "day"]
-  }, [value?.granularity])
+    return granularityDefinitions[localValue?.granularity ?? "day"]
+  }, [localValue?.granularity])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
-    setValue(value)
+    setLocalValue(value)
     onSelect?.(value)
   }
 
@@ -50,14 +64,14 @@ export function OneDateNavigator({
   const handleNavigationChange = (date: DateRange) => {
     handleSelect({
       value: granularityDefinition.toRange(date),
-      granularity: value?.granularity ?? "day",
+      granularity: localValue?.granularity ?? "day",
     })
   }
 
   return (
-    <OneDatePickerPopup
+    <DatePickerPopup
       onSelect={handleSelect}
-      value={value}
+      value={localValue}
       defaultValue={defaultValue}
       presets={presets}
       granularities={granularities}
@@ -68,9 +82,10 @@ export function OneDateNavigator({
       compareTo={compareTo}
       defaultCompareTo={defaultCompareTo}
       onCompareToChange={handleCompareToChange}
+      asChild
     >
       <DatePickerTrigger
-        value={value}
+        value={localValue}
         compareToValue={compareToValue}
         highlighted={isOpen}
         navigation={!hideNavigation}
@@ -82,6 +97,6 @@ export function OneDateNavigator({
         hideGoToCurrent={hideGoToCurrent}
         onClick={() => setIsOpen(true)}
       />
-    </OneDatePickerPopup>
+    </DatePickerPopup>
   )
 }

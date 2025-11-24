@@ -64,7 +64,7 @@ export default [
             "**/__tests__/**",
           ],
           rules: {
-            "no-console": ["error", { allow: ["warn", "error"] }],
+            "no-console": ["error", { allow: ["warn", "error", "assert"] }],
           },
         },
       ]
@@ -131,6 +131,11 @@ export default [
               message:
                 "Barrel imports are not allowed. Use specific component imports instead.",
             },
+            {
+              name: "@/experimental",
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead.",
+            },
           ],
           patterns: [
             {
@@ -149,9 +154,11 @@ export default [
                 "**/exports.ts",
                 "@/*/exports",
                 "@/**/exports",
+                // exceptions
+                "!@/lib/providers/f0",
               ],
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead. [Rule: 1]",
             },
           ],
         },
@@ -175,21 +182,28 @@ export default [
             {
               name: "@/f0",
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead.  [Rule: 2]",
+            },
+            {
+              name: "@/experimental",
+              message:
+                "Imports from @/experimental root are not allowed. Import the component directly instead. [Rule: 3]",
             },
           ],
           patterns: [
             {
               group: [
                 // F0 patterns (all variations)
-                "*f0",
+                "f0",
                 "*f0.ts",
                 "*/f0",
                 "**/f0",
                 "**/f0.ts",
+                // exceptions
+                "!@/lib/providers/f0",
               ],
               message:
-                "Barrel imports are not allowed. Use specific component imports instead.",
+                "Barrel imports are not allowed. Use specific component imports instead. [Rule: 4]",
             },
           ],
         },

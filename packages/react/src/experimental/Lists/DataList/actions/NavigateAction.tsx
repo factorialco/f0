@@ -23,12 +23,7 @@ export const NavigateAction = memo(
       >
         {children}
         <div className="grid">
-          <F0Icon
-            aria-hidden={true}
-            icon={ChevronRight}
-            size="md"
-            className="opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 group-active:opacity-100"
-          />
+          <F0Icon aria-hidden={true} icon={ChevronRight} size="md" />
         </div>
       </Link>
     )

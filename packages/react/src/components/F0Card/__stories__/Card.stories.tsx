@@ -7,6 +7,7 @@ import {
   Envelope,
   ExternalLink,
   Lightbulb,
+  Link,
   Office,
   Star,
 } from "@/icons/app"
@@ -66,11 +67,13 @@ export const Default: Story = {
       firstName: "Daniel",
       lastName: "Moreno",
     },
+    compact: false,
     title: "Daniel Moreno",
     description: "This is a cool description",
     metadata: [
       {
         icon: Briefcase,
+        tooltip: "Job title",
         property: {
           type: "text",
           value: "Design Engineer",
@@ -78,6 +81,7 @@ export const Default: Story = {
       },
       {
         icon: CalendarArrowRight,
+        tooltip: "Date",
         property: {
           type: "text",
           value: "3 years ago",
@@ -85,12 +89,22 @@ export const Default: Story = {
       },
       {
         icon: Star,
+        tooltip: "Status",
         property: {
           type: "status",
           value: {
             status: "positive",
             label: "Active",
           },
+        },
+      },
+      {
+        icon: Link,
+        tooltip: "Link",
+        property: {
+          type: "text",
+          value:
+            "https://docs.google.com/spreadsheets/d/1jO1tPWhNe1y_ciSmNVYHugIPaOIEWOqrHR50Du2wvbc/edit",
         },
       },
     ],
@@ -349,7 +363,7 @@ export const IntentsShowcase: Story = {
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
-    <div className="flex w-full flex-wrap gap-2 overflow-auto">
+    <div className="flex max-w-xl flex-col gap-2">
       <F0Card.Skeleton />
       <F0Card.Skeleton compact />
       <F0Card {...Default.args} />

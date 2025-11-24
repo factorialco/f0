@@ -33,3 +33,10 @@ export const CriticalAlertTag: Story = {
     level: "critical",
   },
 }
+
+export const PositiveAlertTag: Story = {
+  args: {
+    text: "Success",
+    level: "positive",
+  },
+}

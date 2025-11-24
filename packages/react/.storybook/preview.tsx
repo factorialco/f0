@@ -1,7 +1,7 @@
 // organize-imports-ignore
 import React, { useState } from "react"
 import { INITIAL_VIEWPORTS } from "storybook/viewport"
-import type { Preview } from "@storybook/react-vite"
+import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite"
 
 import { action } from "storybook/actions"
 import { MotionGlobalConfig } from "motion/react"
@@ -11,16 +11,16 @@ import isChromatic from "chromatic/isChromatic"
 import "../src/styles.css"
 
 import { ThemeProvider } from "@/lib/providers/theme"
-import { FactorialOneProvider } from "@/lib/providers/one"
+import { F0Provider } from "@/lib/providers/f0"
 import { DocsContainer } from "./DocsContainer.tsx"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
-import { defaults as l10nDefaults } from "@/lib/providers/l10n"
+import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
 export const withTheme = () => {
   // eslint-disable-next-line react/display-name
-  return (Story) => {
+  return (Story: StoryFn) => {
     return (
       <ThemeProvider theme="light">
         <Story />
@@ -29,11 +29,11 @@ export const withTheme = () => {
   }
 }
 
-export const FactorialOne = (Story, { parameters }) => {
+export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
   const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
 
   return (
-    <FactorialOneProvider
+    <F0Provider
       layout={{
         fullScreen: parameters.layout === "fullscreen",
       }}
@@ -52,10 +52,13 @@ export const FactorialOne = (Story, { parameters }) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
+              console.log("Link clicked", event, ...args)
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()
-              if (props.href) setCurrentPath(props.href)
+              if (props.href) {
+                setCurrentPath(props.href)
+              }
             }}
           />
         ),
@@ -66,14 +69,15 @@ export const FactorialOne = (Story, { parameters }) => {
         }),
       }}
       isDev={parameters.isDev ?? false}
+      dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
     >
       <Story />
-    </FactorialOneProvider>
+    </F0Provider>
   )
 }
 
 const preview: Preview = {
-  decorators: [FactorialOne, withTheme()],
+  decorators: [F0, withTheme()],
 
   parameters: {
     throwPlayFunctionExceptions: true,

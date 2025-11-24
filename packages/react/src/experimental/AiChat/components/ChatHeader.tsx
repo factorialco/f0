@@ -1,25 +1,21 @@
-import { ButtonInternal } from "@/components/Actions/Button/internal"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { useChatWindowContext } from "./ChatWindow"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
   const { setOpen } = useAiChat()
-  const { messageContainerScrollTop } = useChatWindowContext()
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
 
   return (
     <header
       className={cn(
-        "absolute inset-x-0 top-0 z-10 flex justify-between border-0 border-solid border-f1-border-secondary p-3",
-        messageContainerScrollTop > 0 &&
-          "border-b bg-f1-background/30 backdrop-blur-lg"
+        "flex justify-between border-0 border-solid border-f1-border-secondary p-3"
       )}
     >
       <h2 className="text-f1-foreground">

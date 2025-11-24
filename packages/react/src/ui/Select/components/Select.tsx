@@ -1,24 +1,33 @@
-import * as SelectPrimitive from "@radix-ui/react-select"
-import * as React from "react"
-import { useState } from "react"
-import { SelectContext } from "../SelectContext.tsx"
+import { useEffect, useState } from "react"
+import { SelectContext, SelectContextType } from "../SelectContext.tsx"
+import * as SelectPrimitive from "./radix-ui"
+import { SelectPrimitiveProps } from "./radix-ui/select.tsx"
 
-type SelectProps = React.ComponentProps<typeof SelectPrimitive.Root> & {
-  asList?: boolean
+type SelectOption = {
+  value: string
+  label: string
 }
+
+export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
+  as?: "list"
+  placeholder?: string
+  options?: SelectOption[]
+}
+
 /**
  * Select Root component
  */
-const Select = (props: SelectProps) => {
-  // If open prop is not provided, we'll manage it internally
-  const [internalOpen, setInternalOpen] = useState(props.asList ? true : false)
 
-  // Use either the controlled open state from props or the internal state
-  const isOpen = props.asList
-    ? true
-    : props.open !== undefined
-      ? props.open
-      : internalOpen
+const Select = <T extends string = string>(props: SelectProps<T>) => {
+  type Value = NonNullable<typeof props.value>
+  const [internalOpen, setInternalOpen] = useState(!!(props.as === "list"))
+
+  const isOpen =
+    props.as === "list"
+      ? true
+      : props.open !== undefined
+        ? props.open
+        : internalOpen
 
   const handleOpenChange = (open: boolean) => {
     // Update internal state if we're not in controlled mode
@@ -30,28 +39,73 @@ const Select = (props: SelectProps) => {
     props.onOpenChange?.(open)
   }
 
+  const toArray = (value: T | T[] | undefined) => {
+    if (value === undefined) {
+      return []
+    }
+    return Array.isArray(value) ? value : [value]
+  }
+
+  const [localValue, setLocalValue] = useState(toArray(props.value))
+
+  /**
+   * We need to update the local value when the value prop changes
+   * Internally we use always an array of values, so we need to convert the value to an array
+   */
+  useEffect(
+    () => {
+      setLocalValue(toArray(props.value))
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we are checking deeply the value
+    [JSON.stringify(props.value)]
+  )
+
+  const contextValue: SelectContextType = {
+    value: localValue,
+    open: isOpen,
+    as: props.as,
+    multiple: props.multiple || false,
+  }
+
+  const commonProps = {
+    ...props,
+    open: isOpen,
+    onOpenChange: handleOpenChange,
+    children: (
+      <SelectContext.Provider value={contextValue}>
+        {props.children}
+      </SelectContext.Provider>
+    ),
+  }
+
+  const handleValueChange = (value: Value) => {
+    setLocalValue(toArray(value))
+    if (props.multiple) {
+      props.onValueChange?.(toArray(value) as T[])
+    } else {
+      props.onValueChange?.(value as T)
+    }
+  }
+
+  const primitiveProps = props.multiple
+    ? {
+        ...commonProps,
+        multiple: true as const,
+        value: localValue,
+        defaultValue: props.defaultValue,
+        onValueChange: handleValueChange,
+      }
+    : {
+        ...commonProps,
+        multiple: false as const,
+        value: localValue[0],
+        defaultValue: props.defaultValue,
+        onValueChange: handleValueChange,
+      }
+
   return (
-    <div
-      className="[&>div]:!relative"
-      onClick={(e) => {
-        e.preventDefault()
-      }}
-    >
-      <SelectPrimitive.Root
-        {...props}
-        open={isOpen}
-        onOpenChange={handleOpenChange}
-      >
-        <SelectContext.Provider
-          value={{
-            value: props.value,
-            open: isOpen,
-            asList: props.asList,
-          }}
-        >
-          {props.children}
-        </SelectContext.Provider>
-      </SelectPrimitive.Root>
+    <div className="h-full [&>div]:!relative [&>div]:!h-full">
+      <SelectPrimitive.Root<T> {...primitiveProps} />
     </div>
   )
 }

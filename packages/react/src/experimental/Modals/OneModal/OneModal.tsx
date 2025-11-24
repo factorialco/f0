@@ -2,11 +2,11 @@ import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-import React, { ComponentProps, useEffect, useMemo, useState } from "react"
+import { ComponentProps, FC, ReactElement, useMemo } from "react"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
-import { ModalPosition } from "./types"
+import { ContentPadding, ModalPosition } from "./types"
 import { useIsSmallScreen } from "./utils"
 
 export type OneModalProps = {
@@ -16,42 +16,33 @@ export type OneModalProps = {
   onClose: () => void
   /** Whether to render the modal as a bottom sheet on mobile */
   asBottomSheetInMobile?: boolean
+  /** the padding of internal content areas (header, content, footer) */
+  contentPadding?: ContentPadding
   position?: ModalPosition
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
-    | React.ReactElement<
+    | ReactElement<
         | ComponentProps<typeof OneModalHeader>
         | ComponentProps<typeof OneModalContent>
       >
-    | React.ReactElement<
+    | ReactElement<
         | ComponentProps<typeof OneModalHeader>
         | ComponentProps<typeof OneModalContent>
       >[]
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
-export const OneModal: React.FC<OneModalProps> = ({
+export const OneModal: FC<OneModalProps> = ({
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
   isOpen,
+  contentPadding = "md",
   children,
 }) => {
-  const [open, setOpen] = useState(isOpen)
-
-  useEffect(() => {
-    setOpen(isOpen)
-  }, [isOpen])
-
   const handleOpenChange = (open: boolean) => {
-    setOpen(open)
     if (!open) {
       onClose()
     }
-  }
-
-  const handleClose = () => {
-    setOpen(false)
-    onClose()
   }
 
   const isSmallScreen = useIsSmallScreen()
@@ -81,12 +72,13 @@ export const OneModal: React.FC<OneModalProps> = ({
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
       <OneModalProvider
-        isOpen={open}
-        onClose={handleClose}
+        isOpen={isOpen}
+        onClose={onClose}
         position={position}
+        contentPadding={contentPadding}
         shownBottomSheet
       >
-        <Drawer open={open} onOpenChange={handleOpenChange}>
+        <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent className={contentClassName}>{children}</DrawerContent>
         </Drawer>
@@ -95,10 +87,15 @@ export const OneModal: React.FC<OneModalProps> = ({
   }
 
   return (
-    <OneModalProvider isOpen={open} onClose={handleClose} position={position}>
+    <OneModalProvider
+      isOpen={isOpen}
+      onClose={onClose}
+      position={position}
+      contentPadding={contentPadding}
+    >
       <Dialog
-        open={open}
-        onOpenChange={onClose}
+        open={isOpen}
+        onOpenChange={handleOpenChange}
         modal={position === "center" || position === "fullscreen"}
       >
         <DialogContent

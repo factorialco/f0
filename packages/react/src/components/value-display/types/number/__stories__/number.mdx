@@ -1,0 +1,105 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as NumberStories from "./number.stories"
+
+<Meta of={NumberStories} />
+
+### number
+
+Renders a number (right align on table visualizacion)
+
+> For money use the `amount` type instead
+
+#### Value type
+
+```
+type value = number | undefined
+// or
+type value = {
+    number: number | undefined
+    placeholder?: string
+    units?: string
+    unitsPosition?: 'left' | 'right' // default is right
+    decimalPlaces?: number | undefined // if undefined, the number will be rendered as is, if defined, the number will be rendered with the number of decimal places
+}
+```
+
+#### NumberInputAsObject
+
+<Canvas
+  of={NumberStories.NumberInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'number',
+    value: 1234
+})
+`,
+  }}
+/>
+
+#### NumberValueInputAsObject
+
+<Canvas
+  of={NumberStories.NumberValueInputAsObject}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'number'
+    value: {
+      number: 1234
+    }
+})
+`,
+  }}
+/>
+
+#### With decimal places
+
+<Canvas
+  of={NumberStories.NumberValueInputAsObjectWithDecimals}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'number'
+    value: {
+      number: 1234.56789
+      decimalPlaces: 2
+    }
+})
+`,
+  }}
+/>
+
+#### With units
+
+<Canvas
+  of={NumberStories.NumberValueInputAsObjectWithUnits}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'number'
+    value: {
+      number: 1234
+      units: 'km/h',
+      decimalPlaces: 2,
+    }
+})
+`,
+  }}
+/>
+
+#### With placeholder
+
+<Canvas
+  of={NumberStories.NumberWithPlaceholder}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'number'
+    value: {
+      number: undefined,
+      placeholder: 'Some placeholder'
+    }
+})`,
+  }}
+/>

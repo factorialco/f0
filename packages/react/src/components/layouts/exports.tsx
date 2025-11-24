@@ -1,4 +1,4 @@
-import { Component } from "@/lib/component"
+import { Component } from "@/lib/component/component"
 import { HomeLayout as HomeLayoutComponent } from "./HomeLayout"
 import {
   TwoColumnLayout as TwoColumnLayoutComponent,

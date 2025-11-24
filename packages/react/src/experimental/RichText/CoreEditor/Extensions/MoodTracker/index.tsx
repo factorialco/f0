@@ -1,9 +1,9 @@
-import { Button } from "@/components/Actions/Button"
 import {
   Pulse,
   pulseIcon,
   pulseIconColor,
 } from "@/components/avatars/F0AvatarPulse"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
@@ -14,7 +14,6 @@ import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
 } from "@tiptap/react"
-import { AnimatePresence, motion } from "motion/react"
 import React, { useState } from "react"
 
 interface MoodTrackerData {
@@ -83,18 +82,11 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
 
   return (
     <NodeViewWrapper contentEditable={false}>
-      <motion.div
-        className="editor-mood-tracker my-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3"
+      <div
+        className="editor-mood-tracker mb-4 flex w-full flex-col gap-4 rounded-md border border-solid border-f1-border-secondary p-3"
         onClick={(e) => e.stopPropagation()}
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <motion.div
-          className="flex flex-row items-center justify-between gap-2"
-          layout
-        >
+        <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-3">
@@ -126,7 +118,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
 
           <div className="flex flex-row items-center gap-1">
             {/* Toggle button */}
-            <Button
+            <F0Button
               onClick={handleToggleCollapse}
               variant="outline"
               hideLabel
@@ -140,83 +132,28 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
             />
             <Dropdown items={getDropdownItems} size="sm" />
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <motion.div
-              key="content"
-              initial={{
-                height: 0,
-                opacity: 0,
-                scaleY: 0,
-              }}
-              animate={{
-                height: "auto",
-                opacity: 1,
-                scaleY: 1,
-              }}
-              exit={{
-                height: 0,
-                opacity: 0,
-                scaleY: 0,
-              }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-                opacity: { duration: 0.2 },
-              }}
-              style={{
-                transformOrigin: "top",
-                overflow: "hidden",
-              }}
-            >
-              <motion.div
-                className="text-f1-text-primary"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-              >
-                <div className="flex flex-col gap-2">
-                  {data.days.map((day, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{
-                        opacity: 0,
-                        y: -10,
-                        scale: 0.95,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                      }}
-                      transition={{
-                        delay: index * 0.05,
-                        duration: 0.2,
-                        ease: "easeOut",
-                      }}
-                      className="flex flex-row items-center gap-2"
-                    >
-                      <div className="flex items-center justify-center rounded-full">
-                        <F0Icon
-                          icon={pulseIcon[day.mood]}
-                          size="lg"
-                          color={pulseIconColor[day.mood]}
-                        />
-                      </div>
-                      <p className="text-f1-text-primary text-md font-normal">
-                        <span className="font-semibold">{day.day}:</span>{" "}
-                        {day.comment || "-"}
-                      </p>
-                    </motion.div>
-                  ))}
+        {isOpen && (
+          <div className="text-f1-text-primary flex flex-col gap-2">
+            {data.days.map((day, index) => (
+              <div className="flex flex-row items-center gap-2" key={index}>
+                <div className="flex items-center justify-center rounded-full">
+                  <F0Icon
+                    icon={pulseIcon[day.mood]}
+                    size="lg"
+                    color={pulseIconColor[day.mood]}
+                  />
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                <p className="text-f1-text-primary text-md font-normal">
+                  <span className="font-semibold">{day.day}:</span>{" "}
+                  {day.comment || "-"}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>
   )

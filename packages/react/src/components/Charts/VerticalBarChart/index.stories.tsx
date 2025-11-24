@@ -1,19 +1,13 @@
 import { Meta } from "@storybook/react-vite"
 import { VerticalBarChart } from "./index"
 
-const dataConfig = {
-  value: {
-    label: "Value",
-  },
-}
-
-const meta: Meta<typeof VerticalBarChart<typeof dataConfig>> = {
+const meta: Meta = {
   title: "Charts/VerticalBarChart",
   component: VerticalBarChart,
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <div className="h-52 w-full">
+      <div className="h-96 w-full">
         <Story />
       </div>
     ),
@@ -25,53 +19,83 @@ const meta: Meta<typeof VerticalBarChart<typeof dataConfig>> = {
       },
     },
   },
-  args: {
-    dataConfig,
-    data: [
-      { label: "Employee Satisfaction", values: { value: 85 } },
-      { label: "Retention Rate", values: { value: 92 } },
-      { label: "Training Completion", values: { value: 78 } },
-      { label: "Performance Score", values: { value: 88 } },
-      { label: "Recruitment Efficiency", values: { value: 100 } },
-    ],
-    yAxis: {
-      width: 100,
-    },
-  },
 }
 
 export default meta
 
-export const Default = {}
-
-const multiDataConfig = {
-  desktop: {
-    label: "Desktop",
-  },
-  mobile: {
-    label: "Mobile",
+const hiresDataConfig = {
+  hires: {
+    label: "Successful hires",
   },
 }
 
-export const MultipleValues: Meta<
-  typeof VerticalBarChart<typeof multiDataConfig>
-> = {
+export const Default: Meta<typeof VerticalBarChart<typeof hiresDataConfig>> = {
   args: {
-    dataConfig: multiDataConfig,
+    dataConfig: hiresDataConfig,
     data: [
-      { label: "January", values: { mobile: 4000, desktop: 2400 } },
-      { label: "February", values: { mobile: 3000, desktop: 1398 } },
-      { label: "March", values: { mobile: 2000, desktop: 4000 } },
-      { label: "April", values: { mobile: 1500, desktop: 8000 } },
-      { label: "May", values: { mobile: 2000, desktop: 6000 } },
+      { label: "Sarah Johnson", values: { hires: 28 } },
+      { label: "Michael Chen", values: { hires: 25 } },
+      { label: "Emma Thompson", values: { hires: 23 } },
+      { label: "James Wilson", values: { hires: 21 } },
+      { label: "Olivia Martinez", values: { hires: 19 } },
+      { label: "David Brown", values: { hires: 18 } },
+      { label: "Sophie Davis", values: { hires: 16 } },
+      { label: "Alexander Lee", values: { hires: 15 } },
+      { label: "Isabella Garcia", values: { hires: 14 } },
+      { label: "Thomas Anderson", values: { hires: 12 } },
     ],
+    yAxis: {
+      hide: false,
+      width: 120,
+    },
     xAxis: {
       hide: false,
-      tickFormatter: (value: string) =>
-        `${Number.isNaN(parseFloat(value)) ? value : (parseFloat(value) / 100).toFixed(2) + "€"}`,
+      tickFormatter: (value: string) => `${value} hires`,
     },
-    valueFormatter: (value: string | number | undefined) =>
-      `${Number.isNaN(Number(value)) ? value : (Number(value) / 100).toFixed(2) + "€"}`,
+    label: true,
+  },
+}
+
+const hiresBySeniorityDataConfig = {
+  junior: {
+    label: "Junior hires",
+  },
+  senior: {
+    label: "Senior hires",
+  },
+}
+
+export const MultipleBars: Meta<
+  typeof VerticalBarChart<typeof hiresBySeniorityDataConfig>
+> = {
+  args: {
+    dataConfig: hiresBySeniorityDataConfig,
+    data: [
+      { label: "Sarah Johnson", values: { junior: 18, senior: 10 } },
+      { label: "Michael Chen", values: { junior: 15, senior: 10 } },
+      { label: "Emma Thompson", values: { junior: 14, senior: 9 } },
+      { label: "James Wilson", values: { junior: 12, senior: 9 } },
+      { label: "Olivia Martinez", values: { junior: 11, senior: 8 } },
+      { label: "David Brown", values: { junior: 10, senior: 8 } },
+      { label: "Sophie Davis", values: { junior: 9, senior: 7 } },
+      { label: "Alexander Lee", values: { junior: 8, senior: 7 } },
+      { label: "Isabella Garcia", values: { junior: 8, senior: 6 } },
+      { label: "Thomas Anderson", values: { junior: 7, senior: 5 } },
+    ],
+    yAxis: {
+      hide: false,
+      width: 120,
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${value} hires`,
+    },
+  },
+}
+
+const dataConfig = {
+  value: {
+    label: "Value",
   },
 }
 

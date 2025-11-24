@@ -101,6 +101,13 @@ export const ROLES_MOCK = [
   "Software Engineer",
 ]
 
+export const COMPANY_NAMES_MOCK = [
+  "Factorial",
+  "Dazlog",
+  "Acme Corp",
+  "Example Inc",
+  "Test de verdad",
+]
 export const STATUS_MOCK = ["active", "inactive", "active", "active", "active"]
 
 export const SALARY_MOCK = [
@@ -213,6 +220,7 @@ export type MockUser = {
     write?: boolean
     delete: boolean
   }
+  children?: MockUser[]
 }
 
 export const generateMockUsers = (count: number): MockUser[] => {

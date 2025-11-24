@@ -1,26 +1,29 @@
+import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults.ts"
 import { ReactNode } from "react"
 import { ValueDisplayVisualizationType } from "./types.ts"
-import { AlertTagCell } from "./types/alertTag.tsx"
-import { AmountCell } from "./types/amount.tsx"
-import { AvatarListCell } from "./types/avatarList.tsx"
-import { CompanyCell } from "./types/company.tsx"
-import { DateCell } from "./types/date.tsx"
-import { DotTagCell } from "./types/dotTag.tsx"
-import { FileCell } from "./types/file.tsx"
-import { FolderCell } from "./types/folder.tsx"
-import { IconCell } from "./types/icon.tsx"
-import { LongTextCell } from "./types/longText.tsx"
-import { NumberCell } from "./types/number.tsx"
-import { PercentageCell } from "./types/percentage.tsx"
-import { PersonCell } from "./types/person.tsx"
-import { StatusCell } from "./types/status.tsx"
-import { TagCell } from "./types/tag.tsx"
-import { TagListCell } from "./types/tagList.tsx"
-import { TeamCell } from "./types/team.tsx"
-import { TextCell } from "./types/text.tsx"
+import { AlertTagCell } from "./types/alertTag"
+import { AmountCell } from "./types/amount"
+import { AvatarListCell } from "./types/avatarList"
+import { CompanyCell } from "./types/company"
+import { CountryCell } from "./types/country"
+import { DateCell } from "./types/date"
+import { DotTagCell } from "./types/dotTag"
+import { FileCell } from "./types/file"
+import { FolderCell } from "./types/folder"
+import { IconCell } from "./types/icon"
+import { LongTextCell } from "./types/longText"
+import { NumberCell } from "./types/number"
+import { PercentageCell } from "./types/percentage"
+import { PersonCell } from "./types/person"
+import { StatusCell } from "./types/status"
+import { TagCell } from "./types/tag"
+import { TagListCell } from "./types/tagList"
+import { TeamCell } from "./types/team"
+import { TextCell } from "./types/text"
 
 export type ValueDisplayRendererContext = {
   visualization: ValueDisplayVisualizationType
+  i18n: TranslationsType
 }
 
 /**
@@ -52,6 +55,7 @@ export const valueDisplayRenderers = {
   icon: IconCell,
   file: FileCell,
   folder: FolderCell,
+  country: CountryCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**
@@ -94,13 +98,13 @@ const renderIsRendererDefinition = (
 export const metadataRenderer: ValueDisplayRenderer = (
   def,
   context,
-  undefinedValue = ""
+  undefinedValue
 ): ReactNode => {
   const { type, value } = renderIsRendererDefinition(def)
     ? def
     : ({
         type: "text" as const,
-        value: def ?? "-",
+        value: def ?? undefinedValue,
       } satisfies ValueDisplayRendererDefinition)
 
   // Type assertion to ensure the renderer function is typed correctly as typescript can't infer the type correctly
@@ -119,5 +123,6 @@ export const metadataRenderer: ValueDisplayRenderer = (
 
   return renderer(value, {
     visualization: context.visualization,
+    i18n: context.i18n,
   })
 }
