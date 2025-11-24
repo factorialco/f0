@@ -8,7 +8,7 @@ import { CountryCode } from "@/lib/countries"
 import { ValueDisplayRendererContext } from "../../renderers"
 
 interface CountryValue {
-  code: CountryCode
+  code: CountryCode | (string & {})
   label?: string
 }
 export type CountryCellValue = CountryValue
@@ -18,7 +18,7 @@ export const CountryCell = (
   context: ValueDisplayRendererContext
 ) => {
   const countryName =
-    args.label ?? context.i18n.countries[args.code] ?? args.code
+    args.label ?? context.i18n.countries[args.code as CountryCode] ?? args.code
 
   return (
     <div data-cell-type="country" className="flex items-center gap-2">
