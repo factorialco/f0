@@ -25,6 +25,14 @@ export type InFilterOptionItem<T = unknown> = {
  */
 export type InFilterOptions<T, _R extends RecordType = RecordType> = {
   cache?: boolean
+  /**
+   * Optional function to resolve labels for specific values without fetching all options.
+   * This is useful when you have a dynamic source and want to avoid fetching all options
+   * just to display labels for selected values.
+   * @param value - The value to get the label for
+   * @returns The label for the value, or a promise that resolves to the label
+   */
+  getLabel?: (value: T) => string | Promise<string>
 } & (
   | {
       options:
