@@ -24,14 +24,16 @@ export const BaseQuestion = ({
   children,
   // required,
   type: questionType,
-  isWithinSection,
 }: BaseQuestionProps) => {
   const {
     onQuestionChange,
     onAddNewElement,
     isEditMode,
     getIsSingleQuestionInSection,
+    getIsQuestionWithinSection,
   } = useCoCreationFormContext()
+
+  const isWithinSection = getIsQuestionWithinSection(id)
 
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
@@ -98,8 +100,6 @@ export const BaseQuestion = ({
   ]
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
-
-  console.log({ id, isSingleQuestionInSection })
 
   return (
     <div

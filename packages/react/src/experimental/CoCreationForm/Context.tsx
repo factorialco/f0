@@ -15,6 +15,7 @@ type CoCreationFormContextType = CoCreationFormCallbacks & {
   getQuestionById: (questionId: string) => QuestionElement | undefined
   deleteElement: (elementId: string) => void
   getIsSingleQuestionInSection: (questionId: string) => boolean
+  getIsQuestionWithinSection: (questionId: string) => boolean
 }
 
 const CoCreationFormContext = createContext<
@@ -316,6 +317,17 @@ export function CoCreationFormProvider({
     )
   }
 
+  const getIsQuestionWithinSection = (questionId: string) => {
+    return elements.some((element) => {
+      if (element.type === "section") {
+        return element.section.questions?.some(
+          (question) => question.id === questionId
+        )
+      }
+      return false
+    })
+  }
+
   return (
     <CoCreationFormContext.Provider
       value={{
@@ -324,6 +336,7 @@ export function CoCreationFormProvider({
         onAddNewElement: handleAddNewElement,
         onDuplicateElement: handleDuplicateElement,
         getIsSingleQuestionInSection,
+        getIsQuestionWithinSection,
         isEditMode,
         getQuestionById,
         deleteElement,
