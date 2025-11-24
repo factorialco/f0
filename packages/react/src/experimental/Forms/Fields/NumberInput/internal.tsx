@@ -28,7 +28,7 @@ export type NumberInputInternalProps = Omit<
 
 export const NumberInputInternal = forwardRef<
   HTMLInputElement,
-  NumberInputProps
+  NumberInputInternalProps
 >(function NumberInput(
   { locale, value, maxDecimals, step, min, max, onChange, units, ...props },
   ref

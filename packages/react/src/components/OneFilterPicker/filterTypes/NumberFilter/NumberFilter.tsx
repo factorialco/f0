@@ -107,13 +107,13 @@ export function NumberFilter({
     }
   }
 
-  const handleStrictChange = (index: "from" | "to", checked: boolean) => {
+  const handleOpenClosedChange = (index: "from" | "to", checked: boolean) => {
     if (localValue?.mode === "range") {
       setLocalValue({
         ...localValue,
         [index]: {
           ...localValue?.[index],
-          strict: checked,
+          closed: checked,
         },
       })
     }
@@ -149,11 +149,11 @@ export function NumberFilter({
         mode: "range",
         from: {
           value: localValue?.from?.value,
-          closed: localValue?.from?.closed ?? true,
+          closed: localValue?.from?.closed ?? false,
         },
         to: {
           value: localValue?.to?.value,
-          closed: localValue?.to?.closed ?? true,
+          closed: localValue?.to?.closed ?? false,
         },
       })
     } else {
@@ -211,7 +211,7 @@ export function NumberFilter({
                       icon: [Greater, EqualGreater],
                       selected: valueAsRange.from.closed,
                       onChange: (checked: boolean) =>
-                        handleStrictChange("from", checked),
+                        handleOpenClosedChange("from", checked),
                     }
                   : undefined
               }
@@ -240,7 +240,7 @@ export function NumberFilter({
                         icon: [Less, EqualLess],
                         selected: valueAsRange.to.closed,
                         onChange: (checked: boolean) =>
-                          handleStrictChange("to", checked),
+                          handleOpenClosedChange("to", checked),
                       }
                     : undefined
                 }

@@ -89,10 +89,6 @@ export const defaultTranslations = {
       relaxed: "Relaxed",
       strict: "Strict",
     },
-    search: {
-      relaxed: "Relaxed",
-      strict: "Strict",
-    },
     selectAll: "Select all",
     clear: "Clear",
   },
