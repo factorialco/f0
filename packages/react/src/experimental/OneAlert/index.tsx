@@ -5,6 +5,7 @@ import type { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { breakpoints } from "@factorialco/f0-core"
 import { cva, type VariantProps } from "cva"
 import { useEffect, useRef, useState } from "react"
 
@@ -74,7 +75,7 @@ export const OneAlert = ({
 
     const resizeObserver = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width
-      setIsNarrow(width < 640)
+      setIsNarrow(width < breakpoints.sm)
     })
 
     resizeObserver.observe(container)
