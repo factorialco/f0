@@ -6,6 +6,13 @@ import { numberFilter, NumberFilterDefinition } from "./NumberFilter"
 import searchFilter, { SearchFilterDefinition } from "./SearchFilter"
 import { FilterTypeDefinition } from "./types"
 
+export type {
+  DateFilterDefinition,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+}
+
 /**
  * All the available filter types
  */

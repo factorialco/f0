@@ -1,4 +1,7 @@
+import { i18nCountries } from "./partials/countries"
+
 export const defaultTranslations = {
+  countries: i18nCountries,
   approvals: {
     history: "Approval history",
     statuses: {
@@ -78,6 +81,8 @@ export const defaultTranslations = {
       rangeTitle: "Use range",
       range: "Between {{min}} and {{max}}",
     },
+    selectAll: "Select all",
+    clear: "Clear",
   },
   toc: {
     search: "Search...",
@@ -106,6 +111,12 @@ export const defaultTranslations = {
       },
       settings: "{{visualizationName}} settings",
       reset: "Reset to default",
+    },
+    table: {
+      settings: {
+        showAllColumns: "Show all",
+        hideAllColumns: "Hide all",
+      },
     },
     itemsCount: "items",
     emptyStates: {

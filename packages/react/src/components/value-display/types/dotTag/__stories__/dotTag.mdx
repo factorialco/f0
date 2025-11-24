@@ -1,0 +1,29 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as DotTagStories from "./dotTag.stories"
+
+<Meta of={DotTagStories} />
+
+### dotTag
+
+Renders a dot tag
+
+#### Value type
+
+```
+type value = { label: string, color: NewColor }
+```
+
+<Canvas
+  of={DotTagStories.DotTagType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'dotTag'
+    value: {
+        label: 'Engineer',
+        color: 'viridian'
+    }
+})
+`,
+  }}
+/>

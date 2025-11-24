@@ -341,8 +341,14 @@ const SelectComponent = forwardRef(function Select<
   useEffect(() => {
     const foundOption = findOption(localValue)
 
-    onChangeSelectedOption?.(foundOption)
-    setSelectedOption(foundOption)
+    if (foundOption) {
+      onChangeSelectedOption?.(foundOption)
+      setSelectedOption(foundOption)
+    }
+    if (!localValue) {
+      onChangeSelectedOption?.(undefined)
+      setSelectedOption(undefined)
+    }
   }, [
     data.records,
     localValue,
