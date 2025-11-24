@@ -21,4 +21,5 @@ export type SelectOptionProps = {
   onClickAction: (params: OnClickOptionActionParams) => void
   isEditMode?: boolean
   correct?: boolean
+  locked?: boolean
 }

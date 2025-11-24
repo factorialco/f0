@@ -21,6 +21,7 @@ export const SelectOption = ({
   onChangeLabel,
   isEditMode,
   correct,
+  locked,
 }: SelectOptionProps) => {
   const { value, label } = option
 
@@ -64,12 +65,14 @@ export const SelectOption = ({
 
   const shouldToggleLeft = isDragging ? isDraggingThisItem : isEditMode
 
+  const dragEnabled = !!isEditMode && !locked
+
   return (
     <Reorder.Item
       value={option}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      dragListener={!!isEditMode}
+      dragListener={dragEnabled}
       layout="position"
       as="div"
     >
@@ -99,16 +102,18 @@ export const SelectOption = ({
         </div>
         <div
           className={cn(
-            "hidden scale-75 cursor-grab active:cursor-grabbing",
+            "hidden scale-75 cursor-grab",
+            dragEnabled && "active:cursor-grabbing",
             shouldToggleLeft && "group-hover:block",
-            isDragging && "!cursor-grabbing"
+            isDragging && "cursor-grabbing",
+            !dragEnabled && "cursor-not-allowed"
           )}
         >
           <div className="flex aspect-square w-6 scale-90 items-center justify-center">
             <F0Icon icon={Handle} size="sm" />
           </div>
         </div>
-        {isEditMode ? (
+        {isEditMode && !locked ? (
           <textarea
             placeholder={t("coCreationForm.selectQuestion.optionPlaceholder")}
             value={label}
@@ -124,7 +129,7 @@ export const SelectOption = ({
             {t("coCreationForm.selectQuestion.correct")}
           </span>
         )}
-        {isEditMode ? (
+        {isEditMode && !locked ? (
           <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button
               label={t("coCreationForm.selectQuestion.markAsCorrect")}

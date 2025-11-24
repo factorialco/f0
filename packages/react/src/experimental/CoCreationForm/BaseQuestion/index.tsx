@@ -164,7 +164,7 @@ export const BaseQuestion = ({
         />
       </div>
       {children}
-      {isEditMode && (
+      {isEditMode && !containingSection?.locked && (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",

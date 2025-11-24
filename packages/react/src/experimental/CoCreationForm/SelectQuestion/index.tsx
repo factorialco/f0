@@ -15,7 +15,12 @@ import {
 import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
-  const { onQuestionChange, isEditMode } = useCoCreationFormContext()
+  const { onQuestionChange, isEditMode, getSectionContainingQuestion } =
+    useCoCreationFormContext()
+
+  const containingSection = getSectionContainingQuestion(props.id)
+
+  const questionLocked = props.locked || containingSection?.locked
 
   const { t } = useI18n()
 
@@ -136,12 +141,13 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
                   onClickAction={handleClickOptionAction}
                   onChangeLabel={handleChangeLabel}
                   isEditMode={isEditMode}
+                  locked={questionLocked}
                 />
               </div>
             ))}
           </Reorder.Group>
         </DragProvider>
-        {isEditMode && (
+        {isEditMode && !questionLocked && (
           <div className="opacity-50">
             <F0Button
               label={t("coCreationForm.selectQuestion.addOption")}
