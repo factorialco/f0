@@ -77,7 +77,7 @@ export const defaultTranslations = {
       lessThan: "Less than",
       greaterOrEqual: "Greater or equal to",
       greaterThan: "Greater than",
-      equalShort: "= {{value}}",
+      equalShort: "= {{value}}",  
       greaterThanOrEqualShort: ">= {{value}}",
       greaterThanShort: "> {{value}}",
       lessThanOrEqualShort: "<= {{value}}",

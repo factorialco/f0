@@ -206,7 +206,7 @@ export function NumberFilter({
                   ? {
                       label: [
                         i18n.filters.number.greaterThan,
-                        i18n.filters.number.lessThan,
+                        i18n.filters.number.greaterOrEqual,
                       ],
                       icon: [LockLocked, LockUnlocked],
                       selected: valueAsRange.from.strict,
@@ -230,8 +230,8 @@ export function NumberFilter({
                   localValue?.mode === "range" && options.strictToggle
                     ? {
                         label: [
-                          i18n.filters.number.lessOrEqual,
                           i18n.filters.number.lessThan,
+                          i18n.filters.number.lessOrEqual,
                         ],
                         icon: [LockLocked, LockUnlocked],
                         selected: valueAsRange.to.strict,
