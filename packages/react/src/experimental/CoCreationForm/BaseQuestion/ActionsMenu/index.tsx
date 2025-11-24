@@ -140,6 +140,7 @@ type ActionsMenuProps = {
   setOpen: Dispatch<SetStateAction<boolean>>
   questionId: string
   questionType: QuestionType
+  canDeleteQuestion?: boolean
 }
 
 export function ActionsMenu({
@@ -147,6 +148,7 @@ export function ActionsMenu({
   setOpen,
   questionId,
   questionType,
+  canDeleteQuestion = true,
 }: ActionsMenuProps) {
   const { t } = useI18n()
 
@@ -247,11 +249,13 @@ export function ActionsMenu({
             icon={LayersFront}
             onClick={handleDuplicateQuestion}
           />
-          <SimpleItem
-            label={t("coCreationForm.actions.deleteQuestion")}
-            icon={Delete}
-            onClick={handleDeleteQuestion}
-          />
+          {canDeleteQuestion && (
+            <SimpleItem
+              label={t("coCreationForm.actions.deleteQuestion")}
+              icon={Delete}
+              onClick={handleDeleteQuestion}
+            />
+          )}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

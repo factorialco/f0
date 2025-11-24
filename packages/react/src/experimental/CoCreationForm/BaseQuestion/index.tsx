@@ -26,8 +26,12 @@ export const BaseQuestion = ({
   type: questionType,
   isWithinSection,
 }: BaseQuestionProps) => {
-  const { onQuestionChange, onAddNewElement, isEditMode } =
-    useCoCreationFormContext()
+  const {
+    onQuestionChange,
+    onAddNewElement,
+    isEditMode,
+    getIsSingleQuestionInSection,
+  } = useCoCreationFormContext()
 
   const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
     useState(false)
@@ -93,6 +97,10 @@ export const BaseQuestion = ({
     })),
   ]
 
+  const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
+
+  console.log({ id, isSingleQuestionInSection })
+
   return (
     <div
       className={cn(
@@ -111,19 +119,24 @@ export const BaseQuestion = ({
             className="w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden"
             style={TEXT_AREA_STYLE}
           />
-          <div
-            className={cn(
-              "opacity-0 group-hover/question:opacity-100",
-              actionsDropdownOpen && "opacity-100"
-            )}
-          >
-            <ActionsMenu
-              open={actionsDropdownOpen}
-              setOpen={setActionsDropdownOpen}
-              questionId={id}
-              questionType={questionType}
-            />
-          </div>
+          {isEditMode && (
+            <div
+              className={cn(
+                "opacity-0 group-hover/question:opacity-100",
+                actionsDropdownOpen && "opacity-100"
+              )}
+            >
+              <ActionsMenu
+                open={actionsDropdownOpen}
+                setOpen={setActionsDropdownOpen}
+                questionId={id}
+                questionType={questionType}
+                canDeleteQuestion={
+                  !isWithinSection || !isSingleQuestionInSection
+                }
+              />
+            </div>
+          )}
         </div>
         <textarea
           value={description}
