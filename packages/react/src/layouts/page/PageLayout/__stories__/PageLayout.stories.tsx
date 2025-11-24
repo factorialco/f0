@@ -29,7 +29,7 @@ const FocusableElement = () => {
   )
 }
 const meta = {
-  title: "Layout/Page/Page Layout",
+  title: "Page/Page Layout",
   component: PageLayout,
   tags: ["autodocs"],
   decorators: [PageDecorator],
