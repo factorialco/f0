@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.36.0](https://github.com/factorialco/f0/compare/f0-core-v1.35.0...f0-core-v1.36.0) (2025-11-24)
+
+
+### Features
+
+* **OneAlert:** enhance responsiveness ([#2983](https://github.com/factorialco/f0/issues/2983)) ([8cf4f67](https://github.com/factorialco/f0/commit/8cf4f67332b611725dc3b36d2056c099a7fce809))
+
+## [1.35.0](https://github.com/factorialco/f0/compare/f0-core-v1.34.0...f0-core-v1.35.0) (2025-11-24)
+
+
+### Features
+
+* **Icons:** math icons (greater, less...) ([#3016](https://github.com/factorialco/f0/issues/3016)) ([49571e1](https://github.com/factorialco/f0/commit/49571e12ecc1dcade7b496cd4a70c8b753f62cb9))
+
 ## [1.34.0](https://github.com/factorialco/f0/compare/f0-core-v1.33.0...f0-core-v1.34.0) (2025-11-06)
 
 

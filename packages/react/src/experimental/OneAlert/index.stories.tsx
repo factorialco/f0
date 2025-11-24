@@ -54,4 +54,29 @@ export const Default: Story = {
     },
     variant: "info",
   },
+  render: (args) => (
+    <div className="w-[640px]">
+      <OneAlert {...args} />
+    </div>
+  ),
+}
+
+export const Narrow: Story = {
+  args: {
+    ...Default.args,
+    title: "Company page unactive",
+    description:
+      "You are missing the company page. It is mandatory to be activated.",
+    action: {
+      label: "Request info",
+      onClick: fn(),
+    },
+    variant: "warning",
+    link: undefined,
+  },
+  render: (args) => (
+    <div className="w-[320px]">
+      <OneAlert {...args} />
+    </div>
+  ),
 }

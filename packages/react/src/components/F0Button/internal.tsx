@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { cva } from "cva"
 import { forwardRef, useState } from "react"
+import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 
 const iconVariants = cva({
@@ -99,6 +100,8 @@ const ButtonInternal = forwardRef<
   const isLoading = forceLoading || loading
   const shouldHideLabel = hideLabel || emoji
 
+  const buttonLabel = (label ?? "").toString()
+
   return (
     <Action
       variant={variant}
@@ -109,15 +112,22 @@ const ButtonInternal = forwardRef<
       tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
       onClick={handleClick}
       loading={isLoading}
-      className={className}
+      className={cn("max-w-full", className)}
       mode={hideLabel ? "only" : "default"}
-      aria-label={ariaLabel || props.title || label}
+      aria-label={ariaLabel || props.title || buttonLabel}
       title={
-        noTitle ? undefined : props.title || (hideLabel ? label : undefined)
+        noTitle
+          ? undefined
+          : props.title || (hideLabel ? buttonLabel : undefined)
       }
       compact={!!shouldHideLabel}
     >
-      <div className={cn(isLoading && "invisible", "flex items-center gap-1")}>
+      <div
+        className={cn(
+          isLoading && "invisible",
+          "flex min-w-0 flex-1 items-center gap-1"
+        )}
+      >
         {icon && (
           <F0Icon
             size={size === "sm" ? "sm" : "md"}
@@ -136,7 +146,13 @@ const ButtonInternal = forwardRef<
             alt={""}
           />
         )}
-        <span className={cn(shouldHideLabel && "sr-only")}>{label}</span>
+        {!shouldHideLabel ? (
+          <OneEllipsis className={cn(shouldHideLabel && "sr-only")} tag="span">
+            {buttonLabel}
+          </OneEllipsis>
+        ) : (
+          <span className="sr-only">{buttonLabel}</span>
+        )}
         {append}
       </div>
     </Action>

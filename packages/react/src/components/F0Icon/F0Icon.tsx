@@ -67,7 +67,11 @@ const TooltipWrapper: React.FC<{
   children: React.ReactNode
 }> = ({ tooltip, children }) => {
   if (tooltip) {
-    return <TooltipInternal label={tooltip}>{children}</TooltipInternal>
+    return (
+      <TooltipInternal label={tooltip} instant>
+        {children}
+      </TooltipInternal>
+    )
   }
   return children
 }

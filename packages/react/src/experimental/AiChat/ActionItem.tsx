@@ -1,7 +1,9 @@
 import { F0Icon } from "@/components/F0Icon"
 import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
+import { cn } from "@/lib/utils"
 import { ChatSpinner } from "./components/ChatSpinner"
+import "./styles.css"
 
 export interface ActionItemProps {
   title: string
@@ -36,7 +38,9 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
           />
         </div>
       )}
-      <p className="text-pretty">{title}</p>
+      <p className={cn("text-pretty", status === "executing" && "shine-text")}>
+        {title}
+      </p>
     </div>
   )
 }

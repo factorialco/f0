@@ -73,14 +73,14 @@ export const Action = React.forwardRef<
     <>
       <div
         className={cn(
-          "main flex items-center justify-center gap-1",
+          "main flex min-w-0 flex-1 items-center justify-center gap-1",
           compact && compactClasses({ size }),
           loading && "opacity-0",
           iconVariants({ variant: localVariant, mode })
         )}
       >
         {prepend}
-        <span className={cn("flex items-center justify-center")}>
+        <span className={cn("flex min-w-0 flex-1 items-center justify-center")}>
           {children}
         </span>
         {append}

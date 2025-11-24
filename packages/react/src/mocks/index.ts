@@ -220,6 +220,8 @@ export type MockUser = {
     write?: boolean
     delete: boolean
   }
+  children?: MockUser[]
+  detailed?: boolean
 }
 
 export const generateMockUsers = (count: number): MockUser[] => {

@@ -84,6 +84,7 @@ const F0SelectComponent = forwardRef(function Select<
     hint,
     required,
     multiple,
+    portalContainer,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -228,10 +229,24 @@ const F0SelectComponent = forwardRef(function Select<
     [data.records, optionMapper, defaultItems, defaultValues]
   )
 
-  const selectedItems = useMemo(() => {
-    return findOptionsByValue(localValue)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the localValue changes
-  }, [localValue, data.records])
+  useEffect(() => {
+    const foundOption = findOption(localValue)
+
+    if (foundOption) {
+      onChangeSelectedOption?.(foundOption)
+      setSelectedOption(foundOption)
+    }
+    if (!localValue) {
+      onChangeSelectedOption?.(undefined)
+      setSelectedOption(undefined)
+    }
+  }, [
+    data.records,
+    localValue,
+    optionMapper,
+    findOption,
+    onChangeSelectedOption,
+  ])
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
@@ -502,6 +517,7 @@ const F0SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
+            portalContainer={portalContainer}
           />
         )}
       </SelectPrimitive>

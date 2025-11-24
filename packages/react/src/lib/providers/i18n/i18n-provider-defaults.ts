@@ -1,4 +1,7 @@
+import { i18nCountries } from "./partials/countries"
+
 export const defaultTranslations = {
+  countries: i18nCountries,
   approvals: {
     history: "Approval history",
     statuses: {
@@ -74,11 +77,20 @@ export const defaultTranslations = {
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
     retry: "Retry",
-    aboveOrEqual: "Above or equal to",
-    value: "Value",
-    belowOrEqual: "Below or equal to",
-    range_title: "Use range",
-    range: "Between {{min}} and {{max}}",
+    number: {
+      value: "Value",
+      equal: "Equal to",
+      equalTo: "Equal to {{value}}",
+      lessOrEqual: "Less or equal to",
+      greaterOrEqual: "Greater or equal to",
+      equalShort: "= {{value}}",
+      greaterThanOrEqualShort: ">= {{value}}",
+      lessThanOrEqualShort: "<= {{value}}",
+      rangeTitle: "Use range",
+      range: "Between {{min}} and {{max}}",
+    },
+    selectAll: "Select all",
+    clear: "Clear",
   },
   toc: {
     search: "Search...",
@@ -107,6 +119,12 @@ export const defaultTranslations = {
       },
       settings: "{{visualizationName}} settings",
       reset: "Reset to default",
+    },
+    table: {
+      settings: {
+        showAllColumns: "Show all",
+        hideAllColumns: "Hide all",
+      },
     },
     itemsCount: "items",
     emptyStates: {
@@ -241,9 +259,59 @@ export const defaultTranslations = {
     loadingMore: "Loading...",
   },
   numberInput: {
-    between: "Between {{min}} and {{max}}",
-    greaterThan: "Greater than {{min}}",
-    lessThan: "Less than {{max}}",
+    between: "It should be between {{min}} and {{max}}",
+    greaterThan: "It should be greater than {{min}}",
+    lessThan: "It should be less than {{max}}",
+  },
+  coCreationForm: {
+    actions: {
+      actions: "Actions",
+      duplicateQuestion: "Duplicate question",
+      deleteQuestion: "Delete question",
+      duplicateSection: "Duplicate section",
+      deleteSection: "Delete section",
+    },
+    questionTypes: {
+      section: "Section",
+      rating: "Rating",
+      multipleChoice: "Multiple choice",
+      singleChoice: "Single choice",
+      text: "Text",
+      longText: "Long text",
+      numeric: "Numeric",
+      link: "Link",
+      date: "Date",
+    },
+    selectQuestion: {
+      addOption: "Add option",
+      newOption: "New option {{number}}",
+      markAsCorrect: "Mark as correct",
+      remove: "Remove",
+      correct: "Correct",
+      optionPlaceholder: "Type anything you want here...",
+    },
+    answer: {
+      label: "Answer",
+      placeholder: "Respondent's answer",
+    },
+    labels: {
+      endOfSection: "End of section",
+      title: "Title",
+      titlePlaceholder: "Question title",
+      description: "Description",
+      questionDescriptionPlaceholder: "Describe the question in a few words",
+      sectionDescriptionPlaceholder: "Describe the section in a few words",
+      required: "Required",
+      questionType: "Question type",
+      questionOptions: "Question options",
+      actions: "Actions",
+      sectionTitlePlaceholder: "Section title",
+    },
+    defaults: {
+      newSection: "New Section",
+      newQuestion: "New Question",
+      newQuestionDescription: "New question description",
+    },
   },
 } as const
 

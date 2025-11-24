@@ -36,6 +36,10 @@ export type F0SelectProps<T extends string, R = unknown> = {
   className?: string
   selectContentClassName?: string
   actions?: Action[]
+  /*
+   * Specify a container element to portal popover content into.
+   */
+  portalContainer?: HTMLElement | null
 } & ( // Single select not clearable
   | {
       clearable?: false
