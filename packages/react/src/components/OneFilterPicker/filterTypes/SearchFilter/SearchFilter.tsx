@@ -1,7 +1,7 @@
 "use client"
 
 import { InputInternal } from "@/experimental/Forms/Fields/Input/internal"
-import { AlertCircle, AlertCircleLine } from "@/icons/app"
+import { Equal, EqualApproximately } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useMemo, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
@@ -70,6 +70,14 @@ export function SearchFilter({
     }
   }
 
+  const handleStrictChange = (value: boolean) => {
+    setIsStrict(value)
+    onChange({
+      value: localValue ?? "",
+      strict: value,
+    })
+  }
+
   const [isStrict, setIsStrict] = useState(options.defaultStrict)
 
   const localValue = useMemo(() => {
@@ -95,9 +103,9 @@ export function SearchFilter({
                   i18n.filters.search.relaxed,
                   i18n.filters.search.strict,
                 ],
-                icon: [AlertCircle, AlertCircleLine],
+                icon: [EqualApproximately, Equal],
                 selected: isStrict,
-                onChange: setIsStrict,
+                onChange: handleStrictChange,
               }
             : undefined
         }
