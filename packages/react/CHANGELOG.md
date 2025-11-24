@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.282.0](https://github.com/factorialco/f0/compare/f0-react-v1.281.0...f0-react-v1.282.0) (2025-11-24)
+
+
+### Features
+
+* **Table:** implement detailed nested row support and enhance data f… ([#3026](https://github.com/factorialco/f0/issues/3026)) ([399d32f](https://github.com/factorialco/f0/commit/399d32f96daf7e9439dbdd1805e03196a074e83d))
+
 ## [1.281.0](https://github.com/factorialco/f0/compare/f0-react-v1.280.0...f0-react-v1.281.0) (2025-11-24)
 
 
