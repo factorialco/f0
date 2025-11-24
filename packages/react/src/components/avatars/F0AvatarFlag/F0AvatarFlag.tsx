@@ -1,4 +1,5 @@
 import { getFlag } from "@/flags/flagsMap.tsx"
+import { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarFlagProps } from "./types"
@@ -14,7 +15,7 @@ export const F0AvatarFlag = ({
 
   const i18n = useI18n()
 
-  const countryName = i18n.countries[flag] ?? flag
+  const countryName = i18n.countries[flag as CountryCode] ?? flag
 
   return (
     <BaseAvatar
