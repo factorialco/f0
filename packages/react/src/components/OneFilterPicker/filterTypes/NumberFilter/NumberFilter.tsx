@@ -119,11 +119,14 @@ export function NumberFilter({
     }
   }
 
-  const handleChange = (inputValue: number | null, index: "from" | "to") => {
+  const handleValueChange = (
+    inputValue: number | null,
+    index: "from" | "to"
+  ) => {
     setLocalValue((prev) => {
-      if (localValue?.mode === "range") {
+      if (prev?.mode === "range") {
         return {
-          ...(prev ?? {}),
+          ...prev,
           [index]: {
             ...(prev?.[index] ?? {}),
             value: inputValue ?? undefined,
@@ -131,7 +134,10 @@ export function NumberFilter({
         }
       }
       return {
-        ...prev,
+        ...(prev ?? {
+          mode: "single",
+          value: undefined,
+        }),
         value: inputValue ?? undefined,
       }
     })
@@ -181,7 +187,7 @@ export function NumberFilter({
     <>
       <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-6">
         <div className="flex flex-row gap-2">
-          <div className="flex-1">
+          <div className="min-w-1/2 flex-1">
             <NumberInputInternal
               label={
                 localValue?.mode === "range"
@@ -192,7 +198,7 @@ export function NumberFilter({
               }
               locale={l10n.locale}
               value={valueAsRange.from.value}
-              onChange={(inputValue) => handleChange(inputValue, "from")}
+              onChange={(inputValue) => handleValueChange(inputValue, "from")}
               max={options.max}
               min={options.min}
               buttonToggle={
@@ -212,33 +218,30 @@ export function NumberFilter({
             />
           </div>
           {localValue?.mode === "range" && (
-            <>
-              <div className="flex items-center justify-center">-</div>
-              <div className="flex-1">
-                <NumberInputInternal
-                  label={i18n.filters.number.lessOrEqual}
-                  locale={l10n.locale}
-                  value={valueAsRange.to.value}
-                  onChange={(inputValue) => handleChange(inputValue, "to")}
-                  max={options.max}
-                  min={options.min}
-                  buttonToggle={
-                    localValue?.mode === "range" && options.strictToggle
-                      ? {
-                          label: [
-                            i18n.filters.number.lessOrEqual,
-                            i18n.filters.number.lessThan,
-                          ],
-                          icon: [LockLocked, LockUnlocked],
-                          selected: valueAsRange.to.strict,
-                          onChange: (checked: boolean) =>
-                            handleStrictChange("to", checked),
-                        }
-                      : undefined
-                  }
-                />
-              </div>
-            </>
+            <div className="min-w-1/2 flex-1">
+              <NumberInputInternal
+                label={i18n.filters.number.lessOrEqual}
+                locale={l10n.locale}
+                value={valueAsRange.to.value}
+                onChange={(inputValue) => handleValueChange(inputValue, "to")}
+                max={options.max}
+                min={options.min}
+                buttonToggle={
+                  localValue?.mode === "range" && options.strictToggle
+                    ? {
+                        label: [
+                          i18n.filters.number.lessOrEqual,
+                          i18n.filters.number.lessThan,
+                        ],
+                        icon: [LockLocked, LockUnlocked],
+                        selected: valueAsRange.to.strict,
+                        onChange: (checked: boolean) =>
+                          handleStrictChange("to", checked),
+                      }
+                    : undefined
+                }
+              />
+            </div>
           )}
         </div>
         {showModeSwitch && (
