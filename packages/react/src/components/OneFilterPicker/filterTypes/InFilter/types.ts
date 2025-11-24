@@ -31,8 +31,9 @@ export type InFilterOptions<T, _R extends RecordType = RecordType> = {
    * just to display labels for selected values.
    * @param value - The value to get the label for
    * @returns The label for the value, or a promise that resolves to the label
+   * @note The parameter type is `unknown` to allow compatibility when T is different types
    */
-  getLabel?: (value: T) => string | Promise<string>
+  getLabel?: (value: unknown) => string | Promise<string>
 } & (
   | {
       options:
