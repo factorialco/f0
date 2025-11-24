@@ -1,9 +1,13 @@
 import { BaseResponse } from "./fetch.typings"
 import { RecordType } from "./records.typings"
 
-type ChildrenResponseType = "basic" | "detailed"
+export type NestedVariant = "basic" | "detailed"
+export type NestedResponseWithType<R extends RecordType> = {
+  records: R[]
+  type?: NestedVariant
+}
 
 export type ChildrenResponse<R extends RecordType> =
   | BaseResponse<R>
   | R[]
-  | { records: R[] & { type?: ChildrenResponseType } }
+  | NestedResponseWithType<R>

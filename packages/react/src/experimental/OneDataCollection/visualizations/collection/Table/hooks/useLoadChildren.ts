@@ -1,9 +1,9 @@
+import { FiltersDefinition, FiltersState, RecordType } from "@/hooks/datasource"
 import {
-  BaseResponse,
-  FiltersDefinition,
-  FiltersState,
-  RecordType,
-} from "@/hooks/datasource"
+  ChildrenResponse,
+  NestedResponseWithType,
+  NestedVariant,
+} from "@/hooks/datasource/types/nested.typings"
 import { useCallback, useState } from "react"
 
 interface UseLoadChildrenProps<R extends RecordType> {
@@ -12,7 +12,15 @@ interface UseLoadChildrenProps<R extends RecordType> {
   fetchChildren?: (
     item: R,
     filters?: FiltersState<FiltersDefinition>
-  ) => Promise<BaseResponse<R> | R[]> | R[]
+  ) => Promise<ChildrenResponse<R>>
+}
+
+const isDetailed = <R extends RecordType>(
+  data?: ChildrenResponse<R>
+): data is NestedResponseWithType<R> => {
+  if (!data) return false
+
+  return typeof data === "object" && "type" in data && data.type === "detailed"
 }
 
 export const useLoadChildren = <R extends RecordType>({
@@ -22,6 +30,7 @@ export const useLoadChildren = <R extends RecordType>({
 }: UseLoadChildrenProps<R>) => {
   const [children, setChildren] = useState<R[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [childrenType, setChildrenType] = useState<NestedVariant>("basic")
 
   const loadChildren = useCallback(async () => {
     if (children.length > 0) return children
@@ -29,13 +38,18 @@ export const useLoadChildren = <R extends RecordType>({
     setIsLoading(true)
 
     const data = await fetchChildren?.(item, filters)
-    const loadedChildren = Array.isArray(data) ? data : []
+    const loadedChildren = Array.isArray(data) ? data : (data?.records ?? [])
 
     setChildren(loadedChildren)
+
+    if (isDetailed(data)) {
+      setChildrenType(data.type ?? "basic")
+    }
+
     setIsLoading(false)
 
     return loadedChildren
   }, [children, item, filters, fetchChildren])
 
-  return { children, loadChildren, isLoading }
+  return { children, loadChildren, isLoading, childrenType }
 }
