@@ -220,7 +220,11 @@ export function NumberFilter({
           {localValue?.mode === "range" && (
             <div className="min-w-1/2 flex-1">
               <NumberInputInternal
-                label={i18n.filters.number.lessOrEqual}
+                label={
+                  localValue?.to?.closed
+                    ? i18n.filters.number.lessOrEqual
+                    : i18n.filters.number.lessThan
+                }
                 locale={l10n.locale}
                 value={valueAsRange.to.value}
                 onChange={(inputValue) => handleValueChange(inputValue, "to")}
