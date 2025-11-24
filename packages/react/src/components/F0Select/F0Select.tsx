@@ -250,13 +250,10 @@ const F0SelectComponent = forwardRef(function Select<
     onChangeSelectedOption,
   ])
 
-  const onSearchChangeLocal = useCallback(
-    (value: string) => {
-      setCurrentSearch(value)
-      onSearchChange?.(value)
-    },
-    [setCurrentSearch, onSearchChange]
-  )
+  const onSearchChangeLocal = (value: string) => {
+    setCurrentSearch(value)
+    onSearchChange?.(value)
+  }
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {

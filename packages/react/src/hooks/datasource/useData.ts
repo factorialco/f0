@@ -315,11 +315,18 @@ export function useData<
   // like loadMore, setPage, etc.
   const searchValue = useRef<string | undefined>(undefined)
   useEffect(() => {
+    console.log(
+      "searchValue.current",
+      search?.enabled,
+      search?.sync,
+      currentSearch,
+      deferredSearch
+    )
     searchValue.current = !search?.enabled
       ? undefined
       : search?.sync
         ? currentSearch
-        : deferredSearch
+        : deferredSearch || currentSearch
   }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
   /**
@@ -729,6 +736,10 @@ export function useData<
       ...deps,
     ]
   )
+
+  useEffect(() => {
+    console.log("searchValue.current", searchValue.current)
+  }, [searchValue])
 
   useEffect(
     () => {
