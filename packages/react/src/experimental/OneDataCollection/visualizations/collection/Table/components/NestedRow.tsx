@@ -13,7 +13,7 @@ import {
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { TableColumnDefinition } from "../types"
 import { Row } from "./Row"
-import { RowLoading } from "./RowLoading"
+import { DEFAULT_LOADING_ROWS_COUNT, RowLoading } from "./RowLoading"
 
 export type RowProps<
   R extends RecordType,
@@ -85,11 +85,13 @@ const NestedRowComponentInner = <
   const [open, setOpen] = useState(false)
   const rowRef = useRef<HTMLTableRowElement>(null)
 
-  const { children, loadChildren, isLoading } = useLoadChildren({
+  const { children, loadChildren, isLoading, childrenType } = useLoadChildren({
     item,
     filters: source.currentFilters,
     fetchChildren: source.fetchChildren,
   })
+
+  const typeDetailed = childrenType === "detailed"
 
   const updateCounts = (
     visualDelta: number,
@@ -114,7 +116,8 @@ const NestedRowComponentInner = <
     setOpen(isExpanding)
 
     if (isExpanding) {
-      const loadingRowsCount = 3
+      const loadingRowsCount =
+        source.childrenCount?.(item) || DEFAULT_LOADING_ROWS_COUNT
 
       onChildrenExpand?.(loadingRowsCount, true)
 
@@ -150,6 +153,7 @@ const NestedRowComponentInner = <
         expandedLevels={expandedChildrenCount}
         onExpand={handleExpand}
         ref={rowRef}
+        nestedVariant={childrenType}
       />
 
       {open && isLoading && (
@@ -216,9 +220,10 @@ const NestedRowComponentInner = <
                   frozenColumnsLeft={frozenColumnsLeft}
                   checkColumnWidth={checkColumnWidth}
                   tableWithChildren={tableWithChildren}
-                  depth={depth + 1}
+                  depth={typeDetailed ? depth : depth + 1}
                   noBorder
                   onExpand={handleExpand}
+                  nestedVariant={childrenType}
                 />
               )
             }

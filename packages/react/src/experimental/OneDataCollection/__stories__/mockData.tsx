@@ -242,13 +242,16 @@ export const getMockVisualizations = (options?: {
         {
           label: "Name",
           width: 140,
-          render: (item) => ({
-            type: "person",
-            value: {
-              firstName: item.name.split(" ")[0],
-              lastName: item.name.split(" ")[1],
-            },
-          }),
+          render: (item) =>
+            !item.children && item.detailed
+              ? item.name
+              : {
+                  type: "person",
+                  value: {
+                    firstName: item.name.split(" ")[0],
+                    lastName: item.name.split(" ")[1],
+                  },
+                },
           id: "name",
           sorting: options?.table?.noSorting ? undefined : "name",
           hidden: options?.table?.allowColumnHiding ? true : undefined,
@@ -884,7 +887,31 @@ export const createPromiseDataFetch = (
             ...user,
             children:
               index % 2 === 0 && nestedRecords
-                ? [{ ...user }, { ...user }]
+                ? [
+                    {
+                      ...user,
+                      children: [
+                        { ...user },
+                        {
+                          ...user,
+                          detailed: index === 0,
+                          children: [
+                            { ...user, detailed: index === 0 },
+                            { ...user, detailed: index === 0 },
+                          ],
+                        },
+                        { ...user },
+                      ],
+                    },
+                    {
+                      ...user,
+                      detailed: index === 0,
+                      children: [
+                        { ...user, detailed: index === 0 },
+                        { ...user, detailed: index === 0 },
+                      ],
+                    },
+                  ]
                 : undefined,
           })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
@@ -1104,7 +1131,13 @@ export const ExampleComponent = ({
       childrenCount: (item) => item?.children?.length,
       fetchChildren: async (item) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        return item.children ?? []
+
+        return item.children
+          ? {
+              records: item.children,
+              type: item.detailed ? "detailed" : "basic",
+            }
+          : []
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },

@@ -1,3 +1,4 @@
+import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { cn } from "@/lib/utils"
 import {
   CHEVRON_SIZE,
@@ -13,16 +14,25 @@ interface TreeConnectorProps {
   hasChildren: boolean
   depth: number
   expandedLevels: number
+  type?: NestedVariant
 }
 
-export const connectorVariables = (expandedLevels: number) => {
+export const connectorVariables = (
+  expandedLevels: number,
+  type: NestedVariant
+) => {
+  const height =
+    type === "detailed"
+      ? `calc(${expandedLevels + 1} * 100% - ${SPACING_FACTOR + CHEVRON_SIZE / 2}px)`
+      : `calc(${expandedLevels} * 100% - ${SPACING_FACTOR}px)`
+
   return {
     "--line-left": `-${2 * CHEVRON_SIZE}px`,
     "--line-width": LINE_WIDTH,
     "--horizontal-offset": `${CHEVRON_SIZE / 2}px`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
     "--line-top": `-${2 * CHEVRON_SIZE}px`,
-    "--line-height": `calc(${expandedLevels} * 100% - ${SPACING_FACTOR}px)`,
+    "--line-height": height,
   }
 }
 
@@ -51,9 +61,14 @@ export const TreeConnector = ({
   hasChildren,
   depth,
   expandedLevels,
+  type = "basic",
 }: TreeConnectorProps) => {
   const firstCellWithDepth = isFirstCellWithDepth(firstCell, depth)
   const firstCellExpanded = isFirstCellExpanded(expandedLevels, firstCell)
+  const typeBasic = type === "basic"
+  const typeDetailed = type === "detailed"
+
+  const detailedWithChildren = typeDetailed && hasChildren
 
   if (!firstCellExpanded && !firstCellWithDepth && !hasChildren) {
     return null
@@ -64,12 +79,14 @@ export const TreeConnector = ({
       className={cn(
         "absolute inset-0 h-full",
         firstCellExpanded && verticalConnectorStyles,
-        firstCellWithDepth && horizontalConnectorStyles,
+        firstCellWithDepth &&
+          (typeBasic || detailedWithChildren) &&
+          horizontalConnectorStyles,
         firstCellWithDepth && !hasChildren && "after:w-8"
       )}
       style={{
         marginLeft: firstCellWithDepth ? getNestedMarginLeft(depth) : undefined,
-        ...connectorVariables(expandedLevels),
+        ...connectorVariables(expandedLevels, type),
       }}
     />
   )

@@ -15,6 +15,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
@@ -56,6 +57,7 @@ export type RowProps<
   expandedLevels?: number
   onExpand?: () => void
   loading?: boolean
+  nestedVariant?: NestedVariant
 }
 
 const RowComponentInner = <
@@ -84,6 +86,7 @@ const RowComponentInner = <
     expandedLevels = 0,
     onExpand,
     loading = false,
+    nestedVariant = "basic",
   }: RowProps<
     R,
     Filters,
@@ -189,6 +192,7 @@ const RowComponentInner = <
           expandedLevels={expandedLevels}
           onExpand={onExpand}
           loading={loading}
+          type={nestedVariant}
         >
           <div
             className={cn(
