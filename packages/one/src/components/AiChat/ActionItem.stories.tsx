@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import React, { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ActionItem } from "./ActionItem"
 
 const meta = {
@@ -35,25 +35,31 @@ export const Default: Story = {
   },
 }
 
+const InfiniteStatusCyclingComponent = (
+  args: React.ComponentProps<typeof ActionItem>
+) => {
+  const statuses = ["inProgress", "executing", "completed"] as const
+  const [currentStatusIndex, setCurrentStatusIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStatusIndex((prevIndex) => (prevIndex + 1) % statuses.length)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [statuses.length])
+
+  return (
+    <ActionItem
+      {...args}
+      status={statuses[currentStatusIndex]}
+      title="Cycling through all states"
+    />
+  )
+}
+
 export const InfiniteStatusCycling: Story = {
   render: (args) => {
-    const statuses = ["inProgress", "executing", "completed"] as const
-    const [currentStatusIndex, setCurrentStatusIndex] = React.useState(0)
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setCurrentStatusIndex((prevIndex) => (prevIndex + 1) % statuses.length)
-      }, 1000)
-
-      return () => clearInterval(interval)
-    }, [statuses.length])
-
-    return (
-      <ActionItem
-        {...args}
-        status={statuses[currentStatusIndex]}
-        title="Cycling through all states"
-      />
-    )
+    return <InfiniteStatusCyclingComponent {...args} />
   },
 }
