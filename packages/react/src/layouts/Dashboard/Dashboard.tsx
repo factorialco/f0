@@ -55,6 +55,7 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
 
     const handleChange = useCallback(
       (widgets: GridStackReactWidget[]) => {
+        console.log("widgets", widgets)
         setGridWidgets(widgets)
         onChange(widgets)
       },
@@ -68,8 +69,6 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
           id: widget.id,
           h: widget.size.h ?? 1,
           w: widget.size.w ?? 1,
-          noMove: !editMode,
-          noResize: !editMode,
           renderFn: () => (
             <DashboardWidget title={widget.title} draggable={editMode}>
               {widget.content()}
@@ -82,6 +81,7 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
 
     useEffect(() => {
       setGridWidgets((prev) => {
+        console.log("editMode", editMode, prev)
         return prev.map((widget) => ({
           ...widget,
           noMove: !editMode,

@@ -28,12 +28,6 @@ const meta = {
             title: `Widget ${Math.random()}`,
           },
         ])
-        // ref.current?.addWidget({
-        //   id: `widget-${Math.random()}`,
-        //   w: 1,
-        //   h: 1,
-        //   renderFn: () => <div>Widget</div>,
-        // })
       }
 
       const [editMode, setEditMode] = useState(false)
@@ -62,6 +56,20 @@ const meta = {
               args={{
                 ...args,
                 widgets,
+                onChange: (widgets) => {
+                  console.log("widgets", widgets)
+                  // setWidgets(
+                  //   widgets.map((widget) => ({
+                  //     id: widget.id,
+                  //     title: widget.title,
+                  //     availableSizes: widget.allowedSizes,
+                  //     x: widget.x,
+                  //     y: widget.y,
+                  //     size: { w: widget.w, h: widget.h },
+                  //     content: widget.renderFn,
+                  //   }))
+                  // )
+                },
                 ref: ref,
                 editMode: editMode,
               }}

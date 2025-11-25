@@ -147,8 +147,9 @@ export function GridStackProvider({
               // Update widget properties (noMove, noResize, locked, position, size)
               const updateOptions: Partial<GridStackWidget> = {}
               propertiesChanged.forEach((prop) => {
-                if (widget[prop] !== undefined) {
-                  updateOptions[prop] = widget[prop]
+                const value = widget[prop]
+                if (value !== undefined) {
+                  ;(updateOptions as Record<string, unknown>)[prop] = value
                 }
               })
 
