@@ -22,6 +22,16 @@ interface GridStackProviderProps {
   onChange?: (widgets: GridStackReactWidget[]) => void
 }
 
+const propsToObserve = [
+  "noMove",
+  "noResize",
+  "locked",
+  "w",
+  "h",
+  "x",
+  "y",
+] as const
+
 export function GridStackProvider({
   children,
   options,
@@ -101,40 +111,77 @@ export function GridStackProvider({
           // Add new widgets
           try {
             gridStack.addWidget(widget)
+            // After adding widget, wait for React to render the handle via portal
+            // then re-initialize drag handlers to ensure handle is applied
+            const handleSelector = options.handle
+            if (handleSelector) {
+              setTimeout(() => {
+                if (!gridStack || !gridStack.el) return
+                const addedElement =
+                  gridStack.el.querySelector<GridItemHTMLElement>(
+                    `[gs-id="${widget.id}"]`
+                  )
+                if (addedElement) {
+                  // Verify handle exists in the DOM
+                  const handleExists =
+                    addedElement.querySelector(handleSelector)
+                  if (handleExists) {
+                    // Re-initialize drag handlers with handle option
+                    gridStack.prepareDragDrop(addedElement, true)
+                  }
+                }
+              }, 0)
+            }
           } catch (error) {
             console.warn("Error adding widget:", error)
           }
         } else if (element && previousWidget) {
           // Update existing widgets if properties changed
           // Check if editable properties have changed
-          const propertiesChanged =
-            (previousWidget.noMove ?? false) !== (widget.noMove ?? false) ||
-            (previousWidget.noResize ?? false) !== (widget.noResize ?? false) ||
-            (previousWidget.locked ?? false) !== (widget.locked ?? false) ||
-            previousWidget.w !== widget.w ||
-            previousWidget.h !== widget.h ||
-            previousWidget.x !== widget.x ||
-            previousWidget.y !== widget.y
+          const propertiesChanged = propsToObserve.filter(
+            (prop) => previousWidget[prop] !== widget[prop]
+          )
 
-          if (propertiesChanged) {
+          if (propertiesChanged.length > 0) {
             try {
               // Update widget properties (noMove, noResize, locked, position, size)
               const updateOptions: Partial<GridStackWidget> = {}
-              if (widget.noMove !== undefined)
-                updateOptions.noMove = widget.noMove
-              if (widget.noResize !== undefined)
-                updateOptions.noResize = widget.noResize
-              if (widget.locked !== undefined)
-                updateOptions.locked = widget.locked
-              if (widget.w !== undefined) updateOptions.w = widget.w
-              if (widget.h !== undefined) updateOptions.h = widget.h
-              if (widget.x !== undefined) updateOptions.x = widget.x
-              if (widget.y !== undefined) updateOptions.y = widget.y
+              propertiesChanged.forEach((prop) => {
+                if (widget[prop] !== undefined) {
+                  updateOptions[prop] = widget[prop]
+                }
+              })
 
               gridStack.update(element, updateOptions)
+              // Re-initialize drag handlers after update to ensure handle is applied
+              const handleSelector = options.handle
+              if (handleSelector) {
+                setTimeout(() => {
+                  if (!gridStack || !gridStack.el) return
+                  const handleExists = element.querySelector(handleSelector)
+                  if (handleExists) {
+                    gridStack.prepareDragDrop(element, true)
+                  }
+                }, 0)
+              }
             } catch (error) {
               console.warn("Error updating widget:", error)
             }
+          } else if (element && options.handle) {
+            // Even if properties didn't change, ensure handle is applied
+            // This handles cases where handle option changed
+            const handleSelector = options.handle
+            setTimeout(() => {
+              if (!gridStack || !gridStack.el) return
+              const handleExists = element.querySelector(handleSelector)
+              if (handleExists) {
+                try {
+                  gridStack.prepareDragDrop(element, true)
+                } catch {
+                  // Ignore errors
+                }
+              }
+            }, 0)
           }
         }
       })
@@ -158,7 +205,42 @@ export function GridStackProvider({
 
     // Update ref for next comparison
     previousWidgetsRef.current = options.children
-  }, [options.children, gridStack])
+  }, [options.children, options.handle, gridStack])
+
+  // Ensure handle option is applied after widgets are synced and rendered
+  useEffect(() => {
+    if (!gridStack || !options.handle) return
+
+    // Update the handle option on the grid instance
+    if (gridStack.opts) {
+      gridStack.opts.handle = options.handle
+    }
+
+    // Use a small delay to ensure DOM is updated after React renders
+    // This allows GridStack to find the handle elements
+    const timeoutId = setTimeout(() => {
+      if (gridStack && gridStack.el && options.handle) {
+        // Verify handle elements exist
+        const handleElements = gridStack.el.querySelectorAll(options.handle)
+        if (handleElements.length > 0) {
+          // Handle elements are present, GridStack should pick them up
+          // Force GridStack to re-initialize drag handlers if needed
+          try {
+            // Temporarily disable and re-enable to force re-initialization
+            const wasEnabled = !gridStack.opts?.disableResize
+            if (wasEnabled) {
+              gridStack.disable(false)
+              gridStack.enable(false)
+            }
+          } catch {
+            // Ignore errors
+          }
+        }
+      }
+    }, 0)
+
+    return () => clearTimeout(timeoutId)
+  }, [gridStack, options.handle, options.children])
 
   const emitChange = useCallback(() => {
     if (!gridStack) {

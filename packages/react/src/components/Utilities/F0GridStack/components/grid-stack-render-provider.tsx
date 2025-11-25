@@ -47,7 +47,12 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
   const initGridStackInstance = useCallback(() => {
     if (containerRef.current) {
       GridStack.renderCB = renderCBFn
-      return GridStack.init(optionsRef.current, containerRef.current)
+      const instance = GridStack.init(optionsRef.current, containerRef.current)
+      // Ensure handle option is set immediately after initialization
+      if (instance && optionsRef.current.handle && instance.opts) {
+        instance.opts.handle = optionsRef.current.handle
+      }
+      return instance
     }
     return null
   }, [renderCBFn])
@@ -88,6 +93,11 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
     } else if (gridStack) {
       // Update options ref even if we're not recreating (for widget sync)
       optionsRef.current = options
+      // Update grid options (like handle) if they changed
+      // This ensures handle option is applied to existing widgets
+      if (options.handle && gridStack.opts) {
+        gridStack.opts.handle = options.handle
+      }
     }
   }, [options, gridStack, setGridStack])
 

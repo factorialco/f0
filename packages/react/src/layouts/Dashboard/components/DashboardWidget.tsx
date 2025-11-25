@@ -10,6 +10,7 @@ export interface DashboardWidgetProps {
   title: string
   draggable?: boolean
   actions?: DropdownItem[]
+  handleRef?: React.RefObject<HTMLDivElement>
 }
 
 export const DashboardWidget = ({
@@ -29,8 +30,14 @@ export const DashboardWidget = ({
     >
       <header className="flex items-center gap-2">
         <div className="flex items-center gap-2">
-          {draggable.toString()}
-          {draggable && <F0Icon icon={Handle} size="sm" />}
+          {draggable && (
+            <div
+              className="dashboard-widget-handle cursor-grab active:cursor-grabbing"
+              data-gs-handle="true"
+            >
+              <F0Icon icon={Handle} size="sm" />
+            </div>
+          )}
           <F0Heading content={title} as="h6" />
         </div>
         <div className="flex items-center gap-2">

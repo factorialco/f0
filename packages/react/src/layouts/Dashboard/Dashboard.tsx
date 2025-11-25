@@ -5,7 +5,7 @@ import {
   GridStackReactWidget,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
-import { forwardRef, useMemo } from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { DashboardWidget } from "./components/DashboardWidget"
 
 export type GridFixedGroupSize = { w: number; h: number }
@@ -35,6 +35,7 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
       () => ({
         acceptWidgets: true,
         margin: 8,
+        handle: ".dashboard-widget-handle",
         column: 4,
         columnOpts: {
           breakpointForWindow: true,
@@ -50,30 +51,52 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
       []
     )
 
-    const gridWidgets = useMemo(() => {
-      return widgets.map((widget) => ({
-        id: widget.id,
-        h: widget.size.h ?? 1,
-        w: widget.size.w ?? 1,
-        noMove: !editMode,
-        noResize: !editMode,
-        renderFn: () => (
-          <DashboardWidget title={widget.title} draggable={editMode}>
-            {widget.content()}
-          </DashboardWidget>
-        ),
-      }))
-    }, [widgets, editMode])
+    const [gridWidgets, setGridWidgets] = useState<GridStackReactWidget[]>([])
+
+    const handleChange = useCallback(
+      (widgets: GridStackReactWidget[]) => {
+        setGridWidgets(widgets)
+        onChange(widgets)
+      },
+      [onChange]
+    )
+
+    useEffect(() => {
+      console.log("widgets", widgets)
+      setGridWidgets(
+        widgets.map((widget) => ({
+          id: widget.id,
+          h: widget.size.h ?? 1,
+          w: widget.size.w ?? 1,
+          noMove: !editMode,
+          noResize: !editMode,
+          renderFn: () => (
+            <DashboardWidget title={widget.title} draggable={editMode}>
+              {widget.content()}
+            </DashboardWidget>
+          ),
+        }))
+      )
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [widgets])
+
+    useEffect(() => {
+      setGridWidgets((prev) => {
+        return prev.map((widget) => ({
+          ...widget,
+          noMove: !editMode,
+          noResize: !editMode,
+        }))
+      })
+    }, [editMode])
 
     return (
-      <>
-        <F0GridStack
-          ref={ref}
-          options={gridOptions}
-          onChange={onChange}
-          widgets={gridWidgets}
-        ></F0GridStack>
-      </>
+      <F0GridStack
+        ref={ref}
+        options={gridOptions}
+        onChange={handleChange}
+        widgets={gridWidgets}
+      />
     )
   }
 )
