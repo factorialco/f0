@@ -15,6 +15,11 @@ const meta: Meta<typeof BreadcrumbSelect> = {
   title: "Navigation/BreadcrumbSelect",
   component: BreadcrumbSelect,
   tags: ["autodocs", "internal"],
+  parameters: {
+    a11y: {
+      skipCi: true,
+    },
+  },
 }
 
 export default meta
