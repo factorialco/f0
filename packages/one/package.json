@@ -72,8 +72,8 @@
     "@eslint/compat": "^1.2.9",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.27.0",
-    "@factorialco/f0-core": "workspace:*",
-    "@factorialco/f0-react": "workspace:*",
+    "@factorialco/f0-core": "latest",
+    "@factorialco/f0-react": "latest",
     "@types/node": "^22.13.9",
     "@types/react": "^18.3.18",
     "@testing-library/jest-dom": "^6.6.3",
@@ -106,7 +106,7 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@factorialco/f0-core": "workspace:*",
-    "@factorialco/f0-react": "workspace:*"
+    "@factorialco/f0-core": "latest",
+    "@factorialco/f0-react": "latest"
   }
 }
