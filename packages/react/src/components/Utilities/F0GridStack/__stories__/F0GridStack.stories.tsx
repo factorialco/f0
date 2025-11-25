@@ -203,7 +203,21 @@ export const WithRefMethods: Story = {
           widgets={widgets}
         />
 
-        {/* <div id="widgets">{JSON.stringify(widgets, null, 2)}</div> */}
+        <div id="widgets">
+          {JSON.stringify(
+            widgets.map((w) => {
+              return {
+                id: w.id,
+                w: w.w,
+                h: w.h,
+                meta: w.meta,
+                content: w.content?.toString(),
+              }
+            }),
+            null,
+            2
+          )}
+        </div>
       </div>
     )
   },
