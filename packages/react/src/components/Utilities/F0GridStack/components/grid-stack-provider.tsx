@@ -141,7 +141,9 @@ export function GridStackProvider({
           // Update existing widgets if properties changed
           // Check if editable properties have changed
           const propertiesChanged = propsToObserve.filter(
-            (prop) => previousWidget[prop] !== widget[prop]
+            (prop) =>
+              previousWidget[prop as keyof GridStackWidget] !==
+              widget[prop as keyof GridStackWidget]
           )
 
           if (propertiesChanged.length > 0) {

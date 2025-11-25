@@ -3,11 +3,10 @@ import { F0Button } from "@/components/F0Button"
 import { OneCalendar } from "@/experimental/OneCalendar"
 import { getMockValue } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { cloneElement, useCallback, useMemo, useRef, useState } from "react"
+import { cloneElement, useCallback, useRef, useState } from "react"
 import {
   F0GridStack,
   GridStackReactWidget,
-  GridStackWidgetPosition,
   type F0GridStackRef,
 } from "../F0GridStack"
 
@@ -81,18 +80,21 @@ const meta = {
   },
   decorators: [
     (Story, { args }) => {
-      const [positions, setPositions] = useState<GridStackWidgetPosition[]>([])
+      const [widgets, setWidgets] = useState<GridStackReactWidget[]>(
+        args.widgets
+      )
       return (
         <div className="h-full w-full">
           <Story
             args={{
               ...args,
-              onChange: (layout) => {
-                setPositions(layout)
+              widgets,
+              onChange: (widgets) => {
+                setWidgets(widgets)
               },
             }}
           />
-          <div id="positions">{JSON.stringify(positions, null, 2)}</div>
+          <div id="widgets">{JSON.stringify(widgets, null, 2)}</div>
         </div>
       )
     },
@@ -176,30 +178,26 @@ export const WithRefMethods: Story = {
       setWidgetCounter(0)
     }
 
-    const widgets = useMemo<GridStackReactWidget[]>(
-      () =>
-        Array.from({ length: 10 }, (_, index) => ({
-          id: `node-${index + 1}`,
-          w: 2,
-          h: 2,
-          meta: {
-            title: `Widget ${index + 1}`,
-          },
-          content: (
-            <div
-              key={`node-${index + 1}`}
-              className="h-full rounded-md bg-f1-background-secondary p-4"
-            >
-              {cloneElement(getMockValue(mockComponents, index), {
-                key: `node-${index + 1}`,
-              })}
-            </div>
-          ),
-        })),
-      []
+    const [widgets, setWidgets] = useState<GridStackReactWidget[]>(
+      Array.from({ length: 10 }, (_, index) => ({
+        id: `node-${index + 1}`,
+        w: 2,
+        h: 2,
+        meta: {
+          title: `Widget ${index + 1}`,
+        },
+        content: (
+          <div
+            key={`node-${index + 1}`}
+            className="h-full rounded-md bg-f1-background-secondary p-4"
+          >
+            {cloneElement(getMockValue(mockComponents, index), {
+              key: `node-${index + 1}`,
+            })}
+          </div>
+        ),
+      }))
     )
-
-    const [positions, setPositions] = useState<GridStackWidgetPosition[]>([])
 
     return (
       <div className="flex flex-col gap-4">
@@ -213,14 +211,14 @@ export const WithRefMethods: Story = {
           options={{
             column: 12,
           }}
-          onChange={(positions) => {
-            console.log("layout", positions)
-            setPositions(positions)
+          onChange={(widgets) => {
+            console.log("widgets", widgets)
+            setWidgets(widgets)
           }}
           widgets={widgets}
         />
 
-        <div id="positions">{JSON.stringify(positions, null, 2)}</div>
+        {/* <div id="widgets">{JSON.stringify(widgets, null, 2)}</div> */}
       </div>
     )
   },
