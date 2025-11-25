@@ -3,12 +3,8 @@ import { F0Button } from "@/components/F0Button"
 import { OneCalendar } from "@/experimental/OneCalendar"
 import { getMockValue } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { cloneElement, useCallback, useRef, useState } from "react"
-import {
-  F0GridStack,
-  GridStackReactWidget,
-  type F0GridStackRef,
-} from "../F0GridStack"
+import { cloneElement, useCallback, useState } from "react"
+import { F0GridStack, GridStackReactWidget } from "../F0GridStack"
 
 const meta = {
   title: "Utilities/GridStack",
@@ -144,40 +140,6 @@ export const WithRefMethods: Story = {
     widgets: [],
   },
   render: () => {
-    const gridRef = useRef<F0GridStackRef>(null)
-    const [widgetCounter, setWidgetCounter] = useState<number>(10)
-
-    const handleAddWidget = useCallback(() => {
-      const newId = `node-${widgetCounter + 1}`
-      gridRef.current?.addWidget({
-        id: newId,
-        w: 2,
-        h: 2,
-        meta: {
-          title: `New Widget ${newId}`,
-        },
-        content: (
-          <div className="h-full rounded-md bg-f1-background-accent p-4">
-            New Widget {newId}
-          </div>
-        ),
-      })
-      setWidgetCounter(widgetCounter + 1)
-    }, [widgetCounter])
-
-    const handleRemoveWidget = () => {
-      if (widgetCounter > 0) {
-        const idToRemove = `node-${widgetCounter}`
-        gridRef.current?.removeWidget(idToRemove)
-        setWidgetCounter((prev) => prev - 1)
-      }
-    }
-
-    const handleRemoveAll = () => {
-      gridRef.current?.removeAll()
-      setWidgetCounter(0)
-    }
-
     const [widgets, setWidgets] = useState<GridStackReactWidget[]>(
       Array.from({ length: 10 }, (_, index) => ({
         id: `node-${index + 1}`,
@@ -198,6 +160,33 @@ export const WithRefMethods: Story = {
         ),
       }))
     )
+    const handleAddWidget = useCallback(() => {
+      const newId = `node-${widgets.length + 1}`
+      setWidgets((prev) => [
+        ...prev,
+        {
+          id: newId,
+          w: 2,
+          h: 2,
+          meta: {
+            title: `New Widget ${newId}`,
+          },
+          content: (
+            <div className="h-full rounded-md bg-f1-background-accent p-4">
+              New Widget {newId}
+            </div>
+          ),
+        },
+      ])
+    }, [widgets.length])
+
+    const handleRemoveWidget = () => {
+      setWidgets((prev) => prev.slice(0, -1))
+    }
+
+    const handleRemoveAll = () => {
+      setWidgets([])
+    }
 
     return (
       <div className="flex flex-col gap-4">
@@ -207,14 +196,10 @@ export const WithRefMethods: Story = {
           <F0Button onClick={handleRemoveAll} label="Remove All" />
         </div>
         <F0GridStack
-          ref={gridRef}
           options={{
             column: 12,
           }}
-          onChange={(widgets) => {
-            console.log("widgets", widgets)
-            setWidgets(widgets)
-          }}
+          onChange={setWidgets}
           widgets={widgets}
         />
 

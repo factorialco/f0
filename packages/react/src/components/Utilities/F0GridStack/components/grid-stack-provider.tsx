@@ -98,9 +98,11 @@ export function GridStackProvider({
     })
 
     // Update rawWidgetMetaMap to match originalWidgets or options.children
-    setRawWidgetMetaMap(() => {
+    // Merge with existing map to preserve widgets added via addWidget
+    setRawWidgetMetaMap((prev) => {
       const newMap = new Map<string, GridStackWidget>()
       const widgetsToProcess = originalWidgets || options.children || []
+
       const deepFindNodeWithContent = (
         obj: GridStackWidget | GridStackReactWidget
       ) => {
@@ -118,6 +120,21 @@ export function GridStackProvider({
       widgetsToProcess.forEach((child) => {
         deepFindNodeWithContent(child)
       })
+
+      // Preserve widgets from previous map that aren't in the new widgets list
+      // These are widgets added via addWidget that aren't in originalWidgets/options.children
+      prev.forEach((widget, id) => {
+        if (!newMap.has(id)) {
+          // Check if widget still exists in gridstack before preserving it
+          const element = gridStack?.el?.querySelector<GridItemHTMLElement>(
+            `[gs-id="${id}"]`
+          )
+          if (element) {
+            newMap.set(id, widget)
+          }
+        }
+      })
+
       return newMap
     })
 
@@ -215,17 +232,28 @@ export function GridStackProvider({
       })
 
       // Remove widgets that are no longer in options
+      // But preserve widgets that were added via addWidget (they exist in rawWidgetMetaMap but not in convertedOptions.children)
       previousWidgetIds.forEach((id) => {
         if (!newWidgetIds.has(id)) {
-          try {
-            const element = gridStack.el.querySelector<GridItemHTMLElement>(
-              `[gs-id="${id}"]`
-            )
-            if (element) {
-              gridStack.removeWidget(element, false)
+          // Check if widget exists in rawWidgetMetaMap but not in originalWidgets/options.children
+          // These are widgets added via addWidget and should be preserved
+          const widgetInMetaMap = rawWidgetMetaMap.get(id)
+          const widgetsToProcess = originalWidgets || options.children || []
+          const isInOriginalWidgets = widgetsToProcess.some((w) => w.id === id)
+
+          // Only remove if widget is not in rawWidgetMetaMap (was removed) or is in originalWidgets but removed
+          // Preserve widgets added via addWidget
+          if (!widgetInMetaMap || isInOriginalWidgets) {
+            try {
+              const element = gridStack.el.querySelector<GridItemHTMLElement>(
+                `[gs-id="${id}"]`
+              )
+              if (element) {
+                gridStack.removeWidget(element, false)
+              }
+            } catch (error) {
+              console.warn("Error removing widget:", error)
             }
-          } catch (error) {
-            console.warn("Error removing widget:", error)
           }
         }
       })
@@ -371,72 +399,11 @@ export function GridStackProvider({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gridStack])
-
-  const addWidget = useCallback(
-    (widget: GridStackReactWidget) => {
-      gridStack?.addWidget(convertWidgetRecursive(widget))
-      setRawWidgetMetaMap((prev) => {
-        const newMap = new Map<string, GridStackWidget>(prev)
-        newMap.set(widget.id, widget as GridStackWidget)
-        return newMap
-      })
-    },
-    [gridStack]
-  )
-
-  const addSubGrid = useCallback(
-    (
-      subGrid: GridStackReactWidget & {
-        id: Required<GridStackWidget>["id"]
-        subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-          children: Array<GridStackReactWidget>
-        }
-      }
-    ) => {
-      gridStack?.addWidget(convertWidgetRecursive(subGrid))
-
-      setRawWidgetMetaMap((prev) => {
-        const newMap = new Map<string, GridStackWidget>(prev)
-        subGrid.subGridOpts?.children?.forEach((meta: GridStackReactWidget) => {
-          newMap.set(meta.id, meta as GridStackWidget)
-        })
-        return newMap
-      })
-    },
-    [gridStack]
-  )
-
-  const removeWidget = useCallback(
-    (id: string) => {
-      const element = document.body.querySelector<GridItemHTMLElement>(
-        `[gs-id="${id}"]`
-      )
-      if (element) gridStack?.removeWidget(element)
-
-      setRawWidgetMetaMap((prev) => {
-        const newMap = new Map<string, GridStackWidget>(prev)
-        newMap.delete(id)
-        return newMap
-      })
-    },
-    [gridStack]
-  )
-
-  const removeAll = useCallback(() => {
-    gridStack?.removeAll()
-    setRawWidgetMetaMap(new Map<string, GridStackWidget>())
-  }, [gridStack])
-
   return (
     <GridStackContext.Provider
       value={{
         options: convertedOptions,
         gridStack,
-
-        addWidget,
-        removeWidget,
-        addSubGrid,
-        removeAll,
 
         _gridStack: {
           value: gridStack,

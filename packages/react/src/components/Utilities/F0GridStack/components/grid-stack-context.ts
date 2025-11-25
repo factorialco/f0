@@ -9,17 +9,6 @@ export type GridStackWidgetWithRequiredId = GridStackWidget & {
 export const GridStackContext = createContext<{
   options: GridStackOptions
   gridStack: GridStack | null
-  addWidget: (widget: GridStackWidgetWithRequiredId) => void
-  removeWidget: (id: string) => void
-  addSubGrid: (
-    subGrid: GridStackWidgetWithRequiredId & {
-      subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-        children: Array<GridStackWidgetWithRequiredId>
-      }
-    }
-  ) => void
-  removeAll: () => void
-
   _gridStack: {
     value: GridStack | null
     set: React.Dispatch<React.SetStateAction<GridStack | null>>
