@@ -1,13 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Dashboard, Widget } from "../"
+import { Dashboard, type Widget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0GridStackRef } from "@/components/Utilities/F0GridStack"
 import { PageLayout } from "@/layouts/page/PageLayout"
+import { Optional } from "@/lib/typescript-utils/opional"
 import { useRef, useState } from "react"
 
+const availableSizes = [
+  { w: 1, h: 1 },
+  { w: 2, h: 1 },
+  { w: 2, h: 2 },
+]
 const meta = {
   title: "Dashboard",
   component: Dashboard,
@@ -16,16 +22,22 @@ const meta = {
     (Story, { args }) => {
       const ref = useRef<F0GridStackRef>(null)
 
-      const [widgets, setWidgets] = useState<Widget[]>(args.widgets)
+      const [widgets, setWidgets] = useState<Optional<Widget, "x" | "y">[]>(
+        args.widgets
+      )
 
       const handleAddWidget = () => {
         setWidgets((prev) => [
           ...prev,
           {
             id: `widget-${Math.random()}`,
-            size: { w: 1, h: 1 },
-            content: () => <div>Widget</div>,
+            w: 1,
+            h: 1,
+            content: <div>Widget {Math.random()}</div>,
             title: `Widget ${Math.random()}`,
+            x: 0,
+            y: 0,
+            availableSizes,
           },
         ])
       }
@@ -56,25 +68,9 @@ const meta = {
               args={{
                 ...args,
                 widgets,
-                onChange: (widgets) => {
-                  console.log("widgets onChange stories", widgets)
-                  setWidgets(
-                    widgets.map((widget) => {
-                      const meta = widget.meta as
-                        | { title: string; content: () => React.ReactNode }
-                        | undefined
-                      return {
-                        id: widget.id,
-                        title: meta?.title ?? "",
-                        availableSizes: widget.allowedSizes,
-                        x: widget.x,
-                        y: widget.y,
-                        size: { w: widget.w ?? 1, h: widget.h ?? 1 },
-                        content:
-                          meta?.content ?? (() => widget.renderFn ?? null),
-                      }
-                    })
-                  )
+                onChange: (updatedWidgets) => {
+                  console.log("widgets onChange stories", updatedWidgets)
+                  setWidgets(updatedWidgets)
                 },
                 ref: ref,
                 editMode: editMode,
@@ -110,15 +106,11 @@ export const Default: Story = {
     widgets: [
       {
         id: "widget-1",
-        size: { w: 1, h: 1 },
-        content: () => <div>Widget 1</div>,
+        w: 1,
+        h: 1,
+        content: <div>Widget 1</div>,
         title: "Widget 1",
-        availableSizes: [
-          { w: 1, h: 1 },
-          { w: 2, h: 1 },
-          { w: 1, h: 2 },
-          { w: 2, h: 2 },
-        ],
+        availableSizes,
       },
     ],
   },

@@ -72,7 +72,7 @@ Adds a new widget to the grid programmatically.
   - `h`: Height in grid rows
   - `x`: X position in grid columns (optional, will auto-place if not provided)
   - `y`: Y position in grid rows (optional, will auto-place if not provided)
-  - `renderFn`: React element to render
+  - `content`: React element to render
   - `meta`: Optional metadata object associated with the widget
   - `allowedSizes`: Optional array of allowed size combinations
   - `allowResize`: Whether the widget can be resized (default: true)
@@ -89,7 +89,7 @@ gridRef.current?.addWidget({
     title: "New Widget",
     type: "chart",
   },
-  renderFn: (
+  content: (
     <div className="bg-f1-background-secondary h-full rounded-md p-4">
       New Widget Content
     </div>
@@ -136,17 +136,17 @@ gridRef.current?.addSubGrid({
         id: "nested-widget-1",
         w: 2,
         h: 2,
-        renderFn: <div>Nested Widget 1</div>,
+        content: <div>Nested Widget 1</div>,
       },
       {
         id: "nested-widget-2",
         w: 2,
         h: 2,
-        renderFn: <div>Nested Widget 2</div>,
+        content: <div>Nested Widget 2</div>,
       },
     ],
   },
-  renderFn: <div>Sub-grid Container</div>,
+  content: <div>Sub-grid Container</div>,
 })
 ```
 

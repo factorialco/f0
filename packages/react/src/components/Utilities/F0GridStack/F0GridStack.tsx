@@ -14,10 +14,11 @@ export type GridStackReactOptions = Omit<GridStackOptions, "children">
 
 export type GridStackReactSize = { w: number; h: number }
 
-export interface GridStackReactWidget extends GridStackWidget {
+export interface GridStackReactWidget extends Omit<GridStackWidget, "content"> {
   id: Required<GridStackWidget>["id"]
   allowedSizes?: GridStackReactSize[]
-  renderFn?: React.ReactElement
+  content?: React.ReactElement
+  meta?: Record<string, unknown>
 }
 
 export interface F0GridStackProps {
@@ -37,7 +38,7 @@ export interface F0GridStackProps {
  *   id: 'new-widget',
  *   w: 2,
  *   h: 2,
- *   renderFn: <div>Content</div>
+ *   content: <div>Content</div>
  *   meta: {
  *     // Your metadata associated with the widget
  *   }
@@ -60,9 +61,7 @@ export interface F0GridStackRef {
     subGrid: GridStackReactWidget & {
       id: Required<GridStackWidget>["id"]
       subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-        children: Array<
-          GridStackWidget & { id: Required<GridStackWidget>["id"] }
-        >
+        children: Array<GridStackReactWidget>
       }
     }
   ) => void
@@ -101,7 +100,7 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
           noMove: widget.noMove,
           noResize: widget.noResize,
           locked: widget.locked,
-          renderFn: widget.renderFn,
+          content: widget.content,
           allowedSizes: widget.allowedSizes,
         }))
       )
@@ -111,7 +110,7 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
       console.log("widgets", widgets)
       return {
         ...options,
-        children: widgets,
+        children: widgets as GridStackWidget[],
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options, widgetsSignature])

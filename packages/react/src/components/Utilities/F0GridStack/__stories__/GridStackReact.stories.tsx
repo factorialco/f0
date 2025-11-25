@@ -70,7 +70,7 @@ const meta = {
             // Whether the node can be moved
             allowMove?: boolean;
             // The React element to render
-            renderFn?: React.ReactElement;
+            content?: React.ReactElement;
           }`,
         },
       },
@@ -125,7 +125,7 @@ export const Default: Story = {
       id: `widget-${index}`,
       w: 2,
       h: 2,
-      renderFn: (
+      content: (
         <div className="h-full rounded-md bg-f1-background-secondary p-4">
           {getMockValue(mockComponents, index)}
         </div>
@@ -154,7 +154,7 @@ export const WithRefMethods: Story = {
         meta: {
           title: `New Widget ${newId}`,
         },
-        renderFn: (
+        content: (
           <div className="h-full rounded-md bg-f1-background-accent p-4">
             New Widget {newId}
           </div>
@@ -185,7 +185,7 @@ export const WithRefMethods: Story = {
           meta: {
             title: `Widget ${index + 1}`,
           },
-          renderFn: (
+          content: (
             <div
               key={`node-${index + 1}`}
               className="h-full rounded-md bg-f1-background-secondary p-4"

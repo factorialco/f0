@@ -57,7 +57,7 @@ export const GridFixedGroup = ({
       allowResize: true,
       allowMove: true,
       allowedSizes: block.availableSizes,
-      renderFn: () => <>{block.render}</>,
+      content: <>{block.render}</>,
     }))
   }, [blocks])
 

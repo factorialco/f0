@@ -86,7 +86,7 @@ describe("F0GridStack", () => {
       y: 0,
       w: 2,
       h: 2,
-      renderFn: <div>Widget 1</div>,
+      content: <div>Widget 1</div>,
     },
     {
       id: "node-2",
@@ -94,7 +94,7 @@ describe("F0GridStack", () => {
       y: 0,
       w: 3,
       h: 1,
-      renderFn: <div>Widget 2</div>,
+      content: <div>Widget 2</div>,
       allowedSizes: [
         { w: 2, h: 1 },
         { w: 3, h: 1 },
@@ -107,7 +107,7 @@ describe("F0GridStack", () => {
       y: 2,
       w: 1,
       h: 1,
-      renderFn: <div>Widget 3</div>,
+      content: <div>Widget 3</div>,
     },
   ]
 
@@ -165,13 +165,13 @@ describe("F0GridStack", () => {
           id: "small-node",
           w: 1,
           h: 1,
-          renderFn: <span>Small</span>,
+          content: <span>Small</span>,
         },
         {
           id: "large-node",
           w: 6,
           h: 4,
-          renderFn: <div>Large</div>,
+          content: <div>Large</div>,
         },
         {
           id: "positioned-node",
@@ -179,7 +179,7 @@ describe("F0GridStack", () => {
           y: 5,
           w: 2,
           h: 2,
-          renderFn: <p>Positioned</p>,
+          content: <p>Positioned</p>,
         },
       ]
 
@@ -200,7 +200,7 @@ describe("F0GridStack", () => {
             { w: 2, h: 2 },
             { w: 4, h: 4 },
           ],
-          renderFn: <div>Constrained</div>,
+          content: <div>Constrained</div>,
         },
       ]
 
@@ -447,7 +447,7 @@ describe("F0GridStack", () => {
           id: "no-id",
           w: 2,
           h: 2,
-          renderFn: <div>No ID</div>,
+          content: <div>No ID</div>,
         },
       ]
 
@@ -544,7 +544,7 @@ describe("F0GridStack", () => {
           id: "node-4",
           w: 2,
           h: 2,
-          renderFn: <div>New Node</div>,
+          content: <div>New Node</div>,
         },
       ]
 

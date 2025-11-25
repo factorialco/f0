@@ -1,4 +1,5 @@
 import { createPortal } from "react-dom"
+import type { GridStackReactWidget } from "../F0GridStack"
 import { useGridStackContext } from "./grid-stack-context"
 import { useGridStackRenderContext } from "./grid-stack-render-context"
 import { GridStackWidgetContext } from "./grid-stack-widget-context"
@@ -18,7 +19,11 @@ export function GridStackRender() {
 
         return (
           <GridStackWidgetContext.Provider key={id} value={{ widget: { id } }}>
-            {meta.renderFn && createPortal(meta.renderFn, widgetContainer)}
+            {(meta as GridStackReactWidget).content &&
+              createPortal(
+                (meta as GridStackReactWidget).content!,
+                widgetContainer
+              )}
           </GridStackWidgetContext.Provider>
         )
       })}

@@ -46,7 +46,8 @@ export function GridStackProvider({
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
     const deepFindNodeWithContent = (obj: GridStackWidget) => {
-      if (obj.id && obj.renderFn) {
+      const reactWidget = obj as GridStackReactWidget
+      if (obj.id && reactWidget.content) {
         map.set(obj.id, obj)
       }
 
@@ -81,7 +82,8 @@ export function GridStackProvider({
     setRawWidgetMetaMap(() => {
       const newMap = new Map<string, GridStackWidget>()
       const deepFindNodeWithContent = (obj: GridStackWidget) => {
-        if (obj.id && obj.renderFn) {
+        const reactWidget = obj as GridStackReactWidget
+        if (obj.id && reactWidget.content) {
           newMap.set(obj.id, obj)
         }
 
@@ -263,7 +265,7 @@ export function GridStackProvider({
           if (!widgetMeta) return null
 
           // Merge layout data (w, h, x, y, meta) with widget metadata
-          // This ensures we return the full widget data including renderFn, allowedSizes, etc.
+          // This ensures we return the full widget data including content, allowedSizes, etc.
           const updatedWidget: GridStackReactWidget = {
             ...widgetMeta,
             id: widgetId,
@@ -275,8 +277,8 @@ export function GridStackProvider({
             meta: item.meta
               ? { ...widgetMeta.meta, ...item.meta }
               : widgetMeta.meta,
-            // Ensure renderFn matches GridStackReactWidget type
-            renderFn: widgetMeta.renderFn ?? undefined,
+            // Ensure content matches GridStackReactWidget type
+            content: (widgetMeta as GridStackReactWidget).content ?? undefined,
           }
 
           return updatedWidget
@@ -339,15 +341,11 @@ export function GridStackProvider({
   }, [gridStack])
 
   const addWidget = useCallback(
-    (
-      widget: GridStackWidget & {
-        id: Required<GridStackWidget>["id"]
-      }
-    ) => {
-      gridStack?.addWidget(widget)
+    (widget: GridStackReactWidget) => {
+      gridStack?.addWidget(widget as GridStackWidget)
       setRawWidgetMetaMap((prev) => {
         const newMap = new Map<string, GridStackWidget>(prev)
-        newMap.set(widget.id, widget)
+        newMap.set(widget.id, widget as GridStackWidget)
         return newMap
       })
     },
@@ -356,28 +354,20 @@ export function GridStackProvider({
 
   const addSubGrid = useCallback(
     (
-      subGrid: GridStackWidget & {
+      subGrid: GridStackReactWidget & {
         id: Required<GridStackWidget>["id"]
         subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-          children: Array<
-            GridStackWidget & { id: Required<GridStackWidget>["id"] }
-          >
+          children: Array<GridStackReactWidget>
         }
       }
     ) => {
-      gridStack?.addWidget(subGrid)
+      gridStack?.addWidget(subGrid as GridStackWidget)
 
       setRawWidgetMetaMap((prev) => {
         const newMap = new Map<string, GridStackWidget>(prev)
-        subGrid.subGridOpts?.children?.forEach(
-          (
-            meta: GridStackWidget & {
-              id: Required<GridStackWidget>["id"]
-            }
-          ) => {
-            newMap.set(meta.id, meta)
-          }
-        )
+        subGrid.subGridOpts?.children?.forEach((meta: GridStackReactWidget) => {
+          newMap.set(meta.id, meta as GridStackWidget)
+        })
         return newMap
       })
     },

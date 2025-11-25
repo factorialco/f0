@@ -5,28 +5,31 @@ import {
   GridStackReactWidget,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
+import { Optional } from "@/lib/typescript-utils/opional"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { DashboardWidget } from "./components/DashboardWidget"
 
 export type GridFixedGroupSize = { w: number; h: number }
 
-export interface Widget {
+export type Widget = {
   id: string
-  size: GridFixedGroupSize
   availableSizes?: GridFixedGroupSize[]
-  content: () => React.ReactNode
+  content: React.ReactNode
   title: string
-}
+  x: number
+  y: number
+  locked?: boolean
+} & GridFixedGroupSize
 
 export interface DashboardProps {
-  widgets: Widget[]
+  widgets: Optional<Widget, "x" | "y">[]
   editMode?: boolean
   /**
    * Callback function that is called whenever the layout changes.
    * Receives an array of widgets with updated positions and properties.
    * This can be used to keep widgets in sync by using the returned data.
    */
-  onChange?: (widgets: GridStackReactWidget[]) => void
+  onChange?: (widgets: Widget[]) => void
 }
 
 const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
@@ -54,10 +57,22 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
     const [gridWidgets, setGridWidgets] = useState<GridStackReactWidget[]>([])
 
     const handleChange = useCallback(
-      (widgets: GridStackReactWidget[]) => {
-        console.log("handleChange", widgets)
-        setGridWidgets(widgets)
-        onChange(widgets)
+      (gridWidgets: GridStackReactWidget[]) => {
+        setGridWidgets(gridWidgets)
+        onChange(
+          gridWidgets.map((widget) => ({
+            id: widget.id,
+            w: (widget as GridStackReactWidget & { w?: number }).w ?? 1,
+            h: (widget as GridStackReactWidget & { h?: number }).h ?? 1,
+            availableSizes: widget.allowedSizes,
+            content: widget.meta.content ?? null,
+            title: (widget.meta?.title as string | undefined) ?? "",
+            x: (widget as GridStackReactWidget & { x?: number }).x ?? 0,
+            y: (widget as GridStackReactWidget & { y?: number }).y ?? 0,
+            locked: (widget as GridStackReactWidget & { locked?: boolean })
+              .locked,
+          }))
+        )
       },
       [onChange]
     )
@@ -66,32 +81,24 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
       setGridWidgets(
         widgets.map((widget) => ({
           id: widget.id,
-          h: widget.size.h ?? 1,
-          w: widget.size.w ?? 1,
+          h: widget.h ?? 1,
+          w: widget.w ?? 1,
           allowedSizes: widget.availableSizes,
+          noMove: !editMode,
+          noResize: !editMode,
+          locked: widget.locked,
           meta: {
             title: widget.title,
             content: widget.content,
           },
-          renderFn: (
+          content: (
             <DashboardWidget title={widget.title} draggable={editMode}>
-              {widget.content()}
+              {widget.content}
             </DashboardWidget>
           ),
         }))
       )
     }, [widgets, editMode])
-
-    useEffect(() => {
-      setGridWidgets((prev) => {
-        console.log("editMode", editMode, prev)
-        return prev.map((widget) => ({
-          ...widget,
-          noMove: !editMode,
-          noResize: !editMode,
-        }))
-      })
-    }, [editMode])
 
     return (
       <F0GridStack
