@@ -24,6 +24,7 @@ export type InputProps<T extends string> = Pick<
     | "placeholder"
     | "clearable"
     | "maxLength"
+    | "hideMaxLength"
     | "label"
     | "labelIcon"
     | "icon"
