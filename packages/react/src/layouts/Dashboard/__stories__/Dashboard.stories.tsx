@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Dashboard } from "../"
 
 import { F0Button } from "@/components/F0Button"
-import { F0GridStackRef } from "@/components/Utilities/F0GridStack/F0GridStack"
+import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0GridStackRef } from "@/components/Utilities/F0GridStack"
 import { PageLayout } from "@/layouts/page/PageLayout"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 
 const meta = {
   title: "Dashboard",
@@ -24,9 +25,22 @@ const meta = {
         })
       }
 
+      const [editMode, setEditMode] = useState(false)
+
       return (
         <>
           <PageLayout
+            header={
+              <>
+                <F0Checkbox
+                  title="Edit mode"
+                  checked={editMode}
+                  onCheckedChange={(checked) => {
+                    setEditMode(checked)
+                  }}
+                />
+              </>
+            }
             aside={
               <>
                 <F0Button label="Add widget" onClick={handleAddWidget} />
@@ -37,6 +51,7 @@ const meta = {
               args={{
                 ...args,
                 ref: ref,
+                editMode: editMode,
               }}
             />
           </PageLayout>

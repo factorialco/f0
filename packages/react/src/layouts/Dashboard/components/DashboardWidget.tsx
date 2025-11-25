@@ -21,18 +21,23 @@ export const DashboardWidget = ({
 }: DashboardWidgetProps) => {
   return (
     <article
-      className={cn("relative h-full rounded-md bg-[#f00] p-4", className)}
+      className={cn(
+        "relative h-full rounded-md border border-solid border-f1-border-secondary bg-f1-background px-4 py-2",
+        "hover:border-f1-border-hover",
+        className
+      )}
     >
       <header className="flex items-center gap-2">
         <div className="flex items-center gap-2">
+          {draggable.toString()}
           {draggable && <F0Icon icon={Handle} size="sm" />}
-          <F0Heading content={title} as="h2" />
+          <F0Heading content={title} as="h6" />
         </div>
         <div className="flex items-center gap-2">
           {actions && <Dropdown items={actions} />}
         </div>
       </header>
-      <div className="p-4">{children}</div>
+      <div className="">{children}</div>
     </article>
   )
 }

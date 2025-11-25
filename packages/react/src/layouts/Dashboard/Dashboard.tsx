@@ -46,15 +46,14 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
     )
 
     const gridWidgets = useMemo(() => {
-      return widgets.map((widget) => ({
+      widgets.map((widget) => ({
         id: widget.id,
         h: widget.size.h ?? 1,
         w: widget.size.w ?? 1,
-        allowResize: editMode,
-        allowMove: editMode,
-        allowedSizes: widget.availableSizes,
+        noMove: !editMode,
+        noResize: !editMode,
         renderFn: () => (
-          <DashboardWidget title={widget.title}>
+          <DashboardWidget title={widget.title} draggable={editMode}>
             {widget.content()}
           </DashboardWidget>
         ),
