@@ -70,10 +70,10 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
           ).toString() as "-1" | "0" | "1"
         ]
 
-      const perventageText = numericFormatter(percentageDef, false)
+      const percentageText = numericFormatter(percentageDef, false)
       const amountText = numericFormatter(amountDef, true)
 
-      text = [perventageText, amountText].filter(Boolean).join(" · ")
+      text = [percentageText, amountText].filter(Boolean).join(" · ")
       additionalAccessibleText = `${status} balance`
 
       icon =
