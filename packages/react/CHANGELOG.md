@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.288.0](https://github.com/factorialco/f0/compare/f0-react-v1.287.0...f0-react-v1.288.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add time (ClockPlus & Sleep) icons ([#3040](https://github.com/factorialco/f0/issues/3040)) ([af6ec70](https://github.com/factorialco/f0/commit/af6ec70e69c05b9bd2978738f4d222b6203ee515))
+
 ## [1.287.0](https://github.com/factorialco/f0/compare/f0-react-v1.286.0...f0-react-v1.287.0) (2025-11-25)
 
 
