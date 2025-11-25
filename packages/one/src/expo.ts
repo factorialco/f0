@@ -6,8 +6,26 @@
  * and optimal tree-shaking.
  */
 
-// Test component (temporary for build verification)
+// AiChat components (expo - fullscreen version)
+// TODO: Review - FullScreen components structure and dependencies
 export {
-  TestExpoComponent,
-  type TestExpoComponentProps,
-} from "./components/TestExpoComponent"
+  ActionItem,
+  AiChatProvider,
+  AiFullscreenChat, // Expo-only: FullScreen chat component
+  useAiChat,
+  type ActionItemProps,
+  type AiChatProviderProps,
+} from "./components/AiChat/exports"
+
+// I18n provider
+export {
+  I18nProvider,
+  buildTranslations,
+  defaultTranslations,
+  useI18n,
+  type I18nContextType,
+  type I18nProviderProps,
+  type I18nStrings,
+  type TranslationKey,
+  type TranslationsType,
+} from "./lib/providers/i18n"

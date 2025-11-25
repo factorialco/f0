@@ -73,11 +73,13 @@ export default defineConfig({
         "react-dom",
         "react-native",
         /@copilotkit\/.*/,
+        /@factorialco\/.*/,
         "motion",
         "clsx",
         "tailwind-merge",
         "usehooks-ts",
       ],
+      maxParallelFileOps: 100, // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {
         globals: {
           react: "React",
