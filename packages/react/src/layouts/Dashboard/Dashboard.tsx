@@ -2,7 +2,7 @@ import {
   F0GridStack,
   F0GridStackRef,
   GridStackReactOptions,
-  GridStackWidgetPosition,
+  GridStackReactWidget,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
 import { forwardRef, useMemo } from "react"
@@ -21,7 +21,12 @@ export interface Widget {
 export interface DashboardProps {
   widgets: Widget[]
   editMode?: boolean
-  onChange?: (positions: GridStackWidgetPosition[]) => void
+  /**
+   * Callback function that is called whenever the layout changes.
+   * Receives an array of widgets with updated positions and properties.
+   * This can be used to keep widgets in sync by using the returned data.
+   */
+  onChange?: (widgets: GridStackReactWidget[]) => void
 }
 
 const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(

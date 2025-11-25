@@ -20,22 +20,27 @@ export interface GridStackReactWidget extends GridStackWidget {
   renderFn?: () => React.ReactElement
 }
 
-/**
- * Represents a node in the grid layout.
- */
-export interface GridStackWidgetPosition {
-  id: string
-  w: number
-  h: number
-  x: number
-  y: number
-  meta?: Record<string, unknown>
-}
-
 export interface F0GridStackProps {
   options: GridStackReactOptions
   widgets: GridStackReactWidget[]
-  onChange?: (layout: GridStackWidgetPosition[]) => void
+  /**
+   * Callback function that is called whenever the layout changes (widget moved, resized, added, or removed).
+   * Receives an array of widgets with updated positions and properties.
+   * This can be used to keep widgets in sync by using the returned data as the widgets prop.
+   *
+   * @example
+   * ```tsx
+   * const [widgets, setWidgets] = useState(initialWidgets)
+   *
+   * <F0GridStack
+   *   widgets={widgets}
+   *   onChange={(updatedWidgets) => {
+   *     setWidgets(updatedWidgets)
+   *   }}
+   * />
+   * ```
+   */
+  onChange?: (widgets: GridStackReactWidget[]) => void
 }
 
 /**

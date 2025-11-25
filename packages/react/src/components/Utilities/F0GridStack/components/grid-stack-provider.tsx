@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { GridStackWidgetPosition } from "../F0GridStack"
+import { GridStackReactWidget } from "../F0GridStack"
 import { GridStackContext } from "./grid-stack-context"
 import "./types"
 
@@ -19,7 +19,7 @@ interface GridStackProviderProps {
   children: React.ReactNode
   options: GridStackOptions
   onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
-  onChange?: (layout: GridStackWidgetPosition[]) => void
+  onChange?: (widgets: GridStackReactWidget[]) => void
 }
 
 export function GridStackProvider({
@@ -168,19 +168,44 @@ export function GridStackProvider({
     const layout = gridStack.save()
 
     if (Array.isArray(layout)) {
-      onChange?.(
-        layout.map((item) => ({
-          id: item.id ?? "",
-          meta: item.meta,
-          w: item.w ?? 1,
-          h: item.h ?? 1,
-          x: item.x ?? 0,
-          y: item.y ?? 0,
-        }))
-      )
+      // Merge layout data (positions) with widget metadata from rawWidgetMetaMap
+      const updatedWidgets: GridStackReactWidget[] = layout
+        .map((item) => {
+          const widgetId = item.id
+          if (!widgetId) return null
+
+          // Get the widget metadata from rawWidgetMetaMap
+          const widgetMeta = rawWidgetMetaMap.get(widgetId)
+
+          if (!widgetMeta) return null
+
+          // Merge layout data (w, h, x, y, meta) with widget metadata
+          // This ensures we return the full widget data including renderFn, allowedSizes, etc.
+          const updatedWidget: GridStackReactWidget = {
+            ...widgetMeta,
+            id: widgetId,
+            w: item.w ?? widgetMeta.w ?? 1,
+            h: item.h ?? widgetMeta.h ?? 1,
+            x: item.x ?? widgetMeta.x ?? 0,
+            y: item.y ?? widgetMeta.y ?? 0,
+            // Merge meta if both exist
+            meta: item.meta
+              ? { ...widgetMeta.meta, ...item.meta }
+              : widgetMeta.meta,
+            // Ensure renderFn matches GridStackReactWidget type (can't return null)
+            renderFn: widgetMeta.renderFn
+              ? () => widgetMeta.renderFn?.() ?? <></>
+              : undefined,
+          }
+
+          return updatedWidget
+        })
+        .filter((widget): widget is GridStackReactWidget => widget !== null)
+
+      onChange?.(updatedWidgets)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridStack])
+  }, [gridStack, rawWidgetMetaMap])
 
   useEffect(() => {
     if (!gridStack) return
