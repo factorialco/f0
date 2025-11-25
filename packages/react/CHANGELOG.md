@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.287.0](https://github.com/factorialco/f0/compare/f0-react-v1.286.0...f0-react-v1.287.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** IT computer and tablet icons ([#3035](https://github.com/factorialco/f0/issues/3035)) ([2b7fc15](https://github.com/factorialco/f0/commit/2b7fc1503b1a62f3b17a79616926c4b62d3d4eba))
+
 ## [1.286.0](https://github.com/factorialco/f0/compare/f0-react-v1.285.0...f0-react-v1.286.0) (2025-11-25)
 
 
