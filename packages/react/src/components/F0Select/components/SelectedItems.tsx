@@ -1,28 +1,61 @@
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { forwardRef } from "react"
 import type { F0SelectItemObject } from "../types"
 
 type SelectValueProps = {
   selection: F0SelectItemObject<string>[]
   multiple?: boolean
+  /** Total count of selected items (useful when not all items are loaded) */
+  totalSelectedCount?: number
+  /** Whether all items are selected */
+  allSelected?: boolean | "indeterminate"
 }
+
+/** Maximum number of labels to show before displaying count */
+const MAX_VISIBLE_LABELS = 2
 
 /**
  * Component for displaying the selected item or items in the inputField
  */
 export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
-  function SelectValue({ selection, multiple }, ref) {
+  function SelectValue(
+    { selection, multiple, totalSelectedCount, allSelected },
+    ref
+  ) {
+    const i18n = useI18n()
+
     if (multiple) {
+      // Use totalSelectedCount if provided, otherwise use selection.length
+      const selectedCount = totalSelectedCount ?? selection.length
+
+      // If no items are selected, return nothing
+      if (selectedCount === 0 && selection.length === 0) {
+        return null
+      }
+
+      // Handle "All selected" state for large datasets
+      if (allSelected === true && totalSelectedCount !== undefined) {
+        return (
+          <div className="flex w-full items-center gap-1 text-left">
+            <OneEllipsis className="min-w-0 flex-1">
+              {`${totalSelectedCount} ${i18n.status.selected.plural.toLowerCase()}`}
+            </OneEllipsis>
+          </div>
+        )
+      }
+
+      // Show labels for small selections, count for large ones
+      const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
+      const remainingCount = selectedCount - visibleItems.length
+
       return (
         <div className="flex w-full items-center gap-1 text-left">
           <OneEllipsis className="min-w-0 flex-1">
-            {selection
-              .slice(0, 2)
-              .map((item) => item.label)
-              .join(", ")}
+            {visibleItems.map((item) => item.label).join(", ")}
           </OneEllipsis>
-          {selection.length > 2 && <div>+{selection.length - 2}</div>}
+          {remainingCount > 0 && <div>+{remainingCount}</div>}
         </div>
       )
     }

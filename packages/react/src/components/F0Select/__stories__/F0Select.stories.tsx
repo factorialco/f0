@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { F0Select, F0SelectItemObject, selectSizes } from "../index"
+import { F0Select, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
@@ -211,20 +211,9 @@ const meta: Meta = {
       )
       const [searchValue, setSearchValue] = useState("")
       // Sets a click handler to change the label's value
-      const handleOnChange = (
-        value: string,
-        item?: unknown,
-        option?: F0SelectItemObject<string>
-      ) => {
+      const handleOnChange = (value: string) => {
         setLocalValue(value)
-        console.log(
-          "selected value:",
-          value,
-          "- original item:",
-          item,
-          "- selection option:",
-          option
-        )
+        console.log("value", value)
       }
 
       const handleOnSearchChange = (value: string) => {
@@ -449,7 +438,7 @@ export const LargeList: Story = {
 
 export const WithDataSourceNotPaginated: Story = {
   args: {
-    label: "Select label",
+    label: "Not Paginated (with Filters)",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
@@ -459,14 +448,14 @@ export const WithDataSourceNotPaginated: Story = {
       value: item.value,
       label: item.label,
       icon: item.icon,
-      description: item.description,
+      description: `${item.role} - ${item.department}`,
     }),
   },
 }
 
 export const WithDataSourcePaginated: Story = {
   args: {
-    label: "Data Source Paginated",
+    label: "Data Source Paginated (with Filters)",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
@@ -476,7 +465,7 @@ export const WithDataSourcePaginated: Story = {
       value: item.value,
       label: item.label,
       icon: item.icon,
-      description: item.description,
+      description: `${item.role} - ${item.department}`,
     }),
   },
 }
@@ -583,7 +572,7 @@ export const MultiplePaginated: Story = {
   args: {
     label: "Multiple Paginated",
     multiple: true,
-    value: ["option-2", "option-3"],
+    value: ["option-200", "option-300"],
     clearable: true,
     source: mockPaginatedSource,
     mapOptions: (item: MockItem) => ({
@@ -592,8 +581,156 @@ export const MultiplePaginated: Story = {
       icon: item.icon,
       description: item.description,
     }),
+    onSelectItems: (selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    },
+    onChange: (value) => {
+      console.log("value", value)
+    },
+    showSearchBox: true,
   },
   decorators: [],
+}
+
+/**
+ * Demonstrates multiselection with initial values from different pages.
+ * Items like option-50 and option-100 may not be in the first page but
+ * should still show as selected.
+ */
+export const MultipleWithInitialValuesFromDifferentPages: Story = {
+  args: {
+    label: "Multiple with initial values",
+    multiple: true,
+    value: ["option-2", "option-50", "option-100"],
+    clearable: true,
+    showSearchBox: true,
+    source: mockPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+/**
+ * Demonstrates the Select All functionality with paginated data.
+ * When "Select All" is clicked, all 10,000 items should be selected,
+ * not just the visible ones.
+ */
+export const MultipleSelectAllPaginated: Story = {
+  args: {
+    label: "Select All Demo",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    value: ["option-200", "option-3", "option-10"],
+    source: mockPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+    }),
+    onSelectItems: (selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    },
+  },
+}
+
+/**
+ * Demonstrates multiselection with filters applied.
+ * The filters actually work! Try selecting a Role or Department to filter the list.
+ * - Role filter: Filters by job role (Engineer, Designer, Manager, etc.)
+ * - Department filter: Filters by department (Engineering, Marketing, etc.)
+ */
+export const MultipleWithFiltersAndSelection: Story = {
+  args: {
+    label: "With Filters (Role & Department)",
+    multiple: true,
+    showSearchBox: true,
+    clearable: true,
+    value: undefined, // Override default to start with no selection
+    source: mockPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      description: `${item.role} - ${item.department}`,
+    }),
+  },
+}
+
+/**
+ * Single select with working filters.
+ * Demonstrates filtering by Role and Department with single selection.
+ */
+export const SingleSelectWithFilters: Story = {
+  args: {
+    label: "Select Employee",
+    placeholder: "Choose an employee...",
+    showSearchBox: true,
+    clearable: true,
+    value: undefined, // Override default to start with no selection
+    source: mockPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      description: `${item.role} - ${item.department}`,
+      icon: item.icon,
+    }),
+  },
+}
+
+/**
+ * Demonstrates selection with onSelectItems callback for massive datasets.
+ * The onSelectItems callback provides the full selection state:
+ * - status.allSelected: true if "Select All" was clicked, "indeterminate" if some items deselected after
+ * - status.items: Map of all items with their checked state
+ * - filters: Current applied filters
+ * - selectedCount: Total number of selected items
+ *
+ * For "chunked" selection:
+ * - When allSelected is true/indeterminate: excluded items = items with checked=false
+ * - When allSelected is false: included items = items with checked=true
+ */
+export const MultipleWithSelectItems: Story = {
+  args: {
+    label: "With onSelectItems",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    value: ["option-200", "option-3", "option-10"],
+    source: mockPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+    }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSelectItems: (selectionStatus: any) => {
+      const { status, filters, selectedCount } = selectionStatus
+      const isAllSelectedMode =
+        status.allSelected === true || status.allSelected === "indeterminate"
+
+      // Extract included/excluded IDs from the items Map
+      const includedIds: string[] = []
+      const excludedIds: string[] = []
+
+      for (const [id, itemState] of status.items.entries()) {
+        if (itemState.checked) {
+          includedIds.push(String(id))
+        } else {
+          excludedIds.push(String(id))
+        }
+      }
+
+      console.log("Selection changed:", {
+        allSelected: isAllSelectedMode,
+        includedIds: isAllSelectedMode ? [] : includedIds,
+        excludedIds: isAllSelectedMode ? excludedIds : [],
+        filters,
+        selectedCount,
+      })
+    },
+  },
 }
 
 export const WithCustomTrigger: Story = {

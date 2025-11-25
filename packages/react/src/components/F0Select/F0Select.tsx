@@ -25,7 +25,14 @@ import {
 } from "@/ui/Select"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { isEqual } from "lodash"
-import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
@@ -91,6 +98,9 @@ const F0SelectComponent = forwardRef(function Select<
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
+  // Extract onSelectItems from props for multiple selection
+  const onSelectItems =
+    "onSelectItems" in props ? props.onSelectItems : undefined
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
@@ -226,12 +236,35 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }, [data, optionMapper])
 
-  const onSelectItems = useCallback(
-    (items: SelectedItemsState<ActualRecordType>) => {
-      console.log("onSelectItems", items)
-    },
-    []
-  )
+  /**
+   * Initialize selection state from the value prop.
+   * This allows the component to display pre-selected values when the data loads.
+   */
+  const initialSelectedState = useMemo(():
+    | SelectedItemsState<ActualRecordType>
+    | undefined => {
+    const values = toArray(value) ?? defaultValues ?? []
+    if (values.length === 0) {
+      return undefined
+    }
+
+    const items = new Map() as SelectedItemsState<ActualRecordType>["items"]
+
+    for (const val of values) {
+      const itemData = itemsByValue[val]
+      items.set(val, {
+        id: val,
+        checked: true,
+        item: itemData?.item as WithGroupId<ActualRecordType> | undefined,
+      })
+    }
+
+    return {
+      allSelected: false,
+      items,
+      groups: new Map(),
+    }
+  }, [value, defaultValues, itemsByValue])
 
   const {
     handleSelectAll,
@@ -244,7 +277,8 @@ const F0SelectComponent = forwardRef(function Select<
     paginationInfo,
     source: localSource,
     selectionMode: multiple ? "multi" : "single",
-    onSelectItems,
+    onSelectItems: onSelectItems,
+    selectedState: initialSelectedState,
   })
 
   const onSearchChangeLocal = useCallback(
@@ -255,121 +289,107 @@ const F0SelectComponent = forwardRef(function Select<
     [setCurrentSearch, onSearchChange]
   )
 
+  // Track whether the user has interacted with the selection
+  const hasUserInteracted = useRef(false)
+  const isFirstRender = useRef(true)
+
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
-      const item = itemsByValue[value]
-      if (!item) {
-        return
-      }
+      hasUserInteracted.current = true
       handleSelectItemChange(value, checked)
-      onChangeSelectedOption?.(item.option, checked)
+
+      // Only call onChangeSelectedOption if we have the item data
+      const item = itemsByValue[value]
+      if (item) {
+        onChangeSelectedOption?.(item.option, checked)
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
-    [onChangeSelectedOption, itemsByValue]
+    [onChangeSelectedOption, itemsByValue, handleSelectItemChange]
+  )
+
+  // Mark user interaction when select all is used
+  const handleSelectAllWithTracking = useCallback(
+    (checked: boolean) => {
+      hasUserInteracted.current = true
+      handleSelectAll(checked)
+    },
+    [handleSelectAll]
   )
 
   /**
-   * Emit the value change. The type depends on the multiple prop and async.
+   * Emit the value change. The type depends on the multiple prop and selectionMode.
+   * Only emit after user interaction to avoid spurious onChange calls on mount.
    */
   useDeepCompareEffect(() => {
-    const checkedItems = selectionMeta.checkedItems.filter(
-      (item) => item !== undefined
-    )
-    console.log("selectionMeta", selectionMeta)
-    console.log("checkedItems", checkedItems)
-
-    const checkedItemsValues = checkedItems.map(
-      (item) => String(item.value) as T
-    )
-    const checkedItemsOriginalItems = checkedItems.map((item) => item)
-    const checkedItemsOptions = checkedItems.map((item) => {
-      return optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
-    })
-    if (multiple) {
-      // Non paginated
-      onChange?.(
-        checkedItemsValues,
-        checkedItemsOriginalItems,
-        checkedItemsOptions
-      )
-    } else {
-      onChange?.(
-        checkedItemsValues[0],
-        checkedItemsOriginalItems[0],
-        checkedItemsOptions[0]
-      )
+    // Skip onChange before user has interacted with the component
+    // This prevents emitting undefined values on initial mount/data load
+    if (!hasUserInteracted.current) {
+      // Mark first render as complete
+      if (isFirstRender.current) {
+        isFirstRender.current = false
+      }
+      return
     }
-  }, [selectionMeta.checkedItems])
 
-  // Handle change
-
-  useDeepCompareEffect(() => {
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
 
-    console.log("selectedState", selectedState)
     const checkedItems = Array.from(selectedState.items.values() || []).filter(
       (item) => item.checked
     )
-    // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
+
+    // Helper to extract the original item from a record
+    // For static options: the record IS the option, and option.item contains the original data
+    // For datasource: the record is the original data, optionMapper creates the option
+    const extractOriginalItem = (
+      record: ActualRecordType | undefined
+    ): ResolvedRecordType<R> | undefined => {
+      if (!record) return undefined
+      if (source) {
+        // For datasource, the record itself is the original item
+        return record as unknown as ResolvedRecordType<R>
+      }
+      // For static options, extract the 'item' property from the option
+      const option = record as unknown as F0SelectItemObject<
+        T,
+        ResolvedRecordType<R>
+      >
+      return option.item
+    }
+
+    // TypeScript cannot infer the type of the onChange callback when it has generics,
+    // so we need to cast it to the correct type
     if (multiple) {
       const values = checkedItems.map((item) => String(item.id) as T)
-      const items = checkedItems
+      const records = checkedItems
         .map((item) => item.item)
         .filter(
           (item): item is WithGroupId<ResolvedRecordType<R>> =>
             item !== undefined
         )
-      const options = items.map((item) => {
+      const originalItems = records
+        .map(extractOriginalItem)
+        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+      const options = records.map((item) => {
         return optionMapper(item) as F0SelectItemObject<
           T,
           ResolvedRecordType<R>
         >
       })
 
-      onChange?.(values, items, options)
+      onChange?.(values, originalItems, options)
     } else {
       const selectedItem = checkedItems[0]
-      const value = String(selectedItem?.id) as T
-      const item = selectedItem?.item as ResolvedRecordType<R> | undefined
-      const option =
-        selectedItem?.item &&
-        (optionMapper(selectedItem.item) as F0SelectItemObject<
-          T,
-          ResolvedRecordType<R>
-        >)
-      console.log("selectedItem", selectedItem)
-      onChange?.(value, item, option)
+      const value = selectedItem ? (String(selectedItem.id) as T) : undefined
+      const record = selectedItem?.item as ActualRecordType | undefined
+      const originalItem = extractOriginalItem(record)
+      const option = record
+        ? (optionMapper(record) as F0SelectItemObject<T, ResolvedRecordType<R>>)
+        : undefined
+
+      onChange?.(value as T, originalItem, option)
     }
   }, [selectedState])
-
-  // const handleLocalValueChange = (
-  //   changedValue: string | string[] | undefined
-  // ) => {
-  //   // Resets the search value when the option is selected
-  //   setCurrentSearch(undefined)
-  //   setLocalValue((toArray(changedValue) ?? []) as T[])
-
-  //   console.log("changedValue", changedValue)
-  //   const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
-
-  //   // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
-  //   if (multiple) {
-  //     const values = foundOptions.map((option) => option.value)
-  //     const items = foundOptions
-  //       .map((option) => option.item)
-  //       .filter((item): item is ResolvedRecordType<R> => item !== undefined)
-
-  //     onChange?.(values, items, foundOptions)
-  //   } else {
-  //     console.log("foundOptions", foundOptions)
-  //     const value = foundOptions[0]?.value
-  //     const item = foundOptions[0]?.item
-  //     const option = foundOptions[0]
-
-  //     onChange?.(value, item, option)
-  //   }
-  // }
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
     (open: boolean) => {
@@ -383,7 +403,6 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
-  // const collapsible = localSource.grouping?.collapsible
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
@@ -428,7 +447,6 @@ const F0SelectComponent = forwardRef(function Select<
               itemCount={group.itemCount}
               onOpenChange={(open) => setGroupOpen(group.key, open)}
               open={openGroups[group.key]}
-              // showOpenChange={collapsible}
             />
           ),
         })
@@ -451,7 +469,6 @@ const F0SelectComponent = forwardRef(function Select<
     return Array.from(selectedState.items.values())
       .filter((item) => item.checked)
       .map((item) => String(item.id))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the selectedState.items changes
   }, [selectedState.items])
 
   /**
@@ -463,20 +480,18 @@ const F0SelectComponent = forwardRef(function Select<
     disabled,
     open: openLocal,
     onOpenChange: handleChangeOpenLocal,
-    // onValueChange: handleLocalValueChange,
   }
 
   const selectPrimitiveProps = multiple
     ? ({
         ...commonProps,
         value: selectedItemsValues,
-        //value: localValue as string[],
         multiple: true as const,
       } as const)
     : ({
         ...commonProps,
-        //value: localValue[0] as string | undefined,
-        value: selectedItemsValues[0],
+        // Use empty string instead of undefined to maintain controlled component state
+        value: selectedItemsValues[0] ?? "",
         multiple: false as const,
       } as const)
 
@@ -503,7 +518,14 @@ const F0SelectComponent = forwardRef(function Select<
               hideLabel={hideLabel}
               value={selectionMeta.selectedItemsCount.toString()}
               isEmpty={(value) => +(value ?? 0) === 0}
-              onClear={() => clearSelection()}
+              onClear={() => {
+                hasUserInteracted.current = true
+                clearSelection()
+                // Call with undefined to indicate no item is selected
+                ;(onChangeSelectedOption as (option: undefined) => void)?.(
+                  undefined
+                )
+              }}
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
@@ -531,19 +553,20 @@ const F0SelectComponent = forwardRef(function Select<
                 {selectionMeta.checkedItems && (
                   <SelectedItems
                     multiple={multiple}
-                    selection={selectionMeta.checkedItems.map((item) => {
-                      if (item) {
-                        return optionMapper(item) as F0SelectItemObject<
-                          T,
-                          ResolvedRecordType<R>
-                        >
-                      }
-                      return {
-                        value: "test" as T,
-                        label: "test",
-                        description: "test",
-                      }
-                    })}
+                    totalSelectedCount={selectionMeta.selectedItemsCount}
+                    allSelected={selectedState.allSelected}
+                    selection={selectionMeta.checkedItems
+                      .filter(
+                        (item): item is NonNullable<typeof item> =>
+                          item !== undefined
+                      )
+                      .map(
+                        (item) =>
+                          optionMapper(item) as F0SelectItemObject<
+                            T,
+                            ResolvedRecordType<R>
+                          >
+                      )}
                   />
                 )}
               </button>
@@ -578,7 +601,7 @@ const F0SelectComponent = forwardRef(function Select<
                       selectedState.allSelected === "indeterminate"
                     }
                     value={!!selectedState.allSelected}
-                    onChange={handleSelectAll}
+                    onChange={handleSelectAllWithTracking}
                   />
                 )}
               </>

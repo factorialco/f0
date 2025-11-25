@@ -1,11 +1,11 @@
-import { createDataSourceDefinition } from "@/hooks/datasource"
+import { createDataSourceDefinition, FiltersState } from "@/hooks/datasource"
 import {
   DEPARTMENTS_MOCK,
   FIRST_NAMES_MOCK,
+  getMockValue,
   MOCK_ICONS,
   ROLES_MOCK,
   SURNAMES_MOCK,
-  getMockValue,
 } from "@/mocks"
 
 export const mockItems = Array.from({ length: 10000 }, (_, i) => ({
@@ -17,54 +17,108 @@ export const mockItems = Array.from({ length: 10000 }, (_, i) => ({
   description: `Description for option ${i}`,
 }))
 
-export type MockItem = (typeof mockItems)[number]
+// Get unique roles and departments for filter options
+const uniqueRoles = [...new Set(mockItems.map((item) => item.role))]
+const uniqueDepartments = [...new Set(mockItems.map((item) => item.department))]
 
-export const mockPaginatedSource = createDataSourceDefinition<MockItem>({
-  filters: {
-    status: {
-      type: "in",
-      label: "Status",
-      options: {
-        options: [
-          { value: "eliseo-vargas", label: "Elise Vargas" },
-          { value: "alexander-smith", label: "Alexander Smith" },
-          { value: "bob-johnson", label: "Bob Johnson" },
-          { value: "carol-williams", label: "Carol Williams" },
-          { value: "dave-brown", label: "Dave Brown" },
-          { value: "saul-vargas", label: "Saul Vargas" },
-          { value: "michael-johnson", label: "Michael Johnson" },
-          { value: "john-williams", label: "John Williams" },
-          { value: "jane-brown", label: "Jane Brown" },
-          { value: "jose-martinez", label: "Jose Martinez" },
-          { value: "james-smith", label: "James Smith" },
-          { value: "david-williams", label: "David Williams" },
-          { value: "william-brown", label: "William Brown" },
-          { value: "emily-martinez", label: "Emily Martinez" },
-          { value: "luis-garcia", label: "Luis Garcia" },
-          { value: "robert-martinez", label: "Robert Martinez" },
-          { value: "joseph-smith", label: "Joseph Smith" },
-          { value: "daniel-williams", label: "Daniel Williams" },
-          { value: "patrick-brown", label: "Patrick Brown" },
-          { value: "charles-martinez", label: "Charles Martinez" },
-          { value: "anthony-smith", label: "Anthony Smith" },
-        ],
-      },
-    },
-    date: {
-      type: "date",
-      label: "Date",
-      options: {
-        minDate: new Date("2021-01-01"),
-        maxDate: new Date("2021-12-31"),
-        mode: "range",
-        view: "quarter",
-      },
+// Filter definitions that actually match the data
+export const mockFiltersDefinition = {
+  role: {
+    type: "in" as const,
+    label: "Role",
+    options: {
+      options: uniqueRoles.map((role) => ({
+        value: role,
+        label: role,
+      })),
     },
   },
+  department: {
+    type: "in" as const,
+    label: "Department",
+    options: {
+      options: uniqueDepartments.map((dept) => ({
+        value: dept,
+        label: dept,
+      })),
+    },
+  },
+}
+
+// Type for our filters
+type MockFilters = typeof mockFiltersDefinition
+
+/**
+ * Helper function to apply filters to the mock data
+ */
+const applyFilters = (
+  items: typeof mockItems,
+  filters?: FiltersState<MockFilters>
+): typeof mockItems => {
+  if (!filters) return items
+
+  return items.filter((item) => {
+    // Filter by role
+    if (
+      filters.role &&
+      Array.isArray(filters.role) &&
+      filters.role.length > 0
+    ) {
+      if (!filters.role.includes(item.role)) {
+        return false
+      }
+    }
+
+    // Filter by department
+    if (
+      filters.department &&
+      Array.isArray(filters.department) &&
+      filters.department.length > 0
+    ) {
+      if (!filters.department.includes(item.department)) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
+
+export type MockItem = (typeof mockItems)[number]
+
+/**
+ * Helper function to fetch a single item by ID
+ * Useful for loading initial values that may not be in the current page
+ */
+export const mockFetchSingleItem = async (
+  id: string
+): Promise<MockItem | null> => {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  return mockItems.find((item) => item.value === id) ?? null
+}
+
+/**
+ * Helper function to fetch multiple items by IDs
+ * Useful for loading initial values that may not be in the current page
+ */
+export const mockFetchItemsByIds = async (
+  ids: string[]
+): Promise<MockItem[]> => {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  return mockItems.filter((item) => ids.includes(item.value))
+}
+
+export const mockPaginatedSource = createDataSourceDefinition<
+  MockItem,
+  MockFilters
+>({
+  filters: mockFiltersDefinition,
   dataAdapter: {
     paginationType: "infinite-scroll",
     fetchData: (options) => {
-      const { search, pagination } = options
+      const { search, pagination, filters } = options
       return new Promise((resolve) => {
         setTimeout(
           () => {
@@ -72,12 +126,17 @@ export const mockPaginatedSource = createDataSourceDefinition<MockItem>({
             const cursor = "cursor" in pagination ? pagination.cursor : null
             const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
 
-            const results = mockItems.filter(
-              (item) =>
-                !search ||
-                item.label.toLowerCase().includes(search.toLowerCase()) ||
-                item.description.toLowerCase().includes(search.toLowerCase())
-            )
+            // First apply filters
+            let results = applyFilters(mockItems, filters)
+
+            // Then apply search
+            if (search) {
+              results = results.filter(
+                (item) =>
+                  item.label.toLowerCase().includes(search.toLowerCase()) ||
+                  item.description.toLowerCase().includes(search.toLowerCase())
+              )
+            }
 
             const paginatedResults = results.slice(
               cursor ? Number(cursor) : 0,
@@ -94,67 +153,32 @@ export const mockPaginatedSource = createDataSourceDefinition<MockItem>({
             }
             resolve(res)
           },
-          1000 + Math.random() * 500
+          500 + Math.random() * 300
         )
       })
     },
   },
 })
 
-export const mockNonPaginatedSource = createDataSourceDefinition<MockItem>({
-  filters: {
-    status: {
-      type: "in",
-      label: "Status",
-      options: {
-        options: [
-          { value: "eliseo-vargas", label: "Elise Vargas" },
-          { value: "alexander-smith", label: "Alexander Smith" },
-          { value: "bob-johnson", label: "Bob Johnson" },
-          { value: "carol-williams", label: "Carol Williams" },
-          { value: "dave-brown", label: "Dave Brown" },
-          { value: "saul-vargas", label: "Saul Vargas" },
-          { value: "michael-johnson", label: "Michael Johnson" },
-          { value: "john-williams", label: "John Williams" },
-          { value: "jane-brown", label: "Jane Brown" },
-          { value: "jose-martinez", label: "Jose Martinez" },
-          { value: "james-smith", label: "James Smith" },
-          { value: "david-williams", label: "David Williams" },
-          { value: "william-brown", label: "William Brown" },
-          { value: "emily-martinez", label: "Emily Martinez" },
-          { value: "luis-garcia", label: "Luis Garcia" },
-          { value: "robert-martinez", label: "Robert Martinez" },
-          { value: "joseph-smith", label: "Joseph Smith" },
-          { value: "daniel-williams", label: "Daniel Williams" },
-          { value: "patrick-brown", label: "Patrick Brown" },
-          { value: "charles-martinez", label: "Charles Martinez" },
-          { value: "anthony-smith", label: "Anthony Smith" },
-        ],
-      },
-    },
-    date: {
-      type: "date",
-      label: "Date",
-      options: {
-        minDate: new Date("2021-01-01"),
-        maxDate: new Date("2021-12-31"),
-        mode: "range",
-        view: "quarter",
-      },
-    },
-  },
+export const mockNonPaginatedSource = createDataSourceDefinition<
+  MockItem,
+  MockFilters
+>({
+  filters: mockFiltersDefinition,
   dataAdapter: {
     fetchData: (options) => {
-      const { search } = options
+      const { search, filters } = options
       return new Promise((resolve) => {
         setTimeout(() => {
-          const results = mockItems
-            .slice(0, 100)
-            .filter(
-              (item) =>
-                !search ||
-                item.label.toLowerCase().includes(search.toLowerCase())
+          // First apply filters to first 100 items
+          let results = applyFilters(mockItems.slice(0, 100), filters)
+
+          // Then apply search
+          if (search) {
+            results = results.filter((item) =>
+              item.label.toLowerCase().includes(search.toLowerCase())
             )
+          }
 
           const res = {
             records: results,

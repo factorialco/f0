@@ -121,90 +121,91 @@ export function useSelectable<
   }, [allSelectedState])
 
   /**
-   * Update the local selected state
+   * Update the local selected state from external selectedState prop.
+   * IMPORTANT: This should only be called when the external prop changes (e.g., value prop changes).
+   * It preserves user changes that exist in localSelectedState but not in the incoming selectedState.
    */
   const updateLocalSelectedState = useCallback(
     (selectedState: SelectedItemsState<R> | undefined) => {
       const newSelectedState = parseSelectedState(selectedState)
 
-      const mergedItems = new Map<
-        SelectedItemState<R>["id"],
-        SelectedItemState<R>
-      >()
-      for (const [
-        itemStateId,
-        itemState,
-      ] of newSelectedState.items?.entries() || []) {
-        // Try to get the item from the local selected state if not found, try to get it from the data records
-        const item = getItemById(itemStateId)
-        mergedItems.set(itemStateId, {
-          id: itemStateId,
-          checked: itemState.checked,
-          item,
-        })
-      }
-      //Add the missing records as false
-      for (const record of data.records) {
-        const id = source.selectable && source.selectable(record)
-        // Get the status from the upper level
-        const checked = allSelectedCheck
-        if (id && !mergedItems.has(id)) {
-          mergedItems.set(id, {
-            id,
-            checked,
-            item: record,
+      setLocalSelectedState((current) => {
+        const mergedItems = new Map<
+          SelectedItemState<R>["id"],
+          SelectedItemState<R>
+        >()
+
+        // First, preserve ALL existing items from current state (user changes)
+        for (const [id, itemState] of current.items?.entries() || []) {
+          mergedItems.set(id, itemState)
+        }
+
+        // Then, update/add items from the incoming selectedState
+        // Only update if the item doesn't exist OR if we're updating the item data
+        for (const [
+          itemStateId,
+          itemState,
+        ] of newSelectedState.items?.entries() || []) {
+          const existingItem = mergedItems.get(itemStateId)
+          const item = getItemById(itemStateId)
+
+          if (!existingItem) {
+            // New item from props - add it
+            mergedItems.set(itemStateId, {
+              id: itemStateId,
+              checked: itemState.checked,
+              item,
+            })
+          } else if (existingItem.item === undefined && item !== undefined) {
+            // Existing item but we now have the item data - update only the item field
+            mergedItems.set(itemStateId, {
+              ...existingItem,
+              item,
+            })
+          }
+          // Otherwise, keep the existing item state (preserve user changes)
+        }
+
+        // Add missing records from data.records
+        for (const record of data.records) {
+          const id = source.selectable && source.selectable(record)
+          if (id && !mergedItems.has(id)) {
+            mergedItems.set(id, {
+              id,
+              checked: allSelectedCheck,
+              item: record,
+            })
+          }
+        }
+
+        const mergedGroups = new Map<string, SelectedItemState<R>>()
+        for (const [
+          groupId,
+          groupState,
+        ] of newSelectedState.groups?.entries() || []) {
+          mergedGroups.set(String(groupId), {
+            id: groupId,
+            checked: groupState.checked,
           })
         }
-      }
 
-      const mergedGroups = new Map<string, SelectedItemState<R>>()
-      for (const [groupId, groupState] of newSelectedState.groups?.entries() ||
-        []) {
-        mergedGroups.set(String(groupId), {
-          id: groupId,
-          checked: groupState.checked,
-        })
-      }
-
-      newSelectedState.allSelected = allSelectedState
-
-      setLocalSelectedState(() => ({
-        allSelected: newSelectedState.allSelected,
-        items: mergedItems,
-        groups: mergedGroups,
-      }))
+        return {
+          allSelected: current.allSelected, // Preserve current allSelected state
+          items: mergedItems,
+          groups: mergedGroups,
+        }
+      })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.records, source.selectable, localSelectedState, allSelectedState]
+    [data.records, source.selectable, allSelectedCheck]
   )
 
+  // Sync external selectedState prop with internal localSelectedState
+  // Only run when selectedState changes, NOT when data.records changes
+  // Data changes are handled by the separate effect below
   useDeepCompareEffect(() => {
-    console.log("selectedState ******************2", selectedState)
     updateLocalSelectedState(selectedState)
-
-    // if (isGrouped) {
-    //   for (const defaultGroup of selectedState.groups || []) {
-    //     const group = data.groups.find(
-    //       (group) => group.key === defaultGroup.groupId
-    //     )
-    //     if (group) {
-    //       handleSelectGroupChange(group, defaultGroup.checked)
-    //     }
-    //   }
-    // }
-
-    // for (const item of selectedState.items || []) {
-    //   console.log("item ====================", data.records)
-    //   const record = data.records.find((record) => {
-    //     const id = source.selectable && source.selectable(record)
-    //     return id && id === item.id
-    //   })
-    //   console.log("record ====================", record)
-    //   if (record) {
-    //     handleSelectItemChange(record, item.checked)
-    //   }
-    // }
-  }, [selectedState, data.records])
+  }, [selectedState])
 
   // // Update the localSelectedState based on the localSelectionState
   // //This structure contains the itemState and also the item itself if was loaded
@@ -398,39 +399,49 @@ export function useSelectable<
       isMultiSelection ? undefined : 1
     )
 
-    const newItemsState = new Map(localSelectedState.items)
-    let updated = 0
-    for (const id of itemIds) {
-      // If the item is already selected, we don't need to update the state if onlyIfNotSelected is true
-      if (onlyIfNotPreviousState && newItemsState.has(id)) {
-        return
+    // Use setState callback to ensure we always have the latest state
+    setLocalSelectedState((current) => {
+      const newItemsState = new Map(current.items)
+      let updated = 0
+
+      for (const id of itemIds) {
+        // If the item already has state, skip it when onlyIfNotPreviousState is true
+        if (onlyIfNotPreviousState && newItemsState.has(id)) {
+          continue // Skip this item, don't exit the entire function
+        }
+
+        updated++
+        // Try to get item from current state first, then from data records
+        const existingItem = current.items?.get(id)?.item
+        const item =
+          existingItem ??
+          data.records.find((record) => {
+            const recordId = source.selectable && source.selectable(record)
+            return recordId && recordId === id
+          })
+
+        newItemsState.set(id, { id, checked, item })
       }
 
-      updated++
-      newItemsState.set(id, { id, checked, item: getItemById(id) })
-    }
+      // If nothing was updated, return the same state to avoid unnecessary re-renders
+      if (updated === 0) {
+        return current
+      }
 
-    // Single selection, we just set the state
-    if (!isMultiSelection) {
-      setLocalSelectedState((current) => ({
-        ...current,
-        items: newItemsState,
-      }))
-      return
-    }
-
-    // Multi selection, we add the new items to the state
-    if (updated > 0) {
-      setLocalSelectedState((current) => {
+      // For single selection, replace the items map entirely
+      if (!isMultiSelection) {
         return {
           ...current,
-          items: new Map([
-            ...(current.items?.entries() || []),
-            ...(newItemsState.entries() || []),
-          ]),
+          items: newItemsState,
         }
-      })
-    }
+      }
+
+      // For multi selection, return updated items
+      return {
+        ...current,
+        items: newItemsState,
+      }
+    })
   }
 
   const handleSelectAll = (checked: boolean) => {
@@ -457,27 +468,13 @@ export function useSelectable<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- clearSelected is a stable function
   }, [source.currentFilters])
 
-  /**f0
+  /**
    * Handle the data changes to update the selected items status
+   * This effect runs when data loads or changes to:
+   * 1. Apply selection state to new items (with onlyIfNotPreviousState = true)
+   * 2. Populate the `item` field for items that were selected before data loaded
    */
   useDeepCompareEffect(() => {
-    // if (isGrouped) {
-    //   for (const group of data.groups) {
-    //     // If the group was loaded before, we can't change the state
-    //     const groupChecked =
-    //       groupAllSelectedStatus[group.key]?.checked || isAllSelected
-    //     if (!groupsState.has(group.key)) {
-    //       setGroupsState((current) => {
-    //         const newState = new Map(current)
-    //         newState.set(group.key, { group, checked: groupChecked })
-    //         return newState
-    //       })
-    //     }
-
-    //     // Apply the status to the new loaded group items
-    //     handleSelectItemChange(group.records, groupChecked, true)
-    //   }
-    // } else
     {
       // For the flattened data, we need to check if the item was loaded before
       const itemIds = data.records
@@ -487,8 +484,37 @@ export function useSelectable<
         })
         .filter((id) => id !== undefined)
       handleSelectItemChange(itemIds, isAllSelected, true)
+
+      // Also update items that have checked=true but item=undefined
+      // This happens when items are pre-selected before data loads
+      setLocalSelectedState((current) => {
+        let hasChanges = false
+        const updatedItems = new Map(current.items)
+
+        for (const [id, itemState] of updatedItems.entries()) {
+          // If item is undefined but we have data loaded, try to find it
+          if (itemState.item === undefined) {
+            const foundItem = data.records.find((record) => {
+              const recordId = source.selectable && source.selectable(record)
+              return recordId && recordId === id
+            })
+            if (foundItem) {
+              updatedItems.set(id, { ...itemState, item: foundItem })
+              hasChanges = true
+            }
+          }
+        }
+
+        if (!hasChanges) {
+          return current
+        }
+
+        return {
+          ...current,
+          items: updatedItems,
+        }
+      })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, isGrouped])
 
   // Control the allSelectedCheck state

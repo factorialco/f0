@@ -3,8 +3,11 @@ import type { IconType } from "@/components/F0Icon"
 import type {
   DataSourceDefinition,
   FiltersDefinition,
+  FiltersState,
   GroupingDefinition,
+  OnSelectItemsCallback,
   RecordType,
+  SelectedItemsState,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField"
@@ -14,13 +17,14 @@ import { Action } from "./components/SelectBottomActions"
 export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
 
 /**
- * Select component for choosing from a list of options.
- *
- * @template T - The type of the emitted  value
- * @template R - The type of the record/item data (used with data source)
- *
+ * Re-export selection types from datasource for convenience
  */
-export type F0SelectProps<T extends string, R = unknown> = {
+export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
+
+/**
+ * Base props shared across all F0Select variants
+ */
+type F0SelectBaseProps<T extends string, R = unknown> = {
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean
@@ -36,43 +40,73 @@ export type F0SelectProps<T extends string, R = unknown> = {
   className?: string
   selectContentClassName?: string
   actions?: Action[]
-} & ( // Single select not clearable
-  | {
-      clearable?: false
-      multiple?: false
-      value?: T
-      defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
-      onChange?: (
-        value: T,
-        originalItem?: ResolvedRecordType<R> | undefined,
-        option?: F0SelectItemObject<T, ResolvedRecordType<R>>
-      ) => void
-    }
-  // Single select clearable
-  | {
-      clearable: true
-      multiple?: false
-      value?: T
-      defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
-      onChange?: (
-        value: T,
-        originalItem?: ResolvedRecordType<R> | undefined,
-        option?: F0SelectItemObject<T, ResolvedRecordType<R>>
-      ) => void
-    }
-  // Multiple select
-  | {
-      multiple: true
-      clearable?: boolean
-      value?: T[]
-      defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[]
-      onChange?: (
-        value: T[],
-        originalItems: ResolvedRecordType<R>[],
-        options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
-      ) => void
-    }
-) &
+}
+
+/**
+ * Select component for choosing from a list of options.
+ *
+ * @template T - The type of the emitted value
+ * @template R - The type of the record/item data (used with data source)
+ */
+export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
+  T,
+  R
+> & // Single select not clearable
+  (
+    | {
+        clearable?: false
+        multiple?: false
+        value?: T
+        defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
+        onChange?: (
+          value: T,
+          originalItem?: ResolvedRecordType<R> | undefined,
+          option?: F0SelectItemObject<T, ResolvedRecordType<R>>
+        ) => void
+        /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
+        onSelectItems?: never
+      }
+    // Single select clearable
+    | {
+        clearable: true
+        multiple?: false
+        value?: T
+        defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
+        onChange?: (
+          value: T,
+          originalItem?: ResolvedRecordType<R> | undefined,
+          option?: F0SelectItemObject<T, ResolvedRecordType<R>>
+        ) => void
+        onSelectItems?: never
+      }
+    // Multiple select
+    | {
+        multiple: true
+        clearable?: boolean
+        value?: T[]
+        defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+        onChange?: (
+          value: T[],
+          originalItems: ResolvedRecordType<R>[],
+          options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+        ) => void
+        /**
+         * Callback for selection changes - provides full selection state including:
+         * - `status.allSelected`: true if "Select All" was used, "indeterminate" if some items deselected after Select All
+         * - `status.items`: Map of all items with their checked state
+         * - `filters`: Current applied filters
+         * - `selectedCount`: Total number of selected items
+         *
+         * Use this for "chunked" selection mode where you need to track:
+         * - When allSelected is true/indeterminate: excluded items are those with checked=false
+         * - When allSelected is false: included items are those with checked=true
+         */
+        onSelectItems?: OnSelectItemsCallback<
+          ResolvedRecordType<R>,
+          FiltersDefinition
+        >
+      }
+  ) &
   (
     | {
         source: DataSourceDefinition<
