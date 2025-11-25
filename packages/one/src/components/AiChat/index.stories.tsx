@@ -9,7 +9,7 @@ const meta = {
   },
   tags: ["autodocs"],
   decorators: [
-    (Story) => {
+    (Story: React.ComponentType) => {
       return (
         <div className="h-full w-full bg-[hsl(0,0,98)]">
           <AiChatProvider

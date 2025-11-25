@@ -30,7 +30,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  render: (args) => {
+  render: (args: React.ComponentProps<typeof ActionItem>) => {
     return <ActionItem {...args} />
   },
 }
@@ -59,7 +59,7 @@ const InfiniteStatusCyclingComponent = (
 }
 
 export const InfiniteStatusCycling: Story = {
-  render: (args) => {
+  render: (args: React.ComponentProps<typeof ActionItem>) => {
     return <InfiniteStatusCyclingComponent {...args} />
   },
 }

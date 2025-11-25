@@ -10,7 +10,7 @@ const meta = {
   },
   tags: ["autodocs", "no-sidebar"],
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="w-96 bg-f1-background p-4">
         <FeedbackModalProvider>
           <Story />

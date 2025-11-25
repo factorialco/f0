@@ -1,9 +1,8 @@
-import { ButtonInternal } from "../../../components/F0Button/internal"
-// @ts-expect-error - Input and OneModal are not exported but exist in the package
 import { type AIMessage } from "@copilotkit/shared"
 import { Input } from "@factorialco/f0-react/experimental/Forms/Fields/Input"
 import { OneModal } from "@factorialco/f0-react/experimental/Modals/OneModal"
 import { useCallback, useEffect, useState } from "react"
+import { ButtonInternal } from "../../../components/F0Button/internal"
 import { useI18n } from "../../../lib/providers/i18n"
 import { UserReaction } from "./FeedbackProvider"
 
