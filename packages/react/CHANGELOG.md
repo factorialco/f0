@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.284.0](https://github.com/factorialco/f0/compare/f0-react-v1.283.0...f0-react-v1.284.0) (2025-11-25)
+
+
+### Features
+
+* **ChatHeader:** add start new chat button ([#3001](https://github.com/factorialco/f0/issues/3001)) ([1fbf97e](https://github.com/factorialco/f0/commit/1fbf97e3ca53737ff129284e49ca5c247636720b))
+
 ## [1.283.0](https://github.com/factorialco/f0/compare/f0-react-v1.282.0...f0-react-v1.283.0) (2025-11-24)
 
 
