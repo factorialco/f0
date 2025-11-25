@@ -69,3 +69,44 @@ jobs:
         run: pnpm --filter @factorialco/f0-react-native run lint
       - name: Check typescript
         run: pnpm --filter @factorialco/f0-react-native exec tsc --noEmit
+  prettier-one:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_one == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[🔷 ONE] Prettier"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      - name: Check formatting with Prettier
+        run: pnpm --filter @factorialco/one run prettier:check:ci
+  eslint-one:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_one == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[🔷 ONE] Eslint"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "22.x"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build core package
+        run: pnpm --filter @factorialco/f0-core build
+      - name: Build react package
+        run: pnpm --filter @factorialco/f0-react build
+      - name: Check linting with eslint
+        run: pnpm --filter @factorialco/one run lint
+      - name: Check typescript
+        run: pnpm --filter @factorialco/one exec tsc --noEmit
