@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.37.0](https://github.com/factorialco/f0/compare/f0-core-v1.36.0...f0-core-v1.37.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add new module Salary Advance icons ([#3032](https://github.com/factorialco/f0/issues/3032)) ([5c61e02](https://github.com/factorialco/f0/commit/5c61e02e53f3e6119be621f57055870cdc819b72))
+
 ## [1.36.0](https://github.com/factorialco/f0/compare/f0-core-v1.35.0...f0-core-v1.36.0) (2025-11-24)
 
 

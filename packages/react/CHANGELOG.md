@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.285.0](https://github.com/factorialco/f0/compare/f0-react-v1.284.0...f0-react-v1.285.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add new module Salary Advance icons ([#3032](https://github.com/factorialco/f0/issues/3032)) ([5c61e02](https://github.com/factorialco/f0/commit/5c61e02e53f3e6119be621f57055870cdc819b72))
+
 ## [1.284.0](https://github.com/factorialco/f0/compare/f0-react-v1.283.0...f0-react-v1.284.0) (2025-11-25)
 
 
