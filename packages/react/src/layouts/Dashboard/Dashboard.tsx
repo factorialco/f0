@@ -13,7 +13,7 @@ export type GridFixedGroupSize = { w: number; h: number }
 export interface Widget {
   id: string
   size: GridFixedGroupSize
-  availableSizes: GridFixedGroupSize[]
+  availableSizes?: GridFixedGroupSize[]
   content: () => React.ReactNode
   title: string
 }
@@ -46,7 +46,7 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
     )
 
     const gridWidgets = useMemo(() => {
-      widgets.map((widget) => ({
+      return widgets.map((widget) => ({
         id: widget.id,
         h: widget.size.h ?? 1,
         w: widget.size.w ?? 1,

@@ -19,12 +19,12 @@ export const gridWidgetContainersMap = new WeakMap<
 export function GridStackRenderProvider({ children }: PropsWithChildren) {
   const {
     _gridStack: { value: gridStack, set: setGridStack },
-    initialOptions,
+    options,
   } = useGridStackContext()
 
   const widgetContainersRef = useRef<Map<string, HTMLElement>>(new Map())
   const containerRef = useRef<HTMLDivElement>(null)
-  const optionsRef = useRef<GridStackOptions>(initialOptions)
+  const optionsRef = useRef<GridStackOptions>(options)
 
   const renderCBFn = useCallback(
     (element: HTMLElement, widget: GridStackWidget & { grid?: GridStack }) => {
@@ -44,7 +44,7 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
     []
   )
 
-  const initGrid = useCallback(() => {
+  const initGridStackInstance = useCallback(() => {
     if (containerRef.current) {
       GridStack.renderCB = renderCBFn
       return GridStack.init(optionsRef.current, containerRef.current)
@@ -53,30 +53,30 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
   }, [renderCBFn])
 
   useLayoutEffect(() => {
-    if (!isEqual(initialOptions, optionsRef.current) && gridStack) {
+    if (!isEqual(options, optionsRef.current) && gridStack) {
       try {
         gridStack.removeAll(false)
         gridStack.destroy(false)
         widgetContainersRef.current.clear()
         // Clean up the WeakMap entry for this grid instance
         gridWidgetContainersMap.delete(gridStack)
-        optionsRef.current = initialOptions
-        setGridStack(initGrid())
+        optionsRef.current = options
+        setGridStack(initGridStackInstance())
       } catch (e) {
         console.error("Error reinitializing gridstack", e)
       }
     }
-  }, [initialOptions, gridStack, initGrid, setGridStack])
+  }, [options, gridStack, initGridStackInstance, setGridStack])
 
   useLayoutEffect(() => {
     if (!gridStack) {
       try {
-        setGridStack(initGrid())
+        setGridStack(initGridStackInstance())
       } catch (e) {
         console.error("Error initializing gridstack", e)
       }
     }
-  }, [gridStack, initGrid, setGridStack])
+  }, [gridStack, initGridStackInstance, setGridStack])
 
   return (
     <GridStackRenderContext.Provider

@@ -7,7 +7,7 @@ export type GridStackWidgetWithRequiredId = GridStackWidget & {
 }
 
 export const GridStackContext = createContext<{
-  initialOptions: GridStackOptions
+  options: GridStackOptions
   gridStack: GridStack | null
   addWidget: (widget: GridStackWidgetWithRequiredId) => void
   removeWidget: (id: string) => void

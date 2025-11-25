@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Dashboard } from "../"
+import { Dashboard, Widget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -16,13 +16,24 @@ const meta = {
     (Story, { args }) => {
       const ref = useRef<F0GridStackRef>(null)
 
+      const [widgets, setWidgets] = useState<Widget[]>(args.widgets)
+
       const handleAddWidget = () => {
-        ref.current?.addWidget({
-          id: `widget-${Math.random()}`,
-          w: 1,
-          h: 1,
-          renderFn: () => <div>Widget</div>,
-        })
+        setWidgets((prev) => [
+          ...prev,
+          {
+            id: `widget-${Math.random()}`,
+            size: { w: 1, h: 1 },
+            content: () => <div>Widget</div>,
+            title: `Widget ${Math.random()}`,
+          },
+        ])
+        // ref.current?.addWidget({
+        //   id: `widget-${Math.random()}`,
+        //   w: 1,
+        //   h: 1,
+        //   renderFn: () => <div>Widget</div>,
+        // })
       }
 
       const [editMode, setEditMode] = useState(false)
@@ -50,6 +61,7 @@ const meta = {
             <Story
               args={{
                 ...args,
+                widgets,
                 ref: ref,
                 editMode: editMode,
               }}

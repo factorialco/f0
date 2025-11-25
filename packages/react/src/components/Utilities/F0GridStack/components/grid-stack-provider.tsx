@@ -11,14 +11,14 @@ import "./types"
 
 interface GridStackProviderProps {
   children: React.ReactNode
-  initialOptions: GridStackOptions
+  options: GridStackOptions
   onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
   onChange?: (layout: GridStackWidgetPosition[]) => void
 }
 
 export function GridStackProvider({
   children,
-  initialOptions,
+  options,
   onResizeStop,
   onChange,
 }: PropsWithChildren<GridStackProviderProps>) {
@@ -36,7 +36,7 @@ export function GridStackProvider({
         })
       }
     }
-    initialOptions.children?.forEach((child: GridStackWidget) => {
+    options.children?.forEach((child: GridStackWidget) => {
       deepFindNodeWithContent(child)
     })
     return map
@@ -156,7 +156,7 @@ export function GridStackProvider({
   return (
     <GridStackContext.Provider
       value={{
-        initialOptions,
+        options,
         gridStack,
 
         addWidget,
