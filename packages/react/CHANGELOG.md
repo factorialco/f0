@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.286.0](https://github.com/factorialco/f0/compare/f0-react-v1.285.0...f0-react-v1.286.0) (2025-11-25)
+
+
+### Features
+
+* expose hideMaxLength prop in experimental Input component ([#3037](https://github.com/factorialco/f0/issues/3037)) ([f758b57](https://github.com/factorialco/f0/commit/f758b57935b1fed880ccb5d0adfe05580915f200))
+
 ## [1.285.0](https://github.com/factorialco/f0/compare/f0-react-v1.284.0...f0-react-v1.285.0) (2025-11-25)
 
 
