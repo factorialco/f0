@@ -1,7 +1,7 @@
 import { Message } from "@copilotkit/shared"
 import { randomUUID } from "node:crypto"
 import { describe, expect, it } from "vitest"
-import { convertMessagesToTurns } from "../MessagesContainer"
+import { convertMessagesToTurns } from "../../convertMessagesToTurns"
 
 describe("convertMessagesToTurn", () => {
   it("every user message creates new turn", () => {

@@ -12,10 +12,11 @@ import { cn } from "../../../lib/utils"
 import { useAiChat } from "../providers/AiChatStateProvider"
 // TODO: Review - MessagesContainerFullscreen uses useAiChatTranslations but the provider doesn't exist
 // Should we use useI18n() instead like in OneSwitch.tsx, or add AiChatTranslationsProvider?
+import { convertMessagesToTurns } from "../convertMessagesToTurns"
 import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
-import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
+import { useScrollToBottom } from "./MessagesContainer"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
 
