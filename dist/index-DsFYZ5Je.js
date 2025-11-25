@@ -6084,7 +6084,46 @@ const bh = (t) => {
 function wh(t) {
   return t.role === "assistant" && t.agentName !== void 0;
 }
-const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
+function bo(t) {
+  if (t.length === 0)
+    return [];
+  console.assert(
+    t[0].role === "user",
+    "Invariant violation! Assistant message received before user message"
+  );
+  const e = [];
+  for (const [n, s] of t.entries()) {
+    if (s.role === "user") {
+      e.push([s]);
+      continue;
+    }
+    const i = e[e.length - 1];
+    if (wh(s) && vi(i)) {
+      if (n !== t.length - 1) {
+        const o = i.pop();
+        i.push(s, o);
+      }
+      continue;
+    }
+    if (Sh(s)) {
+      vi(i) ? i.at(-1).push(s) : i.push([s]);
+      continue;
+    }
+    i.push(s);
+  }
+  return e;
+}
+function Sh(t) {
+  var e;
+  return t.role === "assistant" && ((e = t.toolCalls) == null ? void 0 : e.some(
+    (n) => n.function.name === "orchestratorThinking"
+  )) === !0;
+}
+function vi(t) {
+  const e = t.at(-1);
+  return Array.isArray(e);
+}
+const xo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
   const [i, o] = K(""), r = Ct(), { title: a, label: l, placeholder: u } = n === "like" ? r.ai.feedbackModal.positive : r.ai.feedbackModal.negative, c = Ot(() => {
     e(s, i);
   }, [i, s, e]), d = () => {
@@ -6131,7 +6170,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
       })
     })]
   });
-}, xo = ({ messages: t }) => {
+}, To = ({ messages: t }) => {
   const e = Ct();
   return m(ho, {
     icon: na,
@@ -6151,7 +6190,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
       })
     })
   });
-}, vi = (t) => typeof t == "boolean" ? `${t}` : t === 0 ? "0" : t, Sh = (t) => {
+}, bi = (t) => typeof t == "boolean" ? `${t}` : t === 0 ? "0" : t, Ch = (t) => {
   const e = function() {
     for (var i = arguments.length, o = new Array(i), r = 0; r < i; r++)
       o[r] = arguments[r];
@@ -6176,7 +6215,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
       var r;
       if ((i == null ? void 0 : i.variants) == null) return e(i == null ? void 0 : i.base, o == null ? void 0 : o.class, o == null ? void 0 : o.className);
       const { variants: a, defaultVariants: l } = i, u = Object.keys(a).map((h) => {
-        const f = o == null ? void 0 : o[h], p = l == null ? void 0 : l[h], g = vi(f) || vi(p);
+        const f = o == null ? void 0 : o[h], p = l == null ? void 0 : l[h], g = bi(f) || bi(p);
         return a[h][g];
       }), c = {
         ...l,
@@ -6204,7 +6243,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
     },
     cx: e
   };
-}, { cva: Ch } = Sh(), Ah = Ch({
+}, { cva: Ah } = Ch(), Ph = Ah({
   variants: {
     size: {
       sm: "h-[1.375rem] w-[1.375rem]",
@@ -6215,7 +6254,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
   defaultVariants: {
     size: "md"
   }
-}), bi = [{
+}), xi = [{
   id: "bottom",
   delay: 2.6,
   transformOrigin: "center 89%",
@@ -6239,10 +6278,10 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
   transformOrigin: "center 11%",
   rotateAxis: "1, 0, 0",
   path: "M15.9939 1.33514e-05C19.6511 1.37386e-05 23.2335 1.22043 26.0525 3.58204C23.2335 5.86737 19.651 7.16115 15.9939 7.16115C12.1849 7.16103 8.67993 5.79089 5.93728 3.58204C8.75621 1.29671 12.3369 0.000125175 15.9939 1.33514e-05Z"
-}], Ph = ({ spin: t = !1, size: e = "md", background: n, hover: s = !1, ...i }, o) => {
+}], Mh = ({ spin: t = !1, size: e = "md", background: n, hover: s = !1, ...i }, o) => {
   const r = se(), { onAnimationStart: a, onAnimationEnd: l, onDragStart: u, onDragEnd: c, onDrag: d, className: h, ...f } = i;
   return m("div", {
-    className: E(Ah({
+    className: E(Ph({
       size: e
     }), h),
     style: {
@@ -6279,7 +6318,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
             cy: "16",
             r: "16"
           })
-        }), bi.map((p) => m("clipPath", {
+        }), xi.map((p) => m("clipPath", {
           id: `${r}-${p.id}`,
           children: m("path", {
             d: p.path
@@ -6287,7 +6326,7 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
         }, p.id))]
       }), m("g", {
         clipPath: `url(#${r}-circle)`,
-        children: bi.map((p) => m($.foreignObject, {
+        children: xi.map((p) => m($.foreignObject, {
           x: "0",
           y: "0",
           width: "32",
@@ -6345,12 +6384,12 @@ const bo = ({ onClose: t, onSubmit: e, reactionType: n, message: s }) => {
       })]
     })
   });
-}, Mh = hn(Ph), Dh = 3;
-function Vh(t, e = Dh) {
+}, Dh = hn(Mh), Vh = 3;
+function Eh(t, e = Vh) {
   return [...t].sort(() => 0.5 - Math.random()).slice(0, e);
 }
-const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
-  const { sendMessage: s } = ne(), i = Vh(n);
+const wo = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
+  const { sendMessage: s } = ne(), i = Eh(n);
   return m(ie, {
     mode: "popLayout",
     children: D($.div, {
@@ -6388,7 +6427,7 @@ const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
               delay: 0.4
             }
           },
-          children: m(Mh, {
+          children: m(Dh, {
             spin: !0,
             size: "lg",
             className: "my-4"
@@ -6500,15 +6539,15 @@ const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
       })]
     }, "welcome")
   });
-}, Eh = (t) => m(po, {
-  children: m(Rh, {
+}, Rh = (t) => m(po, {
+  children: m(kh, {
     ...t
   })
-}), Rh = ({ inProgress: t, children: e, RenderMessage: n, AssistantMessage: s, UserMessage: i, ImageRenderer: o, onRegenerate: r, onCopy: a, markdownTagRenderers: l }) => {
-  const u = j(null), { messages: c, interrupt: d } = ne(), { threadId: h } = Ti(), { close: f, currentReaction: p, currentMessage: g, isOpen: b } = ts(), y = Ct(), { greeting: T, initialMessage: v, welcomeScreenSuggestions: C, onThumbsUp: x, onThumbsDown: S } = yt(), M = st(() => kh(v || y.ai.defaultInitialMessage), [v, y.ai.defaultInitialMessage]), A = c.length == 0 && (T || M.length > 0), { messagesContainerRef: R, messagesEndRef: k, showScrollToBottom: it, scrollToBottom: At } = wo(), { height: Pt = 0 } = Ko({
+}), kh = ({ inProgress: t, children: e, RenderMessage: n, AssistantMessage: s, UserMessage: i, ImageRenderer: o, onRegenerate: r, onCopy: a, markdownTagRenderers: l }) => {
+  const u = j(null), { messages: c, interrupt: d } = ne(), { threadId: h } = Ti(), { close: f, currentReaction: p, currentMessage: g, isOpen: b } = ts(), y = Ct(), { greeting: T, initialMessage: v, welcomeScreenSuggestions: C, onThumbsUp: x, onThumbsDown: S } = yt(), M = st(() => Nh(v || y.ai.defaultInitialMessage), [v, y.ai.defaultInitialMessage]), A = c.length == 0 && (T || M.length > 0), { messagesContainerRef: R, messagesEndRef: k, showScrollToBottom: it, scrollToBottom: At } = So(), { height: Pt = 0 } = Ko({
     ref: R,
     box: "border-box"
-  }), q = st(() => So(c), [c]);
+  }), q = st(() => bo(c), [c]);
   return D(ee, {
     children: [D($.div, {
       layout: !0,
@@ -6518,7 +6557,7 @@ const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
         layout: "position",
         ref: u,
         className: A ? "flex flex-1 pb-3" : "flex flex-col gap-8",
-        children: [A && m(To, {
+        children: [A && m(wo, {
           greeting: T,
           initialMessages: M,
           suggestions: C
@@ -6531,7 +6570,7 @@ const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
             },
             children: W.map((U, ht) => {
               const Mt = N === q.length - 1 && ht === W.length - 1;
-              return Array.isArray(U) && !Mt ? m(xo, {
+              return Array.isArray(U) && !Mt ? m(To, {
                 messages: U,
                 isActive: !1,
                 inProgress: t,
@@ -6586,7 +6625,7 @@ const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
           })
         })
       })]
-    }), b && m(bo, {
+    }), b && m(xo, {
       onSubmit: (W, N) => {
         const V = p === "like" ? x : S;
         V == null || V(W, {
@@ -6606,7 +6645,7 @@ const To = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
     })]
   });
 };
-function kh(t) {
+function Nh(t) {
   const e = [];
   return t && (Array.isArray(t) ? e.push(...t) : e.push(t)), e.map((n) => ({
     id: n,
@@ -6614,7 +6653,7 @@ function kh(t) {
     content: n
   }));
 }
-function wo() {
+function So() {
   const t = j(null), e = j(null), n = j(!1), s = j(!1), [i, o] = K(!1), r = (c = "smooth") => {
     e.current && t.current && (o(!1), n.current = !0, t.current.scrollIntoView({
       behavior: c
@@ -6661,40 +6700,6 @@ function wo() {
     scrollToBottom: r
   };
 }
-function So(t) {
-  if (t.length === 0)
-    return [];
-  console.assert(t[0].role === "user", "Invariant violation! Assistant message received before user message");
-  const e = [];
-  for (const [n, s] of t.entries()) {
-    if (s.role === "user") {
-      e.push([s]);
-      continue;
-    }
-    const i = e[e.length - 1];
-    if (wh(s) && xi(i)) {
-      if (n !== t.length - 1) {
-        const o = i.pop();
-        i.push(s, o);
-      }
-      continue;
-    }
-    if (Nh(s)) {
-      xi(i) ? i.at(-1).push(s) : i.push([s]);
-      continue;
-    }
-    i.push(s);
-  }
-  return e;
-}
-function Nh(t) {
-  var e;
-  return t.role === "assistant" && ((e = t.toolCalls) == null ? void 0 : e.some((n) => n.function.name === "orchestratorThinking")) === !0;
-}
-function xi(t) {
-  const e = t.at(-1);
-  return Array.isArray(e);
-}
 const Oh = {
   ai: {
     openChat: "Open Chat with One AI",
@@ -6733,7 +6738,7 @@ const Fh = (t) => m(po, {
     ...t
   })
 }), Bh = ({ inProgress: t, children: e, RenderMessage: n, AssistantMessage: s, UserMessage: i, ImageRenderer: o, onRegenerate: r, onCopy: a, markdownTagRenderers: l }) => {
-  const u = j(null), { messages: c, interrupt: d } = ne(), { threadId: h } = Ti(), { close: f, currentReaction: p, currentMessage: g, isOpen: b } = ts(), y = Ih(), { greeting: T, initialMessage: v, welcomeScreenSuggestions: C, onThumbsUp: x, onThumbsDown: S } = yt(), M = st(() => jh(v || y.ai.defaultInitialMessage), [v, y.ai.defaultInitialMessage]), A = c.length === 0 && (T || M.length > 0), { messagesContainerRef: R, messagesEndRef: k, showScrollToBottom: it, scrollToBottom: At } = wo(), Pt = st(() => So(c), [c]);
+  const u = j(null), { messages: c, interrupt: d } = ne(), { threadId: h } = Ti(), { close: f, currentReaction: p, currentMessage: g, isOpen: b } = ts(), y = Ih(), { greeting: T, initialMessage: v, welcomeScreenSuggestions: C, onThumbsUp: x, onThumbsDown: S } = yt(), M = st(() => jh(v || y.ai.defaultInitialMessage), [v, y.ai.defaultInitialMessage]), A = c.length === 0 && (T || M.length > 0), { messagesContainerRef: R, messagesEndRef: k, showScrollToBottom: it, scrollToBottom: At } = So(), Pt = st(() => bo(c), [c]);
   return D(ee, {
     children: [D("div", {
       className: "flex h-full w-full flex-col overflow-hidden",
@@ -6753,7 +6758,7 @@ const Fh = (t) => m(po, {
           style: {
             width: "100%"
           },
-          children: [A && m(To, {
+          children: [A && m(wo, {
             greeting: T,
             initialMessages: M,
             suggestions: C
@@ -6761,7 +6766,7 @@ const Fh = (t) => m(po, {
             className: "flex flex-col items-start justify-start gap-2",
             children: q.map((N, V) => {
               const U = W === Pt.length - 1 && V === q.length - 1;
-              return Array.isArray(N) && !U ? m(xo, {
+              return Array.isArray(N) && !U ? m(To, {
                 messages: N,
                 isActive: !1,
                 inProgress: t,
@@ -6824,7 +6829,7 @@ const Fh = (t) => m(po, {
         },
         children: e
       })]
-    }), b && m(bo, {
+    }), b && m(xo, {
       onSubmit: (q, W) => {
         const N = p === "like" ? x : S;
         N == null || N(q, {
@@ -6996,7 +7001,7 @@ const Uh = (t) => Uo, $h = ({ sources: t }) => {
     },
     Window: Th,
     Header: bh,
-    Messages: Eh,
+    Messages: Rh,
     Button: gh,
     Input: vo,
     UserMessage: Ao,
