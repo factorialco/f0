@@ -8,18 +8,21 @@ import {
   type PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
 import { GridStackReactWidget } from "../F0GridStack"
 import { GridStackContext } from "./grid-stack-context"
 import "./types"
+import { convertWidgetRecursive } from "./widget-utils"
 
 interface GridStackProviderProps {
   children: React.ReactNode
   options: GridStackOptions
   onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
   onChange?: (widgets: GridStackReactWidget[]) => void
+  originalWidgets?: GridStackReactWidget[]
 }
 
 const propsToObserve = [
@@ -37,18 +40,34 @@ export function GridStackProvider({
   options,
   onResizeStop,
   onChange,
+  originalWidgets,
 }: PropsWithChildren<GridStackProviderProps>) {
   const [gridStack, setGridStack] = useState<GridStack | null>(null)
   const gridStackRef = useRef<GridStack | null>(null)
+
+  // Convert widgets for gridstack (convert React content to functions)
+  const convertedOptions = useMemo(() => {
+    if (!originalWidgets || originalWidgets.length === 0) {
+      return options
+    }
+    return {
+      ...options,
+      children: originalWidgets.map(convertWidgetRecursive),
+    }
+  }, [options, originalWidgets])
+
   const previousWidgetsRef = useRef<GridStackWidget[] | undefined>(
-    options.children
+    convertedOptions.children
   )
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
-    const deepFindNodeWithContent = (obj: GridStackWidget) => {
+    const widgetsToProcess = originalWidgets || options.children || []
+    const deepFindNodeWithContent = (
+      obj: GridStackWidget | GridStackReactWidget
+    ) => {
       const reactWidget = obj as GridStackReactWidget
       if (obj.id && reactWidget.content) {
-        map.set(obj.id, obj)
+        map.set(obj.id, obj as GridStackWidget)
       }
 
       if (obj.subGridOpts?.children) {
@@ -57,19 +76,19 @@ export function GridStackProvider({
         })
       }
     }
-    options.children?.forEach((child: GridStackWidget) => {
+    widgetsToProcess.forEach((child) => {
       deepFindNodeWithContent(child)
     })
     return map
   })
 
-  // Sync widgets when options.children changes (without recreating gridStack)
+  // Sync widgets when convertedOptions.children changes (without recreating gridStack)
   useEffect(() => {
     const previousWidgetIds = new Set(
       previousWidgetsRef.current?.map((w) => w.id).filter(Boolean) || []
     )
     const newWidgetIds = new Set(
-      options.children?.map((w) => w.id).filter(Boolean) || []
+      convertedOptions.children?.map((w) => w.id).filter(Boolean) || []
     )
     const previousWidgetsMap = new Map<string, GridStackWidget>()
     previousWidgetsRef.current?.forEach((w) => {
@@ -78,13 +97,16 @@ export function GridStackProvider({
       }
     })
 
-    // Update rawWidgetMetaMap to match options.children
+    // Update rawWidgetMetaMap to match originalWidgets or options.children
     setRawWidgetMetaMap(() => {
       const newMap = new Map<string, GridStackWidget>()
-      const deepFindNodeWithContent = (obj: GridStackWidget) => {
+      const widgetsToProcess = originalWidgets || options.children || []
+      const deepFindNodeWithContent = (
+        obj: GridStackWidget | GridStackReactWidget
+      ) => {
         const reactWidget = obj as GridStackReactWidget
         if (obj.id && reactWidget.content) {
-          newMap.set(obj.id, obj)
+          newMap.set(obj.id, obj as GridStackWidget)
         }
 
         if (obj.subGridOpts?.children) {
@@ -93,7 +115,7 @@ export function GridStackProvider({
           })
         }
       }
-      options.children?.forEach((child: GridStackWidget) => {
+      widgetsToProcess.forEach((child) => {
         deepFindNodeWithContent(child)
       })
       return newMap
@@ -101,7 +123,7 @@ export function GridStackProvider({
 
     // Sync widgets with gridStack instance
     if (gridStack && gridStack.el && gridStack.el.parentElement) {
-      options.children?.forEach((widget) => {
+      convertedOptions.children?.forEach((widget) => {
         if (!widget.id) return
 
         const previousWidget = previousWidgetsMap.get(widget.id)
@@ -111,11 +133,12 @@ export function GridStackProvider({
 
         if (!previousWidgetIds.has(widget.id)) {
           // Add new widgets
+          // Note: widget is already converted (from convertedOptions.children)
           try {
             gridStack.addWidget(widget)
             // After adding widget, wait for React to render the handle via portal
             // then re-initialize drag handlers to ensure handle is applied
-            const handleSelector = options.handle
+            const handleSelector = convertedOptions.handle
             if (handleSelector) {
               setTimeout(() => {
                 if (!gridStack || !gridStack.el) return
@@ -159,7 +182,7 @@ export function GridStackProvider({
 
               gridStack.update(element, updateOptions)
               // Re-initialize drag handlers after update to ensure handle is applied
-              const handleSelector = options.handle
+              const handleSelector = convertedOptions.handle
               if (handleSelector) {
                 setTimeout(() => {
                   if (!gridStack || !gridStack.el) return
@@ -172,10 +195,10 @@ export function GridStackProvider({
             } catch (error) {
               console.warn("Error updating widget:", error)
             }
-          } else if (element && options.handle) {
+          } else if (element && convertedOptions.handle) {
             // Even if properties didn't change, ensure handle is applied
             // This handles cases where handle option changed
-            const handleSelector = options.handle
+            const handleSelector = convertedOptions.handle
             setTimeout(() => {
               if (!gridStack || !gridStack.el) return
               const handleExists = element.querySelector(handleSelector)
@@ -209,24 +232,31 @@ export function GridStackProvider({
     }
 
     // Update ref for next comparison
-    previousWidgetsRef.current = options.children
-  }, [options.children, options.handle, gridStack])
+    previousWidgetsRef.current = convertedOptions.children
+  }, [
+    convertedOptions.children,
+    convertedOptions.handle,
+    gridStack,
+    originalWidgets,
+  ])
 
   // Ensure handle option is applied after widgets are synced and rendered
   useEffect(() => {
-    if (!gridStack || !options.handle) return
+    if (!gridStack || !convertedOptions.handle) return
 
     // Update the handle option on the grid instance
     if (gridStack.opts) {
-      gridStack.opts.handle = options.handle
+      gridStack.opts.handle = convertedOptions.handle
     }
 
     // Use a small delay to ensure DOM is updated after React renders
     // This allows GridStack to find the handle elements
     const timeoutId = setTimeout(() => {
-      if (gridStack && gridStack.el && options.handle) {
+      if (gridStack && gridStack.el && convertedOptions.handle) {
         // Verify handle elements exist
-        const handleElements = gridStack.el.querySelectorAll(options.handle)
+        const handleElements = gridStack.el.querySelectorAll(
+          convertedOptions.handle
+        )
         if (handleElements.length > 0) {
           // Handle elements are present, GridStack should pick them up
           // Force GridStack to re-initialize drag handlers if needed
@@ -245,7 +275,7 @@ export function GridStackProvider({
     }, 0)
 
     return () => clearTimeout(timeoutId)
-  }, [gridStack, options.handle, options.children])
+  }, [gridStack, convertedOptions.handle, convertedOptions.children])
 
   const emitChange = useCallback(() => {
     if (!gridStack) {
@@ -344,7 +374,7 @@ export function GridStackProvider({
 
   const addWidget = useCallback(
     (widget: GridStackReactWidget) => {
-      gridStack?.addWidget(widget as GridStackWidget)
+      gridStack?.addWidget(convertWidgetRecursive(widget))
       setRawWidgetMetaMap((prev) => {
         const newMap = new Map<string, GridStackWidget>(prev)
         newMap.set(widget.id, widget as GridStackWidget)
@@ -363,7 +393,7 @@ export function GridStackProvider({
         }
       }
     ) => {
-      gridStack?.addWidget(subGrid as GridStackWidget)
+      gridStack?.addWidget(convertWidgetRecursive(subGrid))
 
       setRawWidgetMetaMap((prev) => {
         const newMap = new Map<string, GridStackWidget>(prev)
@@ -400,7 +430,7 @@ export function GridStackProvider({
   return (
     <GridStackContext.Provider
       value={{
-        options,
+        options: convertedOptions,
         gridStack,
 
         addWidget,

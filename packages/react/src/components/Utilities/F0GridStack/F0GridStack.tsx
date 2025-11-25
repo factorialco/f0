@@ -100,7 +100,7 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
           noMove: widget.noMove,
           noResize: widget.noResize,
           locked: widget.locked,
-          content: widget.content,
+          content: widget.content?.toString() ?? "",
           allowedSizes: widget.allowedSizes,
         }))
       )
@@ -162,6 +162,7 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
     return (
       <GridStackProvider
         options={gridOptions}
+        originalWidgets={widgets}
         onResizeStop={onResizeStop}
         onChange={onChange}
       >
