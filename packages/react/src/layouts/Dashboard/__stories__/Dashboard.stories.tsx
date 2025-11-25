@@ -57,18 +57,24 @@ const meta = {
                 ...args,
                 widgets,
                 onChange: (widgets) => {
-                  console.log("widgets", widgets)
-                  // setWidgets(
-                  //   widgets.map((widget) => ({
-                  //     id: widget.id,
-                  //     title: widget.title,
-                  //     availableSizes: widget.allowedSizes,
-                  //     x: widget.x,
-                  //     y: widget.y,
-                  //     size: { w: widget.w, h: widget.h },
-                  //     content: widget.renderFn,
-                  //   }))
-                  // )
+                  console.log("widgets onChange stories", widgets)
+                  setWidgets(
+                    widgets.map((widget) => {
+                      const meta = widget.meta as
+                        | { title: string; content: () => React.ReactNode }
+                        | undefined
+                      return {
+                        id: widget.id,
+                        title: meta?.title ?? "",
+                        availableSizes: widget.allowedSizes,
+                        x: widget.x,
+                        y: widget.y,
+                        size: { w: widget.w ?? 1, h: widget.h ?? 1 },
+                        content:
+                          meta?.content ?? (() => widget.renderFn ?? null),
+                      }
+                    })
+                  )
                 },
                 ref: ref,
                 editMode: editMode,

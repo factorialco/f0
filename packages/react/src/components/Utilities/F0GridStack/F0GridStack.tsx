@@ -17,29 +17,12 @@ export type GridStackReactSize = { w: number; h: number }
 export interface GridStackReactWidget extends GridStackWidget {
   id: Required<GridStackWidget>["id"]
   allowedSizes?: GridStackReactSize[]
-  renderFn?: () => React.ReactElement
+  renderFn?: React.ReactElement
 }
 
 export interface F0GridStackProps {
   options: GridStackReactOptions
   widgets: GridStackReactWidget[]
-  /**
-   * Callback function that is called whenever the layout changes (widget moved, resized, added, or removed).
-   * Receives an array of widgets with updated positions and properties.
-   * This can be used to keep widgets in sync by using the returned data as the widgets prop.
-   *
-   * @example
-   * ```tsx
-   * const [widgets, setWidgets] = useState(initialWidgets)
-   *
-   * <F0GridStack
-   *   widgets={widgets}
-   *   onChange={(updatedWidgets) => {
-   *     setWidgets(updatedWidgets)
-   *   }}
-   * />
-   * ```
-   */
   onChange?: (widgets: GridStackReactWidget[]) => void
 }
 
@@ -54,7 +37,7 @@ export interface F0GridStackProps {
  *   id: 'new-widget',
  *   w: 2,
  *   h: 2,
- *   renderFn: () => <div>Content</div>
+ *   renderFn: <div>Content</div>
  *   meta: {
  *     // Your metadata associated with the widget
  *   }
@@ -107,14 +90,31 @@ RefHandler.displayName = "RefHandler"
 
 export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
   ({ options, widgets, onChange }, ref) => {
-    const gridOptions = useMemo(
-      () => ({
+    const widgetsSignature = useMemo(() => {
+      return JSON.stringify(
+        widgets.map((widget) => ({
+          id: widget.id,
+          w: widget.w,
+          h: widget.h,
+          x: widget.x,
+          y: widget.y,
+          noMove: widget.noMove,
+          noResize: widget.noResize,
+          locked: widget.locked,
+          renderFn: widget.renderFn,
+          allowedSizes: widget.allowedSizes,
+        }))
+      )
+    }, [widgets])
+
+    const gridOptions = useMemo(() => {
+      console.log("widgets", widgets)
+      return {
         ...options,
         children: widgets,
-      }),
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [widgets]
-    )
+    }, [options, widgetsSignature])
 
     /**
      * Finds the closest allowed size to the given width and height.

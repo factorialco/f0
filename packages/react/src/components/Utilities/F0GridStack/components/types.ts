@@ -4,7 +4,7 @@ declare module "gridstack" {
   interface GridStackWidget {
     id?: string
     allowedSizes?: Array<{ w: number; h: number }>
-    renderFn?: () => React.ReactElement | null
+    renderFn?: React.ReactElement | null
     meta?: Record<string, unknown>
   }
 
@@ -15,6 +15,6 @@ declare module "gridstack" {
     x?: number
     y?: number
     allowedSizes?: Array<{ w: number; h: number }>
-    renderFn?: () => React.ReactElement | null
+    renderFn?: React.ReactElement | null
   }
 }

@@ -46,7 +46,7 @@ export function GridStackProvider({
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
     const deepFindNodeWithContent = (obj: GridStackWidget) => {
-      if (obj.id && obj.renderFn?.()) {
+      if (obj.id && obj.renderFn) {
         map.set(obj.id, obj)
       }
 
@@ -81,7 +81,7 @@ export function GridStackProvider({
     setRawWidgetMetaMap(() => {
       const newMap = new Map<string, GridStackWidget>()
       const deepFindNodeWithContent = (obj: GridStackWidget) => {
-        if (obj.id && obj.renderFn?.()) {
+        if (obj.id && obj.renderFn) {
           newMap.set(obj.id, obj)
         }
 
@@ -275,10 +275,8 @@ export function GridStackProvider({
             meta: item.meta
               ? { ...widgetMeta.meta, ...item.meta }
               : widgetMeta.meta,
-            // Ensure renderFn matches GridStackReactWidget type (can't return null)
-            renderFn: widgetMeta.renderFn
-              ? () => widgetMeta.renderFn?.() ?? <></>
-              : undefined,
+            // Ensure renderFn matches GridStackReactWidget type
+            renderFn: widgetMeta.renderFn ?? undefined,
           }
 
           return updatedWidget

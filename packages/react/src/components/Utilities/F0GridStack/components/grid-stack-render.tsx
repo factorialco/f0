@@ -18,7 +18,7 @@ export function GridStackRender() {
 
         return (
           <GridStackWidgetContext.Provider key={id} value={{ widget: { id } }}>
-            {createPortal(meta.renderFn?.(), widgetContainer)}
+            {meta.renderFn && createPortal(meta.renderFn, widgetContainer)}
           </GridStackWidgetContext.Provider>
         )
       })}
