@@ -4,7 +4,13 @@ import type {
   GridStackOptions,
   GridStackWidget,
 } from "gridstack"
-import { type PropsWithChildren, useCallback, useEffect, useState } from "react"
+import {
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { GridStackWidgetPosition } from "../F0GridStack"
 import { GridStackContext } from "./grid-stack-context"
 import "./types"
@@ -23,6 +29,10 @@ export function GridStackProvider({
   onChange,
 }: PropsWithChildren<GridStackProviderProps>) {
   const [gridStack, setGridStack] = useState<GridStack | null>(null)
+  const gridStackRef = useRef<GridStack | null>(null)
+  const previousWidgetsRef = useRef<GridStackWidget[] | undefined>(
+    options.children
+  )
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
     const deepFindNodeWithContent = (obj: GridStackWidget) => {
@@ -41,6 +51,114 @@ export function GridStackProvider({
     })
     return map
   })
+
+  // Sync widgets when options.children changes (without recreating gridStack)
+  useEffect(() => {
+    const previousWidgetIds = new Set(
+      previousWidgetsRef.current?.map((w) => w.id).filter(Boolean) || []
+    )
+    const newWidgetIds = new Set(
+      options.children?.map((w) => w.id).filter(Boolean) || []
+    )
+    const previousWidgetsMap = new Map<string, GridStackWidget>()
+    previousWidgetsRef.current?.forEach((w) => {
+      if (w.id) {
+        previousWidgetsMap.set(w.id, w)
+      }
+    })
+
+    // Update rawWidgetMetaMap to match options.children
+    setRawWidgetMetaMap(() => {
+      const newMap = new Map<string, GridStackWidget>()
+      const deepFindNodeWithContent = (obj: GridStackWidget) => {
+        if (obj.id && obj.renderFn?.()) {
+          newMap.set(obj.id, obj)
+        }
+
+        if (obj.subGridOpts?.children) {
+          obj.subGridOpts.children.forEach((child: GridStackWidget) => {
+            deepFindNodeWithContent(child)
+          })
+        }
+      }
+      options.children?.forEach((child: GridStackWidget) => {
+        deepFindNodeWithContent(child)
+      })
+      return newMap
+    })
+
+    // Sync widgets with gridStack instance
+    if (gridStack && gridStack.el && gridStack.el.parentElement) {
+      options.children?.forEach((widget) => {
+        if (!widget.id) return
+
+        const previousWidget = previousWidgetsMap.get(widget.id)
+        const element = gridStack.el.querySelector<GridItemHTMLElement>(
+          `[gs-id="${widget.id}"]`
+        )
+
+        if (!previousWidgetIds.has(widget.id)) {
+          // Add new widgets
+          try {
+            gridStack.addWidget(widget)
+          } catch (error) {
+            console.warn("Error adding widget:", error)
+          }
+        } else if (element && previousWidget) {
+          // Update existing widgets if properties changed
+          // Check if editable properties have changed
+          const propertiesChanged =
+            (previousWidget.noMove ?? false) !== (widget.noMove ?? false) ||
+            (previousWidget.noResize ?? false) !== (widget.noResize ?? false) ||
+            (previousWidget.locked ?? false) !== (widget.locked ?? false) ||
+            previousWidget.w !== widget.w ||
+            previousWidget.h !== widget.h ||
+            previousWidget.x !== widget.x ||
+            previousWidget.y !== widget.y
+
+          if (propertiesChanged) {
+            try {
+              // Update widget properties (noMove, noResize, locked, position, size)
+              const updateOptions: Partial<GridStackWidget> = {}
+              if (widget.noMove !== undefined)
+                updateOptions.noMove = widget.noMove
+              if (widget.noResize !== undefined)
+                updateOptions.noResize = widget.noResize
+              if (widget.locked !== undefined)
+                updateOptions.locked = widget.locked
+              if (widget.w !== undefined) updateOptions.w = widget.w
+              if (widget.h !== undefined) updateOptions.h = widget.h
+              if (widget.x !== undefined) updateOptions.x = widget.x
+              if (widget.y !== undefined) updateOptions.y = widget.y
+
+              gridStack.update(element, updateOptions)
+            } catch (error) {
+              console.warn("Error updating widget:", error)
+            }
+          }
+        }
+      })
+
+      // Remove widgets that are no longer in options
+      previousWidgetIds.forEach((id) => {
+        if (!newWidgetIds.has(id)) {
+          try {
+            const element = gridStack.el.querySelector<GridItemHTMLElement>(
+              `[gs-id="${id}"]`
+            )
+            if (element) {
+              gridStack.removeWidget(element, false)
+            }
+          } catch (error) {
+            console.warn("Error removing widget:", error)
+          }
+        }
+      })
+    }
+
+    // Update ref for next comparison
+    previousWidgetsRef.current = options.children
+  }, [options.children, gridStack])
 
   const emitChange = useCallback(() => {
     if (!gridStack) {
@@ -67,22 +185,50 @@ export function GridStackProvider({
   useEffect(() => {
     if (!gridStack) return
 
+    // Check if the gridStack instance is valid and has a DOM element
+    // This prevents errors when the instance is destroyed or not fully initialized
+    if (!gridStack.el || !gridStack.el.parentElement) {
+      return
+    }
+
     const handleResizeStop = (event: Event, el: GridItemHTMLElement) => {
       onResizeStop?.(event, el)
     }
 
-    gridStack.on("resizestop", handleResizeStop)
-    gridStack.on("change added removed", emitChange)
+    try {
+      gridStack.on("resizestop", handleResizeStop)
+      gridStack.on("change added removed", emitChange)
+    } catch (error) {
+      console.error("Error attaching GridStack event listeners:", error)
+      return
+    }
 
     return () => {
-      gridStack.off("resizestop")
-      gridStack.off("change added removed")
+      // Use ref to ensure we're cleaning up the correct instance
+      const currentGridStack = gridStackRef.current
+      if (currentGridStack && currentGridStack.el) {
+        try {
+          currentGridStack.off("resizestop")
+          currentGridStack.off("change added removed")
+        } catch (error) {
+          // Ignore errors during cleanup as the instance might already be destroyed
+          console.warn("Error cleaning up GridStack event listeners:", error)
+        }
+      }
     }
   }, [gridStack, onResizeStop, emitChange])
 
+  // Update ref when gridStack changes
+  useEffect(() => {
+    gridStackRef.current = gridStack
+  }, [gridStack])
+
   useEffect(() => {
     if (!gridStack) return
-    emitChange()
+    // Only emit change if the gridStack instance is valid
+    if (gridStack.el && gridStack.el.parentElement) {
+      emitChange()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gridStack])
 

@@ -157,7 +157,7 @@ export const F0GridStack = forwardRef<F0GridStackRef, F0GridStackProps>(
 
     return (
       <GridStackProvider
-        initialOptions={gridOptions}
+        options={gridOptions}
         onResizeStop={onResizeStop}
         onChange={onChange}
       >
