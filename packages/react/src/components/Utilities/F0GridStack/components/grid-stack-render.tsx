@@ -8,6 +8,8 @@ export function GridStackRender() {
   const { _rawWidgetMetaMap } = useGridStackContext()
   const { getWidgetContainer } = useGridStackRenderContext()
 
+  console.log(Array.from(_rawWidgetMetaMap.value.entries()))
+
   return (
     <>
       {Array.from(_rawWidgetMetaMap.value.entries()).map(([id, meta]) => {

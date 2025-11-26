@@ -58,9 +58,6 @@ export function GridStackProvider({
     }
   }, [options, widgets])
 
-  const previousWidgetsRef = useRef<GridStackWidget[] | undefined>(
-    convertedOptions.children
-  )
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
     const widgetsToProcess = widgets || options.children || []
@@ -289,7 +286,9 @@ export function GridStackProvider({
       (widget) => !widgetsInGridstackIds.includes(widget.id!)
     )
     widgetsToAdd?.forEach((widget) => {
-      gridStack.addWidget(convertWidgetRecursive(widget))
+      const convertedWidget = convertWidgetRecursive(widget)
+      gridStack.addWidget(convertedWidget)
+      rawWidgetMetaMap.set(widget.id!, widget)
     })
 
     /**
@@ -304,6 +303,7 @@ export function GridStackProvider({
       )
       if (element) {
         gridStack.removeWidget(element, true)
+        rawWidgetMetaMap.delete(widget.id!)
       }
     })
 
@@ -398,14 +398,10 @@ export function GridStackProvider({
       const updatedWidgets: GridStackReactWidget[] = layout
         .map((item) => {
           const widgetId = item.id
-          console.log("item", item)
           if (!widgetId) return null
 
-          const widgetMeta = rawWidgetMetaMap.get(widgetId)
-          console.log("widgetMeta", widgetMeta)
-
           const updatedWidget: GridStackReactWidget = {
-            ...widgetMeta,
+            ...item,
             id: widgetId,
             w: item.w ?? 1,
             h: item.h ?? 1,
