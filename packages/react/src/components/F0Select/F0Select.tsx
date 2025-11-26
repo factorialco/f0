@@ -240,12 +240,9 @@ const F0SelectComponent = forwardRef(function Select<
   useEffect(() => {
     const foundOptions = findOptionsByValue(localValue)
 
-    if (foundOptions.length > 0) {
-      setSelectedItems(foundOptions)
-    }
-    if (!localValue) {
-      setSelectedItems([])
-    }
+    // Always update selectedItems based on foundOptions
+    // This handles both selection and clearing
+    setSelectedItems(foundOptions)
   }, [
     data.records,
     localValue,
@@ -293,6 +290,11 @@ const F0SelectComponent = forwardRef(function Select<
       const option = foundOptions[0]
 
       onChange?.(value, item, option)
+
+      // Notify when selection is cleared (option is undefined)
+      if (option === undefined) {
+        onChangeSelectedOption?.(undefined, false)
+      }
     }
   }
 
