@@ -53,6 +53,7 @@ export type RowProps<
   tableWithChildren: boolean
   depth?: number
   hasLoadedChildren?: boolean
+  onLoadMoreChildren?: () => void
   noBorder?: boolean
   expandedLevels?: number
   onExpand?: () => void
@@ -81,6 +82,7 @@ const RowComponentInner = <
     groupIndex,
     tableWithChildren,
     hasLoadedChildren,
+    onLoadMoreChildren,
     depth = 0,
     noBorder = false,
     expandedLevels = 0,
@@ -144,7 +146,6 @@ const RowComponentInner = <
         groupIndex={groupIndex}
         tableWithChildren={tableWithChildren}
         key={key}
-        ref={ref}
       />
     )
   }
@@ -192,6 +193,7 @@ const RowComponentInner = <
           expandedLevels={expandedLevels}
           onExpand={onExpand}
           loading={loading}
+          onLoadMoreChildren={onLoadMoreChildren}
           type={nestedVariant}
         >
           <div
@@ -205,7 +207,7 @@ const RowComponentInner = <
         </TableCell>
       ))}
 
-      {source.itemActions && !loading && (
+      {source.itemActions && !loading && !onLoadMoreChildren && (
         <>
           {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
           <td className="sticky right-0 top-0 z-10 hidden md:table-cell">

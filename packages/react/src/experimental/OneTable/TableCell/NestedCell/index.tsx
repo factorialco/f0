@@ -1,3 +1,5 @@
+import { F0Button } from "@/components/F0Button"
+import { ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import {
@@ -20,6 +22,7 @@ interface NestedCellProps {
   tableWithChildren?: boolean
   onClick?: () => void
   onExpand?: () => void
+  onLoadMoreChildren?: () => void
 }
 
 export const NestedCell = ({
@@ -33,6 +36,7 @@ export const NestedCell = ({
   tableWithChildren = false,
   onClick,
   onExpand,
+  onLoadMoreChildren,
 }: NestedCellProps) => {
   const firstCellWithChildren = isFirstCellWithChildren(firstCell, hasChildren)
   const firstCellWithDepth = isFirstCellWithDepth(firstCell, depth)
@@ -59,50 +63,73 @@ export const NestedCell = ({
         onClick?.()
       }}
     >
-      <div
-        className={cn(
-          "h-[var(--chevron-size)] w-[var(--chevron-size)]",
-          firstCellWithChildren &&
-            "pointer-events-auto cursor-pointer rounded-2xs hover:bg-f1-foreground-disabled"
-        )}
-        style={
-          {
-            ...{
-              "--chevron-size": `${CHEVRON_SIZE}px`,
-              "--spacing-factor": `${SPACING_FACTOR}px`,
-            },
-          } as React.CSSProperties
-        }
-        onClick={(e) => {
-          if (firstCellWithChildren) {
-            e.stopPropagation()
-            onExpand?.()
-          }
-        }}
-      >
-        {firstCellWithChildren &&
-          (expandedLevels > 0 ? (
-            <ChevronDown
-              className="pointer-events-none shrink-0"
-              size={CHEVRON_SIZE}
+      {onLoadMoreChildren ? (
+        <>
+          <div
+            className={cn(
+              "pointer-events-auto cursor-pointer rounded-2xs hover:bg-f1-foreground-disabled"
+            )}
+          >
+            <F0Button
+              variant="neutral"
+              size="sm"
+              icon={ArrowDown}
+              label="Load more"
+              onClick={(e) => {
+                e.stopPropagation()
+                onLoadMoreChildren?.()
+              }}
             />
-          ) : (
-            <ChevronRight
-              className="pointer-events-none shrink-0"
-              size={CHEVRON_SIZE}
-            />
-          ))}
-      </div>
-      <div
-        className={cn(
-          firstCellWithChildren && "min-w-0",
-          firstCellWithNoChildrenAndTableChildren &&
-            "pl-[var(--spacing-factor)]",
-          "relative"
-        )}
-      >
-        {children}
-      </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            className={cn(
+              "h-[var(--chevron-size)] w-[var(--chevron-size)]",
+              firstCellWithChildren &&
+                "pointer-events-auto cursor-pointer rounded-2xs hover:bg-f1-foreground-disabled"
+            )}
+            style={
+              {
+                ...{
+                  "--chevron-size": `${CHEVRON_SIZE}px`,
+                  "--spacing-factor": `${SPACING_FACTOR}px`,
+                },
+              } as React.CSSProperties
+            }
+            onClick={(e) => {
+              if (firstCellWithChildren) {
+                e.stopPropagation()
+                onExpand?.()
+              }
+            }}
+          >
+            {firstCellWithChildren &&
+              (expandedLevels > 0 ? (
+                <ChevronDown
+                  className="pointer-events-none shrink-0"
+                  size={CHEVRON_SIZE}
+                />
+              ) : (
+                <ChevronRight
+                  className="pointer-events-none shrink-0"
+                  size={CHEVRON_SIZE}
+                />
+              ))}
+          </div>
+          <div
+            className={cn(
+              firstCellWithChildren && "min-w-0",
+              firstCellWithNoChildrenAndTableChildren &&
+                "pl-[var(--spacing-factor)]",
+              "relative"
+            )}
+          >
+            {children}
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
 import { useLayoutEffect, useRef } from "react"
 import { Row, RowProps } from "../Row"
 
@@ -108,9 +109,12 @@ export const RowLoading = <
     NavigationFilters,
     Grouping
   >
+  paginationInfo?: ChildrenPaginationInfo<R>
 }) => {
   const loadingRowsCount =
-    props.source.childrenCount?.(props.item) ?? DEFAULT_LOADING_ROWS_COUNT
+    props.source.childrenCount?.(props.item, props.paginationInfo) ??
+    DEFAULT_LOADING_ROWS_COUNT
+
   return Array.from({ length: loadingRowsCount }).map((_, rowIndex) => (
     <SingleLoadingRow
       key={`row-loading-${rowIndex}`}

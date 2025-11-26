@@ -95,6 +95,12 @@ interface TableCellProps {
    * @default "basic"
    */
   type?: NestedVariant
+
+  /**
+   * The onLoadMoreChildren handler for the cell
+   * @default false
+   */
+  onLoadMoreChildren?: () => void
 }
 
 export function TableCell({
@@ -107,6 +113,7 @@ export function TableCell({
   colSpan,
   className,
   hasChildren = false,
+  onLoadMoreChildren,
   tableWithChildren = false,
   depth = 0,
   expandedLevels = 0,
@@ -208,6 +215,7 @@ export function TableCell({
                 tableWithChildren={tableWithChildren}
                 onClick={onClick}
                 onExpand={onExpand}
+                onLoadMoreChildren={onLoadMoreChildren}
               >
                 {children}
               </NestedCell>

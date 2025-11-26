@@ -241,7 +241,7 @@ export const getMockVisualizations = (options?: {
       columns: [
         {
           label: "Name",
-          width: 140,
+          width: 400,
           render: (item) =>
             !item.children && item.detailed
               ? item.name
@@ -328,17 +328,17 @@ export const getMockVisualizations = (options?: {
           sorting: options?.table?.noSorting ? undefined : "role",
           id: "role4",
         },
-        {
-          label: "Long",
-          render: () => ({
-            type: "longText",
-            value: {
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
-              lines: 4,
-            },
-          }),
-          id: "longText",
-        },
+        // {
+        //   label: "Long",
+        //   render: () => ({
+        //     type: "longText",
+        //     value: {
+        //       text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+        //       lines: 4,
+        //     },
+        //   }),
+        //   id: "longText",
+        // },
         {
           label: "Permissions",
           render: (item) =>
@@ -1136,8 +1136,16 @@ export const ExampleComponent = ({
           ? {
               records: item.children,
               type: item.detailed ? "detailed" : "basic",
+              paginationInfo: {
+                cursor: "aaa",
+                total: item.children.length,
+                perPage: 2,
+                currentPage: 1,
+                pagesCount: 1,
+                hasMore: true,
+              },
             }
-          : []
+          : { records: [] }
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
