@@ -988,7 +988,7 @@ export const ExampleComponent = ({
     FiltersType,
     NavigationFiltersDefinition
   >
-  defaultSelectedItems?: SelectedItemsState
+  defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
   bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>

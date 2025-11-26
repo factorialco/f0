@@ -80,10 +80,12 @@ export type UseSelectableReturn<
    */
   clearSelection: () => void
   /**
-   * Handles the change of the selected item
+   * Handles the change of the selected item.
+   * Accepts either SelectionId(s) or the item itself (R).
+   * When passing an item, the ID will be extracted using source.selectable.
    */
   handleSelectItemChange: (
-    id: SelectionId | readonly SelectionId[],
+    itemOrId: R | SelectionId | readonly SelectionId[],
     checked: boolean
   ) => void
   /**
@@ -91,10 +93,12 @@ export type UseSelectableReturn<
    */
   handleSelectAll: (checked: boolean) => void
   /**
-   * Handles the change of the selected group
+   * Handles the change of the selected group.
+   * Accepts either SelectionId(s) or a GroupRecord.
+   * When passing a GroupRecord, the key will be used as the ID.
    */
   handleSelectGroupChange: (
-    id: SelectionId | readonly SelectionId[],
+    groupOrId: GroupRecord<R> | SelectionId | readonly SelectionId[],
     checked: boolean
   ) => void
 }
