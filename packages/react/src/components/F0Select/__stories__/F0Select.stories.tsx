@@ -568,100 +568,49 @@ export const MultipleNotPaginated: Story = {
   },
 }
 
+/**
+ * Multiple selection with paginated data.
+ * Use `defaultItem` to provide labels for pre-selected values not in the first page.
+ * Try the "Select All" to select all 10,000 items.
+ */
 export const MultiplePaginated: Story = {
   args: {
     label: "Multiple Paginated",
     multiple: true,
-    value: ["option-200", "option-300"],
+    value: ["option-2", "option-50", "option-500"],
+    // Provide defaultItem for values not in the first page
+    defaultItem: [
+      {
+        value: "option-50",
+        label: mockItems[50].label,
+        icon: mockItems[50].icon,
+      },
+      {
+        value: "option-500",
+        label: mockItems[500].label,
+        icon: mockItems[500].icon,
+      },
+    ],
     clearable: true,
+    showSearchBox: true,
     source: mockPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
       icon: item.icon,
-      description: item.description,
     }),
-    onSelectItems: (selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
-    },
-    onChange: (value) => {
+    onChange: fn((value) => {
       console.log("value", value)
-    },
-    showSearchBox: true,
-  },
-  decorators: [],
-}
-
-/**
- * Demonstrates multiselection with initial values from different pages.
- * Items like option-50 and option-100 may not be in the first page but
- * should still show as selected.
- */
-export const MultipleWithInitialValuesFromDifferentPages: Story = {
-  args: {
-    label: "Multiple with initial values",
-    multiple: true,
-    value: ["option-2", "option-50", "option-100"],
-    clearable: true,
-    showSearchBox: true,
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
-      value: item.value,
-      label: item.label,
-      icon: item.icon,
-      description: item.description,
     }),
-  },
-}
-
-/**
- * Demonstrates the Select All functionality with paginated data.
- * When "Select All" is clicked, all 10,000 items should be selected,
- * not just the visible ones.
- */
-export const MultipleSelectAllPaginated: Story = {
-  args: {
-    label: "Select All Demo",
-    multiple: true,
-    clearable: true,
-    showSearchBox: true,
-    value: ["option-200", "option-3", "option-10"],
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
-      value: item.value,
-      label: item.label,
-    }),
-    onSelectItems: (selectionStatus) => {
+    onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
-    },
-  },
-}
-
-/**
- * Demonstrates multiselection with filters applied.
- * The filters actually work! Try selecting a Role or Department to filter the list.
- * - Role filter: Filters by job role (Engineer, Designer, Manager, etc.)
- * - Department filter: Filters by department (Engineering, Marketing, etc.)
- */
-export const MultipleWithFiltersAndSelection: Story = {
-  args: {
-    label: "With Filters (Role & Department)",
-    multiple: true,
-    showSearchBox: true,
-    clearable: true,
-    value: undefined, // Override default to start with no selection
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
-      value: item.value,
-      label: item.label,
-      description: `${item.role} - ${item.department}`,
     }),
   },
 }
 
 /**
- * Single select with working filters.
- * Demonstrates filtering by Role and Department with single selection.
+ * Single select with paginated data and filters.
+ * Use `defaultItem` to provide label for pre-selected value not in the first page.
  */
 export const SingleSelectWithFilters: Story = {
   args: {
@@ -669,7 +618,14 @@ export const SingleSelectWithFilters: Story = {
     placeholder: "Choose an employee...",
     showSearchBox: true,
     clearable: true,
-    value: undefined, // Override default to start with no selection
+    value: "option-500",
+    // Provide defaultItem for value not in the first page
+    defaultItem: {
+      value: "option-500",
+      label: mockItems[500].label,
+      description: `${mockItems[500].role} - ${mockItems[500].department}`,
+      icon: mockItems[500].icon,
+    },
     source: mockPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
@@ -677,59 +633,6 @@ export const SingleSelectWithFilters: Story = {
       description: `${item.role} - ${item.department}`,
       icon: item.icon,
     }),
-  },
-}
-
-/**
- * Demonstrates selection with onSelectItems callback for massive datasets.
- * The onSelectItems callback provides the full selection state:
- * - status.allSelected: true if "Select All" was clicked, "indeterminate" if some items deselected after
- * - status.items: Map of all items with their checked state
- * - filters: Current applied filters
- * - selectedCount: Total number of selected items
- *
- * For "chunked" selection:
- * - When allSelected is true/indeterminate: excluded items = items with checked=false
- * - When allSelected is false: included items = items with checked=true
- */
-export const MultipleWithSelectItems: Story = {
-  args: {
-    label: "With onSelectItems",
-    multiple: true,
-    clearable: true,
-    showSearchBox: true,
-    value: ["option-200", "option-3", "option-10"],
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
-      value: item.value,
-      label: item.label,
-    }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSelectItems: (selectionStatus: any) => {
-      const { status, filters, selectedCount } = selectionStatus
-      const isAllSelectedMode =
-        status.allSelected === true || status.allSelected === "indeterminate"
-
-      // Extract included/excluded IDs from the items Map
-      const includedIds: string[] = []
-      const excludedIds: string[] = []
-
-      for (const [id, itemState] of status.items.entries()) {
-        if (itemState.checked) {
-          includedIds.push(String(id))
-        } else {
-          excludedIds.push(String(id))
-        }
-      }
-
-      console.log("Selection changed:", {
-        allSelected: isAllSelectedMode,
-        includedIds: isAllSelectedMode ? [] : includedIds,
-        excludedIds: isAllSelectedMode ? excludedIds : [],
-        filters,
-        selectedCount,
-      })
-    },
   },
 }
 

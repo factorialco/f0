@@ -223,17 +223,31 @@ const F0SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
+  /**
+   * Map of items from paginated data by their value.
+   * Used for dropdown list and selection state.
+   */
   const itemsByValue = useMemo(() => {
-    return Object.fromEntries(
-      data.records
-        .map((record) => {
-          const mappedOption = optionMapper(record)
-          return mappedOption.type === "separator"
-            ? [undefined]
-            : [mappedOption.value, { item: record, option: mappedOption }]
-        })
-        .filter(([value]) => value !== undefined)
-    )
+    const entries: [
+      string,
+      {
+        item: ActualRecordType
+        option: F0SelectItemObject<T, ActualRecordType>
+      },
+    ][] = []
+
+    // Only add items from paginated data (NOT fetchedItems)
+    for (const record of data.records) {
+      const mappedOption = optionMapper(record)
+      if (mappedOption.type !== "separator") {
+        entries.push([
+          mappedOption.value,
+          { item: record, option: mappedOption },
+        ])
+      }
+    }
+
+    return Object.fromEntries(entries)
   }, [data, optionMapper])
 
   /**
@@ -280,6 +294,32 @@ const F0SelectComponent = forwardRef(function Select<
     onSelectItems: onSelectItems,
     selectedState: initialSelectedState,
   })
+
+  /**
+   * Get display items for the selection preview.
+   * Uses localValue (the current value prop) to determine what to display.
+   * Looks up items from paginated data or defaultItems.
+   */
+  const getDisplayItemsForSelection = useMemo(() => {
+    const result: F0SelectItemObject<T, ResolvedRecordType<R>>[] = []
+
+    for (const valueId of localValue) {
+      // Try to get from paginated data first
+      const fromData = itemsByValue[valueId]
+      if (fromData) {
+        result.push(fromData.option)
+        continue
+      }
+
+      // Try defaultItems (pre-selected values provided by parent)
+      const fromDefault = defaultItems.find((item) => item.value === valueId)
+      if (fromDefault) {
+        result.push(fromDefault)
+      }
+    }
+
+    return result
+  }, [localValue, itemsByValue, defaultItems])
 
   const onSearchChangeLocal = useCallback(
     (value: string) => {
@@ -516,7 +556,10 @@ const F0SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              value={selectionMeta.selectedItemsCount.toString()}
+              value={Math.max(
+                localValue.length,
+                selectionMeta.selectedItemsCount
+              ).toString()}
               isEmpty={(value) => +(value ?? 0) === 0}
               onClear={() => {
                 hasUserInteracted.current = true
@@ -550,23 +593,16 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectionMeta.checkedItems && (
+                {(localValue.length > 0 ||
+                  selectionMeta.selectedItemsCount > 0) && (
                   <SelectedItems
                     multiple={multiple}
-                    totalSelectedCount={selectionMeta.selectedItemsCount}
+                    totalSelectedCount={Math.max(
+                      localValue.length,
+                      selectionMeta.selectedItemsCount
+                    )}
                     allSelected={selectedState.allSelected}
-                    selection={selectionMeta.checkedItems
-                      .filter(
-                        (item): item is NonNullable<typeof item> =>
-                          item !== undefined
-                      )
-                      .map(
-                        (item) =>
-                          optionMapper(item) as F0SelectItemObject<
-                            T,
-                            ResolvedRecordType<R>
-                          >
-                      )}
+                    selection={getDisplayItemsForSelection}
                   />
                 )}
               </button>

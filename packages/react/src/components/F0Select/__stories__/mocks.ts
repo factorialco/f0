@@ -86,30 +86,6 @@ const applyFilters = (
 
 export type MockItem = (typeof mockItems)[number]
 
-/**
- * Helper function to fetch a single item by ID
- * Useful for loading initial values that may not be in the current page
- */
-export const mockFetchSingleItem = async (
-  id: string
-): Promise<MockItem | null> => {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 50))
-  return mockItems.find((item) => item.value === id) ?? null
-}
-
-/**
- * Helper function to fetch multiple items by IDs
- * Useful for loading initial values that may not be in the current page
- */
-export const mockFetchItemsByIds = async (
-  ids: string[]
-): Promise<MockItem[]> => {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  return mockItems.filter((item) => ids.includes(item.value))
-}
-
 export const mockPaginatedSource = createDataSourceDefinition<
   MockItem,
   MockFilters

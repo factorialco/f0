@@ -401,7 +401,11 @@ export function useSelectable<
 
     // Use setState callback to ensure we always have the latest state
     setLocalSelectedState((current) => {
-      const newItemsState = new Map(current.items)
+      // For single selection when checking a new item, start with empty map
+      // to replace the previous selection entirely
+      const newItemsState =
+        !isMultiSelection && checked ? new Map() : new Map(current.items)
+
       let updated = 0
 
       for (const id of itemIds) {
@@ -428,15 +432,6 @@ export function useSelectable<
         return current
       }
 
-      // For single selection, replace the items map entirely
-      if (!isMultiSelection) {
-        return {
-          ...current,
-          items: newItemsState,
-        }
-      }
-
-      // For multi selection, return updated items
       return {
         ...current,
         items: newItemsState,

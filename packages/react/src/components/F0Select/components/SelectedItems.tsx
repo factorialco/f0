@@ -50,6 +50,17 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
       const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
       const remainingCount = selectedCount - visibleItems.length
 
+      // If no items are loaded yet but we have a count, show just the count
+      if (visibleItems.length === 0 && selectedCount > 0) {
+        return (
+          <div className="flex w-full items-center gap-1 text-left">
+            <OneEllipsis className="min-w-0 flex-1">
+              {`${selectedCount} ${i18n.status.selected.plural.toLowerCase()}`}
+            </OneEllipsis>
+          </div>
+        )
+      }
+
       return (
         <div className="flex w-full items-center gap-1 text-left">
           <OneEllipsis className="min-w-0 flex-1">
@@ -61,6 +72,21 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
     }
 
     const selectedItem = selection[0]
+
+    // For single select: if no item loaded but we have a count, show loading indicator
+    if (!selectedItem && totalSelectedCount && totalSelectedCount > 0) {
+      return (
+        <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
+          <OneEllipsis
+            tag="span"
+            className="text-left text-f1-foreground-secondary"
+          >
+            ...
+          </OneEllipsis>
+        </div>
+      )
+    }
+
     return (
       selectedItem && (
         <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
