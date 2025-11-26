@@ -567,9 +567,12 @@ const F0SelectComponent = forwardRef(function Select<
                 hasUserInteracted.current = true
                 clearSelection()
                 // Call with undefined to indicate no item is selected
-                ;(onChangeSelectedOption as (option: undefined) => void)?.(
-                  undefined
-                )
+                ;(
+                  onChangeSelectedOption as (
+                    option: undefined,
+                    checked: boolean
+                  ) => void
+                )?.(undefined, false)
               }}
               placeholder={placeholder || ""}
               disabled={disabled}

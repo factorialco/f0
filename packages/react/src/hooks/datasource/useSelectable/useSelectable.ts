@@ -54,7 +54,7 @@ export function useSelectable<
       localSelectedState.items?.get(id)?.item ??
       data.records.find((record) => {
         const itemId = source.selectable && source.selectable(record)
-        return itemId && itemId === id
+        return itemId !== undefined && itemId === id
       })
     return item
   }
@@ -439,7 +439,7 @@ export function useSelectable<
           existingItem ??
           data.records.find((record) => {
             const recordId = source.selectable && source.selectable(record)
-            return recordId && recordId === id
+            return recordId !== undefined && recordId === id
           })
 
         newItemsState.set(id, { id, checked, item })
@@ -568,7 +568,7 @@ export function useSelectable<
         if (itemState.item === undefined) {
           const foundItem = data.records.find((record) => {
             const recordId = source.selectable && source.selectable(record)
-            return recordId && recordId === id
+            return recordId !== undefined && recordId === id
           })
           if (foundItem) {
             updatedItems.set(id, { ...itemState, item: foundItem })
