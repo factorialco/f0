@@ -515,11 +515,7 @@ export const WithCustomTrigger = {
           }}
         >
           <div className="flex justify-start gap-2">
-            <F0TagRaw
-              icon={open ? ChevronDown : ChevronRight}
-              text={"+10"}
-              onlyIcon
-            />
+            <F0TagRaw icon={open ? ChevronDown : ChevronRight} />
             <span className="my-auto">{`${numSelected} selected`}</span>
           </div>
         </EntitySelect>
