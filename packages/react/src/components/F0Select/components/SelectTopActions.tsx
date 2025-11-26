@@ -44,6 +44,15 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
+  if (
+    !showSearchBox &&
+    !filters &&
+    (!grouping ||
+      (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2))
+  ) {
+    return null
+  }
+
   return (
     <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
       <div className="flex flex-1 flex-row gap-2">
