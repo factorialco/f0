@@ -64,7 +64,7 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
             id: widget.id,
             w: (widget as GridStackReactWidget & { w?: number }).w ?? 1,
             h: (widget as GridStackReactWidget & { h?: number }).h ?? 1,
-            availableSizes: widget.allowedSizes,
+            allowedSizes: widget.allowedSizes,
             content: widget.meta.content ?? null,
             title: (widget.meta?.title as string | undefined) ?? "",
             x: (widget as GridStackReactWidget & { x?: number }).x ?? 0,
@@ -102,7 +102,6 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
 
     return (
       <F0GridStack
-        ref={ref}
         options={gridOptions}
         onChange={handleChange}
         widgets={gridWidgets}
