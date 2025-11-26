@@ -77,7 +77,12 @@ const BaseOnePersonListItem = React.forwardRef<
           <div className="-ml-1.5 flex flex-row items-center [&>div]:-mr-1">
             {props.bottomTags.map((tag, i) => (
               <>
-                <F0TagRaw key={tag.text} {...tag} />
+                <F0TagRaw
+                  key={tag.text}
+                  {...tag}
+                  className="text-f1-foreground-secondary"
+                  noBorder
+                />
                 {i < props.bottomTags.length - 1 && <span>·</span>}
               </>
             ))}

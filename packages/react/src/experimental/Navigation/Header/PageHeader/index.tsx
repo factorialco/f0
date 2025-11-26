@@ -220,7 +220,7 @@ export function PageHeader({
                   <F0TagStatus
                     text={statusTag.text}
                     variant={statusTag.variant}
-                    additionalAccessibleText={statusTag.tooltip}
+                    additionalAccesibleText={statusTag.tooltip}
                   />
                 </div>
               </Tooltip>

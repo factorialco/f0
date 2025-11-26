@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
-  ({ avatar, text }, ref) => {
+  ({ avatar, onClick, text }, ref) => {
     useTextFormatEnforcer(text, { disallowEmpty: true })
 
     return (
@@ -19,7 +19,7 @@ export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
         className="border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]"
         left={<F0Avatar avatar={avatar} size="xs" />}
         text={text}
-        shape={avatar.type === "person" ? "rounded" : "square"}
+        onClick={onClick}
       />
     )
   }
