@@ -1,9 +1,8 @@
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
 import { forwardRef, useEffect, useMemo, useState } from "react"
-import { F0Icon } from "../../../../components/F0Icon"
-import { ChevronDown, ChevronUp } from "../../../../icons/app"
 import { InputInternalProps } from "../Input/internal"
+import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"
 
 const formatValue = (value: number, locale: string, maxDecimals?: number) =>
@@ -90,7 +89,6 @@ export const NumberInputInternal = forwardRef<
   }
 
   const handleStep = (type: "increase" | "decrease") => () => {
-    console.log("handleStep", type)
     if (!step) return
     if (value == null) {
       const initialValue = step
@@ -103,34 +101,6 @@ export const NumberInputInternal = forwardRef<
     }
 
     handleChange(formatValue(newValue, locale, maxDecimals))
-  }
-
-  const Arrows = () => {
-    if (!step) return null
-
-    return (
-      <div
-        className="-mt-1 hidden h-full flex-col group-focus-within:flex group-hover:flex"
-        onClick={(e) => e.preventDefault()}
-      >
-        <div
-          onClick={handleStep("increase")}
-          className="pointer-events-auto h-3 cursor-pointer"
-          role="button"
-          aria-label="Increase"
-        >
-          <F0Icon size="sm" icon={ChevronUp} />
-        </div>
-        <div
-          onClick={handleStep("decrease")}
-          className="pointer-events-auto h-3 cursor-pointer"
-          role="button"
-          aria-label="Decrease"
-        >
-          <F0Icon size="sm" icon={ChevronDown} />
-        </div>
-      </div>
-    )
   }
 
   useEffect(() => {
@@ -153,7 +123,7 @@ export const NumberInputInternal = forwardRef<
         {...props}
         hint={localHint}
         appendTag={units}
-        append={<Arrows />}
+        append={<Arrows step={step} onClickArrow={handleStep} />}
       />
     </div>
   )

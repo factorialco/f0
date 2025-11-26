@@ -104,7 +104,6 @@ import Jm from "./Jm"
 import Jo from "./Jo"
 import Jp from "./Jp"
 import Ke from "./Ke"
-// Add the rest of your flag imports...
 
 // Create type for the flag component
 export type FlagComponent = ComponentType<React.SVGProps<SVGSVGElement>>
