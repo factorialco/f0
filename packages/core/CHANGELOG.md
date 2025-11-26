@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.40.0](https://github.com/factorialco/f0/compare/f0-core-v1.39.0...f0-core-v1.40.0) (2025-11-26)
+
+
+### Features
+
+* **FilterPicker:** number filter open close ([#3017](https://github.com/factorialco/f0/issues/3017)) ([0efc8e3](https://github.com/factorialco/f0/commit/0efc8e38872e2b0bb4f973cd59997a8dd96c9dab))
+
 ## [1.39.0](https://github.com/factorialco/f0/compare/f0-core-v1.38.0...f0-core-v1.39.0) (2025-11-25)
 
 
