@@ -124,6 +124,9 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(react@18.3.1)
     devDependencies:
+      '@chromatic-com/storybook':
+        specifier: ^4.1.1
+        version: 4.1.1(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
       '@eslint/compat':
         specifier: ^1.2.9
         version: 1.2.9(eslint@9.27.0(jiti@2.4.2))
@@ -133,6 +136,27 @@ importers:
       '@eslint/js':
         specifier: ^9.27.0
         version: 9.27.0
+      '@storybook/addon-a11y':
+        specifier: ^9.1.3
+        version: 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+      '@storybook/addon-designs':
+        specifier: ^10.0.2
+        version: 10.0.2(@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+      '@storybook/addon-docs':
+        specifier: ^9.1.3
+        version: 9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+      '@storybook/addon-links':
+        specifier: ^9.1.3
+        version: 9.1.3(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+      '@storybook/addon-themes':
+        specifier: ^9.1.3
+        version: 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
+      '@storybook/react-vite':
+        specifier: ^9.1.3
+        version: 9.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.40.2)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))(typescript@5.8.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))
+      '@storybook/test-runner':
+        specifier: ^0.23.0
+        version: 0.23.0(@swc/helpers@0.5.17)(@types/node@22.15.21)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))
       '@testing-library/jest-dom':
         specifier: ^6.6.3
         version: 6.6.3
@@ -150,7 +174,7 @@ importers:
         version: 18.3.5(@types/react@18.3.18)
       '@types/react-native':
         specifier: ^0.73.0
-        version: 0.73.0(@types/react@18.3.18)(react@18.3.1)
+        version: 0.73.0(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1)
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.32.1
         version: 8.32.1(@typescript-eslint/parser@8.32.1(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.2)
@@ -166,9 +190,15 @@ importers:
       '@vitest/ui':
         specifier: 3.0.7
         version: 3.0.7(vitest@3.0.7)
+      '@vueless/storybook-dark-mode':
+        specifier: ^9.0.7
+        version: 9.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.3)
+      chromatic:
+        specifier: ^11.28.0
+        version: 11.28.0
       eslint:
         specifier: ^9.27.0
         version: 9.27.0(jiti@2.4.2)
@@ -181,9 +211,15 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.20
         version: 0.4.20(eslint@9.27.0(jiti@2.4.2))
+      eslint-plugin-storybook:
+        specifier: ^9.1.3
+        version: 9.1.3(eslint@9.27.0(jiti@2.4.2))(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0)))(typescript@5.8.2)
       globals:
         specifier: ^16.0.0
         version: 16.0.0
+      http-server:
+        specifier: ^14.1.1
+        version: 14.1.1
       jsdom:
         specifier: ^26.0.0
         version: 26.0.0
@@ -202,9 +238,15 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.6.10
         version: 0.6.11(prettier-plugin-organize-imports@4.1.0(prettier@3.5.2)(typescript@5.8.2))(prettier@3.5.2)
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
       rollup-plugin-jsx-remove-attributes:
         specifier: ^3.1.1
         version: 3.1.1(@rollup/pluginutils@5.1.4(rollup@4.40.2))(astring@1.9.0)(estree-walker@3.0.3)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))
+      storybook:
+        specifier: ^9.1.3
+        version: 9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.43.1)(yaml@2.7.0))
       typescript:
         specifier: ^5.7.2
         version: 5.8.2
@@ -17420,12 +17462,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.18
 
-  '@react-native/virtualized-lists@0.76.9(@types/react@18.3.18)(react-native@0.76.9(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)':
+  '@react-native/virtualized-lists@0.76.9(@types/react@18.3.18)(react-native@0.76.9(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)':
     dependencies:
       invariant: 2.2.4
       nullthrows: 1.1.1
       react: 18.3.1
-      react-native: 0.76.9(@types/react@18.3.18)(react@18.3.1)
+      react-native: 0.76.9(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1)
     optionalDependencies:
       '@types/react': 18.3.18
 
@@ -19082,9 +19124,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@types/react-native@0.73.0(@types/react@18.3.18)(react@18.3.1)':
+  '@types/react-native@0.73.0(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
-      react-native: 0.76.9(@types/react@18.3.18)(react@18.3.1)
+      react-native: 0.76.9(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1)
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
@@ -25838,7 +25880,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  react-native@0.76.9(@types/react@18.3.18)(react@18.3.1):
+  react-native@0.76.9(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1):
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native/assets-registry': 0.76.9
@@ -25847,7 +25889,7 @@ snapshots:
       '@react-native/gradle-plugin': 0.76.9
       '@react-native/js-polyfills': 0.76.9
       '@react-native/normalize-colors': 0.76.9
-      '@react-native/virtualized-lists': 0.76.9(@types/react@18.3.18)(react-native@0.76.9(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      '@react-native/virtualized-lists': 0.76.9(@types/react@18.3.18)(react-native@0.76.9(@babel/core@7.26.10)(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
       abort-controller: 3.0.0
       anser: 1.4.10
       ansi-regex: 5.0.1

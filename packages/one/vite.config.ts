@@ -12,20 +12,26 @@ const alias = {
   "~": path.resolve(__dirname, "./"),
 }
 
+const isStorybookBuild = process.env.STORYBOOK_BUILD === "true"
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     libInjectCss(),
-    // Remove test IDs in production builds
-    removeTestIdAttribute({
-      include: [/\.[tj]sx$/],
-      exclude: ["**/node_modules/**"],
-      attributes: ["data-testid"],
-      environments: ["production"],
-      debug: false,
-      usage: "vite",
-    }),
+    // Only remove test IDs in production builds that are NOT for Storybook
+    ...(isStorybookBuild
+      ? []
+      : [
+          removeTestIdAttribute({
+            include: [/\.[tj]sx$/],
+            exclude: ["**/node_modules/**"],
+            attributes: ["data-testid"],
+            environments: ["production"],
+            debug: false,
+            usage: "vite",
+          }),
+        ]),
     // Generate TypeScript declarations
     ...(process.env.BUILD_TYPES
       ? [
