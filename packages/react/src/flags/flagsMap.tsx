@@ -28,7 +28,10 @@ for (const [path, module] of Object.entries(flagModules)) {
 }
 
 // Dynamically create and populate flags object
-export const flagsMap: Record<CountryCode, FlagComponent> = {}
+export const flagsMap: Record<CountryCode, FlagComponent> = {} as Record<
+  CountryCode,
+  FlagComponent
+>
 
 for (const [path, module] of Object.entries(flagModules)) {
   const countryCode = getComponentName(path).toLowerCase()
