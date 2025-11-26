@@ -228,10 +228,6 @@ const F0SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
-  const [selectedItems, setSelectedItems] = useState<
-    F0SelectItemObject<T, ActualRecordType>[]
-  >([])
-
   /**
    * Map of items from paginated data by their value.
    * Used for dropdown list and selection state.

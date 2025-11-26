@@ -40,6 +40,8 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   className?: string
   selectContentClassName?: string
   actions?: Action[]
+  /** Container element to render the portal content into */
+  portalContainer?: HTMLElement | null
 }
 
 /**
