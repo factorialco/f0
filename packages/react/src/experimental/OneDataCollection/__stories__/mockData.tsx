@@ -1136,8 +1136,16 @@ export const ExampleComponent = ({
           ? {
               records: item.children,
               type: item.detailed ? "detailed" : "basic",
+              paginationInfo: {
+                cursor: "aaa",
+                total: item.children.length,
+                perPage: 2,
+                currentPage: 1,
+                pagesCount: 1,
+                hasMore: true,
+              },
             }
-          : []
+          : { records: [] }
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
