@@ -50,7 +50,6 @@ describe("Filters", () => {
         const searchFilter = screen.getByText(/search:/i)
         const departmentFilter = screen.getByText(/department:/i)
 
-        console.log(screen.debug())
         // Verify both filters are visible in the UI
         expect(searchFilter).toBeInTheDocument()
         expect(departmentFilter).toBeInTheDocument()

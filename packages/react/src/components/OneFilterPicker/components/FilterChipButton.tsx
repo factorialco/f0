@@ -42,13 +42,19 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
         value: FilterValue<Definition[keyof Definition]>,
         context: { schema: Definition[keyof Definition]; i18n: I18nContextType }
       ) => Promise<string>
-      const label = await labelRenderer(value, { schema: filter, i18n })
 
-      if (typeof label === "object") {
-        setChipLabel(label)
-      } else {
-        setChipLabel({ label: label, icon: undefined, avatar: undefined })
-      }
+      const valueLabel = await labelRenderer(value, { schema: filter, i18n })
+      const label =
+        typeof valueLabel === "object"
+          ? valueLabel
+          : { label: valueLabel, icon: undefined, avatar: undefined }
+
+      setChipLabel({
+        label: `${filter.label}: ${label.label}`,
+        icon: label.icon,
+        avatar: label.avatar,
+      })
+
       setIsLoading(false)
     }
 
@@ -67,12 +73,14 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
       {isLoading ? (
         <Skeleton className="h-5 w-[100px]" />
       ) : (
-        <Chip
-          variant="selected"
-          {...chipLabel}
-          onClose={onRemove}
-          onClick={onSelect}
-        />
+        <>
+          <Chip
+            variant="selected"
+            {...chipLabel}
+            onClose={onRemove}
+            onClick={onSelect}
+          />
+        </>
       )}
     </motion.div>
   )
