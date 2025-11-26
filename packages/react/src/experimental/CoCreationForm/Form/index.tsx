@@ -91,11 +91,13 @@ export const CoCreationForm = ({
   elements,
   isEditMode,
   onChange,
+  allowedQuestionTypes,
 }: CoCreationFormProps) => (
   <CoCreationFormProvider
     isEditMode={isEditMode}
     elements={elements}
     onChange={onChange}
+    allowedQuestionTypes={allowedQuestionTypes}
   >
     <div className="flex flex-col gap-6">
       <DragProvider>
