@@ -231,6 +231,10 @@ export const TableCollection = <
     !!source.selectable
   )
 
+  const tableWithChildren = data?.records.some((item) =>
+    source.itemsWithChildren?.(item)
+  )
+
   /*
    * Initial loading
    */
@@ -250,7 +254,7 @@ export const TableCollection = <
   }
 
   return (
-    <div className="test flex h-full min-h-0 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4">
       <OneTable loading={isLoading}>
         <TableHeader sticky={true}>
           <TableRow>
@@ -404,6 +408,7 @@ export const TableCollection = <
                   columns={columns}
                   frozenColumnsLeft={frozenColumnsLeft}
                   checkColumnWidth={checkColumnWidth}
+                  tableWithChildren={tableWithChildren}
                 />
               )
             })}

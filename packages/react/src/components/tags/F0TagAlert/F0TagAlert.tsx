@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle, InfoCircle, Warning } from "@/icons/app"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
-import { BaseTag } from "../internal/BaseTag"
+import { BaseTag } from "../BaseTag"
 import type { Level, Props } from "./types"
 
 const iconMap: Record<Level, IconType> = {

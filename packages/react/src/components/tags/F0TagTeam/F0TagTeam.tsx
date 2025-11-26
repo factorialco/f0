@@ -1,18 +1,19 @@
 import { forwardRef } from "react"
-import { F0TagAvatar } from "../internal/TagAvatar"
-import type { F0TagTeamProps } from "./types"
+import { F0TagAvatar } from "../TagAvatar"
+import type { Props } from "./types"
 
-export const F0TagTeam = forwardRef<HTMLDivElement, F0TagTeamProps>(
-  ({ name, src }, ref) => {
+export const F0TagTeam = forwardRef<HTMLDivElement, Props>(
+  ({ teamName, teamImageUrl, onClick }, ref) => {
     return (
       <F0TagAvatar
         ref={ref}
         avatar={{
           type: "team",
-          name: name,
-          src: src,
+          name: teamName,
+          src: teamImageUrl,
         }}
-        text={name}
+        text={teamName}
+        onClick={onClick}
       />
     )
   }

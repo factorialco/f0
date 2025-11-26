@@ -94,6 +94,7 @@ const F0SelectComponent = forwardRef(function Select<
     hint,
     required,
     multiple,
+    portalContainer,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -105,9 +106,13 @@ const F0SelectComponent = forwardRef(function Select<
 
   const [openLocal, setOpenLocal] = useState(open)
 
-  const defaultItems = toArray(props.defaultItem).filter(
-    (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
-      item !== undefined
+  const defaultItems = useMemo(
+    () =>
+      toArray(props.defaultItem).filter(
+        (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
+          item !== undefined
+      ),
+    [props.defaultItem]
   )
 
   const defaultValues = useMemo(
@@ -223,6 +228,10 @@ const F0SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
+  const [selectedItems, setSelectedItems] = useState<
+    F0SelectItemObject<T, ActualRecordType>[]
+  >([])
+
   /**
    * Map of items from paginated data by their value.
    * Used for dropdown list and selection state.
@@ -321,13 +330,10 @@ const F0SelectComponent = forwardRef(function Select<
     return result
   }, [localValue, itemsByValue, defaultItems])
 
-  const onSearchChangeLocal = useCallback(
-    (value: string) => {
-      setCurrentSearch(value)
-      onSearchChange?.(value)
-    },
-    [setCurrentSearch, onSearchChange]
-  )
+  const onSearchChangeLocal = (value: string) => {
+    setCurrentSearch(value)
+    onSearchChange?.(value)
+  }
 
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
@@ -648,6 +654,7 @@ const F0SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
+            portalContainer={portalContainer}
           />
         )}
       </SelectPrimitive>

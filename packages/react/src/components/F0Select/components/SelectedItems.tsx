@@ -88,18 +88,16 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
     }
 
     return (
-      selectedItem && (
-        <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
-          {selectedItem.icon && (
-            <div className="h-5 shrink-0 text-f1-icon">
-              <F0Icon icon={selectedItem.icon} />
-            </div>
-          )}
-          <OneEllipsis tag="span" className="text-left">
-            {selectedItem.label}
-          </OneEllipsis>
-        </div>
-      )
+      <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
+        {selectedItem.icon && (
+          <div className="h-5 shrink-0 text-f1-icon">
+            <F0Icon icon={selectedItem.icon} />
+          </div>
+        )}
+        <OneEllipsis tag="span" className="text-left">
+          {selectedItem.label}
+        </OneEllipsis>
+      </div>
     )
   }
 )

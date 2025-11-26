@@ -1,3 +1,4 @@
+import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import {
   Tooltip,
@@ -6,6 +7,21 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
+
+export const tags = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "span",
+  "div",
+  "label",
+  "code",
+] as const
+export type Tag = (typeof tags)[number]
 
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   if (!element) return false
@@ -18,9 +34,6 @@ const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   return element.scrollWidth > element.clientWidth
 }
 
-export const tags = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"] as const
-export type Tag = (typeof tags)[number]
-
 type EllipsisWrapperProps = {
   children: string
   className?: string
@@ -29,6 +42,7 @@ type EllipsisWrapperProps = {
   onHasEllipsisChange: (hasEllipsis: boolean) => void
   disabled?: boolean
   tag: Tag
+  markdown?: boolean
 }
 
 /**
@@ -47,7 +61,9 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       lines,
       onHasEllipsisChange,
       noTooltip,
+      tag = "span",
       disabled,
+      markdown,
       ...props
     },
     ref
@@ -86,8 +102,10 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       }
     }, [ref, onHasEllipsisChange, lines, disabled])
 
+    const html = markdown ? parseMarkdown(children) : undefined
+
     return React.createElement(
-      props.tag,
+      tag,
       {
         ref,
         className: cn(
@@ -106,8 +124,11 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
           lineClamp: lines > 1 ? lines : undefined,
         },
         ...props,
+        ...(markdown && html
+          ? { dangerouslySetInnerHTML: { __html: html } }
+          : {}),
       },
-      children
+      markdown ? undefined : children
     )
   }
 )
@@ -138,9 +159,14 @@ type OneEllipsisProps = {
    * The tag to use for the text.
    */
   tag?: Tag
+  /**
+   * Enable markdown parsing for content
+   * @default false
+   */
+  markdown?: boolean
 }
 
-const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
+const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
   (
     {
       className,
@@ -148,13 +174,15 @@ const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
       children,
       noTooltip = false,
       disabled = false,
+      markdown = false,
+      tag = "span",
       ...props
     },
     forwardedRef
   ) => {
     const [hasEllipsis, setHasEllipsis] = useState(false)
 
-    const internalRef = useRef<HTMLDivElement>(null)
+    const internalRef = useRef<HTMLElement>(null)
     const ref = forwardedRef || internalRef
 
     const Text = useMemo(() => {
@@ -165,8 +193,9 @@ const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
           lines={lines}
           onHasEllipsisChange={setHasEllipsis}
           disabled={disabled}
+          markdown={markdown}
+          tag={tag}
           {...props}
-          tag={props.tag ?? "span"}
           data-testid="one-ellipsis"
           noTooltip={noTooltip}
         >
@@ -174,15 +203,17 @@ const OneEllipsis = forwardRef<HTMLDivElement, OneEllipsisProps>(
         </EllipsisWrapper>
       )
       // eslint-disable-next-line react-hooks/exhaustive-deps -- We dont want to track props as dependencies
-    }, [className, lines, ref, children, disabled])
+    }, [className, lines, ref, children, disabled, markdown, tag])
+
+    const plainText = useMemo(() => {
+      return markdown ? stripMarkdown(children) : children
+    }, [children, markdown])
 
     return hasEllipsis && !noTooltip ? (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="min-w-0 flex-1 overflow-hidden">{Text}</span>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xl">{children}</TooltipContent>
+          <TooltipTrigger asChild>{Text}</TooltipTrigger>
+          <TooltipContent className="max-w-xl">{plainText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     ) : (

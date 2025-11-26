@@ -153,11 +153,17 @@ or are the same
 
 #### No Persistence
 
+If the id is not provided, the data collection will not be persisted.
+
 ```typescript
 <OneDataCollection
   // No id provided - no persistence
 />
 ```
+
+But you can also disable persistence by passing `storage={false}`; the component
+will still use the ID for other purposes (like column configuration keys), but
+won't persist state to storage.
 
 ## Implementation Example
 

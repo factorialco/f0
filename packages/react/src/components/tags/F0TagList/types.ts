@@ -1,23 +1,10 @@
-import { TagVariant } from "../F0Tag/F0Tag"
+import { TagVariant } from "../Tag"
 
 // Generic type helper to create tag data types
 type TagDataType<T extends string> = Omit<
   Extract<TagVariant, { type: T }>,
   "type" | "description"
 >
-
-export const tagTypes = [
-  "dot",
-  "person",
-  "team",
-  "company",
-  "alert",
-  "status",
-  "balance",
-  "raw",
-] as const
-
-export type TagType = (typeof tagTypes)[number]
 
 // Define tag types using the generic helper
 type TagTypeMapping = {
@@ -31,7 +18,13 @@ type TagTypeMapping = {
   raw: TagDataType<"raw">
 }
 
-export type F0TagListProps<T extends TagType> = {
+export type TagType = keyof TagTypeMapping
+
+type WithTooltipDescription = {
+  description?: string
+}
+
+export type Props<T extends TagType> = {
   /**
    * The type of tags to display. Only one type can be used at a time.
    */
@@ -40,7 +33,7 @@ export type F0TagListProps<T extends TagType> = {
   /**
    * Array of tag data corresponding to the specified type.
    */
-  tags: Array<TagTypeMapping[T]>
+  tags: Array<TagTypeMapping[T] & WithTooltipDescription>
 
   /**
    * The maximum number of tags to display.
@@ -49,13 +42,15 @@ export type F0TagListProps<T extends TagType> = {
   max?: number
 
   /**
-   * The minimum number of tags to display.
-   * @default 0
-   */
-  min?: number
-
-  /**
    * The remaining number to display.
    */
   remainingCount?: number
+
+  /**
+   * The layout of the tag list.
+   * - "fill" - Tags will expand to fill the available width, with overflow items shown in a counter
+   * - "compact" - Tags will be stacked together up to the max limit, with remaining shown in counter
+   * @default "compact"
+   */
+  layout?: "fill" | "compact"
 }

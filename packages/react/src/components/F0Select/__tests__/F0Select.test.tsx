@@ -416,7 +416,7 @@ describe("Select", () => {
       expect(handleChange).toHaveBeenCalledWith(undefined, undefined, undefined)
     })
     await waitFor(() => {
-      expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined)
+      expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined, false)
     })
   })
 })

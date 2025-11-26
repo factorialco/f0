@@ -1,0 +1,30 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as IconStories from "./icon.stories"
+
+<Meta of={IconStories} />
+
+### icon
+
+Renders an icon with a label
+
+#### Value type
+
+```
+type value = { icon: IconType, label: string }
+```
+
+<Canvas
+  of={IconStories.IconType}
+  source={{
+    code: `
+// Example with dot tags
+render: (item) => ({
+    type: 'icon',
+    value: {
+        icon: Placeholder,
+        label: 'Icon'
+    }
+})
+`,
+  }}
+/>

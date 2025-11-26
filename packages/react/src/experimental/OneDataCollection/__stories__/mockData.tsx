@@ -2,9 +2,17 @@ import { PromiseState } from "@/lib/promise-to-observable"
 import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
+import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { cn } from "@/lib/utils"
-import { generateMockUsers, MockUser } from "@/mocks"
+import {
+  COMPANY_NAMES_MOCK,
+  generateMockUsers,
+  getMockValue,
+  MOCK_ICONS,
+  MockUser,
+  TEAMS_MOCK,
+} from "@/mocks"
 export { generateMockUsers, type MockUser }
 
 import {
@@ -48,6 +56,7 @@ import {
   Upload,
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
+import { mockImage } from "@/testing/mocks/images"
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
@@ -207,6 +216,7 @@ export const getMockVisualizations = (options?: {
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
     noSorting?: boolean
+    nestedRecords?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -232,13 +242,16 @@ export const getMockVisualizations = (options?: {
         {
           label: "Name",
           width: 140,
-          render: (item) => ({
-            type: "person",
-            value: {
-              firstName: item.name.split(" ")[0],
-              lastName: item.name.split(" ")[1],
-            },
-          }),
+          render: (item) =>
+            !item.children && item.detailed
+              ? item.name
+              : {
+                  type: "person",
+                  value: {
+                    firstName: item.name.split(" ")[0],
+                    lastName: item.name.split(" ")[1],
+                  },
+                },
           id: "name",
           sorting: options?.table?.noSorting ? undefined : "name",
           hidden: options?.table?.allowColumnHiding ? true : undefined,
@@ -430,20 +443,44 @@ export const getMockVisualizations = (options?: {
   list: {
     type: "list",
     options: {
-      itemDefinition: (item) => ({
-        title: item.name,
-        description: [item.email, item.role],
-        avatar: {
-          type: "person",
-          firstName: item.name.split(" ")[0],
-          lastName: item.name.split(" ")[1],
-          badge: {
-            type: "module",
-            module: "inbox",
-            tooltip: "Inbox",
-          },
-        },
-      }),
+      itemDefinition: (item) => {
+        const getMockAvatar = (index: number): AvatarVariant => {
+          const avatars = [
+            {
+              type: "person" as const,
+              firstName: item.name.split(" ")[0],
+              lastName: item.name.split(" ")[1],
+              badge: {
+                type: "module" as const,
+                module: "inbox" as const,
+                tooltip: "Inbox",
+              },
+              src: mockImage("person", index),
+            },
+            {
+              type: "company" as const,
+              name: getMockValue(COMPANY_NAMES_MOCK, item.index),
+              src: mockImage("company", index),
+            },
+            {
+              type: "team" as const,
+              name: getMockValue(TEAMS_MOCK, item.index),
+              src: mockImage("team", index),
+            },
+            {
+              type: "icon" as const,
+              icon: getMockValue(MOCK_ICONS, item.index),
+            },
+          ]
+
+          return avatars[index % avatars.length]
+        }
+        return {
+          title: item.name,
+          description: [item.email, item.role],
+          avatar: getMockAvatar(item.index),
+        }
+      },
       fields: [
         {
           label: "Email",
@@ -561,9 +598,17 @@ export const getMockVisualizations = (options?: {
           tooltip: "Email",
           property: { type: "text", value: u.email },
         },
-        { icon: Building, property: { type: "text", value: u.department } },
-        { icon: Briefcase, property: { type: "text", value: u.role } },
-        { icon: Star, property: { type: "text", value: u.id } },
+        {
+          icon: Building,
+          tooltip: "Department",
+          property: { type: "text", value: u.department },
+        },
+        {
+          icon: Briefcase,
+          tooltip: "Role",
+          property: { type: "text", value: u.role },
+        },
+        { icon: Star, tooltip: "ID", property: { type: "text", value: u.id } },
       ],
       onMove: options?.cache
         ? async (
@@ -792,7 +837,8 @@ export const createObservableDataFetch = (delay = 0) => {
 
 export const createPromiseDataFetch = (
   delay = 500,
-  cache?: MockDataCache<MockUser>
+  cache?: MockDataCache<MockUser>,
+  nestedRecords = false
 ) => {
   return (
     options: DataCollectionBaseFetchOptions<
@@ -837,7 +883,37 @@ export const createPromiseDataFetch = (
         }
 
         resolve({
-          records: filteredData,
+          records: filteredData.map((user, index) => ({
+            ...user,
+            children:
+              index % 2 === 0 && nestedRecords
+                ? [
+                    {
+                      ...user,
+                      children: [
+                        { ...user },
+                        {
+                          ...user,
+                          detailed: index === 0,
+                          children: [
+                            { ...user, detailed: index === 0 },
+                            { ...user, detailed: index === 0 },
+                          ],
+                        },
+                        { ...user },
+                      ],
+                    },
+                    {
+                      ...user,
+                      detailed: index === 0,
+                      children: [
+                        { ...user, detailed: index === 0 },
+                        { ...user, detailed: index === 0 },
+                      ],
+                    },
+                  ]
+                : undefined,
+          })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
         })
       }, delay)
@@ -883,6 +959,8 @@ export const ExampleComponent = ({
    */
   enableCache = true,
   hideFilters,
+  tmpFullWidth,
+  nestedRecords = false,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -900,9 +978,11 @@ export const ExampleComponent = ({
     >
   >
   id?: string
-  storage?: {
-    features?: DataCollectionStorageFeaturesDefinition
-  }
+  storage?:
+    | false
+    | {
+        features?: DataCollectionStorageFeaturesDefinition
+      }
   dataAdapter?: DataCollectionDataAdapter<
     MockUser,
     FiltersType,
@@ -932,6 +1012,8 @@ export const ExampleComponent = ({
   currentFilters?: FiltersState<FiltersType>
   currentSortings?: SortingsState<typeof sortings>
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
+  tmpFullWidth?: boolean
+  nestedRecords?: boolean
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -977,11 +1059,11 @@ export const ExampleComponent = ({
     return {
       fetchData: useObservable
         ? createObservableDataFetch()
-        : createPromiseDataFetch(100, cache),
+        : createPromiseDataFetch(100, cache, nestedRecords),
       // Include cacheVersion as a property so dataAdapter reference changes
       _cacheVersion: cacheVersion,
     }
-  }, [dataAdapter, useObservable, cache, cacheVersion])
+  }, [dataAdapter, useObservable, cache, cacheVersion, nestedRecords])
 
   const dataSource = useDataCollectionSource(
     {
@@ -1045,6 +1127,18 @@ export const ExampleComponent = ({
             ? searchBar
             : undefined,
       dataAdapter: dataAdapterMemoized,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      childrenCount: (item) => item?.children?.length,
+      fetchChildren: async (item) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        return item.children
+          ? {
+              records: item.children,
+              type: item.detailed ? "detailed" : "basic",
+            }
+          : []
+      },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
         { id: "prod", filters: { department: ["Product"] } },
@@ -1060,6 +1154,7 @@ export const ExampleComponent = ({
       className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
+        tmpFullWidth={tmpFullWidth}
         id={id}
         storage={storage}
         fullHeight={fullHeight}
@@ -1488,11 +1583,15 @@ export const buildSecondaryActions = (): SecondaryActionItem[] => {
       icon: Pencil,
       onClick: () => console.log(`Another user action`),
       description: "User actions",
+      loading: true,
     },
     {
       label: "Export",
       icon: Upload,
-      onClick: () => console.log(`Downloading users`),
+      onClick: () =>
+        new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
+          console.log(`Downloading users`)
+        ),
       description: "Download users",
     },
     {
@@ -1500,6 +1599,14 @@ export const buildSecondaryActions = (): SecondaryActionItem[] => {
       icon: Download,
       onClick: () => console.log(`Importing users`),
       description: "Import users",
+      loading: true,
+    },
+    {
+      label: "Disabled",
+      icon: Download,
+      onClick: () => console.log(`Should not be shown`),
+      description: "Import users",
+      disabled: true,
     },
   ]
 }

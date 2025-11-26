@@ -186,6 +186,7 @@ const meta: Meta = {
     },
   },
   args: {
+    label: "Select a theme",
     placeholder: "Select a theme",
     onChange: fn(),
     value: "light",
@@ -218,7 +219,6 @@ const meta: Meta = {
 
       const handleOnSearchChange = (value: string) => {
         setSearchValue(value)
-        console.log("searchValue", value)
       }
 
       const truncatedValue = (localValue || []).slice(0, 50)
@@ -427,6 +427,7 @@ export const WithActions: Story = {
 export const LargeList: Story = {
   args: {
     ...WithSearchBox.args,
+    label: "Select a theme",
     value: "option-4",
     options: [
       ...(meta.args?.options || []),

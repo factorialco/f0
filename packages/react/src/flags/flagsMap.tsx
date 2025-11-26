@@ -2,6 +2,7 @@
 import type { ComponentType, ReactElement } from "react"
 
 // Import all flags
+import { CountryCode } from "@/lib/countries"
 import Ad from "./Ad"
 import Ae from "./Ae"
 import Af from "./Af"
@@ -109,7 +110,7 @@ import Ke from "./Ke"
 export type FlagComponent = ComponentType<React.SVGProps<SVGSVGElement>>
 
 // Create the mapping from lowercase country code to flag component
-export const flagsMap: Record<string, FlagComponent> = {
+export const flagsMap: Record<CountryCode, FlagComponent> = {
   ad: Ad,
   ae: Ae,
   af: Af,
@@ -215,12 +216,14 @@ export const flagsMap: Record<string, FlagComponent> = {
 }
 
 // Helper function to get a flag component by its lowercase code
-export const getFlag = (code: string): FlagComponent | ReactElement => {
-  const FlagComponent = flagsMap[code.toLowerCase()]
+export const getFlag = (
+  code: string
+): FlagComponent | ReactElement | undefined => {
+  const FlagComponent = flagsMap[code.toLowerCase() as CountryCode]
 
   if (!FlagComponent) {
     console.warn(`Flag component for code "${code}" not found`)
-    return <div />
+    return undefined
   }
 
   return FlagComponent

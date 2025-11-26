@@ -319,7 +319,7 @@ export function useData<
       ? undefined
       : search?.sync
         ? currentSearch
-        : deferredSearch
+        : deferredSearch || currentSearch
   }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
   /**

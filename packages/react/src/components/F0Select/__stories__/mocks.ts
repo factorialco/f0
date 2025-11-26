@@ -8,7 +8,7 @@ import {
   SURNAMES_MOCK,
 } from "@/mocks"
 
-export const mockItems = Array.from({ length: 10000 }, (_, i) => ({
+export const mockItems = Array.from({ length: 1000 }, (_, i) => ({
   value: `option-${i}`,
   label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
   icon: getMockValue(MOCK_ICONS, i),

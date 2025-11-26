@@ -161,7 +161,10 @@ export const BasicActionsExample: Story = {
       primaryActions: () => ({
         label: "Create user",
         icon: Ai,
-        onClick: () => console.log(`Creating a user`),
+        onClick: () =>
+          new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
+            console.log(`Creating a user`)
+          ),
       }),
       secondaryActions: {
         expanded: 0,
@@ -190,6 +193,7 @@ export const MultiplePrimaryActionsExample: Story = {
           label: "Create admin",
           icon: Person,
           onClick: () => console.log(`Creating a admin`),
+          disabled: true,
         },
       ],
       secondaryActions: {
