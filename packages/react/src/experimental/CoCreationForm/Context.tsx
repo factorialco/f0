@@ -11,6 +11,7 @@ import {
 
 type CoCreationFormContextType = CoCreationFormCallbacks & {
   isEditMode?: boolean
+  disallowOptionalQuestions?: boolean
   lastElementId: string | undefined
   getQuestionById: (questionId: string) => QuestionElement | undefined
   deleteElement: (elementId: string) => void
@@ -24,17 +25,21 @@ const CoCreationFormContext = createContext<
   CoCreationFormContextType | undefined
 >(undefined)
 
-export function CoCreationFormProvider({
-  elements,
-  children,
-  isEditMode,
-  onChange,
-}: {
+type CoCreationFormProviderProps = {
   children: React.ReactNode
   isEditMode?: boolean
   elements: CoCreationFormElement[]
   onChange: (elements: CoCreationFormElement[]) => void
-}) {
+  disallowOptionalQuestions?: boolean
+}
+
+export function CoCreationFormProvider({
+  elements,
+  children,
+  isEditMode,
+  disallowOptionalQuestions,
+  onChange,
+}: CoCreationFormProviderProps) {
   const { t } = useI18n()
 
   const lastElementId = useMemo(() => {
@@ -344,6 +349,7 @@ export function CoCreationFormProvider({
         getQuestionById,
         deleteElement,
         lastElementId,
+        disallowOptionalQuestions,
       }}
     >
       {children}
