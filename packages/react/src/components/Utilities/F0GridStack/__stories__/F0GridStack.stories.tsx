@@ -90,7 +90,18 @@ const meta = {
               },
             }}
           />
-          <div id="widgets">{JSON.stringify(widgets, null, 2)}</div>
+          <div id="widgets">
+            {JSON.stringify(
+              widgets.map((w) => {
+                return {
+                  ...w,
+                  content: "?",
+                }
+              }),
+              null,
+              2
+            )}
+          </div>
         </div>
       )
     },
@@ -132,7 +143,7 @@ export const Default: Story = {
   },
 }
 
-export const WithRefMethods: Story = {
+export const WithMethods: Story = {
   args: {
     options: {
       column: 12,
@@ -161,7 +172,8 @@ export const WithRefMethods: Story = {
       }))
     )
     const handleAddWidget = useCallback(() => {
-      const newId = `node-${widgets.length + 1}`
+      const randomIndex = Math.random()
+      const newId = `node-${randomIndex.toString().replace(".", "")}`
       setWidgets((prev) => [
         ...prev,
         {
@@ -181,7 +193,10 @@ export const WithRefMethods: Story = {
     }, [widgets.length])
 
     const handleRemoveWidget = () => {
-      setWidgets((prev) => prev.slice(0, -1))
+      setWidgets((prev) => {
+        console.log("prev", prev.slice(0, -1))
+        return prev.slice(0, -1)
+      })
     }
 
     const handleRemoveAll = () => {
@@ -207,11 +222,8 @@ export const WithRefMethods: Story = {
           {JSON.stringify(
             widgets.map((w) => {
               return {
-                id: w.id,
-                w: w.w,
-                h: w.h,
-                meta: w.meta,
-                content: w.content?.toString(),
+                ...w,
+                content: "?",
               }
             }),
             null,

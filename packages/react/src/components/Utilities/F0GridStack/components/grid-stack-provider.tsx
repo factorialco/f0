@@ -1,3 +1,4 @@
+import { useDeepCompareEffect } from "@reactuses/core"
 import type {
   GridItemHTMLElement,
   GridStack,
@@ -22,7 +23,7 @@ interface GridStackProviderProps {
   options: GridStackOptions
   onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
   onChange?: (widgets: GridStackReactWidget[]) => void
-  originalWidgets?: GridStackReactWidget[]
+  widgets?: GridStackReactWidget[]
 }
 
 const propsToObserve = [
@@ -40,28 +41,29 @@ export function GridStackProvider({
   options,
   onResizeStop,
   onChange,
-  originalWidgets,
+  widgets,
 }: PropsWithChildren<GridStackProviderProps>) {
   const [gridStack, setGridStack] = useState<GridStack | null>(null)
   const gridStackRef = useRef<GridStack | null>(null)
 
   // Convert widgets for gridstack (convert React content to functions)
   const convertedOptions = useMemo(() => {
-    if (!originalWidgets || originalWidgets.length === 0) {
+    if (!widgets || widgets.length === 0) {
       return options
     }
+
     return {
       ...options,
-      children: originalWidgets.map(convertWidgetRecursive),
+      children: widgets.map(convertWidgetRecursive),
     }
-  }, [options, originalWidgets])
+  }, [options, widgets])
 
   const previousWidgetsRef = useRef<GridStackWidget[] | undefined>(
     convertedOptions.children
   )
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
-    const widgetsToProcess = originalWidgets || options.children || []
+    const widgetsToProcess = widgets || options.children || []
     const deepFindNodeWithContent = (
       obj: GridStackWidget | GridStackReactWidget
     ) => {
@@ -83,190 +85,268 @@ export function GridStackProvider({
   })
 
   // Sync widgets when convertedOptions.children changes (without recreating gridStack)
-  useEffect(() => {
-    const previousWidgetIds = new Set(
-      previousWidgetsRef.current?.map((w) => w.id).filter(Boolean) || []
+  // useEffect(() => {
+  //   const previousWidgetIds = new Set(
+  //     previousWidgetsRef.current?.map((w) => w.id).filter(Boolean) || []
+  //   )
+  //   const newWidgetIds = new Set(
+  //     convertedOptions.children?.map((w) => w.id).filter(Boolean) || []
+  //   )
+  //   const previousWidgetsMap = new Map<string, GridStackWidget>()
+  //   previousWidgetsRef.current?.forEach((w) => {
+  //     if (w.id) {
+  //       previousWidgetsMap.set(w.id, w)
+  //     }
+  //   })
+
+  //   // Update rawWidgetMetaMap to match originalWidgets or options.children
+  //   // Merge with existing map to preserve widgets added via addWidget
+  //   setRawWidgetMetaMap((prev) => {
+  //     const newMap = new Map<string, GridStackWidget>()
+  //     const widgetsToProcess = originalWidgets || options.children || []
+
+  //     const deepFindNodeWithContent = (
+  //       obj: GridStackWidget | GridStackReactWidget
+  //     ) => {
+  //       const reactWidget = obj as GridStackReactWidget
+  //       if (obj.id && reactWidget.content) {
+  //         newMap.set(obj.id, obj as GridStackWidget)
+  //       }
+
+  //       if (obj.subGridOpts?.children) {
+  //         obj.subGridOpts.children.forEach((child: GridStackWidget) => {
+  //           deepFindNodeWithContent(child)
+  //         })
+  //       }
+  //     }
+  //     widgetsToProcess.forEach((child) => {
+  //       deepFindNodeWithContent(child)
+  //     })
+
+  //     // Preserve widgets from previous map that aren't in the new widgets list
+  //     // These are widgets added via addWidget that aren't in originalWidgets/options.children
+  //     prev.forEach((widget, id) => {
+  //       if (!newMap.has(id)) {
+  //         // Check if widget still exists in gridstack before preserving it
+  //         const element = gridStack?.el?.querySelector<GridItemHTMLElement>(
+  //           `[gs-id="${id}"]`
+  //         )
+  //         if (element) {
+  //           newMap.set(id, widget)
+  //         }
+  //       }
+  //     })
+
+  //     return newMap
+  //   })
+
+  //   // Sync widgets with gridStack instance
+  //   if (gridStack && gridStack.el && gridStack.el.parentElement) {
+  //     convertedOptions.children?.forEach((widget) => {
+  //       if (!widget.id) return
+
+  //       const previousWidget = previousWidgetsMap.get(widget.id)
+  //       const element = gridStack.el.querySelector<GridItemHTMLElement>(
+  //         `[gs-id="${widget.id}"]`
+  //       )
+
+  //       if (!previousWidgetIds.has(widget.id)) {
+  //         // Add new widgets
+  //         // Note: widget is already converted (from convertedOptions.children)
+  //         try {
+  //           gridStack.addWidget(widget)
+  //           // After adding widget, wait for React to render the handle via portal
+  //           // then re-initialize drag handlers to ensure handle is applied
+  //           const handleSelector = convertedOptions.handle
+  //           if (handleSelector) {
+  //             setTimeout(() => {
+  //               if (!gridStack || !gridStack.el) return
+  //               const addedElement =
+  //                 gridStack.el.querySelector<GridItemHTMLElement>(
+  //                   `[gs-id="${widget.id}"]`
+  //                 )
+  //               if (addedElement) {
+  //                 // Verify handle exists in the DOM
+  //                 const handleExists =
+  //                   addedElement.querySelector(handleSelector)
+  //                 if (handleExists) {
+  //                   // Re-initialize drag handlers with handle option
+  //                   gridStack.prepareDragDrop(addedElement, true)
+  //                 }
+  //               }
+  //             }, 0)
+  //           }
+  //         } catch (error) {
+  //           console.warn("Error adding widget:", error)
+  //         }
+  //       } else if (element && previousWidget) {
+  //         // Update existing widgets if properties changed
+  //         // Check if editable properties have changed
+  //         const propertiesChanged = propsToObserve.filter(
+  //           (prop) =>
+  //             previousWidget[prop as keyof GridStackWidget] !==
+  //             widget[prop as keyof GridStackWidget]
+  //         )
+
+  //         if (propertiesChanged.length > 0) {
+  //           try {
+  //             // Update widget properties (noMove, noResize, locked, position, size)
+  //             const updateOptions: Partial<GridStackWidget> = {}
+  //             propertiesChanged.forEach((prop) => {
+  //               const value = widget[prop]
+  //               if (value !== undefined) {
+  //                 ;(updateOptions as Record<string, unknown>)[prop] = value
+  //               }
+  //             })
+
+  //             gridStack.update(element, updateOptions)
+  //             // Re-initialize drag handlers after update to ensure handle is applied
+  //             const handleSelector = convertedOptions.handle
+  //             if (handleSelector) {
+  //               setTimeout(() => {
+  //                 if (!gridStack || !gridStack.el) return
+  //                 const handleExists = element.querySelector(handleSelector)
+  //                 if (handleExists) {
+  //                   gridStack.prepareDragDrop(element, true)
+  //                 }
+  //               }, 0)
+  //             }
+  //           } catch (error) {
+  //             console.warn("Error updating widget:", error)
+  //           }
+  //         } else if (element && convertedOptions.handle) {
+  //           // Even if properties didn't change, ensure handle is applied
+  //           // This handles cases where handle option changed
+  //           const handleSelector = convertedOptions.handle
+  //           setTimeout(() => {
+  //             if (!gridStack || !gridStack.el) return
+  //             const handleExists = element.querySelector(handleSelector)
+  //             if (handleExists) {
+  //               try {
+  //                 gridStack.prepareDragDrop(element, true)
+  //               } catch {
+  //                 // Ignore errors
+  //               }
+  //             }
+  //           }, 0)
+  //         }
+  //       }
+  //     })
+
+  //     // Remove widgets that are no longer in options
+  //     // But preserve widgets that were added via addWidget (they exist in rawWidgetMetaMap but not in convertedOptions.children)
+  //     previousWidgetIds.forEach((id) => {
+  //       if (!newWidgetIds.has(id)) {
+  //         // Check if widget exists in rawWidgetMetaMap but not in originalWidgets/options.children
+  //         // These are widgets added via addWidget and should be preserved
+  //         const widgetInMetaMap = rawWidgetMetaMap.get(id)
+  //         const widgetsToProcess = originalWidgets || options.children || []
+  //         const isInOriginalWidgets = widgetsToProcess.some((w) => w.id === id)
+
+  //         // Only remove if widget is not in rawWidgetMetaMap (was removed) or is in originalWidgets but removed
+  //         // Preserve widgets added via addWidget
+  //         console.log("widgetInMetaMap", widgetInMetaMap)
+  //         console.log("isInOriginalWidgets", isInOriginalWidgets)
+  //         try {
+  //           const element = gridStack.el.querySelector<GridItemHTMLElement>(
+  //             `[gs-id="${id}"]`
+  //           )
+  //           if (element) {
+  //             gridStack.removeWidget(element, false)
+  //           }
+  //         } catch (error) {
+  //           console.warn("Error removing widget:", error)
+  //         }
+  //       }
+  //     })
+  //   }
+
+  //   // Update ref for next comparison
+  //   previousWidgetsRef.current = convertedOptions.children
+  // }, [
+  //   convertedOptions.children,
+  //   convertedOptions.handle,
+  //   gridStack,
+  //   originalWidgets,
+  // ])
+
+  useDeepCompareEffect(() => {
+    if (!gridStack) return
+
+    // Get the previous state
+    const widgetsInGridstack = gridStack.save()
+    if (!Array.isArray(widgetsInGridstack)) {
+      return
+    }
+    const widgetsInGridstackIds = widgetsInGridstack.map((widget) => widget.id)
+    const newWidgets = widgets || []
+    const newWidgetsIds = newWidgets.map((widget) => widget.id)
+
+    /**
+     * Add new widgets to gridstack
+     */
+    const widgetsToAdd = newWidgets.filter(
+      (widget) => !widgetsInGridstackIds.includes(widget.id!)
     )
-    const newWidgetIds = new Set(
-      convertedOptions.children?.map((w) => w.id).filter(Boolean) || []
+    widgetsToAdd?.forEach((widget) => {
+      gridStack.addWidget(convertWidgetRecursive(widget))
+    })
+
+    /**
+     * Remove widgets from gridstack that are not in the widgets array
+     */
+    const widgetsToRemove = widgetsInGridstack.filter(
+      (widget) => !newWidgetsIds.includes(widget.id!)
     )
-    const previousWidgetsMap = new Map<string, GridStackWidget>()
-    previousWidgetsRef.current?.forEach((w) => {
-      if (w.id) {
-        previousWidgetsMap.set(w.id, w)
+    widgetsToRemove?.forEach((widget) => {
+      const element = gridStack.el.querySelector<GridItemHTMLElement>(
+        `[gs-id="${widget.id}"]`
+      )
+      if (element) {
+        gridStack.removeWidget(element, true)
       }
     })
 
-    // Update rawWidgetMetaMap to match originalWidgets or options.children
-    // Merge with existing map to preserve widgets added via addWidget
-    setRawWidgetMetaMap((prev) => {
-      const newMap = new Map<string, GridStackWidget>()
-      const widgetsToProcess = originalWidgets || options.children || []
-
-      const deepFindNodeWithContent = (
-        obj: GridStackWidget | GridStackReactWidget
-      ) => {
-        const reactWidget = obj as GridStackReactWidget
-        if (obj.id && reactWidget.content) {
-          newMap.set(obj.id, obj as GridStackWidget)
-        }
-
-        if (obj.subGridOpts?.children) {
-          obj.subGridOpts.children.forEach((child: GridStackWidget) => {
-            deepFindNodeWithContent(child)
-          })
-        }
+    /**
+     * Update widgets DOM elements in gridstack that are in the widgets array
+     */
+    const widgetsToUpdate = newWidgets.filter((widget) =>
+      widgetsInGridstackIds.includes(widget.id!)
+    )
+    widgetsToUpdate?.forEach((widget) => {
+      const widgetInGridstack = widgetsInGridstack.find(
+        (w) => w.id === widget.id
+      )
+      if (!widgetInGridstack) {
+        return
       }
-      widgetsToProcess.forEach((child) => {
-        deepFindNodeWithContent(child)
-      })
 
-      // Preserve widgets from previous map that aren't in the new widgets list
-      // These are widgets added via addWidget that aren't in originalWidgets/options.children
-      prev.forEach((widget, id) => {
-        if (!newMap.has(id)) {
-          // Check if widget still exists in gridstack before preserving it
-          const element = gridStack?.el?.querySelector<GridItemHTMLElement>(
-            `[gs-id="${id}"]`
+      const propertiesChanged = propsToObserve.filter(
+        (prop) => widgetInGridstack[prop] !== widget[prop]
+      )
+
+      if (propertiesChanged.length > 0) {
+        try {
+          // Update widget properties (noMove, noResize, locked, position, size)
+          const updateOptions: Partial<GridStackWidget> = {}
+          propertiesChanged.forEach((prop) => {
+            const value = widget[prop]
+            if (value !== undefined) {
+              ;(updateOptions as Record<string, unknown>)[prop] = value
+            }
+          })
+          const element = gridStack.el.querySelector<GridItemHTMLElement>(
+            `[gs-id="${widget.id}"]`
           )
           if (element) {
-            newMap.set(id, widget)
+            gridStack.update(element, updateOptions)
           }
+        } catch (error) {
+          console.warn("Error updating widget:", error)
         }
-      })
-
-      return newMap
+      }
     })
-
-    // Sync widgets with gridStack instance
-    if (gridStack && gridStack.el && gridStack.el.parentElement) {
-      convertedOptions.children?.forEach((widget) => {
-        if (!widget.id) return
-
-        const previousWidget = previousWidgetsMap.get(widget.id)
-        const element = gridStack.el.querySelector<GridItemHTMLElement>(
-          `[gs-id="${widget.id}"]`
-        )
-
-        if (!previousWidgetIds.has(widget.id)) {
-          // Add new widgets
-          // Note: widget is already converted (from convertedOptions.children)
-          try {
-            gridStack.addWidget(widget)
-            // After adding widget, wait for React to render the handle via portal
-            // then re-initialize drag handlers to ensure handle is applied
-            const handleSelector = convertedOptions.handle
-            if (handleSelector) {
-              setTimeout(() => {
-                if (!gridStack || !gridStack.el) return
-                const addedElement =
-                  gridStack.el.querySelector<GridItemHTMLElement>(
-                    `[gs-id="${widget.id}"]`
-                  )
-                if (addedElement) {
-                  // Verify handle exists in the DOM
-                  const handleExists =
-                    addedElement.querySelector(handleSelector)
-                  if (handleExists) {
-                    // Re-initialize drag handlers with handle option
-                    gridStack.prepareDragDrop(addedElement, true)
-                  }
-                }
-              }, 0)
-            }
-          } catch (error) {
-            console.warn("Error adding widget:", error)
-          }
-        } else if (element && previousWidget) {
-          // Update existing widgets if properties changed
-          // Check if editable properties have changed
-          const propertiesChanged = propsToObserve.filter(
-            (prop) =>
-              previousWidget[prop as keyof GridStackWidget] !==
-              widget[prop as keyof GridStackWidget]
-          )
-
-          if (propertiesChanged.length > 0) {
-            try {
-              // Update widget properties (noMove, noResize, locked, position, size)
-              const updateOptions: Partial<GridStackWidget> = {}
-              propertiesChanged.forEach((prop) => {
-                const value = widget[prop]
-                if (value !== undefined) {
-                  ;(updateOptions as Record<string, unknown>)[prop] = value
-                }
-              })
-
-              gridStack.update(element, updateOptions)
-              // Re-initialize drag handlers after update to ensure handle is applied
-              const handleSelector = convertedOptions.handle
-              if (handleSelector) {
-                setTimeout(() => {
-                  if (!gridStack || !gridStack.el) return
-                  const handleExists = element.querySelector(handleSelector)
-                  if (handleExists) {
-                    gridStack.prepareDragDrop(element, true)
-                  }
-                }, 0)
-              }
-            } catch (error) {
-              console.warn("Error updating widget:", error)
-            }
-          } else if (element && convertedOptions.handle) {
-            // Even if properties didn't change, ensure handle is applied
-            // This handles cases where handle option changed
-            const handleSelector = convertedOptions.handle
-            setTimeout(() => {
-              if (!gridStack || !gridStack.el) return
-              const handleExists = element.querySelector(handleSelector)
-              if (handleExists) {
-                try {
-                  gridStack.prepareDragDrop(element, true)
-                } catch {
-                  // Ignore errors
-                }
-              }
-            }, 0)
-          }
-        }
-      })
-
-      // Remove widgets that are no longer in options
-      // But preserve widgets that were added via addWidget (they exist in rawWidgetMetaMap but not in convertedOptions.children)
-      previousWidgetIds.forEach((id) => {
-        if (!newWidgetIds.has(id)) {
-          // Check if widget exists in rawWidgetMetaMap but not in originalWidgets/options.children
-          // These are widgets added via addWidget and should be preserved
-          const widgetInMetaMap = rawWidgetMetaMap.get(id)
-          const widgetsToProcess = originalWidgets || options.children || []
-          const isInOriginalWidgets = widgetsToProcess.some((w) => w.id === id)
-
-          // Only remove if widget is not in rawWidgetMetaMap (was removed) or is in originalWidgets but removed
-          // Preserve widgets added via addWidget
-          if (!widgetInMetaMap || isInOriginalWidgets) {
-            try {
-              const element = gridStack.el.querySelector<GridItemHTMLElement>(
-                `[gs-id="${id}"]`
-              )
-              if (element) {
-                gridStack.removeWidget(element, false)
-              }
-            } catch (error) {
-              console.warn("Error removing widget:", error)
-            }
-          }
-        }
-      })
-    }
-
-    // Update ref for next comparison
-    previousWidgetsRef.current = convertedOptions.children
-  }, [
-    convertedOptions.children,
-    convertedOptions.handle,
-    gridStack,
-    originalWidgets,
-  ])
+  }, [widgets])
 
   // Ensure handle option is applied after widgets are synced and rendered
   useEffect(() => {
@@ -312,33 +392,29 @@ export function GridStackProvider({
 
     const layout = gridStack.save()
 
+    console.log("layout2", layout)
     if (Array.isArray(layout)) {
       // Merge layout data (positions) with widget metadata from rawWidgetMetaMap
       const updatedWidgets: GridStackReactWidget[] = layout
         .map((item) => {
           const widgetId = item.id
+          console.log("item", item)
           if (!widgetId) return null
 
-          // Get the widget metadata from rawWidgetMetaMap
           const widgetMeta = rawWidgetMetaMap.get(widgetId)
+          console.log("widgetMeta", widgetMeta)
 
-          if (!widgetMeta) return null
-
-          // Merge layout data (w, h, x, y, meta) with widget metadata
-          // This ensures we return the full widget data including content, allowedSizes, etc.
           const updatedWidget: GridStackReactWidget = {
             ...widgetMeta,
             id: widgetId,
-            w: item.w ?? widgetMeta.w ?? 1,
-            h: item.h ?? widgetMeta.h ?? 1,
-            x: item.x ?? widgetMeta.x ?? 0,
-            y: item.y ?? widgetMeta.y ?? 0,
+            w: item.w ?? 1,
+            h: item.h ?? 1,
+            x: item.x ?? 0,
+            y: item.y ?? 0,
             // Merge meta if both exist
-            meta: item.meta
-              ? { ...widgetMeta.meta, ...item.meta }
-              : widgetMeta.meta,
+            meta: item.meta ?? undefined,
             // Ensure content matches GridStackReactWidget type
-            content: (widgetMeta as GridStackReactWidget).content ?? undefined,
+            content: item.content ?? (() => <div>No content</div>),
           }
 
           return updatedWidget

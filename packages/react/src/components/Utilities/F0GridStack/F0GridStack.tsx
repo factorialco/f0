@@ -13,7 +13,8 @@ export type GridStackReactOptions = Omit<GridStackOptions, "children">
 
 export type GridStackReactSize = { w: number; h: number }
 
-export interface GridStackReactWidget extends Omit<GridStackWidget, "content"> {
+export interface GridStackReactWidget
+  extends Omit<GridStackWidget, "content" | "id"> {
   id: Required<GridStackWidget>["id"]
   allowedSizes?: GridStackReactSize[]
   content?: React.ReactElement
@@ -145,7 +146,7 @@ export const F0GridStack = ({
   return (
     <GridStackProvider
       options={gridOptions}
-      originalWidgets={widgets}
+      widgets={widgets}
       onResizeStop={onResizeStop}
       onChange={onChange}
     >

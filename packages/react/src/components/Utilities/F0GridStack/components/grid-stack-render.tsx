@@ -14,6 +14,7 @@ export function GridStackRender() {
         const widgetContainer = getWidgetContainer(id)
 
         if (!widgetContainer) {
+          console.error(`Widget container not found for widget ${id}`)
           return null
         }
 
