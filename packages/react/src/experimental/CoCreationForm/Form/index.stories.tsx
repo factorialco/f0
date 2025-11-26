@@ -32,7 +32,6 @@ type Story = StoryObj<typeof CoCreationForm>
 export const Default: Story = {
   args: {
     isEditMode: true,
-    disallowOptionalQuestions: true,
     elements: [
       {
         type: "question",
