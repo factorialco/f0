@@ -81,11 +81,27 @@ export const filters = {
     type: "search",
     label: "Search",
   },
+  searchStrict: {
+    type: "search",
+    label: "Search with strict toggle example",
+    options: {
+      strictToggle: true,
+    },
+  },
   department: {
     type: "in",
     label: "Department",
     options: {
       options: DEPARTMENTS_MOCK.map((value) => ({ value, label: value })),
+    },
+  },
+  salary: {
+    type: "number",
+    label: "Salary",
+    options: {
+      modes: ["range", "single"],
+      min: 0,
+      openCloseToggle: true,
     },
   },
 } as const
@@ -759,6 +775,27 @@ export const filterUsers = (
     )
   }
 
+  const salaryFilterValues = filterValues.salary
+  if (salaryFilterValues) {
+    filteredUsers = filteredUsers.filter((user) => {
+      if (salaryFilterValues?.mode === "range") {
+        return (
+          user.salary &&
+          salaryFilterValues.from.value !== undefined &&
+          (salaryFilterValues.from.closed
+            ? user.salary >= salaryFilterValues.from.value
+            : user.salary > salaryFilterValues.from.value) &&
+          user.salary &&
+          salaryFilterValues.to.value !== undefined &&
+          (salaryFilterValues.to.closed
+            ? user.salary <= salaryFilterValues.to.value
+            : user.salary < salaryFilterValues.to.value)
+        )
+      }
+      return user.salary === salaryFilterValues.value
+    })
+  }
+
   if (search) {
     filteredUsers = filteredUsers.filter(
       (user) =>
@@ -852,6 +889,8 @@ export const createPromiseDataFetch = (
       search,
       navigationFilters,
     } = options
+
+    console.log("filters", filters)
 
     return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {

@@ -90,7 +90,9 @@ export function FilterContent<Definition extends FiltersDefinition>({
         {renderFilterForm({
           schema: filter,
           value: currentValue,
-          onChange: (value) => onFilterChange(selectedFilterKey, value),
+          onChange: (value) => {
+            onFilterChange(selectedFilterKey, value)
+          },
         })}
       </div>
     </div>
