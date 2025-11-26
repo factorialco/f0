@@ -1,3 +1,4 @@
+import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
 import { AnimatePresence, motion } from "motion/react"
@@ -88,6 +89,12 @@ interface TableCellProps {
    * @default false
    */
   loading?: boolean
+
+  /**
+   * The type of the cell
+   * @default "basic"
+   */
+  type?: NestedVariant
 }
 
 export function TableCell({
@@ -105,6 +112,7 @@ export function TableCell({
   expandedLevels = 0,
   onExpand,
   loading = false,
+  type = "basic",
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -186,6 +194,7 @@ export function TableCell({
                 hasChildren={hasChildren}
                 depth={depth}
                 expandedLevels={expandedLevels}
+                type={type}
               />
             )}
 

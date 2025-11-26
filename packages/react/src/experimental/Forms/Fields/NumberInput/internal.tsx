@@ -90,6 +90,7 @@ export const NumberInputInternal = forwardRef<
   }
 
   const handleStep = (type: "increase" | "decrease") => () => {
+    console.log("handleStep", type)
     if (!step) return
     if (value == null) {
       const initialValue = step
@@ -114,15 +115,17 @@ export const NumberInputInternal = forwardRef<
       >
         <div
           onClick={handleStep("increase")}
-          className="h-3 cursor-pointer"
+          className="pointer-events-auto h-3 cursor-pointer"
           role="button"
+          aria-label="Increase"
         >
           <F0Icon size="sm" icon={ChevronUp} />
         </div>
         <div
           onClick={handleStep("decrease")}
-          className="h-3 cursor-pointer"
+          className="pointer-events-auto h-3 cursor-pointer"
           role="button"
+          aria-label="Decrease"
         >
           <F0Icon size="sm" icon={ChevronDown} />
         </div>

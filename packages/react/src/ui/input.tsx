@@ -120,7 +120,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           onKeyDown={onKeyDown}
           className={cn(
             "[&::-webkit-search-cancel-button]:hidden",
-            "w-full shrink disabled:cursor-not-allowed"
+            "w-full shrink placeholder:-z-10 disabled:cursor-not-allowed"
           )}
         />
       </InputField>

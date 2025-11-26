@@ -337,6 +337,10 @@ export const WithAsyncOptions: Story = {
         type: "search"
         label: string
       }
+      salary: {
+        type: "number"
+        label: string
+      }
     }
 
     const [filters, setFilters] = useState<FiltersState<AsyncDefinitionType>>(
@@ -398,6 +402,10 @@ export const WithAsyncOptions: Story = {
       search: {
         type: "search",
         label: "Search",
+      },
+      salary: {
+        type: "number",
+        label: "Salary",
       },
     }
 

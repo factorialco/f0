@@ -11,7 +11,7 @@ import {
 import { useLayoutEffect, useRef } from "react"
 import { Row, RowProps } from "../Row"
 
-const DEFAULT_LOADING_ROWS_COUNT = 3
+export const DEFAULT_LOADING_ROWS_COUNT = 3
 
 const SingleLoadingRow = <
   R extends RecordType,

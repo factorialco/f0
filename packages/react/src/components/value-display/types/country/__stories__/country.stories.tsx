@@ -1,4 +1,3 @@
-import { CountryCode } from "@/lib/countries"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { Cell, mockItem } from "../../../__stories__/shared"
@@ -97,7 +96,7 @@ export const Snapshot: Story = {
                   render: () => ({
                     type: "country",
                     value: {
-                      code: variant.code as CountryCode,
+                      code: variant.code,
                       label: variant.label,
                     },
                   }),
@@ -119,7 +118,7 @@ export const Snapshot: Story = {
                   render: () => ({
                     type: "country",
                     value: {
-                      code: variant.code as CountryCode,
+                      code: variant.code,
                       label: variant.label,
                     },
                   }),

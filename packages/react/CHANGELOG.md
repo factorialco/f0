@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.288.0](https://github.com/factorialco/f0/compare/f0-react-v1.287.0...f0-react-v1.288.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add time (ClockPlus & Sleep) icons ([#3040](https://github.com/factorialco/f0/issues/3040)) ([af6ec70](https://github.com/factorialco/f0/commit/af6ec70e69c05b9bd2978738f4d222b6203ee515))
+
+## [1.287.0](https://github.com/factorialco/f0/compare/f0-react-v1.286.0...f0-react-v1.287.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** IT computer and tablet icons ([#3035](https://github.com/factorialco/f0/issues/3035)) ([2b7fc15](https://github.com/factorialco/f0/commit/2b7fc1503b1a62f3b17a79616926c4b62d3d4eba))
+
+## [1.286.0](https://github.com/factorialco/f0/compare/f0-react-v1.285.0...f0-react-v1.286.0) (2025-11-25)
+
+
+### Features
+
+* expose hideMaxLength prop in experimental Input component ([#3037](https://github.com/factorialco/f0/issues/3037)) ([f758b57](https://github.com/factorialco/f0/commit/f758b57935b1fed880ccb5d0adfe05580915f200))
+
+## [1.285.0](https://github.com/factorialco/f0/compare/f0-react-v1.284.0...f0-react-v1.285.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add new module Salary Advance icons ([#3032](https://github.com/factorialco/f0/issues/3032)) ([5c61e02](https://github.com/factorialco/f0/commit/5c61e02e53f3e6119be621f57055870cdc819b72))
+
+## [1.284.0](https://github.com/factorialco/f0/compare/f0-react-v1.283.0...f0-react-v1.284.0) (2025-11-25)
+
+
+### Features
+
+* **ChatHeader:** add start new chat button ([#3001](https://github.com/factorialco/f0/issues/3001)) ([1fbf97e](https://github.com/factorialco/f0/commit/1fbf97e3ca53737ff129284e49ca5c247636720b))
+
+## [1.283.0](https://github.com/factorialco/f0/compare/f0-react-v1.282.0...f0-react-v1.283.0) (2025-11-24)
+
+
+### Features
+
+* **OneAlert:** enhance responsiveness ([#2983](https://github.com/factorialco/f0/issues/2983)) ([8cf4f67](https://github.com/factorialco/f0/commit/8cf4f67332b611725dc3b36d2056c099a7fce809))
+
+## [1.282.0](https://github.com/factorialco/f0/compare/f0-react-v1.281.0...f0-react-v1.282.0) (2025-11-24)
+
+
+### Features
+
+* **Table:** implement detailed nested row support and enhance data f… ([#3026](https://github.com/factorialco/f0/issues/3026)) ([399d32f](https://github.com/factorialco/f0/commit/399d32f96daf7e9439dbdd1805e03196a074e83d))
+
+## [1.281.0](https://github.com/factorialco/f0/compare/f0-react-v1.280.0...f0-react-v1.281.0) (2025-11-24)
+
+
+### Features
+
+* create all needed components for new co-creation form ([#2958](https://github.com/factorialco/f0/issues/2958)) ([ac0e3e8](https://github.com/factorialco/f0/commit/ac0e3e85652c3cdc4479e90c87c4911a355dbf21))
+
+## [1.280.0](https://github.com/factorialco/f0/compare/f0-react-v1.279.2...f0-react-v1.280.0) (2025-11-24)
+
+
+### Features
+
+* add F0Text and F0Heading components ([#2408](https://github.com/factorialco/f0/issues/2408)) ([63b6f42](https://github.com/factorialco/f0/commit/63b6f42040fd4283580c35d30fe4ca71f404a108))
+
+## [1.279.2](https://github.com/factorialco/f0/compare/f0-react-v1.279.1...f0-react-v1.279.2) (2025-11-24)
+
+
+### Bug Fixes
+
+* make more permissive flag code prop type to allow any string ([#3020](https://github.com/factorialco/f0/issues/3020)) ([d5d61ff](https://github.com/factorialco/f0/commit/d5d61ffe046ba27441591d24bd9750b312cf12e8))
+
 ## [1.279.1](https://github.com/factorialco/f0/compare/f0-react-v1.279.0...f0-react-v1.279.1) (2025-11-24)
 
 
