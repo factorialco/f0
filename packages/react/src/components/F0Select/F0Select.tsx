@@ -93,9 +93,13 @@ const F0SelectComponent = forwardRef(function Select<
 
   const [openLocal, setOpenLocal] = useState(open)
 
-  const defaultItems = toArray(props.defaultItem).filter(
-    (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
-      item !== undefined
+  const defaultItems = useMemo(
+    () =>
+      toArray(props.defaultItem).filter(
+        (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
+          item !== undefined
+      ),
+    [props.defaultItem]
   )
 
   const defaultValues = useMemo(
@@ -383,14 +387,16 @@ const F0SelectComponent = forwardRef(function Select<
   // TODO USE DATA SOURCE SELECTABLE
   useEffect(() => {
     if (multiple) {
-      if (selectedItems.length === items.length && !selectAll) {
+      const allSelected = selectedItems.length === items.length
+      const noneSelected = selectedItems.length === 0
+
+      if (allSelected) {
         setSelectAll(true)
-      }
-      if (selectedItems.length === 0) {
+      } else if (noneSelected) {
         setSelectAll(false)
       }
     }
-  }, [selectedItems, items, multiple, selectAll])
+  }, [selectedItems.length, items.length, multiple])
 
   const isPartiallySelected = useMemo(() => {
     if (multiple) {
