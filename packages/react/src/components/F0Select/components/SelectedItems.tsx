@@ -87,6 +87,10 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
       )
     }
 
+    if (!selectedItem) {
+      return null
+    }
+
     return (
       <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
         {selectedItem.icon && (

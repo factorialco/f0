@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { F0Select, selectSizes } from "../index"
+import { F0Select, F0SelectItemObject, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
@@ -212,9 +212,20 @@ const meta: Meta = {
       )
       const [searchValue, setSearchValue] = useState("")
       // Sets a click handler to change the label's value
-      const handleOnChange = (value: string) => {
+      const handleOnChange = (
+        value: string,
+        item?: unknown,
+        option?: F0SelectItemObject<string>
+      ) => {
         setLocalValue(value)
-        console.log("value", value)
+        console.log(
+          "selected value:",
+          value,
+          "- original item:",
+          item,
+          "- selection option:",
+          option
+        )
       }
 
       const handleOnSearchChange = (value: string) => {
