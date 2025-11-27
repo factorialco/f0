@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.291.0](https://github.com/factorialco/f0/compare/f0-react-v1.290.0...f0-react-v1.291.0) (2025-11-27)
+
+
+### Features
+
+* f0select multiselection ([#2959](https://github.com/factorialco/f0/issues/2959)) ([cc653ae](https://github.com/factorialco/f0/commit/cc653ae5dbd54471a31f91b4db67cf595bd9fc06))
+
 ## [1.290.0](https://github.com/factorialco/f0/compare/f0-react-v1.289.0...f0-react-v1.290.0) (2025-11-27)
 
 
