@@ -8,7 +8,7 @@ import {
   SelectionId,
 } from "../types"
 import type { SortingsDefinition } from "../types/sortings.typings"
-import { GroupRecord } from "../useData"
+import { GROUP_ID_SYMBOL, GroupRecord, WithGroupId } from "../useData"
 import {
   AllSelectionStatus,
   SelectionStatus,
@@ -533,16 +533,27 @@ export function useSelectable<
   const previousDataRecordsKey = useRef<string>("")
 
   /**
+   * Get all records from data, handling both flat and grouped data
+   */
+  const getAllRecords = useCallback(() => {
+    if (data.type === "grouped") {
+      return data.groups.flatMap((group) => group.records)
+    }
+    return data.records
+  }, [data])
+
+  /**
    * Handle the data changes to update the selected items status
    * This effect runs when data loads or changes to:
    * 1. Apply selection state to new items (with onlyIfNotPreviousState = true)
    * 2. Populate the `item` field for items that were selected before data loaded
    */
   useEffect(() => {
-    if (data.records.length === 0) return
+    const allRecords = getAllRecords()
+    if (allRecords.length === 0) return
 
     // Create a stable key from record IDs
-    const recordIds = data.records
+    const recordIds = allRecords
       .map((record) => source.selectable?.(record))
       .filter((id) => id !== undefined)
 
@@ -554,8 +565,29 @@ export function useSelectable<
     }
     previousDataRecordsKey.current = currentKey
 
-    // Use the ref value to avoid dependency on isAllSelected
-    handleSelectItemChangeInternal(recordIds, isAllSelectedRef.current, true)
+    // For grouped data, check if each record's group is selected
+    // For flat data, use the global isAllSelected state
+    if (isGrouped) {
+      // Process each record and check if its group is selected
+      for (const record of allRecords) {
+        const recordId = source.selectable?.(record)
+        if (recordId === undefined) continue
+
+        const groupId = (record as WithGroupId<R>)[GROUP_ID_SYMBOL] as
+          | string
+          | undefined
+        if (groupId) {
+          const groupState = groupsState.get(groupId)
+          if (groupState?.checked) {
+            // The group is selected, so select this new item
+            handleSelectItemChangeInternal(recordId, true, true)
+          }
+        }
+      }
+    } else {
+      // Use the ref value to avoid dependency on isAllSelected
+      handleSelectItemChangeInternal(recordIds, isAllSelectedRef.current, true)
+    }
 
     // Also update items that have checked=true but item=undefined
     // This happens when items are pre-selected before data loads
@@ -566,12 +598,15 @@ export function useSelectable<
       for (const [id, itemState] of updatedItems.entries()) {
         // If item is undefined but we have data loaded, try to find it
         if (itemState.item === undefined) {
-          const foundItem = data.records.find((record) => {
+          const foundItem = allRecords.find((record) => {
             const recordId = source.selectable && source.selectable(record)
             return recordId !== undefined && recordId === id
           })
           if (foundItem) {
-            updatedItems.set(id, { ...itemState, item: foundItem })
+            updatedItems.set(id, {
+              ...itemState,
+              item: foundItem as WithGroupId<R>,
+            })
             hasChanges = true
           }
         }
@@ -587,7 +622,14 @@ export function useSelectable<
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we use refs and stable keys
-  }, [data.records, source.selectable])
+  }, [
+    data.records,
+    data.groups,
+    source.selectable,
+    getAllRecords,
+    isGrouped,
+    groupsState,
+  ])
 
   // Control the allSelectedCheck state
   // If all items are selected, we need to set the allSelectedCheck state to true

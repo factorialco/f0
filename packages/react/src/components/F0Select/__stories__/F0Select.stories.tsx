@@ -568,7 +568,7 @@ export const MultipleNotPaginated: Story = {
   args: {
     label: "Multiple Not Paginated",
     multiple: true,
-    value: ["option-2", "option-3", "option-1000"],
+    value: ["option-2", "option-3", "option-50"],
     clearable: true,
     source: mockNonPaginatedSource,
     mapOptions: (item: MockItem) => ({
