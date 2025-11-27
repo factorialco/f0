@@ -1,9 +1,9 @@
 import { F0Icon, type IconType } from "@factorialco/f0-react"
 import ExternalLink from "@factorialco/f0-react/icons/app/ExternalLink"
 import Search from "@factorialco/f0-react/icons/app/Search"
-import { useI18n } from "../../../lib/providers/i18n"
-import { Action } from "../../../ui/Action"
-import { AiCollapsibleMessage } from "./AiCollapsibleMessage"
+import { useI18n } from "../../lib/providers/i18n"
+import { Action } from "../../ui/Action"
+import { CollapsibleMessage } from "../CollapsibleMessage"
 
 export type Source = {
   title: string
@@ -31,7 +31,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
   }
 
   return (
-    <AiCollapsibleMessage
+    <CollapsibleMessage
       icon={Search}
       title={translations.ai.resourcesGroupTitle}
     >
@@ -64,6 +64,6 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
           )
         })}
       </div>
-    </AiCollapsibleMessage>
+    </CollapsibleMessage>
   )
 }

@@ -1,4 +1,7 @@
-import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
+import {
+  Markdown,
+  type AssistantMessageProps as CopilotAssistantMessageProps,
+} from "@copilotkit/react-ui"
 import { F0Button } from "@factorialco/f0-react"
 import {
   ThumbsDown,
@@ -8,12 +11,14 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import type React from "react"
 import { useCallback, useRef, useState } from "react"
-import { useI18n } from "../../../lib/providers/i18n"
-import { cn } from "../../../lib/utils"
-import { ButtonCopy } from "../../../ui/ButtonCopy"
+import { useI18n } from "../../lib/providers/i18n"
+import { cn } from "../../lib/utils"
+import { ButtonCopy } from "../../ui/ButtonCopy"
 import { ActionItem } from "../ActionItem"
-import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
-import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
+import { markdownRenderers as f0MarkdownRenderers } from "../AiChat/markdownRenderers"
+import { useFeedbackModal, type UserReaction } from "../FeedbackModal"
+
+export type AssistantMessageProps = CopilotAssistantMessageProps
 
 export const AssistantMessage = ({
   isGenerating,

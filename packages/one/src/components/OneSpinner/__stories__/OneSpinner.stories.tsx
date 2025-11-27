@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ChatSpinner } from "./ChatSpinner"
+import { OneSpinner } from "../OneSpinner"
 
-const meta: Meta<typeof ChatSpinner> = {
-  title: "Experimental/AiChat/ChatSpinner",
-  component: ChatSpinner,
+const meta: Meta<typeof OneSpinner> = {
+  title: "Experimental/OneSpinner",
+  component: OneSpinner,
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
 }
 
 export default meta

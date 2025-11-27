@@ -11,10 +11,13 @@ import { useEventListener, useResizeObserver } from "usehooks-ts"
 import { ButtonInternal } from "../../../components/F0Button/internal"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
+import {
+  FeedbackModal,
+  FeedbackModalProvider,
+  useFeedbackModal,
+} from "../../FeedbackModal"
 import { convertMessagesToTurns } from "../convertMessagesToTurns"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { FeedbackModal } from "./FeedbackModal"
-import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
 

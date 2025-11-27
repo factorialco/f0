@@ -4,7 +4,7 @@ import type { SVGProps } from "react"
 import { Ref, forwardRef, useId } from "react"
 import { cn } from "../../lib/utils"
 
-interface OneIconProps extends SVGProps<SVGSVGElement> {
+export interface OneIconProps extends SVGProps<SVGSVGElement> {
   spin?: boolean
   hover?: boolean
   background?: string
@@ -53,7 +53,7 @@ const pieces = [
   },
 ]
 
-const OneIcon = (
+const OneIconComponent = (
   {
     spin = false,
     size = "md",
@@ -195,5 +195,5 @@ const OneIcon = (
     </div>
   )
 }
-const ForwardRef = forwardRef<SVGSVGElement, OneIconProps>(OneIcon)
-export default ForwardRef
+
+export const OneIcon = forwardRef<SVGSVGElement, OneIconProps>(OneIconComponent)

@@ -2,7 +2,7 @@ import { F0Icon } from "@factorialco/f0-react"
 import CheckCircleLine from "@factorialco/f0-react/icons/animated/CheckCircleLine"
 import DottedCircle from "@factorialco/f0-react/icons/app/DottedCircle"
 import { cn } from "../../lib/utils"
-import { ChatSpinner } from "./components/ChatSpinner"
+import { OneSpinner } from "../OneSpinner"
 import "./styles.css"
 
 export interface ActionItemProps {
@@ -25,7 +25,7 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
       )}
       {status === "executing" && (
         <div className="-mt-[2px] grid h-6 w-6 shrink-0 items-center justify-items-center">
-          <ChatSpinner />
+          <OneSpinner />
         </div>
       )}
       {status === "completed" && (

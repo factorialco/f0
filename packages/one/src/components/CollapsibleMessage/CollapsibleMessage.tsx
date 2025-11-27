@@ -2,24 +2,24 @@ import { F0Icon, type IconType } from "@factorialco/f0-react"
 import ChevronRight from "@factorialco/f0-react/icons/app/ChevronRight"
 import { motion } from "motion/react"
 import { ReactNode, useState } from "react"
-import { useReducedMotion } from "../../../lib/a11y"
+import { useReducedMotion } from "../../lib/a11y"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "../../../ui/collapsible"
+} from "../../ui/collapsible"
 
-export type AiCollapsibleMessageProps = {
+export type CollapsibleMessageProps = {
   icon: IconType
   title: string
   children: ReactNode
 }
 
-export const AiCollapsibleMessage = ({
+export const CollapsibleMessage = ({
   icon,
   title,
   children,
-}: AiCollapsibleMessageProps) => {
+}: CollapsibleMessageProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 

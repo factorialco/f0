@@ -1,14 +1,14 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { AssistantMessage } from "./AssistantMessage"
-import { FeedbackModalProvider } from "./FeedbackProvider"
+import { FeedbackModalProvider } from "../../FeedbackModal"
+import { AssistantMessage } from "../AssistantMessage"
 
 const meta = {
-  title: "Experimental/AiChat/AssistantMessage",
+  title: "Experimental/AssistantMessage",
   component: AssistantMessage,
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   decorators: [
     (Story: React.ComponentType) => (
       <div className="w-96 bg-f1-background p-4">

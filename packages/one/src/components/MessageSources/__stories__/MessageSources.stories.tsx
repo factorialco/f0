@@ -1,9 +1,9 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { MessageSources } from "./MessageSources"
+import { MessageSources } from "../MessageSources"
 
 const meta = {
   component: MessageSources,
-  title: "Experimental/AiChat/MessageSources",
+  title: "Experimental/MessageSources",
   tags: ["autodocs"],
 } satisfies Meta<typeof MessageSources>
 

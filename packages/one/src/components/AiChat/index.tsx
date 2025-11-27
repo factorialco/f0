@@ -10,10 +10,9 @@ import { type AIMessage } from "@copilotkit/shared"
 import { experimental as experimentalComponent } from "@factorialco/f0-react"
 import { useEffect } from "react"
 import { cn } from "../../lib/utils"
-import { ActionItem } from "./ActionItem"
+import { ActionItem } from "../ActionItem"
 import {
   AssistantMessage,
-  ChatButton,
   ChatHeader,
   ChatTextarea,
   ChatWindow,
@@ -215,7 +214,10 @@ const AiChatCmp = () => {
       Window={ChatWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
-      Button={ChatButton}
+      Button={() => {
+        // Return null to hide CopilotKit's default chat button
+        return null
+      }}
       Input={ChatTextarea}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}

@@ -33,7 +33,7 @@ const pieces = [
   },
 ]
 
-const OneIcon = (
+const OneSpinnerComponent = (
   svgProps: SVGProps<SVGSVGElement>,
   ref: Ref<SVGSVGElement>
 ) => {
@@ -154,6 +154,7 @@ const OneIcon = (
     </div>
   )
 }
-export const ChatSpinner = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(
-  OneIcon
+
+export const OneSpinner = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(
+  OneSpinnerComponent
 )

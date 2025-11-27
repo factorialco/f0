@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-import { ActionItem } from "./ActionItem"
+import { ActionItem } from "../ActionItem"
 
 const meta = {
-  title: "Experimental/AiChat/ActionItem",
+  title: "Experimental/ActionItem",
   component: ActionItem,
   parameters: {
     layout: "centered",

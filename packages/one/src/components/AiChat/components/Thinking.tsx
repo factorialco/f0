@@ -2,7 +2,7 @@ import { MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import Lightbulb from "@factorialco/f0-react/icons/app/Lightbulb"
 import { useI18n } from "../../../lib/providers/i18n"
-import { AiCollapsibleMessage } from "./AiCollapsibleMessage"
+import { CollapsibleMessage } from "../../CollapsibleMessage"
 
 type ThinkingProps = {
   messages: Message[]
@@ -16,7 +16,7 @@ export const Thinking = ({ messages }: ThinkingProps) => {
   const translations = useI18n()
 
   return (
-    <AiCollapsibleMessage
+    <CollapsibleMessage
       icon={Lightbulb}
       title={translations.ai.thoughtsGroupTitle}
     >
@@ -31,6 +31,6 @@ export const Thinking = ({ messages }: ThinkingProps) => {
           </div>
         ))}
       </div>
-    </AiCollapsibleMessage>
+    </CollapsibleMessage>
   )
 }

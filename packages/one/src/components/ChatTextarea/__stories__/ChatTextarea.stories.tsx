@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
-import { ChatTextarea } from "./ChatTextarea"
+import { ChatTextarea } from "../ChatTextarea"
 
 // Wrapper component to manage state
 const ChatTextareaWrapper = () => {
@@ -88,12 +88,12 @@ const ChatTextareaWrapper = () => {
 }
 
 const meta = {
-  title: "Experimental/AiChat/ChatTextarea",
+  title: "Experimental/ChatTextarea",
   component: ChatTextareaWrapper,
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ChatTextareaWrapper>
 
 export default meta

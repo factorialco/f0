@@ -2,11 +2,11 @@ import { type AIMessage } from "@copilotkit/shared"
 import { Input } from "@factorialco/f0-react/experimental/Forms/Fields/Input"
 import { OneModal } from "@factorialco/f0-react/experimental/Modals/OneModal"
 import { useCallback, useEffect, useState } from "react"
-import { ButtonInternal } from "../../../components/F0Button/internal"
-import { useI18n } from "../../../lib/providers/i18n"
+import { useI18n } from "../../lib/providers/i18n"
+import { ButtonInternal } from "../F0Button/internal"
 import { UserReaction } from "./FeedbackProvider"
 
-interface ReactionModalProps {
+export interface FeedbackModalProps {
   onClose: (message: AIMessage) => void
   onSubmit: (message: AIMessage, feedback: string) => void
   reactionType: UserReaction
@@ -18,7 +18,7 @@ export const FeedbackModal = ({
   onSubmit,
   reactionType,
   message,
-}: ReactionModalProps) => {
+}: FeedbackModalProps) => {
   const [text, setText] = useState("")
   const translations = useI18n()
   const { title, label, placeholder } =

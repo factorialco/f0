@@ -2,11 +2,17 @@ import { type InputProps } from "@copilotkit/react-ui"
 import { ArrowUp, SolidStop } from "@factorialco/f0-react/icons/app"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { ButtonInternal } from "../../../components/F0Button/internal"
-import { useI18n } from "../../../lib/providers/i18n"
-import { cn } from "../../../lib/utils"
+import { useI18n } from "../../lib/providers/i18n"
+import { cn } from "../../lib/utils"
+import { ButtonInternal } from "../F0Button/internal"
 
-export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
+export type ChatTextareaProps = InputProps
+
+export const ChatTextarea = ({
+  inProgress,
+  onSend,
+  onStop,
+}: ChatTextareaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)

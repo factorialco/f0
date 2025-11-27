@@ -9,8 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../ui/tooltip"
-import OneIcon from "./OneIcon"
-import { useAiChat } from "./providers/AiChatStateProvider"
+import { useAiChat } from "../AiChat/providers/AiChatStateProvider"
+import { OneIcon } from "../OneIcon"
 
 export const OneSwitch = ({
   className,

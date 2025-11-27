@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { HILActionConfirmation } from "./HILActionConfirmation"
+import { HILActionConfirmation } from "../HILActionConfirmation"
 
 const meta = {
-  title: "Experimental/AiChat/HILActionConfirmation",
+  title: "Experimental/HILActionConfirmation",
   component: HILActionConfirmation,
   parameters: {
     layout: "centered",

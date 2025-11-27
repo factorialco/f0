@@ -4,7 +4,7 @@ import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import { type IconType } from "@factorialco/f0-react"
 import { ButtonInternal } from "../../../components/F0Button/internal"
-import OneIcon from "../OneIcon"
+import { OneIcon } from "../../OneIcon"
 
 export type WelcomeScreenSuggestion = {
   icon: IconType
