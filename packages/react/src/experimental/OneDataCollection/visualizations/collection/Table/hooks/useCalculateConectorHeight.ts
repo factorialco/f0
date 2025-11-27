@@ -1,6 +1,8 @@
+import { PADDING_TOP } from "@/experimental/OneTable/TableCell/utils/nested"
+import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
-export const useCalculateConectorHeight = () => {
+export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
   const [firstRow, setFirstRow] = useState<HTMLTableRowElement | null>(null)
   const [lastRow, setLastRow] = useState<HTMLTableRowElement | null>(null)
   const [calculatedHeight, setCalculatedHeight] = useState(0)
@@ -29,17 +31,35 @@ export const useCalculateConectorHeight = () => {
   )
 
   useLayoutEffect(() => {
-    if (!firstRow || !lastRow) {
+    const previousRow = firstRow?.previousElementSibling
+
+    if (!firstRow || !lastRow || !previousRow) {
       setCalculatedHeight(0)
       return
     }
 
+    const heightForLastBasicRow = () => {
+      return lastRow.getBoundingClientRect().top
+    }
+
+    const heightForLastDetailedRow = () => {
+      return lastRow.getBoundingClientRect().bottom - PADDING_TOP
+    }
+
+    const previousRowHeight = () => {
+      return previousRow.getBoundingClientRect().height
+    }
+
     const calculateHeight = () => {
-      const middleLastNestedRowHeight =
-        lastRow.getBoundingClientRect().height / 2 +
-        lastRow.getBoundingClientRect().top
+      const lastRowHeight =
+        nestedVariant === "basic"
+          ? heightForLastBasicRow()
+          : heightForLastDetailedRow()
+
       const height =
-        middleLastNestedRowHeight - firstRow.getBoundingClientRect().top - 6
+        lastRowHeight -
+        firstRow.getBoundingClientRect().top +
+        previousRowHeight()
 
       setCalculatedHeight(height)
     }
@@ -70,7 +90,7 @@ export const useCalculateConectorHeight = () => {
       observer.disconnect()
       resizeObserver.disconnect()
     }
-  }, [firstRow, lastRow])
+  }, [firstRow, lastRow, nestedVariant])
 
   return { setFirstChildRef, setLastChildRef, calculatedHeight }
 }

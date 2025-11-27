@@ -90,7 +90,7 @@ export const useLoadChildren = <
     getChildren(nestedFetchedData?.[rowId])
   )
   const [paginationInfo, setPaginationInfo] = useState<
-    ChildrenPaginationInfo<R> | undefined
+    ChildrenPaginationInfo | undefined
   >(nestedFetchedData?.[rowId]?.paginationInfo)
   const [isLoading, setIsLoading] = useState(false)
   const [childrenType, setChildrenType] = useState<NestedVariant>(
@@ -102,11 +102,11 @@ export const useLoadChildren = <
 
     setIsLoading(true)
 
-    const data = await source.fetchChildren?.(
+    const data = await source.fetchChildren?.({
       item,
-      source.currentFilters,
-      paginationInfo
-    )
+      filters: source.currentFilters,
+      pagination: paginationInfo,
+    })
     const loadedChildren = getChildren(data)
 
     const updatedChildren = [...children, ...loadedChildren]

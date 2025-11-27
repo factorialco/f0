@@ -72,7 +72,6 @@ const LoadMoreRowInner = <
         ...props.nestedRowProps,
         depth: depth + 1,
         hasLoadedChildren: false,
-        nestedVariant: "basic",
         onLoadMoreChildren: props.onLoadMoreChildren,
       }}
     />
