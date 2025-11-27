@@ -75,7 +75,7 @@ export const Interactive: Story = {
 export const WithAIButton: Story = {
   args: {
     title: "Widget with AI button",
-    showOne: true,
+    AIButton: fn(),
     children: <Slot />,
   },
 }
@@ -93,7 +93,7 @@ export const Full: Story = {
     title: "Fully Configured Widget with a long title",
     draggable: true,
     resizable: true,
-    showOne: true,
+    AIButton: fn(),
     dropdown: sampleDropdownItems,
     children: <Slot />,
   },

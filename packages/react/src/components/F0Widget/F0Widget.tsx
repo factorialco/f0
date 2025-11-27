@@ -21,7 +21,7 @@ export interface WidgetProps {
   resizable?: boolean
   onResizeStart?: () => void
   onResizeEnd?: () => void
-  showOne?: boolean
+  AIButton?: () => void
   dropdown?: DropdownItem[]
   children: ReactNode
   selected?: boolean
@@ -36,7 +36,7 @@ const F0WidgetBase = ({
   resizable = false,
   onResizeStart,
   onResizeEnd,
-  showOne = false,
+  AIButton,
   dropdown,
   children,
   selected = false,
@@ -82,7 +82,7 @@ const F0WidgetBase = ({
           className={cn(
             "flex min-w-0 flex-1 items-center",
             !draggable && "pl-4",
-            !dropdown && !showOne && "pr-4"
+            !dropdown && !AIButton && "pr-4"
           )}
         >
           {draggable && (
@@ -102,20 +102,20 @@ const F0WidgetBase = ({
             <F0Text variant="label" content={title} ellipsis />
           </div>
         </div>
-        {(showOne || dropdown) && (
+        {(AIButton || dropdown) && (
           <div
             className={cn(
               "flex shrink-0 items-center gap-0.5 pr-2",
               !dropdown && "pr-4"
             )}
           >
-            {showOne && (
+            {AIButton && (
               <div className="flex h-6 items-center">
                 <F0Button
                   variant="outline"
                   size="sm"
                   label="Ask One"
-                  onClick={() => {}}
+                  onClick={AIButton}
                 />
               </div>
             )}

@@ -1,9 +1,13 @@
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
+import { F0Widget } from "@/components/F0Widget"
+import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
 import { OneCalendar } from "@/experimental/OneCalendar"
+import { Delete, Pencil, Upload } from "@/icons/app"
 import { getMockValue } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { cloneElement, useCallback, useMemo, useRef, useState } from "react"
+import { fn } from "storybook/test"
 import {
   F0GridStack,
   GridStackReactWidget,
@@ -102,6 +106,13 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+const sampleDropdownItems: DropdownItem[] = [
+  { label: "Edit", icon: Pencil, onClick: fn() },
+  { label: "Export", icon: Upload, onClick: fn() },
+  { type: "separator" },
+  { label: "Delete", icon: Delete, critical: true, onClick: fn() },
+]
+
 const mockComponents = [
   <div key="1">
     This is a long text that will be truncated with an ellipsis if it
@@ -120,15 +131,21 @@ export const Default: Story = {
   args: {
     options: {
       column: 12,
+      handle: ".f0-widget-drag-handle",
     },
     widgets: Array.from({ length: 10 }, (_, index) => ({
       id: `widget-${index}`,
       w: 2,
       h: 2,
       renderFn: () => (
-        <div className="h-full rounded-md bg-f1-background-secondary p-4">
+        <F0Widget
+          title={`Widget ${index + 1}`}
+          draggable
+          resizable
+          dropdown={sampleDropdownItems}
+        >
           {getMockValue(mockComponents, index)}
-        </div>
+        </F0Widget>
       ),
     })),
   },
@@ -155,9 +172,16 @@ export const WithRefMethods: Story = {
           title: `New Widget ${newId}`,
         },
         renderFn: () => (
-          <div className="h-full rounded-md bg-f1-background-accent p-4">
-            New Widget {newId}
-          </div>
+          <F0Widget
+            title={`New Widget ${newId}`}
+            draggable
+            resizable
+            dropdown={sampleDropdownItems}
+          >
+            <div className="flex h-full items-center justify-center">
+              New Widget {newId}
+            </div>
+          </F0Widget>
         ),
       })
       setWidgetCounter(widgetCounter + 1)
@@ -186,14 +210,17 @@ export const WithRefMethods: Story = {
             title: `Widget ${index + 1}`,
           },
           renderFn: () => (
-            <div
+            <F0Widget
               key={`node-${index + 1}`}
-              className="h-full rounded-md bg-f1-background-secondary p-4"
+              title={`Widget ${index + 1}`}
+              draggable
+              resizable
+              dropdown={sampleDropdownItems}
             >
               {cloneElement(getMockValue(mockComponents, index), {
                 key: `node-${index + 1}`,
               })}
-            </div>
+            </F0Widget>
           ),
         })),
       []
@@ -212,6 +239,7 @@ export const WithRefMethods: Story = {
           ref={gridRef}
           options={{
             column: 12,
+            handle: ".f0-widget-drag-handle",
           }}
           onChange={(positions) => {
             console.log("layout", positions)
