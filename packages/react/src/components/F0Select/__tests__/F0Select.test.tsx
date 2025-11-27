@@ -4,11 +4,11 @@ import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Search } from "../../../../../icons/app"
-import { Select } from "../index"
-import type { SelectItemProps } from "../types"
+import { Search } from "../../../icons/app"
+import { F0Select } from "../index"
+import type { F0SelectItemProps } from "../types"
 
-const mockOptions: SelectItemProps<string, RecordType>[] = [
+const mockOptions: F0SelectItemProps<string, RecordType>[] = [
   {
     value: "option1",
     label: "Option 1",
@@ -54,6 +54,9 @@ const defaultSelectProps = {
   placeholder: "",
   label: "Pick an option",
   hideLabel: false,
+  onChange: (value: string) => {
+    console.log(value)
+  },
 }
 
 describe("Select", () => {
@@ -97,10 +100,11 @@ describe("Select", () => {
 
   it("renders with placeholder", async () => {
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
+        multiple={false}
+        clearable={false}
         options={mockOptions}
-        onChange={() => {}}
         placeholder="Select an option"
       />
     )
@@ -113,7 +117,7 @@ describe("Select", () => {
   it("shows options when clicked", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -128,14 +132,9 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
-  it("displays selected value", async () => {
+  it("should display selected value", async () => {
     render(
-      <Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-        value="option1"
-      />
+      <F0Select {...defaultSelectProps} options={mockOptions} value="option1" />
     )
 
     await waitFor(() => {
@@ -146,7 +145,7 @@ describe("Select", () => {
   it("renders search box when showSearchBox is true", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -163,7 +162,7 @@ describe("Select", () => {
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -183,7 +182,7 @@ describe("Select", () => {
   it("should not lose the focus when the search input is focused and the list changes", async () => {
     const user = userEvent.setup({ delay: 100 })
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -203,7 +202,7 @@ describe("Select", () => {
   it("shows empty message when no options match search", async () => {
     const user = userEvent.setup()
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -227,7 +226,7 @@ describe("Select", () => {
     const handleSearchChange = vi.fn()
 
     render(
-      <Select
+      <F0Select
         options={mockOptions}
         onChange={() => {}}
         showSearchBox
@@ -261,7 +260,7 @@ describe("Select", () => {
 
   it("disables select when disabled prop is true", async () => {
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
@@ -276,9 +275,13 @@ describe("Select", () => {
 
   it("renders with custom trigger", () => {
     render(
-      <Select {...defaultSelectProps} options={mockOptions} onChange={() => {}}>
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      >
         <button>Custom Trigger</button>
-      </Select>
+      </F0Select>
     )
 
     expect(screen.getByText("Custom Trigger")).toBeInTheDocument()
@@ -289,7 +292,7 @@ describe("Select", () => {
     const user = userEvent.setup()
 
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
@@ -318,7 +321,7 @@ describe("Select", () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
-    const mockOptions: SelectItemProps<string>[] = [
+    const mockOptions: F0SelectItemProps<string>[] = [
       {
         value: "option1",
         label: "Option 1",
@@ -335,7 +338,7 @@ describe("Select", () => {
     ]
 
     render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
@@ -361,7 +364,7 @@ describe("Select", () => {
     const user = userEvent.setup()
 
     const { container } = render(
-      <Select
+      <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={handleChange}
@@ -410,10 +413,10 @@ describe("Select", () => {
 
     // Verify that onChange is called with empty string and onChangeSelectedOption with undefined
     await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledWith("", undefined, undefined)
+      expect(handleChange).toHaveBeenCalledWith(undefined, undefined, undefined)
     })
     await waitFor(() => {
-      expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined)
+      expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined, false)
     })
   })
 })

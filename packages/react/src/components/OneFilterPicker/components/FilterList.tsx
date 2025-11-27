@@ -70,7 +70,7 @@ export function FilterList<Definition extends FiltersDefinition>({
         <F1SearchBox
           key="filter-list-search"
           name="filter-list-search"
-          placeholder={i18n.toc.search}
+          placeholder={i18n.filters.searchPlaceholder}
           value={searchValue}
           onChange={setSearchValue}
           autoFocus={!selectedFilterKey}

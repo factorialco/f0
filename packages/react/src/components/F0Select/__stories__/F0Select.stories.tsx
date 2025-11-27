@@ -1,63 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { Select, SelectItemObject, SelectProps, selectSizes } from "../index"
+import { F0Select, F0SelectItemObject, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
-import {
-  DEPARTMENTS_MOCK,
-  FIRST_NAMES_MOCK,
-  getMockValue,
-  MOCK_ICONS,
-  ROLES_MOCK,
-  SURNAMES_MOCK,
-} from "@/mocks"
 
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
-
-// Wraps the Select component with a hook to show the selected value
-const SelectWithHooks = (props: SelectProps<string>) => {
-  const { label, ...restProps } = props
-  const [localValue, setLocalValue] = useState(props.value)
-  const [searchValue, setSearchValue] = useState("")
-  // Sets a click handler to change the label's value
-  const handleOnChange = (
-    value: string,
-    item?: unknown,
-    option?: SelectItemObject<string>
-  ) => {
-    setLocalValue(value)
-    console.log(
-      "selected value:",
-      value,
-      "- original item:",
-      item,
-      "- selection option:",
-      option
-    )
-  }
-
-  const handleOnSearchChange = (value: string) => {
-    setSearchValue(value)
-    console.log("searchValue", value)
-  }
-
-  return (
-    <div className="w-48">
-      <Select
-        label={label ?? "The label"}
-        {...restProps}
-        value={localValue}
-        onChange={handleOnChange}
-        searchValue={searchValue}
-        onSearchChange={handleOnSearchChange}
-      />
-    </div>
-  )
-}
+import {
+  MockItem,
+  mockItems,
+  mockNonPaginatedSource,
+  mockPaginatedSource,
+} from "./mocks"
 
 const icons: Record<string, IconType> = {
   light: Circle,
@@ -86,8 +43,8 @@ const items = [
 ]
 
 const meta: Meta = {
-  title: "Input/Select",
-  component: SelectWithHooks,
+  title: "Select",
+  component: F0Select,
   parameters: {
     a11y: {
       skipCi: true,
@@ -229,6 +186,7 @@ const meta: Meta = {
     },
   },
   args: {
+    label: "Select a theme",
     placeholder: "Select a theme",
     onChange: fn(),
     value: "light",
@@ -246,9 +204,59 @@ const meta: Meta = {
     showSearchBox: false,
   },
   decorators: [
+    ((Story, { args }) => {
+      // Wraps the Select component with a hook to show the selected value
+      // This decorator is for single-select stories only
+      const [localValue, setLocalValue] = useState(
+        args.value as string | undefined
+      )
+      const [searchValue, setSearchValue] = useState("")
+      // Sets a click handler to change the label's value
+      const handleOnChange = (
+        value: string,
+        item?: unknown,
+        option?: F0SelectItemObject<string>
+      ) => {
+        setLocalValue(value)
+        console.log(
+          "selected value:",
+          value,
+          "- original item:",
+          item,
+          "- selection option:",
+          option
+        )
+      }
+
+      const handleOnSearchChange = (value: string) => {
+        setSearchValue(value)
+      }
+
+      const truncatedValue = (localValue || []).slice(0, 50)
+
+      return (
+        <>
+          <Story
+            args={
+              {
+                ...args,
+                value: localValue,
+                onChange: handleOnChange,
+                searchValue: searchValue,
+                onSearchChange: handleOnSearchChange,
+              } as typeof args
+            }
+          />
+          <div className="mt-20">
+            Selected: {JSON.stringify(truncatedValue, null, 2)} - Total:{" "}
+            {localValue?.length}
+          </div>
+        </>
+      )
+    }) satisfies Decorator,
     (Story) => (
       <div
-        className="w-[350px]"
+        className="w-[330px]"
         onClick={() => {
           console.log("click was received in elements below the select")
         }}
@@ -258,7 +266,7 @@ const meta: Meta = {
     ),
   ],
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof SelectWithHooks>
+} satisfies Meta<typeof F0Select>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -371,6 +379,7 @@ export const WithHint: Story = {
 export const Clearable: Story = {
   args: {
     label: "Select a theme",
+    value: "dark",
     clearable: true,
   },
 }
@@ -383,7 +392,7 @@ export const WithSearchBox: Story = {
   render: (args) => {
     return (
       <>
-        <Select
+        <F0Select
           showSearchBox
           label="Select a theme"
           onChange={fn()}
@@ -410,6 +419,7 @@ export const WithActions: Story = {
     showSearchBox: true,
     searchEmptyMessage: "No results found",
     searchBoxPlaceholder: "Search for a theme",
+    label: "Select a theme",
     actions: [
       {
         label: "Create new option",
@@ -421,20 +431,10 @@ export const WithActions: Story = {
   },
 }
 
-const mockItems = Array.from({ length: 10000 }, (_, i) => ({
-  value: `option-${i}`,
-  label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
-  icon: getMockValue(MOCK_ICONS, i),
-  role: getMockValue(ROLES_MOCK, i),
-  department: getMockValue(DEPARTMENTS_MOCK, i),
-  description: `Description for option ${i}`,
-}))
-
-type MockItem = (typeof mockItems)[number]
-
 export const LargeList: Story = {
   args: {
     ...WithSearchBox.args,
+    label: "Select a theme",
     value: "option-4",
     options: [
       ...(meta.args?.options || []),
@@ -446,32 +446,13 @@ export const LargeList: Story = {
 
 export const WithDataSourceNotPaginated: Story = {
   args: {
+    label: "Select label",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
     value: "option-2",
-    source: createDataSourceDefinition<MockItem>({
-      dataAdapter: {
-        fetchData: (options) => {
-          const { search } = options
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              const results = mockItems.filter(
-                (item) =>
-                  !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
-              )
-
-              const res = {
-                records: results,
-              }
-              resolve(res)
-            }, 100)
-          })
-        },
-      },
-    }),
-    mapOptions: (item: (typeof mockItems)[number]) => ({
+    source: mockNonPaginatedSource,
+    mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
       icon: item.icon,
@@ -482,93 +463,12 @@ export const WithDataSourceNotPaginated: Story = {
 
 export const WithDataSourcePaginated: Story = {
   args: {
+    label: "Data Source Paginated",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
     value: "option-2",
-    source: createDataSourceDefinition<MockItem>({
-      filters: {
-        status: {
-          type: "in",
-          label: "Status",
-          options: {
-            options: [
-              { value: "eliseo-vargas", label: "Elise Vargas" },
-              { value: "alexander-smith", label: "Alexander Smith" },
-              { value: "bob-johnson", label: "Bob Johnson" },
-              { value: "carol-williams", label: "Carol Williams" },
-              { value: "dave-brown", label: "Dave Brown" },
-              { value: "saul-vargas", label: "Saul Vargas" },
-              { value: "michael-johnson", label: "Michael Johnson" },
-              { value: "john-williams", label: "John Williams" },
-              { value: "jane-brown", label: "Jane Brown" },
-              { value: "jose-martinez", label: "Jose Martinez" },
-              { value: "james-smith", label: "James Smith" },
-              { value: "david-williams", label: "David Williams" },
-              { value: "william-brown", label: "William Brown" },
-              { value: "emily-martinez", label: "Emily Martinez" },
-              { value: "luis-garcia", label: "Luis Garcia" },
-              { value: "robert-martinez", label: "Robert Martinez" },
-              { value: "joseph-smith", label: "Joseph Smith" },
-              { value: "daniel-williams", label: "Daniel Williams" },
-              { value: "patrick-brown", label: "Patrick Brown" },
-              { value: "charles-martinez", label: "Charles Martinez" },
-              { value: "anthony-smith", label: "Anthony Smith" },
-            ],
-          },
-        },
-        date: {
-          type: "date",
-          label: "Date",
-          options: {
-            minDate: new Date("2021-01-01"),
-            maxDate: new Date("2021-12-31"),
-            mode: "range",
-            view: "quarter",
-          },
-        },
-      },
-      dataAdapter: {
-        paginationType: "infinite-scroll",
-        fetchData: (options) => {
-          const { search, pagination } = options
-          return new Promise((resolve) => {
-            setTimeout(
-              () => {
-                const pageSize = pagination.perPage ?? 10
-                const cursor = "cursor" in pagination ? pagination.cursor : null
-                const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
-
-                const results = mockItems.filter(
-                  (item) =>
-                    !search ||
-                    item.label.toLowerCase().includes(search.toLowerCase()) ||
-                    item.description
-                      .toLowerCase()
-                      .includes(search.toLowerCase())
-                )
-
-                const paginatedResults = results.slice(
-                  cursor ? Number(cursor) : 0,
-                  nextCursor
-                )
-
-                const res = {
-                  type: "infinite-scroll" as const,
-                  cursor: String(nextCursor),
-                  perPage: pageSize,
-                  hasMore: nextCursor < results.length,
-                  records: paginatedResults,
-                  total: results.length,
-                }
-                resolve(res)
-              },
-              1000 + Math.random() * 500
-            )
-          })
-        },
-      },
-    }),
+    source: mockPaginatedSource,
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
@@ -580,6 +480,7 @@ export const WithDataSourcePaginated: Story = {
 
 export const WithDataSourceGrouping: Story = {
   args: {
+    label: "Data Source Grouping",
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
@@ -659,8 +560,25 @@ export const WithDataSourceGrouping: Story = {
   },
 }
 
+export const MultipleNotPaginated: Story = {
+  args: {
+    label: "Multiple Not Paginated",
+    multiple: true,
+    value: mockItems.map((item) => item.value),
+    clearable: true,
+    source: mockNonPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
 export const WithCustomTrigger: Story = {
   args: {
+    label: "With Custom Trigger",
     placeholder: "Choose a color",
     onChange: fn(),
     value: "red",
@@ -672,7 +590,7 @@ export const WithCustomTrigger: Story = {
     ],
   },
   render: ({ value, options, placeholder, onChange, ...args }) => (
-    <Select
+    <F0Select
       label="Choose a color"
       value={value}
       options={options}
@@ -683,7 +601,7 @@ export const WithCustomTrigger: Story = {
       <div className="flex h-24 w-24 items-center rounded-md border border-solid border-f1-border bg-f1-background-secondary p-2 text-center transition-colors hover:bg-f1-background-secondary-hover">
         {placeholder}
       </div>
-    </Select>
+    </F0Select>
   ),
 }
 
@@ -694,6 +612,7 @@ export const Snapshot: Story = {
   },
   render: () => {
     const base = {
+      multiple: false as const,
       clearable: true,
       icon: Placeholder,
       labelIcon: Placeholder,
@@ -721,14 +640,14 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <Select
+              <F0Select
                 size={size}
                 label="Label text here"
                 onChange={fn()}
                 options={[]}
               />
               {snapshotVariants.map((variant, index) => (
-                <Select
+                <F0Select
                   key={`${size}-${index}`}
                   size={size}
                   {...variant}

@@ -1,5 +1,5 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { Select } from "@/experimental/Forms/Fields/Select"
+import { F0Select } from "@/components/F0Select"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
@@ -327,7 +327,7 @@ export const WithSelectInput: Story = {
               This demonstrates the Select component inside a modal with long
               text options.
             </p>
-            <Select
+            <F0Select
               label="Choose an option (long text test)"
               placeholder="Select an option"
               showSearchBox

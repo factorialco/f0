@@ -1,170 +1,47 @@
-import { F0Avatar } from "@/components/avatars/F0Avatar"
-import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
-import { F0TagRaw } from "@/components/tags/F0TagRaw"
-
 import {
   BaseFetchOptions,
   BaseResponse,
-  DataSourceDefinition,
   FiltersDefinition,
   getDataSourcePaginationType,
-  GroupingDefinition,
   PaginatedDataAdapter,
   PromiseOrObservable,
-  RecordType,
-  SortingsDefinition,
   useData,
   useDataSource,
   useGroups,
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { toArray } from "@/lib/toArray"
 import { GroupHeader } from "@/ui/GroupHeader/index"
-import { InputField, InputFieldProps } from "@/ui/InputField"
+import { InputField } from "@/ui/InputField"
 import {
   SelectContent,
-  SelectItem as SelectItemPrimitive,
   Select as SelectPrimitive,
   SelectSeparator,
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
+import { isEqual } from "lodash"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
-import { Action, SelectBottomActions } from "./SelectBottomActions"
-import { SelectTopActions } from "./SelectTopActions"
-import type { SelectItemObject, SelectItemProps } from "./types"
+import { SelectAll } from "./components/SelectAll"
+import { SelectBottomActions } from "./components/SelectBottomActions"
+import { SelectedItems } from "./components/SelectedItems"
+import { SelectItem } from "./components/SelectItem"
+import { SelectTopActions } from "./components/SelectTopActions"
+import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+  F0SelectProps,
+  ResolvedRecordType,
+} from "./types"
 export * from "./types"
 
-// Helper type to resolve the actual record type
-export type ResolvedRecordType<R> = R extends RecordType ? R : RecordType
-
-/**
- * Select component for choosing from a list of options.
- *
- * @template T - The type of the emitted  value
- * @template R - The type of the record/item data (used with data source)
- *
- */
-export type SelectProps<T extends string, R = unknown> = {
-  onChange: (
-    value: T,
-    originalItem?: ResolvedRecordType<R>,
-    option?: SelectItemObject<T, ResolvedRecordType<R>>
-  ) => void
-  onChangeSelectedOption?: (
-    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
-  ) => void
-  value?: T
-  defaultItem?: SelectItemObject<T, ResolvedRecordType<R>>
-  children?: React.ReactNode
-  open?: boolean
-  showSearchBox?: boolean
-  searchBoxPlaceholder?: string
-  onSearchChange?: (value: string) => void
-  searchValue?: string
-  onOpenChange?: (open: boolean) => void
-  searchEmptyMessage?: string
-  className?: string
-  selectContentClassName?: string
-  actions?: Action[]
-  portalContainer?: HTMLElement | null
-} & (
-  | {
-      source: DataSourceDefinition<
-        ResolvedRecordType<R>,
-        FiltersDefinition,
-        SortingsDefinition,
-        GroupingDefinition<ResolvedRecordType<R>>
-      >
-      mapOptions: (
-        item: ResolvedRecordType<R>
-      ) => SelectItemProps<T, ResolvedRecordType<R>>
-      options?: never
-    }
-  | {
-      source?: never
-      mapOptions?: never
-      searchFn?: (
-        option: SelectItemProps<T, unknown>,
-        search?: string
-      ) => boolean | undefined
-      options: SelectItemProps<T, unknown>[]
-    }
-) &
-  Pick<
-    InputFieldProps<T>,
-    | "required"
-    | "loading"
-    | "hideLabel"
-    | "clearable"
-    | "labelIcon"
-    | "size"
-    | "label"
-    | "icon"
-    | "placeholder"
-    | "disabled"
-    | "name"
-    | "error"
-    | "status"
-    | "hint"
-  >
-const SelectItem = <T extends string, R>({
-  item,
-}: {
-  item: SelectItemObject<T, R>
-}) => {
-  return (
-    <SelectItemPrimitive value={item.value} disabled={item.disabled}>
-      <div className="flex w-full items-start gap-1.5">
-        {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-        {item.icon && (
-          <div className="shrink-0 text-f1-icon">
-            <F0Icon icon={item.icon} />
-          </div>
-        )}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <OneEllipsis lines={2} className="font-medium">
-            {item.label}
-          </OneEllipsis>
-          {item.description && (
-            <OneEllipsis lines={2} className="text-f1-foreground-secondary">
-              {item.description}
-            </OneEllipsis>
-          )}
-        </div>
-        {item.tag && (
-          <div className="self-center">
-            <F0TagRaw text={item.tag} />
-          </div>
-        )}
-      </div>
-    </SelectItemPrimitive>
-  )
-}
-
-const SelectValue = forwardRef<
-  HTMLDivElement,
-  { item: SelectItemObject<string> }
->(function SelectValue({ item }, ref) {
-  return (
-    <div
-      className="flex min-w-0 flex-1 items-center justify-start gap-1.5"
-      ref={ref}
-    >
-      {item.icon && (
-        <div className="h-5 shrink-0 text-f1-icon">
-          <F0Icon icon={item.icon} />
-        </div>
-      )}
-      <OneEllipsis tag="span">{item.label}</OneEllipsis>
-    </div>
-  )
-})
-
-const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
+const defaultSearchFn = (
+  option: F0SelectItemProps<string>,
+  search?: string
+) => {
   return (
     option.type === "separator" ||
     !search ||
@@ -172,7 +49,7 @@ const defaultSearchFn = (option: SelectItemProps<string>, search?: string) => {
   )
 }
 
-const SelectComponent = forwardRef(function Select<
+const F0SelectComponent = forwardRef(function Select<
   T extends string,
   R = unknown,
 >(
@@ -206,25 +83,45 @@ const SelectComponent = forwardRef(function Select<
     status,
     hint,
     required,
+    multiple,
     portalContainer,
     ...props
-  }: SelectProps<T, R>,
+  }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
 
+  const defaultItems = useMemo(
+    () =>
+      toArray(props.defaultItem).filter(
+        (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
+          item !== undefined
+      ),
+    [props.defaultItem]
+  )
+
+  const defaultValues = useMemo(
+    () => defaultItems.map((item) => item.value),
+    [defaultItems]
+  )
+
   const [localValue, setLocalValue] = useState(
-    value || props.defaultItem?.value
+    toArray(value) ?? defaultValues ?? []
   )
 
   useEffect(() => {
-    if (value !== localValue) {
-      setLocalValue(value || props.defaultItem?.value)
+    if (
+      !isEqual(
+        toArray(value) ?? [],
+        localValue?.map((item) => String(item)) ?? []
+      )
+    ) {
+      setLocalValue(toArray(value) ?? defaultValues ?? [])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, props.defaultItem])
+  }, [value])
 
   const dataSource = useMemo(() => {
     if (
@@ -285,7 +182,7 @@ const SelectComponent = forwardRef(function Select<
    * Maps an item to a SelectItemProps<T, ActualRecordType>
    */
   const optionMapper = useCallback(
-    (item: ActualRecordType): SelectItemProps<T, ActualRecordType> => {
+    (item: ActualRecordType): F0SelectItemProps<T, ActualRecordType> => {
       if (source) {
         if (!mapOptions) {
           throw new Error("mapOptions is required when using a source")
@@ -293,7 +190,7 @@ const SelectComponent = forwardRef(function Select<
         return mapOptions(item)
       }
       // At this point, we are sure that options is an array of SelectItemProps<T, ActualRecordType>
-      return item as unknown as SelectItemProps<T, ActualRecordType>
+      return item as unknown as F0SelectItemProps<T, ActualRecordType>
     },
     [mapOptions, source]
   )
@@ -303,76 +200,102 @@ const SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
-  const [selectedOption, setSelectedOption] = useState<
-    SelectItemObject<T, ActualRecordType> | undefined
-  >(undefined)
+  const [selectedItems, setSelectedItems] = useState<
+    F0SelectItemObject<T, ActualRecordType>[]
+  >([])
 
   /**
    * Finds an option in the data records by value and returns the mapped option
    * @param value - The value to find
    * @returns The option if found, undefined otherwise
    */
-  const findOption = useCallback(
+  const findOptionsByValue = useCallback(
     (
-      value: string | T | undefined
-    ): SelectItemObject<T, ActualRecordType> | undefined => {
-      if (value === undefined) {
-        return undefined
+      values: (string | T)[] | undefined
+    ): F0SelectItemObject<T, ActualRecordType>[] => {
+      if (values === undefined) {
+        return []
       }
 
-      if (value === props.defaultItem?.value) {
-        return props.defaultItem
+      if (isEqual(values, defaultValues)) {
+        return defaultItems
       }
 
+      const res = []
       for (const option of data.records) {
         const mappedOption = optionMapper(option)
+
         if (
           mappedOption.type !== "separator" &&
-          String(mappedOption.value) === value
+          values?.includes(String(mappedOption.value))
         ) {
-          return mappedOption
+          res.push(mappedOption)
         }
       }
-      return undefined
+      return res
     },
-    [data.records, optionMapper, props.defaultItem]
+    [data.records, optionMapper, defaultItems, defaultValues]
   )
 
   useEffect(() => {
-    const foundOption = findOption(localValue)
+    const foundOptions = findOptionsByValue(localValue)
 
-    if (foundOption) {
-      onChangeSelectedOption?.(foundOption)
-      setSelectedOption(foundOption)
-    }
-    if (!localValue) {
-      onChangeSelectedOption?.(undefined)
-      setSelectedOption(undefined)
-    }
+    // Always update selectedItems based on foundOptions
+    // This handles both selection and clearing
+    setSelectedItems(foundOptions)
   }, [
     data.records,
     localValue,
     optionMapper,
-    findOption,
+    findOptionsByValue,
     onChangeSelectedOption,
   ])
 
-  const onSearchChangeLocal = useCallback(
-    (value: string) => {
-      setCurrentSearch(value)
-      onSearchChange?.(value)
+  const onSearchChangeLocal = (value: string) => {
+    setCurrentSearch(value)
+    onSearchChange?.(value)
+  }
+
+  const onItemCheckChange = useCallback(
+    (value: string, checked: boolean) => {
+      const foundOption = findOptionsByValue([value])[0]
+      if (foundOption) {
+        onChangeSelectedOption?.(foundOption, checked)
+      }
     },
-    [setCurrentSearch, onSearchChange]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
+    [onChangeSelectedOption]
   )
 
-  const handleLocalValueChange = (changedValue: string | undefined) => {
+  const handleLocalValueChange = (
+    changedValue: string | string[] | undefined
+  ) => {
     // Resets the search value when the option is selected
     setCurrentSearch(undefined)
-    setLocalValue(changedValue as T)
+    setLocalValue((toArray(changedValue) ?? []) as T[])
 
-    const foundOption = findOption(changedValue)
+    const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
 
-    onChange?.(changedValue as T, foundOption?.item, foundOption)
+    // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
+    if (multiple) {
+      const values = foundOptions.map((option) => option.value)
+      const items = foundOptions
+        .map((option) => option.item)
+        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+
+      onChange?.(values, items, foundOptions)
+    } else {
+      const value = foundOptions[0]?.value
+      const item = foundOptions[0]?.item
+      const option = foundOptions[0]
+
+      onChange?.(value, item, option)
+
+      // Notify when selection is cleared (option is undefined)
+      if (option === undefined) {
+        onChangeSelectedOption?.(undefined, false)
+      }
+    }
   }
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
@@ -446,23 +369,68 @@ const SelectComponent = forwardRef(function Select<
   const handleScrollBottom = () => {
     loadMore()
   }
-
   const i18n = useI18n()
+
+  const [selectAll, setSelectAll] = useState(false)
+
+  const handleSelectAll = (value: boolean) => {
+    if (multiple) {
+      setSelectAll(value)
+      handleLocalValueChange(
+        value
+          ? items
+              .map((item) => item.value?.toString())
+              .filter((value) => value !== undefined)
+          : []
+      )
+    }
+  }
+
+  // TODO USE DATA SOURCE SELECTABLE
+  useEffect(() => {
+    if (multiple) {
+      const allSelected = selectedItems.length === items.length
+      const noneSelected = selectedItems.length === 0
+
+      if (allSelected) {
+        setSelectAll(true)
+      } else if (noneSelected) {
+        setSelectAll(false)
+      }
+    }
+  }, [selectedItems.length, items.length, multiple])
+
+  const isPartiallySelected = useMemo(() => {
+    if (multiple) {
+      return selectedItems.length > 0 && selectedItems.length < items.length
+    }
+    return false
+  }, [selectedItems, items, multiple])
+
+  const commonProps = {
+    ...props,
+    onItemCheckChange,
+    disabled,
+    open: openLocal,
+    onOpenChange: handleChangeOpenLocal,
+    onValueChange: handleLocalValueChange,
+  }
+
+  const selectPrimitiveProps = multiple
+    ? ({
+        ...commonProps,
+        value: localValue as string[],
+        multiple: true as const,
+      } as const)
+    : ({
+        ...commonProps,
+        value: localValue[0] as string | undefined,
+        multiple: false as const,
+      } as const)
 
   return (
     <>
-      <SelectPrimitive
-        onValueChange={handleLocalValueChange}
-        value={
-          localValue !== undefined && localValue !== null
-            ? String(localValue)
-            : undefined
-        }
-        disabled={disabled}
-        open={openLocal}
-        onOpenChange={handleChangeOpenLocal}
-        {...props}
-      >
+      <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
             <div
@@ -481,8 +449,9 @@ const SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              value={localValue as string}
-              onChange={(value) => handleLocalValueChange(value)}
+              value={localValue.join(",")}
+              isEmpty={(value) => value?.length === 0}
+              onClear={() => handleLocalValueChange([])}
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
@@ -507,7 +476,12 @@ const SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectedOption && <SelectValue item={selectedOption} />}
+                {selectedItems && (
+                  <SelectedItems
+                    multiple={multiple}
+                    selection={selectedItems}
+                  />
+                )}
               </button>
             </InputField>
           )}
@@ -520,18 +494,28 @@ const SelectComponent = forwardRef(function Select<
             emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
             bottom={<SelectBottomActions actions={actions} />}
             top={
-              <SelectTopActions
-                searchValue={currentSearch}
-                onSearchChange={onSearchChangeLocal}
-                searchBoxPlaceholder={searchBoxPlaceholder}
-                showSearchBox={showSearchBox}
-                grouping={localSource.grouping}
-                currentGrouping={localSource.currentGrouping}
-                onGroupingChange={localSource.setCurrentGrouping}
-                filters={localSource.filters}
-                currentFilters={localSource.currentFilters}
-                onFiltersChange={localSource.setCurrentFilters}
-              />
+              <>
+                <SelectTopActions
+                  searchValue={currentSearch}
+                  onSearchChange={onSearchChangeLocal}
+                  searchBoxPlaceholder={searchBoxPlaceholder}
+                  showSearchBox={showSearchBox}
+                  grouping={localSource.grouping}
+                  currentGrouping={localSource.currentGrouping}
+                  onGroupingChange={localSource.setCurrentGrouping}
+                  filters={localSource.filters}
+                  currentFilters={localSource.currentFilters}
+                  onFiltersChange={localSource.setCurrentFilters}
+                />
+                {multiple && (
+                  <SelectAll
+                    selectedCount={selectedItems.length}
+                    indeterminate={isPartiallySelected}
+                    value={selectAll}
+                    onChange={handleSelectAll}
+                  />
+                )}
+              </>
             }
             forceMinHeight={!!localSource.filters}
             onScrollBottom={handleScrollBottom}
@@ -547,9 +531,9 @@ const SelectComponent = forwardRef(function Select<
   )
 })
 
-export const Select = SelectComponent as <
+export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
+  props: F0SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
 ) => React.ReactElement

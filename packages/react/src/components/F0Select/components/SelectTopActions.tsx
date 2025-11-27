@@ -9,7 +9,7 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { useState } from "react"
-import { F1SearchBox } from "../F1SearchBox"
+import { F1SearchBox } from "../../../experimental/Forms/Fields/F1SearchBox"
 
 interface SelectTopActionsProps<
   R extends RecordType = RecordType,
@@ -44,20 +44,30 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-  if (!showSearchBox) return null
+  if (
+    !showSearchBox &&
+    !filters &&
+    (!grouping ||
+      (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2))
+  ) {
+    return null
+  }
+
   return (
     <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
       <div className="flex flex-1 flex-row gap-2">
-        <div className="flex-1">
-          <F1SearchBox
-            placeholder={searchBoxPlaceholder ?? i18n.toc.search}
-            onChange={onSearchChange}
-            value={searchValue}
-            debounceTime={400}
-            autoFocus={!isFiltersOpen}
-            clearable
-          />
-        </div>
+        {showSearchBox && (
+          <div className="flex-1">
+            <F1SearchBox
+              placeholder={searchBoxPlaceholder ?? i18n.toc.search}
+              onChange={onSearchChange}
+              value={searchValue}
+              debounceTime={400}
+              autoFocus={!isFiltersOpen}
+              clearable
+            />
+          </div>
+        )}
         {filters && (
           <OneFilterPicker
             filters={filters}
