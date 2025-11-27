@@ -68,6 +68,17 @@ export const actionVariants = cva({
         "active:bg-f1-background-selected-hover active:shadow-[inset_0_2px_4px_0_rgba(13,22,37,.1)]",
         "data-[pressed=true]:bg-f1-background-selected-hover data-[pressed=true]:shadow-[inset_0_2px_4px_0_rgba(13,22,37,.1)]"
       ),
+      ai: cn(
+        baseButton,
+        "bg-f1-border text-f1-foreground transition-all duration-200",
+        "[--gradient-angle:0deg]",
+        "hover:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] hover:before:opacity-100",
+        "hover:animate-rotate-gradient",
+        "before:pointer-events-none before:absolute before:inset-px before:rounded-[9px] before:bg-f1-background before:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] before:content-['']",
+        "after:pointer-events-none after:absolute after:inset-0 after:z-[-1] after:translate-y-px after:rounded after:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] after:opacity-0 after:blur-sm after:transition-all after:duration-200 after:content-[''] hover:after:opacity-20",
+        "active:bg-f1-background-tertiary active:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)]",
+        "data-[pressed=true]:bg-f1-background-tertiary data-[pressed=true]:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] data-[pressed=true]:after:opacity-70 data-[pressed=true]:after:ring-f1-border-hover"
+      ),
     },
     pressed: {
       true: "[&_.main]:translate-y-px",
@@ -114,6 +125,7 @@ export const iconVariants = cva({
       ghost: "",
       promote: "",
       outlinePromote: "",
+      ai: "",
       link: "",
       mention: "",
       selected: "",
@@ -160,6 +172,11 @@ export const iconVariants = cva({
       variant: "outlinePromote",
       mode: "default",
       class: "[&>svg]:text-f1-icon-promote",
+    },
+    {
+      variant: "ai",
+      mode: "default",
+      class: "[&>svg]:text-f1-icon",
     },
     {
       variant: "link",
@@ -250,6 +267,7 @@ export const loadingVariants = cva({
       ghost: "border-f1-foreground border-t-transparent",
       promote: "border-f1-icon-promote border-t-transparent",
       outlinePromote: "border-f1-icon-promote border-t-transparent",
+      ai: "border-f1-foreground border-t-transparent",
       unstyled: "",
     },
   },

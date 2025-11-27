@@ -2,6 +2,12 @@
 @import "../assets/fonts/style.css";
 @import "@factorialco/f0-core/base.css";
 
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 :root {
   --ds-sidebar-width: 240px;
 }

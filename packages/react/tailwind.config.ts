@@ -11,4 +11,21 @@ export default {
     "./docs/**/*.{mdx,ts,tsx}",
     "./storybook/**/*.{mdx,ts,tsx}",
   ],
+  theme: {
+    ...baseConfig.theme,
+    extend: {
+      ...baseConfig.theme?.extend,
+      keyframes: {
+        ...baseConfig.theme?.extend?.keyframes,
+        "rotate-gradient": {
+          from: { "--gradient-angle": "0deg" },
+          to: { "--gradient-angle": "360deg" },
+        },
+      },
+      animation: {
+        ...baseConfig.theme?.extend?.animation,
+        "rotate-gradient": "rotate-gradient 4s linear infinite",
+      },
+    },
+  },
 } satisfies Config
