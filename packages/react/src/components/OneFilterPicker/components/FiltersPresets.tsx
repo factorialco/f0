@@ -20,11 +20,11 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   onPresetsChange,
   presetsLoading = false,
 }: FilterPresetsProps<Filters>) => {
-  const renderListPresetItem = (
-    preset: NonNullable<typeof presets>[number],
-    index: number,
-    isVisible = true
-  ) => {
+  /**
+   * Computes the selection state and click handler for a preset.
+   * Handles both 'replace' (default) and 'additive' modes.
+   */
+  const getPresetState = (preset: NonNullable<typeof presets>[number]) => {
     const isAdditive = preset.mode === "additive"
 
     // For additive mode, check if all preset filters are present in current value
@@ -60,6 +60,16 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         }
       }
     }
+
+    return { isSelected, handleClick }
+  }
+
+  const renderListPresetItem = (
+    preset: NonNullable<typeof presets>[number],
+    index: number,
+    isVisible = true
+  ) => {
+    const { isSelected, handleClick } = getPresetState(preset)
 
     return (
       <Preset
@@ -77,41 +87,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     preset: NonNullable<typeof presets>[number],
     index: number
   ) => {
-    const isAdditive = preset.mode === "additive"
-
-    // For additive mode, check if all preset filters are present in current value
-    // For replace mode, check exact match
-    const isSelected = isAdditive
-      ? Object.entries(preset.filter).every(
-          ([key, val]) => JSON.stringify(value[key]) === JSON.stringify(val)
-        )
-      : JSON.stringify(preset.filter) === JSON.stringify(value)
-
-    const handleClick = () => {
-      if (isSelected) {
-        // Deselect
-        if (isAdditive) {
-          // Remove only preset's keys from current filters
-          const newFilters = { ...value }
-          Object.keys(preset.filter).forEach((key) => {
-            delete newFilters[key as keyof typeof newFilters]
-          })
-          onPresetsChange?.(newFilters)
-        } else {
-          // Clear all filters
-          onPresetsChange?.({} as FiltersState<Filters>)
-        }
-      } else {
-        // Select
-        if (isAdditive) {
-          // Merge preset's filter with current filters
-          onPresetsChange?.({ ...value, ...preset.filter })
-        } else {
-          // Replace with preset's filter
-          onPresetsChange?.(preset.filter)
-        }
-      }
-    }
+    const { isSelected, handleClick } = getPresetState(preset)
 
     return (
       <button
