@@ -104,6 +104,7 @@ function TOCContent({
   searchPlaceholder,
   onReorder,
   hideChildrenCounter = false,
+  footer,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -219,7 +220,7 @@ function TOCContent({
         </OneEllipsis>
       </div>
 
-      <ScrollArea className="h-full min-h-0">
+      <ScrollArea className="min-h-0 flex-1 overflow-hidden">
         <div className="px-3 pb-2">
           {sortable ? (
             <Reorder.Group
@@ -261,6 +262,8 @@ function TOCContent({
           )}
         </div>
       </ScrollArea>
+
+      {footer && <div className="flex-shrink-0">{footer}</div>}
     </nav>
   )
 }

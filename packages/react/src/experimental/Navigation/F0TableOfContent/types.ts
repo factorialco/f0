@@ -46,4 +46,5 @@ export interface TOCProps {
   showSearchBox?: boolean
   searchPlaceholder?: string
   hideChildrenCounter?: boolean
+  footer?: React.ReactNode
 }
