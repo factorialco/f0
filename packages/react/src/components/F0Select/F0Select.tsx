@@ -373,8 +373,11 @@ const F0SelectComponent = forwardRef(function Select<
       return
     }
 
-    // Resets the search value when the option is selected
-    setCurrentSearch(undefined)
+    // Only reset search in single select mode (dropdown closes after selection)
+    // In multiple mode, user may want to continue selecting more items
+    if (!multiple) {
+      setCurrentSearch(undefined)
+    }
 
     const checkedItems = Array.from(selectedState.items.values() || []).filter(
       (item) => item.checked
@@ -403,6 +406,11 @@ const F0SelectComponent = forwardRef(function Select<
     // so we need to cast it to the correct type
     if (multiple) {
       const values = checkedItems.map((item) => String(item.id) as T)
+
+      // Sync localValue with actual selection state
+      // This ensures the preview shows correct items after deselection
+      setLocalValue(values)
+
       const records = checkedItems
         .map((item) => item.item)
         .filter(
@@ -423,6 +431,10 @@ const F0SelectComponent = forwardRef(function Select<
     } else {
       const selectedItem = checkedItems[0]
       const value = selectedItem ? (String(selectedItem.id) as T) : undefined
+
+      // Sync localValue with actual selection state
+      setLocalValue(value ? [value] : [])
+
       const record = selectedItem?.item as ActualRecordType | undefined
       const originalItem = extractOriginalItem(record)
       const option = record

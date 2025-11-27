@@ -24,7 +24,10 @@ export type SelectionStatus<
   Filters extends FiltersDefinition,
 > = {
   allChecked: boolean | "indeterminate"
+  /** Status of items that have been loaded. Items not yet loaded won't appear here. */
   itemsStatus: ReadonlyArray<{ item: R; checked: boolean }>
+  /** All selected item IDs, including those not yet loaded */
+  selectedIds: ReadonlyArray<SelectionId>
   checkedItems: ReadonlyArray<R>
   uncheckedItems: ReadonlyArray<R>
   groupsStatus: Record<string, boolean>

@@ -92,6 +92,11 @@ export function useSelectable<
   )
 
   const [allSelectedCheck, setAllSelectedCheck] = useState(false)
+  // Store the total count when "select all" was clicked
+  // This is used to show the correct count even when filtering
+  const [allSelectedTotalCount, setAllSelectedTotalCount] = useState<
+    number | null
+  >(null)
 
   /**
    * Determine the status of the all selected checkbox
@@ -485,6 +490,13 @@ export function useSelectable<
     }
     setAllSelectedCheck(checked)
 
+    // Store the total count when selecting all, clear it when deselecting
+    if (checked) {
+      setAllSelectedTotalCount(totalKnownItemsCount)
+    } else {
+      setAllSelectedTotalCount(null)
+    }
+
     if (isGrouped && data.type === "grouped") {
       // Select/deselect all groups using data.groups (not groupsState which might be empty)
       const allGroupIds = data.groups.map((group) => group.key)
@@ -500,6 +512,31 @@ export function useSelectable<
       if (allItemIds.length > 0) {
         handleSelectItemChangeInternal(allItemIds, checked)
       }
+
+      // Apply the same checked state to ALL items in localSelectedState
+      // This handles items that were previously selected but are not in current data.records
+      // (e.g., items selected while filtering that are not in the current page)
+      setLocalSelectedState((current) => {
+        const newItems = new Map(current.items)
+        let hasChanges = false
+
+        for (const [id, itemState] of newItems.entries()) {
+          if (itemState.checked !== checked) {
+            newItems.set(id, { ...itemState, checked })
+            hasChanges = true
+          }
+        }
+
+        if (!hasChanges) {
+          return current
+        }
+
+        return {
+          ...current,
+          allSelected: checked ? true : false,
+          items: newItems,
+        }
+      })
     }
   }
 
@@ -644,6 +681,7 @@ export function useSelectable<
   useEffect(() => {
     if (checkedCount === 0) {
       setAllSelectedCheck(false)
+      setAllSelectedTotalCount(null)
     }
   }, [checkedCount])
 
@@ -654,9 +692,13 @@ export function useSelectable<
         0
       )
     } else {
-      return allSelectedCheck
-        ? totalKnownItemsCount - uncheckedCount
-        : checkedCount
+      if (allSelectedCheck) {
+        // Use the saved total count from when "select all" was clicked
+        // This prevents the count from changing when searching/filtering
+        const baseTotal = allSelectedTotalCount ?? totalKnownItemsCount
+        return baseTotal - uncheckedCount
+      }
+      return checkedCount
     }
   }, [
     groupAllSelectedStatus,
@@ -665,6 +707,7 @@ export function useSelectable<
     checkedCount,
     isGrouped,
     allSelectedCheck,
+    allSelectedTotalCount,
   ])
 
   // Track the previous state to avoid unnecessary onSelectItems calls
@@ -690,10 +733,16 @@ export function useSelectable<
       .filter((itemState) => itemState.item !== undefined)
       .map(({ item, checked }) => ({ item: item as R, checked }))
 
+    // Get all selected IDs (including items not yet loaded)
+    const selectedIds = Array.from(localSelectedState.items?.entries() || [])
+      .filter(([, itemState]) => itemState.checked)
+      .map(([id]) => id)
+
     onSelectItems?.(
       {
         allSelected: allSelectedState,
         itemsStatus,
+        selectedIds,
         groupsStatus: Object.fromEntries(
           Array.from(groupsState.values()).map(({ group, checked }) => [
             group.key,
@@ -722,9 +771,15 @@ export function useSelectable<
       .filter((itemState) => itemState.item !== undefined)
       .map(({ item, checked }) => ({ item: item as R, checked }))
 
+    // Get all selected IDs (including items not yet loaded)
+    const selectedIds = Array.from(localSelectedState.items?.entries() || [])
+      .filter(([, itemState]) => itemState.checked)
+      .map(([id]) => id)
+
     return {
       allChecked: allSelectedState,
       itemsStatus,
+      selectedIds,
       checkedItems: Array.from(checkedItems.values()),
       uncheckedItems: Array.from(uncheckedItems.values()),
       groupsStatus: Object.fromEntries(

@@ -1,19 +1,121 @@
 import { createDataSourceDefinition, FiltersState } from "@/hooks/datasource"
-import {
-  DEPARTMENTS_MOCK,
-  FIRST_NAMES_MOCK,
-  getMockValue,
-  MOCK_ICONS,
-  ROLES_MOCK,
-  SURNAMES_MOCK,
-} from "@/mocks"
+import { DEPARTMENTS_MOCK, MOCK_ICONS, ROLES_MOCK } from "@/mocks"
+
+// Extended name lists for more variety
+const FIRST_NAMES = [
+  "Dani",
+  "Desirée",
+  "Eliseo",
+  "Arnau",
+  "Carlos",
+  "Lilian",
+  "Andrea",
+  "Mario",
+  "Nik",
+  "René",
+  "Sergio",
+  "Saúl",
+  "Emma",
+  "Lucas",
+  "Sofia",
+  "Diego",
+  "Isabella",
+  "Mateo",
+  "Valentina",
+  "Sebastian",
+  "Camila",
+  "Daniel",
+  "Victoria",
+  "Gabriel",
+  "Martina",
+  "Pablo",
+  "Lucia",
+  "Alejandro",
+  "Julia",
+  "Adrian",
+  "Paula",
+  "Hugo",
+  "Clara",
+  "Leo",
+  "Alba",
+  "Marc",
+  "Noa",
+  "Ivan",
+  "Carla",
+  "Alex",
+]
+
+const SURNAMES = [
+  "Smith",
+  "Johnson",
+  "Williams",
+  "Brown",
+  "Jones",
+  "Garcia",
+  "Miller",
+  "Davis",
+  "Rodriguez",
+  "Martinez",
+  "Hernandez",
+  "Lopez",
+  "Gonzalez",
+  "Wilson",
+  "Anderson",
+  "Thomas",
+  "Taylor",
+  "Moore",
+  "Jackson",
+  "Martin",
+  "Lee",
+  "Perez",
+  "Thompson",
+  "White",
+  "Harris",
+  "Sanchez",
+  "Clark",
+  "Ramirez",
+  "Lewis",
+  "Robinson",
+  "Walker",
+  "Young",
+  "King",
+  "Wright",
+  "Scott",
+  "Torres",
+  "Nguyen",
+  "Hill",
+  "Flores",
+  "Green",
+  "Adams",
+  "Nelson",
+  "Baker",
+  "Hall",
+  "Rivera",
+  "Campbell",
+  "Mitchell",
+  "Carter",
+  "Roberts",
+  "Gomez",
+]
+
+/**
+ * Generate a unique name using prime number offsets to avoid repetition patterns
+ */
+const generateUniqueName = (index: number): string => {
+  // Use prime numbers to create better distribution
+  const firstNameIndex =
+    (index * 7 + Math.floor(index / FIRST_NAMES.length)) % FIRST_NAMES.length
+  const surnameIndex =
+    (index * 11 + Math.floor(index / SURNAMES.length) * 3) % SURNAMES.length
+  return `${FIRST_NAMES[firstNameIndex]} ${SURNAMES[surnameIndex]}`
+}
 
 export const mockItems = Array.from({ length: 1000 }, (_, i) => ({
   value: `option-${i}`,
-  label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
-  icon: getMockValue(MOCK_ICONS, i),
-  role: getMockValue(ROLES_MOCK, i),
-  department: getMockValue(DEPARTMENTS_MOCK, i),
+  label: generateUniqueName(i),
+  icon: MOCK_ICONS[i % MOCK_ICONS.length],
+  role: ROLES_MOCK[i % ROLES_MOCK.length],
+  department: DEPARTMENTS_MOCK[i % DEPARTMENTS_MOCK.length],
   description: `Description for option ${i}`,
 }))
 
@@ -96,28 +198,28 @@ export const mockPaginatedSource = createDataSourceDefinition<
     fetchData: (options) => {
       const { search, pagination, filters } = options
       return new Promise((resolve) => {
+        // Fast response for fluid experience (50-100ms)
         setTimeout(
           () => {
-            const pageSize = pagination.perPage ?? 10
+            const pageSize = pagination.perPage ?? 20
             const cursor = "cursor" in pagination ? pagination.cursor : null
-            const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+            const startIndex = cursor ? Number(cursor) : 0
+            const nextCursor = startIndex + pageSize
 
             // First apply filters
             let results = applyFilters(mockItems, filters)
 
             // Then apply search
             if (search) {
+              const searchLower = search.toLowerCase()
               results = results.filter(
                 (item) =>
-                  item.label.toLowerCase().includes(search.toLowerCase()) ||
-                  item.description.toLowerCase().includes(search.toLowerCase())
+                  item.label.toLowerCase().includes(searchLower) ||
+                  item.description.toLowerCase().includes(searchLower)
               )
             }
 
-            const paginatedResults = results.slice(
-              cursor ? Number(cursor) : 0,
-              nextCursor
-            )
+            const paginatedResults = results.slice(startIndex, nextCursor)
 
             const res = {
               type: "infinite-scroll" as const,
@@ -129,7 +231,7 @@ export const mockPaginatedSource = createDataSourceDefinition<
             }
             resolve(res)
           },
-          500 + Math.random() * 300
+          50 + Math.random() * 50
         )
       })
     },
@@ -151,8 +253,9 @@ export const mockNonPaginatedSource = createDataSourceDefinition<
 
           // Then apply search
           if (search) {
+            const searchLower = search.toLowerCase()
             results = results.filter((item) =>
-              item.label.toLowerCase().includes(search.toLowerCase())
+              item.label.toLowerCase().includes(searchLower)
             )
           }
 
@@ -160,7 +263,7 @@ export const mockNonPaginatedSource = createDataSourceDefinition<
             records: results,
           }
           resolve(res)
-        }, 100)
+        }, 50)
       })
     },
   },
