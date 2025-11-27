@@ -17,11 +17,8 @@ export const isFirstCellWithChildren = (
   return firstCell && hasChildren
 }
 
-export const isFirstCellExpanded = (
-  expandedLevels: number,
-  firstCell: boolean
-) => {
-  return expandedLevels > 0 && firstCell
+export const isFirstCellExpanded = (expanded: boolean, firstCell: boolean) => {
+  return expanded && firstCell
 }
 
 export const isFirstCellWithTableChildren = (

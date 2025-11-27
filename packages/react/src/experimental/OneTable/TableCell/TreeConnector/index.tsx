@@ -1,4 +1,4 @@
-import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
+import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
 import {
   CHEVRON_SIZE,
@@ -11,21 +11,13 @@ import {
 
 interface TreeConnectorProps {
   firstCell: boolean
-  hasChildren: boolean
-  depth: number
-  expandedLevels: number
-  type?: NestedVariant
+  nestedRowProps?: NestedRowProps & {
+    rowWithChildren?: boolean
+    tableWithChildren?: boolean
+  }
 }
 
-export const connectorVariables = (
-  expandedLevels: number,
-  type: NestedVariant
-) => {
-  const height =
-    type === "detailed"
-      ? `calc(${expandedLevels + 1} * 100% - ${SPACING_FACTOR + CHEVRON_SIZE / 2}px)`
-      : `calc(${expandedLevels} * 100% - ${SPACING_FACTOR}px)`
-
+export const connectorVariables = (height: string) => {
   return {
     "--line-left": `-${2 * CHEVRON_SIZE}px`,
     "--line-width": LINE_WIDTH,
@@ -58,19 +50,32 @@ export const horizontalConnectorStyles =
 
 export const TreeConnector = ({
   firstCell,
-  hasChildren,
-  depth,
-  expandedLevels,
-  type = "basic",
+  nestedRowProps,
 }: TreeConnectorProps) => {
-  const firstCellWithDepth = isFirstCellWithDepth(firstCell, depth)
-  const firstCellExpanded = isFirstCellExpanded(expandedLevels, firstCell)
-  const typeBasic = type === "basic"
-  const typeDetailed = type === "detailed"
+  const firstCellWithDepth = isFirstCellWithDepth(
+    firstCell,
+    nestedRowProps?.depth ?? 0
+  )
+  const firstCellExpanded = isFirstCellExpanded(
+    nestedRowProps?.expanded ?? false,
+    firstCell
+  )
+  const typeBasic = nestedRowProps?.nestedVariant === "basic"
+  const typeDetailed = nestedRowProps?.nestedVariant === "detailed"
 
-  const detailedWithChildren = typeDetailed && hasChildren
+  const detailedWithChildren = typeDetailed && nestedRowProps?.rowWithChildren
+  const marginLeft = firstCellWithDepth
+    ? getNestedMarginLeft(nestedRowProps?.depth ?? 0)
+    : undefined
+  const connectorHeight = nestedRowProps?.connectorHeight
+    ? `${nestedRowProps?.connectorHeight}px`
+    : "0px"
 
-  if (!firstCellExpanded && !firstCellWithDepth && !hasChildren) {
+  if (
+    !firstCellExpanded &&
+    !firstCellWithDepth &&
+    !nestedRowProps?.rowWithChildren
+  ) {
     return null
   }
 
@@ -82,11 +87,11 @@ export const TreeConnector = ({
         firstCellWithDepth &&
           (typeBasic || detailedWithChildren) &&
           horizontalConnectorStyles,
-        firstCellWithDepth && !hasChildren && "after:w-8"
+        firstCellWithDepth && !nestedRowProps?.rowWithChildren && "after:w-8"
       )}
       style={{
-        marginLeft: firstCellWithDepth ? getNestedMarginLeft(depth) : undefined,
-        ...connectorVariables(expandedLevels, type),
+        marginLeft,
+        ...connectorVariables(connectorHeight),
       }}
     />
   )

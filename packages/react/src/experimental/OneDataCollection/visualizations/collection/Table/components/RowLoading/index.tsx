@@ -8,6 +8,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
 import { useLayoutEffect, useRef } from "react"
 import { Row, RowProps } from "../Row"
 
@@ -28,7 +29,7 @@ const SingleLoadingRow = <
   item,
   columns,
   frozenColumnsLeft,
-  depth,
+  nestedRowProps,
   groupIndex,
   onCheckedChange,
   selectedItems,
@@ -63,17 +64,20 @@ const SingleLoadingRow = <
       key={`row-loading-${rowIndex}`}
       index={rowIndex}
       frozenColumnsLeft={frozenColumnsLeft}
-      depth={depth}
       columns={columns}
-      hasLoadedChildren={false}
       noBorder
       groupIndex={groupIndex}
       onCheckedChange={onCheckedChange}
       selectedItems={selectedItems}
       checkColumnWidth={checkColumnWidth}
-      tableWithChildren={tableWithChildren}
       loading
       ref={loadingRowRef}
+      nestedRowProps={{
+        ...nestedRowProps,
+        depth: (nestedRowProps?.depth ?? 0) + 1,
+        hasLoadedChildren: false,
+      }}
+      tableWithChildren={tableWithChildren}
     />
   )
 }
@@ -108,9 +112,12 @@ export const RowLoading = <
     NavigationFilters,
     Grouping
   >
+  paginationInfo?: ChildrenPaginationInfo<R>
 }) => {
   const loadingRowsCount =
-    props.source.childrenCount?.(props.item) ?? DEFAULT_LOADING_ROWS_COUNT
+    props.source.childrenCount?.(props.item, props.paginationInfo) ??
+    DEFAULT_LOADING_ROWS_COUNT
+
   return Array.from({ length: loadingRowsCount }).map((_, rowIndex) => (
     <SingleLoadingRow
       key={`row-loading-${rowIndex}`}
