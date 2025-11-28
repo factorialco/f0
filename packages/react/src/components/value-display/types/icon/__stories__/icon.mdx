@@ -18,12 +18,12 @@ type value = {
 }
 ```
 
-| Property    | Type      | Description                                                                 |
-| ----------- | --------- | --------------------------------------------------------------------------- |
-| `icon`      | IconType  | The icon component to display                                               |
-| `label`     | string    | The label text (used as aria-label when hidden)                             |
-| `tooltip`   | string?   | Optional tooltip text displayed on hover                                    |
-| `hideLabel` | boolean?  | When true, hides the label visually but keeps it accessible for screen readers |
+| Property    | Type     | Description                                                                    |
+| ----------- | -------- | ------------------------------------------------------------------------------ |
+| `icon`      | IconType | The icon component to display                                                  |
+| `label`     | string   | The label text (used as aria-label when hidden)                                |
+| `tooltip`   | string?  | Optional tooltip text displayed on hover                                       |
+| `hideLabel` | boolean? | When true, hides the label visually but keeps it accessible for screen readers |
 
 <Canvas
   of={IconStories.IconType}
@@ -43,7 +43,8 @@ render: (item) => ({
 
 #### Icon with hidden label
 
-When `hideLabel` is true, the label is visually hidden but remains accessible to screen readers via `aria-label`.
+When `hideLabel` is true, the label is visually hidden but remains accessible to
+screen readers via `aria-label`.
 
 <Canvas
   of={IconStories.IconWithHiddenLabel}
