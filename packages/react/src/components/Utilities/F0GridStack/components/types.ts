@@ -1,12 +1,12 @@
-// declare module "gridstack" {
-//   //   interface GridStackWidget {
-//   //     id?: string
-//   //     allowedSizes?: Array<{ w: number; h: number }>
-//   //     meta?: Record<string, unknown>
-//   //     content?: React.ReactNode
-//   //   }
+declare module "gridstack" {
+  interface GridStackWidget {
+    id: string
+    allowedSizes?: Array<{ w: number; h: number }>
+    meta?: Record<string, unknown>
+    content: () => React.ReactElement
+  }
 
-//   interface GridStackNode {
-//     allowedSizes?: Array<{ w: number; h: number }>
-//   }
-// }
+  interface GridStackNode {
+    allowedSizes?: Array<{ w: number; h: number }>
+  }
+}

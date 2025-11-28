@@ -4,10 +4,9 @@ import { Dashboard, type Widget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { F0GridStackRef } from "@/components/Utilities/F0GridStack"
 import { PageLayout } from "@/layouts/page/PageLayout"
 import { Optional } from "@/lib/typescript-utils/opional"
-import { useRef, useState } from "react"
+import { useState } from "react"
 
 const availableSizes = [
   { w: 1, h: 1 },
@@ -34,8 +33,6 @@ const meta = {
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story, { args }) => {
-      const ref = useRef<F0GridStackRef>(null)
-
       const [widgets, setWidgets] = useState<Optional<Widget, "x" | "y">[]>(
         args.widgets
       )
@@ -86,7 +83,6 @@ const meta = {
                   console.log("widgets onChange stories", updatedWidgets)
                   setWidgets(updatedWidgets)
                 },
-                ref: ref,
                 editMode: editMode,
               }}
             />
