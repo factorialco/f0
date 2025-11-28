@@ -38,7 +38,10 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
                 options?: { value: string; label: string }[]
               })
             : undefined
-        const optionsList = filterOptions?.options ?? []
+
+        const optionsList = Array.isArray(filterOptions?.options)
+          ? filterOptions.options
+          : []
 
         displayValues = (value as string[]).map((v) => {
           const opt = optionsList.find((o) => o.value === v)
