@@ -25,6 +25,7 @@ export const DashboardWidget = ({
       className={cn(
         "relative h-full rounded-md border border-solid border-f1-border-secondary bg-f1-background px-4 py-2",
         "hover:border-f1-border-hover",
+        "flex flex-col",
         className
       )}
     >
@@ -44,7 +45,7 @@ export const DashboardWidget = ({
           {actions && <Dropdown items={actions} />}
         </div>
       </header>
-      <div className="">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
     </article>
   )
 }
