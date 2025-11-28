@@ -48,13 +48,11 @@ export function GridStackProvider({
 
   // Convert widgets for gridstack (convert React content to functions)
   const convertedOptions = useMemo(() => {
-    if (!widgets || widgets.length === 0) {
-      return options
-    }
+    console.log("widgets ***************-->", widgets)
 
     return {
       ...options,
-      children: widgets.map(convertWidgetRecursive),
+      children: (widgets || []).map(convertWidgetRecursive),
     }
   }, [options, widgets])
 
@@ -102,10 +100,10 @@ export function GridStackProvider({
     const widgetsToAdd = newWidgets.filter(
       (widget) => !widgetsInGridstackIds.includes(widget.id!)
     )
-    widgetsToAdd?.forEach((widget) => {
+    widgetsToAdd.forEach((widget) => {
       const convertedWidget = convertWidgetRecursive(widget)
       gridStack.addWidget(convertedWidget)
-      rawWidgetMetaMap.set(widget.id!, widget)
+      rawWidgetMetaMap.set(widget.id!, convertedWidget)
     })
 
     /**
@@ -131,6 +129,7 @@ export function GridStackProvider({
       (widget) => true || widgetsInGridstackIds.includes(widget.id!)
     )
     widgetsToUpdate?.forEach((widget) => {
+      console.log("updatingwidget", widget)
       const widgetInGridstack = widgetsInGridstack.find(
         (w) => w.id === widget.id
       )
@@ -210,7 +209,6 @@ export function GridStackProvider({
 
     const layout = gridStack.save()
 
-    console.log("layout2", layout)
     if (Array.isArray(layout)) {
       // Merge layout data (positions) with widget metadata from rawWidgetMetaMap
       const updatedWidgets: GridStackReactWidget[] = layout
@@ -228,7 +226,7 @@ export function GridStackProvider({
             // Merge meta if both exist
             meta: item.meta ?? undefined,
             // Ensure content matches GridStackReactWidget type
-            content: item.content ?? (() => <div>No content</div>),
+            content: item.content ?? <div>No content</div>,
           }
 
           return updatedWidget

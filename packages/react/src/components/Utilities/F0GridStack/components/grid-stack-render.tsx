@@ -8,7 +8,10 @@ export function GridStackRender() {
   const { _rawWidgetMetaMap } = useGridStackContext()
   const { getWidgetContainer } = useGridStackRenderContext()
 
-  console.log(Array.from(_rawWidgetMetaMap.value.entries()))
+  console.log(
+    "_rawWidgetMetaMap",
+    Array.from(_rawWidgetMetaMap.value.entries())
+  )
 
   return (
     <>
@@ -20,11 +23,13 @@ export function GridStackRender() {
           return null
         }
 
+        console.log("meta", meta.content)
+
         return (
           <GridStackWidgetContext.Provider key={id} value={{ widget: { id } }}>
             {(meta as GridStackReactWidget).content &&
               createPortal(
-                (meta as GridStackReactWidget).content!,
+                <>***{(meta as GridStackReactWidget).content!}---</>,
                 widgetContainer
               )}
           </GridStackWidgetContext.Provider>

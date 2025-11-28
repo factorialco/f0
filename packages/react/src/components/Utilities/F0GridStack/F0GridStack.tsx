@@ -73,7 +73,9 @@ export const F0GridStack = ({
   widgets,
   onChange,
 }: F0GridStackProps) => {
+  console.log("widgets F0GridStack", widgets)
   const widgetsSignature = useMemo(() => {
+    console.log("widgetsSignature widgets", widgets)
     return JSON.stringify(
       widgets.map((widget) => ({
         id: widget.id,
@@ -91,10 +93,10 @@ export const F0GridStack = ({
   }, [widgets])
 
   const gridOptions = useMemo(() => {
-    console.log("widgets", widgets)
+    console.log("gridOptions widgets", widgets)
     return {
       ...options,
-      children: widgets as GridStackWidget[],
+      children: widgets,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, widgetsSignature])

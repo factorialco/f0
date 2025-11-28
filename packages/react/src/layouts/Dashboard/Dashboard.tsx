@@ -32,6 +32,19 @@ export interface DashboardProps {
   onChange?: (widgets: Widget[]) => void
 }
 
+const limitDepth = (obj: unknown, depth = 0): unknown => {
+  if (depth >= 3) return "[Max Depth]"
+  if (obj === null || typeof obj !== "object") return obj
+  if (Array.isArray(obj)) {
+    return obj.map((item) => limitDepth(item, depth + 1))
+  }
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    result[key] = limitDepth(value, depth + 1)
+  }
+  return result
+}
+
 const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
   ({ widgets, editMode = false, onChange = () => {} }: DashboardProps, ref) => {
     const gridOptions: GridStackReactOptions = useMemo(
@@ -54,23 +67,49 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
       []
     )
 
-    const [gridWidgets, setGridWidgets] = useState<GridStackReactWidget[]>([])
+    const widgetsToGridWidgets = (
+      widgets: Optional<Widget, "x" | "y">[],
+      editMode: boolean
+    ) => {
+      return widgets.map((widget) => ({
+        id: widget.id,
+        h: widget.h ?? 1,
+        w: widget.w ?? 1,
+        allowedSizes: widget.availableSizes,
+        noMove: !editMode,
+        noResize: !editMode,
+        locked: widget.locked,
+        meta: {
+          title: widget.title,
+          content: widget.content,
+        },
+        content: (
+          <DashboardWidget title={widget.title} draggable={editMode}>
+            {widget.content}
+          </DashboardWidget>
+        ),
+      }))
+    }
+
+    const [gridWidgets, setGridWidgets] = useState<GridStackReactWidget[]>(
+      widgetsToGridWidgets(widgets, editMode)
+    )
 
     const handleChange = useCallback(
       (gridWidgets: GridStackReactWidget[]) => {
         setGridWidgets(gridWidgets)
+        console.log("gridWidgets", limitDepth(gridWidgets))
         onChange(
           gridWidgets.map((widget) => ({
             id: widget.id,
-            w: (widget as GridStackReactWidget & { w?: number }).w ?? 1,
-            h: (widget as GridStackReactWidget & { h?: number }).h ?? 1,
+            w: widget.w ?? 1,
+            h: widget.h ?? 1,
             allowedSizes: widget.allowedSizes,
-            content: widget.meta.content ?? null,
+            content: widget.meta?.content ?? null,
             title: (widget.meta?.title as string | undefined) ?? "",
-            x: (widget as GridStackReactWidget & { x?: number }).x ?? 0,
-            y: (widget as GridStackReactWidget & { y?: number }).y ?? 0,
-            locked: (widget as GridStackReactWidget & { locked?: boolean })
-              .locked,
+            x: widget.x ?? 0,
+            y: widget.y ?? 0,
+            locked: widget.locked,
           }))
         )
       },
@@ -78,26 +117,7 @@ const Dashboard = forwardRef<F0GridStackRef, DashboardProps>(
     )
 
     useEffect(() => {
-      setGridWidgets(
-        widgets.map((widget) => ({
-          id: widget.id,
-          h: widget.h ?? 1,
-          w: widget.w ?? 1,
-          allowedSizes: widget.availableSizes,
-          noMove: !editMode,
-          noResize: !editMode,
-          locked: widget.locked,
-          meta: {
-            title: widget.title,
-            content: widget.content,
-          },
-          content: (
-            <DashboardWidget title={widget.title} draggable={editMode}>
-              {widget.content}
-            </DashboardWidget>
-          ),
-        }))
-      )
+      setGridWidgets(widgetsToGridWidgets(widgets, editMode))
     }, [widgets, editMode])
 
     return (
