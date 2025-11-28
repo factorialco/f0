@@ -34,22 +34,24 @@ export const IconCell = (
   args: IconCellValue,
   meta: ValueDisplayRendererContext
 ) => (
-  <TooltipWrapper tooltip={args.tooltip}>
-    <div
-      className={cn(
-        "flex items-center gap-2",
-        meta.visualization === "table" && tableDisplayClassNames.avatar
-      )}
-    >
-      <F0Icon
-        icon={args.icon}
-        aria-label={args.hideLabel ? args.label : undefined}
-      />
-      {args.hideLabel ? (
-        <span className="sr-only">{args.label}</span>
-      ) : (
-        <span className="text-f1-foreground">{args.label}</span>
-      )}
-    </div>
-  </TooltipWrapper>
+  <div
+    className={cn(
+      "flex items-center gap-2",
+      meta.visualization === "table" && tableDisplayClassNames.avatar
+    )}
+  >
+    <TooltipWrapper tooltip={args.tooltip}>
+      <div className="inline-flex items-center gap-2">
+        <F0Icon
+          icon={args.icon}
+          aria-label={args.hideLabel ? args.label : undefined}
+        />
+        {args.hideLabel ? (
+          <span className="sr-only">{args.label}</span>
+        ) : (
+          <span className="text-f1-foreground">{args.label}</span>
+        )}
+      </div>
+    </TooltipWrapper>
+  </div>
 )
