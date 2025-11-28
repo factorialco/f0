@@ -7,7 +7,7 @@ export const aiTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Ask about time, people, or company info…",
+    inputPlaceholder: "Write something here…",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
