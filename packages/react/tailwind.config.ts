@@ -24,7 +24,7 @@ export default {
       },
       animation: {
         ...baseConfig.theme?.extend?.animation,
-        "rotate-gradient": "rotate-gradient 4s linear infinite",
+        "rotate-gradient": "rotate-gradient 2s linear infinite",
       },
     },
   },
