@@ -276,7 +276,7 @@ export const TableCollection = <
                         !allSelectedStatus.checked)
                     }
                     onCheckedChange={handleSelectAll}
-                    title="Select all"
+                    title={t.actions.selectAll}
                     hideLabel
                     disabled={data?.records.length === 0}
                   />
