@@ -32,20 +32,25 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
       let displayValues: string[] = []
       if (Array.isArray(value)) {
         // Try to get labels from filter options if available
+        // For "in" type filters, options are in filterDef.options.options
         const filterOptions =
           filterDef && "options" in filterDef
             ? (filterDef.options as {
-                options?: { value: string; label: string }[]
+                options?:
+                  | { value: string; label: string }[]
+                  | (() =>
+                      | { value: string; label: string }[]
+                      | Promise<{ value: string; label: string }[]>)
               })
             : undefined
 
-        const optionsList = Array.isArray(filterOptions?.options)
-          ? filterOptions.options
-          : []
+        // Get options array - handle both static arrays and functions
+        const optionsValue = filterOptions?.options
+        const optionsList = Array.isArray(optionsValue) ? optionsValue : []
 
         displayValues = (value as string[]).map((v) => {
           const opt = optionsList.find((o) => o.value === v)
-          return opt?.label ?? v
+          return opt?.label ?? String(v)
         })
       }
 
