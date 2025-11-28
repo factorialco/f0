@@ -250,6 +250,7 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    downloadTableAsExcel: "Download table as Excel",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",

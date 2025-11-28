@@ -2,6 +2,7 @@ import { F0Button } from "@/components/F0Button"
 import { ButtonCopy } from "@/ui/ButtonCopy"
 
 import {
+  Download,
   ThumbsDown,
   ThumbsDownFilled,
   ThumbsUp,
@@ -10,9 +11,10 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { ActionItem } from "../ActionItem"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
+import { downloadTablesAsExcel, hasMarkdownTables } from "../utils/tableExport"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
@@ -42,6 +44,8 @@ export const AssistantMessage = ({
   const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
   const [isHovered, setIsHovered] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
+
+  const contentHasTables = useMemo(() => hasMarkdownTables(content), [content])
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -100,6 +104,22 @@ export const AssistantMessage = ({
                   }}
                 />
               </div>
+              {contentHasTables && (
+                <div>
+                  <F0Button
+                    variant="ghost"
+                    size="sm"
+                    label={translations.ai.downloadTableAsExcel}
+                    icon={Download}
+                    hideLabel
+                    disabled={isGenerating}
+                    onClick={(e) => {
+                      downloadTablesAsExcel(content)
+                      e.currentTarget.blur()
+                    }}
+                  />
+                </div>
+              )}
               <div>
                 <F0Button
                   variant="ghost"
