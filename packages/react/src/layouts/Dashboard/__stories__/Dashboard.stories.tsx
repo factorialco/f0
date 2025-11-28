@@ -46,8 +46,7 @@ const meta = {
             h: 1,
             content: <DemoWidget />,
             title: `Widget ${Math.random()}`,
-            x: 0,
-            y: 0,
+            // Don't set x and y - let GridStack auto-position next to the last widget
             availableSizes,
           },
         ])

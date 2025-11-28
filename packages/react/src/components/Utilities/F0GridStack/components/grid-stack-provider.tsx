@@ -75,6 +75,16 @@ export function GridStackProvider({
     return map
   })
 
+  // Ref to track reactContentMap synchronously for emitChange callback
+  // This ensures emitChange always has access to the latest content when GridStack fires events
+  const reactContentMapRef =
+    useRef<Map<string, React.ReactElement>>(reactContentMap)
+
+  // Keep ref in sync with state updates
+  useEffect(() => {
+    reactContentMapRef.current = reactContentMap
+  }, [reactContentMap])
+
   // Store only converted widgets (with function content) for GridStack operations
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
     const map = new Map<string, GridStackWidget>()
@@ -119,6 +129,14 @@ export function GridStackProvider({
       (widget) => !widgetsInGridstackIds.includes(widget.id!)
     )
     if (widgetsToAdd.length > 0) {
+      // Update ref synchronously BEFORE adding widgets to GridStack
+      // This ensures emitChange has access to content when "added" event fires
+      widgetsToAdd.forEach((widget) => {
+        if (widget.content) {
+          reactContentMapRef.current.set(widget.id!, widget.content)
+        }
+      })
+
       widgetsToAdd.forEach((widget) => {
         const convertedWidget = convertWidgetRecursive(widget)
         gridStack.addWidget(convertedWidget)
@@ -150,6 +168,13 @@ export function GridStackProvider({
       (widget) => !newWidgetsIds.includes(widget.id!)
     )
     if (widgetsToRemove.length > 0) {
+      const idsToRemove = widgetsToRemove.map((w) => w.id!).filter(Boolean)
+
+      // Update ref synchronously BEFORE removing widgets from GridStack
+      idsToRemove.forEach((id) => {
+        reactContentMapRef.current.delete(id)
+      })
+
       widgetsToRemove.forEach((widget) => {
         const element = gridStack.el.querySelector<GridItemHTMLElement>(
           `[gs-id="${widget.id}"]`
@@ -159,7 +184,6 @@ export function GridStackProvider({
         }
       })
       // Update maps using functional updates
-      const idsToRemove = widgetsToRemove.map((w) => w.id!).filter(Boolean)
       setRawWidgetMetaMap((prev) => {
         const next = new Map(prev)
         idsToRemove.forEach((id) => next.delete(id))
@@ -199,22 +223,64 @@ export function GridStackProvider({
 
         if (propertiesChanged.length > 0) {
           const updateOptions: Partial<GridStackWidget> = {}
-          propertiesChanged.forEach((prop) => {
-            const value = widget[prop]
-            if (value !== undefined) {
-              ;(updateOptions as Record<string, unknown>)[prop] = value
-            }
-          })
-          const element = gridStack.el.querySelector<GridItemHTMLElement>(
-            `[gs-id="${widget.id}"]`
+          const sizeProps = ["w", "h", "x", "y"] as const
+          const interactionProps = ["noMove", "noResize", "locked"] as const
+
+          // Check if only interaction properties changed (not size/position)
+          const changedSizeProps = propertiesChanged.filter((prop) =>
+            sizeProps.includes(prop as (typeof sizeProps)[number])
           )
-          if (element) {
-            widgetsNeedingGridUpdate.push({
-              id: widget.id!,
-              element,
-              updateOptions,
+          const changedInteractionProps = propertiesChanged.filter((prop) =>
+            interactionProps.includes(prop as (typeof interactionProps)[number])
+          )
+
+          // If sizes differ between GridStack and props, but only interaction props changed in the update,
+          // preserve GridStack's current sizes (don't reset them to prop values)
+          // This prevents resizing when only editMode changes
+          if (
+            changedSizeProps.length > 0 &&
+            changedInteractionProps.length > 0 &&
+            changedSizeProps.length + changedInteractionProps.length ===
+              propertiesChanged.length
+          ) {
+            // Only update interaction properties, preserve sizes from GridStack
+            changedInteractionProps.forEach((prop) => {
+              const value = widget[prop]
+              if (value !== undefined) {
+                ;(updateOptions as Record<string, unknown>)[prop] = value
+              }
+            })
+          } else {
+            // Normal update: include all changed properties
+            propertiesChanged.forEach((prop) => {
+              const value = widget[prop]
+              if (value !== undefined) {
+                ;(updateOptions as Record<string, unknown>)[prop] = value
+              }
             })
           }
+
+          // Only push update if there are options to update
+          if (Object.keys(updateOptions).length > 0) {
+            const element = gridStack.el.querySelector<GridItemHTMLElement>(
+              `[gs-id="${widget.id}"]`
+            )
+            if (element) {
+              widgetsNeedingGridUpdate.push({
+                id: widget.id!,
+                element,
+                updateOptions,
+              })
+            }
+          }
+        }
+      })
+
+      // Update ref synchronously BEFORE updating widgets in GridStack
+      // This ensures emitChange has access to latest content when "change" event fires
+      widgetsToUpdate.forEach((widget) => {
+        if (widget.content) {
+          reactContentMapRef.current.set(widget.id!, widget.content)
         }
       })
 
@@ -293,14 +359,16 @@ export function GridStackProvider({
     const layout = gridStack.save()
 
     if (Array.isArray(layout)) {
-      // Merge layout data (positions) with React content from reactContentMap
+      // Merge layout data (positions) with React content from reactContentMapRef
+      // Use ref instead of state to ensure we always have the latest content synchronously
+      // This fixes the race condition where GridStack fires events before state updates complete
       const updatedWidgets: GridStackReactWidget[] = layout
         .map((item) => {
           const widgetId = item.id
           if (!widgetId) return null
 
-          // Retrieve React content from reactContentMap (always up-to-date)
-          const content = reactContentMap.get(widgetId)
+          // Retrieve React content from reactContentMapRef (always up-to-date synchronously)
+          const content = reactContentMapRef.current.get(widgetId)
 
           // GridStack preserves custom properties like meta, but TypeScript doesn't know about them
           const itemWithMeta = item as GridStackWidget & {
@@ -316,7 +384,7 @@ export function GridStackProvider({
             y: item.y ?? 0,
             // Preserve meta if it exists (GridStack preserves custom properties)
             meta: itemWithMeta.meta,
-            // Use React content from reactContentMap
+            // Use React content from reactContentMapRef
             content: content ?? <div>No content</div>,
           }
 
@@ -327,7 +395,7 @@ export function GridStackProvider({
       onChange?.(updatedWidgets)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridStack, reactContentMap])
+  }, [gridStack])
 
   useEffect(() => {
     if (!gridStack) return
