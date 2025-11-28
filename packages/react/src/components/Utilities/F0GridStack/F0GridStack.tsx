@@ -55,7 +55,6 @@ export const F0GridStack = ({
   const gridOptions = useMemo(() => {
     return {
       ...options,
-      children: widgets,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, widgetsSignature])

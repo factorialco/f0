@@ -24,7 +24,7 @@ export function convertWidgetForGridStack(
         const div = document.createElement("div")
         return div
       },
-    } as GridStackWidget
+    } as unknown as GridStackWidget
   }
 
   return rest as GridStackWidget
@@ -47,7 +47,7 @@ export function convertWidgetRecursive(
     converted.subGridOpts = {
       ...widget.subGridOpts,
       children: widget.subGridOpts.children.map((child) =>
-        convertWidgetRecursive(child)
+        convertWidgetRecursive(child as GridStackReactWidget)
       ),
     }
   }
