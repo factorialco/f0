@@ -75,7 +75,6 @@ const meta = {
             aside={
               <>
                 <F0Button label="Add widget" onClick={handleAddWidget} />
-                <pre>{JSON.stringify(widgets, null, 2)}</pre>
               </>
             }
           >
@@ -92,6 +91,7 @@ const meta = {
               }}
             />
           </PageLayout>
+          <pre>{JSON.stringify(widgets, null, 2)}</pre>
         </>
       )
     },
