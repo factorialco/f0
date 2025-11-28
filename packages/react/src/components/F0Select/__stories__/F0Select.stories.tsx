@@ -15,10 +15,12 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
 import {
+  Employee,
+  employeeNonPaginatedSource,
+  employeePaginatedSource,
+  getEmployeeById,
   MockItem,
   mockItems,
-  mockNonPaginatedSource,
-  mockPaginatedSource,
 } from "./mocks"
 
 const icons: Record<string, IconType> = {
@@ -500,34 +502,45 @@ export const LargeList: Story = {
 
 export const WithDataSourceNotPaginated: Story = {
   args: {
-    label: "Not Paginated (with Filters)",
-    placeholder: "Select a value",
+    label: "Select Employee",
+    placeholder: "Search employees...",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
-    source: mockNonPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    value: "5",
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
-      description: `${item.role} - ${item.department}`,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.department}`,
     }),
   },
 }
 
 export const WithDataSourcePaginated: Story = {
   args: {
-    label: "Data Source Paginated (with Filters)",
-    placeholder: "Select a value",
+    label: "Select Employee",
+    placeholder: "Search employees...",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    value: "42",
+    defaultItem: (() => {
+      const emp = getEmployeeById(42)
+      return emp
+        ? {
+            value: emp.value,
+            label: emp.label,
+            avatar: emp.avatar,
+            description: `${emp.jobTitle} · ${emp.department}`,
+          }
+        : undefined
+    })(),
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
-      description: `${item.role} - ${item.department}`,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.department}`,
     }),
   },
 }
@@ -550,11 +563,11 @@ export const WithDataSourceGrouping: Story = {
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
-          department: {
-            name: "Department",
+          workplace: {
+            name: "Workplace",
             label: (groupId) => `${groupId}`,
             itemCount: (groupId) =>
-              mockItems.filter((item) => item.department === groupId).length,
+              mockItems.filter((item) => item.workplace === groupId).length,
           },
         },
       },
@@ -608,7 +621,7 @@ export const WithDataSourceGrouping: Story = {
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
+      avatar: item.avatar,
       description: item.description,
     }),
   },
@@ -616,16 +629,18 @@ export const WithDataSourceGrouping: Story = {
 
 export const MultipleNotPaginated: Story = {
   args: {
-    label: "Multiple Not Paginated",
+    label: "Select Team Members",
+    placeholder: "Search employees...",
     multiple: true,
-    value: ["option-2", "option-3", "option-50"],
+    value: ["2", "5", "12"],
     clearable: true,
-    source: mockNonPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
-      description: item.description,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.department}`,
     }),
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
@@ -634,35 +649,40 @@ export const MultipleNotPaginated: Story = {
 }
 
 /**
- * Multiple selection with paginated data.
+ * Multiple selection with paginated data (2,847 employees).
  * Use `defaultItem` to provide labels for pre-selected values not in the first page.
- * Try the "Select All" to select all 10,000 items.
+ * Try the "Select All" to select all employees - the checkbox will show indeterminate state
+ * when some but not all are selected.
  */
 export const MultiplePaginated: Story = {
   args: {
-    label: "Multiple Paginated",
+    label: "Select Team Members",
+    placeholder: "Search employees...",
     multiple: true,
-    value: ["option-2", "option-50", "option-500"],
+    value: ["3", "42", "500", "1200"],
     // Provide defaultItem for values not in the first page
-    defaultItem: [
-      {
-        value: "option-50",
-        label: mockItems[50].label,
-        icon: mockItems[50].icon,
-      },
-      {
-        value: "option-500",
-        label: mockItems[500].label,
-        icon: mockItems[500].icon,
-      },
-    ],
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
     clearable: true,
     showSearchBox: true,
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
+      avatar: item.avatar,
     }),
     onChange: fn((value) => {
       console.log("value", value)
@@ -676,6 +696,7 @@ export const MultiplePaginated: Story = {
 /**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
+ * Filter by department, office, or legal entity to narrow down results.
  */
 export const SingleSelectWithFilters: Story = {
   args: {
@@ -683,20 +704,25 @@ export const SingleSelectWithFilters: Story = {
     placeholder: "Choose an employee...",
     showSearchBox: true,
     clearable: true,
-    value: "option-500",
+    value: "250",
     // Provide defaultItem for value not in the first page
-    defaultItem: {
-      value: "option-500",
-      label: mockItems[500].label,
-      description: `${mockItems[500].role} - ${mockItems[500].department}`,
-      icon: mockItems[500].icon,
-    },
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    defaultItem: (() => {
+      const emp = getEmployeeById(250)
+      return emp
+        ? {
+            value: emp.value,
+            label: emp.label,
+            description: `${emp.jobTitle} · ${emp.office}`,
+            avatar: emp.avatar,
+          }
+        : undefined
+    })(),
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      description: `${item.role} - ${item.department}`,
-      icon: item.icon,
+      description: `${item.jobTitle} · ${item.office}`,
+      avatar: item.avatar,
     }),
   },
 }

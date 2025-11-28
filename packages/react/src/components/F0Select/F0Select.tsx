@@ -651,7 +651,9 @@ const F0SelectComponent = forwardRef(function Select<
                   <SelectAll
                     selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={
-                      selectedState.allSelected === "indeterminate"
+                      selectedState.allSelected === "indeterminate" ||
+                      (selectedState.allSelected === false &&
+                        selectionMeta.selectedItemsCount > 0)
                     }
                     value={!!selectedState.allSelected}
                     onChange={handleSelectAllWithTracking}

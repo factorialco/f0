@@ -266,8 +266,15 @@ export const TableCollection = <
               >
                 <div className="flex w-full items-center justify-end">
                   <F0Checkbox
-                    checked={allSelectedStatus.checked}
-                    indeterminate={allSelectedStatus.indeterminate}
+                    checked={
+                      allSelectedStatus.selectedCount > 0 ||
+                      allSelectedStatus.checked
+                    }
+                    indeterminate={
+                      allSelectedStatus.indeterminate ||
+                      (allSelectedStatus.selectedCount > 0 &&
+                        !allSelectedStatus.checked)
+                    }
                     onCheckedChange={handleSelectAll}
                     title="Select all"
                     hideLabel

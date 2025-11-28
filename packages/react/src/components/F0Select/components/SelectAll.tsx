@@ -21,7 +21,7 @@ export const SelectAll = ({
 
   const handleChange = (checked: boolean) => {
     if (indeterminate) {
-      onChange(true)
+      onChange(false)
     } else {
       onChange(checked)
     }
@@ -49,7 +49,7 @@ export const SelectAll = ({
         <F0Checkbox
           id="select-all"
           title={i18n.actions.selectAll}
-          checked={value}
+          checked={indeterminate || value}
           indeterminate={indeterminate}
           onCheckedChange={handleChange}
           presentational

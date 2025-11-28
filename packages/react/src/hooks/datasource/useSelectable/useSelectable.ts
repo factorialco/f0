@@ -92,11 +92,6 @@ export function useSelectable<
   )
 
   const [allSelectedCheck, setAllSelectedCheck] = useState(false)
-  // Store the total count when "select all" was clicked
-  // This is used to show the correct count even when filtering
-  const [allSelectedTotalCount, setAllSelectedTotalCount] = useState<
-    number | null
-  >(null)
 
   /**
    * Determine the status of the all selected checkbox
@@ -490,13 +485,6 @@ export function useSelectable<
     }
     setAllSelectedCheck(checked)
 
-    // Store the total count when selecting all, clear it when deselecting
-    if (checked) {
-      setAllSelectedTotalCount(totalKnownItemsCount)
-    } else {
-      setAllSelectedTotalCount(null)
-    }
-
     if (isGrouped && data.type === "grouped") {
       // Select/deselect all groups using data.groups (not groupsState which might be empty)
       const allGroupIds = data.groups.map((group) => group.key)
@@ -681,7 +669,6 @@ export function useSelectable<
   useEffect(() => {
     if (checkedCount === 0) {
       setAllSelectedCheck(false)
-      setAllSelectedTotalCount(null)
     }
   }, [checkedCount])
 
@@ -692,13 +679,9 @@ export function useSelectable<
         0
       )
     } else {
-      if (allSelectedCheck) {
-        // Use the saved total count from when "select all" was clicked
-        // This prevents the count from changing when searching/filtering
-        const baseTotal = allSelectedTotalCount ?? totalKnownItemsCount
-        return baseTotal - uncheckedCount
-      }
-      return checkedCount
+      return allSelectedCheck
+        ? totalKnownItemsCount - uncheckedCount
+        : checkedCount
     }
   }, [
     groupAllSelectedStatus,
@@ -707,7 +690,6 @@ export function useSelectable<
     checkedCount,
     isGrouped,
     allSelectedCheck,
-    allSelectedTotalCount,
   ])
 
   // Track the previous state to avoid unnecessary onSelectItems calls

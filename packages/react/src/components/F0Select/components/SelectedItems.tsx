@@ -3,6 +3,7 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { forwardRef } from "react"
 import type { F0SelectItemObject } from "../types"
+import { ItemsCounter } from "./ItemsCounter"
 
 type SelectValueProps = {
   selection: F0SelectItemObject<string>[]
@@ -35,19 +36,63 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
         return null
       }
 
-      // Handle "All selected" state for large datasets
-      if (allSelected === true && totalSelectedCount !== undefined) {
+      // Handle "All selected" state - always show "All selected" regardless of count
+      if (allSelected === true) {
         return (
           <div className="flex w-full items-center gap-1 text-left">
             <OneEllipsis className="min-w-0 flex-1">
-              {`${totalSelectedCount} ${i18n.status.selected.plural.toLowerCase()}`}
+              {i18n.status.selected.all}
             </OneEllipsis>
           </div>
         )
       }
 
-      // Show labels for small selections, count for large ones
+      // Handle indeterminate state - show labels for small selections, count for large ones
+      if (allSelected === "indeterminate") {
+        const MAX_ITEMS_FOR_LABELS = 20
+
+        // For large selections, show just the count
+        if (selectedCount >= MAX_ITEMS_FOR_LABELS) {
+          return (
+            <div className="flex w-full items-center gap-1 text-left">
+              <OneEllipsis className="min-w-0 flex-1">
+                {`${selectedCount} ${i18n.status.selected.plural.toLowerCase()}`}
+              </OneEllipsis>
+            </div>
+          )
+        }
+
+        // For small selections, show visible labels with counter for remaining
+        const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
+        const remainingItems = selection.slice(MAX_VISIBLE_LABELS)
+        const remainingCount = selectedCount - visibleItems.length
+
+        // If no items are loaded yet but we have a count, show just the count
+        if (visibleItems.length === 0 && selectedCount > 0) {
+          return (
+            <div className="flex w-full items-center gap-1 text-left">
+              <OneEllipsis className="min-w-0 flex-1">
+                {`${selectedCount} ${i18n.status.selected.plural.toLowerCase()}`}
+              </OneEllipsis>
+            </div>
+          )
+        }
+
+        return (
+          <div className="flex w-full items-center gap-1 text-left">
+            <OneEllipsis className="min-w-0 flex-1">
+              {visibleItems.map((item) => item.label).join(", ")}
+            </OneEllipsis>
+            {remainingCount > 0 && (
+              <ItemsCounter count={remainingCount} items={remainingItems} />
+            )}
+          </div>
+        )
+      }
+
+      // Show labels for small selections, count with popover for large ones
       const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
+      const remainingItems = selection.slice(MAX_VISIBLE_LABELS)
       const remainingCount = selectedCount - visibleItems.length
 
       // If no items are loaded yet but we have a count, show just the count
@@ -66,7 +111,9 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
           <OneEllipsis className="min-w-0 flex-1">
             {visibleItems.map((item) => item.label).join(", ")}
           </OneEllipsis>
-          {remainingCount > 0 && <div>+{remainingCount}</div>}
+          {remainingCount > 0 && (
+            <ItemsCounter count={remainingCount} items={remainingItems} />
+          )}
         </div>
       )
     }
