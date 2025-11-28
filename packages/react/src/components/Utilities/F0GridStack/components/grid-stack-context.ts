@@ -17,6 +17,10 @@ export const GridStackContext = createContext<{
     value: Map<string, GridStackWidget>
     set: React.Dispatch<React.SetStateAction<Map<string, GridStackWidget>>>
   }
+  _reactContentMap: {
+    value: Map<string, React.ReactElement>
+    set: React.Dispatch<React.SetStateAction<Map<string, React.ReactElement>>>
+  }
 } | null>(null)
 
 export function useGridStackContext() {

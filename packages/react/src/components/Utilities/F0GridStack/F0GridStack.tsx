@@ -19,6 +19,9 @@ export interface GridStackReactWidget
   allowedSizes?: GridStackReactSize[]
   content?: React.ReactElement
   meta?: Record<string, unknown>
+  _meta?: {
+    originalContent?: React.ReactElement
+  }
 }
 
 export interface F0GridStackProps {
@@ -27,55 +30,12 @@ export interface F0GridStackProps {
   onChange?: (widgets: GridStackReactWidget[]) => void
 }
 
-/**
- * Methods exposed via ref to control the grid programmatically.
- * @example
- * ```tsx
- * const gridRef = useRef<F0GridStackRef>(null)
- *
- * // Add a widget
- * gridRef.current?.addWidget({
- *   id: 'new-widget',
- *   w: 2,
- *   h: 2,
- *   content: <div>Content</div>
- *   meta: {
- *     // Your metadata associated with the widget
- *   }
- * })
- *
- * // Remove a widget
- * gridRef.current?.removeWidget('widget-id')
- *
- * // Remove all widgets
- * gridRef.current?.removeAll()
- *
- * // Save current layout
- * const layout = gridRef.current?.saveOptions()
- * ```
- */
-export interface F0GridStackRef {
-  addWidget: (widget: GridStackReactWidget) => void
-  removeWidget: (id: string) => void
-  addSubGrid: (
-    subGrid: GridStackReactWidget & {
-      id: Required<GridStackWidget>["id"]
-      subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-        children: Array<GridStackReactWidget>
-      }
-    }
-  ) => void
-  removeAll: () => void
-}
-
 export const F0GridStack = ({
   options,
   widgets,
   onChange,
 }: F0GridStackProps) => {
-  console.log("widgets F0GridStack", widgets)
   const widgetsSignature = useMemo(() => {
-    console.log("widgetsSignature widgets", widgets)
     return JSON.stringify(
       widgets.map((widget) => ({
         id: widget.id,
@@ -93,7 +53,6 @@ export const F0GridStack = ({
   }, [widgets])
 
   const gridOptions = useMemo(() => {
-    console.log("gridOptions widgets", widgets)
     return {
       ...options,
       children: widgets,

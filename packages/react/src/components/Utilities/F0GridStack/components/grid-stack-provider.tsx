@@ -48,28 +48,46 @@ export function GridStackProvider({
 
   // Convert widgets for gridstack (convert React content to functions)
   const convertedOptions = useMemo(() => {
-    console.log("widgets ***************-->", widgets)
-
     return {
       ...options,
-      children: (widgets || []).map(convertWidgetRecursive),
+      children: (widgets || []).map((widget) => convertWidgetRecursive(widget)),
     }
   }, [options, widgets])
 
-  const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
-    const map = new Map<string, GridStackWidget>()
-    const widgetsToProcess = widgets || options.children || []
-    const deepFindNodeWithContent = (
-      obj: GridStackWidget | GridStackReactWidget
-    ) => {
-      const reactWidget = obj as GridStackReactWidget
-      if (obj.id && reactWidget.content) {
-        map.set(obj.id, obj as GridStackWidget)
+  // Store original React content separately to prevent GridStack's deepClone from causing stack overflow
+  const [reactContentMap, setReactContentMap] = useState(() => {
+    const map = new Map<string, React.ReactElement>()
+    const widgetsToProcess = widgets || []
+    const deepFindNodeWithContent = (obj: GridStackReactWidget) => {
+      if (obj.id && obj.content) {
+        map.set(obj.id, obj.content)
       }
 
       if (obj.subGridOpts?.children) {
-        obj.subGridOpts.children.forEach((child: GridStackWidget) => {
-          deepFindNodeWithContent(child)
+        obj.subGridOpts.children.forEach((child) => {
+          deepFindNodeWithContent(child as GridStackReactWidget)
+        })
+      }
+    }
+    widgetsToProcess.forEach((child) => {
+      deepFindNodeWithContent(child)
+    })
+    return map
+  })
+
+  // Store only converted widgets (with function content) for GridStack operations
+  const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
+    const map = new Map<string, GridStackWidget>()
+    const widgetsToProcess = widgets || []
+    const deepFindNodeWithContent = (obj: GridStackReactWidget) => {
+      if (obj.id) {
+        const convertedWidget = convertWidgetRecursive(obj)
+        map.set(obj.id, convertedWidget)
+      }
+
+      if (obj.subGridOpts?.children) {
+        obj.subGridOpts.children.forEach((child) => {
+          deepFindNodeWithContent(child as GridStackReactWidget)
         })
       }
     }
@@ -100,11 +118,30 @@ export function GridStackProvider({
     const widgetsToAdd = newWidgets.filter(
       (widget) => !widgetsInGridstackIds.includes(widget.id!)
     )
-    widgetsToAdd.forEach((widget) => {
-      const convertedWidget = convertWidgetRecursive(widget)
-      gridStack.addWidget(convertedWidget)
-      rawWidgetMetaMap.set(widget.id!, convertedWidget)
-    })
+    if (widgetsToAdd.length > 0) {
+      widgetsToAdd.forEach((widget) => {
+        const convertedWidget = convertWidgetRecursive(widget)
+        gridStack.addWidget(convertedWidget)
+      })
+      // Update maps using functional updates
+      setRawWidgetMetaMap((prev) => {
+        const next = new Map(prev)
+        widgetsToAdd.forEach((widget) => {
+          const convertedWidget = convertWidgetRecursive(widget)
+          next.set(widget.id!, convertedWidget)
+        })
+        return next
+      })
+      setReactContentMap((prev) => {
+        const next = new Map(prev)
+        widgetsToAdd.forEach((widget) => {
+          if (widget.content) {
+            next.set(widget.id!, widget.content)
+          }
+        })
+        return next
+      })
+    }
 
     /**
      * Remove widgets from gridstack that are not in the widgets array
@@ -112,38 +149,55 @@ export function GridStackProvider({
     const widgetsToRemove = widgetsInGridstack.filter(
       (widget) => !newWidgetsIds.includes(widget.id!)
     )
-    widgetsToRemove?.forEach((widget) => {
-      const element = gridStack.el.querySelector<GridItemHTMLElement>(
-        `[gs-id="${widget.id}"]`
-      )
-      if (element) {
-        gridStack.removeWidget(element, true)
-        rawWidgetMetaMap.delete(widget.id!)
-      }
-    })
+    if (widgetsToRemove.length > 0) {
+      widgetsToRemove.forEach((widget) => {
+        const element = gridStack.el.querySelector<GridItemHTMLElement>(
+          `[gs-id="${widget.id}"]`
+        )
+        if (element) {
+          gridStack.removeWidget(element, true)
+        }
+      })
+      // Update maps using functional updates
+      const idsToRemove = widgetsToRemove.map((w) => w.id!).filter(Boolean)
+      setRawWidgetMetaMap((prev) => {
+        const next = new Map(prev)
+        idsToRemove.forEach((id) => next.delete(id))
+        return next
+      })
+      setReactContentMap((prev) => {
+        const next = new Map(prev)
+        idsToRemove.forEach((id) => next.delete(id))
+        return next
+      })
+    }
 
     /**
      * Update widgets DOM elements in gridstack that are in the widgets array
      */
-    const widgetsToUpdate = newWidgets.filter(
-      (widget) => true || widgetsInGridstackIds.includes(widget.id!)
+    const widgetsToUpdate = newWidgets.filter((widget) =>
+      widgetsInGridstackIds.includes(widget.id!)
     )
-    widgetsToUpdate?.forEach((widget) => {
-      console.log("updatingwidget", widget)
-      const widgetInGridstack = widgetsInGridstack.find(
-        (w) => w.id === widget.id
-      )
-      if (!widgetInGridstack) {
-        return
-      }
+    if (widgetsToUpdate.length > 0) {
+      const widgetsNeedingGridUpdate: Array<{
+        id: string
+        element: GridItemHTMLElement
+        updateOptions: Partial<GridStackWidget>
+      }> = []
 
-      const propertiesChanged = propsToObserve.filter(
-        (prop) => widgetInGridstack[prop] !== widget[prop]
-      )
+      widgetsToUpdate.forEach((widget) => {
+        const widgetInGridstack = widgetsInGridstack.find(
+          (w) => w.id === widget.id
+        )
+        if (!widgetInGridstack) {
+          return
+        }
 
-      if (propertiesChanged.length > 0) {
-        try {
-          // Update widget properties (noMove, noResize, locked, position, size)
+        const propertiesChanged = propsToObserve.filter(
+          (prop) => widgetInGridstack[prop] !== widget[prop]
+        )
+
+        if (propertiesChanged.length > 0) {
           const updateOptions: Partial<GridStackWidget> = {}
           propertiesChanged.forEach((prop) => {
             const value = widget[prop]
@@ -155,14 +209,43 @@ export function GridStackProvider({
             `[gs-id="${widget.id}"]`
           )
           if (element) {
-            gridStack.update(element, updateOptions)
-            rawWidgetMetaMap.set(widget.id!, widget)
+            widgetsNeedingGridUpdate.push({
+              id: widget.id!,
+              element,
+              updateOptions,
+            })
           }
+        }
+      })
+
+      // Update GridStack DOM elements
+      widgetsNeedingGridUpdate.forEach(({ element, updateOptions }) => {
+        try {
+          gridStack.update(element, updateOptions)
         } catch (error) {
           console.warn("Error updating widget:", error)
         }
-      }
-    })
+      })
+
+      // Update maps using functional updates (always update for content changes)
+      setRawWidgetMetaMap((prev) => {
+        const next = new Map(prev)
+        widgetsToUpdate.forEach((widget) => {
+          const convertedWidget = convertWidgetRecursive(widget)
+          next.set(widget.id!, convertedWidget)
+        })
+        return next
+      })
+      setReactContentMap((prev) => {
+        const next = new Map(prev)
+        widgetsToUpdate.forEach((widget) => {
+          if (widget.content) {
+            next.set(widget.id!, widget.content)
+          }
+        })
+        return next
+      })
+    }
   }, [widgets])
 
   // Ensure handle option is applied after widgets are synced and rendered
@@ -210,11 +293,19 @@ export function GridStackProvider({
     const layout = gridStack.save()
 
     if (Array.isArray(layout)) {
-      // Merge layout data (positions) with widget metadata from rawWidgetMetaMap
+      // Merge layout data (positions) with React content from reactContentMap
       const updatedWidgets: GridStackReactWidget[] = layout
         .map((item) => {
           const widgetId = item.id
           if (!widgetId) return null
+
+          // Retrieve React content from reactContentMap (always up-to-date)
+          const content = reactContentMap.get(widgetId)
+
+          // GridStack preserves custom properties like meta, but TypeScript doesn't know about them
+          const itemWithMeta = item as GridStackWidget & {
+            meta?: Record<string, unknown>
+          }
 
           const updatedWidget: GridStackReactWidget = {
             ...item,
@@ -223,10 +314,10 @@ export function GridStackProvider({
             h: item.h ?? 1,
             x: item.x ?? 0,
             y: item.y ?? 0,
-            // Merge meta if both exist
-            meta: item.meta ?? undefined,
-            // Ensure content matches GridStackReactWidget type
-            content: item.content ?? <div>No content</div>,
+            // Preserve meta if it exists (GridStack preserves custom properties)
+            meta: itemWithMeta.meta,
+            // Use React content from reactContentMap
+            content: content ?? <div>No content</div>,
           }
 
           return updatedWidget
@@ -236,7 +327,7 @@ export function GridStackProvider({
       onChange?.(updatedWidgets)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridStack, rawWidgetMetaMap])
+  }, [gridStack, reactContentMap])
 
   useEffect(() => {
     if (!gridStack) return
@@ -300,6 +391,10 @@ export function GridStackProvider({
         _rawWidgetMetaMap: {
           value: rawWidgetMetaMap,
           set: setRawWidgetMetaMap,
+        },
+        _reactContentMap: {
+          value: reactContentMap,
+          set: setReactContentMap,
         },
       }}
     >
