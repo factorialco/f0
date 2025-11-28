@@ -1,17 +1,17 @@
 import { createDataSourceDefinition, FiltersState } from "@/hooks/datasource"
 
-// Departments/Teams
+// Departments/Teams with numeric IDs
 const DEPARTMENTS = [
-  "Engineering",
-  "Product",
-  "Design",
-  "Marketing",
-  "Sales",
-  "Customer Success",
-  "Finance",
-  "HR",
-  "Operations",
-  "Legal",
+  { id: 1, name: "Engineering" },
+  { id: 2, name: "Product" },
+  { id: 3, name: "Design" },
+  { id: 4, name: "Marketing" },
+  { id: 5, name: "Sales" },
+  { id: 6, name: "Customer Success" },
+  { id: 7, name: "Finance" },
+  { id: 8, name: "HR" },
+  { id: 9, name: "Operations" },
+  { id: 10, name: "Legal" },
 ] as const
 
 // Job titles by department
@@ -65,23 +65,23 @@ const JOB_TITLES: Record<string, string[]> = {
   Legal: ["Legal Counsel", "Compliance Officer", "Contract Manager"],
 }
 
-// Office locations
+// Office locations with numeric IDs
 const OFFICES = [
-  "Barcelona HQ",
-  "Madrid",
-  "London",
-  "New York",
-  "San Francisco",
-  "Berlin",
-  "Remote",
+  { id: 101, name: "Barcelona HQ" },
+  { id: 102, name: "Madrid" },
+  { id: 103, name: "London" },
+  { id: 104, name: "New York" },
+  { id: 105, name: "San Francisco" },
+  { id: 106, name: "Berlin" },
+  { id: 107, name: "Remote" },
 ] as const
 
-// Legal entities
+// Legal entities with numeric IDs
 const LEGAL_ENTITIES = [
-  "Factorial HR SL",
-  "Factorial Inc",
-  "Factorial UK Ltd",
-  "Factorial GmbH",
+  { id: 201, name: "Factorial HR SL" },
+  { id: 202, name: "Factorial Inc" },
+  { id: 203, name: "Factorial UK Ltd" },
+  { id: 204, name: "Factorial GmbH" },
 ] as const
 
 // Extended name lists for variety
@@ -249,7 +249,9 @@ const generateEmployee = (id: number) => {
   const firstName = FIRST_NAMES[firstNameIndex]
   const lastName = LAST_NAMES[lastNameIndex]
   const department = DEPARTMENTS[departmentIndex]
-  const titles = JOB_TITLES[department]
+  const office = OFFICES[officeIndex]
+  const legalEntity = LEGAL_ENTITIES[entityIndex]
+  const titles = JOB_TITLES[department.name]
   const titleIndex = Math.floor(seededRandom(seed + 5) * titles.length)
 
   return {
@@ -264,10 +266,13 @@ const generateEmployee = (id: number) => {
       firstName,
       lastName,
     },
-    department,
+    departmentId: department.id,
+    departmentName: department.name,
     jobTitle: titles[titleIndex],
-    office: OFFICES[officeIndex],
-    legalEntity: LEGAL_ENTITIES[entityIndex],
+    officeId: office.id,
+    officeName: office.name,
+    legalEntityId: legalEntity.id,
+    legalEntityName: legalEntity.name,
     hireDate: new Date(
       2018 + Math.floor(seededRandom(seed + 6) * 6),
       Math.floor(seededRandom(seed + 7) * 12),
@@ -290,15 +295,15 @@ const getAllEmployees = () => {
   return _allEmployees
 }
 
-// Filter definitions
+// Filter definitions - value is numeric ID, label is the display text
 export const employeeFiltersDefinition = {
   department: {
     type: "in" as const,
     label: "Department",
     options: {
       options: DEPARTMENTS.map((dept) => ({
-        value: dept,
-        label: dept,
+        value: String(dept.id),
+        label: dept.name,
       })),
     },
   },
@@ -307,8 +312,8 @@ export const employeeFiltersDefinition = {
     label: "Office",
     options: {
       options: OFFICES.map((office) => ({
-        value: office,
-        label: office,
+        value: String(office.id),
+        label: office.name,
       })),
     },
   },
@@ -317,8 +322,8 @@ export const employeeFiltersDefinition = {
     label: "Legal Entity",
     options: {
       options: LEGAL_ENTITIES.map((entity) => ({
-        value: entity,
-        label: entity,
+        value: String(entity.id),
+        label: entity.name,
       })),
     },
   },
@@ -330,6 +335,7 @@ export type Employee = ReturnType<typeof generateEmployee>
 
 /**
  * Apply filters to employee list
+ * Filters use string IDs that match the numeric IDs
  */
 const applyFilters = (
   employees: Employee[],
@@ -343,7 +349,7 @@ const applyFilters = (
       Array.isArray(filters.department) &&
       filters.department.length > 0
     ) {
-      if (!filters.department.includes(employee.department)) {
+      if (!filters.department.includes(String(employee.departmentId))) {
         return false
       }
     }
@@ -353,7 +359,7 @@ const applyFilters = (
       Array.isArray(filters.office) &&
       filters.office.length > 0
     ) {
-      if (!filters.office.includes(employee.office)) {
+      if (!filters.office.includes(String(employee.officeId))) {
         return false
       }
     }
@@ -363,7 +369,7 @@ const applyFilters = (
       Array.isArray(filters.legalEntity) &&
       filters.legalEntity.length > 0
     ) {
-      if (!filters.legalEntity.includes(employee.legalEntity)) {
+      if (!filters.legalEntity.includes(String(employee.legalEntityId))) {
         return false
       }
     }
@@ -384,7 +390,7 @@ const applySearch = (employees: Employee[], search?: string): Employee[] => {
       employee.label.toLowerCase().includes(searchLower) ||
       employee.email.toLowerCase().includes(searchLower) ||
       employee.jobTitle.toLowerCase().includes(searchLower) ||
-      employee.department.toLowerCase().includes(searchLower)
+      employee.departmentName.toLowerCase().includes(searchLower)
   )
 }
 
@@ -490,46 +496,56 @@ export const mockItems = getAllEmployees().map((e) => ({
   label: e.label,
   avatar: e.avatar,
   role: e.jobTitle,
-  workplace: e.office,
-  legalEntity: e.legalEntity,
-  description: `${e.jobTitle} - ${e.department}`,
+  roleId: e.jobTitle, // Using job title as ID since we don't have separate IDs for job titles
+  workplace: e.officeName,
+  workplaceId: e.officeId,
+  legalEntity: e.legalEntityName,
+  legalEntityId: e.legalEntityId,
+  description: `${e.jobTitle} - ${e.departmentName}`,
 }))
 
 export type MockItem = (typeof mockItems)[number]
+
+// Create unique office options from OFFICES with numeric IDs
+const officeFilterOptions = OFFICES.map((office) => ({
+  value: String(office.id),
+  label: office.name,
+}))
+
+// Create unique legal entity options from LEGAL_ENTITIES with numeric IDs
+const legalEntityFilterOptions = LEGAL_ENTITIES.map((entity) => ({
+  value: String(entity.id),
+  label: entity.name,
+}))
+
+// Create unique job title options (using title as both value and label since we don't have IDs for these)
+const jobTitleFilterOptions = [
+  ...new Set(mockItems.map((item) => item.role)),
+].map((role) => ({
+  value: role,
+  label: role,
+}))
 
 export const mockFiltersDefinition = {
   role: {
     type: "in" as const,
     label: "Job Title",
     options: {
-      options: [...new Set(mockItems.map((item) => item.role))].map((role) => ({
-        value: role,
-        label: role,
-      })),
+      options: jobTitleFilterOptions,
     },
   },
   workplace: {
     type: "in" as const,
     label: "Office",
     options: {
-      options: [...new Set(mockItems.map((item) => item.workplace))].map(
-        (workplace) => ({
-          value: workplace,
-          label: workplace,
-        })
-      ),
+      options: officeFilterOptions,
     },
   },
   legalEntity: {
     type: "in" as const,
     label: "Legal Entity",
     options: {
-      options: [...new Set(mockItems.map((item) => item.legalEntity))].map(
-        (legalEntity) => ({
-          value: legalEntity,
-          label: legalEntity,
-        })
-      ),
+      options: legalEntityFilterOptions,
     },
   },
 }
@@ -543,6 +559,7 @@ const applyMockFilters = (
   if (!filters) return items
 
   return items.filter((item) => {
+    // Role filter uses role name as value (no separate ID)
     if (
       filters.role &&
       Array.isArray(filters.role) &&
@@ -550,19 +567,22 @@ const applyMockFilters = (
     ) {
       if (!filters.role.includes(item.role)) return false
     }
+    // Workplace filter uses numeric ID
     if (
       filters.workplace &&
       Array.isArray(filters.workplace) &&
       filters.workplace.length > 0
     ) {
-      if (!filters.workplace.includes(item.workplace)) return false
+      if (!filters.workplace.includes(String(item.workplaceId))) return false
     }
+    // Legal entity filter uses numeric ID
     if (
       filters.legalEntity &&
       Array.isArray(filters.legalEntity) &&
       filters.legalEntity.length > 0
     ) {
-      if (!filters.legalEntity.includes(item.legalEntity)) return false
+      if (!filters.legalEntity.includes(String(item.legalEntityId)))
+        return false
     }
     return true
   })
