@@ -6,8 +6,8 @@ import {
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-import { InFilter } from "./InFilter"
-import type { InFilterOptionItem, InFilterOptions } from "./types"
+import { InFilter } from "../InFilter"
+import type { InFilterOptionItem, InFilterOptions } from "../types"
 
 const meta = {
   title: "FilterPicker/Filters/InFilter",
@@ -347,7 +347,7 @@ export const SyncFunctionOptions: Story = {
 
 const mockUsers: MockUser[] = generateMockUsers(30)
 
-const DataSourceFilterOptions: InFilterOptions<string, MockUser> = {
+const dataSourceFilterOptions: InFilterOptions<string, MockUser> = {
   source: createDataSourceDefinition({
     dataAdapter: {
       fetchData: async ({ pagination, search }) => {
@@ -388,7 +388,7 @@ export const WithDataSource: Story = {
   args: {
     schema: {
       label: "Countries",
-      options: DataSourceFilterOptions as unknown as InFilterOptions<string>,
+      options: dataSourceFilterOptions,
     },
     value: [],
     onChange: () => {},

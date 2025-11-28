@@ -1,3 +1,5 @@
+import { Tooltip } from "@/experimental/Overlays/Tooltip/index.tsx"
+import { flagsMap } from "@/flags"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { avatarSizes } from "../../internal/BaseAvatar"
@@ -66,7 +68,6 @@ export const Snapshot: Story = {
   render: () => (
     <div className="flex w-fit flex-col gap-2">
       <h3 className="text-lg font-semibold">All Flag Avatars</h3>
-
       <section>
         <h4 className="text-lg font-semibold">With Flag</h4>
         <div className="flex flex-row gap-2">
@@ -85,6 +86,16 @@ export const Snapshot: Story = {
               flag={"es"}
               badge={{ type: "module", module: "inbox" }}
             />
+          ))}
+        </div>
+      </section>
+      <section>
+        <h4 className="text-lg font-semibold">With All Flags</h4>
+        <div className="flex flex-row flex-wrap gap-2">
+          {Object.keys(flagsMap).map((flag) => (
+            <Tooltip key={flag} label={flag} description={flag.toString()}>
+              <F0AvatarFlag size="md" flag={flag} />
+            </Tooltip>
           ))}
         </div>
       </section>

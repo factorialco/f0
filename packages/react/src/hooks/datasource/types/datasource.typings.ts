@@ -5,7 +5,7 @@ import {
 } from "@/components/OneFilterPicker/types"
 import { DataAdapter } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
-import { ChildrenResponse } from "./nested.typings"
+import { ChildrenPaginationInfo, ChildrenResponse } from "./nested.typings"
 import { RecordType } from "./records.typings"
 import { SearchOptions } from "./search.typings"
 import { SelectedItemsState } from "./selection.typings"
@@ -77,12 +77,16 @@ export type DataSourceDefinition<
   /***** NESTED RECORDS ***************************************************/
   fetchChildren?: (
     item: R,
-    filters?: FiltersState<FiltersDefinition>
+    filters?: FiltersState<FiltersDefinition>,
+    pagination?: ChildrenPaginationInfo<R>
   ) => Promise<ChildrenResponse<R>>
   /** Function to determine if an item has children */
   itemsWithChildren?: (item: R) => boolean
   /** Function to get the number of children for an item */
-  childrenCount?: (item: R) => number | undefined
+  childrenCount?: (
+    item: R,
+    pagination?: ChildrenPaginationInfo<R>
+  ) => number | undefined
 }
 
 /**

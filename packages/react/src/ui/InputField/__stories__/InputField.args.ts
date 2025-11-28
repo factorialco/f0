@@ -97,6 +97,16 @@ const inputFieldArgs = {
   hideMaxLength: {
     description: "Whether to hide the max length indicator",
   },
+  buttonToggle: {
+    description: "Button toggle to render inside the input field",
+    control: "object",
+    table: {
+      type: {
+        summary:
+          "{ label: string | [string, string], icon: IconType | [IconType, IconType], selected: boolean, disabled?: boolean, onChange: (selected: boolean) => void } | undefined",
+      },
+    },
+  },
 }
 
 export const getInputFieldArgs = (

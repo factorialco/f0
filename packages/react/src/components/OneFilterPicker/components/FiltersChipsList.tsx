@@ -50,9 +50,10 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
             const filterType = getFilterType(filterSchema.type)
             type FilterType = FilterDefinitionsByType[typeof filterSchema.type]
 
-            const typedFilterType = filterType as FilterTypeDefinition<
-              FilterValue<FilterType>
-            >
+            const typedFilterType =
+              filterType as unknown as FilterTypeDefinition<
+                FilterValue<FilterType>
+              >
 
             if (
               typedFilterType.isEmpty(currentValue, {

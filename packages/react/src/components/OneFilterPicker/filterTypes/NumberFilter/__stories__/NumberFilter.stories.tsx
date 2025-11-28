@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { NumberFilter } from "./NumberFilter"
+import { NumberFilter } from "../NumberFilter"
 
 const meta = {
   title: "FilterPicker/Filters/NumberFilter",
@@ -43,7 +43,10 @@ export const SingleWithSelectedValues: Story = {
         max: 100,
       },
     },
-    value: [100, 100],
+    value: {
+      mode: "single",
+      value: 100,
+    },
     onChange: () => {},
   },
 }
@@ -57,7 +60,31 @@ export const RangeWithSelectedValues: Story = {
         max: 100,
       },
     },
-    value: [0, 100],
+    value: {
+      mode: "range",
+      from: {
+        value: 0,
+        closed: true,
+      },
+      to: {
+        value: 100,
+        closed: true,
+      },
+    },
+    onChange: () => {},
+  },
+}
+
+export const RangeWithOpenCloseToggle: Story = {
+  args: {
+    schema: {
+      label: "Department",
+      options: {
+        min: 0,
+        max: 100,
+        openCloseToggle: true,
+      },
+    },
     onChange: () => {},
   },
 }
