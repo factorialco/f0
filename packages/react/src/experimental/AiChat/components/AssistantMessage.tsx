@@ -1,6 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import { ButtonCopy } from "@/ui/ButtonCopy"
-
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import {
   Download,
   ThumbsDown,
@@ -10,11 +9,16 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ButtonCopy } from "@/ui/ButtonCopy"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { ActionItem } from "../ActionItem"
 import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
-import { downloadTablesAsExcel, hasMarkdownTables } from "../utils/tableExport"
+import {
+  downloadTables,
+  hasMarkdownTables,
+  type ExportFormat,
+} from "../utils/tableExport"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
@@ -46,6 +50,30 @@ export const AssistantMessage = ({
   const timeoutRef = useRef<NodeJS.Timeout>()
 
   const contentHasTables = useMemo(() => hasMarkdownTables(content), [content])
+
+  const exportItems = useMemo(
+    () => [
+      {
+        value: "xlsx" as ExportFormat,
+        label: translations.ai.exportAsXLSX,
+        icon: Download,
+      },
+      {
+        value: "csv" as ExportFormat,
+        label: translations.ai.exportAsCSV,
+        icon: Download,
+      },
+    ],
+    [translations.ai.exportAsXLSX, translations.ai.exportAsCSV]
+  )
+
+  const handleExport = useCallback(
+    (format: ExportFormat) => {
+      downloadTables(content, translations.ai.generatedTableFilename, format)
+    },
+    [content, translations.ai.generatedTableFilename]
+  )
+
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -55,6 +83,7 @@ export const AssistantMessage = ({
       setIsHovered(true)
     }
   }, [isGenerating, isLoading, subComponent])
+
   const handleMouseLeave = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       setIsHovered(false)
@@ -85,19 +114,13 @@ export const AssistantMessage = ({
 
           {contentHasTables && !isGenerating && (
             <div className="mt-2 flex w-full justify-end">
-              <F0Button
+              <F0ButtonDropdown
                 variant="outline"
                 size="md"
-                label={translations.ai.downloadTableAsExcel}
-                icon={Download}
+                items={exportItems}
+                value="xlsx"
                 disabled={isGenerating}
-                onClick={(e) => {
-                  downloadTablesAsExcel(
-                    content,
-                    translations.ai.generatedTableFilename
-                  )
-                  e.currentTarget.blur()
-                }}
+                onClick={(value) => handleExport(value as ExportFormat)}
               />
             </div>
           )}

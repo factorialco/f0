@@ -2,6 +2,10 @@
  * Utility functions to parse markdown tables and export them to Excel/CSV format
  */
 
+import * as XLSX from "xlsx"
+
+export type ExportFormat = "csv" | "xlsx"
+
 interface TableData {
   headers: string[]
   rows: string[][]
@@ -111,11 +115,25 @@ function tablesToCSV(tables: TableData[]): string {
 }
 
 /**
- * Downloads tables as an Excel-compatible CSV file
- * @param content - The markdown content containing tables
- * @param filename - Optional filename (without extension)
+ * Downloads a blob as a file
  */
-export function downloadTablesAsExcel(
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Downloads tables as CSV file
+ * @param content - The markdown content containing tables
+ * @param filename - Filename (without extension)
+ */
+export function downloadTablesAsCSV(
   content: string,
   filename: string = "table-export"
 ): void {
@@ -134,13 +152,74 @@ export function downloadTablesAsExcel(
     type: "text/csv;charset=utf-8",
   })
 
-  // Create download link
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement("a")
-  link.href = url
-  link.download = `${filename}.csv`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  downloadBlob(blob, `${filename}.csv`)
+}
+
+/**
+ * Downloads tables as XLSX file
+ * @param content - The markdown content containing tables
+ * @param filename - Filename (without extension)
+ */
+export function downloadTablesAsXLSX(
+  content: string,
+  filename: string = "table-export"
+): void {
+  const tables = parseMarkdownTables(content)
+
+  if (tables.length === 0) {
+    console.warn("No tables found in content")
+    return
+  }
+
+  // Create a new workbook
+  const workbook = XLSX.utils.book_new()
+
+  // Add each table as a separate sheet
+  tables.forEach((table, index) => {
+    // Combine headers and rows into a single array
+    const data = [table.headers, ...table.rows]
+
+    // Create worksheet from array
+    const worksheet = XLSX.utils.aoa_to_sheet(data)
+
+    // Add worksheet to workbook
+    const sheetName = tables.length > 1 ? `Table ${index + 1}` : "Table"
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  })
+
+  // Generate XLSX file and download
+  const xlsxBuffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" })
+  const blob = new Blob([xlsxBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  })
+
+  downloadBlob(blob, `${filename}.xlsx`)
+}
+
+/**
+ * Downloads tables in the specified format
+ * @param content - The markdown content containing tables
+ * @param filename - Filename (without extension)
+ * @param format - Export format ('csv' or 'xlsx')
+ */
+export function downloadTables(
+  content: string,
+  filename: string = "table-export",
+  format: ExportFormat = "csv"
+): void {
+  if (format === "xlsx") {
+    downloadTablesAsXLSX(content, filename)
+  } else {
+    downloadTablesAsCSV(content, filename)
+  }
+}
+
+/**
+ * @deprecated Use downloadTablesAsCSV or downloadTables instead
+ */
+export function downloadTablesAsExcel(
+  content: string,
+  filename: string = "table-export"
+): void {
+  downloadTablesAsCSV(content, filename)
 }
