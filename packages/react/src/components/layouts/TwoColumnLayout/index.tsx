@@ -1,11 +1,14 @@
 import { cn } from "@/lib/utils"
-import { ReactNode, forwardRef } from "react"
+import { Menu, PanelLeftClose } from "lucide-react"
+import { ReactNode, forwardRef, useState } from "react"
 
 export interface TwoColumnLayoutProps {
   children: ReactNode
   sideContent: ReactNode
   mainColumnPosition?: "left" | "right"
   sticky?: boolean
+  collapsible?: boolean
+  defaultCollapsed?: boolean
 }
 
 export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
@@ -15,9 +18,12 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
       sideContent,
       mainColumnPosition = "left",
       sticky = false,
+      collapsible = false,
+      defaultCollapsed = false,
     },
     ref
   ) {
+    const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
     return (
       <div ref={ref} className="h-full">
         <div
@@ -48,6 +54,9 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
               "order-1",
               mainColumnPosition === "right" ? "md:order-1" : "md:order-3"
             )}
+            collapsible={collapsible}
+            isCollapsed={isCollapsed}
+            onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
           >
             {sideContent}
           </Aside>
@@ -60,17 +69,50 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
 const Aside = ({
   children,
   className,
+  collapsible = false,
+  isCollapsed = false,
+  onToggleCollapse,
 }: {
   children: ReactNode
   className?: string
   sticky?: boolean
-}) => (
-  <aside
-    className={cn(
-      "min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
-      className
-    )}
-  >
-    {children}
-  </aside>
-)
+  collapsible?: boolean
+  isCollapsed?: boolean
+  onToggleCollapse?: () => void
+}) => {
+  return (
+    <aside
+      className={cn(
+        "min-w-30 relative py-5 pl-4 pr-4 transition-all duration-300 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
+        isCollapsed && collapsible && "md:min-w-16 md:max-w-16",
+        className
+      )}
+    >
+      {collapsible && (
+        <button
+          onClick={onToggleCollapse}
+          className={cn(
+            "absolute left-4 top-4 z-10 rounded-md p-2 hover:bg-f1-background-secondary",
+            "transition-colors duration-200 focus:outline-none focus:ring-2",
+            "focus:ring-f1-border-focus"
+          )}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <Menu className="h-5 w-5 text-f1-foreground" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5 text-f1-foreground" />
+          )}
+        </button>
+      )}
+      <div
+        className={cn(
+          "transition-opacity duration-300",
+          collapsible && isCollapsed && "md:invisible md:opacity-0"
+        )}
+      >
+        {children}
+      </div>
+    </aside>
+  )
+}
