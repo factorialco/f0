@@ -1,8 +1,81 @@
 import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Link } from "@/components/F0Link/F0Link"
 import DownloadIcon from "@/icons/app/Download"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
+import { useCallback, useMemo, useRef } from "react"
+import {
+  downloadTableFromElement,
+  type ExportFormat,
+} from "./utils/tableExport"
+
+/**
+ * Table wrapper component with max height, scroll, and download button
+ */
+function TableWrapper({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLTableElement>) {
+  const translations = useI18n()
+  const tableRef = useRef<HTMLTableElement>(null)
+
+  const exportItems = useMemo(
+    () => [
+      {
+        value: "xlsx" as ExportFormat,
+        label: translations.ai.exportAsXLSX,
+        icon: DownloadIcon,
+      },
+      {
+        value: "csv" as ExportFormat,
+        label: translations.ai.exportAsCSV,
+        icon: DownloadIcon,
+      },
+    ],
+    [translations.ai.exportAsXLSX, translations.ai.exportAsCSV]
+  )
+
+  const handleExport = useCallback(
+    (format: ExportFormat) => {
+      if (tableRef.current) {
+        downloadTableFromElement(
+          tableRef.current,
+          translations.ai.generatedTableFilename,
+          format
+        )
+      }
+    },
+    [translations.ai.generatedTableFilename]
+  )
+
+  return (
+    <div className="mb-2 flex flex-col gap-2">
+      <div className="max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary">
+        <table
+          ref={tableRef}
+          {...props}
+          className={cn(
+            "w-full border-separate border-spacing-0",
+            props.className
+          )}
+        >
+          {children}
+        </table>
+      </div>
+      <div className="flex justify-start">
+        <F0ButtonDropdown
+          variant="outline"
+          size="sm"
+          items={exportItems}
+          value="xlsx"
+          onClick={(value) => handleExport(value as ExportFormat)}
+        />
+      </div>
+    </div>
+  )
+}
 
 export const markdownRenderers: NonNullable<
   AssistantMessageProps["markdownTagRenderers"]
@@ -121,16 +194,8 @@ export const markdownRenderers: NonNullable<
       {children}
     </ol>
   ),
-  table: ({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
-    <table
-      {...props}
-      className={cn(
-        "mb-2 w-full border-separate border-spacing-0 overflow-hidden rounded-md border border-solid border-f1-border-secondary",
-        props.className
-      )}
-    >
-      {children}
-    </table>
+  table: (props: React.HTMLAttributes<HTMLTableElement>) => (
+    <TableWrapper {...props} />
   ),
   th: ({
     children,
@@ -139,7 +204,9 @@ export const markdownRenderers: NonNullable<
     <th
       {...props}
       className={cn(
-        "border-0 border-b border-solid border-f1-border-secondary px-3 py-2 text-left font-medium text-f1-foreground-secondary",
+        "border-0 border-b border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left font-medium text-f1-foreground-secondary",
+        // Make header sticky when scrolling vertically
+        "sticky top-0",
         props.className
       )}
     >
