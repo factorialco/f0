@@ -36,7 +36,7 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
         >
           <main
             className={cn(
-              "sm:min-h-xs relative order-2 h-fit border-0 sm:flex-1 sm:border-solid md:order-2",
+              "sm:min-h-xs relative order-2 h-full border-0 sm:flex-1 sm:border-solid md:order-2",
               sticky
                 ? "md:h-full md:max-h-full md:overflow-y-auto"
                 : "min-h-full",
