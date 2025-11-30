@@ -6230,31 +6230,6 @@ declare global {
 }
 
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        renderFn?: () => React.ReactElement | null;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        id?: string;
-        w?: number;
-        h?: number;
-        x?: number;
-        y?: number;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        renderFn?: () => React.ReactElement | null;
-    }
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6282,8 +6257,28 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        renderFn?: () => React.ReactElement | null;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        id?: string;
+        w?: number;
+        h?: number;
+        x?: number;
+        y?: number;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        renderFn?: () => React.ReactElement | null;
+    }
 }
 
 
@@ -6293,4 +6288,9 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
