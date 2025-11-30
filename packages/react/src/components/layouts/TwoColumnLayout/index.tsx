@@ -36,14 +36,15 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
         >
           <main
             className={cn(
-              "sm:min-h-xs relative order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6",
+              "sm:min-h-xs relative order-2 h-fit border-0 sm:flex-1 sm:border-solid md:order-2",
               sticky
                 ? "md:h-full md:max-h-full md:overflow-y-auto"
                 : "min-h-full",
               mainColumnPosition === "right"
                 ? "sm:border-l sm:border-l-f1-border-secondary"
                 : "sm:border-r sm:border-r-f1-border-secondary",
-              "border-t border-solid border-t-f1-border-secondary sm:border-t-0"
+              "border-t border-solid border-t-f1-border-secondary sm:border-t-0",
+              collapsible ? "px-4 py-5 md:px-6 md:pl-16" : "px-4 py-5 md:px-6"
             )}
           >
             {collapsible && (
@@ -63,7 +64,7 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
                 )}
               </button>
             )}
-            <div className={cn(collapsible && "md:ml-12")}>{mainContent}</div>
+            {mainContent}
           </main>
           <Aside
             sticky={sticky}
