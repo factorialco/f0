@@ -25,6 +25,20 @@ export const AssistantMessage = ({
   onCopy,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
+
+  // Debug: verificar formato del content y detección de tablas
+  console.log("content", content)
+  // TODO: Eliminar después de verificar
+  console.log("[AssistantMessage] content type:", typeof content)
+  console.log(
+    "[AssistantMessage] content preview:",
+    typeof content === "string" ? content.substring(0, 200) : content
+  )
+  console.log(
+    "[AssistantMessage] hasMarkdownTables:",
+    hasMarkdownTables(content)
+  )
+
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(
@@ -77,6 +91,7 @@ export const AssistantMessage = ({
       {message && (
         <>
           <div className="w-fit max-w-[min(90%,330px)] [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
+            ejemplo nuevo
             <Markdown
               content={content}
               components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}

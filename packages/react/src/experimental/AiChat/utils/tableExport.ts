@@ -17,8 +17,9 @@ export function parseMarkdownTables(content: string): TableData[] {
 
   // Match markdown table patterns
   // A table starts with a header row, followed by a separator row (---|---|...), then data rows
+  // Note: The separator row pattern includes | in the character class to match multi-column tables
   const tableRegex =
-    /(?:^|\n)((?:\|[^\n]+\|)\n(?:\|[\s:-]+\|)\n(?:(?:\|[^\n]+\|)(?:\n|$))+)/gm
+    /(?:^|\n)((?:\|[^\n]+\|)\n(?:\|[\s:|-]+\|)\n(?:(?:\|[^\n]+\|)(?:\n|$))+)/gm
 
   const matches = content.matchAll(tableRegex)
 
@@ -68,8 +69,9 @@ function parseTableRow(line: string): string[] {
  * Checks if markdown content contains at least one table
  */
 export function hasMarkdownTables(content: string): boolean {
+  // Note: The separator row pattern includes | in the character class to match multi-column tables
   const tableRegex =
-    /(?:^|\n)(?:\|[^\n]+\|)\n(?:\|[\s:-]+\|)\n(?:(?:\|[^\n]+\|)(?:\n|$))+/m
+    /(?:^|\n)(?:\|[^\n]+\|)\n(?:\|[\s:|-]+\|)\n(?:(?:\|[^\n]+\|)(?:\n|$))+/m
   return tableRegex.test(content)
 }
 
