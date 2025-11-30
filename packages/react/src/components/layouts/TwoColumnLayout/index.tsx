@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { Menu } from "lucide-react"
+import { Menu, PanelLeftClose } from "lucide-react"
 import { ReactNode, forwardRef, useState } from "react"
 
 export interface TwoColumnLayoutProps {
@@ -56,7 +56,11 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
                 )}
                 aria-label={isCollapsed ? "Show sidebar" : "Hide sidebar"}
               >
-                <Menu className="h-5 w-5 text-f1-foreground" />
+                {isCollapsed ? (
+                  <Menu className="h-5 w-5 text-f1-foreground" />
+                ) : (
+                  <PanelLeftClose className="h-5 w-5 text-f1-foreground" />
+                )}
               </button>
             )}
             <div className={cn(collapsible && "md:ml-12")}>{mainContent}</div>
@@ -90,14 +94,14 @@ const Aside = ({
   collapsible?: boolean
   isCollapsed?: boolean
 }) => {
-  if (collapsible && isCollapsed) {
-    return null
-  }
-
   return (
     <aside
       className={cn(
         "min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
+        "transition-all duration-300 ease-in-out",
+        collapsible &&
+          isCollapsed &&
+          "md:min-w-0 md:max-w-0 md:overflow-hidden md:p-0 md:opacity-0",
         className
       )}
     >
