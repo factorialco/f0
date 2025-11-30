@@ -113,10 +113,10 @@ export const AssistantMessage = ({
           </div>
 
           {contentHasTables && !isGenerating && (
-            <div className="mt-2 flex w-full justify-end">
+            <div className="mt-2 flex w-full justify-start">
               <F0ButtonDropdown
                 variant="outline"
-                size="md"
+                size="sm"
                 items={exportItems}
                 value="xlsx"
                 disabled={isGenerating}
