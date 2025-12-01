@@ -11,7 +11,7 @@ import { ButtonCopy } from "@/ui/ButtonCopy"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { ActionItem } from "../ActionItem"
-import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
+import { markdownRenderers as f0MarkdownRenderers } from "../MarkdownRenderers"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
