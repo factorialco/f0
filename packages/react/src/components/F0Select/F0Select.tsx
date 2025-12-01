@@ -570,11 +570,15 @@ const F0SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              value={Math.max(
-                localValue.length,
-                selectionMeta.selectedItemsCount
-              ).toString()}
-              isEmpty={(value) => +(value ?? 0) === 0}
+              value={
+                localValue.length > 0 || selectionMeta.selectedItemsCount > 0
+                  ? Math.max(
+                      localValue.length,
+                      selectionMeta.selectedItemsCount
+                    ).toString()
+                  : undefined
+              }
+              isEmpty={(value) => !value || +(value ?? 0) === 0}
               onClear={() => {
                 hasUserInteracted.current = true
                 clearSelection()
