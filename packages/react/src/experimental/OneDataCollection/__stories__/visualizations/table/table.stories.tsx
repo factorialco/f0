@@ -1,5 +1,11 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
+import { useState } from "react"
+import {
+  ExampleComponent,
+  getMockVisualizations,
+  MockUser,
+  sortings,
+} from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/Table",
@@ -109,22 +115,47 @@ export const TableColumnHidden: Story = {
 }
 
 export const TableDynamicColumns: Story = {
-  render: () => (
-    <ExampleComponent
-      frozenColumns={2}
-      tableAllowColumnReordering
-      tableAllowColumnHiding
-      tableColumns={(data) => {
-        console.log("data", data)
-        return [
-          {
-            label: "Name",
-            render: (item) => item.name,
-            sorting: "name",
-            width: 140,
-          },
-        ]
-      }}
-    />
-  ),
+  render: () => {
+    const [count, setCount] = useState(0)
+    return (
+      <>
+        <button onClick={() => setCount((prev) => prev + 1)}>Add column</button>
+
+        <ExampleComponent
+          frozenColumns={2}
+          tableAllowColumnReordering
+          tableAllowColumnHiding
+          tableColumns={(_data) => {
+            console.log("data", _data)
+            return [
+              {
+                label: "Name",
+                render: (item: MockUser) => item.name,
+                sorting: "name" as keyof typeof sortings,
+                width: 140,
+              },
+              {
+                label: "Email",
+                render: (item: MockUser) => item.email,
+                sorting: "email" as keyof typeof sortings,
+                width: 140,
+              },
+              {
+                label: "Role",
+                render: (item: MockUser) => item.role,
+                sorting: "role" as keyof typeof sortings,
+                width: 140,
+              },
+              {
+                label: "Department",
+                render: (item: MockUser) => item.department,
+                sorting: "department" as keyof typeof sortings,
+                width: 140,
+              },
+            ].slice(0, count)
+          }}
+        />
+      </>
+    )
+  },
 }
