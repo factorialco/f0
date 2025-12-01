@@ -512,7 +512,7 @@ export const WithDataSourceNotPaginated: Story = {
       value: item.value,
       label: item.label,
       avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.department}`,
+      description: `${item.jobTitle} · ${item.departmentName}`,
     }),
   },
 }
@@ -531,7 +531,7 @@ export const WithDataSourcePaginated: Story = {
             value: emp.value,
             label: emp.label,
             avatar: emp.avatar,
-            description: `${emp.jobTitle} · ${emp.department}`,
+            description: `${emp.jobTitle} · ${emp.departmentName}`,
           }
         : undefined
     })(),
@@ -540,7 +540,7 @@ export const WithDataSourcePaginated: Story = {
       value: item.value,
       label: item.label,
       avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.department}`,
+      description: `${item.jobTitle} · ${item.departmentName}`,
     }),
   },
 }
@@ -640,7 +640,7 @@ export const MultipleNotPaginated: Story = {
       value: item.value,
       label: item.label,
       avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.department}`,
+      description: `${item.jobTitle} · ${item.departmentName}`,
     }),
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
@@ -712,7 +712,7 @@ export const SingleSelectWithFilters: Story = {
         ? {
             value: emp.value,
             label: emp.label,
-            description: `${emp.jobTitle} · ${emp.office}`,
+            description: `${emp.jobTitle} · ${emp.officeName}`,
             avatar: emp.avatar,
           }
         : undefined
@@ -721,7 +721,7 @@ export const SingleSelectWithFilters: Story = {
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      description: `${item.jobTitle} · ${item.office}`,
+      description: `${item.jobTitle} · ${item.officeName}`,
       avatar: item.avatar,
     }),
   },
