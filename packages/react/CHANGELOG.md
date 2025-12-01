@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.291.1](https://github.com/factorialco/f0/compare/f0-react-v1.291.0...f0-react-v1.291.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* remove fixing min-w-[40px] ([#3058](https://github.com/factorialco/f0/issues/3058)) ([aeb4ef6](https://github.com/factorialco/f0/commit/aeb4ef6783464c4eb3d02595226983c5532ad331))
+
 ## [1.291.0](https://github.com/factorialco/f0/compare/f0-react-v1.290.0...f0-react-v1.291.0) (2025-11-27)
 
 
