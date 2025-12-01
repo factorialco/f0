@@ -94,6 +94,13 @@ export function useSelectable<
   const [allSelectedCheck, setAllSelectedCheck] = useState(false)
 
   /**
+   * Store the total count when "select all" is clicked.
+   * This value is used to calculate selectedItemsCount even when search filters change,
+   * ensuring the count reflects the actual selection, not the filtered results.
+   */
+  const [selectAllTotal, setSelectAllTotal] = useState<number | null>(null)
+
+  /**
    * Determine the status of the all selected checkbox
    */
   const isAllSelected = useMemo(() => {
@@ -330,6 +337,7 @@ export function useSelectable<
 
   const clearSelectedItems = useCallback(() => {
     handleSelectAll(false)
+    setSelectAllTotal(null)
     setLocalSelectedState(() => ({
       allSelected: false,
       items: new Map(),
@@ -484,6 +492,13 @@ export function useSelectable<
       return
     }
     setAllSelectedCheck(checked)
+
+    // Store the total count when select all is activated, clear it when deactivated
+    if (checked) {
+      setSelectAllTotal(totalKnownItemsCount)
+    } else {
+      setSelectAllTotal(null)
+    }
 
     if (isGrouped && data.type === "grouped") {
       // Select/deselect all groups using data.groups (not groupsState which might be empty)
@@ -679,13 +694,17 @@ export function useSelectable<
         0
       )
     } else {
-      return allSelectedCheck
-        ? totalKnownItemsCount - uncheckedCount
-        : checkedCount
+      // When allSelectedCheck is true, use the stored selectAllTotal (the count at the time
+      // select all was clicked) instead of totalKnownItemsCount which changes with search filters.
+      // This ensures the selected count reflects the actual selection, not the filtered results.
+      if (allSelectedCheck && selectAllTotal !== null) {
+        return selectAllTotal - uncheckedCount
+      }
+      return checkedCount
     }
   }, [
     groupAllSelectedStatus,
-    totalKnownItemsCount,
+    selectAllTotal,
     uncheckedCount,
     checkedCount,
     isGrouped,

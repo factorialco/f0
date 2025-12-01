@@ -253,11 +253,11 @@ const SelectContent = forwardRef<
                 asList
                   ? "max-h-full"
                   : taller
-                    ? "max-h-[440px]"
-                    : "max-h-[320px]",
+                    ? "max-h-[340px]"
+                    : "max-h-[300px]",
                 loadingNewContent &&
                   "select-none opacity-10 transition-opacity",
-                forceMinHeight && "min-h-[450px]"
+                forceMinHeight && "min-h-[340px]"
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
