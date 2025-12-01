@@ -4,33 +4,18 @@ import DownloadIcon from "@/icons/app/Download"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
-import { useCallback, useRef } from "react"
+import { useRef } from "react"
 import { downloadTableAsExcel } from "./utils/tableExport"
 
-/**
- * Table wrapper component with max height, scroll, and download button
- */
-function TableWrapper({
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLTableElement>) {
-  const translations = useI18n()
-  const tableRef = useRef<HTMLTableElement>(null)
-
-  const handleExport = useCallback(() => {
-    if (tableRef.current) {
-      downloadTableAsExcel(
-        tableRef.current,
-        translations.ai.generatedTableFilename
-      )
-    }
-  }, [translations.ai.generatedTableFilename])
+function Table({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) {
+  const { ai } = useI18n()
+  const ref = useRef<HTMLTableElement>(null)
 
   return (
     <div className="mb-2 flex flex-col gap-2">
       <div className="max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary">
         <table
-          ref={tableRef}
+          ref={ref}
           {...props}
           className={cn(
             "w-full border-separate border-spacing-0",
@@ -40,15 +25,16 @@ function TableWrapper({
           {children}
         </table>
       </div>
-      <div className="flex justify-start">
-        <F0Button
-          variant="outline"
-          size="sm"
-          label={translations.ai.exportTable}
-          icon={DownloadIcon}
-          onClick={handleExport}
-        />
-      </div>
+      <F0Button
+        variant="outline"
+        size="sm"
+        label={ai.exportTable}
+        icon={DownloadIcon}
+        onClick={() => {
+          if (ref.current)
+            downloadTableAsExcel(ref.current, ai.generatedTableFilename)
+        }}
+      />
     </div>
   )
 }
@@ -171,7 +157,7 @@ export const markdownRenderers: NonNullable<
     </ol>
   ),
   table: (props: React.HTMLAttributes<HTMLTableElement>) => (
-    <TableWrapper {...props} />
+    <Table {...props} />
   ),
   th: ({
     children,
@@ -180,9 +166,7 @@ export const markdownRenderers: NonNullable<
     <th
       {...props}
       className={cn(
-        "border-0 border-b border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left font-medium text-f1-foreground-secondary",
-        // Make header sticky when scrolling vertically
-        "sticky top-0",
+        "sticky top-0 border-0 border-b border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left font-medium text-f1-foreground-secondary",
         props.className
       )}
     >
