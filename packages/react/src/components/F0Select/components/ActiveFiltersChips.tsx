@@ -1,12 +1,25 @@
 import { Chip } from "@/experimental/OneChip"
 import { FiltersDefinition, FiltersState } from "@/hooks/datasource"
+import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
 import { AnimatePresence, motion } from "motion/react"
+import { useEffect, useState } from "react"
+import {
+  FilterDefinition,
+  FilterTypeKey,
+  filterTypes,
+} from "../../OneFilterPicker/filterTypes/filters"
 
 type ActiveFiltersChipsProps<Filters extends FiltersDefinition> = {
   filters: Filters
   currentFilters: FiltersState<Filters>
   onFiltersChange: (filters: FiltersState<Filters>) => void
+}
+
+type ActiveFilter = {
+  key: string
+  label: string
+  displayText: string
 }
 
 /**
@@ -17,55 +30,81 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
   currentFilters,
   onFiltersChange,
 }: ActiveFiltersChipsProps<Filters>) => {
-  // Get active filters with their labels
-  const activeFilters = Object.entries(currentFilters)
-    .filter(([, value]) => {
-      if (value === undefined || value === null) return false
-      if (Array.isArray(value)) return value.length > 0
-      return value !== ""
-    })
-    .map(([key, value]) => {
-      const filterDef = filters[key as keyof Filters]
-      const filterLabel = filterDef?.label ?? key
+  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([])
+  const i18n = useI18n()
 
-      // Get the display values
-      let displayValues: string[] = []
-      if (Array.isArray(value)) {
-        // Try to get labels from filter options if available
-        // For "in" type filters, options are in filterDef.options.options
-        const filterOptions =
-          filterDef && "options" in filterDef
-            ? (filterDef.options as {
-                options?:
-                  | { value: string; label: string }[]
-                  | (() =>
-                      | { value: string; label: string }[]
-                      | Promise<{ value: string; label: string }[]>)
-              })
-            : undefined
+  // Resolve filter labels using chipLabel from filter type definitions
+  useEffect(() => {
+    const resolveLabels = async () => {
+      const entries = Object.entries(currentFilters).filter(([, value]) => {
+        if (value === undefined || value === null) return false
+        if (Array.isArray(value)) return value.length > 0
+        return value !== ""
+      })
 
-        // Get options array - handle both static arrays and functions
-        const optionsValue = filterOptions?.options
-        const optionsList = Array.isArray(optionsValue) ? optionsValue : []
+      const resolved = await Promise.all(
+        entries.map(async ([key, value]) => {
+          const filterDef = filters[key as keyof Filters] as
+            | FilterDefinition
+            | undefined
+          const filterLabel = filterDef?.label ?? key
 
-        displayValues = (value as string[]).map((v) => {
-          const opt = optionsList.find((o) => o.value === v)
-          return opt?.label ?? String(v)
+          if (!filterDef || !filterDef.type) {
+            return {
+              key,
+              label: filterLabel,
+              displayText: String(value),
+            }
+          }
+
+          // Get the filter type definition
+          const filterType = filterTypes[filterDef.type as FilterTypeKey]
+          if (!filterType?.chipLabel) {
+            return {
+              key,
+              label: filterLabel,
+              displayText: Array.isArray(value)
+                ? value.join(", ")
+                : String(value),
+            }
+          }
+
+          // Use the chipLabel function from the filter type
+          try {
+            /* eslint-disable @typescript-eslint/no-explicit-any -- Filter types have different value/schema types */
+            const chipLabelResult = await filterType.chipLabel(value as any, {
+              schema: filterDef as any,
+              i18n,
+            })
+            /* eslint-enable @typescript-eslint/no-explicit-any */
+            const displayText =
+              typeof chipLabelResult === "string"
+                ? chipLabelResult
+                : chipLabelResult.label
+
+            return {
+              key,
+              label: filterLabel,
+              displayText,
+            }
+          } catch {
+            // Fallback if chipLabel fails
+            return {
+              key,
+              label: filterLabel,
+              displayText: Array.isArray(value)
+                ? value.join(", ")
+                : String(value),
+            }
+          }
         })
-      }
+      )
 
-      // Format display: first value + remaining count
-      const firstValue = displayValues[0] ?? ""
-      const remainingCount = displayValues.length - 1
-      const displayText =
-        remainingCount > 0 ? `${firstValue}  +${remainingCount}` : firstValue
+      setActiveFilters(resolved)
+    }
 
-      return {
-        key,
-        label: filterLabel,
-        displayText,
-      }
-    })
+    resolveLabels()
+  }, [currentFilters, filters, i18n])
 
   if (activeFilters.length === 0) return null
 
