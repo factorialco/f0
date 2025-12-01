@@ -26,16 +26,18 @@ export function Table({
           {children}
         </table>
       </div>
-      <F0Button
-        variant="outline"
-        size="sm"
-        label={ai.exportTable}
-        icon={DownloadIcon}
-        onClick={() => {
-          if (ref.current)
-            downloadTableAsExcel(ref.current, ai.generatedTableFilename)
-        }}
-      />
+      <div className="flex justify-start">
+        <F0Button
+          variant="outline"
+          size="sm"
+          label={ai.exportTable}
+          icon={DownloadIcon}
+          onClick={() => {
+            if (ref.current)
+              downloadTableAsExcel(ref.current, ai.generatedTableFilename)
+          }}
+        />
+      </div>
     </div>
   )
 }
