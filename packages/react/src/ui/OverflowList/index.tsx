@@ -136,7 +136,6 @@ const OverflowList = function OverflowList<T>({
   // Common classes in the measurement and visible containers
   const itemsWrapperClasses =
     "flex min-w-0 flex-1 items-center justify-start whitespace-nowrap"
-  const itemClasses = "min-w-[40px]"
 
   return (
     <div
@@ -162,7 +161,6 @@ const OverflowList = function OverflowList<T>({
             <div
               key={`measure-${index}`}
               data-testid="overflow-measurement-item"
-              className={itemClasses}
               style={{ marginLeft: gap < 0 ? `${gap}px` : undefined }}
             >
               {renderListItem(item, index, false)}
@@ -182,7 +180,7 @@ const OverflowList = function OverflowList<T>({
           visibleItems.map((item, index) => (
             <div
               key={`item-${index}`}
-              className={cn(itemClasses, "transition-all duration-150")}
+              className="transition-all duration-150"
               data-testid="overflow-visible-item"
               style={{
                 marginLeft: gap < 0 ? `${gap}px` : undefined,
