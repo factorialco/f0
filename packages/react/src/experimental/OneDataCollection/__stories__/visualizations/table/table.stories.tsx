@@ -107,3 +107,24 @@ export const TableColumnOrdering: Story = {
 export const TableColumnHidden: Story = {
   render: () => <ExampleComponent frozenColumns={2} tableAllowColumnHiding />,
 }
+
+export const TableDynamicColumns: Story = {
+  render: () => (
+    <ExampleComponent
+      frozenColumns={2}
+      tableAllowColumnReordering
+      tableAllowColumnHiding
+      tableColumns={(data) => {
+        console.log("data", data)
+        return [
+          {
+            label: "Name",
+            render: (item) => item.name,
+            sorting: "name",
+            width: 140,
+          },
+        ]
+      }}
+    />
+  ),
+}

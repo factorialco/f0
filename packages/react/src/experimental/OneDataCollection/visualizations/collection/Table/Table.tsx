@@ -86,15 +86,6 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
-  // Sorted and hidden columns
-  const { columns } = useColumns(
-    originalColumns,
-    frozenColumns,
-    settings.visualization?.table,
-    allowColumnReordering,
-    allowColumnHiding
-  )
-
   const {
     data,
     paginationInfo,
@@ -115,6 +106,25 @@ export const TableCollection = <
       onLoadError(error)
     },
   })
+
+  /**
+   * Columns definition
+   */
+  const originalColumnsArray = useMemo(() => {
+    if (typeof originalColumns === "function") {
+      return originalColumns(data)
+    }
+    return originalColumns
+  }, [originalColumns, data])
+
+  // Sorted and hidden columns
+  const { columns } = useColumns(
+    originalColumnsArray,
+    frozenColumns,
+    settings.visualization?.table,
+    allowColumnReordering,
+    allowColumnHiding
+  )
 
   const { currentSortings, setCurrentSortings, isLoading } = source
 

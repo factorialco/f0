@@ -71,7 +71,9 @@ type TableVisualizationOptions<T> = {
   /**
    * The columns to display
    */
-  columns: ReadonlyArray<TableColumnDefinition<T>>
+  columns:
+    | ReadonlyArray<TableColumnDefinition<T>>
+    | ((data: T[]) => ReadonlyArray<TableColumnDefinition<T>>)
 
   /**
    * The number of columns to freeze on the left
@@ -353,3 +355,23 @@ Allow users to show/hide columns using column settings:
 ```
 
 <Canvas of={TableStories.TableColumnOrderingAndHidden} meta={TableStories} />
+
+## Dynamic Columns
+
+You can also define the columns dynamically based on the data:
+
+```tsx
+{
+  type: "table",
+  options: {
+    columns: (data) => data.map((item) => ({
+      label: item.name,
+      render: (item) => item.name,
+      sorting: "name",
+      width: 140,
+    })),
+  },
+}
+```
+
+<Canvas of={TableStories.TableDynamicColumns} meta={TableStories} />

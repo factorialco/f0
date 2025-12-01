@@ -81,7 +81,11 @@ export type TableVisualizationOptions<
   /**
    * The columns to display
    */
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  columns:
+    | ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+    | ((
+        data: readonly R[]
+      ) => ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>)
   /**
    * The number of columns to freeze on the left
    */

@@ -74,6 +74,7 @@ import {
 } from "../navigationFilters/types"
 import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
+import { TableColumnDefinition } from "../visualizations/collection/Table"
 
 // Example filter definition
 export const filters = {
@@ -233,6 +234,15 @@ export const getMockVisualizations = (options?: {
     allowColumnReordering?: boolean
     noSorting?: boolean
     nestedRecords?: boolean
+    columns?:
+      | ReadonlyArray<
+          TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
+        >
+      | ((
+          data: readonly MockUser[]
+        ) => ReadonlyArray<
+          TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
+        >)
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -254,7 +264,7 @@ export const getMockVisualizations = (options?: {
       allowColumnReordering: options?.table?.allowColumnReordering,
       frozenColumns:
         options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
-      columns: [
+      columns: options?.table?.columns ?? [
         {
           label: "Name",
           width: 140,
@@ -1000,6 +1010,7 @@ export const ExampleComponent = ({
   hideFilters,
   tmpFullWidth,
   nestedRecords = false,
+  tableColumns,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -1043,6 +1054,15 @@ export const ExampleComponent = ({
   searchBar?: boolean | SearchOptions
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
+  tableColumns?:
+    | ReadonlyArray<
+        TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
+      >
+    | ((
+        data: readonly MockUser[]
+      ) => ReadonlyArray<
+        TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
+      >)
   onStateChange?: (
     state: DataCollectionStatusComplete<FiltersState<typeof filters>>
   ) => void
@@ -1085,6 +1105,7 @@ export const ExampleComponent = ({
       frozenColumns,
       allowColumnHiding: tableAllowColumnHiding,
       allowColumnReordering: tableAllowColumnReordering,
+      columns: tableColumns,
     },
     cache,
   })
