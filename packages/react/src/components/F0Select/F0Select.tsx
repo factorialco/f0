@@ -571,14 +571,18 @@ const F0SelectComponent = forwardRef(function Select<
               labelIcon={labelIcon}
               hideLabel={hideLabel}
               value={
-                localValue.length > 0 || selectionMeta.selectedItemsCount > 0
-                  ? Math.max(
+                multiple
+                  ? // For multiple: use count of selected items
+                    Math.max(
                       localValue.length,
                       selectionMeta.selectedItemsCount
                     ).toString()
-                  : undefined
+                  : // For single: use the selected value directly
+                    (localValue[0] ?? undefined)
               }
-              isEmpty={(value) => !value || +(value ?? 0) === 0}
+              isEmpty={(value) =>
+                multiple ? !value || +(value ?? 0) === 0 : !value
+              }
               onClear={() => {
                 hasUserInteracted.current = true
                 clearSelection()
@@ -614,14 +618,22 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {(localValue.length > 0 ||
-                  selectionMeta.selectedItemsCount > 0) && (
+                {(multiple
+                  ? localValue.length > 0 ||
+                    selectionMeta.selectedItemsCount > 0
+                  : !!localValue[0]) && (
                   <SelectedItems
                     multiple={multiple}
-                    totalSelectedCount={Math.max(
-                      localValue.length,
-                      selectionMeta.selectedItemsCount
-                    )}
+                    totalSelectedCount={
+                      multiple
+                        ? Math.max(
+                            localValue.length,
+                            selectionMeta.selectedItemsCount
+                          )
+                        : localValue[0]
+                          ? 1
+                          : 0
+                    }
                     allSelected={selectedState.allSelected}
                     selection={getDisplayItemsForSelection}
                   />
