@@ -250,9 +250,7 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    exportTable: "Export table",
-    exportAsCSV: "Download as CSV",
-    exportAsXLSX: "Download as Excel",
+    exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {

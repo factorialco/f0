@@ -1,15 +1,11 @@
 import { F0Button } from "@/components/F0Button"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Link } from "@/components/F0Link/F0Link"
 import DownloadIcon from "@/icons/app/Download"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
-import { useCallback, useMemo, useRef } from "react"
-import {
-  downloadTableFromElement,
-  type ExportFormat,
-} from "./utils/tableExport"
+import { useCallback, useRef } from "react"
+import { downloadTableAsExcel } from "./utils/tableExport"
 
 /**
  * Table wrapper component with max height, scroll, and download button
@@ -21,34 +17,14 @@ function TableWrapper({
   const translations = useI18n()
   const tableRef = useRef<HTMLTableElement>(null)
 
-  const exportItems = useMemo(
-    () => [
-      {
-        value: "xlsx" as ExportFormat,
-        label: translations.ai.exportAsXLSX,
-        icon: DownloadIcon,
-      },
-      {
-        value: "csv" as ExportFormat,
-        label: translations.ai.exportAsCSV,
-        icon: DownloadIcon,
-      },
-    ],
-    [translations.ai.exportAsXLSX, translations.ai.exportAsCSV]
-  )
-
-  const handleExport = useCallback(
-    (format: ExportFormat) => {
-      if (tableRef.current) {
-        downloadTableFromElement(
-          tableRef.current,
-          translations.ai.generatedTableFilename,
-          format
-        )
-      }
-    },
-    [translations.ai.generatedTableFilename]
-  )
+  const handleExport = useCallback(() => {
+    if (tableRef.current) {
+      downloadTableAsExcel(
+        tableRef.current,
+        translations.ai.generatedTableFilename
+      )
+    }
+  }, [translations.ai.generatedTableFilename])
 
   return (
     <div className="mb-2 flex flex-col gap-2">
@@ -65,12 +41,12 @@ function TableWrapper({
         </table>
       </div>
       <div className="flex justify-start">
-        <F0ButtonDropdown
+        <F0Button
           variant="outline"
           size="sm"
-          items={exportItems}
-          value="xlsx"
-          onClick={(value) => handleExport(value as ExportFormat)}
+          label={translations.ai.exportTable}
+          icon={DownloadIcon}
+          onClick={handleExport}
         />
       </div>
     </div>
