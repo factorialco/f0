@@ -328,10 +328,15 @@ const SelectableExample = () => {
     handleSelectItemChange,
     handleSelectAll,
     allSelectedStatus,
-  } = useSelectable(data, paginationInfo, dataSource, (selectedItems) => {
-    console.log("Selection changed:", {
-      selectedItems,
-    })
+  } = useSelectable({
+    data,
+    paginationInfo,
+    source: dataSource,
+    onSelectItems: (selectedItems) => {
+      console.log("Selection changed:", {
+        selectedItems,
+      })
+    },
   })
 
   if (isLoading) return <div>Loading...</div>
@@ -495,10 +500,16 @@ const CompleteExample = () => {
     handleSelectGroupChange,
     allSelectedStatus,
     groupAllSelectedStatus,
-  } = useSelectable(data, paginationInfo, dataSource, (selectedItems) => {
-    console.log("Selection changed:", {
-      selectedItems,
-    })
+  } = useSelectable({
+    data,
+    paginationInfo,
+    source: dataSource,
+    selectionMode: "single",
+    onSelectItems: (selectedItems) => {
+      console.log("Selection changed:", {
+        selectedItems,
+      })
+    },
   })
 
   if (isLoading) return <div>Loading...</div>

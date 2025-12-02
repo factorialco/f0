@@ -80,7 +80,7 @@ export const Action = React.forwardRef<
         )}
       >
         {prepend}
-        <span className={cn("flex min-w-0 flex-1 items-center justify-center")}>
+        <span className="flex min-w-0 flex-1 items-center justify-center">
           {children}
         </span>
         {append}

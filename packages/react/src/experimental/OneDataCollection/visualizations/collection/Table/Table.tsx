@@ -149,13 +149,14 @@ export const TableCollection = <
     handleSelectItemChange,
     handleSelectAll,
     handleSelectGroupChange,
-  } = useSelectable(
+  } = useSelectable({
     data,
     paginationInfo,
     source,
     onSelectItems,
-    source.defaultSelectedItems
-  )
+    selectionMode: "multi",
+    selectedState: source.defaultSelectedItems,
+  })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
@@ -265,10 +266,17 @@ export const TableCollection = <
               >
                 <div className="flex w-full items-center justify-end">
                   <F0Checkbox
-                    checked={allSelectedStatus.checked}
-                    indeterminate={allSelectedStatus.indeterminate}
+                    checked={
+                      allSelectedStatus.selectedCount > 0 ||
+                      allSelectedStatus.checked
+                    }
+                    indeterminate={
+                      allSelectedStatus.indeterminate ||
+                      (allSelectedStatus.selectedCount > 0 &&
+                        !allSelectedStatus.checked)
+                    }
                     onCheckedChange={handleSelectAll}
-                    title="Select all"
+                    title={t.actions.selectAll}
                     hideLabel
                     disabled={data?.records.length === 0}
                   />

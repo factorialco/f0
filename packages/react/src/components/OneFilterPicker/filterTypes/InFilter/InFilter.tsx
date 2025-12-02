@@ -225,7 +225,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       )}
       <div
         className={cn(
-          "overflow-y-scroll px-2",
+          "overflow-y-auto px-2",
           isCompactMode && "px-1",
           isCompactMode ? "max-h-[360px]" : "h-full"
         )}

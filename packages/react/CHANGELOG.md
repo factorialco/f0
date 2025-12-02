@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.295.0](https://github.com/factorialco/f0/compare/f0-react-v1.294.0...f0-react-v1.295.0) (2025-12-02)
+
+
+### Features
+
+* (select) multiselection with paginated datasource ([#3041](https://github.com/factorialco/f0/issues/3041)) ([ee8f24b](https://github.com/factorialco/f0/commit/ee8f24bc936460bef612c0eb6c277b24434a19ed))
+
+## [1.294.0](https://github.com/factorialco/f0/compare/f0-react-v1.293.0...f0-react-v1.294.0) (2025-12-02)
+
+
+### Features
+
+* **AIButton:** new AI Button component ([#3062](https://github.com/factorialco/f0/issues/3062)) ([2638aa9](https://github.com/factorialco/f0/commit/2638aa90b23258570ecf67b625813f9f76dddf96))
+
+## [1.293.0](https://github.com/factorialco/f0/compare/f0-react-v1.292.0...f0-react-v1.293.0) (2025-12-02)
+
+
+### Features
+
+* **Table:** update nested row handling and improve layout  ([#3054](https://github.com/factorialco/f0/issues/3054)) ([ac541d2](https://github.com/factorialco/f0/commit/ac541d22d733314c136733fa5ba72e067273ff3f))
+
 ## [1.292.0](https://github.com/factorialco/f0/compare/f0-react-v1.291.1...f0-react-v1.292.0) (2025-12-02)
 
 

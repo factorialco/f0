@@ -3,17 +3,24 @@ import { fn } from "storybook/test"
 import { F0Select, F0SelectItemObject, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
-import { createDataSourceDefinition } from "@/hooks/datasource"
+import {
+  createDataSourceDefinition,
+  FiltersDefinition,
+  RecordType,
+} from "@/hooks/datasource"
+import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 import { useState } from "react"
 import {
+  Employee,
+  employeeNonPaginatedSource,
+  employeePaginatedSource,
+  getEmployeeById,
   MockItem,
   mockItems,
-  mockNonPaginatedSource,
-  mockPaginatedSource,
 } from "./mocks"
 
 const icons: Record<string, IconType> = {
@@ -205,34 +212,68 @@ const meta: Meta = {
   },
   decorators: [
     ((Story, { args }) => {
-      // Wraps the Select component with a hook to show the selected value
-      // This decorator is for single-select stories only
       const [localValue, setLocalValue] = useState(
         args.value as string | undefined
       )
       const [searchValue, setSearchValue] = useState("")
-      // Sets a click handler to change the label's value
+      const [selectionStatus, setSelectionStatus] = useState<
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        SelectedItemsDetailedStatus<any, any> | undefined
+      >(undefined)
+
       const handleOnChange = (
         value: string,
         item?: unknown,
         option?: F0SelectItemObject<string>
       ) => {
         setLocalValue(value)
-        console.log(
-          "selected value:",
-          value,
-          "- original item:",
-          item,
-          "- selection option:",
-          option
-        )
+        console.log("selected:", value, item, option)
       }
 
       const handleOnSearchChange = (value: string) => {
         setSearchValue(value)
       }
 
+      const handleOnSelectItems = (
+        status: SelectedItemsDetailedStatus<RecordType, FiltersDefinition>
+      ) => {
+        setSelectionStatus(status)
+        // @ts-expect-error - onSelectItems is not typed correctly
+        args.onSelectItems?.(status)
+      }
+
       const truncatedValue = (localValue || []).slice(0, 50)
+      const isMultiplePaginated = args.multiple && args.source
+
+      const getSelectionDisplay = () => {
+        if (!selectionStatus) return "No selection yet"
+        const { allSelected, selectedIds, itemsStatus } = selectionStatus
+
+        if (allSelected === true) return "All selected"
+
+        if (allSelected === "indeterminate") {
+          const uncheckedIds = itemsStatus
+            .filter((item: { checked: boolean }) => !item.checked)
+            .map(
+              (item: { item: { value?: string } }) => item.item?.value ?? "?"
+            )
+          return `All selected except: ${uncheckedIds.slice(0, 10).join(", ")}${uncheckedIds.length > 10 ? "..." : ""}`
+        }
+
+        if (selectedIds.length === 0) return "No items selected"
+        return `Selected: ${selectedIds.slice(0, 10).join(", ")}${selectedIds.length > 10 ? "..." : ""}`
+      }
+
+      const getFiltersDisplay = () => {
+        if (!selectionStatus?.filters) return ""
+        const activeFilters = Object.entries(selectionStatus.filters)
+          .filter(
+            ([, value]) => value !== undefined && value !== null && value !== ""
+          )
+          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+        if (activeFilters.length === 0) return ""
+        return `Filters: ${activeFilters.join(", ")}`
+      }
 
       return (
         <>
@@ -244,12 +285,27 @@ const meta: Meta = {
                 onChange: handleOnChange,
                 searchValue: searchValue,
                 onSearchChange: handleOnSearchChange,
+                ...(isMultiplePaginated
+                  ? { onSelectItems: handleOnSelectItems }
+                  : {}),
               } as typeof args
             }
           />
-          <div className="mt-20">
-            Selected: {JSON.stringify(truncatedValue, null, 2)} - Total:{" "}
-            {localValue?.length}
+          <div className="mt-10">
+            {isMultiplePaginated ? (
+              <>
+                <p>{getSelectionDisplay()}</p>
+                {selectionStatus && (
+                  <p>Total: {selectionStatus.selectedCount}</p>
+                )}
+                {getFiltersDisplay() && <p>Filters: {getFiltersDisplay()}</p>}
+              </>
+            ) : (
+              <>
+                Selected: {JSON.stringify(truncatedValue, null, 2)}
+                {args.multiple && ` - Total: ${localValue?.length ?? 0}`}
+              </>
+            )}
           </div>
         </>
       )
@@ -446,34 +502,45 @@ export const LargeList: Story = {
 
 export const WithDataSourceNotPaginated: Story = {
   args: {
-    label: "Select label",
-    placeholder: "Select a value",
+    label: "Select Employee",
+    placeholder: "Search employees...",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
-    source: mockNonPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    value: "5",
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
-      description: item.description,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
     }),
   },
 }
 
 export const WithDataSourcePaginated: Story = {
   args: {
-    label: "Data Source Paginated",
-    placeholder: "Select a value",
+    label: "Select Employee",
+    placeholder: "Search employees...",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
-    source: mockPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    value: "42",
+    defaultItem: (() => {
+      const emp = getEmployeeById(42)
+      return emp
+        ? {
+            value: emp.value,
+            label: emp.label,
+            avatar: emp.avatar,
+            description: `${emp.jobTitle} · ${emp.departmentName}`,
+          }
+        : undefined
+    })(),
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
-      description: item.description,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
     }),
   },
 }
@@ -496,11 +563,11 @@ export const WithDataSourceGrouping: Story = {
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
-          department: {
-            name: "Department",
+          workplace: {
+            name: "Workplace",
             label: (groupId) => `${groupId}`,
             itemCount: (groupId) =>
-              mockItems.filter((item) => item.department === groupId).length,
+              mockItems.filter((item) => item.workplace === groupId).length,
           },
         },
       },
@@ -554,7 +621,7 @@ export const WithDataSourceGrouping: Story = {
     mapOptions: (item: MockItem) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
+      avatar: item.avatar,
       description: item.description,
     }),
   },
@@ -562,16 +629,100 @@ export const WithDataSourceGrouping: Story = {
 
 export const MultipleNotPaginated: Story = {
   args: {
-    label: "Multiple Not Paginated",
+    label: "Select Team Members",
+    placeholder: "Search employees...",
     multiple: true,
-    value: mockItems.map((item) => item.value),
+    value: ["2", "5", "12"],
     clearable: true,
-    source: mockNonPaginatedSource,
-    mapOptions: (item: MockItem) => ({
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
-      icon: item.icon,
-      description: item.description,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
+ * Multiple selection with paginated data (2,847 employees).
+ * Use `defaultItem` to provide labels for pre-selected values not in the first page.
+ * Try the "Select All" to select all employees - the checkbox will show indeterminate state
+ * when some but not all are selected.
+ */
+export const MultiplePaginated: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["3", "42", "500", "1200"],
+    // Provide defaultItem for values not in the first page
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
+    clearable: true,
+    showSearchBox: true,
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onChange: fn((value) => {
+      console.log("value", value)
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
+ * Single select with paginated data and filters.
+ * Use `defaultItem` to provide label for pre-selected value not in the first page.
+ * Filter by department, office, or legal entity to narrow down results.
+ */
+export const SingleSelectWithFilters: Story = {
+  args: {
+    label: "Select Employee",
+    placeholder: "Choose an employee...",
+    showSearchBox: true,
+    clearable: true,
+    value: "250",
+    // Provide defaultItem for value not in the first page
+    defaultItem: (() => {
+      const emp = getEmployeeById(250)
+      return emp
+        ? {
+            value: emp.value,
+            label: emp.label,
+            description: `${emp.jobTitle} · ${emp.officeName}`,
+            avatar: emp.avatar,
+          }
+        : undefined
+    })(),
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      description: `${item.jobTitle} · ${item.officeName}`,
+      avatar: item.avatar,
     }),
   },
 }

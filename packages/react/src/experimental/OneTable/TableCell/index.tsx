@@ -11,8 +11,10 @@ import { getColWidth } from "../utils/colWidth"
 import { NestedCell } from "./NestedCell"
 import { TreeConnector } from "./TreeConnector"
 import {
+  emptyDetailedCellClassName,
   isFirstCellWithChildren,
   isFirstCellWithTableChildren,
+  SPACING_FACTOR,
 } from "./utils/nested"
 
 interface TableCellProps {
@@ -98,7 +100,7 @@ export function TableCell({
     firstCell,
     !!nestedRowProps?.tableWithChildren
   ) && {
-    marginLeft: `${(nestedRowProps?.depth ?? 0 + 1) * 24}px`,
+    marginLeft: `${(nestedRowProps?.depth ?? 0 + 1) * SPACING_FACTOR}px`,
   }
 
   return (
@@ -178,6 +180,7 @@ export function TableCell({
               <div
                 className={cn(
                   width !== "auto" && "overflow-hidden",
+                  emptyDetailedCellClassName(nestedRowProps),
                   "relative z-[1]"
                 )}
                 style={{

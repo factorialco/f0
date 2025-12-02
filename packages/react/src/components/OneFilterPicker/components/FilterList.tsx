@@ -79,7 +79,7 @@ export function FilterList<Definition extends FiltersDefinition>({
       </div>
       <div
         className={cn(
-          "flex h-full w-full flex-col gap-1 overflow-y-auto p-2 pt-0",
+          "flex h-full w-full flex-col gap-1 overflow-y-auto overflow-x-hidden p-2 pt-0",
           isCompactMode && "px-1 py-0"
         )}
       >

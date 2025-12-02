@@ -105,6 +105,7 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
           animate={state}
           className={cn(iconVariants({ size }), "select-none", colorClass)}
           style={colorStyle}
+          data-has-color={color !== "currentColor" ? "true" : undefined}
         />
       </TooltipWrapper>
     )
@@ -117,6 +118,7 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
         {...props}
         className={cn("aspect-square", iconVariants({ size }), colorClass)}
         style={colorStyle}
+        data-has-color={color !== "currentColor" ? "true" : undefined}
       />
     </TooltipWrapper>
   )

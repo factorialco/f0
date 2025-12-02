@@ -61,6 +61,7 @@ export const defaultTranslations = {
     selected: {
       singular: "Selected",
       plural: "Selected",
+      all: "All selected",
     },
   },
   filters: {
@@ -264,6 +265,7 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    ask: "Ask One",
   },
   select: {
     noResults: "No results found",

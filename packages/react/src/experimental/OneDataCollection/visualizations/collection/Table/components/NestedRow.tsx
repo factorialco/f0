@@ -85,7 +85,7 @@ const NestedRowContent = <
     })
 
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
-    useCalculateConectorHeight()
+    useCalculateConectorHeight(childrenType)
 
   const typeDetailed = childrenType === "detailed"
   const shouldShowLoading = open && isLoading
@@ -202,15 +202,20 @@ const NestedRowContent = <
           {...props}
           rowRef={internalRowRef}
           nestedRowProps={sharedNestedRowProps}
+          paginationInfo={paginationInfo}
         />
       )}
 
-      {shouldShowLoadMore && (
+      {shouldShowLoadMore && !isLoading && (
         <LoadMoreRow
           {...props}
           rowRef={internalRowRef}
           onLoadMoreChildren={loadChildren}
           ref={setLastChildRef}
+          nestedRowProps={{
+            ...props.nestedRowProps,
+            nestedVariant: childrenType,
+          }}
         />
       )}
     </>

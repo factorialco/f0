@@ -63,7 +63,7 @@ export type DataSourceDefinition<
   /** Selectable items value under the checkbox column (undefined if not selectable) */
   selectable?: (item: R) => string | number | undefined
   /** Default selected items */
-  defaultSelectedItems?: SelectedItemsState
+  defaultSelectedItems?: SelectedItemsState<R>
 
   /***** GROUPING ***************************************************/
   /** Grouping configuration */
@@ -75,18 +75,25 @@ export type DataSourceDefinition<
   /*******************************************************/
 
   /***** NESTED RECORDS ***************************************************/
-  fetchChildren?: (
-    item: R,
-    filters?: FiltersState<FiltersDefinition>,
-    pagination?: ChildrenPaginationInfo<R>
-  ) => Promise<ChildrenResponse<R>>
+  fetchChildren?: ({
+    item,
+    filters,
+    pagination,
+  }: {
+    item: R
+    filters?: FiltersState<Filters>
+    pagination?: ChildrenPaginationInfo
+  }) => Promise<ChildrenResponse<R>>
   /** Function to determine if an item has children */
   itemsWithChildren?: (item: R) => boolean
   /** Function to get the number of children for an item */
-  childrenCount?: (
-    item: R,
-    pagination?: ChildrenPaginationInfo<R>
-  ) => number | undefined
+  childrenCount?: ({
+    item,
+    pagination,
+  }: {
+    item: R
+    pagination?: ChildrenPaginationInfo
+  }) => number | undefined
 }
 
 /**
