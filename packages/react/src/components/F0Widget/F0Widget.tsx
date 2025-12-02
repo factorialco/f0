@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/F0Button"
+import { AIButton as AIButtonComponent } from "@/components/AIButton"
 import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
 import {
@@ -111,8 +111,7 @@ const F0WidgetBase = ({
           >
             {AIButton && (
               <div className="flex h-6 items-center">
-                <F0Button
-                  variant="outline"
+                <AIButtonComponent
                   size="sm"
                   label="Ask One"
                   onClick={AIButton}
