@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.292.0](https://github.com/factorialco/f0/compare/f0-react-v1.291.1...f0-react-v1.292.0) (2025-12-02)
+
+
+### Features
+
+* AIChat add download button for markdown table ([#3055](https://github.com/factorialco/f0/issues/3055)) ([33ec11c](https://github.com/factorialco/f0/commit/33ec11c8668e78f1660126b68fb99b1c3aac9416))
+
 ## [1.291.1](https://github.com/factorialco/f0/compare/f0-react-v1.291.0...f0-react-v1.291.1) (2025-12-01)
 
 
