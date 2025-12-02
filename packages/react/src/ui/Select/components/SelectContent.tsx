@@ -250,15 +250,17 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
-                asList
-                  ? "max-h-full"
-                  : taller
-                    ? "max-h-[340px]"
-                    : "max-h-[300px]",
-                loadingNewContent &&
-                  "select-none opacity-10 transition-opacity",
-                forceMinHeight && "min-h-[340px]"
+                loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
+              style={
+                !asList
+                  ? {
+                      // Use Radix's available height variable to constrain the ScrollArea
+                      // when viewport space is limited. Subtract space for top/bottom content (~120px)
+                      maxHeight: `min(${taller ? "460px" : "320px"}, calc(var(--radix-select-content-available-height, 320px) - 120px))`,
+                    }
+                  : { maxHeight: "100%" }
+              }
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
               scrollMargin={scrollMargin}
