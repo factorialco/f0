@@ -4,7 +4,7 @@ import { Dashboard, type Widget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { Layout } from "@/layouts/page/Layout"
+import { Layout } from "@/layouts/Layout"
 import { Optional } from "@/lib/typescript-utils/opional"
 import { useState } from "react"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"

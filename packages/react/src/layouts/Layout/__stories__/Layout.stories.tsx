@@ -5,9 +5,9 @@ import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/
 import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 
+import { F0Checkbox } from "@/f0"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
-import { cn } from "@/lib/utils"
-import { ComponentProps } from "react"
+import { ComponentProps, useState } from "react"
 import { Layout } from "../index"
 
 const FocusableElement = () => {
@@ -176,7 +176,7 @@ export const WithContentBlocks: Story = {
   },
 }
 
-export const WithFluidGridGroupLayout: Story = {
+export const WithGroupMasonry: Story = {
   args: {
     ...Default.args,
     children: (
@@ -266,51 +266,44 @@ const getMockAllowedSizes = (index: number) => {
   ].slice(index % 3)
 }
 
-export const WithFixedGridGroupLayout: Story = {
+export const WithGroupGrid: Story = {
   args: {
     ...Default.args,
-    children: (
-      <>
-        <Layout.BlockContent
-          title="Fixed Grid Group Layout example"
-          description="This is an example of a Grid Group Layout."
-          variant="default"
-        >
-          The content above is a `GridGroupLayout`{" "}
-        </Layout.BlockContent>
-        <Layout.GroupGrid
-          sortable={true}
-          onSort={(items: React.ReactNode[]) => console.log(items)}
-          blocks={Array.from({ length: 22 }).map((_, index) => {
-            return {
-              id: `block-${index}`,
-              size: getMockAllowedSizes(index)[0],
-              availableSizes: getMockAllowedSizes(index),
-              render: (
-                <Layout.Block
-                  actions={[
-                    {
-                      items: [
-                        {
-                          label: "Action 1",
-                          onClick: () => console.log("Action 1"),
-                        },
-                      ],
-                    },
-                  ]}
-                  className={cn(
-                    "rounded-md",
-                    `bg-f1-background`,
-                    "border-[1px] border-solid border-f1-border"
-                  )}
-                >
-                  Block {index + 4}
-                </Layout.Block>
-              ),
-            }
-          })}
-        />
-      </>
-    ),
+  },
+  render: (args) => {
+    const [editMode, setEditMode] = useState(false)
+    return (
+      <Layout.Page {...args}>
+        <>
+          <Layout.BlockContent
+            title="Fixed Grid Group Layout example"
+            description="This is an example of a Grid Group Layout."
+            variant="default"
+          >
+            The content above is a `GridGroupLayout`{" "}
+            <F0Checkbox
+              title="Edit Mode"
+              checked={editMode}
+              onCheckedChange={(checked) => setEditMode(checked)}
+            />
+          </Layout.BlockContent>
+          <Layout.GroupGrid
+            editMode={editMode}
+            WidgetWrapper={(widget) => (
+              <div className="h-full bg-[#ff000030] p-4">{widget.content}</div>
+            )}
+            widgets={Array.from({ length: 22 }).map((_, index) => {
+              return {
+                id: `block-${index}`,
+                w: getMockAllowedSizes(index)[0].w,
+                h: getMockAllowedSizes(index)[0].h,
+                availableSizes: getMockAllowedSizes(index),
+                content: <div>Block {index + 4}</div>,
+              }
+            })}
+          />
+        </>
+      </Layout.Page>
+    )
   },
 }
