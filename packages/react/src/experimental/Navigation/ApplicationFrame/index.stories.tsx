@@ -1,4 +1,7 @@
+import Calendar from "@/icons/app/Calendar"
 import ExternalLink from "@/icons/app/ExternalLink"
+import PalmTree from "@/icons/app/PalmTree"
+import Search from "@/icons/app/Search"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
@@ -23,6 +26,20 @@ const meta: Meta<typeof ApplicationFrame> = {
       showDevConsole: false,
       enabled: true,
       greeting: "Hello, John",
+      welcomeScreenSuggestions: [
+        {
+          icon: Calendar,
+          message: "What meetings do I have today?",
+        },
+        {
+          icon: PalmTree,
+          message: "How many vacation days do I have left?",
+        },
+        {
+          icon: Search,
+          message: "Help me find a colleague",
+        },
+      ],
     },
     aiPromotion: {
       enabled: false,
