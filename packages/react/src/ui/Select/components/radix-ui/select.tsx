@@ -843,9 +843,10 @@ const SelectContentImpl = React.forwardRef<
       <RemoveScroll as={Slot} allowPinchZoom>
         <FocusScope
           asChild
-          // we make sure we're not trapping once it's been closed
-          // (closed !== unmounted when animating out)
-          trapped={context.open}
+          // Disable focus trapping entirely to avoid conflicts with other
+          // focus traps (e.g., modals/dialogs). The select will still work
+          // correctly for keyboard navigation.
+          trapped={false}
           onMountAutoFocus={(event) => {
             // we prevent open autofocus because we manually focus the selected item
             event.preventDefault()
@@ -853,7 +854,10 @@ const SelectContentImpl = React.forwardRef<
           onUnmountAutoFocus={composeEventHandlers(
             onCloseAutoFocus,
             (event) => {
-              context.trigger?.focus({ preventScroll: true })
+              // Only restore focus if the trigger still exists and is connected to the DOM
+              if (context.trigger?.isConnected) {
+                context.trigger.focus({ preventScroll: true })
+              }
               event.preventDefault()
             }
           )}
