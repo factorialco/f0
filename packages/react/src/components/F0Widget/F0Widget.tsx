@@ -5,7 +5,8 @@ import {
   DropdownInternal,
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
-import { CornerHandle, Ellipsis, Handle } from "@/icons/app"
+import { Ellipsis, Handle } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -18,9 +19,6 @@ export interface WidgetProps {
   onDragStart?: () => void
   onDragEnd?: () => void
   isDragging?: boolean
-  resizable?: boolean
-  onResizeStart?: () => void
-  onResizeEnd?: () => void
   AIButton?: () => void
   dropdown?: DropdownItem[]
   children: ReactNode
@@ -33,21 +31,19 @@ const F0WidgetBase = ({
   onDragStart,
   onDragEnd,
   isDragging = false,
-  resizable = false,
-  onResizeStart,
-  onResizeEnd,
   AIButton,
   dropdown,
   children,
   selected = false,
 }: WidgetProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const t = useI18n()
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
   }
 
-  const isInteractive = draggable || resizable
+  const isInteractive = draggable
 
   // Handle drag end globally
   useEffect(() => {
@@ -89,6 +85,7 @@ const F0WidgetBase = ({
             <div
               className="flex h-12 w-12 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
               onMouseDown={onDragStart}
+              data-gs-handle="true"
             >
               <F0Icon icon={Handle} size="xs" />
             </div>
@@ -113,7 +110,7 @@ const F0WidgetBase = ({
               <div className="flex h-6 items-center">
                 <AIButtonComponent
                   size="sm"
-                  label="Ask One"
+                  label={t.ai.ask}
                   onClick={AIButton}
                 />
               </div>
@@ -141,22 +138,13 @@ const F0WidgetBase = ({
         )}
       </div>
       <div className="flex flex-1 flex-col px-4 pb-4">{children}</div>
-      {resizable && (
-        <div
-          className="absolute -bottom-1 right-0 text-f1-icon-secondary hover:cursor-nwse-resize"
-          onMouseDown={onResizeStart}
-          onMouseUp={onResizeEnd}
-        >
-          <F0Icon icon={CornerHandle} size="sm" />
-        </div>
-      )}
     </div>
   )
 }
 
 const F0WidgetSkeleton = () => {
   return (
-    <div className="relative flex h-full w-full flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
+    <div className="relative flex h-full w-full cursor-progress flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
       <div className="flex h-12 w-full items-center px-4">
         <Skeleton className="h-3 w-full max-w-16 rounded-md" />
       </div>

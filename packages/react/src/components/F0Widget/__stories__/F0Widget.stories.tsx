@@ -50,7 +50,6 @@ export const Interactive: Story = {
   args: {
     title: "Interactive Widget",
     draggable: true,
-    resizable: true,
     children: <Slot />,
   },
   render: (args) => {
@@ -92,7 +91,6 @@ export const Full: Story = {
   args: {
     title: "Fully Configured Widget with a long title",
     draggable: true,
-    resizable: true,
     AIButton: fn(),
     dropdown: sampleDropdownItems,
     children: <Slot />,
