@@ -75,7 +75,7 @@ export const actionVariants = cva({
         "hover:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] hover:before:opacity-100",
         "hover:animate-rotate-gradient",
         "before:pointer-events-none before:absolute before:inset-px before:rounded-[9px] before:bg-f1-background before:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] before:content-['']",
-        "after:pointer-events-none after:absolute after:inset-0 after:z-[-1] after:translate-y-px after:rounded after:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] after:opacity-0 after:blur-sm after:transition-all after:duration-200 after:content-[''] hover:after:opacity-20",
+        "after:pointer-events-none after:absolute after:inset-0 after:z-[-1] after:translate-y-px after:scale-90 after:animate-rotate-gradient after:rounded after:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] after:opacity-0 after:mix-blend-overlay after:blur-sm after:content-[''] after:[transition:transform_200ms,opacity_200ms] hover:after:scale-100 hover:after:opacity-80",
         "active:bg-f1-background-tertiary active:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)]",
         "data-[pressed=true]:bg-f1-background-tertiary data-[pressed=true]:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] data-[pressed=true]:after:opacity-70 data-[pressed=true]:after:ring-f1-border-hover"
       ),
@@ -140,109 +140,116 @@ export const iconVariants = cva({
     {
       variant: "default",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-inverse dark:[&>svg]:text-f1-icon-bold/80",
+      class: "[&_svg]:text-f1-icon-inverse dark:[&_svg]:text-f1-icon-bold/80",
     },
     {
       variant: "outline",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg]:text-f1-icon",
     },
     {
       variant: "neutral",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg]:text-f1-icon",
     },
     {
       variant: "critical",
       mode: "default",
       class:
-        "[&>svg]:text-f1-icon-critical-bold group-hover:[&>svg]:text-f1-icon-inverse group-active:[&>svg]:text-f1-icon-inverse group-data-[pressed=true]:[&>svg]:text-f1-icon-inverse dark:group-hover:[&>svg]:text-f1-icon-bold/80 dark:group-active:[&>svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&>svg]:text-f1-icon-bold/80",
+        "[&_svg]:text-f1-icon-critical-bold group-hover:[&_svg]:text-f1-icon-inverse group-active:[&_svg]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg]:text-f1-icon-inverse dark:group-hover:[&_svg]:text-f1-icon-bold/80 dark:group-active:[&_svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg]:text-f1-icon-bold/80",
     },
     {
       variant: "ghost",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg]:text-f1-icon",
     },
     {
       variant: "promote",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg]:text-f1-icon-promote",
     },
     {
       variant: "outlinePromote",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg]:text-f1-icon-promote",
     },
     {
       variant: "ai",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class:
+        "[&_svg>circle]:[stroke:url(#ai-gradient)] [&_svg>path]:[fill:url(#ai-gradient)] [&_svg>rect]:[fill:url(#ai-gradient)]",
     },
     {
       variant: "link",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg]:text-f1-icon",
     },
     {
       variant: "mention",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-accent",
+      class: "[&_svg]:text-f1-icon-accent",
     },
     {
       variant: "unstyled",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-accent",
+      class: "[&_svg]:text-f1-icon-accent",
     },
     {
       variant: "default",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-inverse dark:[&>svg]:text-f1-icon-bold",
+      class: "[&_svg]:text-f1-icon-inverse dark:[&_svg]:text-f1-icon-bold",
     },
     {
       variant: "outline",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-bold",
+      class: "[&_svg]:text-f1-icon-bold",
     },
     {
       variant: "neutral",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-bold",
+      class: "[&_svg]:text-f1-icon-bold",
     },
     {
       variant: "critical",
       mode: "only",
       class:
-        "[&>svg]:text-f1-icon-critical-bold group-hover:[&>svg]:text-f1-icon-inverse group-active:[&>svg]:text-f1-icon-inverse group-data-[pressed=true]:[&>svg]:text-f1-icon-inverse dark:group-hover:[&>svg]:text-f1-icon-bold/80 dark:group-active:[&>svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&>svg]:text-f1-icon-bold/80",
+        "[&_svg]:text-f1-icon-critical-bold group-hover:[&_svg]:text-f1-icon-inverse group-active:[&_svg]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg]:text-f1-icon-inverse dark:group-hover:[&_svg]:text-f1-icon-bold/80 dark:group-active:[&_svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg]:text-f1-icon-bold/80",
     },
     {
       variant: "ghost",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-bold",
+      class: "[&_svg]:text-f1-icon-bold",
     },
     {
       variant: "promote",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg]:text-f1-icon-promote",
     },
     {
       variant: "outlinePromote",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg]:text-f1-icon-promote",
     },
     {
       variant: "link",
       mode: "only",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg]:text-f1-icon",
     },
     {
       variant: "unstyled",
       mode: "only",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg]:text-f1-icon",
     },
     {
       variant: "mention",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-accent",
+      class: "[&_svg]:text-f1-icon-accent",
+    },
+    {
+      variant: "ai",
+      mode: "only",
+      class:
+        "[&_svg>circle]:[stroke:url(#ai-gradient)] [&_svg>path]:[fill:url(#ai-gradient)] [&_svg>rect]:[fill:url(#ai-gradient)]",
     },
   ],
   defaultVariants: {
