@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.295.0](https://github.com/factorialco/f0/compare/f0-react-v1.294.0...f0-react-v1.295.0) (2025-12-02)
+
+
+### Features
+
+* (select) multiselection with paginated datasource ([#3041](https://github.com/factorialco/f0/issues/3041)) ([ee8f24b](https://github.com/factorialco/f0/commit/ee8f24bc936460bef612c0eb6c277b24434a19ed))
+
 ## [1.294.0](https://github.com/factorialco/f0/compare/f0-react-v1.293.0...f0-react-v1.294.0) (2025-12-02)
 
 
