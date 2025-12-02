@@ -260,7 +260,7 @@ export const getMockVisualizations = (options?: {
           width: 140,
           render: (item) =>
             !item.children && item.detailed
-              ? item.name
+              ? ""
               : {
                   type: "person",
                   value: {
@@ -1167,8 +1167,8 @@ export const ExampleComponent = ({
             : undefined,
       dataAdapter: dataAdapterMemoized,
       itemsWithChildren: (item) => !!item?.children?.length,
-      childrenCount: (item) => item?.children?.length,
-      fetchChildren: async (item) => {
+      childrenCount: ({ item }) => item?.children?.length,
+      fetchChildren: async ({ item }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
         return item.children
