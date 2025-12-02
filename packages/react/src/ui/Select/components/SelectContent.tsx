@@ -225,6 +225,21 @@ const SelectContent = forwardRef<
         position={asList ? "item-aligned" : position}
         collisionPadding={16}
         {...props}
+        // Prevent the default focus restoration when the select closes.
+        // This avoids infinite focus loops when the select is inside a modal
+        // or other focus-trapping container.
+        onCloseAutoFocus={(event) => {
+          // Call user's handler if provided
+          if (
+            props.onCloseAutoFocus &&
+            typeof props.onCloseAutoFocus === "function"
+          ) {
+            props.onCloseAutoFocus(event)
+          }
+          // Always prevent the default behavior - the browser will naturally
+          // return focus to the last focused element before the select opened
+          event.preventDefault()
+        }}
         onAnimationStart={() => {
           // Set the animation state to started as the elements are visible
           setAnimationStarted(true)
@@ -289,15 +304,19 @@ const SelectContent = forwardRef<
     ) : (
       <SelectPrimitive.Portal container={portalContainer}>
         <>
-          {/* Overlay to prevent clicks on the content */}
-          {open && (
+          {/* 
+            Overlay to prevent clicks from propagating.
+            Only render when NOT using a custom portal container to avoid
+            conflicts with modal focus management.
+          */}
+          {open && !portalContainer && (
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
               }}
-            ></div>
+            />
           )}
           {content}
         </>
