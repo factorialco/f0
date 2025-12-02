@@ -120,13 +120,14 @@ export const ListCollection = <
     groupAllSelectedStatus,
     handleSelectItemChange,
     handleSelectGroupChange,
-  } = useSelectable(
+  } = useSelectable({
     data,
     paginationInfo,
     source,
     onSelectItems,
-    source.defaultSelectedItems
-  )
+    selectionMode: "multi",
+    selectedState: source.defaultSelectedItems,
+  })
 
   /*
    * Groups

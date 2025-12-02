@@ -5,9 +5,11 @@ import {
   getDataSourcePaginationType,
   PaginatedDataAdapter,
   PromiseOrObservable,
+  SelectedItemsState,
   useData,
   useDataSource,
   useGroups,
+  useSelectable,
   WithGroupId,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
@@ -21,8 +23,16 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { isEqual } from "lodash"
-import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
@@ -89,6 +99,9 @@ const F0SelectComponent = forwardRef(function Select<
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
+  // Extract onSelectItems from props for multiple selection
+  const onSelectItems =
+    "onSelectItems" in props ? props.onSelectItems : undefined
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
@@ -168,6 +181,15 @@ const F0SelectComponent = forwardRef(function Select<
   const localSource = useDataSource(
     {
       ...dataSource,
+      selectable: (item) => {
+        if (!item) {
+          return undefined
+        }
+        const mappedOption = optionMapper(item)
+        return mappedOption.type !== "separator"
+          ? mappedOption.value
+          : undefined
+      },
       search: showSearchBox
         ? {
             enabled: showSearchBox,
@@ -195,108 +217,233 @@ const F0SelectComponent = forwardRef(function Select<
     [mapOptions, source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore, isLoading } =
-    useData<ActualRecordType>(localSource)
+  const {
+    data,
+    isInitialLoading,
+    loadMore,
+    isLoadingMore,
+    isLoading,
+    paginationInfo,
+  } = useData<ActualRecordType>(localSource)
 
   const { currentSearch, setCurrentSearch } = localSource
 
-  const [selectedItems, setSelectedItems] = useState<
-    F0SelectItemObject<T, ActualRecordType>[]
-  >([])
+  /**
+   * Map of items from paginated data by their value.
+   * Used for dropdown list and selection state.
+   */
+  const itemsByValue = useMemo(() => {
+    const entries: [
+      string,
+      {
+        item: ActualRecordType
+        option: F0SelectItemObject<T, ActualRecordType>
+      },
+    ][] = []
+
+    // Only add items from paginated data (NOT fetchedItems)
+    for (const record of data.records) {
+      const mappedOption = optionMapper(record)
+      if (mappedOption.type !== "separator") {
+        entries.push([
+          mappedOption.value,
+          { item: record, option: mappedOption },
+        ])
+      }
+    }
+
+    return Object.fromEntries(entries)
+  }, [data, optionMapper])
 
   /**
-   * Finds an option in the data records by value and returns the mapped option
-   * @param value - The value to find
-   * @returns The option if found, undefined otherwise
+   * Initialize selection state from the value prop.
+   * This allows the component to display pre-selected values when the data loads.
    */
-  const findOptionsByValue = useCallback(
-    (
-      values: (string | T)[] | undefined
-    ): F0SelectItemObject<T, ActualRecordType>[] => {
-      if (values === undefined) {
-        return []
+  const initialSelectedState = useMemo(():
+    | SelectedItemsState<ActualRecordType>
+    | undefined => {
+    const values = toArray(value) ?? defaultValues ?? []
+    if (values.length === 0) {
+      return undefined
+    }
+
+    const items = new Map() as SelectedItemsState<ActualRecordType>["items"]
+
+    for (const val of values) {
+      const itemData = itemsByValue[val]
+      items.set(val, {
+        id: val,
+        checked: true,
+        item: itemData?.item as WithGroupId<ActualRecordType> | undefined,
+      })
+    }
+
+    return {
+      allSelected: false,
+      items,
+      groups: new Map(),
+    }
+  }, [value, defaultValues, itemsByValue])
+
+  const {
+    handleSelectAll,
+    handleSelectItemChange,
+    selectedState,
+    clearSelection,
+    selectionMeta,
+  } = useSelectable({
+    data,
+    paginationInfo,
+    source: localSource,
+    selectionMode: multiple ? "multi" : "single",
+    onSelectItems: onSelectItems,
+    selectedState: initialSelectedState,
+  })
+
+  /**
+   * Get display items for the selection preview.
+   * Uses localValue (the current value prop) to determine what to display.
+   * Looks up items from paginated data or defaultItems.
+   */
+  const getDisplayItemsForSelection = useMemo(() => {
+    const result: F0SelectItemObject<T, ResolvedRecordType<R>>[] = []
+
+    for (const valueId of localValue) {
+      // Try to get from paginated data first
+      const fromData = itemsByValue[valueId]
+      if (fromData) {
+        result.push(fromData.option)
+        continue
       }
 
-      if (isEqual(values, defaultValues)) {
-        return defaultItems
+      // Try defaultItems (pre-selected values provided by parent)
+      const fromDefault = defaultItems.find((item) => item.value === valueId)
+      if (fromDefault) {
+        result.push(fromDefault)
       }
+    }
 
-      const res = []
-      for (const option of data.records) {
-        const mappedOption = optionMapper(option)
-
-        if (
-          mappedOption.type !== "separator" &&
-          values?.includes(String(mappedOption.value))
-        ) {
-          res.push(mappedOption)
-        }
-      }
-      return res
-    },
-    [data.records, optionMapper, defaultItems, defaultValues]
-  )
-
-  useEffect(() => {
-    const foundOptions = findOptionsByValue(localValue)
-
-    // Always update selectedItems based on foundOptions
-    // This handles both selection and clearing
-    setSelectedItems(foundOptions)
-  }, [
-    data.records,
-    localValue,
-    optionMapper,
-    findOptionsByValue,
-    onChangeSelectedOption,
-  ])
+    return result
+  }, [localValue, itemsByValue, defaultItems])
 
   const onSearchChangeLocal = (value: string) => {
     setCurrentSearch(value)
     onSearchChange?.(value)
   }
 
+  // Track whether the user has interacted with the selection
+  const hasUserInteracted = useRef(false)
+  const isFirstRender = useRef(true)
+
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
-      const foundOption = findOptionsByValue([value])[0]
-      if (foundOption) {
-        onChangeSelectedOption?.(foundOption, checked)
+      hasUserInteracted.current = true
+      handleSelectItemChange(value, checked)
+
+      // Only call onChangeSelectedOption if we have the item data
+      const item = itemsByValue[value]
+      if (item) {
+        onChangeSelectedOption?.(item.option, checked)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to re-run this effect when the onChangeSelectedOption changes
-    [onChangeSelectedOption]
+    [onChangeSelectedOption, itemsByValue, handleSelectItemChange]
   )
 
-  const handleLocalValueChange = (
-    changedValue: string | string[] | undefined
-  ) => {
-    // Resets the search value when the option is selected
-    setCurrentSearch(undefined)
-    setLocalValue((toArray(changedValue) ?? []) as T[])
+  // Mark user interaction when select all is used
+  const handleSelectAllWithTracking = useCallback(
+    (checked: boolean) => {
+      hasUserInteracted.current = true
+      handleSelectAll(checked)
+    },
+    [handleSelectAll]
+  )
 
-    const foundOptions = findOptionsByValue(toArray(changedValue) ?? [])
-
-    // Typescript can not infer the type of the onChange callback when it has generics, so we need to cast it to the correct type
-    if (multiple) {
-      const values = foundOptions.map((option) => option.value)
-      const items = foundOptions
-        .map((option) => option.item)
-        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
-
-      onChange?.(values, items, foundOptions)
-    } else {
-      const value = foundOptions[0]?.value
-      const item = foundOptions[0]?.item
-      const option = foundOptions[0]
-
-      onChange?.(value, item, option)
-
-      // Notify when selection is cleared (option is undefined)
-      if (option === undefined) {
-        onChangeSelectedOption?.(undefined, false)
+  /**
+   * Emit the value change. The type depends on the multiple prop and selectionMode.
+   * Only emit after user interaction to avoid spurious onChange calls on mount.
+   */
+  useDeepCompareEffect(() => {
+    // Skip onChange before user has interacted with the component
+    // This prevents emitting undefined values on initial mount/data load
+    if (!hasUserInteracted.current) {
+      // Mark first render as complete
+      if (isFirstRender.current) {
+        isFirstRender.current = false
       }
+      return
     }
-  }
+
+    // Only reset search in single select mode (dropdown closes after selection)
+    // In multiple mode, user may want to continue selecting more items
+    if (!multiple) {
+      setCurrentSearch(undefined)
+    }
+
+    const checkedItems = Array.from(selectedState.items.values() || []).filter(
+      (item) => item.checked
+    )
+
+    // Helper to extract the original item from a record
+    // For static options: the record IS the option, and option.item contains the original data
+    // For datasource: the record is the original data, optionMapper creates the option
+    const extractOriginalItem = (
+      record: ActualRecordType | undefined
+    ): ResolvedRecordType<R> | undefined => {
+      if (!record) return undefined
+      if (source) {
+        // For datasource, the record itself is the original item
+        return record as unknown as ResolvedRecordType<R>
+      }
+      // For static options, extract the 'item' property from the option
+      const option = record as unknown as F0SelectItemObject<
+        T,
+        ResolvedRecordType<R>
+      >
+      return option.item
+    }
+
+    // TypeScript cannot infer the type of the onChange callback when it has generics,
+    // so we need to cast it to the correct type
+    if (multiple) {
+      const values = checkedItems.map((item) => String(item.id) as T)
+
+      // Sync localValue with actual selection state
+      // This ensures the preview shows correct items after deselection
+      setLocalValue(values)
+
+      const records = checkedItems
+        .map((item) => item.item)
+        .filter(
+          (item): item is WithGroupId<ResolvedRecordType<R>> =>
+            item !== undefined
+        )
+      const originalItems = records
+        .map(extractOriginalItem)
+        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+      const options = records.map((item) => {
+        return optionMapper(item) as F0SelectItemObject<
+          T,
+          ResolvedRecordType<R>
+        >
+      })
+
+      onChange?.(values, originalItems, options)
+    } else {
+      const selectedItem = checkedItems[0]
+      const value = selectedItem ? (String(selectedItem.id) as T) : undefined
+
+      // Sync localValue with actual selection state
+      setLocalValue(value ? [value] : [])
+
+      const record = selectedItem?.item as ActualRecordType | undefined
+      const originalItem = extractOriginalItem(record)
+      const option = record
+        ? (optionMapper(record) as F0SelectItemObject<T, ResolvedRecordType<R>>)
+        : undefined
+
+      onChange?.(value as T, originalItem, option)
+    }
+  }, [selectedState])
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
     (open: boolean) => {
@@ -310,7 +457,6 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
-  // const collapsible = localSource.grouping?.collapsible
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
@@ -355,7 +501,6 @@ const F0SelectComponent = forwardRef(function Select<
               itemCount={group.itemCount}
               onOpenChange={(open) => setGroupOpen(group.key, open)}
               open={openGroups[group.key]}
-              // showOpenChange={collapsible}
             />
           ),
         })
@@ -371,60 +516,36 @@ const F0SelectComponent = forwardRef(function Select<
   }
   const i18n = useI18n()
 
-  const [selectAll, setSelectAll] = useState(false)
+  /**
+   * Get the values of the selected items from the state to pass to the select primitive
+   */
+  const selectedItemsValues = useMemo(() => {
+    return Array.from(selectedState.items.values())
+      .filter((item) => item.checked)
+      .map((item) => String(item.id))
+  }, [selectedState.items])
 
-  const handleSelectAll = (value: boolean) => {
-    if (multiple) {
-      setSelectAll(value)
-      handleLocalValueChange(
-        value
-          ? items
-              .map((item) => item.value?.toString())
-              .filter((value) => value !== undefined)
-          : []
-      )
-    }
-  }
-
-  // TODO USE DATA SOURCE SELECTABLE
-  useEffect(() => {
-    if (multiple) {
-      const allSelected = selectedItems.length === items.length
-      const noneSelected = selectedItems.length === 0
-
-      if (allSelected) {
-        setSelectAll(true)
-      } else if (noneSelected) {
-        setSelectAll(false)
-      }
-    }
-  }, [selectedItems.length, items.length, multiple])
-
-  const isPartiallySelected = useMemo(() => {
-    if (multiple) {
-      return selectedItems.length > 0 && selectedItems.length < items.length
-    }
-    return false
-  }, [selectedItems, items, multiple])
-
+  /**
+   * Common props for the select primitive
+   */
   const commonProps = {
     ...props,
     onItemCheckChange,
     disabled,
     open: openLocal,
     onOpenChange: handleChangeOpenLocal,
-    onValueChange: handleLocalValueChange,
   }
 
   const selectPrimitiveProps = multiple
     ? ({
         ...commonProps,
-        value: localValue as string[],
+        value: selectedItemsValues,
         multiple: true as const,
       } as const)
     : ({
         ...commonProps,
-        value: localValue[0] as string | undefined,
+        // Use empty string instead of undefined to maintain controlled component state
+        value: selectedItemsValues[0] ?? "",
         multiple: false as const,
       } as const)
 
@@ -449,9 +570,30 @@ const F0SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
-              value={localValue.join(",")}
-              isEmpty={(value) => value?.length === 0}
-              onClear={() => handleLocalValueChange([])}
+              value={
+                multiple
+                  ? // For multiple: use count of selected items
+                    Math.max(
+                      localValue.length,
+                      selectionMeta.selectedItemsCount
+                    ).toString()
+                  : // For single: use the selected value directly
+                    (localValue[0] ?? undefined)
+              }
+              isEmpty={(value) =>
+                multiple ? !value || +(value ?? 0) === 0 : !value
+              }
+              onClear={() => {
+                hasUserInteracted.current = true
+                clearSelection()
+                // Call with undefined to indicate no item is selected
+                ;(
+                  onChangeSelectedOption as (
+                    option: undefined,
+                    checked: boolean
+                  ) => void
+                )?.(undefined, false)
+              }}
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
@@ -476,10 +618,24 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {selectedItems && (
+                {(multiple
+                  ? localValue.length > 0 ||
+                    selectionMeta.selectedItemsCount > 0
+                  : !!localValue[0]) && (
                   <SelectedItems
                     multiple={multiple}
-                    selection={selectedItems}
+                    totalSelectedCount={
+                      multiple
+                        ? Math.max(
+                            localValue.length,
+                            selectionMeta.selectedItemsCount
+                          )
+                        : localValue[0]
+                          ? 1
+                          : 0
+                    }
+                    allSelected={selectedState.allSelected}
+                    selection={getDisplayItemsForSelection}
                   />
                 )}
               </button>
@@ -509,10 +665,14 @@ const F0SelectComponent = forwardRef(function Select<
                 />
                 {multiple && (
                   <SelectAll
-                    selectedCount={selectedItems.length}
-                    indeterminate={isPartiallySelected}
-                    value={selectAll}
-                    onChange={handleSelectAll}
+                    selectedCount={selectionMeta.selectedItemsCount}
+                    indeterminate={
+                      selectedState.allSelected === "indeterminate" ||
+                      (selectedState.allSelected === false &&
+                        selectionMeta.selectedItemsCount > 0)
+                    }
+                    value={!!selectedState.allSelected}
+                    onChange={handleSelectAllWithTracking}
                   />
                 )}
               </>

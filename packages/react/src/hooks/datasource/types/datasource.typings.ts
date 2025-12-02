@@ -63,7 +63,7 @@ export type DataSourceDefinition<
   /** Selectable items value under the checkbox column (undefined if not selectable) */
   selectable?: (item: R) => string | number | undefined
   /** Default selected items */
-  defaultSelectedItems?: SelectedItemsState
+  defaultSelectedItems?: SelectedItemsState<R>
 
   /***** GROUPING ***************************************************/
   /** Grouping configuration */

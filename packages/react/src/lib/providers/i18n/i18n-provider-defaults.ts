@@ -61,6 +61,7 @@ export const defaultTranslations = {
     selected: {
       singular: "Selected",
       plural: "Selected",
+      all: "All selected",
     },
   },
   filters: {
