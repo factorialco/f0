@@ -174,9 +174,9 @@ export const VisualizationSettingsRenderer = <
   const settingsRenderer = getSettingsRenderer(visualization)
 
   if (settingsRenderer) {
-    return settingsRenderer(
-      visualization.options as unknown as Parameters<typeof settingsRenderer>[0]
-    )
+    return settingsRenderer({
+      ...visualization.options,
+    } as unknown as Parameters<typeof settingsRenderer>[0])
   }
 
   return null

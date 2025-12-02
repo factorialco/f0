@@ -27,6 +27,7 @@ import {
   useDataCollectionSource,
 } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 import {
+  Data,
   GroupingDefinition,
   GroupingState,
   SortingsStateMultiple,
@@ -239,7 +240,7 @@ export const getMockVisualizations = (options?: {
           TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
         >
       | ((
-          data: readonly MockUser[]
+          data: Data<MockUser>
         ) => ReadonlyArray<
           TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
         >)
@@ -1059,7 +1060,7 @@ export const ExampleComponent = ({
         TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
       >
     | ((
-        data: readonly MockUser[]
+        data: Data<MockUser>
       ) => ReadonlyArray<
         TableColumnDefinition<MockUser, typeof sortings, SummariesDefinition>
       >)

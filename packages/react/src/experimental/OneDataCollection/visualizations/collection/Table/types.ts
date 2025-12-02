@@ -1,5 +1,6 @@
 import { TableHead } from "@/experimental/OneTable"
 import {
+  Data,
   FiltersDefinition,
   GroupingDefinition,
   RecordType,
@@ -84,7 +85,7 @@ export type TableVisualizationOptions<
   columns:
     | ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
     | ((
-        data: readonly R[]
+        data: Data<R>
       ) => ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>)
   /**
    * The number of columns to freeze on the left
