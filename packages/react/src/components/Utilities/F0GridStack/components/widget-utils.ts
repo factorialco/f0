@@ -20,6 +20,8 @@ export function convertWidgetForGridStack(
   if (content !== undefined) {
     return {
       ...rest,
+      //To avoid and issue with GridStack's deepClone, we need to set _originalContent to null
+      _originalContent: null,
       content: () => {
         const div = document.createElement("div")
         return div

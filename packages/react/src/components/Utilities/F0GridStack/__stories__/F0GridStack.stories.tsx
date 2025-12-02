@@ -190,7 +190,7 @@ export const WithMethods: Story = {
           ),
         },
       ])
-    }, [widgets.length])
+    }, [])
 
     const handleRemoveWidget = () => {
       setWidgets((prev) => {

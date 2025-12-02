@@ -289,8 +289,8 @@ export const WithGroupGrid: Story = {
           </Layout.BlockContent>
           <Layout.GroupGrid
             editMode={editMode}
-            WidgetWrapper={(widget) => (
-              <div className="h-full bg-[#ff000030] p-4">{widget.content}</div>
+            WidgetWrapper={(children) => (
+              <div className="h-full bg-[#ff000030] p-4">{children}</div>
             )}
             widgets={Array.from({ length: 22 }).map((_, index) => {
               return {

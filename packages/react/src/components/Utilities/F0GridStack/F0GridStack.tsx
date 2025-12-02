@@ -104,28 +104,16 @@ export const F0GridStack = ({
   }
 
   return (
-    <>
-      {widgets.map((widget, index) => (
-        <div key={index}>
-          {index}:{" "}
-          {Object.entries(widget).map(([key, value]) => (
-            <div key={key}>
-              {key}: {value?.toString()}
-            </div>
-          ))}
-        </div>
-      ))}
-      <GridStackProvider
-        options={gridOptions}
-        widgets={widgets}
-        onResizeStop={onResizeStop}
-        onChange={onChange}
-      >
-        <GridStackRenderProvider>
-          <GridStackRender />
-        </GridStackRenderProvider>
-      </GridStackProvider>
-    </>
+    <GridStackProvider
+      options={gridOptions}
+      widgets={widgets}
+      onResizeStop={onResizeStop}
+      onChange={onChange}
+    >
+      <GridStackRenderProvider>
+        <GridStackRender />
+      </GridStackRenderProvider>
+    </GridStackProvider>
   )
 }
 
