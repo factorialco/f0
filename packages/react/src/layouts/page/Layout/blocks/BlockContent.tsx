@@ -1,18 +1,9 @@
 import { cn } from "@/lib/utils"
-import { ReactNode } from "react"
 import { createPageLayoutBlock } from "../utils"
-import { PageLayoutBlockProps } from "./PageLayoutBlock"
-import { PageLayoutBlock } from "./PageLayoutBlock/PageLayoutBlock"
-
-export interface PageLayoutContentBlockProps extends PageLayoutBlockProps {
-  title: string
-  description?: string
-  titleLevel?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
-  children: ReactNode
-}
+import { Block, BlockProps } from "./Block"
 
 // Make the additional props optional for the helper function
-interface ContentBlockExtraProps {
+interface BlockContentExtraProps {
   title?: string
   description?: string
   titleLevel?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
@@ -25,13 +16,13 @@ const PageLayoutContentBlockComponent = ({
   children,
   className,
   ...props
-}: PageLayoutBlockProps & ContentBlockExtraProps) => {
+}: BlockProps & BlockContentExtraProps) => {
   if (!title) return null
 
   const TitleTag = titleLevel
 
   return (
-    <PageLayoutBlock {...props} className={cn("space-y-4", className)}>
+    <Block {...props} className={cn("space-y-4", className)}>
       <div className="space-y-2">
         <TitleTag
           className={cn("font-semibold text-f1-foreground", {
@@ -52,12 +43,12 @@ const PageLayoutContentBlockComponent = ({
       </div>
 
       <div className="flex-1">{children}</div>
-    </PageLayoutBlock>
+    </Block>
   )
 }
 
 // Create the component using the helper function
-export const PageLayoutContentBlock = createPageLayoutBlock(
-  "PageLayoutContentBlock",
+export const BlockContent = createPageLayoutBlock(
+  "BlockContent",
   PageLayoutContentBlockComponent
 )

@@ -1,7 +1,7 @@
 import {
   PageLayoutBlockComponent,
   PageLayoutBlockProps,
-} from "./components/PageLayoutBlock/types"
+} from "./groups/components/PageLayoutBlock/types"
 
 // Helper function to create components that inherit from PageLayoutBlock
 export const createPageLayoutBlock = <T extends Record<string, unknown>>(

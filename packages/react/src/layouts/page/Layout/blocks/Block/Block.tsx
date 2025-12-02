@@ -2,12 +2,8 @@ import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
 import { cva } from "cva"
 import { forwardRef, useMemo } from "react"
-import {
-  LayoutBlockActionGroup,
-  LayoutBlockActionItem,
-  PageLayoutBlockComponent,
-  PageLayoutBlockProps,
-} from "./types"
+import { PageLayoutBlockComponent } from "../../types"
+import { BlockActionGroup, BlockActionItem, BlockProps } from "./types"
 
 const variants = cva({
   base: "flex h-full w-full flex-col p-4",
@@ -27,7 +23,7 @@ const variants = cva({
  * @returns An array of dropdown items
  */
 export const actionsToLayoutBlockActionItems = (
-  actions: LayoutBlockActionGroup[] | undefined
+  actions: BlockActionGroup[] | undefined
 ): DropdownItem[] => {
   return (actions || [])
     .map((group) => group.items)
@@ -44,14 +40,11 @@ export const actionsToLayoutBlockActionItems = (
  * Normalize the items to an array of DropdownButtonGroup
  */
 const normalizeActionItems = (
-  items:
-    | LayoutBlockActionItem[]
-    | LayoutBlockActionGroup[]
-    | LayoutBlockActionGroup
+  items: BlockActionItem[] | BlockActionGroup[] | BlockActionGroup
 ) => {
   const isActionDefinition = (
-    item: LayoutBlockActionItem | LayoutBlockActionGroup
-  ): item is LayoutBlockActionItem => {
+    item: BlockActionItem | BlockActionGroup
+  ): item is BlockActionItem => {
     return "onClick" in item
   }
 
@@ -73,7 +66,7 @@ const normalizeActionItems = (
   }
 }
 
-export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
+export const Block = forwardRef<HTMLDivElement, BlockProps>(
   (
     {
       children,
@@ -132,7 +125,6 @@ export const PageLayoutBlock = forwardRef<HTMLDivElement, PageLayoutBlockProps>(
   }
 )
 
-PageLayoutBlock.displayName = "PageLayoutBlock"
+Block.displayName = "Block"
 // Mark as a valid PageLayoutBlock component
-;(PageLayoutBlock as unknown as PageLayoutBlockComponent).__isPageLayoutBlock =
-  true
+;(Block as unknown as PageLayoutBlockComponent).__isPageLayoutBlock = true

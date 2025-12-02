@@ -8,11 +8,7 @@ import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { cn } from "@/lib/utils"
 import { ComponentProps } from "react"
-import { GridFixedGroup } from "../../groups/GridFixedGroup"
-import { GridFluidGroup } from "../../groups/GridFluidGroup"
-import { PageLayoutBlock } from "../components/PageLayoutBlock"
-import { PageLayoutContentBlock } from "../components/PageLayoutContentBlock"
-import { PageLayout } from "../index"
+import { Layout } from "../index"
 
 const FocusableElement = () => {
   return (
@@ -29,9 +25,9 @@ const FocusableElement = () => {
   )
 }
 const meta = {
-  title: "Page/Page Layout",
-  component: PageLayout,
-  tags: ["autodocs"],
+  title: "Page/Layout",
+  component: Layout.Page,
+  tags: ["autodocs", "experimental"],
   decorators: [PageDecorator],
   args: {
     children: (
@@ -66,8 +62,10 @@ const meta = {
     docs: {
       description: {
         component: [
-          "A page layout component that is used to display a main content, header and an aside content. This component manages the responsiveness of the content.",
-          "This component doesnt provide any padding or margin for the content, only the content layout",
+          "This component provides a page layout and the subcomponents to build a page: Groups and blocks",
+          "A groups represents a section of the page and can contain blocks with relationships between them",
+          "A block represents a content section of the page and can contain other blocks or content",
+          "The page layout is a responsive layout that can be used to display a page with a header, aside and main content",
         ]
           .map((line) => `<p>${line}</p>`)
           .join(""),
@@ -77,7 +75,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof PageLayout>
+} satisfies Meta<typeof Layout.Page>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -88,25 +86,25 @@ export const ProfileExample: Story = {
   args: {
     variant: "main-aside",
     children: (
-      <PageLayout.Block>
+      <Layout.Block>
         <Dashboard {...DashboardStories.default.args} />
-      </PageLayout.Block>
+      </Layout.Block>
     ),
     header: (
-      <PageLayout.Block variant="full">
+      <Layout.Block variant="full">
         <div className="flex flex-col items-center justify-center bg-f1-foreground-secondary p-3 text-f1-foreground-inverse">
           Header
         </div>
-      </PageLayout.Block>
+      </Layout.Block>
     ),
     aside: (
-      <PageLayout.Block>
+      <Layout.Block>
         <DetailsItemsList
           {...(DetailsItemsListStories.default.args as ComponentProps<
             typeof DetailsItemsList
           >)}
         />
-      </PageLayout.Block>
+      </Layout.Block>
     ),
   },
 }
@@ -123,15 +121,15 @@ export const WithContentBlocks: Story = {
     ...Default.args,
     children: (
       <>
-        <PageLayoutContentBlock
+        <Layout.BlockContent
           title="Welcome Dashboard"
           description="Here's an overview of your current activities and metrics"
           variant="default"
         >
           <Dashboard {...DashboardStories.default.args} />
-        </PageLayoutContentBlock>
+        </Layout.BlockContent>
 
-        <PageLayoutContentBlock
+        <Layout.BlockContent
           title="Quick Actions"
           description="Frequently used actions and shortcuts"
           titleLevel="h3"
@@ -145,26 +143,26 @@ export const WithContentBlocks: Story = {
               Action 2
             </button>
           </div>
-        </PageLayoutContentBlock>
+        </Layout.BlockContent>
 
-        <PageLayoutContentBlock title="System Status" titleLevel="h4">
+        <Layout.BlockContent title="System Status" titleLevel="h4">
           <div className="text-sm text-f1-foreground-secondary">
             All systems operational ✅
           </div>
-        </PageLayoutContentBlock>
+        </Layout.BlockContent>
 
-        <PageLayout.Group sortable onSort={(items) => console.log(items)}>
-          <PageLayoutContentBlock title="System Status" titleLevel="h4">
+        <Layout.Group sortable>
+          <Layout.BlockContent title="System Status" titleLevel="h4">
             <div className="text-sm text-f1-foreground-secondary">
               All systems operational ✅
             </div>
-          </PageLayoutContentBlock>
-          <PageLayoutContentBlock title="System Status 2" titleLevel="h4">
+          </Layout.BlockContent>
+          <Layout.BlockContent title="System Status 2" titleLevel="h4">
             <div className="text-sm text-f1-foreground-secondary">
               All systems operational 2✅
             </div>
-          </PageLayoutContentBlock>
-        </PageLayout.Group>
+          </Layout.BlockContent>
+        </Layout.Group>
       </>
     ),
   },
@@ -183,21 +181,21 @@ export const WithFluidGridGroupLayout: Story = {
     ...Default.args,
     children: (
       <>
-        <PageLayoutContentBlock
+        <Layout.BlockContent
           title="Fluid Grid Group Layout example"
           description="This is an example of a Fluid Grid Group Layout."
           variant="default"
         >
           The content above is a `GridGroupLayout`
-        </PageLayoutContentBlock>
-        <GridFluidGroup
+        </Layout.BlockContent>
+        <Layout.GroupMasonry
           sortable={true}
           onSort={(items: React.ReactNode[]) => console.log(items)}
           blocks={[
             {
               id: "0",
               render: (
-                <PageLayoutContentBlock
+                <Layout.BlockContent
                   className="min-w-[500px] bg-[#ff000030]"
                   title="Quick Actions"
                   description="Frequently used actions and shortcuts"
@@ -212,13 +210,13 @@ export const WithFluidGridGroupLayout: Story = {
                       Action 2
                     </button>
                   </div>
-                </PageLayoutContentBlock>
+                </Layout.BlockContent>
               ),
             },
             {
               id: "1",
               render: (
-                <PageLayoutContentBlock
+                <Layout.BlockContent
                   title="System Status"
                   titleLevel="h4"
                   className="w-100 min-w-full bg-[#00ff0030]"
@@ -226,13 +224,13 @@ export const WithFluidGridGroupLayout: Story = {
                   <div className="text-sm text-f1-foreground-secondary">
                     Block 2 (full width)
                   </div>
-                </PageLayoutContentBlock>
+                </Layout.BlockContent>
               ),
             },
             {
               id: "2",
               render: (
-                <PageLayoutContentBlock
+                <Layout.BlockContent
                   title="System Status"
                   titleLevel="h4"
                   className="min-w-[100px] bg-[#0000ff30]"
@@ -240,17 +238,17 @@ export const WithFluidGridGroupLayout: Story = {
                   <div className="text-sm text-f1-foreground-secondary">
                     Block 3
                   </div>
-                </PageLayoutContentBlock>
+                </Layout.BlockContent>
               ),
             },
             ...Array.from({ length: 10 }).map((_, index) => ({
               id: `block-${index}`,
               render: (
-                <PageLayoutBlock
+                <Layout.Block
                   className={`bg-[rgb(${(index * 53) % 255}, ${(index * 113) % 255}, ${(index * 197) % 255}, 0.18)]`}
                 >
                   Block {index + 4}
-                </PageLayoutBlock>
+                </Layout.Block>
               ),
             })),
           ]}
@@ -273,14 +271,14 @@ export const WithFixedGridGroupLayout: Story = {
     ...Default.args,
     children: (
       <>
-        <PageLayoutContentBlock
+        <Layout.BlockContent
           title="Fixed Grid Group Layout example"
           description="This is an example of a Grid Group Layout."
           variant="default"
         >
           The content above is a `GridGroupLayout`{" "}
-        </PageLayoutContentBlock>
-        <GridFixedGroup
+        </Layout.BlockContent>
+        <Layout.GroupGrid
           sortable={true}
           onSort={(items: React.ReactNode[]) => console.log(items)}
           blocks={Array.from({ length: 22 }).map((_, index) => {
@@ -289,7 +287,7 @@ export const WithFixedGridGroupLayout: Story = {
               size: getMockAllowedSizes(index)[0],
               availableSizes: getMockAllowedSizes(index),
               render: (
-                <PageLayoutBlock
+                <Layout.Block
                   actions={[
                     {
                       items: [
@@ -307,7 +305,7 @@ export const WithFixedGridGroupLayout: Story = {
                   )}
                 >
                   Block {index + 4}
-                </PageLayoutBlock>
+                </Layout.Block>
               ),
             }
           })}

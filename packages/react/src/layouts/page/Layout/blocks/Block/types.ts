@@ -1,19 +1,19 @@
 import { IconType } from "@/components/F0Icon"
 import { ReactElement } from "react"
 
-export interface LayoutBlockActionItem {
+export interface BlockActionItem {
   label: string
   description?: string
   icon?: IconType
   onClick: () => void
 }
 
-export interface LayoutBlockActionGroup {
+export interface BlockActionGroup {
   label?: string
-  items: LayoutBlockActionItem[]
+  items: BlockActionItem[]
 }
 
-export interface PageLayoutBlockProps {
+export interface BlockProps {
   children: React.ReactNode
   variant?: "default" | "full-width" | "full"
   fullHeight?: boolean
@@ -27,21 +27,12 @@ export interface PageLayoutBlockProps {
   /**
    * The actions to display in the block.
    */
-  actions?:
-    | LayoutBlockActionItem[]
-    | LayoutBlockActionGroup[]
-    | LayoutBlockActionGroup
+  actions?: BlockActionItem[] | BlockActionGroup[] | BlockActionGroup
   /**
    * TODO: Limit the elements here to button or onebutton
    */
   primaryAction?: React.ReactNode
 }
 
-// Base marker interface for PageLayoutBlock components
-export interface PageLayoutBlockComponent {
-  __isPageLayoutBlock: true
-  displayName?: string
-}
-
 // Type for components that inherit from PageLayoutBlock
-export type PageLayoutBlockElement = ReactElement<PageLayoutBlockProps>
+export type BlockElement = ReactElement<BlockProps>

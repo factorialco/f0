@@ -5,27 +5,28 @@ import {
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
 import { useMemo } from "react"
+import { PageLayoutGroupComponent } from "../../types"
 
-export type GridFixedGroupSize = { w: number; h: number }
+export type GroupGridWidgetSize = { w: number; h: number }
 
 interface BlockItem {
   id: string
-  size: GridFixedGroupSize
-  availableSizes: GridFixedGroupSize[]
+  size: GroupGridWidgetSize
+  availableSizes: GroupGridWidgetSize[]
   render: React.ReactNode
 }
 
-export interface GridFixedGroupProps {
+export interface GroupGridProps {
   blocks: BlockItem[]
   sortable?: boolean
   onSort?: (items: React.ReactNode[]) => void
 }
 
-export const GridFixedGroup = ({
+export const GroupGrid = ({
   blocks,
   sortable: _sortable = false,
   onSort: _onSort = () => {},
-}: GridFixedGroupProps) => {
+}: GroupGridProps) => {
   const gridOptions: GridStackReactOptions = useMemo(
     () => ({
       acceptWidgets: true,
@@ -69,3 +70,7 @@ export const GridFixedGroup = ({
     ></F0GridStack>
   )
 }
+
+GroupGrid.displayName = "GroupGrid"
+// Mark as a valid PageLayoutGroup component
+;(GroupGrid as unknown as PageLayoutGroupComponent).__isPageLayoutGroup = true

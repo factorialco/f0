@@ -4,7 +4,7 @@ import { Dashboard, type Widget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { PageLayout } from "@/layouts/page/PageLayout"
+import { Layout } from "@/layouts/page/Layout"
 import { Optional } from "@/lib/typescript-utils/opional"
 import { useState } from "react"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
@@ -94,7 +94,7 @@ const meta = {
       return (
         <>
           <div className="p-4">
-            <PageLayout
+            <Layout
               header={
                 <>
                   <F0Checkbox
@@ -148,7 +148,7 @@ const meta = {
                   editMode: editMode,
                 }}
               />
-            </PageLayout>
+            </Layout>
 
             <pre className="mt-10 overflow-x-auto text-xs">
               {JSON.stringify(widgets, null, 2)}

@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useState } from "react"
+import { PageLayoutGroupComponent } from "../../types"
 import { SortableBlock } from "./components/SortableBlock"
 
 interface SortableBlockItem {
@@ -23,17 +24,17 @@ interface SortableBlockItem {
   render: React.ReactNode
 }
 
-export interface GridGroupProps {
+export interface GroupMasonryProps {
   blocks: SortableBlockItem[]
   sortable?: boolean
   onSort?: (items: React.ReactNode[]) => void
 }
 
-export const GridFluidGroup = ({
+export const GroupMasonry = ({
   blocks,
   sortable: _sortable = false,
   onSort: _onSort = () => {},
-}: GridGroupProps) => {
+}: GroupMasonryProps) => {
   const [items, setItems] = useState<SortableBlockItem[]>([])
 
   useDeepCompareEffect(() => {
@@ -99,3 +100,8 @@ export const GridFluidGroup = ({
     </div>
   )
 }
+
+GroupMasonry.displayName = "GroupMasonry"
+// Mark as a valid PageLayoutGroup component
+;(GroupMasonry as unknown as PageLayoutGroupComponent).__isPageLayoutGroup =
+  true
