@@ -133,6 +133,7 @@ export const baseConfig: Omit<Config, "content"> = {
         autofill: "autofill 0s both",
       },
       containers: {
+        sm: "40rem",
         "8xl": "96rem",
         "9xl": "120rem",
         "10xl": "152rem",

@@ -55,6 +55,7 @@ export const defaultTranslations = {
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
+    selectAll: "Select all",
   },
   status: {
     selected: {
@@ -63,6 +64,13 @@ export const defaultTranslations = {
     },
   },
   filters: {
+    searchPlaceholder: "Search filters...",
+    inFilter: {
+      searchPlaceholder: "Search options...",
+    },
+    activeFilters: "Active filters: {{filters}}",
+    filteringBy: "Filtering by {{label}}",
+    availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
     applySelection: "Apply selection",
@@ -74,12 +82,20 @@ export const defaultTranslations = {
       equal: "Equal to",
       equalTo: "Equal to {{value}}",
       lessOrEqual: "Less or equal to",
+      lessThan: "Less than",
       greaterOrEqual: "Greater or equal to",
+      greaterThan: "Greater than",
       equalShort: "= {{value}}",
       greaterThanOrEqualShort: ">= {{value}}",
+      greaterThanShort: "> {{value}}",
       lessThanOrEqualShort: "<= {{value}}",
+      lessThanShort: "< {{value}}",
       rangeTitle: "Use range",
-      range: "Between {{min}} and {{max}}",
+      range: "{{minStrict}} {{min}} and {{maxStrict}} {{max}}",
+    },
+    search: {
+      relaxed: "Relaxed",
+      strict: "Strict",
     },
     selectAll: "Select all",
     clear: "Clear",
@@ -224,6 +240,7 @@ export const defaultTranslations = {
   ai: {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
+    startNewChat: "Start new chat",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
@@ -233,6 +250,8 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -254,6 +273,56 @@ export const defaultTranslations = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
+  },
+  coCreationForm: {
+    actions: {
+      actions: "Actions",
+      duplicateQuestion: "Duplicate question",
+      deleteQuestion: "Delete question",
+      duplicateSection: "Duplicate section",
+      deleteSection: "Delete section",
+    },
+    questionTypes: {
+      section: "Section",
+      rating: "Rating",
+      multipleChoice: "Multiple choice",
+      singleChoice: "Single choice",
+      text: "Text",
+      longText: "Long text",
+      numeric: "Numeric",
+      link: "Link",
+      date: "Date",
+    },
+    selectQuestion: {
+      addOption: "Add option",
+      newOption: "New option {{number}}",
+      markAsCorrect: "Mark as correct",
+      remove: "Remove",
+      correct: "Correct",
+      optionPlaceholder: "Type anything you want here...",
+    },
+    answer: {
+      label: "Answer",
+      placeholder: "Respondent's answer",
+    },
+    labels: {
+      endOfSection: "End of section",
+      title: "Title",
+      titlePlaceholder: "Question title",
+      description: "Description",
+      questionDescriptionPlaceholder: "Describe the question in a few words",
+      sectionDescriptionPlaceholder: "Describe the section in a few words",
+      required: "Required",
+      questionType: "Question type",
+      questionOptions: "Question options",
+      actions: "Actions",
+      sectionTitlePlaceholder: "Section title",
+    },
+    defaults: {
+      newSection: "New Section",
+      newQuestion: "New Question",
+      newQuestionDescription: "New question description",
+    },
   },
 } as const
 

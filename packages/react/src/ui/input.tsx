@@ -35,6 +35,7 @@ export type InputProps = Omit<
     | "onClear"
     | "readonly"
     | "autocomplete"
+    | "buttonToggle"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -72,6 +73,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onBlur,
       onKeyDown,
       readonly,
+      buttonToggle,
       ...props
     },
     ref
@@ -110,6 +112,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onBlur={onBlur}
         inputRef={ref}
         readonly={readonly}
+        buttonToggle={buttonToggle}
       >
         <input
           type={type}
@@ -117,7 +120,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           onKeyDown={onKeyDown}
           className={cn(
             "[&::-webkit-search-cancel-button]:hidden",
-            "w-full shrink disabled:cursor-not-allowed"
+            "w-full shrink placeholder:-z-10 disabled:cursor-not-allowed"
           )}
         />
       </InputField>

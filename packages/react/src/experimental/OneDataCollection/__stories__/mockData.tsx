@@ -81,11 +81,27 @@ export const filters = {
     type: "search",
     label: "Search",
   },
+  searchStrict: {
+    type: "search",
+    label: "Search with strict toggle example",
+    options: {
+      strictToggle: true,
+    },
+  },
   department: {
     type: "in",
     label: "Department",
     options: {
       options: DEPARTMENTS_MOCK.map((value) => ({ value, label: value })),
+    },
+  },
+  salary: {
+    type: "number",
+    label: "Salary",
+    options: {
+      modes: ["range", "single"],
+      min: 0,
+      openCloseToggle: true,
     },
   },
 } as const
@@ -242,13 +258,16 @@ export const getMockVisualizations = (options?: {
         {
           label: "Name",
           width: 140,
-          render: (item) => ({
-            type: "person",
-            value: {
-              firstName: item.name.split(" ")[0],
-              lastName: item.name.split(" ")[1],
-            },
-          }),
+          render: (item) =>
+            !item.children && item.detailed
+              ? item.name
+              : {
+                  type: "person",
+                  value: {
+                    firstName: item.name.split(" ")[0],
+                    lastName: item.name.split(" ")[1],
+                  },
+                },
           id: "name",
           sorting: options?.table?.noSorting ? undefined : "name",
           hidden: options?.table?.allowColumnHiding ? true : undefined,
@@ -756,6 +775,27 @@ export const filterUsers = (
     )
   }
 
+  const salaryFilterValues = filterValues.salary
+  if (salaryFilterValues) {
+    filteredUsers = filteredUsers.filter((user) => {
+      if (salaryFilterValues?.mode === "range") {
+        return (
+          user.salary &&
+          salaryFilterValues.from.value !== undefined &&
+          (salaryFilterValues.from.closed
+            ? user.salary >= salaryFilterValues.from.value
+            : user.salary > salaryFilterValues.from.value) &&
+          user.salary &&
+          salaryFilterValues.to.value !== undefined &&
+          (salaryFilterValues.to.closed
+            ? user.salary <= salaryFilterValues.to.value
+            : user.salary < salaryFilterValues.to.value)
+        )
+      }
+      return user.salary === salaryFilterValues.value
+    })
+  }
+
   if (search) {
     filteredUsers = filteredUsers.filter(
       (user) =>
@@ -850,6 +890,8 @@ export const createPromiseDataFetch = (
       navigationFilters,
     } = options
 
+    console.log("filters", filters)
+
     return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
         // Use cache if provided, otherwise use static mockUsers
@@ -884,7 +926,31 @@ export const createPromiseDataFetch = (
             ...user,
             children:
               index % 2 === 0 && nestedRecords
-                ? [{ ...user }, { ...user }]
+                ? [
+                    {
+                      ...user,
+                      children: [
+                        { ...user },
+                        {
+                          ...user,
+                          detailed: index === 0,
+                          children: [
+                            { ...user, detailed: index === 0 },
+                            { ...user, detailed: index === 0 },
+                          ],
+                        },
+                        { ...user },
+                      ],
+                    },
+                    {
+                      ...user,
+                      detailed: index === 0,
+                      children: [
+                        { ...user, detailed: index === 0 },
+                        { ...user, detailed: index === 0 },
+                      ],
+                    },
+                  ]
                 : undefined,
           })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
@@ -1104,7 +1170,21 @@ export const ExampleComponent = ({
       childrenCount: (item) => item?.children?.length,
       fetchChildren: async (item) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        return item.children ?? []
+
+        return item.children
+          ? {
+              records: item.children,
+              type: item.detailed ? "detailed" : "basic",
+              paginationInfo: {
+                cursor: "aaa",
+                total: item.children.length,
+                perPage: 2,
+                currentPage: 1,
+                pagesCount: 1,
+                hasMore: true,
+              },
+            }
+          : { records: [] }
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },

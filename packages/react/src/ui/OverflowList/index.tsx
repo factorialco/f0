@@ -59,6 +59,18 @@ interface OverflowListProps<T> {
   max?: number
 
   /**
+   * The minimum number of items to display
+   * @default 0
+   */
+  min?: number
+
+  /**
+   * Whether the items can change their width dynamically, for example when they have ellipsis
+   * @default false
+   */
+  fluidItems?: boolean
+
+  /**
    * The widths of the items in pixels
    * This value is used to avoid calculating the width of the items in runtime
    * @default undefined (means auto)
@@ -76,6 +88,7 @@ const OverflowList = function OverflowList<T>({
   className = "",
   gap = 8,
   max,
+  min = 0,
   itemsWidth,
 }: OverflowListProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
@@ -94,6 +107,7 @@ const OverflowList = function OverflowList<T>({
     isInitialized,
   } = useOverflowCalculation(items, gap, {
     max,
+    min,
     itemsWidth,
   })
 
@@ -119,6 +133,10 @@ const OverflowList = function OverflowList<T>({
 
   const showOverflow = forceShowingOverflowIndicator || overflowItems.length > 0
 
+  // Common classes in the measurement and visible containers
+  const itemsWrapperClasses =
+    "flex min-w-0 flex-1 items-center justify-start whitespace-nowrap"
+
   return (
     <div
       ref={containerRef}
@@ -132,7 +150,10 @@ const OverflowList = function OverflowList<T>({
         <div
           ref={measurementContainerRef}
           aria-hidden="true"
-          className="pointer-events-none invisible absolute left-0 top-0 flex opacity-0"
+          className={cn(
+            "pointer-events-none invisible absolute left-0 top-0 opacity-0",
+            itemsWrapperClasses
+          )}
           style={{ gap: gap > 0 ? `${gap}px` : undefined }}
           data-testid="overflow-measurement-container"
         >
@@ -149,8 +170,10 @@ const OverflowList = function OverflowList<T>({
       )}
 
       <div
-        className="flex items-center whitespace-nowrap"
-        style={{ gap: gap > 0 ? `${gap}px` : undefined }}
+        className={itemsWrapperClasses}
+        style={{
+          gap: gap > 0 ? `${gap}px` : undefined,
+        }}
         data-testid="overflow-visible-container"
       >
         {isInitialized &&
@@ -159,7 +182,9 @@ const OverflowList = function OverflowList<T>({
               key={`item-${index}`}
               className="transition-all duration-150"
               data-testid="overflow-visible-item"
-              style={{ marginLeft: gap < 0 ? `${gap}px` : undefined }}
+              style={{
+                marginLeft: gap < 0 ? `${gap}px` : undefined,
+              }}
             >
               {renderListItem(item, index, true)}
             </div>

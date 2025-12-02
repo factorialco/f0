@@ -1,224 +1,229 @@
-export { default as Ad } from "./Ad"
-export { default as Ae } from "./Ae"
-export { default as Af } from "./Af"
-export { default as Ag } from "./Ag"
-export { default as Ai } from "./Ai"
-export { default as Al } from "./Al"
-export { default as Am } from "./Am"
-export { default as Ao } from "./Ao"
-export { default as Ar } from "./Ar"
-export { default as As } from "./As"
-export { default as At } from "./At"
-export { default as Au } from "./Au"
-export { default as Aw } from "./Aw"
-export { default as Ax } from "./Ax"
-export { default as Az } from "./Az"
-export { default as Ba } from "./Ba"
-export { default as Bb } from "./Bb"
-export { default as Bd } from "./Bd"
-export { default as Be } from "./Be"
-export { default as Bf } from "./Bf"
-export { default as Bg } from "./Bg"
-export { default as Bh } from "./Bh"
-export { default as Bi } from "./Bi"
-export { default as Bj } from "./Bj"
-export { default as Bm } from "./Bm"
-export { default as Bo } from "./Bo"
-export { default as Br } from "./Br"
-export { default as Br1 } from "./Br1"
-export { default as Bt } from "./Bt"
-export { default as Bw } from "./Bw"
-export { default as By } from "./By"
-export { default as Bz } from "./Bz"
-export { default as Ca } from "./Ca"
-export { default as Cd } from "./Cd"
-export { default as Cf } from "./Cf"
-export { default as Cg } from "./Cg"
-export { default as Ch } from "./Ch"
-export { default as Ci } from "./Ci"
-export { default as Ck } from "./Ck"
-export { default as Cl } from "./Cl"
-export { default as Cm } from "./Cm"
-export { default as Cn } from "./Cn"
-export { default as Co } from "./Co"
-export { default as Cr } from "./Cr"
-export { default as Cu } from "./Cu"
-export { default as Cv } from "./Cv"
-export { default as Cw } from "./Cw"
-export { default as Cy } from "./Cy"
-export { default as Cz } from "./Cz"
-export { default as De } from "./De"
-export { default as Dj } from "./Dj"
-export { default as Dk } from "./Dk"
-export { default as Dm } from "./Dm"
-export { default as Do } from "./Do"
-export { default as Dz } from "./Dz"
-export { default as Ec } from "./Ec"
-export { default as Ee } from "./Ee"
-export { default as Eg } from "./Eg"
-export { default as Er } from "./Er"
-export { default as Es } from "./Es"
-export { default as Et } from "./Et"
-export { default as Fi } from "./Fi"
-export { default as Fj } from "./Fj"
-export { default as Fk } from "./Fk"
-export { default as Fm } from "./Fm"
-export { default as Fo } from "./Fo"
-export { default as Fr } from "./Fr"
-export { default as Ga } from "./Ga"
-export { default as Gb } from "./Gb"
-export { default as Gd } from "./Gd"
-export { default as Ge } from "./Ge"
-export { default as Gg } from "./Gg"
-export { default as Gh } from "./Gh"
-export { default as Gi } from "./Gi"
-export { default as Gl } from "./Gl"
-export { default as Gm } from "./Gm"
-export { default as Gn } from "./Gn"
-export { default as Gq } from "./Gq"
-export { default as Gr } from "./Gr"
-export { default as Gt } from "./Gt"
-export { default as Gu } from "./Gu"
-export { default as Gw } from "./Gw"
-export { default as Hk } from "./Hk"
-export { default as Hn } from "./Hn"
-export { default as Hr } from "./Hr"
-export { default as Ht } from "./Ht"
-export { default as Hu } from "./Hu"
-export { default as Id } from "./Id"
-export { default as Ie } from "./Ie"
-export { default as Il } from "./Il"
-export { default as Im } from "./Im"
-export { default as In } from "./In"
-export { default as Io } from "./Io"
-export { default as Iq } from "./Iq"
-export { default as Ir } from "./Ir"
-export { default as Is } from "./Is"
-export { default as It } from "./It"
-export { default as Je } from "./Je"
-export { default as Jm } from "./Jm"
-export { default as Jo } from "./Jo"
-export { default as Jp } from "./Jp"
-export { default as Ke } from "./Ke"
-export { default as Kg } from "./Kg"
-export { default as Kh } from "./Kh"
-export { default as Ki } from "./Ki"
-export { default as Km } from "./Km"
-export { default as Kn } from "./Kn"
-export { default as Kp } from "./Kp"
-export { default as Kr } from "./Kr"
-export { default as Kw } from "./Kw"
-export { default as Ky } from "./Ky"
-export { default as Kz } from "./Kz"
-export { default as La } from "./La"
-export { default as Lb } from "./Lb"
-export { default as Lc } from "./Lc"
-export { default as Li } from "./Li"
-export { default as Lk } from "./Lk"
-export { default as Lr } from "./Lr"
-export { default as Ls } from "./Ls"
-export { default as Lt } from "./Lt"
-export { default as Lu } from "./Lu"
-export { default as Lv } from "./Lv"
-export { default as Ly } from "./Ly"
-export { default as Ma } from "./Ma"
-export { default as Mc } from "./Mc"
-export { default as Md } from "./Md"
-export { default as Me } from "./Me"
-export { default as Mg } from "./Mg"
-export { default as Mh } from "./Mh"
-export { default as Mk } from "./Mk"
-export { default as Ml } from "./Ml"
-export { default as Mm } from "./Mm"
-export { default as Mn } from "./Mn"
-export { default as Mo } from "./Mo"
-export { default as Mp } from "./Mp"
-export { default as Mq } from "./Mq"
-export { default as Mr } from "./Mr"
-export { default as Ms } from "./Ms"
-export { default as Mt } from "./Mt"
-export { default as Mu } from "./Mu"
-export { default as Mv } from "./Mv"
-export { default as Mw } from "./Mw"
-export { default as Mx } from "./Mx"
-export { default as My } from "./My"
-export { default as Mz } from "./Mz"
-export { default as Na } from "./Na"
-export { default as Ne } from "./Ne"
-export { default as Nf } from "./Nf"
-export { default as Ng } from "./Ng"
-export { default as Ni } from "./Ni"
-export { default as Nl } from "./Nl"
-export { default as No } from "./No"
-export { default as Np } from "./Np"
-export { default as Nr } from "./Nr"
-export { default as Nu } from "./Nu"
-export { default as Nz } from "./Nz"
-export { default as Om } from "./Om"
-export { default as Pa } from "./Pa"
-export { default as Pe } from "./Pe"
-export { default as Pf } from "./Pf"
-export { default as Pg } from "./Pg"
-export { default as Ph } from "./Ph"
-export { default as Pk } from "./Pk"
-export { default as Pl } from "./Pl"
-export { default as Pn } from "./Pn"
-export { default as Pr } from "./Pr"
-export { default as Ps } from "./Ps"
-export { default as Pt } from "./Pt"
-export { default as Pw } from "./Pw"
-export { default as Py } from "./Py"
-export { default as Qa } from "./Qa"
-export { default as Ro } from "./Ro"
-export { default as Rs } from "./Rs"
-export { default as Ru } from "./Ru"
-export { default as Rw } from "./Rw"
-export { default as Sa } from "./Sa"
-export { default as Sb } from "./Sb"
-export { default as Sc } from "./Sc"
-export { default as Sd } from "./Sd"
-export { default as Se } from "./Se"
-export { default as Sg } from "./Sg"
-export { default as Si } from "./Si"
-export { default as Sk } from "./Sk"
-export { default as Sl } from "./Sl"
-export { default as Sm } from "./Sm"
-export { default as Sn } from "./Sn"
-export { default as So } from "./So"
-export { default as Sr } from "./Sr"
-export { default as Ss } from "./Ss"
-export { default as St } from "./St"
-export { default as Sv } from "./Sv"
-export { default as Sx } from "./Sx"
-export { default as Sy } from "./Sy"
-export { default as Sz } from "./Sz"
-export { default as Tc } from "./Tc"
-export { default as Td } from "./Td"
-export { default as Tg } from "./Tg"
-export { default as Th } from "./Th"
-export { default as Tj } from "./Tj"
-export { default as Tk } from "./Tk"
-export { default as Tl } from "./Tl"
-export { default as Tm } from "./Tm"
-export { default as Tn } from "./Tn"
-export { default as To } from "./To"
-export { default as Tr } from "./Tr"
-export { default as Tt } from "./Tt"
-export { default as Tv } from "./Tv"
-export { default as Tw } from "./Tw"
-export { default as Tz } from "./Tz"
-export { default as Ua } from "./Ua"
-export { default as Ug } from "./Ug"
-export { default as Us } from "./Us"
-export { default as Uy } from "./Uy"
-export { default as Uz } from "./Uz"
-export { default as Ve } from "./Ve"
-export { default as Vi } from "./Vi"
-export { default as Vn } from "./Vn"
-export { default as Vu } from "./Vu"
-export { default as Ws } from "./Ws"
-export { default as Xk } from "./Xk"
-export { default as Ye } from "./Ye"
-export { default as Za } from "./Za"
-export { default as Zm } from "./Zm"
-export { default as Zw } from "./Zw"
+import { flagsComponents, flagsMap } from "./flagsMap.tsx"
+
+// Re-export all flag components individually for named imports
+export const Es = flagsComponents.Es
+export const Ad = flagsComponents.Ad
+export const Ae = flagsComponents.Ae
+export const Af = flagsComponents.Af
+export const Ag = flagsComponents.Ag
+export const Ai = flagsComponents.Ai
+export const Al = flagsComponents.Al
+export const Am = flagsComponents.Am
+export const Ao = flagsComponents.Ao
+export const Ar = flagsComponents.Ar
+export const As = flagsComponents.As
+export const At = flagsComponents.At
+export const Au = flagsComponents.Au
+export const Aw = flagsComponents.Aw
+export const Ax = flagsComponents.Ax
+export const Az = flagsComponents.Az
+export const Ba = flagsComponents.Ba
+export const Bb = flagsComponents.Bb
+export const Bd = flagsComponents.Bd
+export const Be = flagsComponents.Be
+export const Bf = flagsComponents.Bf
+export const Bg = flagsComponents.Bg
+export const Bh = flagsComponents.Bh
+export const Bi = flagsComponents.Bi
+export const Bj = flagsComponents.Bj
+export const Bm = flagsComponents.Bm
+export const Bo = flagsComponents.Bo
+export const Br = flagsComponents.Br
+export const Br1 = flagsComponents.Br1
+export const Bt = flagsComponents.Bt
+export const Bw = flagsComponents.Bw
+export const By = flagsComponents.By
+export const Bz = flagsComponents.Bz
+export const Ca = flagsComponents.Ca
+export const Cd = flagsComponents.Cd
+export const Cf = flagsComponents.Cf
+export const Cg = flagsComponents.Cg
+export const Ch = flagsComponents.Ch
+export const Ci = flagsComponents.Ci
+export const Ck = flagsComponents.Ck
+export const Cl = flagsComponents.Cl
+export const Cm = flagsComponents.Cm
+export const Cn = flagsComponents.Cn
+export const Co = flagsComponents.Co
+export const Cr = flagsComponents.Cr
+export const Cu = flagsComponents.Cu
+export const Cv = flagsComponents.Cv
+export const Cw = flagsComponents.Cw
+export const Cy = flagsComponents.Cy
+export const Cz = flagsComponents.Cz
+export const De = flagsComponents.De
+export const Dj = flagsComponents.Dj
+export const Dk = flagsComponents.Dk
+export const Dm = flagsComponents.Dm
+export const Do = flagsComponents.Do
+export const Dz = flagsComponents.Dz
+export const Ec = flagsComponents.Ec
+export const Ee = flagsComponents.Ee
+export const Eg = flagsComponents.Eg
+export const Er = flagsComponents.Er
+export const Et = flagsComponents.Et
+export const Fi = flagsComponents.Fi
+export const Fj = flagsComponents.Fj
+export const Fk = flagsComponents.Fk
+export const Fm = flagsComponents.Fm
+export const Fo = flagsComponents.Fo
+export const Fr = flagsComponents.Fr
+export const Ga = flagsComponents.Ga
+export const Gb = flagsComponents.Gb
+export const Gd = flagsComponents.Gd
+export const Ge = flagsComponents.Ge
+export const Gg = flagsComponents.Gg
+export const Gh = flagsComponents.Gh
+export const Gi = flagsComponents.Gi
+export const Gl = flagsComponents.Gl
+export const Gm = flagsComponents.Gm
+export const Gn = flagsComponents.Gn
+export const Gq = flagsComponents.Gq
+export const Gr = flagsComponents.Gr
+export const Gt = flagsComponents.Gt
+export const Gu = flagsComponents.Gu
+export const Gw = flagsComponents.Gw
+export const Hk = flagsComponents.Hk
+export const Hn = flagsComponents.Hn
+export const Hr = flagsComponents.Hr
+export const Ht = flagsComponents.Ht
+export const Hu = flagsComponents.Hu
+export const Id = flagsComponents.Id
+export const Ie = flagsComponents.Ie
+export const Il = flagsComponents.Il
+export const Im = flagsComponents.Im
+export const In = flagsComponents.In
+export const Io = flagsComponents.Io
+export const Iq = flagsComponents.Iq
+export const Ir = flagsComponents.Ir
+export const Is = flagsComponents.Is
+export const It = flagsComponents.It
+export const Je = flagsComponents.Je
+export const Jm = flagsComponents.Jm
+export const Jo = flagsComponents.Jo
+export const Jp = flagsComponents.Jp
+export const Ke = flagsComponents.Ke
+export const Kg = flagsComponents.Kg
+export const Kh = flagsComponents.Kh
+export const Ki = flagsComponents.Ki
+export const Km = flagsComponents.Km
+export const Kn = flagsComponents.Kn
+export const Kp = flagsComponents.Kp
+export const Kr = flagsComponents.Kr
+export const Kw = flagsComponents.Kw
+export const Ky = flagsComponents.Ky
+export const Kz = flagsComponents.Kz
+export const La = flagsComponents.La
+export const Lb = flagsComponents.Lb
+export const Lc = flagsComponents.Lc
+export const Li = flagsComponents.Li
+export const Lk = flagsComponents.Lk
+export const Lr = flagsComponents.Lr
+export const Ls = flagsComponents.Ls
+export const Lt = flagsComponents.Lt
+export const Lu = flagsComponents.Lu
+export const Lv = flagsComponents.Lv
+export const Ly = flagsComponents.Ly
+export const Ma = flagsComponents.Ma
+export const Mc = flagsComponents.Mc
+export const Md = flagsComponents.Md
+export const Me = flagsComponents.Me
+export const Mg = flagsComponents.Mg
+export const Mh = flagsComponents.Mh
+export const Mk = flagsComponents.Mk
+export const Ml = flagsComponents.Ml
+export const Mm = flagsComponents.Mm
+export const Mn = flagsComponents.Mn
+export const Mo = flagsComponents.Mo
+export const Mp = flagsComponents.Mp
+export const Mq = flagsComponents.Mq
+export const Mr = flagsComponents.Mr
+export const Ms = flagsComponents.Ms
+export const Mt = flagsComponents.Mt
+export const Mu = flagsComponents.Mu
+export const Mv = flagsComponents.Mv
+export const Mw = flagsComponents.Mw
+export const Mx = flagsComponents.Mx
+export const My = flagsComponents.My
+export const Mz = flagsComponents.Mz
+export const Na = flagsComponents.Na
+export const Ne = flagsComponents.Ne
+export const Nf = flagsComponents.Nf
+export const Ng = flagsComponents.Ng
+export const Ni = flagsComponents.Ni
+export const Nl = flagsComponents.Nl
+export const No = flagsComponents.No
+export const Np = flagsComponents.Np
+export const Nr = flagsComponents.Nr
+export const Nu = flagsComponents.Nu
+export const Nz = flagsComponents.Nz
+export const Om = flagsComponents.Om
+export const Pa = flagsComponents.Pa
+export const Pe = flagsComponents.Pe
+export const Pf = flagsComponents.Pf
+export const Pg = flagsComponents.Pg
+export const Ph = flagsComponents.Ph
+export const Pk = flagsComponents.Pk
+export const Pl = flagsComponents.Pl
+export const Pn = flagsComponents.Pn
+export const Pr = flagsComponents.Pr
+export const Ps = flagsComponents.Ps
+export const Pt = flagsComponents.Pt
+export const Pw = flagsComponents.Pw
+export const Py = flagsComponents.Py
+export const Qa = flagsComponents.Qa
+export const Ro = flagsComponents.Ro
+export const Rs = flagsComponents.Rs
+export const Ru = flagsComponents.Ru
+export const Rw = flagsComponents.Rw
+export const Sa = flagsComponents.Sa
+export const Sb = flagsComponents.Sb
+export const Sc = flagsComponents.Sc
+export const Sd = flagsComponents.Sd
+export const Se = flagsComponents.Se
+export const Sg = flagsComponents.Sg
+export const Si = flagsComponents.Si
+export const Sk = flagsComponents.Sk
+export const Sl = flagsComponents.Sl
+export const Sm = flagsComponents.Sm
+export const Sn = flagsComponents.Sn
+export const So = flagsComponents.So
+export const Sr = flagsComponents.Sr
+export const Ss = flagsComponents.Ss
+export const St = flagsComponents.St
+export const Sv = flagsComponents.Sv
+export const Sx = flagsComponents.Sx
+export const Sy = flagsComponents.Sy
+export const Sz = flagsComponents.Sz
+export const Tc = flagsComponents.Tc
+export const Td = flagsComponents.Td
+export const Tg = flagsComponents.Tg
+export const Th = flagsComponents.Th
+export const Tj = flagsComponents.Tj
+export const Tk = flagsComponents.Tk
+export const Tl = flagsComponents.Tl
+export const Tm = flagsComponents.Tm
+export const Tn = flagsComponents.Tn
+export const To = flagsComponents.To
+export const Tr = flagsComponents.Tr
+export const Tt = flagsComponents.Tt
+export const Tv = flagsComponents.Tv
+export const Tw = flagsComponents.Tw
+export const Tz = flagsComponents.Tz
+export const Ua = flagsComponents.Ua
+export const Ug = flagsComponents.Ug
+export const Us = flagsComponents.Us
+export const Uy = flagsComponents.Uy
+export const Uz = flagsComponents.Uz
+export const Ve = flagsComponents.Ve
+export const Vi = flagsComponents.Vi
+export const Vn = flagsComponents.Vn
+export const Vu = flagsComponents.Vu
+export const Ws = flagsComponents.Ws
+export const Xk = flagsComponents.Xk
+export const Ye = flagsComponents.Ye
+export const Za = flagsComponents.Za
+export const Zm = flagsComponents.Zm
+export const Zw = flagsComponents.Zw
+
+export { flagsComponents, flagsMap }

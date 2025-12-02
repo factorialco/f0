@@ -526,6 +526,7 @@ export const WithNumberFilter: Story = {
         },
       },
     },
-    onChange: (value) => console.log("Number filter changed", value),
+    value: {},
+    onChange: fn(),
   },
 }

@@ -4,12 +4,14 @@ import { F0Button } from "@/components/F0Button"
 import type { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
+import { useRef } from "react"
 
 type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive"
 
 const alertVariants = cva({
-  base: "flex w-full flex-col items-start justify-between gap-4 rounded-md p-2 pr-3 text-f1-foreground sm:flex-row sm:items-center",
+  base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
   variants: {
     variant: {
       info: "bg-f1-background-info",
@@ -63,40 +65,52 @@ export const OneAlert = ({
   icon,
   variant = "neutral",
 }: AlertProps) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   return (
-    <div className={alertVariants({ variant })}>
-      <div className="flex flex-grow items-center justify-between gap-16">
-        <div className="flex flex-row gap-2">
-          <div className="h-6 w-6 flex-shrink-0">
-            {variant === "neutral" ? (
-              <F0AvatarIcon icon={icon || Placeholder} size="sm" />
-            ) : (
-              <F0AvatarAlert type={variant} size="sm" />
-            )}
+    <div ref={containerRef} className="@container">
+      <div className={alertVariants({ variant })}>
+        <div
+          className={cn(
+            "flex flex-col items-start gap-3 @sm:flex-row @sm:items-center @sm:justify-between"
+          )}
+        >
+          <div className="flex flex-row gap-2">
+            <div className="h-6 w-6 flex-shrink-0">
+              {variant === "neutral" ? (
+                <F0AvatarIcon icon={icon || Placeholder} size="sm" />
+              ) : (
+                <F0AvatarAlert type={variant} size="sm" />
+              )}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <p className={titleVariants({ variant })}>{title}</p>
+              <p className="text-base text-f1-foreground-secondary">
+                {description}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <p className={titleVariants({ variant })}>{title}</p>
-            <p className="text-base text-f1-foreground-secondary">
-              {description}
-            </p>
-          </div>
+          {(action || link) && (
+            <div
+              className={cn(
+                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0"
+              )}
+            >
+              {link && (
+                <F0Link href={link.href} target="_blank" variant="link">
+                  {link.label}
+                </F0Link>
+              )}
+              {action && (
+                <F0Button
+                  label={action.label}
+                  variant="outline"
+                  onClick={action.onClick}
+                />
+              )}
+            </div>
+          )}
         </div>
-        {(action || link) && (
-          <div className="flex flex-row items-center gap-3">
-            {link && (
-              <F0Link href={link.href} target="_blank" variant="link">
-                {link.label}
-              </F0Link>
-            )}
-            {action && (
-              <F0Button
-                label={action.label}
-                variant="outline"
-                onClick={action.onClick}
-              />
-            )}
-          </div>
-        )}
       </div>
     </div>
   )

@@ -1,9 +1,15 @@
-import { BaseResponse } from "./fetch.typings"
+import { InfiniteScrollPaginatedResponse } from "./fetch.typings"
 import { RecordType } from "./records.typings"
 
-type ChildrenResponseType = "basic" | "detailed"
+export type NestedVariant = "basic" | "detailed"
+export type NestedResponseWithType<R extends RecordType> = {
+  records: R[]
+  type?: NestedVariant
+  paginationInfo?: ChildrenPaginationInfo<R>
+}
 
-export type ChildrenResponse<R extends RecordType> =
-  | BaseResponse<R>
-  | R[]
-  | { records: R[] & { type?: ChildrenResponseType } }
+export type ChildrenPaginationInfo<R extends RecordType> = Omit<
+  InfiniteScrollPaginatedResponse<R>,
+  "type" | "records"
+>
+export type ChildrenResponse<R extends RecordType> = NestedResponseWithType<R>

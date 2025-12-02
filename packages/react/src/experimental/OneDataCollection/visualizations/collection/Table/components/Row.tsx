@@ -15,6 +15,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
@@ -49,13 +50,20 @@ export type RowProps<
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
   checkColumnWidth: number
-  tableWithChildren: boolean
-  depth?: number
-  hasLoadedChildren?: boolean
   noBorder?: boolean
-  expandedLevels?: number
-  onExpand?: () => void
   loading?: boolean
+  tableWithChildren: boolean
+  nestedRowProps?: NestedRowProps
+}
+
+export type NestedRowProps = {
+  connectorHeight?: number
+  depth?: number
+  expanded?: boolean
+  hasLoadedChildren?: boolean
+  nestedVariant?: NestedVariant
+  onExpand?: () => void
+  onLoadMoreChildren?: () => void
 }
 
 const RowComponentInner = <
@@ -77,13 +85,10 @@ const RowComponentInner = <
     checkColumnWidth,
     index,
     groupIndex,
-    tableWithChildren,
-    hasLoadedChildren,
-    depth = 0,
     noBorder = false,
-    expandedLevels = 0,
-    onExpand,
     loading = false,
+    nestedRowProps,
+    tableWithChildren,
   }: RowProps<
     R,
     Filters,
@@ -125,7 +130,9 @@ const RowComponentInner = <
     dropDownOpen,
   } = useItemActions({ source, item })
 
-  const hasChildrenLoaded = hasLoadedChildren === undefined || hasLoadedChildren
+  const hasChildrenLoaded =
+    nestedRowProps?.hasLoadedChildren === undefined ||
+    nestedRowProps?.hasLoadedChildren
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
@@ -139,9 +146,9 @@ const RowComponentInner = <
         checkColumnWidth={checkColumnWidth}
         index={index}
         groupIndex={groupIndex}
+        nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
         key={key}
-        ref={ref}
       />
     )
   }
@@ -183,12 +190,12 @@ const RowComponentInner = <
           onClick={itemOnClick}
           width={column.width}
           sticky={getStickyPosition(cellIndex)}
-          hasChildren={rowWithChildren}
-          tableWithChildren={tableWithChildren}
-          depth={depth}
-          expandedLevels={expandedLevels}
-          onExpand={onExpand}
           loading={loading}
+          nestedRowProps={{
+            ...nestedRowProps,
+            rowWithChildren,
+            tableWithChildren,
+          }}
         >
           <div
             className={cn(
@@ -201,36 +208,38 @@ const RowComponentInner = <
         </TableCell>
       ))}
 
-      {source.itemActions && !loading && (
-        <>
-          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
-              <ItemActionsRow
-                primaryItemActions={primaryItemActions}
-                dropdownItemActions={dropdownItemActions}
-                handleDropDownOpenChange={handleDropDownOpenChange}
+      {source.itemActions &&
+        !loading &&
+        !nestedRowProps?.onLoadMoreChildren && (
+          <>
+            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+                <ItemActionsRow
+                  primaryItemActions={primaryItemActions}
+                  dropdownItemActions={dropdownItemActions}
+                  handleDropDownOpenChange={handleDropDownOpenChange}
+                />
+              </ItemActionsRowContainer>
+            </td>
+            {/** Mobile item actions */}
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-actions`}
+              width={68}
+              sticky={{
+                right: 0,
+              }}
+              href={itemHref}
+              className="table-cell md:hidden"
+              loading={loading}
+            >
+              <ItemActionsMobile
+                items={mobileDropdownItemActions}
+                onOpenChange={handleDropDownOpenChange}
               />
-            </ItemActionsRowContainer>
-          </td>
-          {/** Mobile item actions */}
-          <TableCell
-            key={`table-cell-${groupIndex}-${index}-actions`}
-            width={68}
-            sticky={{
-              right: 0,
-            }}
-            href={itemHref}
-            className="table-cell md:hidden"
-            loading={loading}
-          >
-            <ItemActionsMobile
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          </TableCell>
-        </>
-      )}
+            </TableCell>
+          </>
+        )}
     </TableRow>
   )
 }

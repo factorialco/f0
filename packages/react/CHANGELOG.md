@@ -1,5 +1,103 @@
 # Changelog
 
+## [1.292.0](https://github.com/factorialco/f0/compare/f0-react-v1.291.1...f0-react-v1.292.0) (2025-12-02)
+
+
+### Features
+
+* AIChat add download button for markdown table ([#3055](https://github.com/factorialco/f0/issues/3055)) ([33ec11c](https://github.com/factorialco/f0/commit/33ec11c8668e78f1660126b68fb99b1c3aac9416))
+
+## [1.291.1](https://github.com/factorialco/f0/compare/f0-react-v1.291.0...f0-react-v1.291.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* remove fixing min-w-[40px] ([#3058](https://github.com/factorialco/f0/issues/3058)) ([aeb4ef6](https://github.com/factorialco/f0/commit/aeb4ef6783464c4eb3d02595226983c5532ad331))
+
+## [1.291.0](https://github.com/factorialco/f0/compare/f0-react-v1.290.0...f0-react-v1.291.0) (2025-11-27)
+
+
+### Features
+
+* f0select multiselection ([#2959](https://github.com/factorialco/f0/issues/2959)) ([cc653ae](https://github.com/factorialco/f0/commit/cc653ae5dbd54471a31f91b4db67cf595bd9fc06))
+
+## [1.290.0](https://github.com/factorialco/f0/compare/f0-react-v1.289.0...f0-react-v1.290.0) (2025-11-27)
+
+
+### Features
+
+* **NestedRow:** enhance nested row component with data fetching and … ([#3049](https://github.com/factorialco/f0/issues/3049)) ([36339fe](https://github.com/factorialco/f0/commit/36339fed5ff406e89fa5d161f1ff99665ae12453))
+
+## [1.289.0](https://github.com/factorialco/f0/compare/f0-react-v1.288.0...f0-react-v1.289.0) (2025-11-26)
+
+
+### Features
+
+* **FilterPicker:** number filter open close ([#3017](https://github.com/factorialco/f0/issues/3017)) ([0efc8e3](https://github.com/factorialco/f0/commit/0efc8e38872e2b0bb4f973cd59997a8dd96c9dab))
+
+## [1.288.0](https://github.com/factorialco/f0/compare/f0-react-v1.287.0...f0-react-v1.288.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add time (ClockPlus & Sleep) icons ([#3040](https://github.com/factorialco/f0/issues/3040)) ([af6ec70](https://github.com/factorialco/f0/commit/af6ec70e69c05b9bd2978738f4d222b6203ee515))
+
+## [1.287.0](https://github.com/factorialco/f0/compare/f0-react-v1.286.0...f0-react-v1.287.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** IT computer and tablet icons ([#3035](https://github.com/factorialco/f0/issues/3035)) ([2b7fc15](https://github.com/factorialco/f0/commit/2b7fc1503b1a62f3b17a79616926c4b62d3d4eba))
+
+## [1.286.0](https://github.com/factorialco/f0/compare/f0-react-v1.285.0...f0-react-v1.286.0) (2025-11-25)
+
+
+### Features
+
+* expose hideMaxLength prop in experimental Input component ([#3037](https://github.com/factorialco/f0/issues/3037)) ([f758b57](https://github.com/factorialco/f0/commit/f758b57935b1fed880ccb5d0adfe05580915f200))
+
+## [1.285.0](https://github.com/factorialco/f0/compare/f0-react-v1.284.0...f0-react-v1.285.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add new module Salary Advance icons ([#3032](https://github.com/factorialco/f0/issues/3032)) ([5c61e02](https://github.com/factorialco/f0/commit/5c61e02e53f3e6119be621f57055870cdc819b72))
+
+## [1.284.0](https://github.com/factorialco/f0/compare/f0-react-v1.283.0...f0-react-v1.284.0) (2025-11-25)
+
+
+### Features
+
+* **ChatHeader:** add start new chat button ([#3001](https://github.com/factorialco/f0/issues/3001)) ([1fbf97e](https://github.com/factorialco/f0/commit/1fbf97e3ca53737ff129284e49ca5c247636720b))
+
+## [1.283.0](https://github.com/factorialco/f0/compare/f0-react-v1.282.0...f0-react-v1.283.0) (2025-11-24)
+
+
+### Features
+
+* **OneAlert:** enhance responsiveness ([#2983](https://github.com/factorialco/f0/issues/2983)) ([8cf4f67](https://github.com/factorialco/f0/commit/8cf4f67332b611725dc3b36d2056c099a7fce809))
+
+## [1.282.0](https://github.com/factorialco/f0/compare/f0-react-v1.281.0...f0-react-v1.282.0) (2025-11-24)
+
+
+### Features
+
+* **Table:** implement detailed nested row support and enhance data f… ([#3026](https://github.com/factorialco/f0/issues/3026)) ([399d32f](https://github.com/factorialco/f0/commit/399d32f96daf7e9439dbdd1805e03196a074e83d))
+
+## [1.281.0](https://github.com/factorialco/f0/compare/f0-react-v1.280.0...f0-react-v1.281.0) (2025-11-24)
+
+
+### Features
+
+* create all needed components for new co-creation form ([#2958](https://github.com/factorialco/f0/issues/2958)) ([ac0e3e8](https://github.com/factorialco/f0/commit/ac0e3e85652c3cdc4479e90c87c4911a355dbf21))
+
+## [1.280.0](https://github.com/factorialco/f0/compare/f0-react-v1.279.2...f0-react-v1.280.0) (2025-11-24)
+
+
+### Features
+
+* add F0Text and F0Heading components ([#2408](https://github.com/factorialco/f0/issues/2408)) ([63b6f42](https://github.com/factorialco/f0/commit/63b6f42040fd4283580c35d30fe4ca71f404a108))
+
 ## [1.279.2](https://github.com/factorialco/f0/compare/f0-react-v1.279.1...f0-react-v1.279.2) (2025-11-24)
 
 

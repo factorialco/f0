@@ -1,0 +1,664 @@
+import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
+import { fn } from "storybook/test"
+import { F0Select, F0SelectItemObject, selectSizes } from "../index"
+
+import { IconType } from "@/components/F0Icon"
+import { createDataSourceDefinition } from "@/hooks/datasource"
+import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
+
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { inputFieldStatus } from "@/ui/InputField"
+import { useState } from "react"
+import {
+  MockItem,
+  mockItems,
+  mockNonPaginatedSource,
+  mockPaginatedSource,
+} from "./mocks"
+
+const icons: Record<string, IconType> = {
+  light: Circle,
+  dark: Appearance,
+  system: Desktop,
+}
+const items = [
+  {
+    id: "light",
+    name: "Light",
+    description: "A bright and airy theme for a visually appealing interface",
+    extra: 123,
+  },
+  {
+    id: "dark",
+    name: "Dark",
+    description: "A sleek and modern theme for a sophisticated look",
+    tag: "Paid",
+  },
+  {
+    id: "system",
+    name: "System with a long label can overflow",
+    description: "A theme that adapts to the system's default appearance",
+    tag: "Unpaid",
+  },
+]
+
+const meta: Meta = {
+  title: "Select",
+  component: F0Select,
+  parameters: {
+    a11y: {
+      skipCi: true,
+    },
+    docs: {
+      description: {
+        component:
+          "<p>Renders an select input field with a list of options to choose from.</p>" +
+          "<p>The list is virtualized so can handle large amount of items</p>",
+      },
+    },
+  },
+  argTypes: {
+    label: {
+      description: "Label of the select",
+      required: true,
+    },
+    placeholder: {
+      description: "Placeholder of the select",
+    },
+    value: {
+      description: "Current selected value of the select",
+    },
+    defaultItem: {
+      description: "Default item to be selected when component mounts",
+    },
+    size: {
+      control: "select",
+      options: ["sm", "md"],
+      defaultValue: "sm",
+      description: "Size of the select",
+    },
+    disabled: {
+      control: "boolean",
+      description: "Whether the select is disabled",
+    },
+    open: {
+      control: "boolean",
+      description: "Controls whether the select dropdown is open",
+    },
+    hideLabel: {
+      control: "boolean",
+      description:
+        "Whether to hide the label visually (still accessible to screen readers)",
+    },
+    clearable: {
+      control: "boolean",
+      description: "Whether the select value can be cleared",
+    },
+    icon: {
+      description: "Icon to display inside the select input",
+    },
+    labelIcon: {
+      description: "Icon to display next to the label",
+    },
+    error: {
+      description:
+        "Error message to display below the select, This is a shortcut for status.type = 'error'",
+    },
+    status: {
+      description:
+        "Status of the select and a message to display below the select",
+      control: "select",
+      options: inputFieldStatus,
+      defaultValue: "default",
+    },
+    hint: {
+      description:
+        "Hint to display below the select, This is a shortcut for status.type = 'default'. Error status overwrites hint",
+    },
+    children: {
+      description:
+        "Custom trigger content for the select. When provided, replaces the default input field trigger",
+    },
+    showSearchBox: {
+      description:
+        "Shows a search box. The component will filter the items by name and by description unless searchFunc will be in use",
+    },
+    searchValue: {
+      description: "Default value for the search box",
+    },
+    searchEmptyMessage: {
+      description: "Message to show when filter returns no results",
+    },
+    searchBoxPlaceholder: {
+      description: "Placeholder for the search box",
+    },
+    searchFn: {
+      description:
+        "Function to filter the options. If not provided, the component will filter the options by label. Only applies when options are passed in the options prop, not when a data source is used (use fetchData options for this)",
+      table: {
+        type: {
+          summary:
+            "(option: SelectItemObject<string>, search?: string) => boolean | undefined",
+        },
+      },
+    },
+    onSearchChange: {
+      description: "Function called when the search input value changes",
+    },
+    onOpenChange: {
+      description:
+        "Function called when the select dropdown open state changes",
+    },
+    options: {
+      description:
+        "<p>Array of options to show in the select. Each option can its an object of type `SelectItemObject` or `'separator'`" +
+        " to render a separator line</p>" +
+        "```typescript\n" +
+        "type SelectItemObject<T> = {\n" +
+        "  value: T\n" +
+        "  label: string\n" +
+        "  description?: string\n" +
+        "  avatar?: AvatarVariant\n" +
+        "  icon?: IconType\n" +
+        "  item?: unknown\n" +
+        "  disabled?: boolean\n" +
+        "}```",
+    },
+    onChange: {
+      description:
+        "Function to handle the change event. Returns the value of the selected option, and the item object if it exists",
+    },
+    actions: {
+      description:
+        "<p>List of action buttons that will be displayed at the bottom of the select dropdown. Each action should have a label, onClick handler, optional icon, and variant.</p>" +
+        "```typescript\n" +
+        "type Action = {\n" +
+        "  label: string\n" +
+        "  onClick: () => void\n" +
+        "  icon?: IconType\n" +
+        "  variant?: 'ghost' | 'critical'\n" +
+        "}```",
+    },
+    loading: {
+      control: "boolean",
+      description:
+        "Whether the select is loading. If true, the select will be disabled",
+    },
+  },
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    value: "light",
+    options: items.map((item) => {
+      return {
+        value: item.id,
+        label: item.name,
+        icon: icons[item.id],
+        description: item.description,
+        tag: item.tag,
+        item,
+      }
+    }),
+    disabled: false,
+    showSearchBox: false,
+  },
+  decorators: [
+    ((Story, { args }) => {
+      // Wraps the Select component with a hook to show the selected value
+      // This decorator is for single-select stories only
+      const [localValue, setLocalValue] = useState(
+        args.value as string | undefined
+      )
+      const [searchValue, setSearchValue] = useState("")
+      // Sets a click handler to change the label's value
+      const handleOnChange = (
+        value: string,
+        item?: unknown,
+        option?: F0SelectItemObject<string>
+      ) => {
+        setLocalValue(value)
+        console.log(
+          "selected value:",
+          value,
+          "- original item:",
+          item,
+          "- selection option:",
+          option
+        )
+      }
+
+      const handleOnSearchChange = (value: string) => {
+        setSearchValue(value)
+      }
+
+      const truncatedValue = (localValue || []).slice(0, 50)
+
+      return (
+        <>
+          <Story
+            args={
+              {
+                ...args,
+                value: localValue,
+                onChange: handleOnChange,
+                searchValue: searchValue,
+                onSearchChange: handleOnSearchChange,
+              } as typeof args
+            }
+          />
+          <div className="mt-20">
+            Selected: {JSON.stringify(truncatedValue, null, 2)} - Total:{" "}
+            {localValue?.length}
+          </div>
+        </>
+      )
+    }) satisfies Decorator,
+    (Story) => (
+      <div
+        className="w-[330px]"
+        onClick={() => {
+          console.log("click was received in elements below the select")
+        }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  tags: ["autodocs", "experimental"],
+} satisfies Meta<typeof F0Select>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Default: Story = {
+  args: {
+    label: "Select a theme",
+    value: undefined,
+    placeholder: undefined,
+  },
+}
+
+export const WithPreselectedValue: Story = {
+  args: {
+    label: "Select a theme",
+    value: "dark",
+  },
+}
+
+export const WithDisabledOptions: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    options: items.map((item, index) => {
+      return {
+        value: item.id,
+        label: item.name,
+        icon: icons[item.id],
+        description: item.description,
+        tag: item.tag,
+        item,
+        disabled: index === 1,
+      }
+    }),
+  },
+}
+
+export const WithPlaceholder: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    value: undefined,
+  },
+}
+
+export const WithHiddenLabel: Story = {
+  args: {
+    label: "Select a theme",
+    hideLabel: true,
+  },
+}
+
+export const WithIcon: Story = {
+  args: {
+    label: "Select a theme",
+    icon: Desktop,
+  },
+}
+
+export const WithLabelIcon: Story = {
+  args: {
+    label: "Select a theme",
+    labelIcon: Circle,
+  },
+}
+
+export const SizeMd: Story = {
+  args: {
+    label: "Select a theme",
+    icon: Desktop,
+    size: "md",
+  },
+}
+
+export const WithError: Story = {
+  args: {
+    label: "Select a theme",
+    error: "Error message",
+  },
+}
+
+export const WithWarning: Story = {
+  args: {
+    label: "Select a theme",
+    status: {
+      type: "warning",
+      message: "Warning message",
+    },
+  },
+}
+
+export const WithInfo: Story = {
+  args: {
+    label: "Select a theme",
+    status: {
+      type: "info",
+      message: "Info message",
+    },
+  },
+}
+
+export const WithHint: Story = {
+  args: {
+    label: "Select a theme",
+    hint: "Hint message",
+  },
+}
+
+export const Clearable: Story = {
+  args: {
+    label: "Select a theme",
+    value: "dark",
+    clearable: true,
+  },
+}
+
+export const WithSearchBox: Story = {
+  args: {
+    searchEmptyMessage: "No results found",
+    searchBoxPlaceholder: "Search for a theme",
+  },
+  render: (args) => {
+    return (
+      <>
+        <F0Select
+          showSearchBox
+          label="Select a theme"
+          onChange={fn()}
+          searchFn={(option, searchValue) => {
+            console.log("searchFn", option, searchValue)
+            return (
+              option.type === "separator" ||
+              !searchValue ||
+              option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+              option.description
+                ?.toLowerCase()
+                .includes(searchValue.toLowerCase())
+            )
+          }}
+          options={args.options}
+        />
+      </>
+    )
+  },
+}
+
+export const WithActions: Story = {
+  args: {
+    showSearchBox: true,
+    searchEmptyMessage: "No results found",
+    searchBoxPlaceholder: "Search for a theme",
+    label: "Select a theme",
+    actions: [
+      {
+        label: "Create new option",
+        onClick: fn(),
+        icon: Plus,
+        variant: "ghost",
+      },
+    ],
+  },
+}
+
+export const LargeList: Story = {
+  args: {
+    ...WithSearchBox.args,
+    label: "Select a theme",
+    value: "option-4",
+    options: [
+      ...(meta.args?.options || []),
+      { type: "separator" },
+      ...mockItems,
+    ],
+  },
+}
+
+export const WithDataSourceNotPaginated: Story = {
+  args: {
+    label: "Select label",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: mockNonPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithDataSourcePaginated: Story = {
+  args: {
+    label: "Data Source Paginated",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: mockPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithDataSourceGrouping: Story = {
+  args: {
+    label: "Data Source Grouping",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        groupBy: {
+          role: {
+            name: "Role",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+          department: {
+            name: "Department",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.department === groupId).length,
+          },
+        },
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination, sortings } = options
+          return new Promise((resolve) => {
+            setTimeout(
+              () => {
+                const pageSize = pagination.perPage ?? 10
+                const cursor = "cursor" in pagination ? pagination.cursor : null
+                const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+
+                const sortField = sortings?.[0]?.field as keyof MockItem
+                const results = mockItems
+                  .sort((a, b) => {
+                    return (
+                      (a[sortField] as string)?.localeCompare(
+                        b[sortField] as string
+                      ) ?? 0
+                    )
+                  })
+                  .filter(
+                    (item) =>
+                      !search ||
+                      item.label.toLowerCase().includes(search.toLowerCase())
+                  )
+
+                const paginatedResults = results.slice(
+                  cursor ? Number(cursor) : 0,
+                  nextCursor
+                )
+
+                const res = {
+                  type: "infinite-scroll" as const,
+                  cursor: String(nextCursor),
+                  perPage: pageSize,
+                  hasMore: nextCursor < results.length,
+                  records: paginatedResults,
+                  total: results.length,
+                }
+                resolve(res)
+              },
+              100 + Math.random() * 100
+            )
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+export const MultipleNotPaginated: Story = {
+  args: {
+    label: "Multiple Not Paginated",
+    multiple: true,
+    value: mockItems.map((item) => item.value),
+    clearable: true,
+    source: mockNonPaginatedSource,
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithCustomTrigger: Story = {
+  args: {
+    label: "With Custom Trigger",
+    placeholder: "Choose a color",
+    onChange: fn(),
+    value: "red",
+    options: [
+      { value: "red", label: "Red" },
+      { value: "green", label: "Green" },
+      { type: "separator" },
+      { value: "blue", label: "Blue" },
+    ],
+  },
+  render: ({ value, options, placeholder, onChange, ...args }) => (
+    <F0Select
+      label="Choose a color"
+      value={value}
+      options={options}
+      placeholder={placeholder}
+      onChange={onChange}
+      {...args}
+    >
+      <div className="flex h-24 w-24 items-center rounded-md border border-solid border-f1-border bg-f1-background-secondary p-2 text-center transition-colors hover:bg-f1-background-secondary-hover">
+        {placeholder}
+      </div>
+    </F0Select>
+  ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSkipA11y(withSnapshot({})),
+  args: {
+    label: "Label text here",
+  },
+  render: () => {
+    const base = {
+      multiple: false as const,
+      clearable: true,
+      icon: Placeholder,
+      labelIcon: Placeholder,
+      label: "Label text here",
+    }
+    const snapshotVariants = [
+      { ...base },
+      { ...base, disabled: true },
+      { ...base, readonly: true },
+      { ...base, required: true },
+      { ...base, hideLabel: true },
+      { ...base, error: true },
+      { ...base, status: { type: "error" as const, message: "Error message" } },
+      {
+        ...base,
+        status: { type: "warning" as const, message: "Warning message" },
+      },
+      { ...base, status: { type: "info" as const, message: "Info message" } },
+      { ...base, hint: "Hint message" },
+      { ...base },
+    ]
+    return (
+      <div className="flex flex-col gap-4">
+        {selectSizes.map((size) => (
+          <section key={size}>
+            <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
+            <div className="flex flex-col gap-4">
+              <F0Select
+                size={size}
+                label="Label text here"
+                onChange={fn()}
+                options={[]}
+              />
+              {snapshotVariants.map((variant, index) => (
+                <F0Select
+                  key={`${size}-${index}`}
+                  size={size}
+                  {...variant}
+                  onChange={fn()}
+                  options={[]}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
+  },
+}

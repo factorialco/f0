@@ -1,3 +1,4 @@
+import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
 import { AnimatePresence, motion } from "motion/react"
@@ -55,39 +56,18 @@ interface TableCellProps {
   className?: string
 
   /**
-   * Defines if the cell has children
-   * @default false
-   */
-  hasChildren?: boolean
-
-  /**
-   * Defines if the cell is a table with children
-   * @default false
-   */
-  tableWithChildren?: boolean
-
-  /**
-   * The depth level of nested children (used for indentation)
-   * @default 0
-   */
-  depth?: number
-
-  /**
-   * The number of expanded levels of nested children
-   * @default 0
-   */
-  expandedLevels?: number
-
-  /**
-   * The onExpand handler for the cell
-   */
-  onExpand?: () => void
-
-  /**
    * Defines if the cell is loading
    * @default false
    */
+
   loading?: boolean
+  /**
+   * The props for the nested row
+   */
+  nestedRowProps?: NestedRowProps & {
+    rowWithChildren?: boolean
+    tableWithChildren?: boolean
+  }
 }
 
 export function TableCell({
@@ -99,12 +79,8 @@ export function TableCell({
   sticky,
   colSpan,
   className,
-  hasChildren = false,
-  tableWithChildren = false,
-  depth = 0,
-  expandedLevels = 0,
-  onExpand,
   loading = false,
+  nestedRowProps,
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -120,9 +96,9 @@ export function TableCell({
   const linkRef = useRef<HTMLAnchorElement>(null)
   const firstCellMarginLeft = isFirstCellWithTableChildren(
     firstCell,
-    tableWithChildren
+    !!nestedRowProps?.tableWithChildren
   ) && {
-    marginLeft: `${(depth + 1) * 24}px`,
+    marginLeft: `${(nestedRowProps?.depth ?? 0 + 1) * 24}px`,
   }
 
   return (
@@ -183,22 +159,18 @@ export function TableCell({
             {firstCell && (
               <TreeConnector
                 firstCell={firstCell}
-                hasChildren={hasChildren}
-                depth={depth}
-                expandedLevels={expandedLevels}
+                nestedRowProps={nestedRowProps}
               />
             )}
 
-            {isFirstCellWithChildren(firstCell, hasChildren) ? (
+            {isFirstCellWithChildren(
+              firstCell,
+              !!nestedRowProps?.rowWithChildren
+            ) ? (
               <NestedCell
                 linkRef={linkRef}
-                hasChildren={hasChildren}
                 firstCell={firstCell}
-                depth={depth}
-                expandedLevels={expandedLevels}
-                tableWithChildren={tableWithChildren}
-                onClick={onClick}
-                onExpand={onExpand}
+                nestedRowProps={nestedRowProps}
               >
                 {children}
               </NestedCell>
