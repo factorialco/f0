@@ -12,11 +12,11 @@ import {
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { fn } from "storybook/test"
-import { OneActionBar } from "."
+import { ActionBar } from "."
 
-const meta: Meta<typeof OneActionBar> = {
+const meta: Meta<typeof ActionBar> = {
   title: "ActionBar",
-  component: OneActionBar,
+  component: ActionBar,
   parameters: {
     layout: "fullscreen",
     docs: {
@@ -55,7 +55,7 @@ const meta: Meta<typeof OneActionBar> = {
 }
 
 export default meta
-type Story = StoryObj<typeof OneActionBar>
+type Story = StoryObj<typeof ActionBar>
 
 interface Item {
   id: string
@@ -143,7 +143,7 @@ export const Default: Story = {
             </div>
           ))}
         </div>
-        <OneActionBar
+        <ActionBar
           {...args}
           isOpen={hasSelectedItems}
           selectedNumber={selectedItems.length}
@@ -183,7 +183,7 @@ export const NoSelectedItems: Story = {
           label={open ? "Hide ActionBar" : "Show ActionBar"}
           icon={open ? EyeInvisible : EyeVisible}
         />
-        <OneActionBar {...args} isOpen={open} />
+        <ActionBar {...args} isOpen={open} />
       </div>
     )
   },

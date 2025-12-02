@@ -58,7 +58,7 @@ const normalizeItems = (
   }
 }
 
-interface OneActionBarProps {
+interface ActionBarProps {
   /**
    * Whether the action bar is open
    */
@@ -100,14 +100,14 @@ const Alert = ({ message }: { message: string }) => {
   )
 }
 
-export const OneActionBar = ({
+export const ActionBar = ({
   isOpen,
   secondaryActions = [],
   selectedNumber = undefined,
   onUnselect,
   warningMessage,
   ...props
-}: OneActionBarProps) => {
+}: ActionBarProps) => {
   const i18n = useI18n()
 
   const selectedText =
