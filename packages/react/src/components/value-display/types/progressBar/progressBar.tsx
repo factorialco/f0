@@ -54,18 +54,15 @@ export const ProgressBarCell = (
   return (
     <div
       className="flex w-full items-center gap-2"
-      aria-live="polite"
       data-cell-type="progressBar"
     >
       <div className="min-w-16 flex-grow">
         <Progress
           color={barColor}
           value={percentage}
+          max={100}
+          getValueLabel={(val) => `${val.toFixed(1)}%`}
           className="w-full"
-          aria-valuemin={0}
-          aria-valuemax={max}
-          aria-valuenow={value}
-          aria-label={`${percentage.toFixed(1)}%`}
         />
       </div>
       {label !== undefined && (
