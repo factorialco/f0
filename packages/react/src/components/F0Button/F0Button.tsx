@@ -18,8 +18,10 @@ const privateProps = [
 
 export type F0ButtonProps = Omit<
   ButtonInternalProps,
-  (typeof privateProps)[number]
->
+  (typeof privateProps)[number] | "variant"
+> & {
+  variant?: Exclude<ButtonInternalProps["variant"], "ai">
+}
 
 const F0Button = forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
