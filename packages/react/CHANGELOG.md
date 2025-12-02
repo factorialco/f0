@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.296.0](https://github.com/factorialco/f0/compare/f0-react-v1.295.0...f0-react-v1.296.0) (2025-12-02)
+
+
+### Features
+
+* create F0ActionBar component ([#3067](https://github.com/factorialco/f0/issues/3067)) ([30b3c72](https://github.com/factorialco/f0/commit/30b3c7282168737147f4a116a27c5f978f184111))
+
 ## [1.295.0](https://github.com/factorialco/f0/compare/f0-react-v1.294.0...f0-react-v1.295.0) (2025-12-02)
 
 
