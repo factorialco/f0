@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Dashboard, type Widget } from "../"
+import { Dashboard, DashboardWidget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -21,9 +21,9 @@ const meta = {
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story, { args }) => {
-      const [widgets, setWidgets] = useState<Optional<Widget, "x" | "y">[]>(
-        args.widgets
-      )
+      const [widgets, setWidgets] = useState<
+        Optional<DashboardWidget, "x" | "y">[]
+      >(args.widgets)
 
       const handleAddTextWidget = () => {
         setWidgets((prev) => [
@@ -33,7 +33,9 @@ const meta = {
             w: 1,
             h: 1,
             content: <TextWidget />,
-            title: `Title ${Math.random()}`,
+            meta: {
+              title: `Title ${Math.random()}`,
+            },
           },
         ])
       }
@@ -51,7 +53,9 @@ const meta = {
               { w: 2, h: 2 },
             ],
             content: <ChartWidget />,
-            title: `Title ${Math.random()}`,
+            meta: {
+              title: `Title ${Math.random()}`,
+            },
           },
         ])
       }
@@ -68,7 +72,9 @@ const meta = {
               { w: 2, h: 1 },
             ],
             content: <TableWidget />,
-            title: `Table ${Math.random()}`,
+            meta: {
+              title: `Table ${Math.random()}`,
+            },
           },
         ])
       }
@@ -85,7 +91,9 @@ const meta = {
               { w: 2, h: 2 },
             ],
             content: <KpiWidget />,
-            title: `KPI ${Math.random()}`,
+            meta: {
+              title: `KPI ${Math.random()}`,
+            },
           },
         ])
       }
@@ -94,7 +102,7 @@ const meta = {
       return (
         <>
           <div className="p-4">
-            <Layout
+            <Layout.Page
               header={
                 <>
                   <F0Checkbox
@@ -148,11 +156,9 @@ const meta = {
                   editMode: editMode,
                 }}
               />
-            </Layout>
+            </Layout.Page>
 
-            <pre className="mt-10 overflow-x-auto text-xs">
-              {JSON.stringify(widgets, null, 2)}
-            </pre>
+            <pre className="mt-10 overflow-x-auto text-xs"></pre>
           </div>
         </>
       )
@@ -198,7 +204,9 @@ export const Default: Story = {
             planning.
           </p>
         ),
-        title: "Widget 1",
+        meta: {
+          title: "Widget 1",
+        },
         availableSizes,
       },
     ],

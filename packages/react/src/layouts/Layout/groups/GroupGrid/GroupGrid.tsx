@@ -19,15 +19,17 @@ export interface GroupGridProps {
    */
   onChange?: (widgets: GroupGridWidget[]) => void
   WidgetWrapper?: (
-    widget: Optional<GroupGridWidget, "x" | "y">,
+    children: React.ReactNode,
+    meta: Record<string, unknown> | undefined,
     editMode: boolean
   ) => React.ReactElement
 }
 
 const defaultWidgetWrapper = (
-  widget: Optional<GroupGridWidget, "x" | "y">,
+  children: React.ReactNode,
+  meta: Record<string, unknown> | undefined,
   _editMode: boolean
-) => <div>{widget.content}</div>
+) => <div>{children}</div>
 
 export const GroupGrid = ({
   widgets = [],
@@ -68,11 +70,9 @@ export const GroupGrid = ({
         noMove: !editMode,
         noResize: !editMode,
         locked: widget.locked,
-        meta: {
-          title: widget.meta?.title ?? "",
-          //content: widget.content,
-        },
-        content: WidgetWrapper(widget, editMode),
+        meta: widget.meta,
+        _originalContent: widget.content,
+        content: WidgetWrapper(widget.content, widget.meta, editMode),
       }
       // Only include x and y if they're defined, so GridStack can auto-position when undefined
       if (widget.x !== undefined) {
@@ -98,19 +98,22 @@ export const GroupGrid = ({
       setGridWidgets(gridWidgets)
       // Only call onChange if this is not an editMode-only change
       // (editMode-only changes are handled internally to preserve sizes)
+
       if (!isEditModeOnlyChangeRef.current) {
         onChange(
-          gridWidgets.map((widget) => ({
-            id: widget.id,
-            w: widget.w ?? 1,
-            h: widget.h ?? 1,
-            allowedSizes: widget.allowedSizes,
-            content:
-              (widget.meta?.content as React.ReactNode | undefined) ?? null,
-            x: widget.x ?? 0,
-            y: widget.y ?? 0,
-            locked: widget.locked,
-          }))
+          gridWidgets.map((widget) => {
+            return {
+              id: widget.id,
+              w: widget.w ?? 1,
+              h: widget.h ?? 1,
+              allowedSizes: widget.allowedSizes,
+              meta: widget.meta,
+              content: widget._originalContent,
+              x: widget.x ?? 0,
+              y: widget.y ?? 0,
+              locked: widget.locked,
+            }
+          })
         )
       }
       isEditModeOnlyChangeRef.current = false
@@ -133,16 +136,17 @@ export const GroupGrid = ({
             return currentWidget
           }
           // Only update noMove/noResize and content, preserve everything else
+          const content =
+            currentWidget?._originalContent ?? widgetFromProp.content
+
           return {
             ...currentWidget,
             noMove: !editMode,
             noResize: !editMode,
             locked: widgetFromProp.locked,
-            meta: {
-              title: widgetFromProp.meta?.title ?? "",
-              content: widgetFromProp.content,
-            },
-            content: WidgetWrapper(widgetFromProp, editMode),
+            meta: widgetFromProp.meta,
+            _originalContent: content,
+            content: WidgetWrapper(content, widgetFromProp.meta, editMode),
           }
         })
       )
@@ -154,6 +158,8 @@ export const GroupGrid = ({
         )
         return widgets.map((widget) => {
           const currentWidget = currentWidgetsMap.get(widget.id)
+          const content = currentWidget?._originalContent || widget.content
+
           // Preserve size/position from current state if widget exists, otherwise use prop
           // Only include x and y if they're defined, so GridStack can auto-position when undefined
           const gridWidget: GridStackReactWidget = {
@@ -164,11 +170,9 @@ export const GroupGrid = ({
             noMove: !editMode,
             noResize: !editMode,
             locked: widget.locked,
-            meta: {
-              title: widget.meta?.title ?? "",
-              content: widget.content,
-            },
-            content: WidgetWrapper(widget, editMode),
+            meta: widget.meta,
+            _originalContent: content,
+            content: WidgetWrapper(content, widget.meta, editMode),
           }
           // Preserve x/y from current widget if it exists, otherwise use from prop if defined
           const x = currentWidget?.x ?? widget.x

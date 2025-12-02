@@ -48,6 +48,10 @@ export function GridStackProvider({
 
   // Convert widgets for gridstack (convert React content to functions)
   const convertedOptions = useMemo(() => {
+    console.log(
+      "widgets2",
+      (widgets || []).map((widget) => convertWidgetRecursive(widget))
+    )
     return {
       ...options,
       children: (widgets || []).map((widget) => convertWidgetRecursive(widget)),
@@ -367,12 +371,15 @@ export function GridStackProvider({
           const widgetId = item.id
           if (!widgetId) return null
 
+          console.log("item", item)
+
           // Retrieve React content from reactContentMapRef (always up-to-date synchronously)
           const content = reactContentMapRef.current.get(widgetId)
 
           // GridStack preserves custom properties like meta, but TypeScript doesn't know about them
           const itemWithMeta = item as GridStackWidget & {
             meta?: Record<string, unknown>
+            _originalContent?: React.ReactNode
           }
 
           const updatedWidget: GridStackReactWidget = {
@@ -384,9 +391,12 @@ export function GridStackProvider({
             y: item.y ?? 0,
             // Preserve meta if it exists (GridStack preserves custom properties)
             meta: itemWithMeta.meta,
+            _originalContent: itemWithMeta._originalContent,
             // Use React content from reactContentMapRef
             content: content ?? <div>No content</div>,
           }
+
+          console.log("updatedWidget", updatedWidget)
 
           return updatedWidget
         })

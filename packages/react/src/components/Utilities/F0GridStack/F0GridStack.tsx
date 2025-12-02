@@ -19,9 +19,8 @@ export interface GridStackReactWidget
   allowedSizes?: GridStackReactSize[]
   content?: React.ReactElement
   meta?: Record<string, unknown>
-  _meta?: {
-    originalContent?: React.ReactElement
-  }
+
+  _originalContent?: React.ReactNode
 }
 
 export interface F0GridStackProps {
@@ -47,6 +46,7 @@ export const F0GridStack = ({
         noResize: widget.noResize,
         locked: widget.locked,
         content: widget.content?.toString() ?? "",
+        _originalContent: widget._originalContent?.toString() ?? "",
         allowedSizes: widget.allowedSizes,
       }))
     )
@@ -104,16 +104,28 @@ export const F0GridStack = ({
   }
 
   return (
-    <GridStackProvider
-      options={gridOptions}
-      widgets={widgets}
-      onResizeStop={onResizeStop}
-      onChange={onChange}
-    >
-      <GridStackRenderProvider>
-        <GridStackRender />
-      </GridStackRenderProvider>
-    </GridStackProvider>
+    <>
+      {widgets.map((widget, index) => (
+        <div key={index}>
+          {index}:{" "}
+          {Object.entries(widget).map(([key, value]) => (
+            <div key={key}>
+              {key}: {value?.toString()}
+            </div>
+          ))}
+        </div>
+      ))}
+      <GridStackProvider
+        options={gridOptions}
+        widgets={widgets}
+        onResizeStop={onResizeStop}
+        onChange={onChange}
+      >
+        <GridStackRenderProvider>
+          <GridStackRender />
+        </GridStackRenderProvider>
+      </GridStackProvider>
+    </>
   )
 }
 
