@@ -9,7 +9,7 @@ import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/na
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
-import { useSelectable } from "@/hooks/datasource/useSelectable"
+import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
@@ -368,13 +368,14 @@ export const CardCollection = <
     groupAllSelectedStatus,
     handleSelectItemChange,
     handleSelectGroupChange,
-  } = useSelectable(
+  } = useSelectable({
     data,
     paginationInfo,
     source,
     onSelectItems,
-    source.defaultSelectedItems
-  )
+    selectionMode: "multi",
+    selectedState: source.defaultSelectedItems,
+  })
 
   /**
    * Groups

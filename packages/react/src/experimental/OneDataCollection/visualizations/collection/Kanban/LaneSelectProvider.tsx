@@ -67,16 +67,20 @@ export const LaneSelectProvider = <
     Filters,
     Sortings,
     Grouping
-  >(
-    props.data || { type: "flat", records: [], groups: [] },
-    props.paginationInfo,
-    props.source,
-    props.onSelectItems,
-    props.source.defaultSelectedItems
-  )
+  >({
+    data: props.data || { type: "flat", records: [], groups: [] },
+    paginationInfo: props.paginationInfo,
+    source: props.source,
+    onSelectItems: props.onSelectItems,
+    selectedState: props.source.defaultSelectedItems,
+  })
 
   useEffect(() => {
-    props.onHandleSelectItemCallbackChange(handleSelectItemChange)
+    // handleSelectItemChange now accepts R | SelectionId | readonly SelectionId[]
+    // which is compatible with the expected (item: R, checked: boolean) => void
+    props.onHandleSelectItemCallbackChange(
+      handleSelectItemChange as (item: R, checked: boolean) => void
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleSelectItemChange])
 

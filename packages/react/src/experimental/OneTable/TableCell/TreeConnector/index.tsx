@@ -1,11 +1,14 @@
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
 import {
+  BUTTON_HEIGHT,
+  CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,
   getNestedMarginLeft,
   isFirstCellExpanded,
   isFirstCellWithDepth,
   LINE_WIDTH,
+  PADDING_TOP,
   SPACING_FACTOR,
 } from "../utils/nested"
 
@@ -17,14 +20,21 @@ interface TreeConnectorProps {
   }
 }
 
-export const connectorVariables = (height: string) => {
+export const connectorVariables = (
+  height: string,
+  nestedRowProps?: NestedRowProps
+) => {
+  const horizontalOffset = nestedRowProps?.onLoadMoreChildren
+    ? BUTTON_HEIGHT / 2 - PADDING_TOP
+    : (CHEVRON_PARENT_SIZE - PADDING_TOP) / 2
+
   return {
     "--line-left": `-${2 * CHEVRON_SIZE}px`,
     "--line-width": LINE_WIDTH,
-    "--horizontal-offset": `${CHEVRON_SIZE / 2}px`,
+    "--horizontal-offset": `${horizontalOffset}px`,
+    "--horizontal-left": `4px`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
-    "--line-top": `-${2 * CHEVRON_SIZE}px`,
-    "--line-height": height,
+    "--line-height": `calc(${height} - ${CHEVRON_PARENT_SIZE + PADDING_TOP}px )`,
   }
 }
 
@@ -32,7 +42,7 @@ export const verticalConnectorStyles =
   "h-full overflow-visible " +
   "before:absolute " +
   "before:-left-[var(--line-left)] " +
-  "before:-top-[var(--line-top)] " +
+  "before:top-[40px] " +
   "before:h-[var(--line-height)] " +
   "before:w-[var(--line-width)] " +
   "before:bg-f1-foreground-disabled " +
@@ -40,7 +50,7 @@ export const verticalConnectorStyles =
 
 export const horizontalConnectorStyles =
   "after:absolute " +
-  "after:left-[var(--horizontal-offset)] " +
+  "after:left-[var(--horizontal-left)] " +
   "after:top-[var(--horizontal-offset)] " +
   "after:h-[var(--horizontal-height)] " +
   "after:w-4 " +
@@ -60,10 +70,14 @@ export const TreeConnector = ({
     nestedRowProps?.expanded ?? false,
     firstCell
   )
-  const typeBasic = nestedRowProps?.nestedVariant === "basic"
-  const typeDetailed = nestedRowProps?.nestedVariant === "detailed"
+  const typeBasic =
+    nestedRowProps === undefined || nestedRowProps?.nestedVariant === "basic"
 
-  const detailedWithChildren = typeDetailed && nestedRowProps?.rowWithChildren
+  const basicOrWithChildren = typeBasic || nestedRowProps?.rowWithChildren
+  const detailedWithLoadMore =
+    nestedRowProps?.nestedVariant === "detailed" &&
+    nestedRowProps?.onLoadMoreChildren
+
   const marginLeft = firstCellWithDepth
     ? getNestedMarginLeft(nestedRowProps?.depth ?? 0)
     : undefined
@@ -85,13 +99,13 @@ export const TreeConnector = ({
         "absolute inset-0 h-full",
         firstCellExpanded && verticalConnectorStyles,
         firstCellWithDepth &&
-          (typeBasic || detailedWithChildren) &&
-          horizontalConnectorStyles,
-        firstCellWithDepth && !nestedRowProps?.rowWithChildren && "after:w-8"
+          basicOrWithChildren &&
+          !detailedWithLoadMore &&
+          horizontalConnectorStyles
       )}
       style={{
         marginLeft,
-        ...connectorVariables(connectorHeight),
+        ...connectorVariables(connectorHeight, nestedRowProps),
       }}
     />
   )

@@ -4,6 +4,7 @@ import { ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import {
+  CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,
   getNestedMarginLeft,
   isFirstCellWithChildren,
@@ -48,7 +49,13 @@ export const NestedCell = ({
     )
 
   const marginLeft = firstCellWithDepth
-    ? getNestedMarginLeft(nestedRowProps?.depth ?? 0)
+    ? getNestedMarginLeft(
+        nestedRowProps?.depth ?? 0,
+        nestedRowProps?.nestedVariant === "detailed" &&
+          nestedRowProps?.onLoadMoreChildren
+          ? -16
+          : 0
+      )
     : undefined
 
   return (
@@ -67,16 +74,12 @@ export const NestedCell = ({
     >
       {nestedRowProps?.onLoadMoreChildren ? (
         <>
-          <div
-            className={cn(
-              "pointer-events-auto cursor-pointer rounded-2xs hover:bg-f1-foreground-disabled"
-            )}
-          >
+          <div className={cn("pointer-events-auto cursor-pointer")}>
             <F0Button
-              variant="neutral"
-              size="sm"
+              variant="ghost"
+              size="md"
               icon={ArrowDown}
-              label="Load more"
+              label="See more"
               onClick={(e) => {
                 e.stopPropagation()
                 nestedRowProps?.onLoadMoreChildren?.()
@@ -88,13 +91,14 @@ export const NestedCell = ({
         <>
           <div
             className={cn(
-              "h-[var(--chevron-size)] w-[var(--chevron-size)]",
+              "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] items-center justify-center",
               firstCellWithChildren &&
-                "pointer-events-auto cursor-pointer rounded-2xs hover:bg-f1-foreground-disabled"
+                "pointer-events-auto cursor-pointer rounded-sm hover:bg-f1-foreground-disabled"
             )}
             style={
               {
                 ...{
+                  "--chevron-parent-size": `${CHEVRON_PARENT_SIZE}px`,
                   "--chevron-size": `${CHEVRON_SIZE}px`,
                   "--spacing-factor": `${SPACING_FACTOR}px`,
                 },

@@ -12,7 +12,7 @@ import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
 import { useLayoutEffect, useRef } from "react"
 import { Row, RowProps } from "../Row"
 
-export const DEFAULT_LOADING_ROWS_COUNT = 3
+export const DEFAULT_LOADING_ROWS_COUNT = 5
 
 const SingleLoadingRow = <
   R extends RecordType,
@@ -112,11 +112,25 @@ export const RowLoading = <
     NavigationFilters,
     Grouping
   >
-  paginationInfo?: ChildrenPaginationInfo<R>
+  paginationInfo?: ChildrenPaginationInfo
 }) => {
+  const childrenCount = props.source.childrenCount?.({
+    item: props.item,
+    pagination: props.paginationInfo,
+  })
+
+  const paginatedChildrenCount = props.paginationInfo
+    ? props.paginationInfo.total
+      ? Math.min(
+          props.paginationInfo.perPage,
+          props.paginationInfo.total -
+            props.paginationInfo.currentPage * props.paginationInfo.perPage
+        )
+      : props.paginationInfo.perPage
+    : undefined
+
   const loadingRowsCount =
-    props.source.childrenCount?.(props.item, props.paginationInfo) ??
-    DEFAULT_LOADING_ROWS_COUNT
+    childrenCount ?? paginatedChildrenCount ?? DEFAULT_LOADING_ROWS_COUNT
 
   return Array.from({ length: loadingRowsCount }).map((_, rowIndex) => (
     <SingleLoadingRow

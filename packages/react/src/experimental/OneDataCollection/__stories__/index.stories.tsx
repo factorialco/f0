@@ -879,11 +879,12 @@ export const WithSelectableAndDefaultSelectedItems: Story = {
       selectable={(item) => item.id}
       defaultSelectedItems={{
         allSelected: false,
-        items: [
-          { id: mockUsers[0].id, checked: true },
-          { id: mockUsers[1].id, checked: false },
-          { id: mockUsers[2].id, checked: true },
-        ],
+        items: new Map([
+          [mockUsers[0].id, { id: mockUsers[0].id, checked: true }],
+          [mockUsers[1].id, { id: mockUsers[1].id, checked: false }],
+          [mockUsers[2].id, { id: mockUsers[2].id, checked: true }],
+        ]),
+        groups: new Map(),
       }}
     />
   ),
@@ -905,11 +906,11 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
       }}
       defaultSelectedItems={{
         allSelected: false,
-        items: [
-          { id: mockUsers[0].id, checked: true },
-          { id: mockUsers[2].id, checked: true },
-        ],
-        groups: [{ groupId: "Product", checked: true }],
+        items: new Map([
+          [mockUsers[0].id, { id: mockUsers[0].id, checked: true }],
+          [mockUsers[2].id, { id: mockUsers[2].id, checked: true }],
+        ]),
+        groups: new Map([["Product", { id: "Product", checked: true }]]),
       }}
     />
   ),

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.41.0](https://github.com/factorialco/f0/compare/f0-core-v1.40.0...f0-core-v1.41.0) (2025-12-02)
+
+
+### Features
+
+* **AIButton:** new AI Button component ([#3062](https://github.com/factorialco/f0/issues/3062)) ([2638aa9](https://github.com/factorialco/f0/commit/2638aa90b23258570ecf67b625813f9f76dddf96))
+
 ## [1.40.0](https://github.com/factorialco/f0/compare/f0-core-v1.39.0...f0-core-v1.40.0) (2025-11-26)
 
 

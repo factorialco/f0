@@ -8,6 +8,7 @@ export const actionButtonVariants = [
   "ghost",
   "promote",
   "outlinePromote",
+  "ai",
 ] as const
 export type ActionButtonVariant = (typeof actionButtonVariants)[number]
 

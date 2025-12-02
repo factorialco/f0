@@ -61,6 +61,7 @@ export const defaultTranslations = {
     selected: {
       singular: "Selected",
       plural: "Selected",
+      all: "All selected",
     },
   },
   filters: {
@@ -250,6 +251,8 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",

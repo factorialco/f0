@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { DataSourceDefinition, PaginationInfo } from "../types"
 import { Data, GROUP_ID_SYMBOL } from "../useData"
-import { useSelectable } from "../useSelectable"
+import { useSelectable } from "../useSelectable/useSelectable"
 
 type TestRecord = {
   id: number
@@ -55,7 +55,13 @@ describe("useSelectable", () => {
 
     it("should handle item selection", async () => {
       const { result } = renderHook(() =>
-        useSelectable(mockData, null, mockSource, vi.fn(), undefined)
+        useSelectable({
+          data: mockData,
+          paginationInfo: null,
+          source: mockSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+        })
       )
 
       act(() => {
@@ -117,7 +123,13 @@ describe("useSelectable", () => {
 
     it("should handle group selection", async () => {
       const { result } = renderHook(() =>
-        useSelectable(mockGroupedData, null, mockSource, vi.fn(), undefined)
+        useSelectable({
+          data: mockGroupedData,
+          paginationInfo: null,
+          source: mockSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+        })
       )
 
       act(() => {
@@ -135,7 +147,13 @@ describe("useSelectable", () => {
 
     it("should handle select all in grouped data", async () => {
       const { result } = renderHook(() =>
-        useSelectable(mockGroupedData, null, mockSource, vi.fn(), undefined)
+        useSelectable({
+          data: mockGroupedData,
+          paginationInfo: null,
+          source: mockSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+        })
       )
 
       act(() => {
@@ -186,7 +204,13 @@ describe("useSelectable", () => {
 
       const { result, rerender } = renderHook(
         ({ data }) =>
-          useSelectable(data, paginationInfo, mockSource, vi.fn(), undefined),
+          useSelectable({
+            data,
+            paginationInfo,
+            source: mockSource,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+          }),
         { initialProps: { data: initialGroupedData } }
       )
 
