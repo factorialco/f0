@@ -95,7 +95,7 @@ export const WelcomeScreen = ({
               }}
             >
               <ButtonInternal
-                className="font-medium"
+                className="border border-solid border-f1-border-secondary font-medium shadow"
                 variant="ghost"
                 label={suggestion.message}
                 icon={suggestion.icon}
