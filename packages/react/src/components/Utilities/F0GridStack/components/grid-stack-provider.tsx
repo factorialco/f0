@@ -48,10 +48,6 @@ export function GridStackProvider({
 
   // Convert widgets for gridstack (convert React content to functions)
   const convertedOptions = useMemo(() => {
-    console.log(
-      "widgets2",
-      (widgets || []).map((widget) => convertWidgetRecursive(widget))
-    )
     return {
       ...options,
       children: (widgets || []).map((widget) => convertWidgetRecursive(widget)),
@@ -88,6 +84,37 @@ export function GridStackProvider({
   useEffect(() => {
     reactContentMapRef.current = reactContentMap
   }, [reactContentMap])
+
+  // Store original content separately to prevent GridStack's deepClone from causing stack overflow
+  const [originalContentMap, setOriginalContentMap] = useState(() => {
+    const map = new Map<string, React.ReactNode>()
+    const widgetsToProcess = widgets || []
+    const deepFindNodeWithOriginalContent = (obj: GridStackReactWidget) => {
+      if (obj.id && obj._originalContent !== undefined) {
+        map.set(obj.id, obj._originalContent)
+      }
+
+      if (obj.subGridOpts?.children) {
+        obj.subGridOpts.children.forEach((child) => {
+          deepFindNodeWithOriginalContent(child as GridStackReactWidget)
+        })
+      }
+    }
+    widgetsToProcess.forEach((child) => {
+      deepFindNodeWithOriginalContent(child)
+    })
+    return map
+  })
+
+  // Ref to track originalContentMap synchronously for emitChange callback
+  // This ensures emitChange always has access to the latest _originalContent when GridStack fires events
+  const originalContentMapRef =
+    useRef<Map<string, React.ReactNode>>(originalContentMap)
+
+  // Keep ref in sync with state updates
+  useEffect(() => {
+    originalContentMapRef.current = originalContentMap
+  }, [originalContentMap])
 
   // Store only converted widgets (with function content) for GridStack operations
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
@@ -139,6 +166,9 @@ export function GridStackProvider({
         if (widget.content) {
           reactContentMapRef.current.set(widget.id!, widget.content)
         }
+        if (widget._originalContent !== undefined) {
+          originalContentMapRef.current.set(widget.id!, widget._originalContent)
+        }
       })
 
       widgetsToAdd.forEach((widget) => {
@@ -163,6 +193,15 @@ export function GridStackProvider({
         })
         return next
       })
+      setOriginalContentMap((prev) => {
+        const next = new Map(prev)
+        widgetsToAdd.forEach((widget) => {
+          if (widget._originalContent !== undefined) {
+            next.set(widget.id!, widget._originalContent)
+          }
+        })
+        return next
+      })
     }
 
     /**
@@ -177,6 +216,7 @@ export function GridStackProvider({
       // Update ref synchronously BEFORE removing widgets from GridStack
       idsToRemove.forEach((id) => {
         reactContentMapRef.current.delete(id)
+        originalContentMapRef.current.delete(id)
       })
 
       widgetsToRemove.forEach((widget) => {
@@ -194,6 +234,11 @@ export function GridStackProvider({
         return next
       })
       setReactContentMap((prev) => {
+        const next = new Map(prev)
+        idsToRemove.forEach((id) => next.delete(id))
+        return next
+      })
+      setOriginalContentMap((prev) => {
         const next = new Map(prev)
         idsToRemove.forEach((id) => next.delete(id))
         return next
@@ -286,6 +331,9 @@ export function GridStackProvider({
         if (widget.content) {
           reactContentMapRef.current.set(widget.id!, widget.content)
         }
+        if (widget._originalContent !== undefined) {
+          originalContentMapRef.current.set(widget.id!, widget._originalContent)
+        }
       })
 
       // Update GridStack DOM elements
@@ -311,6 +359,15 @@ export function GridStackProvider({
         widgetsToUpdate.forEach((widget) => {
           if (widget.content) {
             next.set(widget.id!, widget.content)
+          }
+        })
+        return next
+      })
+      setOriginalContentMap((prev) => {
+        const next = new Map(prev)
+        widgetsToUpdate.forEach((widget) => {
+          if (widget._originalContent !== undefined) {
+            next.set(widget.id!, widget._originalContent)
           }
         })
         return next
@@ -371,15 +428,14 @@ export function GridStackProvider({
           const widgetId = item.id
           if (!widgetId) return null
 
-          console.log("item", item)
-
           // Retrieve React content from reactContentMapRef (always up-to-date synchronously)
           const content = reactContentMapRef.current.get(widgetId)
+          // Retrieve _originalContent from originalContentMapRef (always up-to-date synchronously)
+          const originalContent = originalContentMapRef.current.get(widgetId)
 
           // GridStack preserves custom properties like meta, but TypeScript doesn't know about them
           const itemWithMeta = item as GridStackWidget & {
             meta?: Record<string, unknown>
-            _originalContent?: React.ReactNode
           }
 
           const updatedWidget: GridStackReactWidget = {
@@ -391,12 +447,11 @@ export function GridStackProvider({
             y: item.y ?? 0,
             // Preserve meta if it exists (GridStack preserves custom properties)
             meta: itemWithMeta.meta,
-            _originalContent: itemWithMeta._originalContent,
+            // Use _originalContent from originalContentMapRef
+            _originalContent: originalContent,
             // Use React content from reactContentMapRef
             content: content ?? <div>No content</div>,
           }
-
-          console.log("updatedWidget", updatedWidget)
 
           return updatedWidget
         })

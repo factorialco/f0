@@ -27,7 +27,7 @@ export interface GroupGridProps {
 
 const defaultWidgetWrapper = (
   children: React.ReactNode,
-  meta: Record<string, unknown> | undefined,
+  _meta: Record<string, unknown> | undefined,
   _editMode: boolean
 ) => <div>{children}</div>
 

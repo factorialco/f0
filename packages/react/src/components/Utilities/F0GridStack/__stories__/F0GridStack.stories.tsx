@@ -194,7 +194,6 @@ export const WithMethods: Story = {
 
     const handleRemoveWidget = () => {
       setWidgets((prev) => {
-        console.log("prev", prev.slice(0, -1))
         return prev.slice(0, -1)
       })
     }
