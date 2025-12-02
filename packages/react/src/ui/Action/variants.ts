@@ -140,38 +140,39 @@ export const iconVariants = cva({
     {
       variant: "default",
       mode: "default",
-      class: "[&_svg]:text-f1-icon-inverse dark:[&_svg]:text-f1-icon-bold/80",
+      class:
+        "[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:[&_svg:not([data-has-color])]:text-f1-icon-bold/80",
     },
     {
       variant: "outline",
       mode: "default",
-      class: "[&_svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "neutral",
       mode: "default",
-      class: "[&_svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "critical",
       mode: "default",
       class:
-        "[&_svg]:text-f1-icon-critical-bold group-hover:[&_svg]:text-f1-icon-inverse group-active:[&_svg]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg]:text-f1-icon-inverse dark:group-hover:[&_svg]:text-f1-icon-bold/80 dark:group-active:[&_svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg]:text-f1-icon-bold/80",
+        "[&_svg:not([data-has-color])]:text-f1-icon-critical-bold group-hover:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-active:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:group-hover:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-active:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-bold/80",
     },
     {
       variant: "ghost",
       mode: "default",
-      class: "[&_svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "promote",
       mode: "default",
-      class: "[&_svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "outlinePromote",
       mode: "default",
-      class: "[&_svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "ai",
@@ -182,68 +183,69 @@ export const iconVariants = cva({
     {
       variant: "link",
       mode: "default",
-      class: "[&_svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "mention",
       mode: "default",
-      class: "[&_svg]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "unstyled",
       mode: "default",
-      class: "[&_svg]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "default",
       mode: "only",
-      class: "[&_svg]:text-f1-icon-inverse dark:[&_svg]:text-f1-icon-bold",
+      class:
+        "[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "outline",
       mode: "only",
-      class: "[&_svg]:text-f1-icon-bold",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "neutral",
       mode: "only",
-      class: "[&_svg]:text-f1-icon-bold",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "critical",
       mode: "only",
       class:
-        "[&_svg]:text-f1-icon-critical-bold group-hover:[&_svg]:text-f1-icon-inverse group-active:[&_svg]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg]:text-f1-icon-inverse dark:group-hover:[&_svg]:text-f1-icon-bold/80 dark:group-active:[&_svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg]:text-f1-icon-bold/80",
+        "[&_svg:not([data-has-color])]:text-f1-icon-critical-bold group-hover:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-active:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:group-hover:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-active:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-bold/80",
     },
     {
       variant: "ghost",
       mode: "only",
-      class: "[&_svg]:text-f1-icon-bold",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "promote",
       mode: "only",
-      class: "[&_svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "outlinePromote",
       mode: "only",
-      class: "[&_svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "link",
       mode: "only",
-      class: "[&_svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "unstyled",
       mode: "only",
-      class: "[&_svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "mention",
       mode: "default",
-      class: "[&_svg]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "ai",
