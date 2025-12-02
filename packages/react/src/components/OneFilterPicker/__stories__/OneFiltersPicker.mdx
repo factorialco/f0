@@ -161,6 +161,8 @@ allows limit user select to a min and max number.
 - `max?`: The maximum number that the user can select.
 - `modes?`: The modes of the number filter, can be `range` (default) or/and
   `single`.
+- `openCloseToggle?`: Whether to show a toggle to open and close the range.
+  Default is `false`.
 
 ```tsx
 const filters: FiltersDefinition<typeof mockUsers> = {
@@ -170,25 +172,49 @@ const filters: FiltersDefinition<typeof mockUsers> = {
     options: {
       min: 0,
       max: 100,
+      openCloseToggle: true,
     },
   },
 }
 ```
 
-The filter returns always a tuple of two numbers, the first one is the minimum
-value and the second one is the maximum value. If the mode is `single` the
-second value is the same as the first one.
+The filter returns a object with the following properties:
+
+- `mode`: The mode of the number filter, can be `range` or `single`.
+- `from`: The minimum number that the user can select.
+- `to`: The maximum number that the user can select.
+- `closed`: Whether the range is closed or open
+  [Mathematical definition of open and close intervals](<https://en.wikipedia.org/wiki/Interval_(mathematics)#Definitions_and_terminology>).
 
 ```tsx
-[100, 100], // Means = 100
+{
+  mode: "single",
+  value: 100,
+}
 // or
-[0, 100], // Means >= 0 and <= 100
+{
+  mode: "range",
+  from: {
+    value: 100,
+    closed: true,
+  },
+  to: {
+    value: 100,
+    closed: false,
+  },
+} // Means >= 0 and < 100
 // or
-[0, undefined], // Means >= 0
-// or
-[undefined, 100], // Means <= 100
-// or
-[undefined, undefined], // Means no range
+{
+  mode: "range",
+  from: {
+    value: 0,
+    closed: false,
+  },
+  to: {
+    value: undefined,
+    closed: true,
+  },
+} // Means > 0
 ```
 
 ## Adding a new filter type

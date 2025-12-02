@@ -1,18 +1,18 @@
 import { F0Icon } from "@/components/F0Icon"
 import {
+  F0Select,
+  F0SelectItemObject,
+  F0SelectProps,
   ResolvedRecordType,
-  Select,
-  SelectItemObject,
-  SelectProps,
-} from "@/experimental/Forms/Fields/Select"
+} from "@/components/F0Select"
 import { ChevronDown } from "@/icons/app"
 import { motion } from "motion/react"
 import { useState } from "react"
 
-export type BreadcrumbSelectProps<T extends string, R = unknown> = SelectProps<
-  T,
-  R
->
+export type BreadcrumbSelectProps<
+  T extends string,
+  R = unknown,
+> = F0SelectProps<T, R> & { multiple?: false }
 
 export function BreadcrumbSelect<T extends string, R = unknown>({
   ...props
@@ -31,19 +31,19 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
   const handleChange = (
     value: T,
     item?: ResolvedRecordType<R>,
-    option?: SelectItemObject<T, ResolvedRecordType<R>>
+    option?: F0SelectItemObject<T, ResolvedRecordType<R>>
   ) => {
     props.onChange?.(value, item, option)
   }
 
   const handleChangeSelectedOption = (
-    option: SelectItemObject<T, ResolvedRecordType<R>> | undefined
+    option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined
   ) => {
     setSelectedLabel(option?.label || "")
   }
 
   return (
-    <Select<T, R>
+    <F0Select<T, R>
       {...props}
       onOpenChange={onOpenChangeLocal}
       onChange={handleChange}
@@ -51,7 +51,10 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
       label={selectedLabel}
       hideLabel
     >
-      <button className="flex h-6 items-center justify-between rounded-sm border px-1.5 py-0.5 font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary">
+      <button
+        className="flex h-6 items-center justify-between rounded-sm border px-1.5 py-0.5 font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary"
+        aria-label={selectedLabel}
+      >
         <span className="block grow text-f1-foreground">{selectedLabel}</span>
         <div className="ml-2">
           <motion.div
@@ -66,6 +69,6 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
           </motion.div>
         </div>
       </button>
-    </Select>
+    </F0Select>
   )
 }

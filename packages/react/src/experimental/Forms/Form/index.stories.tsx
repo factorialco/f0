@@ -2,13 +2,13 @@ import { F0Button } from "@/components/F0Button"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Select } from "@/components/F0Select"
 import { Textarea } from "@/ui/textarea"
 import { UseFormReturn } from "react-hook-form"
 import { number, z } from "zod"
 import { AutoGrid } from "../../Utilities/Layout/AutoGrid"
 import { Input } from "../Fields/Input"
 import { NumberInput } from "../Fields/NumberInput"
-import { Select } from "../Fields/Select"
 import { FormField } from "../FormField"
 import { useFormSchema } from "../lib/useForm"
 import { Form, FormActions } from "./index"
@@ -170,7 +170,7 @@ export const Default: Story = {
           name="tag"
         >
           {(field) => (
-            <Select
+            <F0Select
               label="Tag"
               {...field}
               value={field.value ? String(field.value) : undefined}

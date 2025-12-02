@@ -55,6 +55,7 @@ export const defaultTranslations = {
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
+    selectAll: "Select all",
   },
   status: {
     selected: {
@@ -63,6 +64,13 @@ export const defaultTranslations = {
     },
   },
   filters: {
+    searchPlaceholder: "Search filters...",
+    inFilter: {
+      searchPlaceholder: "Search options...",
+    },
+    activeFilters: "Active filters: {{filters}}",
+    filteringBy: "Filtering by {{label}}",
+    availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
     applySelection: "Apply selection",
@@ -74,12 +82,20 @@ export const defaultTranslations = {
       equal: "Equal to",
       equalTo: "Equal to {{value}}",
       lessOrEqual: "Less or equal to",
+      lessThan: "Less than",
       greaterOrEqual: "Greater or equal to",
+      greaterThan: "Greater than",
       equalShort: "= {{value}}",
       greaterThanOrEqualShort: ">= {{value}}",
+      greaterThanShort: "> {{value}}",
       lessThanOrEqualShort: "<= {{value}}",
+      lessThanShort: "< {{value}}",
       rangeTitle: "Use range",
-      range: "Between {{min}} and {{max}}",
+      range: "{{minStrict}} {{min}} and {{maxStrict}} {{max}}",
+    },
+    search: {
+      relaxed: "Relaxed",
+      strict: "Strict",
     },
     selectAll: "Select all",
     clear: "Clear",

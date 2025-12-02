@@ -46,10 +46,9 @@ describe("Filters", () => {
       )
 
       // Check for active filters in the UI
-      let searchFilter, departmentFilter
       await waitFor(() => {
-        searchFilter = screen.getByText(/search:/i)
-        departmentFilter = screen.getByText(/department:/i)
+        const searchFilter = screen.getByText(/search:/i)
+        const departmentFilter = screen.getByText(/department:/i)
 
         // Verify both filters are visible in the UI
         expect(searchFilter).toBeInTheDocument()
