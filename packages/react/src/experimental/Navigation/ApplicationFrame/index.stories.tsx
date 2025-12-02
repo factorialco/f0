@@ -1,5 +1,7 @@
 import { Lightbulb } from "@/icons/app"
 import ExternalLink from "@/icons/app/ExternalLink"
+import PalmTree from "@/icons/app/PalmTree"
+import Search from "@/icons/app/Search"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
