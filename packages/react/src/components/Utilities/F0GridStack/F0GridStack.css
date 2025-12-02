@@ -1,0 +1,6 @@
+.grid-stack-item .ui-resizable-se {
+  bottom: 15px;
+  right: 15px;
+  border: 2px solid #f00;
+  transform: rotate(0deg);
+}

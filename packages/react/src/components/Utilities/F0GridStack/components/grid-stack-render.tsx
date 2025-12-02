@@ -3,7 +3,7 @@ import { useGridStackContext } from "./grid-stack-context"
 import { useGridStackRenderContext } from "./grid-stack-render-context"
 import { GridStackWidgetContext } from "./grid-stack-widget-context"
 
-export function GridStackRender() {
+export function GridStackRender({ className }: { className?: string }) {
   const { _reactContentMap } = useGridStackContext()
   const { getWidgetContainer } = useGridStackRenderContext()
 

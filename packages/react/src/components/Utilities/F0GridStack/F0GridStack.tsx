@@ -8,7 +8,7 @@ import { useMemo } from "react"
 import { GridStackProvider } from "./components/grid-stack-provider"
 import { GridStackRender } from "./components/grid-stack-render"
 import { GridStackRenderProvider } from "./components/grid-stack-render-provider"
-
+import "./F0GridStack.css"
 export type GridStackReactOptions = Omit<GridStackOptions, "children">
 
 export type GridStackReactSize = { w: number; h: number }
