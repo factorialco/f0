@@ -15,19 +15,6 @@ const availableSizes = [
   { w: 2, h: 2 },
 ]
 
-const DemoWidget = () => {
-  const [count, setCount] = useState(0)
-  return (
-    <div>
-      <div>
-        <button onClick={() => setCount(count + 1)}>Increment</button>
-        <button onClick={() => setCount(count - 1)}>Decrement</button>
-      </div>
-      <div>Count: {count}</div>
-    </div>
-  )
-}
-
 const meta = {
   title: "Dashboard",
   component: Dashboard,
