@@ -219,3 +219,77 @@ jobs:
           curl -X POST -H "Content-Type: application/json" \
               --data @/tmp/payload.json \
               "${{ secrets.SLACK_WEBHOOK_ZERO_UPDATER }}"
+
+  publish-one:
+    name: "[🔷 ONE] Publish to npm"
+    # Prevents running on the release-please branch
+    # For workflow_run trigger we need to check if the workflow_run was successful and if the new_version output was set to not run on it if no new version was released
+    if: |
+      contains(github.event.release.tag_name, 'one-v') &&
+      github.head_ref != 'release-please--branches--master' && !contains(github.event.pull_request.labels.*.name, 'autorelease') && 
+      github.event_name == 'workflow_dispatch' || github.event_name == 'release' || 
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.event.inputs.release_tag || github.sha }} # Checkout the tagged release
+      - uses: ./.github/actions/setup-node-pnpm
+        name: Setup Node and pnpm
+      - name: Build dependencies
+        run: |
+          pnpm --filter @factorialco/f0-core build
+          pnpm --filter @factorialco/f0-react build
+      - uses: ./.github/actions/publish-to-npmjs
+        id: publish
+        with:
+          workspace: "@factorialco/one"
+          registry_token: ${{ secrets.NPMJS_TOKEN }}
+      - name: Notify Slack
+        if: ${{ steps.publish.outputs.published == 'true' }}
+        env:
+          RELEASE_BODY_RAW: ${{ github.event.release.body }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          PACKAGE: "@factorialco/one"
+          NPM_URL: "https://www.npmjs.com/package/@factorialco/one?activeTab=versions"
+        run: |
+          # 1️⃣  Convert GitHub-style markdown ➜ Slack mrkdwn
+          RELEASE_BODY=$(echo "$RELEASE_BODY_RAW" | perl -pe '
+            s/^### (.+)$/*\1*/;           # h3 ➜ bold
+            s/^## (.+)$/*\1*/;            # h2 ➜ bold
+            s/^(\s*[-*])\s+/• /;          # bullets
+            s/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g;  # links
+          ')
+
+          # 2️⃣  JSON-escape the body (newline-preserving)
+          BODY_JSON=$(printf "%s" "$RELEASE_BODY" | jq -Rs .)
+
+          # 3️⃣  Build Block-Kit payload with jq
+          jq -n --arg body "$RELEASE_BODY" \
+                --arg rel_url "$RELEASE_URL" \
+                --arg rel_name "$RELEASE_NAME" \
+                --arg npm "$NPM_URL" \
+                --arg pkg "$PACKAGE" '
+          {
+            blocks: [
+              { type: "header",
+                text: { type: "plain_text", text: "🔷 New version \($rel_name) released" } },
+              { type: "section",
+                text: { type: "mrkdwn", text: $body } },
+              { type: "context",
+                elements: [
+                  { type: "mrkdwn", text: "<\($npm)|npm package>" },
+                  { type: "mrkdwn", text: "<\($rel_url)|GitHub release>" }
+                ] }
+            ]
+          }' > /tmp/payload.json
+
+          # 4️⃣  Send
+          curl -X POST -H "Content-Type: application/json" \
+              --data @/tmp/payload.json \
+              "${{ secrets.SLACK_WEBHOOK_ZERO_UPDATER }}"

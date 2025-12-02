@@ -16,6 +16,11 @@
       "pull-request-header": "🤖 F0 Core stable release 🚀",
       "pull-request-title-pattern": "chore${scope}: 🤖 Core 🎯 release${component} ${version}",
       "group-pull-request-title-pattern": "chore${scope}: 🤖 Core 🎯 release ${version}"
+    },
+    "packages/one": {
+      "pull-request-header": "🤖 ONE package stable release 🚀",
+      "pull-request-title-pattern": "chore${scope}: 🤖 ONE package release${component} ${version} 🚀",
+      "group-pull-request-title-pattern": "chore${scope}: 🤖 ONE package release ${version} 🚀"
     }
   }
 }

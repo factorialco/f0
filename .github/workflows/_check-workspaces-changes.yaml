@@ -2,6 +2,9 @@ name: "Check workspaces changes"
 on:
   workflow_call:
     outputs:
+      package_one:
+        description: "Changes in the one package"
+        value: ${{ jobs.changes.outputs.package_one }}
       package_react:
         description: "Changes in the react package"
         value: ${{ jobs.changes.outputs.package_react }}
@@ -18,6 +21,7 @@ jobs:
     name: Check for workspaces with changes
     runs-on: ubuntu-latest
     outputs:
+      package_one: ${{ steps.changes.outputs.package_one }}
       package_react: ${{ steps.changes.outputs.package_react }}
       package_react_native: ${{ steps.changes.outputs.package_react_native }}
       package_core: ${{ steps.changes.outputs.package_core }}
@@ -28,10 +32,14 @@ jobs:
         with:
           token: ${{ github.token }}
           filters: |
+            package_one: 
+              - "packages/one/**"
+              - "packages/core/**"
+              - "packages/react/**"
             package_react: 
-              - 'packages/react/**'
-              - 'packages/core/**'
+              - "packages/react/**"
+              - "packages/core/**"
             package_react_native: 
-              - 'packages/react-native/**'
+              - "packages/react-native/**"
             package_core: 
-              - 'packages/core/**'
+              - "packages/core/**"

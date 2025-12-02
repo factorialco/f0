@@ -1,0 +1,8 @@
+/* ONE package styles */
+/* This file compiles Tailwind classes used by ONE components */
+/* Note: The consumer should also import @factorialco/f0-react/dist/styles.css for base styles */
+
+/* Import base styles from f0-core */
+@import "@factorialco/f0-core/base.css";
+
+/* ONE-specific styles will be added here as needed */

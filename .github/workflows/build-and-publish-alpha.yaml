@@ -107,3 +107,37 @@ jobs:
         with:
           branch-name: npm/alpha-pr-${{ github.event.pull_request.number }}-core
           directory: packages/core
+
+  publish-alpha-one:
+    name: "[🔷 ONE] Build and Publish ALPHA"
+    needs: detect-changes
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       github.event.comment.body == 'build') ||
+      (github.event_name == 'pull_request' && 
+      needs.detect-changes.outputs.package_one == 'true')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/setup-node-pnpm
+        name: Setup Node and pnpm
+
+      - name: Build
+        run: |
+          pnpm --filter @factorialco/f0-core build
+          pnpm --filter @factorialco/f0-react build
+          pnpm --filter @factorialco/one build
+
+      - name: Publish to release branch npm/alpha-pr-${{ github.event.pull_request.number }}-one
+        uses: ./.github/actions/publish-release-branch
+        with:
+          branch-name: npm/alpha-pr-${{ github.event.pull_request.number }}-one
+          directory: packages/one
