@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.299.2](https://github.com/factorialco/f0/compare/f0-react-v1.299.1...f0-react-v1.299.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* aria values in ProgressBar value-display ([#3077](https://github.com/factorialco/f0/issues/3077)) ([0f4bb29](https://github.com/factorialco/f0/commit/0f4bb29c7c2b8089282b78fd797ddcd233889fad))
+
 ## [1.299.1](https://github.com/factorialco/f0/compare/f0-react-v1.299.0...f0-react-v1.299.1) (2025-12-03)
 
 
