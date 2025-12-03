@@ -16,6 +16,7 @@ import {
 
 type CoCreationFormContextType = CoCreationFormCallbacks & {
   isEditMode?: boolean
+  disallowOptionalQuestions?: boolean
   lastElementId: string | undefined
   getQuestionById: (questionId: string) => QuestionElement | undefined
   deleteElement: (elementId: string) => void
@@ -35,6 +36,7 @@ type CoCreationFormProviderProps = {
   isEditMode?: boolean
   elements: CoCreationFormElement[]
   onChange: (elements: CoCreationFormElement[]) => void
+  disallowOptionalQuestions?: boolean
   allowedQuestionTypes?: QuestionType[]
 }
 
@@ -42,6 +44,7 @@ export function CoCreationFormProvider({
   elements,
   children,
   isEditMode,
+  disallowOptionalQuestions,
   onChange,
   allowedQuestionTypes,
 }: CoCreationFormProviderProps) {
@@ -361,6 +364,7 @@ export function CoCreationFormProvider({
         getQuestionById,
         deleteElement,
         lastElementId,
+        disallowOptionalQuestions,
         isQuestionTypeAllowed,
       }}
     >

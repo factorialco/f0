@@ -157,6 +157,7 @@ export function ActionsMenu({
     getQuestionById,
     deleteElement,
     onDuplicateElement,
+    disallowOptionalQuestions,
   } = useCoCreationFormContext()
 
   const question = useMemo(
@@ -221,14 +222,16 @@ export function ActionsMenu({
         <DropdownMenuLabel className="p-4 pb-2 font-medium text-f1-foreground-secondary">
           {t("coCreationForm.labels.questionOptions")}
         </DropdownMenuLabel>
-        <DropdownMenuGroup>
-          <ToggleItem
-            label={t("coCreationForm.labels.required")}
-            icon={AlertCircleLine}
-            checked={!!question?.required}
-            onChange={handleChangeRequired}
-          />
-        </DropdownMenuGroup>
+        {!disallowOptionalQuestions && (
+          <DropdownMenuGroup>
+            <ToggleItem
+              label={t("coCreationForm.labels.required")}
+              icon={AlertCircleLine}
+              checked={!!question?.required}
+              onChange={handleChangeRequired}
+            />
+          </DropdownMenuGroup>
+        )}
         <DropdownMenuGroup>
           <SubMenuItem<QuestionType>
             label={t("coCreationForm.labels.questionType")}
