@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.297.0](https://github.com/factorialco/f0/compare/f0-react-v1.296.0...f0-react-v1.297.0) (2025-12-03)
+
+
+### Features
+
+* **AIButton:** One animated icon ([#3069](https://github.com/factorialco/f0/issues/3069)) ([58e73e2](https://github.com/factorialco/f0/commit/58e73e229ff725c95a09f698cf21d7f70ff03b12))
+
 ## [1.296.0](https://github.com/factorialco/f0/compare/f0-react-v1.295.0...f0-react-v1.296.0) (2025-12-02)
 
 
