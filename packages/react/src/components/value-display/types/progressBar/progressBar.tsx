@@ -64,7 +64,7 @@ export const ProgressBarCell = (
           color={barColor}
           value={percentage}
           max={100}
-          getValueLabel={(val) => `${(val ?? 0).toFixed(1)}%`}
+          getValueLabel={(val) => `${(val ?? 0).toFixed(1)}% ${label}`}
           aria-label={label}
           className="w-full"
         />
