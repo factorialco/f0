@@ -10,10 +10,9 @@ vi.mock("@/components/F0Text", () => ({
   ),
 }))
 
-const Icon = () => <div data-testid="icon" />
 vi.mock("@/components/F0Icon", () => ({
   F0Icon: ({
-    icon: Icon,
+    icon: _Icon,
     size,
   }: {
     icon: React.ComponentType
