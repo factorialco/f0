@@ -38,7 +38,7 @@ import { statusToChecked } from "../utils"
 import { useDataCollectionVisualizationsState } from "../VisualizationsStateProvider"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
-import { TableVisualizationOptions } from "./types"
+import { TableVisualizationOptions, TableVisualizationState } from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -126,8 +126,13 @@ export const TableCollection = <
   useEffect(() => {
     setVisualizationState("table", (prev) => ({
       ...prev,
-      columns: originalColumnsArray,
+      columns: [...originalColumnsArray] as TableVisualizationState<
+        RecordType,
+        SortingsDefinition,
+        SummariesDefinition
+      >["columns"],
     }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the originalColumnsArray changes, just when the data changes
   }, [originalColumnsArray])
 
   // Sorted and hidden columns

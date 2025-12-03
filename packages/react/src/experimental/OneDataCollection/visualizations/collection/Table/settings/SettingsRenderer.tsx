@@ -20,7 +20,7 @@ export const SettingsRenderer = <
     return null
   }
 
-  const columns = visualizationsState.visualization.table.columns
+  const columns = visualizationsState.visualization?.table?.columns ?? []
 
   return (
     <TableSettings
