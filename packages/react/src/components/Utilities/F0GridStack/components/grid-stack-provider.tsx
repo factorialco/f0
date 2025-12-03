@@ -5,7 +5,9 @@ import type {
   GridStackOptions,
   GridStackWidget,
 } from "gridstack"
+import { motion } from "motion/react"
 import {
+  cloneElement,
   type PropsWithChildren,
   useCallback,
   useEffect,
@@ -36,6 +38,7 @@ const propsToObserve = [
   "y",
 ] as const
 
+const REMOVE_ANIMATION_DURATION = 600
 export function GridStackProvider({
   children,
   options,
@@ -215,8 +218,10 @@ export function GridStackProvider({
 
       // Update ref synchronously BEFORE removing widgets from GridStack
       idsToRemove.forEach((id) => {
-        reactContentMapRef.current.delete(id)
-        originalContentMapRef.current.delete(id)
+        setTimeout(() => {
+          reactContentMapRef.current.delete(id)
+          originalContentMapRef.current.delete(id)
+        }, REMOVE_ANIMATION_DURATION)
       })
 
       widgetsToRemove.forEach((widget) => {
@@ -224,23 +229,53 @@ export function GridStackProvider({
           `[gs-id="${widget.id}"]`
         )
         if (element) {
-          gridStack.removeWidget(element, true)
+          setTimeout(() => {
+            gridStack.removeWidget(element, true)
+          }, REMOVE_ANIMATION_DURATION)
         }
       })
       // Update maps using functional updates
       setRawWidgetMetaMap((prev) => {
         const next = new Map(prev)
-        idsToRemove.forEach((id) => next.delete(id))
+        idsToRemove.forEach((id) => {
+          setTimeout(() => {
+            next.delete(id)
+          }, REMOVE_ANIMATION_DURATION)
+        })
         return next
       })
+
       setReactContentMap((prev) => {
         const next = new Map(prev)
-        idsToRemove.forEach((id) => next.delete(id))
+        idsToRemove.forEach((id) => {
+          const content = next.get(id)
+          if (content) {
+            next.set(
+              id,
+              <motion.div
+                className="h-full w-full"
+                initial={{ opacity: 1, scale: 1 }}
+                animate={{ opacity: 0, scale: 0.5 }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: REMOVE_ANIMATION_DURATION / 1000 }}
+              >
+                {cloneElement(content)}
+              </motion.div>
+            )
+          }
+          setTimeout(() => {
+            next.delete(id)
+          }, REMOVE_ANIMATION_DURATION)
+        })
         return next
       })
       setOriginalContentMap((prev) => {
         const next = new Map(prev)
-        idsToRemove.forEach((id) => next.delete(id))
+        idsToRemove.forEach((id) => {
+          setTimeout(() => {
+            next.delete(id)
+          }, REMOVE_ANIMATION_DURATION)
+        })
         return next
       })
     }

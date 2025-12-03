@@ -13,9 +13,10 @@ const Dashboard = ({
       widgets={widgets}
       editMode={editMode}
       onChange={onChange}
-      WidgetWrapper={(children, meta, editMode) => {
+      WidgetWrapper={(children, meta, editMode, removing) => {
         return (
           <DashboardWidget
+            removing={removing}
             title={(meta?.title as string) ?? ""}
             draggable={editMode}
             actions={meta?.actions}
