@@ -3,9 +3,12 @@ import { EmojiImage } from "@/lib/emojis"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
+import { motion } from "motion/react"
 import { forwardRef, useState } from "react"
 import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
+
+const IconMotion = motion.create(F0Icon)
 
 /**
  * A button component internal that includes the private slots and props
@@ -30,6 +33,7 @@ const ButtonInternal = forwardRef<
     tooltip,
     noAutoTooltip,
     noTitle,
+    iconRotate = false,
     ...props
   },
   ref
@@ -41,6 +45,7 @@ const ButtonInternal = forwardRef<
   )
 
   const [loading, setLoading] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const handleClick = async (
     event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
@@ -103,6 +108,8 @@ const ButtonInternal = forwardRef<
             : props.title || (hideLabel ? buttonLabel : undefined)
         }
         compact={!!shouldHideLabel}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <div
           className={cn(
@@ -111,7 +118,36 @@ const ButtonInternal = forwardRef<
             icon && !hideLabel && "-ml-[3px]"
           )}
         >
-          {icon && <F0Icon size={size === "sm" ? "sm" : "md"} icon={icon} />}
+          {icon &&
+            (iconRotate ? (
+              <IconMotion
+                size={size === "sm" ? "sm" : "md"}
+                icon={icon}
+                animate={{
+                  rotate: isHovered ? 90 : 0,
+                  scale: isHovered ? [1, 0.8, 1] : 1,
+                  filter: isHovered
+                    ? ["blur(0px)", "blur(1px)", "blur(0px)"]
+                    : "blur(0px)",
+                }}
+                transition={{
+                  rotate: {
+                    duration: 0.5,
+                    ease: [0.77, 0, 0.13, 1.52],
+                  },
+                  scale: {
+                    duration: 0.4,
+                    ease: [0.65, 0, 0.35, 1],
+                  },
+                  filter: {
+                    duration: 0.4,
+                    ease: [0.65, 0, 0.35, 1],
+                  },
+                }}
+              />
+            ) : (
+              <F0Icon size={size === "sm" ? "sm" : "md"} icon={icon} />
+            ))}
           {emoji && (
             <EmojiImage
               emoji={emoji}
