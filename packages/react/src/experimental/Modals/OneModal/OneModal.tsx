@@ -2,7 +2,15 @@ import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-import { ComponentProps, FC, ReactElement, useMemo } from "react"
+import {
+  ComponentProps,
+  FC,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
@@ -39,6 +47,21 @@ export const OneModal: FC<OneModalProps> = ({
   contentPadding = "md",
   children,
 }) => {
+  // Use state to store the container element so we can trigger re-renders
+  // when it's set. This ensures child components like F0Select get the
+  // correct portalContainer after the modal content mounts.
+  const [containerElement, setContainerElement] =
+    useState<HTMLDivElement | null>(null)
+
+  const portalContainerRef = useRef<HTMLDivElement | null>(null)
+
+  // Callback ref to update both the ref and state
+  const setContentRef = useCallback((node: HTMLDivElement | null) => {
+    portalContainerRef.current = node
+    // Update state to trigger re-render so children get the new container
+    setContainerElement(node)
+  }, [])
+
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose()
@@ -56,17 +79,17 @@ export const OneModal: FC<OneModalProps> = ({
 
     if (isSidePosition) {
       return cn(
-        "w-full overflow-x-hidden flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary",
+        "w-full flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary",
         position === "left" && "left-3",
         position === "right" && "left-auto right-3"
       )
     }
 
     if (position === "fullscreen") {
-      return "w-[calc(100%-48px)] h-[calc(100%-48px)] overflow-x-hidden"
+      return "w-[calc(100%-48px)] h-[calc(100%-48px)] rounded-xl"
     }
 
-    return "flex flex-col max-h-[620px] max-w-[680px] overflow-hidden"
+    return "flex flex-col max-h-[620px] max-w-[680px] rounded-xl"
   }, [position, isSmallScreen, asBottomSheetInMobile, isSidePosition])
 
   if (isSmallScreen && asBottomSheetInMobile) {
@@ -76,11 +99,15 @@ export const OneModal: FC<OneModalProps> = ({
         onClose={onClose}
         position={position}
         contentPadding={contentPadding}
+        portalContainerRef={portalContainerRef}
+        portalContainer={containerElement}
         shownBottomSheet
       >
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
-          <DrawerContent className={contentClassName}>{children}</DrawerContent>
+          <DrawerContent ref={setContentRef} className={contentClassName}>
+            {children}
+          </DrawerContent>
         </Drawer>
       </OneModalProvider>
     )
@@ -92,6 +119,8 @@ export const OneModal: FC<OneModalProps> = ({
       onClose={onClose}
       position={position}
       contentPadding={contentPadding}
+      portalContainerRef={portalContainerRef}
+      portalContainer={containerElement}
     >
       <Dialog
         open={isOpen}
@@ -99,6 +128,7 @@ export const OneModal: FC<OneModalProps> = ({
         modal={position === "center" || position === "fullscreen"}
       >
         <DialogContent
+          ref={setContentRef}
           withTraslateAnimation={!isSidePosition}
           className={contentClassName}
         >
