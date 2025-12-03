@@ -66,7 +66,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content 1</div>,
         },
       ]
@@ -93,14 +97,22 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content 1</div>,
         },
         {
           id: "widget-2",
           w: 3,
           h: 1,
-          title: "Widget 2",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 2",
+          },
           content: <div>Content 2</div>,
         },
       ]
@@ -120,7 +132,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -139,7 +155,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -149,7 +169,7 @@ describe("Dashboard", () => {
       const callArgs = mockF0GridStack.mock.calls[0][0]
       expect(callArgs.options.acceptWidgets).toBe(true)
       expect(callArgs.options.margin).toBe(8)
-      expect(callArgs.options.handle).toBe(".dashboard-widget-handle")
+      expect(callArgs.options.handle).toBe("[data-gs-handle='true']")
       expect(callArgs.options.column).toBe(4)
     })
 
@@ -159,7 +179,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -188,7 +212,9 @@ describe("Dashboard", () => {
           h: 2,
           x: 0,
           y: 0,
-          title: "Widget 1",
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content 1</div>,
         },
       ]
@@ -212,7 +238,11 @@ describe("Dashboard", () => {
           id: "my-widget-id",
           w: 1,
           h: 1,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -229,7 +259,13 @@ describe("Dashboard", () => {
       const widgets: Widget[] = [
         {
           id: "widget-1",
-          title: "Widget",
+          w: 1,
+          h: 1,
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -249,7 +285,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
           availableSizes: [
             { w: 2, h: 2 },
@@ -275,7 +315,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -311,7 +355,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
           locked: true,
         },
@@ -331,7 +379,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "My Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "My Widget",
+          },
           content: <div>My Content</div>,
         },
       ]
@@ -343,8 +395,8 @@ describe("Dashboard", () => {
 
       expect(gridWidgets[0].meta).toEqual({
         title: "My Widget",
-        content: <div>My Content</div>,
       })
+      expect(gridWidgets[0]._originalContent).toEqual(<div>My Content</div>)
     })
 
     it("should wrap content in DashboardWidget", () => {
@@ -353,7 +405,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget Title",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget Title",
+          },
           content: <div>Widget Content</div>,
         },
       ]
@@ -376,7 +432,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -413,7 +473,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -433,7 +497,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget 1",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -446,7 +514,11 @@ describe("Dashboard", () => {
           id: "widget-2",
           w: 3,
           h: 1,
-          title: "Widget 2",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget 2",
+          },
           content: <div>Content 2</div>,
         },
       ]
@@ -467,7 +539,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -502,7 +578,9 @@ describe("Dashboard", () => {
           h: 2,
           x: 1,
           y: 1,
-          title: "Widget 1",
+          meta: {
+            title: "Widget 1",
+          },
           content: <div>Content 1</div>,
         },
       ]
@@ -519,8 +597,8 @@ describe("Dashboard", () => {
           y: 1,
           meta: {
             title: "Widget 1",
-            content: <div>Content 1</div>,
           },
+          _originalContent: <div>Content 1</div>,
         },
       ]
 
@@ -538,7 +616,7 @@ describe("Dashboard", () => {
       expect(onChangeCallArgs[0].h).toBe(2)
       expect(onChangeCallArgs[0].x).toBe(1)
       expect(onChangeCallArgs[0].y).toBe(1)
-      expect(onChangeCallArgs[0].title).toBe("Widget 1")
+      expect(onChangeCallArgs[0].meta?.title).toBe("Widget 1")
     })
 
     it("should extract meta data correctly", () => {
@@ -548,7 +626,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "My Title",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "My Title",
+          },
           content: <div>My Content</div>,
         },
       ]
@@ -560,10 +642,12 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
+          x: 0,
+          y: 0,
           meta: {
             title: "My Title",
-            content: <div>My Content</div>,
           },
+          _originalContent: <div>My Content</div>,
         },
       ]
 
@@ -573,7 +657,7 @@ describe("Dashboard", () => {
       }
 
       const onChangeCallArgs = onChange.mock.calls[0][0] as Widget[]
-      expect(onChangeCallArgs[0].title).toBe("My Title")
+      expect(onChangeCallArgs[0].meta?.title).toBe("My Title")
       expect(onChangeCallArgs[0].content).toEqual(<div>My Content</div>)
     })
 
@@ -584,7 +668,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -600,8 +688,8 @@ describe("Dashboard", () => {
           y: 4,
           meta: {
             title: "Widget",
-            content: <div>Content</div>,
           },
+          _originalContent: <div>Content</div>,
         },
       ]
 
@@ -622,7 +710,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
           locked: true,
         },
@@ -635,11 +727,13 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
+          x: 0,
+          y: 0,
           locked: true,
           meta: {
             title: "Widget",
-            content: <div>Content</div>,
           },
+          _originalContent: <div>Content</div>,
         },
       ]
 
@@ -660,7 +754,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -680,7 +778,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -702,7 +804,9 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -721,7 +825,13 @@ describe("Dashboard", () => {
       const widgets: Widget[] = [
         {
           id: "widget-1",
-          title: "Widget",
+          w: 1,
+          h: 1,
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -741,7 +851,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
@@ -769,7 +883,11 @@ describe("Dashboard", () => {
           id: "widget-1",
           w: 2,
           h: 2,
-          title: "Widget",
+          x: 0,
+          y: 0,
+          meta: {
+            title: "Widget",
+          },
           content: <div>Content</div>,
         },
       ]
