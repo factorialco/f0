@@ -9,18 +9,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { PageLayoutGroupComponent } from "../../types"
 import { GroupGridWidget } from "./typings"
 
-export interface GroupGridProps {
-  widgets: Optional<GroupGridWidget, "x" | "y">[]
+export interface GroupGridProps<Widget extends GroupGridWidget> {
+  widgets: Optional<Widget, "x" | "y">[]
   editMode?: boolean
   /**
    * Callback function that is called whenever the layout changes.
    * Receives an array of widgets with updated positions and properties.
    * This can be used to keep widgets in sync by using the returned data.
    */
-  onChange?: (widgets: GroupGridWidget[]) => void
+  onChange?: (widgets: Widget[]) => void
   WidgetWrapper?: (
     children: React.ReactNode,
-    meta: Record<string, unknown> | undefined,
+    meta: Widget["meta"] | undefined,
     editMode: boolean
   ) => React.ReactElement
 }
@@ -31,12 +31,12 @@ const defaultWidgetWrapper = (
   _editMode: boolean
 ) => <div>{children}</div>
 
-export const GroupGrid = ({
+export const GroupGrid = <Widget extends GroupGridWidget>({
   widgets = [],
   editMode = false,
   onChange = () => {},
   WidgetWrapper = defaultWidgetWrapper,
-}: GroupGridProps) => {
+}: GroupGridProps<Widget>) => {
   const gridOptions: GridStackReactOptions = useMemo(
     () => ({
       acceptWidgets: true,
@@ -112,7 +112,7 @@ export const GroupGrid = ({
               x: widget.x ?? 0,
               y: widget.y ?? 0,
               locked: widget.locked,
-            }
+            } as unknown as Widget
           })
         )
       }

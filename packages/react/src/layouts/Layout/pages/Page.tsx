@@ -34,7 +34,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
         <main
           className={cn(
             "sm:min-h-xs h-fit border-0",
-            "order-1 sm:flex-1 sm:border-solid md:order-2",
+            "order-1 flex flex-col sm:flex-1 sm:border-solid md:order-2",
             stickyAside
               ? "md:auto md:h-full md:max-h-full md:overflow-y-auto md:overflow-x-hidden"
               : "min-h-full",

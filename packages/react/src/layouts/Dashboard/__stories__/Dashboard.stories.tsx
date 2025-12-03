@@ -4,6 +4,7 @@ import { Dashboard, DashboardWidget } from "../"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
 import { Optional } from "@/lib/typescript-utils/opional"
 import { useState } from "react"
@@ -25,83 +26,78 @@ const meta = {
         Optional<DashboardWidget, "x" | "y">[]
       >(args.widgets as DashboardWidget[])
 
-      const handleAddTextWidget = () => {
+      const deleteWidget = (widgetId: string) => {
+        setWidgets((prev) => prev.filter((widget) => widget.id !== widgetId))
+      }
+
+      const getCommonActions = (id: string) => [
+        {
+          id: "action-1",
+          label: "Delete",
+          icon: Delete,
+          onClick: () => {
+            deleteWidget(id)
+          },
+        },
+      ]
+
+      const handleAddWidget = (type: "text" | "chart" | "table" | "kpi") => {
+        const id = `widget-${Math.random()}`
+
+        const content = {
+          text: <TextWidget />,
+          chart: <ChartWidget />,
+          table: <TableWidget />,
+          kpi: <KpiWidget />,
+        }[type]
+
+        const availableSizes = {
+          text: [
+            { w: 1, h: 1 },
+            { w: 2, h: 1 },
+            { w: 2, h: 2 },
+          ],
+          chart: [
+            { w: 1, h: 1 },
+            { w: 2, h: 1 },
+            { w: 2, h: 2 },
+          ],
+          table: [
+            { w: 4, h: 2 },
+            { w: 3, h: 2 },
+            { w: 2, h: 1 },
+          ],
+          kpi: [
+            { w: 1, h: 1 },
+            { w: 2, h: 1 },
+            { w: 2, h: 2 },
+          ],
+        }[type]
+
         setWidgets((prev) => [
           ...prev,
           {
-            id: `widget-${Math.random()}`,
+            id,
             w: 1,
             h: 1,
-            content: <TextWidget />,
+            content,
+            availableSizes,
             meta: {
+              actions: getCommonActions(id),
               title: `Title ${Math.random()}`,
+              aiButton: () => {
+                console.log("ai button clicked")
+              },
             },
           },
         ])
       }
 
-      const handleAddChartWidget = () => {
-        setWidgets((prev) => [
-          ...prev,
-          {
-            id: `widget-${Math.random()}`,
-            w: 1,
-            h: 1,
-            availableSizes: [
-              { w: 1, h: 1 },
-              { w: 2, h: 1 },
-              { w: 2, h: 2 },
-            ],
-            content: <ChartWidget />,
-            meta: {
-              title: `Title ${Math.random()}`,
-            },
-          },
-        ])
-      }
-      const handleAddTableWidget = () => {
-        setWidgets((prev) => [
-          ...prev,
-          {
-            id: `widget-${Math.random()}`,
-            w: 4,
-            h: 2,
-            availableSizes: [
-              { w: 4, h: 2 },
-              { w: 3, h: 2 },
-              { w: 2, h: 1 },
-            ],
-            content: <TableWidget />,
-            meta: {
-              title: `Table ${Math.random()}`,
-            },
-          },
-        ])
-      }
-      const handleAddKpiWidget = () => {
-        setWidgets((prev) => [
-          ...prev,
-          {
-            id: `widget-${Math.random()}`,
-            w: 1,
-            h: 1,
-            availableSizes: [
-              { w: 1, h: 1 },
-              { w: 2, h: 1 },
-              { w: 2, h: 2 },
-            ],
-            content: <KpiWidget />,
-            meta: {
-              title: `KPI ${Math.random()}`,
-            },
-          },
-        ])
-      }
       const [editMode, setEditMode] = useState(false)
 
       return (
         <>
-          <div className="p-4">
+          <div className="h-full w-full">
             <Layout.Page
               header={
                 <>
@@ -120,25 +116,25 @@ const meta = {
                     <li>
                       <F0Button
                         label="Add text widget"
-                        onClick={handleAddTextWidget}
+                        onClick={() => handleAddWidget("text")}
                       />
                     </li>
                     <li>
                       <F0Button
                         label="Add chart widget"
-                        onClick={handleAddChartWidget}
+                        onClick={() => handleAddWidget("chart")}
                       />
                     </li>
                     <li>
                       <F0Button
                         label="Add table widget"
-                        onClick={handleAddTableWidget}
+                        onClick={() => handleAddWidget("table")}
                       />
                     </li>
                     <li>
                       <F0Button
                         label="Add kpi widget"
-                        onClick={handleAddKpiWidget}
+                        onClick={() => handleAddWidget("kpi")}
                       />
                     </li>
                   </ul>

@@ -1,7 +1,7 @@
 import { GroupGrid, GroupGridProps } from "../Layout/groups/GroupGrid"
 import { DashboardWidget } from "./components/DashboardWidget"
-
-export type DashboardProps = GroupGridProps
+import { DashboardWidget as DashboardWidgetType } from "./typings"
+export type DashboardProps = GroupGridProps<DashboardWidgetType>
 
 const Dashboard = ({
   widgets,
@@ -18,6 +18,8 @@ const Dashboard = ({
           <DashboardWidget
             title={(meta?.title as string) ?? ""}
             draggable={editMode}
+            actions={meta?.actions}
+            aiButton={meta?.aiButton}
           >
             {children}
           </DashboardWidget>
