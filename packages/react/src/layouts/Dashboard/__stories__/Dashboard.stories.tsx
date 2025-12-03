@@ -166,6 +166,7 @@ const meta = {
       description: {
         component: [
           "A dashboard component that is used to display and edit a grid of widgets. It provides a flexible and responsive layout for displaying widgets in a grid.",
+          "The dashboard component is a wrapper for the `GroupGrid` component.",
         ]
           .map((line) => `<p>${line}</p>`)
           .join(""),

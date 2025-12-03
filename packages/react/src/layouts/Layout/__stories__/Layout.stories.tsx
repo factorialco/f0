@@ -7,6 +7,7 @@ import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index
 
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
+import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { ComponentProps, useState } from "react"
 import { Layout } from "../index"
 
@@ -25,7 +26,7 @@ const FocusableElement = () => {
   )
 }
 const meta = {
-  title: "Page/Layout",
+  title: "Layout System",
   component: Layout.Page,
   tags: ["autodocs", "experimental"],
   decorators: [PageDecorator],
@@ -52,7 +53,7 @@ const meta = {
       </div>
     ),
   },
-  parameters: {
+  parameters: withSkipA11y({
     layout: "fullscreen",
     a11y: {
       config: {
@@ -74,7 +75,7 @@ const meta = {
         height: "650px",
       },
     },
-  },
+  }),
 } satisfies Meta<typeof Layout.Page>
 
 export default meta

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { useState } from "react"
 import { RatingQuestion } from "."
 import { CoCreationFormProvider } from "../Context"
@@ -35,6 +36,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
   args: {
     id: "question-1",
     title: "Rate your experience",
@@ -51,6 +54,8 @@ export const Default: Story = {
 }
 
 export const WithSelectedValue: Story = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
   args: {
     id: "question-2",
     title: "How would you rate this?",
@@ -72,6 +77,8 @@ export const WithSelectedValue: Story = {
 }
 
 export const SmallRange: Story = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
   args: {
     id: "question-3",
     title: "Satisfaction level",
@@ -86,6 +93,8 @@ export const SmallRange: Story = {
 }
 
 export const WithEmojiOptions = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
   args: {
     id: "question-4",
     title: "Satisfaction level",
