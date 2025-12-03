@@ -102,12 +102,20 @@ const F0SelectComponent = forwardRef(function Select<
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   // If inside a OneModal and no portalContainer is provided, use the modal's container
-  // This allows F0Select to work correctly inside modals without extra configuration
+  // only for center/fullscreen modals (which have focus trap).
+  // For side panels (left/right), render in body to prevent clipping.
   const modalContext = useContext(OneModalContext)
+  const shouldUseModalContainer =
+    modalContext.portalContainer &&
+    (modalContext.position === "center" ||
+      modalContext.position === "fullscreen")
+
   const effectivePortalContainer =
     portalContainer !== undefined
       ? portalContainer
-      : modalContext.portalContainer
+      : shouldUseModalContainer
+        ? modalContext.portalContainer
+        : undefined
 
   // Extract onSelectItems from props for multiple selection
   const onSelectItems =

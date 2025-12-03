@@ -99,7 +99,7 @@ export const OneModalHeader = ({
   }
 
   const containerClassName = cn(
-    "flex flex-col gap-3 bg-f1-background",
+    "flex flex-col gap-3",
     classesByContentPadding[contentPadding]
   )
 

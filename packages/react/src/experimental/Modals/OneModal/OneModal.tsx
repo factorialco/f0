@@ -79,17 +79,17 @@ export const OneModal: FC<OneModalProps> = ({
 
     if (isSidePosition) {
       return cn(
-        "w-full overflow-x-hidden flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary",
+        "w-full flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary",
         position === "left" && "left-3",
         position === "right" && "left-auto right-3"
       )
     }
 
     if (position === "fullscreen") {
-      return "w-[calc(100%-48px)] h-[calc(100%-48px)] overflow-x-hidden"
+      return "w-[calc(100%-48px)] h-[calc(100%-48px)] rounded-xl"
     }
 
-    return "flex flex-col max-h-[620px] max-w-[680px] overflow-hidden"
+    return "flex flex-col max-h-[620px] max-w-[680px] rounded-xl"
   }, [position, isSmallScreen, asBottomSheetInMobile, isSidePosition])
 
   if (isSmallScreen && asBottomSheetInMobile) {
