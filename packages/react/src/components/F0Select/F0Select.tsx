@@ -1,3 +1,4 @@
+import { OneModalContext } from "@/experimental/Modals/OneModal/OneModalProvider"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -28,6 +29,7 @@ import { isEqual } from "lodash"
 import {
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -99,6 +101,14 @@ const F0SelectComponent = forwardRef(function Select<
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
+  // If inside a OneModal and no portalContainer is provided, use the modal's container
+  // This allows F0Select to work correctly inside modals without extra configuration
+  const modalContext = useContext(OneModalContext)
+  const effectivePortalContainer =
+    portalContainer !== undefined
+      ? portalContainer
+      : modalContext.portalContainer
+
   // Extract onSelectItems from props for multiple selection
   const onSelectItems =
     "onSelectItems" in props ? props.onSelectItems : undefined
@@ -683,7 +693,7 @@ const F0SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-            portalContainer={portalContainer}
+            portalContainer={effectivePortalContainer}
           />
         )}
       </SelectPrimitive>
