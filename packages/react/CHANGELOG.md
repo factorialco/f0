@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.299.0](https://github.com/factorialco/f0/compare/f0-react-v1.298.2...f0-react-v1.299.0) (2025-12-03)
+
+
+### Features
+
+* add tooltip to icon value display ([#3056](https://github.com/factorialco/f0/issues/3056)) ([325f5e2](https://github.com/factorialco/f0/commit/325f5e259f8f1cee3f2927124728e2922d6f473c))
+
 ## [1.298.2](https://github.com/factorialco/f0/compare/f0-react-v1.298.1...f0-react-v1.298.2) (2025-12-03)
 
 
