@@ -91,30 +91,40 @@ export const CoCreationForm = ({
   elements,
   isEditMode,
   onChange,
-}: CoCreationFormProps) => (
-  <CoCreationFormProvider
-    isEditMode={isEditMode}
-    elements={elements}
-    onChange={onChange}
-  >
-    <div className="flex flex-col gap-6">
-      <DragProvider>
-        <Reorder.Group axis="y" values={elements} onReorder={onChange} as="div">
-          <div className="flex flex-col gap-8">
-            {elements.map((element) => (
-              <Item
-                key={
-                  element.type === "section"
-                    ? element.section.id
-                    : element.question.id
-                }
-                element={element}
-              />
-            ))}
-          </div>
-        </Reorder.Group>
-      </DragProvider>
-      <AddButton />
-    </div>
-  </CoCreationFormProvider>
-)
+}: CoCreationFormProps) => {
+  const shouldShowAddButton =
+    isEditMode && (!elements?.length || elements?.at(-1)?.type === "section")
+
+  return (
+    <CoCreationFormProvider
+      isEditMode={isEditMode}
+      elements={elements}
+      onChange={onChange}
+    >
+      <div className="flex flex-col gap-6">
+        <DragProvider>
+          <Reorder.Group
+            axis="y"
+            values={elements}
+            onReorder={onChange}
+            as="div"
+          >
+            <div className="flex flex-col gap-8">
+              {elements.map((element) => (
+                <Item
+                  key={
+                    element.type === "section"
+                      ? element.section.id
+                      : element.question.id
+                  }
+                  element={element}
+                />
+              ))}
+            </div>
+          </Reorder.Group>
+        </DragProvider>
+        {shouldShowAddButton && <AddButton />}
+      </div>
+    </CoCreationFormProvider>
+  )
+}
