@@ -1,5 +1,18 @@
-.grid-stack-item .ui-resizable-se {
-  @apply bottom-4 right-4 rotate-0 border-2 border-[#f00];
+.grid-stack-item .ui-resizable-handle {
+  @apply bottom-3 right-3 rotate-0 overflow-hidden rounded;
+}
+
+.grid-stack-item .ui-resizable-se::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17.1904 11.6904C17.4443 11.4366 17.8565 11.4366 18.1104 11.6904C18.3641 11.9443 18.3642 12.3565 18.1104 12.6104L12.6104 18.1104C12.3565 18.3642 11.9443 17.3641 11.6904 18.1104C11.4366 17.8565 11.4366 17.4443 11.6904 17.1904L17.1904 11.6904ZM16.1904 6.19043C16.4443 5.93659 16.8565 5.93659 17.1104 6.19043C17.3641 6.44427 17.3642 6.85653 17.1104 7.11035L7.11035 17.1104C6.85653 17.3642 6.44427 17.3641 6.19043 17.1104C5.93659 16.8565 5.93659 16.4443 6.19043 16.1904L16.1904 6.19043Z' fill='%23A1ABBD'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
 }
 
 .ui-draggable-dragging > .grid-stack-item-content {
