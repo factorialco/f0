@@ -141,7 +141,9 @@ const F0SelectComponent = forwardRef(function Select<
         localValue?.map((item) => String(item)) ?? []
       )
     ) {
-      setLocalValue(toArray(value) ?? defaultValues ?? [])
+      const newValue = toArray(value) ?? defaultValues ?? []
+      // Ensure unique values to prevent duplicates
+      setLocalValue(Array.from(new Set(newValue)))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -279,7 +281,10 @@ const F0SelectComponent = forwardRef(function Select<
 
     const items = new Map() as SelectedItemsState<ActualRecordType>["items"]
 
-    for (const val of values) {
+    // Use Set to ensure unique values and prevent duplicates
+    const uniqueValues = Array.from(new Set(values))
+
+    for (const val of uniqueValues) {
       const itemData = itemsByValue[val]
       items.set(val, {
         id: val,
@@ -419,7 +424,8 @@ const F0SelectComponent = forwardRef(function Select<
 
       // Sync localValue with actual selection state
       // This ensures the preview shows correct items after deselection
-      setLocalValue(values)
+      // Use Set to ensure unique values and prevent duplicates
+      setLocalValue(Array.from(new Set(values)))
 
       const records = checkedItems
         .map((item) => item.item)
