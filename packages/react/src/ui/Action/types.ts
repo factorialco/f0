@@ -101,6 +101,16 @@ export interface ActionCommonProps {
    * The tab index of the action.
    */
   tabIndex?: number
+
+  /**
+   * Mouse enter event handler.
+   */
+  onMouseEnter?: () => void
+
+  /**
+   * Mouse leave event handler.
+   */
+  onMouseLeave?: () => void
 }
 
 export const buttonTypes = ["button", "submit", "reset"] as const

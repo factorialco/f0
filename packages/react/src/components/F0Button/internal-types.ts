@@ -83,6 +83,12 @@ export type ButtonInternalProps = Pick<
 
     /**
      * @private
+     * If true, the button will rotate the icon when the button is hovered.
+     */
+    iconRotate?: boolean
+
+    /**
+     * @private
      * The style of the button.
      */
     style?: React.CSSProperties

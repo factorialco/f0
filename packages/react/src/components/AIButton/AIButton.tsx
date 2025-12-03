@@ -35,7 +35,14 @@ const AIButton = forwardRef<
     return rest
   }, props as ButtonInternalProps)
 
-  return <ButtonInternal {...publicProps} variant="ai" ref={ref} />
+  return (
+    <ButtonInternal
+      {...publicProps}
+      variant="ai"
+      ref={ref}
+      iconRotate={props.icon == AIIcons.One ? true : false}
+    />
+  )
 })
 
 AIButton.displayName = "AIButton"
