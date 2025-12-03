@@ -5,7 +5,7 @@ import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/
 import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 
-import { F0Checkbox } from "@/f0"
+import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { ComponentProps, useState } from "react"
 import { Layout } from "../index"
@@ -189,6 +189,7 @@ export const WithGroupMasonry: Story = {
           The content above is a `GridGroupLayout`
         </Layout.BlockContent>
         <Layout.GroupMasonry
+          main
           sortable={true}
           onSort={(items: React.ReactNode[]) => console.log(items)}
           blocks={[
@@ -288,6 +289,7 @@ export const WithGroupGrid: Story = {
             />
           </Layout.BlockContent>
           <Layout.GroupGrid
+            main
             editMode={editMode}
             WidgetWrapper={(children) => (
               <div className="h-full bg-[#ff000030] p-4">{children}</div>

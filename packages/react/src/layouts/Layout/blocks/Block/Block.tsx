@@ -6,7 +6,7 @@ import { PageLayoutBlockComponent } from "../../types"
 import { BlockActionGroup, BlockActionItem, BlockProps } from "./types"
 
 const variants = cva({
-  base: "flex h-full w-full flex-col p-4",
+  base: "flex w-full flex-col p-4",
   variants: {
     variant: {
       default: "",

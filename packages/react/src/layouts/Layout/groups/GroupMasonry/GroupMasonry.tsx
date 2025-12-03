@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils"
 import {
   DndContext,
   DragEndEvent,
@@ -28,12 +29,14 @@ export interface GroupMasonryProps {
   blocks: SortableBlockItem[]
   sortable?: boolean
   onSort?: (items: React.ReactNode[]) => void
+  main?: boolean
 }
 
 export const GroupMasonry = ({
   blocks,
   sortable: _sortable = false,
   onSort: _onSort = () => {},
+  main = false,
 }: GroupMasonryProps) => {
   const [items, setItems] = useState<SortableBlockItem[]>([])
 
@@ -75,7 +78,7 @@ export const GroupMasonry = ({
   }
 
   return (
-    <div className="flex flex-wrap items-stretch gap-4">
+    <div className={cn("flex flex-wrap items-stretch gap-4", main && "flex-1")}>
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}

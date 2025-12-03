@@ -27,12 +27,14 @@ export interface F0GridStackProps {
   options: GridStackReactOptions
   widgets: GridStackReactWidget[]
   onChange?: (widgets: GridStackReactWidget[]) => void
+  className?: string
 }
 
 export const F0GridStack = ({
   options,
   widgets,
   onChange,
+  className,
 }: F0GridStackProps) => {
   const widgetsSignature = useMemo(() => {
     return JSON.stringify(
@@ -55,9 +57,10 @@ export const F0GridStack = ({
   const gridOptions = useMemo(() => {
     return {
       ...options,
+      class: className,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, widgetsSignature])
+  }, [options, widgetsSignature, className])
 
   /**
    * Finds the closest allowed size to the given width and height.

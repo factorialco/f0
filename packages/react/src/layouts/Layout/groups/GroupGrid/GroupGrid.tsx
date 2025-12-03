@@ -5,6 +5,7 @@ import {
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
 import { Optional } from "@/lib/typescript-utils/opional"
+import { cn } from "@/lib/utils"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { PageLayoutGroupComponent } from "../../types"
 import { GroupGridWidget } from "./typings"
@@ -23,6 +24,10 @@ export interface GroupGridProps<Widget extends GroupGridWidget> {
     meta: Widget["meta"] | undefined,
     editMode: boolean
   ) => React.ReactElement
+  /**
+   * If the group is the main content of the page, it will try to take the full height of the page
+   */
+  main?: boolean
 }
 
 const defaultWidgetWrapper = (
@@ -36,6 +41,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   editMode = false,
   onChange = () => {},
   WidgetWrapper = defaultWidgetWrapper,
+  main = false,
 }: GroupGridProps<Widget>) => {
   const gridOptions: GridStackReactOptions = useMemo(
     () => ({
@@ -194,6 +200,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
 
   return (
     <F0GridStack
+      className={cn(main && "h-full flex-1 overflow-auto")}
       options={gridOptions}
       onChange={handleChange}
       widgets={gridWidgets}
