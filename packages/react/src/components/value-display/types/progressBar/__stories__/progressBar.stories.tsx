@@ -28,7 +28,11 @@ export const ProgressBarSimple: Story = {
       label: "Progress",
       render: () => ({
         type: "progressBar",
-        value: 75,
+        value: {
+          value: 75,
+          label: "Progress",
+          hideLabel: true,
+        },
       }),
     },
   },
@@ -113,6 +117,7 @@ export const ProgressBarWithPlaceholder: Story = {
         value: {
           value: undefined,
           placeholder: "No progress data available",
+          label: "No progress data available",
         },
       }),
     },
