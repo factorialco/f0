@@ -19,6 +19,7 @@ export const cardPropertyRenderers = {
   dotTag: valueDisplayRenderers.dotTag,
   file: valueDisplayRenderers.file,
   folder: valueDisplayRenderers.folder,
+  progressBar: valueDisplayRenderers.progressBar,
 } as const
 
 export type CardPropertyType = keyof typeof cardPropertyRenderers
