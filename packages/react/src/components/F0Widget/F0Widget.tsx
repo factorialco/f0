@@ -20,7 +20,7 @@ export interface WidgetProps {
   onDragEnd?: () => void
   isDragging?: boolean
   AIButton?: () => void
-  dropdown?: DropdownItem[]
+  actions?: DropdownItem[]
   children: ReactNode
   selected?: boolean
 }
@@ -32,7 +32,7 @@ const F0WidgetBase = ({
   onDragEnd,
   isDragging = false,
   AIButton,
-  dropdown,
+  actions,
   children,
   selected = false,
 }: WidgetProps) => {
@@ -78,7 +78,7 @@ const F0WidgetBase = ({
           className={cn(
             "flex min-w-0 flex-1 items-center",
             !draggable && "pl-4",
-            !dropdown && !AIButton && "pr-4"
+            !actions && !AIButton && "pr-4"
           )}
         >
           {draggable && (
@@ -99,11 +99,11 @@ const F0WidgetBase = ({
             <F0Text variant="label" content={title} ellipsis />
           </div>
         </div>
-        {(AIButton || dropdown) && (
+        {(AIButton || actions) && (
           <div
             className={cn(
               "flex shrink-0 items-center gap-0.5 pr-2",
-              !dropdown && "pr-4"
+              !actions && "pr-4"
             )}
           >
             {AIButton && (
@@ -115,9 +115,9 @@ const F0WidgetBase = ({
                 />
               </div>
             )}
-            {dropdown && (
+            {actions && (
               <DropdownInternal
-                items={dropdown}
+                items={actions}
                 open={isDropdownOpen}
                 onOpenChange={handleDropdownOpenChange}
                 align="end"

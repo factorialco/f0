@@ -1,8 +1,5 @@
-import { F0Heading } from "@/components/F0Heading"
-import { F0Icon } from "@/components/F0Icon"
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
-import { Handle } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { F0Widget } from "@/components/F0Widget"
+import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 export interface DashboardWidgetProps {
   children: React.ReactNode
@@ -15,37 +12,13 @@ export interface DashboardWidgetProps {
 
 export const DashboardWidget = ({
   children,
-  className,
   title,
   draggable = false,
   actions,
 }: DashboardWidgetProps) => {
   return (
-    <article
-      className={cn(
-        "relative h-full rounded-md border border-solid border-f1-border-secondary bg-f1-background px-4 py-2",
-        "hover:border-f1-border-hover",
-        "flex flex-col",
-        className
-      )}
-    >
-      <header className="flex items-center gap-2">
-        <div className="flex items-center gap-2">
-          {draggable && (
-            <div
-              className="dashboard-widget-handle cursor-grab active:cursor-grabbing"
-              data-gs-handle="true"
-            >
-              <F0Icon icon={Handle} size="sm" />
-            </div>
-          )}
-          <F0Heading content={title} as="h6" />
-        </div>
-        <div className="flex items-center gap-2">
-          {actions && <Dropdown items={actions} />}
-        </div>
-      </header>
-      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-    </article>
+    <F0Widget title={title} draggable={draggable} actions={actions}>
+      {children}
+    </F0Widget>
   )
 }

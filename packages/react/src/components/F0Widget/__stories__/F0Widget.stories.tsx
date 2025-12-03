@@ -79,10 +79,10 @@ export const WithAIButton: Story = {
   },
 }
 
-export const WithDropdown: Story = {
+export const WithActions: Story = {
   args: {
-    title: "Widget with Dropdown",
-    dropdown: sampleDropdownItems,
+    title: "Widget with Actions",
+    actions: sampleDropdownItems,
     children: <Slot />,
   },
 }
@@ -92,7 +92,7 @@ export const Full: Story = {
     title: "Fully Configured Widget with a long title",
     draggable: true,
     AIButton: fn(),
-    dropdown: sampleDropdownItems,
+    actions: sampleDropdownItems,
     children: <Slot />,
   },
 }

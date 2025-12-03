@@ -41,7 +41,7 @@ export const GroupGrid = ({
     () => ({
       acceptWidgets: true,
       margin: 8,
-      handle: ".dashboard-widget-handle",
+      handle: "[data-gs-handle='true']",
       column: 4,
       columnOpts: {
         breakpointForWindow: true,
