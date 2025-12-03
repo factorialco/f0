@@ -6,6 +6,7 @@ import {
 
 import { Optional } from "@/lib/typescript-utils/opional"
 import { cn } from "@/lib/utils"
+import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { PageLayoutGroupComponent } from "../../types"
 import { GroupGridWidget } from "./typings"
@@ -43,6 +44,25 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   WidgetWrapper = defaultWidgetWrapper,
   main = false,
 }: GroupGridProps<Widget>) => {
+  const AnimatedWidgetWrapper = useCallback(
+    (
+      children: React.ReactNode,
+      meta: Record<string, unknown> | undefined,
+      editMode: boolean
+    ) => (
+      <motion.div
+        className="h-full w-full"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.5 }}
+        transition={{ duration: 300 / 1000 }}
+      >
+        {WidgetWrapper(children, meta, editMode)}
+      </motion.div>
+    ),
+    [WidgetWrapper]
+  )
+
   const gridOptions: GridStackReactOptions = useMemo(
     () => ({
       acceptWidgets: true,
@@ -78,7 +98,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
         locked: widget.locked,
         meta: widget.meta,
         _originalContent: widget.content,
-        content: WidgetWrapper(widget.content, widget.meta, editMode),
+        content: AnimatedWidgetWrapper(widget.content, widget.meta, editMode),
       }
       // Only include x and y if they're defined, so GridStack can auto-position when undefined
       if (widget.x !== undefined) {
@@ -152,7 +172,11 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
             locked: widgetFromProp.locked,
             meta: widgetFromProp.meta,
             _originalContent: content,
-            content: WidgetWrapper(content, widgetFromProp.meta, editMode),
+            content: AnimatedWidgetWrapper(
+              content,
+              widgetFromProp.meta,
+              editMode
+            ),
           }
         })
       )
@@ -178,7 +202,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
             locked: widget.locked,
             meta: widget.meta,
             _originalContent: content,
-            content: WidgetWrapper(content, widget.meta, editMode),
+            content: AnimatedWidgetWrapper(content, widget.meta, editMode),
           }
           // Preserve x/y from current widget if it exists, otherwise use from prop if defined
           const x = currentWidget?.x ?? widget.x
@@ -196,7 +220,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
 
     prevEditModeRef.current = editMode
     prevWidgetsRef.current = widgets
-  }, [widgets, editMode, WidgetWrapper])
+  }, [widgets, editMode, AnimatedWidgetWrapper])
 
   return (
     <F0GridStack
