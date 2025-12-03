@@ -2,7 +2,14 @@ import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-import { ComponentProps, FC, ReactElement, useMemo } from "react"
+import {
+  ComponentProps,
+  FC,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
@@ -19,6 +26,25 @@ export type OneModalProps = {
   /** the padding of internal content areas (header, content, footer) */
   contentPadding?: ContentPadding
   position?: ModalPosition
+  /**
+   * Optional ref to the modal's content container.
+   * Use this ref as the `portalContainer` prop for components like F0Select
+   * to ensure dropdowns render inside the modal and work correctly
+   * with modal focus management.
+   *
+   * @example
+   * ```tsx
+   * const modalRef = useRef<HTMLDivElement>(null)
+   *
+   * <OneModal modalRef={modalRef} isOpen={isOpen} onClose={onClose}>
+   *   <OneModal.Header title="Example" />
+   *   <OneModal.Content>
+   *     <F0Select portalContainer={modalRef.current} ... />
+   *   </OneModal.Content>
+   * </OneModal>
+   * ```
+   */
+  modalRef?: React.RefObject<HTMLDivElement | null>
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
     | ReactElement<
@@ -37,8 +63,26 @@ export const OneModal: FC<OneModalProps> = ({
   onClose,
   isOpen,
   contentPadding = "md",
+  modalRef,
   children,
 }) => {
+  const internalRef = useRef<HTMLDivElement | null>(null)
+  const portalContainerRef = modalRef ?? internalRef
+
+  // Callback ref to set both the internal ref and the external modalRef
+  const setContentRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      // Always update internal ref
+      internalRef.current = node
+      // Update external modalRef if provided (using type assertion for mutable ref)
+      if (modalRef) {
+        ;(modalRef as React.MutableRefObject<HTMLDivElement | null>).current =
+          node
+      }
+    },
+    [modalRef]
+  )
+
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose()
@@ -76,11 +120,14 @@ export const OneModal: FC<OneModalProps> = ({
         onClose={onClose}
         position={position}
         contentPadding={contentPadding}
+        portalContainerRef={portalContainerRef}
         shownBottomSheet
       >
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
-          <DrawerContent className={contentClassName}>{children}</DrawerContent>
+          <DrawerContent ref={setContentRef} className={contentClassName}>
+            {children}
+          </DrawerContent>
         </Drawer>
       </OneModalProvider>
     )
@@ -92,6 +139,7 @@ export const OneModal: FC<OneModalProps> = ({
       onClose={onClose}
       position={position}
       contentPadding={contentPadding}
+      portalContainerRef={portalContainerRef}
     >
       <Dialog
         open={isOpen}
@@ -99,6 +147,7 @@ export const OneModal: FC<OneModalProps> = ({
         modal={position === "center" || position === "fullscreen"}
       >
         <DialogContent
+          ref={setContentRef}
           withTraslateAnimation={!isSidePosition}
           className={contentClassName}
         >
