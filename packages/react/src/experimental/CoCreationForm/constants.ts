@@ -1,12 +1,15 @@
 import { IconType } from "@/components/F0Icon/F0Icon"
 import { Check, CheckDouble, List, Numbers, Star, TextSize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useCoCreationFormContext } from "./Context"
 import { QuestionType } from "./types"
 
 export const useQuestionTypes = () => {
+  const { isQuestionTypeAllowed } = useCoCreationFormContext()
+
   const { t } = useI18n()
 
-  const questionTypes: {
+  const allQuestionTypes: {
     label: string
     icon: IconType
     questionType: QuestionType
@@ -43,5 +46,9 @@ export const useQuestionTypes = () => {
     },
   ]
 
-  return questionTypes
+  const filteredQuestionTypes = allQuestionTypes.filter((questionType) =>
+    isQuestionTypeAllowed(questionType.questionType)
+  )
+
+  return filteredQuestionTypes
 }
