@@ -110,6 +110,13 @@ declare type Action_2 = {
     variant?: "default" | "outline" | "promote";
 };
 
+export declare type ActionBarGroup = {
+    label?: string;
+    items: ActionBarItem[];
+};
+
+export declare type ActionBarItem = ActionType_2;
+
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
 declare type ActionButtonProps = ActionBaseProps & {
@@ -298,7 +305,14 @@ export declare type actionType = {
     icon?: IconType;
 };
 
-declare type ActionType_2 = CopyActionType | NavigateActionType | OpenLinkActionType;
+declare type ActionType_2 = {
+    label: string;
+    icon?: IconType;
+    onClick?: () => void;
+    disabled?: boolean;
+    critical?: boolean;
+    description?: string;
+};
 
 declare type actionType_2 = {
     label: string;
@@ -308,6 +322,8 @@ declare type actionType_2 = {
     hideLabel?: boolean;
     variant?: "default" | "outline" | "neutral";
 };
+
+declare type ActionType_3 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
 
@@ -1567,7 +1583,7 @@ declare const CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttri
 declare type CompanyItemProps = {
     name: string;
     avatarUrl?: URL_2;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 export declare function CompanySelector({ companies, selected, onChange, isLoading, withNotification, additionalOptions, }: CompanySelectorProps): JSX_2.Element;
@@ -2594,7 +2610,7 @@ declare type EmployeeItemProps = {
     firstName: string;
     lastName: string;
     avatarUrl?: URL_2;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 declare type EmptyState = {
@@ -2734,6 +2750,27 @@ declare type ExtractVisualizationSettings<T> = T extends {
         default: infer S;
     };
 } ? S : never;
+
+export declare const F0ActionBar: ({ isOpen, secondaryActions, label, ...props }: F0ActionBarProps) => JSX_2.Element;
+
+declare interface F0ActionBarProps {
+    /**
+     * Whether the action bar is open
+     */
+    isOpen: boolean;
+    /**
+     * The primary action
+     */
+    primaryActions?: ActionBarItem[] | ActionBarGroup[] | ActionBarGroup;
+    /**
+     * The secondary actions
+     */
+    secondaryActions?: ActionBarItem[];
+    /**
+     * The label of the action bar
+     */
+    label?: string;
+}
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
@@ -3641,7 +3678,7 @@ declare type ItemDefinition = {
 declare type ItemProps = {
     text: string;
     icon?: IconType;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
@@ -5720,7 +5757,7 @@ declare const TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<
 
 declare type TeamItemProps = {
     name: string;
-    action?: ActionType_2;
+    action?: ActionType_3;
 };
 
 export declare const Textarea: React.FC<TextareaProps>;
@@ -6353,8 +6390,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
     }
 }
@@ -6362,8 +6399,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
