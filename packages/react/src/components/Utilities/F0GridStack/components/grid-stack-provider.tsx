@@ -6,8 +6,7 @@ import type {
   GridStackWidget,
 } from "gridstack"
 import { motion } from "motion/react"
-import {
-  cloneElement,
+import React, {
   type PropsWithChildren,
   useCallback,
   useEffect,
@@ -38,7 +37,64 @@ const propsToObserve = [
   "y",
 ] as const
 
-const REMOVE_ANIMATION_DURATION = 600
+const REMOVE_ANIMATION_DURATION = 300
+
+/**
+ * Clones an element and preserves canvas content by converting to data URLs
+ * @param element - The element to clone
+ * @returns The innerHTML string with canvas content preserved as images
+ */
+function cloneElementWithCanvas(element: HTMLElement): string {
+  // Clone the element deeply
+  const clonedElement = element.cloneNode(true) as HTMLElement
+
+  // Find all canvas elements in the original element
+  const originalCanvases = element.querySelectorAll("canvas")
+
+  // Replace each canvas with an img element containing the canvas data as a data URL
+  originalCanvases.forEach((originalCanvas) => {
+    if (originalCanvas.width > 0 && originalCanvas.height > 0) {
+      try {
+        // Convert canvas to data URL (base64 image)
+        const dataURL = originalCanvas.toDataURL("image/png")
+
+        // Find the corresponding canvas in the cloned element
+        // We need to find it by position/index since we can't use the original reference
+        const allClonedCanvases = clonedElement.querySelectorAll("canvas")
+        const canvasIndex = Array.from(
+          element.querySelectorAll("canvas")
+        ).indexOf(originalCanvas)
+        const clonedCanvas = allClonedCanvases[canvasIndex]
+
+        if (clonedCanvas && clonedCanvas.parentElement) {
+          // Create an img element with the canvas data
+          const img = document.createElement("img")
+          img.src = dataURL
+          img.style.width = `${originalCanvas.width}px`
+          img.style.height = `${originalCanvas.height}px`
+          img.style.display = "block"
+
+          // Copy any relevant attributes from the canvas
+          if (originalCanvas.className) {
+            img.className = originalCanvas.className
+          }
+          if (originalCanvas.id) {
+            img.id = originalCanvas.id
+          }
+
+          // Replace the canvas with the img element
+          clonedCanvas.parentElement.replaceChild(img, clonedCanvas)
+        }
+      } catch (error) {
+        // If canvas is tainted (CORS issue) or conversion fails, keep the canvas as-is
+        console.warn("Failed to convert canvas to image:", error)
+      }
+    }
+  })
+
+  return clonedElement.innerHTML
+}
+
 export function GridStackProvider({
   children,
   options,
@@ -250,17 +306,29 @@ export function GridStackProvider({
         idsToRemove.forEach((id) => {
           const content = next.get(id)
           if (content) {
+            // Find the widget container element to capture its HTML and dimensions
+            const widgetElement =
+              gridStack.el.querySelector<GridItemHTMLElement>(
+                `[gs-id="${id}"] .grid-stack-item-content`
+              )
+
+            // Capture the static HTML and dimensions from the DOM before wrapping
+            let staticHTML = ""
+            if (widgetElement) {
+              // Clone the element with canvas content preserved
+              staticHTML = cloneElementWithCanvas(widgetElement)
+            }
+
             next.set(
               id,
               <motion.div
                 className="h-full w-full"
                 initial={{ opacity: 1, scale: 1 }}
-                animate={{ opacity: 0, scale: 0.5 }}
-                exit={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 0, scale: 0.7 }}
+                exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ duration: REMOVE_ANIMATION_DURATION / 1000 }}
-              >
-                {cloneElement(content)}
-              </motion.div>
+                dangerouslySetInnerHTML={{ __html: staticHTML }}
+              />
             )
           }
           setTimeout(() => {
