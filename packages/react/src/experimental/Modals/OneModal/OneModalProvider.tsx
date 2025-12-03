@@ -9,9 +9,15 @@ type OneModalContextType = {
   contentPadding: ContentPadding
   /**
    * Reference to the modal's content container element.
-   * Use this as the `portalContainer` prop for components like F0Select.
+   * @deprecated Use `portalContainer` instead for components like F0Select.
    */
   portalContainerRef: RefObject<HTMLDivElement | null>
+  /**
+   * The modal's content container element.
+   * Use this as the `portalContainer` prop for components like F0Select
+   * to ensure dropdowns render inside the modal.
+   */
+  portalContainer: HTMLDivElement | null
 }
 
 export const OneModalContext = createContext<OneModalContextType>({
@@ -21,6 +27,7 @@ export const OneModalContext = createContext<OneModalContextType>({
   contentPadding: "md",
   shownBottomSheet: false,
   portalContainerRef: { current: null },
+  portalContainer: null,
 })
 
 export const OneModalProvider = ({
@@ -31,6 +38,7 @@ export const OneModalProvider = ({
   position,
   children,
   portalContainerRef,
+  portalContainer,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -39,6 +47,7 @@ export const OneModalProvider = ({
   children: React.ReactNode
   contentPadding: ContentPadding
   portalContainerRef: RefObject<HTMLDivElement | null>
+  portalContainer: HTMLDivElement | null
 }) => {
   return (
     <OneModalContext.Provider
@@ -49,6 +58,7 @@ export const OneModalProvider = ({
         shownBottomSheet,
         contentPadding,
         portalContainerRef,
+        portalContainer,
       }}
     >
       {children}

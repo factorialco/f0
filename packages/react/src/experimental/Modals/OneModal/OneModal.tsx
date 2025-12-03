@@ -9,6 +9,7 @@ import {
   useCallback,
   useMemo,
   useRef,
+  useState,
 } from "react"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
@@ -49,10 +50,16 @@ export const OneModal: FC<OneModalProps> = ({
   modalRef,
   children,
 }) => {
+  // Use state to store the container element so we can trigger re-renders
+  // when it's set. This ensures child components like F0Select get the
+  // correct portalContainer after the modal content mounts.
+  const [containerElement, setContainerElement] =
+    useState<HTMLDivElement | null>(null)
+
   const internalRef = useRef<HTMLDivElement | null>(null)
   const portalContainerRef = modalRef ?? internalRef
 
-  // Callback ref to set both the internal ref and the external modalRef
+  // Callback ref to set both the internal ref, external modalRef, and state
   const setContentRef = useCallback(
     (node: HTMLDivElement | null) => {
       // Always update internal ref
@@ -62,6 +69,8 @@ export const OneModal: FC<OneModalProps> = ({
         ;(modalRef as React.MutableRefObject<HTMLDivElement | null>).current =
           node
       }
+      // Update state to trigger re-render so children get the new container
+      setContainerElement(node)
     },
     [modalRef]
   )
@@ -104,6 +113,7 @@ export const OneModal: FC<OneModalProps> = ({
         position={position}
         contentPadding={contentPadding}
         portalContainerRef={portalContainerRef}
+        portalContainer={containerElement}
         shownBottomSheet
       >
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
@@ -123,6 +133,7 @@ export const OneModal: FC<OneModalProps> = ({
       position={position}
       contentPadding={contentPadding}
       portalContainerRef={portalContainerRef}
+      portalContainer={containerElement}
     >
       <Dialog
         open={isOpen}

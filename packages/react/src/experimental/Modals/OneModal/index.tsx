@@ -2,6 +2,7 @@ import { OneModal } from "./OneModal"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalFooter } from "./OneModalFooter/OneModalFooter"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
+import { useOneModal } from "./OneModalProvider"
 
 type OneModalComponent = typeof OneModal & {
   Header: typeof OneModalHeader
@@ -15,4 +16,4 @@ ComposedOneModal.Header = OneModalHeader
 ComposedOneModal.Content = OneModalContent
 ComposedOneModal.Footer = OneModalFooter
 
-export { ComposedOneModal as OneModal }
+export { ComposedOneModal as OneModal, useOneModal }
