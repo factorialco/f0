@@ -5,6 +5,7 @@ import {
   DropdownInternal,
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { One as OneIcon } from "@/icons/ai"
 import { Ellipsis, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
@@ -112,6 +113,7 @@ const F0WidgetBase = ({
                   size="sm"
                   label={t.ai.ask}
                   onClick={AIButton}
+                  icon={OneIcon}
                 />
               </div>
             )}
