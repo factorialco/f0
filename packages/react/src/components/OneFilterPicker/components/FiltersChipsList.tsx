@@ -7,6 +7,7 @@ import {
   FilterTypeSchema,
   getFilterType,
 } from "../filterTypes"
+import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
 import { FilterChipButton } from "./FilterChipButton"
 
@@ -27,20 +28,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
 }: FiltersChipsListProps<Filters>) {
   const i18n = useI18n()
 
-  const activeFilterKeys = Object.keys(filters).filter((key) => {
-    const filterValue = value[key as keyof Filters]
-    const filterSchema = filters[key as keyof Filters]
-
-    const filterType = getFilterType(filterSchema.type)
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- We need to pass the filter value as any to the isEmpty function
-    const isEmpty = filterType.isEmpty(filterValue as any, {
-      schema: filterSchema as unknown as FilterTypeSchema,
-      i18n,
-    })
-
-    return !isEmpty
-  }) as Array<keyof Filters>
+  const activeFilterKeys = getActiveFilterKeys(filters, value, i18n)
 
   if (activeFilterKeys.length === 0) {
     return null
@@ -62,9 +50,10 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
             const filterType = getFilterType(filterSchema.type)
             type FilterType = FilterDefinitionsByType[typeof filterSchema.type]
 
-            const typedFilterType = filterType as FilterTypeDefinition<
-              FilterValue<FilterType>
-            >
+            const typedFilterType =
+              filterType as unknown as FilterTypeDefinition<
+                FilterValue<FilterType>
+              >
 
             if (
               typedFilterType.isEmpty(currentValue, {

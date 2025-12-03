@@ -3,6 +3,7 @@ import {
   Briefcase,
   Calendar,
   CalendarArrowRight,
+  ChartPie,
   Delete,
   Envelope,
   ExternalLink,
@@ -260,6 +261,76 @@ export const Compact: Story = {
   },
 }
 
+export const WithProgressBar: Story = {
+  args: {
+    avatar: {
+      type: "icon",
+      icon: ChartPie,
+    },
+    title: "Project Alpha",
+    description: "Q4 sprint progress tracking",
+    metadata: [
+      {
+        icon: Calendar,
+        tooltip: "Due date",
+        property: {
+          type: "date",
+          value: new Date(2025, 11, 31),
+        },
+      },
+      {
+        icon: ChartPie,
+        tooltip: "Completion",
+        property: {
+          type: "progressBar",
+          value: {
+            value: 75,
+            max: 100,
+            label: "75%",
+          },
+        },
+      },
+      {
+        icon: Star,
+        tooltip: "Status",
+        property: {
+          type: "status",
+          value: {
+            status: "positive",
+            label: "On track",
+          },
+        },
+      },
+    ],
+  },
+}
+
+export const WithProgressBarCustomColor: Story = {
+  args: {
+    avatar: {
+      type: "icon",
+      icon: Briefcase,
+    },
+    title: "Budget Report",
+    description: "Monthly budget utilization",
+    metadata: [
+      {
+        icon: ChartPie,
+        tooltip: "Budget used",
+        property: {
+          type: "progressBar",
+          value: {
+            value: 85,
+            max: 100,
+            label: "€8,500 / €10,000",
+            color: "categorical-2",
+          },
+        },
+      },
+    ],
+  },
+}
+
 export const Skeleton: Story = {
   render: () => {
     return <F0Card.Skeleton />
@@ -371,6 +442,8 @@ export const Snapshot: Story = {
       <F0Card {...Compact.args} />
       <F0Card {...WithActionsAndLink.args} />
       <F0Card {...WithImage.args} />
+      <F0Card {...WithProgressBar.args} />
+      <F0Card {...WithProgressBarCustomColor.args} />
     </div>
   ),
 }

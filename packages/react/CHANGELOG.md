@@ -1,5 +1,82 @@
 # Changelog
 
+## [1.298.0](https://github.com/factorialco/f0/compare/f0-react-v1.297.0...f0-react-v1.298.0) (2025-12-03)
+
+
+### Features
+
+* value display add progress bar ([#3053](https://github.com/factorialco/f0/issues/3053)) ([1becf8f](https://github.com/factorialco/f0/commit/1becf8f528e5ada5e85ae52fd0a915680c57d4e3))
+
+## [1.297.0](https://github.com/factorialco/f0/compare/f0-react-v1.296.0...f0-react-v1.297.0) (2025-12-03)
+
+
+### Features
+
+* **AIButton:** One animated icon ([#3069](https://github.com/factorialco/f0/issues/3069)) ([58e73e2](https://github.com/factorialco/f0/commit/58e73e229ff725c95a09f698cf21d7f70ff03b12))
+
+## [1.296.0](https://github.com/factorialco/f0/compare/f0-react-v1.295.0...f0-react-v1.296.0) (2025-12-02)
+
+
+### Features
+
+* create F0ActionBar component ([#3067](https://github.com/factorialco/f0/issues/3067)) ([30b3c72](https://github.com/factorialco/f0/commit/30b3c7282168737147f4a116a27c5f978f184111))
+
+## [1.295.0](https://github.com/factorialco/f0/compare/f0-react-v1.294.0...f0-react-v1.295.0) (2025-12-02)
+
+
+### Features
+
+* (select) multiselection with paginated datasource ([#3041](https://github.com/factorialco/f0/issues/3041)) ([ee8f24b](https://github.com/factorialco/f0/commit/ee8f24bc936460bef612c0eb6c277b24434a19ed))
+
+## [1.294.0](https://github.com/factorialco/f0/compare/f0-react-v1.293.0...f0-react-v1.294.0) (2025-12-02)
+
+
+### Features
+
+* **AIButton:** new AI Button component ([#3062](https://github.com/factorialco/f0/issues/3062)) ([2638aa9](https://github.com/factorialco/f0/commit/2638aa90b23258570ecf67b625813f9f76dddf96))
+
+## [1.293.0](https://github.com/factorialco/f0/compare/f0-react-v1.292.0...f0-react-v1.293.0) (2025-12-02)
+
+
+### Features
+
+* **Table:** update nested row handling and improve layout  ([#3054](https://github.com/factorialco/f0/issues/3054)) ([ac541d2](https://github.com/factorialco/f0/commit/ac541d22d733314c136733fa5ba72e067273ff3f))
+
+## [1.292.0](https://github.com/factorialco/f0/compare/f0-react-v1.291.1...f0-react-v1.292.0) (2025-12-02)
+
+
+### Features
+
+* AIChat add download button for markdown table ([#3055](https://github.com/factorialco/f0/issues/3055)) ([33ec11c](https://github.com/factorialco/f0/commit/33ec11c8668e78f1660126b68fb99b1c3aac9416))
+
+## [1.291.1](https://github.com/factorialco/f0/compare/f0-react-v1.291.0...f0-react-v1.291.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* remove fixing min-w-[40px] ([#3058](https://github.com/factorialco/f0/issues/3058)) ([aeb4ef6](https://github.com/factorialco/f0/commit/aeb4ef6783464c4eb3d02595226983c5532ad331))
+
+## [1.291.0](https://github.com/factorialco/f0/compare/f0-react-v1.290.0...f0-react-v1.291.0) (2025-11-27)
+
+
+### Features
+
+* f0select multiselection ([#2959](https://github.com/factorialco/f0/issues/2959)) ([cc653ae](https://github.com/factorialco/f0/commit/cc653ae5dbd54471a31f91b4db67cf595bd9fc06))
+
+## [1.290.0](https://github.com/factorialco/f0/compare/f0-react-v1.289.0...f0-react-v1.290.0) (2025-11-27)
+
+
+### Features
+
+* **NestedRow:** enhance nested row component with data fetching and … ([#3049](https://github.com/factorialco/f0/issues/3049)) ([36339fe](https://github.com/factorialco/f0/commit/36339fed5ff406e89fa5d161f1ff99665ae12453))
+
+## [1.289.0](https://github.com/factorialco/f0/compare/f0-react-v1.288.0...f0-react-v1.289.0) (2025-11-26)
+
+
+### Features
+
+* **FilterPicker:** number filter open close ([#3017](https://github.com/factorialco/f0/issues/3017)) ([0efc8e3](https://github.com/factorialco/f0/commit/0efc8e38872e2b0bb4f973cd59997a8dd96c9dab))
+
 ## [1.288.0](https://github.com/factorialco/f0/compare/f0-react-v1.287.0...f0-react-v1.288.0) (2025-11-25)
 
 

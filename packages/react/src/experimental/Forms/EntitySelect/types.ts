@@ -1,6 +1,6 @@
 import { InputFieldProps } from "@/ui/InputField"
 import { PopoverProps } from "@radix-ui/react-popover"
-import { Action } from "../Fields/Select/SelectBottomActions"
+import { Action } from "../../../components/F0Select/components/SelectBottomActions"
 
 export type EntitySelectSubEntity = {
   subId: EntityId

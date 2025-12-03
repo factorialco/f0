@@ -111,9 +111,13 @@ export const BasicKanbanVisualization: Story = {
           },
         ]}
         defaultSelectedItems={{
-          items: items
-            .slice(0, 3)
-            .map((item) => ({ id: item.id, checked: true })),
+          allSelected: false,
+          items: new Map(
+            items
+              .slice(0, 3)
+              .map((item) => [item.id, { id: item.id, checked: true }])
+          ),
+          groups: new Map(),
         }}
         fullHeight={true}
         navigationFilters={{

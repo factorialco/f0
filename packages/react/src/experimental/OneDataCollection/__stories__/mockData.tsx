@@ -81,11 +81,27 @@ export const filters = {
     type: "search",
     label: "Search",
   },
+  searchStrict: {
+    type: "search",
+    label: "Search with strict toggle example",
+    options: {
+      strictToggle: true,
+    },
+  },
   department: {
     type: "in",
     label: "Department",
     options: {
       options: DEPARTMENTS_MOCK.map((value) => ({ value, label: value })),
+    },
+  },
+  salary: {
+    type: "number",
+    label: "Salary",
+    options: {
+      modes: ["range", "single"],
+      min: 0,
+      openCloseToggle: true,
     },
   },
 } as const
@@ -244,7 +260,7 @@ export const getMockVisualizations = (options?: {
           width: 140,
           render: (item) =>
             !item.children && item.detailed
-              ? item.name
+              ? ""
               : {
                   type: "person",
                   value: {
@@ -759,6 +775,27 @@ export const filterUsers = (
     )
   }
 
+  const salaryFilterValues = filterValues.salary
+  if (salaryFilterValues) {
+    filteredUsers = filteredUsers.filter((user) => {
+      if (salaryFilterValues?.mode === "range") {
+        return (
+          user.salary &&
+          salaryFilterValues.from.value !== undefined &&
+          (salaryFilterValues.from.closed
+            ? user.salary >= salaryFilterValues.from.value
+            : user.salary > salaryFilterValues.from.value) &&
+          user.salary &&
+          salaryFilterValues.to.value !== undefined &&
+          (salaryFilterValues.to.closed
+            ? user.salary <= salaryFilterValues.to.value
+            : user.salary < salaryFilterValues.to.value)
+        )
+      }
+      return user.salary === salaryFilterValues.value
+    })
+  }
+
   if (search) {
     filteredUsers = filteredUsers.filter(
       (user) =>
@@ -852,6 +889,8 @@ export const createPromiseDataFetch = (
       search,
       navigationFilters,
     } = options
+
+    console.log("filters", filters)
 
     return new Promise<BaseResponse<MockUser>>((resolve) => {
       setTimeout(() => {
@@ -988,7 +1027,7 @@ export const ExampleComponent = ({
     FiltersType,
     NavigationFiltersDefinition
   >
-  defaultSelectedItems?: SelectedItemsState
+  defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
   bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
@@ -1128,16 +1167,24 @@ export const ExampleComponent = ({
             : undefined,
       dataAdapter: dataAdapterMemoized,
       itemsWithChildren: (item) => !!item?.children?.length,
-      childrenCount: (item) => item?.children?.length,
-      fetchChildren: async (item) => {
+      childrenCount: ({ item }) => item?.children?.length,
+      fetchChildren: async ({ item }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
         return item.children
           ? {
               records: item.children,
               type: item.detailed ? "detailed" : "basic",
+              paginationInfo: {
+                cursor: "aaa",
+                total: item.children.length,
+                perPage: 2,
+                currentPage: 1,
+                pagesCount: 1,
+                hasMore: true,
+              },
             }
-          : []
+          : { records: [] }
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },

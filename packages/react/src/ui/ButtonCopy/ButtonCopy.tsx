@@ -4,7 +4,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Action, ActionButtonProps, ActionButtonVariant } from "@/ui/Action"
 import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, MouseEventHandler, useEffect, useState } from "react"
-import { iconOnlyVariants } from "../../components/F0Button/internal"
 
 export type ButtonCopyProps = Omit<
   ActionButtonProps,
@@ -102,9 +101,6 @@ export const ButtonCopy = forwardRef<HTMLButtonElement, ButtonCopyProps>(
             <F0Icon
               size={size === "sm" ? "sm" : "md"}
               icon={isCopying ? Check : LayersFront}
-              className={iconOnlyVariants({
-                variant,
-              })}
             />
           </motion.span>
         </AnimatePresence>

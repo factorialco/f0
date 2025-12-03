@@ -1,11 +1,16 @@
 import { useI18n } from "@/lib/providers/i18n"
 import flatten from "lodash/flatten"
 import React, { createContext, useContext, useMemo } from "react"
-import { getDefaultParamsForQuestionType, getNewElementId } from "./lib"
+import {
+  getDefaultParamsForQuestionType,
+  getDefaultQuestionTypeToAdd,
+  getNewElementId,
+} from "./lib"
 import {
   CoCreationFormCallbacks,
   CoCreationFormElement,
   QuestionElement,
+  QuestionType,
   SectionElement,
 } from "./types"
 
@@ -19,6 +24,7 @@ type CoCreationFormContextType = CoCreationFormCallbacks & {
   getSectionContainingQuestion: (
     questionId: string
   ) => SectionElement | undefined
+  isQuestionTypeAllowed: (questionType: QuestionType) => boolean
 }
 
 const CoCreationFormContext = createContext<
@@ -31,6 +37,7 @@ type CoCreationFormProviderProps = {
   elements: CoCreationFormElement[]
   onChange: (elements: CoCreationFormElement[]) => void
   disallowOptionalQuestions?: boolean
+  allowedQuestionTypes?: QuestionType[]
 }
 
 export function CoCreationFormProvider({
@@ -39,6 +46,7 @@ export function CoCreationFormProvider({
   isEditMode,
   disallowOptionalQuestions,
   onChange,
+  allowedQuestionTypes,
 }: CoCreationFormProviderProps) {
   const { t } = useI18n()
 
@@ -189,6 +197,9 @@ export function CoCreationFormProvider({
       type === "section" ? "section" : "question"
     )
 
+    const defaultQuestionTypeToAdd =
+      getDefaultQuestionTypeToAdd(allowedQuestionTypes)
+
     const newElement: CoCreationFormElement =
       type === "section"
         ? {
@@ -203,9 +214,9 @@ export function CoCreationFormProvider({
                   description: t(
                     "coCreationForm.defaults.newQuestionDescription"
                   ),
-                  type: "text",
+                  type: defaultQuestionTypeToAdd,
                   required: true,
-                  ...getDefaultParamsForQuestionType("text"),
+                  ...getDefaultParamsForQuestionType(defaultQuestionTypeToAdd),
                 } as QuestionElement,
               ],
             },
@@ -336,6 +347,10 @@ export function CoCreationFormProvider({
     return element?.type === "section" ? element.section : undefined
   }
 
+  const isQuestionTypeAllowed = (questionType: QuestionType) => {
+    return !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
+  }
+
   return (
     <CoCreationFormContext.Provider
       value={{
@@ -350,6 +365,7 @@ export function CoCreationFormProvider({
         deleteElement,
         lastElementId,
         disallowOptionalQuestions,
+        isQuestionTypeAllowed,
       }}
     >
       {children}

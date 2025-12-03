@@ -1,7 +1,11 @@
 import { ActionDefinition } from "../../item-actions"
 
 export const statusToChecked = <
-  T extends { checked: boolean; indeterminate: boolean },
+  T extends {
+    checked: boolean
+    indeterminate: boolean
+    selectedCount?: number
+  },
 >(
   status: T | undefined
 ): boolean | "indeterminate" => {
@@ -9,11 +13,22 @@ export const statusToChecked = <
     return false
   }
 
+  // If indeterminate, always return "indeterminate" (some items selected)
+  if (status.indeterminate) {
+    return "indeterminate"
+  }
+
+  // If there are selected items but not all checked, it's indeterminate
+  if (
+    status.selectedCount !== undefined &&
+    status.selectedCount > 0 &&
+    !status.checked
+  ) {
+    return "indeterminate"
+  }
+
+  // Otherwise return checked status
   return status.checked
-    ? status.indeterminate
-      ? "indeterminate"
-      : true
-    : false
 }
 
 /**

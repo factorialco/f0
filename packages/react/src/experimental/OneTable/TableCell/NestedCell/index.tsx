@@ -1,6 +1,10 @@
+import { F0Button } from "@/components/F0Button"
+import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
+import { ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import {
+  CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,
   getNestedMarginLeft,
   isFirstCellWithChildren,
@@ -12,38 +16,47 @@ import {
 interface NestedCellProps {
   width?: number | "auto"
   linkRef: React.RefObject<HTMLAnchorElement>
-  hasChildren: boolean
   firstCell: boolean
-  depth: number
-  expandedLevels: number
+  nestedRowProps?: NestedRowProps & {
+    rowWithChildren?: boolean
+    tableWithChildren?: boolean
+  }
   children: React.ReactNode
-  tableWithChildren?: boolean
   onClick?: () => void
-  onExpand?: () => void
 }
 
 export const NestedCell = ({
   width,
   linkRef,
-  hasChildren,
   firstCell,
-  depth,
-  expandedLevels,
+  nestedRowProps,
   children,
-  tableWithChildren = false,
   onClick,
-  onExpand,
 }: NestedCellProps) => {
-  const firstCellWithChildren = isFirstCellWithChildren(firstCell, hasChildren)
-  const firstCellWithDepth = isFirstCellWithDepth(firstCell, depth)
+  const firstCellWithChildren = isFirstCellWithChildren(
+    firstCell,
+    !!nestedRowProps?.rowWithChildren
+  )
+  const firstCellWithDepth = isFirstCellWithDepth(
+    firstCell,
+    nestedRowProps?.depth ?? 0
+  )
   const firstCellWithNoChildrenAndTableChildren =
     isFirstCellWithNoChildrenAndTableChildren(
       firstCell,
-      hasChildren,
-      tableWithChildren
+      !!nestedRowProps?.rowWithChildren,
+      !!nestedRowProps?.tableWithChildren
     )
 
-  const marginLeft = firstCellWithDepth ? getNestedMarginLeft(depth) : undefined
+  const marginLeft = firstCellWithDepth
+    ? getNestedMarginLeft(
+        nestedRowProps?.depth ?? 0,
+        nestedRowProps?.nestedVariant === "detailed" &&
+          nestedRowProps?.onLoadMoreChildren
+          ? -16
+          : 0
+      )
+    : undefined
 
   return (
     <div
@@ -59,50 +72,70 @@ export const NestedCell = ({
         onClick?.()
       }}
     >
-      <div
-        className={cn(
-          "h-[var(--chevron-size)] w-[var(--chevron-size)]",
-          firstCellWithChildren &&
-            "pointer-events-auto cursor-pointer rounded-2xs hover:bg-f1-foreground-disabled"
-        )}
-        style={
-          {
-            ...{
-              "--chevron-size": `${CHEVRON_SIZE}px`,
-              "--spacing-factor": `${SPACING_FACTOR}px`,
-            },
-          } as React.CSSProperties
-        }
-        onClick={(e) => {
-          if (firstCellWithChildren) {
-            e.stopPropagation()
-            onExpand?.()
-          }
-        }}
-      >
-        {firstCellWithChildren &&
-          (expandedLevels > 0 ? (
-            <ChevronDown
-              className="pointer-events-none shrink-0"
-              size={CHEVRON_SIZE}
+      {nestedRowProps?.onLoadMoreChildren ? (
+        <>
+          <div className={cn("pointer-events-auto cursor-pointer")}>
+            <F0Button
+              variant="ghost"
+              size="md"
+              icon={ArrowDown}
+              label="See more"
+              onClick={(e) => {
+                e.stopPropagation()
+                nestedRowProps?.onLoadMoreChildren?.()
+              }}
             />
-          ) : (
-            <ChevronRight
-              className="pointer-events-none shrink-0"
-              size={CHEVRON_SIZE}
-            />
-          ))}
-      </div>
-      <div
-        className={cn(
-          firstCellWithChildren && "min-w-0",
-          firstCellWithNoChildrenAndTableChildren &&
-            "pl-[var(--spacing-factor)]",
-          "relative"
-        )}
-      >
-        {children}
-      </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            className={cn(
+              "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] items-center justify-center",
+              firstCellWithChildren &&
+                "pointer-events-auto cursor-pointer rounded-sm hover:bg-f1-foreground-disabled"
+            )}
+            style={
+              {
+                ...{
+                  "--chevron-parent-size": `${CHEVRON_PARENT_SIZE}px`,
+                  "--chevron-size": `${CHEVRON_SIZE}px`,
+                  "--spacing-factor": `${SPACING_FACTOR}px`,
+                },
+              } as React.CSSProperties
+            }
+            onClick={(e) => {
+              if (firstCellWithChildren) {
+                e.stopPropagation()
+                nestedRowProps?.onExpand?.()
+              }
+            }}
+          >
+            {firstCellWithChildren &&
+              (nestedRowProps?.expanded ? (
+                <ChevronDown
+                  className="pointer-events-none shrink-0"
+                  size={CHEVRON_SIZE}
+                />
+              ) : (
+                <ChevronRight
+                  className="pointer-events-none shrink-0"
+                  size={CHEVRON_SIZE}
+                />
+              ))}
+          </div>
+          <div
+            className={cn(
+              firstCellWithChildren && "min-w-0",
+              firstCellWithNoChildrenAndTableChildren &&
+                "pl-[var(--spacing-factor)]",
+              "relative"
+            )}
+          >
+            {children}
+          </div>
+        </>
+      )}
     </div>
   )
 }

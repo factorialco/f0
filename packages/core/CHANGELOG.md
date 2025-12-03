@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.42.0](https://github.com/factorialco/f0/compare/f0-core-v1.41.0...f0-core-v1.42.0) (2025-12-03)
+
+
+### Features
+
+* **AIButton:** One animated icon ([#3069](https://github.com/factorialco/f0/issues/3069)) ([58e73e2](https://github.com/factorialco/f0/commit/58e73e229ff725c95a09f698cf21d7f70ff03b12))
+
+## [1.41.0](https://github.com/factorialco/f0/compare/f0-core-v1.40.0...f0-core-v1.41.0) (2025-12-02)
+
+
+### Features
+
+* **AIButton:** new AI Button component ([#3062](https://github.com/factorialco/f0/issues/3062)) ([2638aa9](https://github.com/factorialco/f0/commit/2638aa90b23258570ecf67b625813f9f76dddf96))
+
+## [1.40.0](https://github.com/factorialco/f0/compare/f0-core-v1.39.0...f0-core-v1.40.0) (2025-11-26)
+
+
+### Features
+
+* **FilterPicker:** number filter open close ([#3017](https://github.com/factorialco/f0/issues/3017)) ([0efc8e3](https://github.com/factorialco/f0/commit/0efc8e38872e2b0bb4f973cd59997a8dd96c9dab))
+
 ## [1.39.0](https://github.com/factorialco/f0/compare/f0-core-v1.38.0...f0-core-v1.39.0) (2025-11-25)
 
 

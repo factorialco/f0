@@ -114,15 +114,13 @@ const SelectContent = forwardRef<
 
     const asList = asSelectProp === "list"
 
-    const valueArray = useMemo(
-      () =>
-        new Set(
-          (Array.isArray(value) ? value : [value]).filter(
-            (item) => item !== undefined
-          )
-        ),
-      [value]
-    )
+    const valueArray = useMemo(() => {
+      return new Set(
+        (Array.isArray(value) ? value : [value]).filter(
+          (item) => item !== undefined
+        )
+      )
+    }, [value])
 
     const positionIndex = useMemo(() => {
       return (
@@ -227,6 +225,21 @@ const SelectContent = forwardRef<
         position={asList ? "item-aligned" : position}
         collisionPadding={16}
         {...props}
+        // Prevent the default focus restoration when the select closes.
+        // This avoids infinite focus loops when the select is inside a modal
+        // or other focus-trapping container.
+        onCloseAutoFocus={(event) => {
+          // Call user's handler if provided
+          if (
+            props.onCloseAutoFocus &&
+            typeof props.onCloseAutoFocus === "function"
+          ) {
+            props.onCloseAutoFocus(event)
+          }
+          // Always prevent the default behavior - the browser will naturally
+          // return focus to the last focused element before the select opened
+          event.preventDefault()
+        }}
         onAnimationStart={() => {
           // Set the animation state to started as the elements are visible
           setAnimationStarted(true)
@@ -252,14 +265,13 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
+                // Dynamic max-height: min of desired height and available viewport space minus top/bottom content
                 asList
                   ? "max-h-full"
                   : taller
-                    ? "max-h-[440px]"
-                    : "max-h-[320px]",
-                loadingNewContent &&
-                  "select-none opacity-10 transition-opacity",
-                forceMinHeight && "min-h-[450px]"
+                    ? "max-h-[min(460px,calc(var(--radix-select-content-available-height,460px)-120px))]"
+                    : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)-120px))]",
+                loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
@@ -292,15 +304,19 @@ const SelectContent = forwardRef<
     ) : (
       <SelectPrimitive.Portal container={portalContainer}>
         <>
-          {/* Overlay to prevent clicks on the content */}
-          {open && (
+          {/* 
+            Overlay to prevent clicks from propagating.
+            Only render when NOT using a custom portal container to avoid
+            conflicts with modal focus management.
+          */}
+          {open && !portalContainer && (
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
               }}
-            ></div>
+            />
           )}
           {content}
         </>

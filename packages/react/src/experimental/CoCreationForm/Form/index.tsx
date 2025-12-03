@@ -93,6 +93,7 @@ export const CoCreationForm = ({
   isEditMode,
   onChange,
   disallowOptionalQuestions,
+  allowedQuestionTypes,
 }: CoCreationFormProps) => {
   const elements = useMemo<CoCreationFormElement[]>(
     () =>
@@ -133,6 +134,7 @@ export const CoCreationForm = ({
       elements={elements}
       onChange={onChange}
       disallowOptionalQuestions={disallowOptionalQuestions}
+      allowedQuestionTypes={allowedQuestionTypes}
     >
       <div className="flex flex-col gap-6">
         <DragProvider>

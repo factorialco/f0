@@ -1,15 +1,29 @@
+import { AvatarVariant } from "@/components/avatars/F0Avatar/F0Avatar"
+import { IconType } from "@/components/F0Icon"
 import { I18nContextType } from "@/lib/providers/i18n"
 
-export type FilterTypeSchema<Options extends object = never> = {
-  options: Options extends never ? never : Options
+export type FilterTypeSchemaOptionalOptions<Options extends object = never> = {
   label: string
+  options?: Options extends never ? never : Options
 }
+export type FilterTypeSchemaRequiredOptions<Options extends object = never> = {
+  label: string
+  options: Options extends never ? never : Options
+}
+
+export type FilterTypeSchema<
+  Options extends object = never,
+  OptionalOptions extends boolean = false,
+> = OptionalOptions extends true
+  ? FilterTypeSchemaOptionalOptions<Options>
+  : FilterTypeSchemaRequiredOptions<Options>
 
 export type FilterTypeComponentProps<
   Value = unknown,
   Options extends object = never,
+  OptionalOptions extends boolean = false,
 > = {
-  schema: FilterTypeSchema<Options>
+  schema: FilterTypeSchema<Options, OptionalOptions>
   value: Value
   onChange: (value: Value) => void
   isCompactMode?: boolean
@@ -20,19 +34,37 @@ export type FilterTypeContext<Options extends object = never> = {
   i18n: I18nContextType
 }
 
+export type ChipLabel = {
+  label: string
+} & (
+  | {
+      icon: IconType
+      avatar?: never
+    }
+  | {
+      icon?: never
+      avatar: AvatarVariant
+    }
+  | {
+      icon?: never
+      avatar?: never
+    }
+)
+
 export type FilterTypeDefinition<
   Value = unknown,
   Options extends object = never,
   EmptyValue = Value,
+  OptionalOptions extends boolean = false,
 > = {
-  /** Check if the value is empty */
   emptyValue: EmptyValue
+  /** Check if the value is empty */
   isEmpty: (
     value: Value | undefined,
     context: FilterTypeContext<Options>
   ) => boolean
   /** Render the filter form */
-  render: <Schema extends FilterTypeSchema<Options>>(props: {
+  render: <Schema extends FilterTypeSchema<Options, OptionalOptions>>(props: {
     schema: Schema
     value: Value
     onChange: (value: Value) => void
@@ -44,7 +76,7 @@ export type FilterTypeDefinition<
   chipLabel: (
     value: Value,
     context: FilterTypeContext<Options>
-  ) => string | Promise<string>
+  ) => string | ChipLabel | Promise<string | ChipLabel>
 
   /**
    * The default options to render a filter of this type, for example max and min date for a date filter, the list of options for an in filter, etc

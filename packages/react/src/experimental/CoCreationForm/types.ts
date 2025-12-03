@@ -128,4 +128,5 @@ export type CoCreationFormProps = {
   onChange: (elements: CoCreationFormElement[]) => void
   isEditMode?: boolean
   disallowOptionalQuestions?: boolean
+  allowedQuestionTypes?: QuestionType[]
 }

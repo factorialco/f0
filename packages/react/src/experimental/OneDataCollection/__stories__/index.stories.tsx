@@ -6,11 +6,14 @@ import {
   ArrowRight,
   Briefcase,
   Building,
+  ChartLine,
+  ChartPie,
   CheckCircle,
   Delete,
   Download,
   Envelope,
   Inbox,
+  Office,
   Pencil,
   Person,
   Placeholder,
@@ -197,6 +200,7 @@ export const BasicTableView: Story = {
       },
       dataAdapter: {
         fetchData: ({ filters, sortings, search }) => {
+          console.log("filters", filters)
           filters.department?.map((department) => {
             console.log("department", department)
           })
@@ -878,11 +882,12 @@ export const WithSelectableAndDefaultSelectedItems: Story = {
       selectable={(item) => item.id}
       defaultSelectedItems={{
         allSelected: false,
-        items: [
-          { id: mockUsers[0].id, checked: true },
-          { id: mockUsers[1].id, checked: false },
-          { id: mockUsers[2].id, checked: true },
-        ],
+        items: new Map([
+          [mockUsers[0].id, { id: mockUsers[0].id, checked: true }],
+          [mockUsers[1].id, { id: mockUsers[1].id, checked: false }],
+          [mockUsers[2].id, { id: mockUsers[2].id, checked: true }],
+        ]),
+        groups: new Map(),
       }}
     />
   ),
@@ -904,11 +909,11 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
       }}
       defaultSelectedItems={{
         allSelected: false,
-        items: [
-          { id: mockUsers[0].id, checked: true },
-          { id: mockUsers[2].id, checked: true },
-        ],
-        groups: [{ groupId: "Product", checked: true }],
+        items: new Map([
+          [mockUsers[0].id, { id: mockUsers[0].id, checked: true }],
+          [mockUsers[2].id, { id: mockUsers[2].id, checked: true }],
+        ]),
+        groups: new Map([["Product", { id: "Product", checked: true }]]),
       }}
     />
   ),
@@ -1869,6 +1874,212 @@ export const TableWithSecondaryActions: Story = {
                   label: "Department",
                   render: (item) => item.department,
                   sorting: "department",
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+}
+
+// Example showcasing progressBar in different visualizations (Training Module style)
+export const WithProgressBar: Story = {
+  render: () => {
+    // Mock training modules data
+    const trainingModules = [
+      {
+        id: "module-1",
+        title: "Data Protection & Privacy Compliance",
+        module: "Module 2 of 6",
+        progress: 26,
+        status: "In progress",
+        workMode: "Hybrid",
+      },
+      {
+        id: "module-2",
+        title: "Workplace Safety Guidelines",
+        module: "Module 1 of 4",
+        progress: 75,
+        status: "In progress",
+        workMode: "Remote",
+      },
+      {
+        id: "module-3",
+        title: "Leadership & Management Skills",
+        module: "Module 3 of 8",
+        progress: 100,
+        status: "Completed",
+        workMode: "Hybrid",
+      },
+      {
+        id: "module-4",
+        title: "Communication Essentials",
+        module: "Module 1 of 3",
+        progress: 0,
+        status: "Not started",
+        workMode: "Office",
+      },
+      {
+        id: "module-5",
+        title: "Time Management Techniques",
+        module: "Module 4 of 5",
+        progress: 50,
+        status: "In progress",
+        workMode: "Remote",
+      },
+    ]
+
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () =>
+          Promise.resolve({
+            records: trainingModules,
+          }),
+      },
+      itemActions: () => [
+        {
+          label: "Continue",
+          icon: ArrowRight,
+          onClick: () => console.log("Continue clicked"),
+          type: "primary",
+        },
+      ],
+    })
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "card",
+            options: {
+              title: (item) => item.title,
+              description: (item) => item.module,
+              image: () => mockImage("person", 4),
+              cardProperties: [
+                {
+                  label: "Progress",
+                  icon: ChartPie,
+                  tooltip: "Course completion progress",
+                  render: (item) => ({
+                    type: "progressBar",
+                    value: {
+                      value: item.progress,
+                      max: 100,
+                      label: `${item.progress}%`,
+                    },
+                  }),
+                },
+                {
+                  label: "Status",
+                  icon: ChartLine,
+                  tooltip: "Current status",
+                  render: (item) => ({
+                    type: "dotTag",
+                    value: {
+                      label: item.status,
+                      color:
+                        item.status === "Completed"
+                          ? "viridian"
+                          : item.status === "In progress"
+                            ? "malibu"
+                            : "smoke",
+                    },
+                  }),
+                },
+                {
+                  label: "Work Mode",
+                  icon: Office,
+                  tooltip: "Work location",
+                  render: (item) => item.workMode,
+                },
+              ],
+            },
+          },
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Title",
+                  render: (item) => item.title,
+                },
+                {
+                  label: "Module",
+                  render: (item) => item.module,
+                },
+                {
+                  label: "Progress",
+                  render: (item) => ({
+                    type: "progressBar",
+                    value: {
+                      value: item.progress,
+                      max: 100,
+                      label: `${item.progress}%`,
+                    },
+                  }),
+                },
+                {
+                  label: "Status",
+                  render: (item) => ({
+                    type: "dotTag",
+                    value: {
+                      label: item.status,
+                      color:
+                        item.status === "Completed"
+                          ? "viridian"
+                          : item.status === "In progress"
+                            ? "malibu"
+                            : "smoke",
+                    },
+                  }),
+                },
+                {
+                  label: "Work Mode",
+                  render: (item) => item.workMode,
+                },
+              ],
+            },
+          },
+          {
+            type: "list",
+            options: {
+              itemDefinition: (item) => ({
+                title: item.title,
+                description: [item.module],
+              }),
+              fields: [
+                {
+                  label: "Progress",
+                  render: (item) => ({
+                    type: "progressBar",
+                    value: {
+                      value: item.progress,
+                      max: 100,
+                      label: `${item.progress}%`,
+                    },
+                  }),
+                },
+                {
+                  label: "Status",
+                  render: (item) => ({
+                    type: "dotTag",
+                    value: {
+                      label: item.status,
+                      color:
+                        item.status === "Completed"
+                          ? "viridian"
+                          : item.status === "In progress"
+                            ? "malibu"
+                            : "smoke",
+                    },
+                  }),
+                },
+                {
+                  label: "Work Mode",
+                  render: (item) => item.workMode,
                 },
               ],
             },

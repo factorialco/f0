@@ -149,6 +149,9 @@ export const AllVariants: Story = {
       <Action variant="outlinePromote" {...args}>
         Outline Promote
       </Action>
+      <Action variant="ai" {...args}>
+        AI button
+      </Action>
       <Action variant="link" {...args}>
         Link
       </Action>

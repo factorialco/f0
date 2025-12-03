@@ -76,7 +76,7 @@ const ScrollArea = forwardRef<
       >
         <ScrollAreaPrimitive.Viewport
           ref={localViewportRef}
-          className="size-full rounded-[inherit] [&>div]:!block"
+          className="size-full snap-none rounded-[inherit] [&>div]:!block"
           tabIndex={0}
           data-scroll-container
         >

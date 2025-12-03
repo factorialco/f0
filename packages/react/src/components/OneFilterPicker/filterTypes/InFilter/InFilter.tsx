@@ -213,7 +213,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
-            placeholder={i18n.toc.search}
+            placeholder={i18n.filters.inFilter.searchPlaceholder}
             value={searchTerm}
             onChange={setSearchTerm}
             clearable
@@ -225,14 +225,14 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       )}
       <div
         className={cn(
-          "overflow-y-scroll px-2",
+          "overflow-y-auto px-2",
           isCompactMode && "px-1",
           isCompactMode ? "max-h-[360px]" : "h-full"
         )}
         onScroll={handleScroll}
       >
         {isCompactMode && (
-          <div className="sticky bottom-0 left-0 right-0 flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1">
+          <div className="sticky left-0 right-0 top-0 z-10 flex w-full flex-1 items-center justify-between gap-1 rounded bg-f1-background/80 p-2 py-1 pr-1 backdrop-blur-[8px]">
             <span className="max-w-[250px] flex-1 whitespace-nowrap">
               <OneEllipsis className="text-f1-foreground-secondary">
                 {selectedText}
@@ -240,7 +240,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             </span>
             <F0Checkbox
               id="select-all"
-              title="Select all"
+              title={i18n.actions.selectAll}
               checked={value.length === filteredOptions.length}
               onCheckedChange={handleCheckSelectAll}
               presentational

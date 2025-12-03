@@ -1,6 +1,4 @@
 import { F0Button } from "@/components/F0Button"
-import { ButtonCopy } from "@/ui/ButtonCopy"
-
 import {
   ThumbsDown,
   ThumbsDownFilled,
@@ -9,10 +7,11 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ButtonCopy } from "@/ui/ButtonCopy"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { useCallback, useRef, useState } from "react"
 import { ActionItem } from "../ActionItem"
-import { markdownRenderers as f0MarkdownRenderers } from "../markdownRenderers"
+import { markdownRenderers as f0MarkdownRenderers } from "../MarkdownRenderers"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
@@ -42,6 +41,7 @@ export const AssistantMessage = ({
   const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
   const [isHovered, setIsHovered] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout>()
+
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -51,6 +51,7 @@ export const AssistantMessage = ({
       setIsHovered(true)
     }
   }, [isGenerating, isLoading, subComponent])
+
   const handleMouseLeave = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       setIsHovered(false)
@@ -100,6 +101,7 @@ export const AssistantMessage = ({
                   }}
                 />
               </div>
+
               <div>
                 <F0Button
                   variant="ghost"
