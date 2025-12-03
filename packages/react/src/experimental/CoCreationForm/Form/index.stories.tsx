@@ -72,3 +72,10 @@ export const Default: Story = {
     ],
   },
 }
+
+export const Empty: Story = {
+  args: {
+    isEditMode: true,
+    elements: [],
+  },
+}

@@ -207,7 +207,7 @@ export function ActionsMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger tabIndex={-1} asChild>
         <F0Button
           icon={Ellipsis}
           label={t("coCreationForm.labels.actions")}

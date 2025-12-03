@@ -1,5 +1,11 @@
 import flatten from "lodash/flatten"
-import React, { createContext, useContext, useMemo } from "react"
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react"
 import { getDefaultParamsForQuestionType, getNewElementId } from "./lib"
 import {
   CoCreationFormCallbacks,
@@ -325,6 +331,22 @@ export function CoCreationFormProvider({
     })
     return element?.type === "section" ? element.section : undefined
   }
+
+  const isFirstRender = useRef(true)
+
+  const isEmpty = !elements.length
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      if (isEmpty) {
+        handleAddNewElement({
+          type: "section",
+        })
+      }
+      return
+    }
+  }, [isEmpty, handleAddNewElement])
 
   return (
     <CoCreationFormContext.Provider
