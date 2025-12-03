@@ -12,13 +12,13 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
-import { ActionBarItem, OneActionBar } from "../OneActionBar"
 import {
   filterActions,
   getPrimaryActions,
   getSecondaryActions,
   MAX_EXPANDED_ACTIONS,
 } from "./actions"
+import { ActionBar, ActionBarItem } from "./components/ActionBar"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
 import { Search } from "./components/Search"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
@@ -756,7 +756,7 @@ const OneDataCollectionComp = <
       ) : (
         <>
           {bulkActions && (
-            <OneActionBar
+            <ActionBar
               isOpen={showActionBar}
               selectedNumber={selectedItemsCount}
               primaryActions={
