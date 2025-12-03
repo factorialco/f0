@@ -148,10 +148,14 @@ const SelectContent = forwardRef<
     }, [open])
 
     useEffect(() => {
-      // Measure the items when the animation is finished and scroll to item
+      // Measure the items when the animation is finished
       virtualizer.measure()
+    }, [virtualizer, animationStarted, asList])
+
+    useEffect(() => {
+      // Scroll to selected item when position changes
       virtualizer.scrollToIndex(positionIndex)
-    }, [virtualizer, positionIndex, animationStarted, asList])
+    }, [virtualizer, positionIndex])
 
     const virtualItems = virtualizer.getVirtualItems()
 
