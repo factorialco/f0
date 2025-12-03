@@ -27,8 +27,6 @@ export type OneModalProps = {
   /** the padding of internal content areas (header, content, footer) */
   contentPadding?: ContentPadding
   position?: ModalPosition
-  /** Optional ref to the modal's content container. */
-  modalRef?: React.RefObject<HTMLDivElement | null>
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
     | ReactElement<
@@ -47,7 +45,6 @@ export const OneModal: FC<OneModalProps> = ({
   onClose,
   isOpen,
   contentPadding = "md",
-  modalRef,
   children,
 }) => {
   // Use state to store the container element so we can trigger re-renders
@@ -56,24 +53,14 @@ export const OneModal: FC<OneModalProps> = ({
   const [containerElement, setContainerElement] =
     useState<HTMLDivElement | null>(null)
 
-  const internalRef = useRef<HTMLDivElement | null>(null)
-  const portalContainerRef = modalRef ?? internalRef
+  const portalContainerRef = useRef<HTMLDivElement | null>(null)
 
-  // Callback ref to set both the internal ref, external modalRef, and state
-  const setContentRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      // Always update internal ref
-      internalRef.current = node
-      // Update external modalRef if provided (using type assertion for mutable ref)
-      if (modalRef) {
-        ;(modalRef as React.MutableRefObject<HTMLDivElement | null>).current =
-          node
-      }
-      // Update state to trigger re-render so children get the new container
-      setContainerElement(node)
-    },
-    [modalRef]
-  )
+  // Callback ref to update both the ref and state
+  const setContentRef = useCallback((node: HTMLDivElement | null) => {
+    portalContainerRef.current = node
+    // Update state to trigger re-render so children get the new container
+    setContainerElement(node)
+  }, [])
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
