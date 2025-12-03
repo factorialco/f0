@@ -34,6 +34,7 @@ const meta = {
         {
           id: "action-1",
           label: "Delete",
+          critical: true,
           icon: Delete,
           onClick: () => {
             deleteWidget(id)

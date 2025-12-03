@@ -15,6 +15,7 @@ import { LongTextCell } from "./types/longText"
 import { NumberCell } from "./types/number"
 import { PercentageCell } from "./types/percentage"
 import { PersonCell } from "./types/person"
+import { ProgressBarCell } from "./types/progressBar"
 import { StatusCell } from "./types/status"
 import { TagCell } from "./types/tag"
 import { TagListCell } from "./types/tagList"
@@ -47,6 +48,7 @@ export const valueDisplayRenderers = {
   alertTag: AlertTagCell,
   person: PersonCell,
   percentage: PercentageCell,
+  progressBar: ProgressBarCell,
   company: CompanyCell,
   team: TeamCell,
   tag: TagCell,
