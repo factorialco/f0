@@ -105,12 +105,12 @@ export interface ActionCommonProps {
   /**
    * Mouse enter event handler.
    */
-  onMouseEnter?: () => void
+  onMouseEnter?: React.MouseEventHandler<HTMLElement>
 
   /**
    * Mouse leave event handler.
    */
-  onMouseLeave?: () => void
+  onMouseLeave?: React.MouseEventHandler<HTMLElement>
 }
 
 export const buttonTypes = ["button", "submit", "reset"] as const
