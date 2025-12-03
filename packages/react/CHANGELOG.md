@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.299.1](https://github.com/factorialco/f0/compare/f0-react-v1.299.0...f0-react-v1.299.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* add support to disallow optional questions in co-creation form ([#3043](https://github.com/factorialco/f0/issues/3043)) ([7d3d6ff](https://github.com/factorialco/f0/commit/7d3d6ffd65d713d5f8b0f5abfb0d498b2e7edb60))
+
 ## [1.299.0](https://github.com/factorialco/f0/compare/f0-react-v1.298.2...f0-react-v1.299.0) (2025-12-03)
 
 
