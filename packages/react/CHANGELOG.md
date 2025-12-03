@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.298.2](https://github.com/factorialco/f0/compare/f0-react-v1.298.1...f0-react-v1.298.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* OneModal add modalRef prop for external content reference ([#3072](https://github.com/factorialco/f0/issues/3072)) ([49699c0](https://github.com/factorialco/f0/commit/49699c03a7149a856763ce1e41002bcf99347428))
+
 ## [1.298.1](https://github.com/factorialco/f0/compare/f0-react-v1.298.0...f0-react-v1.298.1) (2025-12-03)
 
 
