@@ -23,7 +23,7 @@ const meta = {
     (Story, { args }) => {
       const [widgets, setWidgets] = useState<
         Optional<DashboardWidget, "x" | "y">[]
-      >(args.widgets)
+      >(args.widgets as DashboardWidget[])
 
       const handleAddTextWidget = () => {
         setWidgets((prev) => [
@@ -151,7 +151,7 @@ const meta = {
                   widgets,
                   onChange: (updatedWidgets) => {
                     console.log("widgets onChange stories", updatedWidgets)
-                    setWidgets(updatedWidgets)
+                    setWidgets(updatedWidgets as DashboardWidget[])
                   },
                   editMode: editMode,
                 }}

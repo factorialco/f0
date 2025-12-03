@@ -1,16 +1,11 @@
-import {
-  PageLayoutBlockComponent,
-  PageLayoutBlockProps,
-} from "./groups/components/PageLayoutBlock/types"
+import { PageLayoutBlockComponent } from "./types"
 
 // Helper function to create components that inherit from PageLayoutBlock
-export const createPageLayoutBlock = <T extends Record<string, unknown>>(
+export const createPageLayoutBlock = <Props = unknown>(
   displayName: string,
-  Component: React.ComponentType<PageLayoutBlockProps & T>
-): React.ComponentType<PageLayoutBlockProps & T> => {
-  const WrappedComponent = Component as React.ComponentType<
-    PageLayoutBlockProps & T
-  > &
+  Component: React.ComponentType<Props>
+): React.ComponentType<Props> & PageLayoutBlockComponent => {
+  const WrappedComponent = Component as React.ComponentType<Props> &
     PageLayoutBlockComponent
   WrappedComponent.displayName = displayName
   WrappedComponent.__isPageLayoutBlock = true
