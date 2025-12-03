@@ -42,6 +42,8 @@ export const Action = React.forwardRef<
     compact = false,
     "aria-label": ariaLabel,
     tooltip,
+    onMouseEnter,
+    onMouseLeave,
     ...restProps
   } = props
 
@@ -131,6 +133,8 @@ export const Action = React.forwardRef<
       onClick={props.onClick}
       onFocus={props.onFocus}
       onBlur={props.onBlur}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       ref={ref as React.Ref<HTMLAnchorElement>}
       href={href}
       target={target}
@@ -146,6 +150,8 @@ export const Action = React.forwardRef<
       onClick={props.onClick}
       onFocus={props.onFocus}
       onBlur={props.onBlur}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       ref={ref as React.Ref<HTMLButtonElement>}
       data-pressed={pressed}
       role="button"

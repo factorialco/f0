@@ -1,4 +1,4 @@
-import { Calendar, Search, Summary } from "@/icons/ai"
+import { Calendar, One, Search, Summary } from "@/icons/ai"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { AIButton } from "../AIButton"
@@ -82,6 +82,13 @@ export const Sizes: Story = {
       <AIButton {...args} size="sm" label="Small" icon={Calendar} />
     </div>
   ),
+}
+
+export const OneIcon: Story = {
+  args: {
+    label: "Ask One",
+    icon: One,
+  },
 }
 
 export const Disabled: Story = {

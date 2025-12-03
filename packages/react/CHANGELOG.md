@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.298.0](https://github.com/factorialco/f0/compare/f0-react-v1.297.0...f0-react-v1.298.0) (2025-12-03)
+
+
+### Features
+
+* value display add progress bar ([#3053](https://github.com/factorialco/f0/issues/3053)) ([1becf8f](https://github.com/factorialco/f0/commit/1becf8f528e5ada5e85ae52fd0a915680c57d4e3))
+
+## [1.297.0](https://github.com/factorialco/f0/compare/f0-react-v1.296.0...f0-react-v1.297.0) (2025-12-03)
+
+
+### Features
+
+* **AIButton:** One animated icon ([#3069](https://github.com/factorialco/f0/issues/3069)) ([58e73e2](https://github.com/factorialco/f0/commit/58e73e229ff725c95a09f698cf21d7f70ff03b12))
+
+## [1.296.0](https://github.com/factorialco/f0/compare/f0-react-v1.295.0...f0-react-v1.296.0) (2025-12-02)
+
+
+### Features
+
+* create F0ActionBar component ([#3067](https://github.com/factorialco/f0/issues/3067)) ([30b3c72](https://github.com/factorialco/f0/commit/30b3c7282168737147f4a116a27c5f978f184111))
+
 ## [1.295.0](https://github.com/factorialco/f0/compare/f0-react-v1.294.0...f0-react-v1.295.0) (2025-12-02)
 
 ### Features
