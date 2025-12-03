@@ -1,6 +1,5 @@
 import { F0Button } from "@/components/F0Button"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
-import { Data } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
 import { useMemo } from "react"
@@ -11,15 +10,10 @@ import { SortAndHideListItem } from "./SortAndHideList/types"
 
 type TableSettingsProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- we dont care about the types here, just the columns names and props
-  columns: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  | Readonly<TableColumnDefinition<any, any, any>[]>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ((data: Data<any>) => Readonly<TableColumnDefinition<any, any, any>[]>)
+  columns: Readonly<TableColumnDefinition<any, any, any>[]>
   frozenColumns: number
   allowSorting: boolean
   allowHiding: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Data<any>
 }
 
 export const TableSettings = ({
@@ -31,16 +25,8 @@ export const TableSettings = ({
   const i18n = useI18n()
   const { settings, setVisualizationSettings } = useDataCollectionSettings()
 
-  const columnsArray = useMemo(() => {
-    if (typeof originalColumns === "function") {
-      return originalColumns(data)
-    }
-    ;``
-    return originalColumns
-  }, [originalColumns, data])
-
   const { columnsWithStatus } = useColumns(
-    columnsArray,
+    originalColumns,
     frozenColumns,
     settings.visualization.table,
     allowSorting,

@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import {
@@ -119,7 +120,16 @@ export const TableDynamicColumns: Story = {
     const [count, setCount] = useState(0)
     return (
       <>
-        <button onClick={() => setCount((prev) => prev + 1)}>Add column</button>
+        <div className="mb-4 flex flex-row gap-2">
+          <F0Button
+            onClick={() => setCount((prev) => prev + 1)}
+            label="Add column"
+          />
+          <F0Button
+            onClick={() => setCount((prev) => prev - 1)}
+            label="Remove column"
+          />
+        </div>
 
         <ExampleComponent
           frozenColumns={2}
@@ -152,6 +162,12 @@ export const TableDynamicColumns: Story = {
                 sorting: "department" as keyof typeof sortings,
                 width: 140,
               },
+              ...Array.from({ length: count }, (_, index) => ({
+                label: `Column ${index + 1}`,
+                render: (item: MockUser) => item.name,
+                sorting: "name" as keyof typeof sortings,
+                width: 140,
+              })),
             ].slice(0, count)
           }}
         />

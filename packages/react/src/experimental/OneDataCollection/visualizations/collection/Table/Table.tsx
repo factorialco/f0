@@ -35,6 +35,7 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { statusToChecked } from "../utils"
+import { useDataCollectionVisualizationsState } from "../VisualizationsStateProvider"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { TableVisualizationOptions } from "./types"
@@ -116,6 +117,18 @@ export const TableCollection = <
     }
     return originalColumns
   }, [originalColumns, data])
+
+  /**
+   * Set the columns instance to pass it to settings
+   */
+  const { setVisualizationState } = useDataCollectionVisualizationsState()
+
+  useEffect(() => {
+    setVisualizationState("table", (prev) => ({
+      ...prev,
+      columns: originalColumnsArray,
+    }))
+  }, [originalColumnsArray])
 
   // Sorted and hidden columns
   const { columns } = useColumns(

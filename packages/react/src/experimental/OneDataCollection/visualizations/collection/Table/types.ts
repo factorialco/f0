@@ -19,6 +19,14 @@ export type TableVisualizationSettings = {
   hidden: ColId[]
 }
 
+export type TableVisualizationState<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+> = {
+  columns: TableColumnDefinition<R, Sortings, Summaries>[]
+}
+
 export type WithOptionalSorting<
   R extends RecordType,
   Sortings extends SortingsDefinition,

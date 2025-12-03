@@ -17,13 +17,16 @@ import {
   handleTableResetSettings,
   TableCollection,
   TableCollectionProps,
+  TableColumnDefinition,
   SettingsRenderer as tableSettingsRenderer,
   TableVisualizationSettings,
+  TableVisualizationState,
 } from "./Table"
 
 export type VisualizacionTypeDefinition<
   Props,
   Settings = Record<string, never>,
+  State = Record<string, never>,
 > = {
   render: (props: Props) => JSX.Element
   name: string
@@ -32,6 +35,9 @@ export type VisualizacionTypeDefinition<
     default: Settings
     renderer?: (props: Props) => JSX.Element | null
     resetHandler?: (settings: DataCollectionSettingsContextType) => void
+  }
+  state: {
+    default: State
   }
 }
 
@@ -54,7 +60,8 @@ type CollectionVisualizations<
       NavigationFilters,
       Grouping
     >,
-    TableVisualizationSettings
+    TableVisualizationSettings,
+    TableVisualizationState<Record, Sortings, Summaries>
   >
   list: VisualizacionTypeDefinition<
     ListCollectionProps<
@@ -144,11 +151,23 @@ export const collectionVisualizations: CollectionVisualizations<
         hidden: [],
       },
     },
+    state: {
+      default: {
+        columns: [] as TableColumnDefinition<
+          RecordType,
+          SortingsDefinition,
+          SummariesDefinition
+        >[],
+      },
+    },
   },
   list: {
     name: "List",
     icon: List,
     settings: {
+      default: {},
+    },
+    state: {
       default: {},
     },
     render: <
@@ -191,6 +210,9 @@ export const collectionVisualizations: CollectionVisualizations<
     settings: {
       default: {},
     },
+    state: {
+      default: {},
+    },
     render: <
       Record extends RecordType,
       Filters extends FiltersDefinition,
@@ -229,6 +251,9 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Kanban",
     icon: Kanban,
     settings: {
+      default: {},
+    },
+    state: {
       default: {},
     },
     render: <

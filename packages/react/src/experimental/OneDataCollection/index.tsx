@@ -13,6 +13,7 @@ import {
 import { DataCollectionSettingsProvider } from "./Settings/SettingsProvider"
 import { SummariesDefinition } from "./summary"
 import { GroupingDefinition } from "./types"
+import { DataCollectionVisualizationsStateProvider } from "./visualizations/collection/VisualizationsStateProvider"
 
 export * from "./navigationFilters/types"
 export * from "./OneDatacollection"
@@ -37,7 +38,9 @@ const DataCollection = <
   >
 ) => (
   <DataCollectionSettingsProvider>
-    <OneDataCollectionComp {...props} />
+    <DataCollectionVisualizationsStateProvider>
+      <OneDataCollectionComp {...props} />
+    </DataCollectionVisualizationsStateProvider>
   </DataCollectionSettingsProvider>
 )
 
