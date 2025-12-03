@@ -93,6 +93,7 @@ export const Section = ({
               "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
               inputDisabled && "cursor-not-allowed"
             )}
+            autoFocus
           />
           {isEditMode && !locked && (
             <div

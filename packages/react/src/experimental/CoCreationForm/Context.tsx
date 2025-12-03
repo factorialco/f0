@@ -1,4 +1,3 @@
-import { useI18n } from "@/lib/providers/i18n"
 import flatten from "lodash/flatten"
 import React, { createContext, useContext, useMemo } from "react"
 import { getDefaultParamsForQuestionType, getNewElementId } from "./lib"
@@ -35,8 +34,6 @@ export function CoCreationFormProvider({
   elements: CoCreationFormElement[]
   onChange: (elements: CoCreationFormElement[]) => void
 }) {
-  const { t } = useI18n()
-
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
     if (!lastElement) return undefined
@@ -190,14 +187,12 @@ export function CoCreationFormProvider({
             type: "section" as const,
             section: {
               id: newElementId,
-              title: t("coCreationForm.defaults.newSection"),
+              title: "",
               questions: [
                 {
                   id: getNewElementId("question"),
-                  title: t("coCreationForm.defaults.newQuestion"),
-                  description: t(
-                    "coCreationForm.defaults.newQuestionDescription"
-                  ),
+                  title: "",
+                  description: "",
                   type: "text",
                   required: true,
                   ...getDefaultParamsForQuestionType("text"),
@@ -209,8 +204,8 @@ export function CoCreationFormProvider({
             type: "question" as const,
             question: {
               id: newElementId,
-              title: t("coCreationForm.defaults.newQuestion"),
-              description: t("coCreationForm.defaults.newQuestionDescription"),
+              title: "",
+              description: "",
               type,
               required: true,
               ...getDefaultParamsForQuestionType(type),
