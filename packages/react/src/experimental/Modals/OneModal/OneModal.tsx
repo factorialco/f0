@@ -26,24 +26,7 @@ export type OneModalProps = {
   /** the padding of internal content areas (header, content, footer) */
   contentPadding?: ContentPadding
   position?: ModalPosition
-  /**
-   * Optional ref to the modal's content container.
-   * Use this ref as the `portalContainer` prop for components like F0Select
-   * to ensure dropdowns render inside the modal and work correctly
-   * with modal focus management.
-   *
-   * @example
-   * ```tsx
-   * const modalRef = useRef<HTMLDivElement>(null)
-   *
-   * <OneModal modalRef={modalRef} isOpen={isOpen} onClose={onClose}>
-   *   <OneModal.Header title="Example" />
-   *   <OneModal.Content>
-   *     <F0Select portalContainer={modalRef.current} ... />
-   *   </OneModal.Content>
-   * </OneModal>
-   * ```
-   */
+  /** Optional ref to the modal's content container. */
   modalRef?: React.RefObject<HTMLDivElement | null>
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
