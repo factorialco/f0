@@ -11,7 +11,8 @@ import { WithPlaceholder } from "../types"
 export interface ProgressBarValue extends WithPlaceholder {
   value: number | undefined
   max?: number
-  label?: string
+  label: string
+  hideLabel?: boolean
   color?: string
 }
 
@@ -45,6 +46,8 @@ export const ProgressBarCell = (
     typeof args === "object" && "max" in args ? (args.max ?? 100) : 100
   const label =
     typeof args === "object" && "label" in args ? args.label : undefined
+  const hideLabel =
+    typeof args === "object" && "hideLabel" in args ? args.hideLabel : undefined
   const color =
     typeof args === "object" && "color" in args ? args.color : undefined
 
@@ -62,11 +65,11 @@ export const ProgressBarCell = (
           value={percentage}
           max={100}
           getValueLabel={(val) => `${(val ?? 0).toFixed(1)}%`}
-          aria-label={label ?? `${percentage.toFixed(1)}%`}
+          aria-label={label}
           className="w-full"
         />
       </div>
-      {label !== undefined && (
+      {!hideLabel && (
         <div className="flex-shrink-0 text-sm font-medium text-f1-foreground">
           {label}
         </div>
