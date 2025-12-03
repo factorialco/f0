@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.298.0](https://github.com/factorialco/f0/compare/f0-react-v1.297.0...f0-react-v1.298.0) (2025-12-03)
+
+
+### Features
+
+* value display add progress bar ([#3053](https://github.com/factorialco/f0/issues/3053)) ([1becf8f](https://github.com/factorialco/f0/commit/1becf8f528e5ada5e85ae52fd0a915680c57d4e3))
+
 ## [1.297.0](https://github.com/factorialco/f0/compare/f0-react-v1.296.0...f0-react-v1.297.0) (2025-12-03)
 
 
