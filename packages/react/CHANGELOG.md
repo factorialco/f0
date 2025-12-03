@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.298.1](https://github.com/factorialco/f0/compare/f0-react-v1.298.0...f0-react-v1.298.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* add support to only allow certain question types in co-creation form ([#3044](https://github.com/factorialco/f0/issues/3044)) ([47bd674](https://github.com/factorialco/f0/commit/47bd674b2bcd1e25c4bf012fc1226a95679a3dd1))
+
 ## [1.298.0](https://github.com/factorialco/f0/compare/f0-react-v1.297.0...f0-react-v1.298.0) (2025-12-03)
 
 
