@@ -4,7 +4,7 @@ import { GridStackRender } from "../grid-stack-render"
 
 // Mock react-dom
 vi.mock("react-dom", () => ({
-  createPortal: vi.fn((children, container) => children),
+  createPortal: vi.fn((children) => children),
 }))
 
 // Mock context hooks

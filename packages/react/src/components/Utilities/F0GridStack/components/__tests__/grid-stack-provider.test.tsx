@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { GridStackReactWidget } from "../../F0GridStack"
 import { GridStackProvider } from "../grid-stack-provider"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _ = React
 
 // Mock gridstack

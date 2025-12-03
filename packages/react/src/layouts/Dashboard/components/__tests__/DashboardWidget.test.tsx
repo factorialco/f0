@@ -10,6 +10,7 @@ vi.mock("@/components/F0Text", () => ({
   ),
 }))
 
+const Icon = () => <div data-testid="icon" />
 vi.mock("@/components/F0Icon", () => ({
   F0Icon: ({
     icon: Icon,
@@ -97,7 +98,6 @@ describe("DashboardWidget", () => {
       )
 
       // Icon should not be present when draggable is false
-      const icons = screen.queryAllByTestId("icon")
       // The icon might still be rendered but not visible, so we check the handle container
       const handle = document.querySelector('[data-gs-handle="true"]')
       expect(handle).not.toBeInTheDocument()
