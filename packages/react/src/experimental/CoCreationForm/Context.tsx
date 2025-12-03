@@ -7,16 +7,22 @@ import React, {
   useMemo,
   useRef,
 } from "react"
-import { getDefaultParamsForQuestionType, getNewElementId } from "./lib"
+import {
+  getDefaultParamsForQuestionType,
+  getDefaultQuestionTypeToAdd,
+  getNewElementId,
+} from "./lib"
 import {
   CoCreationFormCallbacks,
   CoCreationFormElement,
   QuestionElement,
+  QuestionType,
   SectionElement,
 } from "./types"
 
 type CoCreationFormContextType = CoCreationFormCallbacks & {
   isEditMode?: boolean
+  disallowOptionalQuestions?: boolean
   lastElementId: string | undefined
   getQuestionById: (questionId: string) => QuestionElement | undefined
   deleteElement: (elementId: string) => void
@@ -24,23 +30,30 @@ type CoCreationFormContextType = CoCreationFormCallbacks & {
   getSectionContainingQuestion: (
     questionId: string
   ) => SectionElement | undefined
+  isQuestionTypeAllowed: (questionType: QuestionType) => boolean
 }
 
 const CoCreationFormContext = createContext<
   CoCreationFormContextType | undefined
 >(undefined)
 
-export function CoCreationFormProvider({
-  elements,
-  children,
-  isEditMode,
-  onChange,
-}: {
+type CoCreationFormProviderProps = {
   children: React.ReactNode
   isEditMode?: boolean
   elements: CoCreationFormElement[]
   onChange: (elements: CoCreationFormElement[]) => void
-}) {
+  disallowOptionalQuestions?: boolean
+  allowedQuestionTypes?: QuestionType[]
+}
+
+export function CoCreationFormProvider({
+  elements,
+  children,
+  isEditMode,
+  disallowOptionalQuestions,
+  onChange,
+  allowedQuestionTypes,
+}: CoCreationFormProviderProps) {
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
     if (!lastElement) return undefined
@@ -195,6 +208,9 @@ export function CoCreationFormProvider({
         type === "section" ? "section" : "question"
       )
 
+      const defaultQuestionTypeToAdd =
+        getDefaultQuestionTypeToAdd(allowedQuestionTypes)
+
       const newElement: CoCreationFormElement =
         type === "section"
           ? {
@@ -207,9 +223,11 @@ export function CoCreationFormProvider({
                     id: getNewElementId("question"),
                     title: "",
                     description: "",
-                    type: "text",
+                    type: defaultQuestionTypeToAdd,
                     required: true,
-                    ...getDefaultParamsForQuestionType("text"),
+                    ...getDefaultParamsForQuestionType(
+                      defaultQuestionTypeToAdd
+                    ),
                   } as QuestionElement,
                 ],
               },
@@ -228,7 +246,7 @@ export function CoCreationFormProvider({
 
       handleAddElement({ element: newElement, afterId })
     },
-    [handleAddElement]
+    [handleAddElement, allowedQuestionTypes]
   )
 
   const handleDuplicateElement: NonNullable<
@@ -358,6 +376,10 @@ export function CoCreationFormProvider({
     }
   }, [isEmpty, handleAddNewElement])
 
+  const isQuestionTypeAllowed = (questionType: QuestionType) => {
+    return !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
+  }
+
   return (
     <CoCreationFormContext.Provider
       value={{
@@ -371,6 +393,8 @@ export function CoCreationFormProvider({
         getQuestionById,
         deleteElement,
         lastElementId,
+        disallowOptionalQuestions,
+        isQuestionTypeAllowed,
       }}
     >
       {children}

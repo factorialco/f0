@@ -37,3 +37,37 @@ export const IconType: Story = {
     },
   },
 }
+
+export const IconWithHiddenLabel: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Icon with hidden label",
+      render: () => ({
+        type: "icon",
+        value: {
+          icon: Placeholder,
+          label: "Status indicator",
+          hideLabel: true,
+        },
+      }),
+    },
+  },
+}
+
+export const IconWithTooltip: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Icon with tooltip",
+      render: () => ({
+        type: "icon",
+        value: {
+          icon: Placeholder,
+          label: "Icon",
+          tooltip: "This is a helpful tooltip describing the icon",
+        },
+      }),
+    },
+  },
+}

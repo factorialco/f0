@@ -47,3 +47,33 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
 
 export const getNewElementId = (type: "section" | "question") =>
   `new-${type}-${Date.now()}`
+
+const DEFAULT_QUESTION_TYPES: QuestionType[] = [
+  "text",
+  "longText",
+  "select",
+  "multi-select",
+  "numeric",
+  "link",
+  "date",
+]
+
+export const getDefaultQuestionTypeToAdd = (
+  allowedQuestionTypes?: QuestionType[]
+) => {
+  if (!allowedQuestionTypes) {
+    return DEFAULT_QUESTION_TYPES[0]
+  }
+
+  const result = DEFAULT_QUESTION_TYPES.find((type) =>
+    allowedQuestionTypes?.includes(type)
+  )
+
+  if (!result) {
+    throw new Error(
+      `No default question type found for allowed question types: ${allowedQuestionTypes.join(", ")}`
+    )
+  }
+
+  return result
+}

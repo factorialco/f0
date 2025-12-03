@@ -1,3 +1,4 @@
+import { OneModalContext } from "@/experimental/Modals/OneModal/OneModalProvider"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -28,6 +29,7 @@ import { isEqual } from "lodash"
 import {
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -99,6 +101,22 @@ const F0SelectComponent = forwardRef(function Select<
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
+  // If inside a OneModal and no portalContainer is provided, use the modal's container
+  // only for center/fullscreen modals (which have focus trap).
+  // For side panels (left/right), render in body to prevent clipping.
+  const modalContext = useContext(OneModalContext)
+  const shouldUseModalContainer =
+    modalContext.portalContainer &&
+    (modalContext.position === "center" ||
+      modalContext.position === "fullscreen")
+
+  const effectivePortalContainer =
+    portalContainer !== undefined
+      ? portalContainer
+      : shouldUseModalContainer
+        ? modalContext.portalContainer
+        : undefined
+
   // Extract onSelectItems from props for multiple selection
   const onSelectItems =
     "onSelectItems" in props ? props.onSelectItems : undefined
@@ -131,7 +149,9 @@ const F0SelectComponent = forwardRef(function Select<
         localValue?.map((item) => String(item)) ?? []
       )
     ) {
-      setLocalValue(toArray(value) ?? defaultValues ?? [])
+      const newValue = toArray(value) ?? defaultValues ?? []
+      // Ensure unique values to prevent duplicates
+      setLocalValue(Array.from(new Set(newValue)))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -269,7 +289,10 @@ const F0SelectComponent = forwardRef(function Select<
 
     const items = new Map() as SelectedItemsState<ActualRecordType>["items"]
 
-    for (const val of values) {
+    // Use Set to ensure unique values and prevent duplicates
+    const uniqueValues = Array.from(new Set(values))
+
+    for (const val of uniqueValues) {
       const itemData = itemsByValue[val]
       items.set(val, {
         id: val,
@@ -409,7 +432,8 @@ const F0SelectComponent = forwardRef(function Select<
 
       // Sync localValue with actual selection state
       // This ensures the preview shows correct items after deselection
-      setLocalValue(values)
+      // Use Set to ensure unique values and prevent duplicates
+      setLocalValue(Array.from(new Set(values)))
 
       const records = checkedItems
         .map((item) => item.item)
@@ -683,7 +707,7 @@ const F0SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-            portalContainer={portalContainer}
+            portalContainer={effectivePortalContainer}
           />
         )}
       </SelectPrimitive>
