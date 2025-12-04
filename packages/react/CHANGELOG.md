@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.301.0](https://github.com/factorialco/f0/compare/f0-react-v1.300.0...f0-react-v1.301.0) (2025-12-04)
+
+
+### Features
+
+* layout grid ([#2989](https://github.com/factorialco/f0/issues/2989)) ([b1fc994](https://github.com/factorialco/f0/commit/b1fc9947a3259800847473481748a8238e055dd8))
+
 ## [1.300.0](https://github.com/factorialco/f0/compare/f0-react-v1.299.4...f0-react-v1.300.0) (2025-12-04)
 
 
