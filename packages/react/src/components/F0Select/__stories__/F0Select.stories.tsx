@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { F0Select, F0SelectItemObject, selectSizes } from "../index"
+import { F0Select, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import {
@@ -221,13 +221,8 @@ const meta: Meta = {
         SelectedItemsDetailedStatus<any, any> | undefined
       >(undefined)
 
-      const handleOnChange = (
-        value: string,
-        item?: unknown,
-        option?: F0SelectItemObject<string>
-      ) => {
+      const handleOnChange = (value: string) => {
         setLocalValue(value)
-        console.log("selected:", value, item, option)
       }
 
       const handleOnSearchChange = (value: string) => {
@@ -642,9 +637,6 @@ export const MultipleNotPaginated: Story = {
       avatar: item.avatar,
       description: `${item.jobTitle} · ${item.departmentName}`,
     }),
-    onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
-    }),
   },
 }
 
@@ -684,9 +676,6 @@ export const MultiplePaginated: Story = {
       label: item.label,
       avatar: item.avatar,
     }),
-    onChange: fn((value) => {
-      console.log("value", value)
-    }),
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
     }),
@@ -717,9 +706,6 @@ export const MultipleManualSelectionOnly: Story = {
       label: item.label,
       avatar: item.avatar,
       description: `${item.jobTitle} · ${item.departmentName}`,
-    }),
-    onSelectItems: fn((selectionStatus) => {
-      console.log("selectedIds:", selectionStatus.selectedIds)
     }),
   },
 }
