@@ -1,8 +1,10 @@
-import { screen, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
+import React from "react"
 import { describe, expect, it, vi } from "vitest"
 import { DashboardWidget } from "../DashboardWidget"
 
+const _ = React
 // Mock components
 vi.mock("@/components/F0Text", () => ({
   F0Text: ({ content }: { content: string }) => (
@@ -142,17 +144,22 @@ describe("DashboardWidget", () => {
       expect(handle).toBeInTheDocument()
     })
 
-    it("should render actions dropdown when provided", () => {
+    it("should render actions dropdown when provided", async () => {
       const actions = [
         { id: "action-1", label: "Action 1" },
         { id: "action-2", label: "Action 2" },
       ]
 
-      zeroRender(
+      const { container } = zeroRender(
         <DashboardWidget title="Widget" actions={actions}>
           <div>Content</div>
         </DashboardWidget>
       )
+
+      const widget = container.querySelector("div.relative")
+      if (widget) {
+        await userEvent.hover(widget)
+      }
 
       expect(screen.getByTestId("dropdown-internal")).toBeInTheDocument()
     })
