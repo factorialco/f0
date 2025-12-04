@@ -17,6 +17,7 @@ import {
   updateUrlWithFilters,
 } from "../utils"
 import {
+  additivePresets,
   filterDefinition,
   generateCountries,
   getPresetMock,
@@ -150,6 +151,46 @@ const FiltersWithPresetsAndInitialState = () => {
 
 export const WithPresetsAndInitialFilters: StoryObj = {
   render: () => <FiltersWithPresetsAndInitialState />,
+}
+
+/**
+ * Additive presets merge their filter with existing selections instead of replacing them.
+ * This is useful for status filters or other filters that should combine with the user's
+ * current selection.
+ *
+ * Try this:
+ * 1. Select a Department (e.g., "Engineering")
+ * 2. Click on a location preset (e.g., "London Office")
+ * 3. Notice both filters are now active - the preset merged with your selection
+ * 4. Click the same preset again to remove only the location filter
+ */
+const FiltersWithAdditivePresets = () => {
+  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
+    {}
+  )
+
+  return (
+    <div className="w-[800px]">
+      <p className="mb-4 text-sm text-f1-foreground-secondary">
+        These presets use <code>mode: &quot;additive&quot;</code> - they merge
+        with your existing filters instead of replacing them. Try selecting a
+        department first, then click a location preset.
+      </p>
+      <OneFilterPickerComponent
+        filters={filterDefinition}
+        value={filters}
+        presets={additivePresets}
+        onChange={setFilters}
+      />
+      <pre className="font-mono mt-4 rounded bg-f1-background-secondary p-4 text-sm">
+        {JSON.stringify(filters, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const WithAdditivePresets: StoryObj = {
+  render: () => <FiltersWithAdditivePresets />,
 }
 
 type Story = StoryObj<typeof OneFilterPicker.Root>
