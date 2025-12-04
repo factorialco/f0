@@ -6,7 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
-import { Optional } from "@/lib/typescript-utils/opional"
+import { Optional } from "@/lib/typescript-utils/optional"
 import { useState } from "react"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 

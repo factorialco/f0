@@ -493,42 +493,6 @@ describe("GridStackProvider", () => {
     })
   })
 
-  describe("Context Provider", () => {
-    it("should provide context with all required properties", async () => {
-      const TestComponent = async () => {
-        const { useGridStackContext } = await import("../grid-stack-context")
-        const context = useGridStackContext()
-        return (
-          <div>
-            <div data-testid="has-options">
-              {context.options ? "yes" : "no"}
-            </div>
-            <div data-testid="has-gridstack">
-              {context.gridStack !== undefined ? "yes" : "no"}
-            </div>
-            <div data-testid="has-react-map">
-              {context._reactContentMap ? "yes" : "no"}
-            </div>
-            <div data-testid="has-raw-map">
-              {context._rawWidgetMetaMap ? "yes" : "no"}
-            </div>
-          </div>
-        )
-      }
-
-      // Test that GridStackProvider renders without errors
-      // Context is tested separately in grid-stack-context.test.tsx
-      zeroRender(
-        <GridStackProvider options={{ column: 12 }} widgets={[]}>
-          <div>Test</div>
-        </GridStackProvider>
-      )
-
-      // Component should render successfully
-      expect(mockGridStackInstance).toBeDefined()
-    })
-  })
-
   describe("Error Handling", () => {
     it("should handle errors during widget update", () => {
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {})

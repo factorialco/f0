@@ -4,7 +4,7 @@ import {
   GridStackReactWidget,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 
-import { Optional } from "@/lib/typescript-utils/opional"
+import { Optional } from "@/lib/typescript-utils/optional"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
