@@ -3,13 +3,8 @@ import { F0Button } from "@/components/F0Button"
 import { OneCalendar } from "@/experimental/OneCalendar"
 import { getMockValue } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { cloneElement, useCallback, useMemo, useRef, useState } from "react"
-import {
-  F0GridStack,
-  GridStackReactWidget,
-  GridStackWidgetPosition,
-  type F0GridStackRef,
-} from "../F0GridStack"
+import { cloneElement, useCallback, useState } from "react"
+import { F0GridStack, GridStackReactWidget } from "../F0GridStack"
 
 const meta = {
   title: "Utilities/GridStack",
@@ -69,8 +64,8 @@ const meta = {
             allowResize?: boolean;
             // Whether the node can be moved
             allowMove?: boolean;
-            // The function to render the node
-            renderFn?: () => React.ReactElement;
+            // The React element to render
+            content?: React.ReactElement;
           }`,
         },
       },
@@ -81,18 +76,32 @@ const meta = {
   },
   decorators: [
     (Story, { args }) => {
-      const [positions, setPositions] = useState<GridStackWidgetPosition[]>([])
+      const [widgets, setWidgets] = useState<GridStackReactWidget[]>(
+        args.widgets
+      )
       return (
         <div className="h-full w-full">
           <Story
             args={{
               ...args,
-              onChange: (layout) => {
-                setPositions(layout)
+              widgets,
+              onChange: (widgets) => {
+                setWidgets(widgets)
               },
             }}
           />
-          <div id="positions">{JSON.stringify(positions, null, 2)}</div>
+          <div id="widgets">
+            {JSON.stringify(
+              widgets.map((w) => {
+                return {
+                  ...w,
+                  content: "?",
+                }
+              }),
+              null,
+              2
+            )}
+          </div>
         </div>
       )
     },
@@ -125,7 +134,7 @@ export const Default: Story = {
       id: `widget-${index}`,
       w: 2,
       h: 2,
-      renderFn: () => (
+      content: (
         <div className="h-full rounded-md bg-f1-background-secondary p-4">
           {getMockValue(mockComponents, index)}
         </div>
@@ -134,7 +143,7 @@ export const Default: Story = {
   },
 }
 
-export const WithRefMethods: Story = {
+export const WithMethods: Story = {
   args: {
     options: {
       column: 12,
@@ -142,64 +151,56 @@ export const WithRefMethods: Story = {
     widgets: [],
   },
   render: () => {
-    const gridRef = useRef<F0GridStackRef>(null)
-    const [widgetCounter, setWidgetCounter] = useState<number>(10)
-
-    const handleAddWidget = useCallback(() => {
-      const newId = `node-${widgetCounter + 1}`
-      gridRef.current?.addWidget({
-        id: newId,
+    const [widgets, setWidgets] = useState<GridStackReactWidget[]>(
+      Array.from({ length: 10 }, (_, index) => ({
+        id: `node-${index + 1}`,
         w: 2,
         h: 2,
         meta: {
-          title: `New Widget ${newId}`,
+          title: `Widget ${index + 1}`,
         },
-        renderFn: () => (
-          <div className="h-full rounded-md bg-f1-background-accent p-4">
-            New Widget {newId}
+        content: (
+          <div
+            key={`node-${index + 1}`}
+            className="h-full rounded-md bg-f1-background-secondary p-4"
+          >
+            {cloneElement(getMockValue(mockComponents, index), {
+              key: `node-${index + 1}`,
+            })}
           </div>
         ),
-      })
-      setWidgetCounter(widgetCounter + 1)
-    }, [widgetCounter])
-
-    const handleRemoveWidget = () => {
-      if (widgetCounter > 0) {
-        const idToRemove = `node-${widgetCounter}`
-        gridRef.current?.removeWidget(idToRemove)
-        setWidgetCounter((prev) => prev - 1)
-      }
-    }
-
-    const handleRemoveAll = () => {
-      gridRef.current?.removeAll()
-      setWidgetCounter(0)
-    }
-
-    const widgets = useMemo<GridStackReactWidget[]>(
-      () =>
-        Array.from({ length: 10 }, (_, index) => ({
-          id: `node-${index + 1}`,
+      }))
+    )
+    const handleAddWidget = useCallback(() => {
+      const randomIndex = Math.random()
+      const newId = `node-${randomIndex.toString().replace(".", "")}`
+      setWidgets((prev) => [
+        ...prev,
+        {
+          id: newId,
           w: 2,
           h: 2,
           meta: {
-            title: `Widget ${index + 1}`,
+            title: `New Widget ${newId}`,
           },
-          renderFn: () => (
-            <div
-              key={`node-${index + 1}`}
-              className="h-full rounded-md bg-f1-background-secondary p-4"
-            >
-              {cloneElement(getMockValue(mockComponents, index), {
-                key: `node-${index + 1}`,
-              })}
+          content: (
+            <div className="h-full rounded-md bg-f1-background-accent p-4">
+              New Widget {newId}
             </div>
           ),
-        })),
-      []
-    )
+        },
+      ])
+    }, [])
 
-    const [positions, setPositions] = useState<GridStackWidgetPosition[]>([])
+    const handleRemoveWidget = () => {
+      setWidgets((prev) => {
+        return prev.slice(0, -1)
+      })
+    }
+
+    const handleRemoveAll = () => {
+      setWidgets([])
+    }
 
     return (
       <div className="flex flex-col gap-4">
@@ -209,18 +210,25 @@ export const WithRefMethods: Story = {
           <F0Button onClick={handleRemoveAll} label="Remove All" />
         </div>
         <F0GridStack
-          ref={gridRef}
           options={{
             column: 12,
           }}
-          onChange={(positions) => {
-            console.log("layout", positions)
-            setPositions(positions)
-          }}
+          onChange={setWidgets}
           widgets={widgets}
         />
 
-        <div id="positions">{JSON.stringify(positions, null, 2)}</div>
+        <div id="widgets">
+          {JSON.stringify(
+            widgets.map((w) => {
+              return {
+                ...w,
+                content: "?",
+              }
+            }),
+            null,
+            2
+          )}
+        </div>
       </div>
     )
   },

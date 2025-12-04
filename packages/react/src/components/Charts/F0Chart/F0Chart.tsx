@@ -21,6 +21,18 @@ export const F0Chart = ({
   useEffect(() => {
     if (ref.current) {
       chart.current = echarts.init(ref.current, f0LightTheme)
+
+      const container = ref.current
+      const resizeObserver = new ResizeObserver(() => {
+        chart.current?.resize()
+      })
+
+      resizeObserver.observe(container)
+
+      return () => {
+        resizeObserver.disconnect()
+        chart.current?.dispose()
+      }
     }
   }, [ref])
 

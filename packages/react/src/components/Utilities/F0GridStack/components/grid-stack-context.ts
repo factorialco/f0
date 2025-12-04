@@ -7,19 +7,8 @@ export type GridStackWidgetWithRequiredId = GridStackWidget & {
 }
 
 export const GridStackContext = createContext<{
-  initialOptions: GridStackOptions
+  options: GridStackOptions
   gridStack: GridStack | null
-  addWidget: (widget: GridStackWidgetWithRequiredId) => void
-  removeWidget: (id: string) => void
-  addSubGrid: (
-    subGrid: GridStackWidgetWithRequiredId & {
-      subGridOpts: Required<GridStackWidget>["subGridOpts"] & {
-        children: Array<GridStackWidgetWithRequiredId>
-      }
-    }
-  ) => void
-  removeAll: () => void
-
   _gridStack: {
     value: GridStack | null
     set: React.Dispatch<React.SetStateAction<GridStack | null>>
@@ -27,6 +16,10 @@ export const GridStackContext = createContext<{
   _rawWidgetMetaMap: {
     value: Map<string, GridStackWidget>
     set: React.Dispatch<React.SetStateAction<Map<string, GridStackWidget>>>
+  }
+  _reactContentMap: {
+    value: Map<string, React.ReactElement>
+    set: React.Dispatch<React.SetStateAction<Map<string, React.ReactElement>>>
   }
 } | null>(null)
 

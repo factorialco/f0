@@ -7,7 +7,7 @@ import * as HeaderStories from "../Header/PageHeader/index.stories"
 import { Tabs } from "../Tabs"
 import * as TabsStories from "../Tabs/index.stories"
 
-import { StandardLayout } from "@/components/layouts/StandardLayout"
+import { StandardLayout } from "@/layouts/StandardLayout"
 import { ComponentProps } from "react"
 import { ApplicationFrame } from "../ApplicationFrame"
 

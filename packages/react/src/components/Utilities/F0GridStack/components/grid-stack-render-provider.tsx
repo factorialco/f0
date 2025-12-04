@@ -19,12 +19,12 @@ export const gridWidgetContainersMap = new WeakMap<
 export function GridStackRenderProvider({ children }: PropsWithChildren) {
   const {
     _gridStack: { value: gridStack, set: setGridStack },
-    initialOptions,
+    options,
   } = useGridStackContext()
 
   const widgetContainersRef = useRef<Map<string, HTMLElement>>(new Map())
   const containerRef = useRef<HTMLDivElement>(null)
-  const optionsRef = useRef<GridStackOptions>(initialOptions)
+  const optionsRef = useRef<GridStackOptions>(options)
 
   const renderCBFn = useCallback(
     (element: HTMLElement, widget: GridStackWidget & { grid?: GridStack }) => {
@@ -44,39 +44,73 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
     []
   )
 
-  const initGrid = useCallback(() => {
+  const initGridStackInstance = useCallback(() => {
     if (containerRef.current) {
       GridStack.renderCB = renderCBFn
-      return GridStack.init(optionsRef.current, containerRef.current)
+      const instance = GridStack.init(optionsRef.current, containerRef.current)
+      // Ensure handle option is set immediately after initialization
+      if (instance && optionsRef.current.handle && instance.opts) {
+        instance.opts.handle = optionsRef.current.handle
+      }
+      return instance
     }
     return null
   }, [renderCBFn])
 
+  // Helper to compare options excluding children
+  const compareOptionsWithoutChildren = (
+    a: GridStackOptions,
+    b: GridStackOptions
+  ): boolean => {
+    const { children: _, ...aWithoutChildren } = a
+    const { children: __, ...bWithoutChildren } = b
+    return isEqual(aWithoutChildren, bWithoutChildren)
+  }
+
   useLayoutEffect(() => {
-    if (!isEqual(initialOptions, optionsRef.current) && gridStack) {
+    // Only recreate gridStack if grid configuration options change (excluding children)
+    // Widget changes are handled separately in grid-stack-provider
+    if (
+      !compareOptionsWithoutChildren(options, optionsRef.current) &&
+      gridStack
+    ) {
       try {
+        // Remove all widgets first
         gridStack.removeAll(false)
+        // Destroy the gridStack instance (this should clean up event listeners)
         gridStack.destroy(false)
         widgetContainersRef.current.clear()
         // Clean up the WeakMap entry for this grid instance
         gridWidgetContainersMap.delete(gridStack)
-        optionsRef.current = initialOptions
-        setGridStack(initGrid())
+        // Update options ref before creating new instance
+        optionsRef.current = options
+        // Set to null first to trigger cleanup in grid-stack-provider
+        // This ensures the useEffect cleanup runs before creating a new instance
+        setGridStack(null)
       } catch (e) {
-        console.error("Error reinitializing gridstack", e)
+        console.error("Error destroying gridstack", e)
+      }
+    } else if (gridStack) {
+      // Update options ref even if we're not recreating (for widget sync)
+      optionsRef.current = options
+      // Update grid options (like handle) if they changed
+      // This ensures handle option is applied to existing widgets
+      if (options.handle && gridStack.opts) {
+        gridStack.opts.handle = options.handle
       }
     }
-  }, [initialOptions, gridStack, initGrid, setGridStack])
+  }, [options, gridStack, setGridStack])
 
+  // Separate effect to create new instance after cleanup or on initial mount
   useLayoutEffect(() => {
-    if (!gridStack) {
+    if (!gridStack && containerRef.current) {
       try {
-        setGridStack(initGrid())
+        setGridStack(initGridStackInstance())
       } catch (e) {
         console.error("Error initializing gridstack", e)
       }
     }
-  }, [gridStack, initGrid, setGridStack])
+  }, [gridStack, initGridStackInstance, setGridStack])
 
   return (
     <GridStackRenderContext.Provider
