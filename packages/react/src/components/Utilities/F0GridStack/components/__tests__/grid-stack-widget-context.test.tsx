@@ -80,7 +80,7 @@ describe("grid-stack-widget-context", () => {
     })
 
     it("should handle different widget IDs", () => {
-      const TestComponent = ({ widgetId }: { widgetId: string }) => {
+      const TestComponent = () => {
         const context = useGridStackWidgetContext()
         return (
           <div>

@@ -453,9 +453,7 @@ describe("Dashboard", () => {
       expect(React.isValidElement(content1)).toBe(true)
 
       // Test editMode = false
-      const { rerender } = zeroRender(
-        <Dashboard widgets={widgets} editMode={false} />
-      )
+      zeroRender(<Dashboard widgets={widgets} editMode={false} />)
 
       const callArgs2 = mockF0GridStack.mock.calls[0][0]
       const gridWidgets2 = callArgs2.widgets as GridStackReactWidget[]

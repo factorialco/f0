@@ -19,8 +19,6 @@ export const SortableBlock = ({ id, children }: SortableBlockProps) => {
     flexDirection: "column" as const,
   }
 
-  console.log(style)
-
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       {children}

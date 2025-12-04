@@ -64,7 +64,6 @@ export const GroupMasonry = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    console.log(over)
     setActiveId(null)
 
     if (over && active.id !== over.id) {
