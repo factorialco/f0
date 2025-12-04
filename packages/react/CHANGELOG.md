@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.302.0](https://github.com/factorialco/f0/compare/f0-react-v1.301.0...f0-react-v1.302.0) (2025-12-04)
+
+
+### Features
+
+* add disableSelectAll prop to F0Select for manual item selection ([#3082](https://github.com/factorialco/f0/issues/3082)) ([f35e596](https://github.com/factorialco/f0/commit/f35e596afa5a0e8d72e2d9e7e280457232cea2bb))
+
 ## [1.301.0](https://github.com/factorialco/f0/compare/f0-react-v1.300.0...f0-react-v1.301.0) (2025-12-04)
 
 
