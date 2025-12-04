@@ -1,9 +1,9 @@
-import type { GridStackReactWidget } from "@/components/Utilities/F0GridStack/F0GridStack"
 import { screen, zeroRender } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Dashboard, type Widget } from "../Dashboard"
+import { Dashboard } from "../Dashboard"
+import { DashboardWidget } from "../typings"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _ = React
 
@@ -61,7 +61,7 @@ describe("Dashboard", () => {
 
   describe("Component Rendering", () => {
     it("should render F0GridStack with correct props", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardDashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -92,7 +92,7 @@ describe("Dashboard", () => {
     })
 
     it("should render with widgets", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -127,7 +127,7 @@ describe("Dashboard", () => {
 
     it("should support forwardRef", () => {
       const ref = { current: null }
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -141,7 +141,7 @@ describe("Dashboard", () => {
         },
       ]
 
-      zeroRender(<Dashboard ref={ref} widgets={widgets} />)
+      zeroRender(<Dashboard widgets={widgets} />)
 
       // Ref should be supported (forwardRef implementation)
       expect(ref).toBeDefined()
@@ -150,7 +150,7 @@ describe("Dashboard", () => {
 
   describe("Grid Options", () => {
     it("should have correct default grid options structure", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -174,7 +174,7 @@ describe("Dashboard", () => {
     })
 
     it("should have correct columnOpts breakpoints", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -205,7 +205,7 @@ describe("Dashboard", () => {
 
   describe("Widget Transformation", () => {
     it("should transform widgets correctly", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -222,7 +222,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets).toHaveLength(1)
       expect(gridWidgets[0].id).toBe("widget-1")
@@ -233,7 +233,7 @@ describe("Dashboard", () => {
     })
 
     it("should map widget ID correctly", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "my-widget-id",
           w: 1,
@@ -250,13 +250,13 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].id).toBe("my-widget-id")
     })
 
     it("should use default size when w/h are undefined", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 1,
@@ -273,14 +273,14 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].w).toBe(1)
       expect(gridWidgets[0].h).toBe(1)
     })
 
     it("should map allowedSizes from availableSizes", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -301,7 +301,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].allowedSizes).toEqual([
         { w: 2, h: 2 },
@@ -310,7 +310,7 @@ describe("Dashboard", () => {
     })
 
     it("should set noMove/noResize based on editMode", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -330,7 +330,7 @@ describe("Dashboard", () => {
       )
 
       let callArgs = mockF0GridStack.mock.calls[0][0]
-      let gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      let gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       // When editMode is false, noMove and noResize should be true
       expect(gridWidgets[0].noMove).toBe(true)
@@ -342,7 +342,7 @@ describe("Dashboard", () => {
       // Get the latest call (should be the second one)
       const latestCallIndex = mockF0GridStack.mock.calls.length - 1
       callArgs = mockF0GridStack.mock.calls[latestCallIndex][0]
-      gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       // When editMode is true, noMove and noResize should be false
       expect(gridWidgets[0].noMove).toBe(false)
@@ -350,7 +350,7 @@ describe("Dashboard", () => {
     })
 
     it("should map locked property", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -368,13 +368,13 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].locked).toBe(true)
     })
 
     it("should create meta data structure", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -391,7 +391,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].meta).toEqual({
         title: "My Widget",
@@ -400,7 +400,7 @@ describe("Dashboard", () => {
     })
 
     it("should wrap content in DashboardWidget", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -419,7 +419,7 @@ describe("Dashboard", () => {
       // DashboardWidget is wrapped in content, which is passed to F0GridStack
       // Since F0GridStack is mocked, we verify the content structure via the mock call
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       // Content should be a React element (DashboardWidget wrapper)
       expect(gridWidgets[0].content).toBeDefined()
@@ -427,7 +427,7 @@ describe("Dashboard", () => {
     })
 
     it("should set draggable prop based on editMode", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -445,7 +445,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} editMode={true} />)
 
       const callArgs1 = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets1 = callArgs1.widgets as GridStackReactWidget[]
+      const gridWidgets1 = callArgs1.widgets as GridStackReactDashboardWidget[]
       const content1 = gridWidgets1[0].content as React.ReactElement
 
       // Content should be DashboardWidget with draggable=true
@@ -456,7 +456,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} editMode={false} />)
 
       const callArgs2 = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets2 = callArgs2.widgets as GridStackReactWidget[]
+      const gridWidgets2 = callArgs2.widgets as GridStackReactDashboardWidget[]
       const content2 = gridWidgets2[0].content as React.ReactElement
 
       expect(content2).toBeDefined()
@@ -466,7 +466,7 @@ describe("Dashboard", () => {
 
   describe("State Management", () => {
     it("should initialize state from widgets prop", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -483,14 +483,14 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets).toHaveLength(1)
       expect(gridWidgets[0].id).toBe("widget-1")
     })
 
     it("should update state when widgets prop changes", () => {
-      const initialWidgets: Widget[] = [
+      const initialWidgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -506,7 +506,7 @@ describe("Dashboard", () => {
 
       const { rerender } = zeroRender(<Dashboard widgets={initialWidgets} />)
 
-      const newWidgets: Widget[] = [
+      const newWidgets: DashboardWidget[] = [
         ...initialWidgets,
         {
           id: "widget-2",
@@ -526,13 +526,13 @@ describe("Dashboard", () => {
       // Get the latest call after rerender
       const latestCallIndex = mockF0GridStack.mock.calls.length - 1
       const callArgs = mockF0GridStack.mock.calls[latestCallIndex][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets).toHaveLength(2)
     })
 
     it("should update state when editMode changes", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -551,7 +551,7 @@ describe("Dashboard", () => {
       )
 
       let callArgs = mockF0GridStack.mock.calls[0][0]
-      let gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      let gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].noMove).toBe(true)
 
@@ -560,7 +560,7 @@ describe("Dashboard", () => {
       // Get the latest call after rerender
       const latestCallIndex = mockF0GridStack.mock.calls.length - 1
       callArgs = mockF0GridStack.mock.calls[latestCallIndex][0]
-      gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].noMove).toBe(false)
     })
@@ -569,7 +569,7 @@ describe("Dashboard", () => {
   describe("handleChange Callback", () => {
     it("should call onChange with transformed widgets", () => {
       const onChange = vi.fn()
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -586,7 +586,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} onChange={onChange} />)
 
       // Simulate onChange from F0GridStack
-      const gridWidgets: GridStackReactWidget[] = [
+      const gridWidgets: GridStackReactDashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -607,7 +607,7 @@ describe("Dashboard", () => {
       }
 
       expect(onChange).toHaveBeenCalled()
-      const onChangeCallArgs = onChange.mock.calls[0][0] as Widget[]
+      const onChangeCallArgs = onChange.mock.calls[0][0] as DashboardWidget[]
 
       expect(onChangeCallArgs[0].id).toBe("widget-1")
       expect(onChangeCallArgs[0].w).toBe(2)
@@ -619,7 +619,7 @@ describe("Dashboard", () => {
 
     it("should extract meta data correctly", () => {
       const onChange = vi.fn()
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -635,7 +635,7 @@ describe("Dashboard", () => {
 
       zeroRender(<Dashboard widgets={widgets} onChange={onChange} />)
 
-      const gridWidgets: GridStackReactWidget[] = [
+      const gridWidgets: GridStackReactDashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -654,14 +654,14 @@ describe("Dashboard", () => {
         callArgs.onChange(gridWidgets)
       }
 
-      const onChangeCallArgs = onChange.mock.calls[0][0] as Widget[]
+      const onChangeCallArgs = onChange.mock.calls[0][0] as DashboardWidget[]
       expect(onChangeCallArgs[0].meta?.title).toBe("My Title")
       expect(onChangeCallArgs[0].content).toEqual(<div>My Content</div>)
     })
 
     it("should map position correctly", () => {
       const onChange = vi.fn()
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -677,7 +677,7 @@ describe("Dashboard", () => {
 
       zeroRender(<Dashboard widgets={widgets} onChange={onChange} />)
 
-      const gridWidgets: GridStackReactWidget[] = [
+      const gridWidgets: GridStackReactDashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -696,14 +696,14 @@ describe("Dashboard", () => {
         callArgs.onChange(gridWidgets)
       }
 
-      const onChangeCallArgs = onChange.mock.calls[0][0] as Widget[]
+      const onChangeCallArgs = onChange.mock.calls[0][0] as DashboardWidget[]
       expect(onChangeCallArgs[0].x).toBe(3)
       expect(onChangeCallArgs[0].y).toBe(4)
     })
 
     it("should preserve locked property", () => {
       const onChange = vi.fn()
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -720,7 +720,7 @@ describe("Dashboard", () => {
 
       zeroRender(<Dashboard widgets={widgets} onChange={onChange} />)
 
-      const gridWidgets: GridStackReactWidget[] = [
+      const gridWidgets: GridStackReactDashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -740,14 +740,14 @@ describe("Dashboard", () => {
         callArgs.onChange(gridWidgets)
       }
 
-      const onChangeCallArgs = onChange.mock.calls[0][0] as Widget[]
+      const onChangeCallArgs = onChange.mock.calls[0][0] as DashboardWidget[]
       expect(onChangeCallArgs[0].locked).toBe(true)
     })
   })
 
   describe("Edit Mode Behavior", () => {
     it("should make widgets draggable in edit mode", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -764,14 +764,14 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} editMode={true} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].noMove).toBe(false)
       expect(gridWidgets[0].noResize).toBe(false)
     })
 
     it("should make widgets not draggable in view mode", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -788,7 +788,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} editMode={false} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].noMove).toBe(true)
       expect(gridWidgets[0].noResize).toBe(true)
@@ -797,7 +797,7 @@ describe("Dashboard", () => {
 
   describe("Edge Cases", () => {
     it("should handle widgets without x/y positions", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -812,7 +812,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       // x and y should be undefined if not provided
       expect(gridWidgets[0].x).toBeUndefined()
@@ -820,7 +820,7 @@ describe("Dashboard", () => {
     })
 
     it("should handle widgets with undefined sizes", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 1,
@@ -837,14 +837,14 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].w).toBe(1)
       expect(gridWidgets[0].h).toBe(1)
     })
 
     it("should handle widgets without availableSizes", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -861,7 +861,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets[0].allowedSizes).toBeUndefined()
     })
@@ -870,13 +870,13 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={[]} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       expect(gridWidgets).toHaveLength(0)
     })
 
     it("should handle default editMode (false)", () => {
-      const widgets: Widget[] = [
+      const widgets: DashboardWidget[] = [
         {
           id: "widget-1",
           w: 2,
@@ -893,7 +893,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={widgets} />)
 
       const callArgs = mockF0GridStack.mock.calls[0][0]
-      const gridWidgets = callArgs.widgets as GridStackReactWidget[]
+      const gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
 
       // Default editMode should be false
       expect(gridWidgets[0].noMove).toBe(true)
