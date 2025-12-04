@@ -7,6 +7,8 @@ import {
   CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,
   getNestedMarginLeft,
+  getNestedMarginLeftForLoadMore,
+  isFirstCellDetailed,
   isFirstCellWithChildren,
   isFirstCellWithDepth,
   isFirstCellWithNoChildrenAndTableChildren,
@@ -47,15 +49,15 @@ export const NestedCell = ({
       !!nestedRowProps?.rowWithChildren,
       !!nestedRowProps?.tableWithChildren
     )
+  const detailedVariant = isFirstCellDetailed(firstCell, nestedRowProps)
+
+  const onLoadMoreChildren = nestedRowProps?.onLoadMoreChildren
+  const depth = nestedRowProps?.depth ?? 0
 
   const marginLeft = firstCellWithDepth
-    ? getNestedMarginLeft(
-        nestedRowProps?.depth ?? 0,
-        nestedRowProps?.nestedVariant === "detailed" &&
-          nestedRowProps?.onLoadMoreChildren
-          ? -16
-          : 0
-      )
+    ? getNestedMarginLeft({
+        depth: !firstCellWithChildren ? depth + 1 : depth,
+      })
     : undefined
 
   return (
@@ -65,14 +67,21 @@ export const NestedCell = ({
         "relative z-[1]",
         firstCellWithChildren && "flex items-center gap-2"
       )}
-      style={{ marginLeft }}
+      style={{
+        marginLeft: onLoadMoreChildren
+          ? getNestedMarginLeftForLoadMore({
+              depth: depth + (detailedVariant ? 0 : 1),
+              isDetailedVariant: detailedVariant,
+            })
+          : marginLeft,
+      }}
       onClick={() => {
         // Force the link to be clicked even if the element pointer-events: auto
         linkRef.current?.click()
         onClick?.()
       }}
     >
-      {nestedRowProps?.onLoadMoreChildren ? (
+      {onLoadMoreChildren ? (
         <>
           <div className={cn("pointer-events-auto cursor-pointer")}>
             <F0Button
@@ -82,7 +91,7 @@ export const NestedCell = ({
               label="See more"
               onClick={(e) => {
                 e.stopPropagation()
-                nestedRowProps?.onLoadMoreChildren?.()
+                onLoadMoreChildren?.()
               }}
             />
           </div>
@@ -91,7 +100,7 @@ export const NestedCell = ({
         <>
           <div
             className={cn(
-              "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] items-center justify-center",
+              "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] min-w-[var(--chevron-parent-size)] items-center justify-center",
               firstCellWithChildren &&
                 "pointer-events-auto cursor-pointer rounded-sm hover:bg-f1-foreground-disabled"
             )}

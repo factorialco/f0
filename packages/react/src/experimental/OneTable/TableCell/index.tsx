@@ -96,11 +96,14 @@ export function TableCell({
   const colWidth = getColWidth(width)
 
   const linkRef = useRef<HTMLAnchorElement>(null)
+  const depth = nestedRowProps?.depth ?? 0
+  const isDetailedVariant = nestedRowProps?.nestedVariant === "detailed"
+
   const firstCellMarginLeft = isFirstCellWithTableChildren(
     firstCell,
     !!nestedRowProps?.tableWithChildren
   ) && {
-    marginLeft: `${(nestedRowProps?.depth ?? 0 + 1) * SPACING_FACTOR}px`,
+    marginLeft: `${(depth + (isDetailedVariant ? 0 : 1)) * SPACING_FACTOR}px`,
   }
 
   return (
@@ -143,11 +146,17 @@ export function TableCell({
           />
         )}
       </AnimatePresence>
+
+      {firstCell && nestedRowProps?.tableWithChildren && (
+        <TreeConnector firstCell={firstCell} nestedRowProps={nestedRowProps} />
+      )}
+
       {loading && (
         <div style={{ ...firstCellMarginLeft }}>
           <Skeleton className="h-4 w-full" />
         </div>
       )}
+
       {!loading && (
         <>
           <div
@@ -158,13 +167,6 @@ export function TableCell({
               "pointer-events-none h-full items-start"
             )}
           >
-            {firstCell && (
-              <TreeConnector
-                firstCell={firstCell}
-                nestedRowProps={nestedRowProps}
-              />
-            )}
-
             {isFirstCellWithChildren(
               firstCell,
               !!nestedRowProps?.rowWithChildren
