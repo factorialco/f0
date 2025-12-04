@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.300.0](https://github.com/factorialco/f0/compare/f0-react-v1.299.4...f0-react-v1.300.0) (2025-12-04)
+
+
+### Features
+
+* enhance F0Select component with item caching ([#3084](https://github.com/factorialco/f0/issues/3084)) ([1c5bf96](https://github.com/factorialco/f0/commit/1c5bf96ad512d42e14ee18837f7c1d3dc86197d0))
+
 ## [1.299.4](https://github.com/factorialco/f0/compare/f0-react-v1.299.3...f0-react-v1.299.4) (2025-12-04)
 
 
