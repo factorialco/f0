@@ -4,7 +4,6 @@ import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Dashboard } from "../Dashboard"
 import { DashboardWidget } from "../typings"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _ = React
 
 // Mock F0GridStack - must be inside vi.mock factory due to hoisting
