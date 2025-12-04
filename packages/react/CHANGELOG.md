@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.299.3](https://github.com/factorialco/f0/compare/f0-react-v1.299.2...f0-react-v1.299.3) (2025-12-04)
+
+
+### Bug Fixes
+
+* co-creation form small improvements ([#3073](https://github.com/factorialco/f0/issues/3073)) ([51e2f2a](https://github.com/factorialco/f0/commit/51e2f2afba83135bb872330456e37f5a0d984ec2))
+
 ## [1.299.2](https://github.com/factorialco/f0/compare/f0-react-v1.299.1...f0-react-v1.299.2) (2025-12-03)
 
 
