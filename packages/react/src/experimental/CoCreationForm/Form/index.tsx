@@ -95,6 +95,10 @@ export const CoCreationForm = ({
   disallowOptionalQuestions,
   allowedQuestionTypes,
 }: CoCreationFormProps) => {
+  const shouldShowAddButton =
+    isEditMode &&
+    (!elementsProp?.length || elementsProp?.at(-1)?.type === "section")
+
   const elements = useMemo<CoCreationFormElement[]>(
     () =>
       elementsProp.map((element) => {
@@ -158,7 +162,7 @@ export const CoCreationForm = ({
             </div>
           </Reorder.Group>
         </DragProvider>
-        <AddButton />
+        {shouldShowAddButton && <AddButton />}
       </div>
     </CoCreationFormProvider>
   )
