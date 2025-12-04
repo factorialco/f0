@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.300.0](https://github.com/factorialco/f0/compare/f0-react-v1.299.4...f0-react-v1.300.0) (2025-12-04)
+
+
+### Features
+
+* enhance F0Select component with item caching ([#3084](https://github.com/factorialco/f0/issues/3084)) ([1c5bf96](https://github.com/factorialco/f0/commit/1c5bf96ad512d42e14ee18837f7c1d3dc86197d0))
+
+## [1.299.4](https://github.com/factorialco/f0/compare/f0-react-v1.299.3...f0-react-v1.299.4) (2025-12-04)
+
+
+### Bug Fixes
+
+* adjust max-height calculations in SelectContent component ([#3080](https://github.com/factorialco/f0/issues/3080)) ([f222cae](https://github.com/factorialco/f0/commit/f222caec1d059b82ab04d876ca541d685c2a8b1e))
+
+## [1.299.3](https://github.com/factorialco/f0/compare/f0-react-v1.299.2...f0-react-v1.299.3) (2025-12-04)
+
+
+### Bug Fixes
+
+* co-creation form small improvements ([#3073](https://github.com/factorialco/f0/issues/3073)) ([51e2f2a](https://github.com/factorialco/f0/commit/51e2f2afba83135bb872330456e37f5a0d984ec2))
+
+## [1.299.2](https://github.com/factorialco/f0/compare/f0-react-v1.299.1...f0-react-v1.299.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* aria values in ProgressBar value-display ([#3077](https://github.com/factorialco/f0/issues/3077)) ([0f4bb29](https://github.com/factorialco/f0/commit/0f4bb29c7c2b8089282b78fd797ddcd233889fad))
+
+## [1.299.1](https://github.com/factorialco/f0/compare/f0-react-v1.299.0...f0-react-v1.299.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* add support to disallow optional questions in co-creation form ([#3043](https://github.com/factorialco/f0/issues/3043)) ([7d3d6ff](https://github.com/factorialco/f0/commit/7d3d6ffd65d713d5f8b0f5abfb0d498b2e7edb60))
+
+## [1.299.0](https://github.com/factorialco/f0/compare/f0-react-v1.298.2...f0-react-v1.299.0) (2025-12-03)
+
+
+### Features
+
+* add tooltip to icon value display ([#3056](https://github.com/factorialco/f0/issues/3056)) ([325f5e2](https://github.com/factorialco/f0/commit/325f5e259f8f1cee3f2927124728e2922d6f473c))
+
+## [1.298.2](https://github.com/factorialco/f0/compare/f0-react-v1.298.1...f0-react-v1.298.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* OneModal add modalRef prop for external content reference ([#3072](https://github.com/factorialco/f0/issues/3072)) ([49699c0](https://github.com/factorialco/f0/commit/49699c03a7149a856763ce1e41002bcf99347428))
+
+## [1.298.1](https://github.com/factorialco/f0/compare/f0-react-v1.298.0...f0-react-v1.298.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* add support to only allow certain question types in co-creation form ([#3044](https://github.com/factorialco/f0/issues/3044)) ([47bd674](https://github.com/factorialco/f0/commit/47bd674b2bcd1e25c4bf012fc1226a95679a3dd1))
+
 ## [1.298.0](https://github.com/factorialco/f0/compare/f0-react-v1.297.0...f0-react-v1.298.0) (2025-12-03)
 
 

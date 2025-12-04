@@ -36,12 +36,12 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
         return null
       }
 
-      // Handle "All selected" state - always show "All selected" regardless of count
+      // Handle "All selected" state - show "All selected" with count
       if (allSelected === true) {
         return (
           <div className="flex w-full items-center gap-1 text-left">
             <OneEllipsis className="min-w-0 flex-1">
-              {i18n.status.selected.all}
+              {`${i18n.status.selected.all} (${selectedCount})`}
             </OneEllipsis>
           </div>
         )

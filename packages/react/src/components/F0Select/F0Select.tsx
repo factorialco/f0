@@ -1,3 +1,4 @@
+import { OneModalContext } from "@/experimental/Modals/OneModal/OneModalProvider"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -28,6 +29,7 @@ import { isEqual } from "lodash"
 import {
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -99,6 +101,22 @@ const F0SelectComponent = forwardRef(function Select<
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
+  // If inside a OneModal and no portalContainer is provided, use the modal's container
+  // only for center/fullscreen modals (which have focus trap).
+  // For side panels (left/right), render in body to prevent clipping.
+  const modalContext = useContext(OneModalContext)
+  const shouldUseModalContainer =
+    modalContext.portalContainer &&
+    (modalContext.position === "center" ||
+      modalContext.position === "fullscreen")
+
+  const effectivePortalContainer =
+    portalContainer !== undefined
+      ? portalContainer
+      : shouldUseModalContainer
+        ? modalContext.portalContainer
+        : undefined
+
   // Extract onSelectItems from props for multiple selection
   const onSelectItems =
     "onSelectItems" in props ? props.onSelectItems : undefined
@@ -131,7 +149,9 @@ const F0SelectComponent = forwardRef(function Select<
         localValue?.map((item) => String(item)) ?? []
       )
     ) {
-      setLocalValue(toArray(value) ?? defaultValues ?? [])
+      const newValue = toArray(value) ?? defaultValues ?? []
+      // Ensure unique values to prevent duplicates
+      setLocalValue(Array.from(new Set(newValue)))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -228,6 +248,11 @@ const F0SelectComponent = forwardRef(function Select<
 
   const { currentSearch, setCurrentSearch } = localSource
 
+  // Cache selected items so we can display them even when they're not in current data
+  const selectedItemsCache = useRef<
+    Map<string, F0SelectItemObject<T, ResolvedRecordType<R>>>
+  >(new Map())
+
   /**
    * Map of items from paginated data by their value.
    * Used for dropdown list and selection state.
@@ -269,7 +294,10 @@ const F0SelectComponent = forwardRef(function Select<
 
     const items = new Map() as SelectedItemsState<ActualRecordType>["items"]
 
-    for (const val of values) {
+    // Use Set to ensure unique values and prevent duplicates
+    const uniqueValues = Array.from(new Set(values))
+
+    for (const val of uniqueValues) {
       const itemData = itemsByValue[val]
       items.set(val, {
         id: val,
@@ -303,7 +331,7 @@ const F0SelectComponent = forwardRef(function Select<
   /**
    * Get display items for the selection preview.
    * Uses localValue (the current value prop) to determine what to display.
-   * Looks up items from paginated data or defaultItems.
+   * Looks up items from paginated data, cache, or defaultItems.
    */
   const getDisplayItemsForSelection = useMemo(() => {
     const result: F0SelectItemObject<T, ResolvedRecordType<R>>[] = []
@@ -312,13 +340,24 @@ const F0SelectComponent = forwardRef(function Select<
       // Try to get from paginated data first
       const fromData = itemsByValue[valueId]
       if (fromData) {
+        // Update cache with latest data
+        selectedItemsCache.current.set(valueId, fromData.option)
         result.push(fromData.option)
+        continue
+      }
+
+      // Try from cache (items selected but not in current data)
+      const fromCache = selectedItemsCache.current.get(valueId)
+      if (fromCache) {
+        result.push(fromCache)
         continue
       }
 
       // Try defaultItems (pre-selected values provided by parent)
       const fromDefault = defaultItems.find((item) => item.value === valueId)
       if (fromDefault) {
+        // Add to cache for future use
+        selectedItemsCache.current.set(valueId, fromDefault)
         result.push(fromDefault)
       }
     }
@@ -343,6 +382,12 @@ const F0SelectComponent = forwardRef(function Select<
       // Only call onChangeSelectedOption if we have the item data
       const item = itemsByValue[value]
       if (item) {
+        // Cache the item for future display
+        if (checked) {
+          selectedItemsCache.current.set(value, item.option)
+        } else {
+          selectedItemsCache.current.delete(value)
+        }
         onChangeSelectedOption?.(item.option, checked)
       }
     },
@@ -373,9 +418,9 @@ const F0SelectComponent = forwardRef(function Select<
       return
     }
 
-    // Only reset search in single select mode (dropdown closes after selection)
-    // In multiple mode, user may want to continue selecting more items
-    if (!multiple) {
+    // Only reset search in single select mode when dropdown is closed
+    // Don't clear while user is still typing/searching with dropdown open
+    if (!multiple && !openLocal) {
       setCurrentSearch(undefined)
     }
 
@@ -409,7 +454,8 @@ const F0SelectComponent = forwardRef(function Select<
 
       // Sync localValue with actual selection state
       // This ensures the preview shows correct items after deselection
-      setLocalValue(values)
+      // Use Set to ensure unique values and prevent duplicates
+      setLocalValue(Array.from(new Set(values)))
 
       const records = checkedItems
         .map((item) => item.item)
@@ -586,6 +632,8 @@ const F0SelectComponent = forwardRef(function Select<
               onClear={() => {
                 hasUserInteracted.current = true
                 clearSelection()
+                // Clear the cache when clearing selection
+                selectedItemsCache.current.clear()
                 // Call with undefined to indicate no item is selected
                 ;(
                   onChangeSelectedOption as (
@@ -683,7 +731,7 @@ const F0SelectComponent = forwardRef(function Select<
             isLoadingMore={isLoadingMore}
             isLoading={isLoading || loading}
             showLoadingIndicator={!!children}
-            portalContainer={portalContainer}
+            portalContainer={effectivePortalContainer}
           />
         )}
       </SelectPrimitive>

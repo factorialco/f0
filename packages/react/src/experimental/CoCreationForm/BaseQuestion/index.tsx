@@ -129,6 +129,7 @@ export const BaseQuestion = ({
                 inputDisabled && "cursor-not-allowed"
               )}
               style={TEXT_AREA_STYLE}
+              autoFocus={!isSingleQuestionInSection}
             />
             <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
               <span className="opacity-0">

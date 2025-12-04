@@ -2,6 +2,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Reorder } from "motion/react"
+import { useMemo } from "react"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
 import { DragProvider, useDragContext } from "../DragContext"
 import { Question as QuestionComponent, QuestionProps } from "../Question"
@@ -88,33 +89,81 @@ const Item = ({ element }: ItemProps) => {
 }
 
 export const CoCreationForm = ({
-  elements,
+  elements: elementsProp,
   isEditMode,
   onChange,
-}: CoCreationFormProps) => (
-  <CoCreationFormProvider
-    isEditMode={isEditMode}
-    elements={elements}
-    onChange={onChange}
-  >
-    <div className="flex flex-col gap-6">
-      <DragProvider>
-        <Reorder.Group axis="y" values={elements} onReorder={onChange} as="div">
-          <div className="flex flex-col gap-8">
-            {elements.map((element) => (
-              <Item
-                key={
-                  element.type === "section"
-                    ? element.section.id
-                    : element.question.id
-                }
-                element={element}
-              />
-            ))}
-          </div>
-        </Reorder.Group>
-      </DragProvider>
-      <AddButton />
-    </div>
-  </CoCreationFormProvider>
-)
+  disallowOptionalQuestions,
+  allowedQuestionTypes,
+}: CoCreationFormProps) => {
+  const shouldShowAddButton =
+    isEditMode &&
+    (!elementsProp?.length || elementsProp?.at(-1)?.type === "section")
+
+  const elements = useMemo<CoCreationFormElement[]>(
+    () =>
+      elementsProp.map((element) => {
+        if (element.type === "question") {
+          return {
+            ...element,
+            question: {
+              ...element.question,
+              required: disallowOptionalQuestions
+                ? true
+                : element.question.required,
+            },
+          }
+        }
+
+        if (element.type === "section") {
+          return {
+            ...element,
+            section: {
+              ...element.section,
+              questions: element.section.questions?.map((question) => ({
+                ...question,
+                required: disallowOptionalQuestions ? true : question.required,
+              })),
+            },
+          }
+        }
+
+        return element
+      }),
+    [elementsProp, disallowOptionalQuestions]
+  )
+
+  return (
+    <CoCreationFormProvider
+      isEditMode={isEditMode}
+      elements={elements}
+      onChange={onChange}
+      disallowOptionalQuestions={disallowOptionalQuestions}
+      allowedQuestionTypes={allowedQuestionTypes}
+    >
+      <div className="flex flex-col gap-6">
+        <DragProvider>
+          <Reorder.Group
+            axis="y"
+            values={elements}
+            onReorder={onChange}
+            as="div"
+          >
+            <div className="flex flex-col gap-8">
+              {elements.map((element) => (
+                <Item
+                  key={
+                    element.type === "section"
+                      ? element.section.id
+                      : element.question.id
+                  }
+                  element={element}
+                />
+              ))}
+            </div>
+          </Reorder.Group>
+        </DragProvider>
+        {shouldShowAddButton && <AddButton />}
+      </div>
+    </CoCreationFormProvider>
+  )
+}

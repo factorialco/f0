@@ -625,8 +625,16 @@ export function useSelectable<
         }
       }
     } else {
-      // Use the ref value to avoid dependency on isAllSelected
-      handleSelectItemChangeInternal(recordIds, isAllSelectedRef.current, true)
+      // Only apply selection state to new records in multi-selection mode
+      // In single selection mode, don't auto-select items when data changes
+      if (isMultiSelection) {
+        // Use the ref value to avoid dependency on isAllSelected
+        handleSelectItemChangeInternal(
+          recordIds,
+          isAllSelectedRef.current,
+          true
+        )
+      }
     }
 
     // Also update items that have checked=true but item=undefined

@@ -320,11 +320,6 @@ export const defaultTranslations = {
       actions: "Actions",
       sectionTitlePlaceholder: "Section title",
     },
-    defaults: {
-      newSection: "New Section",
-      newQuestion: "New Question",
-      newQuestionDescription: "New question description",
-    },
   },
 } as const
 
