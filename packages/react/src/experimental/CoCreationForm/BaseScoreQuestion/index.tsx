@@ -34,7 +34,7 @@ const ScoreOption = ({
   return (
     <div
       className={cn(
-        "flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+        "flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border text-center font-medium",
         selected && "border-f1-border-selected-bold",
         !disabled ? "cursor-pointer" : "cursor-default"
       )}

@@ -37,19 +37,18 @@ const Item = ({ element }: ItemProps) => {
     setDraggedItemId(null)
   }
 
-  const elementLocked =
-    element.type === "section"
-      ? element.section.locked
-      : element.question.locked || containingSection?.locked
+  const questionLocked =
+    element.type === "question" &&
+    (element.question.locked || containingSection?.locked)
 
-  const dragEnabled = !!isEditMode && !elementLocked
+  const dragEnabled = !!isEditMode && !questionLocked
 
   return (
     <Reorder.Item
       value={element}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      dragListener={!!isEditMode && !elementLocked}
+      dragListener={!!isEditMode && !questionLocked}
       layout="position"
       as="div"
     >

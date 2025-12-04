@@ -111,7 +111,7 @@ export const BaseQuestion = ({
   return (
     <div
       className={cn(
-        "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
+        "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
         !isDragging && "hover:border-f1-border-hover"
       )}
     >

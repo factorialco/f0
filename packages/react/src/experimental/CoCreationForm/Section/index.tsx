@@ -149,11 +149,11 @@ export const Section = ({
         </Reorder.Group>
       </DragProvider>
       <div className="mt-8 flex flex-row items-center gap-4">
-        <div className="h-px flex-1 bg-f1-border-secondary" />
+        <div className="h-px flex-1 bg-f1-border" />
         <span className="text-base font-medium text-f1-foreground-secondary">
           {t("coCreationForm.labels.endOfSection")}
         </span>
-        <div className="h-px flex-1 bg-f1-border-secondary" />
+        <div className="h-px flex-1 bg-f1-border pr-6" />
       </div>
     </div>
   )
