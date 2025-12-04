@@ -694,6 +694,37 @@ export const MultiplePaginated: Story = {
 }
 
 /**
+ * Multiple selection with manual selection only (no "Select All" button).
+ * The `disableSelectAll` prop removes the "Select All" functionality,
+ * forcing users to select items one by one. The `allSelected` state will
+ * always be false, even when all items are selected manually.
+ *
+ * **Try this**: Select all items manually and check the console -
+ * `selectionStatus.allChecked` will remain `false` even when all are selected.
+ */
+export const MultipleManualSelectionOnly: Story = {
+  args: {
+    label: "Select Team Members (Manual Only)",
+    placeholder: "Search employees...",
+    multiple: true,
+    disableSelectAll: true,
+    value: ["2", "5"],
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectedIds:", selectionStatus.selectedIds)
+    }),
+  },
+}
+
+/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.

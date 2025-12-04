@@ -29,6 +29,7 @@ export function useSelectable<
   selectionMode = "multi",
   selectedState,
   onSelectItems,
+  disableSelectAll = false,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -102,12 +103,25 @@ export function useSelectable<
 
   /**
    * Determine the status of the all selected checkbox
+   * When disableSelectAll is true, this will always be false
    */
   const isAllSelected = useMemo(() => {
+    if (disableSelectAll) {
+      return false
+    }
     return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
-  }, [allSelectedCheck, areAllKnownItemsSelected, checkedCount])
+  }, [
+    disableSelectAll,
+    allSelectedCheck,
+    areAllKnownItemsSelected,
+    checkedCount,
+  ])
 
   const allSelectedState = useMemo(() => {
+    if (disableSelectAll) {
+      return false
+    }
+
     const isPartiallySelected =
       (checkedCount > 0 && !isAllSelected) ||
       (isAllSelected && uncheckedCount > 0)
@@ -117,7 +131,7 @@ export function useSelectable<
         ? "indeterminate"
         : true
       : false
-  }, [isAllSelected, checkedCount, uncheckedCount])
+  }, [disableSelectAll, isAllSelected, checkedCount, uncheckedCount])
 
   useEffect(() => {
     setLocalSelectedState((current) => ({

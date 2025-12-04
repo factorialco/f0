@@ -117,9 +117,11 @@ const F0SelectComponent = forwardRef(function Select<
         ? modalContext.portalContainer
         : undefined
 
-  // Extract onSelectItems from props for multiple selection
+  // Extract onSelectItems and disableSelectAll from props for multiple selection
   const onSelectItems =
     "onSelectItems" in props ? props.onSelectItems : undefined
+  const disableSelectAll =
+    "disableSelectAll" in props ? props.disableSelectAll : false
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
@@ -321,6 +323,7 @@ const F0SelectComponent = forwardRef(function Select<
     selectionMode: multiple ? "multi" : "single",
     onSelectItems: onSelectItems,
     selectedState: initialSelectedState,
+    disableSelectAll: disableSelectAll,
   })
 
   /**
@@ -687,7 +690,7 @@ const F0SelectComponent = forwardRef(function Select<
                   currentFilters={localSource.currentFilters}
                   onFiltersChange={localSource.setCurrentFilters}
                 />
-                {multiple && (
+                {multiple && !disableSelectAll && (
                   <SelectAll
                     selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={
