@@ -37,7 +37,7 @@ const propsToObserve = [
   "y",
 ] as const
 
-const REMOVE_ANIMATION_DURATION = 300
+const REMOVE_ANIMATION_DURATION = 200
 
 /**
  * Clones an element and preserves canvas content by converting to data URLs
@@ -323,10 +323,23 @@ export function GridStackProvider({
               id,
               <motion.div
                 className="h-full w-full"
-                initial={{ opacity: 1, scale: 1 }}
-                animate={{ opacity: 0, scale: 0.7 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: REMOVE_ANIMATION_DURATION / 1000 }}
+                initial={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                animate={{ opacity: 0, scale: 0.85, filter: "blur(14px)" }}
+                exit={{ opacity: 0, scale: 0.85, filter: "blur(14px)" }}
+                transition={{
+                  opacity: {
+                    duration: REMOVE_ANIMATION_DURATION / 1000,
+                    ease: [0.32, 0, 0.67, 0],
+                  },
+                  scale: {
+                    duration: REMOVE_ANIMATION_DURATION / 1000,
+                    ease: [0.65, 0, 0.35, 1],
+                  },
+                  filter: {
+                    duration: REMOVE_ANIMATION_DURATION / 1000,
+                    ease: "linear",
+                  },
+                }}
                 dangerouslySetInnerHTML={{ __html: staticHTML }}
               />
             )

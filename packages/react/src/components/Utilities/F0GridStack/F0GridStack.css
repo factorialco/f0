@@ -20,9 +20,21 @@
 }
 
 .ui-draggable-dragging > .grid-stack-item-content > * {
-  @apply cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)];
+  @apply origin-[24px_24px] !scale-95 cursor-grabbing rounded-lg border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)] transition-all duration-200;
+}
+
+.ui.draggable-dragging {
+  @apply !cursor-grabbing;
 }
 
 .grid-stack-placeholder > .placeholder-content {
-  @apply rounded-md border-[1px] border-solid border-f1-border-hover bg-transparent;
+  @apply rounded-lg bg-f1-foreground/5 opacity-50 blur-[2px];
+}
+
+.grid-stack-item > .grid-stack-item-content {
+  @apply !overflow-visible;
+}
+
+.ui-resizable-resizing > .grid-stack-item-content {
+  @apply rounded-lg;
 }

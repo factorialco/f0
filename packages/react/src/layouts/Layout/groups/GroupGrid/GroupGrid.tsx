@@ -52,10 +52,13 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
     ) => (
       <motion.div
         className="h-full w-full"
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.5 }}
-        transition={{ duration: 300 / 1000 }}
+        initial={{ opacity: 0, scale: 0.8, filter: "blur(8px)" }}
+        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        transition={{
+          opacity: { duration: 0.4, ease: [0.33, 1, 0.68, 1] },
+          scale: { type: "spring", stiffness: 100, damping: 6, mass: 0.5 },
+          filter: { duration: 0.4, ease: [0.33, 1, 0.68, 1] },
+        }}
       >
         {WidgetWrapper(children, meta, editMode)}
       </motion.div>
