@@ -5,7 +5,6 @@ import {
 } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
-import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useCallback, useMemo } from "react"
 
@@ -140,19 +139,15 @@ export const F0ActionBar = ({
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
           transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
-          className={cn(
-            "fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl bg-f1-background p-2 pl-4 text-f1-foreground shadow-lg backdrop-blur-sm dark:bg-f1-background-inverse-secondary sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-8"
-          )}
+          className="fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl bg-f1-background-inverse p-2 pl-4 text-f1-foreground shadow-lg backdrop-blur-sm dark:bg-f1-background-inverse-secondary sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-8"
         >
           {!!label && (
-            <span className="font-medium text-f1-foreground">{label}</span>
+            <span className="font-medium text-f1-foreground-inverse">
+              {label}
+            </span>
           )}
           <div>
-            <div
-              className={cn(
-                "flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full"
-              )}
-            >
+            <div className="dark flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full">
               <Fragment key="mobile-actions">
                 <MobileDropdown items={secondaryActions} />
                 {!singlePrimaryAction ? (
@@ -175,7 +170,7 @@ export const F0ActionBar = ({
                 )}
               </Fragment>
             </div>
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="dark hidden items-center gap-2 sm:flex">
               <Fragment key="desktop-actions">
                 {dropdownActions.length > 0 && (
                   <Dropdown items={dropdownActions} />
