@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.299.4](https://github.com/factorialco/f0/compare/f0-react-v1.299.3...f0-react-v1.299.4) (2025-12-04)
+
+
+### Bug Fixes
+
+* adjust max-height calculations in SelectContent component ([#3080](https://github.com/factorialco/f0/issues/3080)) ([f222cae](https://github.com/factorialco/f0/commit/f222caec1d059b82ab04d876ca541d685c2a8b1e))
+
 ## [1.299.3](https://github.com/factorialco/f0/compare/f0-react-v1.299.2...f0-react-v1.299.3) (2025-12-04)
 
 
