@@ -108,15 +108,18 @@ export const BaseQuestion = ({
 
   const inputDisabled = !isEditMode || locked
 
+  const showDescriptionInput = !!description || !inputDisabled
+
   return (
     <div
       className={cn(
         "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
-        !isDragging && "hover:border-f1-border-hover"
+        !isDragging && "hover:border-f1-border-hover",
+        !showDescriptionInput && "gap-2"
       )}
     >
       <div className="flex flex-col gap-0.5">
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row items-center gap-2">
           <div className="relative w-full">
             <textarea
               value={title}
@@ -125,13 +128,13 @@ export const BaseQuestion = ({
               onChange={handleChangeTitle}
               disabled={inputDisabled}
               className={cn(
-                "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                "w-full resize-none px-2 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
                 inputDisabled && "cursor-not-allowed"
               )}
               style={TEXT_AREA_STYLE}
               autoFocus={!isSingleQuestionInSection}
             />
-            <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
+            <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 text-lg font-semibold">
               <span className="opacity-0">
                 {title || t("coCreationForm.labels.titlePlaceholder")}
               </span>
@@ -148,7 +151,7 @@ export const BaseQuestion = ({
               )}
             </div>
           </div>
-          {isEditMode && !locked && (
+          {isEditMode && !locked ? (
             <div
               className={cn(
                 "opacity-0 group-hover/question:opacity-100",
@@ -165,22 +168,26 @@ export const BaseQuestion = ({
                 }
               />
             </div>
+          ) : (
+            <div className="h-10" />
           )}
         </div>
-        <textarea
-          value={description}
-          aria-label={t("coCreationForm.labels.description")}
-          placeholder={t(
-            "coCreationForm.labels.questionDescriptionPlaceholder"
-          )}
-          onChange={handleChangeDescription}
-          disabled={inputDisabled}
-          className={cn(
-            "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-            inputDisabled && "cursor-not-allowed"
-          )}
-          style={TEXT_AREA_STYLE}
-        />
+        {showDescriptionInput && (
+          <textarea
+            value={description}
+            aria-label={t("coCreationForm.labels.description")}
+            placeholder={t(
+              "coCreationForm.labels.questionDescriptionPlaceholder"
+            )}
+            onChange={handleChangeDescription}
+            disabled={inputDisabled}
+            className={cn(
+              "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+              inputDisabled && "cursor-not-allowed"
+            )}
+            style={TEXT_AREA_STYLE}
+          />
+        )}
       </div>
       {children}
       {isEditMode && !containingSection?.locked && (
