@@ -107,6 +107,11 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
           ResolvedRecordType<R>,
           FiltersDefinition
         >
+        /**
+         * Disables the "Select All" functionality, forcing manual selection of items one by one.
+         * When enabled, the allSelected state will always be false and users must select items individually.
+         */
+        disableSelectAll?: boolean
       }
   ) &
   (
