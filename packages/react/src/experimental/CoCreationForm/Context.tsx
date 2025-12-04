@@ -367,14 +367,14 @@ export function CoCreationFormProvider({
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      if (isEmpty) {
+      if (isEmpty && isEditMode) {
         handleAddNewElement({
           type: "section",
         })
       }
       return
     }
-  }, [isEmpty, handleAddNewElement])
+  }, [isEmpty, handleAddNewElement, isEditMode])
 
   const isQuestionTypeAllowed = (questionType: QuestionType) => {
     return !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
