@@ -2769,7 +2769,7 @@ declare type GroupGridWidget<Meta extends Record<string, unknown> = Record<strin
     meta?: Meta;
     /**
      * Dependencies array that, when changed, will trigger a content update.
-     * The values are compared using shallow equality.
+     * Each value in the array is compared using strict equality (`===`).
      */
     deps?: unknown[];
 } & GroupGridWidgetSize;
@@ -4682,6 +4682,23 @@ declare global {
     }
 }
 
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
+}
+
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -4709,21 +4726,9 @@ declare module "@tiptap/core" {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -4733,9 +4738,4 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
