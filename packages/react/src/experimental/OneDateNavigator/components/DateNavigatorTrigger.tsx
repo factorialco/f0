@@ -176,6 +176,7 @@ const DateNavigatorTrigger = forwardRef<
             />
           )}
           <ButtonInternal
+            fontSize="md"
             size="sm"
             variant="ghost"
             label={label}
@@ -191,6 +192,7 @@ const DateNavigatorTrigger = forwardRef<
               label="Next"
               hideLabel
               size="sm"
+              fontSize="md"
               disabled={!nextPrev?.next}
               onClick={() => handleNavigation(nextPrev?.next ?? false)}
             />
@@ -199,6 +201,7 @@ const DateNavigatorTrigger = forwardRef<
         {!hideGoToCurrent && currentDate && (
           <div className="border-l-solid flex-shrink-0 border-[#f00]">
             <F0Button
+              fontSize="md"
               size="sm"
               variant="ghost"
               label={

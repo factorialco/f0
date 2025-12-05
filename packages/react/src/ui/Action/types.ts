@@ -23,6 +23,8 @@ export type ActionVariant = (typeof actionVariants)[number]
 
 export const actionSizes = ["sm", "md", "lg"] as const
 export type ActionSize = (typeof actionSizes)[number]
+export const fontSizes = ["sm", "md", "lg"] as const
+export type FontSize = (typeof fontSizes)[number]
 
 export interface ActionCommonProps {
   /**
@@ -76,6 +78,10 @@ export interface ActionCommonProps {
    * The size of the action.
    */
   size?: ActionSize
+  /**
+   * The font size of the action.
+   */
+  fontSize?: FontSize
   /**
    * The render mode.
    * @default "default"
