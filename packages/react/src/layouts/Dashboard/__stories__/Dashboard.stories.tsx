@@ -27,6 +27,8 @@ const meta = {
         Optional<DashboardWidget, "x" | "y">[]
       >(args.widgets as DashboardWidget[])
 
+      const [globalCounter, setGlobalCounter] = useState<number>(0)
+
       const deleteWidget = (widgetId: string) => {
         setWidgets((prev) => prev.filter((widget) => widget.id !== widgetId))
       }
@@ -43,15 +45,20 @@ const meta = {
         },
       ]
 
-      const handleAddWidget = (type: "text" | "chart" | "table" | "kpi") => {
-        const id = `widget-${Math.random()}`
-
-        const content = {
-          text: <TextWidget />,
+      const createWidgetContent = (
+        type: "text" | "chart" | "table" | "kpi",
+        counter: number
+      ) => {
+        return {
+          text: <TextWidget globalCounter={counter} />,
           chart: <ChartWidget />,
           table: <TableWidget />,
           kpi: <KpiWidget />,
         }[type]
+      }
+
+      const handleAddWidget = (type: "text" | "chart" | "table" | "kpi") => {
+        const id = `widget-${Math.random()}`
 
         const availableSizes = {
           text: [
@@ -76,13 +83,30 @@ const meta = {
           ],
         }[type]
 
+        // For text widgets, use deps and content as function pattern
+        // For other widgets, use static content
+        const isTextWidget = type === "text"
+        const widgetConfig = isTextWidget
+          ? {
+              deps: ["globalCounter"], // Key into deps object
+              content: (deps: Record<string, unknown>) => {
+                return createWidgetContent(
+                  "text",
+                  deps["globalCounter"] as number
+                )
+              },
+            }
+          : {
+              content: createWidgetContent(type, globalCounter),
+            }
+
         setWidgets((prev) => [
           ...prev,
           {
             id,
             w: 1,
             h: 1,
-            content,
+            ...widgetConfig,
             availableSizes,
             meta: {
               actions: getCommonActions(id),
@@ -90,6 +114,7 @@ const meta = {
               aiButton: () => {
                 console.log("ai button clicked")
               },
+              widgetType: type,
             },
           },
         ])
@@ -102,15 +127,24 @@ const meta = {
           <div className="h-full w-full">
             <Layout.Page
               header={
-                <>
-                  <F0Checkbox
-                    title="Edit mode"
-                    checked={editMode}
-                    onCheckedChange={(checked) => {
-                      setEditMode(checked)
+                <div className="flex items-center gap-2 p-4">
+                  <div className="mr-5">
+                    <F0Checkbox
+                      title="Edit mode"
+                      checked={editMode}
+                      onCheckedChange={(checked) => {
+                        setEditMode(checked)
+                      }}
+                    />
+                  </div>
+                  <F0Button
+                    label="Increment Global Counter"
+                    onClick={() => {
+                      setGlobalCounter((prev) => prev + 1)
                     }}
                   />
-                </>
+                  <p>Global counter: {globalCounter}</p>
+                </div>
               }
               aside={
                 <>
@@ -147,6 +181,7 @@ const meta = {
                 args={{
                   ...args,
                   widgets,
+                  deps: { globalCounter },
                   onChange: (updatedWidgets) => {
                     console.log("widgets onChange stories", updatedWidgets)
                     setWidgets(updatedWidgets as DashboardWidget[])
