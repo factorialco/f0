@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.302.2](https://github.com/factorialco/f0/compare/f0-react-v1.302.1...f0-react-v1.302.2) (2025-12-05)
+
+
+### Bug Fixes
+
+* align elements inside button ([#3094](https://github.com/factorialco/f0/issues/3094)) ([42ddb57](https://github.com/factorialco/f0/commit/42ddb57c78ac1bccc5bfb0bef1a586b085cf0153))
+
 ## [1.302.1](https://github.com/factorialco/f0/compare/f0-react-v1.302.0...f0-react-v1.302.1) (2025-12-04)
 
 
