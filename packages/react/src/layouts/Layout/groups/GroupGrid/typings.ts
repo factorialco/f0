@@ -6,12 +6,13 @@ export type GroupGridWidgetSize = { w: number; h: number }
 
 export type GroupGridWidget<
   Meta extends Record<string, unknown> = Record<string, unknown>,
+  Deps extends string[] = string[],
 > = {
   id: string
   availableSizes?: GroupGridWidgetSize[]
   content:
     | React.ReactNode
-    | ((deps: Record<string, unknown>) => React.ReactNode)
+    | ((deps: Partial<Record<Deps[number], unknown>>) => React.ReactNode)
   x: number
   y: number
   locked?: boolean
@@ -20,5 +21,5 @@ export type GroupGridWidget<
    * Dependencies array that, when changed, will trigger a content update.
    * The values are compared using shallow equality.
    */
-  deps?: unknown[]
+  deps?: Deps[]
 } & GroupGridWidgetSize

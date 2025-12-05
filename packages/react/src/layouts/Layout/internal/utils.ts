@@ -24,10 +24,10 @@ export const validLayoutChildrenGuard = (
   const childArray = Children.toArray(children)
 
   for (const child of childArray) {
-    if (
-      (allowedTypes.includes("block") && !isPageLayoutBlockComponent(child)) ||
-      (allowedTypes.includes("group") && !isPageLayoutGroupComponent(child))
-    ) {
+    const isValidChild =
+      (allowedTypes.includes("block") && isPageLayoutBlockComponent(child)) ||
+      (allowedTypes.includes("group") && isPageLayoutGroupComponent(child))
+    if (!isValidChild) {
       console.warn(
         `${component}: Children components must inherit from PageLayoutBlock or PageLayoutGroup. Found:`,
         child

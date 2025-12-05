@@ -100,29 +100,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   ) => {
     return widgets.map((widget) => {
       // Use content function if provided, otherwise use static content
-      let widgetContent: React.ReactNode
-      if (
-        typeof widget.content === "function" &&
-        widget.deps &&
-        dependencyValues
-      ) {
-        // Create an object from widget's deps keys and dependencyValues
-        const depsObject: Record<string, unknown> = {}
-        widget.deps.forEach((depKey) => {
-          if (
-            typeof depKey === "string" &&
-            dependencyValues[depKey] !== undefined
-          ) {
-            depsObject[depKey] = dependencyValues[depKey]
-          }
-        })
-        widgetContent = widget.content(depsObject)
-      } else if (typeof widget.content === "function") {
-        // If content is a function but no deps or dependencyValues, return null
-        widgetContent = null
-      } else {
-        widgetContent = widget.content
-      }
+      const widgetContent = getWidgetContent(widget, dependencyValues)
 
       const gridWidget: GridStackReactWidget = {
         id: widget.id,
