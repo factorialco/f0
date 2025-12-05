@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.302.3](https://github.com/factorialco/f0/compare/f0-react-v1.302.2...f0-react-v1.302.3) (2025-12-05)
+
+
+### Bug Fixes
+
+* return search from useDataCollectionData ([#3087](https://github.com/factorialco/f0/issues/3087)) ([e5f28d5](https://github.com/factorialco/f0/commit/e5f28d593fffb014c08e93158b252867edd80398))
+
 ## [1.302.2](https://github.com/factorialco/f0/compare/f0-react-v1.302.1...f0-react-v1.302.2) (2025-12-05)
 
 
