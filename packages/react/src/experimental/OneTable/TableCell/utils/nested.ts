@@ -6,9 +6,32 @@ export const CHEVRON_SIZE = 18
 export const LINE_WIDTH = "1px"
 export const PADDING_TOP = 8
 export const BUTTON_HEIGHT = 32
+export const BUTTON_PADDING = 4
+export const CONNECTOR_WIDTH = 40
+export const CONNECTOR_WIDTH_WITH_CHILDREN =
+  CONNECTOR_WIDTH - CHEVRON_PARENT_SIZE
 
-export const getNestedMarginLeft = (depth: number, padding: number = 0) => {
+export const getNestedMarginLeft = ({
+  depth,
+  padding = 0,
+}: {
+  depth: number
+  padding?: number
+}) => {
   return `${depth * SPACING_FACTOR + padding}px`
+}
+
+export const getNestedMarginLeftForLoadMore = ({
+  depth,
+  isDetailedVariant,
+}: {
+  depth: number
+  isDetailedVariant: boolean
+}) => {
+  return getNestedMarginLeft({
+    depth,
+    padding: isDetailedVariant ? -BUTTON_HEIGHT / 2 : -BUTTON_PADDING,
+  })
 }
 
 export const isFirstCellWithDepth = (firstCell: boolean, depth: number) => {
@@ -41,6 +64,13 @@ export const isFirstCellWithNoChildrenAndTableChildren = (
   return (
     !hasChildren && isFirstCellWithTableChildren(firstCell, tableWithChildren)
   )
+}
+
+export const isFirstCellDetailed = (
+  firstCell: boolean,
+  nestedRowProps?: NestedRowProps & { rowWithChildren?: boolean }
+) => {
+  return firstCell && nestedRowProps?.nestedVariant === "detailed"
 }
 
 export const emptyDetailedCellClassName = (
