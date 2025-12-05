@@ -91,6 +91,14 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
     editMode: boolean
   ) => {
     return widgets.map((widget) => {
+      // Use content function if provided, otherwise use static content
+      const widgetContent: React.ReactNode =
+        typeof widget.content === "function" && widget.deps
+          ? widget.content(widget.deps)
+          : typeof widget.content === "function"
+            ? null // If content is a function but no deps, return null
+            : widget.content
+
       const gridWidget: GridStackReactWidget = {
         id: widget.id,
         h: widget.h ?? 1,
@@ -100,8 +108,8 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
         noResize: !editMode,
         locked: widget.locked,
         meta: widget.meta,
-        _originalContent: widget.content,
-        content: AnimatedWidgetWrapper(widget.content, widget.meta, editMode),
+        _originalContent: widgetContent,
+        content: AnimatedWidgetWrapper(widgetContent, widget.meta, editMode),
       }
       // Only include x and y if they're defined, so GridStack can auto-position when undefined
       if (widget.x !== undefined) {
@@ -121,6 +129,11 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   const prevEditModeRef = useRef(editMode)
   const prevWidgetsRef = useRef(widgets)
   const isEditModeOnlyChangeRef = useRef(false)
+  // Track dependencies for each widget to detect changes
+  const prevDepsRef = useRef<Map<string, unknown[]>>(new Map())
+  // Store current widgets in a ref to access in callbacks without dependency issues
+  const widgetsRef = useRef(widgets)
+  widgetsRef.current = widgets
 
   const handleChange = useCallback(
     (gridWidgets: GridStackReactWidget[]) => {
@@ -131,16 +144,25 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
       if (!isEditModeOnlyChangeRef.current) {
         onChange(
           gridWidgets.map((widget) => {
+            // Find the original widget to preserve deps and content function
+            const originalWidget = widgetsRef.current.find(
+              (w) => w.id === widget.id
+            )
             return {
               id: widget.id,
               w: widget.w ?? 1,
               h: widget.h ?? 1,
               allowedSizes: widget.allowedSizes,
               meta: widget.meta,
-              content: widget._originalContent,
+              // Preserve the original content (function or static) from the widget prop
+              content:
+                typeof originalWidget?.content === "function"
+                  ? originalWidget.content
+                  : widget._originalContent,
               x: widget.x ?? 0,
               y: widget.y ?? 0,
               locked: widget.locked,
+              deps: originalWidget?.deps,
             } as unknown as Widget
           })
         )
@@ -150,11 +172,62 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
     [onChange]
   )
 
+  // Helper function to check if dependencies have changed
+  const depsChanged = (
+    prevDeps: unknown[] | undefined,
+    currentDeps: unknown[] | undefined
+  ): boolean => {
+    if (!prevDeps && !currentDeps) return false
+    if (!prevDeps || !currentDeps) return true
+    if (prevDeps.length !== currentDeps.length) return true
+    return prevDeps.some((dep, index) => dep !== currentDeps[index])
+  }
+
+  // Helper function to get widget content, handling content function if provided
+  const getWidgetContent = (
+    widget: Optional<GroupGridWidget, "x" | "y">
+  ): React.ReactNode => {
+    if (typeof widget.content === "function" && widget.deps) {
+      return widget.content(widget.deps)
+    }
+    if (typeof widget.content === "function") {
+      // If content is a function but no deps provided, return null
+      return null
+    }
+    return widget.content
+  }
+
   useEffect(() => {
     const editModeChanged = prevEditModeRef.current !== editMode
     const widgetsReferenceChanged = prevWidgetsRef.current !== widgets
 
-    if (editModeChanged && !widgetsReferenceChanged) {
+    // Check for dependency changes
+    const depsChangedMap = new Map<string, boolean>()
+    widgets.forEach((widget) => {
+      const prevDeps = prevDepsRef.current.get(widget.id)
+      const currentDeps = widget.deps
+      depsChangedMap.set(widget.id, depsChanged(prevDeps, currentDeps))
+      // Update stored deps
+      if (currentDeps) {
+        prevDepsRef.current.set(widget.id, currentDeps)
+      } else {
+        prevDepsRef.current.delete(widget.id)
+      }
+    })
+
+    // Remove deps for widgets that no longer exist
+    const currentWidgetIds = new Set(widgets.map((w) => w.id))
+    prevDepsRef.current.forEach((_, widgetId) => {
+      if (!currentWidgetIds.has(widgetId)) {
+        prevDepsRef.current.delete(widgetId)
+      }
+    })
+
+    const hasDepsChanges = Array.from(depsChangedMap.values()).some(
+      (changed) => changed
+    )
+
+    if (editModeChanged && !widgetsReferenceChanged && !hasDepsChanges) {
       // Only editMode changed: update noMove/noResize in place without changing array reference
       // This prevents GridStackProvider from resetting sizes
       isEditModeOnlyChangeRef.current = true
@@ -164,9 +237,8 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
           if (!widgetFromProp) {
             return currentWidget
           }
-          // Only update noMove/noResize and content, preserve everything else
-          const content =
-            currentWidget?._originalContent ?? widgetFromProp.content
+          // Get content using content function if available, otherwise use static content
+          const content = getWidgetContent(widgetFromProp)
 
           return {
             ...currentWidget,
@@ -183,17 +255,25 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
           }
         })
       )
-    } else if (widgetsReferenceChanged) {
-      // Widgets prop changed: merge with current state to preserve sizes/positions if widget exists
+    } else if (widgetsReferenceChanged || hasDepsChanges) {
+      // Widgets prop changed or dependencies changed: merge with current state to preserve sizes/positions if widget exists
       setGridWidgets((currentGridWidgets) => {
         const currentWidgetsMap = new Map(
           currentGridWidgets.map((w) => [w.id, w])
         )
         return widgets.map((widget) => {
           const currentWidget = currentWidgetsMap.get(widget.id)
-          // Prefer widget.content when provided to allow content updates
-          // Only fall back to _originalContent if widget.content is not provided
-          const content = widget.content ?? currentWidget?._originalContent
+          const widgetDepsChanged = depsChangedMap.get(widget.id) ?? false
+
+          // If dependencies changed or widget is new, use content function or static content
+          // Otherwise, preserve existing content to avoid unnecessary re-renders
+          let content: React.ReactNode
+          if (widgetDepsChanged || !currentWidget) {
+            content = getWidgetContent(widget)
+          } else {
+            // Preserve existing content if deps haven't changed
+            content = currentWidget._originalContent ?? getWidgetContent(widget)
+          }
 
           // Preserve size/position from current state if widget exists, otherwise use prop
           // Only include x and y if they're defined, so GridStack can auto-position when undefined

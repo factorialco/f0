@@ -8,7 +8,7 @@ import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 
 const availableSizes = [
@@ -60,8 +60,6 @@ const meta = {
       const handleAddWidget = (type: "text" | "chart" | "table" | "kpi") => {
         const id = `widget-${Math.random()}`
 
-        const content = createWidgetContent(type, globalCounter)
-
         const availableSizes = {
           text: [
             { w: 1, h: 1 },
@@ -85,13 +83,26 @@ const meta = {
           ],
         }[type]
 
+        // For text widgets, use deps and content as function pattern
+        // For other widgets, use static content
+        const isTextWidget = type === "text"
+        const widgetConfig = isTextWidget
+          ? {
+              deps: [globalCounter],
+              content: (deps: unknown[]) =>
+                createWidgetContent("text", deps[0] as number),
+            }
+          : {
+              content: createWidgetContent(type, globalCounter),
+            }
+
         setWidgets((prev) => [
           ...prev,
           {
             id,
             w: 1,
             h: 1,
-            content,
+            ...widgetConfig,
             availableSizes,
             meta: {
               actions: getCommonActions(id),
@@ -104,24 +115,6 @@ const meta = {
           },
         ])
       }
-
-      useEffect(() => {
-        setWidgets((prev) =>
-          prev.map((widget) => {
-            const widgetType = (widget.meta as { widgetType?: string })
-              ?.widgetType
-            if (widgetType === "text") {
-              // Create a new widget object with updated content
-              // GroupGrid will now use the new content instead of preserving _originalContent
-              return {
-                ...widget,
-                content: createWidgetContent("text", globalCounter),
-              }
-            }
-            return widget
-          })
-        )
-      }, [globalCounter])
 
       const [editMode, setEditMode] = useState(false)
 
@@ -142,7 +135,23 @@ const meta = {
                   </div>
                   <F0Button
                     label="Increment Global Counter"
-                    onClick={() => setGlobalCounter(globalCounter + 1)}
+                    onClick={() => {
+                      const newCounter = globalCounter + 1
+                      setGlobalCounter(newCounter)
+                      // Update widgets' deps when globalCounter changes
+                      setWidgets((prev) =>
+                        prev.map((widget) => {
+                          // Only update widgets that have deps (text widgets)
+                          if (widget.deps && widget.deps.length > 0) {
+                            return {
+                              ...widget,
+                              deps: [newCounter],
+                            }
+                          }
+                          return widget
+                        })
+                      )
+                    }}
                   />
                   <p>Global counter: {globalCounter}</p>
                 </div>

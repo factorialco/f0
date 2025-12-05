@@ -9,9 +9,14 @@ export type GroupGridWidget<
 > = {
   id: string
   availableSizes?: GroupGridWidgetSize[]
-  content: React.ReactNode
+  content: React.ReactNode | ((deps: unknown[]) => React.ReactNode)
   x: number
   y: number
   locked?: boolean
   meta?: Meta
+  /**
+   * Dependencies array that, when changed, will trigger a content update.
+   * The values are compared using shallow equality.
+   */
+  deps?: unknown[]
 } & GroupGridWidgetSize
