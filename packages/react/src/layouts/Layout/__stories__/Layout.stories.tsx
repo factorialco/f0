@@ -5,10 +5,11 @@ import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/
 import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-import { ComponentProps, useState } from "react"
+import { ComponentProps, useMemo, useState } from "react"
 import { Layout } from "../index"
 
 const FocusableElement = () => {
@@ -274,6 +275,25 @@ export const WithGroupGrid: Story = {
   },
   render: (args) => {
     const [editMode, setEditMode] = useState(false)
+    const [globalCounter, setGlobalCounter] = useState(0)
+
+    const widgets = useMemo(() => {
+      return Array.from({ length: 22 }).map((_, index) => {
+        return {
+          id: `block-${index}`,
+          w: getMockAllowedSizes(index)[0].w,
+          h: getMockAllowedSizes(index)[0].h,
+          availableSizes: getMockAllowedSizes(index),
+          content: (
+            <div>
+              <h4>Block {index + 1}</h4>
+              <p>Global counter: {globalCounter}</p>
+            </div>
+          ),
+        }
+      })
+    }, [])
+
     return (
       <Layout.Page {...args}>
         <>
@@ -282,12 +302,19 @@ export const WithGroupGrid: Story = {
             description="This is an example of a Grid Group Layout."
             variant="default"
           >
-            The content above is a `GridGroupLayout`{" "}
-            <F0Checkbox
-              title="Edit Mode"
-              checked={editMode}
-              onCheckedChange={(checked) => setEditMode(checked)}
-            />
+            <div className="flex items-center gap-2">
+              <F0Checkbox
+                title="Edit Mode"
+                checked={editMode}
+                onCheckedChange={(checked) => setEditMode(checked)}
+              />
+              <F0Button
+                label="Increment Global Counter"
+                onClick={() => setGlobalCounter(globalCounter + 1)}
+              />
+              <p>Global counter: {globalCounter}</p>
+            </div>
+            <p>The content above is a `GridGroupLayout`</p>
           </Layout.BlockContent>
           <Layout.GroupGrid
             main
@@ -295,15 +322,7 @@ export const WithGroupGrid: Story = {
             WidgetWrapper={(children) => (
               <div className="h-full bg-[#ff000030] p-4">{children}</div>
             )}
-            widgets={Array.from({ length: 22 }).map((_, index) => {
-              return {
-                id: `block-${index}`,
-                w: getMockAllowedSizes(index)[0].w,
-                h: getMockAllowedSizes(index)[0].h,
-                availableSizes: getMockAllowedSizes(index),
-                content: <div>Block {index + 4}</div>,
-              }
-            })}
+            widgets={widgets}
           />
         </>
       </Layout.Page>

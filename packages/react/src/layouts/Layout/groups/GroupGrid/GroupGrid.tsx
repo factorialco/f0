@@ -191,7 +191,9 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
         )
         return widgets.map((widget) => {
           const currentWidget = currentWidgetsMap.get(widget.id)
-          const content = currentWidget?._originalContent || widget.content
+          // Prefer widget.content when provided to allow content updates
+          // Only fall back to _originalContent if widget.content is not provided
+          const content = widget.content ?? currentWidget?._originalContent
 
           // Preserve size/position from current state if widget exists, otherwise use prop
           // Only include x and y if they're defined, so GridStack can auto-position when undefined
