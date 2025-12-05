@@ -93,6 +93,35 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
     []
   )
 
+  // Helper function to get widget content, handling content function if provided
+  const getWidgetContent = (
+    widget: Optional<GroupGridWidget, "x" | "y">,
+    dependencyValues?: Record<string, unknown>
+  ): React.ReactNode => {
+    if (
+      typeof widget.content === "function" &&
+      widget.deps &&
+      dependencyValues
+    ) {
+      // Create an object from widget's deps keys and dependencyValues
+      const depsObject: Record<string, unknown> = {}
+      widget.deps.forEach((depKey) => {
+        if (
+          typeof depKey === "string" &&
+          dependencyValues[depKey] !== undefined
+        ) {
+          depsObject[depKey] = dependencyValues[depKey]
+        }
+      })
+      return widget.content(depsObject)
+    }
+    if (typeof widget.content === "function") {
+      // If content is a function but no deps or dependencyValues, return null
+      return null
+    }
+    return widget.content
+  }
+
   const widgetsToGridWidgets = (
     widgets: Optional<GroupGridWidget, "x" | "y">[],
     editMode: boolean,
@@ -213,35 +242,6 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
     if (!prevDeps || !currentDeps) return true
     if (prevDeps.length !== currentDeps.length) return true
     return prevDeps.some((dep, index) => dep !== currentDeps[index])
-  }
-
-  // Helper function to get widget content, handling content function if provided
-  const getWidgetContent = (
-    widget: Optional<GroupGridWidget, "x" | "y">,
-    dependencyValues?: Record<string, unknown>
-  ): React.ReactNode => {
-    if (
-      typeof widget.content === "function" &&
-      widget.deps &&
-      dependencyValues
-    ) {
-      // Create an object from widget's deps keys and dependencyValues
-      const depsObject: Record<string, unknown> = {}
-      widget.deps.forEach((depKey) => {
-        if (
-          typeof depKey === "string" &&
-          dependencyValues[depKey] !== undefined
-        ) {
-          depsObject[depKey] = dependencyValues[depKey]
-        }
-      })
-      return widget.content(depsObject)
-    }
-    if (typeof widget.content === "function") {
-      // If content is a function but no deps or dependencyValues, return null
-      return null
-    }
-    return widget.content
   }
 
   useEffect(() => {
