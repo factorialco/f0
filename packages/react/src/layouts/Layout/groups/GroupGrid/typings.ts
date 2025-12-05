@@ -19,7 +19,7 @@ export type GroupGridWidget<
   meta?: Meta
   /**
    * Dependencies array that, when changed, will trigger a content update.
-   * The values are compared using shallow equality.
+   * Each value in the array is compared using strict equality (`===`).
    */
   deps?: Deps[]
 } & GroupGridWidgetSize
