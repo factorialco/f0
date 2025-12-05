@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.1](https://github.com/factorialco/f0/compare/f0-react-v1.303.0...f0-react-v1.303.1) (2025-12-05)
+
+
+### Bug Fixes
+
+* export dashboard and layout ([#3090](https://github.com/factorialco/f0/issues/3090)) ([c80d06e](https://github.com/factorialco/f0/commit/c80d06ea62f8367da677af479edc4d76842540c3))
+
 ## [1.303.0](https://github.com/factorialco/f0/compare/f0-react-v1.302.3...f0-react-v1.303.0) (2025-12-05)
 
 
