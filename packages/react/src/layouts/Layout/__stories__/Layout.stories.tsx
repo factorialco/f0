@@ -9,7 +9,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-import { ComponentProps, useMemo, useState } from "react"
+import { ComponentProps, useCallback, useMemo, useState } from "react"
 import { Layout } from "../index"
 
 const FocusableElement = () => {
@@ -284,16 +284,23 @@ export const WithGroupGrid: Story = {
           w: getMockAllowedSizes(index)[0].w,
           h: getMockAllowedSizes(index)[0].h,
           availableSizes: getMockAllowedSizes(index),
-          content: (
+          deps: ["globalCounter"],
+          content: ({ globalCounter }: { globalCounter?: number }) => (
             <div>
               <h4>Block {index + 1}</h4>
-              <p>Global counter: {globalCounter}</p>
+              <p>Global counter: {globalCounter ?? 0}</p>
             </div>
           ),
         }
       })
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    const widgetWrapper = useCallback(
+      (children: React.ReactNode) => (
+        <div className="h-full bg-[#ff000030] p-4">{children}</div>
+      ),
+      []
+    )
 
     return (
       <Layout.Page {...args}>
@@ -320,9 +327,8 @@ export const WithGroupGrid: Story = {
           <Layout.GroupGrid
             main
             editMode={editMode}
-            WidgetWrapper={(children) => (
-              <div className="h-full bg-[#ff000030] p-4">{children}</div>
-            )}
+            deps={{ globalCounter }}
+            WidgetWrapper={widgetWrapper}
             widgets={widgets}
           />
         </>
