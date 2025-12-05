@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react"
-import { forwardRef } from "react"
+import React, { forwardRef } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { experimentalComponent } from "./experimental"
 import { UserPlatformProvider } from "./providers/user-platafform/UserPlatformProvider"
+
+const _ = React
 
 describe("experimentalComponent", () => {
   beforeEach(() => {
@@ -113,6 +115,7 @@ describe("experimentalComponent", () => {
     })
 
     it("should set displayName to Experimental(name) when original has no displayName", () => {
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { children?: React.ReactNode }
@@ -128,6 +131,7 @@ describe("experimentalComponent", () => {
     })
 
     it("should preserve non-enumerable properties", () => {
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { children?: React.ReactNode }
@@ -155,6 +159,7 @@ describe("experimentalComponent", () => {
 
   describe("component functionality", () => {
     it("should render forwardRef components correctly", () => {
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { children?: React.ReactNode }
@@ -194,6 +199,7 @@ describe("experimentalComponent", () => {
     })
 
     it("should pass props correctly to wrapped components", () => {
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { title: string; children?: React.ReactNode }
@@ -225,6 +231,7 @@ describe("experimentalComponent", () => {
       const consoleWarnSpy = vi
         .spyOn(console, "warn")
         .mockImplementation(() => {})
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { children?: React.ReactNode }
@@ -257,6 +264,7 @@ describe("experimentalComponent", () => {
       const consoleWarnSpy = vi
         .spyOn(console, "warn")
         .mockImplementation(() => {})
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { children?: React.ReactNode }
@@ -314,6 +322,7 @@ describe("experimentalComponent", () => {
     })
 
     it("should not copy render property for forwardRef components", () => {
+      // eslint-disable-next-line react/display-name
       const TestComponent = forwardRef<
         HTMLDivElement,
         { children?: React.ReactNode }
@@ -325,7 +334,9 @@ describe("experimentalComponent", () => {
       )
 
       // The wrapped component should have its own render function
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((WrappedComponent as any).render).not.toBe(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (TestComponent as any).render
       )
     })
