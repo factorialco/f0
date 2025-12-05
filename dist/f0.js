@@ -4032,8 +4032,16 @@ const Do = (n, e, t) => g("div", {
       }],
       columnMax: 4
     }
-  }), []), l = (v, w, D) => v.map((S) => {
-    const A = E(S, D), N = {
+  }), []), l = (v, w) => {
+    if (typeof v.content == "function" && v.deps && w) {
+      const D = {};
+      return v.deps.forEach((S) => {
+        typeof S == "string" && w[S] !== void 0 && (D[S] = w[S]);
+      }), v.content(D);
+    }
+    return typeof v.content == "function" ? null : v.content;
+  }, u = (v, w, D) => v.map((S) => {
+    const A = l(S, D), N = {
       id: S.id,
       h: S.h ?? 1,
       w: S.w ?? 1,
@@ -4046,9 +4054,9 @@ const Do = (n, e, t) => g("div", {
       content: o(A, S.meta, w)
     };
     return S.x !== void 0 && (N.x = S.x), S.y !== void 0 && (N.y = S.y), N;
-  }), [u, c] = W(l(n, e)), d = L(e), h = L(n), f = L(!1), b = L(/* @__PURE__ */ new Map()), y = L(n);
-  y.current = n;
-  const x = L(s), O = B(() => {
+  }), [c, d] = W(u(n, e)), h = L(e), f = L(n), b = L(!1), y = L(/* @__PURE__ */ new Map()), x = L(n);
+  x.current = n;
+  const O = L(s), _ = B(() => {
     const v = /* @__PURE__ */ new Map();
     return !s || Object.keys(s).length === 0 || n.forEach((w) => {
       if (w.deps && w.deps.length > 0) {
@@ -4056,9 +4064,9 @@ const Do = (n, e, t) => g("div", {
         v.set(w.id, D);
       }
     }), v;
-  }, [n, s]), _ = X((v) => {
-    c(v), f.current || t(v.map((w) => {
-      const D = y.current.find((S) => S.id === w.id);
+  }, [n, s]), C = X((v) => {
+    d(v), b.current || t(v.map((w) => {
+      const D = x.current.find((S) => S.id === w.id);
       return {
         id: w.id,
         w: w.w ?? 1,
@@ -4071,37 +4079,29 @@ const Do = (n, e, t) => g("div", {
         locked: w.locked,
         deps: D == null ? void 0 : D.deps
       };
-    })), f.current = !1;
-  }, [t]), C = (v, w) => !v && !w ? !1 : !v || !w || v.length !== w.length ? !0 : v.some((D, S) => D !== w[S]), E = (v, w) => {
-    if (typeof v.content == "function" && v.deps && w) {
-      const D = {};
-      return v.deps.forEach((S) => {
-        typeof S == "string" && w[S] !== void 0 && (D[S] = w[S]);
-      }), v.content(D);
-    }
-    return typeof v.content == "function" ? null : v.content;
-  };
+    })), b.current = !1;
+  }, [t]), E = (v, w) => !v && !w ? !1 : !v || !w || v.length !== w.length ? !0 : v.some((D, S) => D !== w[S]);
   return I(() => {
-    const v = d.current !== e, w = h.current !== n, D = x.current !== s && (x.current === void 0 || s === void 0 || Object.keys(x.current).length !== Object.keys(s).length || Object.keys(s).some((m) => {
+    const v = h.current !== e, w = f.current !== n, D = O.current !== s && (O.current === void 0 || s === void 0 || Object.keys(O.current).length !== Object.keys(s).length || Object.keys(s).some((m) => {
       var R;
-      return ((R = x.current) == null ? void 0 : R[m]) !== s[m];
+      return ((R = O.current) == null ? void 0 : R[m]) !== s[m];
     })), S = /* @__PURE__ */ new Map();
     n.forEach((m) => {
       if (m.deps && m.deps.length > 0) {
-        const R = b.current.get(m.id), k = O.get(m.id);
-        S.set(m.id, C(R, k)), k ? b.current.set(m.id, k) : b.current.delete(m.id);
+        const R = y.current.get(m.id), k = _.get(m.id);
+        S.set(m.id, E(R, k)), k ? y.current.set(m.id, k) : y.current.delete(m.id);
       }
     });
     const A = new Set(n.map((m) => m.id));
-    b.current.forEach((m, R) => {
-      A.has(R) || b.current.delete(R);
+    y.current.forEach((m, R) => {
+      A.has(R) || y.current.delete(R);
     });
     const N = Array.from(S.values()).some((m) => m) || D;
-    v && !w && !N ? (f.current = !0, c((m) => m.map((R) => {
+    v && !w && !N ? (b.current = !0, d((m) => m.map((R) => {
       const k = n.find((V) => V.id === R.id);
       if (!k)
         return R;
-      const H = E(k, s);
+      const H = l(k, s);
       return {
         ...R,
         noMove: !e,
@@ -4111,12 +4111,12 @@ const Do = (n, e, t) => g("div", {
         _originalContent: H,
         content: o(H, k.meta, e)
       };
-    }))) : (w || N) && c((m) => {
+    }))) : (w || N) && d((m) => {
       const R = new Map(m.map((k) => [k.id, k]));
       return n.map((k) => {
         const H = R.get(k.id), V = S.get(k.id) ?? !1;
         let J;
-        V || !H ? J = E(k, s) : J = H._originalContent ?? E(k, s);
+        V || !H ? J = l(k, s) : J = H._originalContent ?? l(k, s);
         const j = {
           id: k.id,
           h: (H == null ? void 0 : H.h) ?? k.h ?? 1,
@@ -4131,12 +4131,12 @@ const Do = (n, e, t) => g("div", {
         }, U = (H == null ? void 0 : H.x) ?? k.x, K = (H == null ? void 0 : H.y) ?? k.y;
         return U !== void 0 && (j.x = U), K !== void 0 && (j.y = K), j;
       });
-    }), d.current = e, h.current = n, x.current = s;
-  }, [n, e, o, O, s]), g(Ai, {
+    }), h.current = e, f.current = n, O.current = s;
+  }, [n, e, o, _, s]), g(Ai, {
     className: $(r && "h-full flex-1 overflow-auto"),
     options: a,
-    onChange: _,
-    widgets: u
+    onChange: C,
+    widgets: c
   });
 };
 Zt.displayName = "GroupGrid";
