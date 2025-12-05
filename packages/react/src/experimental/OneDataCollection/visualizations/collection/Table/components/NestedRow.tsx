@@ -1,3 +1,21 @@
+/**
+ * NestedRow Component
+ *
+ * This component handles the rendering of table rows with hierarchical/nested data structures.
+ * It provides the following functionality:
+ *
+ * 1. **Expandable/Collapsible Rows**: Allows users to expand rows to reveal nested child data.
+ * 2. **Lazy Loading**: Children are loaded on-demand when a row is expanded for the first time,
+ *    improving performance for large datasets.
+ * 3. **Recursive Nesting**: Supports unlimited nesting levels by recursively rendering NestedRow
+ *    components for children that themselves have children.
+ * 4. **Pagination Support**: Handles paginated children with a "Load More" functionality.
+ * 5. **Visual Connectors**: Calculates and renders visual tree connectors to show parent-child
+ *    relationships.
+ * 6. **State Management**: Manages expansion state, loading state, and child data caching at each level.
+ *
+ */
+
 import { forwardRef, useCallback, useRef, useState } from "react"
 
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
@@ -47,7 +65,6 @@ export type RowProps<
   checkColumnWidth: number
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
-  isLastOfRoot?: boolean
 }
 
 const NestedRowContent = <
@@ -74,9 +91,18 @@ const NestedRowContent = <
     | null
 ) => {
   const [open, setOpen] = useState(false)
+
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id : props.index}`
 
+  /**
+   * useLoadChildren hook manages:
+   * - Children data fetching and caching
+   * - Loading state
+   * - Pagination information
+   * - Determining if children are "nested" (have their own children) or "flat"
+   */
   const { children, loadChildren, isLoading, childrenType, paginationInfo } =
     useLoadChildren({
       rowId: rowId,
@@ -84,14 +110,27 @@ const NestedRowContent = <
       source: props.source,
     })
 
+  /**
+   * useCalculateConectorHeight manages the visual tree connector lines
+   * It calculates the height between first and last visible child to draw
+   * the vertical line connecting them to their parent
+   */
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
     useCalculateConectorHeight(childrenType)
 
-  const typeDetailed = childrenType === "detailed"
   const shouldShowLoading = open && isLoading
   const shouldShowChildren = open
   const shouldShowLoadMore = open && paginationInfo?.hasMore
 
+  /**
+   * Combine internal and external refs
+   *
+   * We need both because:
+   * - Internal ref: Used by LoadMore and RowLoading components for positioning
+   * - External ref: Passed from parent for connector height calculations
+   *
+   * This pattern ensures both internal and external consumers can access the DOM element
+   */
   const combinedRowRef = useCallback(
     (element: HTMLTableRowElement | null) => {
       internalRowRef.current = element
@@ -128,6 +167,10 @@ const NestedRowContent = <
         ref={combinedRowRef}
         nestedRowProps={{
           ...sharedNestedRowProps,
+          // If nestedRowProps.parentHasChildren is not provided, we need to set it to true if the parent has children
+          // This nestedRowProps.parentHasChildren is provided on children iteration
+          parentHasChildren:
+            props.nestedRowProps?.parentHasChildren ?? children.length > 0,
           hasLoadedChildren: false,
         }}
         tableWithChildren={props.tableWithChildren}
@@ -139,12 +182,19 @@ const NestedRowContent = <
           const childHasChildren = props.source.itemsWithChildren?.(childItem)
           const isFirstChild = childIndex === 0
           const isLastChild = childIndex === children.length - 1
-          // Mark as last of root if parent is already last of root OR this is the last expandable child
-          // This ensures the entire subtree blocks notifications to grandparent
-          const childIsLastOfRoot =
-            props.isLastOfRoot || (isLastChild && childHasChildren)
+
           const depth = (props.nestedRowProps?.depth ?? 0) + 1
 
+          /**
+           * Get the appropriate ref for connector height calculations
+           *
+           * We only need refs for the first and last children to calculate
+           * the connector line height. Other children don't need refs.
+           *
+           * Special case: If there's a "Load More" button, the last child
+           * doesn't get the ref because the LoadMore component will be the
+           * actual last element.
+           */
           const getChildRef = () => {
             if (isFirstChild) {
               return (el: HTMLTableRowElement | null) => {
@@ -158,6 +208,7 @@ const NestedRowContent = <
             return undefined
           }
 
+          // Recursive case: Child has its own children
           if (childHasChildren) {
             return (
               <NestedRow
@@ -166,15 +217,16 @@ const NestedRowContent = <
                 index={childIndex}
                 item={childItem}
                 tableWithChildren={props.tableWithChildren}
-                isLastOfRoot={childIsLastOfRoot}
                 ref={getChildRef()}
                 nestedRowProps={{
                   ...props.nestedRowProps,
+                  parentHasChildren: true,
                   depth: depth,
                 }}
               />
             )
           } else {
+            // Base case: Leaf node with no children
             return (
               <Row
                 {...props}
@@ -185,9 +237,8 @@ const NestedRowContent = <
                 ref={getChildRef()}
                 nestedRowProps={{
                   ...props.nestedRowProps,
-                  depth: typeDetailed
-                    ? (props.nestedRowProps?.depth ?? 0) + 1
-                    : (props.nestedRowProps?.depth ?? 0) + 1,
+                  depth: (props.nestedRowProps?.depth ?? 0) + 1,
+                  parentHasChildren: true,
                   nestedVariant: childrenType,
                   onExpand: handleExpand,
                 }}
@@ -201,8 +252,12 @@ const NestedRowContent = <
         <RowLoading
           {...props}
           rowRef={internalRowRef}
-          nestedRowProps={sharedNestedRowProps}
+          nestedRowProps={{
+            ...sharedNestedRowProps,
+            parentHasChildren: children.length > 0,
+          }}
           paginationInfo={paginationInfo}
+          ref={setLastChildRef}
         />
       )}
 
@@ -214,6 +269,7 @@ const NestedRowContent = <
           ref={setLastChildRef}
           nestedRowProps={{
             ...props.nestedRowProps,
+            parentHasChildren: true,
             nestedVariant: childrenType,
           }}
         />
@@ -246,6 +302,7 @@ const NestedRowComponentInner = <
     | null
 ) => {
   // Only wrap with Provider at the root level (depth === 0 or undefined)
+  // This ensures we have a single shared context for the entire tree
   if ((props.nestedRowProps?.depth ?? 0) === 0) {
     return (
       <NestedDataProvider>
@@ -254,6 +311,7 @@ const NestedRowComponentInner = <
     )
   }
 
+  // Nested children render without additional provider wrapping
   return <NestedRowContentWithRef {...props} ref={ref} />
 }
 

@@ -4,6 +4,8 @@ import {
   BUTTON_HEIGHT,
   CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,
+  CONNECTOR_WIDTH,
+  CONNECTOR_WIDTH_WITH_CHILDREN,
   getNestedMarginLeft,
   isFirstCellExpanded,
   isFirstCellWithDepth,
@@ -22,11 +24,26 @@ interface TreeConnectorProps {
 
 export const connectorVariables = (
   height: string,
-  nestedRowProps?: NestedRowProps
+  nestedRowProps?: NestedRowProps & {
+    rowWithChildren?: boolean
+    tableWithChildren?: boolean
+  }
 ) => {
-  const horizontalOffset = nestedRowProps?.onLoadMoreChildren
+  const { rowWithChildren, nestedVariant, onLoadMoreChildren } =
+    nestedRowProps ?? {}
+
+  const isDetailedVariant = nestedVariant === "detailed"
+
+  const horizontalOffset = onLoadMoreChildren
     ? BUTTON_HEIGHT / 2 - PADDING_TOP
-    : (CHEVRON_PARENT_SIZE - PADDING_TOP) / 2
+    : CHEVRON_PARENT_SIZE / 2 - PADDING_TOP
+
+  const connectorWidth =
+    rowWithChildren && !onLoadMoreChildren
+      ? CONNECTOR_WIDTH_WITH_CHILDREN
+      : isDetailedVariant
+        ? CONNECTOR_WIDTH - 6
+        : CONNECTOR_WIDTH
 
   return {
     "--line-left": `-${2 * CHEVRON_SIZE}px`,
@@ -35,6 +52,7 @@ export const connectorVariables = (
     "--horizontal-left": `4px`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
     "--line-height": `calc(${height} - ${CHEVRON_PARENT_SIZE + PADDING_TOP}px )`,
+    "--connector-width": `${connectorWidth}px`,
   }
 }
 
@@ -53,7 +71,7 @@ export const horizontalConnectorStyles =
   "after:left-[var(--horizontal-left)] " +
   "after:top-[var(--horizontal-offset)] " +
   "after:h-[var(--horizontal-height)] " +
-  "after:w-4 " +
+  "after:w-[var(--connector-width)] " +
   "after:rounded-bl-[var(--horizontal-height)] " +
   "after:content-[''] " +
   "after:shadow-[inset_1px_-1px_0_0_hsl(var(--neutral-30))]"
@@ -72,14 +90,17 @@ export const TreeConnector = ({
   )
   const typeBasic =
     nestedRowProps === undefined || nestedRowProps?.nestedVariant === "basic"
+  const typeDetailed = nestedRowProps?.nestedVariant === "detailed"
 
   const basicOrWithChildren = typeBasic || nestedRowProps?.rowWithChildren
   const detailedWithLoadMore =
-    nestedRowProps?.nestedVariant === "detailed" &&
-    nestedRowProps?.onLoadMoreChildren
+    typeDetailed && nestedRowProps?.onLoadMoreChildren
 
   const marginLeft = firstCellWithDepth
-    ? getNestedMarginLeft(nestedRowProps?.depth ?? 0)
+    ? getNestedMarginLeft({
+        depth: nestedRowProps?.depth ?? 0,
+        padding: 0,
+      })
     : undefined
   const connectorHeight = nestedRowProps?.connectorHeight
     ? `${nestedRowProps?.connectorHeight}px`
@@ -97,8 +118,11 @@ export const TreeConnector = ({
     <div
       className={cn(
         "absolute inset-0 h-full",
-        firstCellExpanded && verticalConnectorStyles,
-        firstCellWithDepth &&
+        nestedRowProps?.parentHasChildren &&
+          firstCellExpanded &&
+          verticalConnectorStyles,
+        nestedRowProps?.parentHasChildren &&
+          firstCellWithDepth &&
           basicOrWithChildren &&
           !detailedWithLoadMore &&
           horizontalConnectorStyles
