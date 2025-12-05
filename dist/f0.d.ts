@@ -2771,7 +2771,7 @@ declare type GroupGridWidget<Meta extends Record<string, unknown> = Record<strin
      * Dependencies array that, when changed, will trigger a content update.
      * Each value in the array is compared using strict equality (`===`).
      */
-    deps?: Deps[];
+    deps?: Deps;
 } & GroupGridWidgetSize;
 
 declare type GroupGridWidgetSize = {
