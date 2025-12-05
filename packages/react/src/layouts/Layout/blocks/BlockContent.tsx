@@ -3,7 +3,7 @@ import { createPageLayoutBlock } from "../utils"
 import { Block, BlockProps } from "./Block"
 
 // Make the additional props optional for the helper function
-interface BlockContentExtraProps {
+export interface BlockContentExtraProps {
   title?: string
   description?: string
   titleLevel?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"

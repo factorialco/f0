@@ -1,16 +1,17 @@
-import { Block } from "./blocks/Block"
-import { BlockContent } from "./blocks/BlockContent"
-import { GroupGrid } from "./groups/GroupGrid"
-import { GroupLinear } from "./groups/GroupLinear/GroupLinear"
-import { GroupMasonry } from "./groups/GroupMasonry"
-import { Page } from "./pages/Page"
+import { experimentalComponent } from "@/lib/experimental"
+import { Block as BlockComponent } from "./blocks/Block"
+import { BlockContent as BlockContentComponent } from "./blocks/BlockContent"
+import { GroupGrid as GroupGridComponent } from "./groups/GroupGrid"
+import { GroupLinear as GroupLinearComponent } from "./groups/GroupLinear/GroupLinear"
+import { GroupMasonry as GroupMasonryComponent } from "./groups/GroupMasonry"
+import { Page as PageComponent } from "./pages/Page"
 export * from "./types"
 
 export const Layout = {
-  Page: Page,
-  Block: Block,
-  BlockContent: BlockContent,
-  Group: GroupLinear,
-  GroupGrid: GroupGrid,
-  GroupMasonry: GroupMasonry,
+  Page: experimentalComponent("Page", PageComponent),
+  Block: experimentalComponent("Block", BlockComponent),
+  BlockContent: experimentalComponent("BlockContent", BlockContentComponent),
+  Group: experimentalComponent("Group", GroupLinearComponent),
+  GroupGrid: experimentalComponent("GroupGrid", GroupGridComponent),
+  GroupMasonry: experimentalComponent("GroupMasonry", GroupMasonryComponent),
 }

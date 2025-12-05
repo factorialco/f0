@@ -6,6 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
+import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
 import { useState } from "react"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
@@ -161,7 +162,7 @@ const meta = {
       )
     },
   ],
-  parameters: {
+  parameters: withSkipA11y({
     layout: "fullscreen",
     docs: {
       description: {
@@ -176,7 +177,7 @@ const meta = {
         height: "650px",
       },
     },
-  },
+  }),
 } satisfies Meta<typeof Dashboard>
 
 export default meta

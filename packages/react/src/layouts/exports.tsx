@@ -35,3 +35,11 @@ export const HomeLayout = Component(
   },
   HomeLayoutComponent
 )
+
+export {
+  Dashboard,
+  type DashboardProps,
+  type DashboardWidget,
+} from "./Dashboard"
+
+export * from "./Layout"
