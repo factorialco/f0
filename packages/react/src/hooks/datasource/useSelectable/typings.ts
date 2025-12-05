@@ -48,6 +48,11 @@ export type UseSelectableProps<
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   selectionMode?: "multi" | "single"
   selectedState?: SelectedItemsState<R>
+  /**
+   * Disables the automatic "Select All" state when all items are manually selected.
+   * When true, allSelected will always be false even if all items are checked.
+   */
+  disableSelectAll?: boolean
 }
 
 export type SelectionMeta<R extends RecordType> = {
