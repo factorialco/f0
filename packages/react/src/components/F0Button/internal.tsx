@@ -114,7 +114,7 @@ const ButtonInternal = forwardRef<
         <div
           className={cn(
             isLoading && "invisible",
-            "flex min-w-0 flex-1 items-center gap-1",
+            "flex min-w-0 flex-1 items-center justify-center gap-1",
             icon && !hideLabel && "-ml-[3px]"
           )}
         >
