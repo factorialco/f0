@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.0](https://github.com/factorialco/f0/compare/f0-react-v1.302.3...f0-react-v1.303.0) (2025-12-05)
+
+
+### Features
+
+* nested tables design improvements ([#3089](https://github.com/factorialco/f0/issues/3089)) ([b75a1ea](https://github.com/factorialco/f0/commit/b75a1ea994f62200f79ae7f7c6e6fc4e6a3294db))
+
 ## [1.302.3](https://github.com/factorialco/f0/compare/f0-react-v1.302.2...f0-react-v1.302.3) (2025-12-05)
 
 
