@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.302.3](https://github.com/factorialco/f0/compare/f0-react-v1.302.2...f0-react-v1.302.3) (2025-12-05)
+
+
+### Bug Fixes
+
+* return search from useDataCollectionData ([#3087](https://github.com/factorialco/f0/issues/3087)) ([e5f28d5](https://github.com/factorialco/f0/commit/e5f28d593fffb014c08e93158b252867edd80398))
+
+## [1.302.2](https://github.com/factorialco/f0/compare/f0-react-v1.302.1...f0-react-v1.302.2) (2025-12-05)
+
+
+### Bug Fixes
+
+* align elements inside button ([#3094](https://github.com/factorialco/f0/issues/3094)) ([42ddb57](https://github.com/factorialco/f0/commit/42ddb57c78ac1bccc5bfb0bef1a586b085cf0153))
+
+## [1.302.1](https://github.com/factorialco/f0/compare/f0-react-v1.302.0...f0-react-v1.302.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* improve empty state layout in SelectContent component ([#3092](https://github.com/factorialco/f0/issues/3092)) ([ff1f8f9](https://github.com/factorialco/f0/commit/ff1f8f94e3cadad7728f5871f28b98986057aebe))
+
+## [1.302.0](https://github.com/factorialco/f0/compare/f0-react-v1.301.0...f0-react-v1.302.0) (2025-12-04)
+
+
+### Features
+
+* add disableSelectAll prop to F0Select for manual item selection ([#3082](https://github.com/factorialco/f0/issues/3082)) ([f35e596](https://github.com/factorialco/f0/commit/f35e596afa5a0e8d72e2d9e7e280457232cea2bb))
+
 ## [1.301.0](https://github.com/factorialco/f0/compare/f0-react-v1.300.0...f0-react-v1.301.0) (2025-12-04)
 
 
