@@ -88,9 +88,13 @@ const meta = {
         const isTextWidget = type === "text"
         const widgetConfig = isTextWidget
           ? {
-              deps: [globalCounter],
-              content: (deps: unknown[]) =>
-                createWidgetContent("text", deps[0] as number),
+              deps: ["globalCounter"], // Key into deps object
+              content: (deps: Record<string, unknown>) => {
+                return createWidgetContent(
+                  "text",
+                  deps["globalCounter"] as number
+                )
+              },
             }
           : {
               content: createWidgetContent(type, globalCounter),
@@ -136,21 +140,7 @@ const meta = {
                   <F0Button
                     label="Increment Global Counter"
                     onClick={() => {
-                      const newCounter = globalCounter + 1
-                      setGlobalCounter(newCounter)
-                      // Update widgets' deps when globalCounter changes
-                      setWidgets((prev) =>
-                        prev.map((widget) => {
-                          // Only update widgets that have deps (text widgets)
-                          if (widget.deps && widget.deps.length > 0) {
-                            return {
-                              ...widget,
-                              deps: [newCounter],
-                            }
-                          }
-                          return widget
-                        })
-                      )
+                      setGlobalCounter((prev) => prev + 1)
                     }}
                   />
                   <p>Global counter: {globalCounter}</p>
@@ -191,6 +181,7 @@ const meta = {
                 args={{
                   ...args,
                   widgets,
+                  deps: { globalCounter },
                   onChange: (updatedWidgets) => {
                     console.log("widgets onChange stories", updatedWidgets)
                     setWidgets(updatedWidgets as DashboardWidget[])

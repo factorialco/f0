@@ -9,7 +9,9 @@ export type GroupGridWidget<
 > = {
   id: string
   availableSizes?: GroupGridWidgetSize[]
-  content: React.ReactNode | ((deps: unknown[]) => React.ReactNode)
+  content:
+    | React.ReactNode
+    | ((deps: Record<string, unknown>) => React.ReactNode)
   x: number
   y: number
   locked?: boolean
