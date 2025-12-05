@@ -4,7 +4,7 @@ import { useShowExperimentalWarnings } from "./providers/user-platafform/UserPla
 const reported: Record<string, { uses: number; usesReported: number }> = {}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const experimentalComponent = <T extends (...args: any[]) => any>(
+export const experimentalComponent = <T extends React.ComponentType<any>>(
   name: string,
   component: T
 ): T => {
@@ -79,7 +79,8 @@ export const experimentalComponent = <T extends (...args: any[]) => any>(
   }
 
   // For regular components
-  return ((...args: Parameters<T>): ReturnType<T> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ((...args: any[]): any => {
     const showExperimentalWarnings = useShowExperimentalWarnings()
     if (showExperimentalWarnings) {
       initReporting()
@@ -97,6 +98,7 @@ export const experimentalComponent = <T extends (...args: any[]) => any>(
       }
     }
 
-    return component(...args)
-  }) as T
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (component as any)(...args)
+  }) as unknown as T
 }
