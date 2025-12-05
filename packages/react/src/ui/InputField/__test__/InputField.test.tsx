@@ -400,7 +400,7 @@ describe("InputField", () => {
       )
 
       const placeholder = screen.getByText("Enter text")
-      expect(placeholder).toHaveClass("opacity-1")
+      expect(placeholder).toHaveClass("opacity-100")
     })
 
     it("should call onClickPlaceholder when placeholder is clicked", () => {
