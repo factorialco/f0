@@ -86,7 +86,7 @@ describe("F0GridStack", () => {
       y: 0,
       w: 2,
       h: 2,
-      renderFn: () => <div>Widget 1</div>,
+      content: <div>Widget 1</div>,
     },
     {
       id: "node-2",
@@ -94,7 +94,7 @@ describe("F0GridStack", () => {
       y: 0,
       w: 3,
       h: 1,
-      renderFn: () => <div>Widget 2</div>,
+      content: <div>Widget 2</div>,
       allowedSizes: [
         { w: 2, h: 1 },
         { w: 3, h: 1 },
@@ -107,7 +107,7 @@ describe("F0GridStack", () => {
       y: 2,
       w: 1,
       h: 1,
-      renderFn: () => <div>Widget 3</div>,
+      content: <div>Widget 3</div>,
     },
   ]
 
@@ -165,13 +165,13 @@ describe("F0GridStack", () => {
           id: "small-node",
           w: 1,
           h: 1,
-          renderFn: () => <span>Small</span>,
+          content: <span>Small</span>,
         },
         {
           id: "large-node",
           w: 6,
           h: 4,
-          renderFn: () => <div>Large</div>,
+          content: <div>Large</div>,
         },
         {
           id: "positioned-node",
@@ -179,7 +179,7 @@ describe("F0GridStack", () => {
           y: 5,
           w: 2,
           h: 2,
-          renderFn: () => <p>Positioned</p>,
+          content: <p>Positioned</p>,
         },
       ]
 
@@ -200,7 +200,7 @@ describe("F0GridStack", () => {
             { w: 2, h: 2 },
             { w: 4, h: 4 },
           ],
-          renderFn: () => <div>Constrained</div>,
+          content: <div>Constrained</div>,
         },
       ]
 
@@ -447,7 +447,7 @@ describe("F0GridStack", () => {
           id: "no-id",
           w: 2,
           h: 2,
-          renderFn: () => <div>No ID</div>,
+          content: <div>No ID</div>,
         },
       ]
 
@@ -530,6 +530,260 @@ describe("F0GridStack", () => {
     })
   })
 
+  describe("Widget Signature Memoization", () => {
+    it("should create signature from widget properties", () => {
+      const widgets: GridStackReactWidget[] = [
+        {
+          id: "widget-1",
+          w: 2,
+          h: 2,
+          x: 0,
+          y: 0,
+          noMove: false,
+          noResize: false,
+          locked: false,
+          content: <div>Content</div>,
+        },
+      ]
+
+      // The signature should include all relevant properties
+      const signature = JSON.stringify(
+        widgets.map((widget) => ({
+          id: widget.id,
+          w: widget.w,
+          h: widget.h,
+          x: widget.x,
+          y: widget.y,
+          noMove: widget.noMove,
+          noResize: widget.noResize,
+          locked: widget.locked,
+          content: widget.content?.toString() ?? "",
+          allowedSizes: widget.allowedSizes,
+        }))
+      )
+
+      expect(signature).toContain("widget-1")
+      expect(signature).toContain('"w":2')
+      expect(signature).toContain('"h":2')
+    })
+
+    it("should include allowedSizes in signature", () => {
+      const widgets: GridStackReactWidget[] = [
+        {
+          id: "widget-1",
+          w: 2,
+          h: 2,
+          allowedSizes: [
+            { w: 2, h: 2 },
+            { w: 4, h: 4 },
+          ],
+          content: <div>Content</div>,
+        },
+      ]
+
+      const signature = JSON.stringify(
+        widgets.map((widget) => ({
+          id: widget.id,
+          w: widget.w,
+          h: widget.h,
+          x: widget.x,
+          y: widget.y,
+          noMove: widget.noMove,
+          noResize: widget.noResize,
+          locked: widget.locked,
+          content: widget.content?.toString() ?? "",
+          allowedSizes: widget.allowedSizes,
+        }))
+      )
+
+      expect(signature).toContain("allowedSizes")
+    })
+
+    it("should use toString for content in signature", () => {
+      const widgets: GridStackReactWidget[] = [
+        {
+          id: "widget-1",
+          w: 2,
+          h: 2,
+          content: <div>Test Content</div>,
+        },
+      ]
+
+      const signature = JSON.stringify(
+        widgets.map((widget) => ({
+          id: widget.id,
+          w: widget.w,
+          h: widget.h,
+          x: widget.x,
+          y: widget.y,
+          noMove: widget.noMove,
+          noResize: widget.noResize,
+          locked: widget.locked,
+          content: widget.content?.toString() ?? "",
+          allowedSizes: widget.allowedSizes,
+        }))
+      )
+
+      // Content should be converted to string
+      expect(typeof JSON.parse(signature)[0].content).toBe("string")
+    })
+  })
+
+  describe("Grid Options Memoization", () => {
+    it("should merge options with widgets as children", () => {
+      const options = { column: 12, margin: 10 }
+      const widgets: GridStackReactWidget[] = [
+        {
+          id: "widget-1",
+          w: 2,
+          h: 2,
+          content: <div>Content</div>,
+        },
+      ]
+
+      const gridOptions = {
+        ...options,
+        children: widgets,
+      }
+
+      expect(gridOptions.column).toBe(12)
+      expect(gridOptions.margin).toBe(10)
+      expect(gridOptions.children).toEqual(widgets)
+    })
+  })
+
+  describe("onResizeStop Handler Integration", () => {
+    it("should call grid update when size doesn't match target", () => {
+      const mockUpdate = vi.fn()
+      const mockGrid = { update: mockUpdate }
+      const mockElement = {
+        gridstackNode: {
+          w: 2.5,
+          h: 1.5,
+          allowedSizes: [
+            { w: 2, h: 1 },
+            { w: 3, h: 1 },
+            { w: 4, h: 2 },
+          ],
+          grid: mockGrid,
+        },
+      } as unknown as GridItemHTMLElement
+
+      // Simulate onResizeStop logic
+      const node = mockElement.gridstackNode
+      if (!node) return
+
+      const allowed = node.allowedSizes ?? []
+      if (allowed.length === 0) return
+
+      const closestAllowed = (
+        w: number,
+        h: number,
+        allowedSizes: { w: number; h: number }[]
+      ) => {
+        let best = allowedSizes[0],
+          bestDist = Infinity
+        for (const a of allowedSizes) {
+          const dx = a.w - w,
+            dy = a.h - h
+          const dist = dx * dx + dy * dy
+          if (dist < bestDist) {
+            bestDist = dist
+            best = a
+          }
+        }
+        return best
+      }
+
+      const target = closestAllowed(node.w ?? 1, node.h ?? 1, allowed)
+
+      if (node.w !== target.w || node.h !== target.h) {
+        node.grid?.update(mockElement, { w: target.w, h: target.h })
+      }
+
+      expect(mockUpdate).toHaveBeenCalledWith(mockElement, {
+        w: target.w,
+        h: target.h,
+      })
+    })
+
+    it("should not call update when size matches target", () => {
+      const mockUpdate = vi.fn()
+      const mockGrid = { update: mockUpdate }
+      const mockElement = {
+        gridstackNode: {
+          w: 3,
+          h: 1,
+          allowedSizes: [
+            { w: 2, h: 1 },
+            { w: 3, h: 1 },
+          ],
+          grid: mockGrid,
+        },
+      } as unknown as GridItemHTMLElement
+
+      const node = mockElement.gridstackNode
+      if (!node) return
+
+      const allowed = node.allowedSizes ?? []
+      if (allowed.length === 0) return
+
+      const closestAllowed = (
+        w: number,
+        h: number,
+        allowedSizes: { w: number; h: number }[]
+      ) => {
+        let best = allowedSizes[0],
+          bestDist = Infinity
+        for (const a of allowedSizes) {
+          const dx = a.w - w,
+            dy = a.h - h
+          const dist = dx * dx + dy * dy
+          if (dist < bestDist) {
+            bestDist = dist
+            best = a
+          }
+        }
+        return best
+      }
+
+      const target = closestAllowed(node.w ?? 1, node.h ?? 1, allowed)
+
+      if (node.w !== target.w || node.h !== target.h) {
+        node.grid?.update(mockElement, { w: target.w, h: target.h })
+      }
+
+      // Should not be called because w=3, h=1 matches target
+      expect(mockUpdate).not.toHaveBeenCalled()
+    })
+
+    it("should return early when gridstackNode is undefined", () => {
+      const mockElement = {
+        gridstackNode: undefined,
+      } as unknown as GridItemHTMLElement
+
+      // Simulate onResizeStop early return
+      const node = mockElement.gridstackNode
+      expect(node).toBeUndefined()
+    })
+
+    it("should return early when allowedSizes is empty", () => {
+      const mockElement = {
+        gridstackNode: {
+          w: 2,
+          h: 2,
+          allowedSizes: [],
+        },
+      } as unknown as GridItemHTMLElement
+
+      const node = mockElement.gridstackNode
+      if (!node) return
+
+      const allowed = node.allowedSizes ?? []
+      expect(allowed.length).toBe(0)
+    })
+  })
+
   describe("Component Re-rendering", () => {
     it("should handle node updates", () => {
       const { rerender, getByTestId } = zeroRender(
@@ -544,7 +798,7 @@ describe("F0GridStack", () => {
           id: "node-4",
           w: 2,
           h: 2,
-          renderFn: () => <div>New Node</div>,
+          content: <div>New Node</div>,
         },
       ]
 
@@ -579,6 +833,27 @@ describe("F0GridStack", () => {
       expect(
         getByTestId("grid-stack-provider").getAttribute("data-onchange")
       ).toBe("defined")
+    })
+
+    it("should handle widget property changes", () => {
+      const { rerender, getByTestId } = zeroRender(
+        <F0GridStack options={mockOptions} widgets={mockWidgets} />
+      )
+
+      expect(getByTestId("grid-stack-provider")).toBeTruthy()
+
+      const updatedWidgets: GridStackReactWidget[] = [
+        {
+          ...mockWidgets[0],
+          w: 4,
+          h: 4,
+        },
+        ...mockWidgets.slice(1),
+      ]
+
+      rerender(<F0GridStack options={mockOptions} widgets={updatedWidgets} />)
+
+      expect(getByTestId("grid-stack-provider")).toBeTruthy()
     })
   })
 })

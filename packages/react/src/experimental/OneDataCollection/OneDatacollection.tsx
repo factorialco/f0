@@ -1,4 +1,4 @@
-import { useLayout } from "@/components/layouts/LayoutProvider"
+import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"

@@ -7,7 +7,7 @@ interface PageProps {
 export function Page({ children, header, embedded = false }: PageProps) {
   return (
     <div
-      className={`flex w-full flex-col overflow-hidden ${
+      className={`flex min-h-full w-full flex-col overflow-hidden ${
         embedded ? "" : "xs:rounded-xl"
       } bg-f1-special-page ring-1 ring-inset ring-f1-border-secondary`}
     >

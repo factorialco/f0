@@ -23,7 +23,7 @@ const FocusableElement = () => {
   )
 }
 const meta = {
-  title: "Layout/TwoColumnLayout",
+  title: "TwoColumnLayout",
   component: TwoColumnLayout,
   tags: ["autodocs", "internal"],
   decorators: [PageDecorator],

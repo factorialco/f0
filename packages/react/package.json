@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.300.0",
+  "version": "1.303.1",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -21,7 +21,9 @@
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
-    "dev:coder": "pnpm build --watch -- --buildSync",
+    "dev:sync": "pnpm build:prepare && tsx scripts/dev-sync.ts",
+    "build:types": "tsc --project ./tsconfig-build.json",
+    "build:prepare": "pnpm run build:types && run-p build-icons",
     "start": "pnpm run dev",
     "size": "pnpm run build && size-limit",
     "build": "tsc --project ./tsconfig-build.json && run-p build-icons && BUILD_TYPES=true vite build -- --tailwind",
@@ -178,6 +180,9 @@
     "@atlaskit/pragmatic-drag-and-drop-flourish": "^2.0.4",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.1.0",
     "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator": "^3.2.5",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@factorialco/f0-core": "workspace:*",
     "@radix-ui/number": "^1.1.1",
     "@radix-ui/primitive": "^1.1.2",

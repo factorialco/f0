@@ -265,6 +265,7 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    ask: "Ask One",
   },
   select: {
     noResults: "No results found",

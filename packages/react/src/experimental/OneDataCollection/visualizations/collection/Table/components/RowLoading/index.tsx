@@ -9,12 +9,12 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
-import { useLayoutEffect, useRef } from "react"
+import { forwardRef, useLayoutEffect, useRef } from "react"
 import { Row, RowProps } from "../Row"
 
 export const DEFAULT_LOADING_ROWS_COUNT = 5
 
-const SingleLoadingRow = <
+const SingleLoadingRowInner = <
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -22,32 +22,38 @@ const SingleLoadingRow = <
   ItemActions extends ItemActionsDefinition<R>,
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
->({
-  rowRef,
-  rowIndex,
-  source,
-  item,
-  columns,
-  frozenColumnsLeft,
-  nestedRowProps,
-  groupIndex,
-  onCheckedChange,
-  selectedItems,
-  checkColumnWidth,
-  tableWithChildren,
-}: RowProps<
-  R,
-  Filters,
-  Sortings,
-  Summaries,
-  ItemActions,
-  NavigationFilters,
-  Grouping
-> & {
-  rowRef: React.RefObject<HTMLTableRowElement>
-  rowIndex: number
-}) => {
-  const loadingRowRef = useRef<HTMLTableRowElement>(null)
+>(
+  {
+    rowRef,
+    rowIndex,
+    source,
+    item,
+    columns,
+    frozenColumnsLeft,
+    nestedRowProps,
+    groupIndex,
+    onCheckedChange,
+    selectedItems,
+    checkColumnWidth,
+    tableWithChildren,
+  }: RowProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  > & {
+    rowRef: React.RefObject<HTMLTableRowElement>
+    rowIndex: number
+  },
+  ref:
+    | ((element: HTMLTableRowElement | null) => void)
+    | React.RefObject<HTMLTableRowElement>
+    | null
+) => {
+  const loadingRowRef = useRef<HTMLTableRowElement | null>(null)
   const rowRefCurrent = rowRef?.current
 
   useLayoutEffect(() => {
@@ -57,9 +63,22 @@ const SingleLoadingRow = <
     }
   }, [rowRefCurrent, rowRef])
 
+  const depth = nestedRowProps?.depth ?? 0
+
+  const combinedRef = (element: HTMLTableRowElement | null) => {
+    loadingRowRef.current = element
+
+    if (typeof ref === "function") {
+      ref(element)
+    }
+  }
+
   return (
     <Row
-      source={source}
+      source={{
+        ...source,
+        itemsWithChildren: () => false,
+      }}
       item={item}
       key={`row-loading-${rowIndex}`}
       index={rowIndex}
@@ -71,18 +90,19 @@ const SingleLoadingRow = <
       selectedItems={selectedItems}
       checkColumnWidth={checkColumnWidth}
       loading
-      ref={loadingRowRef}
+      ref={combinedRef}
       nestedRowProps={{
         ...nestedRowProps,
-        depth: (nestedRowProps?.depth ?? 0) + 1,
+        depth: nestedRowProps?.parentHasChildren ? depth + 1 : depth,
         hasLoadedChildren: false,
+        expanded: false,
       }}
       tableWithChildren={tableWithChildren}
     />
   )
 }
 
-export const RowLoading = <
+const SingleLoadingRow = forwardRef(SingleLoadingRowInner) as <
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -90,20 +110,8 @@ export const RowLoading = <
   ItemActions extends ItemActionsDefinition<R>,
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
->({
-  rowRef,
-  ...props
-}: RowProps<
-  R,
-  Filters,
-  Sortings,
-  Summaries,
-  ItemActions,
-  NavigationFilters,
-  Grouping
-> & {
-  rowRef: React.RefObject<HTMLTableRowElement>
-  source: DataCollectionSource<
+>(
+  props: RowProps<
     R,
     Filters,
     Sortings,
@@ -111,9 +119,55 @@ export const RowLoading = <
     ItemActions,
     NavigationFilters,
     Grouping
-  >
-  paginationInfo?: ChildrenPaginationInfo
-}) => {
+  > & {
+    rowRef: React.RefObject<HTMLTableRowElement>
+    rowIndex: number
+  } & {
+    ref?:
+      | ((element: HTMLTableRowElement | null) => void)
+      | React.RefObject<HTMLTableRowElement>
+      | null
+  }
+) => JSX.Element
+
+const RowLoadingInner = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  {
+    rowRef,
+    ...props
+  }: RowProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  > & {
+    rowRef: React.RefObject<HTMLTableRowElement>
+    source: DataCollectionSource<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >
+    paginationInfo?: ChildrenPaginationInfo
+  },
+  ref:
+    | ((element: HTMLTableRowElement | null) => void)
+    | React.RefObject<HTMLTableRowElement>
+    | null
+) => {
   const childrenCount = props.source.childrenCount?.({
     item: props.item,
     pagination: props.paginationInfo,
@@ -132,12 +186,54 @@ export const RowLoading = <
   const loadingRowsCount =
     childrenCount ?? paginatedChildrenCount ?? DEFAULT_LOADING_ROWS_COUNT
 
-  return Array.from({ length: loadingRowsCount }).map((_, rowIndex) => (
-    <SingleLoadingRow
-      key={`row-loading-${rowIndex}`}
-      rowRef={rowRef}
-      rowIndex={rowIndex}
-      {...props}
-    />
-  ))
+  return (
+    <>
+      {Array.from({ length: loadingRowsCount }).map((_, rowIndex) => (
+        <SingleLoadingRow
+          key={`row-loading-${rowIndex}`}
+          ref={ref}
+          rowRef={rowRef}
+          rowIndex={rowIndex}
+          {...props}
+        />
+      ))}
+    </>
+  )
 }
+
+export const RowLoading = forwardRef(RowLoadingInner) as <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  props: RowProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  > & {
+    rowRef: React.RefObject<HTMLTableRowElement>
+    source: DataCollectionSource<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >
+    paginationInfo?: ChildrenPaginationInfo
+  } & {
+    ref?:
+      | ((element: HTMLTableRowElement | null) => void)
+      | React.RefObject<HTMLTableRowElement>
+      | null
+  }
+) => JSX.Element

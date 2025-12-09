@@ -62,6 +62,7 @@ export type NestedRowProps = {
   expanded?: boolean
   hasLoadedChildren?: boolean
   nestedVariant?: NestedVariant
+  parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
 }

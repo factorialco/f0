@@ -6,7 +6,7 @@ import { theme as f0LightTheme } from "./themes/f0.light"
 // @ts-expect-error - Duplicate echarts types in dependency tree
 echarts.use(AriaComponent)
 
-interface F0ChartProps {
+export interface F0ChartProps {
   showLegend?: boolean
   options?: Partial<Omit<echarts.EChartsOption, "grid" | "emphasis">>
 }
@@ -21,6 +21,18 @@ export const F0Chart = ({
   useEffect(() => {
     if (ref.current) {
       chart.current = echarts.init(ref.current, f0LightTheme)
+
+      const container = ref.current
+      const resizeObserver = new ResizeObserver(() => {
+        chart.current?.resize()
+      })
+
+      resizeObserver.observe(container)
+
+      return () => {
+        resizeObserver.disconnect()
+        chart.current?.dispose()
+      }
     }
   }, [ref])
 

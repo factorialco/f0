@@ -160,9 +160,9 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <p className={cn("flex items-center justify-center p-2", "min-h-[80px]")}>
-        {emptyMessage || "-"}
-      </p>
+      <div className="flex h-full w-full items-center justify-center p-2">
+        <p className="text-center">{emptyMessage || "-"}</p>
+      </div>
     ) : isVirtual ? (
       <div
         className={cn(
@@ -275,6 +275,12 @@ const SelectContent = forwardRef<
                   : taller
                     ? "max-h-[min(460px,calc(var(--radix-select-content-available-height,460px)-110px))]"
                     : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]",
+                // Apply min-height when filters are present to maintain consistent size
+                !asList &&
+                  forceMinHeight &&
+                  "min-h-[min(450px,calc(var(--radix-select-content-available-height,450px)-110px))]",
+                // Center content vertically when empty
+                isEmpty && "justify-center",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}
@@ -290,7 +296,8 @@ const SelectContent = forwardRef<
                     "p-1",
                     !asList &&
                       position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] w-full"
+                      "h-[var(--radix-select-trigger-height)] w-full",
+                    isEmpty && "flex h-full"
                   )}
                 >
                   {viewportContent}

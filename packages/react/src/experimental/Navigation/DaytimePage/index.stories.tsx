@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApplicationFrame } from "../ApplicationFrame"
 
-import { HomeLayout } from "@/components/layouts/HomeLayout"
-import { Default as DefaultHomeLayoutStory } from "@/components/layouts/HomeLayout/index.stories"
+import { HomeLayout } from "@/layouts/HomeLayout"
+import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories"
 import { DaytimePage, DaytimePageProps } from "./index"
 
 const meta: Meta<typeof DaytimePage> = {
