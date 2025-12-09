@@ -198,6 +198,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
 
   const handleChange = useCallback(
     (gridWidgets: GridStackReactWidget[]) => {
+      console.log("handleChange", gridWidgets)
       setGridWidgets(gridWidgets)
       // Only call onChange if this is not an editMode-only change
       // (editMode-only changes are handled internally to preserve sizes)

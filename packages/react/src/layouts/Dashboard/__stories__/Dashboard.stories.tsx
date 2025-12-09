@@ -8,7 +8,7 @@ import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 
 const availableSizes = [
@@ -120,6 +120,12 @@ const meta = {
         ])
       }
 
+      useEffect(() => {
+        console.log("useEffect add widget")
+        handleAddWidget("text")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [])
+
       const [editMode, setEditMode] = useState(false)
 
       return (
@@ -177,16 +183,7 @@ const meta = {
                 </>
               }
             >
-              <Dashboard
-                widgets={widgets}
-                deps={{ globalCounter }}
-                onChange={(updatedWidgets) => {
-                  console.log("widgets onChange stories", updatedWidgets)
-                  setWidgets(updatedWidgets as DashboardWidget[])
-                }}
-                editMode={editMode}
-              />
-              {/* <Story
+              <Story
                 args={{
                   ...args,
                   widgets,
@@ -197,7 +194,7 @@ const meta = {
                   },
                   editMode: editMode,
                 }}
-              /> */}
+              />
             </Layout.Page>
 
             <pre className="mt-10 overflow-x-auto text-xs"></pre>

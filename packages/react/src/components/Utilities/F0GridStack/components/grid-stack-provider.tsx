@@ -104,6 +104,8 @@ export function GridStackProvider({
 }: PropsWithChildren<GridStackProviderProps>) {
   const [gridStack, setGridStack] = useState<GridStack | null>(null)
   const gridStackRef = useRef<GridStack | null>(null)
+  // Track if widgets have been synced at least once to prevent initial emitChange from overwriting widgets
+  const isInitializedRef = useRef<boolean>(false)
 
   // Convert widgets for gridstack (convert React content to functions)
   const convertedOptions = useMemo(() => {
@@ -489,6 +491,13 @@ export function GridStackProvider({
         return next
       })
     }
+
+    // Mark as initialized after first sync completes
+    // This prevents the initial emitChange() from overwriting widgets added via useEffect
+    // We mark it here after all sync operations (add/remove/update) have completed
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true
+    }
   }, [widgets])
 
   // Ensure handle option is applied after widgets are synced and rendered
@@ -621,8 +630,13 @@ export function GridStackProvider({
 
   useEffect(() => {
     if (!gridStack) return
-    // Only emit change if the gridStack instance is valid
-    if (gridStack.el && gridStack.el.parentElement) {
+    // Only emit change if the gridStack instance is valid and widgets have been initialized
+    // Skip the initial emitChange() to prevent overwriting widgets added via useEffect on mount
+    if (
+      gridStack.el &&
+      gridStack.el.parentElement &&
+      isInitializedRef.current
+    ) {
       emitChange()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
