@@ -8,7 +8,7 @@ import { Optional } from "@/lib/typescript-utils/optional"
 import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { PageLayoutGroupComponent } from "../../types"
+import { createPageLayoutBlockGroup } from "../../utils"
 import { GroupGridWidget } from "./typings"
 
 export interface GroupGridProps<Widget extends GroupGridWidget> {
@@ -43,7 +43,7 @@ const defaultWidgetWrapper = (
   _editMode: boolean
 ) => <div>{children}</div>
 
-export const GroupGrid = <Widget extends GroupGridWidget>({
+const GroupGridComponent = <Widget extends GroupGridWidget>({
   widgets = [],
   editMode = false,
   onChange = () => {},
@@ -389,6 +389,8 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   )
 }
 
-GroupGrid.displayName = "GroupGrid"
-// Mark as a valid PageLayoutGroup component
-;(GroupGrid as unknown as PageLayoutGroupComponent).__isPageLayoutGroup = true
+// Create the component using the helper function
+export const GroupGrid = createPageLayoutBlockGroup(
+  "GroupGrid",
+  GroupGridComponent
+)

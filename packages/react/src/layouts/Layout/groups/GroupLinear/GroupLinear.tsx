@@ -7,10 +7,10 @@ import {
   useState,
 } from "react"
 import { validLayoutChildrenGuard } from "../../internal/utils"
-import { PageLayoutGroupComponent } from "../../types"
+import { createPageLayoutBlockGroup } from "../../utils"
 import { GroupLinearProps } from "./types"
 
-export const GroupLinear = forwardRef<HTMLDivElement, GroupLinearProps>(
+const GroupLinearComponent = forwardRef<HTMLDivElement, GroupLinearProps>(
   ({ children, onSort, ...props }, ref) => {
     validLayoutChildrenGuard("GroupLinear", children, ["block"] as const)
 
@@ -34,6 +34,10 @@ export const GroupLinear = forwardRef<HTMLDivElement, GroupLinearProps>(
   }
 )
 
-GroupLinear.displayName = "GroupLinear"
-// Mark as a valid PageLayoutGroup component
-;(GroupLinear as unknown as PageLayoutGroupComponent).__isPageLayoutGroup = true
+GroupLinearComponent.displayName = "GroupLinear"
+
+// Create the component using the helper function
+export const GroupLinear = createPageLayoutBlockGroup(
+  "GroupLinear",
+  GroupLinearComponent
+)

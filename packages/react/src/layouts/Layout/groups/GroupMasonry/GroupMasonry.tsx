@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useState } from "react"
-import { PageLayoutGroupComponent } from "../../types"
+import { createPageLayoutBlockGroup } from "../../utils"
 import { SortableBlock } from "./components/SortableBlock"
 
 interface SortableBlockItem {
@@ -32,7 +32,7 @@ export interface GroupMasonryProps {
   main?: boolean
 }
 
-export const GroupMasonry = ({
+const GroupMasonryComponent = ({
   blocks,
   sortable: _sortable = false,
   onSort: _onSort = () => {},
@@ -103,7 +103,8 @@ export const GroupMasonry = ({
   )
 }
 
-GroupMasonry.displayName = "GroupMasonry"
-// Mark as a valid PageLayoutGroup component
-;(GroupMasonry as unknown as PageLayoutGroupComponent).__isPageLayoutGroup =
-  true
+// Create the component using the helper function
+export const GroupMasonry = createPageLayoutBlockGroup(
+  "GroupMasonry",
+  GroupMasonryComponent
+)
