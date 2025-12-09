@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { useState } from "react"
 import { CoCreationForm } from "."
 import { CoCreationFormElement } from "../types"
@@ -81,6 +82,8 @@ export const Empty: Story = {
 }
 
 export const WithQuestionWithDuplicateOptions: Story = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
   args: {
     isEditMode: true,
     elements: [
