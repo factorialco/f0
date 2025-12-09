@@ -14,12 +14,12 @@ import { Layout } from "../index"
 
 const FocusableElement = () => {
   return (
-    <div className="p-4">
+    <div className="flex items-center gap-2">
       <label htmlFor="focusable-element">Focusable Element</label>
       <div>
         <input
           type="text"
-          className="border-0 bg-[#fff] px-2"
+          className="border-1 border-solid border-f1-border bg-[#fff] px-2"
           id="focusable-element"
         />
       </div>
@@ -42,7 +42,7 @@ const meta = {
       </div>
     ),
     header: (
-      <div className="flex flex-col items-center justify-center bg-[#777] p-3 text-f1-foreground-inverse">
+      <div className="flex items-center justify-center gap-4 p-3">
         Header
         <FocusableElement />
       </div>

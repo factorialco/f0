@@ -11,7 +11,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { PageLayoutGroupComponent } from "../../types"
 import { GroupGridWidget } from "./typings"
 
-export interface GroupGridProps<Widget extends GroupGridWidget> {
+export interface GroupGridProps<
+  Widget extends GroupGridWidget,
+  Deps extends Record<string, unknown> = Record<string, unknown>,
+> {
   widgets: Optional<Widget, "x" | "y">[]
   editMode?: boolean
   /**
@@ -34,7 +37,7 @@ export interface GroupGridProps<Widget extends GroupGridWidget> {
    * will have their content updated automatically. Widgets reference dependencies
    * by key names (e.g., `deps: ['globalCounter']` maps to `deps: { globalCounter: 0 }`).
    */
-  deps?: Record<string, unknown>
+  deps?: Deps
 }
 
 const defaultWidgetWrapper = (
@@ -43,14 +46,17 @@ const defaultWidgetWrapper = (
   _editMode: boolean
 ) => <div>{children}</div>
 
-export const GroupGrid = <Widget extends GroupGridWidget>({
+export const GroupGrid = <
+  Widget extends GroupGridWidget,
+  Deps extends Record<string, unknown> = Record<string, unknown>,
+>({
   widgets = [],
   editMode = false,
   onChange = () => {},
   WidgetWrapper = defaultWidgetWrapper,
   main = false,
   deps: dependencyValues,
-}: GroupGridProps<Widget>) => {
+}: GroupGridProps<Widget, Deps>) => {
   const AnimatedWidgetWrapper = useCallback(
     (
       children: React.ReactNode,
@@ -96,7 +102,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   // Helper function to get widget content, handling content function if provided
   const getWidgetContent = (
     widget: Optional<GroupGridWidget, "x" | "y">,
-    dependencyValues?: Record<string, unknown>
+    dependencyValues?: Deps
   ): React.ReactNode => {
     if (
       typeof widget.content === "function" &&
@@ -104,16 +110,16 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
       dependencyValues
     ) {
       // Create an object from widget's deps keys and dependencyValues
-      const depsObject: Record<string, unknown> = {}
+      const depsObject: Record<string, Deps[keyof Deps]> = {}
       widget.deps.forEach((depKey) => {
         if (
           typeof depKey === "string" &&
           dependencyValues[depKey] !== undefined
         ) {
-          depsObject[depKey] = dependencyValues[depKey]
+          depsObject[depKey] = dependencyValues[depKey] as Deps[keyof Deps]
         }
       })
-      return widget.content(depsObject)
+      return widget.content(depsObject as Partial<Deps>)
     }
     if (typeof widget.content === "function") {
       // If content is a function but no deps or dependencyValues, return null
@@ -125,7 +131,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   const widgetsToGridWidgets = (
     widgets: Optional<GroupGridWidget, "x" | "y">[],
     editMode: boolean,
-    dependencyValues?: Record<string, unknown>
+    dependencyValues?: Deps
   ) => {
     return widgets.map((widget) => {
       // Use content function if provided, otherwise use static content
@@ -162,34 +168,34 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
   const prevWidgetsRef = useRef(widgets)
   const isEditModeOnlyChangeRef = useRef(false)
   // Track dependencies for each widget to detect changes
-  const prevDepsRef = useRef<Map<string, unknown[]>>(new Map())
+  const prevDepsRef = useRef<Map<string, (keyof Deps)[]>>(new Map())
   // Store current widgets in a ref to access in callbacks without dependency issues
   const widgetsRef = useRef(widgets)
   widgetsRef.current = widgets
   // Track previous dependencyValues to detect changes
-  const prevDependencyValuesRef = useRef<Record<string, unknown> | undefined>(
-    dependencyValues
-  )
+  const prevDependencyValuesRef = useRef<Deps | undefined>(dependencyValues)
 
   // Track resolved dependency values for each widget to detect changes
   // We don't modify widget.deps (which contains keys), but track the resolved values separately
   const resolvedDepsMap = useMemo(() => {
-    const map = new Map<string, unknown[]>()
+    const map = new Map<string, (keyof Deps)[]>()
     if (!dependencyValues || Object.keys(dependencyValues).length === 0) {
       return map
     }
     widgets.forEach((widget) => {
       if (widget.deps && widget.deps.length > 0) {
         // Resolve keys from dependencyValues object
-        const resolvedDeps = widget.deps.map((depKey) => {
-          if (
-            typeof depKey === "string" &&
-            dependencyValues[depKey] !== undefined
-          ) {
-            return dependencyValues[depKey]
-          }
-          return depKey
-        })
+        const resolvedDeps = widget.deps
+          .map((depKey) => {
+            if (
+              typeof depKey === "string" &&
+              dependencyValues[depKey] !== undefined
+            ) {
+              return dependencyValues[depKey]
+            }
+            return depKey
+          })
+          .filter((dep): dep is keyof Deps => dep !== null)
         map.set(widget.id, resolvedDeps)
       }
     })
@@ -235,8 +241,8 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
 
   // Helper function to check if dependencies have changed
   const depsChanged = (
-    prevDeps: unknown[] | undefined,
-    currentDeps: unknown[] | undefined
+    prevDeps: (keyof Deps)[] | undefined,
+    currentDeps: (keyof Deps)[] | undefined
   ): boolean => {
     if (!prevDeps && !currentDeps) return false
     if (!prevDeps || !currentDeps) return true
@@ -371,6 +377,7 @@ export const GroupGrid = <Widget extends GroupGridWidget>({
     prevEditModeRef.current = editMode
     prevWidgetsRef.current = widgets
     prevDependencyValuesRef.current = dependencyValues
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     widgets,
     editMode,
