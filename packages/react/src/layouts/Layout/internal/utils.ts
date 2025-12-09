@@ -5,14 +5,24 @@ import { PageLayoutBlockComponent, PageLayoutGroupComponent } from "../types"
 export const isPageLayoutBlockComponent = (
   child: ReactNode
 ): child is ReactElement<PageLayoutBlockComponent> => {
-  return isValidElement(child) && "__isPageLayoutBlock" in child
+  if (!isValidElement(child) || !child.type || typeof child.type === "string") {
+    return false
+  }
+  return (
+    "__isPageLayoutBlock" in (child.type as unknown as Record<string, unknown>)
+  )
 }
 
-// Utility to check if a component is a valid PageLayoutBlock
+// Utility to check if a component is a valid PageLayoutGroup
 export const isPageLayoutGroupComponent = (
   child: ReactNode
 ): child is ReactElement<PageLayoutGroupComponent> => {
-  return isValidElement(child) && "__isPageLayoutGroup" in child
+  if (!isValidElement(child) || !child.type || typeof child.type === "string") {
+    return false
+  }
+  return (
+    "__isPageLayoutGroup" in (child.type as unknown as Record<string, unknown>)
+  )
 }
 
 // Utility to validate all children are PageLayoutBlock components

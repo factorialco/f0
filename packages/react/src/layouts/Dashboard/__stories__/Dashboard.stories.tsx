@@ -177,7 +177,16 @@ const meta = {
                 </>
               }
             >
-              <Story
+              <Dashboard
+                widgets={widgets}
+                deps={{ globalCounter }}
+                onChange={(updatedWidgets) => {
+                  console.log("widgets onChange stories", updatedWidgets)
+                  setWidgets(updatedWidgets as DashboardWidget[])
+                }}
+                editMode={editMode}
+              />
+              {/* <Story
                 args={{
                   ...args,
                   widgets,
@@ -188,7 +197,7 @@ const meta = {
                   },
                   editMode: editMode,
                 }}
-              />
+              /> */}
             </Layout.Page>
 
             <pre className="mt-10 overflow-x-auto text-xs"></pre>
