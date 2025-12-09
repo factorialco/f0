@@ -28,7 +28,7 @@ const ButtonInternal = forwardRef<
     emoji,
     variant = "default",
     size = "md",
-    fontSize = "md",
+    fontSize,
     append,
     className,
     "aria-label": ariaLabel,
@@ -69,6 +69,7 @@ const ButtonInternal = forwardRef<
   const shouldHideLabel = hideLabel || emoji
 
   const buttonLabel = (label ?? "").toString()
+  const buttonFontSize = fontSize ?? size
 
   return (
     <>
@@ -161,7 +162,7 @@ const ButtonInternal = forwardRef<
             <OneEllipsis
               className={cn(
                 shouldHideLabel && "sr-only",
-                fontSizeVariants({ fontSize })
+                fontSizeVariants({ fontSize: buttonFontSize })
               )}
               tag="span"
             >
