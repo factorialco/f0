@@ -79,3 +79,23 @@ export const Empty: Story = {
     elements: [],
   },
 }
+
+export const WithQuestionWithDuplicateOptions: Story = {
+  args: {
+    isEditMode: true,
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "question-1",
+          title: "Question 1",
+          type: "select" as const,
+          options: [
+            { value: "option-1", label: "Option 1" },
+            { value: "option-1", label: "Option 1" },
+          ],
+        },
+      },
+    ],
+  },
+}

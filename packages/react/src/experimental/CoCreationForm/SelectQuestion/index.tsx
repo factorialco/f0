@@ -2,7 +2,8 @@ import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Reorder } from "motion/react"
-import { useEffect } from "react"
+import { nanoid } from "nanoid"
+import { useEffect, useMemo } from "react"
 import { BaseQuestion } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
@@ -18,25 +19,64 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
   const { onQuestionChange, isEditMode, getSectionContainingQuestion } =
     useCoCreationFormContext()
 
+  const someOptionsWithSameValue =
+    new Set(options.map((option) => option.value)).size !== options.length
+
   const containingSection = getSectionContainingQuestion(props.id)
 
   const questionLocked = props.locked || containingSection?.locked
 
   const { t } = useI18n()
 
-  const baseOnChangeParams: SelectQuestionOnChangeParams = {
-    id: props.id,
-    type: props.type,
-    options,
-  }
+  const baseOnChangeParams: SelectQuestionOnChangeParams = useMemo(
+    () => ({
+      id: props.id,
+      type: props.type,
+      options,
+    }),
+    [props.id, props.type, options]
+  )
 
+  // preventing options with same value to cause unexpected behavior
   useEffect(() => {
-    const someValuesEqual =
-      new Set(options.map((option) => option.value)).size !== options.length
-    if (someValuesEqual) {
-      throw new Error("Options must have unique values")
+    if (!someOptionsWithSameValue) return
+
+    let newOptions = options.map((option) => ({
+      ...option,
+      value: option.label.toLowerCase().replace(/\s+/g, "-"),
+    }))
+
+    const commonChangeParams = {
+      id: props.id,
+      type: props.type,
     }
-  }, [options])
+
+    const newOptionsWithSameValue =
+      new Set(newOptions.map((option) => option.value)).size !==
+      newOptions.length
+
+    if (!newOptionsWithSameValue) {
+      onQuestionChange?.({ ...commonChangeParams, options: newOptions })
+      return
+    }
+
+    newOptions = newOptions.map((option) => ({
+      ...option,
+      value: nanoid(),
+    }))
+
+    if (newOptionsWithSameValue) {
+      onQuestionChange?.({ ...commonChangeParams, options: newOptions })
+    }
+
+    onQuestionChange?.({ ...commonChangeParams, options: newOptions })
+  }, [
+    someOptionsWithSameValue,
+    onQuestionChange,
+    options,
+    props.id,
+    props.type,
+  ])
 
   const handleClickOptionAction = (params: OnClickOptionActionParams) => {
     let newOptions = options
@@ -114,6 +154,10 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
       ...baseOnChangeParams,
       options: newOptions,
     })
+  }
+
+  if (someOptionsWithSameValue) {
+    return null
   }
 
   return (
