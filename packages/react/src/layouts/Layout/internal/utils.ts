@@ -5,7 +5,12 @@ import { PageLayoutBlockComponent, PageLayoutGroupComponent } from "../types"
 export const isPageLayoutBlockComponent = (
   child: ReactNode
 ): child is ReactElement<PageLayoutBlockComponent> => {
-  if (!isValidElement(child) || !child.type || typeof child.type === "string") {
+  if (
+    !isValidElement(child) ||
+    !child.type ||
+    typeof child.type === "string" ||
+    typeof child.type === "symbol"
+  ) {
     return false
   }
   return (
@@ -17,7 +22,12 @@ export const isPageLayoutBlockComponent = (
 export const isPageLayoutGroupComponent = (
   child: ReactNode
 ): child is ReactElement<PageLayoutGroupComponent> => {
-  if (!isValidElement(child) || !child.type || typeof child.type === "string") {
+  if (
+    !isValidElement(child) ||
+    !child.type ||
+    typeof child.type === "string" ||
+    typeof child.type === "symbol"
+  ) {
     return false
   }
   return (
