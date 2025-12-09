@@ -1,5 +1,5 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
   DropdownInternalProps,
@@ -8,13 +8,14 @@ import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/int
 import CrossIcon from "@/icons/app/Cross"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
-import { DialogTitle } from "@/ui/dialog"
-import { DrawerTitle } from "@/ui/drawer"
+import { DialogDescription, DialogTitle } from "@/ui/Dialog/dialog"
+import { DrawerDescription, DrawerTitle } from "@/ui/drawer"
 import { useOneModal } from "../OneModalProvider"
-import { ContentPadding } from "../types"
+import { ContentPadding, ModalPosition } from "../types"
 
 export type OneModalHeaderProps = {
   title?: string
+  description?: string
   /**
    * Module configuration for the header. Only works when modal position is set to "right".
    * Displays module icon and name in the header.
@@ -32,8 +33,38 @@ const classesByContentPadding: Record<ContentPadding, string> = {
   md: "p-5 pb-3",
 }
 
+const Titles = ({
+  title,
+  description,
+  context,
+}: {
+  title?: string
+  description?: string
+  context: { position: ModalPosition }
+}) => {
+  const titleClassName = cn(
+    "font-semibold text-f1-foreground",
+    context.position === "center" ? "text-lg" : "text-xl"
+  )
+  const descriptionClassName = cn(
+    "text-f1-foreground-secondary",
+    context.position === "center" ? "text-base" : "text-lg"
+  )
+  return title || description ? (
+    <div className="flex flex-col gap-1">
+      {!!title && <DialogTitle className={titleClassName}>{title}</DialogTitle>}
+      {!!description && (
+        <DialogDescription className={descriptionClassName}>
+          {description}
+        </DialogDescription>
+      )}
+    </div>
+  ) : null
+}
+
 export const OneModalHeader = ({
   title,
+  description,
   module,
   otherActions,
 }: OneModalHeaderProps) => {
@@ -43,11 +74,6 @@ export const OneModalHeader = ({
     position: modalPosition,
     contentPadding,
   } = useOneModal()
-
-  const dialogClassName = cn(
-    "font-semibold text-f1-foreground",
-    modalPosition === "center" ? "text-lg" : "text-xl"
-  )
 
   const Divider = () => {
     return <div className="h-4 w-px self-center bg-f1-background-secondary" />
@@ -103,6 +129,15 @@ export const OneModalHeader = ({
     classesByContentPadding[contentPadding]
   )
 
+  const drawerTitleClassName = cn(
+    "font-semibold text-f1-foreground",
+    modalPosition === "center" ? "text-lg" : "text-xl"
+  )
+  const drawerDescriptionClassName = cn(
+    "text-f1-foreground-secondary",
+    modalPosition === "center" ? "text-base" : "text-lg"
+  )
+
   if (module && !shownBottomSheet) {
     return (
       <div className={containerClassName}>
@@ -124,11 +159,11 @@ export const OneModalHeader = ({
             />
           </div>
         </div>
-        {!!title && (
-          <DialogTitle className={cn(dialogClassName, "text-2xl")}>
-            {title}
-          </DialogTitle>
-        )}
+        <Titles
+          title={title}
+          description={description}
+          context={{ position: modalPosition }}
+        />
       </div>
     )
   }
@@ -137,15 +172,19 @@ export const OneModalHeader = ({
     <div className={containerClassName}>
       <div className="flex flex-row items-center justify-between">
         {!shownBottomSheet ? (
-          !!title && (
-            <DialogTitle className={dialogClassName}>{title}</DialogTitle>
-          )
+          <Titles
+            title={title}
+            description={description}
+            context={{ position: modalPosition }}
+          />
         ) : (
           <>
             {module ? (
               <Module />
             ) : (
-              <DrawerTitle className={dialogClassName}>{title}</DrawerTitle>
+              <DrawerTitle className={drawerTitleClassName}>
+                {title}
+              </DrawerTitle>
             )}
           </>
         )}
@@ -162,7 +201,13 @@ export const OneModalHeader = ({
         </div>
       </div>
       {module && !!title && (
-        <DrawerTitle className={dialogClassName}>{title}</DrawerTitle>
+        <DrawerTitle className={drawerTitleClassName}>{title}</DrawerTitle>
+      )}
+
+      {!!description && (
+        <DrawerDescription className={drawerDescriptionClassName}>
+          {description}
+        </DrawerDescription>
       )}
     </div>
   )

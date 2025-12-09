@@ -11,12 +11,13 @@ import {
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
 import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
+import { F0Button } from "@/f0"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
 import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ComponentProps, FC } from "react"
+import { ComponentProps, FC, useState } from "react"
 import { OneModal } from "."
 
 const meta: Meta<typeof OneModal> = {
@@ -30,17 +31,29 @@ const meta: Meta<typeof OneModal> = {
   },
   tags: ["autodocs", "experimental"],
   decorators: [
-    (Story) => (
-      <ApplicationFrame
-        {...(ApplicationFrameStoryMeta.args as ComponentProps<
-          typeof ApplicationFrame
-        >)}
-      >
-        <div className="flex-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-          <Story />
-        </div>
-      </ApplicationFrame>
-    ),
+    (Story, { args: { isOpen, ...rest } }) => {
+      const [open, setOpen] = useState(isOpen)
+
+      const handleClose = () => {
+        setOpen(false)
+      }
+      const handleOpen = () => {
+        setOpen(true)
+      }
+
+      return (
+        <ApplicationFrame
+          {...(ApplicationFrameStoryMeta.args as ComponentProps<
+            typeof ApplicationFrame
+          >)}
+        >
+          <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+            <F0Button label="Open modal" onClick={handleOpen} />
+            <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
+          </div>
+        </ApplicationFrame>
+      )
+    },
   ],
 }
 
@@ -99,6 +112,55 @@ export const Default: Story = {
     children: (
       <>
         <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
+        <OneModal.Content tabs={TABS}>
+          <ExampleList />
+        </OneModal.Content>
+      </>
+    ),
+  },
+}
+
+export const WithSmWidth: Story = {
+  args: {
+    isOpen: true,
+    width: "sm",
+    onClose: () => {},
+    children: (
+      <>
+        <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
+        <OneModal.Content tabs={TABS}>
+          <ExampleList />
+        </OneModal.Content>
+      </>
+    ),
+  },
+}
+
+export const WithMdWidth: Story = {
+  args: {
+    ...WithSmWidth.args,
+    width: "md",
+  },
+}
+
+export const WithLgWidth: Story = {
+  args: {
+    ...WithMdWidth.args,
+    width: "lg",
+  },
+}
+
+export const WithDescription: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    children: (
+      <>
+        <OneModal.Header
+          title="Team Status"
+          description="This is a description of the team status. Very long text that should wrap properly and not overflow the container boundaries."
+          otherActions={OTHER_ACTIONS}
+        />
         <OneModal.Content tabs={TABS}>
           <ExampleList />
         </OneModal.Content>

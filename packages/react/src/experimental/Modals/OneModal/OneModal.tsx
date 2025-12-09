@@ -1,7 +1,7 @@
 import { TabsProps } from "@/experimental/Navigation/Tabs"
-import { cn } from "@/lib/utils"
-import { Dialog, DialogContent } from "@/ui/dialog"
+import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
+import { cva } from "cva"
 import {
   ComponentProps,
   FC,
@@ -14,7 +14,7 @@ import {
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
-import { ContentPadding, ModalPosition } from "./types"
+import { ContentPadding, ModalPosition, ModalWidth } from "./types"
 import { useIsSmallScreen } from "./utils"
 
 export type OneModalProps = {
@@ -37,7 +37,39 @@ export type OneModalProps = {
         | ComponentProps<typeof OneModalHeader>
         | ComponentProps<typeof OneModalContent>
       >[]
+  width?: ModalWidth
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
+
+const modalContentClassName = cva({
+  variants: {
+    variant: {
+      bottomSheet: "max-h-[95vh] bg-f1-background",
+      sidePosition:
+        "absolute bottom-3 top-3 flex w-full translate-x-0 translate-y-0 flex-col rounded-md border border-solid border-f1-border-secondary",
+      center: "flex max-h-[95%] min-w-[100px] flex-1 flex-col rounded-xl",
+      fullscreen: "h-[calc(100%-48px)] w-[calc(100%-48px)] rounded-xl",
+    },
+    position: {
+      left: "left-3",
+      right: "left-auto right-3",
+    },
+    width: {
+      sm: "max-w-[539px]",
+      md: "max-w-[680px]",
+      lg: "max-w-[820px]",
+    },
+  },
+  compoundVariants: [
+    {
+      variant: "fullscreen",
+      width: ["sm", "md", "lg"],
+      class: "max-w-[95%]",
+    },
+  ],
+  defaultVariants: {
+    variant: "center",
+  },
+})
 
 export const OneModal: FC<OneModalProps> = ({
   asBottomSheetInMobile = true,
@@ -46,6 +78,7 @@ export const OneModal: FC<OneModalProps> = ({
   isOpen,
   contentPadding = "md",
   children,
+  width = "md",
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -74,23 +107,32 @@ export const OneModal: FC<OneModalProps> = ({
 
   const contentClassName = useMemo(() => {
     if (isSmallScreen && asBottomSheetInMobile) {
-      return "max-h-[95vh] bg-f1-background"
+      return modalContentClassName({
+        variant: "bottomSheet",
+        width,
+      })
     }
 
     if (isSidePosition) {
-      return cn(
-        "w-full flex flex-col absolute top-3 bottom-3 translate-y-0 translate-x-0 max-w-[539px] rounded-md border border-solid border-f1-border-secondary",
-        position === "left" && "left-3",
-        position === "right" && "left-auto right-3"
-      )
+      return modalContentClassName({
+        variant: "sidePosition",
+        position,
+        width,
+      })
     }
 
     if (position === "fullscreen") {
-      return "w-[calc(100%-48px)] h-[calc(100%-48px)] rounded-xl"
+      return modalContentClassName({
+        variant: "fullscreen",
+        width,
+      })
     }
 
-    return "flex flex-col max-h-[620px] max-w-[680px] rounded-xl"
-  }, [position, isSmallScreen, asBottomSheetInMobile, isSidePosition])
+    return modalContentClassName({
+      variant: "center",
+      width,
+    })
+  }, [position, isSmallScreen, asBottomSheetInMobile, isSidePosition, width])
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
