@@ -27,6 +27,12 @@ export const AssistantMessage = ({
     message.toolCalls?.find(
       (tool) => tool.function.name === "orchestratorThinking"
     )
+
+  // Check if messageSources tool is present - if so, message is complete
+  const hasMessageSourcesTool =
+    message?.role === "assistant" &&
+    message.toolCalls?.find((tool) => tool.function.name === "messageSources")
+
   const subComponent = message?.generativeUI?.(
     isThinkingTool
       ? {

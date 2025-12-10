@@ -29,9 +29,13 @@ const SourceIcon = ({ iconName }: { iconName?: string }) => {
 
 export type MessageSourcesProps = {
   sources: Source[]
+  withTopPadding?: boolean
 }
 
-export const MessageSources = ({ sources }: MessageSourcesProps) => {
+export const MessageSources = ({
+  sources,
+  withTopPadding = false,
+}: MessageSourcesProps) => {
   const translations = useI18n()
 
   if (!sources || sources.length === 0 || !Array.isArray(sources)) {
@@ -40,6 +44,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
 
   return (
     <AiCollapsibleMessage
+      withTopPadding={withTopPadding}
       icon={Search}
       title={translations.ai.resourcesGroupTitle}
     >
