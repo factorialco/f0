@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.4](https://github.com/factorialco/f0/compare/f0-react-v1.303.3...f0-react-v1.303.4) (2025-12-10)
+
+
+### Bug Fixes
+
+* date navigator text size ([#3099](https://github.com/factorialco/f0/issues/3099)) ([c10d148](https://github.com/factorialco/f0/commit/c10d148beaf44a1bf16aca9f039924f6c44c3a79))
+
 ## [1.303.3](https://github.com/factorialco/f0/compare/f0-react-v1.303.2...f0-react-v1.303.3) (2025-12-10)
 
 
