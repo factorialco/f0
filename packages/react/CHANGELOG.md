@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.2](https://github.com/factorialco/f0/compare/f0-react-v1.303.1...f0-react-v1.303.2) (2025-12-10)
+
+
+### Bug Fixes
+
+* prevent unwanted behavior when having select questions with same values in the options ([#3101](https://github.com/factorialco/f0/issues/3101)) ([86111da](https://github.com/factorialco/f0/commit/86111da80a1042219f6a098fecd44771ecea125e))
+
 ## [1.303.1](https://github.com/factorialco/f0/compare/f0-react-v1.303.0...f0-react-v1.303.1) (2025-12-05)
 
 
