@@ -1,12 +1,22 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { AiChatProvider } from ".."
+import { useAiChat } from "../providers/AiChatStateProvider"
 import { ChatTextarea } from "./ChatTextarea"
 
 // Wrapper component to manage state
-const ChatTextareaWrapper = () => {
+const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
   const [messages, setMessages] = useState<string[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  const { setPlaceholders } = useAiChat()
+
+  useEffect(() => {
+    if (placeholders) {
+      setPlaceholders(placeholders)
+    }
+  }, [placeholders, setPlaceholders])
 
   const handleSend = async (message: string) => {
     setMessages((prev) => [...prev, `User: ${message}`])
@@ -94,6 +104,13 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs", "no-sidebar"],
+  decorators: [
+    (Story) => (
+      <AiChatProvider>
+        <Story />
+      </AiChatProvider>
+    ),
+  ],
 } satisfies Meta<typeof ChatTextareaWrapper>
 
 export default meta
@@ -101,4 +118,20 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => <ChatTextareaWrapper />,
+}
+
+const PLACEHOLDERS = [
+  "Ask about location, directions, or travel details…",
+  "Inquire about pricing, features, or product availability…",
+  "Request clarification on tasks, deadlines, or requirements…",
+  "Ask for opinions, recommendations, or comparisons…",
+  "Provide details about issues, errors, or unexpected behavior…",
+]
+
+export const WithPlaceholders: Story = {
+  render: () => <ChatTextareaWrapper placeholders={PLACEHOLDERS} />,
+}
+
+export const WithOnePlaceholder: Story = {
+  render: () => <ChatTextareaWrapper placeholders={[PLACEHOLDERS[0]]} />,
 }
