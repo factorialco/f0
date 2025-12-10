@@ -180,6 +180,8 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
     }
   }
 
+  const multiplePlaceholders = placeholders.length > 1
+
   return (
     <motion.form
       layout
@@ -241,6 +243,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           name="one-ai-input"
           ref={textareaRef}
           value={inputValue}
+          placeholder={multiplePlaceholders ? undefined : placeholders?.[0]}
           onChange={(e) => {
             setInputValue(e.target.value)
           }}
@@ -253,15 +256,20 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             hasScrollbar
               ? "scrollbar-macos overflow-y-scroll"
               : "overflow-y-hidden",
-            inputValue ? "caret-f1-foreground" : "caret-transparent"
+            inputValue || !multiplePlaceholders
+              ? "caret-f1-foreground"
+              : "caret-transparent",
+            !multiplePlaceholders && "placeholder:text-f1-foreground-secondary"
           )}
         />
-        <TypewriterPlaceholder
-          placeholders={placeholders}
-          defaultPlaceholder={translation.ai.inputPlaceholder}
-          inputValue={inputValue}
-          inProgress={inProgress}
-        />
+        {multiplePlaceholders && (
+          <TypewriterPlaceholder
+            placeholders={placeholders}
+            defaultPlaceholder={translation.ai.inputPlaceholder}
+            inputValue={inputValue}
+            inProgress={inProgress}
+          />
+        )}
       </div>
 
       <div className="flex flex-row-reverse p-3 pt-0">

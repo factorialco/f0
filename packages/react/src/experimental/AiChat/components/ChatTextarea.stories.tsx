@@ -103,6 +103,13 @@ const meta = {
   parameters: {
     layout: "centered",
   },
+  decorators: [
+    (Story) => (
+      <AiChatProvider>
+        <Story />
+      </AiChatProvider>
+    ),
+  ],
 } satisfies Meta<typeof ChatTextareaWrapper>
 
 export default meta
@@ -122,11 +129,8 @@ const PLACEHOLDERS = [
 
 export const WithPlaceholders: Story = {
   render: () => <ChatTextareaWrapper placeholders={PLACEHOLDERS} />,
-  decorators: [
-    (Story) => (
-      <AiChatProvider>
-        <Story />
-      </AiChatProvider>
-    ),
-  ],
+}
+
+export const WithOnePlaceholder: Story = {
+  render: () => <ChatTextareaWrapper placeholders={[PLACEHOLDERS[0]]} />,
 }
