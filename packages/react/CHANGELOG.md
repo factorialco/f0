@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.5](https://github.com/factorialco/f0/compare/f0-react-v1.303.4...f0-react-v1.303.5) (2025-12-10)
+
+
+### Bug Fixes
+
+* add missing moduleIcon ([#3107](https://github.com/factorialco/f0/issues/3107)) ([ec51f8c](https://github.com/factorialco/f0/commit/ec51f8c2311e103f344c8e35bbecbd5466b2e7d1))
+
 ## [1.303.4](https://github.com/factorialco/f0/compare/f0-react-v1.303.3...f0-react-v1.303.4) (2025-12-10)
 
 
