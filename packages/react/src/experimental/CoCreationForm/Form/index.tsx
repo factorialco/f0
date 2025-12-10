@@ -2,7 +2,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { motion, Reorder } from "motion/react"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
 import { DragProvider, useDragContext } from "../DragContext"
@@ -133,6 +133,12 @@ export const CoCreationForm = ({
       }),
     [elementsProp, disallowOptionalQuestions]
   )
+
+  useEffect(() => {
+    if (applyingChanges) {
+      ;(document.activeElement as HTMLElement)?.blur()
+    }
+  }, [applyingChanges])
 
   return (
     <CoCreationFormProvider
