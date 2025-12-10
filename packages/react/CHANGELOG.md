@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.6](https://github.com/factorialco/f0/compare/f0-react-v1.303.5...f0-react-v1.303.6) (2025-12-10)
+
+
+### Bug Fixes
+
+* lock CoCreationForm while One is applying changes ([#3106](https://github.com/factorialco/f0/issues/3106)) ([ce30714](https://github.com/factorialco/f0/commit/ce30714ad1af5bb60ff288938281dab2a856bf61))
+
 ## [1.303.5](https://github.com/factorialco/f0/compare/f0-react-v1.303.4...f0-react-v1.303.5) (2025-12-10)
 
 
