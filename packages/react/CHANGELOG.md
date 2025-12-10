@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.303.3](https://github.com/factorialco/f0/compare/f0-react-v1.303.2...f0-react-v1.303.3) (2025-12-10)
+
+
+### Bug Fixes
+
+* prevent AI suggestions reloading randomly ([#3102](https://github.com/factorialco/f0/issues/3102)) ([1fda7bf](https://github.com/factorialco/f0/commit/1fda7bf98d056ea6295651a29ba9f93ef63b650b))
+
 ## [1.303.2](https://github.com/factorialco/f0/compare/f0-react-v1.303.1...f0-react-v1.303.2) (2025-12-10)
 
 
