@@ -243,7 +243,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "positive" | "critical" | "warning" | undefined;
+    type?: "info" | "critical" | "warning" | "positive" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -373,7 +373,7 @@ declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
+    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -1002,7 +1002,7 @@ declare type ChipVariants = {
 };
 
 declare const chipVariants: (props?: ({
-    variant?: "selected" | "default" | undefined;
+    variant?: "default" | "selected" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -2353,7 +2353,6 @@ export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps, "r
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
-    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -4192,7 +4191,7 @@ declare type TextVariant = NonNullable<TextVariants["variant"]>;
 declare type TextVariants = VariantProps<typeof textVariants>;
 
 declare const textVariants: (props?: ({
-    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "selected" | "positive" | "inverse" | "critical" | "warning" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
+    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
     align?: "center" | "left" | "right" | undefined;
 } & ({
     class?: ClassValue;
@@ -4672,23 +4671,6 @@ declare global {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
-}
-
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -4713,6 +4695,23 @@ declare module "@tiptap/core" {
         transcript: {
             insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
+    }
+}
+
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
     }
 }
 
