@@ -243,7 +243,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
           name="one-ai-input"
           ref={textareaRef}
           value={inputValue}
-          placeholder={multiplePlaceholders ? undefined : placeholders?.[0]}
+          placeholder={placeholders?.[0]}
           onChange={(e) => {
             setInputValue(e.target.value)
           }}
@@ -259,7 +259,9 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             inputValue || !multiplePlaceholders
               ? "caret-f1-foreground"
               : "caret-transparent",
-            !multiplePlaceholders && "placeholder:text-f1-foreground-secondary"
+            multiplePlaceholders
+              ? "placeholder:text-transparent"
+              : "placeholder:text-f1-foreground-secondary"
           )}
         />
         {multiplePlaceholders && (
