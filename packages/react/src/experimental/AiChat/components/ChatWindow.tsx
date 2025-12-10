@@ -2,7 +2,7 @@ import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useAutoClear } from "../hooks/useAutoClear"
-import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatInternal } from "../providers/AiChatStateProvider"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
   const {
@@ -10,7 +10,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
     autoClearMinutes,
-  } = useAiChat()
+  } = useAiChatInternal()
   const { reset } = useCopilotChatInternal()
   useAutoClear({
     reset,

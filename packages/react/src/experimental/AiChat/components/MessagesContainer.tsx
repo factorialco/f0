@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import { isAgentStateMessage } from "../messageTypes"
-import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatInternal } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
@@ -56,7 +56,7 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
-  } = useAiChat()
+  } = useAiChatInternal()
   const initialMessages = useMemo(
     () =>
       makeInitialMessages(

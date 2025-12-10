@@ -19,7 +19,7 @@ import { breakpoints } from "@factorialco/f0-core"
 import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
 import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
-import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
+import { useAiChatInternal } from "../../AiChat/providers/AiChatStateProvider"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 export interface ApplicationFrameProps {
@@ -132,7 +132,7 @@ function ApplicationFrameContent({
   const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
-  const { open: isAiChatOpen } = useAiChat()
+  const { open: isAiChatOpen } = useAiChatInternal()
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,

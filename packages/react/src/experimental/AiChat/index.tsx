@@ -10,7 +10,7 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -24,7 +24,10 @@ import {
   UserMessage,
 } from "./components"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
-import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import {
+  AiChatStateProvider,
+  useAiChatInternal,
+} from "./providers/AiChatStateProvider"
 
 export type AiChatProviderProps = {
   enabled?: boolean
@@ -82,18 +85,19 @@ const AiChatKitWrapper = ({
   children,
   ...copilotKitProps
 }: Omit<CopilotKitProps, "agent">) => {
-  const { agent } = useAiChat()
+  const { agent } = useAiChatInternal()
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
+      <ThinkingStateInjector />
       {children}
     </CopilotKit>
   )
 }
 
 const ResetFunctionInjector = () => {
-  const { setClearFunction } = useAiChat()
+  const { setClearFunction } = useAiChatInternal()
   const { reset } = useCopilotChatInternal()
 
   useEffect(() => {
@@ -106,8 +110,34 @@ const ResetFunctionInjector = () => {
   return null
 }
 
+const ThinkingStateInjector = () => {
+  const { setIsThinking } = useAiChatInternal()
+  const { messages } = useCopilotChatInternal()
+
+  const isThinking = useMemo(() => {
+    if (messages.length === 0) {
+      return false
+    }
+
+    const lastMessage = messages[messages.length - 1]
+
+    return (
+      lastMessage.role === "assistant" &&
+      lastMessage.toolCalls?.some(
+        (call) => call.function.name === "orchestratorThinking"
+      ) === true
+    )
+  }, [messages])
+
+  useEffect(() => {
+    setIsThinking(isThinking)
+  }, [isThinking, setIsThinking])
+
+  return null
+}
+
 const AiChatCmp = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen } = useAiChatInternal()
 
   useCopilotAction({
     name: "orchestratorThinking",

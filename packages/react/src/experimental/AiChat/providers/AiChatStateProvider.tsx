@@ -13,7 +13,13 @@ import {
 } from "react"
 import { WelcomeScreenSuggestion } from "../components/WelcomeScreen"
 
-const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
+type AiChatInternalContextValue = AiChatProviderReturnValue & {
+  setIsThinking: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const AiChatStateContext = createContext<AiChatInternalContextValue | null>(
+  null
+)
 
 export interface AiChatState {
   greeting?: string
@@ -80,6 +86,10 @@ type AiChatProviderReturnValue = {
    * @internal
    */
   setClearFunction: (clearFn: (() => void) | null) => void
+  /**
+   * Whether the AI is currently thinking (processing but not yet generating response)
+   */
+  isThinking: boolean
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -113,6 +123,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
+  const [isThinking, setIsThinking] = useState(false)
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
@@ -168,6 +179,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setClearFunction,
         placeholders,
         setPlaceholders,
+        isThinking,
+        setIsThinking,
       }}
     >
       {children}
@@ -177,31 +190,53 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
 const noopFn = () => {}
 
+const defaultContextValue: AiChatProviderReturnValue = {
+  enabled: false,
+  setEnabled: noopFn,
+  open: false,
+  setOpen: noopFn,
+  shouldPlayEntranceAnimation: true,
+  setShouldPlayEntranceAnimation: noopFn,
+  agent: undefined,
+  tmp_setAgent: noopFn,
+  setAutoClearMinutes: noopFn,
+  clear: noopFn,
+  setClearFunction: noopFn,
+  autoClearMinutes: null,
+  initialMessage: undefined,
+  setInitialMessage: noopFn,
+  placeholders: [],
+  setPlaceholders: noopFn,
+  welcomeScreenSuggestions: [],
+  setWelcomeScreenSuggestions: noopFn,
+  onThumbsUp: noopFn,
+  onThumbsDown: noopFn,
+  isThinking: false,
+}
+
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
 
   if (context === null) {
+    return defaultContextValue
+  }
+
+  const { setIsThinking: _, ...publicContext } = context
+  return publicContext
+}
+
+/**
+ * Internal hook that provides access to internal state setters.
+ * Not part of the public API.
+ * @internal
+ */
+export function useAiChatInternal(): AiChatInternalContextValue {
+  const context = useContext(AiChatStateContext)
+
+  if (context === null) {
     return {
-      enabled: false,
-      setEnabled: noopFn,
-      open: false,
-      setOpen: noopFn,
-      shouldPlayEntranceAnimation: true,
-      setShouldPlayEntranceAnimation: noopFn,
-      agent: undefined,
-      tmp_setAgent: noopFn,
-      setAutoClearMinutes: noopFn,
-      clear: noopFn,
-      setClearFunction: noopFn,
-      autoClearMinutes: null,
-      initialMessage: undefined,
-      setInitialMessage: noopFn,
-      placeholders: [],
-      setPlaceholders: noopFn,
-      welcomeScreenSuggestions: [],
-      setWelcomeScreenSuggestions: noopFn,
-      onThumbsUp: noopFn,
-      onThumbsDown: noopFn,
+      ...defaultContextValue,
+      setIsThinking: noopFn,
     }
   }
 

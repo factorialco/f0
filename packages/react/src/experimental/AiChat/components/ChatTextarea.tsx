@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatInternal } from "../providers/AiChatStateProvider"
 
 interface TypewriterPlaceholderProps {
   placeholders: string[]
@@ -145,7 +145,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const translation = useI18n()
-  const { placeholders } = useAiChat()
+  const { placeholders } = useAiChatInternal()
 
   const hasDataToSend = inputValue.trim().length > 0
 

@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
-import { useAiChat } from "../providers/AiChatStateProvider"
+import { useAiChatInternal } from "../providers/AiChatStateProvider"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
   const { messages } = useCopilotChatInternal()
-  const { setOpen, clear } = useAiChat()
+  const { setOpen, clear } = useAiChatInternal()
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
   const hasMessages = messages.length > 0

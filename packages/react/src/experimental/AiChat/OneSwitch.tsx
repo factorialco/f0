@@ -10,13 +10,13 @@ import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { motion } from "motion/react"
 import { useState } from "react"
 import OneIcon from "./OneIcon"
-import { useAiChat } from "./providers/AiChatStateProvider"
+import { useAiChatInternal } from "./providers/AiChatStateProvider"
 
 export const OneSwitch = ({
   className,
   disabled,
 }: React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>) => {
-  const { enabled, setOpen, open } = useAiChat()
+  const { enabled, setOpen, open } = useAiChatInternal()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
 
