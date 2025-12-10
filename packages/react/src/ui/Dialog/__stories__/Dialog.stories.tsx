@@ -15,7 +15,7 @@ import {
 const ExampleComponent = (props: {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  withTraslateAnimation?: boolean
+  withTranslateAnimation?: boolean
   container?: HTMLElement | null
 }) => {
   const [open, setOpen] = useState(props.open ?? false)
@@ -26,7 +26,7 @@ const ExampleComponent = (props: {
         <F0Button label="Open Dialog" />
       </DialogTrigger>
       <DialogContent
-        withTraslateAnimation={props.withTraslateAnimation}
+        withTranslateAnimation={props.withTranslateAnimation}
         container={props.container}
       >
         <DialogHeader>
@@ -174,7 +174,7 @@ export const WithoutAnimation: Story = {
         <DialogTrigger asChild>
           <F0Button label="Open Dialog (No Animation)" />
         </DialogTrigger>
-        <DialogContent withTraslateAnimation={false}>
+        <DialogContent withTranslateAnimation={false}>
           <DialogHeader>
             <DialogTitle>Dialog Without Translate Animation</DialogTitle>
             <DialogDescription>

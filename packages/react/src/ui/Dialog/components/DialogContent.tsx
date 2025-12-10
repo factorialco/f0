@@ -11,7 +11,7 @@ export const DialogContent = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     wrapperClassName?: string
-    withTraslateAnimation?: boolean
+    withTranslateAnimation?: boolean
     container?: HTMLElement | null
   }
 >(
@@ -20,7 +20,7 @@ export const DialogContent = forwardRef<
       wrapperClassName,
       className,
       children,
-      withTraslateAnimation = true,
+      withTranslateAnimation = true,
       container: propContainer,
       ...props
     },
@@ -46,8 +46,8 @@ export const DialogContent = forwardRef<
           className={cn(
             "fixed inset-0 z-50 flex items-center justify-center",
             "pointer-events-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-            withTraslateAnimation &&
-              "data-[state=open]:slide-in-to-bottom-[48%] data-[state=closed]:slide-out-to-top-[48%]",
+            withTranslateAnimation &&
+              "data-[state=closed]:slide-out-to-top-[10%] data-[state=open]:slide-in-from-top-[10%]",
             wrapperClassName
           )}
           {...props}

@@ -53,7 +53,7 @@ const modalWrapperClassName = cva({
       right: "left-auto right-3 items-end",
       left: "left-3 items-start",
       center: "",
-      fullscreen: "p-6",
+      fullscreen: "inset-6",
     },
   },
   defaultVariants: {
@@ -139,7 +139,7 @@ export const OneModal: FC<OneModalProps> = ({
       return "sidePosition"
     }
     return "center"
-  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition])
+  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position])
 
   const contentClassName = useMemo(() => {
     return modalContentClassName({
@@ -186,7 +186,7 @@ export const OneModal: FC<OneModalProps> = ({
       >
         <DialogContent
           ref={setContentRef}
-          withTraslateAnimation={!isSidePosition}
+          withTranslateAnimation={!isSidePosition}
           wrapperClassName={modalWrapperClassName({
             variant,
             position,
