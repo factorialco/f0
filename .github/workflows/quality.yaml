@@ -69,3 +69,93 @@ jobs:
         run: pnpm --filter @factorialco/f0-react-native run lint
       - name: Check typescript
         run: pnpm --filter @factorialco/f0-react-native exec tsc --noEmit
+  cycle-dependencies:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Cycle Dependencies Check"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "22.x"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build core package
+        run: pnpm --filter @factorialco/f0-core build
+      - name: Detect cycle dependencies
+        id: detect-cycles
+        uses: ./.github/actions/cycle-dependencies
+        with:
+          package-path: packages/react
+          entry-point: src/f0.ts
+      - name: Restore baseline from cache
+        id: cache-baseline
+        uses: actions/cache/restore@v4
+        with:
+          path: baseline_cycles.txt
+          key: cycle-deps-baseline-react-${{ hashFiles('packages/react/package.json') }}
+      - name: Compare with baseline and prepare comment
+        id: compare
+        run: |
+          BASELINE_FILE="baseline_cycles.txt"
+          CURRENT_FILE="current_cycles.txt"
+
+          if [ ! -f "$BASELINE_FILE" ]; then
+            echo "No baseline found, treating all cycles as new"
+            if [ -s "$CURRENT_FILE" ]; then
+              echo "new_cycles_found=true" >> $GITHUB_OUTPUT
+              echo "new_cycles<<EOF" >> $GITHUB_OUTPUT
+              cat "$CURRENT_FILE" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "new_cycles_found=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Find cycles that are in current but not in baseline
+            NEW_CYCLES=$(comm -13 <(sort "$BASELINE_FILE") <(sort "$CURRENT_FILE") 2>/dev/null || cat "$CURRENT_FILE")
+            
+            if [ -n "$NEW_CYCLES" ] && [ -s "$CURRENT_FILE" ]; then
+              echo "new_cycles_found=true" >> $GITHUB_OUTPUT
+              echo "new_cycles<<EOF" >> $GITHUB_OUTPUT
+              echo "$NEW_CYCLES" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "new_cycles_found=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          # Always save current as new baseline
+          cp "$CURRENT_FILE" "$BASELINE_FILE"
+      - name: Save baseline to cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: baseline_cycles.txt
+          key: cycle-deps-baseline-react-${{ hashFiles('packages/react/package.json') }}
+      - name: Comment on PR with new cycles
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: cycle_dependency
+          condition: ${{ steps.compare.outputs.new_cycles_found == 'true' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: |
+            ## ⚠️ New Circular Dependencies Detected
+
+            The following new circular dependencies have been detected:
+
+            ```
+            ${{ steps.compare.outputs.new_cycles }}
+            ```
+
+            Please review and resolve these circular dependencies.
