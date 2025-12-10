@@ -1,20 +1,28 @@
+/// <reference types="vitest/config" />
 /// <reference types="vitest" />
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
 import react from "@vitejs/plugin-react"
 import { consola } from "consola"
 import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import { copyFileSync, existsSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 import path, { resolve } from "path"
 import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
 import { buildSyncPlugin } from "./vite/build-sync.plugin"
+const dirname =
+  typeof __dirname !== "undefined"
+    ? __dirname
+    : path.dirname(fileURLToPath(import.meta.url))
+
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 
 dotenv.config({
   path: [".env.local", ".env"],
 })
-
 const extraPlugins: Plugin[] = []
 
 // Add tailwind build
@@ -23,7 +31,9 @@ if (buildTailwind) {
   extraPlugins.push({
     name: "build-tailwind",
     async closeBundle() {
-      spawnSync("pnpm", ["build:tailwind"], { stdio: "inherit" })
+      spawnSync("pnpm", ["build:tailwind"], {
+        stdio: "inherit",
+      })
     },
   })
 }
@@ -34,7 +44,6 @@ const buildSync = !!buildSyncArg
 const buildSyncValue = buildSyncArg
   ? buildSyncArg.split("=")[1] || process.env.F0_REMOTE_SYNC
   : null
-
 if (buildSync) {
   if (!buildSyncValue) {
     consola.error(
@@ -42,22 +51,17 @@ if (buildSync) {
     )
     process.exit(1)
   }
-
   const [remote, remoteFolder] = buildSyncValue.split(":")
-
   const target = buildSyncValue.includes(":")
     ? [remote, remoteFolder].filter(Boolean).join(":")
     : buildSyncValue
-
   const targetFolder = `${target}/node_modules/@factorialco/f0-react/dist`
-
   if (!existsSync(targetFolder)) {
     consola.error(
       "The target folder does not exist. Please check the target folder and try again."
     )
     process.exit(1)
   }
-
   extraPlugins.push(
     buildSyncPlugin({
       target: targetFolder,
@@ -82,7 +86,6 @@ if (process.env.BUILD_TYPES) {
     })
   )
 }
-
 const alias = {
   "@": path.resolve(__dirname, "./src"),
   "~": path.resolve(__dirname, "./"),
@@ -136,7 +139,8 @@ export default defineConfig({
     copyPublicDir: false,
     rollupOptions: {
       external: ["react/jsx-runtime", "react", "react-dom", /@copilotkit\/.*/],
-      maxParallelFileOps: 100, // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
+      maxParallelFileOps: 100,
+      // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {
         globals: {
           react: "React",
@@ -159,5 +163,31 @@ export default defineConfig({
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
     },
+    workspace: [
+      {
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, ".storybook"),
+          }),
+        ],
+        test: {
+          name: "storybook",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: "playwright",
+            instances: [
+              {
+                browser: "chromium",
+              },
+            ],
+          },
+          setupFiles: [".storybook/vitest.setup.ts"],
+        },
+      },
+    ],
   },
 })
