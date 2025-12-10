@@ -476,6 +476,9 @@ importers:
       '@eslint/js':
         specifier: ^9.27.0
         version: 9.27.0
+      '@mdx-js/react':
+        specifier: ^3.1.1
+        version: 3.1.1(@types/react@18.3.18)(react@18.3.1)
       '@microsoft/api-extractor':
         specifier: 7.52.8
         version: 7.52.8(@types/node@22.15.21)
@@ -617,6 +620,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      markdown-to-jsx:
+        specifier: ^9.3.3
+        version: 9.3.3(react@18.3.1)
       mockdate:
         specifier: ^3.0.5
         version: 3.0.5
@@ -2583,7 +2589,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {'0': node >=0.10.0}
+    engines: {node: '>=0.10.0'}
 
   '@expo/cli@0.22.24':
     resolution: {integrity: sha512-lhdenxBC8/x/vL39j79eXE09mOaqNNLmiSDdY/PblnI+UNzGgsQ48hBTYa/MQhd0ioXXVKurZL2941dLKwcxJw==}
@@ -3433,8 +3439,8 @@ packages:
     resolution: {integrity: sha512-qC72D4+CDdjGqJvkFMMEAtancHUQ7/d/tAiHf64z8MopFDmcrtbcJuerDtFceuAfQJ2pDSfCKCtbqoGBNnwg0w==}
     engines: {node: '>=8'}
 
-  '@mdx-js/react@3.1.0':
-    resolution: {integrity: sha512-QjHtSaoameoalGnKDT3FoIl4+9RwyTmo9ZJGBdLOks/YOiWHoRDI3PUwEzOE7kEmGcV3AFcp9K6dYu9rEuKLAQ==}
+  '@mdx-js/react@3.1.1':
+    resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
@@ -9868,6 +9874,24 @@ packages:
 
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
+
+  markdown-to-jsx@9.3.3:
+    resolution: {integrity: sha512-6vxAU22zGz3anoU4HiORlk9ld+Hgiu5Ko0tANTSqz9Qc0qiWaXLuMqgLLm4rzLLrPz9TD2UD/8Bsv83cj8fbcQ==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      react: '>= 16.0.0'
+      react-native: '*'
+      solid-js: '>=1.0.0'
+      vue: '>=3.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-native:
+        optional: true
+      solid-js:
+        optional: true
+      vue:
+        optional: true
 
   marky@1.2.5:
     resolution: {integrity: sha512-q9JtQJKjpsVxCRVgQ+WapguSbKC3SQ5HEzFGPAJMStgh3QjCawp00UKv3MTTAArTmGmmPUvllHZoNbZ3gs0I+Q==}
@@ -16711,7 +16735,7 @@ snapshots:
     dependencies:
       '@lukeed/csprng': 1.1.0
 
-  '@mdx-js/react@3.1.0(@types/react@18.3.18)(react@18.3.1)':
+  '@mdx-js/react@3.1.1(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@types/mdx': 2.0.13
       '@types/react': 18.3.18
@@ -18483,7 +18507,7 @@ snapshots:
 
   '@storybook/addon-docs@9.1.3(@types/react@18.3.18)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.44.1)(yaml@2.7.0)))':
     dependencies:
-      '@mdx-js/react': 3.1.0(@types/react@18.3.18)(react@18.3.1)
+      '@mdx-js/react': 3.1.1(@types/react@18.3.18)(react@18.3.1)
       '@storybook/csf-plugin': 9.1.3(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.44.1)(yaml@2.7.0)))
       '@storybook/icons': 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react-dom-shim': 9.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.3(@testing-library/dom@10.4.1)(msw@2.10.4(@types/node@22.15.21)(typescript@5.8.2))(prettier@3.5.2)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.44.1)(yaml@2.7.0)))
@@ -20291,6 +20315,14 @@ snapshots:
       junit-report-builder: 5.1.1
       picocolors: 1.1.1
       playwright: 1.57.0
+
+  axios@1.8.4:
+    dependencies:
+      follow-redirects: 1.15.9
+      form-data: 4.0.2
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
 
   axios@1.8.4(debug@4.4.3):
     dependencies:
@@ -22259,6 +22291,8 @@ snapshots:
 
   flow-parser@0.263.0: {}
 
+  follow-redirects@1.15.9: {}
+
   follow-redirects@1.15.9(debug@4.4.3):
     optionalDependencies:
       debug: 4.4.3
@@ -22830,7 +22864,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.9(debug@4.4.3)
+      follow-redirects: 1.15.9
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -24236,6 +24270,10 @@ snapshots:
       uc.micro: 2.1.0
 
   markdown-table@3.0.4: {}
+
+  markdown-to-jsx@9.3.3(react@18.3.1):
+    optionalDependencies:
+      react: 18.3.1
 
   marky@1.2.5: {}
 
@@ -28281,7 +28319,7 @@ snapshots:
 
   wait-on@7.2.0:
     dependencies:
-      axios: 1.8.4(debug@4.4.3)
+      axios: 1.8.4
       joi: 17.13.3
       lodash: 4.17.21
       minimist: 1.2.8
