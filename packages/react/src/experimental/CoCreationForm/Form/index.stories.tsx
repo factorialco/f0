@@ -81,6 +81,13 @@ export const Empty: Story = {
   },
 }
 
+export const ApplyingChanges: Story = {
+  args: {
+    ...Default.args,
+    applyingChanges: true,
+  },
+}
+
 export const WithQuestionWithDuplicateOptions: Story = {
   // TODO: Fix a11y issues
   parameters: withSkipA11y({}),
