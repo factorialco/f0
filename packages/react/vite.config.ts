@@ -94,6 +94,15 @@ const alias = {
 // Check if we're building for Storybook to preserve data-testid attributes
 const isStorybookBuild = process.env.STORYBOOK_BUILD === "true"
 
+// Check if Storybook tests are being explicitly requested
+// This allows Storybook tests to run only when explicitly requested via --project=storybook
+const isRunningStorybookTests =
+  process.env.RUN_STORYBOOK_TESTS === "true" ||
+  process.argv.includes("--project=storybook") ||
+  process.argv.some(
+    (arg) => arg.startsWith("--project") && arg.includes("storybook")
+  )
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -149,6 +158,7 @@ export default defineConfig({
     },
   },
   test: {
+    name: "unit",
     environment: "jsdom",
     setupFiles: ["./vite/vitest.setup.ts"],
     alias: {
@@ -163,31 +173,37 @@ export default defineConfig({
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
     },
-    workspace: [
-      {
-        extends: true,
-        plugins: [
-          // The plugin will run tests for the stories defined in your Storybook config
-          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-          storybookTest({
-            configDir: path.join(dirname, ".storybook"),
-          }),
-        ],
-        test: {
-          name: "storybook",
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: "playwright",
-            instances: [
-              {
-                browser: "chromium",
+    // Only include Storybook workspace project when explicitly requested
+    // This ensures that by default only unit tests run
+    ...(isRunningStorybookTests
+      ? {
+          workspace: [
+            {
+              extends: true,
+              plugins: [
+                // The plugin will run tests for the stories defined in your Storybook config
+                // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+                storybookTest({
+                  configDir: path.join(dirname, ".storybook"),
+                }),
+              ],
+              test: {
+                name: "storybook",
+                browser: {
+                  enabled: true,
+                  headless: true,
+                  provider: "playwright",
+                  instances: [
+                    {
+                      browser: "chromium",
+                    },
+                  ],
+                },
+                setupFiles: [".storybook/vitest.setup.ts"],
               },
-            ],
-          },
-          setupFiles: [".storybook/vitest.setup.ts"],
-        },
-      },
-    ],
+            },
+          ],
+        }
+      : {}),
   },
 })
