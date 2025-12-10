@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.303.5](https://github.com/factorialco/f0/compare/f0-react-v1.303.4...f0-react-v1.303.5) (2025-12-10)
+
+
+### Bug Fixes
+
+* add missing moduleIcon ([#3107](https://github.com/factorialco/f0/issues/3107)) ([ec51f8c](https://github.com/factorialco/f0/commit/ec51f8c2311e103f344c8e35bbecbd5466b2e7d1))
+
+## [1.303.4](https://github.com/factorialco/f0/compare/f0-react-v1.303.3...f0-react-v1.303.4) (2025-12-10)
+
+
+### Bug Fixes
+
+* date navigator text size ([#3099](https://github.com/factorialco/f0/issues/3099)) ([c10d148](https://github.com/factorialco/f0/commit/c10d148beaf44a1bf16aca9f039924f6c44c3a79))
+
+## [1.303.3](https://github.com/factorialco/f0/compare/f0-react-v1.303.2...f0-react-v1.303.3) (2025-12-10)
+
+
+### Bug Fixes
+
+* prevent AI suggestions reloading randomly ([#3102](https://github.com/factorialco/f0/issues/3102)) ([1fda7bf](https://github.com/factorialco/f0/commit/1fda7bf98d056ea6295651a29ba9f93ef63b650b))
+
+## [1.303.2](https://github.com/factorialco/f0/compare/f0-react-v1.303.1...f0-react-v1.303.2) (2025-12-10)
+
+
+### Bug Fixes
+
+* prevent unwanted behavior when having select questions with same values in the options ([#3101](https://github.com/factorialco/f0/issues/3101)) ([86111da](https://github.com/factorialco/f0/commit/86111da80a1042219f6a098fecd44771ecea125e))
+
 ## [1.303.1](https://github.com/factorialco/f0/compare/f0-react-v1.303.0...f0-react-v1.303.1) (2025-12-05)
 
 

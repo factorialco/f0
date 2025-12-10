@@ -52,6 +52,7 @@ export const modules = {
   profile: ModuleIcons.Profile,
   project_management: ModuleIcons.Projects,
   reports: ModuleIcons.Reports,
+  salary_advance: ModuleIcons.SalaryAdvance,
   settings: ModuleIcons.Settings,
   personal_settings: ModuleIcons.Settings,
   shift_management: ModuleIcons.Shifts,
