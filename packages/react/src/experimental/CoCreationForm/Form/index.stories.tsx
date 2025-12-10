@@ -79,3 +79,10 @@ export const Empty: Story = {
     elements: [],
   },
 }
+
+export const ApplyingChanges: Story = {
+  args: {
+    ...Default.args,
+    applyingChanges: true,
+  },
+}

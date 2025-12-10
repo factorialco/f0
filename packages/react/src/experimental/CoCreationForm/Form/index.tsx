@@ -1,8 +1,9 @@
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Reorder } from "motion/react"
+import { motion, Reorder } from "motion/react"
 import { useMemo } from "react"
+import ApplyingChangesTag from "../ApplyingChangesTag"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
 import { DragProvider, useDragContext } from "../DragContext"
 import { Question as QuestionComponent, QuestionProps } from "../Question"
@@ -94,6 +95,7 @@ export const CoCreationForm = ({
   onChange,
   disallowOptionalQuestions,
   allowedQuestionTypes,
+  applyingChanges,
 }: CoCreationFormProps) => {
   const shouldShowAddButton =
     isEditMode &&
@@ -140,29 +142,49 @@ export const CoCreationForm = ({
       disallowOptionalQuestions={disallowOptionalQuestions}
       allowedQuestionTypes={allowedQuestionTypes}
     >
-      <div className="flex flex-col gap-6">
-        <DragProvider>
-          <Reorder.Group
-            axis="y"
-            values={elements}
-            onReorder={onChange}
-            as="div"
+      <div className="relative">
+        <motion.div
+          className={cn(
+            "flex flex-col gap-6",
+            applyingChanges && "pointer-events-none"
+          )}
+          initial={{ filter: "blur(0px)" }}
+          animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
+          exit={{ filter: "blur(0px)" }}
+        >
+          <DragProvider>
+            <Reorder.Group
+              axis="y"
+              values={elements}
+              onReorder={onChange}
+              as="div"
+            >
+              <div className="flex flex-col gap-8">
+                {elements.map((element) => (
+                  <Item
+                    key={
+                      element.type === "section"
+                        ? element.section.id
+                        : element.question.id
+                    }
+                    element={element}
+                  />
+                ))}
+              </div>
+            </Reorder.Group>
+          </DragProvider>
+          {shouldShowAddButton && <AddButton />}
+        </motion.div>
+        {applyingChanges && (
+          <motion.div
+            className="absolute left-0 top-0 h-full w-full"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
           >
-            <div className="flex flex-col gap-8">
-              {elements.map((element) => (
-                <Item
-                  key={
-                    element.type === "section"
-                      ? element.section.id
-                      : element.question.id
-                  }
-                  element={element}
-                />
-              ))}
-            </div>
-          </Reorder.Group>
-        </DragProvider>
-        {shouldShowAddButton && <AddButton />}
+            <ApplyingChangesTag />
+          </motion.div>
+        )}
       </div>
     </CoCreationFormProvider>
   )

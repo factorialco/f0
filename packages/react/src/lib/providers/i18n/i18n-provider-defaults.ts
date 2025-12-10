@@ -308,6 +308,7 @@ export const defaultTranslations = {
       placeholder: "Respondent's answer",
     },
     labels: {
+      applyingChanges: "Applying changes",
       endOfSection: "End of section",
       title: "Title",
       titlePlaceholder: "Question title",
