@@ -41,14 +41,14 @@
     "generate-ai-icons": "npx @svgr/cli --out-dir src/icons/ai node_modules/@factorialco/f0-core/assets/icons/ai",
     "build-storybook": "storybook build",
     "serve-storybook": "http-server storybook-static",
-    "test-storybook": "test-storybook --testTimeout=60000",
+    "test-storybook": "vitest --project=storybook --testTimeout=60000",
     "prettier:format": "prettier --write \"src/**/*.{ts,tsx,js,md,mdx,css,yaml}\"",
     "prettier:check:ci": "prettier --check \"src/**/*.{ts,tsx,js,md,mdx,css,yaml}\"",
     "tsc": "tsc --noEmit",
-    "vitest": "vitest",
-    "vitest:ui": "vitest --ui",
-    "vitest:watch": "vitest dev",
-    "vitest:ci": "pnpm run vitest --reporter=dot"
+    "vitest": "vitest --project=react",
+    "vitest:ui": "vitest --project=react --ui",
+    "vitest:watch": "vitest --project=react dev",
+    "vitest:ci": "pnpm run vitest --project=react --reporter=dot"
   },
   "peerDependencies": {
     "@copilotkit/react-core": "^1.10.6",
@@ -116,6 +116,7 @@
     "@storybook/addon-docs": "^9.1.3",
     "@storybook/addon-links": "^9.1.3",
     "@storybook/addon-themes": "^9.1.3",
+    "@storybook/addon-vitest": "^9.1.3",
     "@storybook/react-vite": "^9.1.3",
     "@storybook/test-runner": "^0.23.0",
     "@svgr/cli": "^8.1.0",
@@ -170,7 +171,9 @@
     "vite": "^6.3.5",
     "vite-plugin-dts": "4.3.0",
     "vite-plugin-lib-inject-css": "^2.2.1",
-    "vitest": "^3.0.7"
+    "vitest": "^3.0.7",
+    "playwright": "^1.57.0",
+    "@vitest/browser": "3.0.7"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.34"

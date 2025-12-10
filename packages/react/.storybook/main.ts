@@ -59,6 +59,7 @@ const config: StorybookConfig = {
       },
     },
     getAbsolutePath("@storybook/addon-designs"),
+    getAbsolutePath("@storybook/addon-vitest"),
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),

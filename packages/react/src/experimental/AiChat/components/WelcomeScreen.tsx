@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { IconType } from "@/components/F0Icon/F0Icon"
+import { IconType } from "@/components/F0Icon"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import OneIcon from "../OneIcon"
