@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.304.0](https://github.com/factorialco/f0/compare/f0-react-v1.303.6...f0-react-v1.304.0) (2025-12-10)
+
+
+### Features
+
+* add support to change placeholder of one chat ([#3110](https://github.com/factorialco/f0/issues/3110)) ([549a5ff](https://github.com/factorialco/f0/commit/549a5fff500a25496f563139ac8804176d56e28f))
+
 ## [1.303.6](https://github.com/factorialco/f0/compare/f0-react-v1.303.5...f0-react-v1.303.6) (2025-12-10)
 
 
