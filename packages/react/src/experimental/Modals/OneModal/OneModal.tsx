@@ -40,18 +40,41 @@ export type OneModalProps = {
   width?: ModalWidth
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
-const modalContentClassName = cva({
+const modalWrapperClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
       sidePosition:
         "absolute bottom-3 top-3 flex w-full translate-x-0 translate-y-0 flex-col rounded-md border border-solid border-f1-border-secondary",
-      center: "flex max-h-[95%] min-w-[100px] flex-1 flex-col rounded-xl",
-      fullscreen: "h-[calc(100%-48px)] w-[calc(100%-48px)] rounded-xl",
+      center: "flex",
+      fullscreen: "",
     },
     position: {
-      left: "left-3",
-      right: "left-auto right-3",
+      right: "left-auto right-3 items-end",
+      left: "left-3 items-start",
+      center: "",
+      fullscreen: "p-6",
+    },
+  },
+  defaultVariants: {
+    variant: "center",
+  },
+})
+
+const modalContentClassName = cva({
+  variants: {
+    variant: {
+      bottomSheet: "max-h-[95vh] bg-f1-background",
+      sidePosition:
+        "flex h-full w-full flex-col rounded-md border border-solid border-f1-border-secondary",
+      center: "flex max-h-[95%] min-w-[100px] flex-1 flex-col rounded-xl",
+      fullscreen: "h-full w-full rounded-xl",
+    },
+    position: {
+      left: "",
+      right: "",
+      center: "",
+      fullscreen: "",
     },
     width: {
       sm: "max-w-[539px]",
@@ -63,7 +86,7 @@ const modalContentClassName = cva({
     {
       variant: "fullscreen",
       width: ["sm", "md", "lg"],
-      class: "max-w-[95%]",
+      class: "max-w-full",
     },
   ],
   defaultVariants: {
@@ -105,34 +128,26 @@ export const OneModal: FC<OneModalProps> = ({
 
   const isSidePosition = position === "left" || position === "right"
 
-  const contentClassName = useMemo(() => {
-    if (isSmallScreen && asBottomSheetInMobile) {
-      return modalContentClassName({
-        variant: "bottomSheet",
-        width,
-      })
-    }
-
-    if (isSidePosition) {
-      return modalContentClassName({
-        variant: "sidePosition",
-        position,
-        width,
-      })
-    }
-
+  const variant = useMemo(() => {
     if (position === "fullscreen") {
-      return modalContentClassName({
-        variant: "fullscreen",
-        width,
-      })
+      return "fullscreen"
     }
+    if (isSmallScreen && asBottomSheetInMobile) {
+      return "bottomSheet"
+    }
+    if (isSidePosition) {
+      return "sidePosition"
+    }
+    return "center"
+  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition])
 
+  const contentClassName = useMemo(() => {
     return modalContentClassName({
-      variant: "center",
+      variant,
+      position,
       width,
     })
-  }, [position, isSmallScreen, asBottomSheetInMobile, isSidePosition, width])
+  }, [variant, position, width])
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
@@ -172,6 +187,10 @@ export const OneModal: FC<OneModalProps> = ({
         <DialogContent
           ref={setContentRef}
           withTraslateAnimation={!isSidePosition}
+          wrapperClassName={modalWrapperClassName({
+            variant,
+            position,
+          })}
           className={contentClassName}
         >
           {children}

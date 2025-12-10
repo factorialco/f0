@@ -10,12 +10,14 @@ import { DialogPortal } from "./DialogPortal"
 export const DialogContent = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    wrapperClassName?: string
     withTraslateAnimation?: boolean
     container?: HTMLElement | null
   }
 >(
   (
     {
+      wrapperClassName,
       className,
       children,
       withTraslateAnimation = true,
@@ -38,21 +40,28 @@ export const DialogContent = forwardRef<
 
     return (
       <DialogPortal container={container}>
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <DialogOverlay />
-          <DialogPrimitive.Content
-            ref={ref}
+        <DialogOverlay />
+        <DialogPrimitive.Content
+          ref={ref}
+          className={cn(
+            "fixed inset-0 z-50 flex items-center justify-center",
+            "pointer-events-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            withTraslateAnimation &&
+              "data-[state=open]:slide-in-to-bottom-[48%] data-[state=closed]:slide-out-to-top-[48%]",
+            wrapperClassName
+          )}
+          {...props}
+        >
+          <div
             className={cn(
-              "relative z-50 flex w-[90%] flex-col rounded-xl border bg-f1-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-              withTraslateAnimation &&
-                "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+              "relative flex w-[90%] flex-col rounded-xl border bg-f1-background shadow-lg",
+              "pointer-events-auto",
               className
             )}
-            {...props}
           >
             {children}
-          </DialogPrimitive.Content>
-        </div>
+          </div>
+        </DialogPrimitive.Content>
       </DialogPortal>
     )
   }

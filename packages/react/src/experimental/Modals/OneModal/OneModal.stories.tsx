@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Select } from "@/components/F0Select"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
@@ -11,7 +12,6 @@ import {
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
 import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
-import { F0Button } from "@/f0"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
 import DeleteIcon from "@/icons/app/Delete"
@@ -92,9 +92,9 @@ const OTHER_ACTIONS = [
   },
 ]
 
-const ExampleList = () => (
+const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
   <div className="flex flex-col gap-4 p-4">
-    {Array.from({ length: 20 }, (_, i) => (
+    {Array.from({ length: itemsCount }, (_, i) => (
       <div
         key={i}
         className="rounded-sm border border-solid border-f1-border-secondary p-4"
@@ -113,7 +113,7 @@ export const Default: Story = {
       <>
         <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
         <OneModal.Content tabs={TABS}>
-          <ExampleList />
+          <ExampleList itemsCount={2} />
         </OneModal.Content>
       </>
     ),
