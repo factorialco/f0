@@ -7,6 +7,7 @@ import { motion } from "motion/react"
 import { forwardRef, useState } from "react"
 import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
+import { fontSizeVariants } from "./variants"
 
 const IconMotion = motion.create(F0Icon)
 
@@ -27,6 +28,7 @@ const ButtonInternal = forwardRef<
     emoji,
     variant = "default",
     size = "md",
+    fontSize,
     append,
     className,
     "aria-label": ariaLabel,
@@ -67,6 +69,7 @@ const ButtonInternal = forwardRef<
   const shouldHideLabel = hideLabel || emoji
 
   const buttonLabel = (label ?? "").toString()
+  const buttonFontSize = fontSize ?? size
 
   return (
     <>
@@ -157,7 +160,10 @@ const ButtonInternal = forwardRef<
           )}
           {!shouldHideLabel ? (
             <OneEllipsis
-              className={cn(shouldHideLabel && "sr-only")}
+              className={cn(
+                shouldHideLabel && "sr-only",
+                fontSizeVariants({ fontSize: buttonFontSize })
+              )}
               tag="span"
             >
               {buttonLabel}
