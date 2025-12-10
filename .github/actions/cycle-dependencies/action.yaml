@@ -1,0 +1,39 @@
+name: "Cycle Dependencies Check"
+description: "Detect circular dependencies using dpdm"
+inputs:
+  package-path:
+    description: "Path to the package directory"
+    required: true
+  entry-point:
+    description: "Entry point file for dependency analysis"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run dpdm to detect cycles
+      id: detect-cycles
+      run: |
+        cd ${{ inputs.package-path }}
+        OUTPUT_FILE=$(mktemp)
+        npx dpdm --circular --no-tree --no-warning ${{ inputs.entry-point }} > "$OUTPUT_FILE" 2>&1 || true
+
+        # Return to workspace root to save output file
+        cd $GITHUB_WORKSPACE
+
+        if [ -s "$OUTPUT_FILE" ]; then
+          echo "cycles_found=true" >> $GITHUB_OUTPUT
+          # Normalize output: remove empty lines, sort for consistent comparison
+          NORMALIZED=$(cat "$OUTPUT_FILE" | grep -v '^$' | sort)
+          echo "cycles_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Save normalized output to file for comparison
+          echo "$NORMALIZED" > "current_cycles.txt"
+        else
+          echo "cycles_found=false" >> $GITHUB_OUTPUT
+          echo "cycles_output=" >> $GITHUB_OUTPUT
+          touch "current_cycles.txt"
+        fi
+      shell: bash
