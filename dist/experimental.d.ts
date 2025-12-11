@@ -184,6 +184,10 @@ declare interface ActionCommonProps {
      */
     size?: ActionSize;
     /**
+     * The font size of the action.
+     */
+    fontSize?: FontSize;
+    /**
      * The render mode.
      * @default "default"
      */
@@ -433,6 +437,8 @@ declare type AiChatProviderReturnValue = {
     shouldPlayEntranceAnimation: boolean;
     setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
     tmp_setAgent: (agent?: string) => void;
+    placeholders: string[];
+    setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
     /**
      * Set the amount of minutes after which the chat will be cleared automatically
      * Set `null` to disable auto-clearing
@@ -469,6 +475,8 @@ declare interface AiChatState {
     agent?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    placeholders?: string[];
+    setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -1072,7 +1080,7 @@ declare type ButtonDropdownItem<T = string> = {
     description?: string;
 };
 
-declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip" | "fontSize"> & DataAttributes & {
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
@@ -1475,7 +1483,7 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
-export declare const CoCreationForm: ({ elements: elementsProp, isEditMode, onChange, disallowOptionalQuestions, allowedQuestionTypes, }: CoCreationFormProps) => JSX_2.Element;
+export declare const CoCreationForm: ({ elements: elementsProp, isEditMode, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, }: CoCreationFormProps) => JSX_2.Element;
 
 export declare type CoCreationFormCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -1498,6 +1506,7 @@ export declare type CoCreationFormProps = {
     isEditMode?: boolean;
     disallowOptionalQuestions?: boolean;
     allowedQuestionTypes?: QuestionType[];
+    applyingChanges?: boolean;
 };
 
 declare type ColId = string;
@@ -2498,6 +2507,7 @@ declare const defaultTranslations: {
             readonly placeholder: "Respondent's answer";
         };
         readonly labels: {
+            readonly applyingChanges: "Applying changes";
             readonly endOfSection: "End of section";
             readonly title: "Title";
             readonly titlePlaceholder: "Question title";
@@ -3252,6 +3262,10 @@ export declare type FlattenedItem = {
         subItems?: EntitySelectSubEntity[];
     };
 };
+
+declare type FontSize = (typeof fontSizes)[number];
+
+declare const fontSizes: readonly ["sm", "md", "lg"];
 
 export declare function Form<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ onSubmit, children, ...form }: {
     children: React.ReactNode;
@@ -4029,6 +4043,7 @@ export declare const modules: {
     readonly profile: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly project_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly reports: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly salary_advance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly personal_settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly shift_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;

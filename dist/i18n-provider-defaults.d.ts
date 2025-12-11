@@ -408,6 +408,7 @@ export declare const defaultTranslations: {
             readonly placeholder: "Respondent's answer";
         };
         readonly labels: {
+            readonly applyingChanges: "Applying changes";
             readonly endOfSection: "End of section";
             readonly title: "Title";
             readonly titlePlaceholder: "Question title";

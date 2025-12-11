@@ -173,6 +173,10 @@ declare interface ActionCommonProps {
      */
     size?: ActionSize;
     /**
+     * The font size of the action.
+     */
+    fontSize?: FontSize;
+    /**
      * The render mode.
      * @default "default"
      */
@@ -624,7 +628,7 @@ export declare type ButtonDropdownVariant = (typeof buttonDropdownVariants)[numb
 
 export declare const buttonDropdownVariants: readonly ["default", "outline", "neutral"];
 
-declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip"> & DataAttributes & {
+declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip" | "fontSize"> & DataAttributes & {
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
@@ -1879,6 +1883,7 @@ export declare const defaultTranslations: {
             readonly placeholder: "Respondent's answer";
         };
         readonly labels: {
+            readonly applyingChanges: "Applying changes";
             readonly endOfSection: "End of section";
             readonly title: "Title";
             readonly titlePlaceholder: "Question title";
@@ -2655,6 +2660,10 @@ export declare type FlagAvatarVariant = Extract<AvatarVariant, {
     type: "flag";
 }>;
 
+declare type FontSize = (typeof fontSizes)[number];
+
+declare const fontSizes: readonly ["sm", "md", "lg"];
+
 export declare const getAnimationVariants: (options?: AnimationVariantsOptions) => {
     hidden: {
         opacity: number;
@@ -3222,6 +3231,7 @@ export declare const modules: {
     readonly profile: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly project_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly reports: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly salary_advance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly personal_settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly shift_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
