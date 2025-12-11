@@ -23,13 +23,13 @@ const DEFAULT_ENTRY_POINTS = [
   "__TEST_CYCLE___/test1.ts",
 ].map((entryPoint) => join(CURRENT_DIR, "..", entryPoint))
 
+const CACHE_DIR = join(CURRENT_DIR, "..", ".cache")
+
 /**
  * Create baseline filename (absolute path) from a SHA string
  */
 function getBaselineFilePath(sha: string): string {
-  const workspaceRoot = process.cwd()
-  const cacheDir = ".cache"
-  return join(workspaceRoot, cacheDir, `${BASELINE_PREFIX}-${sha}.json`)
+  return join(CACHE_DIR, `${BASELINE_PREFIX}-${sha}.json`)
 }
 
 /**
@@ -238,8 +238,6 @@ function main(): void {
     process.exit(0)
   }
 
-  const cacheDir = ".cache"
-
   // Always use HEAD as baseline (latest commit in current branch)
   const baselineSha = getHeadSha()
   if (!baselineSha) {
@@ -251,7 +249,7 @@ function main(): void {
   consola.log(baselineFile)
 
   // Clean up old cache files
-  cleanupOldCache(cacheDir)
+  cleanupOldCache(CACHE_DIR)
 
   // Load or create baseline
   let baseline: CycleDependency[] = []
