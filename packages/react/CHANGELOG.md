@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.306.0](https://github.com/factorialco/f0/compare/f0-react-v1.305.0...f0-react-v1.306.0) (2025-12-11)
+
+
+### Features
+
+* **gridgroup:** dashboard content update ([#3100](https://github.com/factorialco/f0/issues/3100)) ([50ff1f9](https://github.com/factorialco/f0/commit/50ff1f9bccf8c4b9de74548f60e5708223c3934d))
+
 ## [1.305.0](https://github.com/factorialco/f0/compare/f0-react-v1.304.1...f0-react-v1.305.0) (2025-12-11)
 
 
