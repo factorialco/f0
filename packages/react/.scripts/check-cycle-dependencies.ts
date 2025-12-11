@@ -128,7 +128,9 @@ function runDpdm(entryPoints?: string[]): CycleDependency[] {
   const result: CycleDependency[] = []
 
   for (const entryPoint of entryPoints) {
-    consola.info(`Running dpdm on ${colorize("yellow", entryPoint)}`)
+    consola.info(
+      `Checking cycle dependencies in ${colorize("yellow", entryPoint)}`
+    )
     try {
       const output = execSync(
         `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
