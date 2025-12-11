@@ -439,7 +439,7 @@ function main(): void {
   const cyclesRemoved = baseline.length - current.length
 
   // Output in JSON format for CI or when --json flag is used
-  if (json || ci) {
+  if (json) {
     const output = {
       baseline: {
         commit: baselineSha,
