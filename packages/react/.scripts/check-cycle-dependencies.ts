@@ -4,7 +4,14 @@
 import { consola } from "consola"
 import { colorize } from "consola/utils"
 import { execSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
+import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -107,6 +114,97 @@ function parseArgs(): { preCommit: boolean } {
   const args = process.argv.slice(2)
   return {
     preCommit: args.includes("--pre-commit"),
+  }
+}
+
+/**
+ * Run dpdm on a specific git commit
+ */
+function runDpdmOnCommit(
+  commitSha: string,
+  entryPoints?: string[]
+): CycleDependency[] {
+  const workspaceRoot = process.cwd()
+  const reactPackagePath = join(CURRENT_DIR, "..")
+  const reactPackageRelativePath = relative(workspaceRoot, reactPackagePath)
+
+  // Create a temporary directory for the commit archive
+  const tempDir = join(
+    tmpdir(),
+    `cycle-deps-archive-${commitSha}-${Date.now()}`
+  )
+  const tempReactPath = join(tempDir, reactPackageRelativePath)
+
+  try {
+    // Extract the commit to a temporary directory using git archive
+    mkdirSync(tempDir, { recursive: true })
+    execSync(`git archive ${commitSha} | tar -x -C ${tempDir}`, {
+      cwd: workspaceRoot,
+      encoding: "utf-8",
+      stdio: "pipe",
+    })
+
+    // Now run dpdm from the temp directory
+    entryPoints = (entryPoints || DEFAULT_ENTRY_POINTS).map((entryPoint) => {
+      if (isAbsolute(entryPoint)) {
+        // Convert absolute paths to be relative to reactPackagePath
+        return relative(reactPackagePath, entryPoint)
+      }
+      return entryPoint
+    })
+
+    const result: CycleDependency[] = []
+
+    for (const entryPoint of entryPoints) {
+      consola.info(
+        `Checking cycle dependencies in ${colorize("yellow", entryPoint)} (from commit ${commitSha.slice(0, 7)})`
+      )
+      try {
+        const output = execSync(
+          `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
+          {
+            cwd: tempReactPath,
+            encoding: "utf-8",
+          }
+        )
+        result.push(...parseDpdmOutput(output))
+      } catch (error: unknown) {
+        // dpdm exits with non-zero when cycles are found, but we still want the output
+        let output = ""
+        if (error && typeof error === "object") {
+          const execError = error as {
+            stdout?: string | Buffer
+            stderr?: string | Buffer
+            message?: string
+          }
+          if (execError.stdout) {
+            output =
+              typeof execError.stdout === "string"
+                ? execError.stdout
+                : execError.stdout.toString("utf-8")
+          } else if (execError.stderr) {
+            output =
+              typeof execError.stderr === "string"
+                ? execError.stderr
+                : execError.stderr.toString("utf-8")
+          } else if (execError.message) {
+            output = execError.message
+          }
+        }
+        if (output) {
+          result.push(...parseDpdmOutput(output))
+        }
+      }
+    }
+
+    return result
+  } finally {
+    // Clean up temp directory
+    try {
+      rmSync(tempDir, { recursive: true, force: true })
+    } catch {
+      // Ignore cleanup errors
+    }
   }
 }
 
@@ -280,9 +378,10 @@ function main(): void {
     baseline = loadBaseline(baselineFile)
   } else {
     consola.info(
-      `No baseline found for HEAD (${colorize("yellow", baselineSha)}), creating baseline...`
+      `No baseline found for HEAD (${colorize("yellow", baselineSha)}), creating baseline from commit...`
     )
-    baseline = runDpdm()
+    // Run dpdm on HEAD commit, not current working directory
+    baseline = runDpdmOnCommit(baselineSha)
 
     saveBaseline(baselineFile, baseline)
   }
