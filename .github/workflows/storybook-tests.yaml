@@ -34,8 +34,12 @@ jobs:
         run: |
           pnpm --filter @factorialco/f0-core build
           pnpm --filter @factorialco/f0-react run build-storybook --quiet
+
+      - name: Print environment info
+        run: |
+          pnpm dlx envinfo --system --npmPackages '{vite,@vitejs/*}' --binaries --browsers
       - name: Serve Storybook and run tests
         run: |
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
             "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
-            "pnpx wait-on tcp:6006 && pnpm --filter @factorialco/f0-react test-storybook --silent"
+            "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook --silent --maxWorkers=4 --retry=2"

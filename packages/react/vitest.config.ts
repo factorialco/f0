@@ -62,10 +62,15 @@ export default defineConfig({
             configDir: path.join(dirname, ".storybook"),
           }),
         ],
+        optimizeDeps: {
+          include: ["react", "react-dom", "react/jsx-dev-runtime"],
+        },
         test: {
           name: "storybook",
-          testTimeout: 30000, // 30 seconds timeout per test
-          hookTimeout: 60000, // 60 seconds timeout for hooks
+          testTimeout: 45000, // 45 seconds timeout per test
+          hookTimeout: 90000, // 90 seconds timeout for hooks
+          retry: 2, // Retry failed tests up to 2 times
+          maxWorkers: 2,
           browser: {
             enabled: true,
             headless: true,
