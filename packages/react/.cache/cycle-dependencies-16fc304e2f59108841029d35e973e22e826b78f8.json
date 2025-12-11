@@ -1,0 +1,1431 @@
+[
+  {
+    "cycle": "src/components/F0Icon/index.tsx -> src/components/F0Icon/F0Icon.tsx -> src/experimental/Overlays/Tooltip/index.tsx -> src/experimental/Information/Shortcut/index.tsx",
+    "files": [
+      "src/components/F0Icon/index.tsx",
+      "src/components/F0Icon/F0Icon.tsx",
+      "src/experimental/Overlays/Tooltip/index.tsx",
+      "src/experimental/Information/Shortcut/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/Utilities/F0GridStack/F0GridStack.tsx -> src/components/Utilities/F0GridStack/components/grid-stack-provider.tsx",
+    "files": [
+      "src/components/Utilities/F0GridStack/F0GridStack.tsx",
+      "src/components/Utilities/F0GridStack/components/grid-stack-provider.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/Utilities/F0GridStack/F0GridStack.tsx -> src/components/Utilities/F0GridStack/components/grid-stack-provider.tsx -> src/components/Utilities/F0GridStack/components/widget-utils.ts",
+    "files": [
+      "src/components/Utilities/F0GridStack/F0GridStack.tsx",
+      "src/components/Utilities/F0GridStack/components/grid-stack-provider.tsx",
+      "src/components/Utilities/F0GridStack/components/widget-utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/F0AvatarModule/index.tsx -> src/components/avatars/F0AvatarModule/F0AvatarModule.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/F0AvatarModule/index.tsx",
+      "src/components/avatars/F0AvatarModule/F0AvatarModule.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0AvatarCompany/index.tsx -> src/components/avatars/F0AvatarCompany/F0AvatarCompany.tsx -> src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts",
+    "files": [
+      "src/components/avatars/F0AvatarCompany/index.tsx",
+      "src/components/avatars/F0AvatarCompany/F0AvatarCompany.tsx",
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarEmoji/index.tsx -> src/components/avatars/F0AvatarEmoji/F0AvatarEmoji.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarEmoji/index.tsx",
+      "src/components/avatars/F0AvatarEmoji/F0AvatarEmoji.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFile/index.tsx -> src/components/avatars/F0AvatarFile/F0AvatarFile.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFile/index.tsx",
+      "src/components/avatars/F0AvatarFile/F0AvatarFile.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFile/index.tsx -> src/components/avatars/F0AvatarFile/F0AvatarFile.tsx",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFile/index.tsx",
+      "src/components/avatars/F0AvatarFile/F0AvatarFile.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFlag/index.tsx -> src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFlag/index.tsx",
+      "src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFlag/index.tsx -> src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx -> src/components/avatars/F0AvatarFlag/types.ts",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFlag/index.tsx",
+      "src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx",
+      "src/components/avatars/F0AvatarFlag/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFlag/index.tsx -> src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx -> src/components/avatars/F0AvatarFlag/types.ts",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFlag/index.tsx",
+      "src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx",
+      "src/components/avatars/F0AvatarFlag/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarIcon/index.tsx -> src/components/avatars/F0AvatarIcon/F0AvatarIcon.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarIcon/index.tsx",
+      "src/components/avatars/F0AvatarIcon/F0AvatarIcon.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarPerson/index.tsx -> src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarPerson/index.tsx",
+      "src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarPerson/index.tsx -> src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx -> src/components/avatars/F0AvatarPerson/types.ts",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarPerson/index.tsx",
+      "src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx",
+      "src/components/avatars/F0AvatarPerson/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarPerson/index.tsx -> src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx -> src/components/avatars/F0AvatarPerson/types.ts",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarPerson/index.tsx",
+      "src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx",
+      "src/components/avatars/F0AvatarPerson/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarTeam/index.tsx -> src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarTeam/index.tsx",
+      "src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarTeam/index.tsx -> src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarTeam/index.tsx",
+      "src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Navigation/Dropdown/internal.tsx -> src/experimental/Navigation/Dropdown/DropdownItem.tsx",
+    "files": [
+      "src/experimental/Navigation/Dropdown/internal.tsx",
+      "src/experimental/Navigation/Dropdown/DropdownItem.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/amount/index.tsx -> src/components/value-display/types/amount/amount.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/amount/index.tsx",
+      "src/components/value-display/types/amount/amount.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/amount/index.tsx -> src/components/value-display/types/amount/amount.tsx -> src/components/value-display/types/number/index.tsx -> src/components/value-display/types/number/number.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/amount/index.tsx",
+      "src/components/value-display/types/amount/amount.tsx",
+      "src/components/value-display/types/number/index.tsx",
+      "src/components/value-display/types/number/number.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/avatarList/index.tsx -> src/components/value-display/types/avatarList/avatarList.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/avatarList/index.tsx",
+      "src/components/value-display/types/avatarList/avatarList.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/company/index.tsx -> src/components/value-display/types/company/company.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/company/index.tsx",
+      "src/components/value-display/types/company/company.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/country/index.tsx -> src/components/value-display/types/country/country.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/country/index.tsx",
+      "src/components/value-display/types/country/country.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/date/index.tsx -> src/components/value-display/types/date/date.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/date/index.tsx",
+      "src/components/value-display/types/date/date.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/folder/index.tsx -> src/components/value-display/types/folder/folder.tsx -> src/components/value-display/types/icon/index.tsx -> src/components/value-display/types/icon/icon.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/folder/index.tsx",
+      "src/components/value-display/types/folder/folder.tsx",
+      "src/components/value-display/types/icon/index.tsx",
+      "src/components/value-display/types/icon/icon.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/longText/index.tsx -> src/components/value-display/types/longText/longText.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/longText/index.tsx",
+      "src/components/value-display/types/longText/longText.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/percentage/index.tsx -> src/components/value-display/types/percentage/percentage.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/percentage/index.tsx",
+      "src/components/value-display/types/percentage/percentage.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/person/index.tsx -> src/components/value-display/types/person/person.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/person/index.tsx",
+      "src/components/value-display/types/person/person.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/progressBar/index.tsx -> src/components/value-display/types/progressBar/progressBar.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/progressBar/index.tsx",
+      "src/components/value-display/types/progressBar/progressBar.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/team/index.tsx -> src/components/value-display/types/team/team.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/team/index.tsx",
+      "src/components/value-display/types/team/team.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/text/index.tsx -> src/components/value-display/types/text/text.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/text/index.tsx",
+      "src/components/value-display/types/text/text.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/F0Card/components/CardMetadata.tsx -> src/components/F0Card/types.ts",
+    "files": [
+      "src/components/F0Card/components/CardMetadata.tsx",
+      "src/components/F0Card/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneCalendar/granularities/index.tsx -> src/experimental/OneCalendar/granularities/day/index.tsx -> src/experimental/OneCalendar/utils.ts",
+    "files": [
+      "src/experimental/OneCalendar/granularities/index.tsx",
+      "src/experimental/OneCalendar/granularities/day/index.tsx",
+      "src/experimental/OneCalendar/utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/utils.ts",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/utils.ts",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/types.ts",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/NumberFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/NumberFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/SearchFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/SearchFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/types/index.ts -> src/hooks/datasource/types/datasource.typings.ts -> src/hooks/datasource/types/selection.typings.ts -> src/hooks/datasource/useData.ts",
+    "files": [
+      "src/hooks/datasource/types/index.ts",
+      "src/hooks/datasource/types/datasource.typings.ts",
+      "src/hooks/datasource/types/selection.typings.ts",
+      "src/hooks/datasource/useData.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/types/datasource.typings.ts -> src/hooks/datasource/types/selection.typings.ts -> src/hooks/datasource/useData.ts",
+    "files": [
+      "src/hooks/datasource/types/datasource.typings.ts",
+      "src/hooks/datasource/types/selection.typings.ts",
+      "src/hooks/datasource/useData.ts"
+    ]
+  },
+  {
+    "cycle": "src/ui/Select/index.ts -> src/ui/Select/components/SelectContent.tsx",
+    "files": [
+      "src/ui/Select/index.ts",
+      "src/ui/Select/components/SelectContent.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/F0Select/index.tsx -> src/components/F0Select/F0Select.tsx -> src/components/F0Select/components/SelectTopActions.tsx -> src/experimental/OneDataCollection/Settings/components/GroupingSelector.tsx",
+    "files": [
+      "src/components/F0Select/index.tsx",
+      "src/components/F0Select/F0Select.tsx",
+      "src/components/F0Select/components/SelectTopActions.tsx",
+      "src/experimental/OneDataCollection/Settings/components/GroupingSelector.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/navigationFilters/types.ts -> src/experimental/OneDataCollection/navigationFilters/filterTypes/DateNavigation/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/navigationFilters/types.ts",
+      "src/experimental/OneDataCollection/navigationFilters/filterTypes/DateNavigation/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx -> src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/types.ts -> src/experimental/OneDataCollection/hooks/useDataCollectionSource/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/types.ts",
+      "src/experimental/OneDataCollection/hooks/useDataCollectionSource/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx -> src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx",
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/List/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/List/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx -> src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx -> src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx -> src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/settings/handleResetSettings.ts",
+    "files": [
+      "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx",
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/settings/handleResetSettings.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx -> src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx -> src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx -> src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx",
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+    "files": [
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/useSticky.ts",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/useSticky.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useCalculateConectorHeight.ts -> src/experimental/OneTable/TableCell/utils/nested.ts",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useCalculateConectorHeight.ts",
+      "src/experimental/OneTable/TableCell/utils/nested.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/LoadMore/index.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/LoadMore/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/RowLoading/index.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/RowLoading/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx -> src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx -> src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx -> src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/Table.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx",
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/Table.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneCalendar/granularities/index.tsx -> src/experimental/OneCalendar/granularities/day/index.tsx -> src/experimental/OneCalendar/utils.ts",
+    "files": [
+      "src/experimental/OneCalendar/granularities/index.tsx",
+      "src/experimental/OneCalendar/granularities/day/index.tsx",
+      "src/experimental/OneCalendar/utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/F0AvatarModule/index.tsx -> src/components/avatars/F0AvatarModule/F0AvatarModule.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/F0AvatarModule/index.tsx",
+      "src/components/avatars/F0AvatarModule/F0AvatarModule.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/F0Icon/index.tsx -> src/components/F0Icon/F0Icon.tsx -> src/experimental/Overlays/Tooltip/index.tsx -> src/experimental/Information/Shortcut/index.tsx",
+    "files": [
+      "src/components/F0Icon/index.tsx",
+      "src/components/F0Icon/F0Icon.tsx",
+      "src/experimental/Overlays/Tooltip/index.tsx",
+      "src/experimental/Information/Shortcut/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0AvatarCompany/index.tsx -> src/components/avatars/F0AvatarCompany/F0AvatarCompany.tsx -> src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts",
+    "files": [
+      "src/components/avatars/F0AvatarCompany/index.tsx",
+      "src/components/avatars/F0AvatarCompany/F0AvatarCompany.tsx",
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarEmoji/index.tsx -> src/components/avatars/F0AvatarEmoji/F0AvatarEmoji.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarEmoji/index.tsx",
+      "src/components/avatars/F0AvatarEmoji/F0AvatarEmoji.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFile/index.tsx -> src/components/avatars/F0AvatarFile/F0AvatarFile.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFile/index.tsx",
+      "src/components/avatars/F0AvatarFile/F0AvatarFile.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFile/index.tsx -> src/components/avatars/F0AvatarFile/F0AvatarFile.tsx",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFile/index.tsx",
+      "src/components/avatars/F0AvatarFile/F0AvatarFile.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFlag/index.tsx -> src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFlag/index.tsx",
+      "src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFlag/index.tsx -> src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx -> src/components/avatars/F0AvatarFlag/types.ts",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFlag/index.tsx",
+      "src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx",
+      "src/components/avatars/F0AvatarFlag/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarFlag/index.tsx -> src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx -> src/components/avatars/F0AvatarFlag/types.ts",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarFlag/index.tsx",
+      "src/components/avatars/F0AvatarFlag/F0AvatarFlag.tsx",
+      "src/components/avatars/F0AvatarFlag/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarIcon/index.tsx -> src/components/avatars/F0AvatarIcon/F0AvatarIcon.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarIcon/index.tsx",
+      "src/components/avatars/F0AvatarIcon/F0AvatarIcon.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarPerson/index.tsx -> src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarPerson/index.tsx",
+      "src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarPerson/index.tsx -> src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx -> src/components/avatars/F0AvatarPerson/types.ts",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarPerson/index.tsx",
+      "src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx",
+      "src/components/avatars/F0AvatarPerson/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarPerson/index.tsx -> src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx -> src/components/avatars/F0AvatarPerson/types.ts",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarPerson/index.tsx",
+      "src/components/avatars/F0AvatarPerson/F0AvatarPerson.tsx",
+      "src/components/avatars/F0AvatarPerson/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarTeam/index.tsx -> src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx",
+    "files": [
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarTeam/index.tsx",
+      "src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/avatars/internal/BaseAvatar/index.tsx -> src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx -> src/components/avatars/internal/BaseAvatar/types.ts -> src/components/avatars/F0Avatar/types.ts -> src/components/avatars/F0AvatarTeam/index.tsx -> src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx",
+    "files": [
+      "src/components/avatars/internal/BaseAvatar/index.tsx",
+      "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx",
+      "src/components/avatars/internal/BaseAvatar/types.ts",
+      "src/components/avatars/F0Avatar/types.ts",
+      "src/components/avatars/F0AvatarTeam/index.tsx",
+      "src/components/avatars/F0AvatarTeam/F0AvatarTeam.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/utils.ts",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/utils.ts",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/DateFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/utils.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/types.ts",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/index.ts -> src/components/OneFilterPicker/types.ts -> src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts",
+    "files": [
+      "src/hooks/datasource/index.ts",
+      "src/components/OneFilterPicker/types.ts",
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx -> src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/InFilter/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/InFilter.tsx",
+      "src/components/OneFilterPicker/filterTypes/InFilter/useLoadOptions.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/NumberFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/NumberFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/OneFilterPicker/filterTypes/index.tsx -> src/components/OneFilterPicker/filterTypes/filters.tsx -> src/components/OneFilterPicker/filterTypes/SearchFilter/index.tsx",
+    "files": [
+      "src/components/OneFilterPicker/filterTypes/index.tsx",
+      "src/components/OneFilterPicker/filterTypes/filters.tsx",
+      "src/components/OneFilterPicker/filterTypes/SearchFilter/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/types/index.ts -> src/hooks/datasource/types/datasource.typings.ts -> src/hooks/datasource/types/selection.typings.ts -> src/hooks/datasource/useData.ts",
+    "files": [
+      "src/hooks/datasource/types/index.ts",
+      "src/hooks/datasource/types/datasource.typings.ts",
+      "src/hooks/datasource/types/selection.typings.ts",
+      "src/hooks/datasource/useData.ts"
+    ]
+  },
+  {
+    "cycle": "src/hooks/datasource/types/datasource.typings.ts -> src/hooks/datasource/types/selection.typings.ts -> src/hooks/datasource/useData.ts",
+    "files": [
+      "src/hooks/datasource/types/datasource.typings.ts",
+      "src/hooks/datasource/types/selection.typings.ts",
+      "src/hooks/datasource/useData.ts"
+    ]
+  },
+  {
+    "cycle": "src/ui/Select/index.ts -> src/ui/Select/components/SelectContent.tsx",
+    "files": [
+      "src/ui/Select/index.ts",
+      "src/ui/Select/components/SelectContent.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/F0Select/index.tsx -> src/components/F0Select/F0Select.tsx -> src/components/F0Select/components/SelectTopActions.tsx -> src/experimental/OneDataCollection/Settings/components/GroupingSelector.tsx",
+    "files": [
+      "src/components/F0Select/index.tsx",
+      "src/components/F0Select/F0Select.tsx",
+      "src/components/F0Select/components/SelectTopActions.tsx",
+      "src/experimental/OneDataCollection/Settings/components/GroupingSelector.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Navigation/Dropdown/internal.tsx -> src/experimental/Navigation/Dropdown/DropdownItem.tsx",
+    "files": [
+      "src/experimental/Navigation/Dropdown/internal.tsx",
+      "src/experimental/Navigation/Dropdown/DropdownItem.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem.tsx -> src/experimental/Navigation/Header/index.tsx -> src/experimental/Navigation/Header/Breadcrumbs/index.tsx",
+    "files": [
+      "src/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem.tsx",
+      "src/experimental/Navigation/Header/index.tsx",
+      "src/experimental/Navigation/Header/Breadcrumbs/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx -> src/experimental/CoCreationForm/constants.ts",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+      "src/experimental/CoCreationForm/constants.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx -> src/experimental/CoCreationForm/constants.ts",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+      "src/experimental/CoCreationForm/constants.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/ActionsMenu/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/ActionsMenu/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/ActionsMenu/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/ActionsMenu/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/ActionsMenu/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/ActionsMenu/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/index.tsx -> src/experimental/CoCreationForm/BaseQuestion/types.ts",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseQuestion/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/DateQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/DateQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/LinkQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/LinkQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/LinkQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/LinkQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/NumericQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/NumericQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/NumericQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/NumericQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/RatingQuestion/index.tsx -> src/experimental/CoCreationForm/BaseScoreQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/RatingQuestion/index.tsx",
+      "src/experimental/CoCreationForm/BaseScoreQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/Section/types.ts",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/Section/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/SelectQuestion/types.ts",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/SelectQuestion/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/Context.tsx -> src/experimental/CoCreationForm/lib.ts -> src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/TextQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/Context.tsx",
+      "src/experimental/CoCreationForm/lib.ts",
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/TextQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/CoCreationForm/types.ts -> src/experimental/CoCreationForm/TextQuestion/index.tsx",
+    "files": [
+      "src/experimental/CoCreationForm/types.ts",
+      "src/experimental/CoCreationForm/TextQuestion/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Information/Headers/Metadata/index.tsx -> src/experimental/Information/Headers/Metadata/MetadataValue.tsx",
+    "files": [
+      "src/experimental/Information/Headers/Metadata/index.tsx",
+      "src/experimental/Information/Headers/Metadata/MetadataValue.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Lists/DataList/ItemContainer.tsx -> src/experimental/Lists/DataList/actions/CopyAction.tsx",
+    "files": [
+      "src/experimental/Lists/DataList/ItemContainer.tsx",
+      "src/experimental/Lists/DataList/actions/CopyAction.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Lists/DataList/ItemContainer.tsx -> src/experimental/Lists/DataList/actions/NavigateAction.tsx",
+    "files": [
+      "src/experimental/Lists/DataList/ItemContainer.tsx",
+      "src/experimental/Lists/DataList/actions/NavigateAction.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Lists/DataList/ItemContainer.tsx -> src/experimental/Lists/DataList/actions/OpenLinkAction.tsx",
+    "files": [
+      "src/experimental/Lists/DataList/ItemContainer.tsx",
+      "src/experimental/Lists/DataList/actions/OpenLinkAction.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/navigationFilters/types.ts -> src/experimental/OneDataCollection/navigationFilters/filterTypes/DateNavigation/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/navigationFilters/types.ts",
+      "src/experimental/OneDataCollection/navigationFilters/filterTypes/DateNavigation/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx -> src/experimental/OneDataCollection/Settings/SettingsProvider.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx",
+      "src/experimental/OneDataCollection/Settings/SettingsProvider.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/types.ts -> src/experimental/OneDataCollection/hooks/useDataCollectionSource/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/types.ts",
+      "src/experimental/OneDataCollection/hooks/useDataCollectionSource/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/amount/index.tsx -> src/components/value-display/types/amount/amount.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/amount/index.tsx",
+      "src/components/value-display/types/amount/amount.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/amount/index.tsx -> src/components/value-display/types/amount/amount.tsx -> src/components/value-display/types/number/index.tsx -> src/components/value-display/types/number/number.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/amount/index.tsx",
+      "src/components/value-display/types/amount/amount.tsx",
+      "src/components/value-display/types/number/index.tsx",
+      "src/components/value-display/types/number/number.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/avatarList/index.tsx -> src/components/value-display/types/avatarList/avatarList.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/avatarList/index.tsx",
+      "src/components/value-display/types/avatarList/avatarList.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/company/index.tsx -> src/components/value-display/types/company/company.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/company/index.tsx",
+      "src/components/value-display/types/company/company.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/country/index.tsx -> src/components/value-display/types/country/country.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/country/index.tsx",
+      "src/components/value-display/types/country/country.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/date/index.tsx -> src/components/value-display/types/date/date.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/date/index.tsx",
+      "src/components/value-display/types/date/date.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/folder/index.tsx -> src/components/value-display/types/folder/folder.tsx -> src/components/value-display/types/icon/index.tsx -> src/components/value-display/types/icon/icon.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/folder/index.tsx",
+      "src/components/value-display/types/folder/folder.tsx",
+      "src/components/value-display/types/icon/index.tsx",
+      "src/components/value-display/types/icon/icon.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/longText/index.tsx -> src/components/value-display/types/longText/longText.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/longText/index.tsx",
+      "src/components/value-display/types/longText/longText.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/percentage/index.tsx -> src/components/value-display/types/percentage/percentage.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/percentage/index.tsx",
+      "src/components/value-display/types/percentage/percentage.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/person/index.tsx -> src/components/value-display/types/person/person.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/person/index.tsx",
+      "src/components/value-display/types/person/person.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/progressBar/index.tsx -> src/components/value-display/types/progressBar/progressBar.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/progressBar/index.tsx",
+      "src/components/value-display/types/progressBar/progressBar.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/team/index.tsx -> src/components/value-display/types/team/team.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/team/index.tsx",
+      "src/components/value-display/types/team/team.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/value-display/renderers.tsx -> src/components/value-display/types/text/index.tsx -> src/components/value-display/types/text/text.tsx",
+    "files": [
+      "src/components/value-display/renderers.tsx",
+      "src/components/value-display/types/text/index.tsx",
+      "src/components/value-display/types/text/text.tsx"
+    ]
+  },
+  {
+    "cycle": "src/components/F0Card/components/CardMetadata.tsx -> src/components/F0Card/types.ts",
+    "files": [
+      "src/components/F0Card/components/CardMetadata.tsx",
+      "src/components/F0Card/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx -> src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Card/index.tsx",
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/List/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/List/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+    "files": [
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/useSticky.ts",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/useSticky.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useCalculateConectorHeight.ts -> src/experimental/OneTable/TableCell/utils/nested.ts",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useCalculateConectorHeight.ts",
+      "src/experimental/OneTable/TableCell/utils/nested.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts -> src/experimental/OneTable/index.tsx -> src/experimental/OneTable/Table/index.tsx -> src/experimental/OneTable/TableCell/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+      "src/experimental/OneTable/index.tsx",
+      "src/experimental/OneTable/Table/index.tsx",
+      "src/experimental/OneTable/TableCell/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/LoadMore/index.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/LoadMore/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/RowLoading/index.tsx",
+    "files": [
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/Row.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/RowLoading/index.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/OneDataCollection/property-render.ts -> src/experimental/OneDataCollection/visualizations/collection/types.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx -> src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts -> src/experimental/OneDataCollection/visualizations/collection/Table/types.ts",
+    "files": [
+      "src/experimental/OneDataCollection/property-render.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/types.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/index.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/settings/SettingsRenderer.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/components/TableSettings.tsx",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/hooks/useColums.ts",
+      "src/experimental/OneDataCollection/visualizations/collection/Table/types.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/RichText/CoreEditor/Extensions/AIBlock/index.tsx -> src/experimental/RichText/CoreEditor/Extensions/SlashCommand/index.tsx -> src/experimental/RichText/CoreEditor/Extensions/SlashCommand/AvailableCommands.tsx",
+    "files": [
+      "src/experimental/RichText/CoreEditor/Extensions/AIBlock/index.tsx",
+      "src/experimental/RichText/CoreEditor/Extensions/SlashCommand/index.tsx",
+      "src/experimental/RichText/CoreEditor/Extensions/SlashCommand/AvailableCommands.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/RichText/CoreEditor/index.tsx -> src/experimental/RichText/CoreEditor/Extensions/index.tsx -> src/experimental/RichText/CoreEditor/Extensions/AIBlock/index.tsx -> src/experimental/RichText/CoreEditor/Extensions/AIBlock/extensions.tsx",
+    "files": [
+      "src/experimental/RichText/CoreEditor/index.tsx",
+      "src/experimental/RichText/CoreEditor/Extensions/index.tsx",
+      "src/experimental/RichText/CoreEditor/Extensions/AIBlock/index.tsx",
+      "src/experimental/RichText/CoreEditor/Extensions/AIBlock/extensions.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/RichText/RichTextEditor/index.tsx -> src/experimental/RichText/RichTextEditor/utils/enhance.tsx",
+    "files": [
+      "src/experimental/RichText/RichTextEditor/index.tsx",
+      "src/experimental/RichText/RichTextEditor/utils/enhance.tsx"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Widgets/Content/ClockIn/ClockInGraph/index.tsx -> src/experimental/Widgets/Content/ClockIn/ClockInGraph/helpers.ts -> src/experimental/Widgets/Content/ClockIn/ClockInControls/helpers.ts",
+    "files": [
+      "src/experimental/Widgets/Content/ClockIn/ClockInGraph/index.tsx",
+      "src/experimental/Widgets/Content/ClockIn/ClockInGraph/helpers.ts",
+      "src/experimental/Widgets/Content/ClockIn/ClockInControls/helpers.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Widgets/Content/ClockIn/ClockInControls/index.tsx -> src/experimental/Widgets/Content/ClockIn/ClockInGraph/index.tsx -> src/experimental/Widgets/Content/ClockIn/ClockInGraph/helpers.ts -> src/experimental/Widgets/Content/ClockIn/ClockInControls/helpers.ts",
+    "files": [
+      "src/experimental/Widgets/Content/ClockIn/ClockInControls/index.tsx",
+      "src/experimental/Widgets/Content/ClockIn/ClockInGraph/index.tsx",
+      "src/experimental/Widgets/Content/ClockIn/ClockInGraph/helpers.ts",
+      "src/experimental/Widgets/Content/ClockIn/ClockInControls/helpers.ts"
+    ]
+  },
+  {
+    "cycle": "src/experimental/Widgets/Content/ClockIn/ClockInGraph/index.tsx -> src/experimental/Widgets/Content/ClockIn/ClockInGraph/helpers.ts",
+    "files": [
+      "src/experimental/Widgets/Content/ClockIn/ClockInGraph/index.tsx",
+      "src/experimental/Widgets/Content/ClockIn/ClockInGraph/helpers.ts"
+    ]
+  },
+  {
+    "cycle": "__TEST_CYCLE___/test1.ts -> __TEST_CYCLE___/test2.ts",
+    "files": ["__TEST_CYCLE___/test1.ts", "__TEST_CYCLE___/test2.ts"]
+  },
+  {
+    "cycle": "__TEST_CYCLE___/test1.ts -> __TEST_CYCLE___/test3.ts",
+    "files": ["__TEST_CYCLE___/test1.ts", "__TEST_CYCLE___/test3.ts"]
+  }
+]

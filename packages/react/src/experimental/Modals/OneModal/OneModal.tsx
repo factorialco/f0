@@ -26,7 +26,6 @@ export type OneModalProps = {
   asBottomSheetInMobile?: boolean
   /** the padding of internal content areas (header, content, footer) */
   contentPadding?: ContentPadding
-  position?: ModalPosition
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
     | ReactElement<
@@ -37,8 +36,17 @@ export type OneModalProps = {
         | ComponentProps<typeof OneModalHeader>
         | ComponentProps<typeof OneModalContent>
       >[]
-  width?: ModalWidth
-} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">> &
+  (
+    | {
+        position?: "center"
+        width?: ModalWidth
+      }
+    | {
+        position: Exclude<ModalPosition, "center">
+        width?: undefined
+      }
+  )
 
 const modalWrapperClassName = cva({
   variants: {
@@ -141,11 +149,19 @@ export const OneModal: FC<OneModalProps> = ({
     return "center"
   }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position])
 
+  // Forces the width to be "sm" for sidePosition variants
+  const localWidth = useMemo(() => {
+    if (variant === "sidePosition") {
+      return "sm"
+    }
+    return width
+  }, [variant, width])
+
   const contentClassName = useMemo(() => {
     return modalContentClassName({
       variant,
       position,
-      width,
+      width: localWidth,
     })
   }, [variant, position, width])
 

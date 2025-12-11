@@ -19,6 +19,7 @@ import PencilIcon from "@/icons/app/Pencil"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 import { OneModal } from "."
+import { modalPositions, modalWidths } from "./types"
 
 const meta: Meta<typeof OneModal> = {
   title: "Modals/OneModal",
@@ -30,6 +31,26 @@ const meta: Meta<typeof OneModal> = {
     },
   },
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    position: {
+      description: "The position of the modal",
+      control: {
+        type: "select",
+        options: modalPositions,
+      },
+    },
+    width: {
+      description: "The width of the modal. ⚠️ Only applies to center position",
+      control: {
+        type: "select",
+        options: modalWidths,
+      },
+      table: {
+        type: { summary: "sm | md | lg" },
+        defaultValue: { summary: "md" },
+      },
+    },
+  },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
       const [open, setOpen] = useState(isOpen)
