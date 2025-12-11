@@ -2,13 +2,34 @@
 /// <reference types="node" />
 
 import { consola } from "consola"
+import { colorize } from "consola/utils"
 import { execSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname, isAbsolute, join, relative } from "node:path"
+import { fileURLToPath } from "node:url"
 
 interface CycleDependency {
   cycle: string
   files: string[]
+}
+
+const BASELINE_PREFIX = "cycle-dependencies"
+
+const CURRENT_DIR = dirname(fileURLToPath(import.meta.url))
+
+const DEFAULT_ENTRY_POINTS = [
+  "src/f0.ts",
+  "src/experimental.ts",
+  "__TEST_CYCLE___/test1.ts",
+].map((entryPoint) => join(CURRENT_DIR, "..", entryPoint))
+
+/**
+ * Create baseline filename (absolute path) from a SHA string
+ */
+function getBaselineFilePath(sha: string): string {
+  const workspaceRoot = process.cwd()
+  const cacheDir = ".cache"
+  return join(workspaceRoot, cacheDir, `${BASELINE_PREFIX}-${sha}.json`)
 }
 
 /**
@@ -42,10 +63,16 @@ function parseDpdmOutput(output: string): CycleDependency[] {
 
 /**
  * Get modified TypeScript/TSX files in packages/react/
+ * @param stagedOnly - If true, only check staged files. If false, check both staged and unstaged files.
  */
-function getModifiedReactFiles(): string[] {
+function getModifiedReactFiles(stagedOnly: boolean): string[] {
   try {
-    const output = execSync("git diff --cached --name-only --diff-filter=ACM", {
+    // For pre-commit: check only staged files
+    // For CLI: check both staged and unstaged files
+    const gitCommand = stagedOnly
+      ? "git diff --cached --name-only --diff-filter=ACM"
+      : "git diff HEAD --name-only --diff-filter=ACM"
+    const output = execSync(gitCommand, {
       encoding: "utf-8",
     })
     const files = output
@@ -72,56 +99,59 @@ function getHeadSha(): string {
 }
 
 /**
- * Get previous commit SHA
- */
-function getPreviousCommitSha(): string {
-  try {
-    return execSync("git rev-parse HEAD~1", { encoding: "utf-8" }).trim()
-  } catch {
-    return ""
-  }
-}
-
-/**
  * Parse command line arguments
  */
-function parseArgs(): { previousCommit: boolean } {
+function parseArgs(): { preCommit: boolean } {
   const args = process.argv.slice(2)
   return {
-    previousCommit: args.includes("--previous-commit"),
+    preCommit: args.includes("--pre-commit"),
   }
 }
 
 /**
  * Run dpdm and return parsed cycles
  */
-function runDpdm(): CycleDependency[] {
+function runDpdm(entryPoints?: string[]): CycleDependency[] {
   const workspaceRoot = process.cwd()
-  const reactPackagePath = join(workspaceRoot, "packages/react")
+  const reactPackagePath = join(workspaceRoot)
 
-  try {
-    const output = execSync(
-      "npx dpdm --circular --no-tree --no-warning src/f0.ts 2>&1",
-      {
-        cwd: reactPackagePath,
-        encoding: "utf-8",
-      }
-    )
-    return parseDpdmOutput(output)
-  } catch (error: unknown) {
-    // dpdm exits with non-zero when cycles are found, but we still want the output
-    if (error && typeof error === "object") {
-      const execError = error as {
-        stdout?: string
-        stderr?: string
-        message?: string
-      }
-      const output =
-        execError.stdout || execError.stderr || execError.message || ""
-      return parseDpdmOutput(output)
+  entryPoints = (entryPoints || DEFAULT_ENTRY_POINTS).map((entryPoint) => {
+    if (isAbsolute(entryPoint)) {
+      return relative(workspaceRoot, entryPoint)
     }
-    return []
+    return entryPoint
+  })
+
+  const result: CycleDependency[] = []
+
+  for (const entryPoint of entryPoints) {
+    consola.info(`Running dpdm on ${colorize("yellow", entryPoint)}`)
+    try {
+      const output = execSync(
+        `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
+        {
+          cwd: reactPackagePath,
+          encoding: "utf-8",
+        }
+      )
+      result.push(...parseDpdmOutput(output))
+      console.log("result", result)
+      console.log("entryPoint", entryPoint)
+    } catch (error: unknown) {
+      // dpdm exits with non-zero when cycles are found, but we still want the output
+      if (error && typeof error === "object") {
+        const execError = error as {
+          stdout?: string
+          stderr?: string
+          message?: string
+        }
+        const output =
+          execError.stdout || execError.stderr || execError.message || ""
+        result.push(...parseDpdmOutput(output))
+      }
+    }
   }
+  return result
 }
 
 /**
@@ -195,10 +225,12 @@ function cleanupOldCache(cacheDir: string): void {
 
 function main(): void {
   // Parse command line arguments
-  const { previousCommit } = parseArgs()
+  const { preCommit } = parseArgs()
 
   // Check if React package files were modified
-  const modifiedFiles = getModifiedReactFiles()
+  // For pre-commit: check only staged files
+  // For CLI: check both staged and unstaged files
+  const modifiedFiles = getModifiedReactFiles(preCommit)
   if (modifiedFiles.length === 0) {
     consola.info(
       "No React package files modified, skipping cycle dependency check"
@@ -206,77 +238,35 @@ function main(): void {
     process.exit(0)
   }
 
-  const workspaceRoot = process.cwd()
   const cacheDir = ".cache"
-  let baselineSha: string
-  let baselineFile: string
+
+  // Always use HEAD as baseline (latest commit in current branch)
+  const baselineSha = getHeadSha()
+  if (!baselineSha) {
+    consola.error("Could not find HEAD commit")
+    process.exit(1)
+  }
+  const baselineFile = getBaselineFilePath(baselineSha)
+
+  consola.log(baselineFile)
+
+  // Clean up old cache files
+  cleanupOldCache(cacheDir)
+
+  // Load or create baseline
   let baseline: CycleDependency[] = []
-
-  if (previousCommit) {
-    // Use previous commit as baseline
-    baselineSha = getPreviousCommitSha()
-    if (!baselineSha) {
-      consola.error("Could not find previous commit")
-      process.exit(1)
-    }
-    baselineFile = join(cacheDir, `cycle-dependencies-${baselineSha}.json`)
-
-    // Clean up old cache files
-    cleanupOldCache(cacheDir)
-
-    // Load or create baseline from previous commit
-    if (existsSync(baselineFile)) {
-      baseline = loadBaseline(baselineFile)
-    } else {
-      consola.info(
-        `No baseline found for previous commit (${baselineSha}), creating baseline...`
-      )
-      // Checkout previous commit temporarily
-      const currentHeadSha = getHeadSha()
-      try {
-        execSync(`git checkout ${baselineSha}`, {
-          cwd: workspaceRoot,
-          encoding: "utf-8",
-        })
-        baseline = runDpdm()
-        saveBaseline(baselineFile, baseline)
-        // Checkout back to original HEAD
-        execSync(`git checkout ${currentHeadSha}`, {
-          cwd: workspaceRoot,
-          encoding: "utf-8",
-        })
-      } catch {
-        // Try to checkout back even if there was an error
-        try {
-          execSync(`git checkout ${currentHeadSha}`, {
-            cwd: workspaceRoot,
-            encoding: "utf-8",
-          })
-        } catch {
-          // Ignore checkout errors
-        }
-        consola.error("Failed to checkout previous commit")
-        process.exit(1)
-      }
-    }
+  if (existsSync(baselineFile)) {
+    consola.info(
+      `Loading baseline from cache ${colorize("yellow", baselineFile)}`
+    )
+    baseline = loadBaseline(baselineFile)
   } else {
-    // Use HEAD as baseline (original behavior)
-    baselineSha = getHeadSha()
-    baselineFile = join(cacheDir, `cycle-dependencies-${baselineSha}.json`)
+    consola.info(
+      `No baseline found for HEAD (${colorize("yellow", baselineSha)}), creating baseline...`
+    )
+    baseline = runDpdm()
 
-    // Clean up old cache files
-    cleanupOldCache(cacheDir)
-
-    // Load or create baseline
-    if (existsSync(baselineFile)) {
-      baseline = loadBaseline(baselineFile)
-    } else {
-      consola.info(
-        `No baseline found for HEAD (${baselineSha}), creating baseline...`
-      )
-      baseline = runDpdm()
-      saveBaseline(baselineFile, baseline)
-    }
+    saveBaseline(baselineFile, baseline)
   }
 
   // Run dpdm on current state
@@ -308,6 +298,13 @@ function main(): void {
     process.exit(0)
   } else {
     consola.success("No new circular dependencies detected")
+    consola.log(baseline.length, current.length)
+    if (current.length > 0) {
+      consola.warn(
+        `There are still ${colorize("yellow", current.length.toString())} circular dependencies in the codebase...`
+      )
+      process.exit(0)
+    }
     process.exit(0)
   }
 }
