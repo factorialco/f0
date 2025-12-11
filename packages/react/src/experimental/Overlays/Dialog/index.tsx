@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/ui/dialog"
+} from "@/ui/Dialog/dialog"
 import { forwardRef, useCallback, useState } from "react"
 
 type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
