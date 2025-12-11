@@ -38,4 +38,4 @@ jobs:
         run: |
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
             "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
-            "pnpx wait-on tcp:6006 && pnpm --filter @factorialco/f0-react test-storybook"
+            "pnpx wait-on tcp:6006 && pnpm --filter @factorialco/f0-react test-storybook --silent"

@@ -1,24 +1,14 @@
-/// <reference types="vitest/config" />
-/// <reference types="vitest" />
-import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
 import react from "@vitejs/plugin-react"
 import { consola } from "consola"
 import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import { copyFileSync, existsSync } from "node:fs"
-import { fileURLToPath } from "node:url"
 import path, { resolve } from "path"
 import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
 import { buildSyncPlugin } from "./vite/build-sync.plugin"
-const dirname =
-  typeof __dirname !== "undefined"
-    ? __dirname
-    : path.dirname(fileURLToPath(import.meta.url))
-
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 
 dotenv.config({
   path: [".env.local", ".env"],
@@ -94,15 +84,6 @@ const alias = {
 // Check if we're building for Storybook to preserve data-testid attributes
 const isStorybookBuild = process.env.STORYBOOK_BUILD === "true"
 
-// Check if Storybook tests are being explicitly requested
-// This allows Storybook tests to run only when explicitly requested via --project=storybook
-const isRunningStorybookTests =
-  process.env.RUN_STORYBOOK_TESTS === "true" ||
-  process.argv.includes("--project=storybook") ||
-  process.argv.some(
-    (arg) => arg.startsWith("--project") && arg.includes("storybook")
-  )
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -156,57 +137,5 @@ export default defineConfig({
         },
       },
     },
-  },
-  test: {
-    name: "unit",
-    environment: "jsdom",
-    setupFiles: ["./vite/vitest.setup.ts"],
-    alias: {
-      ...alias,
-    },
-    typecheck: {
-      tsconfig: "./tsconfig.test.json",
-    },
-    coverage: {
-      // you can include other reporters, but 'json-summary' is required, json is recommended
-      reporter: ["text", "json-summary", "json", "html"],
-      // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
-      reportOnFailure: true,
-    },
-    // Only include Storybook workspace project when explicitly requested
-    // This ensures that by default only unit tests run
-    ...(isRunningStorybookTests
-      ? {
-          workspace: [
-            {
-              extends: true,
-              plugins: [
-                // The plugin will run tests for the stories defined in your Storybook config
-                // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-                storybookTest({
-                  configDir: path.join(dirname, ".storybook"),
-                }),
-              ],
-              test: {
-                name: "storybook",
-                testTimeout: 30000, // 30 seconds timeout per test
-                hookTimeout: 60000, // 60 seconds timeout for hooks
-                silent: true, // Suppress console output
-                browser: {
-                  enabled: true,
-                  headless: true,
-                  provider: "playwright",
-                  instances: [
-                    {
-                      browser: "chromium",
-                    },
-                  ],
-                },
-                setupFiles: [".storybook/vitest.setup.ts"],
-              },
-            },
-          ],
-        }
-      : {}),
   },
 })
