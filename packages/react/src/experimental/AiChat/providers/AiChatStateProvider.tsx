@@ -1,5 +1,6 @@
 "use client"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage } from "@copilotkit/shared"
 import {
   createContext,
@@ -20,6 +21,8 @@ export interface AiChatState {
   agent?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  placeholders?: string[]
+  setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -38,6 +41,8 @@ type AiChatProviderReturnValue = {
   shouldPlayEntranceAnimation: boolean
   setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>
   tmp_setAgent: (agent?: string) => void
+  placeholders: string[]
+  setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>
   /**
    * Set the amount of minutes after which the chat will be cleared automatically
    * Set `null` to disable auto-clearing
@@ -97,6 +102,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
   >(initialWelcomeScreenSuggestions)
+  const i18n = useI18n()
+  const [placeholders, setPlaceholders] = useState<string[]>([
+    i18n.t("ai.inputPlaceholder"),
+  ])
 
   const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
     DEFAULT_MINUTES_TO_RESET
@@ -157,6 +166,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         onThumbsDown,
         clear,
         setClearFunction,
+        placeholders,
+        setPlaceholders,
       }}
     >
       {children}
@@ -185,6 +196,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,
+      placeholders: [],
+      setPlaceholders: noopFn,
       welcomeScreenSuggestions: [],
       setWelcomeScreenSuggestions: noopFn,
       onThumbsUp: noopFn,

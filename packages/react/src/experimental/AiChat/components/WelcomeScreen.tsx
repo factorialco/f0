@@ -4,6 +4,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
+import { useMemo } from "react"
 import OneIcon from "../OneIcon"
 
 export type WelcomeScreenSuggestion = {
@@ -33,7 +34,12 @@ export const WelcomeScreen = ({
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
   const { sendMessage } = useCopilotChatInternal()
-  const pickedSuggestions = pickRandomSuggestions(suggestions)
+
+  const pickedSuggestions = useMemo(
+    () => pickRandomSuggestions(suggestions),
+    [suggestions]
+  )
+
   return (
     <AnimatePresence mode="popLayout">
       <motion.div

@@ -109,3 +109,19 @@ export const MultiSelect: Story = {
     ],
   },
 }
+
+export const WithDuplicateOptions: Story = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
+  args: {
+    id: "question-5",
+    title: "What are your primary concerns?",
+    description: "Select one or more options",
+    type: "select",
+    value: null,
+    options: [
+      { value: "communication", label: "Communication 1" },
+      { value: "communication", label: "Communication 2" },
+    ],
+  },
+}
