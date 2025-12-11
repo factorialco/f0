@@ -48,7 +48,8 @@
     "vitest": "vitest",
     "vitest:ui": "vitest --ui",
     "vitest:watch": "vitest dev",
-    "vitest:ci": "pnpm run vitest --reporter=dot"
+    "vitest:ci": "pnpm run vitest --reporter=dot",
+    "cycle-deps:delta": "tsx --tsconfig tsconfig.node.json .scripts/check-cycle-dependencies.ts"
   },
   "peerDependencies": {
     "@copilotkit/react-core": "^1.10.6",
