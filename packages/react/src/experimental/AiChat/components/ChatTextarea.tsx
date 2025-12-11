@@ -139,12 +139,16 @@ const TypewriterPlaceholder = ({
   )
 }
 
+type ChatTextareaProps = InputProps & {
+  submitLabel?: string
+}
+
 export const ChatTextarea = ({
   submitLabel,
   inProgress,
   onSend,
   onStop,
-}: InputProps) => {
+}: ChatTextareaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
