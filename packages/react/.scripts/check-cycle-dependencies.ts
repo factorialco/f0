@@ -149,6 +149,10 @@ function runDpdmOnCommit(
   const tempReactPath = join(tempDir, reactPackageRelativePath)
 
   try {
+    // Validate commitSha to prevent command injection
+    if (!/^[0-9a-f]{7,40}$/i.test(commitSha)) {
+      throw new Error(`Invalid commit SHA: ${commitSha}`);
+    }
     // Extract the commit to a temporary directory using git archive
     mkdirSync(tempDir, { recursive: true })
     execSync(`git archive ${commitSha} | tar -x -C ${tempDir}`, {
