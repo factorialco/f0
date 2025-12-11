@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.305.0](https://github.com/factorialco/f0/compare/f0-react-v1.304.1...f0-react-v1.305.0) (2025-12-11)
+
+
+### Features
+
+* **modal:** sizes ([#3104](https://github.com/factorialco/f0/issues/3104)) ([48c9b3d](https://github.com/factorialco/f0/commit/48c9b3d8c25bbcac5206ea3fa40d50e0e333b472))
+
 ## [1.304.1](https://github.com/factorialco/f0/compare/f0-react-v1.304.0...f0-react-v1.304.1) (2025-12-11)
 
 
