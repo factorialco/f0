@@ -475,7 +475,9 @@ function main(): void {
     }
     consola.log("")
     consola.error(
-      "Please resolve these circular dependencies before committing."
+      "Please resolve these circular dependencies before committing.\n" +
+      "For guidance on resolving circular dependencies, see: https://nodejs.org/api/modules.html#cycles\n" +
+      "Or refer to the project's documentation on dependency management."
     )
     process.exit(1)
   } else if (cyclesDecreased) {
