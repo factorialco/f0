@@ -1,7 +1,7 @@
 "use client"
 
 import { useI18n } from "@/lib/providers/i18n"
-import { type AIMessage } from "@copilotkit/shared"
+import { type AIMessage, type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
   FC,
@@ -80,6 +80,16 @@ type AiChatProviderReturnValue = {
    * @internal
    */
   setClearFunction: (clearFn: (() => void) | null) => void
+  /**
+   * Send a message to the chat
+   * @param message - The message content as a string, or a full Message object
+   */
+  sendMessage: (message: string | Message) => void
+  /**
+   * Internal function to set the sendMessage function from CopilotKit
+   * @internal
+   */
+  setSendMessageFunction: (sendFn: ((message: Message) => void) | null) => void
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -116,6 +126,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
+  // Store the sendMessage function from CopilotKit
+  const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
+    null
+  )
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -125,9 +139,29 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     clearFunctionRef.current = clearFn
   }
 
+  const setSendMessageFunction = (
+    sendFn: ((message: Message) => void) | null
+  ) => {
+    sendMessageFunctionRef.current = sendFn
+  }
+
   const clear = () => {
     if (clearFunctionRef.current) {
       clearFunctionRef.current()
+    }
+  }
+
+  const sendMessage = (message: string | Message) => {
+    if (sendMessageFunctionRef.current) {
+      if (typeof message === "string") {
+        sendMessageFunctionRef.current({
+          id: randomId(),
+          role: "user",
+          content: message,
+        })
+      } else {
+        sendMessageFunctionRef.current(message)
+      }
     }
   }
 
@@ -168,6 +202,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setClearFunction,
         placeholders,
         setPlaceholders,
+        sendMessage,
+        setSendMessageFunction,
       }}
     >
       {children}
@@ -202,6 +238,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setWelcomeScreenSuggestions: noopFn,
       onThumbsUp: noopFn,
       onThumbsDown: noopFn,
+      sendMessage: noopFn,
+      setSendMessageFunction: noopFn,
     }
   }
 
