@@ -152,17 +152,25 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }
 
   const sendMessage = (message: string | Message) => {
-    if (sendMessageFunctionRef.current) {
-      if (typeof message === "string") {
-        sendMessageFunctionRef.current({
-          id: randomId(),
-          role: "user",
-          content: message,
-        })
-      } else {
-        sendMessageFunctionRef.current(message)
-      }
+    if (!sendMessageFunctionRef.current) {
+      return
     }
+
+    // Ensure chat is open when sending a message
+    if (!open) {
+      setOpen(true)
+    }
+
+    const messageToSend: Message =
+      typeof message === "string"
+        ? {
+            id: randomId(),
+            role: "user",
+            content: message,
+          }
+        : message
+
+    sendMessageFunctionRef.current?.(messageToSend)
   }
 
   useEffect(() => {

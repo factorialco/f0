@@ -112,7 +112,9 @@ const SendMessageFunctionInjector = () => {
   const { sendMessage } = useCopilotChatInternal()
 
   useEffect(() => {
-    setSendMessageFunction(sendMessage)
+    if (sendMessage) {
+      setSendMessageFunction(sendMessage)
+    }
     return () => {
       setSendMessageFunction(null)
     }
