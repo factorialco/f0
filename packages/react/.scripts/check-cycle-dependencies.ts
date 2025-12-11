@@ -23,6 +23,8 @@ const DEFAULT_ENTRY_POINTS = [
   "__TEST_CYCLE___/test1.ts",
 ].map((entryPoint) => join(CURRENT_DIR, "..", entryPoint))
 
+const MAX_CACHE_DAYS = 30
+
 const CACHE_DIR = join(CURRENT_DIR, "..", ".cache")
 
 /**
@@ -135,8 +137,6 @@ function runDpdm(entryPoints?: string[]): CycleDependency[] {
         }
       )
       result.push(...parseDpdmOutput(output))
-      console.log("result", result)
-      console.log("entryPoint", entryPoint)
     } catch (error: unknown) {
       // dpdm exits with non-zero when cycles are found, but we still want the output
       if (error && typeof error === "object") {
@@ -213,9 +213,12 @@ function findNewCycles(
  * Clean up old cache files (older than 30 days)
  */
 function cleanupOldCache(cacheDir: string): void {
+  consola.info(
+    `Cleaning up old cache files (older than ${MAX_CACHE_DAYS} days)`
+  )
   try {
     execSync(
-      `find "${cacheDir}" -name "cycle-dependencies-*.json" -type f -mtime +30 -delete 2>/dev/null || true`,
+      `find "${cacheDir}" -name "cycle-dependencies-*.json" -type f -mtime +${MAX_CACHE_DAYS} -delete 2>/dev/null || true`,
       { encoding: "utf-8" }
     )
   } catch {
@@ -245,8 +248,6 @@ function main(): void {
     process.exit(1)
   }
   const baselineFile = getBaselineFilePath(baselineSha)
-
-  consola.log(baselineFile)
 
   // Clean up old cache files
   cleanupOldCache(CACHE_DIR)
@@ -282,7 +283,7 @@ function main(): void {
     consola.error("New circular dependencies detected:")
     consola.log("")
     for (const cycle of newCycles) {
-      consola.error(`  ${cycle.cycle}`)
+      consola.log(`  ${cycle.cycle}`)
     }
     consola.log("")
     consola.error(
@@ -296,7 +297,6 @@ function main(): void {
     process.exit(0)
   } else {
     consola.success("No new circular dependencies detected")
-    consola.log(baseline.length, current.length)
     if (current.length > 0) {
       consola.warn(
         `There are still ${colorize("yellow", current.length.toString())} circular dependencies in the codebase...`
