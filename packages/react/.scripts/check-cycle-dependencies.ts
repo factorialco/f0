@@ -1,6 +1,126 @@
 #!/usr/bin/env node
 /// <reference types="node" />
 
+/**
+ * Cycle Dependency Checker
+ *
+ * This script detects circular dependencies in the React package and compares them
+ * against a baseline to identify newly introduced cycles. It uses a caching mechanism
+ * to store baseline results per commit SHA, enabling fast comparisons without
+ * re-analyzing unchanged code.
+ *
+ * ## Purpose
+ *
+ * Circular dependencies can cause runtime errors, unpredictable behavior, and make
+ * code harder to maintain. This tool helps prevent new circular dependencies from
+ * being introduced by comparing the current state against a known baseline.
+ *
+ * ## How It Works
+ *
+ * 1. **Baseline Comparison**: The script compares the current codebase against a
+ *    baseline (typically the HEAD commit). The baseline contains a list of known
+ *    circular dependencies that were present at that commit.
+ *
+ * 2. **Caching Mechanism**: Baseline results are cached in `.cache/cycle-dependencies-{SHA}.json`
+ *    files, where `{SHA}` is the git commit hash. This allows the script to:
+ *    - Avoid re-running expensive dependency analysis on unchanged commits
+ *    - Quickly compare against any historical commit
+ *    - Automatically clean up cache files older than 30 days
+ *
+ * 3. **Cycle Detection**: Uses `dpdm` (Dependency Mapper) to analyze entry points
+ *    (`src/f0.ts` and `src/experimental.ts`) and detect circular import chains.
+ *
+ * 4. **Comparison Logic**: Only cycles that exist in the current state but NOT in
+ *    the baseline are flagged as "new cycles". This means:
+ *    - Existing cycles are tolerated (they're part of the baseline)
+ *    - New cycles trigger a failure
+ *    - Removing cycles is celebrated but doesn't require baseline updates
+ *
+ * ## Usage Modes
+ *
+ * ### Pre-commit Hook (Default)
+ * ```bash
+ * ./check-cycle-dependencies.ts --pre-commit
+ * ```
+ * - Only checks if React package files were modified
+ * - Compares against HEAD commit baseline
+ * - Exits early if no relevant files changed
+ *
+ * ### CI Mode
+ * ```bash
+ * ./check-cycle-dependencies.ts --ci
+ * ```
+ * - Runs full analysis regardless of file changes
+ * - Suppresses verbose output
+ * - Always compares against HEAD baseline
+ *
+ * ### Compare Against Specific Commit
+ * ```bash
+ * ./check-cycle-dependencies.ts --compare-commit <commit-sha>
+ * ```
+ * - Compares current state against a specific commit
+ * - Useful for validating changes against a known good state
+ * - Automatically creates baseline cache if missing
+ *
+ * ### JSON Output
+ * ```bash
+ * ./check-cycle-dependencies.ts --json
+ * ```
+ * - Outputs structured JSON for programmatic consumption
+ * - Includes baseline, current, and new cycles data
+ * - Exit code: 0 if no new cycles, 1 if new cycles detected
+ *
+ * ## What Developers Should Do
+ *
+ * ### When New Cycles Are Detected
+ *
+ * 1. **Review the cycle**: The script will show the circular dependency path
+ *    (e.g., `A.ts -> B.ts -> C.ts -> A.ts`)
+ *
+ * 2. **Break the cycle**: Refactor the code to eliminate the circular dependency:
+ *    - Extract shared code to a separate module
+ *    - Use dependency injection
+ *    - Move dependencies to a common parent module
+ *    - Consider using barrel exports more carefully
+ *
+ * 3. **Re-run the check**: After fixing, run the script again to verify the cycle
+ *    is resolved
+ *
+ * 4. **Commit the fix**: Once no new cycles are detected, commit your changes
+ *
+ * ### When Cycles Are Removed
+ *
+ * The script will congratulate you! The baseline will automatically update on the
+ * next commit, so you don't need to manually update anything.
+ *
+ * ### Baseline Management
+ *
+ * - **Automatic**: Baselines are created automatically when analyzing a commit
+ * - **Cache Location**: `.cache/cycle-dependencies-{SHA}.json` in the React package
+ * - **Cleanup**: Files older than 30 days are automatically cleaned up
+ * - **Manual Cleanup**: Delete `.cache/cycle-dependencies-*.json` files if needed
+ *
+ * ## Exit Codes
+ *
+ * - `0`: Success - No new cycles detected (or cycles were reduced)
+ * - `1`: Failure - New cycles detected (or error occurred)
+ *
+ * ## Performance Considerations
+ *
+ * - The script skips analysis if no React package files were modified (unless `--ci` is used)
+ * - Baseline caching significantly speeds up repeated checks on the same commit
+ * - Cache files are small JSON files, so disk usage is minimal
+ * - Old cache files (>30 days) are automatically cleaned up
+ *
+ * ## Technical Details
+ *
+ * - Uses `dpdm` for dependency analysis
+ * - Entry points: `src/f0.ts` and `src/experimental.ts`
+ * - Only analyzes `.ts` and `.tsx` files in `packages/react/`
+ * - Baseline format: JSON array of `CycleDependency` objects
+ * - Supports migration from old plain-text baseline format
+ */
+
 import { consola } from "consola"
 import { colorize } from "consola/utils"
 import { execSync } from "node:child_process"
