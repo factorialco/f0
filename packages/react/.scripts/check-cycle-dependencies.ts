@@ -114,12 +114,13 @@ function parseArgs(): { preCommit: boolean } {
  * Run dpdm and return parsed cycles
  */
 function runDpdm(entryPoints?: string[]): CycleDependency[] {
-  const workspaceRoot = process.cwd()
-  const reactPackagePath = join(workspaceRoot)
+  // reactPackagePath should be the packages/react directory, not the workspace root
+  const reactPackagePath = join(CURRENT_DIR, "..")
 
   entryPoints = (entryPoints || DEFAULT_ENTRY_POINTS).map((entryPoint) => {
     if (isAbsolute(entryPoint)) {
-      return relative(workspaceRoot, entryPoint)
+      // Convert absolute paths to be relative to reactPackagePath (packages/react)
+      return relative(reactPackagePath, entryPoint)
     }
     return entryPoint
   })
@@ -139,14 +140,30 @@ function runDpdm(entryPoints?: string[]): CycleDependency[] {
       result.push(...parseDpdmOutput(output))
     } catch (error: unknown) {
       // dpdm exits with non-zero when cycles are found, but we still want the output
+      // In Node.js execSync, stdout is available in error.stdout when encoding is set
+      let output = ""
       if (error && typeof error === "object") {
         const execError = error as {
-          stdout?: string
-          stderr?: string
+          stdout?: string | Buffer
+          stderr?: string | Buffer
           message?: string
         }
-        const output =
-          execError.stdout || execError.stderr || execError.message || ""
+        // Handle both string and Buffer cases
+        if (execError.stdout) {
+          output =
+            typeof execError.stdout === "string"
+              ? execError.stdout
+              : execError.stdout.toString("utf-8")
+        } else if (execError.stderr) {
+          output =
+            typeof execError.stderr === "string"
+              ? execError.stderr
+              : execError.stderr.toString("utf-8")
+        } else if (execError.message) {
+          output = execError.message
+        }
+      }
+      if (output) {
         result.push(...parseDpdmOutput(output))
       }
     }
