@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.42.1](https://github.com/factorialco/f0/compare/f0-core-v1.42.0...f0-core-v1.42.1) (2025-12-11)
+
+
+### Bug Fixes
+
+* **InputField:** change placeholder color ([#3086](https://github.com/factorialco/f0/issues/3086)) ([f1be155](https://github.com/factorialco/f0/commit/f1be15519fb34cd7461e632b16e738e86ad0dac5))
+
 ## [1.42.0](https://github.com/factorialco/f0/compare/f0-core-v1.41.0...f0-core-v1.42.0) (2025-12-03)
 
 
