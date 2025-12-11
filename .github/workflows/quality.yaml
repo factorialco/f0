@@ -93,56 +93,75 @@ jobs:
         run: pnpm install
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
-      - name: Detect cycle dependencies
-        id: detect-cycles
-        uses: ./.github/actions/cycle-dependencies
-        with:
-          package-path: packages/react
-          entry-point: src/f0.ts
-      - name: Restore baseline from cache
-        id: cache-baseline
-        uses: actions/cache/restore@v4
-        with:
-          path: baseline_cycles.txt
-          key: cycle-deps-baseline-react-${{ hashFiles('packages/react/package.json') }}
-      - name: Compare with baseline and prepare comment
-        id: compare
+      - name: Get latest commit from main
+        id: main-commit
         run: |
-          BASELINE_FILE="baseline_cycles.txt"
-          CURRENT_FILE="current_cycles.txt"
+          git fetch origin main:main || true
+          MAIN_COMMIT=$(git rev-parse origin/main 2>/dev/null || git rev-parse main)
+          echo "commit=$MAIN_COMMIT" >> $GITHUB_OUTPUT
+          echo "Main branch commit: $MAIN_COMMIT"
+      - name: Detect cycle dependencies and compare
+        id: compare
+        continue-on-error: true
+        run: |
+          cd packages/react
 
-          if [ ! -f "$BASELINE_FILE" ]; then
-            echo "No baseline found, treating all cycles as new"
-            if [ -s "$CURRENT_FILE" ]; then
-              echo "new_cycles_found=true" >> $GITHUB_OUTPUT
-              echo "new_cycles<<EOF" >> $GITHUB_OUTPUT
-              cat "$CURRENT_FILE" >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
-            else
-              echo "new_cycles_found=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            # Find cycles that are in current but not in baseline
-            NEW_CYCLES=$(comm -13 <(sort "$BASELINE_FILE") <(sort "$CURRENT_FILE") 2>/dev/null || cat "$CURRENT_FILE")
+          # Run the script and capture JSON output
+          # The script may exit with 1 if new cycles are found, so we use continue-on-error
+          SCRIPT_OUTPUT=$(pnpm exec tsx .scripts/check-cycle-dependencies.ts --ci --compare-commit ${{ steps.main-commit.outputs.commit }} 2>&1 || true)
+
+          # Export the output as an environment variable for the Node.js script
+          export SCRIPT_OUTPUT
+
+          # Parse JSON and set outputs
+          node << 'NODE_SCRIPT'
+          const output = process.env.SCRIPT_OUTPUT || '';
+
+          // Extract JSON from output (it should be the last line or a standalone JSON block)
+          const lines = output.trim().split('\n');
+          let jsonLine = '';
+
+          // Find the JSON line (starts with {)
+          for (let i = lines.length - 1; i >= 0; i--) {
+            const line = lines[i].trim();
+            if (line.startsWith('{')) {
+              jsonLine = line;
+              break;
+            }
+          }
+
+          // If no JSON found, try parsing the entire output
+          if (!jsonLine) {
+            jsonLine = output.trim();
+          }
+
+          if (!jsonLine) {
+            console.log('new_cycles_found=false');
+            process.exit(0);
+          }
+
+          try {
+            const data = JSON.parse(jsonLine);
+            const hasNewCycles = data.hasNewCycles === true;
             
-            if [ -n "$NEW_CYCLES" ] && [ -s "$CURRENT_FILE" ]; then
-              echo "new_cycles_found=true" >> $GITHUB_OUTPUT
-              echo "new_cycles<<EOF" >> $GITHUB_OUTPUT
-              echo "$NEW_CYCLES" >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
-            else
-              echo "new_cycles_found=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-          # Always save current as new baseline
-          cp "$CURRENT_FILE" "$BASELINE_FILE"
-      - name: Save baseline to cache
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: baseline_cycles.txt
-          key: cycle-deps-baseline-react-${{ hashFiles('packages/react/package.json') }}
+            console.log(`new_cycles_found=${hasNewCycles}`);
+            
+            if (hasNewCycles && data.newCycles && data.newCycles.cyclesList && data.newCycles.cyclesList.length > 0) {
+              const newCyclesText = data.newCycles.cyclesList
+                .map((cycle) => `  ${cycle.cycle}`)
+                .join('\n');
+              
+              console.log('new_cycles<<CYCLES_EOF');
+              console.log(newCyclesText);
+              console.log('CYCLES_EOF');
+            }
+          } catch (error) {
+            console.error('Error parsing JSON:', error.message);
+            console.error('Attempted to parse:', jsonLine.substring(0, 200));
+            console.log('new_cycles_found=false');
+            process.exit(1);
+          }
+          NODE_SCRIPT
       - name: Comment on PR with new cycles
         uses: ./.github/actions/add-or-update-pr-comment
         with:

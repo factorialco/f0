@@ -24,11 +24,9 @@ const BASELINE_PREFIX = "cycle-dependencies"
 
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url))
 
-const DEFAULT_ENTRY_POINTS = [
-  "src/f0.ts",
-  "src/experimental.ts",
-  "__TEST_CYCLE___/test1.ts",
-].map((entryPoint) => join(CURRENT_DIR, "..", entryPoint))
+const DEFAULT_ENTRY_POINTS = ["src/f0.ts", "src/experimental.ts"].map(
+  (entryPoint) => join(CURRENT_DIR, "..", entryPoint)
+)
 
 const MAX_CACHE_DAYS = 30
 
@@ -110,10 +108,24 @@ function getHeadSha(): string {
 /**
  * Parse command line arguments
  */
-function parseArgs(): { preCommit: boolean } {
+function parseArgs(): {
+  preCommit: boolean
+  compareCommit?: string
+  json: boolean
+  ci: boolean
+} {
   const args = process.argv.slice(2)
+  const compareCommitIndex = args.indexOf("--compare-commit")
+  const compareCommit =
+    compareCommitIndex !== -1 && args[compareCommitIndex + 1]
+      ? args[compareCommitIndex + 1]
+      : undefined
+
   return {
     preCommit: args.includes("--pre-commit"),
+    compareCommit,
+    json: args.includes("--json"),
+    ci: args.includes("--ci"),
   }
 }
 
@@ -122,7 +134,8 @@ function parseArgs(): { preCommit: boolean } {
  */
 function runDpdmOnCommit(
   commitSha: string,
-  entryPoints?: string[]
+  entryPoints?: string[],
+  silent = false
 ): CycleDependency[] {
   const workspaceRoot = process.cwd()
   const reactPackagePath = join(CURRENT_DIR, "..")
@@ -156,9 +169,11 @@ function runDpdmOnCommit(
     const result: CycleDependency[] = []
 
     for (const entryPoint of entryPoints) {
-      consola.info(
-        `Checking cycle dependencies in ${colorize("yellow", entryPoint)} (from commit ${commitSha.slice(0, 7)})`
-      )
+      if (!silent) {
+        consola.info(
+          `Checking cycle dependencies in ${colorize("yellow", entryPoint)} (from commit ${commitSha.slice(0, 7)})`
+        )
+      }
       try {
         const output = execSync(
           `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
@@ -211,7 +226,7 @@ function runDpdmOnCommit(
 /**
  * Run dpdm and return parsed cycles
  */
-function runDpdm(entryPoints?: string[]): CycleDependency[] {
+function runDpdm(entryPoints?: string[], silent = false): CycleDependency[] {
   // reactPackagePath should be the packages/react directory, not the workspace root
   const reactPackagePath = join(CURRENT_DIR, "..")
 
@@ -226,9 +241,11 @@ function runDpdm(entryPoints?: string[]): CycleDependency[] {
   const result: CycleDependency[] = []
 
   for (const entryPoint of entryPoints) {
-    consola.info(
-      `Checking cycle dependencies in ${colorize("yellow", entryPoint)}`
-    )
+    if (!silent) {
+      consola.info(
+        `Checking cycle dependencies in ${colorize("yellow", entryPoint)}`
+      )
+    }
     try {
       const output = execSync(
         `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
@@ -345,49 +362,74 @@ function cleanupOldCache(cacheDir: string): void {
 
 function main(): void {
   // Parse command line arguments
-  const { preCommit } = parseArgs()
+  const { preCommit, compareCommit, json, ci } = parseArgs()
 
-  // Check if React package files were modified
-  // For pre-commit: check only staged files
-  // For CLI: check both staged and unstaged files
-  const modifiedFiles = getModifiedReactFiles(preCommit)
-  if (modifiedFiles.length === 0) {
-    consola.info(
-      "No React package files modified, skipping cycle dependency check"
-    )
-    process.exit(0)
+  // In CI mode or when compareCommit is provided, skip file modification check
+  if (!ci && !compareCommit) {
+    // Check if React package files were modified
+    // For pre-commit: check only staged files
+    // For CLI: check both staged and unstaged files
+    const modifiedFiles = getModifiedReactFiles(preCommit)
+    if (modifiedFiles.length === 0) {
+      consola.info(
+        "No React package files modified, skipping cycle dependency check"
+      )
+      process.exit(0)
+    }
   }
 
-  // Always use HEAD as baseline (latest commit in current branch)
-  const baselineSha = getHeadSha()
-  if (!baselineSha) {
-    consola.error("Could not find HEAD commit")
-    process.exit(1)
+  // Determine baseline commit
+  let baselineSha: string
+  if (compareCommit) {
+    baselineSha = compareCommit
+  } else {
+    // Always use HEAD as baseline (latest commit in current branch)
+    baselineSha = getHeadSha()
+    if (!baselineSha) {
+      if (ci || json) {
+        console.error(
+          JSON.stringify({
+            error: "Could not find HEAD commit",
+            hasNewCycles: false,
+          })
+        )
+      } else {
+        consola.error("Could not find HEAD commit")
+      }
+      process.exit(1)
+    }
   }
+
   const baselineFile = getBaselineFilePath(baselineSha)
 
-  // Clean up old cache files
-  cleanupOldCache(CACHE_DIR)
+  // Clean up old cache files (skip in CI to avoid noise)
+  if (!ci) {
+    cleanupOldCache(CACHE_DIR)
+  }
 
   // Load or create baseline
   let baseline: CycleDependency[] = []
   if (existsSync(baselineFile)) {
-    consola.info(
-      `Loading baseline from cache ${colorize("yellow", baselineFile)}`
-    )
+    if (!ci) {
+      consola.info(
+        `Loading baseline from cache ${colorize("yellow", baselineFile)}`
+      )
+    }
     baseline = loadBaseline(baselineFile)
   } else {
-    consola.info(
-      `No baseline found for HEAD (${colorize("yellow", baselineSha)}), creating baseline from commit...`
-    )
-    // Run dpdm on HEAD commit, not current working directory
-    baseline = runDpdmOnCommit(baselineSha)
+    if (!ci) {
+      consola.info(
+        `No baseline found for commit (${colorize("yellow", baselineSha)}), creating baseline from commit...`
+      )
+    }
+    // Run dpdm on the specified commit
+    baseline = runDpdmOnCommit(baselineSha, undefined, ci)
 
     saveBaseline(baselineFile, baseline)
   }
 
   // Run dpdm on current state
-  const current = runDpdm()
+  const current = runDpdm(undefined, ci)
 
   // Find new cycles
   const newCycles = findNewCycles(baseline, current)
@@ -396,7 +438,31 @@ function main(): void {
   const cyclesDecreased = current.length < baseline.length
   const cyclesRemoved = baseline.length - current.length
 
-  // Report results
+  // Output in JSON format for CI or when --json flag is used
+  if (json || ci) {
+    const output = {
+      baseline: {
+        commit: baselineSha,
+        cycles: baseline.length,
+        cyclesList: baseline,
+      },
+      current: {
+        cycles: current.length,
+        cyclesList: current,
+      },
+      newCycles: {
+        count: newCycles.length,
+        cyclesList: newCycles,
+      },
+      cyclesDecreased,
+      cyclesRemoved: cyclesDecreased ? cyclesRemoved : 0,
+      hasNewCycles: newCycles.length > 0,
+    }
+    console.log(JSON.stringify(output, null, 2))
+    process.exit(newCycles.length > 0 ? 1 : 0)
+  }
+
+  // Report results (human-readable format)
   if (newCycles.length > 0 && current.length > 0) {
     consola.error("New circular dependencies detected:")
     consola.log("")
