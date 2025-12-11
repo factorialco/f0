@@ -1,7 +1,8 @@
 import { Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { buttonToggleSizes, F0ButtonToggle } from "../index"
+import { buttonToggleSizes, buttonToggleVariants } from "../"
+import { F0ButtonToggle } from "../F0ButtonToggle"
 
 const meta = {
   title: "ButtonToggle",
@@ -69,6 +70,16 @@ const meta = {
       action: "selected",
       description: "Callback fired when the button is selected.",
     },
+    variant: {
+      control: "select",
+      options: buttonToggleVariants,
+      description: "Visual style variant of the button. (default: compact)",
+      table: {
+        type: {
+          summary: buttonToggleVariants.join(" | "),
+        },
+      },
+    },
   },
 } satisfies Meta<typeof F0ButtonToggle>
 
@@ -89,6 +100,14 @@ export const SingleIcon: Story = {
   },
 }
 
+export const VariantExpanded: Story = {
+  args: {
+    label: ["Toggle me", "Toggle me"],
+    icon: [MicrophoneNegative, Microphone],
+    variant: "expanded",
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {
@@ -96,23 +115,32 @@ export const Snapshot: Story = {
     icon: [MicrophoneNegative, Microphone],
   },
   render: () => (
-    <div className="flex w-fit flex-row gap-2">
-      {buttonToggleSizes.map((size) => (
-        <>
-          <F0ButtonToggle
-            key={size}
-            size={size}
-            label="Toggle me"
-            icon={[MicrophoneNegative, Microphone]}
-          />
-          <F0ButtonToggle
-            key={size}
-            size={size}
-            label="Toggle me"
-            selected={true}
-            icon={Microphone}
-          />
-        </>
+    <div className="flex flex-col gap-2">
+      {buttonToggleVariants.map((variant) => (
+        <div key={variant}>
+          <h4 className="mb-3 text-lg font-semibold">Variant: {variant}</h4>
+          <div className="flex flex-row gap-2">
+            {buttonToggleSizes.map((size) => (
+              <>
+                <F0ButtonToggle
+                  key={size}
+                  size={size}
+                  label="Toggle me"
+                  icon={[MicrophoneNegative, Microphone]}
+                  variant={variant}
+                />
+                <F0ButtonToggle
+                  key={size}
+                  size={size}
+                  label="Toggle me"
+                  selected={true}
+                  icon={Microphone}
+                  variant={variant}
+                />
+              </>
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   ),
