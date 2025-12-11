@@ -13,23 +13,23 @@ pre-commit:
       run: |
         # Get modified TypeScript/TSX files
         MODIFIED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' | grep '^packages/react/' || true)
-        
+
         if [ -z "$MODIFIED_FILES" ]; then
           echo "No React package files modified, skipping cycle dependency check"
           exit 0
         fi
-        
+
         # Get current HEAD SHA
         HEAD_SHA=$(git rev-parse HEAD)
         CACHE_DIR=".cache"
         BASELINE_FILE="$CACHE_DIR/cycle-dependencies-$HEAD_SHA.json"
-        
+
         # Create cache directory if it doesn't exist
         mkdir -p "$CACHE_DIR"
-        
+
         # Clean up cache files older than 1 month
         find "$CACHE_DIR" -name "cycle-dependencies-*.json" -type f -mtime +30 -delete 2>/dev/null || true
-        
+
         # Check if baseline exists for current HEAD
         if [ ! -f "$BASELINE_FILE" ]; then
           echo "No baseline found for HEAD ($HEAD_SHA), creating baseline..."
@@ -45,13 +45,13 @@ pre-commit:
             touch "$BASELINE_FILE"
           fi
         fi
-        
+
         # Run dpdm on current state
         CURRENT_OUTPUT=$(mktemp)
         cd packages/react
         npx dpdm --circular --no-tree --no-warning src/f0.ts > "$CURRENT_OUTPUT" 2>&1 || true
         cd ../..
-        
+
         # Normalize current output
         CURRENT_NORMALIZED=$(mktemp)
         if [ -s "$CURRENT_OUTPUT" ]; then
@@ -59,10 +59,10 @@ pre-commit:
         else
           touch "$CURRENT_NORMALIZED"
         fi
-        
-        # Compare with baseline
-        NEW_CYCLES=$(comm -13 <(sort "$BASELINE_FILE") <(sort "$CURRENT_NORMALIZED") 2>/dev/null || cat "$CURRENT_NORMALIZED")
-        
+
+        # Compare with baseline (both files are already sorted)
+        NEW_CYCLES=$(comm -13 "$BASELINE_FILE" "$CURRENT_NORMALIZED" 2>/dev/null || cat "$CURRENT_NORMALIZED")
+
         if [ -n "$NEW_CYCLES" ] && [ -s "$CURRENT_NORMALIZED" ]; then
           echo "❌ New circular dependencies detected:"
           echo ""
