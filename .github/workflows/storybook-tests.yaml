@@ -25,11 +25,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node-pnpm
-      - name: Install Playwright
+      - name: Get Playwright version
+        id: playwright-version
         run: |
           PLAYWRIGHT_VERSION=$(pnpm why @playwright/test -r --json | jq -r '.[] | select(.devDependencies["@playwright/test"]) | .devDependencies["@playwright/test"].version')
           echo "PLAYWRIGHT_VERSION: $PLAYWRIGHT_VERSION"
-          pnpx playwright@$PLAYWRIGHT_VERSION install --with-deps
+          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
+          restore-keys: |
+            playwright-browsers-${{ steps.playwright-version.outputs.version }}-
+            playwright-browsers-
+      - name: Install Playwright
+        run: |
+          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps
       - name: Build Storybook
         run: |
           pnpm --filter @factorialco/f0-core build
