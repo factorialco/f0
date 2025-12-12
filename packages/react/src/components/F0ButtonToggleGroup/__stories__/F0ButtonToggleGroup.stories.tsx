@@ -4,10 +4,13 @@ import {
 } from "@/components/F0ButtonToggle"
 import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { toArray } from "@/lib/toArray"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { F0ButtonToggleGroup } from "../index"
+import type {
+  F0ButtonToggleGroupItem,
+  F0ButtonToggleGroupProps,
+} from "../types"
 
 const meta = {
   title: "ButtonToggleGroup",
@@ -67,31 +70,52 @@ const meta = {
   },
   decorators: [
     (Story, { args }) => {
-      const [value, setValue] = useState<string[]>([])
-      const handleChange = (newValue: string | string[]) => {
-        setValue(toArray(newValue))
-      }
+      const [singleValue, setSingleValue] = useState<string>("")
+      const [multipleValue, setMultipleValue] = useState<string[]>([])
+
+      const displayValue = args.multiple
+        ? multipleValue.join(", ") || "(none)"
+        : singleValue || "(none)"
+
+      const storyArgs = args.multiple
+        ? ({
+            ...args,
+            value: multipleValue,
+            onChange: setMultipleValue,
+          } as const)
+        : ({
+            ...args,
+            value: singleValue,
+            onChange: setSingleValue,
+          } as const)
+
       return (
         <div className="flex flex-col gap-4">
-          <Story
-            args={{
-              ...args,
-              value: args.multiple ? value : value[0],
-              onChange: handleChange,
-            }}
-          />
+          <Story args={storyArgs} />
           <div className="text-gray-500 mt-10 text-sm">
-            Value: {Array.isArray(value) ? value.join(", ") : value}
+            Value: {displayValue}
           </div>
         </div>
       )
     },
   ],
-} satisfies Meta<typeof F0ButtonToggleGroup>
+} satisfies Meta<F0ButtonToggleGroupProps>
 
 export default meta
 
-type Story = StoryObj<typeof meta>
+// Story args type - base props only, excluding the discriminated union (value/onChange/multiple)
+type StoryArgs = {
+  items: F0ButtonToggleGroupProps["items"]
+  size: F0ButtonToggleGroupProps["size"]
+  variant?: F0ButtonToggleGroupProps["variant"]
+  required?: boolean
+  disabled?: boolean
+  multiple?: boolean
+}
+
+type Story = Omit<StoryObj<typeof meta>, "args"> & {
+  args?: Partial<StoryArgs>
+}
 
 const mockItems = [
   {
@@ -105,21 +129,23 @@ const mockItems = [
     value: "delete",
   },
   { label: "Option 3", icon: Archive, value: "archive" },
-]
+] satisfies F0ButtonToggleGroupItem[]
 
 // Basic single selection
+const defaultArgs: Partial<StoryArgs> = {
+  items: mockItems,
+  size: "md",
+  multiple: false,
+  required: false,
+}
+
 export const Default: Story = {
-  args: {
-    items: mockItems,
-    size: "md",
-    multiple: false,
-    required: false,
-  },
+  args: defaultArgs,
 }
 
 export const Single: Story = {
   args: {
-    ...Default.args,
+    ...defaultArgs,
     multiple: false,
   },
 }

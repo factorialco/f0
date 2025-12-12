@@ -83,7 +83,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
             size={size}
             withBorder
             variant={variant}
-            selected={selectedValues.includes(item.value)}
+            selected={!!selectedValues?.includes(item.value)}
             onSelectedChange={() => {}}
           />
         </ToggleGroupItem>
