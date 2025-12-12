@@ -11,8 +11,10 @@ export type F0ButtonToggleProps = Omit<
 
 const F0ButtonToggle = forwardRef<HTMLButtonElement, F0ButtonToggleProps>(
   (props, ref) => {
-    const publicProps = { ...props }
-    privateProps.forEach(key => { delete publicProps[key] })
+    const publicProps = privateProps.reduce((acc, key) => {
+      const { [key]: _, ...rest } = acc
+      return rest
+    }, props as F0ButtonToggleInternalProps)
 
     return <F0ButtonToggleInternal {...publicProps} ref={ref} />
   }
