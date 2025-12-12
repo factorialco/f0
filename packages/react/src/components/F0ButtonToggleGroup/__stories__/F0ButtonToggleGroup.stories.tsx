@@ -1,4 +1,7 @@
-import { buttonToggleVariants } from "@/components/F0ButtonToggle"
+import {
+  buttonToggleSizes,
+  buttonToggleVariants,
+} from "@/components/F0ButtonToggle"
 import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { toArray } from "@/lib/toArray"
@@ -90,22 +93,24 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+const mockItems = [
+  {
+    label: ["Active", "Inactive"],
+    icon: [Microphone, MicrophoneNegative],
+    value: "active",
+  },
+  {
+    label: "Option 2 with a long label that should be truncated",
+    icon: Delete,
+    value: "delete",
+  },
+  { label: "Option 3", icon: Archive, value: "archive" },
+]
+
 // Basic single selection
 export const Default: Story = {
   args: {
-    items: [
-      {
-        label: ["Active", "Inactive"],
-        icon: [Microphone, MicrophoneNegative],
-        value: "active",
-      },
-      {
-        label: "Option 2 with a long label that should be truncated",
-        icon: Delete,
-        value: "delete",
-      },
-      { label: "Option 3", icon: Archive, value: "archive" },
-    ],
+    items: mockItems,
     size: "md",
     multiple: false,
     required: false,
@@ -186,11 +191,7 @@ export const Sizes: Story = {
         <div className="flex flex-col items-center gap-2">
           <div style={{ fontWeight: 600 }}>Small (sm)</div>
           <F0ButtonToggleGroup
-            items={[
-              { label: "Option 1", icon: Microphone },
-              { label: "Option 2", icon: Microphone },
-              { label: "Option 3", icon: Microphone },
-            ]}
+            items={mockItems}
             size="sm"
             multiple={false}
             required={false}
@@ -201,11 +202,7 @@ export const Sizes: Story = {
         <div className="flex flex-col items-center gap-2">
           <div style={{ fontWeight: 600 }}>Medium (md)</div>
           <F0ButtonToggleGroup
-            items={[
-              { label: "Option 1", icon: Microphone },
-              { label: "Option 2", icon: Microphone },
-              { label: "Option 3", icon: Microphone },
-            ]}
+            items={mockItems}
             size="md"
             multiple={false}
             required={false}
@@ -216,11 +213,7 @@ export const Sizes: Story = {
         <div className="flex flex-col items-center gap-2">
           <div style={{ fontWeight: 600 }}>Large (lg)</div>
           <F0ButtonToggleGroup
-            items={[
-              { label: "Option 1", icon: Microphone },
-              { label: "Option 2", icon: Microphone },
-              { label: "Option 3", icon: Microphone },
-            ]}
+            items={mockItems}
             size="lg"
             multiple={false}
             required={false}
@@ -245,7 +238,7 @@ export const WithDisabledItem: Story = {
   },
   args: {
     ...Default.args,
-    items: Default.args?.items?.map((item, index) => ({
+    items: mockItems.map((item, index) => ({
       ...item,
       disabled: index === 1,
     })),
@@ -269,102 +262,38 @@ export const Disabled: Story = {
 
 // Snapshot with all variants
 export const Snapshot: Story = {
+  args: {
+    items: mockItems,
+  },
   parameters: withSnapshot({}),
   render: () => {
-    const [singleValue, setSingleValue] = useState<string>("")
-    const [multipleValue, setMultipleValue] = useState<string[]>([])
-    const [requiredValue, setRequiredValue] = useState<string>("Option 1")
-
     return (
       <div className="flex flex-col gap-6">
         <section>
           <h4 className="mb-3 text-lg font-semibold">Single Selection</h4>
           <div className="flex flex-col gap-4">
-            {(["sm", "md", "lg"] as const).map((size) => (
-              <div key={size} className="flex flex-col gap-2">
-                <div style={{ fontWeight: 600 }}>Size: {size}</div>
-                <F0ButtonToggleGroup
-                  items={[
-                    { label: "Option 1", icon: Microphone },
-                    { label: "Option 2", icon: Microphone },
-                    { label: "Option 3", icon: Microphone },
-                  ]}
-                  size={size}
-                  multiple={false}
-                  required={false}
-                  value={singleValue}
-                  onChange={setSingleValue}
-                />
-              </div>
-            ))}
+            {buttonToggleVariants.map((variant) => {
+              return buttonToggleSizes.map((size) => {
+                return (
+                  <div
+                    key={`${size}-${variant}`}
+                    className="flex flex-col gap-2"
+                  >
+                    <div style={{ fontWeight: 600 }}>
+                      Size: {size} Variant: {variant}
+                    </div>
+                    <F0ButtonToggleGroup
+                      items={mockItems}
+                      size={size}
+                      variant={variant}
+                      multiple={false}
+                      required={false}
+                    />
+                  </div>
+                )
+              })
+            })}
           </div>
-        </section>
-        <section>
-          <h4 className="mb-3 text-lg font-semibold">Multiple Selection</h4>
-          <div className="flex flex-col gap-4">
-            {(["sm", "md", "lg"] as const).map((size) => (
-              <div key={size} className="flex flex-col gap-2">
-                <div style={{ fontWeight: 600 }}>Size: {size}</div>
-                <F0ButtonToggleGroup
-                  items={[
-                    { label: "Option 1", icon: Microphone },
-                    { label: "Option 2", icon: Microphone },
-                    { label: "Option 3", icon: Microphone },
-                  ]}
-                  size={size}
-                  multiple={true}
-                  required={false}
-                  value={multipleValue}
-                  onChange={setMultipleValue}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-        <section>
-          <h4 className="mb-3 text-lg font-semibold">With Disabled Items</h4>
-          <F0ButtonToggleGroup
-            items={[
-              { label: "Enabled", icon: Microphone },
-              { label: "Disabled", icon: Microphone, disabled: true },
-              { label: "Enabled", icon: Microphone },
-            ]}
-            size="md"
-            multiple={false}
-            required={false}
-            value={singleValue}
-            onChange={setSingleValue}
-          />
-        </section>
-        <section>
-          <h4 className="mb-3 text-lg font-semibold">Required Selection</h4>
-          <F0ButtonToggleGroup
-            items={[
-              { label: "Option 1", icon: Microphone },
-              { label: "Option 2", icon: Microphone },
-              { label: "Option 3", icon: Microphone },
-            ]}
-            size="md"
-            multiple={false}
-            required={true}
-            value={requiredValue}
-            onChange={setRequiredValue}
-          />
-        </section>
-        <section>
-          <h4 className="mb-3 text-lg font-semibold">With Different Icons</h4>
-          <F0ButtonToggleGroup
-            items={[
-              { label: "Mic Off", icon: MicrophoneNegative },
-              { label: "Mic On", icon: Microphone },
-              { label: "Mic Off", icon: MicrophoneNegative },
-            ]}
-            size="md"
-            multiple={false}
-            required={false}
-            value={singleValue}
-            onChange={setSingleValue}
-          />
         </section>
       </div>
     )

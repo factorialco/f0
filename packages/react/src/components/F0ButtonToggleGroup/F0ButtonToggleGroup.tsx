@@ -23,34 +23,55 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
       return
     }
     setLocalValue(value)
-    onChange?.(multiple ? (value as string[]) : (value as string))
-  }, [value, multiple, onChange, localValue])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
 
-  const handleChange = (value: string | string[]) => {
-    // For requires and not multiple, we need to prevent the selection to be cleared
-    if (required && ((multiple && value.length === 0) || !value)) {
+  useEffect(() => {
+    if (multiple) {
+      onChange?.(value as string[])
+    } else {
+      onChange?.(value as string)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localValue])
+
+  const handleChange = (newValue: string | string[]) => {
+    // For required, prevent clearing all selections
+    if (required && ((multiple && newValue.length === 0) || !newValue)) {
       return
     }
-    console.log("value", value)
-    setLocalValue(value)
-    onChange?.(value)
+    setLocalValue(newValue)
+    if (multiple) {
+      onChange?.(newValue as string[])
+    } else {
+      onChange?.(newValue as string)
+    }
   }
-
   const localItems = useMemo(() => {
     return items.map((item) => ({
       ...item,
-      disabled,
+      disabled: disabled || item.disabled,
     }))
   }, [items, disabled])
 
   const selectedValues = multiple ? localValue : [localValue]
+
+  const groupProps = multiple
+    ? ({
+        type: "multiple" as const,
+        value: localValue as string[],
+      } as const)
+    : ({
+        type: "single" as const,
+        value: localValue as string,
+      } as const)
+
   return (
     <ToggleGroup
-      type={multiple ? "multiple" : "single"}
+      {...groupProps}
+      onValueChange={handleChange}
       disabled={disabled}
       className={cn("flex items-center justify-center gap-1")}
-      value={localValue}
-      onValueChange={handleChange}
     >
       {localItems.map((item) => (
         <ToggleGroupItem
@@ -63,6 +84,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
             withBorder
             variant={variant}
             selected={selectedValues.includes(item.value)}
+            onSelectedChange={() => {}}
           />
         </ToggleGroupItem>
       ))}
