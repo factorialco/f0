@@ -329,6 +329,7 @@ const F0SelectComponent = forwardRef(function Select<
     onSelectItems: onSelectItems,
     selectedState: initialSelectedState,
     disableSelectAll: disableSelectAll,
+    isSearchActive: !!currentSearch,
   })
 
   /**
