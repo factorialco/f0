@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.306.1](https://github.com/factorialco/f0/compare/f0-react-v1.306.0...f0-react-v1.306.1) (2025-12-12)
+
+
+### Bug Fixes
+
+* export AiChatTextarea component ([#3120](https://github.com/factorialco/f0/issues/3120)) ([7fc9f39](https://github.com/factorialco/f0/commit/7fc9f3941b23fed40af033a899d4687444042f82))
+
 ## [1.306.0](https://github.com/factorialco/f0/compare/f0-react-v1.305.0...f0-react-v1.306.0) (2025-12-11)
 
 
