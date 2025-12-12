@@ -286,6 +286,26 @@ export const Disabled: Story = {
   },
 }
 
+// Wrap
+export const Flow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The buttons in the group will wrap to the next line if they don't fit in the available space.",
+      },
+    },
+  },
+  args: {
+    ...Default.args,
+    items: Array.from({ length: 100 }).map((_, index) => ({
+      label: `Option ${index + 1} with a long label that should be truncated`,
+      icon: Archive,
+      value: `option-${index + 1}`,
+    })),
+  },
+}
+
 // Snapshot with all variants
 export const Snapshot: Story = {
   args: {
@@ -294,32 +314,42 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex max-w-96 flex-col gap-6">
+        {buttonToggleVariants.map((variant) => {
+          return buttonToggleSizes.map((size) => {
+            return (
+              <section
+                key={`${size}-${variant}`}
+                className="flex flex-col gap-2"
+              >
+                <h4 className="mb-2 font-semibold">
+                  Size: {size} Variant: {variant}
+                </h4>
+                <F0ButtonToggleGroup
+                  items={mockItems}
+                  size={size}
+                  variant={variant}
+                  multiple={false}
+                  required={false}
+                />
+              </section>
+            )
+          })
+        })}
+
         <section>
-          <h4 className="mb-3 text-lg font-semibold">Single Selection</h4>
-          <div className="flex flex-col gap-4">
-            {buttonToggleVariants.map((variant) => {
-              return buttonToggleSizes.map((size) => {
-                return (
-                  <div
-                    key={`${size}-${variant}`}
-                    className="flex flex-col gap-2"
-                  >
-                    <div style={{ fontWeight: 600 }}>
-                      Size: {size} Variant: {variant}
-                    </div>
-                    <F0ButtonToggleGroup
-                      items={mockItems}
-                      size={size}
-                      variant={variant}
-                      multiple={false}
-                      required={false}
-                    />
-                  </div>
-                )
-              })
-            })}
-          </div>
+          <h4 className="mb-2 font-semibold">Wrap</h4>
+          <F0ButtonToggleGroup
+            items={Array.from({ length: 30 }).map((_, index) => ({
+              label: `Option ${index + 1} with a long label that should be truncated`,
+              icon: Archive,
+              value: `option-${index + 1}`,
+            }))}
+            size="md"
+            variant="expanded"
+            multiple={false}
+            required={false}
+          />
         </section>
       </div>
     )

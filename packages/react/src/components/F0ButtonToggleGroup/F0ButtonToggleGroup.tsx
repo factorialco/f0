@@ -62,12 +62,13 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
       {...groupProps}
       onValueChange={handleChange}
       disabled={disabled}
-      className={cn("flex items-center justify-center gap-1")}
+      className={cn("flex flex-wrap items-center justify-center gap-1")}
     >
       {localItems.map((item) => (
         <ToggleGroupItem
           key={item.value as string}
           value={item.value as string}
+          asChild
         >
           <F0ButtonToggleInternal
             {...item}
