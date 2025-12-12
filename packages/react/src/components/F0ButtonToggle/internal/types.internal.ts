@@ -1,5 +1,4 @@
 import { IconType } from "@/components/F0Icon"
-import { AllOrNone } from "@/lib/typescript-utils/allOrNone"
 import { ButtonToggleSize, ButtonToggleVariant } from "../types"
 
 export type F0ButtonToggleInternalProps = {
@@ -34,11 +33,15 @@ export type F0ButtonToggleInternalProps = {
    * Whether to show a border around the button toggle.
    */
   withBorder?: boolean
-} & AllOrNone<{
-  selected: boolean
-  onSelectedChange: (selected: boolean) => void
-}> & {
-    selected?: undefined
-    onSelectedChange?: undefined
-    defaultSelected?: boolean
-  }
+} & (
+  | {
+      selected: boolean
+      onSelectedChange: (selected: boolean) => void
+      defaultSelected?: undefined
+    }
+  | {
+      defaultSelected?: boolean
+      selected?: undefined
+      onSelectedChange?: undefined
+    }
+)
