@@ -298,7 +298,7 @@ export const ChatTextarea = ({
             disabled={!hasDataToSend}
             variant={hasDataToSend ? "default" : "neutral"}
             label={submitLabel || translation.ai.sendMessage}
-            icon={ArrowUp}
+            icon={submitLabel ? undefined : ArrowUp}
             hideLabel={!submitLabel}
           />
         )}
