@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.306.2](https://github.com/factorialco/f0/compare/f0-react-v1.306.1...f0-react-v1.306.2) (2025-12-12)
+
+
+### Bug Fixes
+
+* prevent deselection in single select mode when not clearable ([#3123](https://github.com/factorialco/f0/issues/3123)) ([cc6504a](https://github.com/factorialco/f0/commit/cc6504ac9a4820f7f0a8d589943d1728578d65bf))
+
 ## [1.306.1](https://github.com/factorialco/f0/compare/f0-react-v1.306.0...f0-react-v1.306.1) (2025-12-12)
 
 
