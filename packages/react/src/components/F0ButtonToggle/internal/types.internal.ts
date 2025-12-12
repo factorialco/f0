@@ -37,4 +37,8 @@ export type F0ButtonToggleInternalProps = {
 } & AllOrNone<{
   selected: boolean
   onSelectedChange: (selected: boolean) => void
-}>
+}> & {
+    selected?: undefined
+    onSelectedChange?: undefined
+    defaultSelected?: boolean
+  }

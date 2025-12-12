@@ -28,10 +28,6 @@ const meta = {
     disabled: false,
   },
   argTypes: {
-    selected: {
-      control: "boolean",
-      description: "Whether the button is in selected/active state.",
-    },
     size: {
       control: "select",
       options: buttonToggleSizes,
@@ -63,9 +59,19 @@ const meta = {
       description:
         "The button is inactive and does not respond to user interaction.",
     },
+    selected: {
+      control: "boolean",
+      description:
+        "Whether the button is in selected/active state. (only works together with onSelectedChange. Controlled component)",
+    },
     onSelectedChange: {
       action: "selected",
       description: "Callback fired when the button is selected.",
+    },
+    defaultSelected: {
+      control: "boolean",
+      description:
+        "Whether the button is in selected/active state by default. (uncontrolled component)",
     },
     variant: {
       control: "select",
@@ -131,6 +137,14 @@ export const Controlled: Story = {
         </p>
       </>
     )
+  },
+}
+
+export const UncontrolledWithDefaultSelected: Story = {
+  args: {
+    label: "Controlled Toggle",
+    icon: Microphone,
+    defaultSelected: true,
   },
 }
 

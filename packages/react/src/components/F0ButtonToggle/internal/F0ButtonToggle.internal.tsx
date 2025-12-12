@@ -77,6 +77,7 @@ export const F0ButtonToggleInternal = forwardRef<
       size = "md",
       variant = "compact",
       withBorder = false,
+      defaultSelected = false,
       ...props
     },
     ref
@@ -100,7 +101,7 @@ export const F0ButtonToggleInternal = forwardRef<
       [singleIcon]
     )
 
-    const [localSelected, setLocalSelected] = useState(selected)
+    const [localSelected, setLocalSelected] = useState(defaultSelected)
 
     // The state can be controlled or uncontrolled
     // If it is controlled, we use the selected prop and onSelectedChange prop
