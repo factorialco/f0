@@ -84,6 +84,8 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
             withBorder
             variant={variant}
             selected={!!selectedValues?.includes(item.value)}
+            // Intentionally pass a no-op function to satisfy type requirements.
+            // The group manages selection state in a controlled manner.
             onSelectedChange={() => {}}
           />
         </ToggleGroupItem>
