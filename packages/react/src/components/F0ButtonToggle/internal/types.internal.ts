@@ -23,8 +23,8 @@ export type F0ButtonToggleInternalProps = {
   /**
    * The variant of the button.
    * @default "compact"
-   * "default" - The button will only show the icon.
-   * "with-label" - The button will show the icon and the label.
+   * "compact" - The button will only show the icon.
+   * "expanded" - The button will show the icon and the label.
    */
   variant?: ButtonToggleVariant
 
