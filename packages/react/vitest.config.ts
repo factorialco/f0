@@ -67,7 +67,6 @@ export default defineConfig({
         },
         test: {
           name: "storybook",
-          threads: false, // disable worker threads for this project
           maxWorkers: 1,
           testTimeout: 120000, // 120 seconds timeout per test
           hookTimeout: 90000, // 90 seconds timeout for hooks
