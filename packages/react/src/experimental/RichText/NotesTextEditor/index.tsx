@@ -69,7 +69,7 @@ const NotesTextEditorComponent = forwardRef<
     actions,
     secondaryActions,
     metadata,
-    withPadding: _withPadding = false,
+    withPadding = true,
   },
   ref
 ) {
@@ -302,7 +302,7 @@ const NotesTextEditorComponent = forwardRef<
 
           <EditorContent
             editor={editor}
-            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14 [&>div]:transition-[padding] [&>div]:duration-300"
+            className={`pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 ${withPadding ? "[&>div]:px-14" : ""}`}
           />
         </div>
       </ScrollArea>
