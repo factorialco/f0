@@ -32,12 +32,17 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
       return
     }
     setLocalValue(newValue)
-    if (multiple) {
-      onChange?.(newValue as string[])
-    } else {
-      onChange?.(newValue as string)
-    }
   }
+
+  useEffect(() => {
+    if (multiple) {
+      onChange?.(localValue as string[])
+    } else {
+      onChange?.(localValue as string)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localValue, multiple])
+
   const localItems = useMemo(() => {
     return items.map((item) => ({
       ...item,
