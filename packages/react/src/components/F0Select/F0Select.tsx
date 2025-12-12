@@ -726,7 +726,7 @@ const F0SelectComponent = forwardRef(function Select<
                   currentFilters={localSource.currentFilters}
                   onFiltersChange={localSource.setCurrentFilters}
                 />
-                {multiple && !disableSelectAll && (
+                {multiple && !disableSelectAll && !currentSearch && (
                   <SelectAll
                     selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={
