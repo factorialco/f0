@@ -3,7 +3,7 @@
  * Used for visual representation of status or type indicators.
  */
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
+import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
@@ -15,20 +15,6 @@ interface IconValue {
   hideLabel?: boolean
 }
 export type IconCellValue = IconValue
-
-const TooltipWrapper: React.FC<{
-  tooltip?: string
-  children: React.ReactNode
-}> = ({ tooltip, children }) => {
-  if (tooltip) {
-    return (
-      <TooltipInternal label={tooltip} instant>
-        {children}
-      </TooltipInternal>
-    )
-  }
-  return children
-}
 
 export const IconCell = (
   args: IconCellValue,

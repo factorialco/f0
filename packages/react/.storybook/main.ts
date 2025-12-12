@@ -59,6 +59,7 @@ const config: StorybookConfig = {
       },
     },
     getAbsolutePath("@storybook/addon-designs"),
+    getAbsolutePath("@storybook/addon-vitest"),
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
@@ -84,6 +85,9 @@ const config: StorybookConfig = {
       "@": resolve(__dirname, "../src"),
       "~": resolve(__dirname, "../"),
     }
+    // Ensure base is set to '/' to prevent absolute path issues in CI
+    // This ensures paths are relative and work correctly when served
+    config.base = config.base || "/"
     return config
   },
 }

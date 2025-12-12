@@ -1,4 +1,4 @@
-import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"
 import { motion } from "motion/react"

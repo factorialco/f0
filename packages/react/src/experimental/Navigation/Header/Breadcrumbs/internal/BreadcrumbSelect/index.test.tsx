@@ -12,12 +12,12 @@ const mockOptions = [
 const mockOnChange = vi.fn()
 
 describe.skip("BreadcrumbSelect", () => {
-  // Mock ResizeObserver
-  global.ResizeObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }))
+  // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work
+  global.ResizeObserver = class MockResizeObserver {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  } as typeof ResizeObserver
 
   Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
     value: 800,

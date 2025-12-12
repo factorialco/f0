@@ -28,19 +28,6 @@ vi.stubGlobal("matchMedia", (query: string) => ({
   dispatchEvent: vi.fn(),
 }))
 
-// Mock ResizeObserver
-vi.stubGlobal("ResizeObserver", {
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-})
-
-// Mock getComputedStyle for the OneEllipsis component
-// ... existing code ...
-vi.stubGlobal("ResizeObserver", {
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-})
-
 // Mock getComputedStyle to return a more complete object
 vi.stubGlobal("getComputedStyle", (elt: Element) => {
   const style = (elt as HTMLElement)?.style
@@ -58,15 +45,7 @@ vi.stubGlobal("getComputedStyle", (elt: Element) => {
   }
 })
 
-// Add pointer event polyfills for testing environment
-if (typeof window !== "undefined") {
-  window.HTMLElement.prototype.hasPointerCapture = () => false
-  window.HTMLElement.prototype.setPointerCapture = () => {}
-  window.HTMLElement.prototype.releasePointerCapture = () => {}
-  window.HTMLElement.prototype.scrollIntoView = () => {}
-}
-
-// Mock ResizeObserver
+// Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work
 vi.stubGlobal(
   "ResizeObserver",
   class MockedResizeObserver {
@@ -75,3 +54,11 @@ vi.stubGlobal(
     disconnect = vi.fn()
   }
 )
+
+// Add pointer event polyfills for testing environment
+if (typeof window !== "undefined") {
+  window.HTMLElement.prototype.hasPointerCapture = () => false
+  window.HTMLElement.prototype.setPointerCapture = () => {}
+  window.HTMLElement.prototype.releasePointerCapture = () => {}
+  window.HTMLElement.prototype.scrollIntoView = () => {}
+}
