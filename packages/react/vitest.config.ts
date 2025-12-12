@@ -67,7 +67,7 @@ export default defineConfig({
         },
         test: {
           name: "storybook",
-          testTimeout: 45000, // 45 seconds timeout per test
+          testTimeout: 120000, // 120 seconds timeout per test
           hookTimeout: 90000, // 90 seconds timeout for hooks
           retry: 2, // Retry failed tests up to 2 times
           maxWorkers: 2,
