@@ -48,11 +48,13 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
+import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText';
+import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -412,6 +414,8 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
+export declare const AiChatOneIcon: ForwardRefExoticComponent<Omit<OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
+
 export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
@@ -467,6 +471,12 @@ declare type AiChatProviderReturnValue = {
      */
     clear: () => void;
     /* Excluded from this release type: setClearFunction */
+    /**
+     * Send a message to the chat
+     * @param message - The message content as a string, or a full Message object
+     */
+    sendMessage: (message: string | Message_2) => void;
+    /* Excluded from this release type: setSendMessageFunction */
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
@@ -486,6 +496,8 @@ declare interface AiChatState {
         feedback: string;
     }) => void;
 }
+
+export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -1396,6 +1408,10 @@ declare type ChartItem<K extends ChartConfig> = {
 
 export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>;
 
+declare type ChatTextareaProps = InputProps_2 & {
+    submitLabel?: string;
+};
+
 export declare type ChatWidgetEmptyStateProps = Props_5;
 
 declare type ChildrenPaginationInfo = {
@@ -1654,7 +1670,7 @@ declare type Content = (ComponentProps<typeof DataList.Item> & {
     type: "dot-tag";
 });
 
-declare type ContentPadding = "sm" | "md";
+declare type ContentPadding = (typeof modalContentPaddings)[number];
 
 declare type CopyActionType = {
     type: "copy";
@@ -3978,7 +3994,15 @@ declare interface MetadataProps {
 
 export declare const MobileDropdown: ({ items, children }: DropdownProps) => JSX_2.Element;
 
-declare type ModalPosition = "center" | "left" | "right" | "fullscreen";
+declare const modalContentPaddings: readonly ["sm", "md"];
+
+declare type ModalPosition = (typeof modalPositions)[number];
+
+declare const modalPositions: readonly ["center", "left", "right", "fullscreen"];
+
+declare type ModalWidth = (typeof modalWidths)[number];
+
+declare const modalWidths: readonly ["sm", "md", "lg"];
 
 declare const moduleAvatarVariants: (props?: ({
     size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
@@ -4488,6 +4512,13 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onOpenChange?: (isOpen: boolean) => void;
 };
 
+declare interface OneIconProps extends SVGProps<SVGSVGElement> {
+    spin?: boolean;
+    hover?: boolean;
+    background?: string;
+    size?: "xs" | "sm" | "md" | "lg";
+}
+
 export declare const OneModal: OneModalComponent;
 
 declare const OneModal_2: FC<OneModalProps>;
@@ -4511,10 +4542,11 @@ declare type OneModalFooterProps = {
     children: React.ReactNode;
 };
 
-declare const OneModalHeader: ({ title, module, otherActions, }: OneModalHeaderProps) => JSX_2.Element;
+declare const OneModalHeader: ({ title, description, module, otherActions, }: OneModalHeaderProps) => JSX_2.Element;
 
 declare type OneModalHeaderProps = {
     title?: string;
+    description?: string;
     /**
      * Module configuration for the header. Only works when modal position is set to "right".
      * Displays module icon and name in the header.
@@ -4536,7 +4568,10 @@ declare type OneModalProps = {
     asBottomSheetInMobile?: boolean;
     /** the padding of internal content areas (header, content, footer) */
     contentPadding?: ContentPadding;
+    /** The position of the modal */
     position?: ModalPosition;
+    /** The width of the modal. Only applies to center position but we can NOT use narrowing as position undefined is valid */
+    width?: ModalWidth;
     /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
     children: ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>> | ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[];
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
@@ -6433,15 +6468,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

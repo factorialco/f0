@@ -61,6 +61,7 @@ import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
 import { PageLayoutBlockComponent as PageLayoutBlockComponent_2 } from './types';
+import { PageLayoutGroupComponent as PageLayoutGroupComponent_2 } from '../Layout';
 import { PageProps } from './pages/Page';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from '../../value-display/types/person';
@@ -1122,6 +1123,10 @@ export declare function createAtlaskitDriver(instanceId: symbol): DndDriver;
  */
 export declare const createDataSourceDefinition: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(definition: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>) => DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>;
 
+export declare const createPageLayoutBlock: <Props = unknown>(displayName: string, Component: React.ComponentType<Props>) => React.ComponentType<Props> & PageLayoutBlockComponent;
+
+export declare const createPageLayoutBlockGroup: <Props = unknown>(displayName: string, Component: React.ComponentType<Props>) => React.ComponentType<Props> & PageLayoutGroupComponent;
+
 /**
  * Extracts the current filters type from filter options.
  * Creates a type mapping filter keys to their respective value types.
@@ -1134,10 +1139,7 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
     [Key in K]?: FilterValue<F["fields"][Key]>;
 } : Record<string, never>;
 
-export declare const Dashboard: {
-    ({ widgets, editMode, onChange, }: DashboardProps_2): JSX_2.Element;
-    displayName: string;
-};
+export declare const Dashboard: ComponentType<DashboardProps_2> & PageLayoutGroupComponent_2;
 
 export declare type DashboardProps = GroupGridProps<DashboardWidget>;
 
@@ -2746,7 +2748,7 @@ export declare interface GridStackReactWidget extends Omit<GridStackWidget, "con
  */
 export declare const GROUP_ID_SYMBOL: unique symbol;
 
-declare interface GroupGridProps<Widget extends GroupGridWidget> {
+declare interface GroupGridProps<Widget extends GroupGridWidget, Deps extends Record<string, unknown> = Record<string, unknown>> {
     widgets: Optional<Widget, "x" | "y">[];
     editMode?: boolean;
     /**
@@ -2760,16 +2762,27 @@ declare interface GroupGridProps<Widget extends GroupGridWidget> {
      * If the group is the main content of the page, it will try to take the full height of the page
      */
     main?: boolean;
+    /**
+     * Current values for dependencies. When this changes, widgets with `deps` arrays
+     * will have their content updated automatically. Widgets reference dependencies
+     * by key names (e.g., `deps: ['globalCounter']` maps to `deps: { globalCounter: 0 }`).
+     */
+    deps?: Deps;
 }
 
-declare type GroupGridWidget<Meta extends Record<string, unknown> = Record<string, unknown>> = {
+declare type GroupGridWidget<Meta extends Record<string, unknown> = Record<string, unknown>, DepsKeys extends string[] = string[]> = {
     id: string;
     availableSizes?: GroupGridWidgetSize[];
-    content: React.ReactNode;
+    content: React.ReactNode | ((deps: Partial<Record<DepsKeys[number], unknown>>) => React.ReactNode);
     x: number;
     y: number;
     locked?: boolean;
     meta?: Meta;
+    /**
+     * Dependencies array that, when changed, will trigger a content update.
+     * Each value in the array is compared using strict equality (`===`).
+     */
+    deps?: DepsKeys;
 } & GroupGridWidgetSize;
 
 declare type GroupGridWidgetSize = {
@@ -3104,7 +3117,7 @@ export declare const Layout: {
     BlockContent: ComponentType<BlockProps & BlockContentExtraProps> & PageLayoutBlockComponent_2;
     Group: ForwardRefExoticComponent<GroupLinearProps & RefAttributes<HTMLDivElement>>;
     GroupGrid: {
-        <Widget extends GroupGridWidget_2>({ widgets, editMode, onChange, WidgetWrapper, main, }: GroupGridProps_2<Widget>): JSX_2.Element;
+        <Widget extends GroupGridWidget_2, Deps extends Record<string, unknown> = Record<string, unknown>>({ widgets, editMode, onChange, WidgetWrapper, main, deps: dependencyValues, }: GroupGridProps_2<Widget, Deps>): JSX_2.Element;
         displayName: string;
     };
     GroupMasonry: {
@@ -4513,7 +4526,7 @@ export declare const usePrivacyMode: () => {
 
 export declare const useReducedMotion: () => boolean;
 
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -4527,6 +4540,12 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * When true, allSelected will always be false even if all items are checked.
      */
     disableSelectAll?: boolean;
+    /**
+     * Indicates if search is currently active.
+     * When true, selecting all visible items won't trigger "all selected" state,
+     * because the visible items are a filtered subset.
+     */
+    isSearchActive?: boolean;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -4726,15 +4745,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
