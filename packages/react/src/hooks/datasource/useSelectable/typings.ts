@@ -53,6 +53,12 @@ export type UseSelectableProps<
    * When true, allSelected will always be false even if all items are checked.
    */
   disableSelectAll?: boolean
+  /**
+   * Indicates if search is currently active.
+   * When true, selecting all visible items won't trigger "all selected" state,
+   * because the visible items are a filtered subset.
+   */
+  isSearchActive?: boolean
 }
 
 export type SelectionMeta<R extends RecordType> = {

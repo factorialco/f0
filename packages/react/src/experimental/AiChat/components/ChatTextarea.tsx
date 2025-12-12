@@ -139,7 +139,16 @@ const TypewriterPlaceholder = ({
   )
 }
 
-export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
+type ChatTextareaProps = InputProps & {
+  submitLabel?: string
+}
+
+export const ChatTextarea = ({
+  submitLabel,
+  inProgress,
+  onSend,
+  onStop,
+}: ChatTextareaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
@@ -188,7 +197,7 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-3 mt-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border hover:cursor-text",
+        "relative isolate flex flex-col gap-3 rounded-lg border border-solid border-f1-border hover:cursor-text",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
@@ -288,9 +297,9 @@ export const ChatTextarea = ({ inProgress, onSend, onStop }: InputProps) => {
             type="submit"
             disabled={!hasDataToSend}
             variant={hasDataToSend ? "default" : "neutral"}
-            label={translation.ai.sendMessage}
-            icon={ArrowUp}
-            hideLabel
+            label={submitLabel || translation.ai.sendMessage}
+            icon={submitLabel ? undefined : ArrowUp}
+            hideLabel={!submitLabel}
           />
         )}
       </div>
