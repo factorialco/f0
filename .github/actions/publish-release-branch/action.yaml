@@ -12,6 +12,7 @@ runs:
   using: "composite"
   steps:
     - name: Publish to release branch ${{ inputs.branch-name }}
+      id: publish
       shell: bash
       run: |
         git config user.name 'github-actions[bot]'
@@ -55,5 +56,22 @@ runs:
         # Get the latest commit SHA from the branch
         LAST=$(git log -n 1 'origin/${{ inputs.branch-name }}' --pretty=format:"%H")
 
+        # Set output for use in next step
+        echo "LAST_COMMIT_SHA=${LAST}" >> $GITHUB_OUTPUT
+
         # Print the message
         echo "::notice title='Package published'::Use pnpm i github:factorialco/f0#${{ inputs.branch-name }} to install the package (or pnpm i github:factorialco/f0#${LAST} to install this specific commit)"
+
+    - name: Add PR comment with package installation instructions
+      if: github.event_name == 'pull_request'
+      uses: ./.github/actions/add-or-update-pr-comment
+      with:
+        comment-type: alpha_version
+        github-token: ${{ github.token }}
+        pr-number: ${{ github.event.pull_request.number }}
+        comment-body: |
+          ## 📦 Alpha Package Version Published
+
+          Use `pnpm i github:factorialco/f0#${{ inputs.branch-name }}` to install the package
+
+          Use `pnpm i github:factorialco/f0#${{ steps.publish.outputs.LAST_COMMIT_SHA }}` to install this specific commit
