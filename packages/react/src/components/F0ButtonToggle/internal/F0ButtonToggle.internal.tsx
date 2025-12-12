@@ -106,14 +106,11 @@ export const F0ButtonToggleInternal = forwardRef<
     // The state can be controlled or uncontrolled
     // If it is controlled, we use the selected prop and onSelectedChange prop
     // If it is uncontrolled, we use the localSelected state and setLocalSelected function
-    const state = useMemo(() => {
-      const isControlled = selected !== undefined
-      return {
-        selected: isControlled ? selected : localSelected,
-        onSelectedChange: isControlled ? onSelectedChange : setLocalSelected,
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selected, onSelectedChange, localSelected])
+    const isControlled = selected !== undefined
+    const state = {
+      selected: isControlled ? selected : localSelected,
+      onSelectedChange: isControlled ? onSelectedChange : setLocalSelected,
+    }
 
     const localLabel = state.selected ? labelOn : labelOff
 
