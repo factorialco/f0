@@ -17,7 +17,7 @@ export type F0ButtonToggleGroupProps = {
    * The size of the buttons.
    * @default "md"
    */
-  size: ButtonToggleSize
+  size?: ButtonToggleSize
 
   /**
    * Whether multiple selections are allowed.
