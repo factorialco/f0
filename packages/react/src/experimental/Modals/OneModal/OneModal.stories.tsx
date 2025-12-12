@@ -1,3 +1,4 @@
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Select } from "@/components/F0Select"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
@@ -16,8 +17,9 @@ import CrossIcon from "@/icons/app/Cross"
 import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ComponentProps, FC } from "react"
+import { ComponentProps, FC, useState } from "react"
 import { OneModal } from "."
+import { modalPositions, modalWidths } from "./types"
 
 const meta: Meta<typeof OneModal> = {
   title: "Modals/OneModal",
@@ -29,18 +31,50 @@ const meta: Meta<typeof OneModal> = {
     },
   },
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    position: {
+      description: "The position of the modal",
+      control: {
+        type: "select",
+        options: modalPositions,
+      },
+    },
+    width: {
+      description: "The width of the modal. ⚠️ Only applies to center position",
+      control: {
+        type: "select",
+        options: modalWidths,
+      },
+      table: {
+        type: { summary: "sm | md | lg" },
+        defaultValue: { summary: "md" },
+      },
+    },
+  },
   decorators: [
-    (Story) => (
-      <ApplicationFrame
-        {...(ApplicationFrameStoryMeta.args as ComponentProps<
-          typeof ApplicationFrame
-        >)}
-      >
-        <div className="flex-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-          <Story />
-        </div>
-      </ApplicationFrame>
-    ),
+    (Story, { args: { isOpen, ...rest } }) => {
+      const [open, setOpen] = useState(isOpen)
+
+      const handleClose = () => {
+        setOpen(false)
+      }
+      const handleOpen = () => {
+        setOpen(true)
+      }
+
+      return (
+        <ApplicationFrame
+          {...(ApplicationFrameStoryMeta.args as ComponentProps<
+            typeof ApplicationFrame
+          >)}
+        >
+          <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+            <F0Button label="Open modal" onClick={handleOpen} />
+            <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
+          </div>
+        </ApplicationFrame>
+      )
+    },
   ],
 }
 
@@ -79,9 +113,9 @@ const OTHER_ACTIONS = [
   },
 ]
 
-const ExampleList = () => (
+const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
   <div className="flex flex-col gap-4 p-4">
-    {Array.from({ length: 20 }, (_, i) => (
+    {Array.from({ length: itemsCount }, (_, i) => (
       <div
         key={i}
         className="rounded-sm border border-solid border-f1-border-secondary p-4"
@@ -99,6 +133,55 @@ export const Default: Story = {
     children: (
       <>
         <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
+        <OneModal.Content tabs={TABS}>
+          <ExampleList itemsCount={2} />
+        </OneModal.Content>
+      </>
+    ),
+  },
+}
+
+export const WithSmWidth: Story = {
+  args: {
+    isOpen: true,
+    width: "sm",
+    onClose: () => {},
+    children: (
+      <>
+        <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
+        <OneModal.Content tabs={TABS}>
+          <ExampleList />
+        </OneModal.Content>
+      </>
+    ),
+  },
+}
+
+export const WithMdWidth: Story = {
+  args: {
+    ...WithSmWidth.args,
+    width: "md",
+  },
+}
+
+export const WithLgWidth: Story = {
+  args: {
+    ...WithMdWidth.args,
+    width: "lg",
+  },
+}
+
+export const WithDescription: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    children: (
+      <>
+        <OneModal.Header
+          title="Team Status"
+          description="This is a description of the team status. Very long text that should wrap properly and not overflow the container boundaries."
+          otherActions={OTHER_ACTIONS}
+        />
         <OneModal.Content tabs={TABS}>
           <ExampleList />
         </OneModal.Content>

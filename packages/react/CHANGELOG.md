@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.306.2](https://github.com/factorialco/f0/compare/f0-react-v1.306.1...f0-react-v1.306.2) (2025-12-12)
+
+
+### Bug Fixes
+
+* prevent deselection in single select mode when not clearable ([#3123](https://github.com/factorialco/f0/issues/3123)) ([cc6504a](https://github.com/factorialco/f0/commit/cc6504ac9a4820f7f0a8d589943d1728578d65bf))
+
+## [1.306.1](https://github.com/factorialco/f0/compare/f0-react-v1.306.0...f0-react-v1.306.1) (2025-12-12)
+
+
+### Bug Fixes
+
+* export AiChatTextarea component ([#3120](https://github.com/factorialco/f0/issues/3120)) ([7fc9f39](https://github.com/factorialco/f0/commit/7fc9f3941b23fed40af033a899d4687444042f82))
+
+## [1.306.0](https://github.com/factorialco/f0/compare/f0-react-v1.305.0...f0-react-v1.306.0) (2025-12-11)
+
+
+### Features
+
+* **gridgroup:** dashboard content update ([#3100](https://github.com/factorialco/f0/issues/3100)) ([50ff1f9](https://github.com/factorialco/f0/commit/50ff1f9bccf8c4b9de74548f60e5708223c3934d))
+
+## [1.305.0](https://github.com/factorialco/f0/compare/f0-react-v1.304.1...f0-react-v1.305.0) (2025-12-11)
+
+
+### Features
+
+* **modal:** sizes ([#3104](https://github.com/factorialco/f0/issues/3104)) ([48c9b3d](https://github.com/factorialco/f0/commit/48c9b3d8c25bbcac5206ea3fa40d50e0e333b472))
+
+## [1.304.1](https://github.com/factorialco/f0/compare/f0-react-v1.304.0...f0-react-v1.304.1) (2025-12-11)
+
+
+### Bug Fixes
+
+* **InputField:** change placeholder color ([#3086](https://github.com/factorialco/f0/issues/3086)) ([f1be155](https://github.com/factorialco/f0/commit/f1be15519fb34cd7461e632b16e738e86ad0dac5))
+
 ## [1.304.0](https://github.com/factorialco/f0/compare/f0-react-v1.303.6...f0-react-v1.304.0) (2025-12-10)
 
 

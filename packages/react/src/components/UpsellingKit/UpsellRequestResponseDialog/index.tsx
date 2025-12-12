@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/ui/dialog"
+} from "@/ui/Dialog/dialog"
 import { Separator } from "@/ui/separator"
 import { forwardRef, useCallback, useState } from "react"
 

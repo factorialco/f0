@@ -5,20 +5,21 @@ import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/
 import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-import { ComponentProps, useState } from "react"
+import { ComponentProps, useCallback, useMemo, useState } from "react"
 import { Layout } from "../index"
 
 const FocusableElement = () => {
   return (
-    <div className="p-4">
+    <div className="flex items-center gap-2">
       <label htmlFor="focusable-element">Focusable Element</label>
       <div>
         <input
           type="text"
-          className="border-0 bg-[#fff] px-2"
+          className="border-1 border-solid border-f1-border bg-[#fff] px-2"
           id="focusable-element"
         />
       </div>
@@ -41,7 +42,7 @@ const meta = {
       </div>
     ),
     header: (
-      <div className="flex flex-col items-center justify-center bg-[#777] p-3 text-f1-foreground-inverse">
+      <div className="flex items-center justify-center gap-4 p-3">
         Header
         <FocusableElement />
       </div>
@@ -274,6 +275,33 @@ export const WithGroupGrid: Story = {
   },
   render: (args) => {
     const [editMode, setEditMode] = useState(false)
+    const [globalCounter, setGlobalCounter] = useState(0)
+
+    const widgets = useMemo(() => {
+      return Array.from({ length: 22 }).map((_, index) => {
+        return {
+          id: `block-${index}`,
+          w: getMockAllowedSizes(index)[0].w,
+          h: getMockAllowedSizes(index)[0].h,
+          availableSizes: getMockAllowedSizes(index),
+          deps: ["globalCounter"],
+          content: ({ globalCounter }: { globalCounter?: number }) => (
+            <div>
+              <h4>Block {index + 1}</h4>
+              <p>Global counter: {globalCounter ?? 0}</p>
+            </div>
+          ),
+        }
+      })
+    }, [])
+
+    const widgetWrapper = useCallback(
+      (children: React.ReactNode) => (
+        <div className="h-full bg-[#ff000030] p-4">{children}</div>
+      ),
+      []
+    )
+
     return (
       <Layout.Page {...args}>
         <>
@@ -282,28 +310,26 @@ export const WithGroupGrid: Story = {
             description="This is an example of a Grid Group Layout."
             variant="default"
           >
-            The content above is a `GridGroupLayout`{" "}
-            <F0Checkbox
-              title="Edit Mode"
-              checked={editMode}
-              onCheckedChange={(checked) => setEditMode(checked)}
-            />
+            <div className="flex items-center gap-2">
+              <F0Checkbox
+                title="Edit Mode"
+                checked={editMode}
+                onCheckedChange={(checked) => setEditMode(checked)}
+              />
+              <F0Button
+                label="Increment Global Counter"
+                onClick={() => setGlobalCounter(globalCounter + 1)}
+              />
+              <p>Global counter: {globalCounter}</p>
+            </div>
+            <p>The content above is a `GridGroupLayout`</p>
           </Layout.BlockContent>
           <Layout.GroupGrid
             main
             editMode={editMode}
-            WidgetWrapper={(children) => (
-              <div className="h-full bg-[#ff000030] p-4">{children}</div>
-            )}
-            widgets={Array.from({ length: 22 }).map((_, index) => {
-              return {
-                id: `block-${index}`,
-                w: getMockAllowedSizes(index)[0].w,
-                h: getMockAllowedSizes(index)[0].h,
-                availableSizes: getMockAllowedSizes(index),
-                content: <div>Block {index + 4}</div>,
-              }
-            })}
+            deps={{ globalCounter }}
+            WidgetWrapper={widgetWrapper}
+            widgets={widgets}
           />
         </>
       </Layout.Page>
