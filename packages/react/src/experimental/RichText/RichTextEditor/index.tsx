@@ -2,6 +2,7 @@ import {
   EditorBubbleMenu,
   MentionedUser,
   MentionsConfig,
+  Toolbar,
   ToolbarLabels,
 } from "@/experimental/RichText/CoreEditor"
 import { withSkeleton } from "@/lib/skeleton"
@@ -126,8 +127,10 @@ const RichTextEditorComponent = forwardRef<
   useEffect(() => {
     if (isFullscreen) {
       document.body.style.overflow = "hidden"
+      setIsToolbarOpen(true)
     } else {
       document.body.style.overflow = ""
+      setIsToolbarOpen(false)
     }
     return () => {
       document.body.style.overflow = ""
@@ -267,8 +270,10 @@ const RichTextEditorComponent = forwardRef<
           <div
             ref={editorContentContainerRef}
             className={cn(
-              "scrollbar-macos relative flex w-full items-start justify-center overflow-y-auto pb-1 pl-3 pr-10 pt-3",
-              isFullscreen ? "h-full" : getHeight(height)
+              "scrollbar-macos relative flex w-full items-start justify-center overflow-y-auto pb-1 pt-3",
+              isFullscreen
+                ? "h-full px-10 pb-24"
+                : cn(getHeight(height), "pl-3 pr-10")
             )}
           >
             <motion.div
@@ -305,6 +310,29 @@ const RichTextEditorComponent = forwardRef<
                   isFullscreen={isFullscreen}
                   label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
                 />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {isFullscreen && isToolbarOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="pointer-events-none absolute bottom-10 left-0 right-0 z-[60] flex w-full items-center justify-center"
+              >
+                <div className="pointer-events-auto flex w-max items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-lg">
+                  <Toolbar
+                    labels={toolbarLabels}
+                    editor={editor}
+                    isFullscreen={isFullscreen}
+                    disableButtons={disableAllButtons}
+                    onClose={() => setIsToolbarOpen(false)}
+                    plainHtmlMode={plainHtmlMode}
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

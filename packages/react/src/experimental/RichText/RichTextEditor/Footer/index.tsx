@@ -84,44 +84,65 @@ const Footer = ({
   return (
     <div ref={containerRef} className="flex max-w-full items-center gap-2 py-3">
       <div className="relative flex flex-grow items-center gap-2">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: isToolbarOpen ? "100%" : 0 }}
-          transition={{
-            duration: 0.3,
-            delay: isToolbarOpen ? 0.15 : 0,
-            ease: "easeInOut",
-          }}
-          onAnimationComplete={() => setToolbarAnimationComplete(isToolbarOpen)}
-          className="absolute left-0 top-0 z-10 h-full bg-f1-background"
-          aria-label="Rich text editor toolbar"
-        >
-          <Toolbar
-            labels={toolbarLabels}
-            editor={editor}
-            isFullscreen={isFullscreen}
-            disableButtons={disableButtons}
-            onClose={() => {
-              setIsToolbarOpen(false)
-              setToolbarAnimationComplete(false)
+        {!isFullscreen && (
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: isToolbarOpen ? "100%" : 0 }}
+            transition={{
+              duration: 0.3,
+              delay: isToolbarOpen ? 0.15 : 0,
+              ease: "easeInOut",
             }}
-            animationComplete={toolbarAnimationComplete}
-            plainHtmlMode={plainHtmlMode}
-          />
-        </motion.div>
+            onAnimationComplete={() =>
+              setToolbarAnimationComplete(isToolbarOpen)
+            }
+            className="absolute left-0 top-0 z-10 h-full bg-f1-background"
+            aria-label="Rich text editor toolbar"
+          >
+            <Toolbar
+              labels={toolbarLabels}
+              editor={editor}
+              isFullscreen={isFullscreen}
+              disableButtons={disableButtons}
+              onClose={() => {
+                setIsToolbarOpen(false)
+                setToolbarAnimationComplete(false)
+              }}
+              animationComplete={toolbarAnimationComplete}
+              plainHtmlMode={plainHtmlMode}
+            />
+          </motion.div>
+        )}
 
-        <motion.div
-          className="flex items-center gap-2 overflow-hidden"
-          initial={{ opacity: 1 }}
-          animate={{
-            opacity: isToolbarOpen ? 0 : 1,
-          }}
-          transition={{
-            duration: isToolbarOpen ? 0.15 : 0.25,
-            delay: isToolbarOpen ? 0 : 0.2,
-            ease: "easeInOut",
-          }}
-        >
+        {!isFullscreen && (
+          <motion.div
+            className="flex items-center gap-2 overflow-hidden"
+            initial={{ opacity: 1 }}
+            animate={{
+              opacity: isToolbarOpen ? 0 : 1,
+            }}
+            transition={{
+              duration: isToolbarOpen ? 0.15 : 0.25,
+              delay: isToolbarOpen ? 0 : 0.2,
+              ease: "easeInOut",
+            }}
+          >
+            <F0Button
+              onClick={(e) => {
+                e?.preventDefault()
+                setIsToolbarOpen(true)
+              }}
+              variant="outline"
+              size="md"
+              label="Toolbar"
+              disabled={disableButtons}
+              hideLabel
+              icon={TextSize}
+            />
+          </motion.div>
+        )}
+
+        {isFullscreen && !isToolbarOpen && (
           <F0Button
             onClick={(e) => {
               e?.preventDefault()
@@ -134,6 +155,9 @@ const Footer = ({
             hideLabel
             icon={TextSize}
           />
+        )}
+
+        <div className="flex items-center gap-2">
           {canUseFiles && (
             <F0Button
               icon={Paperclip}
@@ -174,7 +198,7 @@ const Footer = ({
               {editor.storage.characterCount.characters()}/{maxCharacters}
             </p>
           )}
-        </motion.div>
+        </div>
       </div>
 
       <ActionsMenu
