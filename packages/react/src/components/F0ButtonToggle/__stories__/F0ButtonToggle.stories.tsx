@@ -96,10 +96,6 @@ export const Default: Story = {
     selected: undefined,
     onSelectedChange: undefined,
   },
-  render: (args) => {
-    console.log("args", args)
-    return <F0ButtonToggle {...args} />
-  },
 }
 
 export const SingleIcon: Story = {

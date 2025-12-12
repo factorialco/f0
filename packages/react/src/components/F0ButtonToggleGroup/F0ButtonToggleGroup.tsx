@@ -26,15 +26,6 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
-  useEffect(() => {
-    if (multiple) {
-      onChange?.(value as string[])
-    } else {
-      onChange?.(value as string)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localValue])
-
   const handleChange = (newValue: string | string[]) => {
     // For required, prevent clearing all selections
     if (required && ((multiple && newValue.length === 0) || !newValue)) {
