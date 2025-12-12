@@ -12,6 +12,7 @@ import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
+import { FilterPickerInner } from "./FilterPickerInner"
 
 interface FiltersControlsProps<Filters extends FiltersDefinition> {
   filters: Filters
@@ -129,6 +130,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the active filters change
   }, [activeFilters, filters])
 
+  // Compact mode has its own UI with animations
   if (mode === "compact") {
     const hasFiltersApplied = !!Object.values(localFiltersValue).length
 
@@ -243,6 +245,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     )
   }
 
+  // Default mode uses FilterPickerInner for the content
   return (
     <div className="flex items-center gap-2">
       <Popover open={isOpen} onOpenChange={onOpenChange}>
@@ -263,38 +266,15 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           side="bottom"
           aria-id={id}
         >
-          <div
-            className="flex flex-col transition-all"
-            style={{
-              height: formHeight || DEFAULT_FORM_HEIGHT,
-            }}
-          >
-            <div className="flex min-h-0 flex-1">
-              <FilterList
-                definition={filters}
-                tempFilters={localFiltersValue}
-                selectedFilterKey={selectedFilterKey}
-                onFilterSelect={(key: keyof Filters) =>
-                  setSelectedFilterKey(key)
-                }
-                onClickApplyFilters={handleApplyFilters}
-              />
-              {selectedFilterKey && (
-                <FilterContent
-                  selectedFilterKey={selectedFilterKey}
-                  definition={filters}
-                  tempFilters={localFiltersValue}
-                  onFilterChange={updateFilterValue}
-                />
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-              <F0Button
-                onClick={handleApplyFilters}
-                label={i18n.filters.applyFilters}
-              />
-            </div>
-          </div>
+          <FilterPickerInner
+            filters={filters}
+            tempFilters={localFiltersValue}
+            selectedFilterKey={selectedFilterKey}
+            onFilterSelect={setSelectedFilterKey}
+            onFilterChange={updateFilterValue}
+            onApply={handleApplyFilters}
+            height={formHeight || DEFAULT_FORM_HEIGHT}
+          />
         </PopoverContent>
       </Popover>
     </div>
