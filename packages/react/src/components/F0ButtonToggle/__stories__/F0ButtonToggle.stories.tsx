@@ -1,6 +1,7 @@
 import { Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "storybook/internal/preview-api"
 import { buttonToggleSizes, buttonToggleVariants } from "../"
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
@@ -22,12 +23,8 @@ const meta = {
   },
   tags: ["autodocs"],
   args: {
-    onSelectedChange: (selected) => {
-      console.log("Button toggle clicked", selected)
-    },
     label: ["Toggle me", "Toggle me again"],
     size: "md",
-    selected: false,
     disabled: false,
   },
   argTypes: {
@@ -90,6 +87,12 @@ export const Default: Story = {
   args: {
     label: "Default Toggle",
     icon: [MicrophoneNegative, Microphone],
+    selected: undefined,
+    onSelectedChange: undefined,
+  },
+  render: (args) => {
+    console.log("args", args)
+    return <F0ButtonToggle {...args} />
   },
 }
 
@@ -105,6 +108,29 @@ export const VariantExpanded: Story = {
     label: ["Toggle me", "Toggle me"],
     icon: [MicrophoneNegative, Microphone],
     variant: "expanded",
+  },
+}
+
+export const Controlled: Story = {
+  args: {
+    label: "Controlled Toggle",
+    icon: Microphone,
+    selected: true,
+  },
+  render: (args) => {
+    const [selected, setSelected] = useState(args.selected)
+    return (
+      <>
+        <F0ButtonToggle
+          {...args}
+          selected={selected}
+          onSelectedChange={setSelected}
+        />
+        <p className="text-gray-500 text-sm">
+          Selected: {selected ? "true" : "false"}
+        </p>
+      </>
+    )
   },
 }
 

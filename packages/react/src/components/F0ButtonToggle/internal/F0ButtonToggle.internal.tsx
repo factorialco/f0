@@ -4,11 +4,10 @@ import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 import * as TogglePrimitive from "@radix-ui/react-toggle"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
-import { forwardRef, useEffect, useMemo, useState } from "react"
-import { OneEllipsis } from "../../OneEllipsis"
+import { forwardRef, useMemo, useState } from "react"
 import { F0ButtonToggleInternalProps } from "./types.internal"
 
-const buttonToggleSizeVariants = cva({
+const buttonToggleVariants = cva({
   variants: {
     size: {
       sm: "h-6",
@@ -18,6 +17,14 @@ const buttonToggleSizeVariants = cva({
     variant: {
       expanded: "p-2",
       compact: "",
+    },
+    withBorder: {
+      true: "border border-solid border-f1-border",
+      false: "",
+    },
+    selected: {
+      true: "",
+      false: "",
     },
   },
   compoundVariants: [
@@ -35,6 +42,12 @@ const buttonToggleSizeVariants = cva({
       variant: "expanded",
       size: "lg",
       class: "h-20 w-28 [&_.main]:h-6",
+    },
+    // With border and selected
+    {
+      withBorder: true,
+      selected: true,
+      class: "border-f1-border-selected",
     },
   ],
   defaultVariants: { size: "md", variant: "compact" },
@@ -56,13 +69,14 @@ export const F0ButtonToggleInternal = forwardRef<
 >(
   (
     {
-      onSelectedChange = () => {},
-      selected = false,
+      onSelectedChange,
+      selected,
       label,
       disabled = false,
       icon,
       size = "md",
       variant = "compact",
+      withBorder = false,
       ...props
     },
     ref
@@ -88,26 +102,25 @@ export const F0ButtonToggleInternal = forwardRef<
 
     const [localSelected, setLocalSelected] = useState(selected)
 
-    const handleChange = (pressed: boolean) => {
-      setLocalSelected(pressed)
-      onSelectedChange?.(pressed)
-    }
-
-    useEffect(() => {
-      if (localSelected === selected) {
-        return
+    // The state can be controlled or uncontrolled
+    // If it is controlled, we use the selected prop and onSelectedChange prop
+    // If it is uncontrolled, we use the localSelected state and setLocalSelected function
+    const state = useMemo(() => {
+      const isControlled = selected !== undefined
+      return {
+        selected: isControlled ? selected : localSelected,
+        onSelectedChange: isControlled ? onSelectedChange : setLocalSelected,
       }
-      setLocalSelected(selected)
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when the selected prop changes
-    }, [selected])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selected, onSelectedChange, localSelected])
 
-    const localLabel = localSelected ? labelOn : labelOff
+    const localLabel = state.selected ? labelOn : labelOff
 
     return (
       <TogglePrimitive.Root
         ref={ref}
-        pressed={localSelected}
-        onPressedChange={handleChange}
+        pressed={state.selected}
+        onPressedChange={state.onSelectedChange}
         disabled={disabled}
         aria-label={localLabel}
         title={localLabel}
@@ -115,15 +128,20 @@ export const F0ButtonToggleInternal = forwardRef<
           "aspect-square px-0",
           "flex flex-col items-center justify-center gap-2",
           focusRing(),
-          actionVariants({ variant: localSelected ? "selected" : "ghost" }),
+          actionVariants({ variant: state.selected ? "selected" : "ghost" }),
           buttonSizeVariants({ size }),
-          buttonToggleSizeVariants({ size, variant })
+          buttonToggleVariants({
+            size,
+            variant,
+            withBorder,
+            selected: state.selected,
+          })
         )}
         {...props}
       >
         <AnimatePresence initial={false}>
           <div className="main relative flex flex-col items-center justify-center">
-            {localSelected ? (
+            {state.selected ? (
               <motion.div
                 className="absolute flex items-center justify-center"
                 key="icon-on"
@@ -145,9 +163,11 @@ export const F0ButtonToggleInternal = forwardRef<
 
         {variant === "expanded" && (
           <AnimatePresence initial={false}>
-            <OneEllipsis className={cn(labelSizeVariants({ size }))}>
+            <span
+              className={cn("max-w-full truncate", labelSizeVariants({ size }))}
+            >
               {localLabel}
-            </OneEllipsis>
+            </span>
           </AnimatePresence>
         )}
       </TogglePrimitive.Root>

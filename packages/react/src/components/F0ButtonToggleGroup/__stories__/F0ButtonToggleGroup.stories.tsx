@@ -1,5 +1,7 @@
-import { Microphone, MicrophoneNegative } from "@/icons/app"
+import { buttonToggleVariants } from "@/components/F0ButtonToggle"
+import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { toArray } from "@/lib/toArray"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { F0ButtonToggleGroup } from "../index"
@@ -17,20 +19,6 @@ const meta = {
     },
   },
   tags: ["autodocs"],
-  args: {
-    items: [
-      { label: "Option 1", icon: [Microphone, MicrophoneNegative] },
-      { label: "Option 2", icon: [Microphone, MicrophoneNegative] },
-      { label: "Option 3", icon: [Microphone, MicrophoneNegative] },
-    ],
-    size: "md",
-    multiple: false,
-    required: false,
-    value: "",
-    onChange: (value) => {
-      console.log("Value changed:", value)
-    },
-  },
   argTypes: {
     size: {
       control: "select",
@@ -63,43 +51,93 @@ const meta = {
       description:
         "Array of button items. Each item should have label, icon, and optionally disabled.",
     },
+    variant: {
+      control: "select",
+      options: buttonToggleVariants,
+      description: "Visual style variant of the button. (default: compact)",
+      table: {
+        type: {
+          summary: buttonToggleVariants.join(" | "),
+        },
+      },
+    },
   },
+  decorators: [
+    (Story, { args }) => {
+      const [value, setValue] = useState<string[]>([])
+      const handleChange = (newValue: string | string[]) => {
+        setValue(toArray(newValue))
+      }
+      return (
+        <div className="flex flex-col gap-4">
+          <Story
+            args={{
+              ...args,
+              value: args.multiple ? value : value[0],
+              onChange: handleChange,
+            }}
+          />
+          <div className="text-gray-500 mt-10 text-sm">
+            Value: {Array.isArray(value) ? value.join(", ") : value}
+          </div>
+        </div>
+      )
+    },
+  ],
 } satisfies Meta<typeof F0ButtonToggleGroup>
 
 export default meta
+
 type Story = StoryObj<typeof meta>
 
 // Basic single selection
 export const Default: Story = {
   args: {
     items: [
-      { label: "Option 1", icon: Microphone },
-      { label: "Option 2", icon: Microphone },
-      { label: "Option 3", icon: Microphone },
+      {
+        label: ["Active", "Inactive"],
+        icon: [Microphone, MicrophoneNegative],
+        value: "active",
+      },
+      {
+        label: "Option 2 with a long label that should be truncated",
+        icon: Delete,
+        value: "delete",
+      },
+      { label: "Option 3", icon: Archive, value: "archive" },
     ],
     size: "md",
     multiple: false,
     required: false,
-    value: "",
-    onChange: (value) => {
-      console.log("Value changed:", value)
-    },
-  },
-  render: (args) => {
-    const [value, setValue] = useState<string>("")
-    return (
-      <F0ButtonToggleGroup
-        {...args}
-        value={value}
-        onChange={(newValue) => {
-          setValue(newValue)
-          args.onChange?.(newValue)
-        }}
-      />
-    )
   },
 }
 
+export const Single: Story = {
+  args: {
+    ...Default.args,
+    multiple: false,
+  },
+}
+
+// Required selection
+export const SingleRequired: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When required is true, at least one option must be selected. The selection cannot be cleared.",
+      },
+    },
+  },
+  args: {
+    ...Default.args,
+    required: true,
+  },
+}
+
+export const VariantExpanded: Story = {
+  args: { ...Default.args, variant: "expanded" },
+}
 // Multiple selection
 export const Multiple: Story = {
   parameters: {
@@ -111,84 +149,32 @@ export const Multiple: Story = {
     },
   },
   args: {
-    items: [
-      { label: "Option 1", icon: Microphone },
-      { label: "Option 2", icon: Microphone },
-      { label: "Option 3", icon: Microphone },
-    ],
-    size: "md",
+    ...Default.args,
     multiple: true,
     required: false,
-    value: [],
-    onChange: (value) => {
-      console.log("Value changed:", value)
+  },
+}
+
+export const MultipleRequired: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Allows multiple buttons to be selected at the same time. The value prop uses string[] instead of string. But at least one button must be selected.",
+      },
     },
   },
-  render: (args) => {
-    const [value, setValue] = useState<string[]>([])
-    return (
-      <F0ButtonToggleGroup
-        {...args}
-        value={value}
-        onChange={(newValue) => {
-          setValue(newValue)
-          args.onChange?.(newValue)
-        }}
-      />
-    )
+  args: {
+    ...Multiple.args,
+    multiple: true,
+    required: true,
   },
 }
-
-// With different icons
-export const WithIcons: Story = {
-  parameters: withSnapshot({}),
-  render: () => {
-    const [value1, setValue1] = useState<string>("")
-    const [value2, setValue2] = useState<string[]>([])
-
-    return (
-      <div className="flex flex-col gap-6">
-        <div>
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>
-            Single Selection
-          </div>
-          <F0ButtonToggleGroup
-            items={[
-              { label: "Mic Off", icon: MicrophoneNegative },
-              { label: "Mic On", icon: Microphone },
-              { label: "Mic Off", icon: MicrophoneNegative },
-            ]}
-            size="md"
-            multiple={false}
-            required={false}
-            value={value1}
-            onChange={setValue1}
-          />
-        </div>
-        <div>
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>
-            Multiple Selection
-          </div>
-          <F0ButtonToggleGroup
-            items={[
-              { label: "Mic Off", icon: MicrophoneNegative },
-              { label: "Mic On", icon: Microphone },
-              { label: "Mic Off", icon: MicrophoneNegative },
-            ]}
-            size="md"
-            multiple={true}
-            required={false}
-            value={value2}
-            onChange={setValue2}
-          />
-        </div>
-      </div>
-    )
-  },
-}
-
 // Size variants
 export const Sizes: Story = {
+  args: {
+    ...Default.args,
+  },
   parameters: withSnapshot({}),
   render: () => {
     const [valueSm, setValueSm] = useState<string>("")
@@ -248,7 +234,7 @@ export const Sizes: Story = {
 }
 
 // With disabled items
-export const WithDisabled: Story = {
+export const WithDisabledItem: Story = {
   parameters: {
     docs: {
       description: {
@@ -257,51 +243,27 @@ export const WithDisabled: Story = {
       },
     },
   },
-  render: () => {
-    const [value, setValue] = useState<string>("")
-    return (
-      <F0ButtonToggleGroup
-        items={[
-          { label: "Enabled 1", icon: Microphone },
-          { label: "Disabled", icon: Microphone, disabled: true },
-          { label: "Enabled 2", icon: Microphone },
-        ]}
-        size="md"
-        multiple={false}
-        required={false}
-        value={value}
-        onChange={setValue}
-      />
-    )
+  args: {
+    ...Default.args,
+    items: Default.args?.items?.map((item, index) => ({
+      ...item,
+      disabled: index === 1,
+    })),
   },
 }
 
-// Required selection
-export const Required: Story = {
+// With disabled all items
+export const Disabled: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "When required is true, at least one option must be selected. The selection cannot be cleared.",
+        story: "All items can be disabled. Disabled items cannot be selected.",
       },
     },
   },
-  render: () => {
-    const [value, setValue] = useState<string>("Option 1")
-    return (
-      <F0ButtonToggleGroup
-        items={[
-          { label: "Option 1", icon: Microphone },
-          { label: "Option 2", icon: Microphone },
-          { label: "Option 3", icon: Microphone },
-        ]}
-        size="md"
-        multiple={false}
-        required={true}
-        value={value}
-        onChange={setValue}
-      />
-    )
+  args: {
+    ...Default.args,
+    disabled: true,
   },
 }
 

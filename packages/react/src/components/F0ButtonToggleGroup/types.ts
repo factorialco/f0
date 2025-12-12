@@ -1,7 +1,18 @@
-import { ButtonToggleSize, F0ButtonToggleProps } from "../F0ButtonToggle"
+import {
+  ButtonToggleSize,
+  ButtonToggleVariant,
+  F0ButtonToggleProps,
+} from "../F0ButtonToggle"
+
+export type F0ButtonToggleGroupItem = Pick<
+  F0ButtonToggleProps,
+  "label" | "icon" | "disabled"
+> & {
+  value: string
+}
 
 export type F0ButtonToggleGroupProps = {
-  items: Pick<F0ButtonToggleProps, "label" | "icon" | "disabled">[]
+  items: F0ButtonToggleGroupItem[]
   /**
    * The size of the buttons.
    * @default "md"
@@ -12,13 +23,26 @@ export type F0ButtonToggleGroupProps = {
    * Whether multiple selections are allowed.
    * @default false
    */
-  multiple: boolean
+
+  /**
+   * The variant of the buttons.
+   * @default "compact"
+   * "expanded" - The buttons will be expanded to show the label.
+   * "compact" - The buttons will be compact and only show the icon.
+   */
+  variant?: ButtonToggleVariant
 
   /**
    * Whether a selection is required.
    * @default false
    */
   required: boolean
+
+  /**
+   * Whether all items are disabled.
+   * @default false
+   */
+  disabled?: boolean
 } & (
   | {
       multiple: true
