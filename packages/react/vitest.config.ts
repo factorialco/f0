@@ -67,14 +67,24 @@ export default defineConfig({
         },
         test: {
           name: "storybook",
+          threads: false, // disable worker threads for this project
+          maxWorkers: 1,
           testTimeout: 120000, // 120 seconds timeout per test
           hookTimeout: 90000, // 90 seconds timeout for hooks
           retry: 2, // Retry failed tests up to 2 times
-          maxWorkers: 2,
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright(),
+            provider: playwright({
+              // pass Playwright launch options: avoid sandboxing crashes on GH Actions
+              launchOptions: {
+                args: [
+                  "--no-sandbox",
+                  "--disable-setuid-sandbox",
+                  "--disable-dev-shm-usage",
+                ],
+              },
+            }),
             instances: [
               {
                 browser: "chromium",
