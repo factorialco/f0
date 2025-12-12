@@ -30,6 +30,7 @@ export function useSelectable<
   selectedState,
   onSelectItems,
   disableSelectAll = false,
+  isSearchActive = false,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -94,6 +95,10 @@ export function useSelectable<
 
   const [allSelectedCheck, setAllSelectedCheck] = useState(false)
 
+  // Track if allSelectedCheck was set by explicit user action (clicking "Select All")
+  // vs auto-detection (selecting all items one by one)
+  const wasExplicitSelectAll = useRef(false)
+
   /**
    * Store the total count when "select all" is clicked.
    * This value is used to calculate selectedItemsCount even when search filters change,
@@ -104,10 +109,17 @@ export function useSelectable<
   /**
    * Determine the status of the all selected checkbox
    * When disableSelectAll is true, this will always be false
+   * When isSearchActive is true, don't auto-detect "all selected" from visible items
+   * because they're a filtered subset - only explicit allSelectedCheck counts
    */
   const isAllSelected = useMemo(() => {
     if (disableSelectAll) {
       return false
+    }
+    // When search is active, only allSelectedCheck should trigger "all selected" state
+    // (not areAllKnownItemsSelected, since visible items are filtered)
+    if (isSearchActive) {
+      return allSelectedCheck && checkedCount > 0
     }
     return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
   }, [
@@ -115,6 +127,7 @@ export function useSelectable<
     allSelectedCheck,
     areAllKnownItemsSelected,
     checkedCount,
+    isSearchActive,
   ])
 
   const allSelectedState = useMemo(() => {
@@ -122,16 +135,23 @@ export function useSelectable<
       return false
     }
 
-    const isPartiallySelected =
-      (checkedCount > 0 && !isAllSelected) ||
-      (isAllSelected && uncheckedCount > 0)
+    // During search, only allow allSelected state if user explicitly clicked "Select All"
+    // This prevents auto-detection from triggering during search
+    if (isSearchActive && !wasExplicitSelectAll.current) {
+      return false
+    }
 
-    return isAllSelected
-      ? isPartiallySelected
-        ? "indeterminate"
-        : true
-      : false
-  }, [disableSelectAll, isAllSelected, checkedCount, uncheckedCount])
+    // If user hasn't clicked "Select All" (either explicitly or via auto-detection), state is false
+    if (!allSelectedCheck) {
+      return false
+    }
+
+    // User is in "Select All" mode
+    // Calculate state based on uncheckedCount
+    // - If no items are unchecked: true (all selected)
+    // - If some items are unchecked: indeterminate
+    return uncheckedCount === 0 ? true : "indeterminate"
+  }, [disableSelectAll, allSelectedCheck, uncheckedCount, isSearchActive])
 
   useEffect(() => {
     setLocalSelectedState((current) => ({
@@ -506,6 +526,8 @@ export function useSelectable<
       return
     }
     setAllSelectedCheck(checked)
+    // Mark as explicit user action
+    wasExplicitSelectAll.current = checked
 
     // Store the total count when select all is activated, clear it when deactivated
     if (checked) {
@@ -697,15 +719,20 @@ export function useSelectable<
   // If all items are selected, we need to set the allSelectedCheck state to true
   // If there are no selected items, we need to set the allSelectedCheck state to false
   // If some items are selected, we need to keep the state as is to know if we will need to check the next page items
+  // IMPORTANT: Don't auto-trigger allSelectedCheck during search, because visible items
+  // are a filtered subset and selecting all of them shouldn't mean "select all"
   useEffect(() => {
-    if (areAllKnownItemsSelected) {
+    if (areAllKnownItemsSelected && !isSearchActive) {
       setAllSelectedCheck(true)
+      // This is auto-detection, not explicit user action
+      // wasExplicitSelectAll remains false
     }
-  }, [areAllKnownItemsSelected])
+  }, [areAllKnownItemsSelected, isSearchActive])
 
   useEffect(() => {
     if (checkedCount === 0) {
       setAllSelectedCheck(false)
+      wasExplicitSelectAll.current = false
     }
   }, [checkedCount])
 
