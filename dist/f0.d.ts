@@ -4548,7 +4548,7 @@ export declare const usePrivacyMode: () => {
 
 export declare const useReducedMotion: () => boolean;
 
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -4562,6 +4562,12 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * When true, allSelected will always be false even if all items are checked.
      */
     disableSelectAll?: boolean;
+    /**
+     * Indicates if search is currently active.
+     * When true, selecting all visible items won't trigger "all selected" state,
+     * because the visible items are a filtered subset.
+     */
+    isSearchActive?: boolean;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -4716,33 +4722,6 @@ declare global {
     }
 }
 
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
-        };
-    }
-}
-
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
@@ -4761,8 +4740,30 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        };
+    }
 }
 
 
@@ -4772,4 +4773,9 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
