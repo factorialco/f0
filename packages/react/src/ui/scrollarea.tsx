@@ -65,7 +65,7 @@ const ScrollArea = forwardRef<
         localViewport?.removeEventListener("scroll", handleScroll)
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps -- we want to track the current value
-    }, [localViewportRef.current])
+    }, [localViewportRef.current, onScrollBottom, onScrollTop, scrollMargin])
 
     return (
       <ScrollAreaPrimitive.Root

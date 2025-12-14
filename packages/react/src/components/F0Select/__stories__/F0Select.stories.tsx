@@ -773,6 +773,43 @@ export const WithCustomTrigger: Story = {
   ),
 }
 
+/**
+ * Always open list with a paginated data source.
+ * Demonstrates infinite scroll behavior within the always-open list.
+ */
+export const AlwaysOpenWithDataSource: Story = {
+  args: {
+    label: "Select Employee",
+    alwaysOpen: true,
+    multiple: true,
+    showSearchBox: true,
+    searchBoxPlaceholder: "Search employees...",
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      // description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+  },
+  decorators: [
+    (Story, { args }) => {
+      const [localValue, setLocalValue] = useState<string | undefined>("5")
+      return (
+        <div className="">
+          <Story
+            args={{
+              ...args,
+              value: localValue,
+              onChange: setLocalValue,
+            }}
+          />
+        </div>
+      )
+    },
+  ],
+}
+
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({})),
   args: {

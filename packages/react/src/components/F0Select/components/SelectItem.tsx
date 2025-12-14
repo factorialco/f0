@@ -3,17 +3,24 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { cn } from "@/lib/utils"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 import { F0SelectItemObject } from "../types"
 
 export const SelectItem = <T extends string, R>({
   item,
+  alwaysOpen,
 }: {
   item: F0SelectItemObject<T, R>
+  alwaysOpen: boolean
 }) => {
   return (
-    <SelectItemPrimitive value={item.value} disabled={item.disabled}>
-      <div className="flex w-full items-start gap-1.5">
+    <SelectItemPrimitive
+      value={item.value}
+      disabled={item.disabled}
+      className={cn(alwaysOpen && "px-4")}
+    >
+      <div className={"flex w-full items-start gap-1.5"}>
         {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
         {item.icon && (
           <div className="shrink-0 text-f1-icon">

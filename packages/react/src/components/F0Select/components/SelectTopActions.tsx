@@ -28,6 +28,8 @@ interface SelectTopActionsProps<
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (grouping: GroupingState<R, Grouping>) => void
+  /** Whether to auto-focus the search box. Defaults to true. */
+  autoFocus?: boolean
 }
 
 export const SelectTopActions = <R extends RecordType = RecordType>({
@@ -41,6 +43,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   filters,
   currentFilters,
   onFiltersChange,
+  autoFocus = true,
 }: SelectTopActionsProps<R>) => {
   const i18n = useI18n()
 
@@ -66,7 +69,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
                 onChange={onSearchChange}
                 value={searchValue}
                 debounceTime={400}
-                autoFocus={!isFiltersOpen}
+                autoFocus={autoFocus && !isFiltersOpen}
                 clearable
               />
             </div>

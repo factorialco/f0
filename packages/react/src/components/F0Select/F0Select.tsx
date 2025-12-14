@@ -97,6 +97,7 @@ const F0SelectComponent = forwardRef(function Select<
     required,
     multiple,
     portalContainer,
+    alwaysOpen,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -124,7 +125,7 @@ const F0SelectComponent = forwardRef(function Select<
     "disableSelectAll" in props ? props.disableSelectAll : false
   type ActualRecordType = ResolvedRecordType<R>
 
-  const [openLocal, setOpenLocal] = useState(open)
+  const [openLocal, setOpenLocal] = useState(alwaysOpen || open)
 
   const defaultItems = useMemo(
     () =>
@@ -516,6 +517,8 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const handleChangeOpenLocal = (open: boolean) => {
+    // When alwaysOpen is true, prevent closing
+    if (alwaysOpen && !open) return
     debouncedHandleChangeOpenLocal(open)
   }
 
@@ -542,13 +545,14 @@ const F0SelectComponent = forwardRef(function Select<
                 <SelectItem
                   key={String(mappedOption.value)}
                   item={mappedOption}
+                  alwaysOpen={alwaysOpen ?? false}
                 />
               ),
               value: mappedOption.value,
             }
       })
     },
-    [optionMapper]
+    [alwaysOpen, optionMapper]
   )
 
   const items: VirtualItem[] = useMemo(() => {
@@ -594,8 +598,9 @@ const F0SelectComponent = forwardRef(function Select<
     ...props,
     onItemCheckChange,
     disabled,
-    open: openLocal,
+    open: alwaysOpen || openLocal,
     onOpenChange: handleChangeOpenLocal,
+    ...(alwaysOpen ? { as: "list" as const } : {}),
   }
 
   const selectPrimitiveProps = multiple
@@ -610,6 +615,63 @@ const F0SelectComponent = forwardRef(function Select<
         value: selectedItemsValues[0] ?? "",
         multiple: false as const,
       } as const)
+
+  const selectContent = (
+    <SelectContent
+      items={items}
+      taller={!!source?.filters}
+      className={selectContentClassName}
+      emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
+      bottom={<SelectBottomActions actions={actions} />}
+      top={
+        <>
+          <SelectTopActions
+            searchValue={currentSearch}
+            onSearchChange={onSearchChangeLocal}
+            searchBoxPlaceholder={searchBoxPlaceholder}
+            showSearchBox={showSearchBox}
+            grouping={localSource.grouping}
+            currentGrouping={localSource.currentGrouping}
+            onGroupingChange={localSource.setCurrentGrouping}
+            filters={localSource.filters}
+            currentFilters={localSource.currentFilters}
+            onFiltersChange={localSource.setCurrentFilters}
+            autoFocus={!alwaysOpen}
+          />
+          {multiple && !disableSelectAll && !currentSearch && (
+            <SelectAll
+              selectedCount={selectionMeta.selectedItemsCount}
+              indeterminate={
+                selectedState.allSelected === "indeterminate" ||
+                (selectedState.allSelected === false &&
+                  selectionMeta.selectedItemsCount > 0)
+              }
+              value={!!selectedState.allSelected}
+              onChange={handleSelectAllWithTracking}
+            />
+          )}
+        </>
+      }
+      forceMinHeight={!!localSource.filters}
+      onScrollBottom={handleScrollBottom}
+      scrollMargin={10}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading || loading}
+      showLoadingIndicator={!!children}
+      portalContainer={effectivePortalContainer}
+    />
+  )
+
+  // When alwaysOpen is true, render only the content without a trigger
+  if (alwaysOpen) {
+    return (
+      <div className="h-[450px] w-full rounded-md border border-solid border-f1-border-secondary">
+        <SelectPrimitive {...selectPrimitiveProps}>
+          {selectContent}
+        </SelectPrimitive>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -706,50 +768,7 @@ const F0SelectComponent = forwardRef(function Select<
             </InputField>
           )}
         </SelectTrigger>
-        {openLocal && (
-          <SelectContent
-            items={items}
-            taller={!!source?.filters}
-            className={selectContentClassName}
-            emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
-            bottom={<SelectBottomActions actions={actions} />}
-            top={
-              <>
-                <SelectTopActions
-                  searchValue={currentSearch}
-                  onSearchChange={onSearchChangeLocal}
-                  searchBoxPlaceholder={searchBoxPlaceholder}
-                  showSearchBox={showSearchBox}
-                  grouping={localSource.grouping}
-                  currentGrouping={localSource.currentGrouping}
-                  onGroupingChange={localSource.setCurrentGrouping}
-                  filters={localSource.filters}
-                  currentFilters={localSource.currentFilters}
-                  onFiltersChange={localSource.setCurrentFilters}
-                />
-                {multiple && !disableSelectAll && !currentSearch && (
-                  <SelectAll
-                    selectedCount={selectionMeta.selectedItemsCount}
-                    indeterminate={
-                      selectedState.allSelected === "indeterminate" ||
-                      (selectedState.allSelected === false &&
-                        selectionMeta.selectedItemsCount > 0)
-                    }
-                    value={!!selectedState.allSelected}
-                    onChange={handleSelectAllWithTracking}
-                  />
-                )}
-              </>
-            }
-            forceMinHeight={!!localSource.filters}
-            onScrollBottom={handleScrollBottom}
-            scrollMargin={10}
-            isLoadingMore={isLoadingMore}
-            isLoading={isLoading || loading}
-            showLoadingIndicator={!!children}
-            portalContainer={effectivePortalContainer}
-          />
-        )}
+        {openLocal && selectContent}
       </SelectPrimitive>
     </>
   )
