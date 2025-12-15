@@ -36,22 +36,11 @@ const SingleLoadingRowInner = <
     selectedItems,
     checkColumnWidth,
     tableWithChildren,
-  }: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  }: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     rowRef: React.RefObject<HTMLTableRowElement>
     rowIndex: number
   },
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: ((element: HTMLTableRowElement | null) => void) | React.RefObject<HTMLTableRowElement> | null
 ) => {
   const loadingRowRef = useRef<HTMLTableRowElement | null>(null)
   const rowRefCurrent = rowRef?.current
@@ -111,15 +100,7 @@ const SingleLoadingRow = forwardRef(SingleLoadingRowInner) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     rowRef: React.RefObject<HTMLTableRowElement>
     rowIndex: number
   } & {
@@ -142,15 +123,7 @@ const RowLoadingInner = <
   {
     rowRef,
     ...props
-  }: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  }: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     rowRef: React.RefObject<HTMLTableRowElement>
     source: DataCollectionSource<
       R,
@@ -163,10 +136,7 @@ const RowLoadingInner = <
     >
     paginationInfo?: ChildrenPaginationInfo
   },
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: ((element: HTMLTableRowElement | null) => void) | React.RefObject<HTMLTableRowElement> | null
 ) => {
   const childrenCount = props.source.childrenCount?.({
     item: props.item,
@@ -183,8 +153,7 @@ const RowLoadingInner = <
       : props.paginationInfo.perPage
     : undefined
 
-  const loadingRowsCount =
-    childrenCount ?? paginatedChildrenCount ?? DEFAULT_LOADING_ROWS_COUNT
+  const loadingRowsCount = childrenCount ?? paginatedChildrenCount ?? DEFAULT_LOADING_ROWS_COUNT
 
   return (
     <>
@@ -210,15 +179,7 @@ export const RowLoading = forwardRef(RowLoadingInner) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     rowRef: React.RefObject<HTMLTableRowElement>
     source: DataCollectionSource<
       R,

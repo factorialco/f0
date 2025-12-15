@@ -1,16 +1,12 @@
 import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
-import {
-  BaseQuestion,
-  BaseQuestionPropsForOtherQuestionComponents,
-} from "../BaseQuestion"
+import { BaseQuestion, BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 
-export type BaseScoreQuestionProps =
-  BaseQuestionPropsForOtherQuestionComponents & {
-    value?: number
-    options: { value: number; label: string }[]
-  }
+export type BaseScoreQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+  value?: number
+  options: { value: number; label: string }[]
+}
 
 const ScoreOption = ({
   value,

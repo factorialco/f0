@@ -5,13 +5,12 @@ import * as OverflowListStories from "./index.stories"
 
 # OverflowList
 
-The `OverflowList` is a responsive component that manages lists of items when
-space is limited. It solves the common problem of displaying a horizontal list
-of elements that might not all fit within their container.
+The `OverflowList` is a responsive component that manages lists of items when space is limited. It
+solves the common problem of displaying a horizontal list of elements that might not all fit within
+their container.
 
-As the available space changes (like when a user resizes their browser window),
-the component dynamically recalculates which items should be visible and which
-should be in the overflow dropdown.
+As the available space changes (like when a user resizes their browser window), the component
+dynamically recalculates which items should be visible and which should be in the overflow dropdown.
 
 ## Anatomy
 
@@ -20,25 +19,24 @@ should be in the overflow dropdown.
 
 ## Customization
 
-Every item in the overflow list can be customized using the different render
-props.
+Every item in the overflow list can be customized using the different render props.
 
-The `renderListItem` prop is used to render items outside of the overflow list,
-and the `renderDropdownItem` prop is used for items inside of the dropdown.
+The `renderListItem` prop is used to render items outside of the overflow list, and the
+`renderDropdownItem` prop is used for items inside of the dropdown.
 
 # Fixed Size
 
-For those lists where the width of the items is known, you can set the value to
-avoid calculating the width of the items in runtime
+For those lists where the width of the items is known, you can set the value to avoid calculating
+the width of the items in runtime
 
 ### Overflow Indicator
 
-The overflow indicator is the UI piece used to indicate that there are more
-items in the overflow list. It is rendered when the number of items in the
-overflow list is greater than the number of items that can be displayed.
+The overflow indicator is the UI piece used to indicate that there are more items in the overflow
+list. It is rendered when the number of items in the overflow list is greater than the number of
+items that can be displayed.
 
-If `renderOverflowIndicator` is not provided, the default overflow indicator
-will be displayed, but it can be customized by providing a custom component.
+If `renderOverflowIndicator` is not provided, the default overflow indicator will be displayed, but
+it can be customized by providing a custom component.
 
 <Canvas of={OverflowListStories.WithCustomOverflowIndicator} />
 

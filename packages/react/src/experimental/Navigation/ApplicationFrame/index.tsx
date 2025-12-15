@@ -1,9 +1,4 @@
-import {
-  AnimatePresence,
-  LayoutGroup,
-  motion,
-  MotionConfig,
-} from "motion/react"
+import { AnimatePresence, LayoutGroup, motion, MotionConfig } from "motion/react"
 import { cn, focusRing } from "../../../lib/utils"
 
 import { useReducedMotion } from "../../../lib/a11y"
@@ -42,11 +37,7 @@ export function ApplicationFrame({
     : aiPromotion?.enabled
       ? AiPromotionChatProvider
       : Fragment
-  const aiProps = ai?.enabled
-    ? ai
-    : aiPromotion?.enabled
-      ? aiPromotion
-      : undefined
+  const aiProps = ai?.enabled ? ai : aiPromotion?.enabled ? aiPromotion : undefined
 
   return (
     <FrameProvider>
@@ -99,21 +90,14 @@ function shouldToggleSidebar(
 /**
  * Custom hook to automatically close sidebar when AI chat opens on smaller screens
  */
-function useAutoCloseSidebar(
-  isAiChatOpen: boolean,
-  shouldAutoCloseSidebar: boolean
-) {
+function useAutoCloseSidebar(isAiChatOpen: boolean, shouldAutoCloseSidebar: boolean) {
   const { sidebarState, toggleSidebar } = useSidebar()
   const previousAiChatOpenRef = useRef(isAiChatOpen)
 
   useEffect(() => {
     if (
       shouldAutoCloseSidebar &&
-      shouldToggleSidebar(
-        isAiChatOpen,
-        previousAiChatOpenRef.current,
-        sidebarState
-      )
+      shouldToggleSidebar(isAiChatOpen, previousAiChatOpenRef.current, sidebarState)
     ) {
       toggleSidebar({ isInvokedByUser: false })
     }
@@ -129,17 +113,13 @@ function ApplicationFrameContent({
   sidebar,
   banner,
 }: ApplicationFrameProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
-    useSidebar()
+  const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const { open: isAiChatOpen } = useAiChat()
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
-  const shouldAutoCloseSidebar = useMediaQuery(
-    `(max-width: ${breakpoints.xl}px)`,
-    {
-      initializeWithValue: true,
-    }
-  )
+  const shouldAutoCloseSidebar = useMediaQuery(`(max-width: ${breakpoints.xl}px)`, {
+    initializeWithValue: true,
+  })
 
   useEffect(() => {
     setForceFloat(isAiChatOpen)
@@ -167,12 +147,9 @@ function ApplicationFrameContent({
               <AnimatePresence>
                 {sidebarState === "unlocked" && (
                   <motion.nav
-                    className={cn(
-                      "fixed inset-0 z-[5] bg-f1-background-inverse",
-                      {
-                        hidden: !isSmallScreen,
-                      }
-                    )}
+                    className={cn("fixed inset-0 z-[5] bg-f1-background-inverse", {
+                      hidden: !isSmallScreen,
+                    })}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.1 }}
                     exit={{ opacity: 0 }}
@@ -213,10 +190,7 @@ function ApplicationFrameContent({
                   damping: 30,
                 }}
               >
-                <motion.div
-                  className="flex max-w-full flex-1 overflow-auto"
-                  layout="position"
-                >
+                <motion.div className="flex max-w-full flex-1 overflow-auto" layout="position">
                   {children}
                 </motion.div>
               </motion.main>

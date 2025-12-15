@@ -3,10 +3,9 @@ import { Widget, WidgetProps } from "../Widget"
 
 export type ChartContainerPropsBase = WidgetProps
 
-export type ComposeChartContainerProps<T extends object> =
-  ChartContainerPropsBase & {
-    chart: T
-  }
+export type ComposeChartContainerProps<T extends object> = ChartContainerPropsBase & {
+  chart: T
+}
 
 export const ChartContainer = Object.assign(
   forwardRef<

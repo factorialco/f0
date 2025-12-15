@@ -33,11 +33,7 @@ export const AutoGrid = React.forwardRef<
 >(function AutoGrid({ className, gap, children, tileSize, ...props }, ref) {
   return (
     <div className={cn("@container", "grow")} ref={ref} {...props}>
-      <div
-        className={cn(contentVariants({ gap, tileSize }), className)}
-        ref={ref}
-        {...props}
-      >
+      <div className={cn(contentVariants({ gap, tileSize }), className)} ref={ref} {...props}>
         {children}
       </div>
     </div>

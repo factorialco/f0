@@ -1,17 +1,6 @@
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  LineChartConfig,
-} from "@/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, LineChartConfig } from "@/ui/chart"
 import { ForwardedRef } from "react"
-import {
-  CartesianGrid,
-  Line,
-  LineChart as LineChartPrimitive,
-  XAxis,
-  YAxis,
-} from "recharts"
+import { CartesianGrid, Line, LineChart as LineChartPrimitive, XAxis, YAxis } from "recharts"
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -24,10 +13,9 @@ import { fixedForwardRef } from "../utils/forwardRef"
 import { prepareData } from "../utils/muncher"
 import { LineChartPropsBase } from "../utils/types"
 
-export type LineChartProps<K extends LineChartConfig = LineChartConfig> =
-  LineChartPropsBase<K> & {
-    lineType?: "natural" | "linear"
-  }
+export type LineChartProps<K extends LineChartConfig = LineChartConfig> = LineChartPropsBase<K> & {
+  lineType?: "natural" | "linear"
+}
 
 export const _LineChart = <K extends LineChartConfig>(
   {
@@ -47,11 +35,7 @@ export const _LineChart = <K extends LineChartConfig>(
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       lines.map((key) =>
-        measureTextWidth(
-          yAxis?.tickFormatter
-            ? yAxis.tickFormatter(`${el[key]}`)
-            : `${el[key]}`
-        )
+        measureTextWidth(yAxis?.tickFormatter ? yAxis.tickFormatter(`${el[key]}`) : `${el[key]}`)
       )
     )
   )
@@ -65,18 +49,11 @@ export const _LineChart = <K extends LineChartConfig>(
       >
         {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
         {!xAxis?.hide && <XAxis {...xAxisProps(xAxis)} />}
-        {!yAxis?.hide && (
-          <YAxis
-            {...yAxisProps(yAxis)}
-            width={yAxis.width ?? maxLabelWidth + 20}
-          />
-        )}
+        {!yAxis?.hide && <YAxis {...yAxisProps(yAxis)} width={yAxis.width ?? maxLabelWidth + 20} />}
         {!hideTooltip && (
           <ChartTooltip
             {...chartTooltipProps()}
-            content={
-              <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
-            }
+            content={<ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />}
           />
         )}
         {lines.map((line, index) => (
@@ -86,9 +63,7 @@ export const _LineChart = <K extends LineChartConfig>(
             isAnimationActive={false}
             type={lineType}
             stroke={
-              dataConfig[line].color
-                ? getColor(dataConfig[line].color)
-                : getCategoricalColor(index)
+              dataConfig[line].color ? getColor(dataConfig[line].color) : getCategoricalColor(index)
             }
             strokeWidth={1.5}
             strokeDasharray={dataConfig[line].dashed ? "4 4" : undefined}

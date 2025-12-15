@@ -16,12 +16,10 @@ const meta = {
       description: "The items to display in the list.",
     },
     renderListItem: {
-      description:
-        "What to render as a list item (items outside of the overflow list).",
+      description: "What to render as a list item (items outside of the overflow list).",
     },
     renderDropdownItem: {
-      description:
-        "What to render as a dropdown item (items inside of the overflow list).",
+      description: "What to render as a dropdown item (items inside of the overflow list).",
     },
     renderOverflowIndicator: {
       description:

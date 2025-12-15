@@ -19,13 +19,11 @@ const meta = {
   },
   argTypes: {
     label: {
-      description:
-        "Label text for the input field (required for accessibility)",
+      description: "Label text for the input field (required for accessibility)",
       control: "text",
     },
     hideLabel: {
-      description:
-        "Whether to hide the label visually while keeping it accessible",
+      description: "Whether to hide the label visually while keeping it accessible",
       control: "boolean",
     },
     placeholder: {
@@ -46,8 +44,7 @@ const meta = {
       options: ["sm", "md"],
     },
     error: {
-      description:
-        "Error message(s) to display. Can be a string, array of strings, or boolean",
+      description: "Error message(s) to display. Can be a string, array of strings, or boolean",
       control: "text",
     },
     disabled: {

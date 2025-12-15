@@ -53,14 +53,7 @@ const LaneSelectProvider = <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: LaneSelectProviderProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >
+  props: LaneSelectProviderProps<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>
 ) => {
   const hook = useSelectable<R, Filters, Sortings, Grouping>({
     data: props.data || { type: "flat", records: [], groups: [] },
@@ -114,10 +107,7 @@ export const useSelectableLanes = <
   >(new Map())
 
   const [selectItemsCallbackResult, setSelectItemsCallbackResult] = useState<{
-    selectItemsStatus: Map<
-      string,
-      Parameters<OnSelectItemsCallback<R, Filters>>[0]
-    >
+    selectItemsStatus: Map<string, Parameters<OnSelectItemsCallback<R, Filters>>[0]>
     clearCallback: Map<string, Parameters<OnSelectItemsCallback<R, Filters>>[1]>
   }>({ selectItemsStatus: new Map(), clearCallback: new Map() })
 
@@ -127,15 +117,11 @@ export const useSelectableLanes = <
   }, [selectItemsCallbackResult.clearCallback])
 
   useEffect(() => {
-    const selectItemsStatus = Object.fromEntries(
-      selectItemsCallbackResult.selectItemsStatus
-    )
+    const selectItemsStatus = Object.fromEntries(selectItemsCallbackResult.selectItemsStatus)
 
     onSelectItems?.(
       {
-        ...mergeLanesSelectItemsStatus<R, Filters>(
-          selectItemsCallbackResult.selectItemsStatus
-        ),
+        ...mergeLanesSelectItemsStatus<R, Filters>(selectItemsCallbackResult.selectItemsStatus),
         byLane: selectItemsStatus,
       },
       onClearCallback
@@ -150,16 +136,11 @@ export const useSelectableLanes = <
         source={source}
         data={lane.data || { type: "flat", records: [], groups: [] }}
         paginationInfo={lane.paginationInfo}
-        onHookUpdate={(x) =>
-          setLanesUseSelectable((prev) => new Map(prev).set(lane.id, x))
-        }
+        onHookUpdate={(x) => setLanesUseSelectable((prev) => new Map(prev).set(lane.id, x))}
         onSelectItems={(state, callback) => {
           setSelectItemsCallbackResult((prev) => {
             return {
-              selectItemsStatus: new Map(prev.selectItemsStatus).set(
-                lane.id,
-                state
-              ),
+              selectItemsStatus: new Map(prev.selectItemsStatus).set(lane.id, state),
               clearCallback: new Map(prev.clearCallback).set(lane.id, callback),
             }
           })

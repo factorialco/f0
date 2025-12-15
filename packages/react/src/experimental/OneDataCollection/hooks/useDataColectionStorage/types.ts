@@ -8,17 +8,12 @@ import {
   SortingsState,
 } from "@/hooks/datasource"
 import { DataCollectionSettings } from "../../Settings/SettingsProvider"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "../../navigationFilters/types"
+import { NavigationFiltersDefinition, NavigationFiltersState } from "../../navigationFilters/types"
 
 /**
  * The status of the data collection
  */
-export type DataCollectionStatus<
-  CurrentFiltersState extends FiltersState<FiltersDefinition>,
-> = {
+export type DataCollectionStatus<CurrentFiltersState extends FiltersState<FiltersDefinition>> = {
   grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>
   sortings?: SortingsState<SortingsDefinition>
   filters?: CurrentFiltersState
@@ -45,8 +40,7 @@ export const dataCollectionStorageFeatures = [
   "search",
 ] as const
 
-export type DataCollectionStorageFeature =
-  (typeof dataCollectionStorageFeatures)[number]
+export type DataCollectionStorageFeature = (typeof dataCollectionStorageFeatures)[number]
 
 export type DataCollectionStorageFeaturesDefinition = (
   | "*"
@@ -91,8 +85,6 @@ export type FeatureProviders<
   }
   navigationFilters?: {
     value: NavigationFiltersState<NavigationFilters>
-    setValue: React.Dispatch<
-      React.SetStateAction<NavigationFiltersState<NavigationFilters>>
-    >
+    setValue: React.Dispatch<React.SetStateAction<NavigationFiltersState<NavigationFilters>>>
   }
 }

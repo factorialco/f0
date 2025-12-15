@@ -12,12 +12,7 @@ interface VersionItemProps {
   isActive?: boolean
 }
 
-export function VersionItem({
-  author,
-  timestamp,
-  onClick,
-  isActive,
-}: VersionItemProps) {
+export function VersionItem({ author, timestamp, onClick, isActive }: VersionItemProps) {
   const { locale: localeKey } = useL10n()
   const locale = getLocale(localeKey)
   const formattedDateTime = format(timestamp, "PPPp", { locale })
@@ -50,10 +45,7 @@ export function VersionItem({
           size="xs"
         />
 
-        <OneEllipsis
-          lines={1}
-          className="font-medium text-f1-foreground-secondary"
-        >
+        <OneEllipsis lines={1} className="font-medium text-f1-foreground-secondary">
           {authorName}
         </OneEllipsis>
       </div>

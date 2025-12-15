@@ -1,9 +1,6 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgLineChart = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
+const SvgLineChart = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
   <svg
     width="406"
     height="179"

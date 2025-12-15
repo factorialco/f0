@@ -11,14 +11,10 @@ export type PresetListProps = {
 
 const presetCustom = "__custom__"
 
-const isDateMatchingPreset = (
-  date: DatePickerValue | undefined,
-  preset: DatePreset
-): boolean => {
+const isDateMatchingPreset = (date: DatePickerValue | undefined, preset: DatePreset): boolean => {
   if (!date?.value) return false
 
-  const presetRange =
-    typeof preset.value === "function" ? preset.value() : preset.value
+  const presetRange = typeof preset.value === "function" ? preset.value() : preset.value
 
   // Check if the granularity matches
   if (date.granularity !== preset.granularity) return false
@@ -26,9 +22,7 @@ const isDateMatchingPreset = (
   // Check if the date ranges match
   return (
     isEqual(date.value.from, presetRange.from) &&
-    (!date.value.to ||
-      !presetRange.to ||
-      isEqual(date.value.to, presetRange.to))
+    (!date.value.to || !presetRange.to || isEqual(date.value.to, presetRange.to))
   )
 }
 

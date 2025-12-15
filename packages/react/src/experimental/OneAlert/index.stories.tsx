@@ -14,8 +14,7 @@ const meta: Meta<typeof OneAlert> = {
       description: "Main heading for the alert",
     },
     description: {
-      description:
-        "Secondary text to provide additional information for the alert",
+      description: "Secondary text to provide additional information for the alert",
     },
     action: {
       description: "Button configuration",
@@ -65,8 +64,7 @@ export const Narrow: Story = {
   args: {
     ...Default.args,
     title: "Company page unactive",
-    description:
-      "You are missing the company page. It is mandatory to be activated.",
+    description: "You are missing the company page. It is mandatory to be activated.",
     action: {
       label: "Request info",
       onClick: fn(),

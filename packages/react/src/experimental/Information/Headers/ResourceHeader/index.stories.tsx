@@ -3,13 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { fn } from "storybook/test"
 import * as Icon from "../../../../icons/app"
-import {
-  Archive,
-  Comment,
-  Download,
-  ExternalLink,
-  Pencil,
-} from "../../../../icons/app"
+import { Archive, Comment, Download, ExternalLink, Pencil } from "../../../../icons/app"
 import { PrimaryDropdownAction } from "../../utils"
 import { ResourceHeader } from "./index"
 
@@ -31,20 +25,17 @@ const meta: Meta<typeof ResourceHeader> = {
       description: "Visual indicator of the resource's current state",
     },
     metadata: {
-      description:
-        "Horizontal list of key-value pairs showing relevant information",
+      description: "Horizontal list of key-value pairs showing relevant information",
     },
     primaryAction: {
-      description:
-        "Main button representing the most important action available for the resource",
+      description: "Main button representing the most important action available for the resource",
     },
     secondaryActions: {
       description:
         "Complementary set of lower-priority actions offering additional but less frequent functionalities",
     },
     otherActions: {
-      description:
-        "Expandable menu containing additional operations and advanced options",
+      description: "Expandable menu containing additional operations and advanced options",
     },
   },
 }
@@ -56,8 +47,7 @@ type Story = StoryObj<typeof ResourceHeader>
 export const Default: Story = {
   args: {
     title: "Senior Product Designer",
-    description:
-      "Seeking an experienced product designer to lead design initiatives",
+    description: "Seeking an experienced product designer to lead design initiatives",
     status: {
       label: "Status",
       text: "Draft",
@@ -579,14 +569,10 @@ export const Snapshot: Story = {
       <div>
         <ResourceHeader {...(NoDescription.args as ResourceHeaderProps)} />
         <ResourceHeader {...(Default.args as ResourceHeaderProps)} />
-        <ResourceHeader
-          {...(WithLongDescription.args as ResourceHeaderProps)}
-        />
+        <ResourceHeader {...(WithLongDescription.args as ResourceHeaderProps)} />
         <ResourceHeader {...(WithDropdownAction.args as ResourceHeaderProps)} />
         <ResourceHeader {...(PersonHeader.args as ResourceHeaderProps)} />
-        <ResourceHeader
-          {...(DeactivatedEmployee.args as ResourceHeaderProps)}
-        />
+        <ResourceHeader {...(DeactivatedEmployee.args as ResourceHeaderProps)} />
       </div>
     )
   },

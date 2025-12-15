@@ -14,10 +14,7 @@ export interface I18nProviderProps {
   translations: TranslationsType
 }
 
-const getKey = (
-  key: TranslationKey,
-  object: Record<string, unknown>
-): string | undefined => {
+const getKey = (key: TranslationKey, object: Record<string, unknown>): string | undefined => {
   const keys = key.split(".")
   let current: unknown = object
 
@@ -32,19 +29,13 @@ const getKey = (
   return typeof current === "string" ? current : undefined
 }
 
-export function I18nProvider({
-  children,
-  translations,
-}: I18nProviderProps): JSX.Element {
+export function I18nProvider({ children, translations }: I18nProviderProps): JSX.Element {
   /*
    * Create a function that returns a translation for a given key and replaces the arguments.
    * If the key is not found, it will return undefined.
    * If the key is found, it will return the translation with the arguments replaced.
    */
-  const t = (
-    key: TranslationKey,
-    args: Record<string, string | number> = {}
-  ) => {
+  const t = (key: TranslationKey, args: Record<string, string | number> = {}) => {
     let translation = getKey(key, translations)
     if (translation === undefined) {
       console.warn(`Translation key ${key} not found`)
@@ -57,11 +48,7 @@ export function I18nProvider({
 
     return translation
   }
-  return (
-    <I18nContext.Provider value={{ ...translations, t }}>
-      {children}
-    </I18nContext.Provider>
-  )
+  return <I18nContext.Provider value={{ ...translations, t }}>{children}</I18nContext.Provider>
 }
 
 export function useI18n(): TranslationsType & {
@@ -76,9 +63,7 @@ export function useI18n(): TranslationsType & {
   return context
 }
 
-export const buildTranslations = (
-  translations: TranslationsType
-): TranslationsType => {
+export const buildTranslations = (translations: TranslationsType): TranslationsType => {
   return translations
 }
 

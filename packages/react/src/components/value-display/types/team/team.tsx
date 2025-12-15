@@ -14,10 +14,7 @@ interface TeamValue {
 }
 export type TeamCellValue = WithAvatarBadge<TeamValue>
 
-export const TeamCell = (
-  args: TeamCellValue,
-  meta: ValueDisplayRendererContext
-) => (
+export const TeamCell = (args: TeamCellValue, meta: ValueDisplayRendererContext) => (
   <div
     className={cn(
       "flex items-center gap-2",

@@ -5,11 +5,9 @@ import { AiBannerInternalProps, AiBannerSkeletonProps } from "./types"
 
 export type F0AiBannerProps = AiBannerInternalProps
 
-const F0AiBannerBase = forwardRef<HTMLDivElement, F0AiBannerProps>(
-  (props, ref) => {
-    return <AiBannerInternal ref={ref} {...props} />
-  }
-)
+const F0AiBannerBase = forwardRef<HTMLDivElement, F0AiBannerProps>((props, ref) => {
+  return <AiBannerInternal ref={ref} {...props} />
+})
 
 const F0AiBannerSkeleton = ({ compact }: AiBannerSkeletonProps) => {
   return <AiBannerSkeleton compact={compact} />

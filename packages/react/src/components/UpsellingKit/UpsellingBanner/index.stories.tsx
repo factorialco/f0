@@ -152,8 +152,7 @@ export const Skeleton: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Shows the skeleton loading state when data is being fetched or props are loading.",
+        story: "Shows the skeleton loading state when data is being fetched or props are loading.",
       },
     },
   },

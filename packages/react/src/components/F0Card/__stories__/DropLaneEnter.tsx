@@ -28,9 +28,7 @@ export function DropLaneEnter({
       onDropTargetChange: (args) => {
         const { location, source } = args
         const targets = location.current.dropTargets
-        const overLane = targets.some(
-          (t) => t.data.type === "list-droppable" && t.data.id === id
-        )
+        const overLane = targets.some((t) => t.data.type === "list-droppable" && t.data.id === id)
         const overCard = targets.some((t) => t.data.type === "list-card-target")
         const isEnter = overLane && !overCard
         setOver(isEnter)

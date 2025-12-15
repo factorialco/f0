@@ -129,8 +129,7 @@ export const Default: Story = {
 export const WithActions: Story = {
   args: {
     title: "Product designer",
-    description:
-      "Seeking an experienced product designer to lead design initiatives.",
+    description: "Seeking an experienced product designer to lead design initiatives.",
     primaryAction: {
       label: "Refer",
       icon: Envelope,

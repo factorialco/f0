@@ -27,10 +27,7 @@ interface TestItem {
 }
 
 const generateTestData = (size: number, groupCount: number): TestItem[] => {
-  const categories = Array.from(
-    { length: groupCount },
-    (_, i) => `category_${i}`
-  )
+  const categories = Array.from({ length: groupCount }, (_, i) => `category_${i}`)
 
   return Array.from({ length: size }, (_, i) => ({
     id: i,

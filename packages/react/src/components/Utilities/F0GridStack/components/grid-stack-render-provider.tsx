@@ -1,20 +1,11 @@
 import { GridStack, GridStackOptions, GridStackWidget } from "gridstack"
 import isEqual from "lodash/isEqual"
-import {
-  PropsWithChildren,
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react"
+import { PropsWithChildren, useCallback, useLayoutEffect, useMemo, useRef } from "react"
 import { useGridStackContext } from "./grid-stack-context"
 import { GridStackRenderContext } from "./grid-stack-render-context"
 
 // WeakMap to store widget containers for each grid instance
-export const gridWidgetContainersMap = new WeakMap<
-  GridStack,
-  Map<string, HTMLElement>
->()
+export const gridWidgetContainersMap = new WeakMap<GridStack, Map<string, HTMLElement>>()
 
 export function GridStackRenderProvider({ children }: PropsWithChildren) {
   const {
@@ -58,10 +49,7 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
   }, [renderCBFn])
 
   // Helper to compare options excluding children
-  const compareOptionsWithoutChildren = (
-    a: GridStackOptions,
-    b: GridStackOptions
-  ): boolean => {
+  const compareOptionsWithoutChildren = (a: GridStackOptions, b: GridStackOptions): boolean => {
     const { children: _, ...aWithoutChildren } = a
     const { children: __, ...bWithoutChildren } = b
     return isEqual(aWithoutChildren, bWithoutChildren)
@@ -70,10 +58,7 @@ export function GridStackRenderProvider({ children }: PropsWithChildren) {
   useLayoutEffect(() => {
     // Only recreate gridStack if grid configuration options change (excluding children)
     // Widget changes are handled separately in grid-stack-provider
-    if (
-      !compareOptionsWithoutChildren(options, optionsRef.current) &&
-      gridStack
-    ) {
+    if (!compareOptionsWithoutChildren(options, optionsRef.current) && gridStack) {
       try {
         // Remove all widgets first
         gridStack.removeAll(false)

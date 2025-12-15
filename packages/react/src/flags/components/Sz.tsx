@@ -1,19 +1,9 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgSz = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 512 512"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 512 512" ref={ref} {...props}>
     <g clipPath="url(#a)">
-      <path
-        fill="#4173CD"
-        d="M0 0H512V512H0z"
-        vectorEffect="non-scaling-stroke"
-      />
+      <path fill="#4173CD" d="M0 0H512V512H0z" vectorEffect="non-scaling-stroke" />
       <path
         fill="#4173CD"
         d="M-38.1577 377.444H550.158V438.305C550.158 440.995 549.089 443.575 547.187 445.478C545.284 447.38 542.704 448.449 540.014 448.449H-28.0139C-30.7041 448.449 -33.284 447.38 -35.1863 445.478C-37.0886 443.575 -38.1574 440.995 -38.1577 438.305V377.444ZM-28.0139 63H540.015C542.706 63.0003 545.285 64.0691 547.188 65.9714C549.09 67.8737 550.159 70.4536 550.159 73.1438V134.005H-38.1577V73.1427C-38.1574 70.4526 -37.0886 67.8728 -35.1862 65.9707C-33.2839 64.0686 -30.704 63 -28.0139 63Z"
@@ -92,11 +82,7 @@ const SvgSz = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     </g>
     <defs>
       <clipPath id="a">
-        <path
-          fill="currentColor"
-          d="M0 0H512V512H0z"
-          vectorEffect="non-scaling-stroke"
-        />
+        <path fill="currentColor" d="M0 0H512V512H0z" vectorEffect="non-scaling-stroke" />
       </clipPath>
     </defs>
   </svg>

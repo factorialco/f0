@@ -20,11 +20,7 @@ vi.mock("@/icons/app", () => ({
 
 vi.mock("@/experimental/Navigation/Dropdown", () => ({
   Dropdown: ({ children, items, open, onOpenChange }) => (
-    <div
-      data-testid="dropdown"
-      data-items={JSON.stringify(items)}
-      data-open={open}
-    >
+    <div data-testid="dropdown" data-items={JSON.stringify(items)} data-open={open}>
       {children}
       <button onClick={() => onOpenChange?.(!open)}>Toggle</button>
     </div>
@@ -55,9 +51,7 @@ describe("ItemActionsDropdown", () => {
 
     // Verify items are passed to dropdown
     const dropdownElement = screen.getByTestId("dropdown")
-    const passedItems = JSON.parse(
-      dropdownElement.getAttribute("data-items") || "[]"
-    )
+    const passedItems = JSON.parse(dropdownElement.getAttribute("data-items") || "[]")
     expect(passedItems).toHaveLength(3)
     expect(passedItems[0].label).toBe("View Details")
     expect(passedItems[1].type).toBe("separator")
@@ -71,9 +65,7 @@ describe("ItemActionsDropdown", () => {
 
   it("handles open state changes", () => {
     const onOpenChange = vi.fn()
-    render(
-      <ItemActionsDropdown items={mockItems} onOpenChange={onOpenChange} />
-    )
+    render(<ItemActionsDropdown items={mockItems} onOpenChange={onOpenChange} />)
 
     const toggleButton = screen.getByText("Toggle")
     toggleButton.click()

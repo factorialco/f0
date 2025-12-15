@@ -1,15 +1,8 @@
 import { F0Button } from "@/components/F0Button"
-import {
-  ButtonDropdownItem,
-  F0ButtonDropdown,
-} from "@/components/F0ButtonDropdown"
+import { ButtonDropdownItem, F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
-import {
-  primaryActionType,
-  secondaryActionType,
-  secondaryActionsType,
-} from "../../utils/types"
+import { primaryActionType, secondaryActionType, secondaryActionsType } from "../../utils/types"
 
 interface ActionsMenuProps {
   secondaryAction?: secondaryActionsType
@@ -19,8 +12,7 @@ interface ActionsMenuProps {
   isFullscreen: boolean
 }
 
-const getLabelID = (label?: string) =>
-  label ? label.toLowerCase().replace(" ", "-") : ""
+const getLabelID = (label?: string) => (label ? label.toLowerCase().replace(" ", "-") : "")
 
 // Helper function to normalize secondaryAction to an array
 const normalizeSecondaryActions = (
@@ -81,9 +73,7 @@ const handleActionClick = (
   }
 
   // Check sub actions
-  primaryAction?.subActions
-    ?.find((sub) => getLabelID(sub.label) === labelID)
-    ?.onClick()
+  primaryAction?.subActions?.find((sub) => getLabelID(sub.label) === labelID)?.onClick()
 }
 
 interface SecondaryActionsButtonsProps {
@@ -107,12 +97,8 @@ const SecondaryActionsButtons = ({
     return null
   }
 
-  const switchActions = secondaryActions.filter(
-    (action) => action.type === "switch"
-  )
-  const buttonActions = secondaryActions.filter(
-    (action) => action.type !== "switch"
-  )
+  const switchActions = secondaryActions.filter((action) => action.type === "switch")
+  const buttonActions = secondaryActions.filter((action) => action.type !== "switch")
 
   const shouldHideButtonActions =
     useLittleMode && primaryAction && !isFullscreen && buttonActions.length > 0
@@ -260,14 +246,9 @@ const ActionsMenu = ({
 
   if (secondaryActions.length === 0 && !primaryAction) return null
 
-  const buttonSecondaryActions = secondaryActions.filter(
-    (action) => action.type !== "switch"
-  )
+  const buttonSecondaryActions = secondaryActions.filter((action) => action.type !== "switch")
   const shouldIncludeSecondaryInDropdown =
-    buttonSecondaryActions.length > 0 &&
-    useLittleMode &&
-    primaryAction &&
-    !isFullscreen
+    buttonSecondaryActions.length > 0 && useLittleMode && primaryAction && !isFullscreen
 
   const listOfActions = createActionItems(
     primaryAction,
@@ -280,9 +261,7 @@ const ActionsMenu = ({
   const shouldShowDivider =
     secondaryActions.length > 0 &&
     primaryAction &&
-    (!useLittleMode ||
-      secondaryActions.some((action) => action.type === "switch") ||
-      isFullscreen)
+    (!useLittleMode || secondaryActions.some((action) => action.type === "switch") || isFullscreen)
 
   return (
     <div className="scrollbar-macos flex items-center gap-2 overflow-x-auto overflow-y-hidden">

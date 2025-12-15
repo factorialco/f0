@@ -26,8 +26,7 @@ const meta = {
     },
     successMessage: {
       title: "Request submitted!",
-      description:
-        "One of our experts will contact you as soon as possible with all the details.",
+      description: "One of our experts will contact you as soon as possible with all the details.",
       buttonLabel: "Discover more products",
       buttonOnClick: () => {
         console.log("buttonOnClick")

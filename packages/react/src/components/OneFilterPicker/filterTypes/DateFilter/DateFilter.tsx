@@ -4,11 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { FilterTypeComponentProps } from "../types"
 
 import { OneCalendarInternal } from "@/experimental/OneCalendar"
-import {
-  CalendarMode,
-  CalendarView,
-  DateRange,
-} from "@/experimental/OneCalendar/types"
+import { CalendarMode, CalendarView, DateRange } from "@/experimental/OneCalendar/types"
 
 export type DateFilterOptions = {
   minDate?: Date
@@ -28,12 +24,7 @@ export type DateFilterComponentProps = FilterTypeComponentProps<
 /**
  * A date filter component that provides date picker.
  */
-export function DateFilter({
-  value,
-  onChange,
-  schema,
-  isCompactMode,
-}: DateFilterComponentProps) {
+export function DateFilter({ value, onChange, schema, isCompactMode }: DateFilterComponentProps) {
   const options = {
     mode: "single" as const,
     view: "day" as const,

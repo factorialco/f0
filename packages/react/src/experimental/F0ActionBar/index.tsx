@@ -1,8 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import {
-  ButtonDropdownGroup,
-  F0ButtonDropdown,
-} from "@/components/F0ButtonDropdown"
+import { ButtonDropdownGroup, F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { AnimatePresence, motion } from "motion/react"
@@ -24,9 +21,7 @@ export type ActionBarGroup = {
 
 export type ActionBarItem = ActionType
 
-function isActionGroup(
-  item: ActionBarItem | ActionBarGroup
-): item is ActionBarGroup {
+function isActionGroup(item: ActionBarItem | ActionBarGroup): item is ActionBarGroup {
   return "items" in item
 }
 
@@ -124,9 +119,7 @@ export const F0ActionBar = ({
 
   const getActionByValue = useCallback(
     (value: string) => {
-      return primaryActions
-        .flatMap((group) => group.items)
-        .find((item) => item.label === value)
+      return primaryActions.flatMap((group) => group.items).find((item) => item.label === value)
     },
     [primaryActions]
   )
@@ -141,11 +134,7 @@ export const F0ActionBar = ({
           transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
           className="fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl bg-f1-background-inverse p-2 pl-4 text-f1-foreground shadow-lg backdrop-blur-sm dark:bg-f1-background-inverse-secondary sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-8"
         >
-          {!!label && (
-            <span className="font-medium text-f1-foreground-inverse">
-              {label}
-            </span>
-          )}
+          {!!label && <span className="font-medium text-f1-foreground-inverse">{label}</span>}
           <div>
             <div className="dark flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full">
               <Fragment key="mobile-actions">
@@ -172,9 +161,7 @@ export const F0ActionBar = ({
             </div>
             <div className="dark hidden items-center gap-2 sm:flex">
               <Fragment key="desktop-actions">
-                {dropdownActions.length > 0 && (
-                  <Dropdown items={dropdownActions} />
-                )}
+                {dropdownActions.length > 0 && <Dropdown items={dropdownActions} />}
                 {visibleSecondaryActions
                   .slice()
                   .reverse()

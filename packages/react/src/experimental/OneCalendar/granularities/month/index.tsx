@@ -22,9 +22,9 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { MonthView } from "./MonthView"
 
-export function toMonthGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(date: T): T extends Date | DateRange ? DateRangeComplete : T {
+export function toMonthGranularityDateRange<T extends Date | DateRange | undefined | null>(
+  date: T
+): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfMonth, endOfMonth)
 }
 
@@ -75,12 +75,8 @@ export const monthGranularity: GranularityDefinition = {
     const maxWithGranularity = options.max && endOfMonth(options.max)
 
     return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
+      prev: isAfterOrEqual(prevFrom, minWithGranularity) ? { from: prevFrom, to: prevTo } : false,
+      next: isBeforeOrEqual(nextTo, maxWithGranularity) ? { from: nextFrom, to: nextTo } : false,
     }
   },
   toRangeString: (date) => formatDateRange(date, "MM/yyyy"),

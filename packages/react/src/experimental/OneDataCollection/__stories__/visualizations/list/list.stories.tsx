@@ -45,8 +45,7 @@ export const ListVisualizationWithGrouping: Story = {
               label: (groupId) => groupId,
               itemCount: async (groupId) => {
                 await new Promise((resolve) => setTimeout(resolve, 1000))
-                return mockUsers.filter((user) => user.department === groupId)
-                  .length
+                return mockUsers.filter((user) => user.department === groupId).length
               },
             },
           },
@@ -72,8 +71,7 @@ export const ListVisualizationWithGroupingAndAllGroupsOpenByDefault: Story = {
               label: (groupId) => groupId,
               itemCount: async (groupId) => {
                 await new Promise((resolve) => setTimeout(resolve, 1000))
-                return mockUsers.filter((user) => user.department === groupId)
-                  .length
+                return mockUsers.filter((user) => user.department === groupId).length
               },
             },
           },

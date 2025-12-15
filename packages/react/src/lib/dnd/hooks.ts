@@ -40,14 +40,8 @@ export function useDroppableList(args?: {
 }
 
 export function useDndEvents(
-  handler: (e: {
-    phase: "start" | "over" | "drop" | "cancel"
-    source: DragPayload
-  }) => void
+  handler: (e: { phase: "start" | "over" | "drop" | "cancel"; source: DragPayload }) => void
 ) {
   const ctx = useDndContextOptional()
-  useEffect(
-    () => (ctx ? ctx.driver.subscribe(handler) : undefined),
-    [ctx, handler]
-  )
+  useEffect(() => (ctx ? ctx.driver.subscribe(handler) : undefined), [ctx, handler])
 }

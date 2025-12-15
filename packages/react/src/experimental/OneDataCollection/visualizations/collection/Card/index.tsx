@@ -185,9 +185,7 @@ const GroupCards = <
       .filter((item): item is CardMetadata => item !== null)
   }
 
-  function convertToCardMetadataProperty(
-    value: unknown
-  ): CardMetadataProperty | null {
+  function convertToCardMetadataProperty(value: unknown): CardMetadataProperty | null {
     if (typeof value === "string") {
       return { type: "text", value }
     }
@@ -203,9 +201,7 @@ const GroupCards = <
     return null
   }
 
-  function isCardMetadataProperty(
-    value: unknown
-  ): value is CardMetadataProperty {
+  function isCardMetadataProperty(value: unknown): value is CardMetadataProperty {
     if (typeof value !== "object" || value === null || !("type" in value)) {
       return false
     }
@@ -219,28 +215,22 @@ const GroupCards = <
       {items.map((item, index) => {
         const id = source.selectable ? source.selectable(item) : undefined
         const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
-        const itemOnClick = source.itemOnClick
-          ? source.itemOnClick(item)
-          : undefined
+        const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
 
-        const itemActions = (
-          source.itemActions ? source.itemActions(item) || [] : []
-        ).filter((action) => action.type !== "separator")
+        const itemActions = (source.itemActions ? source.itemActions(item) || [] : []).filter(
+          (action) => action.type !== "separator"
+        )
 
         const otherActions = (
-          itemActions.filter(
-            (action) => action.type === "other" || !action.type
-          ) || []
+          itemActions.filter((action) => action.type === "other" || !action.type) || []
         ).map((action) => ({
           ...action,
           // Reconverts the type to DropdownItemObject
           type: "item" as const,
         }))
 
-        const primaryAction =
-          itemActions.find((action) => action.type === "primary") || undefined
-        const secondaryActions =
-          itemActions.filter((action) => action.type === "secondary") || []
+        const primaryAction = itemActions.find((action) => action.type === "primary") || undefined
+        const secondaryActions = itemActions.filter((action) => action.type === "secondary") || []
 
         const selectable = !!source.selectable && id !== undefined
 
@@ -329,25 +319,24 @@ export const CardCollection = <
     return source.dataAdapter
   }, [source.dataAdapter])
 
-  const { data, paginationInfo, setPage, isInitialLoading } =
-    useDataCollectionData<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      NavigationFilters,
-      Grouping
-    >(
-      {
-        ...source,
-        dataAdapter: overridenDataAdapter,
+  const { data, paginationInfo, setPage, isInitialLoading } = useDataCollectionData<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(
+    {
+      ...source,
+      dataAdapter: overridenDataAdapter,
+    },
+    {
+      onError: (error) => {
+        onLoadError(error)
       },
-      {
-        onError: (error) => {
-          onLoadError(error)
-        },
-      }
-    )
+    }
+  )
 
   useEffect(() => {
     onLoadData({
@@ -363,19 +352,15 @@ export const CardCollection = <
   /**
    * Item selection
    */
-  const {
-    selectedItems,
-    groupAllSelectedStatus,
-    handleSelectItemChange,
-    handleSelectGroupChange,
-  } = useSelectable({
-    data,
-    paginationInfo,
-    source,
-    onSelectItems,
-    selectionMode: "multi",
-    selectedState: source.defaultSelectedItems,
-  })
+  const { selectedItems, groupAllSelectedStatus, handleSelectItemChange, handleSelectGroupChange } =
+    useSelectable({
+      data,
+      paginationInfo,
+      source,
+      onSelectItems,
+      selectionMode: "multi",
+      selectedState: source.defaultSelectedItems,
+    })
 
   /**
    * Groups
@@ -430,9 +415,7 @@ export const CardCollection = <
                             ? "indeterminate"
                             : false
                       }
-                      onSelectChange={(checked) =>
-                        handleSelectGroupChange(group, checked)
-                      }
+                      onSelectChange={(checked) => handleSelectGroupChange(group, checked)}
                       className="px-4 pb-2 pt-4"
                     />
                     <AnimatePresence>

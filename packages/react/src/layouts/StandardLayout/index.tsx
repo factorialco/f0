@@ -3,8 +3,7 @@ import { cva, type VariantProps } from "cva"
 import React from "react"
 import { LayoutProvider } from "../LayoutProvider"
 
-export interface StandardLayoutProps
-  extends VariantProps<typeof layoutVariants> {
+export interface StandardLayoutProps extends VariantProps<typeof layoutVariants> {
   children?: React.ReactNode
 }
 
@@ -23,11 +22,7 @@ export const StandardLayout = React.forwardRef<
 >(({ children, variant, className, ...props }, ref) => {
   return (
     <LayoutProvider layout="standard">
-      <section
-        ref={ref}
-        className={cn("relative flex-1 overflow-auto", className)}
-        {...props}
-      >
+      <section ref={ref} className={cn("relative flex-1 overflow-auto", className)} {...props}>
         <div className={cn(layoutVariants({ variant }))}>{children}</div>
       </section>
     </LayoutProvider>

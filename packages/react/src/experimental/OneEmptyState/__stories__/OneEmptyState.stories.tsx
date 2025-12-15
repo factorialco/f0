@@ -30,9 +30,7 @@ export const Basic: Story = {
 
 export const WithAlert: Story = {
   render: () => {
-    const Divider = () => (
-      <div className="h-px w-80 self-center bg-f1-background-secondary" />
-    )
+    const Divider = () => <div className="h-px w-80 self-center bg-f1-background-secondary" />
     return (
       <div className="flex flex-col items-center gap-4">
         <OneEmptyState variant="warning" title="We couldn't load the data" />
@@ -48,8 +46,7 @@ export const WithAlert: Story = {
 export const WithUpsell: Story = {
   args: {
     title: "Take your team’s skills to the next level",
-    description:
-      "Activate Trainings to create engaging sessions and track real progress!",
+    description: "Activate Trainings to create engaging sessions and track real progress!",
     emoji: "⚡️",
     actions: [
       {

@@ -26,9 +26,7 @@ export function getOptionsWithDefaults<T extends object, D extends object>(
  * @param type - The filter type key
  * @returns The filter type definition with default options and render function
  */
-export const getFilterType = <T extends FilterTypeKey>(
-  type: T
-): FilterTypes[T] => {
+export const getFilterType = <T extends FilterTypeKey>(type: T): FilterTypes[T] => {
   const filterType = filterTypes[type]
   if (!filterType) {
     throw new Error(`Filter type ${type.toString()} not found`)

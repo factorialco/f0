@@ -9,9 +9,7 @@ type Props<Id extends string | number = string | number> = {
   onClick?: (id: Id) => void
 }
 
-export type WidgetInboxListItemProps<
-  Id extends string | number = string | number,
-> = Props<Id>
+export type WidgetInboxListItemProps<Id extends string | number = string | number> = Props<Id>
 
 type WrapperProps = {
   onClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void
@@ -31,13 +29,7 @@ const Wrapper: React.FC<WrapperProps> = ({ onClick, className, children }) => {
   )
 }
 
-export function WidgetInboxListItem({
-  id,
-  title,
-  subtitle,
-  onClick,
-  module,
-}: Props) {
+export function WidgetInboxListItem({ id, title, subtitle, onClick, module }: Props) {
   const className = cn(
     "flex flex-row gap-2 rounded-md border border-solid border-transparent p-2 text-f1-foreground",
     onClick

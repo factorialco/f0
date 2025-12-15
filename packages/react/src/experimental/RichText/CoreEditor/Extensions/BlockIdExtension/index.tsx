@@ -79,14 +79,8 @@ export const BlockIdExtension = Extension.create({
                 const mappedTo = transaction.mapping.map(newEnd)
 
                 // Ensure positions are valid and within document bounds
-                const from = Math.max(
-                  0,
-                  Math.min(mappedFrom, newState.doc.content.size)
-                )
-                const to = Math.max(
-                  0,
-                  Math.min(mappedTo, newState.doc.content.size)
-                )
+                const from = Math.max(0, Math.min(mappedFrom, newState.doc.content.size))
+                const to = Math.max(0, Math.min(mappedTo, newState.doc.content.size))
 
                 if (from < to) {
                   affectedRanges.push({ from, to })
@@ -101,10 +95,7 @@ export const BlockIdExtension = Extension.create({
               // Add safety check for valid range
               if (from >= 0 && to <= newState.doc.content.size && from < to) {
                 newState.doc.nodesBetween(from, to, (node, pos) => {
-                  if (
-                    BLOCK_NODE_TYPES_SET.has(node.type.name) &&
-                    !node.attrs.id
-                  ) {
+                  if (BLOCK_NODE_TYPES_SET.has(node.type.name) && !node.attrs.id) {
                     const id = nanoid(5)
                     tr.setNodeMarkup(pos, undefined, {
                       ...node.attrs,

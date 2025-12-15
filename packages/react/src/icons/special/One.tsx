@@ -22,20 +22,13 @@ const pieces = [
 
 const SvgOne = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => {
   const hasColorClass =
-    (props.className?.includes("text-") &&
-      !props.className?.includes("text-current")) ||
+    (props.className?.includes("text-") && !props.className?.includes("text-current")) ||
     props.style?.color !== undefined
 
   const clipPathId = useId()
 
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      ref={ref}
-      {...props}
-    >
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" ref={ref} {...props}>
       <defs>
         {pieces.map((piece) => (
           <clipPath key={piece.id} id={`${clipPathId}-${piece.id}`}>

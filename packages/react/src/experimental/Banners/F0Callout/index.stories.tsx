@@ -63,8 +63,7 @@ export const Default: StoryObj<F0CalloutProps> = {
     children: (
       <div>
         <p>
-          This is a sample SDM callout with <u>rich text</u> content and{" "}
-          <u>action buttons</u>.
+          This is a sample SDM callout with <u>rich text</u> content and <u>action buttons</u>.
         </p>
         <p>You can customize the title, content, and actions as needed.</p>
       </div>
@@ -121,36 +120,21 @@ export const Variants: StoryObj = {
         </F0Callout>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium">
-          Positive (with CheckDouble icon)
-        </h3>
+        <h3 className="mb-2 text-sm font-medium">Positive (with CheckDouble icon)</h3>
         <F0Callout title="Success Message" variant="positive">
-          <p>
-            This is a positive callout for success messages with a CheckDouble
-            icon.
-          </p>
+          <p>This is a positive callout for success messages with a CheckDouble icon.</p>
         </F0Callout>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium">
-          Info (with InfoCircle icon)
-        </h3>
+        <h3 className="mb-2 text-sm font-medium">Info (with InfoCircle icon)</h3>
         <F0Callout title="Information" variant="info">
-          <p>
-            This is an info callout for informational messages with an
-            InfoCircle icon.
-          </p>
+          <p>This is an info callout for informational messages with an InfoCircle icon.</p>
         </F0Callout>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium">
-          Warning (with Warning icon)
-        </h3>
+        <h3 className="mb-2 text-sm font-medium">Warning (with Warning icon)</h3>
         <F0Callout title="Caution Required" variant="warning">
-          <p>
-            This is a warning callout for cautionary messages with a Warning
-            icon.
-          </p>
+          <p>This is a warning callout for cautionary messages with a Warning icon.</p>
         </F0Callout>
       </div>
     </div>
@@ -181,9 +165,7 @@ export const VariantsWithActions: StoryObj = {
         </F0Callout>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium">
-          Positive with Actions (CheckDouble icon)
-        </h3>
+        <h3 className="mb-2 text-sm font-medium">Positive with Actions (CheckDouble icon)</h3>
         <F0Callout
           title="Success Message"
           variant="positive"
@@ -201,15 +183,13 @@ export const VariantsWithActions: StoryObj = {
           ]}
         >
           <p>
-            This is a positive callout for success messages with action buttons
-            and CheckDouble icon.
+            This is a positive callout for success messages with action buttons and CheckDouble
+            icon.
           </p>
         </F0Callout>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium">
-          Info with Actions (InfoCircle icon)
-        </h3>
+        <h3 className="mb-2 text-sm font-medium">Info with Actions (InfoCircle icon)</h3>
         <F0Callout
           title="Information"
           variant="info"
@@ -227,15 +207,13 @@ export const VariantsWithActions: StoryObj = {
           ]}
         >
           <p>
-            This is an info callout for informational messages with action
-            buttons and InfoCircle icon.
+            This is an info callout for informational messages with action buttons and InfoCircle
+            icon.
           </p>
         </F0Callout>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium">
-          Warning with Actions (Warning icon)
-        </h3>
+        <h3 className="mb-2 text-sm font-medium">Warning with Actions (Warning icon)</h3>
         <F0Callout
           title="Caution Required"
           variant="warning"
@@ -249,8 +227,7 @@ export const VariantsWithActions: StoryObj = {
           onClose={() => alert("Dismissed")}
         >
           <p>
-            This is a warning callout for cautionary messages with action
-            buttons and Warning icon.
+            This is a warning callout for cautionary messages with action buttons and Warning icon.
           </p>
         </F0Callout>
       </div>

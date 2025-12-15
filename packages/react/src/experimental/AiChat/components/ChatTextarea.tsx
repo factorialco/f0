@@ -27,8 +27,7 @@ const TypewriterPlaceholder = ({
   const typeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const placeholderText =
-    placeholders[currentPlaceholderIndex] ?? defaultPlaceholder
+  const placeholderText = placeholders[currentPlaceholderIndex] ?? defaultPlaceholder
 
   useEffect(() => {
     const clearAllIntervals = () => {
@@ -82,9 +81,7 @@ const TypewriterPlaceholder = ({
                 deleteIntervalRef.current = null
               }
               placeholderTimeoutRef.current = setTimeout(() => {
-                const nextIndex =
-                  (currentPlaceholderIndex + 1) %
-                  Math.max(placeholders.length, 1)
+                const nextIndex = (currentPlaceholderIndex + 1) % Math.max(placeholders.length, 1)
                 setCurrentPlaceholderIndex(nextIndex)
               }, pauseBeforeNext)
             }
@@ -96,13 +93,7 @@ const TypewriterPlaceholder = ({
     return () => {
       clearAllIntervals()
     }
-  }, [
-    inputValue,
-    inProgress,
-    placeholderText,
-    currentPlaceholderIndex,
-    placeholders.length,
-  ])
+  }, [inputValue, inProgress, placeholderText, currentPlaceholderIndex, placeholders.length])
 
   if (inputValue.length > 0 || inProgress) {
     return null
@@ -143,12 +134,7 @@ type ChatTextareaProps = InputProps & {
   submitLabel?: string
 }
 
-export const ChatTextarea = ({
-  submitLabel,
-  inProgress,
-  onSend,
-  onStop,
-}: ChatTextareaProps) => {
+export const ChatTextarea = ({ submitLabel, inProgress, onSend, onStop }: ChatTextareaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
@@ -262,12 +248,8 @@ export const ChatTextarea = ({
             "mb-0 mt-3 max-h-[240px] flex-1 resize-none px-3 outline-none transition-all",
             "whitespace-pre-wrap break-words",
             "text-f1-foreground",
-            hasScrollbar
-              ? "scrollbar-macos overflow-y-scroll"
-              : "overflow-y-hidden",
-            inputValue || !multiplePlaceholders
-              ? "caret-f1-foreground"
-              : "caret-transparent",
+            hasScrollbar ? "scrollbar-macos overflow-y-scroll" : "overflow-y-hidden",
+            inputValue || !multiplePlaceholders ? "caret-f1-foreground" : "caret-transparent",
             multiplePlaceholders
               ? "placeholder:text-transparent"
               : "placeholder:text-f1-foreground-secondary"

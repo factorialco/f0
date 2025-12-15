@@ -1,17 +1,8 @@
-import {
-  AnimatePresence,
-  LayoutGroup,
-  motion,
-  MotionConfig,
-} from "motion/react"
+import { AnimatePresence, LayoutGroup, motion, MotionConfig } from "motion/react"
 import { useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
 import { F0Icon } from "../../../../components/F0Icon"
-import {
-  CrossedCircle,
-  Search as SearchIcon,
-  Spinner,
-} from "../../../../icons/app"
+import { CrossedCircle, Search as SearchIcon, Spinner } from "../../../../icons/app"
 import { useI18n } from "../../../../lib/providers/i18n"
 import { cn, focusRing } from "../../../../lib/utils"
 
@@ -74,9 +65,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
 
   return (
     <LayoutGroup id={uniqueId}>
-      <MotionConfig
-        transition={{ duration: 0.2, ease: [0.175, 0.885, 0.32, 1.05] }}
-      >
+      <MotionConfig transition={{ duration: 0.2, ease: [0.175, 0.885, 0.32, 1.05] }}>
         <AnimatePresence>
           <motion.div
             layout
@@ -167,10 +156,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                   </motion.div>
                   {value && (
                     <div className="flex h-7 w-full items-center justify-between gap-1.5 overflow-hidden pr-1.5">
-                      <motion.div
-                        layout
-                        className="line-clamp-1 overflow-hidden py-2 pl-7"
-                      >
+                      <motion.div layout className="line-clamp-1 overflow-hidden py-2 pl-7">
                         {value}
                       </motion.div>
                       <motion.div
@@ -191,11 +177,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                         role="button"
                         aria-label={i18n.actions.clear}
                       >
-                        <F0Icon
-                          icon={CrossedCircle}
-                          size="md"
-                          color="secondary"
-                        />
+                        <F0Icon icon={CrossedCircle} size="md" color="secondary" />
                       </motion.div>
                     </div>
                   )}

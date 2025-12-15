@@ -131,8 +131,7 @@ export function TableCell({
       }}
     >
       <AnimatePresence>
-        {((isStickyLeft && isScrolled) ||
-          (isStickyRight && isScrolledRight)) && (
+        {((isStickyLeft && isScrolled) || (isStickyRight && isScrolledRight)) && (
           <motion.div
             key="cell-shadow-gradient"
             className={cn(
@@ -167,15 +166,8 @@ export function TableCell({
               "pointer-events-none h-full items-start"
             )}
           >
-            {isFirstCellWithChildren(
-              firstCell,
-              !!nestedRowProps?.rowWithChildren
-            ) ? (
-              <NestedCell
-                linkRef={linkRef}
-                firstCell={firstCell}
-                nestedRowProps={nestedRowProps}
-              >
+            {isFirstCellWithChildren(firstCell, !!nestedRowProps?.rowWithChildren) ? (
+              <NestedCell linkRef={linkRef} firstCell={firstCell} nestedRowProps={nestedRowProps}>
                 {children}
               </NestedCell>
             ) : (

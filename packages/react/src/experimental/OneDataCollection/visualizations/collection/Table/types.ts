@@ -18,10 +18,10 @@ export type TableVisualizationSettings = {
   hidden: ColId[]
 }
 
-export type WithOptionalSorting<
-  R extends RecordType,
-  Sortings extends SortingsDefinition,
-> = Omit<PropertyDefinition<R>, "hide"> & {
+export type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<
+  PropertyDefinition<R>,
+  "hide"
+> & {
   sorting?: SortingKey<Sortings>
 
   /**
@@ -42,10 +42,7 @@ export type TableColumnDefinition<
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
 > = WithOptionalSorting<R, Sortings> &
-  Pick<
-    ComponentProps<typeof TableHead>,
-    "hidden" | "info" | "infoIcon" | "sticky" | "width"
-  > & {
+  Pick<ComponentProps<typeof TableHead>, "hidden" | "info" | "infoIcon" | "sticky" | "width"> & {
     /**
      * Optional summary configuration for this column
      * References a key in the Summaries definition, similar to how sorting works

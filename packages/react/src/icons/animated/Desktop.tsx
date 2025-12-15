@@ -54,26 +54,10 @@ const DesktopAnimated = React.forwardRef<SVGSVGElement, DesktopProps>(
         <path d="M7 20H17" vectorEffect="non-scaling-stroke" />
         <path d="M9 20L9 16" vectorEffect="non-scaling-stroke" />
         <path d="M15 20L15 16" vectorEffect="non-scaling-stroke" />
-        <motion.g
-          variants={containerVariants}
-          animate={animate}
-          initial="normal"
-        >
-          <motion.path
-            d="M6 7.5H14"
-            variants={lineVariants}
-            vectorEffect="non-scaling-stroke"
-          />
-          <motion.path
-            d="M6 10H17"
-            variants={lineVariants}
-            vectorEffect="non-scaling-stroke"
-          />
-          <motion.path
-            d="M6 12.5H11"
-            variants={lineVariants}
-            vectorEffect="non-scaling-stroke"
-          />
+        <motion.g variants={containerVariants} animate={animate} initial="normal">
+          <motion.path d="M6 7.5H14" variants={lineVariants} vectorEffect="non-scaling-stroke" />
+          <motion.path d="M6 10H17" variants={lineVariants} vectorEffect="non-scaling-stroke" />
+          <motion.path d="M6 12.5H11" variants={lineVariants} vectorEffect="non-scaling-stroke" />
         </motion.g>
       </svg>
     )

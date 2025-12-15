@@ -15,26 +15,23 @@ import * as IndexStories from "./index.stories"
 
 # Data collection / Status Persistence
 
-The OneDataCollection component supports persisting user preferences and state
-across sessions using the `DataCollectionStorageProvider`. This allows users to
-maintain their preferred settings like filters, sorting, grouping, search terms,
-and visualization preferences.
+The OneDataCollection component supports persisting user preferences and state across sessions using
+the `DataCollectionStorageProvider`. This allows users to maintain their preferred settings like
+filters, sorting, grouping, search terms, and visualization preferences.
 
 ## Overview
 
 The persistence system consists of two main parts:
 
-- **datacollection ID**: A unique identifier that identifies the data collection
-  (this will be used as the key for the storage, but for other purposes like
-  state sharing via url, analytics, etc.)
+- **datacollection ID**: A unique identifier that identifies the data collection (this will be used
+  as the key for the storage, but for other purposes like state sharing via url, analytics, etc.)
 
-- **Storage Features**: Configuration that defines which features should be
-  persisted
+- **Storage Features**: Configuration that defines which features should be persisted
 
 ## Data Collection ID
 
-To enable the persistence of the data collection state, you need to provide a
-unique id to the data collection via `id` prop.
+To enable the persistence of the data collection state, you need to provide a unique id to the data
+collection via `id` prop.
 
 ### Required Format
 
@@ -55,27 +52,21 @@ The storage key **must** follow the format: `{name}/{version}`
 
 ### Key Components
 
-- **Name**: Can be a simple name or a path (e.g., `employees`,
-  `projects/dashboard`)
-- **Version**: Must start with 'v' followed by alphanumeric characters, but not
-  dots:
-
+- **Name**: Can be a simple name or a path (e.g., `employees`, `projects/dashboard`)
+- **Version**: Must start with 'v' followed by alphanumeric characters, but not dots:
   - ✅ `v1`,
   - ❌ `v2.1`, `v1.0.0`
 
 ### Why Versioning is Critical
 
-The version part of the key is essential for handling breaking changes in your
-data collection configuration. You **must** update the version when:
+The version part of the key is essential for handling breaking changes in your data collection
+configuration. You **must** update the version when:
 
-- **Filter definitions change**: New filters added, existing filters modified or
-  removed
-- **Column structure changes**: New columns added, columns renamed, or data
-  types modified
+- **Filter definitions change**: New filters added, existing filters modified or removed
+- **Column structure changes**: New columns added, columns renamed, or data types modified
 - **Grouping options change**: Available grouping fields modified
 - **Sorting options change**: Available sorting fields modified
-- **Visualization configuration changes**: New visualizations added or existing
-  ones modified
+- **Visualization configuration changes**: New visualizations added or existing ones modified
 
 ```typescript
 // Initial implementation
@@ -93,8 +84,8 @@ Without version updates, users might experience:
 
 ## Storage Features
 
-Storage features determine which aspects of the data collection state should be
-persisted and restored.
+Storage features determine which aspects of the data collection state should be persisted and
+restored.
 
 ### Available Features
 
@@ -161,9 +152,8 @@ If the id is not provided, the data collection will not be persisted.
 />
 ```
 
-But you can also disable persistence by passing `storage={false}`; the component
-will still use the ID for other purposes (like column configuration keys), but
-won't persist state to storage.
+But you can also disable persistence by passing `storage={false}`; the component will still use the
+ID for other purposes (like column configuration keys), but won't persist state to storage.
 
 ## Implementation Example
 
@@ -213,7 +203,6 @@ won't persist state to storage.
 ### 3. Storage Key (ID) Naming
 
 - Use descriptive names that reflect the data and context
-- Use paths for hierarchical organization
-  (`[module]/[datacollection descriptive name]`) e.g.
+- Use paths for hierarchical organization (`[module]/[datacollection descriptive name]`) e.g.
   `organization/employees/v1`
 - Keep names consistent across your application

@@ -63,8 +63,7 @@ export function NumberFilter({
     onChange(undefined)
   }
 
-  const showModeSwitch =
-    options.modes === undefined || options.modes?.length > 1
+  const showModeSwitch = options.modes === undefined || options.modes?.length > 1
 
   const [localValue, setLocalValue] = useState<NumberFilterValue>(
     value ?? {
@@ -82,27 +81,18 @@ export function NumberFilter({
       setLocalValue({
         mode: "range",
         from: {
-          value:
-            localValue?.mode === "single"
-              ? localValue?.value
-              : localValue?.from?.value,
+          value: localValue?.mode === "single" ? localValue?.value : localValue?.from?.value,
           closed: true,
         },
         to: {
-          value:
-            localValue?.mode === "single"
-              ? localValue?.value
-              : localValue?.to?.value,
+          value: localValue?.mode === "single" ? localValue?.value : localValue?.to?.value,
           closed: true,
         },
       })
     } else {
       setLocalValue({
         mode: "single",
-        value:
-          localValue?.mode === "single"
-            ? localValue?.value
-            : localValue?.from?.value,
+        value: localValue?.mode === "single" ? localValue?.value : localValue?.from?.value,
       })
     }
   }
@@ -119,10 +109,7 @@ export function NumberFilter({
     }
   }
 
-  const handleValueChange = (
-    inputValue: number | null,
-    index: "from" | "to"
-  ) => {
+  const handleValueChange = (inputValue: number | null, index: "from" | "to") => {
     setLocalValue((prev) => {
       if (prev?.mode === "range") {
         return {
@@ -167,17 +154,11 @@ export function NumberFilter({
   const valueAsRange = useMemo(() => {
     return {
       from: {
-        value:
-          localValue?.mode === "range"
-            ? localValue?.from?.value
-            : localValue?.value,
+        value: localValue?.mode === "range" ? localValue?.from?.value : localValue?.value,
         closed: localValue?.mode === "range" ? localValue?.from?.closed : true,
       },
       to: {
-        value:
-          localValue?.mode === "range"
-            ? localValue?.to?.value
-            : localValue?.value,
+        value: localValue?.mode === "range" ? localValue?.to?.value : localValue?.value,
         closed: localValue?.mode === "range" ? localValue?.to?.closed : true,
       },
     }
@@ -204,14 +185,10 @@ export function NumberFilter({
               buttonToggle={
                 localValue?.mode === "range" && options.openCloseToggle
                   ? {
-                      label: [
-                        i18n.filters.number.greaterThan,
-                        i18n.filters.number.greaterOrEqual,
-                      ],
+                      label: [i18n.filters.number.greaterThan, i18n.filters.number.greaterOrEqual],
                       icon: [Greater, EqualGreater],
                       selected: valueAsRange.from.closed,
-                      onChange: (checked: boolean) =>
-                        handleOpenClosedChange("from", checked),
+                      onChange: (checked: boolean) => handleOpenClosedChange("from", checked),
                     }
                   : undefined
               }
@@ -233,14 +210,10 @@ export function NumberFilter({
                 buttonToggle={
                   localValue?.mode === "range" && options.openCloseToggle
                     ? {
-                        label: [
-                          i18n.filters.number.lessThan,
-                          i18n.filters.number.lessOrEqual,
-                        ],
+                        label: [i18n.filters.number.lessThan, i18n.filters.number.lessOrEqual],
                         icon: [Less, EqualLess],
                         selected: valueAsRange.to.closed,
-                        onChange: (checked: boolean) =>
-                          handleOpenClosedChange("to", checked),
+                        onChange: (checked: boolean) => handleOpenClosedChange("to", checked),
                       }
                     : undefined
                 }

@@ -11,12 +11,7 @@ export type PostEventProps = {
   date: Date
 }
 
-export const BasePostEvent = ({
-  title,
-  imageUrl,
-  place,
-  date,
-}: PostEventProps) => {
+export const BasePostEvent = ({ title, imageUrl, place, date }: PostEventProps) => {
   let description = formatTime(date)
 
   if (place) {

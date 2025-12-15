@@ -49,18 +49,12 @@ export interface NextStepsProps {
 const StepItem = ({ text, isCompleted }: StepItemProps) => (
   <div className="flex flex-row items-center gap-2">
     <F0Icon
-      className={
-        isCompleted ? "text-f1-icon-positive" : "text-f1-icon-secondary"
-      }
+      className={isCompleted ? "text-f1-icon-positive" : "text-f1-icon-secondary"}
       icon={isCompleted ? CheckCircle : DottedCircle}
       size="md"
     />
     <span
-      className={
-        isCompleted
-          ? "font-medium text-f1-foreground"
-          : "text-f1-foreground-secondary"
-      }
+      className={isCompleted ? "font-medium text-f1-foreground" : "text-f1-foreground-secondary"}
     >
       {text}
     </span>
@@ -73,11 +67,7 @@ const NextSteps = ({ title, items }: NextStepsProps) => (
 
     <div className="flex flex-col gap-2">
       {items.map((step: StepItemProps) => (
-        <StepItem
-          key={step.text}
-          text={step.text}
-          isCompleted={step.isCompleted ?? false}
-        />
+        <StepItem key={step.text} text={step.text} isCompleted={step.isCompleted ?? false} />
       ))}
     </div>
   </div>
@@ -125,17 +115,12 @@ const DialogActions = ({
       <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3">
         {renderButtons()}
       </div>
-      <div className="flex flex-col-reverse gap-2 sm:hidden">
-        {renderButtons(true)}
-      </div>
+      <div className="flex flex-col-reverse gap-2 sm:hidden">{renderButtons(true)}</div>
     </DialogFooter>
   )
 }
 
-const UpsellRequestResponseDialog = forwardRef<
-  HTMLDivElement,
-  UpsellRequestResponseDialogProps
->(
+const UpsellRequestResponseDialog = forwardRef<HTMLDivElement, UpsellRequestResponseDialogProps>(
   (
     {
       open,
@@ -160,10 +145,7 @@ const UpsellRequestResponseDialog = forwardRef<
     }, [onClose])
 
     return (
-      <Dialog
-        open={open && !closing}
-        onOpenChange={(open) => !open && handleClose?.()}
-      >
+      <Dialog open={open && !closing} onOpenChange={(open) => !open && handleClose?.()}>
         <DialogContent
           ref={ref}
           className="bottom-3 top-auto max-w-[400px] translate-y-0 sm:bottom-auto sm:top-[50%] sm:translate-y-[-50%]"
@@ -178,9 +160,7 @@ const UpsellRequestResponseDialog = forwardRef<
                 {success ? successMessage?.title : errorMessage?.title}
               </DialogTitle>
               <DialogDescription className="text-lg sm:text-base">
-                {success
-                  ? successMessage?.description
-                  : errorMessage?.description}
+                {success ? successMessage?.description : errorMessage?.description}
               </DialogDescription>
             </div>
           </DialogHeader>

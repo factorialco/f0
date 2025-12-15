@@ -18,124 +18,92 @@ describe("experimentalComponent", () => {
 
   describe("static property preservation", () => {
     it("should preserve __isPageLayoutBlock marker for forwardRef components", () => {
-      const TestBlock = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
+      const TestBlock = forwardRef<HTMLDivElement, { children?: React.ReactNode }>((props, ref) => (
+        <div ref={ref}>{props.children}</div>
+      ))
       TestBlock.displayName = "TestBlock"
       // Mark as a valid PageLayoutBlock component
-      ;(
-        TestBlock as unknown as { __isPageLayoutBlock: boolean }
-      ).__isPageLayoutBlock = true
+      ;(TestBlock as unknown as { __isPageLayoutBlock: boolean }).__isPageLayoutBlock = true
 
       const WrappedBlock = experimentalComponent("TestBlock", TestBlock)
 
       expect(
-        (WrappedBlock as unknown as { __isPageLayoutBlock: boolean })
-          .__isPageLayoutBlock
+        (WrappedBlock as unknown as { __isPageLayoutBlock: boolean }).__isPageLayoutBlock
       ).toBe(true)
     })
 
     it("should preserve __isPageLayoutGroup marker for forwardRef components", () => {
-      const TestGroup = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
+      const TestGroup = forwardRef<HTMLDivElement, { children?: React.ReactNode }>((props, ref) => (
+        <div ref={ref}>{props.children}</div>
+      ))
       TestGroup.displayName = "TestGroup"
       // Mark as a valid PageLayoutGroup component
-      ;(
-        TestGroup as unknown as { __isPageLayoutGroup: boolean }
-      ).__isPageLayoutGroup = true
+      ;(TestGroup as unknown as { __isPageLayoutGroup: boolean }).__isPageLayoutGroup = true
 
       const WrappedGroup = experimentalComponent("TestGroup", TestGroup)
 
       expect(
-        (WrappedGroup as unknown as { __isPageLayoutGroup: boolean })
-          .__isPageLayoutGroup
+        (WrappedGroup as unknown as { __isPageLayoutGroup: boolean }).__isPageLayoutGroup
       ).toBe(true)
     })
 
     it("should preserve __isPageLayoutGroup marker for regular components", () => {
-      const TestGroup = ({ children }: { children?: React.ReactNode }) => (
-        <div>{children}</div>
-      )
+      const TestGroup = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>
       TestGroup.displayName = "TestGroup"
       // Mark as a valid PageLayoutGroup component
-      ;(
-        TestGroup as unknown as { __isPageLayoutGroup: boolean }
-      ).__isPageLayoutGroup = true
+      ;(TestGroup as unknown as { __isPageLayoutGroup: boolean }).__isPageLayoutGroup = true
 
       const WrappedGroup = experimentalComponent("TestGroup", TestGroup)
 
       expect(
-        (WrappedGroup as unknown as { __isPageLayoutGroup: boolean })
-          .__isPageLayoutGroup
+        (WrappedGroup as unknown as { __isPageLayoutGroup: boolean }).__isPageLayoutGroup
       ).toBe(true)
     })
 
     it("should preserve multiple static properties", () => {
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
-      TestComponent.displayName = "TestComponent"
-      ;(
-        TestComponent as unknown as { __isPageLayoutBlock: boolean }
-      ).__isPageLayoutBlock = true
-      ;(TestComponent as unknown as { customProp: string }).customProp =
-        "test-value"
-
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
       )
+      TestComponent.displayName = "TestComponent"
+      ;(TestComponent as unknown as { __isPageLayoutBlock: boolean }).__isPageLayoutBlock = true
+      ;(TestComponent as unknown as { customProp: string }).customProp = "test-value"
+
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       expect(
-        (WrappedComponent as unknown as { __isPageLayoutBlock: boolean })
-          .__isPageLayoutBlock
+        (WrappedComponent as unknown as { __isPageLayoutBlock: boolean }).__isPageLayoutBlock
       ).toBe(true)
-      expect(
-        (WrappedComponent as unknown as { customProp: string }).customProp
-      ).toBe("test-value")
+      expect((WrappedComponent as unknown as { customProp: string }).customProp).toBe("test-value")
     })
 
     it("should preserve displayName from original component", () => {
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
+      )
       TestComponent.displayName = "OriginalDisplayName"
 
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
-      )
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       expect(WrappedComponent.displayName).toBe("OriginalDisplayName")
     })
 
     it("should set displayName to Experimental(name) when original has no displayName", () => {
       // eslint-disable-next-line react/display-name
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
+      )
       // No displayName set
 
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
-      )
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       expect(WrappedComponent.displayName).toBe("Experimental(TestComponent)")
     })
 
     it("should preserve non-enumerable properties", () => {
       // eslint-disable-next-line react/display-name
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
+      )
 
       // Add a non-enumerable property
       Object.defineProperty(TestComponent, "__isPageLayoutBlock", {
@@ -145,14 +113,10 @@ describe("experimentalComponent", () => {
         configurable: true,
       })
 
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
-      )
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       expect(
-        (WrappedComponent as unknown as { __isPageLayoutBlock: boolean })
-          .__isPageLayoutBlock
+        (WrappedComponent as unknown as { __isPageLayoutBlock: boolean }).__isPageLayoutBlock
       ).toBe(true)
     })
   })
@@ -160,15 +124,11 @@ describe("experimentalComponent", () => {
   describe("component functionality", () => {
     it("should render forwardRef components correctly", () => {
       // eslint-disable-next-line react/display-name
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
-
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
       )
+
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       render(
         <UserPlatformProvider showExperimentalWarnings={false}>
@@ -180,14 +140,9 @@ describe("experimentalComponent", () => {
     })
 
     it("should render regular components correctly", () => {
-      const TestComponent = ({ children }: { children?: React.ReactNode }) => (
-        <div>{children}</div>
-      )
+      const TestComponent = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>
 
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
-      )
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       render(
         <UserPlatformProvider showExperimentalWarnings={false}>
@@ -209,10 +164,7 @@ describe("experimentalComponent", () => {
         </div>
       ))
 
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
-      )
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       render(
         <UserPlatformProvider showExperimentalWarnings={false}>
@@ -228,19 +180,13 @@ describe("experimentalComponent", () => {
 
   describe("experimental warnings", () => {
     it("should track usage when showExperimentalWarnings is true", () => {
-      const consoleWarnSpy = vi
-        .spyOn(console, "warn")
-        .mockImplementation(() => {})
+      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
       // eslint-disable-next-line react/display-name
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
-
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
       )
+
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       render(
         <UserPlatformProvider showExperimentalWarnings={true}>
@@ -261,19 +207,13 @@ describe("experimentalComponent", () => {
     })
 
     it("should not track usage when showExperimentalWarnings is false", () => {
-      const consoleWarnSpy = vi
-        .spyOn(console, "warn")
-        .mockImplementation(() => {})
+      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
       // eslint-disable-next-line react/display-name
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
-
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
       )
+
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       render(
         <UserPlatformProvider showExperimentalWarnings={false}>
@@ -303,15 +243,10 @@ describe("experimentalComponent", () => {
       // Store the original prototype to verify it's not copied
       const originalPrototype = TestComponent.prototype
 
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
-      )
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       // Verify that custom properties are copied
-      expect(
-        (WrappedComponent as unknown as { customProp: string }).customProp
-      ).toBe("test")
+      expect((WrappedComponent as unknown as { customProp: string }).customProp).toBe("test")
 
       // Verify that prototype is not copied - the wrapper function (arrow function)
       // doesn't have a prototype property, confirming that prototype wasn't copied
@@ -323,15 +258,11 @@ describe("experimentalComponent", () => {
 
     it("should not copy render property for forwardRef components", () => {
       // eslint-disable-next-line react/display-name
-      const TestComponent = forwardRef<
-        HTMLDivElement,
-        { children?: React.ReactNode }
-      >((props, ref) => <div ref={ref}>{props.children}</div>)
-
-      const WrappedComponent = experimentalComponent(
-        "TestComponent",
-        TestComponent
+      const TestComponent = forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+        (props, ref) => <div ref={ref}>{props.children}</div>
       )
+
+      const WrappedComponent = experimentalComponent("TestComponent", TestComponent)
 
       // The wrapped component should have its own render function
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

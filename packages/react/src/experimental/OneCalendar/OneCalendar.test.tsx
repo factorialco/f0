@@ -5,13 +5,7 @@ import { defaultTranslations, I18nProvider } from "../../lib/providers/i18n"
 import { L10nProvider } from "../../lib/providers/l10n"
 import { OneCalendar } from "./OneCalendar"
 
-const TestWrapper = ({
-  children,
-  locale,
-}: {
-  children: React.ReactNode
-  locale: string
-}) => (
+const TestWrapper = ({ children, locale }: { children: React.ReactNode; locale: string }) => (
   <I18nProvider translations={defaultTranslations}>
     <L10nProvider l10n={{ locale }}>{children}</L10nProvider>
   </I18nProvider>
@@ -26,12 +20,7 @@ describe("OneCalendar", () => {
 
     render(
       <TestWrapper locale="es-ES">
-        <OneCalendar
-          mode="single"
-          view="day"
-          defaultMonth={mockDate}
-          showNavigation={true}
-        />
+        <OneCalendar mode="single" view="day" defaultMonth={mockDate} showNavigation={true} />
       </TestWrapper>
     )
 

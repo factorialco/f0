@@ -1,18 +1,12 @@
 import { BadgeProps } from "@/experimental/Information/Badge"
-import {
-  internalAvatarColors as AvatarColors,
-  Avatar as AvatarComponent,
-} from "@/ui/Avatar"
+import { internalAvatarColors as AvatarColors, Avatar as AvatarComponent } from "@/ui/Avatar"
 import { type ComponentProps } from "react"
 import { F0AvatarModuleProps } from "../../F0AvatarModule"
 import { AvatarSize } from "./types"
 
 type ShadAvatarProps = ComponentProps<typeof AvatarComponent>
 
-export function getInitials(
-  name: string | string[],
-  size: AvatarSize = "md"
-): string {
+export function getInitials(name: string | string[], size: AvatarSize = "md"): string {
   const nameArray = Array.isArray(name) ? name : [name]
   const isSmall = ["xs", "sm"].includes(size)
   if (isSmall) {
@@ -37,8 +31,7 @@ export function getAvatarColor(text: string): ShadAvatarProps["color"] {
     hash = hash & hash
   }
 
-  const index =
-    ((hash % AvatarColors.length) + AvatarColors.length) % AvatarColors.length
+  const index = ((hash % AvatarColors.length) + AvatarColors.length) % AvatarColors.length
 
   return AvatarColors[index]
 }
@@ -145,12 +138,8 @@ export const getMask = {
   get: (type: MaskType, size: MaskSize, variant: MaskVariant) => string
 }
 
-export const getBadgeSize = (
-  size: AvatarSize
-): BadgeProps["size"] | undefined => {
-  const sizeMap: Partial<
-    Record<Exclude<AvatarSize, undefined>, BadgeProps["size"]>
-  > = {
+export const getBadgeSize = (size: AvatarSize): BadgeProps["size"] | undefined => {
+  const sizeMap: Partial<Record<Exclude<AvatarSize, undefined>, BadgeProps["size"]>> = {
     "2xl": "lg",
     xl: "md",
     lg: "sm",
@@ -161,12 +150,8 @@ export const getBadgeSize = (
   return size && sizeMap[size] ? (sizeMap[size] ?? sizeMap.sm) : sizeMap.sm
 }
 
-export const getAvatarSize = (
-  size: AvatarSize
-): F0AvatarModuleProps["size"] => {
-  const sizeMap: Partial<
-    Record<Exclude<AvatarSize, undefined>, F0AvatarModuleProps["size"]>
-  > = {
+export const getAvatarSize = (size: AvatarSize): F0AvatarModuleProps["size"] => {
+  const sizeMap: Partial<Record<Exclude<AvatarSize, undefined>, F0AvatarModuleProps["size"]>> = {
     "2xl": "md",
     xl: "sm",
     lg: "xs",

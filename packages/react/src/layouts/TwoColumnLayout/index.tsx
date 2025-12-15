@@ -10,12 +10,7 @@ export interface TwoColumnLayoutProps {
 
 export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
   function TwoColumnLayout(
-    {
-      children: mainContent,
-      sideContent,
-      mainColumnPosition = "left",
-      sticky = false,
-    },
+    { children: mainContent, sideContent, mainColumnPosition = "left", sticky = false },
     ref
   ) {
     return (
@@ -31,9 +26,7 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
           <main
             className={cn(
               "sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6",
-              sticky
-                ? "md:h-full md:max-h-full md:overflow-y-auto"
-                : "min-h-full",
+              sticky ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full",
               mainColumnPosition === "right"
                 ? "sm:border-l sm:border-l-f1-border-secondary"
                 : "sm:border-r sm:border-r-f1-border-secondary",
@@ -44,10 +37,7 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
           </main>
           <Aside
             sticky={sticky}
-            className={cn(
-              "order-1",
-              mainColumnPosition === "right" ? "md:order-1" : "md:order-3"
-            )}
+            className={cn("order-1", mainColumnPosition === "right" ? "md:order-1" : "md:order-3")}
           >
             {sideContent}
           </Aside>
@@ -66,10 +56,7 @@ const Aside = ({
   sticky?: boolean
 }) => (
   <aside
-    className={cn(
-      "min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
-      className
-    )}
+    className={cn("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", className)}
   >
     {children}
   </aside>

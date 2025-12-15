@@ -12,15 +12,11 @@ function getSubtree(
   content: React.ReactNode | ((children: React.ReactNode) => React.ReactNode)
 ) {
   const { asChild, children } = options
-  if (!asChild)
-    return typeof content === "function" ? content(children) : content
+  if (!asChild) return typeof content === "function" ? content(children) : content
 
   const firstChild = React.Children.only(children) as React.ReactElement
   return React.cloneElement(firstChild, {
-    children:
-      typeof content === "function"
-        ? content(firstChild.props.children)
-        : content,
+    children: typeof content === "function" ? content(firstChild.props.children) : content,
   })
 }
 
@@ -38,7 +34,8 @@ const tabNavigationVariants = cva({
 })
 
 interface TabNavigationProps
-  extends React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Root>,
     VariantProps<typeof tabNavigationVariants> {}
 
 const TabNavigation = React.forwardRef<
@@ -87,10 +84,8 @@ const tabNavigationLinkVariants = cva({
 })
 
 interface TabNavigationLinkProps
-  extends Omit<
-      React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Link>,
-      "onSelect"
-    >,
+  extends
+    Omit<React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Link>, "onSelect">,
     VariantProps<typeof tabNavigationLinkVariants> {
   active?: boolean
 }
@@ -143,16 +138,11 @@ const _TabNavigationLink = React.forwardRef<
   )
 })
 
-const TabNavigationLinkSkeleton: React.FC<{ className?: string }> = ({
-  className,
-}) => {
+const TabNavigationLinkSkeleton: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <li className="list-none">
       <Skeleton
-        className={cn(
-          "mr-4 w-20 rounded-md py-1.5 ring-1 ring-inset ring-transparent",
-          className
-        )}
+        className={cn("mr-4 w-20 rounded-md py-1.5 ring-1 ring-inset ring-transparent", className)}
       >
         &nbsp;
       </Skeleton>
@@ -160,9 +150,6 @@ const TabNavigationLinkSkeleton: React.FC<{ className?: string }> = ({
   )
 }
 
-const TabNavigationLink = withSkeleton(
-  _TabNavigationLink,
-  TabNavigationLinkSkeleton
-)
+const TabNavigationLink = withSkeleton(_TabNavigationLink, TabNavigationLinkSkeleton)
 
 export { TabNavigation, TabNavigationLink }

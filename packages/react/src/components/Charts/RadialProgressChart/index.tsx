@@ -7,12 +7,7 @@ export interface RadialProgressProps {
   overview?: { number: number; label: string }
 }
 
-export function RadialProgressChart({
-  value,
-  max = 100,
-  color,
-  overview,
-}: RadialProgressProps) {
+export function RadialProgressChart({ value, max = 100, color, overview }: RadialProgressProps) {
   const strokeWidth = 12
   const size = 100
   const center = size / 2
@@ -23,10 +18,7 @@ export function RadialProgressChart({
 
   return (
     <div className="relative inline-flex aspect-auto h-full w-full items-center justify-center overflow-hidden">
-      <svg
-        viewBox={`0 0 ${size} ${size}`}
-        className="h-full w-full -rotate-90 transform"
-      >
+      <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90 transform">
         <circle
           cx={center}
           cy={center}
@@ -49,9 +41,7 @@ export function RadialProgressChart({
       </svg>
       {overview && (
         <div className="absolute inset-0 flex translate-y-0.5 flex-col items-center justify-center">
-          <span className="text-sm text-f1-foreground-secondary">
-            {overview.label}
-          </span>
+          <span className="text-sm text-f1-foreground-secondary">{overview.label}</span>
           <span className="text-4xl font-semibold leading-none text-f1-foreground">
             {overview.number}
           </span>

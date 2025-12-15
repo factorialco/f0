@@ -1,16 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgSolidPause = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgSolidPause = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       fill="currentColor"
       d="M5.99999 17V6.99999C5.99999 5.89542 6.89542 4.99999 7.99999 4.99999C9.10456 4.99999 9.99999 5.89542 9.99999 6.99999V17C9.99999 18.1046 9.10456 19 7.99999 19C6.89542 19 5.99999 18.1046 5.99999 17Z"

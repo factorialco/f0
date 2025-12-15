@@ -45,22 +45,9 @@ const BenefitItem = ({ text }: BenefitItemProps) => (
   </div>
 )
 
-export const ProductBlankslate = forwardRef<
-  HTMLDivElement,
-  ProductBlankslateProps
->(
+export const ProductBlankslate = forwardRef<HTMLDivElement, ProductBlankslateProps>(
   (
-    {
-      title,
-      image,
-      benefits,
-      actions,
-      withShadow = true,
-      module,
-      moduleName,
-      tag,
-      promoTag,
-    },
+    { title, image, benefits, actions, withShadow = true, module, moduleName, tag, promoTag },
     ref
   ) => {
     return (
@@ -73,11 +60,7 @@ export const ProductBlankslate = forwardRef<
       >
         {/* Imagen 16:9 */}
         <div className="aspect-auto flex-shrink-0 overflow-hidden rounded-xl py-1 pl-1">
-          <img
-            src={image}
-            alt=""
-            className="h-full w-full rounded-lg object-cover"
-          />
+          <img src={image} alt="" className="h-full w-full rounded-lg object-cover" />
         </div>
 
         {/* Contenido */}
@@ -87,19 +70,14 @@ export const ProductBlankslate = forwardRef<
               <div className="flex flex-row items-center gap-2">
                 {module && <F0AvatarModule module={module} />}
                 {moduleName && (
-                  <p className="text-base font-medium text-f1-foreground">
-                    {moduleName}
-                  </p>
+                  <p className="text-base font-medium text-f1-foreground">{moduleName}</p>
                 )}
               </div>
               {(tag || promoTag) && (
                 <div className="flex justify-start gap-2">
                   {tag && <F0TagRaw icon={tag.icon} text={tag.label} />}
                   {promoTag && (
-                    <F0TagStatus
-                      variant={promoTag.variant || "positive"}
-                      text={promoTag.label}
-                    />
+                    <F0TagStatus variant={promoTag.variant || "positive"} text={promoTag.label} />
                   )}
                 </div>
               )}

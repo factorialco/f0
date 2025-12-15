@@ -1,8 +1,4 @@
-import {
-  FiltersDefinition,
-  GroupingDefinition,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { FiltersDefinition, GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 import { zeroRender } from "@/testing/test-utils"
 import { renderHook, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
@@ -206,9 +202,7 @@ describe("CardCollection", () => {
           const nameLabels = screen.queryAllByText("Name")
           nameLabels.forEach((label) => {
             const isInHeading = !!label.closest('[role="heading"]')
-            const isInContent = label.classList.contains(
-              "text-muted-foreground"
-            )
+            const isInContent = label.classList.contains("text-muted-foreground")
             expect(isInHeading || isInContent).toBe(true)
           })
         })
@@ -299,9 +293,7 @@ describe("CardCollection", () => {
       )
 
       // Wait for loading state to finish and verify error state
-      const { result } = renderHook(() =>
-        useDataCollectionData(createTestSource([], error))
-      )
+      const { result } = renderHook(() => useDataCollectionData(createTestSource([], error)))
       await waitFor(() => {
         expect(result.current.error).toEqual({
           message: "Error fetching data",

@@ -14,35 +14,31 @@ const Breadcrumb = forwardRef<
 >(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
 Breadcrumb.displayName = "Breadcrumb"
 
-const BreadcrumbList = forwardRef<
-  HTMLOListElement,
-  React.ComponentPropsWithoutRef<"ol">
->(({ className, children, ...props }, ref) => {
-  const id = useId()
+const BreadcrumbList = forwardRef<HTMLOListElement, React.ComponentPropsWithoutRef<"ol">>(
+  ({ className, children, ...props }, ref) => {
+    const id = useId()
 
-  return (
-    <ol
-      ref={ref}
-      className={cn(
-        "flex h-8 list-none flex-nowrap items-center text-f1-foreground-secondary",
-        className
-      )}
-      {...props}
-    >
-      <LayoutGroup id={id}>
-        <AnimatePresence initial={false}>{children}</AnimatePresence>
-      </LayoutGroup>
-    </ol>
-  )
-})
+    return (
+      <ol
+        ref={ref}
+        className={cn(
+          "flex h-8 list-none flex-nowrap items-center text-f1-foreground-secondary",
+          className
+        )}
+        {...props}
+      >
+        <LayoutGroup id={id}>
+          <AnimatePresence initial={false}>{children}</AnimatePresence>
+        </LayoutGroup>
+      </ol>
+    )
+  }
+)
 
 BreadcrumbList.displayName = "BreadcrumbList"
 
 const BreadcrumbItem = ({ className, ...props }: ComponentProps<"li">) => (
-  <li
-    className={cn("inline-flex items-center gap-0.5 pr-1", className)}
-    {...props}
-  />
+  <li className={cn("inline-flex items-center gap-0.5 pr-1", className)} {...props} />
 )
 BreadcrumbItem.displayName = "BreadcrumbItem"
 
@@ -67,26 +63,21 @@ const BreadcrumbLink = forwardRef<
 })
 BreadcrumbLink.displayName = "BreadcrumbLink"
 
-const BreadcrumbPage = forwardRef<
-  HTMLSpanElement,
-  React.ComponentPropsWithoutRef<"span">
->(({ className, ...props }, ref) => (
-  <span
-    ref={ref}
-    role="link"
-    aria-disabled="true"
-    aria-current="page"
-    className={cn("truncate px-1.5 py-0.5 text-f1-foreground", className)}
-    {...props}
-  />
-))
+const BreadcrumbPage = forwardRef<HTMLSpanElement, React.ComponentPropsWithoutRef<"span">>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      role="link"
+      aria-disabled="true"
+      aria-current="page"
+      className={cn("truncate px-1.5 py-0.5 text-f1-foreground", className)}
+      {...props}
+    />
+  )
+)
 BreadcrumbPage.displayName = "BreadcrumbPage"
 
-const BreadcrumbSeparator = ({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<"li">) => (
+const BreadcrumbSeparator = ({ children, className, ...props }: React.ComponentProps<"li">) => (
   <li
     role="presentation"
     aria-hidden="true"
@@ -98,10 +89,7 @@ const BreadcrumbSeparator = ({
 )
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
 
-const BreadcrumbEllipsis = ({
-  className,
-  ...props
-}: React.ComponentProps<"span">) => (
+const BreadcrumbEllipsis = ({ className, ...props }: React.ComponentProps<"span">) => (
   <span
     role="presentation"
     aria-hidden="true"

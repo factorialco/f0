@@ -139,9 +139,7 @@ describe("useSelectable", () => {
       await waitFor(() => {
         expect(result.current.selectedGroups.size).toBe(1)
         expect(result.current.selectedItems.size).toBe(2)
-        expect(result.current.groupAllSelectedStatus["group1"].checked).toBe(
-          true
-        )
+        expect(result.current.groupAllSelectedStatus["group1"].checked).toBe(true)
       })
     })
 
@@ -216,18 +214,13 @@ describe("useSelectable", () => {
 
       // Select all items in first group
       act(() => {
-        result.current.handleSelectGroupChange(
-          initialGroupedData.groups[0],
-          true
-        )
+        result.current.handleSelectGroupChange(initialGroupedData.groups[0], true)
       })
 
       await waitFor(() => {
         expect(result.current.selectedGroups.size).toBe(1)
         expect(result.current.selectedItems.size).toBe(2)
-        expect(result.current.groupAllSelectedStatus["group1"].checked).toBe(
-          true
-        )
+        expect(result.current.groupAllSelectedStatus["group1"].checked).toBe(true)
       })
 
       // Simulate page change with new data for the same group
@@ -257,9 +250,7 @@ describe("useSelectable", () => {
       await waitFor(() => {
         expect(result.current.selectedGroups.size).toBe(1)
         expect(result.current.selectedItems.size).toBe(3)
-        expect(result.current.groupAllSelectedStatus["group1"].checked).toBe(
-          true
-        )
+        expect(result.current.groupAllSelectedStatus["group1"].checked).toBe(true)
       })
     })
   })

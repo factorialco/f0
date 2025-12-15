@@ -1,16 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgSuitcase = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgSuitcase = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <rect
       width={16}
       height={12}

@@ -25,7 +25,8 @@ export type EntitySelectNamedGroup = {
 }
 
 interface EntitySelectCommonProps<T>
-  extends Omit<PopoverProps, "children" | "modal">,
+  extends
+    Omit<PopoverProps, "children" | "modal">,
     Pick<
       InputFieldProps<string>,
       | "label"
@@ -84,14 +85,11 @@ export interface EntitySelectSingleProps<T> extends EntitySelectCommonProps<T> {
   singleSelector: true
 }
 
-export interface EntitySelectMultipleProps<T>
-  extends EntitySelectCommonProps<T> {
+export interface EntitySelectMultipleProps<T> extends EntitySelectCommonProps<T> {
   onSelect: (entities: EntitySelectEntity[]) => void
   singleSelector: false | undefined
 }
 
-export type EntitySelectProps<T> =
-  | EntitySelectSingleProps<T>
-  | EntitySelectMultipleProps<T>
+export type EntitySelectProps<T> = EntitySelectSingleProps<T> | EntitySelectMultipleProps<T>
 
 export type EntityId = number | string

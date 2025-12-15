@@ -15,16 +15,9 @@ export type WidgetEmptyStateProps = {
   actions?: Action[]
 }
 
-export function WidgetEmptyState({
-  title,
-  description,
-  emoji,
-  actions,
-}: WidgetEmptyStateProps) {
+export function WidgetEmptyState({ title, description, emoji, actions }: WidgetEmptyStateProps) {
   if ((actions?.length ?? 0) > 2) {
-    throw Error(
-      "You can only provide up to two actions for the WidgetEmptyState"
-    )
+    throw Error("You can only provide up to two actions for the WidgetEmptyState")
   }
 
   return (

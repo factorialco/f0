@@ -13,11 +13,7 @@ interface UseAutoClearOptions {
  * @param reset - Function to call when auto-clearing should occur
  * @param isOpen - Whether the chat is currently open or closed
  */
-export const useAutoClear = ({
-  autoClearMinutes,
-  reset,
-  isOpen,
-}: UseAutoClearOptions) => {
+export const useAutoClear = ({ autoClearMinutes, reset, isOpen }: UseAutoClearOptions) => {
   const closedTimer = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {

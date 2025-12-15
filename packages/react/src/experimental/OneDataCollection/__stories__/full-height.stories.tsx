@@ -56,13 +56,7 @@ export const WithPagination: Story = {
       paginationType: "pages",
     })
 
-    return (
-      <ExampleComponent
-        frozenColumns={2}
-        fullHeight
-        dataAdapter={dataAdapter}
-      />
-    )
+    return <ExampleComponent frozenColumns={2} fullHeight dataAdapter={dataAdapter} />
   },
 }
 

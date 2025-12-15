@@ -52,8 +52,7 @@ export const workplaceWithEmployees: EntitySelectEntity[] = [
 ]
 
 function getEmployeesFromRange(start: number, end: number) {
-  return Array.from(
-    { length: end - start },
-    (_, i) => famousEmployeesAsSubItems[i + start]
-  ).filter(Boolean)
+  return Array.from({ length: end - start }, (_, i) => famousEmployeesAsSubItems[i + start]).filter(
+    Boolean
+  )
 }

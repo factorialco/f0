@@ -4,9 +4,7 @@ import { NavigationFilter, NavigationFilterComponentProps } from "../../types"
 import { DateNavigation } from "./DateNavigation"
 import { DateValue } from "./types"
 
-const isDateValue = (
-  value: Date | DateRange | DateValue
-): value is DateValue => {
+const isDateValue = (value: Date | DateRange | DateValue): value is DateValue => {
   return "date" in value
 }
 
@@ -14,9 +12,7 @@ const dateNavigatorFilter: NavigationFilter<
   DateValue,
   DateValue | Date | DateRange | undefined | null
 > = {
-  valueConverter: function <
-    FilterDef extends NavigationFilterComponentProps<DateValue>["filter"],
-  >(
+  valueConverter: function <FilterDef extends NavigationFilterComponentProps<DateValue>["filter"]>(
     value: Date | DateRange | DateValue | null | undefined,
     filterDef: FilterDef,
     i18n: TranslationsType
@@ -25,8 +21,7 @@ const dateNavigatorFilter: NavigationFilter<
       ? filterDef.granularity
       : [filterDef.granularity]
 
-    const granularity =
-      filterDef.defaultGranularity || availableGranularities[0] || "day"
+    const granularity = filterDef.defaultGranularity || availableGranularities[0] || "day"
 
     if (!value) {
       value = new Date()

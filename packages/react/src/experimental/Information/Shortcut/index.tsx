@@ -11,8 +11,7 @@ const shortcutVariants = cva({
 
   variants: {
     variant: {
-      default:
-        "border-f1-border-secondary bg-f1-background-tertiary text-f1-foreground-secondary",
+      default: "border-f1-border-secondary bg-f1-background-tertiary text-f1-foreground-secondary",
       inverse: "border-f1-border-inverse text-f1-foreground-inverse-secondary",
     },
   },
@@ -26,11 +25,7 @@ interface ShortcutProps extends VariantProps<typeof shortcutVariants> {
 }
 
 type PlatformDependentKey = "cmd" | "option" | "ctrl"
-const platformDependentKeys = new Set<PlatformDependentKey>([
-  "cmd",
-  "option",
-  "ctrl",
-])
+const platformDependentKeys = new Set<PlatformDependentKey>(["cmd", "option", "ctrl"])
 const platformKeyMap: Record<
   Extract<Platform, "mac" | "windows" | "linux">,
   Record<PlatformDependentKey, string | F0IconProps["icon"]>

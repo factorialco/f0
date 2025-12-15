@@ -171,11 +171,7 @@ export const NoColumns: Story = {
 const randomClasses = ["h-64", "h-full", "h-32", "w-32", "w-full", "w-64"]
 
 const SLIDES_RANDOM = [
-  <BarChartWidget
-    key="widget"
-    chart={BarChartStory.args as BarChartProps}
-    fullHeight
-  />,
+  <BarChartWidget key="widget" chart={BarChartStory.args as BarChartProps} fullHeight />,
   ...Array.from({ length: 6 }, (_, i) => {
     const randomHeight = randomClasses[Math.floor(i / 2)]
     const randomWidth = randomClasses[Math.floor(i / 2) + 3]

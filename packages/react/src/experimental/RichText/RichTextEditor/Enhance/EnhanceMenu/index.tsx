@@ -21,9 +21,7 @@ const Option = ({ option, onClick, selectedOption = null }: OptionProps) => {
         selectedOption?.id === option.id && "bg-f1-background-secondary"
       )}
     >
-      <p className="text-neutral-40 text-md grow text-ellipsis font-normal">
-        {option.label}
-      </p>
+      <p className="text-neutral-40 text-md grow text-ellipsis font-normal">{option.label}</p>
       {option.subOptions && option.subOptions.length > 0 && (
         <F0Icon icon={ChevronRight} size="md" className="text-f1-icon" />
       )}
@@ -50,8 +48,7 @@ const AIEnhanceMenu = ({
   enhancementOptions,
   inputPlaceholder,
 }: AIEnhanceMenuProps) => {
-  const [selectedOption, setSelectedOption] =
-    useState<EnhancementOption | null>(null)
+  const [selectedOption, setSelectedOption] = useState<EnhancementOption | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const customInputRef = useRef<HTMLInputElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -74,8 +71,7 @@ const AIEnhanceMenu = ({
 
       if (
         !clickedOnSubMenu &&
-        (!clickedOnMainMenu ||
-          (clickedOnMainMenu && optionItem?.id !== selectedOption.id))
+        (!clickedOnMainMenu || (clickedOnMainMenu && optionItem?.id !== selectedOption.id))
       ) {
         setSelectedOption(null)
       }
@@ -92,9 +88,7 @@ const AIEnhanceMenu = ({
 
   const handleOptionSelect = (option: EnhancementOption) => {
     if (option.subOptions && option.subOptions.length > 0) {
-      setSelectedOption((prevSelected) =>
-        prevSelected?.id === option.id ? null : option
-      )
+      setSelectedOption((prevSelected) => (prevSelected?.id === option.id ? null : option))
     } else {
       onSelect({ selectedIntent: option.id, customIntent: undefined })
       onClose()
@@ -159,29 +153,23 @@ const AIEnhanceMenu = ({
       </div>
 
       <AnimatePresence>
-        {selectedOption &&
-          selectedOption.subOptions &&
-          selectedOption.subOptions.length > 0 && (
-            <motion.div
-              ref={subMenuRef}
-              className="absolute bottom-0 left-full z-50 max-h-60 w-60 overflow-y-auto rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm"
-              style={{ marginLeft: "8px" }}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="scrollbar-macos flex flex-col overflow-y-auto">
-                {selectedOption.subOptions.map((subOption) => (
-                  <Option
-                    key={subOption.id}
-                    onClick={handleSubOptionSelect}
-                    option={subOption}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
+        {selectedOption && selectedOption.subOptions && selectedOption.subOptions.length > 0 && (
+          <motion.div
+            ref={subMenuRef}
+            className="absolute bottom-0 left-full z-50 max-h-60 w-60 overflow-y-auto rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm"
+            style={{ marginLeft: "8px" }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="scrollbar-macos flex flex-col overflow-y-auto">
+              {selectedOption.subOptions.map((subOption) => (
+                <Option key={subOption.id} onClick={handleSubOptionSelect} option={subOption} />
+              ))}
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   )

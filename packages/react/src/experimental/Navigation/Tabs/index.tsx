@@ -45,9 +45,7 @@ export const BaseTabs: React.FC<TabsProps> = ({
   // If embedded, only show first tab
   const visibleTabs = embedded ? [tabs[0]] : tabs
 
-  const sortedTabs = [...visibleTabs].sort((a, b) =>
-    a.index ? 1 : b.index ? -1 : 0
-  )
+  const sortedTabs = [...visibleTabs].sort((a, b) => (a.index ? 1 : b.index ? -1 : 0))
   const activeTab = sortedTabs.find((tab) =>
     "href" in tab ? isActive(tab.href) : activeTabId === tab.id
   )
@@ -84,11 +82,7 @@ export const BaseTabs: React.FC<TabsProps> = ({
             >
               <Link role="link" {...props}>
                 {props.variant === "upsell" && (
-                  <F0Icon
-                    icon={Upsell}
-                    size="md"
-                    className="mr-1 text-[hsl(var(--promote-50))]"
-                  />
+                  <F0Icon icon={Upsell} size="md" className="mr-1 text-[hsl(var(--promote-50))]" />
                 )}
                 {label}
               </Link>
@@ -100,9 +94,7 @@ export const BaseTabs: React.FC<TabsProps> = ({
   )
 }
 
-export const TabsSkeleton: React.FC<Pick<TabsProps, "secondary">> = ({
-  secondary,
-}) => {
+export const TabsSkeleton: React.FC<Pick<TabsProps, "secondary">> = ({ secondary }) => {
   return (
     <TabNavigation
       aria-label={secondary ? "Secondary empty nav" : "Main empty nav"}

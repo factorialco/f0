@@ -101,9 +101,7 @@ export function ClockInControls({
   const breakTypeOptions =
     breakTypes?.map((breakType) => ({
       value: breakType.id,
-      label: breakType.duration
-        ? `${breakType.name} · ${breakType.duration}`
-        : breakType.name,
+      label: breakType.duration ? `${breakType.name} · ${breakType.duration}` : breakType.name,
       description: breakType.description,
       tag: breakType.isPaid ? labels.paid : labels.unpaid,
     })) ?? []
@@ -182,21 +180,13 @@ export function ClockInControls({
                   />
                 </div>
               </div>
-              {subtitle && (
-                <p className="line-clamp-1 text-f1-foreground-secondary">
-                  {subtitle}
-                </p>
-              )}
+              {subtitle && <p className="line-clamp-1 text-f1-foreground-secondary">{subtitle}</p>}
             </div>
 
             <div className="flex justify-center gap-2 @xs:justify-start">
               {status === "clocked-out" && (
                 <div className="mr-3 @xs:mr-0">
-                  <F0Button
-                    onClick={onClockIn}
-                    label={labels.clockIn}
-                    icon={SolidPlay}
-                  />
+                  <F0Button onClick={onClockIn} label={labels.clockIn} icon={SolidPlay} />
                 </div>
               )}
 
@@ -252,11 +242,7 @@ export function ClockInControls({
                     icon={SolidStop}
                     hideLabel
                   />
-                  <F0Button
-                    onClick={onClockIn}
-                    label={labels.resume}
-                    icon={SolidPlay}
-                  />
+                  <F0Button onClick={onClockIn} label={labels.resume} icon={SolidPlay} />
                 </>
               )}
             </div>
@@ -300,9 +286,7 @@ export function ClockInControls({
                 </>
               )}
               {canShowProject && projectSelectorElement}
-              {canShowBreakTypeName && breakTypeName && (
-                <F0TagRaw text={breakTypeName} />
-              )}
+              {canShowBreakTypeName && breakTypeName && <F0TagRaw text={breakTypeName} />}
             </>
           )}
         </div>

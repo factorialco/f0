@@ -17,10 +17,7 @@ interface NumberValue extends WithPlaceholder {
 
 export type NumberCellValue = number | undefined | NumberValue
 
-export const NumberCell = (
-  args: NumberCellValue,
-  meta: ValueDisplayRendererContext
-) => {
+export const NumberCell = (args: NumberCellValue, meta: ValueDisplayRendererContext) => {
   const value = resolveValue<number>(args, "number")
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "number")
 
@@ -41,22 +38,15 @@ export const NumberCell = (
     <div
       className={cn(
         "flex flex-1 items-center gap-1 text-f1-foreground",
-        meta.visualization === "table" && [
-          "justify-end",
-          tableDisplayClassNames.text,
-        ],
+        meta.visualization === "table" && ["justify-end", tableDisplayClassNames.text],
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
       )}
     >
-      {number.unitsPosition === "left" && number.units && (
-        <Units units={number.units} />
-      )}
+      {number.unitsPosition === "left" && number.units && <Units units={number.units} />}
       {number.decimalPlaces !== undefined
         ? number.number?.toFixed(number.decimalPlaces)
         : (number.number?.toString() ?? "")}
-      {number.unitsPosition === "right" && number.units && (
-        <Units units={number.units} />
-      )}
+      {number.unitsPosition === "right" && number.units && <Units units={number.units} />}
     </div>
   )
 }

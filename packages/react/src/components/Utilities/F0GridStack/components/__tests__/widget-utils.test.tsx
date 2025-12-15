@@ -1,10 +1,7 @@
 import type { GridStackWidget } from "gridstack"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { GridStackReactWidget } from "../../F0GridStack"
-import {
-  convertWidgetForGridStack,
-  convertWidgetRecursive,
-} from "../widget-utils"
+import { convertWidgetForGridStack, convertWidgetRecursive } from "../widget-utils"
 
 describe("widget-utils", () => {
   beforeEach(() => {
@@ -69,9 +66,7 @@ describe("widget-utils", () => {
       expect(result.noMove).toBe(true)
       expect(result.noResize).toBe(false)
       expect(result.locked).toBe(true)
-      expect(
-        (result as GridStackWidget & { allowedSizes?: unknown }).allowedSizes
-      ).toEqual([
+      expect((result as GridStackWidget & { allowedSizes?: unknown }).allowedSizes).toEqual([
         { w: 2, h: 2 },
         { w: 3, h: 4 },
       ])
@@ -335,15 +330,11 @@ describe("widget-utils", () => {
 
       expect(middle1.id).toBe("middle-1")
       expect(middle1.subGridOpts?.children).toHaveLength(1)
-      expect((middle1.subGridOpts?.children?.[0] as GridStackWidget).id).toBe(
-        "leaf-1"
-      )
+      expect((middle1.subGridOpts?.children?.[0] as GridStackWidget).id).toBe("leaf-1")
 
       expect(middle2.id).toBe("middle-2")
       expect(middle2.subGridOpts?.children).toHaveLength(1)
-      expect((middle2.subGridOpts?.children?.[0] as GridStackWidget).id).toBe(
-        "leaf-2"
-      )
+      expect((middle2.subGridOpts?.children?.[0] as GridStackWidget).id).toBe("leaf-2")
     })
 
     it("should handle empty sub-grid children array", () => {

@@ -19,12 +19,7 @@ export const DashboardWidget = ({
   aiButton,
 }: DashboardWidgetProps) => {
   return (
-    <F0Widget
-      title={title}
-      draggable={draggable}
-      actions={actions}
-      AIButton={aiButton}
-    >
+    <F0Widget title={title} draggable={draggable} actions={actions} AIButton={aiButton}>
       {children}
     </F0Widget>
   )

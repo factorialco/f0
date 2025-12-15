@@ -4,38 +4,33 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # InputField
 
-`InputField` is a wrapper component that enhances native HTML `<input>` or
-`<textarea>` elements with a consistent style and additional features. It
-provides a structured way to display labels, icons, error messages, character
-counters, and more.
+`InputField` is a wrapper component that enhances native HTML `<input>` or `<textarea>` elements
+with a consistent style and additional features. It provides a structured way to display labels,
+icons, error messages, character counters, and more.
 
 ## When to use
 
-Use `InputField` whenever you need to capture text input from a user. It's
-designed to be composed with standard `input` or `textarea` elements, inheriting
-their basic functionality while adding a layer of design consistency and
-extended features from the F0 design system.
+Use `InputField` whenever you need to capture text input from a user. It's designed to be composed
+with standard `input` or `textarea` elements, inheriting their basic functionality while adding a
+layer of design consistency and extended features from the F0 design system.
 
 ## Anatomy
 
 The `InputField` is composed of several parts:
 
 - **Label**: Text to describe the input's purpose.
-- **Input area**: The area where the user types. This is where the child
-  component (like `<input>`) is rendered.
+- **Input area**: The area where the user types. This is where the child component (like `<input>`)
+  is rendered.
 - **Icon**: An optional icon to the left of the input area.
 - **Clear button**: An optional button to clear the input's content.
-- **Append content**: An optional area at the end of the input for additional
-  elements.
+- **Append content**: An optional area at the end of the input for additional elements.
 - **Messages**: A section below the input for error messages or other hints.
-- **Character count**: Displays the number of characters entered out of a
-  maximum length.
+- **Character count**: Displays the number of characters entered out of a maximum length.
 
 ## Usage
 
-To use `InputField`, you need to pass an `<input>` or `<textarea>` element as
-`children`. `InputField` will then clone this element and add the necessary
-props to it.
+To use `InputField`, you need to pass an `<input>` or `<textarea>` element as `children`.
+`InputField` will then clone this element and add the necessary props to it.
 
 ```tsx
 import { InputField } from "./InputField"
@@ -60,8 +55,7 @@ const MyComponent = () => {
 
 ## Props
 
-`InputField` accepts a variety of props to customize its behavior and
-appearance.
+`InputField` accepts a variety of props to customize its behavior and appearance.
 
 ### General Props
 
@@ -123,10 +117,9 @@ appearance.
 
 ## Composition
 
-The `InputField` is designed to be composed with other components. The
-`children` prop is the key to this composition. You can pass any component that
-accepts `value`, `onChange`, `onFocus`, `onBlur`, `disabled`, and `readonly`
-props. The `InputField` will automatically provide them.
+The `InputField` is designed to be composed with other components. The `children` prop is the key to
+this composition. You can pass any component that accepts `value`, `onChange`, `onFocus`, `onBlur`,
+`disabled`, and `readonly` props. The `InputField` will automatically provide them.
 
-This is especially useful for creating more complex and specialized input
-components while maintaining a consistent appearance.
+This is especially useful for creating more complex and specialized input components while
+maintaining a consistent appearance.

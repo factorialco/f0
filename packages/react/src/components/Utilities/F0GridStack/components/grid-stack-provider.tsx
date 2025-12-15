@@ -1,10 +1,5 @@
 import { useDeepCompareEffect } from "@reactuses/core"
-import type {
-  GridItemHTMLElement,
-  GridStack,
-  GridStackOptions,
-  GridStackWidget,
-} from "gridstack"
+import type { GridItemHTMLElement, GridStack, GridStackOptions, GridStackWidget } from "gridstack"
 import { motion } from "motion/react"
 import React, {
   type PropsWithChildren,
@@ -27,15 +22,7 @@ interface GridStackProviderProps {
   widgets?: GridStackReactWidget[]
 }
 
-const propsToObserve = [
-  "noMove",
-  "noResize",
-  "locked",
-  "w",
-  "h",
-  "x",
-  "y",
-] as const
+const propsToObserve = ["noMove", "noResize", "locked", "w", "h", "x", "y"] as const
 
 const REMOVE_ANIMATION_DURATION = 200
 
@@ -61,9 +48,7 @@ function cloneElementWithCanvas(element: HTMLElement): string {
         // Find the corresponding canvas in the cloned element
         // We need to find it by position/index since we can't use the original reference
         const allClonedCanvases = clonedElement.querySelectorAll("canvas")
-        const canvasIndex = Array.from(
-          element.querySelectorAll("canvas")
-        ).indexOf(originalCanvas)
+        const canvasIndex = Array.from(element.querySelectorAll("canvas")).indexOf(originalCanvas)
         const clonedCanvas = allClonedCanvases[canvasIndex]
 
         if (clonedCanvas && clonedCanvas.parentElement) {
@@ -138,8 +123,7 @@ export function GridStackProvider({
 
   // Ref to track reactContentMap synchronously for emitChange callback
   // This ensures emitChange always has access to the latest content when GridStack fires events
-  const reactContentMapRef =
-    useRef<Map<string, React.ReactElement>>(reactContentMap)
+  const reactContentMapRef = useRef<Map<string, React.ReactElement>>(reactContentMap)
 
   // Keep ref in sync with state updates
   useEffect(() => {
@@ -169,8 +153,7 @@ export function GridStackProvider({
 
   // Ref to track originalContentMap synchronously for emitChange callback
   // This ensures emitChange always has access to the latest _originalContent when GridStack fires events
-  const originalContentMapRef =
-    useRef<Map<string, React.ReactNode>>(originalContentMap)
+  const originalContentMapRef = useRef<Map<string, React.ReactNode>>(originalContentMap)
 
   // Keep ref in sync with state updates
   useEffect(() => {
@@ -217,9 +200,7 @@ export function GridStackProvider({
     /**
      * Add new widgets to gridstack
      */
-    const widgetsToAdd = newWidgets.filter(
-      (widget) => !widgetsInGridstackIds.includes(widget.id!)
-    )
+    const widgetsToAdd = newWidgets.filter((widget) => !widgetsInGridstackIds.includes(widget.id!))
     if (widgetsToAdd.length > 0) {
       // Update ref synchronously BEFORE adding widgets to GridStack
       // This ensures emitChange has access to content when "added" event fires
@@ -283,9 +264,7 @@ export function GridStackProvider({
       })
 
       widgetsToRemove.forEach((widget) => {
-        const element = gridStack.el.querySelector<GridItemHTMLElement>(
-          `[gs-id="${widget.id}"]`
-        )
+        const element = gridStack.el.querySelector<GridItemHTMLElement>(`[gs-id="${widget.id}"]`)
         if (element) {
           setTimeout(() => {
             gridStack.removeWidget(element, true)
@@ -309,10 +288,9 @@ export function GridStackProvider({
           const content = next.get(id)
           if (content) {
             // Find the widget container element to capture its HTML and dimensions
-            const widgetElement =
-              gridStack.el.querySelector<GridItemHTMLElement>(
-                `[gs-id="${id}"] .grid-stack-item-content`
-              )
+            const widgetElement = gridStack.el.querySelector<GridItemHTMLElement>(
+              `[gs-id="${id}"] .grid-stack-item-content`
+            )
 
             // Capture the static HTML and dimensions from the DOM before wrapping
             let staticHTML = ""
@@ -377,9 +355,7 @@ export function GridStackProvider({
       }> = []
 
       widgetsToUpdate.forEach((widget) => {
-        const widgetInGridstack = widgetsInGridstack.find(
-          (w) => w.id === widget.id
-        )
+        const widgetInGridstack = widgetsInGridstack.find((w) => w.id === widget.id)
         if (!widgetInGridstack) {
           return
         }
@@ -407,8 +383,7 @@ export function GridStackProvider({
           if (
             changedSizeProps.length > 0 &&
             changedInteractionProps.length > 0 &&
-            changedSizeProps.length + changedInteractionProps.length ===
-              propertiesChanged.length
+            changedSizeProps.length + changedInteractionProps.length === propertiesChanged.length
           ) {
             // Only update interaction properties, preserve sizes from GridStack
             changedInteractionProps.forEach((prop) => {
@@ -514,9 +489,7 @@ export function GridStackProvider({
     const timeoutId = setTimeout(() => {
       if (gridStack && gridStack.el && convertedOptions.handle) {
         // Verify handle elements exist
-        const handleElements = gridStack.el.querySelectorAll(
-          convertedOptions.handle
-        )
+        const handleElements = gridStack.el.querySelectorAll(convertedOptions.handle)
         if (handleElements.length > 0) {
           // Handle elements are present, GridStack should pick them up
           // Force GridStack to re-initialize drag handlers if needed
@@ -632,11 +605,7 @@ export function GridStackProvider({
     if (!gridStack) return
     // Only emit change if the gridStack instance is valid and widgets have been initialized
     // Skip the initial emitChange() to prevent overwriting widgets added via useEffect on mount
-    if (
-      gridStack.el &&
-      gridStack.el.parentElement &&
-      isInitializedRef.current
-    ) {
+    if (gridStack.el && gridStack.el.parentElement && isInitializedRef.current) {
       emitChange()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

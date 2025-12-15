@@ -24,8 +24,7 @@ const meta = {
       control: { type: "text" },
     },
     status: {
-      description:
-        "Status of the input and a message to display below the input",
+      description: "Status of the input and a message to display below the input",
       control: "select",
       options: inputFieldStatus,
       defaultValue: "default",

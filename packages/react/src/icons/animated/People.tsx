@@ -70,10 +70,7 @@ const PeopleAnimated = React.forwardRef<SVGSVGElement, PeopleProps>(
             d="M16 13C17.6569 13 19 11.6569 19 10C19 8.34315 17.6569 7 16 7"
             vectorEffect="non-scaling-stroke"
           />
-          <path
-            d="M17 16C19 16 19.75 17 19.75 17"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d="M17 16C19 16 19.75 17 19.75 17" vectorEffect="non-scaling-stroke" />
         </motion.g>
       </svg>
     )

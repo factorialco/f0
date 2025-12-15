@@ -183,12 +183,7 @@ describe("InputField", () => {
       const handleChange = vi.fn()
 
       const { container } = render(
-        <InputField
-          label="Test Label"
-          clearable
-          value="test"
-          onChange={handleChange}
-        >
+        <InputField label="Test Label" clearable value="test" onChange={handleChange}>
           <input />
         </InputField>
       )
@@ -210,9 +205,7 @@ describe("InputField", () => {
       )
 
       // When value is empty, the clear button should not be rendered
-      const animatePresence = container.querySelector(
-        "[data-testid='animate-presence']"
-      )
+      const animatePresence = container.querySelector("[data-testid='animate-presence']")
       expect(animatePresence).toBeNull()
     })
   })
@@ -225,9 +218,7 @@ describe("InputField", () => {
         </InputField>
       )
 
-      expect(
-        container.querySelector('[aria-busy="true"][aria-live="polite"]')
-      ).toBeInTheDocument()
+      expect(container.querySelector('[aria-busy="true"][aria-live="polite"]')).toBeInTheDocument()
     })
 
     it("should not show spinner when not loading", () => {
@@ -351,9 +342,7 @@ describe("InputField", () => {
       )
 
       // When disabled, clearable section should not be rendered
-      const animatePresence = container.querySelector(
-        "[data-testid='animate-presence']"
-      )
+      const animatePresence = container.querySelector("[data-testid='animate-presence']")
       expect(animatePresence).not.toBeInTheDocument()
     })
 
@@ -622,12 +611,7 @@ describe("InputField", () => {
       const customIsEmpty = vi.fn().mockReturnValue(false)
 
       const { container } = render(
-        <InputField
-          label="Test Label"
-          isEmpty={customIsEmpty}
-          clearable
-          value=""
-        >
+        <InputField label="Test Label" isEmpty={customIsEmpty} clearable value="">
           <input />
         </InputField>
       )

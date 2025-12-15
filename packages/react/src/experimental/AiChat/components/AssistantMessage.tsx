@@ -1,10 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import {
-  ThumbsDown,
-  ThumbsDownFilled,
-  ThumbsUp,
-  ThumbsUpFilled,
-} from "@/icons/app"
+import { ThumbsDown, ThumbsDownFilled, ThumbsUp, ThumbsUpFilled } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ButtonCopy } from "@/ui/ButtonCopy"
@@ -24,9 +19,7 @@ export const AssistantMessage = ({
   const content = message?.content || ""
   const isThinkingTool =
     message?.role === "assistant" &&
-    message.toolCalls?.find(
-      (tool) => tool.function.name === "orchestratorThinking"
-    )
+    message.toolCalls?.find((tool) => tool.function.name === "orchestratorThinking")
   const subComponent = message?.generativeUI?.(
     isThinkingTool
       ? {
@@ -125,14 +118,11 @@ export const AssistantMessage = ({
                   variant="ghost"
                   size="sm"
                   label={translations.actions.thumbsDown}
-                  icon={
-                    reactionValue === "dislike" ? ThumbsDownFilled : ThumbsDown
-                  }
+                  icon={reactionValue === "dislike" ? ThumbsDownFilled : ThumbsDown}
                   hideLabel
                   disabled={isGenerating}
                   onClick={(e) => {
-                    const newValue =
-                      reactionValue === "dislike" ? null : "dislike"
+                    const newValue = reactionValue === "dislike" ? null : "dislike"
                     if (newValue) {
                       openFeedbackModal(newValue, message)
                     }

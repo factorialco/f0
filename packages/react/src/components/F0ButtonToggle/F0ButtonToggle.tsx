@@ -6,10 +6,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, useEffect, useMemo, useState } from "react"
 import { F0ButtonToggleProps } from "./types"
 
-export const F0ButtonToggle = forwardRef<
-  HTMLButtonElement,
-  F0ButtonToggleProps
->(
+export const F0ButtonToggle = forwardRef<HTMLButtonElement, F0ButtonToggleProps>(
   (
     {
       onSelectedChange = () => {},

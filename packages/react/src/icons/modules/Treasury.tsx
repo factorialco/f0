@@ -1,16 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgTreasury = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgTreasury = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       fill="currentColor"
       d="M11.7705 3.0539C11.9211 3.01845 12.0789 3.01845 12.2295 3.0539L19.7295 4.81854C20.181 4.92496 20.5 5.32828 20.5 5.79218V8.00019C20.5 8.55247 20.0523 9.00019 19.5 9.00019H18.6504V16.0002H19.5C20.0523 16.0002 20.5 16.4479 20.5 17.0002V19.0002C20.5 19.5525 20.0523 20.0002 19.5 20.0002H4.5C3.94772 20.0002 3.5 19.5525 3.5 19.0002V17.0002C3.50002 16.4479 3.94773 16.0002 4.5 16.0002H5.34961V9.00019H4.5C3.94772 9.00019 3.5 8.55247 3.5 8.00019V5.79218C3.50003 5.32828 3.81901 4.92496 4.27051 4.81854L11.7705 3.0539ZM10.6504 16.0002H13.3496V9.00019H10.6504V16.0002ZM14.6504 16.0002H17.3496V9.00019H14.6504V16.0002ZM6.65039 16.0002H9.34961V9.00019H6.65039V16.0002Z"

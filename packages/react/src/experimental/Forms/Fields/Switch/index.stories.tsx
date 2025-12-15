@@ -25,8 +25,7 @@ const meta = {
     },
     onCheckedChange: {
       control: false,
-      description:
-        "The callback function that is called when the switch is toggled",
+      description: "The callback function that is called when the switch is toggled",
     },
     disabled: {
       control: "boolean",

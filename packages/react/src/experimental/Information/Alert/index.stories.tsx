@@ -36,8 +36,7 @@ export const Positive: Story = {
     <Alert {...props}>
       <AlertTitle>Training completed!</AlertTitle>
       <AlertDescription>
-        You successfully completed the training &apos;Eat. Sleep. Command Z.
-        Repeat&apos;.
+        You successfully completed the training &apos;Eat. Sleep. Command Z. Repeat&apos;.
       </AlertDescription>
     </Alert>
   ),
@@ -51,8 +50,8 @@ export const Warning: Story = {
     <Alert {...props}>
       <AlertTitle>Top up account</AlertTitle>
       <AlertDescription>
-        Your account balance is below 1.000,00 €. Add money to your balance in
-        order to avoid failed card payments immediately.
+        Your account balance is below 1.000,00 €. Add money to your balance in order to avoid failed
+        card payments immediately.
       </AlertDescription>
     </Alert>
   ),
@@ -66,8 +65,8 @@ export const Info: Story = {
     <Alert {...props}>
       <AlertTitle>Invite your Bookkeeper</AlertTitle>
       <AlertDescription>
-        You can now invite your Bookkeeper to centralize all types of
-        communications about employee updates in one place.
+        You can now invite your Bookkeeper to centralize all types of communications about employee
+        updates in one place.
       </AlertDescription>
     </Alert>
   ),

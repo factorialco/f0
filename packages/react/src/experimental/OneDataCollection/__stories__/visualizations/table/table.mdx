@@ -14,10 +14,9 @@ import * as TableStories from "./table.stories"
 
 ## Introduction
 
-The Table visualization is a tabular visualization that displays data in rows
-and columns with advanced features like column sorting, filtering, frozen
-columns, column reordering, and column hiding. It provides a comprehensive view
-of structured data with enhanced interactivity.
+The Table visualization is a tabular visualization that displays data in rows and columns with
+advanced features like column sorting, filtering, frozen columns, column reordering, and column
+hiding. It provides a comprehensive view of structured data with enhanced interactivity.
 
 ## Examples
 
@@ -25,8 +24,8 @@ of structured data with enhanced interactivity.
 
 ## Setting Up Table Visualization
 
-To enable the Table visualization in your data collection component, provide the
-`type: "table"` in the `visualizations` prop:
+To enable the Table visualization in your data collection component, provide the `type: "table"` in
+the `visualizations` prop:
 
 ```tsx
 <OneDataCollection
@@ -256,8 +255,8 @@ type TableColumnDefinition<T> = {
 
 ### Frozen Columns
 
-You can freeze columns to the left side of the table to keep them visible while
-scrolling horizontally:
+You can freeze columns to the left side of the table to keep them visible while scrolling
+horizontally:
 
 ```tsx
 {
@@ -356,9 +355,9 @@ Allow users to show/hide columns using column settings:
 
 ## Nested Tables
 
-Tables can display hierarchical data by allowing rows to be expanded to reveal
-child items. This functionality is useful for representing tree structures,
-categories with subcategories, or any parent-child relationship in your data.
+Tables can display hierarchical data by allowing rows to be expanded to reveal child items. This
+functionality is useful for representing tree structures, categories with subcategories, or any
+parent-child relationship in your data.
 
 ### Basic Setup
 
@@ -397,8 +396,7 @@ To enable nested tables, you need to provide three methods in your data source:
 
 **Type:** `(item: R) => boolean`
 
-Function that determines if an item has children and therefore should display
-the expand button.
+Function that determines if an item has children and therefore should display the expand button.
 
 **Example:**
 
@@ -420,15 +418,14 @@ itemsWithChildren: (item) => {
 **Type:**
 `({ item, pagination }: { item: R; pagination?: ChildrenPaginationInfo }) => number | undefined`
 
-Function that returns the total number of child items an element has. This
-number is displayed next to the expand button and helps the user understand how
-many items they will see when expanding.
+Function that returns the total number of child items an element has. This number is displayed next
+to the expand button and helps the user understand how many items they will see when expanding.
 
 **Parameters:**
 
 - `item`: The parent item whose child count we want to know
-- `pagination`: (Optional) Current pagination information of the children,
-  useful if you need to calculate the total based on pagination state
+- `pagination`: (Optional) Current pagination information of the children, useful if you need to
+  calculate the total based on pagination state
 
 **Example:**
 
@@ -448,24 +445,23 @@ childrenCount: ({ item, pagination }) => {
 }
 ```
 
-**Note:** If you return `undefined`, no counter will be displayed next to the
-expand button, but the button will still work.
+**Note:** If you return `undefined`, no counter will be displayed next to the expand button, but the
+button will still work.
 
 #### `fetchChildren`
 
 **Type:**
 `({ item, filters, pagination }: { item: R; filters?: FiltersState<Filters>; pagination?: ChildrenPaginationInfo }) => Promise<ChildrenResponse<R>>`
 
-Async function that fetches the child items of a parent item. This is the main
-method that controls how hierarchical data is loaded.
+Async function that fetches the child items of a parent item. This is the main method that controls
+how hierarchical data is loaded.
 
 **Parameters:**
 
 - `item`: The parent item whose children will be loaded
-- `filters`: (Optional) Current filter state applied in the table. You can use
-  these filters to also filter child items
-- `pagination`: (Optional) Pagination information for loading more children
-  incrementally
+- `filters`: (Optional) Current filter state applied in the table. You can use these filters to also
+  filter child items
+- `pagination`: (Optional) Pagination information for loading more children incrementally
 
 **Returns:** `Promise<ChildrenResponse<R>>`
 
@@ -492,15 +488,14 @@ type ChildrenPaginationInfo = {
 
 ### Response Types: `basic` vs `detailed`
 
-The `type` field in the `fetchChildren` response controls the visual layout of
-child items. Both types support expandable children, but they differ in their
-presentation:
+The `type` field in the `fetchChildren` response controls the visual layout of child items. Both
+types support expandable children, but they differ in their presentation:
 
 #### `"basic"` (default)
 
-Children are displayed in a **hierarchical tree view** with visual connectors
-and indentation. This creates a traditional tree structure that clearly shows
-the parent-child relationships. Use this type when:
+Children are displayed in a **hierarchical tree view** with visual connectors and indentation. This
+creates a traditional tree structure that clearly shows the parent-child relationships. Use this
+type when:
 
 - You want a clear hierarchical visualization
 - Visual tree structure is important for understanding relationships
@@ -530,9 +525,9 @@ fetchChildren: async ({ item }) => {
 
 #### `"detailed"`
 
-Children are displayed **aligned with the parent** without tree connectors or
-indentation. This creates a flatter, more detailed view where children are
-treated as full table rows. Use this type when:
+Children are displayed **aligned with the parent** without tree connectors or indentation. This
+creates a flatter, more detailed view where children are treated as full table rows. Use this type
+when:
 
 - You need to display detailed information for the parent
 - You prefer a cleaner, less hierarchical appearance
@@ -574,8 +569,8 @@ fetchChildren: async ({ item }) => {
 
 ### Children Pagination
 
-When a parent item has many children, you can implement pagination to load them
-incrementally. This significantly improves performance and user experience.
+When a parent item has many children, you can implement pagination to load them incrementally. This
+significantly improves performance and user experience.
 
 #### Pagination Setup
 
@@ -623,8 +618,8 @@ fetchChildren: async ({ item, filters, pagination }) => {
 
 #### "Load More" Behavior
 
-When `paginationInfo.hasMore` is `true`, a "Load more" button is automatically
-shown at the end of the expanded children. When clicked:
+When `paginationInfo.hasMore` is `true`, a "Load more" button is automatically shown at the end of
+the expanded children. When clicked:
 
 1. `fetchChildren` is called with the current `pagination`
 2. New items are **appended** to existing ones (they don't replace them)

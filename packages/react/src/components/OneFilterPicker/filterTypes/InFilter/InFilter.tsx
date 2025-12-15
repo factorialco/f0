@@ -115,9 +115,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     () =>
       hasSource
         ? options
-        : options.filter((option) =>
-            option.label.toLowerCase().includes(searchTerm.toLowerCase())
-          ),
+        : options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase())),
     [hasSource, options, searchTerm]
   )
 
@@ -134,10 +132,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       <div className="text-f1-foreground-destructive flex w-full flex-col items-center justify-center gap-2 py-4">
         <p className="text-sm">{i18n.filters.failedToLoadOptions}</p>
         <button
-          className={cn(
-            "text-f1-foreground-primary text-xs underline",
-            focusRing()
-          )}
+          className={cn("text-f1-foreground-primary text-xs underline", focusRing())}
           onClick={() => {
             // Re-trigger the effect to retry loading
             loadOptions(true)
@@ -199,17 +194,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   }
 
   const selectedText = `${value.length} ${
-    value.length === 1
-      ? i18n.status.selected.singular
-      : i18n.status.selected.plural
+    value.length === 1 ? i18n.status.selected.singular : i18n.status.selected.plural
   }`.toLowerCase()
 
   return (
-    <div
-      className="flex min-h-full w-full flex-col"
-      role="group"
-      aria-label={schema.label}
-    >
+    <div className="flex min-h-full w-full flex-col" role="group" aria-label={schema.label}>
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
@@ -234,9 +223,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         {isCompactMode && (
           <div className="sticky left-0 right-0 top-0 z-10 flex w-full flex-1 items-center justify-between gap-1 rounded bg-f1-background/80 p-2 py-1 pr-1 backdrop-blur-[8px]">
             <span className="max-w-[250px] flex-1 whitespace-nowrap">
-              <OneEllipsis className="text-f1-foreground-secondary">
-                {selectedText}
-              </OneEllipsis>
+              <OneEllipsis className="text-f1-foreground-secondary">{selectedText}</OneEllipsis>
             </span>
             <F0Checkbox
               id="select-all"
@@ -266,9 +253,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                   cacheLabel(cacheKey, option.value, option.label)
                 }
                 onChange(
-                  isSelected
-                    ? value.filter((v) => v !== option.value)
-                    : [...value, option.value]
+                  isSelected ? value.filter((v) => v !== option.value) : [...value, option.value]
                 )
               }}
             >

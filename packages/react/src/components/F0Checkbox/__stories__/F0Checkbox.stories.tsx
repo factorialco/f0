@@ -30,8 +30,7 @@ const meta = {
     },
     onCheckedChange: {
       control: false,
-      description:
-        "The callback function that is called when the checkbox is checked",
+      description: "The callback function that is called when the checkbox is checked",
     },
     indeterminate: {
       control: "boolean",
@@ -60,9 +59,7 @@ export const Default: Story = {
   },
   render: (args) => {
     const [checked, setChecked] = useState(false)
-    return (
-      <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    return <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -79,9 +76,7 @@ export const Disabled: Story = {
   },
   render: (args) => {
     const [checked, setChecked] = useState(false)
-    return (
-      <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    return <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
   },
 }
 
@@ -92,9 +87,7 @@ export const Indeterminate: Story = {
   },
   render: (args) => {
     const [checked, setChecked] = useState(false)
-    return (
-      <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    return <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
   },
 }
 
@@ -105,8 +98,6 @@ export const Checked: Story = {
   },
   render: (args) => {
     const [checked, setChecked] = useState(true)
-    return (
-      <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    return <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
   },
 }

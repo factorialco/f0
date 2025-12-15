@@ -18,9 +18,7 @@ interface TestWidget {
 describe("GridStackRenderProvider", () => {
   beforeEach(() => {
     // Clear the WeakMap before each test
-    gridWidgetContainersMap.constructor.prototype.clear?.call(
-      gridWidgetContainersMap
-    )
+    gridWidgetContainersMap.constructor.prototype.clear?.call(gridWidgetContainersMap)
   })
 
   describe("Widget Container Management", () => {

@@ -3,11 +3,7 @@ import { fn } from "storybook/test"
 import { F0Select, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
-import {
-  createDataSourceDefinition,
-  FiltersDefinition,
-  RecordType,
-} from "@/hooks/datasource"
+import { createDataSourceDefinition, FiltersDefinition, RecordType } from "@/hooks/datasource"
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 
@@ -94,8 +90,7 @@ const meta: Meta = {
     },
     hideLabel: {
       control: "boolean",
-      description:
-        "Whether to hide the label visually (still accessible to screen readers)",
+      description: "Whether to hide the label visually (still accessible to screen readers)",
     },
     clearable: {
       control: "boolean",
@@ -112,8 +107,7 @@ const meta: Meta = {
         "Error message to display below the select, This is a shortcut for status.type = 'error'",
     },
     status: {
-      description:
-        "Status of the select and a message to display below the select",
+      description: "Status of the select and a message to display below the select",
       control: "select",
       options: inputFieldStatus,
       defaultValue: "default",
@@ -144,8 +138,7 @@ const meta: Meta = {
         "Function to filter the options. If not provided, the component will filter the options by label. Only applies when options are passed in the options prop, not when a data source is used (use fetchData options for this)",
       table: {
         type: {
-          summary:
-            "(option: SelectItemObject<string>, search?: string) => boolean | undefined",
+          summary: "(option: SelectItemObject<string>, search?: string) => boolean | undefined",
         },
       },
     },
@@ -153,8 +146,7 @@ const meta: Meta = {
       description: "Function called when the search input value changes",
     },
     onOpenChange: {
-      description:
-        "Function called when the select dropdown open state changes",
+      description: "Function called when the select dropdown open state changes",
     },
     options: {
       description:
@@ -188,8 +180,7 @@ const meta: Meta = {
     },
     loading: {
       control: "boolean",
-      description:
-        "Whether the select is loading. If true, the select will be disabled",
+      description: "Whether the select is loading. If true, the select will be disabled",
     },
   },
   args: {
@@ -212,13 +203,11 @@ const meta: Meta = {
   },
   decorators: [
     ((Story, { args }) => {
-      const [localValue, setLocalValue] = useState(
-        args.value as string | undefined
-      )
+      const [localValue, setLocalValue] = useState(args.value as string | undefined)
       const [searchValue, setSearchValue] = useState("")
       const [selectionStatus, setSelectionStatus] = useState<
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        SelectedItemsDetailedStatus<any, any> | undefined
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          SelectedItemsDetailedStatus<any, any> | undefined
       >(undefined)
 
       const handleOnChange = (value: string) => {
@@ -249,9 +238,7 @@ const meta: Meta = {
         if (allSelected === "indeterminate") {
           const uncheckedIds = itemsStatus
             .filter((item: { checked: boolean }) => !item.checked)
-            .map(
-              (item: { item: { value?: string } }) => item.item?.value ?? "?"
-            )
+            .map((item: { item: { value?: string } }) => item.item?.value ?? "?")
           return `All selected except: ${uncheckedIds.slice(0, 10).join(", ")}${uncheckedIds.length > 10 ? "..." : ""}`
         }
 
@@ -262,9 +249,7 @@ const meta: Meta = {
       const getFiltersDisplay = () => {
         if (!selectionStatus?.filters) return ""
         const activeFilters = Object.entries(selectionStatus.filters)
-          .filter(
-            ([, value]) => value !== undefined && value !== null && value !== ""
-          )
+          .filter(([, value]) => value !== undefined && value !== null && value !== "")
           .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
         if (activeFilters.length === 0) return ""
         return `Filters: ${activeFilters.join(", ")}`
@@ -280,9 +265,7 @@ const meta: Meta = {
                 onChange: handleOnChange,
                 searchValue: searchValue,
                 onSearchChange: handleOnSearchChange,
-                ...(isMultiplePaginated
-                  ? { onSelectItems: handleOnSelectItems }
-                  : {}),
+                ...(isMultiplePaginated ? { onSelectItems: handleOnSelectItems } : {}),
               } as typeof args
             }
           />
@@ -290,9 +273,7 @@ const meta: Meta = {
             {isMultiplePaginated ? (
               <>
                 <p>{getSelectionDisplay()}</p>
-                {selectionStatus && (
-                  <p>Total: {selectionStatus.selectedCount}</p>
-                )}
+                {selectionStatus && <p>Total: {selectionStatus.selectedCount}</p>}
                 {getFiltersDisplay() && <p>Filters: {getFiltersDisplay()}</p>}
               </>
             ) : (
@@ -453,9 +434,7 @@ export const WithSearchBox: Story = {
               option.type === "separator" ||
               !searchValue ||
               option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-              option.description
-                ?.toLowerCase()
-                .includes(searchValue.toLowerCase())
+              option.description?.toLowerCase().includes(searchValue.toLowerCase())
             )
           }}
           options={args.options}
@@ -487,11 +466,7 @@ export const LargeList: Story = {
     ...WithSearchBox.args,
     label: "Select a theme",
     value: "option-4",
-    options: [
-      ...(meta.args?.options || []),
-      { type: "separator" },
-      ...mockItems,
-    ],
+    options: [...(meta.args?.options || []), { type: "separator" }, ...mockItems],
   },
 }
 
@@ -555,14 +530,12 @@ export const WithDataSourceGrouping: Story = {
           role: {
             name: "Role",
             label: (groupId) => `${groupId}`,
-            itemCount: (groupId) =>
-              mockItems.filter((item) => item.role === groupId).length,
+            itemCount: (groupId) => mockItems.filter((item) => item.role === groupId).length,
           },
           workplace: {
             name: "Workplace",
             label: (groupId) => `${groupId}`,
-            itemCount: (groupId) =>
-              mockItems.filter((item) => item.workplace === groupId).length,
+            itemCount: (groupId) => mockItems.filter((item) => item.workplace === groupId).length,
           },
         },
       },
@@ -580,22 +553,13 @@ export const WithDataSourceGrouping: Story = {
                 const sortField = sortings?.[0]?.field as keyof MockItem
                 const results = mockItems
                   .sort((a, b) => {
-                    return (
-                      (a[sortField] as string)?.localeCompare(
-                        b[sortField] as string
-                      ) ?? 0
-                    )
+                    return (a[sortField] as string)?.localeCompare(b[sortField] as string) ?? 0
                   })
                   .filter(
-                    (item) =>
-                      !search ||
-                      item.label.toLowerCase().includes(search.toLowerCase())
+                    (item) => !search || item.label.toLowerCase().includes(search.toLowerCase())
                   )
 
-                const paginatedResults = results.slice(
-                  cursor ? Number(cursor) : 0,
-                  nextCursor
-                )
+                const paginatedResults = results.slice(cursor ? Number(cursor) : 0, nextCursor)
 
                 const res = {
                   type: "infinite-scroll" as const,
@@ -808,12 +772,7 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <F0Select
-                size={size}
-                label="Label text here"
-                onChange={fn()}
-                options={[]}
-              />
+              <F0Select size={size} label="Label text here" onChange={fn()} options={[]} />
               {snapshotVariants.map((variant, index) => (
                 <F0Select
                   key={`${size}-${index}`}

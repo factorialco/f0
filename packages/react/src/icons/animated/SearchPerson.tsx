@@ -71,14 +71,7 @@ const SearchPersonAnimated = React.forwardRef<SVGSVGElement, SearchPersonProps>(
           transition={magnifierTransition}
           animate={animate}
         >
-          <rect
-            x="4"
-            y="4"
-            width="14"
-            height="14"
-            rx="7"
-            vectorEffect="non-scaling-stroke"
-          />
+          <rect x="4" y="4" width="14" height="14" rx="7" vectorEffect="non-scaling-stroke" />
           <path d="M16 16L19 19" vectorEffect="non-scaling-stroke" />
         </motion.g>
       </svg>

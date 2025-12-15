@@ -2,10 +2,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import {
-  useCopilotChatInternal as useCopilotChat,
-  useCopilotContext,
-} from "@copilotkit/react-core"
+import { useCopilotChatInternal as useCopilotChat, useCopilotContext } from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
@@ -42,37 +39,19 @@ const Messages = ({
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
   const { threadId } = useCopilotContext()
-  const {
-    close: closeFeedbackModal,
-    currentReaction,
-    currentMessage,
-    isOpen,
-  } = useFeedbackModal()
+  const { close: closeFeedbackModal, currentReaction, currentMessage, isOpen } = useFeedbackModal()
 
   const translations = useI18n()
-  const {
-    greeting,
-    initialMessage,
-    welcomeScreenSuggestions,
-    onThumbsUp,
-    onThumbsDown,
-  } = useAiChat()
+  const { greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown } =
+    useAiChat()
   const initialMessages = useMemo(
-    () =>
-      makeInitialMessages(
-        initialMessage || translations.ai.defaultInitialMessage
-      ),
+    () => makeInitialMessages(initialMessage || translations.ai.defaultInitialMessage),
     [initialMessage, translations.ai.defaultInitialMessage]
   )
-  const showWelcomeBlock =
-    messages.length == 0 && (greeting || initialMessages.length > 0)
+  const showWelcomeBlock = messages.length == 0 && (greeting || initialMessages.length > 0)
 
-  const {
-    messagesContainerRef,
-    messagesEndRef,
-    showScrollToBottom,
-    scrollToBottom,
-  } = useScrollToBottom()
+  const { messagesContainerRef, messagesEndRef, showScrollToBottom, scrollToBottom } =
+    useScrollToBottom()
   const { height: containerHeight = 0 } = useResizeObserver({
     ref: messagesContainerRef,
     box: "border-box",
@@ -94,9 +73,7 @@ const Messages = ({
         <motion.div
           layout="position"
           ref={turnsContainerRef}
-          className={
-            showWelcomeBlock ? "flex flex-1 pb-3" : "flex flex-col gap-8"
-          }
+          className={showWelcomeBlock ? "flex flex-1 pb-3" : "flex flex-col gap-8"}
         >
           {showWelcomeBlock && (
             <WelcomeScreen
@@ -122,8 +99,7 @@ const Messages = ({
               >
                 {turnMessages.map((message, index) => {
                   const isCurrentMessage =
-                    turnIndex === turns.length - 1 &&
-                    index === turnMessages.length - 1
+                    turnIndex === turns.length - 1 && index === turnMessages.length - 1
 
                   if (Array.isArray(message) && !isCurrentMessage) {
                     return (
@@ -191,14 +167,12 @@ const Messages = ({
       {isOpen && (
         <FeedbackModal
           onSubmit={(message, feedback) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
+            const callback = currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback })
             closeFeedbackModal()
           }}
           onClose={(message) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
+            const callback = currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback: "" })
             closeFeedbackModal()
           }}
@@ -244,12 +218,10 @@ export function useScrollToBottom() {
 
   const checkIsScrollingUp = () => {
     if (messagesContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } =
-        messagesContainerRef.current
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current
       const PRECISION = 20
 
-      isUserScrollUpRef.current =
-        scrollTop + clientHeight + PRECISION < scrollHeight
+      isUserScrollUpRef.current = scrollTop + clientHeight + PRECISION < scrollHeight
     } else {
       isUserScrollUpRef.current = false
     }
@@ -261,8 +233,7 @@ export function useScrollToBottom() {
       return
     }
 
-    const { scrollTop, scrollHeight, clientHeight } =
-      messagesContainerRef.current
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current
 
     const isScrolledFarUp = scrollTop < scrollHeight - 3 * clientHeight
     setShowScrollToBottom(isScrolledFarUp)
@@ -333,10 +304,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     const currentTurn = turns[turns.length - 1]
 
     // Handle agent state messages that arrive during thinking message grouping
-    if (
-      isAgentStateMessage(message) &&
-      isCurrentlyGroupingThinking(currentTurn)
-    ) {
+    if (isAgentStateMessage(message) && isCurrentlyGroupingThinking(currentTurn)) {
       // we want to ignore the last agent state message
       // to avoid rerenders of thinking components and play extra animations
       if (i !== messages.length - 1) {
@@ -368,9 +336,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
 function isThinkingMessage(message: Message): boolean {
   return (
     message.role === "assistant" &&
-    message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
-    ) === true
+    message.toolCalls?.some((call) => call.function.name === "orchestratorThinking") === true
   )
 }
 

@@ -19,11 +19,7 @@ export const statusToChecked = <
   }
 
   // If there are selected items but not all checked, it's indeterminate
-  if (
-    status.selectedCount !== undefined &&
-    status.selectedCount > 0 &&
-    !status.checked
-  ) {
+  if (status.selectedCount !== undefined && status.selectedCount > 0 && !status.checked) {
     return "indeterminate"
   }
 
@@ -37,9 +33,7 @@ export const statusToChecked = <
  * @param item - The item to convert the actions for
  * @returns An array of dropdown items
  */
-export const actionsToDropdownItems = (
-  actions: ActionDefinition[] | undefined
-) => {
+export const actionsToDropdownItems = (actions: ActionDefinition[] | undefined) => {
   return (actions || []).map((action) => {
     return action.type === "separator"
       ? action

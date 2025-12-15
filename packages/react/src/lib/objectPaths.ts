@@ -33,9 +33,10 @@ export type RecordPathValue<T, P extends string> = P extends keyof T
  * @param path - The path string (e.g., 'a.b.c')
  * @returns The value at the path, or undefined if not found
  */
-export function getValueByPath<
-  T extends Record<string, unknown> | undefined | null,
->(obj: T, path: string): unknown {
+export function getValueByPath<T extends Record<string, unknown> | undefined | null>(
+  obj: T,
+  path: string
+): unknown {
   if (!obj || typeof obj !== "object") {
     return undefined
   }

@@ -25,24 +25,15 @@ type MetadataItemValue =
   | ({ type: "list" } & (
       | {
           variant: "person"
-          avatars: (
-            | PersonAvatarVariant
-            | (PersonAvatarVariant & Record<string, unknown>)
-          )[]
+          avatars: (PersonAvatarVariant | (PersonAvatarVariant & Record<string, unknown>))[]
         }
       | {
           variant: "team"
-          avatars: (
-            | TeamAvatarVariant
-            | (TeamAvatarVariant & Record<string, unknown>)
-          )[]
+          avatars: (TeamAvatarVariant | (TeamAvatarVariant & Record<string, unknown>))[]
         }
       | {
           variant: "company"
-          avatars: (
-            | CompanyAvatarVariant
-            | (CompanyAvatarVariant & Record<string, unknown>)
-          )[]
+          avatars: (CompanyAvatarVariant | (CompanyAvatarVariant & Record<string, unknown>))[]
         }
     ))
   | { type: "data-list"; data: string[] }
@@ -113,10 +104,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
   const isAction = Boolean(item.actions?.length)
   const hasHover = isAction || isList
 
-  const getValueToCopy = (
-    value: MetadataItemValue,
-    copyValue?: string
-  ): string => {
+  const getValueToCopy = (value: MetadataItemValue, copyValue?: string): string => {
     if (copyValue) {
       return copyValue
     }
@@ -154,10 +142,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         {item.label}
         {item.info && (
           <div className="flex h-4 w-4 items-center text-f1-foreground-tertiary hover:cursor-help">
-            <Tooltip
-              label={item.info.title}
-              description={item.info.description}
-            >
+            <Tooltip label={item.info.title} description={item.info.description}>
               <F0Icon icon={InfoCircleLine} size="sm" />
             </Tooltip>
           </div>
@@ -173,12 +158,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         className="relative flex h-5 w-fit items-center hover:cursor-default"
         aria-label={`${item.label} actions`}
       >
-        <div
-          className={cn(
-            "hidden font-medium text-f1-foreground md:block",
-            !isAction && "block"
-          )}
-        >
+        <div className={cn("hidden font-medium text-f1-foreground md:block", !isAction && "block")}>
           <MetadataValue item={item} collapse />
         </div>
         {isAction && (
@@ -230,10 +210,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
                       return (
                         <ButtonCopy
                           key={`copy-${index}`}
-                          valueToCopy={getValueToCopy(
-                            item.value,
-                            action.copyValue
-                          )}
+                          valueToCopy={getValueToCopy(item.value, action.copyValue)}
                         />
                       )
                     } else {
@@ -270,10 +247,7 @@ export const Metadata = memo(function Metadata({ items }: MetadataProps) {
         <>
           <MetadataItem key={`item-${index}`} item={item} />
           {index < cleanedItems.length - 1 && (
-            <div
-              key={`separator-${index}`}
-              className="hidden h-4 w-[1px] bg-f1-border md:block"
-            />
+            <div key={`separator-${index}`} className="hidden h-4 w-[1px] bg-f1-border md:block" />
           )}
         </>
       ))}

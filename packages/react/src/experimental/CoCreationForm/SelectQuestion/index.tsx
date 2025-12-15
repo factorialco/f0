@@ -9,15 +9,11 @@ import { useCoCreationFormContext } from "../Context"
 import { DragProvider } from "../DragContext"
 import { SelectQuestionOption } from "../types"
 import { SelectOption } from "./SelectOption"
-import {
-  OnChangeLabelParams,
-  OnClickOptionActionParams,
-} from "./SelectOption/types"
+import { OnChangeLabelParams, OnClickOptionActionParams } from "./SelectOption/types"
 import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
-  const { onQuestionChange, isEditMode, getSectionContainingQuestion } =
-    useCoCreationFormContext()
+  const { onQuestionChange, isEditMode, getSectionContainingQuestion } = useCoCreationFormContext()
 
   const someOptionsWithSameValue =
     new Set(options.map((option) => option.value)).size !== options.length
@@ -52,8 +48,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     }
 
     const newOptionsWithSameValue =
-      new Set(newOptions.map((option) => option.value)).size !==
-      newOptions.length
+      new Set(newOptions.map((option) => option.value)).size !== newOptions.length
 
     if (!newOptionsWithSameValue) {
       onQuestionChange?.({ ...commonChangeParams, options: newOptions })
@@ -70,13 +65,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     }
 
     onQuestionChange?.({ ...commonChangeParams, options: newOptions })
-  }, [
-    someOptionsWithSameValue,
-    onQuestionChange,
-    options,
-    props.id,
-    props.type,
-  ])
+  }, [someOptionsWithSameValue, onQuestionChange, options, props.id, props.type])
 
   const handleClickOptionAction = (params: OnClickOptionActionParams) => {
     let newOptions = options
@@ -88,8 +77,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     if (params.action === "mark-as-correct") {
       newOptions = options.map((option) => ({
         ...option,
-        correct:
-          option.value === params.value ? !option.correct : option.correct,
+        correct: option.value === params.value ? !option.correct : option.correct,
       }))
     }
 
@@ -164,12 +152,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
     <BaseQuestion {...props}>
       <div className="-mx-0.5 flex flex-col items-start [&>div]:w-full">
         <DragProvider>
-          <Reorder.Group
-            axis="y"
-            values={options}
-            onReorder={handleReorderOptions}
-            as="div"
-          >
+          <Reorder.Group axis="y" values={options} onReorder={handleReorderOptions} as="div">
             {options.map((option, index) => (
               <div className="w-full [&>div]:w-full" key={option.value}>
                 <SelectOption

@@ -2,11 +2,7 @@ import { IconType } from "@/components/F0Icon"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { GroupingDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { Kanban, List, Table } from "@/icons/app"
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
@@ -21,10 +17,7 @@ import {
   TableVisualizationSettings,
 } from "./Table"
 
-export type VisualizacionTypeDefinition<
-  Props,
-  Settings = Record<string, never>,
-> = {
+export type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
   render: (props: Props) => JSX.Element
   name: string
   icon: IconType
@@ -123,15 +116,7 @@ export const collectionVisualizations: CollectionVisualizations<
       >
     ) => {
       return (
-        <TableCollection<
-          R,
-          Filters,
-          Sortings,
-          Summaries,
-          ItemActions,
-          NavigationFilters,
-          Grouping
-        >
+        <TableCollection<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
           {...props}
         />
       )

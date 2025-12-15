@@ -24,8 +24,7 @@ const widgets = [
   <BarChartWidget {...BarChartWidgetStoriesMeta.args} />,
   <Widget header={{ title: "A form widget", subtitle: "Enter your data" }}>
     <p>
-      Never gonna give you up. Never gonna let you down. Never gonna turn around
-      and desert you.
+      Never gonna give you up. Never gonna let you down. Never gonna turn around and desert you.
     </p>
   </Widget>,
 ]

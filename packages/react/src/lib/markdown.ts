@@ -4,10 +4,7 @@ import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import { unified } from "unified"
 
-const PROCESSOR = unified()
-  .use(remarkParse)
-  .use(remarkRehype)
-  .use(rehypeStringify)
+const PROCESSOR = unified().use(remarkParse).use(remarkRehype).use(rehypeStringify)
 
 /**
  * Parses markdown content and returns sanitized HTML

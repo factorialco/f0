@@ -16,10 +16,7 @@ interface DateValue extends WithPlaceholder {
 }
 export type DateCellValue = Date | undefined | DateValue
 
-export const DateCell = (
-  args: DateCellValue,
-  meta: ValueDisplayRendererContext
-) => {
+export const DateCell = (args: DateCellValue, meta: ValueDisplayRendererContext) => {
   const formattedDate = formatDateValue(args)
 
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "date")

@@ -100,8 +100,7 @@ const meta = {
       },
     },
     onSelect: {
-      description:
-        "The callback function that is called when the user selects a value",
+      description: "The callback function that is called when the user selects a value",
       table: {
         type: {
           summary: "function",
@@ -126,14 +125,12 @@ const meta = {
       },
     },
     onCompareToChange: {
-      description:
-        "The callback function that is called when the user selects a compare to value",
+      description: "The callback function that is called when the user selects a compare to value",
       table: {
         type: {
           summary: "function",
         },
-        detail:
-          "function(compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void",
+        detail: "function(compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void",
       },
     },
     minDate: {
@@ -235,15 +232,7 @@ export const WithCustomRange: Story = {
     defaultValue: {
       granularity: "month",
     } as DatePickerValue,
-    granularities: [
-      "day",
-      "week",
-      "month",
-      "quarter",
-      "halfyear",
-      "year",
-      "range",
-    ],
+    granularities: ["day", "week", "month", "quarter", "halfyear", "year", "range"],
   },
 }
 
@@ -355,10 +344,7 @@ export const WithCompareTo: Story = {
         {
           label: "Yesterday",
           value: () =>
-            granularityDefinitions.day.add(
-              granularityDefinitions.day.toRange(new Date()),
-              -1
-            ),
+            granularityDefinitions.day.add(granularityDefinitions.day.toRange(new Date()), -1),
         },
         {
           label: "Previous Day",
@@ -377,14 +363,8 @@ export const WithCompareTo: Story = {
         {
           label: "Previous 2 Week",
           value: (value) => [
-            granularityDefinitions.week.add(
-              granularityDefinitions.week.toRange(value),
-              -2
-            ),
-            granularityDefinitions.week.add(
-              granularityDefinitions.week.toRange(value),
-              -1
-            ),
+            granularityDefinitions.week.add(granularityDefinitions.week.toRange(value), -2),
+            granularityDefinitions.week.add(granularityDefinitions.week.toRange(value), -1),
           ],
         },
       ],
@@ -406,16 +386,10 @@ export const ChangeValueFromOutside: Story = {
     granularities: ["day", "week", "month", "quarter"],
   },
   render: (args) => {
-    const [value, setValue] = useState<DatePickerValue | undefined>(
-      args.defaultValue
-    )
+    const [value, setValue] = useState<DatePickerValue | undefined>(args.defaultValue)
     return (
       <>
-        <OneDateNavigator
-          {...args}
-          value={value}
-          onSelect={(value) => setValue(value)}
-        />
+        <OneDateNavigator {...args} value={value} onSelect={(value) => setValue(value)} />
         <div className="mt-4">
           <button
             onClick={() =>

@@ -22,23 +22,14 @@ interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
 
 function Spinner({ size, className }: SpinnerProps) {
   return (
-    <div
-      className={cn(spinnerVariants({ size, className }))}
-      aria-live="polite"
-      aria-busy={true}
-    >
+    <div className={cn(spinnerVariants({ size, className }))} aria-live="polite" aria-busy={true}>
       <svg
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="h-full w-full"
       >
-        <circle
-          cx="16"
-          cy="16"
-          r="12"
-          className="stroke-f1-background-secondary"
-        />
+        <circle cx="16" cy="16" r="12" className="stroke-f1-background-secondary" />
         <motion.circle
           cx="16"
           cy="16"

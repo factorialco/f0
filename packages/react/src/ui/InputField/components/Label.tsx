@@ -10,14 +10,7 @@ type LabelProps = {
   icon?: IconType
   disabled?: boolean
 }
-const Label = ({
-  label,
-  required,
-  htmlFor,
-  className,
-  icon,
-  disabled,
-}: LabelProps) => {
+const Label = ({ label, required, htmlFor, className, icon, disabled }: LabelProps) => {
   return (
     <label
       className={cn(

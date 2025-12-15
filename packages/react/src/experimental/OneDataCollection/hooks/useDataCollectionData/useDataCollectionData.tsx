@@ -50,8 +50,7 @@ function useDCDataWithoutLanes<
       },
       onResponse: (result) => {
         // Extract summaries data if available
-        const extractedSummaries =
-          "summaries" in result ? result.summaries : undefined
+        const extractedSummaries = "summaries" in result ? result.summaries : undefined
 
         setSummariesData(extractedSummaries)
       },
@@ -65,10 +64,9 @@ function useDCDataWithoutLanes<
   }
 }
 
-export type UseDataCollectionData<R extends RecordType> =
-  UseDataCollectionDataReturn<R> & {
-    summaries?: R
-  }
+export type UseDataCollectionData<R extends RecordType> = UseDataCollectionDataReturn<R> & {
+  summaries?: R
+}
 
 export function useDataCollectionData<
   R extends RecordType,

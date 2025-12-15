@@ -61,15 +61,8 @@ export function optimisticSameLaneOverCard<TRecord>(args: {
   sourceId: string
   setItems: React.Dispatch<React.SetStateAction<TRecord[]>>
 }): KanbanOnMoveParam {
-  const {
-    resourceIndexOnLane,
-    cardTarget,
-    sourceItem,
-    fromLaneId,
-    toLaneId,
-    sourceId,
-    setItems,
-  } = args
+  const { resourceIndexOnLane, cardTarget, sourceItem, fromLaneId, toLaneId, sourceId, setItems } =
+    args
   const indexOfTarget = Number(cardTarget.data.index)
   const closestEdge = extractClosestEdge(cardTarget.data)
   setItems((prev) => {
@@ -101,14 +94,7 @@ export function optimisticSameLaneOverEmpty<TRecord>(args: {
   sourceId: string
   setItems: React.Dispatch<React.SetStateAction<TRecord[]>>
 }): KanbanOnMoveParam {
-  const {
-    resourceIndexOnLane,
-    sourceItem,
-    fromLaneId,
-    toLaneId,
-    sourceId,
-    setItems,
-  } = args
+  const { resourceIndexOnLane, sourceItem, fromLaneId, toLaneId, sourceId, setItems } = args
   setItems((prev) => {
     const newItems = [...prev]
     newItems.splice(resourceIndexOnLane, 1)
@@ -132,17 +118,12 @@ export function optimisticDifferentLaneInsertOverCard<TRecord>(args: {
   sourceId: string
   setItems: React.Dispatch<React.SetStateAction<TRecord[]>>
 }): KanbanOnMoveParam {
-  const { cardTarget, sourceItem, fromLaneId, toLaneId, sourceId, setItems } =
-    args
+  const { cardTarget, sourceItem, fromLaneId, toLaneId, sourceId, setItems } = args
   const indexOfTarget = Number(cardTarget.data.index)
   const closestEdge = extractClosestEdge(cardTarget.data)
   setItems((prev) => {
     const newItems = [...prev]
-    newItems.splice(
-      indexOfTarget + (closestEdge === "bottom" ? 1 : 0),
-      0,
-      sourceItem
-    )
+    newItems.splice(indexOfTarget + (closestEdge === "bottom" ? 1 : 0), 0, sourceItem)
     return newItems
   })
   return {

@@ -47,34 +47,11 @@ const BarGraphAnimated = React.forwardRef<SVGSVGElement, BarGraphProps>(
         strokeLinejoin="round"
         {...props}
       >
-        <rect
-          x="4"
-          y="6"
-          width="16"
-          height="12"
-          rx="3"
-          vectorEffect="non-scaling-stroke"
-        />
-        <motion.g
-          variants={containerVariants}
-          animate={animate}
-          initial="normal"
-        >
-          <motion.path
-            d="M8 15L8 13"
-            vectorEffect="non-scaling-stroke"
-            variants={lineVariants}
-          />
-          <motion.path
-            d="M12 15L12 9"
-            vectorEffect="non-scaling-stroke"
-            variants={lineVariants}
-          />
-          <motion.path
-            d="M16 15L16 11"
-            vectorEffect="non-scaling-stroke"
-            variants={lineVariants}
-          />
+        <rect x="4" y="6" width="16" height="12" rx="3" vectorEffect="non-scaling-stroke" />
+        <motion.g variants={containerVariants} animate={animate} initial="normal">
+          <motion.path d="M8 15L8 13" vectorEffect="non-scaling-stroke" variants={lineVariants} />
+          <motion.path d="M12 15L12 9" vectorEffect="non-scaling-stroke" variants={lineVariants} />
+          <motion.path d="M16 15L16 11" vectorEffect="non-scaling-stroke" variants={lineVariants} />
         </motion.g>
       </svg>
     )

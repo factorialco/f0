@@ -71,8 +71,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    mediaUrl:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    mediaUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
     title: "More benefits to René & your team",
     description:
       "Enjoy greater savings through flexible benefits like meals, transport, and health insurance.",
@@ -114,8 +113,7 @@ export const Default: Story = {
 }
 export const WithUpsellingButton: Story = {
   args: {
-    mediaUrl:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    mediaUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
     title: "More benefits to René & your team",
     description:
       "Enjoy greater savings through flexible benefits like meals, transport, and health insurance.",
@@ -130,8 +128,7 @@ export const WithUpsellingButton: Story = {
         showConfirmation: true,
         errorMessage: {
           title: "Request failed",
-          description:
-            "We couldn't process your request. Please try again later.",
+          description: "We couldn't process your request. Please try again later.",
         },
         onClick: async () => {
           console.log("onRequest")

@@ -30,10 +30,7 @@ const TooltipWrapper: React.FC<{
   return children
 }
 
-export const IconCell = (
-  args: IconCellValue,
-  meta: ValueDisplayRendererContext
-) => (
+export const IconCell = (args: IconCellValue, meta: ValueDisplayRendererContext) => (
   <div
     className={cn(
       "flex items-center gap-2",
@@ -42,10 +39,7 @@ export const IconCell = (
   >
     <TooltipWrapper tooltip={args.tooltip}>
       <div className="inline-flex items-center gap-2">
-        <F0Icon
-          icon={args.icon}
-          aria-label={args.hideLabel ? args.label : undefined}
-        />
+        <F0Icon icon={args.icon} aria-label={args.hideLabel ? args.label : undefined} />
         {args.hideLabel ? (
           <span className="sr-only">{args.label}</span>
         ) : (

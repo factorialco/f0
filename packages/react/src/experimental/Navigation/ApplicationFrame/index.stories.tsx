@@ -79,9 +79,7 @@ export default meta
 
 type Story = StoryObj<typeof ApplicationFrame>
 
-const DefaultStoryComponent = (
-  args: ComponentProps<typeof ApplicationFrame>
-) => {
+const DefaultStoryComponent = (args: ComponentProps<typeof ApplicationFrame>) => {
   return (
     <ApplicationFrame
       ai={args.ai}

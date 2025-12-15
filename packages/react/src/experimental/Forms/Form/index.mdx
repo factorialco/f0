@@ -13,14 +13,13 @@ import * as FormStories from "./index.stories.tsx"
 
 ## Introduction
 
-This is a quick Introduction of [React hook form](https://react-hook-form.com/)
-and [Zod](https://zod.dev/).
+This is a quick Introduction of [React hook form](https://react-hook-form.com/) and
+[Zod](https://zod.dev/).
 
 ### General definition of form
 
-We use the hook `useForm` which allow us (passing a Zod squema) to interact with
-a form. We did a simplication of this process with the hook `useFormSchema`. But
-a more complete example can be:
+We use the hook `useForm` which allow us (passing a Zod squema) to interact with a form. We did a
+simplication of this process with the hook `useFormSchema`. But a more complete example can be:
 
 ```javascript
 const form = useFormSchema(
@@ -42,27 +41,25 @@ const form = useFormSchema(
 )
 ```
 
-As you can see you can specify different schemas if you define a function so you
-can use for example different schemas to validate.
+As you can see you can specify different schemas if you define a function so you can use for example
+different schemas to validate.
 
 ### React hook form API frequent commands
 
-- How do I access values? → React hook form got you covered. You can use
-  `form.getValues()` to access all the values and you can access to the specific
-  you want to.
-- I do not see my values update. → you can use `form.watch` to subscribe to
-  field changes. You can pass to that method an array of methods you want to
-  listen to. This is specially useful if you don’t use controlled inputs.
+- How do I access values? → React hook form got you covered. You can use `form.getValues()` to
+  access all the values and you can access to the specific you want to.
+- I do not see my values update. → you can use `form.watch` to subscribe to field changes. You can
+  pass to that method an array of methods you want to listen to. This is specially useful if you
+  don’t use controlled inputs.
 - I want to set an specific field to a value → you can do this `form.setValue`
-- I want to reset a field → you can reset the state of an specific value with
-  `form.resetField`
-- I change a value but I cannot see the validations → you can trigger
-  validations over specific fields or the general form with `form.trigger`
+- I want to reset a field → you can reset the state of an specific value with `form.resetField`
+- I change a value but I cannot see the validations → you can trigger validations over specific
+  fields or the general form with `form.trigger`
 
 ### Zod usage
 
-`Zod` is the library we use to define the schema against it will validate our
-forms. A general example of this:
+`Zod` is the library we use to define the schema against it will validate our forms. A general
+example of this:
 
 ```javascript
 const schema = z
@@ -89,11 +86,10 @@ const schema = z
 ```
 
 As you saw, we have different primitives to define values, (more info in
-[primitives](https://zod.dev/?id=primitives)) such as strings, booleans,
-numbers, etc. You can improve validations setting this primitives as optional, a
-max value, min value, parsing values, etc. But if you want to perform more
-complex validations over an specific field you can use the refine function where
-you can specify a path and an error message for it:
+[primitives](https://zod.dev/?id=primitives)) such as strings, booleans, numbers, etc. You can
+improve validations setting this primitives as optional, a max value, min value, parsing values,
+etc. But if you want to perform more complex validations over an specific field you can use the
+refine function where you can specify a path and an error message for it:
 
 ```javascript
 const mySupercoolField = z.string()
@@ -115,8 +111,8 @@ mySchema.superRefine(({ field1, field2 }, context) => {
 
 If you want a more complete example you can check this
 [notion](https://www.notion.so/factorialco/How-to-use-react-hook-form-zod-in-forms-14d5e6e051ee8009a266ed7ed517c944)
-where we describe how we use this libraries in order to build the forms in the
-mobile app for Expenses.
+where we describe how we use this libraries in order to build the forms in the mobile app for
+Expenses.
 
 ### Default
 

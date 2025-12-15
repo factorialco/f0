@@ -13,12 +13,7 @@ type ItemProps = {
   allowHiding: boolean
 }
 
-const Item = ({
-  item,
-  onChangeVisibility,
-  allowSorting,
-  allowHiding,
-}: ItemProps) => {
+const Item = ({ item, onChangeVisibility, allowSorting, allowHiding }: ItemProps) => {
   const classes = "flex items-center gap-2 text-medium text-sm pr-4"
   const controls = useDragControls()
 

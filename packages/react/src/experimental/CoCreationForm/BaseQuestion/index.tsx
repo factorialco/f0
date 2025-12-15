@@ -40,8 +40,7 @@ export const BaseQuestion = ({
 
   const isWithinSection = !!containingSection
 
-  const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] =
-    useState(false)
+  const [isNewQuestionDropdownOpen, setIsNewQuestionDropdownOpen] = useState(false)
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
 
   const { isDragging } = useDragContext()
@@ -52,21 +51,15 @@ export const BaseQuestion = ({
       id,
       type: questionType,
       title: e.target.value,
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
+    } as Parameters<NonNullable<CoCreationFormCallbacks["onQuestionChange"]>>[0])
   }
 
-  const handleChangeDescription = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
+  const handleChangeDescription = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onQuestionChange?.({
       id,
       type: questionType,
       description: e.target.value,
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
+    } as Parameters<NonNullable<CoCreationFormCallbacks["onQuestionChange"]>>[0])
   }
 
   const handleAddNewQuestion = (type: QuestionType) => {
@@ -160,9 +153,7 @@ export const BaseQuestion = ({
                 setOpen={setActionsDropdownOpen}
                 questionId={id}
                 questionType={questionType}
-                canDeleteQuestion={
-                  !isWithinSection || !isSingleQuestionInSection
-                }
+                canDeleteQuestion={!isWithinSection || !isSingleQuestionInSection}
               />
             </div>
           )}
@@ -170,9 +161,7 @@ export const BaseQuestion = ({
         <textarea
           value={description}
           aria-label={t("coCreationForm.labels.description")}
-          placeholder={t(
-            "coCreationForm.labels.questionDescriptionPlaceholder"
-          )}
+          placeholder={t("coCreationForm.labels.questionDescriptionPlaceholder")}
           onChange={handleChangeDescription}
           disabled={inputDisabled}
           className={cn(

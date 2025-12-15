@@ -100,13 +100,7 @@ describe("getColsOrderFromDefinition", () => {
     const result = getColsOrderFromDefinition(columns)
 
     // Ordered columns first, then non-ordered in original order
-    expect(result).toEqual([
-      "column1",
-      "column2",
-      "column3",
-      "column5",
-      "column6",
-    ])
+    expect(result).toEqual(["column1", "column2", "column3", "column5", "column6"])
   })
 
   it("should use columns.length as fallback value for undefined order", () => {

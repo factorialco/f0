@@ -10,14 +10,7 @@ const WithStepStory = composeStory(WithStep, Meta)
 
 describe("NumberInput", () => {
   test("renders the input", () => {
-    render(
-      <NumberInput
-        locale="es-ES"
-        value={123.456}
-        maxDecimals={2}
-        label="Number Input"
-      />
-    )
+    render(<NumberInput locale="es-ES" value={123.456} maxDecimals={2} label="Number Input" />)
     const input = screen.getByRole("textbox")
     expect(input).toHaveValue("123,46")
   })
@@ -34,12 +27,7 @@ describe("NumberInput", () => {
     test("trigger the onChange callback with the number", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
-          locale="en-US"
-          maxDecimals={0}
-          onChange={onChange}
-          label="Number Input"
-        />
+        <NumberInput locale="en-US" maxDecimals={0} onChange={onChange} label="Number Input" />
       )
 
       const input = screen.getByRole("textbox")

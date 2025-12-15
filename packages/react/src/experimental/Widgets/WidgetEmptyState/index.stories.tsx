@@ -43,10 +43,7 @@ export const Default: Story = {
         title="Really really long title that we want to show that we want to show to our users for them to read"
         description="Really really long description that we want to show to our users for them to read and express their thoughts"
       />
-      <WidgetEmptyState
-        title="Widget Empty State"
-        description="This is a widget empty state"
-      />
+      <WidgetEmptyState title="Widget Empty State" description="This is a widget empty state" />
     </div>
   ),
 }

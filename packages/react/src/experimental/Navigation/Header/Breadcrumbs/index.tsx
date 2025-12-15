@@ -1,21 +1,11 @@
 import { Breadcrumb, BreadcrumbList } from "@/ui/breadcrumb"
-import {
-  ReactNode,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useTransition,
-} from "react"
+import { ReactNode, useLayoutEffect, useRef, useState, useTransition } from "react"
 
 import { BreadcrumbItem } from "./internal/BreadcrumbItem"
 import { CollapsedBreadcrumbItem } from "./internal/CollapsedBreadcrumbItem"
 
 import { calculateBreadcrumbState } from "./layoutCalculation"
-import {
-  BreadcrumbItemType,
-  BreadcrumbState,
-  DropdownItemWithoutIcon,
-} from "./types"
+import { BreadcrumbItemType, BreadcrumbState, DropdownItemWithoutIcon } from "./types"
 export * from "./types"
 
 export interface BreadcrumbsProps {
@@ -65,11 +55,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
       const containerWidth = containerRef.current?.clientWidth ?? null
       const breadcrumbsElements = Array.from(list.children) as HTMLElement[]
       startTransition(() => {
-        const state = calculateBreadcrumbState(
-          containerWidth,
-          breadcrumbs,
-          breadcrumbsElements
-        )
+        const state = calculateBreadcrumbState(containerWidth, breadcrumbs, breadcrumbsElements)
         setState(state)
       })
     }
@@ -95,11 +81,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
       }}
       key={`breadcrumb-${breadcrumbs.at(-1)?.id ?? 0}`}
     >
-      <ol
-        className="invisible absolute -left-full"
-        aria-hidden="true"
-        ref={listRef}
-      >
+      <ol className="invisible absolute -left-full" aria-hidden="true" ref={listRef}>
         {breadcrumbs.map((item, index) => (
           <BreadcrumbItem
             key={item.id}

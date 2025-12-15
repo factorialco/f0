@@ -33,12 +33,7 @@ export interface KanbanProps<TRecord extends RecordType> {
   loading?: boolean
 
   /** Render a card for a given record */
-  renderCard: (
-    item: TRecord,
-    index: number,
-    total: number,
-    laneId?: string
-  ) => ReactNode
+  renderCard: (item: TRecord, index: number, total: number, laneId?: string) => ReactNode
 
   /** Extract a stable key for a given record */
   getKey: (item: TRecord, index: number, laneId?: string) => string | number

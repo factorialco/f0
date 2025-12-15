@@ -18,19 +18,14 @@ type ItemProps = {
 const Item = ({ element }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
-  const { isEditMode, getSectionContainingQuestion } =
-    useCoCreationFormContext()
+  const { isEditMode, getSectionContainingQuestion } = useCoCreationFormContext()
 
   const containingSection =
-    element.type === "question"
-      ? getSectionContainingQuestion(element.question.id)
-      : undefined
+    element.type === "question" ? getSectionContainingQuestion(element.question.id) : undefined
 
   const handleDragStart = () => {
     setIsDragging(true)
-    setDraggedItemId(
-      element.type === "section" ? element.section.id : element.question.id
-    )
+    setDraggedItemId(element.type === "section" ? element.section.id : element.question.id)
   }
 
   const handleDragEnd = () => {
@@ -73,9 +68,7 @@ const Item = ({ element }: ItemProps) => {
               <F0Icon icon={Handle} size="sm" />
             </div>
           )}
-          {element.type === "section" && (
-            <SectionComponent {...element.section} />
-          )}
+          {element.type === "section" && <SectionComponent {...element.section} />}
           {element.type === "question" && (
             <QuestionComponent
               {...({
@@ -98,8 +91,7 @@ export const CoCreationForm = ({
   applyingChanges,
 }: CoCreationFormProps) => {
   const shouldShowAddButton =
-    isEditMode &&
-    (!elementsProp?.length || elementsProp?.at(-1)?.type === "section")
+    isEditMode && (!elementsProp?.length || elementsProp?.at(-1)?.type === "section")
 
   const elements = useMemo<CoCreationFormElement[]>(
     () =>
@@ -109,9 +101,7 @@ export const CoCreationForm = ({
             ...element,
             question: {
               ...element.question,
-              required: disallowOptionalQuestions
-                ? true
-                : element.question.required,
+              required: disallowOptionalQuestions ? true : element.question.required,
             },
           }
         }
@@ -150,29 +140,17 @@ export const CoCreationForm = ({
     >
       <div className="relative">
         <motion.div
-          className={cn(
-            "flex flex-col gap-6",
-            applyingChanges && "pointer-events-none"
-          )}
+          className={cn("flex flex-col gap-6", applyingChanges && "pointer-events-none")}
           initial={{ filter: "blur(0px)" }}
           animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
           exit={{ filter: "blur(0px)" }}
         >
           <DragProvider>
-            <Reorder.Group
-              axis="y"
-              values={elements}
-              onReorder={onChange}
-              as="div"
-            >
+            <Reorder.Group axis="y" values={elements} onReorder={onChange} as="div">
               <div className="flex flex-col gap-8">
                 {elements.map((element) => (
                   <Item
-                    key={
-                      element.type === "section"
-                        ? element.section.id
-                        : element.question.id
-                    }
+                    key={element.type === "section" ? element.section.id : element.question.id}
                     element={element}
                   />
                 ))}

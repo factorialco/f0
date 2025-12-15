@@ -48,13 +48,7 @@ type Props = {
   avatarType?: AvatarVariants
 }
 
-export const MaxCounter = ({
-  count,
-  size = "md",
-  type,
-  list,
-  avatarType = "person",
-}: Props) => {
+export const MaxCounter = ({ count, size = "md", type, list, avatarType = "person" }: Props) => {
   const counter = (
     <div
       className={cn(
@@ -62,11 +56,7 @@ export const MaxCounter = ({
         sizeVariants({ size, type })
       )}
     >
-      {size === "xs" ? (
-        <F0Icon icon={EllipsisHorizontal} size="xs" />
-      ) : (
-        `+${count}`
-      )}
+      {size === "xs" ? <F0Icon icon={EllipsisHorizontal} size="xs" /> : `+${count}`}
     </div>
   )
 
@@ -83,20 +73,14 @@ export const MaxCounter = ({
               className="flex w-[180px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
             >
               <div className="h-6 w-6 shrink-0">
-                <F0Avatar
-                  avatar={{ type: avatarType, ...avatar } as AvatarVariant}
-                  size="sm"
-                />
+                <F0Avatar avatar={{ type: avatarType, ...avatar } as AvatarVariant} size="sm" />
               </div>
               <div className="min-w-0 flex-1 truncate font-semibold">
                 {getAvatarDisplayName(avatarType, avatar)}
               </div>
             </div>
           ))}
-          <ScrollBar
-            orientation="vertical"
-            className="[&_div]:bg-f1-background"
-          />
+          <ScrollBar orientation="vertical" className="[&_div]:bg-f1-background" />
         </ScrollArea>
       </HoverCardContent>
     </HoverCard>

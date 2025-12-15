@@ -1,23 +1,12 @@
 import { IconType } from "@/components/F0Icon"
-import {
-  ActionButtonVariant,
-  ActionProps,
-  ButtonType,
-  NavTarget,
-} from "@/ui/Action"
+import { ActionButtonVariant, ActionProps, ButtonType, NavTarget } from "@/ui/Action"
 import { ButtonSize } from "./types"
 
 export type { ButtonType }
 
 export type ButtonInternalProps = Pick<
   ActionProps,
-  | "size"
-  | "disabled"
-  | "className"
-  | "pressed"
-  | "compact"
-  | "tooltip"
-  | "fontSize"
+  "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip" | "fontSize"
 > &
   DataAttributes & {
     /**
@@ -31,9 +20,7 @@ export type ButtonInternalProps = Pick<
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (
-      event: React.MouseEvent<HTMLElement, MouseEvent>
-    ) => void | Promise<unknown>
+    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>
     /**
      * The title of the button.
      */

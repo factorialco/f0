@@ -25,43 +25,14 @@ const JOB_TITLES: Record<string, string[]> = {
     "DevOps Engineer",
     "QA Engineer",
   ],
-  Product: [
-    "Product Manager",
-    "Senior Product Manager",
-    "Product Owner",
-    "Product Analyst",
-  ],
-  Design: [
-    "Product Designer",
-    "Senior Product Designer",
-    "UX Researcher",
-    "Design Lead",
-  ],
-  Marketing: [
-    "Marketing Manager",
-    "Content Specialist",
-    "Growth Manager",
-    "Brand Designer",
-  ],
-  Sales: [
-    "Account Executive",
-    "Sales Manager",
-    "Sales Development Rep",
-    "Enterprise Sales",
-  ],
-  "Customer Success": [
-    "Customer Success Manager",
-    "Support Specialist",
-    "Implementation Manager",
-  ],
+  Product: ["Product Manager", "Senior Product Manager", "Product Owner", "Product Analyst"],
+  Design: ["Product Designer", "Senior Product Designer", "UX Researcher", "Design Lead"],
+  Marketing: ["Marketing Manager", "Content Specialist", "Growth Manager", "Brand Designer"],
+  Sales: ["Account Executive", "Sales Manager", "Sales Development Rep", "Enterprise Sales"],
+  "Customer Success": ["Customer Success Manager", "Support Specialist", "Implementation Manager"],
   Finance: ["Financial Analyst", "Accountant", "Finance Manager", "Controller"],
   HR: ["HR Manager", "Recruiter", "People Partner", "Talent Acquisition"],
-  Operations: [
-    "Operations Manager",
-    "Project Manager",
-    "Business Analyst",
-    "Coordinator",
-  ],
+  Operations: ["Operations Manager", "Project Manager", "Business Analyst", "Coordinator"],
   Legal: ["Legal Counsel", "Compliance Officer", "Contract Manager"],
 }
 
@@ -240,9 +211,7 @@ const generateEmployee = (id: number) => {
 
   const firstNameIndex = Math.floor(seededRandom(seed) * FIRST_NAMES.length)
   const lastNameIndex = Math.floor(seededRandom(seed + 1) * LAST_NAMES.length)
-  const departmentIndex = Math.floor(
-    seededRandom(seed + 2) * DEPARTMENTS.length
-  )
+  const departmentIndex = Math.floor(seededRandom(seed + 2) * DEPARTMENTS.length)
   const officeIndex = Math.floor(seededRandom(seed + 3) * OFFICES.length)
   const entityIndex = Math.floor(seededRandom(seed + 4) * LEGAL_ENTITIES.length)
 
@@ -288,9 +257,7 @@ const TOTAL_EMPLOYEES = 2000
 let _allEmployees: ReturnType<typeof generateEmployee>[] | null = null
 const getAllEmployees = () => {
   if (!_allEmployees) {
-    _allEmployees = Array.from({ length: TOTAL_EMPLOYEES }, (_, i) =>
-      generateEmployee(i + 1)
-    )
+    _allEmployees = Array.from({ length: TOTAL_EMPLOYEES }, (_, i) => generateEmployee(i + 1))
   }
   return _allEmployees
 }
@@ -344,21 +311,13 @@ const applyFilters = (
   if (!filters) return employees
 
   return employees.filter((employee) => {
-    if (
-      filters.department &&
-      Array.isArray(filters.department) &&
-      filters.department.length > 0
-    ) {
+    if (filters.department && Array.isArray(filters.department) && filters.department.length > 0) {
       if (!filters.department.includes(String(employee.departmentId))) {
         return false
       }
     }
 
-    if (
-      filters.office &&
-      Array.isArray(filters.office) &&
-      filters.office.length > 0
-    ) {
+    if (filters.office && Array.isArray(filters.office) && filters.office.length > 0) {
       if (!filters.office.includes(String(employee.officeId))) {
         return false
       }
@@ -407,10 +366,7 @@ const simulateLatency = (): Promise<void> => {
  * Paginated data source for employees
  * Simulates a real API with cursor-based pagination
  */
-export const employeePaginatedSource = createDataSourceDefinition<
-  Employee,
-  EmployeeFilters
->({
+export const employeePaginatedSource = createDataSourceDefinition<Employee, EmployeeFilters>({
   filters: employeeFiltersDefinition,
   dataAdapter: {
     paginationType: "infinite-scroll",
@@ -447,10 +403,7 @@ export const employeePaginatedSource = createDataSourceDefinition<
 /**
  * Non-paginated data source (loads all at once, limited to 100)
  */
-export const employeeNonPaginatedSource = createDataSourceDefinition<
-  Employee,
-  EmployeeFilters
->({
+export const employeeNonPaginatedSource = createDataSourceDefinition<Employee, EmployeeFilters>({
   filters: employeeFiltersDefinition,
   dataAdapter: {
     fetchData: async (options) => {
@@ -519,9 +472,7 @@ const legalEntityFilterOptions = LEGAL_ENTITIES.map((entity) => ({
 }))
 
 // Create unique job title options (using title as both value and label since we don't have IDs for these)
-const jobTitleFilterOptions = [
-  ...new Set(mockItems.map((item) => item.role)),
-].map((role) => ({
+const jobTitleFilterOptions = [...new Set(mockItems.map((item) => item.role))].map((role) => ({
   value: role,
   label: role,
 }))
@@ -560,19 +511,11 @@ const applyMockFilters = (
 
   return items.filter((item) => {
     // Role filter uses role name as value (no separate ID)
-    if (
-      filters.role &&
-      Array.isArray(filters.role) &&
-      filters.role.length > 0
-    ) {
+    if (filters.role && Array.isArray(filters.role) && filters.role.length > 0) {
       if (!filters.role.includes(item.role)) return false
     }
     // Workplace filter uses numeric ID
-    if (
-      filters.workplace &&
-      Array.isArray(filters.workplace) &&
-      filters.workplace.length > 0
-    ) {
+    if (filters.workplace && Array.isArray(filters.workplace) && filters.workplace.length > 0) {
       if (!filters.workplace.includes(String(item.workplaceId))) return false
     }
     // Legal entity filter uses numeric ID
@@ -581,17 +524,13 @@ const applyMockFilters = (
       Array.isArray(filters.legalEntity) &&
       filters.legalEntity.length > 0
     ) {
-      if (!filters.legalEntity.includes(String(item.legalEntityId)))
-        return false
+      if (!filters.legalEntity.includes(String(item.legalEntityId))) return false
     }
     return true
   })
 }
 
-export const mockPaginatedSource = createDataSourceDefinition<
-  MockItem,
-  MockFilters
->({
+export const mockPaginatedSource = createDataSourceDefinition<MockItem, MockFilters>({
   filters: mockFiltersDefinition,
   dataAdapter: {
     paginationType: "infinite-scroll",
@@ -630,10 +569,7 @@ export const mockPaginatedSource = createDataSourceDefinition<
   },
 })
 
-export const mockNonPaginatedSource = createDataSourceDefinition<
-  MockItem,
-  MockFilters
->({
+export const mockNonPaginatedSource = createDataSourceDefinition<MockItem, MockFilters>({
   filters: mockFiltersDefinition,
   dataAdapter: {
     fetchData: async (options) => {
@@ -645,9 +581,7 @@ export const mockNonPaginatedSource = createDataSourceDefinition<
 
       if (search) {
         const searchLower = search.toLowerCase()
-        results = results.filter((item) =>
-          item.label.toLowerCase().includes(searchLower)
-        )
+        results = results.filter((item) => item.label.toLowerCase().includes(searchLower))
       }
 
       return {

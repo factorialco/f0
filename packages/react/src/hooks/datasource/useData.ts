@@ -1,17 +1,7 @@
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/components/OneFilterPicker/types"
+import type { FiltersDefinition, FiltersState } from "@/components/OneFilterPicker/types"
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
 import { Observable } from "zen-observable-ts"
 import {
   BaseFetchOptions,
@@ -45,10 +35,7 @@ type SimpleResult<T> = T[]
 /**
  * Hook options for useData
  */
-export interface UseDataOptions<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> {
+export interface UseDataOptions<R extends RecordType, Filters extends FiltersDefinition> {
   filters?: Partial<FiltersState<Filters>>
   /**
    * A function that is called when an error occurs during data fetching.
@@ -140,9 +127,7 @@ function useDataFetchState<R extends RecordType>() {
  * Custom hook for handling pagination state
  */
 function usePaginationState() {
-  const [paginationInfo, setPaginationInfo] = useState<PaginationInfo | null>(
-    null
-  )
+  const [paginationInfo, setPaginationInfo] = useState<PaginationInfo | null>(null)
   return { paginationInfo, setPaginationInfo }
 }
 
@@ -153,10 +138,7 @@ const defaultFetchDataAndUpdateOptions = <
   options: O
 ): O => options
 
-const defaultIdProvider = (
-  item: RecordType,
-  index?: number
-): string | number =>
+const defaultIdProvider = (item: RecordType, index?: number): string | number =>
   "id" in item ? `${item.id}` : index || JSON.stringify(item)
 
 /**
@@ -336,9 +318,7 @@ export function useData<
   ): R[] => {
     {
       // The Map order is guaranteed to be the same as the order of the items in the array. Check https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps
-      const idMap = new Map(
-        prevData.map((item, index) => [idProvider(item, index), item])
-      )
+      const idMap = new Map(prevData.map((item, index) => [idProvider(item, index), item]))
 
       for (const [index, record] of newData.entries()) {
         const id = idProvider(record, index)
@@ -364,8 +344,7 @@ export function useData<
       if ("records" in result) {
         records = result.records
         // Use a default value of "pages" when paginationType is undefined
-        const paginationType: PaginationType | undefined =
-          dataAdapter.paginationType
+        const paginationType: PaginationType | undefined = dataAdapter.paginationType
 
         // Update pagination info based on the pagination type
         if (
@@ -413,11 +392,7 @@ export function useData<
         setTotalItems?.(result.length)
       }
 
-      setRawData(
-        appendMode
-          ? (prevData) => mergeItems(prevData, records, idProvider)
-          : records
-      )
+      setRawData(appendMode ? (prevData) => mergeItems(prevData, records, idProvider) : records)
       setError(null)
       setIsInitialLoading(false)
       setIsLoading(!!isLoadingYet)
@@ -444,8 +419,7 @@ export function useData<
     const data: WithGroupId<R>[] = rawData.map((record) => ({
       ...record,
       [GROUP_ID_SYMBOL]:
-        (currentGrouping?.field &&
-          getValueByPath(record, currentGrouping.field as string)) ||
+        (currentGrouping?.field && getValueByPath(record, currentGrouping.field as string)) ||
         undefined,
     }))
 
@@ -456,15 +430,11 @@ export function useData<
       currentGrouping &&
       currentGrouping.field &&
       grouping &&
-      (grouping.groupBy as Record<string, unknown>)[
-        currentGrouping.field as string
-      ]
+      (grouping.groupBy as Record<string, unknown>)[currentGrouping.field as string]
     ) {
       const groupedData = groupBy(data, GROUP_ID_SYMBOL)
       const fieldName = currentGrouping.field as string
-      const groupConfig = (grouping.groupBy as Record<string, unknown>)[
-        fieldName
-      ] as {
+      const groupConfig = (grouping.groupBy as Record<string, unknown>)[fieldName] as {
         label: (
           groupId: unknown,
           filters: FiltersState<FiltersDefinition>
@@ -478,17 +448,12 @@ export function useData<
       return {
         type: "grouped" as const,
         records: data,
-        groups: Array.from(groupedData.entries()).map(
-          ([groupKey, groupRecords]) => ({
-            key: groupKey,
-            label: groupConfig.label(groupKey as unknown, mergedFilters),
-            itemCount: groupConfig.itemCount?.(
-              groupKey as unknown,
-              mergedFilters
-            ),
-            records: groupRecords,
-          })
-        ),
+        groups: Array.from(groupedData.entries()).map(([groupKey, groupRecords]) => ({
+          key: groupKey,
+          label: groupConfig.label(groupKey as unknown, mergedFilters),
+          itemCount: groupConfig.itemCount?.(groupKey as unknown, mergedFilters),
+          records: groupRecords,
+        })),
       }
     }
 
@@ -575,13 +540,11 @@ export function useData<
             : []),
         ]
 
-        const baseFetchOptions: BaseFetchOptions<Filters> = fetchParamsProvider(
-          {
-            filters,
-            search,
-            sortings,
-          }
-        )
+        const baseFetchOptions: BaseFetchOptions<Filters> = fetchParamsProvider({
+          filters,
+          search,
+          sortings,
+        })
 
         function fetcher(): PromiseOrObservable<ResultType> {
           setTotalItems(undefined)
@@ -695,9 +658,7 @@ export function useData<
       if (!currentPaginationInfo || isLoading || isLoadingMore) return
 
       if (!isInfiniteScrollPagination(currentPaginationInfo)) {
-        console.warn(
-          "loadMore is only applicable for infinite-scroll pagination type"
-        )
+        console.warn("loadMore is only applicable for infinite-scroll pagination type")
         return
       }
 
@@ -738,8 +699,7 @@ export function useData<
       if (!isLoadingMoreRef.current) {
         setIsLoading(true)
         // Explicitly pass 0 as the initial position for infinite scroll
-        const initialPosition =
-          dataAdapter.paginationType === "infinite-scroll" ? 0 : 1
+        const initialPosition = dataAdapter.paginationType === "infinite-scroll" ? 0 : 1
         fetchDataAndUpdate({
           filters: mergedFilters,
           currentPage: initialPosition,

@@ -11,20 +11,14 @@ import {
 } from "@/hooks/datasource"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
-import {
-  zeroRender as render,
-  zeroRenderHook as renderHook,
-} from "@/testing/test-utils"
+import { zeroRender as render, zeroRenderHook as renderHook } from "@/testing/test-utils"
 import { act, screen, waitFor, within } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { LayoutGrid } from "lucide-react"
 import { describe, expect, test, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
-import {
-  DataCollectionSource,
-  useDataCollectionSource,
-} from "../hooks/useDataCollectionSource"
+import { DataCollectionSource, useDataCollectionSource } from "../hooks/useDataCollectionSource"
 
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
@@ -57,9 +51,7 @@ describe("Collections", () => {
               return {
                 records: mockData.filter((user) => {
                   if (filters.name && typeof filters.name === "string") {
-                    return user.name
-                      .toLowerCase()
-                      .includes(filters.name.toLowerCase())
+                    return user.name.toLowerCase().includes(filters.name.toLowerCase())
                   }
                   return true
                 }),
@@ -149,31 +141,31 @@ describe("Collections", () => {
         useDataCollectionSource({
           dataAdapter: {
             fetchData: () =>
-              new Observable<
-                PromiseState<BaseResponse<{ name: string; role: string }>>
-              >((observer) => {
-                observer.next({
-                  loading: true,
-                  error: null,
-                  data: null,
-                })
-
-                setTimeout(() => {
+              new Observable<PromiseState<BaseResponse<{ name: string; role: string }>>>(
+                (observer) => {
                   observer.next({
-                    loading: false,
+                    loading: true,
                     error: null,
-                    data: {
-                      records: [
-                        { name: "John Doe", role: "Senior Engineer" },
-                        { name: "Jane Smith", role: "Product Manager" },
-                      ],
-                    },
+                    data: null,
                   })
-                  observer.complete()
-                }, 0)
 
-                return () => {}
-              }),
+                  setTimeout(() => {
+                    observer.next({
+                      loading: false,
+                      error: null,
+                      data: {
+                        records: [
+                          { name: "John Doe", role: "Senior Engineer" },
+                          { name: "Jane Smith", role: "Product Manager" },
+                        ],
+                      },
+                    })
+                    observer.complete()
+                  }, 0)
+
+                  return () => {}
+                }
+              ),
           },
         }),
       { wrapper: TestWrapper }
@@ -251,9 +243,7 @@ describe("Collections", () => {
               }
 
               if (filters.department && filters.department.length > 0) {
-                filtered = filtered.filter((user) =>
-                  filters.department?.includes(user.department)
-                )
+                filtered = filtered.filter((user) => filters.department?.includes(user.department))
               }
 
               return { records: filtered }
@@ -407,9 +397,7 @@ describe("Collections", () => {
 
     await waitFor(() => {
       expect(screen.getByText("John Doe")).toBeInTheDocument()
-      expect(
-        screen.getByText("Senior Engineer - Engineering")
-      ).toBeInTheDocument()
+      expect(screen.getByText("Senior Engineer - Engineering")).toBeInTheDocument()
     })
   })
 
@@ -553,8 +541,7 @@ describe("Collections", () => {
 
       if (sortings) {
         const nameSorting = sortings.find(
-          (sorting: SortingsState<SortingsDefinition>) =>
-            sorting?.field === "name"
+          (sorting: SortingsState<SortingsDefinition>) => sorting?.field === "name"
         )
         if (nameSorting) {
           sorted.sort((a, b) => {
@@ -1027,9 +1014,7 @@ describe("Collections", () => {
 
     // Find and click the actions button (typically has MoreVertical icon or similar)
     // so we expect 4 buttons total (2 desktop + 2 mobile for 2 rows)
-    const actionsButtons = await waitFor(() =>
-      screen.getAllByRole("button", { name: /actions/i })
-    )
+    const actionsButtons = await waitFor(() => screen.getAllByRole("button", { name: /actions/i }))
     expect(actionsButtons).toHaveLength(4) // Desktop + Mobile
 
     // Find the desktop version of the actions (first 2 are desktop, last 2 are mobile)
@@ -1198,8 +1183,7 @@ describe("Collections", () => {
                 | BaseFetchOptions<FiltersDefinition>
                 | PaginatedFetchOptions<FiltersDefinition>
             ) => {
-              const pagination =
-                "pagination" in options ? options.pagination : undefined
+              const pagination = "pagination" in options ? options.pagination : undefined
               const { currentPage = 1 } = pagination || {}
               const itemsPerPage = 10
               const totalItems = 45
@@ -1208,14 +1192,11 @@ describe("Collections", () => {
               const startIndex = (currentPage - 1) * itemsPerPage
               const endIndex = Math.min(startIndex + itemsPerPage, totalItems)
 
-              const paginatedData = Array.from(
-                { length: endIndex - startIndex },
-                (_, i) => ({
-                  id: startIndex + i + 1,
-                  name: `User ${startIndex + i + 1}`,
-                  email: `user${startIndex + i + 1}@example.com`,
-                })
-              )
+              const paginatedData = Array.from({ length: endIndex - startIndex }, (_, i) => ({
+                id: startIndex + i + 1,
+                name: `User ${startIndex + i + 1}`,
+                email: `user${startIndex + i + 1}@example.com`,
+              }))
 
               return {
                 records: paginatedData,
@@ -1257,8 +1238,7 @@ describe("Collections", () => {
     })
 
     // Find and click the next page button
-    const nextPageButton =
-      screen.getByLabelText(/next/i) || screen.getByText(/next/i)
+    const nextPageButton = screen.getByLabelText(/next/i) || screen.getByText(/next/i)
 
     act(() => {
       nextPageButton.click()

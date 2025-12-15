@@ -20,15 +20,8 @@ const splitVariants = cva({
   },
 })
 
-export const Split = React.forwardRef<
-  BoxRef,
-  BoxProps & VariantProps<typeof splitVariants>
->(function Split({ className, gap, wrap, ...props }, ref) {
-  return (
-    <FlexBox
-      className={cn(splitVariants({ gap, wrap }), className)}
-      ref={ref}
-      {...props}
-    />
-  )
-})
+export const Split = React.forwardRef<BoxRef, BoxProps & VariantProps<typeof splitVariants>>(
+  function Split({ className, gap, wrap, ...props }, ref) {
+    return <FlexBox className={cn(splitVariants({ gap, wrap }), className)} ref={ref} {...props} />
+  }
+)

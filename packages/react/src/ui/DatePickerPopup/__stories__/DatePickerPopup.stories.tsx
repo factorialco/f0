@@ -96,15 +96,7 @@ export const WithCustomRange: Story = {
     defaultValue: {
       granularity: "month",
     } as DatePickerValue,
-    granularities: [
-      "day",
-      "week",
-      "month",
-      "quarter",
-      "halfyear",
-      "year",
-      "range",
-    ],
+    granularities: ["day", "week", "month", "quarter", "halfyear", "year", "range"],
   },
 }
 

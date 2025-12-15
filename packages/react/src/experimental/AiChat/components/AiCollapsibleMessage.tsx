@@ -3,11 +3,7 @@ import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"
 import { motion } from "motion/react"
 import { ReactNode, useState } from "react"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../../../ui/collapsible"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../../ui/collapsible"
 
 export type AiCollapsibleMessageProps = {
   icon: IconType
@@ -15,29 +11,18 @@ export type AiCollapsibleMessageProps = {
   children: ReactNode
 }
 
-export const AiCollapsibleMessage = ({
-  icon,
-  title,
-  children,
-}: AiCollapsibleMessageProps) => {
+export const AiCollapsibleMessage = ({ icon, title, children }: AiCollapsibleMessageProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 
   return (
-    <Collapsible
-      className="mb-1 w-full"
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
-    >
+    <Collapsible className="mb-1 w-full" open={isExpanded} onOpenChange={setIsExpanded}>
       <CollapsibleTrigger className="flex w-full items-center text-base text-f1-foreground-secondary transition-colors duration-150 hover:text-f1-foreground [&[data-state=open]>svg]:rotate-90">
         <span className="mr-2 *:block">
           <F0Icon icon={icon} className="block" />
         </span>
         <span className="mr-[2px]">{title}</span>
-        <F0Icon
-          icon={ChevronRight}
-          className="h-4 w-4 transition-transform duration-200"
-        />
+        <F0Icon icon={ChevronRight} className="h-4 w-4 transition-transform duration-200" />
       </CollapsibleTrigger>
       <CollapsibleContent forceMount className="data-[state=open]:mt-3">
         <motion.div

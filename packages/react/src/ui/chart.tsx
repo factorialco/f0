@@ -59,23 +59,13 @@ function useChart() {
 }
 
 interface ChartContainerComponentProps
-  extends React.ComponentProps<"div">,
-    VariantProps<typeof variants> {
+  extends React.ComponentProps<"div">, VariantProps<typeof variants> {
   config: ChartConfig
-  children: React.ComponentProps<
-    typeof RechartsPrimitive.ResponsiveContainer
-  >["children"]
+  children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"]
 }
 
 const ChartContainerComponent = (
-  {
-    id,
-    className,
-    children,
-    aspect,
-    config,
-    ...props
-  }: ChartContainerComponentProps,
+  { id, className, children, aspect, config, ...props }: ChartContainerComponentProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) => {
   const uniqueId = React.useId()
@@ -83,14 +73,11 @@ const ChartContainerComponent = (
   const anotherRef = React.useRef<HTMLDivElement | null>(null)
   const [height, setHeight] = useState<number | undefined>()
   const observer = useMemo(() => {
-    return new ResizeObserver((entries) =>
-      setHeight(entries[0].contentRect.height)
-    )
+    return new ResizeObserver((entries) => setHeight(entries[0].contentRect.height))
   }, [])
 
   useLayoutEffect(() => {
-    const refToObserve =
-      ref && "current" in ref ? ref.current : anotherRef.current
+    const refToObserve = ref && "current" in ref ? ref.current : anotherRef.current
 
     if (refToObserve) {
       observer.observe(refToObserve.parentElement!)
@@ -115,10 +102,7 @@ const ChartContainerComponent = (
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer
-          height={height}
-          className="overflow-visible"
-        >
+        <RechartsPrimitive.ResponsiveContainer height={height} className="overflow-visible">
           {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
@@ -145,9 +129,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
+    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color
     return color ? `  --color-${key}: ${color};` : null
   })
   .join("\n")}
@@ -214,9 +196,7 @@ const ChartTooltipContent = React.forwardRef<
 
       if (labelFormatter) {
         return (
-          <div className={cn("font-medium", labelClassName)}>
-            {labelFormatter(value, payload)}
-          </div>
+          <div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>
         )
       }
 
@@ -225,15 +205,7 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       return <div className={cn("font-medium", labelClassName)}>{value}</div>
-    }, [
-      label,
-      labelFormatter,
-      payload,
-      hideLabel,
-      labelClassName,
-      config,
-      labelKey,
-    ])
+    }, [label, labelFormatter, payload, hideLabel, labelClassName, config, labelKey])
 
     if (!active || !payload?.length) {
       return null
@@ -367,12 +339,7 @@ const ChartLegendContent = React.forwardRef<
       >
         {payload.map((item) => {
           const key = `${nameKey || item.dataKey || "value"}`
-          const itemConfig = getPayloadConfigFromPayload(
-            config,
-            item,
-            key,
-            hiddenKey
-          )
+          const itemConfig = getPayloadConfigFromPayload(config, item, key, hiddenKey)
 
           return (
             <div
@@ -415,18 +382,13 @@ function getPayloadConfigFromPayload(
   }
 
   const payloadPayload =
-    "payload" in payload &&
-    typeof payload.payload === "object" &&
-    payload.payload !== null
+    "payload" in payload && typeof payload.payload === "object" && payload.payload !== null
       ? payload.payload
       : undefined
 
   let configLabelKey = key
 
-  if (
-    key in payload &&
-    typeof payload[key as keyof typeof payload] === "string"
-  ) {
+  if (key in payload && typeof payload[key as keyof typeof payload] === "string") {
     configLabelKey = payload[key as keyof typeof payload]
   } else if (
     payloadPayload &&
@@ -442,9 +404,7 @@ function getPayloadConfigFromPayload(
     return undefined
   }
 
-  return configLabelKey in config
-    ? config[configLabelKey]
-    : config[key as keyof typeof config]
+  return configLabelKey in config ? config[configLabelKey] : config[key as keyof typeof config]
 }
 
 export {

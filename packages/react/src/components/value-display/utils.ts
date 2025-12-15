@@ -40,10 +40,7 @@ export function isShowingPlaceholder(args: unknown, valueKey: string): boolean {
  * Resolves the display value from a cell value object
  * Returns the actual value if present, the placeholder if defined, or undefined
  */
-export function resolveValue<T>(
-  args: unknown,
-  valueKey: string
-): T | string | undefined {
+export function resolveValue<T>(args: unknown, valueKey: string): T | string | undefined {
   if (args !== undefined && typeof args !== "object") {
     return args as T
   }
@@ -60,12 +57,7 @@ export function resolveValue<T>(
 
   if (value !== undefined) {
     // If we're expecting a Date and it looks like date data but lost its prototype
-    if (
-      valueKey === "date" &&
-      value !== null &&
-      typeof value === "object" &&
-      "getTime" in value
-    ) {
+    if (valueKey === "date" && value !== null && typeof value === "object" && "getTime" in value) {
       return new Date((value as Date).getTime()) as unknown as T
     }
     return value as T
@@ -146,9 +138,7 @@ export function formatDateValue(value: unknown): string {
 function isDateLike(value: unknown): boolean {
   return Boolean(
     value instanceof Date ||
-      (value &&
-        typeof value === "object" &&
-        ("toLocaleDateString" in value || "getTime" in value))
+    (value && typeof value === "object" && ("toLocaleDateString" in value || "getTime" in value))
   )
 }
 

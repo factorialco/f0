@@ -85,9 +85,7 @@ export const Default: Story = {
         label: "Data list",
         value: {
           type: "data-list",
-          data: Array(50)
-            .fill(["Manager", "Direct report", "Self review", "Peer"])
-            .flat(),
+          data: Array(50).fill(["Manager", "Direct report", "Self review", "Peer"]).flat(),
         },
       },
       {

@@ -3,10 +3,7 @@ import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
-import {
-  DataCollectionSource,
-  useDataCollectionSource,
-} from "../../hooks/useDataCollectionSource"
+import { DataCollectionSource, useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../index"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
@@ -135,8 +132,7 @@ function BaseStory<
                     render: (item) => ({
                       type: "status",
                       value: {
-                        status:
-                          item.status === "active" ? "positive" : "warning",
+                        status: item.status === "active" ? "positive" : "warning",
                         label: item.status,
                       },
                     }),
@@ -225,9 +221,7 @@ export const WithExpandedActionsExample: Story = {
       dataAdapter: {
         fetchData: ({ filters }) =>
           Promise.resolve({
-            records: mockUsers.filter((user) =>
-              filters.status?.includes(user.status)
-            ),
+            records: mockUsers.filter((user) => filters.status?.includes(user.status)),
           }),
       },
       primaryActions: () => ({
@@ -268,9 +262,7 @@ export const WithGroupedExpandedActionsExample: Story = {
       dataAdapter: {
         fetchData: ({ filters }) =>
           Promise.resolve({
-            records: mockUsers.filter((user) =>
-              filters.status?.includes(user.status)
-            ),
+            records: mockUsers.filter((user) => filters.status?.includes(user.status)),
           }),
       },
       primaryActions: () => ({

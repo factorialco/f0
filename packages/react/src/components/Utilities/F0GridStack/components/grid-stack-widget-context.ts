@@ -9,9 +9,7 @@ export const GridStackWidgetContext = createContext<{
 export function useGridStackWidgetContext() {
   const context = useContext(GridStackWidgetContext)
   if (!context) {
-    throw new Error(
-      "useGridStackWidgetContext must be used within a GridStackWidgetProvider"
-    )
+    throw new Error("useGridStackWidgetContext must be used within a GridStackWidgetProvider")
   }
   return context
 }

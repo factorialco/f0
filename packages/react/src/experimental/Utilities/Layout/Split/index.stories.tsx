@@ -75,8 +75,8 @@ export const VerticalAlign: Story = {
     <Split {...args}>
       <Placeholder>Single line content</Placeholder>
       <Placeholder className="grow">
-        Content with <br /> multiple lines <br /> of text <br /> to showcase how
-        elements <br /> with different <br /> height will be aligned
+        Content with <br /> multiple lines <br /> of text <br /> to showcase how elements <br />{" "}
+        with different <br /> height will be aligned
       </Placeholder>
       <Placeholder>
         Content with <br /> two lines

@@ -1,10 +1,7 @@
 import { TagVariant } from "../Tag"
 
 // Generic type helper to create tag data types
-type TagDataType<T extends string> = Omit<
-  Extract<TagVariant, { type: T }>,
-  "type" | "description"
->
+type TagDataType<T extends string> = Omit<Extract<TagVariant, { type: T }>, "type" | "description">
 
 // Define tag types using the generic helper
 type TagTypeMapping = {

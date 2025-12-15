@@ -10,13 +10,9 @@ const meta: Meta<typeof CoCreationForm> = {
   component: CoCreationForm,
   tags: ["autodocs", "experimental"],
   render: (args) => {
-    const [elements, setElements] = useState<CoCreationFormElement[]>(
-      args.elements
-    )
+    const [elements, setElements] = useState<CoCreationFormElement[]>(args.elements)
 
-    return (
-      <CoCreationForm {...args} elements={elements} onChange={setElements} />
-    )
+    return <CoCreationForm {...args} elements={elements} onChange={setElements} />
   },
   decorators: [
     (Story) => (

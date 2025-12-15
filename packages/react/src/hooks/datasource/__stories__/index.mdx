@@ -5,9 +5,8 @@ import LinkTo from "@storybook/addon-links/react"
 
 # Datasource Hooks
 
-The `@/hooks/datasource` package provides a comprehensive set of React hooks for
-managing data collection state, including filtering, sorting, searching,
-pagination, grouping, and selection.
+The `@/hooks/datasource` package provides a comprehensive set of React hooks for managing data
+collection state, including filtering, sorting, searching, pagination, grouping, and selection.
 
 {/* prettier-ignore */}
 > If your are looking for the `OneDataCollection` component, please refer to the  <LinkTo kind="Components/Data Collection" story="Documentation">OneDataCollection</LinkTo>
@@ -19,13 +18,10 @@ pagination, grouping, and selection.
 
 The datasource hooks follow a layered architecture that separates concerns:
 
-1. **Configuration & State Management** (`useDataSource`) - Manages all the
-   configuration and state for filters, search, sorting, navigation filters, and
-   grouping
-2. **Data Fetching** (`useData`) - Handles the actual data fetching, loading
-   states, and pagination
-3. **Selection Management** (`useSelectable`) - Manages item and group selection
-   state
+1. **Configuration & State Management** (`useDataSource`) - Manages all the configuration and state
+   for filters, search, sorting, navigation filters, and grouping
+2. **Data Fetching** (`useData`) - Handles the actual data fetching, loading states, and pagination
+3. **Selection Management** (`useSelectable`) - Manages item and group selection state
 4. **Group Management** (`useGroups`) - Manages group expand/collapse state
 
 ## Why Separate Hooks?
@@ -46,8 +42,7 @@ The hooks were extracted from `OneDataCollection` for several key reasons:
 
 ### 🔧 **Flexibility**
 
-- Different visualizations can customize data fetching (e.g., grid-friendly
-  pagination)
+- Different visualizations can customize data fetching (e.g., grid-friendly pagination)
 - Mix and match hooks based on component needs
 - Easy to extend with new functionality
 
@@ -55,8 +50,8 @@ The hooks were extracted from `OneDataCollection` for several key reasons:
 
 ### [useDataSource](/?path=/docs/hooks-datasource-usedatasource--docs)
 
-Creates and manages a data source with comprehensive state management for
-filters, search, sorting, navigation filters, and grouping.
+Creates and manages a data source with comprehensive state management for filters, search, sorting,
+navigation filters, and grouping.
 
 ```tsx
 const dataSource = useDataSource({
@@ -89,8 +84,8 @@ const dataSource = useDataSource({
 
 ### [useData](/?path=/docs/hooks-datasource-usedata--docs)
 
-Handles data fetching, loading states, and pagination. Consumes a data source
-and provides the actual data.
+Handles data fetching, loading states, and pagination. Consumes a data source and provides the
+actual data.
 
 ```tsx
 const { data, isLoading, paginationInfo, setPage } = useData(dataSource)
@@ -98,8 +93,7 @@ const { data, isLoading, paginationInfo, setPage } = useData(dataSource)
 
 ### [useSelectable](/?path=/docs/hooks-datasource-useselectable--docs)
 
-Manages selection state for individual items and groups, with support for bulk
-operations.
+Manages selection state for individual items and groups, with support for bulk operations.
 
 ```tsx
 const {
@@ -119,8 +113,7 @@ const {
 
 ### [useGroups](/?path=/docs/hooks-datasource-usegroups--docs)
 
-Manages group expand/collapse state with support for default open states and
-animations.
+Manages group expand/collapse state with support for default open states and animations.
 
 ```tsx
 const { openGroups, setGroupOpen } = useGroups(data.groups, defaultOpenGroups)
@@ -272,5 +265,4 @@ const dataSource = useDataSource<MyRecord, MyFilters>({
 4. **Add selection** with `useSelectable` (optional)
 5. **Manage groups** with `useGroups` (optional)
 
-For detailed examples and API references, see the individual hook documentation
-linked above.
+For detailed examples and API references, see the individual hook documentation linked above.

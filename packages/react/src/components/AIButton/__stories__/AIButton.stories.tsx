@@ -30,8 +30,7 @@ const meta = {
     },
     disabled: {
       control: "boolean",
-      description:
-        "The button is inactive and does not respond to interaction.",
+      description: "The button is inactive and does not respond to interaction.",
     },
     hideLabel: {
       control: "boolean",

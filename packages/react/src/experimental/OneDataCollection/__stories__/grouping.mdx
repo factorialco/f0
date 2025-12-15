@@ -15,21 +15,17 @@ import * as GroupingStories from "./grouping.stories"
 
 ## Introduction
 
-Data collection grouping allows to group the data by a field. This is useful to
-organize the data in a more readable way and to perform aggregations on the
-data.
+Data collection grouping allows to group the data by a field. This is useful to organize the data in
+a more readable way and to perform aggregations on the data.
 
-The grouping is applied in the frontend just defining whitch field is used for
-the grouping. T he `useDataCollection` hook fetch thedata as is (flat), and then
-the data is grouped in the frontend.
+The grouping is applied in the frontend just defining whitch field is used for the grouping. T he
+`useDataCollection` hook fetch thedata as is (flat), and then the data is grouped in the frontend.
 
-> Important: For paginated data with grouping, the data must be sorted by the
-> grouping field in last term (and then other sortings can be applied) to
-> warranty all the rows with the same value for the grouping fields are together
-> in the list
+> Important: For paginated data with grouping, the data must be sorted by the grouping field in last
+> term (and then other sortings can be applied) to warranty all the rows with the same value for the
+> grouping fields are together in the list
 
-The grouping is defined in the grouping property of the `useDataCollection`
-hook.
+The grouping is defined in the grouping property of the `useDataCollection` hook.
 
 ```tsx
 const { source, currentGrouping, setCurrentGrouping } = useDataCollection({
@@ -96,28 +92,26 @@ export type GroupingDefinition<R extends RecordType> = {
 
 ### Mandatory
 
-The `mandatory` property is used to define if the grouping is mandatory or not.
-If it is mandatory, the data must be grouped by one of the grouping fields. If
-it is not mandatory, the user can choose not grouping the data and still
-choosing group by one of the available fields.
+The `mandatory` property is used to define if the grouping is mandatory or not. If it is mandatory,
+the data must be grouped by one of the grouping fields. If it is not mandatory, the user can choose
+not grouping the data and still choosing group by one of the available fields.
 
 ### Collapsible
 
-The `collapsible` property is used to define if the grouping is collapsible or
-not. If it is collapsible, the user can collapse the grouping . If it is not
-collapsible, the grouping is always expanded.
+The `collapsible` property is used to define if the grouping is collapsible or not. If it is
+collapsible, the user can collapse the grouping . If it is not collapsible, the grouping is always
+expanded.
 
 ### Default open groups
 
-The `defaultOpenGroups` property is used to define the default open groups. If
-it is a boolean, it will be applied to all groups. If it is an array, it will be
-applied to the groups in the array. This property is only used if the grouping
-is collapsible.
+The `defaultOpenGroups` property is used to define the default open groups. If it is a boolean, it
+will be applied to all groups. If it is an array, it will be applied to the groups in the array.
+This property is only used if the grouping is collapsible.
 
 ### GroupBy
 
-The `groupBy` property is used to define the grouping fields. Each key is a
-field of the record and the value is an object with the following properties:
+The `groupBy` property is used to define the grouping fields. Each key is a field of the record and
+the value is an object with the following properties:
 
 > It accepts a property or a path to a property for nested objects. e.g:
 >
@@ -133,19 +127,17 @@ field of the record and the value is an object with the following properties:
 >
 > "manager.name" will group by the `name` property of the `manager` object.
 
-- `name`: The name of the grouping (used in the UI to select the how to group
-  the data). e.g 'Department'.
-- `label`: The label of of a group, used to show the group title. e.g 'Sales'.
-  This function receives the group id (e.g. 123, which is the department id) and
-  the current filters state, and it returns the label to show or a promise. In
-  the case of a promise the datacollection will render a skeleton until the
-  promise is resolved. you can use this to fetch the label from an api, array,
+- `name`: The name of the grouping (used in the UI to select the how to group the data). e.g
+  'Department'.
+- `label`: The label of of a group, used to show the group title. e.g 'Sales'. This function
+  receives the group id (e.g. 123, which is the department id) and the current filters state, and it
+  returns the label to show or a promise. In the case of a promise the datacollection will render a
+  skeleton until the promise is resolved. you can use this to fetch the label from an api, array,
   etc.
-- `itemCount`: The count of elements in a group. This function receives the
-  group id (e.g. 123, which is the department id) and the current filters state,
-  and it returns the item count of the group or a promise. In the case of a
-  promise the datacollection will render a skeleton until the promise is
-  resolved. you can use this to fetch the item count from an api, array, etc.
+- `itemCount`: The count of elements in a group. This function receives the group id (e.g. 123,
+  which is the department id) and the current filters state, and it returns the item count of the
+  group or a promise. In the case of a promise the datacollection will render a skeleton until the
+  promise is resolved. you can use this to fetch the item count from an api, array, etc.
 
 ## Examples
 

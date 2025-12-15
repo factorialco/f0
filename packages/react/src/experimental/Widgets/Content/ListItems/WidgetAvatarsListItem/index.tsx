@@ -27,12 +27,7 @@ type WrapperProps = {
   children: React.ReactNode
 }
 
-const Wrapper: React.FC<WrapperProps> = ({
-  onClick,
-  withEmoji,
-  withPointerCursor,
-  children,
-}) => {
+const Wrapper: React.FC<WrapperProps> = ({ onClick, withEmoji, withPointerCursor, children }) => {
   const className = cn(
     "flex flex-row items-center rounded-md border border-solid border-transparent p-2 text-f1-foreground",
     withEmoji ? "gap-2" : "gap-2.5",

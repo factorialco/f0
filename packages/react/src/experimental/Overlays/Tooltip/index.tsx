@@ -34,29 +34,20 @@ export function TooltipInternal({
 }: TooltipInternalProps) {
   return (
     <>
-      <TooltipProvider
-        delayDuration={instant ? 100 : delay}
-        disableHoverableContent={instant}
-      >
+      <TooltipProvider delayDuration={instant ? 100 : delay} disableHoverableContent={instant}>
         <TooltipPrimitive>
           <TooltipTrigger asChild className="pointer-events-auto">
             {children}
           </TooltipTrigger>
           <TooltipContent
-            className={cn(
-              "max-w-xs",
-              shortcut && "pr-1.5",
-              instant && "pointer-events-none"
-            )}
+            className={cn("max-w-xs", shortcut && "pr-1.5", instant && "pointer-events-none")}
           >
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 {label && <p className="font-semibold">{label}</p>}
                 {shortcut && <Shortcut keys={shortcut} variant="inverse" />}
               </div>
-              {description && (
-                <p className="font-normal">{description.toString()}</p>
-              )}
+              {description && <p className="font-normal">{description.toString()}</p>}
             </div>
           </TooltipContent>
         </TooltipPrimitive>
@@ -67,10 +58,7 @@ export function TooltipInternal({
 
 const privateProps = ["delay"] as const
 
-export type TooltipProps = Omit<
-  TooltipInternalProps,
-  (typeof privateProps)[number]
->
+export type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps)[number]>
 
 const Tooltip = (props: TooltipProps) => {
   const publicProps = privateProps.reduce((acc, key) => {

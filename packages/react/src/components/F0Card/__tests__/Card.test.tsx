@@ -1,9 +1,4 @@
-import {
-  zeroRender as render,
-  screen,
-  userEvent,
-  waitFor,
-} from "@/testing/test-utils"
+import { zeroRender as render, screen, userEvent, waitFor } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
 import { describe, expect, it, vi } from "vitest"
 import { F0Card } from "../F0Card"
@@ -11,9 +6,7 @@ import type { CardSecondaryLink } from "../components/CardActions"
 
 describe("F0Card Component", () => {
   it("renders title and description correctly", () => {
-    render(
-      <F0Card title="Test Card Title" description="Test card description" />
-    )
+    render(<F0Card title="Test Card Title" description="Test card description" />)
 
     expect(screen.getByText("Test Card Title")).toBeInTheDocument()
     expect(screen.getByText("Test card description")).toBeInTheDocument()
@@ -59,13 +52,7 @@ describe("F0Card Component", () => {
     const user = userEvent.setup()
     const handleSelect = vi.fn()
 
-    render(
-      <F0Card
-        title="Selectable Card"
-        selectable={true}
-        onSelect={handleSelect}
-      />
-    )
+    render(<F0Card title="Selectable Card" selectable={true} onSelect={handleSelect} />)
 
     const card = screen.getByTestId("card")
     expect(card).toBeInTheDocument()

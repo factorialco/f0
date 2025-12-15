@@ -6,9 +6,7 @@ import { Li, Ol, Ul } from "./components/Lists"
 import { Table, Td, Th } from "./components/Table"
 import { Em, H1, H2, H3, P, Strong } from "./components/Typography"
 
-export const markdownRenderers: NonNullable<
-  AssistantMessageProps["markdownTagRenderers"]
-> = {
+export const markdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]> = {
   p: P,
   h1: H1,
   h2: H2,

@@ -49,17 +49,8 @@ vi.mock("../grid-stack-context", async () => {
   return {
     ...actual,
     GridStackContext: {
-      Provider: ({
-        children,
-        value,
-      }: {
-        children: React.ReactNode
-        value: unknown
-      }) => (
-        <div
-          data-testid="grid-stack-context-provider"
-          data-value={JSON.stringify(value)}
-        >
+      Provider: ({ children, value }: { children: React.ReactNode; value: unknown }) => (
+        <div data-testid="grid-stack-context-provider" data-value={JSON.stringify(value)}>
           {children}
         </div>
       ),
@@ -72,9 +63,7 @@ describe("GridStackProvider", () => {
     vi.clearAllMocks()
     mockGridStackInstance.el = document.createElement("div")
     mockGridStackInstance.opts = {}
-    ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-      []
-    )
+    ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue([])
   })
 
   describe("Widget Conversion", () => {
@@ -183,9 +172,7 @@ describe("GridStackProvider", () => {
         },
       ]
 
-      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-        savedWidgets
-      )
+      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(savedWidgets)
 
       const newWidgets: GridStackReactWidget[] = [
         ...initialWidgets,
@@ -245,9 +232,7 @@ describe("GridStackProvider", () => {
         },
       ]
 
-      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-        savedWidgets
-      )
+      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(savedWidgets)
 
       const element = document.createElement("div")
       element.setAttribute("gs-id", "widget-2")
@@ -295,9 +280,7 @@ describe("GridStackProvider", () => {
         },
       ]
 
-      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-        savedWidgets
-      )
+      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(savedWidgets)
 
       const element = document.createElement("div")
       element.setAttribute("gs-id", "widget-1")
@@ -338,11 +321,7 @@ describe("GridStackProvider", () => {
       const onResizeStop = vi.fn()
 
       zeroRender(
-        <GridStackProvider
-          options={{ column: 12 }}
-          widgets={[]}
-          onResizeStop={onResizeStop}
-        >
+        <GridStackProvider options={{ column: 12 }} widgets={[]} onResizeStop={onResizeStop}>
           <div>Test</div>
         </GridStackProvider>
       )
@@ -357,11 +336,7 @@ describe("GridStackProvider", () => {
       const onChange = vi.fn()
 
       zeroRender(
-        <GridStackProvider
-          options={{ column: 12 }}
-          widgets={[]}
-          onChange={onChange}
-        >
+        <GridStackProvider options={{ column: 12 }} widgets={[]} onChange={onChange}>
           <div>Test</div>
         </GridStackProvider>
       )
@@ -409,16 +384,10 @@ describe("GridStackProvider", () => {
         },
       ]
 
-      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-        savedLayout
-      )
+      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(savedLayout)
 
       zeroRender(
-        <GridStackProvider
-          options={{ column: 12 }}
-          widgets={widgets}
-          onChange={onChange}
-        >
+        <GridStackProvider options={{ column: 12 }} widgets={widgets} onChange={onChange}>
           <div>Test</div>
         </GridStackProvider>
       )
@@ -452,16 +421,10 @@ describe("GridStackProvider", () => {
         },
       ]
 
-      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-        savedLayout
-      )
+      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(savedLayout)
 
       zeroRender(
-        <GridStackProvider
-          options={{ column: 12 }}
-          widgets={widgets}
-          onChange={onChange}
-        >
+        <GridStackProvider options={{ column: 12 }} widgets={widgets} onChange={onChange}>
           <div>Test</div>
         </GridStackProvider>
       )
@@ -517,9 +480,7 @@ describe("GridStackProvider", () => {
         },
       ]
 
-      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(
-        savedWidgets
-      )
+      ;(mockGridStackInstance.save as ReturnType<typeof vi.fn>).mockReturnValue(savedWidgets)
 
       const element = document.createElement("div")
       element.setAttribute("gs-id", "widget-1")

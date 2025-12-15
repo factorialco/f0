@@ -39,9 +39,7 @@ export const actionsToLayoutBlockActionItems = (
 /**
  * Normalize the items to an array of DropdownButtonGroup
  */
-const normalizeActionItems = (
-  items: BlockActionItem[] | BlockActionGroup[] | BlockActionGroup
-) => {
+const normalizeActionItems = (items: BlockActionItem[] | BlockActionGroup[] | BlockActionGroup) => {
   const isActionDefinition = (
     item: BlockActionItem | BlockActionGroup
   ): item is BlockActionItem => {
@@ -82,10 +80,7 @@ export const Block = forwardRef<HTMLDivElement, BlockProps>(
     },
     ref
   ) => {
-    const actions = useMemo(
-      () => normalizeActionItems(props.actions || []),
-      [props.actions]
-    )
+    const actions = useMemo(() => normalizeActionItems(props.actions || []), [props.actions])
 
     const actionsDropdownItems: DropdownItem[] = useMemo(
       () => actions.flatMap((action) => action.items),

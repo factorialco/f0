@@ -23,21 +23,13 @@ export const Preset = ({ label, number, onClick, selected }: PresetProps) => {
           "bg-f1-background-selected-secondary text-f1-foreground-selected outline-f1-border-selected hover:outline-f1-border-selected"
       )}
     >
-      <input
-        type="checkbox"
-        className="sr-only"
-        checked={selected}
-        onChange={() => onClick?.()}
-      />
+      <input type="checkbox" className="sr-only" checked={selected} onChange={() => onClick?.()} />
       <span className="whitespace-nowrap">{label}</span>
       {number !== undefined && (
         <Await resolve={number} fallback={<Skeleton className="h-4 w-4" />}>
           {(number) =>
             number !== undefined && (
-              <Counter
-                value={number}
-                type={selected ? "selected" : "default"}
-              />
+              <Counter value={number} type={selected ? "selected" : "default"} />
             )
           }
         </Await>

@@ -1,13 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgHub = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <g fill="currentColor" filter="url(#a)">
       <path
         d="M4.5 7.5C4.5 5.84315 5.84315 4.5 7.5 4.5C9.15685 4.5 10.5 5.84315 10.5 7.5C10.5 9.15685 9.15685 10.5 7.5 10.5C5.84315 10.5 4.5 9.15685 4.5 7.5Z"
@@ -47,11 +41,7 @@ const SvgHub = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
         <feComposite in2="hardAlpha" operator="out" />
         <feColorMatrix values="0 0 0 0 0.0352941 0 0 0 0 0.0627451 0 0 0 0 0.109804 0 0 0 0.12 0" />
         <feBlend in2="BackgroundImageFix" result="effect1_dropShadow_1762_18" />
-        <feBlend
-          in="SourceGraphic"
-          in2="effect1_dropShadow_1762_18"
-          result="shape"
-        />
+        <feBlend in="SourceGraphic" in2="effect1_dropShadow_1762_18" result="shape" />
       </filter>
     </defs>
   </svg>

@@ -24,9 +24,7 @@ export function mergeFiltersWithIntersection<T extends Record<string, unknown>>(
       laneValue.length > 0
     ) {
       // Find intersection of the two arrays
-      const intersection = globalValue.filter((item) =>
-        laneValue.includes(item)
-      )
+      const intersection = globalValue.filter((item) => laneValue.includes(item))
       result[key] = intersection
     } else {
       // For non-array filters or when one is empty, lane filter takes precedence

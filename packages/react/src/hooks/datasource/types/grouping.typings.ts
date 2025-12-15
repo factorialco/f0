@@ -1,7 +1,4 @@
-import {
-  FiltersDefinition,
-  FiltersState,
-} from "@/components/OneFilterPicker/types"
+import { FiltersDefinition, FiltersState } from "@/components/OneFilterPicker/types"
 import { RecordPaths, RecordPathValue } from "@/lib/objectPaths"
 import { RecordType } from "./records.typings"
 import { SortOrder } from "./sortings.typings"
@@ -47,10 +44,7 @@ export type GroupingDefinition<R extends RecordType> = {
  * The selected the grouping state
  * @template Grouping - The grouping definition
  */
-export type GroupingState<
-  R extends RecordType,
-  Grouping extends GroupingDefinition<R>,
-> =
+export type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> =
   | {
       field: keyof Grouping["groupBy"]
       order?: SortOrder

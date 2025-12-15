@@ -1,15 +1,9 @@
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { useEffect, useMemo, useState } from "react"
 import { SummariesDefinition } from "../../../../summary"
-import {
-  ColId,
-  TableColumnDefinition,
-  TableVisualizationSettings,
-} from "../types"
+import { ColId, TableColumnDefinition, TableVisualizationSettings } from "../types"
 
-const getColumnId = <
-  Col extends Pick<TableColumnDefinition<never, never, never>, "id" | "label">,
->(
+const getColumnId = <Col extends Pick<TableColumnDefinition<never, never, never>, "id" | "label">>(
   column: Col
 ) => {
   return column.id ?? column.label ?? "column"
@@ -32,9 +26,7 @@ export const getColsOrderFromDefinition = <
 
 export const getColsHiddenFromDefinition = <
   Col extends Pick<TableColumnDefinition<never, never, never>, "id" | "label"> &
-    Partial<
-      Pick<TableColumnDefinition<never, never, never>, "hidden" | "noHiding">
-    >,
+    Partial<Pick<TableColumnDefinition<never, never, never>, "hidden" | "noHiding">>,
 >(
   columns: Readonly<Col[]>
 ): ColId[] => {
@@ -80,12 +72,10 @@ export const useColumns = <
   allowHiding?: boolean
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   const [colsHidden, setColsHidden] = useState<ColId[]>(
-    (allowHiding ? settings?.hidden : undefined) ??
-      getColsHiddenFromDefinition(originalColumns)
+    (allowHiding ? settings?.hidden : undefined) ?? getColsHiddenFromDefinition(originalColumns)
   )
   const [colsOrder, setColsOrder] = useState<ColId[]>(
-    (allowSorting ? settings?.order : undefined) ??
-      getColsOrderFromDefinition(originalColumns)
+    (allowSorting ? settings?.order : undefined) ?? getColsOrderFromDefinition(originalColumns)
   )
 
   useEffect(() => {
@@ -121,11 +111,7 @@ export const useColumns = <
       // The rest of the columns are sorted and hidden using the status in colsOrder and colsHidden
       ...cols
         .slice(nonEditableColumns)
-        .sort(
-          (a, b) =>
-            colsOrder.indexOf(getColumnId(a)) -
-            colsOrder.indexOf(getColumnId(b))
-        )
+        .sort((a, b) => colsOrder.indexOf(getColumnId(a)) - colsOrder.indexOf(getColumnId(b)))
         .map((column, index) => ({
           column: {
             ...column,
@@ -137,19 +123,10 @@ export const useColumns = <
           order: index + frozenColumns,
         })),
     ]
-  }, [
-    frozenColumns,
-    colsOrder,
-    colsHidden,
-    originalColumns,
-    allowSorting,
-    allowHiding,
-  ])
+  }, [frozenColumns, colsOrder, colsHidden, originalColumns, allowSorting, allowHiding])
 
   const columns = useMemo(() => {
-    return columnsWithStatus
-      .filter((column) => column.visible)
-      .map((column) => column.column)
+    return columnsWithStatus.filter((column) => column.visible).map((column) => column.column)
   }, [columnsWithStatus])
 
   return {

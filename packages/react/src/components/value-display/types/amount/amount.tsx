@@ -19,10 +19,7 @@ export interface AmountValue extends WithPlaceholder {
 
 export type AmountCellValue = number | undefined | AmountValue
 
-export const AmountCell = (
-  args: AmountCellValue,
-  meta: ValueDisplayRendererContext
-) => {
+export const AmountCell = (args: AmountCellValue, meta: ValueDisplayRendererContext) => {
   const amount = {
     // defaults
     symbolPosition: "right" as const,

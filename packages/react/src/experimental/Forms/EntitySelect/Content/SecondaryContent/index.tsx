@@ -1,12 +1,7 @@
 import { useMemo } from "react"
 import { VirtualList } from "../../../../Navigation/VirtualList"
 import { ListTag } from "../../ListTag"
-import {
-  EntityId,
-  EntitySelectEntity,
-  EntitySelectSubEntity,
-  FlattenedItem,
-} from "../../types"
+import { EntityId, EntitySelectEntity, EntitySelectSubEntity, FlattenedItem } from "../../types"
 
 export const SecondaryContent = ({
   groupView,
@@ -19,10 +14,7 @@ export const SecondaryContent = ({
 }: {
   groupView: boolean
   onRemove: (entity: EntitySelectEntity) => void
-  onSubItemRemove: (
-    parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
+  onSubItemRemove: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void
   selectedEntities: EntitySelectEntity[]
   selectedLabel?: string
   disabled?: boolean

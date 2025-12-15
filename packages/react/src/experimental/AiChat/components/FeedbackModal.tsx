@@ -13,12 +13,7 @@ interface ReactionModalProps {
   message: AIMessage
 }
 
-export const FeedbackModal = ({
-  onClose,
-  onSubmit,
-  reactionType,
-  message,
-}: ReactionModalProps) => {
+export const FeedbackModal = ({ onClose, onSubmit, reactionType, message }: ReactionModalProps) => {
   const [text, setText] = useState("")
   const translations = useI18n()
   const { title, label, placeholder } =
@@ -50,12 +45,7 @@ export const FeedbackModal = ({
   }, [handleSubmit])
 
   return (
-    <OneModal
-      position="center"
-      isOpen
-      onClose={handleClose}
-      contentPadding="sm"
-    >
+    <OneModal position="center" isOpen onClose={handleClose} contentPadding="sm">
       <OneModal.Header title={title}></OneModal.Header>
       <OneModal.Content>
         <div className="flex flex-col gap-6 p-4">
@@ -72,10 +62,7 @@ export const FeedbackModal = ({
       </OneModal.Content>
       <OneModal.Footer>
         <div className="flex flex-1 flex-row-reverse gap-3">
-          <ButtonInternal
-            onClick={handleSubmit}
-            label={translations.actions.send}
-          />
+          <ButtonInternal onClick={handleSubmit} label={translations.actions.send} />
           <ButtonInternal
             onClick={handleClose}
             label={translations.actions.cancel}

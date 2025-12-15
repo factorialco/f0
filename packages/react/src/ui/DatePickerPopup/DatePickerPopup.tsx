@@ -24,10 +24,7 @@ export type CompareToDef = {
     | ((value: DateRangeComplete) => DateRangeComplete | DateRangeComplete[])
 }
 
-export type DatePickerCompareTo = Record<
-  GranularityDefinitionKey,
-  CompareToDef[]
->
+export type DatePickerCompareTo = Record<GranularityDefinitionKey, CompareToDef[]>
 
 export interface DatePickerPopupProps {
   onSelect?: (value: DatePickerValue | undefined) => void
@@ -46,9 +43,7 @@ export interface DatePickerPopupProps {
   defaultCompareTo?: CompareToDefKey
   hideCalendarInput?: boolean
   asChild?: boolean
-  onCompareToChange?: (
-    compareTo: DateRangeComplete | DateRangeComplete[] | undefined
-  ) => void
+  onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void
 }
 
 const PRESET_CUSTOM = "__custom__"
@@ -68,9 +63,7 @@ export function DatePickerPopup({
   ...props
 }: DatePickerPopupProps) {
   const i18n = useI18n()
-  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
-    value || defaultValue
-  )
+  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(value || defaultValue)
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -116,9 +109,7 @@ export function DatePickerPopup({
 
     handleSelect({
       value: granularityDefinitions[selectedPreset.granularity].toRange(
-        typeof selectedPreset.value === "function"
-          ? selectedPreset.value()
-          : selectedPreset.value
+        typeof selectedPreset.value === "function" ? selectedPreset.value() : selectedPreset.value
       ),
       granularity: selectedPreset.granularity,
     })
@@ -151,9 +142,9 @@ export function DatePickerPopup({
   )
 
   // Compare to
-  const [selectedCompareTo, setSelectedCompareTo] = useState<
-    string | undefined
-  >(defaultCompareTo || undefined)
+  const [selectedCompareTo, setSelectedCompareTo] = useState<string | undefined>(
+    defaultCompareTo || undefined
+  )
 
   const compareToOptions = useMemo(() => {
     const granularityCompareTo = (compareTo ?? {})[localGranularity] || []
@@ -214,9 +205,7 @@ export function DatePickerPopup({
   // Also when the local value changes to emit the new compare to date
   useEffect(() => {
     onCompareToChange?.(
-      selectedCompareTo
-        ? compareToOptions[+selectedCompareTo]?.dateValue
-        : undefined
+      selectedCompareTo ? compareToOptions[+selectedCompareTo]?.dateValue : undefined
     )
   }, [selectedCompareTo, onCompareToChange, compareToOptions])
 
@@ -225,11 +214,7 @@ export function DatePickerPopup({
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent className="w-full overflow-auto" align="start">
         {showPresets ? (
-          <PresetList
-            presets={presets}
-            date={localValue}
-            onSelect={handlePresetSelect}
-          />
+          <PresetList presets={presets} date={localValue} onSelect={handlePresetSelect} />
         ) : (
           <div className="flex gap-4">
             {(presets.length > 0 || granularities.length > 1) && (
@@ -265,9 +250,7 @@ export function DatePickerPopup({
               />
               {compareToOptions.length > 0 && (
                 <div className="mt-4 flex flex-col gap-2">
-                  <div className="text-gray-500 text-sm">
-                    {i18n.date.compareTo}
-                  </div>
+                  <div className="text-gray-500 text-sm">{i18n.date.compareTo}</div>
                   <F0Select
                     label={i18n.date.compareTo}
                     hideLabel

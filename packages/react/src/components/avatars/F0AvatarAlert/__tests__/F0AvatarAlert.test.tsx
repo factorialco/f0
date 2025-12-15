@@ -6,13 +6,7 @@ import { F0AvatarAlert } from "../F0AvatarAlert"
 // Mock F0Icon component to capture the icon prop
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MockF0Icon = vi.fn(({ icon, size }: { icon: any; size: any }) => {
-  return (
-    <div
-      data-testid="mocked-icon"
-      data-icon={icon?.name || "unknown"}
-      data-size={size}
-    />
-  )
+  return <div data-testid="mocked-icon" data-icon={icon?.name || "unknown"} data-size={size} />
 })
 
 vi.mock("@/icons/app", () => ({
@@ -68,9 +62,7 @@ describe("F0AvatarAlert", () => {
 
     Object.entries(sizeTests).forEach(([size, expectedClasses]) => {
       it(`should apply correct classes for ${size} size`, () => {
-        const { container } = zeroRender(
-          <F0AvatarAlert type="info" size={size} />
-        )
+        const { container } = zeroRender(<F0AvatarAlert type="info" size={size} />)
 
         const avatarElement = container.firstChild as HTMLElement
 

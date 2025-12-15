@@ -1,7 +1,4 @@
-import {
-  GranularityDefinitionKey,
-  granularityDefinitions,
-} from "@/experimental/OneCalendar"
+import { GranularityDefinitionKey, granularityDefinitions } from "@/experimental/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -59,9 +56,7 @@ export function F0DatePicker({
       return value
         ? {
             value: granularity.toRange(
-              granularity.calendarMode === "range"
-                ? value.value
-                : (value.value?.from ?? undefined)
+              granularity.calendarMode === "range" ? value.value : (value.value?.from ?? undefined)
             ),
             granularity: value.granularity,
           }
@@ -113,9 +108,7 @@ export function F0DatePicker({
   }
 
   const availablePresets = useMemo(() => {
-    return presets.filter((preset) =>
-      granularities.includes(preset.granularity)
-    )
+    return presets.filter((preset) => granularities.includes(preset.granularity))
   }, [presets, granularities])
 
   const inputRef = useRef<HTMLInputElement>(null)

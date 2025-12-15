@@ -12,9 +12,7 @@ export type EmptyState = {
 export const emptyStatesTypes = ["no-data", "no-results", "error"] as const
 export type EmptyStateType = (typeof emptyStatesTypes)[number]
 
-export type CustomEmptyStates = Partial<
-  Record<EmptyStateType, Partial<EmptyState>>
->
+export type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>
 export type EmptyStates = Record<EmptyStateType, EmptyState>
 
 export const useEmptyState = (
@@ -62,10 +60,7 @@ export const useEmptyState = (
     | undefined
   >(undefined)
 
-  const setEmptyStateType = (
-    type: EmptyStateType | false,
-    errorMessage?: string
-  ) => {
+  const setEmptyStateType = (type: EmptyStateType | false, errorMessage?: string) => {
     if (!type) {
       setEmptyState(undefined)
       return
@@ -77,8 +72,7 @@ export const useEmptyState = (
     const base: EmptyState = {
       title: custom.title ?? def.title,
       description:
-        custom.description ??
-        (type === "error" && errorMessage ? errorMessage : def.description),
+        custom.description ?? (type === "error" && errorMessage ? errorMessage : def.description),
       actions: custom.actions ?? def.actions,
     }
 

@@ -11,12 +11,7 @@ export type SelectAllProps = {
   onChange: (checked: boolean) => void
 }
 
-export const SelectAll = ({
-  selectedCount,
-  indeterminate,
-  value,
-  onChange,
-}: SelectAllProps) => {
+export const SelectAll = ({ selectedCount, indeterminate, value, onChange }: SelectAllProps) => {
   const i18n = useI18n()
 
   const handleChange = (checked: boolean) => {
@@ -30,10 +25,7 @@ export const SelectAll = ({
   return (
     <div className="flex items-center gap-2 p-1 pl-4 pr-3">
       <div className="flex-1 whitespace-nowrap">
-        <Await
-          resolve={selectedCount}
-          fallback={<Skeleton className="h-4 w-4" />}
-        >
+        <Await resolve={selectedCount} fallback={<Skeleton className="h-4 w-4" />}>
           {(selectedCount: number) => (
             <OneEllipsis className="text-f1-foreground-secondary">
               {`${selectedCount} ${

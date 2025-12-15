@@ -10,11 +10,7 @@ import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/na
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
 import { TableCell, TableRow } from "@/experimental/OneTable"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { GroupingDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -90,15 +86,7 @@ const RowComponentInner = <
     loading = false,
     nestedRowProps,
     tableWithChildren,
-  }: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  >,
+  }: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>,
   ref: React.ForwardedRef<HTMLTableRowElement>
 ) => {
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
@@ -108,20 +96,13 @@ const RowComponentInner = <
 
   const i18n = useI18n()
 
-  const renderCell = (
-    item: R,
-    column: TableColumnDefinition<R, Sortings, Summaries>
-  ) => {
+  const renderCell = (item: R, column: TableColumnDefinition<R, Sortings, Summaries>) => {
     return renderProperty(item, column, "table", i18n)
   }
 
   const key = `table-row-${groupIndex}-${index}`
 
-  const { getStickyPosition } = useSticky(
-    frozenColumnsLeft,
-    columns,
-    !!source.selectable
-  )
+  const { getStickyPosition } = useSticky(frozenColumnsLeft, columns, !!source.selectable)
 
   const {
     primaryItemActions,
@@ -132,8 +113,7 @@ const RowComponentInner = <
   } = useItemActions({ source, item })
 
   const hasChildrenLoaded =
-    nestedRowProps?.hasLoadedChildren === undefined ||
-    nestedRowProps?.hasLoadedChildren
+    nestedRowProps?.hasLoadedChildren === undefined || nestedRowProps?.hasLoadedChildren
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
@@ -166,11 +146,7 @@ const RowComponentInner = <
       )}
     >
       {source.selectable && (
-        <TableCell
-          width={checkColumnWidth}
-          sticky={{ left: 0 }}
-          loading={loading}
-        >
+        <TableCell width={checkColumnWidth} sticky={{ left: 0 }} loading={loading}>
           {id !== undefined && (
             <div className="pointer-events-auto flex items-center justify-end">
               <Checkbox
@@ -199,49 +175,42 @@ const RowComponentInner = <
             tableWithChildren,
           }}
         >
-          <div
-            className={cn(
-              column.align === "right" ? "justify-end" : "",
-              "flex"
-            )}
-          >
+          <div className={cn(column.align === "right" ? "justify-end" : "", "flex")}>
             {renderCell(item, column)}
           </div>
         </TableCell>
       ))}
 
-      {source.itemActions &&
-        !loading &&
-        !nestedRowProps?.onLoadMoreChildren && (
-          <>
-            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
-                <ItemActionsRow
-                  primaryItemActions={primaryItemActions}
-                  dropdownItemActions={dropdownItemActions}
-                  handleDropDownOpenChange={handleDropDownOpenChange}
-                />
-              </ItemActionsRowContainer>
-            </td>
-            {/** Mobile item actions */}
-            <TableCell
-              key={`table-cell-${groupIndex}-${index}-actions`}
-              width={68}
-              sticky={{
-                right: 0,
-              }}
-              href={itemHref}
-              className="table-cell md:hidden"
-              loading={loading}
-            >
-              <ItemActionsMobile
-                items={mobileDropdownItemActions}
-                onOpenChange={handleDropDownOpenChange}
+      {source.itemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
+        <>
+          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+              <ItemActionsRow
+                primaryItemActions={primaryItemActions}
+                dropdownItemActions={dropdownItemActions}
+                handleDropDownOpenChange={handleDropDownOpenChange}
               />
-            </TableCell>
-          </>
-        )}
+            </ItemActionsRowContainer>
+          </td>
+          {/** Mobile item actions */}
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-actions`}
+            width={68}
+            sticky={{
+              right: 0,
+            }}
+            href={itemHref}
+            className="table-cell md:hidden"
+            loading={loading}
+          >
+            <ItemActionsMobile
+              items={mobileDropdownItemActions}
+              onOpenChange={handleDropDownOpenChange}
+            />
+          </TableCell>
+        </>
+      )}
     </TableRow>
   )
 }
@@ -255,15 +224,9 @@ const Row = forwardRef(RowComponentInner) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & { ref?: React.ForwardedRef<HTMLTableRowElement> }
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
+    ref?: React.ForwardedRef<HTMLTableRowElement>
+  }
 ) => ReturnType<typeof RowComponentInner>
 
 export { Row }

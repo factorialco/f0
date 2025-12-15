@@ -13,41 +13,39 @@ const iconMap: Record<Level, IconType> = {
   positive: CheckCircle,
 }
 
-export const F0TagAlert = forwardRef<HTMLDivElement, Props>(
-  ({ text, level }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+export const F0TagAlert = forwardRef<HTMLDivElement, Props>(({ text, level }, ref) => {
+  useTextFormatEnforcer(text, { disallowEmpty: true })
 
-    return (
-      <BaseTag
-        ref={ref}
-        className={cn(
-          "pl-0.5",
-          {
-            info: "bg-f1-background-info text-f1-foreground-info",
-            warning: "bg-f1-background-warning text-f1-foreground-warning",
-            critical: "bg-f1-background-critical text-f1-foreground-critical",
-            positive: "bg-f1-background-positive text-f1-foreground-positive",
-          }[level]
-        )}
-        left={
-          <F0Icon
-            icon={iconMap[level]}
-            size="md"
-            aria-hidden
-            className={cn(
-              {
-                info: "text-f1-icon-info",
-                warning: "text-f1-icon-warning",
-                critical: "text-f1-icon-critical",
-                positive: "text-f1-icon-positive",
-              }[level]
-            )}
-          />
-        }
-        text={text}
-      />
-    )
-  }
-)
+  return (
+    <BaseTag
+      ref={ref}
+      className={cn(
+        "pl-0.5",
+        {
+          info: "bg-f1-background-info text-f1-foreground-info",
+          warning: "bg-f1-background-warning text-f1-foreground-warning",
+          critical: "bg-f1-background-critical text-f1-foreground-critical",
+          positive: "bg-f1-background-positive text-f1-foreground-positive",
+        }[level]
+      )}
+      left={
+        <F0Icon
+          icon={iconMap[level]}
+          size="md"
+          aria-hidden
+          className={cn(
+            {
+              info: "text-f1-icon-info",
+              warning: "text-f1-icon-warning",
+              critical: "text-f1-icon-critical",
+              positive: "text-f1-icon-positive",
+            }[level]
+          )}
+        />
+      }
+      text={text}
+    />
+  )
+})
 
 F0TagAlert.displayName = "F0TagAlert"

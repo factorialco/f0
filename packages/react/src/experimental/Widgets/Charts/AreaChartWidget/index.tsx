@@ -1,13 +1,9 @@
 import { forwardRef } from "react"
-import {
-  AreaChart,
-  AreaChartProps,
-} from "../../../../components/Charts/AreaChart"
+import { AreaChart, AreaChartProps } from "../../../../components/Charts/AreaChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 
-export interface AreaChartWidgetProps
-  extends ComposeChartContainerProps<AreaChartProps> {
+export interface AreaChartWidgetProps extends ComposeChartContainerProps<AreaChartProps> {
   canBeBlurred?: boolean
 }
 

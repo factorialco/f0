@@ -29,10 +29,7 @@ export function Reaction({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { fireEmojiConfetti } = useEmojiConfetti()
 
-  const handleClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    emoji: string
-  ) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>, emoji: string) => {
     event.stopPropagation()
     setCount(count + (isActive ? -1 : 1))
     setIsActive(!isActive)
@@ -76,9 +73,5 @@ export function Reaction({
     </Action>
   )
 
-  return tooltipContent ? (
-    <Tooltip label={tooltipContent}>{button}</Tooltip>
-  ) : (
-    button
-  )
+  return tooltipContent ? <Tooltip label={tooltipContent}>{button}</Tooltip> : button
 }

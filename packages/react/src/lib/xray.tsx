@@ -11,11 +11,7 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
-import {
-  componentTypes,
-  type ComponentMetadata,
-  type ComponentTypes,
-} from "./component/types"
+import { componentTypes, type ComponentMetadata, type ComponentTypes } from "./component/types"
 
 declare global {
   interface Window {
@@ -33,17 +29,13 @@ export const XRayContext = createContext<{
   disable: () => void
 }>({ enabled: false, enable: () => null, disable: () => null, filter: [] })
 
-export const XRayProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const XRayProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [enabled, setEnabled] = useState(false)
   const [filter, setFilter] = useState<ComponentTypes[]>([])
 
   const enable = useCallback(
     (filter?: ComponentTypes[]) => {
-      setFilter(
-        filter || [...componentTypes].filter((type) => type !== "layout")
-      )
+      setFilter(filter || [...componentTypes].filter((type) => type !== "layout"))
       setEnabled(true)
     },
     [setFilter, setEnabled]

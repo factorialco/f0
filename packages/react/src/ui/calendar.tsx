@@ -33,11 +33,7 @@ function Calendar({
         ),
         head_cell: cn(
           "text-f1-foreground-secondary rounded-xs font-medium flex justify-center items-center",
-          props.showWeekNumber
-            ? compact
-              ? "w-[30px] flex-shrink-0"
-              : "w-full"
-            : "w-full",
+          props.showWeekNumber ? (compact ? "w-[30px] flex-shrink-0" : "w-full") : "w-full",
           compact ? "h-6 text-sm" : "h-8 text-md"
         ),
         row: cn(
@@ -47,11 +43,7 @@ function Calendar({
         ),
         cell: cn(
           "text-center font-medium p-0 relative text-f1-foreground transition-all duration-100",
-          props.showWeekNumber
-            ? compact
-              ? "w-[30px] flex-shrink-0"
-              : "w-full"
-            : "w-full",
+          props.showWeekNumber ? (compact ? "w-[30px] flex-shrink-0" : "w-full") : "w-full",
           compact ? "rounded-sm h-7 text-md" : "rounded-md h-10 text-md",
           "before:absolute before:inset-0 before:z-0 before:bg-f1-background-selected-bold before:opacity-0 before:transition-all before:duration-100 before:content-[''] hover:before:bg-f1-background-selected-bold-hover before:pointer-events-none",
           compact ? "before:rounded-sm" : "before:rounded-md",
@@ -68,8 +60,7 @@ function Calendar({
               : "[&>span.rdp-weeknumber]:w-7 [&>span.rdp-weeknumber]:flex-shrink-0",
             "[&>span.rdp-weeknumber]:text-md"
           ),
-          props.mode === "single" &&
-            "[&:has([aria-selected].day-selected)]:before:opacity-100",
+          props.mode === "single" && "[&:has([aria-selected].day-selected)]:before:opacity-100",
           props.showWeekNumber &&
             "[&:has([aria-selected].day-range-middle)]:bg-f1-background-selected-bold [&:has([aria-selected].day-range-start)]:bg-f1-background-selected-bold [&:has([aria-selected].day-range-end)]:bg-f1-background-selected-bold hover:before:bg-f1-background-selected-bold"
         ),
@@ -81,8 +72,7 @@ function Calendar({
               : "h-7 w-7 text-sm"
             : "h-10 w-10 text-md"
         ),
-        day_range_start:
-          "day-range-start aria-selected:text-f1-foreground-inverse",
+        day_range_start: "day-range-start aria-selected:text-f1-foreground-inverse",
         day_range_end: "day-range-end aria-selected:text-f1-foreground-inverse",
         day_today: cn(
           "relative after:absolute after:inset-x-0 after:z-20 after:mx-auto after:rounded-full after:bg-f1-background-selected-bold after:transition-colors after:duration-100 after:content-[''] after:pointer-events-none aria-selected:after:bg-f1-background",
@@ -108,11 +98,7 @@ function Calendar({
         ...(compact && {
           hideLastWeek: (date) => {
             // Hide the last week that contains days from the next month
-            const nextMonth = new Date(
-              date.getFullYear(),
-              date.getMonth() + 1,
-              1
-            )
+            const nextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1)
             const isNextMonth = date.getMonth() === nextMonth.getMonth()
             return isNextMonth
           },
@@ -125,12 +111,8 @@ function Calendar({
         }),
       }}
       components={{
-        IconLeft: () => (
-          <ChevronLeft className={compact ? "h-3 w-3" : "h-4 w-4"} />
-        ),
-        IconRight: () => (
-          <ChevronRight className={compact ? "h-3 w-3" : "h-4 w-4"} />
-        ),
+        IconLeft: () => <ChevronLeft className={compact ? "h-3 w-3" : "h-4 w-4"} />,
+        IconRight: () => <ChevronRight className={compact ? "h-3 w-3" : "h-4 w-4"} />,
       }}
       {...props}
     />

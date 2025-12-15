@@ -8,11 +8,7 @@ export type ItemActionsMobileProps = {
   className?: string
 }
 
-export const ItemActionsMobile = ({
-  items,
-  onOpenChange,
-  className,
-}: ItemActionsMobileProps) => {
+export const ItemActionsMobile = ({ items, onOpenChange, className }: ItemActionsMobileProps) => {
   return (
     <div className={cn(className)}>
       <ItemActionsDropdown

@@ -5,31 +5,20 @@ import { cn } from "@/lib/utils"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
 import { KanbanLane } from "./components/KanbanLane.tsx"
-import type {
-  KanbanLaneAttributes,
-  KanbanOnMoveParam,
-  KanbanProps,
-} from "./types.ts"
+import type { KanbanLaneAttributes, KanbanOnMoveParam, KanbanProps } from "./types.ts"
 
-export function Kanban<TRecord extends RecordType>(
-  props: KanbanProps<TRecord>
-): JSX.Element {
+export function Kanban<TRecord extends RecordType>(props: KanbanProps<TRecord>): JSX.Element {
   const { lanes, renderCard, getKey, className, dnd, loading, onCreate } = props
 
   // Local source-of-truth for lanes to orchestrate moves centrally
-  const [localLanes, setLocalLanes] = useState(
-    () => lanes as KanbanProps<TRecord>["lanes"]
-  )
+  const [localLanes, setLocalLanes] = useState(() => lanes as KanbanProps<TRecord>["lanes"])
 
   const lastLanesRef = useRef<string>("")
   const optimisticSignatureRef = useRef<string | null>(null)
 
   useEffect(() => {
     const newSignature = lanes
-      .map(
-        (l) =>
-          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
-      )
+      .map((l) => `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`)
       .join("|")
 
     // If we're in optimistic mode, only accept updates that match our optimistic state
@@ -194,8 +183,7 @@ export function Kanban<TRecord extends RecordType>(
         const items = [...lane.items]
         items.splice(sourceIndex, 1)
         // Adjust index after removal
-        const adjustedIndex =
-          sourceIndex < insertIndex ? insertIndex - 1 : insertIndex
+        const adjustedIndex = sourceIndex < insertIndex ? insertIndex - 1 : insertIndex
         items.splice(adjustedIndex, 0, sourceRecord)
         return { ...lane, items }
       }
@@ -203,9 +191,7 @@ export function Kanban<TRecord extends RecordType>(
         const items = [...lane.items]
         items.splice(sourceIndex, 1)
         const nextTotal =
-          typeof lane.total === "number" && !isSameLane
-            ? Math.max(0, lane.total - 1)
-            : lane.total
+          typeof lane.total === "number" && !isSameLane ? Math.max(0, lane.total - 1) : lane.total
         return { ...lane, items, total: nextTotal }
       }
       if (idx === toLaneIdx) {
@@ -213,9 +199,7 @@ export function Kanban<TRecord extends RecordType>(
         const boundedIndex = Math.max(0, Math.min(insertIndex, items.length))
         items.splice(boundedIndex, 0, sourceRecord)
         const nextTotal =
-          typeof lane.total === "number" && !isSameLane
-            ? lane.total + 1
-            : lane.total
+          typeof lane.total === "number" && !isSameLane ? lane.total + 1 : lane.total
         return { ...lane, items, total: nextTotal }
       }
       return lane
@@ -225,10 +209,7 @@ export function Kanban<TRecord extends RecordType>(
     setLocalLanes(next)
 
     const optimisticSignature = next
-      .map(
-        (l) =>
-          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
-      )
+      .map((l) => `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`)
       .join("|")
 
     // Enter optimistic mode - ignore external updates until server confirms
@@ -238,9 +219,7 @@ export function Kanban<TRecord extends RecordType>(
     try {
       // Call external move if provided
       const destinyRecord =
-        indexOfTarget == null
-          ? null
-          : (prev[toLaneIdx].items[indexOfTarget] as TRecord | undefined)
+        indexOfTarget == null ? null : (prev[toLaneIdx].items[indexOfTarget] as TRecord | undefined)
       const result = await dnd?.onMove?.(
         fromLaneId,
         toLaneId,
@@ -269,8 +248,7 @@ export function Kanban<TRecord extends RecordType>(
 
           const serverSignature = updated
             .map(
-              (l) =>
-                `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+              (l) => `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
             )
             .join("|")
           lastLanesRef.current = serverSignature
@@ -289,53 +267,42 @@ export function Kanban<TRecord extends RecordType>(
 
   return (
     <div className={cn("relative h-full w-full px-4", className)}>
-      <ScrollArea
-        className={"relative h-full w-full [&>div>div]:h-full"}
-        viewportRef={viewportRef}
-      >
+      <ScrollArea className={"relative h-full w-full [&>div>div]:h-full"} viewportRef={viewportRef}>
         <div className="relative mb-2 flex h-full items-start gap-2">
-          {localLanes.map(
-            (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
-              const total = lane.total ?? lane.items.length
-              return (
-                <div
-                  key={lane.id ?? String(laneIndex)}
-                  className="relative shrink-0"
-                  data-testid={`lane-${lane.id ?? String(laneIndex)}`}
-                >
-                  <KanbanLane<TRecord>
-                    id={lane.id}
-                    getLaneResourceIndexById={
-                      lane.id
-                        ? (id) => getIndexById(lane.id as string, id)
-                        : undefined
-                    }
-                    onMove={onMove}
-                    title={lane.title}
-                    items={lane.items}
-                    getKey={(item, index) => getKey(item, index, lane.id)}
-                    renderCard={(item, index) => {
-                      const node = renderCard(item, index, total, lane.id)
-                      return node
-                    }}
-                    emptyState={lane.emptyState}
-                    loading={loading || lane.loading}
-                    variant={lane.variant}
-                    total={total}
-                    hasMore={lane.hasMore}
-                    loadingMore={lane.loadingMore}
-                    fetchMore={lane.fetchMore}
-                    onPrimaryAction={
-                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
-                    }
-                    onFooterAction={
-                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
-                    }
-                  />
-                </div>
-              )
-            }
-          )}
+          {localLanes.map((lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
+            const total = lane.total ?? lane.items.length
+            return (
+              <div
+                key={lane.id ?? String(laneIndex)}
+                className="relative shrink-0"
+                data-testid={`lane-${lane.id ?? String(laneIndex)}`}
+              >
+                <KanbanLane<TRecord>
+                  id={lane.id}
+                  getLaneResourceIndexById={
+                    lane.id ? (id) => getIndexById(lane.id as string, id) : undefined
+                  }
+                  onMove={onMove}
+                  title={lane.title}
+                  items={lane.items}
+                  getKey={(item, index) => getKey(item, index, lane.id)}
+                  renderCard={(item, index) => {
+                    const node = renderCard(item, index, total, lane.id)
+                    return node
+                  }}
+                  emptyState={lane.emptyState}
+                  loading={loading || lane.loading}
+                  variant={lane.variant}
+                  total={total}
+                  hasMore={lane.hasMore}
+                  loadingMore={lane.loadingMore}
+                  fetchMore={lane.fetchMore}
+                  onPrimaryAction={onCreate && lane.id ? () => onCreate(lane.id!) : undefined}
+                  onFooterAction={onCreate && lane.id ? () => onCreate(lane.id!) : undefined}
+                />
+              </div>
+            )
+          })}
         </div>
       </ScrollArea>
       {/* Horizontal edge zones (invisible during drag) */}

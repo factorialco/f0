@@ -7,9 +7,7 @@ import { MentionedUser, MentionListRef, MentionNodeAttrs } from "./types"
 export function createSuggestionConfig(
   mentionSuggestions: MentionedUser[],
   setMentionSuggestions: (suggestions: MentionedUser[]) => void,
-  onMentionQueryStringChanged?: (
-    query: string
-  ) => Promise<MentionedUser[]> | undefined,
+  onMentionQueryStringChanged?: (query: string) => Promise<MentionedUser[]> | undefined,
   users?: MentionedUser[]
 ) {
   return {
@@ -30,9 +28,7 @@ export function createSuggestionConfig(
         if (!normalizedQuery) {
           filtered = users
         } else {
-          filtered = users.filter((user) =>
-            user.label.toLowerCase().includes(normalizedQuery)
-          )
+          filtered = users.filter((user) => user.label.toLowerCase().includes(normalizedQuery))
         }
         setMentionSuggestions(filtered)
         return filtered
@@ -88,11 +84,7 @@ export function createSuggestionConfig(
             const parentText = $from.parent.textContent || ""
 
             // Search backwards from current position, but limit to reasonable mention length
-            for (
-              let i = currentOffset - 1;
-              i >= Math.max(0, currentOffset - 100);
-              i--
-            ) {
+            for (let i = currentOffset - 1; i >= Math.max(0, currentOffset - 100); i--) {
               const char = parentText[i]
               if (char === "@") {
                 atPosition = from - (currentOffset - i)
@@ -105,11 +97,7 @@ export function createSuggestionConfig(
             }
 
             if (atPosition !== -1) {
-              props.editor
-                .chain()
-                .focus()
-                .deleteRange({ from: atPosition, to: to })
-                .run()
+              props.editor.chain().focus().deleteRange({ from: atPosition, to: to }).run()
             } else {
               // Fallback to the provided range if we can't find the @ symbol
               props.editor.chain().focus().deleteRange(props.range).run()
@@ -187,10 +175,7 @@ export function createSuggestionConfig(
         },
         onKeyDown: (props: { event: KeyboardEvent }) => {
           if (!component) return false
-          if (
-            props.event.key === "ArrowUp" ||
-            props.event.key === "ArrowDown"
-          ) {
+          if (props.event.key === "ArrowUp" || props.event.key === "ArrowDown") {
             return (component.ref as MentionListRef)?.onKeyDown(props) || false
           }
           if (props.event.key === "Escape") {

@@ -138,29 +138,15 @@ export const SALARY_MOCK = [
   135000,
 ]
 
-export const DEPARTMENTS_MOCK = [
-  "Engineering",
-  "Product",
-  "Design",
-  "Marketing",
-] as const
+export const DEPARTMENTS_MOCK = ["Engineering", "Product", "Design", "Marketing"] as const
 export const YEARS_OF_EXPERIENCIE_MOCK = [
   8, 12, 4, 15, 7, 3, 11, 6, 13, 2, 9, 14, 5, 10, 1, 8, 13, 4, 11, 6,
 ]
-export const START_DATE_MOCK = Array.from(
-  { length: 20 },
-  (_, i) => new Date(2025, 6, 30 + i)
-)
+export const START_DATE_MOCK = Array.from({ length: 20 }, (_, i) => new Date(2025, 6, 30 + i))
 
-export const PROJECTS_MOCK = [
-  "Project A",
-  "Project B",
-  "Project C",
-  "Project D",
-]
+export const PROJECTS_MOCK = ["Project A", "Project B", "Project C", "Project D"]
 export const PERFORMANCE_SCORE_MOCK = [
-  85, 92, 78, 95, 88, 73, 91, 82, 94, 77, 89, 96, 81, 87, 93, 76, 90, 84, 97,
-  80,
+  85, 92, 78, 95, 88, 73, 91, 82, 94, 77, 89, 96, 81, 87, 93, 76, 90, 84, 97, 80,
 ]
 
 export const DOT_TAG_COLORS_MOCK: NewColor[] = [
@@ -183,17 +169,9 @@ export const PERFORMANCE_LITERAL_MOCK = [
 ]
 
 export const TEAMS_MOCK = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"]
-export const CERTIFICATIONS_MOCK = [
-  "AWS, Google Cloud",
-  "Azure, MongoDB",
-  "Kubernetes, Docker",
-]
+export const CERTIFICATIONS_MOCK = ["AWS, Google Cloud", "Azure, MongoDB", "Kubernetes, Docker"]
 
-export const LANGUAGES_MOCK = [
-  "English, Spanish",
-  "English, French, German",
-  "English, Mandarin",
-]
+export const LANGUAGES_MOCK = ["English, Spanish", "English, French, German", "English, Mandarin"]
 
 export const EDUCATION_MOCK = ["Ph.D.", "Master's", "Bachelor's", "Associate's"]
 

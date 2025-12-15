@@ -1,13 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgBold = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       stroke="currentColor"
       d="M12.5 11.5C14.1569 11.5 15.5 10.1569 15.5 8.5C15.5 6.84315 14.1569 5.5 12.5 5.5L9 5.5C7.89543 5.5 7 6.39543 7 7.5L7 16.5C7 17.6046 7.89543 18.5 9 18.5H15"

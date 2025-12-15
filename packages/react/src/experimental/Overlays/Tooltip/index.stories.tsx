@@ -7,9 +7,7 @@ const meta: Meta<typeof TooltipInternal> = {
   component: TooltipInternal,
   tags: ["autodocs", "experimental"],
   decorators: [
-    (Story) => (
-      <div className="flex h-32 items-center justify-center p-6">{Story()}</div>
-    ),
+    (Story) => <div className="flex h-32 items-center justify-center p-6">{Story()}</div>,
   ],
 }
 

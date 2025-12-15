@@ -8,10 +8,7 @@ import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
 import { OneFilterPicker } from "../../components/OneFilterPicker"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "../../components/OneFilterPicker/types"
+import type { FiltersDefinition, FiltersState } from "../../components/OneFilterPicker/types"
 import {
   filterActions,
   getPrimaryActions,
@@ -39,11 +36,7 @@ import { useEventEmitter } from "./useEventEmitter"
 import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
 
-import {
-  GroupingDefinition,
-  OnSelectItemsCallback,
-  RecordType,
-} from "@/hooks/datasource"
+import { GroupingDefinition, OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
@@ -97,15 +90,7 @@ export type OneDataCollectionProps<
     Grouping
   >
   visualizations: ReadonlyArray<
-    Visualization<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
+    Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
   >
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   onBulkAction?: OnBulkActionCallback<R, Filters>
@@ -114,9 +99,7 @@ export type OneDataCollectionProps<
   fullHeight?: boolean
 
   /** Function to handle state change */
-  onStateChange?: (
-    state: DataCollectionStatusComplete<FiltersState<Filters>>
-  ) => void
+  onStateChange?: (state: DataCollectionStatusComplete<FiltersState<Filters>>) => void
 
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
@@ -218,10 +201,7 @@ const OneDataCollectionComp = <
   /**
    * Data collection actions
    */
-  const primaryActionItems = useMemo(
-    () => getPrimaryActions(primaryActions),
-    [primaryActions]
-  )
+  const primaryActionItems = useMemo(() => getPrimaryActions(primaryActions), [primaryActions])
 
   const allSecondaryActions = useMemo(
     () => filterActions(getSecondaryActions(secondaryActions)),
@@ -231,10 +211,7 @@ const OneDataCollectionComp = <
   const expandedSecondaryActions = useMemo(
     () =>
       Math.min(
-        (secondaryActions &&
-          "expanded" in secondaryActions &&
-          secondaryActions.expanded) ||
-          0,
+        (secondaryActions && "expanded" in secondaryActions && secondaryActions.expanded) || 0,
         MAX_EXPANDED_ACTIONS
       ),
     [secondaryActions]
@@ -242,8 +219,7 @@ const OneDataCollectionComp = <
 
   // Extracts the expandedSecondaryActions from the first group
   const secondaryActionsItems = useMemo(
-    () =>
-      allSecondaryActions[0]?.items.slice(0, expandedSecondaryActions) || [],
+    () => allSecondaryActions[0]?.items.slice(0, expandedSecondaryActions) || [],
     [allSecondaryActions, expandedSecondaryActions]
   )
 
@@ -252,22 +228,20 @@ const OneDataCollectionComp = <
     return [
       {
         ...allSecondaryActions[0],
-        items:
-          allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
+        items: allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
       },
       ...allSecondaryActions.slice(1),
     ].filter((group) => group.items.length > 0)
   }, [allSecondaryActions, expandedSecondaryActions])
 
-  const hasCollectionsActions =
-    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
+  const hasCollectionsActions = primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
 
   /**
    * Clear selected items function
    */
-  const [clearSelectedItemsFunc, setClearSelectedItemsFunc] = useState<
-    (() => void) | undefined
-  >(undefined)
+  const [clearSelectedItemsFunc, setClearSelectedItemsFunc] = useState<(() => void) | undefined>(
+    undefined
+  )
 
   /**
    * Layout
@@ -277,9 +251,7 @@ const OneDataCollectionComp = <
   /**
    * Bulk actions
    */
-  type MappedBulkAction =
-    | (BulkActionDefinition & { onClick: () => void })
-    | { type: "separator" }
+  type MappedBulkAction = (BulkActionDefinition & { onClick: () => void }) | { type: "separator" }
 
   const [bulkActions, setBulkActions] = useState<
     | {
@@ -338,9 +310,7 @@ const OneDataCollectionComp = <
   const totalItemSummaryFn = useMemo(() => {
     if (totalItemSummary === true) {
       return (totalItems: number | undefined) =>
-        totalItems !== undefined
-          ? `${totalItems} ${i18n.collections.itemsCount}`
-          : null
+        totalItems !== undefined ? `${totalItems} ${i18n.collections.itemsCount}` : null
     }
     return totalItemSummary || undefined
   }, [totalItemSummary, i18n])
@@ -355,8 +325,7 @@ const OneDataCollectionComp = <
      * Show action bar
      */
     setShowActionBar(
-      !!selectedItems.allSelected ||
-        selectedItems.itemsStatus.some((item) => item.checked)
+      !!selectedItems.allSelected || selectedItems.itemsStatus.some((item) => item.checked)
     )
 
     /**
@@ -372,9 +341,7 @@ const OneDataCollectionComp = <
     /**
      * Bulk actions for the action bar
      */
-    const bulkActions = source.bulkActions
-      ? source.bulkActions(selectedItems)
-      : undefined
+    const bulkActions = source.bulkActions ? source.bulkActions(selectedItems) : undefined
 
     const mapBulkActions = (
       action: BulkActionDefinition | { type: "separator" }
@@ -457,10 +424,7 @@ const OneDataCollectionComp = <
   }
 
   const onLoadError = (error: DataError) => {
-    setEmptyStateType(
-      "error",
-      error.cause instanceof Error ? error.cause.message : error.message
-    )
+    setEmptyStateType("error", error.cause instanceof Error ? error.cause.message : error.message)
   }
 
   const showPresetsLoading = useDebounceBoolean({
@@ -471,12 +435,7 @@ const OneDataCollectionComp = <
   useEffect(() => {
     setEmptyStateType(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional we should remove the empty state when the filters, search, navigation filters change
-  }, [
-    currentFilters,
-    currentSearch,
-    currentNavigationFilters,
-    source.dataAdapter,
-  ])
+  }, [currentFilters, currentSearch, currentNavigationFilters, source.dataAdapter])
 
   const showTotalItemSummary = useMemo(() => {
     return totalItemSummaryFn !== undefined
@@ -605,9 +564,7 @@ const OneDataCollectionComp = <
   }, [navigationFilters, bottomRightHasItems])
 
   const showTopToolbar = useMemo(() => {
-    return (
-      totalItemSummaryPosition === "top" || navigationFiltersPosition === "top"
-    )
+    return totalItemSummaryPosition === "top" || navigationFiltersPosition === "top"
   }, [totalItemSummaryPosition, navigationFiltersPosition])
 
   const showBottomToolbar = useMemo(() => {
@@ -617,12 +574,7 @@ const OneDataCollectionComp = <
       navigationFiltersPosition === "bottom" ||
       totalItemSummaryPosition === "bottom"
     )
-  }, [
-    filters,
-    bottomRightHasItems,
-    navigationFiltersPosition,
-    totalItemSummaryPosition,
-  ])
+  }, [filters, bottomRightHasItems, navigationFiltersPosition, totalItemSummaryPosition])
 
   return (
     <div
@@ -632,8 +584,7 @@ const OneDataCollectionComp = <
         fullHeight && "h-full flex-1"
       )}
       style={{
-        width:
-          layout === "standard" && !tmpFullWidth ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout,
+        width: layout === "standard" && !tmpFullWidth ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout,
       }}
     >
       {showTopToolbar && (
@@ -689,9 +640,7 @@ const OneDataCollectionComp = <
                   <Spinner size="small" />
                 </motion.div>
               )}
-              {search && (
-                <Search onChange={setCurrentSearch} value={currentSearch} />
-              )}
+              {search && <Search onChange={setCurrentSearch} value={currentSearch} />}
               {shouldShowSettings && (
                 <Settings
                   visualizations={visualizations}
@@ -729,12 +678,7 @@ const OneDataCollectionComp = <
         </div>
       )}
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
-      <div
-        className={cn(
-          emptyState && "hidden",
-          fullHeight && "h-full min-h-0 flex-1"
-        )}
-      >
+      <div className={cn(emptyState && "hidden", fullHeight && "h-full min-h-0 flex-1")}>
         <VisualizationRenderer
           visualization={visualizations[currentVisualization]}
           source={source}
@@ -760,9 +704,7 @@ const OneDataCollectionComp = <
               isOpen={showActionBar}
               selectedNumber={selectedItemsCount}
               primaryActions={
-                bulkActionsGroups && "primary" in bulkActionsGroups
-                  ? bulkActionsGroups.primary
-                  : []
+                bulkActionsGroups && "primary" in bulkActionsGroups ? bulkActionsGroups.primary : []
               }
               secondaryActions={
                 bulkActionsGroups && "secondary" in bulkActionsGroups
@@ -770,9 +712,7 @@ const OneDataCollectionComp = <
                   : []
               }
               warningMessage={
-                "warningMessage" in bulkActions
-                  ? bulkActions.warningMessage
-                  : undefined
+                "warningMessage" in bulkActions ? bulkActions.warningMessage : undefined
               }
               onUnselect={() => clearSelectedItemsFunc?.()}
             />

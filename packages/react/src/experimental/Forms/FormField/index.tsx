@@ -6,12 +6,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/ui/form"
-import {
-  ControllerProps,
-  ControllerRenderProps,
-  FieldPath,
-  FieldValues,
-} from "react-hook-form"
+import { ControllerProps, ControllerRenderProps, FieldPath, FieldValues } from "react-hook-form"
 
 export type FormFieldProps<
   TFieldValues extends FieldValues,

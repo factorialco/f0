@@ -4,14 +4,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { LayoutGroup, Reorder } from "motion/react"
-import {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DragProvider } from "./DragContext"
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
@@ -191,10 +184,7 @@ function TOCContent({
 
   return (
     <nav
-      className={cn(
-        "flex h-full w-[248px] flex-col overflow-hidden",
-        className
-      )}
+      className={cn("flex h-full w-[248px] flex-col overflow-hidden", className)}
       aria-label={title}
       ref={containerRef}
     >

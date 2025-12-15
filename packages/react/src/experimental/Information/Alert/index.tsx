@@ -1,13 +1,7 @@
 import { cva, type VariantProps } from "cva"
 import * as React from "react"
 
-import {
-  BookOpen,
-  CircleCheck,
-  LucideProps,
-  OctagonX,
-  TriangleAlert,
-} from "lucide-react"
+import { BookOpen, CircleCheck, LucideProps, OctagonX, TriangleAlert } from "lucide-react"
 import { Component } from "../../../lib/component/component"
 import { cn } from "../../../lib/utils"
 
@@ -48,12 +42,7 @@ const Alert = Component(
     const IconComponent = variant ? variantIcons[variant] : null
 
     return (
-      <div
-        ref={ref}
-        role="alert"
-        className={cn(alertVariants({ variant }), className)}
-        {...props}
-      >
+      <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props}>
         <div className="flex flex-row">
           {IconComponent && (
             <div className="mr-2 flex h-6 items-center">
@@ -67,30 +56,23 @@ const Alert = Component(
   })
 )
 
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(function AlertTitle({ className, ...props }, ref) {
-  return (
-    <h5
-      ref={ref}
-      className={cn("mb-1 text-base font-medium tracking-tight", className)}
-      {...props}
-    />
-  )
-})
+const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  function AlertTitle({ className, ...props }, ref) {
+    return (
+      <h5
+        ref={ref}
+        className={cn("mb-1 text-base font-medium tracking-tight", className)}
+        {...props}
+      />
+    )
+  }
+)
 
 const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(function AlertDescription({ className, ...props }, ref) {
-  return (
-    <div
-      ref={ref}
-      className={cn("[&_p]:leading-relaxed", className)}
-      {...props}
-    />
-  )
+  return <div ref={ref} className={cn("[&_p]:leading-relaxed", className)} {...props} />
 })
 
 export { Alert, AlertDescription, AlertTitle }

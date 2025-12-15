@@ -45,10 +45,7 @@ export interface TranscriptConfig {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     transcript: {
-      insertTranscript: (
-        data: TranscriptData,
-        config?: TranscriptConfig
-      ) => ReturnType
+      insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType
     }
   }
 }
@@ -112,9 +109,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-3">
-                <p className="text-f1-text-primary text-lg font-semibold">
-                  {data.title}
-                </p>
+                <p className="text-f1-text-primary text-lg font-semibold">{data.title}</p>
               </div>
               <p className="text-f1-text-secondary text-sm">
                 {data.messages.length}{" "}
@@ -132,9 +127,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
               variant="outline"
               hideLabel
               label={
-                isOpen
-                  ? config.labels?.collapse || "Collapse"
-                  : config.labels?.expand || "Expand"
+                isOpen ? config.labels?.collapse || "Collapse" : config.labels?.expand || "Expand"
               }
               icon={isOpen ? ChevronUp : ChevronDown}
               size="sm"

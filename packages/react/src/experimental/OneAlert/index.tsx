@@ -85,28 +85,18 @@ export const OneAlert = ({
             </div>
             <div className="flex flex-col gap-0.5">
               <p className={titleVariants({ variant })}>{title}</p>
-              <p className="text-base text-f1-foreground-secondary">
-                {description}
-              </p>
+              <p className="text-base text-f1-foreground-secondary">{description}</p>
             </div>
           </div>
           {(action || link) && (
-            <div
-              className={cn(
-                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0"
-              )}
-            >
+            <div className={cn("flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0")}>
               {link && (
                 <F0Link href={link.href} target="_blank" variant="link">
                   {link.label}
                 </F0Link>
               )}
               {action && (
-                <F0Button
-                  label={action.label}
-                  variant="outline"
-                  onClick={action.onClick}
-                />
+                <F0Button label={action.label} variant="outline" onClick={action.onClick} />
               )}
             </div>
           )}

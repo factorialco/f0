@@ -37,8 +37,7 @@ export const mockItem = {
     {
       label: "React",
       color: "viridian" as NewColor,
-      description:
-        "React is a JavaScript library for building user interfaces.",
+      description: "React is a JavaScript library for building user interfaces.",
     },
     {
       label: "TypeScript",

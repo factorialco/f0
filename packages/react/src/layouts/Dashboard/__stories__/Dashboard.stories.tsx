@@ -23,9 +23,9 @@ const meta = {
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story, { args }) => {
-      const [widgets, setWidgets] = useState<
-        Optional<DashboardWidget, "x" | "y">[]
-      >(args.widgets as DashboardWidget[])
+      const [widgets, setWidgets] = useState<Optional<DashboardWidget, "x" | "y">[]>(
+        args.widgets as DashboardWidget[]
+      )
 
       const [globalCounter, setGlobalCounter] = useState<number>(0)
 
@@ -45,10 +45,7 @@ const meta = {
         },
       ]
 
-      const createWidgetContent = (
-        type: "text" | "chart" | "table" | "kpi",
-        counter: number
-      ) => {
+      const createWidgetContent = (type: "text" | "chart" | "table" | "kpi", counter: number) => {
         return {
           text: <TextWidget globalCounter={counter} />,
           chart: <ChartWidget />,
@@ -90,10 +87,7 @@ const meta = {
           ? {
               deps: ["globalCounter"], // Key into deps object
               content: (deps: Record<string, unknown>) => {
-                return createWidgetContent(
-                  "text",
-                  deps["globalCounter"] as number
-                )
+                return createWidgetContent("text", deps["globalCounter"] as number)
               },
             }
           : {
@@ -156,28 +150,16 @@ const meta = {
                 <>
                   <ul className="flex list-none flex-col gap-2 p-4">
                     <li>
-                      <F0Button
-                        label="Add text widget"
-                        onClick={() => handleAddWidget("text")}
-                      />
+                      <F0Button label="Add text widget" onClick={() => handleAddWidget("text")} />
                     </li>
                     <li>
-                      <F0Button
-                        label="Add chart widget"
-                        onClick={() => handleAddWidget("chart")}
-                      />
+                      <F0Button label="Add chart widget" onClick={() => handleAddWidget("chart")} />
                     </li>
                     <li>
-                      <F0Button
-                        label="Add table widget"
-                        onClick={() => handleAddWidget("table")}
-                      />
+                      <F0Button label="Add table widget" onClick={() => handleAddWidget("table")} />
                     </li>
                     <li>
-                      <F0Button
-                        label="Add kpi widget"
-                        onClick={() => handleAddWidget("kpi")}
-                      />
+                      <F0Button label="Add kpi widget" onClick={() => handleAddWidget("kpi")} />
                     </li>
                   </ul>
                 </>
@@ -233,15 +215,13 @@ export const Default: Story = {
         h: 1,
         content: (
           <p>
-            This report presents an overview and analysis of employee salaries
-            within the organization. It summarizes key findings, including
-            average and median earnings, salary distribution across departments,
-            and trends observed over the reporting period. The report identifies
-            disparities, highlights areas for improvement, and provides
-            recommendations to ensure competitive and equitable compensation
-            practices. The summary aims to inform leadership and support
-            strategic decisions regarding salary management and workforce
-            planning.
+            This report presents an overview and analysis of employee salaries within the
+            organization. It summarizes key findings, including average and median earnings, salary
+            distribution across departments, and trends observed over the reporting period. The
+            report identifies disparities, highlights areas for improvement, and provides
+            recommendations to ensure competitive and equitable compensation practices. The summary
+            aims to inform leadership and support strategic decisions regarding salary management
+            and workforce planning.
           </p>
         ),
         meta: {

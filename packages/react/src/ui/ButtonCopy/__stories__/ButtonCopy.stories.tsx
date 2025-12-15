@@ -20,42 +20,29 @@ const meta = {
   argTypes: {
     valueToCopy: {
       control: "text",
-      description:
-        "The text value that will be copied to clipboard when the button is clicked.",
+      description: "The text value that will be copied to clipboard when the button is clicked.",
     },
     variant: {
       control: "select",
-      options: [
-        "default",
-        "critical",
-        "neutral",
-        "ghost",
-        "outline",
-        "promote",
-        "outlinePromote",
-      ],
+      options: ["default", "critical", "neutral", "ghost", "outline", "promote", "outlinePromote"],
       description: "Visual style variant of the copy button.",
     },
     size: {
       control: "select",
       options: buttonCopySizes,
-      description:
-        "Sets the button size. Copy buttons are typically used in 'sm' size.",
+      description: "Sets the button size. Copy buttons are typically used in 'sm' size.",
     },
     copyTooltipLabel: {
       control: "text",
-      description:
-        "Custom tooltip label shown before copying. Defaults to translation for 'Copy'.",
+      description: "Custom tooltip label shown before copying. Defaults to translation for 'Copy'.",
     },
     copiedTooltipLabel: {
       control: "text",
-      description:
-        "Custom tooltip label shown after copying. Defaults to 'Copied'.",
+      description: "Custom tooltip label shown after copying. Defaults to 'Copied'.",
     },
     disabled: {
       control: "boolean",
-      description:
-        "The button is inactive and does not respond to user interaction.",
+      description: "The button is inactive and does not respond to user interaction.",
     },
     onCopy: {
       action: "copied",
@@ -144,9 +131,7 @@ export const CustomLabels: Story = {
     await step("Click and verify custom copied label", async () => {
       const button = canvas.getByRole("button")
       await userEvent.click(button)
-      expect(button.getAttribute("aria-label")).toBe(
-        "Text copied successfully!"
-      )
+      expect(button.getAttribute("aria-label")).toBe("Text copied successfully!")
     })
   },
 }
@@ -211,11 +196,7 @@ export const InteractiveCopyTest: Story = {
 
     return (
       <div className="flex flex-col items-center gap-4">
-        <ButtonCopy
-          {...args}
-          valueToCopy="Interactive copy test"
-          onCopy={handleCopy}
-        />
+        <ButtonCopy {...args} valueToCopy="Interactive copy test" onCopy={handleCopy} />
         <p className="text-gray-600 text-sm">Copied {copyCount} times</p>
       </div>
     )

@@ -39,15 +39,7 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      options: [
-        "default",
-        "critical",
-        "neutral",
-        "ghost",
-        "outline",
-        "promote",
-        "outlinePromote",
-      ],
+      options: ["default", "critical", "neutral", "ghost", "outline", "promote", "outlinePromote"],
       description: "Visual style variant of the button.",
     },
     size: {
@@ -58,8 +50,7 @@ const meta = {
     },
     label: {
       control: "text",
-      description:
-        "The visible label for the button. Required for accessibility.",
+      description: "The visible label for the button. Required for accessibility.",
     },
     icon: {
       control: "boolean",
@@ -73,8 +64,7 @@ const meta = {
     },
     disabled: {
       control: "boolean",
-      description:
-        "The button is inactive and does not respond to user interaction.",
+      description: "The button is inactive and does not respond to user interaction.",
     },
     loading: {
       control: "boolean",
@@ -175,67 +165,21 @@ export const IconVariants: Story = {
         <div className="flex gap-2">
           <F0Button {...args} variant="default" label="Default" icon={Add} />
           <F0Button {...args} variant="outline" label="Outline" icon={Add} />
-          <F0Button
-            {...args}
-            variant="neutral"
-            label="Neutral"
-            icon={Archive}
-          />
+          <F0Button {...args} variant="neutral" label="Neutral" icon={Archive} />
           <F0Button {...args} variant="ghost" label="Ghost" icon={Save} />
-          <F0Button
-            {...args}
-            variant="critical"
-            label="Critical"
-            icon={Delete}
-          />
+          <F0Button {...args} variant="critical" label="Critical" icon={Delete} />
           <F0Button {...args} variant="promote" label="Promote" icon={Add} />
         </div>
       </div>
       <div>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Only icon</div>
         <div className="flex gap-2">
-          <F0Button
-            {...args}
-            variant="default"
-            label="Default"
-            icon={Add}
-            hideLabel
-          />
-          <F0Button
-            {...args}
-            variant="outline"
-            label="Outline"
-            icon={Add}
-            hideLabel
-          />
-          <F0Button
-            {...args}
-            variant="neutral"
-            label="Neutral"
-            icon={Archive}
-            hideLabel
-          />
-          <F0Button
-            {...args}
-            variant="ghost"
-            label="Ghost"
-            icon={Save}
-            hideLabel
-          />
-          <F0Button
-            {...args}
-            variant="critical"
-            label="Critical "
-            icon={Delete}
-            hideLabel
-          />
-          <F0Button
-            {...args}
-            variant="promote"
-            label="Promote"
-            icon={Add}
-            hideLabel
-          />
+          <F0Button {...args} variant="default" label="Default" icon={Add} hideLabel />
+          <F0Button {...args} variant="outline" label="Outline" icon={Add} hideLabel />
+          <F0Button {...args} variant="neutral" label="Neutral" icon={Archive} hideLabel />
+          <F0Button {...args} variant="ghost" label="Ghost" icon={Save} hideLabel />
+          <F0Button {...args} variant="critical" label="Critical " icon={Delete} hideLabel />
+          <F0Button {...args} variant="promote" label="Promote" icon={Add} hideLabel />
         </div>
       </div>
       <div>
@@ -274,39 +218,12 @@ export const Ellipsis: Story = {
       className="flex max-w-[120px] flex-col items-center gap-4 p-3"
       style={{ border: "1px dotted #333" }}
     >
-      <F0Button
-        {...args}
-        size="lg"
-        label="Large label that will be truncated"
-      />
-      <F0Button
-        {...args}
-        size="md"
-        label="Medium label that will be truncated"
-      />
-      <F0Button
-        {...args}
-        size="sm"
-        label="Small label that will be truncated"
-      />
-      <F0Button
-        icon={Add}
-        {...args}
-        size="lg"
-        label="Large label that will be truncated"
-      />
-      <F0Button
-        icon={Add}
-        {...args}
-        size="md"
-        label="Medium label that will be truncated"
-      />
-      <F0Button
-        icon={Add}
-        {...args}
-        size="sm"
-        label="Small label that will be truncated"
-      />
+      <F0Button {...args} size="lg" label="Large label that will be truncated" />
+      <F0Button {...args} size="md" label="Medium label that will be truncated" />
+      <F0Button {...args} size="sm" label="Small label that will be truncated" />
+      <F0Button icon={Add} {...args} size="lg" label="Large label that will be truncated" />
+      <F0Button icon={Add} {...args} size="md" label="Medium label that will be truncated" />
+      <F0Button icon={Add} {...args} size="sm" label="Small label that will be truncated" />
       <F0Button
         icon={Add}
         {...args}

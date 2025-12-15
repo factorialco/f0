@@ -7,10 +7,7 @@ import {
   PersonAvatarVariant,
   TeamAvatarVariant,
 } from "@/components/avatars/F0Avatar"
-import {
-  F0AvatarList,
-  F0AvatarListProps,
-} from "@/components/avatars/F0AvatarList"
+import { F0AvatarList, F0AvatarListProps } from "@/components/avatars/F0AvatarList"
 import { cn } from "@/lib/utils"
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
@@ -33,10 +30,7 @@ type AvatarListValue = {
 )
 export type AvatarListCellValue = AvatarListValue
 
-export const AvatarListCell = (
-  args: AvatarListCellValue,
-  meta: ValueDisplayRendererContext
-) => {
+export const AvatarListCell = (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => {
   const type = args.type ?? ("person" as const)
 
   return (

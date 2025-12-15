@@ -1,16 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgAppearance = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgAppearance = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <mask id="a" fill="currentColor">
       <path
         fillRule="evenodd"

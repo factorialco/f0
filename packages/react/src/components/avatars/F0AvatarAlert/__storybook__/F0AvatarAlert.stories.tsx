@@ -1,11 +1,7 @@
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
-import {
-  alertAvatarSizes,
-  alertAvatarTypes,
-  F0AvatarAlert,
-} from "../F0AvatarAlert"
+import { alertAvatarSizes, alertAvatarTypes, F0AvatarAlert } from "../F0AvatarAlert"
 
 const meta: Meta<typeof F0AvatarAlert> = {
   component: F0AvatarAlert,
@@ -14,9 +10,7 @@ const meta: Meta<typeof F0AvatarAlert> = {
   parameters: {
     docs: {
       description: {
-        component: [
-          "An avatar component that displays an alert icon and color based on the type.",
-        ]
+        component: ["An avatar component that displays an alert icon and color based on the type."]
           .map((line) => `<p>${line}</p>`)
           .join(""),
       },

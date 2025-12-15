@@ -29,8 +29,7 @@ export default meta
 type Story = StoryObj<typeof ProductBlankslate>
 
 const defaultArgs = {
-  title:
-    "Optimize and centralize your sales processes with quotes and invoices",
+  title: "Optimize and centralize your sales processes with quotes and invoices",
   image: "https://placehold.co/280x328", // 3:4 ratio
   variant: "promote" as const,
   benefits: [
@@ -48,15 +47,8 @@ export const Default: Story = {
     ...defaultArgs,
     actions: (
       <div className="flex gap-3">
-        <F0Button
-          label="Request information"
-          onClick={() => alert("Request information")}
-        />
-        <F0Button
-          label="Learn more"
-          variant="outline"
-          onClick={() => alert("Read more")}
-        />
+        <F0Button label="Request information" onClick={() => alert("Request information")} />
+        <F0Button label="Learn more" variant="outline" onClick={() => alert("Read more")} />
       </div>
     ),
   },
@@ -68,13 +60,10 @@ export const WithUpsellingButton: Story = {
     actions: (
       <UpsellingButton
         label="Request information"
-        onRequest={async () =>
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-        }
+        onRequest={async () => await new Promise((resolve) => setTimeout(resolve, 1000))}
         errorMessage={{
           title: "Request failed",
-          description:
-            "We couldn't process your request. Please try again later.",
+          description: "We couldn't process your request. Please try again later.",
         }}
         successMessage={{
           title: "Request submitted!",

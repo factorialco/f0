@@ -2,10 +2,7 @@ import * as React from "react"
 import { cn } from "../lib/utils"
 import { InputField, InputFieldProps } from "./InputField"
 
-export type InputProps = Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  "size" | "onChange"
-> &
+export type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "onChange"> &
   Pick<
     InputFieldProps<string>,
     | "label"

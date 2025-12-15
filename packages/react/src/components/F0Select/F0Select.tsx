@@ -26,15 +26,7 @@ import {
 } from "@/ui/Select"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { isEqual } from "lodash"
-import {
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
@@ -50,10 +42,7 @@ import type {
 } from "./types"
 export * from "./types"
 
-const defaultSearchFn = (
-  option: F0SelectItemProps<string>,
-  search?: string
-) => {
+const defaultSearchFn = (option: F0SelectItemProps<string>, search?: string) => {
   return (
     option.type === "separator" ||
     !search ||
@@ -61,10 +50,7 @@ const defaultSearchFn = (
   )
 }
 
-const F0SelectComponent = forwardRef(function Select<
-  T extends string,
-  R = unknown,
->(
+const F0SelectComponent = forwardRef(function Select<T extends string, R = unknown>(
   {
     placeholder,
     onChange,
@@ -107,8 +93,7 @@ const F0SelectComponent = forwardRef(function Select<
   const modalContext = useContext(OneModalContext)
   const shouldUseModalContainer =
     modalContext.portalContainer &&
-    (modalContext.position === "center" ||
-      modalContext.position === "fullscreen")
+    (modalContext.position === "center" || modalContext.position === "fullscreen")
 
   const effectivePortalContainer =
     portalContainer !== undefined
@@ -118,10 +103,8 @@ const F0SelectComponent = forwardRef(function Select<
         : undefined
 
   // Extract onSelectItems and disableSelectAll from props for multiple selection
-  const onSelectItems =
-    "onSelectItems" in props ? props.onSelectItems : undefined
-  const disableSelectAll =
-    "disableSelectAll" in props ? props.disableSelectAll : false
+  const onSelectItems = "onSelectItems" in props ? props.onSelectItems : undefined
+  const disableSelectAll = "disableSelectAll" in props ? props.disableSelectAll : false
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
@@ -129,28 +112,17 @@ const F0SelectComponent = forwardRef(function Select<
   const defaultItems = useMemo(
     () =>
       toArray(props.defaultItem).filter(
-        (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
-          item !== undefined
+        (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> => item !== undefined
       ),
     [props.defaultItem]
   )
 
-  const defaultValues = useMemo(
-    () => defaultItems.map((item) => item.value),
-    [defaultItems]
-  )
+  const defaultValues = useMemo(() => defaultItems.map((item) => item.value), [defaultItems])
 
-  const [localValue, setLocalValue] = useState(
-    toArray(value) ?? defaultValues ?? []
-  )
+  const [localValue, setLocalValue] = useState(toArray(value) ?? defaultValues ?? [])
 
   useEffect(() => {
-    if (
-      !isEqual(
-        toArray(value) ?? [],
-        localValue?.map((item) => String(item)) ?? []
-      )
-    ) {
+    if (!isEqual(toArray(value) ?? [], localValue?.map((item) => String(item)) ?? [])) {
       const newValue = toArray(value) ?? defaultValues ?? []
       // Ensure unique values to prevent duplicates
       setLocalValue(Array.from(new Set(newValue)))
@@ -173,10 +145,7 @@ const F0SelectComponent = forwardRef(function Select<
     return {
       ...source,
       dataAdapter: source
-        ? (source.dataAdapter as PaginatedDataAdapter<
-            ActualRecordType,
-            FiltersDefinition
-          >)
+        ? (source.dataAdapter as PaginatedDataAdapter<ActualRecordType, FiltersDefinition>)
         : {
             fetchData: ({
               search,
@@ -185,9 +154,7 @@ const F0SelectComponent = forwardRef(function Select<
             > => {
               // Apply the search function to the options
               const searchFn =
-                "searchFn" in props && props.searchFn
-                  ? props.searchFn
-                  : defaultSearchFn
+                "searchFn" in props && props.searchFn ? props.searchFn : defaultSearchFn
 
               return {
                 records: options.filter(
@@ -208,9 +175,7 @@ const F0SelectComponent = forwardRef(function Select<
           return undefined
         }
         const mappedOption = optionMapper(item)
-        return mappedOption.type !== "separator"
-          ? mappedOption.value
-          : undefined
+        return mappedOption.type !== "separator" ? mappedOption.value : undefined
       },
       search: showSearchBox
         ? {
@@ -239,21 +204,15 @@ const F0SelectComponent = forwardRef(function Select<
     [mapOptions, source]
   )
 
-  const {
-    data,
-    isInitialLoading,
-    loadMore,
-    isLoadingMore,
-    isLoading,
-    paginationInfo,
-  } = useData<ActualRecordType>(localSource)
+  const { data, isInitialLoading, loadMore, isLoadingMore, isLoading, paginationInfo } =
+    useData<ActualRecordType>(localSource)
 
   const { currentSearch, setCurrentSearch } = localSource
 
   // Cache selected items so we can display them even when they're not in current data
-  const selectedItemsCache = useRef<
-    Map<string, F0SelectItemObject<T, ResolvedRecordType<R>>>
-  >(new Map())
+  const selectedItemsCache = useRef<Map<string, F0SelectItemObject<T, ResolvedRecordType<R>>>>(
+    new Map()
+  )
 
   /**
    * Map of items from paginated data by their value.
@@ -272,10 +231,7 @@ const F0SelectComponent = forwardRef(function Select<
     for (const record of data.records) {
       const mappedOption = optionMapper(record)
       if (mappedOption.type !== "separator") {
-        entries.push([
-          mappedOption.value,
-          { item: record, option: mappedOption },
-        ])
+        entries.push([mappedOption.value, { item: record, option: mappedOption }])
       }
     }
 
@@ -286,9 +242,7 @@ const F0SelectComponent = forwardRef(function Select<
    * Initialize selection state from the value prop.
    * This allows the component to display pre-selected values when the data loads.
    */
-  const initialSelectedState = useMemo(():
-    | SelectedItemsState<ActualRecordType>
-    | undefined => {
+  const initialSelectedState = useMemo((): SelectedItemsState<ActualRecordType> | undefined => {
     const values = toArray(value) ?? defaultValues ?? []
     if (values.length === 0) {
       return undefined
@@ -315,22 +269,17 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [value, defaultValues, itemsByValue])
 
-  const {
-    handleSelectAll,
-    handleSelectItemChange,
-    selectedState,
-    clearSelection,
-    selectionMeta,
-  } = useSelectable({
-    data,
-    paginationInfo,
-    source: localSource,
-    selectionMode: multiple ? "multi" : "single",
-    onSelectItems: onSelectItems,
-    selectedState: initialSelectedState,
-    disableSelectAll: disableSelectAll,
-    isSearchActive: !!currentSearch,
-  })
+  const { handleSelectAll, handleSelectItemChange, selectedState, clearSelection, selectionMeta } =
+    useSelectable({
+      data,
+      paginationInfo,
+      source: localSource,
+      selectionMode: multiple ? "multi" : "single",
+      onSelectItems: onSelectItems,
+      selectedState: initialSelectedState,
+      disableSelectAll: disableSelectAll,
+      isSearchActive: !!currentSearch,
+    })
 
   /**
    * Get display items for the selection preview.
@@ -400,14 +349,7 @@ const F0SelectComponent = forwardRef(function Select<
         onChangeSelectedOption?.(item.option, checked)
       }
     },
-    [
-      onChangeSelectedOption,
-      itemsByValue,
-      handleSelectItemChange,
-      multiple,
-      clearable,
-      localValue,
-    ]
+    [onChangeSelectedOption, itemsByValue, handleSelectItemChange, multiple, clearable, localValue]
   )
 
   // Mark user interaction when select all is used
@@ -456,10 +398,7 @@ const F0SelectComponent = forwardRef(function Select<
         return record as unknown as ResolvedRecordType<R>
       }
       // For static options, extract the 'item' property from the option
-      const option = record as unknown as F0SelectItemObject<
-        T,
-        ResolvedRecordType<R>
-      >
+      const option = record as unknown as F0SelectItemObject<T, ResolvedRecordType<R>>
       return option.item
     }
 
@@ -475,18 +414,12 @@ const F0SelectComponent = forwardRef(function Select<
 
       const records = checkedItems
         .map((item) => item.item)
-        .filter(
-          (item): item is WithGroupId<ResolvedRecordType<R>> =>
-            item !== undefined
-        )
+        .filter((item): item is WithGroupId<ResolvedRecordType<R>> => item !== undefined)
       const originalItems = records
         .map(extractOriginalItem)
         .filter((item): item is ResolvedRecordType<R> => item !== undefined)
       const options = records.map((item) => {
-        return optionMapper(item) as F0SelectItemObject<
-          T,
-          ResolvedRecordType<R>
-        >
+        return optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
       })
 
       onChange?.(values, originalItems, options)
@@ -507,13 +440,10 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [selectedState])
 
-  const debouncedHandleChangeOpenLocal = useDebounceCallback(
-    (open: boolean) => {
-      onOpenChange?.(open)
-      setOpenLocal(open)
-    },
-    100
-  )
+  const debouncedHandleChangeOpenLocal = useDebounceCallback((open: boolean) => {
+    onOpenChange?.(open)
+    setOpenLocal(open)
+  }, 100)
 
   const handleChangeOpenLocal = (open: boolean) => {
     debouncedHandleChangeOpenLocal(open)
@@ -526,9 +456,7 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const getItems = useCallback(
-    (
-      records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
-    ): VirtualItem[] => {
+    (records: WithGroupId<ActualRecordType>[] | ActualRecordType[]): VirtualItem[] => {
       return records.map((option, index) => {
         const mappedOption = optionMapper(option)
         return mappedOption.type === "separator"
@@ -538,12 +466,7 @@ const F0SelectComponent = forwardRef(function Select<
             }
           : {
               height: mappedOption.description ? 64 : 32,
-              item: (
-                <SelectItem
-                  key={String(mappedOption.value)}
-                  item={mappedOption}
-                />
-              ),
+              item: <SelectItem key={String(mappedOption.value)} item={mappedOption} />,
               value: mappedOption.value,
             }
       })
@@ -635,28 +558,21 @@ const F0SelectComponent = forwardRef(function Select<
               value={
                 multiple
                   ? // For multiple: use count of selected items
-                    Math.max(
-                      localValue.length,
-                      selectionMeta.selectedItemsCount
-                    ).toString()
+                    Math.max(localValue.length, selectionMeta.selectedItemsCount).toString()
                   : // For single: use the selected value directly
                     (localValue[0] ?? undefined)
               }
-              isEmpty={(value) =>
-                multiple ? !value || +(value ?? 0) === 0 : !value
-              }
+              isEmpty={(value) => (multiple ? !value || +(value ?? 0) === 0 : !value)}
               onClear={() => {
                 hasUserInteracted.current = true
                 clearSelection()
                 // Clear the cache when clearing selection
                 selectedItemsCache.current.clear()
                 // Call with undefined to indicate no item is selected
-                ;(
-                  onChangeSelectedOption as (
-                    option: undefined,
-                    checked: boolean
-                  ) => void
-                )?.(undefined, false)
+                ;(onChangeSelectedOption as (option: undefined, checked: boolean) => void)?.(
+                  undefined,
+                  false
+                )
               }}
               placeholder={placeholder || ""}
               disabled={disabled}
@@ -671,9 +587,7 @@ const F0SelectComponent = forwardRef(function Select<
               onClickContent={() => {
                 handleChangeOpenLocal(!openLocal)
               }}
-              append={
-                <Arrow open={openLocal} disabled={disabled} size={size} />
-              }
+              append={<Arrow open={openLocal} disabled={disabled} size={size} />}
             >
               <button
                 className="flex w-full items-center justify-between"
@@ -683,17 +597,13 @@ const F0SelectComponent = forwardRef(function Select<
                 }}
               >
                 {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
+                  ? localValue.length > 0 || selectionMeta.selectedItemsCount > 0
                   : !!localValue[0]) && (
                   <SelectedItems
                     multiple={multiple}
                     totalSelectedCount={
                       multiple
-                        ? Math.max(
-                            localValue.length,
-                            selectionMeta.selectedItemsCount
-                          )
+                        ? Math.max(localValue.length, selectionMeta.selectedItemsCount)
                         : localValue[0]
                           ? 1
                           : 0
@@ -732,8 +642,7 @@ const F0SelectComponent = forwardRef(function Select<
                     selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={
                       selectedState.allSelected === "indeterminate" ||
-                      (selectedState.allSelected === false &&
-                        selectionMeta.selectedItemsCount > 0)
+                      (selectedState.allSelected === false && selectionMeta.selectedItemsCount > 0)
                     }
                     value={!!selectedState.allSelected}
                     onChange={handleSelectAllWithTracking}
@@ -755,9 +664,6 @@ const F0SelectComponent = forwardRef(function Select<
   )
 })
 
-export const F0Select = F0SelectComponent as <
-  T extends string = string,
-  R = unknown,
->(
+export const F0Select = F0SelectComponent as <T extends string = string, R = unknown>(
   props: F0SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
 ) => React.ReactElement

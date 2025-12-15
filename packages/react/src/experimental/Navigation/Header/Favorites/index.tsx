@@ -28,11 +28,7 @@ interface FavoriteButtonProps {
   label: string
 }
 
-export const FavoriteButton = ({
-  isMarked,
-  onChange,
-  label,
-}: FavoriteButtonProps) => {
+export const FavoriteButton = ({ isMarked, onChange, label }: FavoriteButtonProps) => {
   const [hasTransitioned, setHasTransitioned] = useState(false)
 
   const handleClick = () => {
@@ -43,10 +39,7 @@ export const FavoriteButton = ({
   return (
     <AnimatePresence mode="wait">
       <button
-        className={cn(
-          "flex h-6 w-6 items-center justify-center rounded",
-          focusRing()
-        )}
+        className={cn("flex h-6 w-6 items-center justify-center rounded", focusRing())}
         onClick={handleClick}
         aria-label={label}
       >

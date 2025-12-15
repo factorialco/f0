@@ -13,22 +13,15 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource/types"
-import {
-  PrimaryActionsDefinitionFn,
-  SecondaryActionsDefinition,
-} from "../../actions"
+import { PrimaryActionsDefinitionFn, SecondaryActionsDefinition } from "../../actions"
 import { ItemActionsDefinition } from "../../item-actions"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "../../navigationFilters/types"
+import { NavigationFiltersDefinition, NavigationFiltersState } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
 import { BulkActionDefinition, OnBulkActionCallback } from "../../types"
 
-export type BulkActionsDefinition<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) =>
+export type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (
+  selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]
+) =>
   | {
       primary?: (BulkActionDefinition | { type: "separator" })[]
       secondary?: (BulkActionDefinition | { type: "separator" })[]
@@ -40,17 +33,14 @@ export type BulkActionsDefinition<
 /**
  * Extended base fetch options for data collection
  */
-type DataCollectionExtendFetchOptions<
-  NavigationFilters extends NavigationFiltersDefinition,
-> = {
+type DataCollectionExtendFetchOptions<NavigationFilters extends NavigationFiltersDefinition> = {
   navigationFilters: NavigationFiltersState<NavigationFilters>
 }
 
 export type DataCollectionBaseFetchOptions<
   Filters extends FiltersDefinition,
   NavigationFilters extends NavigationFiltersDefinition,
-> = BaseFetchOptions<Filters> &
-  DataCollectionExtendFetchOptions<NavigationFilters>
+> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>
 
 /**
  * Extended base fetch options for data collection
@@ -58,8 +48,7 @@ export type DataCollectionBaseFetchOptions<
 export type DataCollectionPaginatedFetchOptions<
   Filters extends FiltersDefinition,
   NavigationFilters extends NavigationFiltersDefinition,
-> = PaginatedFetchOptions<Filters> &
-  DataCollectionExtendFetchOptions<NavigationFilters>
+> = PaginatedFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>
 
 /**
  * Data collection data adapter
@@ -67,8 +56,7 @@ export type DataCollectionPaginatedFetchOptions<
 export type DataCollectionDataAdapter<
   R extends RecordType = RecordType,
   Filters extends FiltersDefinition = FiltersDefinition,
-  NavigationFilters extends
-    NavigationFiltersDefinition = NavigationFiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition,
 > =
   | BaseDataAdapter<
       R,
@@ -102,13 +90,9 @@ export type DataCollectionSourceDefinition<
   Sortings extends SortingsDefinition = SortingsDefinition,
   Summaries extends SummariesDefinition = SummariesDefinition,
   ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>,
-  NavigationFilters extends
-    NavigationFiltersDefinition = NavigationFiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
-> = Omit<
-  DataSourceDefinition<R, Filters, Sortings, Grouping>,
-  "dataAdapter"
-> & {
+> = Omit<DataSourceDefinition<R, Filters, Sortings, Grouping>, "dataAdapter"> & {
   /**
    * Data Collection specific datasource elements / features
    */
@@ -159,8 +143,7 @@ export type DataCollectionSource<
   Sortings extends SortingsDefinition = SortingsDefinition,
   Summaries extends SummariesDefinition = SummariesDefinition,
   ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>,
-  NavigationFilters extends
-    NavigationFiltersDefinition = NavigationFiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
 > = DataSource<R, Filters, Sortings, Grouping> &
   DataCollectionSourceDefinition<

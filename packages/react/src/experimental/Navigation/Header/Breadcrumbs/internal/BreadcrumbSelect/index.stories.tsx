@@ -1,14 +1,6 @@
-import {
-  FIRST_NAMES_MOCK,
-  MOCK_ICONS,
-  SURNAMES_MOCK,
-  getMockValue,
-} from "@/mocks"
+import { FIRST_NAMES_MOCK, MOCK_ICONS, SURNAMES_MOCK, getMockValue } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import {
-  F0SelectItemObject,
-  F0SelectItemProps,
-} from "../../../../../../components/F0Select"
+import { F0SelectItemObject, F0SelectItemProps } from "../../../../../../components/F0Select"
 import { Search } from "../../../../../../icons/app"
 import { BreadcrumbSelect } from "./index"
 const meta: Meta<typeof BreadcrumbSelect> = {
@@ -59,11 +51,7 @@ export const Default: Story = {
 export const WithSearchbox: Story = {
   args: {
     value: "recruitment",
-    onChange: (
-      value: string,
-      item?: unknown,
-      option?: F0SelectItemObject<string, unknown>
-    ) => {
+    onChange: (value: string, item?: unknown, option?: F0SelectItemObject<string, unknown>) => {
       console.log("onChange BreadcrumbSelect", value, item, option)
     },
     searchBoxPlaceholder: "Search",
@@ -109,9 +97,7 @@ export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
           return new Promise((resolve) => {
             setTimeout(() => {
               const results = mockItems.filter(
-                (item) =>
-                  !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
+                (item) => !search || item.label.toLowerCase().includes(search.toLowerCase())
               )
 
               const res = {
@@ -172,15 +158,10 @@ export const AsyncDataWithLargeDataset: StoryObj<
               const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
 
               const results = mockItemsLargeDataset.filter(
-                (item) =>
-                  !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
+                (item) => !search || item.label.toLowerCase().includes(search.toLowerCase())
               )
 
-              const paginatedResults = results.slice(
-                cursor ? Number(cursor) : 0,
-                nextCursor
-              )
+              const paginatedResults = results.slice(cursor ? Number(cursor) : 0, nextCursor)
 
               const res = {
                 type: "infinite-scroll" as const,
@@ -196,9 +177,7 @@ export const AsyncDataWithLargeDataset: StoryObj<
         },
       },
     },
-    mapOptions: (
-      item: MockItemLargeDataSet
-    ): F0SelectItemProps<string, MockItemLargeDataSet> => ({
+    mapOptions: (item: MockItemLargeDataSet): F0SelectItemProps<string, MockItemLargeDataSet> => ({
       value: item.value,
       label: item.label,
       icon: item.icon,

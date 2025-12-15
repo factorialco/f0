@@ -115,12 +115,7 @@ export const WithCustomTrigger: Story = {
   render: (args) => (
     <Dropdown {...args}>
       <button aria-label="Open user menu">
-        <F0AvatarPerson
-          src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
-          size="lg"
-        />
+        <F0AvatarPerson src="/avatars/person04.jpg" firstName="Dani" lastName="Moreno" size="lg" />
       </button>
     </Dropdown>
   ),

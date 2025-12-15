@@ -17,9 +17,7 @@ describe("convertMessagesToTurn", () => {
         content: "How are you?",
       },
     ]
-    expect(convertMessagesToTurns(onlyUserMessages)).toHaveLength(
-      onlyUserMessages.length
-    )
+    expect(convertMessagesToTurns(onlyUserMessages)).toHaveLength(onlyUserMessages.length)
   })
 
   it("includes all assistant messages between two user messages to the first turn", () => {
@@ -49,12 +47,12 @@ describe("convertMessagesToTurn", () => {
     expect(turns[0]).toHaveLength(3)
     expect(turns[1]).toHaveLength(1)
 
-    expect(
-      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "assistant"])
-    expect(
-      turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user"])
+    expect(turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual([
+      "user",
+      "assistant",
+      "assistant",
+    ])
+    expect(turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual(["user"])
   })
 
   it("groups thinking tool calls into an array", () => {
@@ -83,14 +81,14 @@ describe("convertMessagesToTurn", () => {
     expect(turns[0]).toHaveLength(3)
     expect(turns[1]).toHaveLength(1)
 
-    expect(
-      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "array"])
+    expect(turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual([
+      "user",
+      "assistant",
+      "array",
+    ])
     expect(turns[0][2]).toHaveLength(3)
 
-    expect(
-      turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user"])
+    expect(turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual(["user"])
   })
 
   it("groups individual thinking tool calls", () => {
@@ -119,13 +117,15 @@ describe("convertMessagesToTurn", () => {
     expect(turns[0]).toHaveLength(5)
     expect(turns[1]).toHaveLength(1)
 
-    expect(
-      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "array", "assistant", "array"])
+    expect(turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual([
+      "user",
+      "assistant",
+      "array",
+      "assistant",
+      "array",
+    ])
 
-    expect(
-      turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user"])
+    expect(turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual(["user"])
   })
 
   it("does not group other tool calls", () => {
@@ -153,9 +153,7 @@ describe("convertMessagesToTurn", () => {
     expect(turns[0]).toHaveLength(5)
     expect(turns[1]).toHaveLength(1)
 
-    expect(
-      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual([
+    expect(turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual([
       "user",
       "assistant",
       "assistant",
@@ -163,9 +161,7 @@ describe("convertMessagesToTurn", () => {
       "assistant",
     ])
 
-    expect(
-      turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user"])
+    expect(turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual(["user"])
   })
 
   it("hoists agentState message above thinking tool calls if agentState comes between thinking calls", () => {
@@ -198,20 +194,19 @@ describe("convertMessagesToTurn", () => {
     expect(turns[0]).toHaveLength(4)
     expect(turns[1]).toHaveLength(1)
 
-    expect(
-      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "assistant", "array"])
+    expect(turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual([
+      "user",
+      "assistant",
+      "assistant",
+      "array",
+    ])
     expect(turns[0][3]).toHaveLength(3)
 
-    expect(
-      turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user"])
+    expect(turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))).toStrictEqual(["user"])
   })
 })
 
-const createToolCallMessage = (
-  name: string | undefined = "toolName"
-): Message => {
+const createToolCallMessage = (name: string | undefined = "toolName"): Message => {
   return {
     id: randomUUID(),
     role: "assistant",
@@ -229,5 +224,4 @@ const createToolCallMessage = (
   }
 }
 
-const createThinkingMessage = (): Message =>
-  createToolCallMessage("orchestratorThinking")
+const createThinkingMessage = (): Message => createToolCallMessage("orchestratorThinking")

@@ -10,38 +10,32 @@ import * as TwoColumnLayoutStories from "./TwoColumnLayout/__stories__/TwoColumn
 
 ### Definition
 
-Layouts are structural templates that define how content is organized and
-presented on a page. They provide consistent containers that determine the
-overall arrangement of UI elements while respecting design system rules for
-spacing, responsiveness, and visual hierarchy. Layouts serve as the foundation
-upon which more specific components and content blocks are placed.
+Layouts are structural templates that define how content is organized and presented on a page. They
+provide consistent containers that determine the overall arrangement of UI elements while respecting
+design system rules for spacing, responsiveness, and visual hierarchy. Layouts serve as the
+foundation upon which more specific components and content blocks are placed.
 
 ### Purpose
 
 The purpose of layouts in our design system is as follows:
 
-- **Consistency**: Ensures visual and structural uniformity throughout the
-  application.
-- **Efficiency**: Optimizes development through standardized and reusable
-  containers and provide with established patterns for content layout.
-- **Separation of concerns**: Establishes clear boundaries between content
-  structure and presentation.
-- **Adaptability**: Ensures proper display across different screen sizes and
-  devices.
-- **Flexibility**: Supports various content organization methods without
-  requiring custom CSS.
+- **Consistency**: Ensures visual and structural uniformity throughout the application.
+- **Efficiency**: Optimizes development through standardized and reusable containers and provide
+  with established patterns for content layout.
+- **Separation of concerns**: Establishes clear boundaries between content structure and
+  presentation.
+- **Adaptability**: Ensures proper display across different screen sizes and devices.
+- **Flexibility**: Supports various content organization methods without requiring custom CSS.
 
 ## Types of layouts
 
-The layouts in our design system exclusively control the behavior of the
-container, establishing the overall page structure. They do not dictate the
-specific arrangement of elements within the sections they define, allowing
-flexibility in content organization while maintaining a consistent structure.
+The layouts in our design system exclusively control the behavior of the container, establishing the
+overall page structure. They do not dictate the specific arrangement of elements within the sections
+they define, allowing flexibility in content organization while maintaining a consistent structure.
 
 ### StandardLayout
 
-The default layout used throughout the application when no specific layout is
-specified.
+The default layout used throughout the application when no specific layout is specified.
 
 **When to use it:**
 
@@ -61,27 +55,23 @@ specified.
 
 ### TwoColumnLayout
 
-Structure the content into two distinct areas: a primary column for essential
-content and a secondary column for supplementary information.
+Structure the content into two distinct areas: a primary column for essential content and a
+secondary column for supplementary information.
 
 **When to use it:**
 
 - On detail pages that need to display related but independent information
-- For interfaces that require separating contextual navigation from the main
-  content
-- When you need to present actions or auxiliary information alongside the main
-  content
+- For interfaces that require separating contextual navigation from the main content
+- When you need to present actions or auxiliary information alongside the main content
 
 **Key Features:**
 
-- The main column can be positioned on the left or right to fit patterns like
-  notification panels or anchor menus
-- Default configuration: primary column on the left, secondary column on the
-  right
+- The main column can be positioned on the left or right to fit patterns like notification panels or
+  anchor menus
+- Default configuration: primary column on the left, secondary column on the right
 - Padding is applied independently to each column, not the overall layout
 - Columns automatically occupy the full available height
-- Each column functions as an independent StandardLayout, maintaining its
-  vertical flow properties
+- Each column functions as an independent StandardLayout, maintaining its vertical flow properties
 
 <Canvas of={TwoColumnLayoutStories.Default} meta={TwoColumnLayoutStories} />
 <Controls of={TwoColumnLayoutStories.Default} />

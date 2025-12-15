@@ -33,11 +33,7 @@ const BaseExampleComponent = ({
   currentFilters,
   emptyStates,
 }: {
-  dataAdapter: DataCollectionDataAdapter<
-    MockUser,
-    typeof filters,
-    NavigationFiltersDefinition
-  >
+  dataAdapter: DataCollectionDataAdapter<MockUser, typeof filters, NavigationFiltersDefinition>
   currentFilters?: FiltersState<typeof filters>
   emptyStates?: CustomEmptyStates
 }) => {
@@ -149,24 +145,22 @@ export const CustomMessagesAndActions: Story = {
   },
 }
 
-const intervalObservable = new Observable<PromiseState<BaseResponse<MockUser>>>(
-  (observer) => {
-    let count = 0
-    const intervalId = setInterval(() => {
-      observer.next({
-        loading: false,
-        data: { records: mockUsers.slice(0, count) },
-      })
-      count++
-      if (count > 5) {
-        observer.complete()
-      }
-    }, 2000)
+const intervalObservable = new Observable<PromiseState<BaseResponse<MockUser>>>((observer) => {
+  let count = 0
+  const intervalId = setInterval(() => {
+    observer.next({
+      loading: false,
+      data: { records: mockUsers.slice(0, count) },
+    })
+    count++
+    if (count > 5) {
+      observer.complete()
+    }
+  }, 2000)
 
-    // Teardown logic
-    return () => clearInterval(intervalId)
-  }
-)
+  // Teardown logic
+  return () => clearInterval(intervalId)
+})
 
 // Example: subscribe and log emitted values
 intervalObservable.subscribe({

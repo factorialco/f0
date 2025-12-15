@@ -45,11 +45,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
           )}
         >
           {header && (
-            <header
-              className={cn(
-                stickyHeader && "sticky top-0 z-30 bg-f1-background"
-              )}
-            >
+            <header className={cn(stickyHeader && "sticky top-0 z-30 bg-f1-background")}>
               {header}
             </header>
           )}

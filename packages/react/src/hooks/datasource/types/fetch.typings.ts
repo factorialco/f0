@@ -1,7 +1,4 @@
-import {
-  FiltersDefinition,
-  FiltersState,
-} from "@/components/OneFilterPicker/types"
+import { FiltersDefinition, FiltersState } from "@/components/OneFilterPicker/types"
 import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { Observable } from "zen-observable-ts"
@@ -19,15 +16,11 @@ export type BaseFetchOptions<Filters extends FiltersDefinition> = {
 }
 
 // Update PaginatedFetchOptions to handle both pagination types
-export type PaginatedFetchOptions<Filters extends FiltersDefinition> =
-  BaseFetchOptions<Filters> & {
-    pagination: {
-      perPage?: number // Common to both
-    } & (
-      | { currentPage: number; cursor?: never }
-      | { cursor?: string | null; currentPage?: never }
-    )
-  }
+export type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
+  pagination: {
+    perPage?: number // Common to both
+  } & ({ currentPage: number; cursor?: never } | { cursor?: string | null; currentPage?: never })
+}
 
 /**
  * Base response type for collection data
@@ -80,14 +73,13 @@ export type BasePaginatedResponse<R> = BaseResponse<R> & {
  * @property {number} currentPage - The index of the current page being viewed.
  * @property {number} pagesCount - The total number of pages available.
  */
-export type PageBasedPaginatedResponse<TRecord> =
-  BasePaginatedResponse<TRecord> & {
-    type: Extract<PaginationType, "pages">
-    /** Current page number (1-indexed) */
-    currentPage: number
-    /** Total number of pages available */
-    pagesCount: number
-  }
+export type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<TRecord> & {
+  type: Extract<PaginationType, "pages">
+  /** Current page number (1-indexed) */
+  currentPage: number
+  /** Total number of pages available */
+  pagesCount: number
+}
 
 /**
  * Represents a paginated response structure tailored for infinite scroll implementations.
@@ -100,22 +92,21 @@ export type PageBasedPaginatedResponse<TRecord> =
  * @property {string | null} cursor The current position cursor used to fetch the next set of records.
  * @property {boolean} hasMore Indicates whether there are additional records available for loading.
  */
-export type InfiniteScrollPaginatedResponse<TRecord> =
-  BasePaginatedResponse<TRecord> & {
-    type: Extract<PaginationType, "infinite-scroll">
-    /**
-     * Represents the current position cursor for pagination.
-     * This is typically a string (often Base64-encoded) that represents
-     * the position of the last item in the current result set.
-     * Used to fetch the next page of results.
-     */
-    cursor: string | null
-    /**
-     * A boolean flag indicating whether there are more items available for fetching.
-     * Used to determine if additional requests should be made for pagination.
-     */
-    hasMore: boolean
-  }
+export type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResponse<TRecord> & {
+  type: Extract<PaginationType, "infinite-scroll">
+  /**
+   * Represents the current position cursor for pagination.
+   * This is typically a string (often Base64-encoded) that represents
+   * the position of the last item in the current result set.
+   * Used to fetch the next page of results.
+   */
+  cursor: string | null
+  /**
+   * A boolean flag indicating whether there are more items available for fetching.
+   * Used to determine if additional requests should be made for pagination.
+   */
+  hasMore: boolean
+}
 
 /**
  * Response type for paginated collection data
@@ -152,10 +143,7 @@ export type BaseDataAdapter<
    */
   fetchData: (
     options: Options
-  ) =>
-    | FetchReturn
-    | Promise<FetchReturn>
-    | Observable<PromiseState<FetchReturn>>
+  ) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>
 }
 
 /**
@@ -166,8 +154,7 @@ export type BaseDataAdapter<
 export type PaginatedDataAdapter<
   R extends RecordType,
   Filters extends FiltersDefinition,
-  Options extends
-    PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>,
+  Options extends PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>,
   FetchReturn = PaginatedResponse<R>,
 > = {
   /** Indicates this adapter uses page-based pagination */
@@ -181,10 +168,7 @@ export type PaginatedDataAdapter<
    */
   fetchData: (
     options: Options
-  ) =>
-    | FetchReturn
-    | Promise<FetchReturn>
-    | Observable<PromiseState<FetchReturn>>
+  ) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>
 }
 
 /**
@@ -192,17 +176,9 @@ export type PaginatedDataAdapter<
  * @template R - The type of records in the collection
  * @template Filters - The available filter configurations
  */
-export type DataAdapter<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> =
+export type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> =
   | BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>>
-  | PaginatedDataAdapter<
-      R,
-      Filters,
-      PaginatedFetchOptions<Filters>,
-      PaginatedResponse<R>
-    >
+  | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>
 
 /**
  * Represents a collection of selected items.

@@ -40,13 +40,7 @@ export const useDataCollectionStorage = <
 >(
   key: string | undefined,
   featuresDef: DataCollectionStorageFeaturesDefinition,
-  featureProviders: FeatureProviders<
-    R,
-    Grouping,
-    Sortings,
-    Filters,
-    NavigationFilters
-  >,
+  featureProviders: FeatureProviders<R, Grouping, Sortings, Filters, NavigationFilters>,
   disabled?: boolean
 ): UseDataCollectionStorage => {
   const [storageReady, setStorageReady] = useState(false)
@@ -82,25 +76,15 @@ export const useDataCollectionStorage = <
     }
 
     storageProvider.get(key!).then((status) => {
-      Object.entries(featureProviders).forEach(
-        ([featureName, featureProvider]) => {
-          if (
-            storageFeatures.includes(
-              featureName as DataCollectionStorageFeature
-            )
-          ) {
-            const featureValue =
-              status[
-                featureName as keyof DataCollectionStatus<FiltersState<Filters>>
-              ]
-            if (featureValue) {
-              ;(featureProvider.setValue as (value: unknown) => void)(
-                featureValue
-              )
-            }
+      Object.entries(featureProviders).forEach(([featureName, featureProvider]) => {
+        if (storageFeatures.includes(featureName as DataCollectionStorageFeature)) {
+          const featureValue =
+            status[featureName as keyof DataCollectionStatus<FiltersState<Filters>>]
+          if (featureValue) {
+            ;(featureProvider.setValue as (value: unknown) => void)(featureValue)
           }
         }
-      )
+      })
     })
 
     setStorageReady(true)
@@ -110,26 +94,16 @@ export const useDataCollectionStorage = <
   const serializedFeatureValues = useMemo(
     () =>
       JSON.stringify(
-        Object.entries(featureProviders).map(
-          ([providerName, featureProvider]) => [
-            providerName,
-            featureProvider.value,
-          ]
-        )
+        Object.entries(featureProviders).map(([providerName, featureProvider]) => [
+          providerName,
+          featureProvider.value,
+        ])
       ),
     [featureProviders]
   )
 
   const debouncedSetFeatures = useDebounceCallback(
-    (
-      featureProviders: FeatureProviders<
-        R,
-        Grouping,
-        Sortings,
-        Filters,
-        NavigationFilters
-      >
-    ) => {
+    (featureProviders: FeatureProviders<R, Grouping, Sortings, Filters, NavigationFilters>) => {
       if (!active || !storageReady) {
         return
       }
@@ -159,13 +133,7 @@ export const useDataCollectionStorage = <
   useEffect(() => {
     debouncedSetFeatures(featureProviders)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
-  }, [
-    key,
-    storageFeatures,
-    storageProvider,
-    storageReady,
-    serializedFeatureValues,
-  ])
+  }, [key, storageFeatures, storageProvider, storageReady, serializedFeatureValues])
 
   return {
     storageReady,

@@ -16,28 +16,23 @@ import * as ActionDataCollectionStories from "./actions/collection-actions.stori
 
 ## Introduction
 
-The selectable and bulk actions are two features related (but selectable can
-work without bulk actions) that allow the user to select items in the data
-collection and perform actions on them.
+The selectable and bulk actions are two features related (but selectable can work without bulk
+actions) that allow the user to select items in the data collection and perform actions on them.
 
-The selectable is applied in the frontend just defining a function that returns
-the id of the item to be selected in the source. This value is common for all
-visualizations.
+The selectable is applied in the frontend just defining a function that returns the id of the item
+to be selected in the source. This value is common for all visualizations.
 
-The bulk actions are applied in the frontend just defining a function that
-returns the actions to be performed on the selected items.
+The bulk actions are applied in the frontend just defining a function that returns the actions to be
+performed on the selected items.
 
-> Important: The value returned by the selectable function must be unique for
-> each datacollection
+> Important: The value returned by the selectable function must be unique for each datacollection
 
 ## Selectable
 
-In order to use the selectable, you need to define a function that returns the
-id of the item to be selected in the source. This value is common for all
-visualizations.
+In order to use the selectable, you need to define a function that returns the id of the item to be
+selected in the source. This value is common for all visualizations.
 
-> Important: The value returned by the selectable function must be unique for
-> each datacollection
+> Important: The value returned by the selectable function must be unique for each datacollection
 
 ```tsx
 const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
@@ -53,31 +48,27 @@ const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
 />
 ```
 
-You can react to the item selection change using the `OneDataCollection`
-component `onSelectItems` prop.
+You can react to the item selection change using the `OneDataCollection` component `onSelectItems`
+prop.
 
 ### onSelectItems
 
-The `onSelectItems` prop is a function that is called when the user selects or
-de-selects an item.
+The `onSelectItems` prop is a function that is called when the user selects or de-selects an item.
 
 The callback receives the an object with the following properties:
 
 - `allSelected`: A boolean indicating the all items check is checked.
-- `groupsStatus`: If the data is grouped, an object with the status of each
-  group all checked status. e.g. `{ "group1": true, "group2": false }` (Checked
-  true means the user has checked all items in the group or the all group global
-  check)
-- `itemsStatus`: This is an array of `{item: R, checked: boolean}` objects which
-  indicates the items status. NOTE: This doesn't represent all the selected
-  items, it represents the items that where loaded in the data collection and
-  their status.
+- `groupsStatus`: If the data is grouped, an object with the status of each group all checked
+  status. e.g. `{ "group1": true, "group2": false }` (Checked true means the user has checked all
+  items in the group or the all group global check)
+- `itemsStatus`: This is an array of `{item: R, checked: boolean}` objects which indicates the items
+  status. NOTE: This doesn't represent all the selected items, it represents the items that where
+  loaded in the data collection and their status.
 - `filters`: The current filters state
 
 ### defaultSelectedItems
 
-The `defaultSelectedItems` prop is an object that contains the default selected
-items.
+The `defaultSelectedItems` prop is an object that contains the default selected items.
 
 ```tsx
 const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
@@ -118,10 +109,9 @@ const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
 
 You can think why not just return an array of selected items?
 
-The answer is that the data collection is a stateful component that is
-responsible for fetching the data and not all the dataset is loaded from the
-backend. Data collection only loads the data needed to render the view in each
-moment.
+The answer is that the data collection is a stateful component that is responsible for fetching the
+data and not all the dataset is loaded from the backend. Data collection only loads the data needed
+to render the view in each moment.
 
 Imagine this scenario:
 
@@ -134,18 +124,18 @@ Imagine this scenario:
 - You deselect the element 1,5,6 and 10 in the third page
 - You want to delete the selected items
 
-The datacollection only know the first 30 items in the dataset, so it can't
-return an array of selected items.
+The datacollection only know the first 30 items in the dataset, so it can't return an array of
+selected items.
 
-In this case trusting only in the itemsStatus the action will not delete all the
-items the user expect as there is no items loaded from the rest of pages.
+In this case trusting only in the itemsStatus the action will not delete all the items the user
+expect as there is no items loaded from the rest of pages.
 
-This is why the `onSelectItems` callback receives more information to allow you
-to recover the list of selected items in your side (typically in the backend)
+This is why the `onSelectItems` callback receives more information to allow you to recover the list
+of selected items in your side (typically in the backend)
 
-In this example you know the user has checked the `allSelected` that means it
-wants to delete all the items in the dataset, but from the `itemsStatus` you
-know that the user unchecked the items 1,5,6 and 10 you should not remove them.
+In this example you know the user has checked the `allSelected` that means it wants to delete all
+the items in the dataset, but from the `itemsStatus` you know that the user unchecked the items
+1,5,6 and 10 you should not remove them.
 
 This works in the same way for the groups.
 
@@ -156,29 +146,28 @@ This works in the same way for the groups.
 
 ## Bulk actions
 
-Bulk Actions allow users to select multiple items in a table and perform an
-action on all of them simultaneously. This functionality significantly improves
-user efficiency when working with large data sets, eliminating the need to
-perform the same action repeatedly on individual items.
+Bulk Actions allow users to select multiple items in a table and perform an action on all of them
+simultaneously. This functionality significantly improves user efficiency when working with large
+data sets, eliminating the need to perform the same action repeatedly on individual items.
 
 It includes several key elements:
 
-1. **Main checkbox**: Located in the table header, it allows selecting or
-   deselecting all visible items.
-2. **Individual checkboxes**: Positioned in the first column of each row, they
-   allow selecting specific items.
-3. **Floating toolbar**: A dark bar that appears at the bottom of the screen
-   when items are selected. It contains:
+1. **Main checkbox**: Located in the table header, it allows selecting or deselecting all visible
+   items.
+2. **Individual checkboxes**: Positioned in the first column of each row, they allow selecting
+   specific items.
+3. **Floating toolbar**: A dark bar that appears at the bottom of the screen when items are
+   selected. It contains:
    - **Counter**: Displays the number of selected items.
-   - **Available actions**: Buttons or dropdown menu representing the actions
-     that can be performed on the selected items.
+   - **Available actions**: Buttons or dropdown menu representing the actions that can be performed
+     on the selected items.
    - **Cancel button**: Allows deselecting all items and hiding the toolbar.
 
-The bulk actions allows you to define a set of actions that will be available
-when the user has selected items.
+The bulk actions allows you to define a set of actions that will be available when the user has
+selected items.
 
-The data collection will render the actions in the actionbar of the data
-collection and will be disabled if no items are selected.
+The data collection will render the actions in the actionbar of the data collection and will be
+disabled if no items are selected.
 
 ```tsx
 const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
@@ -216,19 +205,19 @@ const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
 />
 ```
 
-You can react to the action selected by the user using the `OneDataCollection`
-component `onBulkAction` prop.
+You can react to the action selected by the user using the `OneDataCollection` component
+`onBulkAction` prop.
 
 ### datasource.bulkActions
 
-Defined the available actions in the data source via a function that get the
-selected items (in the same way as the `onSelectItems` callback). This allows
-you to define the actions based on the selected items.
+Defined the available actions in the data source via a function that get the selected items (in the
+same way as the `onSelectItems` callback). This allows you to define the actions based on the
+selected items.
 
 It returns an object with the following properties:
 
-- `primary`: A mandatory array of primary actions. If more than one action is
-  defined, the data collection will render a dropdown button with the actions.
+- `primary`: A mandatory array of primary actions. If more than one action is defined, the data
+  collection will render a dropdown button with the actions.
 - `secondary`: An optional array of secondary actions.
 
 ```tsx
@@ -244,21 +233,20 @@ It returns an object with the following properties:
 
 - `label: string`: The label to show in the button / dropdown
 - `icon?: IconType`: The icon to show in the button / dropdown
-- `id: string`: The id of the action. This is used to identify the action in the
-  `onBulkAction` callback.
-- `keepSelection?: boolean`: If true, the selection will not be cleared after
-  the action is performed (false by default)
+- `id: string`: The id of the action. This is used to identify the action in the `onBulkAction`
+  callback.
+- `keepSelection?: boolean`: If true, the selection will not be cleared after the action is
+  performed (false by default)
 
 ### onBulkAction
 
-The `onBulkAction` prop is a function that is called when the user selects an
-action.
+The `onBulkAction` prop is a function that is called when the user selects an action.
 
 The callback receives the following parameters:
 
 - `action`: The action selected by the user
-- `selectedItems`: The items selected by the user. Check the `onSelectItems`
-  callback for more information about the structure of the object.
+- `selectedItems`: The items selected by the user. Check the `onSelectItems` callback for more
+  information about the structure of the object.
 
 <Canvas
   of={DataCollectionStories.WithSelectableAndBulkActions}

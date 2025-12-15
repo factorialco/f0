@@ -48,8 +48,7 @@ interface FrameProviderProps {
 export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
   const [forceFloat, setForceFloat] = useState(false)
-  const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
-    useState(false)
+  const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] = useState(false)
 
   const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
@@ -62,9 +61,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
     return storedState !== null ? !!storedState : true
   })
   const [visible, setVisible] = useState(false)
-  const [prevSidebarState, setPrevSidebarState] = useState<SidebarState | null>(
-    null
-  )
+  const [prevSidebarState, setPrevSidebarState] = useState<SidebarState | null>(null)
 
   const toggleSidebar = useCallback(
     (

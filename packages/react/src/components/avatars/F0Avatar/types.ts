@@ -22,13 +22,7 @@ export type AvatarBadge = (
   tooltip?: string
 }
 
-export const avatarVariants = [
-  "person",
-  "team",
-  "company",
-  "file",
-  "flag",
-] as const
+export const avatarVariants = ["person", "team", "company", "file", "flag"] as const
 
 export type AvatarVariants = (typeof avatarVariants)[number]
 

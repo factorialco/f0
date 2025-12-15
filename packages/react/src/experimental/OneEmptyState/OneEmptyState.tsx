@@ -16,13 +16,9 @@ export function OneEmptyState({
       {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
       {variant !== "default" && <F0AvatarAlert type={variant} size="lg" />}
       <div className="flex flex-col items-center justify-center gap-0.5">
-        <p className="text-center text-lg font-medium text-f1-foreground">
-          {title}
-        </p>
+        <p className="text-center text-lg font-medium text-f1-foreground">{title}</p>
         {description && (
-          <p className="max-w-96 text-center text-f1-foreground-secondary">
-            {description}
-          </p>
+          <p className="max-w-96 text-center text-f1-foreground-secondary">{description}</p>
         )}
       </div>
       {actions && (

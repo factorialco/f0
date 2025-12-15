@@ -103,11 +103,7 @@ export function ProductWidget({
                       className="h-full w-full rounded-md"
                     />
                   ) : (
-                    <img
-                      src={mediaUrl}
-                      alt={title}
-                      className="h-full w-full rounded-md"
-                    />
+                    <img src={mediaUrl} alt={title} className="h-full w-full rounded-md" />
                   ))}
               </div>
               <div className="flex flex-col gap-[2px] p-3">
@@ -131,9 +127,7 @@ export function ProductWidget({
                     loadingState={action.loadingState}
                     nextSteps={action.nextSteps}
                     closeLabel={action.closeLabel}
-                    showConfirmation={
-                      showConfirmation && action.showConfirmation
-                    }
+                    showConfirmation={showConfirmation && action.showConfirmation}
                     variant={action.variant}
                   />
                 ) : (

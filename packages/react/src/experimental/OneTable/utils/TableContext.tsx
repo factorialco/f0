@@ -7,9 +7,7 @@ interface TableContextValue {
   setIsScrolledRight: (value: boolean) => void
 }
 
-export const TableContext = createContext<TableContextValue | undefined>(
-  undefined
-)
+export const TableContext = createContext<TableContextValue | undefined>(undefined)
 
 export function useTable() {
   const context = useContext(TableContext)

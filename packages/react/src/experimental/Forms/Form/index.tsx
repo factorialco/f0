@@ -3,10 +3,7 @@ import { F0Button } from "@/components/F0Button"
 import { Form as FormProvider } from "@/ui/form"
 import { FormType, InferSchema, SchemaType } from "../lib/useForm"
 
-export function Form<
-  Schema extends SchemaType,
-  FormData extends InferSchema<Schema>,
->({
+export function Form<Schema extends SchemaType, FormData extends InferSchema<Schema>>({
   onSubmit,
   children,
   ...form
@@ -19,9 +16,7 @@ export function Form<
     <FormProvider {...form}>
       <form onSubmit={onSubmit} className={"flex flex-col gap-4"}>
         {rootError && (
-          <p className="text-sm font-medium text-f1-foreground-critical">
-            {rootError.message}
-          </p>
+          <p className="text-sm font-medium text-f1-foreground-critical">{rootError.message}</p>
         )}
         {children}
       </form>
@@ -29,10 +24,7 @@ export function Form<
   )
 }
 
-export function FormActions<
-  Schema extends SchemaType,
-  FormData extends InferSchema<Schema>,
->({
+export function FormActions<Schema extends SchemaType, FormData extends InferSchema<Schema>>({
   submitLabel,
   form,
 }: {
@@ -41,11 +33,7 @@ export function FormActions<
 }) {
   return (
     <div>
-      <F0Button
-        type="submit"
-        label={submitLabel}
-        loading={form.formState.isSubmitting}
-      />
+      <F0Button type="submit" label={submitLabel} loading={form.formState.isSubmitting} />
     </div>
   )
 }

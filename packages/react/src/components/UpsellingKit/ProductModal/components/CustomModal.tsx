@@ -56,10 +56,7 @@ export function CustomModal({
         </div>
         <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[512px] flex-col">
           {children}
-          <ScrollBar
-            orientation="vertical"
-            className="[&_div]:bg-f1-background"
-          />
+          <ScrollBar orientation="vertical" className="[&_div]:bg-f1-background" />
         </ScrollArea>
       </DialogContent>
     </Dialog>

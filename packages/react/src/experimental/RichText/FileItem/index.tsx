@@ -1,9 +1,6 @@
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import {
-  DropdownInternal,
-  DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal"
+import { DropdownInternal, DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
 import { cn } from "@/lib/utils"

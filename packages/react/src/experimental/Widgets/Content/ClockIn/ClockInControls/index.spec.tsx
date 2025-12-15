@@ -89,9 +89,7 @@ describe("ClockInControls", () => {
         onChangeLocationId={() => {}}
       />
     )
-    expect(
-      screen.getByText(`${defaultLabels.remainingTime} 04:39`)
-    ).toBeInTheDocument()
+    expect(screen.getByText(`${defaultLabels.remainingTime} 04:39`)).toBeInTheDocument()
   })
 
   it("shows overtime text", () => {
@@ -111,9 +109,7 @@ describe("ClockInControls", () => {
         onChangeLocationId={() => {}}
       />
     )
-    expect(
-      screen.getByText(`${defaultLabels.overtime} 00:17`)
-    ).toBeInTheDocument()
+    expect(screen.getByText(`${defaultLabels.overtime} 00:17`)).toBeInTheDocument()
   })
 
   it("calls onClockIn when clock in button is clicked", () => {

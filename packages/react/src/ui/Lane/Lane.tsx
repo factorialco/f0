@@ -60,10 +60,7 @@ export function Lane<Record extends RecordType>({
         className={cn(
           "relative flex h-full min-h-0 flex-1 flex-col px-1 pb-1",
           (showFooterAction || items.length === 0) && "pb-11",
-          !showFooterAction &&
-            items.length === 0 &&
-            dropPlaceholderIndex !== undefined &&
-            "pb-1"
+          !showFooterAction && items.length === 0 && dropPlaceholderIndex !== undefined && "pb-1"
         )}
       >
         {loading ? (
@@ -105,16 +102,10 @@ export function Lane<Record extends RecordType>({
                 ) : (
                   items.map((record, index) => {
                     const key = getKey(record, index)
-                    return (
-                      <React.Fragment key={key}>
-                        {renderCard(record, index)}
-                      </React.Fragment>
-                    )
+                    return <React.Fragment key={key}>{renderCard(record, index)}</React.Fragment>
                   })
                 )}
-                {(loadingMore || hasMore) && (
-                  <LoadingSkeleton ref={loadingIndicatorRef} />
-                )}
+                {(loadingMore || hasMore) && <LoadingSkeleton ref={loadingIndicatorRef} />}
               </div>
             </ScrollArea>
             {loadingMore && (

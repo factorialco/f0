@@ -63,8 +63,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
                 color="default"
                 className={cn(
                   "opacity-0 transition-opacity duration-300",
-                  !copied &&
-                    "group-hover:opacity-100 group-focus-visible:opacity-100"
+                  !copied && "group-hover:opacity-100 group-focus-visible:opacity-100"
                 )}
               />
             </motion.div>
@@ -85,8 +84,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
                 color="positive"
                 className={cn(
                   "text-f1-icon-positive opacity-0 transition-opacity duration-300",
-                  copied &&
-                    "group-hover:opacity-100 group-focus-visible:opacity-100"
+                  copied && "group-hover:opacity-100 group-focus-visible:opacity-100"
                 )}
               />
             </motion.div>

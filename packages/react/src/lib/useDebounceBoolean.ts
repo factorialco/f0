@@ -5,10 +5,7 @@ type Params<T extends boolean> = {
   delay: number
 }
 
-export const useDebounceBoolean = <T extends boolean>({
-  value,
-  delay,
-}: Params<T>) => {
+export const useDebounceBoolean = <T extends boolean>({ value, delay }: Params<T>) => {
   const [debouncedValue, setDebouncedValue] = useState(false)
 
   useEffect(() => {

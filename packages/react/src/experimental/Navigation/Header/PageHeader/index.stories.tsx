@@ -194,8 +194,7 @@ export const WithProductUpdate: Story = {
       updatesPageUrl: "https://factorialmakers.atlassian.net/browse/FCT-24580",
       emptyScreen: {
         title: "There aren’t updates for Projects yet",
-        description:
-          "Check out our product updates page to see past launches and what’s coming.",
+        description: "Check out our product updates page to see past launches and what’s coming.",
         buttonText: "Go to Updates",
       },
       errorScreen: {

@@ -100,12 +100,7 @@ export const Default: Story = {
           )}
         </FormField>
 
-        <FormField
-          label="Email"
-          description="Write your email"
-          control={form.control}
-          name="email"
-        >
+        <FormField label="Email" description="Write your email" control={form.control} name="email">
           {(field) => (
             <Input
               label="Email"
@@ -163,12 +158,7 @@ export const Default: Story = {
           )}
         </FormField>
 
-        <FormField
-          label="Tag"
-          description="Select a tag"
-          control={form.control}
-          name="tag"
-        >
+        <FormField label="Tag" description="Select a tag" control={form.control} name="tag">
           {(field) => (
             <F0Select
               label="Tag"
@@ -190,11 +180,7 @@ export const Default: Story = {
           name="acceptedTerms"
         >
           {(field) => (
-            <F0Checkbox
-              {...field}
-              onCheckedChange={field.onChange}
-              value={String(field.value)}
-            />
+            <F0Checkbox {...field} onCheckedChange={field.onChange} value={String(field.value)} />
           )}
         </FormField>
 
@@ -231,13 +217,7 @@ export const AsyncFieldValidation: Story = {
           control={form.control}
           name="username"
         >
-          {(field) => (
-            <Input
-              label="Username"
-              placeholder="Try 'taken' as a username"
-              {...field}
-            />
-          )}
+          {(field) => <Input label="Username" placeholder="Try 'taken' as a username" {...field} />}
         </FormField>
 
         <FormActions form={form} submitLabel="Create" />
@@ -268,13 +248,7 @@ export const AsyncSubmit: Story = {
           control={form.control}
           name="comment"
         >
-          {(field) => (
-            <Textarea
-              label="Comment"
-              placeholder="Add your comment"
-              {...field}
-            />
-          )}
+          {(field) => <Textarea label="Comment" placeholder="Add your comment" {...field} />}
         </FormField>
 
         <FormActions form={form} submitLabel="Create" />
@@ -291,9 +265,7 @@ export const MultipleTypeSchema: Story = {
       z.object({ type: z.literal("fish"), swimming: z.boolean() })
     )
 
-    const dogSchema = animalSchema.merge(
-      z.object({ type: z.literal("dog"), running: z.boolean() })
-    )
+    const dogSchema = animalSchema.merge(z.object({ type: z.literal("dog"), running: z.boolean() }))
 
     const fishForm = useFormSchema(
       fishSchema,
@@ -466,28 +438,20 @@ export const NestedSchemas: Story = {
     type SubFormType = UseFormReturn<z.infer<typeof itemSchema>>
 
     // FORM definitions
-    const form = useFormSchema(
-      schema,
-      { defaultValues: { items: [], total: 0 } },
-      async (data) => {
-        alert(`Form has been submitted: ${JSON.stringify(data)}`)
+    const form = useFormSchema(schema, { defaultValues: { items: [], total: 0 } }, async (data) => {
+      alert(`Form has been submitted: ${JSON.stringify(data)}`)
 
-        return { success: true }
-      }
-    )
+      return { success: true }
+    })
 
     interface SubFormProps {
       form: FormType
     }
 
     const SubForm = ({ form }: SubFormProps) => {
-      const subForm = useFormSchema(
-        itemSchema,
-        { defaultValues: {} },
-        async (_data) => {
-          return { success: true }
-        }
-      )
+      const subForm = useFormSchema(itemSchema, { defaultValues: {} }, async (_data) => {
+        return { success: true }
+      })
 
       subForm.watch("quantity")
       subForm.watch("price")
@@ -513,9 +477,7 @@ export const NestedSchemas: Story = {
 
           if (!valid) {
             if (subForm.getFieldState("quantity").error) {
-              alert(
-                "Quantity " + subForm.getFieldState("quantity").error?.message
-              )
+              alert("Quantity " + subForm.getFieldState("quantity").error?.message)
             }
 
             if (subForm.getFieldState("price").error) {
@@ -523,9 +485,7 @@ export const NestedSchemas: Story = {
             }
 
             if (subForm.getFieldState("comment").error) {
-              alert(
-                "Comment " + subForm.getFieldState("comment").error?.message
-              )
+              alert("Comment " + subForm.getFieldState("comment").error?.message)
             }
           } else {
             addItem(quantity, price, comment)
@@ -536,12 +496,7 @@ export const NestedSchemas: Story = {
       return (
         <div>
           <AutoGrid gap="4">
-            <FormField
-              label=""
-              description="Quantity"
-              control={subForm.control}
-              name="quantity"
-            >
+            <FormField label="" description="Quantity" control={subForm.control} name="quantity">
               {(field) => (
                 <NumberInput
                   label="Quantity"
@@ -556,12 +511,7 @@ export const NestedSchemas: Story = {
               )}
             </FormField>
 
-            <FormField
-              label=""
-              description="Price"
-              control={subForm.control}
-              name="price"
-            >
+            <FormField label="" description="Price" control={subForm.control} name="price">
               {(field) => (
                 <NumberInput
                   {...field}
@@ -581,13 +531,7 @@ export const NestedSchemas: Story = {
               control={subForm.control}
               name="comment"
             >
-              {(field) => (
-                <Input
-                  label="Comment"
-                  placeholder="Add your comment"
-                  {...field}
-                />
-              )}
+              {(field) => <Input label="Comment" placeholder="Add your comment" {...field} />}
             </FormField>
 
             <div className="mt-3">
@@ -610,19 +554,15 @@ export const NestedSchemas: Story = {
       <Form {...form}>
         <SubForm form={form} />
 
-        {form
-          .getValues()
-          .items.map((item: z.infer<typeof itemSchema>, index: number) => {
-            return (
-              <div key={index}>
-                {item.quantity} x {item.price} Comment: {item.comment}
-              </div>
-            )
-          })}
+        {form.getValues().items.map((item: z.infer<typeof itemSchema>, index: number) => {
+          return (
+            <div key={index}>
+              {item.quantity} x {item.price} Comment: {item.comment}
+            </div>
+          )
+        })}
 
-        {form.formState.errors.items && (
-          <div>{form.formState.errors.items.message}</div>
-        )}
+        {form.formState.errors.items && <div>{form.formState.errors.items.message}</div>}
         <div className="mt-3">
           <FormActions form={form} submitLabel="Submit" />
         </div>

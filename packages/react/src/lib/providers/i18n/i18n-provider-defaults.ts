@@ -349,9 +349,6 @@ type Join<T extends string[], D extends string> = T extends []
         : never
       : string
 
-export type TranslationKey = Join<
-  PathsToStringProps<typeof defaultTranslations>,
-  "."
->
+export type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">
 
 export type TranslationsType = TranslationShape<typeof defaultTranslations>

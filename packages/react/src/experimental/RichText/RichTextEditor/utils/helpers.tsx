@@ -10,14 +10,10 @@ const checkContainerHeight = (
   return containerRef.current.clientHeight >= heightThreshold
 }
 
-const isScrolledToBottom = (
-  containerRef: RefObject<HTMLDivElement>
-): boolean => {
+const isScrolledToBottom = (containerRef: RefObject<HTMLDivElement>): boolean => {
   if (!containerRef.current) return true
   const container = containerRef.current
-  return (
-    container.scrollHeight - container.scrollTop - container.clientHeight < 1
-  )
+  return container.scrollHeight - container.scrollTop - container.clientHeight < 1
 }
 
 const getHeightThreshold = (height: heightType): number => {
@@ -103,11 +99,7 @@ interface HandleEditorUpdateProps {
   setEditorState: (state: { html: string; json: JSONContent | null }) => void
 }
 
-const handleEditorUpdate = ({
-  editor,
-  onChange,
-  setEditorState,
-}: HandleEditorUpdateProps) => {
+const handleEditorUpdate = ({ editor, onChange, setEditorState }: HandleEditorUpdateProps) => {
   setEditorState({
     html: editor.getHTML(),
     json: null,

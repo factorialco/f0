@@ -66,11 +66,7 @@ function useOverflowCalculation<T>(items: T[], gap: number) {
         if (newSize > availableSize + 30) break
 
         accumulatedSize = newSize
-        accumulatedSize = addGapBetweenItems(
-          accumulatedSize,
-          i,
-          itemSizes.length
-        )
+        accumulatedSize = addGapBetweenItems(accumulatedSize, i, itemSizes.length)
         visibleCount++
       }
 
@@ -87,10 +83,7 @@ function useOverflowCalculation<T>(items: T[], gap: number) {
     const currentContainerSize = containerRef.current.clientHeight
     const itemSizes = measureItemSizes()
 
-    const visibleCount = calculateVisibleItemCount(
-      itemSizes,
-      currentContainerSize
-    )
+    const visibleCount = calculateVisibleItemCount(itemSizes, currentContainerSize)
 
     // If no items can fit, put all items in the overflow
     if (visibleCount === 0) {
@@ -169,8 +162,7 @@ const VerticalOverflowList = function VerticalOverflowList<T>({
   minSize,
   onVisibleItemsChange,
 }: OverflowListProps<T>) {
-  const { containerRef, measurementContainerRef, visibleItems } =
-    useOverflowCalculation(items, gap)
+  const { containerRef, measurementContainerRef, visibleItems } = useOverflowCalculation(items, gap)
 
   useEffect(() => {
     onVisibleItemsChange?.(visibleItems)

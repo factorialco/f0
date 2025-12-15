@@ -1,10 +1,6 @@
 import { userEvent, zeroRender } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
-import type {
-  FiltersDefinition,
-  FiltersState,
-  PresetsDefinition,
-} from "../types"
+import type { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 import { FiltersPresets } from "./FiltersPresets"
 
 const mockPresets: PresetsDefinition<FiltersDefinition> = [

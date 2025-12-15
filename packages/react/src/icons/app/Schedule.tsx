@@ -1,29 +1,14 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgSchedule = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgSchedule = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       stroke="currentColor"
       strokeLinecap="round"
       d="M10.5 18H7C5.34315 18 4 16.6569 4 15V9C4 7.34315 5.34315 6 7 6H17C18.6569 6 20 7.34315 20 9V9"
       vectorEffect="non-scaling-stroke"
     />
-    <circle
-      cx={17.5}
-      cy={15.5}
-      r={4.5}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={17.5} cy={15.5} r={4.5} stroke="currentColor" vectorEffect="non-scaling-stroke" />
     <path
       stroke="currentColor"
       strokeLinecap="round"

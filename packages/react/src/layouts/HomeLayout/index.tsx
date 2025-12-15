@@ -1,11 +1,5 @@
 import { Carousel } from "@/experimental/Navigation/Carousel"
-import {
-  Children,
-  forwardRef,
-  ReactNode,
-  useImperativeHandle,
-  useRef,
-} from "react"
+import { Children, forwardRef, ReactNode, useImperativeHandle, useRef } from "react"
 import { LayoutProvider } from "../LayoutProvider"
 
 type Props = {
@@ -49,15 +43,11 @@ export const HomeLayout = forwardRef<HTMLDivElement, Props>(function HomeLayout(
 
         {/* Larger screen content */}
         <div className="hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid">
-          <div className="col-span-3 flex flex-row gap-5 *:flex-1">
-            {arrayWidgets.slice(0, 3)}
-          </div>
+          <div className="col-span-3 flex flex-row gap-5 *:flex-1">{arrayWidgets.slice(0, 3)}</div>
 
           <main className="col-span-2">{children}</main>
 
-          <div className="flex flex-1 flex-col gap-5">
-            {arrayWidgets.slice(3)}
-          </div>
+          <div className="flex flex-1 flex-col gap-5">{arrayWidgets.slice(3)}</div>
         </div>
       </div>
     </LayoutProvider>

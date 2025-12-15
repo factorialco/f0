@@ -21,14 +21,9 @@ export type AxisConfig = {
   width?: number
 }
 
-export type ChartConfig = Record<
-  string,
-  OriginalChartConfig[keyof OriginalChartConfig]
->
+export type ChartConfig = Record<string, OriginalChartConfig[keyof OriginalChartConfig]>
 
-export type ChartPropsBase<
-  K extends OriginalChartConfig = OriginalChartConfig,
-> = {
+export type ChartPropsBase<K extends OriginalChartConfig = OriginalChartConfig> = {
   dataConfig: K
   data: ChartItem<K>[]
   xAxis?: AxisConfig

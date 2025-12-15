@@ -15,10 +15,7 @@ export interface TextValue extends WithPlaceholder {
 
 export type TextCellValue = string | number | undefined | TextValue
 
-export const TextCell = (
-  args: TextCellValue,
-  meta: ValueDisplayRendererContext
-) => {
+export const TextCell = (args: TextCellValue, meta: ValueDisplayRendererContext) => {
   const value = resolveValue<string | number>(args, "text")
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "text")
 

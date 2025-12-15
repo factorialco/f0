@@ -126,10 +126,7 @@ export function KanbanCard<T = unknown>({
         <F0Link
           ref={linkRef}
           href={props.link}
-          className={cn(
-            "!z-1 pointer-events-none absolute inset-0 block rounded-xl",
-            focusRing()
-          )}
+          className={cn("!z-1 pointer-events-none absolute inset-0 block rounded-xl", focusRing())}
           aria-label={props.title}
         >
           &nbsp;
@@ -141,13 +138,7 @@ export function KanbanCard<T = unknown>({
             const activeEdge = (forcedEdge ?? overEdge) as "top" | "bottom"
             const isEdgeDisabled = disabledEdges.includes(activeEdge)
             if (isEdgeDisabled) return null
-            return (
-              <DropIndicator
-                edge={activeEdge}
-                type="terminal-no-bleed"
-                gap="4px"
-              />
-            )
+            return <DropIndicator edge={activeEdge} type="terminal-no-bleed" gap="4px" />
           })()}
         </>
       )}

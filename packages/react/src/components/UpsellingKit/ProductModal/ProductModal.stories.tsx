@@ -18,9 +18,7 @@ const meta = {
   decorators: [
     (Story) => (
       <ApplicationFrame
-        {...(ApplicationFrameStoryMeta.args as ComponentProps<
-          typeof ApplicationFrame
-        >)}
+        {...(ApplicationFrameStoryMeta.args as ComponentProps<typeof ApplicationFrame>)}
       >
         <div className="flex-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background">
           <Story />
@@ -124,8 +122,7 @@ export const Default: Story = {
     },
     successMessage: {
       title: "Request submitted!",
-      description:
-        "One of our experts will contact you as soon as possible with all the details.",
+      description: "One of our experts will contact you as soon as possible with all the details.",
       buttonLabel: "Discover more products",
       buttonOnClick: () => {
         console.log("buttonOnClick")

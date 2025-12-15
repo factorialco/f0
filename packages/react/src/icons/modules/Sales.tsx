@@ -1,13 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgSales = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       fill="currentColor"
       d="M5.17157 14.0858L5.34315 14.2574L10.3431 9.25736L12.0931 11.0074C12.7835 11.6977 13.9028 11.6977 14.5931 11.0074C15.2835 10.317 15.2835 9.19771 14.5931 8.50736L11.9645 5.87868C10.7929 4.70711 8.8934 4.70711 7.72182 5.87868L5.17157 8.42893C3.60948 9.99103 3.60948 12.5237 5.17157 14.0858Z"

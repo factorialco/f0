@@ -7,8 +7,7 @@ const inputFieldArgs = {
     control: "text",
   },
   hideLabel: {
-    description:
-      "Whether to hide the label visually while keeping it accessible",
+    description: "Whether to hide the label visually while keeping it accessible",
     control: "boolean",
   },
   labelIcon: {
@@ -35,8 +34,7 @@ const inputFieldArgs = {
     options: ["sm", "md"],
   },
   error: {
-    description:
-      "Error message(s) to display. Can be a string, array of strings, or boolean",
+    description: "Error message(s) to display. Can be a string, array of strings, or boolean",
     control: "text",
   },
   disabled: {
@@ -109,9 +107,7 @@ const inputFieldArgs = {
   },
 }
 
-export const getInputFieldArgs = (
-  keys?: ReadonlyArray<keyof typeof inputFieldArgs | string>
-) => {
+export const getInputFieldArgs = (keys?: ReadonlyArray<keyof typeof inputFieldArgs | string>) => {
   if (!keys) {
     return inputFieldArgs
   }

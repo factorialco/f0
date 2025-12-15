@@ -1,8 +1,5 @@
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import {
-  DropdownItem,
-  DropdownItemSeparator,
-} from "@/experimental/Navigation/Dropdown/internal"
+import { DropdownItem, DropdownItemSeparator } from "@/experimental/Navigation/Dropdown/internal"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   ActionDefinition,
@@ -11,11 +8,7 @@ import {
 } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { GroupingDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { useState } from "react"
 import { actionsToDropdownItems } from "../../visualizations/collection/utils"
 
@@ -70,8 +63,7 @@ export const useItemActions = <
   Grouping
 >): UseItemActions => {
   const [dropDownOpen, setDropDownOpen] = useState(false)
-  const [dropDownOpenTimeout, setDropDownOpenTimeout] =
-    useState<NodeJS.Timeout | null>(null)
+  const [dropDownOpenTimeout, setDropDownOpenTimeout] = useState<NodeJS.Timeout | null>(null)
 
   if (!source.itemActions) {
     return {
@@ -97,8 +89,7 @@ export const useItemActions = <
   // the rest of the actions go to the dropdown
   const dropdownItemActions = actionsToDropdownItems(
     itemActions.filter(
-      (action) =>
-        action.type === "separator" || !primaryItemActions.includes(action)
+      (action) => action.type === "separator" || !primaryItemActions.includes(action)
     )
   )
 
@@ -106,8 +97,7 @@ export const useItemActions = <
   const mobileDropdownItemActions = actionsToDropdownItems([
     ...primaryItemActions,
     ...itemActions.filter(
-      (action) =>
-        action.type === "separator" || !primaryItemActions.includes(action)
+      (action) => action.type === "separator" || !primaryItemActions.includes(action)
     ),
   ])
 

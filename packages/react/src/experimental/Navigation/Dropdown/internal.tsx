@@ -51,20 +51,14 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     ...props
   } = item
 
-  const itemClass = cn(
-    "flex items-start gap-1.5 w-full",
-    critical && "text-f1-foreground-critical"
-  )
+  const itemClass = cn("flex items-start gap-1.5 w-full", critical && "text-f1-foreground-critical")
 
   return (
     <DropdownMenuItem asChild className={itemClass}>
       {href ? (
         <Link
           href={href}
-          className={cn(
-            itemClass,
-            "text-f1-foreground no-underline hover:cursor-pointer"
-          )}
+          className={cn(itemClass, "text-f1-foreground no-underline hover:cursor-pointer")}
           {...props}
         >
           <DropdownItemContent item={item} />
@@ -91,8 +85,7 @@ export function DropdownInternal({
   const i18n = useI18n()
   const [internalOpen, setInternalOpen] = useState(false)
 
-  const isControlled =
-    controlledOpen !== undefined && controlledOnOpenChange !== undefined
+  const isControlled = controlledOpen !== undefined && controlledOnOpenChange !== undefined
   const open = isControlled ? controlledOpen : internalOpen
   const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen
 

@@ -5,10 +5,7 @@ import { useEffect, useState } from "react"
 import { fn } from "storybook/test"
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import * as OneFilterPicker from "../index"
-import {
-  OneFilterPicker as OneFilterPickerComponent,
-  OneFilterPickerRootProps,
-} from "../index"
+import { OneFilterPicker as OneFilterPickerComponent, OneFilterPickerRootProps } from "../index"
 import type { FiltersDefinition, FiltersState } from "../types"
 import {
   deserializeFilters,
@@ -31,9 +28,9 @@ const meta = {
   },
   decorators: [
     (Story, { args }) => {
-      const [filters, setFilters] = useState<
-        FiltersState<typeof filterDefinition>
-      >(args?.value as FiltersState<typeof filterDefinition>)
+      const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
+        args?.value as FiltersState<typeof filterDefinition>
+      )
 
       return (
         <>
@@ -42,9 +39,7 @@ const meta = {
           </div>
           <p>
             Filters:
-            <pre className="font-mono text-sm">
-              {JSON.stringify(filters, null, 2)}
-            </pre>
+            <pre className="font-mono text-sm">{JSON.stringify(filters, null, 2)}</pre>
           </p>
         </>
       )
@@ -55,12 +50,10 @@ const meta = {
 export default meta
 
 const FiltersWithState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      name: "John",
-      department: ["engineering"],
-    }
-  )
+  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>({
+    name: "John",
+    department: ["engineering"],
+  })
 
   return (
     <OneFilterPickerComponent
@@ -77,13 +70,11 @@ export const Interactive: StoryObj = {
 
 // Example of pre-populated filters
 const FiltersWithInitialState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      department: ["engineering", "marketing"],
-      name: "John",
-      manager: ["alice"],
-    }
-  )
+  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>({
+    department: ["engineering", "marketing"],
+    name: "John",
+    manager: ["alice"],
+  })
 
   return (
     <OneFilterPickerComponent
@@ -104,9 +95,7 @@ const FiltersWithPresets = ({
 }: {
   presets?: OneFilterPicker.PresetsDefinition<typeof filterDefinition>
 }) => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {}
-  )
+  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>({})
 
   return (
     <OneFilterPickerComponent
@@ -131,12 +120,10 @@ export const WithPreselectedFiltersAndItemCount: StoryObj = {
 
 // Example with presets and initial filters
 const FiltersWithPresetsAndInitialState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      department: ["engineering"],
-      role: ["engineer"],
-    }
-  )
+  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>({
+    department: ["engineering"],
+    role: ["engineer"],
+  })
 
   return (
     <OneFilterPickerComponent
@@ -200,9 +187,7 @@ export const WithUrlSerialization: Story = {
       return getFiltersFromUrl() || {}
     })
 
-    const [serializedValue, setSerializedValue] = useState(() =>
-      serializeFilters(filters)
-    )
+    const [serializedValue, setSerializedValue] = useState(() => serializeFilters(filters))
 
     // Update URL and serialized value whenever filters change
     useEffect(() => {
@@ -233,8 +218,8 @@ export const WithUrlSerialization: Story = {
             className="font-mono text-sm"
           />
           <p className="text-muted-foreground text-sm">
-            This field shows the serialized filter state that would normally be
-            in the URL. You can modify it to see how the filters update.
+            This field shows the serialized filter state that would normally be in the URL. You can
+            modify it to see how the filters update.
           </p>
         </div>
         <OneFilterPickerComponent
@@ -262,9 +247,7 @@ export const WithPresetsAndUrlSerialization: Story = {
       return getFiltersFromUrl() || {}
     })
 
-    const [serializedValue, setSerializedValue] = useState(() =>
-      serializeFilters(filters)
-    )
+    const [serializedValue, setSerializedValue] = useState(() => serializeFilters(filters))
 
     // Update URL and serialized value whenever filters change
     useEffect(() => {
@@ -295,8 +278,8 @@ export const WithPresetsAndUrlSerialization: Story = {
             className="font-mono text-sm"
           />
           <p className="text-muted-foreground text-sm">
-            This field shows the serialized filter state that would normally be
-            in the URL. You can modify it to see how the filters update.
+            This field shows the serialized filter state that would normally be in the URL. You can
+            modify it to see how the filters update.
           </p>
         </div>
         <OneFilterPickerComponent
@@ -343,9 +326,7 @@ export const WithAsyncOptions: Story = {
       }
     }
 
-    const [filters, setFilters] = useState<FiltersState<AsyncDefinitionType>>(
-      {}
-    )
+    const [filters, setFilters] = useState<FiltersState<AsyncDefinitionType>>({})
 
     const asyncDefinition: AsyncDefinitionType = {
       department: {
@@ -439,9 +420,7 @@ const LargeAsyncOptionsComponent = (props: { cache: boolean }) => {
     }
   }
 
-  const [filters, setFilters] = useState<
-    FiltersState<LargeAsyncDefinitionType>
-  >({})
+  const [filters, setFilters] = useState<FiltersState<LargeAsyncDefinitionType>>({})
 
   const largeAsyncDefinition: LargeAsyncDefinitionType = {
     countries: {
@@ -468,13 +447,13 @@ const LargeAsyncOptionsComponent = (props: { cache: boolean }) => {
   return (
     <div className="w-[600px]">
       <p className="mb-4 text-sm text-f1-foreground-secondary">
-        This example loads a large list of countries asynchronously. Open the
-        Countries filter and use the search field to filter the options.
+        This example loads a large list of countries asynchronously. Open the Countries filter and
+        use the search field to filter the options.
       </p>
       {props.cache && (
         <p>
-          The options are cached so that the same options are not loaded again
-          when the filter is opened.
+          The options are cached so that the same options are not loaded again when the filter is
+          opened.
         </p>
       )}
       <OneFilterPickerComponent
@@ -495,9 +474,7 @@ export const WithLargeAsyncOptionsWithCache: Story = {
 
 // Example with source-based pagination
 const SourceBasedPaginationComponent = () => {
-  const [filters, setFilters] = useState<
-    FiltersState<typeof sourceBasedDefinition>
-  >({})
+  const [filters, setFilters] = useState<FiltersState<typeof sourceBasedDefinition>>({})
 
   return (
     <div className="w-96">

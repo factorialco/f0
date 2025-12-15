@@ -6,9 +6,7 @@ export interface PromiseState<T> {
   data?: T | null
 }
 
-export function promiseToObservable<T>(
-  promise: Promise<T>
-): Observable<PromiseState<T>> {
+export function promiseToObservable<T>(promise: Promise<T>): Observable<PromiseState<T>> {
   return new Observable((observer) => {
     // Initial loading state
     observer.next({

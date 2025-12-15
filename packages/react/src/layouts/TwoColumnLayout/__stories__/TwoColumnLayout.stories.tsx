@@ -13,11 +13,7 @@ const FocusableElement = () => {
     <div className="p-4">
       <label htmlFor="focusable-element">Focusable Element</label>
       <div>
-        <input
-          type="text"
-          className="border-0 bg-[#fff] px-2"
-          id="focusable-element"
-        />
+        <input type="text" className="border-0 bg-[#fff] px-2" id="focusable-element" />
       </div>
     </div>
   )
@@ -32,9 +28,7 @@ const meta = {
       <div className="flex h-64 flex-col items-center justify-center bg-f1-foreground-info text-f1-foreground-inverse">
         Main
         <FocusableElement />
-        <p>
-          Should the the first focusable element even if main is on right side
-        </p>
+        <p>Should the the first focusable element even if main is on right side</p>
       </div>
     ),
     sideContent: (
@@ -74,9 +68,7 @@ export const Profile: Story = {
     children: <Dashboard {...DashboardStories.default.args} />,
     sideContent: (
       <DetailsItemsList
-        {...(DetailsItemsListStories.default.args as ComponentProps<
-          typeof DetailsItemsList
-        >)}
+        {...(DetailsItemsListStories.default.args as ComponentProps<typeof DetailsItemsList>)}
       />
     ),
   },

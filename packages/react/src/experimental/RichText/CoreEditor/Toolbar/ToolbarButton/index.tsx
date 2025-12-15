@@ -59,12 +59,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         prepend={<F0Icon icon={icon} />}
       >
         {showLabel && (
-          <span
-            className={cn(
-              "text-sm",
-              active && "text-f1-background-selected-bold"
-            )}
-          >
+          <span className={cn("text-sm", active && "text-f1-background-selected-bold")}>
             {label}
           </span>
         )}

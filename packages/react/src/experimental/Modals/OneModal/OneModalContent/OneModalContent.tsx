@@ -24,11 +24,7 @@ export const OneModalContent = ({
     <>
       {tabs && (
         <div className="-mx-2">
-          <Tabs
-            tabs={tabs}
-            activeTabId={activeTabId}
-            setActiveTabId={setActiveTabId}
-          />
+          <Tabs tabs={tabs} activeTabId={activeTabId} setActiveTabId={setActiveTabId} />
         </div>
       )}
       <ScrollArea
@@ -40,10 +36,7 @@ export const OneModalContent = ({
         )}
       >
         {children}
-        <ScrollBar
-          orientation="vertical"
-          className="[&_div]:bg-f1-background"
-        />
+        <ScrollBar orientation="vertical" className="[&_div]:bg-f1-background" />
       </ScrollArea>
     </>
   )

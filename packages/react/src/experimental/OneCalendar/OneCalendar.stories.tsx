@@ -80,11 +80,7 @@ export const MonthSingle: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -115,11 +111,7 @@ export const MonthRange: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -148,11 +140,7 @@ export const YearSingle: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -183,11 +171,7 @@ export const YearRange: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -222,11 +206,7 @@ export const DaySingle: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange?.from}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange?.from} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -241,11 +221,7 @@ export const DayRange: Story = {
   render: (args) => {
     const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
       const start = mockDate
-      const end = new Date(
-        start.getFullYear(),
-        start.getMonth(),
-        start.getDate() + 5
-      )
+      const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 5)
       return {
         from: start,
         to: end,
@@ -260,11 +236,7 @@ export const DayRange: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -304,11 +276,7 @@ export const Week: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -350,11 +318,7 @@ export const QuarterSingle: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedDate}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedDate} onSelect={handleSelect} />
         {displayRange && <SelectedDateDisplay range={displayRange} />}
       </div>
     )
@@ -393,11 +357,7 @@ export const QuarterRange: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -439,11 +399,7 @@ export const HalfYearSingle: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedDate}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedDate} onSelect={handleSelect} />
         {displayRange && <SelectedDateDisplay range={displayRange} />}
       </div>
     )
@@ -481,11 +437,7 @@ export const HalfYearRange: Story = {
 
     return (
       <div className="mx-auto max-w-80">
-        <OneCalendar
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendar {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -610,11 +562,7 @@ export const CompactMonthSingle: OneCalendarInternalStory = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendarInternal
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendarInternal {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -646,11 +594,7 @@ export const CompactMonthRange: OneCalendarInternalStory = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendarInternal
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendarInternal {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -691,11 +635,7 @@ export const CompactWeek: OneCalendarInternalStory = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendarInternal
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendarInternal {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )
@@ -711,11 +651,7 @@ export const CompactDayRange: OneCalendarInternalStory = {
   render: (args) => {
     const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
       const start = mockDate
-      const end = new Date(
-        start.getFullYear(),
-        start.getMonth(),
-        start.getDate() + 5
-      )
+      const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 5)
       return {
         from: start,
         to: end,
@@ -730,11 +666,7 @@ export const CompactDayRange: OneCalendarInternalStory = {
 
     return (
       <div className="mx-auto max-w-64">
-        <OneCalendarInternal
-          {...args}
-          defaultSelected={selectedRange}
-          onSelect={handleSelect}
-        />
+        <OneCalendarInternal {...args} defaultSelected={selectedRange} onSelect={handleSelect} />
         {selectedRange && <SelectedDateDisplay range={selectedRange} />}
       </div>
     )

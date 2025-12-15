@@ -65,9 +65,7 @@ const hiresBySeniorityDataConfig = {
   },
 }
 
-export const MultipleBars: Meta<
-  typeof VerticalBarChart<typeof hiresBySeniorityDataConfig>
-> = {
+export const MultipleBars: Meta<typeof VerticalBarChart<typeof hiresBySeniorityDataConfig>> = {
   args: {
     dataConfig: hiresBySeniorityDataConfig,
     data: [

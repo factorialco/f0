@@ -47,9 +47,7 @@ const isDetailed = <R extends RecordType>(
   return typeof data === "object" && "type" in data && data.type === "detailed"
 }
 
-const getChildren = <R extends RecordType>(
-  fetchedData?: ChildrenResponse<R>
-): R[] => {
+const getChildren = <R extends RecordType>(fetchedData?: ChildrenResponse<R>): R[] => {
   if (!fetchedData) return []
 
   return Array.isArray(fetchedData) ? fetchedData : fetchedData.records
@@ -84,14 +82,11 @@ export const useLoadChildren = <
   NavigationFilters,
   Grouping
 >) => {
-  const { fetchedData: nestedFetchedData, updateFetchedData } =
-    useNestedDataContext<R>()
-  const [children, setChildren] = useState<R[]>(
-    getChildren(nestedFetchedData?.[rowId])
+  const { fetchedData: nestedFetchedData, updateFetchedData } = useNestedDataContext<R>()
+  const [children, setChildren] = useState<R[]>(getChildren(nestedFetchedData?.[rowId]))
+  const [paginationInfo, setPaginationInfo] = useState<ChildrenPaginationInfo | undefined>(
+    nestedFetchedData?.[rowId]?.paginationInfo
   )
-  const [paginationInfo, setPaginationInfo] = useState<
-    ChildrenPaginationInfo | undefined
-  >(nestedFetchedData?.[rowId]?.paginationInfo)
   const [isLoading, setIsLoading] = useState(false)
   const [childrenType, setChildrenType] = useState<NestedVariant>(
     getChildrenType(nestedFetchedData?.[rowId])

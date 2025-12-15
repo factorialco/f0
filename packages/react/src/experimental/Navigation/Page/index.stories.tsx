@@ -43,10 +43,7 @@ export const Default: Story = {
   args: {
     header: (
       <>
-        <PageHeader
-          module={defaultModule}
-          actions={HeaderStories.WithActions.args?.actions}
-        />
+        <PageHeader module={defaultModule} actions={HeaderStories.WithActions.args?.actions} />
         <Tabs {...(TabsStories.Primary.args as TabsProps)} />
       </>
     ),

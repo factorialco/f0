@@ -28,20 +28,12 @@ const widgets = [
     {...(AreaChartWidgetStoriesMeta.args as ComposeChartContainerProps<AreaChartProps>)}
   />,
   <Widget key="never-gonna" header={{ title: "A form widget" }}>
-    <WidgetInboxList
-      {...(WidgetInboxListDefaultStory.args as WidgetInboxListProps)}
-    />
+    <WidgetInboxList {...(WidgetInboxListDefaultStory.args as WidgetInboxListProps)} />
   </Widget>,
   <LineChartWidget key="line-chart" {...LineChartWidgetStoriesMeta.args} />,
   <BarChartWidget key="bar-chart" {...BarChartWidgetStoriesMeta.args} />,
-  <VerticalBarChartWidget
-    key="vertical-bar-chart"
-    {...VerticalBarChartWidgetStoriesMeta.args}
-  />,
-  <RadialProgressWidget
-    key="radial-progress"
-    {...RadialProgressWidgetStoriesMeta.args}
-  />,
+  <VerticalBarChartWidget key="vertical-bar-chart" {...VerticalBarChartWidgetStoriesMeta.args} />,
+  <RadialProgressWidget key="radial-progress" {...RadialProgressWidgetStoriesMeta.args} />,
 ]
 
 const meta = {

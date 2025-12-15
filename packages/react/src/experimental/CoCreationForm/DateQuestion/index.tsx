@@ -1,10 +1,7 @@
 import { DatePickerValue, F0DatePicker } from "@/components/F0DatePicker"
 import { useI18n } from "@/lib/providers/i18n"
 import { useMemo } from "react"
-import {
-  BaseQuestion,
-  BaseQuestionPropsForOtherQuestionComponents,
-} from "../BaseQuestion"
+import { BaseQuestion, BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
@@ -16,10 +13,7 @@ export type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   value?: Date | null
 }
 
-export const DateQuestion = ({
-  value,
-  ...baseQuestionComponentProps
-}: DateQuestionProps) => {
+export const DateQuestion = ({ value, ...baseQuestionComponentProps }: DateQuestionProps) => {
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
   const { t } = useI18n()

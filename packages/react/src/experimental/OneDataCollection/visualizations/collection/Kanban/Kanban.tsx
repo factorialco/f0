@@ -1,7 +1,4 @@
-import type {
-  CardMetadata,
-  CardMetadataProperty,
-} from "@/components/F0Card/types"
+import type { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { useDataCollectionLanesData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
@@ -20,11 +17,7 @@ import type { KanbanProps } from "@/ui/Kanban/types"
 import { useEffect, useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../../../item-actions"
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
-import type {
-  GroupingDefinition,
-  SortingsDefinition,
-  SummariesDefinition,
-} from "../../../types"
+import type { GroupingDefinition, SortingsDefinition, SummariesDefinition } from "../../../types"
 import { KanbanCollectionProps } from "./types"
 
 export const KanbanCollection = <
@@ -78,9 +71,7 @@ export const KanbanCollection = <
   const idProvider = source.idProvider
 
   const lanesSignature = useMemo(() => {
-    return JSON.stringify(
-      Object.values(lanesHooks).map((laneHook) => laneHook.data)
-    )
+    return JSON.stringify(Object.values(lanesHooks).map((laneHook) => laneHook.data))
   }, [lanesHooks])
 
   const laneItems = useMemo(() => {
@@ -128,15 +119,11 @@ export const KanbanCollection = <
         fetchMore: hasMore ? () => laneData.loadMore() : undefined,
       }
     }),
-    loading: Object.values(lanesHooks).some(
-      (laneHook) => laneHook.isInitialLoading
-    ),
+    loading: Object.values(lanesHooks).some((laneHook) => laneHook.isInitialLoading),
     getKey: (item, index) => {
       if (idProvider) return String(idProvider(item, index))
       const fallbackId = (item as unknown as { id?: string | number })?.id
-      return fallbackId !== undefined && fallbackId !== null
-        ? String(fallbackId)
-        : String(index)
+      return fallbackId !== undefined && fallbackId !== null ? String(fallbackId) : String(index)
     },
     renderCard: (item, index, total, laneId) => {
       const dragId = String(
@@ -148,9 +135,7 @@ export const KanbanCollection = <
 
       // Gets the lane useSelectable hook
       const useSelectable =
-        lanesUseSelectable && laneId
-          ? lanesUseSelectable.get(laneId)
-          : undefined
+        lanesUseSelectable && laneId ? lanesUseSelectable.get(laneId) : undefined
 
       const isSelected =
         (typeof itemId === "string" || typeof itemId === "number") &&
@@ -158,9 +143,7 @@ export const KanbanCollection = <
         useSelectable?.selectedItems.has(itemId)
 
       const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
-      const itemOnClick = source.itemOnClick
-        ? source.itemOnClick(item)
-        : undefined
+      const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
 
       return (
         <KanbanCard<R>
@@ -175,9 +158,7 @@ export const KanbanCollection = <
           description={description ? description(item) : undefined}
           avatar={avatar ? avatar(item) : undefined}
           draggable={onMove !== undefined}
-          metadata={
-            optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined
-          }
+          metadata={optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined}
           compact
           forceVerticalMetadata
           selectable={source.selectable !== undefined}

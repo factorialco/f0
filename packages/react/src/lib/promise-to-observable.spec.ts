@@ -43,9 +43,7 @@ describe("promiseToObservable", () => {
     const promise = Promise.resolve(42)
     const observable = promiseToObservable(promise)
 
-    const result = await firstValueFrom(
-      observable.filter((state) => !state.loading)
-    )
+    const result = await firstValueFrom(observable.filter((state) => !state.loading))
 
     expect(result).toEqual({
       loading: false,
@@ -59,9 +57,7 @@ describe("promiseToObservable", () => {
     const promise = Promise.reject(error)
     const observable = promiseToObservable(promise)
 
-    const result = await firstValueFrom(
-      observable.filter((state) => !state.loading)
-    )
+    const result = await firstValueFrom(observable.filter((state) => !state.loading))
 
     expect(result).toEqual({
       loading: false,

@@ -36,17 +36,9 @@ export const _RadarChart = <K extends ChartConfig>(
   }))
 
   return (
-    <ChartContainer
-      config={dataConfig}
-      ref={ref}
-      aspect={aspect}
-      data-chromatic="ignore"
-    >
+    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-chromatic="ignore">
       <RadarChartPrimitive accessibilityLayer data={preparedData}>
-        <ChartTooltip
-          cursor
-          content={<ChartTooltipContent indicator="dot" />}
-        />
+        <ChartTooltip cursor content={<ChartTooltipContent indicator="dot" />} />
 
         <PolarGrid gridType="circle" />
         <PolarAngleAxis dataKey="subject" />
@@ -61,14 +53,10 @@ export const _RadarChart = <K extends ChartConfig>(
             key={key}
             dataKey={key}
             fill={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
+              dataConfig[key].color ? getColor(dataConfig[key].color) : getCategoricalColor(index)
             }
             stroke={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
+              dataConfig[key].color ? getColor(dataConfig[key].color) : getCategoricalColor(index)
             }
             strokeWidth={1.5}
             fillOpacity={0.3}

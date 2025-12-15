@@ -26,12 +26,7 @@ export const OpenLinkAction = memo(
       >
         {children}
         <div className="grid opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 group-active:opacity-100">
-          <F0Icon
-            aria-hidden={true}
-            icon={ExternalLink}
-            size="md"
-            color="default"
-          />
+          <F0Icon aria-hidden={true} icon={ExternalLink} size="md" color="default" />
         </div>
       </Link>
     )

@@ -7,19 +7,11 @@ import { DashboardWidget } from "../DashboardWidget"
 const _ = React
 // Mock components
 vi.mock("@/components/F0Text", () => ({
-  F0Text: ({ content }: { content: string }) => (
-    <p data-testid="one-ellipsis">{content}</p>
-  ),
+  F0Text: ({ content }: { content: string }) => <p data-testid="one-ellipsis">{content}</p>,
 }))
 
 vi.mock("@/components/F0Icon", () => ({
-  F0Icon: ({
-    icon: _Icon,
-    size,
-  }: {
-    icon: React.ComponentType
-    size: string
-  }) => (
+  F0Icon: ({ icon: _Icon, size }: { icon: React.ComponentType; size: string }) => (
     <div data-testid="icon" data-size={size}>
       Icon
     </div>
@@ -61,9 +53,7 @@ describe("DashboardWidget", () => {
         </DashboardWidget>
       )
 
-      expect(screen.getByTestId("one-ellipsis")).toHaveTextContent(
-        "My Widget Title"
-      )
+      expect(screen.getByTestId("one-ellipsis")).toHaveTextContent("My Widget Title")
     })
 
     it("should render children content", () => {
@@ -73,9 +63,7 @@ describe("DashboardWidget", () => {
         </DashboardWidget>
       )
 
-      expect(screen.getByTestId("widget-content")).toHaveTextContent(
-        "Widget Content"
-      )
+      expect(screen.getByTestId("widget-content")).toHaveTextContent("Widget Content")
     })
   })
 
@@ -137,9 +125,7 @@ describe("DashboardWidget", () => {
         </DashboardWidget>
       )
 
-      expect(screen.getByTestId("one-ellipsis")).toHaveTextContent(
-        "Widget Title"
-      )
+      expect(screen.getByTestId("one-ellipsis")).toHaveTextContent("Widget Title")
       const handle = document.querySelector('[data-gs-handle="true"]')
       expect(handle).toBeInTheDocument()
     })

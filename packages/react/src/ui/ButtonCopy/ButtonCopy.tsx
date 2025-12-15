@@ -7,14 +7,7 @@ import { forwardRef, MouseEventHandler, useEffect, useState } from "react"
 
 export type ButtonCopyProps = Omit<
   ActionButtonProps,
-  | "onClick"
-  | "children"
-  | "title"
-  | "label"
-  | "hideLabel"
-  | "icon"
-  | "target"
-  | "aria-label"
+  "onClick" | "children" | "title" | "label" | "hideLabel" | "icon" | "target" | "aria-label"
 > & {
   valueToCopy: string
   copiedTooltipLabel?: string
@@ -48,9 +41,7 @@ export const ButtonCopy = forwardRef<HTMLButtonElement, ButtonCopyProps>(
 
     const defaultCopyLabel = customCopyTooltipLabel ?? translations.actions.copy
     const defaultCopiedLabel = customCopiedTooltipLabel ?? "Copied"
-    const currentTooltipLabel = isCopying
-      ? defaultCopiedLabel
-      : defaultCopyLabel
+    const currentTooltipLabel = isCopying ? defaultCopiedLabel : defaultCopyLabel
 
     useEffect(() => {
       let timeoutId: ReturnType<typeof setTimeout> | null = null
@@ -98,10 +89,7 @@ export const ButtonCopy = forwardRef<HTMLButtonElement, ButtonCopyProps>(
               verticalAlign: "middle",
             }}
           >
-            <F0Icon
-              size={size === "sm" ? "sm" : "md"}
-              icon={isCopying ? Check : LayersFront}
-            />
+            <F0Icon size={size === "sm" ? "sm" : "md"} icon={isCopying ? Check : LayersFront} />
           </motion.span>
         </AnimatePresence>
       </Action>

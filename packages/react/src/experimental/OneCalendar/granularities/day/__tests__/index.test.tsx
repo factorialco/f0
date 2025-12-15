@@ -192,13 +192,10 @@ describe("dayGranularity", () => {
 
   describe("getPrevNext", () => {
     it("returns correct prev/next dates within bounds", () => {
-      const result = dayGranularity.getPrevNext(
-        dayGranularity.toRange(baseDate),
-        {
-          min: new Date(2024, 0, 14),
-          max: new Date(2024, 0, 17),
-        }
-      )
+      const result = dayGranularity.getPrevNext(dayGranularity.toRange(baseDate), {
+        min: new Date(2024, 0, 14),
+        max: new Date(2024, 0, 17),
+      })
 
       expect(result).toEqual({
         prev: {

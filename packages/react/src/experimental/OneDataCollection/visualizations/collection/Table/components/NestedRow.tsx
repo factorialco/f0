@@ -24,11 +24,7 @@ import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-act
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
 
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { GroupingDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { NestedDataProvider } from "../providers/NestedProvider"
@@ -76,15 +72,7 @@ const NestedRowContent = <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  >,
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>,
   externalRef:
     | ((element: HTMLTableRowElement | null) => void)
     | React.RefObject<HTMLTableRowElement>
@@ -103,12 +91,11 @@ const NestedRowContent = <
    * - Pagination information
    * - Determining if children are "nested" (have their own children) or "flat"
    */
-  const { children, loadChildren, isLoading, childrenType, paginationInfo } =
-    useLoadChildren({
-      rowId: rowId,
-      item: props.item,
-      source: props.source,
-    })
+  const { children, loadChildren, isLoading, childrenType, paginationInfo } = useLoadChildren({
+    rowId: rowId,
+    item: props.item,
+    source: props.source,
+  })
 
   /**
    * useCalculateConectorHeight manages the visual tree connector lines
@@ -169,8 +156,7 @@ const NestedRowContent = <
           ...sharedNestedRowProps,
           // If nestedRowProps.parentHasChildren is not provided, we need to set it to true if the parent has children
           // This nestedRowProps.parentHasChildren is provided on children iteration
-          parentHasChildren:
-            props.nestedRowProps?.parentHasChildren ?? children.length > 0,
+          parentHasChildren: props.nestedRowProps?.parentHasChildren ?? children.length > 0,
           hasLoadedChildren: false,
         }}
         tableWithChildren={props.tableWithChildren}
@@ -287,19 +273,8 @@ const NestedRowComponentInner = <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  >,
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>,
+  ref: ((element: HTMLTableRowElement | null) => void) | React.RefObject<HTMLTableRowElement> | null
 ) => {
   // Only wrap with Provider at the root level (depth === 0 or undefined)
   // This ensures we have a single shared context for the entire tree
@@ -324,15 +299,7 @@ const NestedRowContentWithRef = forwardRef(NestedRowContent) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     ref?:
       | ((element: HTMLTableRowElement | null) => void)
       | React.RefObject<HTMLTableRowElement>
@@ -349,15 +316,7 @@ const NestedRow = forwardRef(NestedRowComponentInner) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     ref?: React.ForwardedRef<HTMLTableRowElement>
   }
 ) => ReturnType<typeof NestedRowComponentInner>

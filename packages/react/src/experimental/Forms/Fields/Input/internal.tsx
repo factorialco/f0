@@ -2,17 +2,9 @@ import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 import { InputFieldProps } from "@/ui/InputField"
-import {
-  ComponentProps,
-  HTMLInputTypeAttribute,
-  useMemo,
-  useState,
-} from "react"
+import { ComponentProps, HTMLInputTypeAttribute, useMemo, useState } from "react"
 
-export type InputInternalProps<T extends string> = Pick<
-  ComponentProps<typeof ShadcnInput>,
-  "ref"
-> &
+export type InputInternalProps<T extends string> = Pick<ComponentProps<typeof ShadcnInput>, "ref"> &
   Pick<
     InputFieldProps<T>,
     | "autoFocus"
@@ -40,10 +32,7 @@ export type InputInternalProps<T extends string> = Pick<
     onPressEnter?: () => void
   }
 
-const InputInternal = <T extends string = string>({
-  type,
-  ...props
-}: InputInternalProps<T>) => {
+const InputInternal = <T extends string = string>({ type, ...props }: InputInternalProps<T>) => {
   const [showPassword, setShowPassword] = useState(false)
 
   const localType = useMemo(() => {

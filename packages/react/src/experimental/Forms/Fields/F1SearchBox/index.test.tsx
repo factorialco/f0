@@ -96,9 +96,7 @@ describe("F1SearchBox", () => {
   describe("combined threshold and debounce behavior", () => {
     it("respects both threshold and debounce", () => {
       const onChange = vi.fn()
-      render(
-        <F1SearchBox threshold={3} debounceTime={500} onChange={onChange} />
-      )
+      render(<F1SearchBox threshold={3} debounceTime={500} onChange={onChange} />)
 
       const input = screen.getByRole("searchbox")
 

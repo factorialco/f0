@@ -1,13 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { CommandGroup, CommandItem } from "./AvailableCommands"
 
 interface CommandListHandle {
@@ -157,14 +150,9 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
                     {item.emoji ? (
                       <span className="text-base">{item.emoji}</span>
                     ) : item.icon ? (
-                      <F0Icon
-                        icon={item.icon}
-                        className="text-f1-foreground-secondary"
-                      />
+                      <F0Icon icon={item.icon} className="text-f1-foreground-secondary" />
                     ) : null}
-                    <p className="flex-grow text-sm font-medium text-f1-foreground">
-                      {item.title}
-                    </p>
+                    <p className="flex-grow text-sm font-medium text-f1-foreground">{item.title}</p>
                   </div>
                 )
               })}

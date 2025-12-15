@@ -11,10 +11,7 @@ export const useInfiniteScrollPagination = (
   const loadingIndicatorRef = useRef<HTMLTableCellElement>(null)
 
   useEffect(() => {
-    if (
-      !isInfiniteScrollPagination(paginationInfo) ||
-      !paginationInfo.hasMore
-    ) {
+    if (!isInfiniteScrollPagination(paginationInfo) || !paginationInfo.hasMore) {
       return
     }
 

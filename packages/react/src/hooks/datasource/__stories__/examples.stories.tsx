@@ -17,8 +17,7 @@ const meta: Meta = {
     },
     docs: {
       description: {
-        component:
-          "Examples demonstrating the usage of datasource hooks together.",
+        component: "Examples demonstrating the usage of datasource hooks together.",
       },
     },
   },
@@ -27,10 +26,7 @@ const meta: Meta = {
 export default meta
 
 import { Await } from "@/components/Utilities/Await"
-import {
-  generateMockUsers,
-  MockUser,
-} from "@/experimental/OneDataCollection/__stories__/mockData"
+import { generateMockUsers, MockUser } from "@/experimental/OneDataCollection/__stories__/mockData"
 import { DEPARTMENTS_MOCK } from "@/mocks"
 
 const mockUsers: MockUser[] = generateMockUsers(30)
@@ -73,17 +69,12 @@ const createMockDataAdapter = () =>
       }
 
       if (filters.status && filters.status.length > 0) {
-        filteredUsers = filteredUsers.filter((user) =>
-          filters.status?.includes(user.status)
-        )
+        filteredUsers = filteredUsers.filter((user) => filters.status?.includes(user.status))
       }
       const { cursor, perPage } = pagination
 
       if (cursor) {
-        filteredUsers = filteredUsers.slice(
-          parseInt(cursor),
-          parseInt(cursor) + (perPage ?? 10)
-        )
+        filteredUsers = filteredUsers.slice(parseInt(cursor), parseInt(cursor) + (perPage ?? 10))
       }
 
       return {
@@ -150,8 +141,7 @@ const BasicExample = () => {
                 style={{
                   padding: "2px 8px",
                   borderRadius: "12px",
-                  backgroundColor:
-                    user.status === "active" ? "#d4edda" : "#f8d7da",
+                  backgroundColor: user.status === "active" ? "#d4edda" : "#f8d7da",
                   color: user.status === "active" ? "#155724" : "#721c24",
                   fontSize: "0.8em",
                 }}
@@ -202,28 +192,19 @@ const GroupedExample = () => {
 
       <div style={{ marginBottom: "16px" }}>
         <button
-          onClick={() =>
-            data.groups.forEach((group) => setGroupOpen(group.key, true))
-          }
+          onClick={() => data.groups.forEach((group) => setGroupOpen(group.key, true))}
           style={{ marginRight: "8px" }}
         >
           Expand All
         </button>
-        <button
-          onClick={() =>
-            data.groups.forEach((group) => setGroupOpen(group.key, false))
-          }
-        >
+        <button onClick={() => data.groups.forEach((group) => setGroupOpen(group.key, false))}>
           Collapse All
         </button>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {data.groups.map((group) => (
-          <div
-            key={group.key}
-            style={{ border: "1px solid #ddd", borderRadius: "8px" }}
-          >
+          <div key={group.key} style={{ border: "1px solid #ddd", borderRadius: "8px" }}>
             <button
               onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
               style={{
@@ -239,9 +220,7 @@ const GroupedExample = () => {
                 justifyContent: "space-between",
               }}
             >
-              <span
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>{openGroups[group.key] ? "▼" : "▶"}</span>
                 <strong>
                   <Await resolve={group.itemCount} fallback={<span>...</span>}>
@@ -286,10 +265,8 @@ const GroupedExample = () => {
                         style={{
                           padding: "2px 8px",
                           borderRadius: "12px",
-                          backgroundColor:
-                            user.status === "active" ? "#d4edda" : "#f8d7da",
-                          color:
-                            user.status === "active" ? "#155724" : "#721c24",
+                          backgroundColor: user.status === "active" ? "#d4edda" : "#f8d7da",
+                          color: user.status === "active" ? "#155724" : "#721c24",
                           fontSize: "0.8em",
                         }}
                       >
@@ -323,21 +300,17 @@ const SelectableExample = () => {
 
   const { data, isLoading, error, paginationInfo } = useData(dataSource)
 
-  const {
-    selectedItems,
-    handleSelectItemChange,
-    handleSelectAll,
-    allSelectedStatus,
-  } = useSelectable({
-    data,
-    paginationInfo,
-    source: dataSource,
-    onSelectItems: (selectedItems) => {
-      console.log("Selection changed:", {
-        selectedItems,
-      })
-    },
-  })
+  const { selectedItems, handleSelectItemChange, handleSelectAll, allSelectedStatus } =
+    useSelectable({
+      data,
+      paginationInfo,
+      source: dataSource,
+      onSelectItems: (selectedItems) => {
+        console.log("Selection changed:", {
+          selectedItems,
+        })
+      },
+    })
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error: {error.message}</div>
@@ -440,8 +413,7 @@ const SelectableExample = () => {
                 style={{
                   padding: "2px 8px",
                   borderRadius: "12px",
-                  backgroundColor:
-                    user.status === "active" ? "#d4edda" : "#f8d7da",
+                  backgroundColor: user.status === "active" ? "#d4edda" : "#f8d7da",
                   color: user.status === "active" ? "#155724" : "#721c24",
                   fontSize: "0.8em",
                 }}
@@ -519,9 +491,7 @@ const CompleteExample = () => {
   return (
     <div>
       <h3>Complete Data Collection</h3>
-      <p>
-        All hooks working together: grouping, selection, and group management
-      </p>
+      <p>All hooks working together: grouping, selection, and group management</p>
 
       {/* Global controls */}
       <div
@@ -558,9 +528,7 @@ const CompleteExample = () => {
 
           <div style={{ display: "flex", gap: "8px" }}>
             <button
-              onClick={() =>
-                data.groups.forEach((group) => setGroupOpen(group.key, true))
-              }
+              onClick={() => data.groups.forEach((group) => setGroupOpen(group.key, true))}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -571,9 +539,7 @@ const CompleteExample = () => {
               Expand All
             </button>
             <button
-              onClick={() =>
-                data.groups.forEach((group) => setGroupOpen(group.key, false))
-              }
+              onClick={() => data.groups.forEach((group) => setGroupOpen(group.key, false))}
               style={{
                 padding: "4px 8px",
                 border: "1px solid #ccc",
@@ -630,41 +596,29 @@ const CompleteExample = () => {
           const groupStatus = groupAllSelectedStatus[group.key]
 
           return (
-            <div
-              key={group.key}
-              style={{ border: "1px solid #ddd", borderRadius: "8px" }}
-            >
+            <div key={group.key} style={{ border: "1px solid #ddd", borderRadius: "8px" }}>
               <div
                 style={{
                   padding: "12px",
                   background: "#f8f9fa",
-                  borderBottom: openGroups[group.key]
-                    ? "1px solid #ddd"
-                    : "none",
+                  borderBottom: openGroups[group.key] ? "1px solid #ddd" : "none",
                   borderRadius: openGroups[group.key] ? "8px 8px 0 0" : "8px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                 }}
               >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <input
                     type="checkbox"
                     checked={groupStatus?.checked || false}
                     ref={(el) => {
-                      if (el)
-                        el.indeterminate = groupStatus?.indeterminate || false
+                      if (el) el.indeterminate = groupStatus?.indeterminate || false
                     }}
-                    onChange={(e) =>
-                      handleSelectGroupChange(group, e.target.checked)
-                    }
+                    onChange={(e) => handleSelectGroupChange(group, e.target.checked)}
                   />
                   <button
-                    onClick={() =>
-                      setGroupOpen(group.key, !openGroups[group.key])
-                    }
+                    onClick={() => setGroupOpen(group.key, !openGroups[group.key])}
                     style={{
                       background: "none",
                       border: "none",
@@ -676,10 +630,7 @@ const CompleteExample = () => {
                   >
                     <span>{openGroups[group.key] ? "▼" : "▶"}</span>
                     <strong>
-                      <Await
-                        resolve={group.label}
-                        fallback={<div>Loading...</div>}
-                      >
+                      <Await resolve={group.label} fallback={<div>Loading...</div>}>
                         {(label) => <>{label}</>}
                       </Await>
                     </strong>
@@ -687,14 +638,10 @@ const CompleteExample = () => {
                 </div>
 
                 <div style={{ fontSize: "0.9em", color: "#666" }}>
-                  <Await
-                    resolve={group.itemCount}
-                    fallback={<div>Loading...</div>}
-                  >
+                  <Await resolve={group.itemCount} fallback={<div>Loading...</div>}>
                     {(itemCount) => (
                       <>
-                        {groupStatus?.selectedCount || 0} of {itemCount}{" "}
-                        selected
+                        {groupStatus?.selectedCount || 0} of {itemCount} selected
                       </>
                     )}
                   </Await>
@@ -715,9 +662,7 @@ const CompleteExample = () => {
                       key={user.id}
                       style={{
                         padding: "8px",
-                        backgroundColor: selectedItems.has(user.id)
-                          ? "#e3f2fd"
-                          : "#f8f9fa",
+                        backgroundColor: selectedItems.has(user.id) ? "#e3f2fd" : "#f8f9fa",
                         borderRadius: "4px",
                         display: "flex",
                         alignItems: "center",
@@ -727,9 +672,7 @@ const CompleteExample = () => {
                       <input
                         type="checkbox"
                         checked={selectedItems.has(user.id)}
-                        onChange={(e) =>
-                          handleSelectItemChange(user, e.target.checked)
-                        }
+                        onChange={(e) => handleSelectItemChange(user, e.target.checked)}
                         disabled={!user.canBeSelected}
                       />
                       <div style={{ flex: 1 }}>
@@ -743,10 +686,8 @@ const CompleteExample = () => {
                           style={{
                             padding: "2px 8px",
                             borderRadius: "12px",
-                            backgroundColor:
-                              user.status === "active" ? "#d4edda" : "#f8d7da",
-                            color:
-                              user.status === "active" ? "#155724" : "#721c24",
+                            backgroundColor: user.status === "active" ? "#d4edda" : "#f8d7da",
+                            color: user.status === "active" ? "#155724" : "#721c24",
                             fontSize: "0.8em",
                           }}
                         >
@@ -834,10 +775,7 @@ const FilterExample = () => {
               multiple
               value={dataSource.currentFilters.department || []}
               onChange={(e) => {
-                const values = Array.from(
-                  e.target.selectedOptions,
-                  (option) => option.value
-                )
+                const values = Array.from(e.target.selectedOptions, (option) => option.value)
                 handleFilterChange("department", values)
               }}
               style={{ padding: "4px", minWidth: "150px" }}
@@ -862,10 +800,7 @@ const FilterExample = () => {
               multiple
               value={dataSource.currentFilters.status || []}
               onChange={(e) => {
-                const values = Array.from(
-                  e.target.selectedOptions,
-                  (option) => option.value
-                )
+                const values = Array.from(e.target.selectedOptions, (option) => option.value)
                 handleFilterChange("status", values)
               }}
               style={{ padding: "4px", minWidth: "150px" }}
@@ -904,8 +839,7 @@ const FilterExample = () => {
                 style={{
                   padding: "2px 8px",
                   borderRadius: "12px",
-                  backgroundColor:
-                    user.status === "active" ? "#d4edda" : "#f8d7da",
+                  backgroundColor: user.status === "active" ? "#d4edda" : "#f8d7da",
                   color: user.status === "active" ? "#155724" : "#721c24",
                   fontSize: "0.8em",
                 }}
@@ -928,8 +862,7 @@ export const Basic: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Basic usage of useDataSource and useData hooks to display a simple list of users.",
+        story: "Basic usage of useDataSource and useData hooks to display a simple list of users.",
       },
     },
   },
@@ -940,8 +873,7 @@ export const Grouped: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Data collection with grouping functionality using useGroups hook.",
+        story: "Data collection with grouping functionality using useGroups hook.",
       },
     },
   },
@@ -952,8 +884,7 @@ export const Selectable: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Data collection with selection functionality using useSelectable hook.",
+        story: "Data collection with selection functionality using useSelectable hook.",
       },
     },
   },
@@ -976,8 +907,7 @@ export const WithFilters: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Data collection with interactive filters demonstrating state management.",
+        story: "Data collection with interactive filters demonstrating state management.",
       },
     },
   },

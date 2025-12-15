@@ -128,9 +128,7 @@ describe("groupBy", () => {
     })
 
     it("should handle array with single item", () => {
-      const items: TestItem[] = [
-        { id: 1, category: "single", name: "Only item" },
-      ]
+      const items: TestItem[] = [{ id: 1, category: "single", name: "Only item" }]
 
       const grouped = groupBy(items, "category")
 
@@ -202,25 +200,11 @@ describe("groupBy", () => {
       const byDepartment = groupBy(users, "department")
       const byRole = groupBy(users, "role")
 
-      expect(Array.from(byDepartment.keys())).toEqual([
-        "Engineering",
-        "Marketing",
-        "Sales",
-      ])
-      expect(Array.from(byRole.keys())).toEqual([
-        "Developer",
-        "Manager",
-        "Senior",
-      ])
+      expect(Array.from(byDepartment.keys())).toEqual(["Engineering", "Marketing", "Sales"])
+      expect(Array.from(byRole.keys())).toEqual(["Developer", "Manager", "Senior"])
 
-      expect(byDepartment.get("Engineering")?.map((u) => u.name)).toEqual([
-        "Alice",
-        "Charlie",
-      ])
-      expect(byRole.get("Manager")?.map((u) => u.name)).toEqual([
-        "Bob",
-        "Diana",
-      ])
+      expect(byDepartment.get("Engineering")?.map((u) => u.name)).toEqual(["Alice", "Charlie"])
+      expect(byRole.get("Manager")?.map((u) => u.name)).toEqual(["Bob", "Diana"])
     })
 
     it("should maintain referential integrity of original objects", () => {

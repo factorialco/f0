@@ -20,24 +20,19 @@ import {
 } from "recharts"
 import { usePrivacyMode } from "../../../lib/privacyMode"
 import { getCategoricalColor, getColor } from "../utils/colors"
-import {
-  cartesianGridProps,
-  chartTooltipProps,
-  measureTextWidth,
-} from "../utils/elements"
+import { cartesianGridProps, chartTooltipProps, measureTextWidth } from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { prepareData } from "../utils/muncher"
 import { LineChartPropsBase } from "../utils/types"
 
 type allowedLineTypes = "natural" | "linear" | "step" | "monotoneX"
 
-export type AreaChartProps<K extends LineChartConfig = LineChartConfig> =
-  LineChartPropsBase<K> & {
-    lineType?: allowedLineTypes
-    marginTop?: number
-    canBeBlurred?: boolean
-    blurArea?: "l" | "r" | "lr"
-  }
+export type AreaChartProps<K extends LineChartConfig = LineChartConfig> = LineChartPropsBase<K> & {
+  lineType?: allowedLineTypes
+  marginTop?: number
+  canBeBlurred?: boolean
+  blurArea?: "l" | "r" | "lr"
+}
 
 // Rechart props give any
 type TickProps = TextProps & {
@@ -90,11 +85,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       areas.map((key) =>
-        measureTextWidth(
-          yAxis?.tickFormatter
-            ? yAxis.tickFormatter(`${el[key]}`)
-            : `${el[key]}`
-        )
+        measureTextWidth(yAxis?.tickFormatter ? yAxis.tickFormatter(`${el[key]}`) : `${el[key]}`)
       )
     )
   )
@@ -187,10 +178,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             </linearGradient>
           ))}
         </defs>
-        <CartesianGrid
-          {...cartesianGridProps()}
-          mask={`url(#${chartId}-transparent-edges)`}
-        />
+        <CartesianGrid {...cartesianGridProps()} mask={`url(#${chartId}-transparent-edges)`} />
         {isXAxisVisible && (
           <XAxis
             dataKey="x"
@@ -210,11 +198,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             axisLine={false}
             tickMargin={8}
             tickCount={yAxis?.tickCount}
-            tickFormatter={
-              canBeBlurred && privacyModeEnabled
-                ? () => "**"
-                : yAxis?.tickFormatter
-            }
+            tickFormatter={canBeBlurred && privacyModeEnabled ? () => "**" : yAxis?.tickFormatter}
             ticks={yAxis?.ticks}
             domain={yAxis?.domain}
             width={yAxisWidth}
@@ -223,12 +207,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
         {showTooltip && (
           <ChartTooltip
             {...chartTooltipProps()}
-            content={
-              <ChartTooltipContent
-                indicator="dot"
-                yAxisFormatter={yAxis?.tickFormatter}
-              />
-            }
+            content={<ChartTooltipContent indicator="dot" yAxisFormatter={yAxis?.tickFormatter} />}
           />
         )}
         {areas.map((area, index) => (
@@ -241,19 +220,14 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             fill={`url(#fill${area}-${chartId})`}
             fillOpacity={dataConfig[area].dashed ? 0 : 0.4}
             stroke={
-              dataConfig[area].color
-                ? getColor(dataConfig[area].color)
-                : getCategoricalColor(index)
+              dataConfig[area].color ? getColor(dataConfig[area].color) : getCategoricalColor(index)
             }
             strokeWidth={1.5}
             strokeDasharray={dataConfig[area].dashed ? "4 4" : undefined}
           />
         ))}
         {Object.keys(dataConfig).length > 1 && (
-          <ChartLegend
-            className="flex justify-start"
-            content={<ChartLegendContent />}
-          />
+          <ChartLegend className="flex justify-start" content={<ChartLegendContent />} />
         )}
       </AreaChartPrimitive>
     </ChartContainer>

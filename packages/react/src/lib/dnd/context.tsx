@@ -17,17 +17,8 @@ export function useDndContextOptional(): DndContextValue | null {
   return useContext(Ctx)
 }
 
-export function DndProvider({
-  driver,
-  children,
-}: {
-  driver: DndDriver
-  children: ReactNode
-}) {
+export function DndProvider({ driver, children }: { driver: DndDriver; children: ReactNode }) {
   const driverRef = useRef(driver)
-  const value = useMemo<DndContextValue>(
-    () => ({ driver: driverRef.current }),
-    []
-  )
+  const value = useMemo<DndContextValue>(() => ({ driver: driverRef.current }), [])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

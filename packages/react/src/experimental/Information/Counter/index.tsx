@@ -29,8 +29,6 @@ export function Counter({ size, type, value, maxValue }: CounterProps) {
   const displayValue = maxValue && value > maxValue ? `+${maxValue}` : value
 
   return (
-    <div className={cn("text-f1-foreground", counterVariants({ size, type }))}>
-      {displayValue}
-    </div>
+    <div className={cn("text-f1-foreground", counterVariants({ size, type }))}>{displayValue}</div>
   )
 }

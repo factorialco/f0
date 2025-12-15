@@ -19,10 +19,7 @@ export type AllSelectionStatus = {
   unselectedCount: number
 }
 
-export type SelectionStatus<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> = {
+export type SelectionStatus<R extends RecordType, Filters extends FiltersDefinition> = {
   allChecked: boolean | "indeterminate"
   /** Status of items that have been loaded. Items not yet loaded won't appear here. */
   itemsStatus: ReadonlyArray<{ item: R; checked: boolean }>
@@ -68,10 +65,7 @@ export type SelectionMeta<R extends RecordType> = {
   uncheckedItems: ReadonlyArray<R>
 }
 
-export type UseSelectableReturn<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> = {
+export type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
   isAllSelected: boolean
   selectedItems: Map<SelectionId, R>
   selectedGroups: Map<SelectionId, GroupRecord<R>>

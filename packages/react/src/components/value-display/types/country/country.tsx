@@ -13,12 +13,8 @@ interface CountryValue {
 }
 export type CountryCellValue = CountryValue
 
-export const CountryCell = (
-  args: CountryCellValue,
-  context: ValueDisplayRendererContext
-) => {
-  const countryName =
-    args.label ?? context.i18n.countries[args.code as CountryCode] ?? args.code
+export const CountryCell = (args: CountryCellValue, context: ValueDisplayRendererContext) => {
+  const countryName = args.label ?? context.i18n.countries[args.code as CountryCode] ?? args.code
 
   return (
     <div data-cell-type="country" className="flex items-center gap-2">

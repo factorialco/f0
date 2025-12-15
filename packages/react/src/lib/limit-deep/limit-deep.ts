@@ -13,10 +13,7 @@ export const limitDeep = <T extends object>(obj: T, depth: number): T => {
     }
     // Handle regular objects
     return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [
-        key,
-        limitDeep(value, depth - 1),
-      ])
+      Object.entries(obj).map(([key, value]) => [key, limitDeep(value, depth - 1)])
     ) as T
   }
   return obj

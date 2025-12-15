@@ -16,11 +16,7 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
       {status === "inProgress" && (
         <div className="-mt-[2px] *:block">
-          <F0Icon
-            state="animate"
-            size={inGroup ? "md" : "lg"}
-            icon={DottedCircle}
-          />
+          <F0Icon state="animate" size={inGroup ? "md" : "lg"} icon={DottedCircle} />
         </div>
       )}
       {status === "executing" && (
@@ -38,9 +34,7 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
           />
         </div>
       )}
-      <p className={cn("text-pretty", status === "executing" && "shine-text")}>
-        {title}
-      </p>
+      <p className={cn("text-pretty", status === "executing" && "shine-text")}>{title}</p>
     </div>
   )
 }

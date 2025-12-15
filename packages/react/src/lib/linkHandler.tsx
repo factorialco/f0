@@ -11,10 +11,7 @@ import {
 
 export type LinkContextValue = {
   currentPath?: string
-  component?: (
-    props: LinkProps,
-    ref: ForwardedRef<HTMLAnchorElement>
-  ) => JSX.Element
+  component?: (props: LinkProps, ref: ForwardedRef<HTMLAnchorElement>) => JSX.Element
 }
 
 const LinkContext = createContext<LinkContextValue | undefined>(undefined)
@@ -24,11 +21,7 @@ export const LinkProvider: React.FC<
     children: ReactNode
   } & LinkContextValue
 > = ({ children, component, currentPath }) => {
-  return (
-    <LinkContext.Provider value={{ component, currentPath }}>
-      {children}
-    </LinkContext.Provider>
-  )
+  return <LinkContext.Provider value={{ component, currentPath }}>{children}</LinkContext.Provider>
 }
 
 export const useLinkContext = () => {
@@ -53,18 +46,12 @@ export const useNavigation = () => {
   const { currentPath } = useLinkContext()
 
   const isActive = useCallback(
-    (
-      path: string | undefined,
-      { exact = false }: { exact?: boolean } = { exact: false }
-    ) => {
+    (path: string | undefined, { exact = false }: { exact?: boolean } = { exact: false }) => {
       if (currentPath === undefined || path === undefined) return false
 
-      if (exact)
-        return stripTrailingSlash(currentPath) === stripTrailingSlash(path)
+      if (exact) return stripTrailingSlash(currentPath) === stripTrailingSlash(path)
 
-      return `${stripTrailingSlash(currentPath)}/`.startsWith(
-        `${stripTrailingSlash(path)}/`
-      )
+      return `${stripTrailingSlash(currentPath)}/`.startsWith(`${stripTrailingSlash(path)}/`)
     },
     [currentPath]
   )
@@ -96,8 +83,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       forwardRef<HTMLAnchorElement>(function Component(props: LinkProps, ref) {
         if (isDisabled) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { href, target, rel, download, exactMatch, ...spanProps } =
-            props
+          const { href, target, rel, download, exactMatch, ...spanProps } = props
           return <span ref={ref} aria-disabled={true} {...spanProps} />
         }
 

@@ -22,13 +22,7 @@ import {
 } from "@/ui/dropdown-menu"
 import { Skeleton } from "@/ui/skeleton"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import {
-  ComponentProps,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState,
-} from "react"
+import { ComponentProps, ReactElement, useCallback, useEffect, useState } from "react"
 
 type ProductUpdate = {
   title: string
@@ -137,11 +131,7 @@ const ProductUpdates = ({
           hideLabel
           label={label}
           pressed={open}
-          append={
-            hasUnread && (
-              <UnreadDot className="absolute -right-0.5 -top-[1px]" />
-            )
-          }
+          append={hasUnread && <UnreadDot className="absolute -right-0.5 -top-[1px]" />}
         />
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
@@ -163,19 +153,12 @@ const ProductUpdates = ({
             )}
             {state === "idle" && updates !== null && updates.length > 0 && (
               <div className="px-1">
-                <FeaturedDropdownItem
-                  {...featuredUpdate}
-                  onClick={onItemClick}
-                />
+                <FeaturedDropdownItem {...featuredUpdate} onClick={onItemClick} />
                 {updates.length > 1 && (
                   <>
                     <div className="pb-1">
                       {restUpdates.map((update, index) => (
-                        <DropdownItem
-                          key={index}
-                          {...update}
-                          onClick={onItemClick}
-                        />
+                        <DropdownItem key={index} {...update} onClick={onItemClick} />
                       ))}
                     </div>
                   </>
@@ -258,9 +241,7 @@ const FeaturedDropdownItem = ({
           <div className="flex items-start gap-4">
             <div className="flex-1 *:text-base">
               <h3 className="font-medium">{title}</h3>
-              <p className="font-normal text-f1-foreground-secondary">
-                {updated}
-              </p>
+              <p className="font-normal text-f1-foreground-secondary">{updated}</p>
             </div>
             {unread && <UnreadDot className="mt-1.5" />}
           </div>
@@ -270,13 +251,7 @@ const FeaturedDropdownItem = ({
   )
 }
 
-const DropdownItem = ({
-  title,
-  href,
-  updated,
-  unread = false,
-  onClick,
-}: ProductUpdate) => {
+const DropdownItem = ({ title, href, updated, unread = false, onClick }: ProductUpdate) => {
   const itemClass = cn("flex flex-col items-stretch gap-3 w-full")
 
   return (
@@ -286,17 +261,12 @@ const DropdownItem = ({
         target="_blank"
         referrerPolicy="no-referrer"
         rel="noopener noreferrer"
-        className={cn(
-          itemClass,
-          "text-f1-foreground no-underline hover:cursor-pointer"
-        )}
+        className={cn(itemClass, "text-f1-foreground no-underline hover:cursor-pointer")}
       >
         <div className="flex items-start gap-4">
           <div className="flex-1 *:text-base">
             <h3 className="text-pretty font-medium">{title}</h3>
-            <p className="font-normal text-f1-foreground-secondary">
-              {updated}
-            </p>
+            <p className="font-normal text-f1-foreground-secondary">{updated}</p>
           </div>
           {unread && <UnreadDot className="mt-1.5" />}
         </div>
@@ -355,9 +325,7 @@ const BaseScreen = ({
       </div>
       <div className="flex flex-1 flex-col gap-1 text-center *:text-base">
         <h3 className="text-pretty font-medium">{title}</h3>
-        <p className="font-normal text-f1-foreground-secondary">
-          {description}
-        </p>
+        <p className="font-normal text-f1-foreground-secondary">{description}</p>
       </div>
       {button}
     </div>
@@ -400,12 +368,7 @@ const ErrorScreen = ({
 )
 
 const ProductUpdatesSkeleton = () => (
-  <div
-    className="flex flex-col"
-    role="status"
-    aria-busy="true"
-    aria-live="polite"
-  >
+  <div className="flex flex-col" role="status" aria-busy="true" aria-live="polite">
     <div className="p-2">
       <Skeleton className="h-56 w-full rounded" />
       <div className="flex basis-1/3 flex-row justify-between gap-2 p-3">

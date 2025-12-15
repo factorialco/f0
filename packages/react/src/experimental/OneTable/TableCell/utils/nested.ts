@@ -8,8 +8,7 @@ export const PADDING_TOP = 8
 export const BUTTON_HEIGHT = 32
 export const BUTTON_PADDING = 4
 export const CONNECTOR_WIDTH = 40
-export const CONNECTOR_WIDTH_WITH_CHILDREN =
-  CONNECTOR_WIDTH - CHEVRON_PARENT_SIZE
+export const CONNECTOR_WIDTH_WITH_CHILDREN = CONNECTOR_WIDTH - CHEVRON_PARENT_SIZE
 
 export const getNestedMarginLeft = ({
   depth,
@@ -38,10 +37,7 @@ export const isFirstCellWithDepth = (firstCell: boolean, depth: number) => {
   return firstCell && depth > 0
 }
 
-export const isFirstCellWithChildren = (
-  firstCell: boolean,
-  hasChildren: boolean
-) => {
+export const isFirstCellWithChildren = (firstCell: boolean, hasChildren: boolean) => {
   return firstCell && hasChildren
 }
 
@@ -49,10 +45,7 @@ export const isFirstCellExpanded = (expanded: boolean, firstCell: boolean) => {
   return expanded && firstCell
 }
 
-export const isFirstCellWithTableChildren = (
-  firstCell: boolean,
-  tableWithChildren: boolean
-) => {
+export const isFirstCellWithTableChildren = (firstCell: boolean, tableWithChildren: boolean) => {
   return firstCell && tableWithChildren
 }
 
@@ -61,9 +54,7 @@ export const isFirstCellWithNoChildrenAndTableChildren = (
   hasChildren: boolean,
   tableWithChildren: boolean
 ) => {
-  return (
-    !hasChildren && isFirstCellWithTableChildren(firstCell, tableWithChildren)
-  )
+  return !hasChildren && isFirstCellWithTableChildren(firstCell, tableWithChildren)
 }
 
 export const isFirstCellDetailed = (
@@ -76,8 +67,7 @@ export const isFirstCellDetailed = (
 export const emptyDetailedCellClassName = (
   nestedRowProps?: NestedRowProps & { rowWithChildren?: boolean }
 ) => {
-  const { nestedVariant, onLoadMoreChildren, rowWithChildren } =
-    nestedRowProps ?? {}
+  const { nestedVariant, onLoadMoreChildren, rowWithChildren } = nestedRowProps ?? {}
 
   return (
     nestedVariant === "detailed" &&

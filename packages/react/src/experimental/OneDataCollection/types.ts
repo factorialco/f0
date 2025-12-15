@@ -1,8 +1,5 @@
 import { IconType } from "@/components/F0Icon"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/components/OneFilterPicker/types"
+import type { FiltersDefinition, FiltersState } from "@/components/OneFilterPicker/types"
 import {
   DataError,
   GroupingDefinition,
@@ -42,14 +39,8 @@ export type BulkActionDefinition = {
  */
 export type ExtractPropertyKeys<RecordType> = keyof RecordType
 
-export type OnBulkActionCallback<
-  Record extends RecordType,
-  Filters extends FiltersDefinition,
-> = (
-  ...args: [
-    action: BulkAction,
-    ...Parameters<OnSelectItemsCallback<Record, Filters>>,
-  ]
+export type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (
+  ...args: [action: BulkAction, ...Parameters<OnSelectItemsCallback<Record, Filters>>]
 ) => void
 
 export type OnLoadDataCallback<

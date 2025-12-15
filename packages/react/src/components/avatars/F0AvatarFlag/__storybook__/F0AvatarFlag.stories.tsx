@@ -11,12 +11,7 @@ const meta: Meta<typeof F0AvatarFlag> = {
   title: "Avatars/AvatarFlag",
   tags: ["autodocs"],
   argTypes: {
-    ...getBaseAvatarArgTypes([
-      "size",
-      "aria-label",
-      "aria-labelledby",
-      "badge",
-    ]),
+    ...getBaseAvatarArgTypes(["size", "aria-label", "aria-labelledby", "badge"]),
     flag: {
       control: "text",
       description: "The flag name to display",
@@ -25,9 +20,7 @@ const meta: Meta<typeof F0AvatarFlag> = {
   parameters: {
     docs: {
       description: {
-        component: ["A flag avatar component."]
-          .map((line) => `<p>${line}</p>`)
-          .join(""),
+        component: ["A flag avatar component."].map((line) => `<p>${line}</p>`).join(""),
       },
     },
   },

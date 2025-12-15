@@ -10,11 +10,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable"
+import { arrayMove, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useState } from "react"
 import { PageLayoutGroupComponent } from "../../types"
@@ -78,11 +74,7 @@ export const GroupMasonry = ({
 
   return (
     <div className={cn("flex flex-wrap items-stretch gap-4", main && "flex-1")}>
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <SortableContext items={items}>
           {items.map((block) => (
             <SortableBlock key={block.id} id={block.id}>
@@ -105,5 +97,4 @@ export const GroupMasonry = ({
 
 GroupMasonry.displayName = "GroupMasonry"
 // Mark as a valid PageLayoutGroup component
-;(GroupMasonry as unknown as PageLayoutGroupComponent).__isPageLayoutGroup =
-  true
+;(GroupMasonry as unknown as PageLayoutGroupComponent).__isPageLayoutGroup = true

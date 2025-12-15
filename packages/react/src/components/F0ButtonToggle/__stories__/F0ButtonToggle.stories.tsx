@@ -10,8 +10,7 @@ const meta = {
     layout: "centered",
     docs: {
       description: {
-        component:
-          "A button that can be toggled between two states. Works like a checkbox",
+        component: "A button that can be toggled between two states. Works like a checkbox",
       },
     },
     design: {
@@ -62,8 +61,7 @@ const meta = {
     },
     disabled: {
       control: "boolean",
-      description:
-        "The button is inactive and does not respond to user interaction.",
+      description: "The button is inactive and does not respond to user interaction.",
     },
     onSelectedChange: {
       action: "selected",

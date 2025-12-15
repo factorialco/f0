@@ -87,10 +87,7 @@ export function MetadataValue({
         </div>
       ) : (
         <div
-          className={cn(
-            "flex flex-col gap-1 [&>div]:w-fit",
-            value.tags.length > 1 && "-mt-[3px]"
-          )}
+          className={cn("flex flex-col gap-1 [&>div]:w-fit", value.tags.length > 1 && "-mt-[3px]")}
         >
           {value.tags.map((tag) => (
             <F0TagRaw key={tag} text={tag} />

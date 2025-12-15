@@ -1,18 +1,11 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
-import {
-  GroupingDefinition,
-  GroupingState,
-  RecordType,
-} from "@/hooks/datasource"
+import { GroupingDefinition, GroupingState, RecordType } from "@/hooks/datasource"
 import { SortOrder } from "@/hooks/datasource/types/sortings.typings"
 import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-type GroupingSelectorProps<
-  R extends RecordType,
-  Grouping extends GroupingDefinition<R>,
-> = {
+type GroupingSelectorProps<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (groupingState: GroupingState<R, Grouping>) => void
@@ -21,20 +14,14 @@ type GroupingSelectorProps<
 
 const EmptyGroupingValue = "__no-grouping__"
 
-export const GroupingSelector = <
-  R extends RecordType,
-  Grouping extends GroupingDefinition<R>,
->({
+export const GroupingSelector = <R extends RecordType, Grouping extends GroupingDefinition<R>>({
   grouping,
   currentGrouping,
   onGroupingChange,
   hideLabel = false,
 }: GroupingSelectorProps<R, Grouping>) => {
   const i18n = useI18n()
-  if (
-    !grouping ||
-    (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2)
-  ) {
+  if (!grouping || (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2)) {
     return null
   }
 
@@ -78,9 +65,9 @@ export const GroupingSelector = <
                       field: value as keyof Grouping["groupBy"],
                       order:
                         (
-                          grouping.groupBy[
-                            value as keyof Grouping["groupBy"]
-                          ] as { defaultDirection?: SortOrder }
+                          grouping.groupBy[value as keyof Grouping["groupBy"]] as {
+                            defaultDirection?: SortOrder
+                          }
                         )?.defaultDirection ??
                         currentGrouping?.order ??
                         "asc",

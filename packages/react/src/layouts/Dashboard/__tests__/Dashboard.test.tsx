@@ -36,11 +36,7 @@ vi.mock("../components/DashboardWidget", () => ({
     draggable?: boolean
     children: React.ReactNode
   }) => (
-    <div
-      data-testid="dashboard-widget"
-      data-title={title}
-      data-draggable={draggable}
-    >
+    <div data-testid="dashboard-widget" data-title={title} data-draggable={draggable}>
       <div data-testid="widget-title">{title}</div>
       {children}
     </div>
@@ -52,9 +48,7 @@ describe("Dashboard", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    const module = await import(
-      "../../../components/Utilities/F0GridStack/F0GridStack"
-    )
+    const module = await import("../../../components/Utilities/F0GridStack/F0GridStack")
     mockF0GridStack = vi.mocked(module.F0GridStack)
   })
 
@@ -84,10 +78,7 @@ describe("Dashboard", () => {
       zeroRender(<Dashboard widgets={[]} />)
 
       expect(screen.getByTestId("f0-grid-stack")).toBeInTheDocument()
-      expect(screen.getByTestId("f0-grid-stack")).toHaveAttribute(
-        "data-widgets-count",
-        "0"
-      )
+      expect(screen.getByTestId("f0-grid-stack")).toHaveAttribute("data-widgets-count", "0")
     })
 
     it("should render with widgets", () => {
@@ -118,10 +109,7 @@ describe("Dashboard", () => {
 
       zeroRender(<Dashboard widgets={widgets} />)
 
-      expect(screen.getByTestId("f0-grid-stack")).toHaveAttribute(
-        "data-widgets-count",
-        "2"
-      )
+      expect(screen.getByTestId("f0-grid-stack")).toHaveAttribute("data-widgets-count", "2")
     })
 
     it("should support forwardRef", () => {
@@ -324,9 +312,7 @@ describe("Dashboard", () => {
       ]
 
       // Test edit mode = false (default)
-      const { rerender } = zeroRender(
-        <Dashboard widgets={widgets} editMode={false} />
-      )
+      const { rerender } = zeroRender(<Dashboard widgets={widgets} editMode={false} />)
 
       let callArgs = mockF0GridStack.mock.calls[0][0]
       let gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]
@@ -545,9 +531,7 @@ describe("Dashboard", () => {
         },
       ]
 
-      const { rerender } = zeroRender(
-        <Dashboard widgets={widgets} editMode={false} />
-      )
+      const { rerender } = zeroRender(<Dashboard widgets={widgets} editMode={false} />)
 
       let callArgs = mockF0GridStack.mock.calls[0][0]
       let gridWidgets = callArgs.widgets as GridStackReactDashboardWidget[]

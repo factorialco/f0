@@ -154,10 +154,11 @@ export const famousEmployees: EntitySelectEntity[] = [
   },
 ]
 
-export const famousEmployeesAsSubItems: EntitySelectSubEntity[] =
-  famousEmployees.map((employee) => ({
+export const famousEmployeesAsSubItems: EntitySelectSubEntity[] = famousEmployees.map(
+  (employee) => ({
     subId: employee.id,
     subName: employee.name,
     subAvatar: employee.avatar,
     subSearchKeys: employee.searchKeys,
-  }))
+  })
+)

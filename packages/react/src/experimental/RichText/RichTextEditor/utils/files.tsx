@@ -8,9 +8,7 @@ const handleAddFiles = (
   setFiles: (files: File[]) => void
 ) => {
   if (filesConfig) {
-    const updatedFiles = filesConfig.multipleFiles
-      ? [...files, ...newFiles]
-      : newFiles
+    const updatedFiles = filesConfig.multipleFiles ? [...files, ...newFiles] : newFiles
     setFiles(updatedFiles)
     filesConfig.onFiles(updatedFiles)
   }
@@ -30,13 +28,8 @@ const handleRemoveFile = (
   }
 }
 
-const getAcceptFileTypeString = (
-  filesConfig: filesConfig | undefined
-): string => {
-  if (
-    filesConfig?.acceptedFileType &&
-    filesConfig.acceptedFileType.length > 0
-  ) {
+const getAcceptFileTypeString = (filesConfig: filesConfig | undefined): string => {
+  if (filesConfig?.acceptedFileType && filesConfig.acceptedFileType.length > 0) {
     return filesConfig.acceptedFileType
       .map((type) => {
         switch (type) {

@@ -18,9 +18,7 @@ export const LoadingSkeleton = forwardRef<HTMLDivElement, LoadingSkeletonProps>(
     return (
       <div ref={ref} className="space-y-1" aria-hidden={!showPlaceholders}>
         {showPlaceholders &&
-          Array.from({ length: count }).map((_, i) => (
-            <F0Card.Skeleton compact key={i} />
-          ))}
+          Array.from({ length: count }).map((_, i) => <F0Card.Skeleton compact key={i} />)}
       </div>
     )
   }

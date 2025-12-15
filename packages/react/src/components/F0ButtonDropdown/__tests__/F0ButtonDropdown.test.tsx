@@ -6,14 +6,7 @@ import { F0ButtonDropdown } from "../index"
 // Mock the imported components
 vi.mock("@/ui/Action", () => ({
   actionSizes: ["sm", "md", "lg"],
-  Action: ({
-    children,
-    prepend,
-    onClick,
-    appendOutside,
-    disabled,
-    ...props
-  }) => (
+  Action: ({ children, prepend, onClick, appendOutside, disabled, ...props }) => (
     <>
       <button onClick={onClick} disabled={disabled} {...props}>
         {prepend && <div data-testid="action-prepend">{prepend}</div>}
@@ -49,12 +42,7 @@ describe("F0ButtonDropdown", () => {
   const openDropdown = async (user: ReturnType<typeof userEvent.setup>) => {
     user.click(screen.getByTestId("button-menu"))
 
-    await waitFor(() =>
-      expect(screen.getByTestId("dropdown")).toHaveAttribute(
-        "data-open",
-        "true"
-      )
-    )
+    await waitFor(() => expect(screen.getByTestId("dropdown")).toHaveAttribute("data-open", "true"))
   }
 
   const mockIcons: Record<string, IconType> = {
@@ -85,38 +73,28 @@ describe("F0ButtonDropdown", () => {
   })
 
   it("renders with provided value", () => {
-    render(
-      <F0ButtonDropdown items={mockItems} value="item2" onClick={mockOnClick} />
-    )
+    render(<F0ButtonDropdown items={mockItems} value="item2" onClick={mockOnClick} />)
 
     expect(screen.getByTestId("button-main")).toBeDefined()
     expect(screen.getByTestId("action-label").textContent).toBe("Item 2")
   })
 
   it("passes dropdown items excluding the selected item", () => {
-    render(
-      <F0ButtonDropdown items={mockItems} value="item1" onClick={mockOnClick} />
-    )
+    render(<F0ButtonDropdown items={mockItems} value="item1" onClick={mockOnClick} />)
 
     const dropdownElement = screen.getByTestId("dropdown")
-    const passedItems = JSON.parse(
-      dropdownElement.getAttribute("data-items") || "[]"
-    )
+    const passedItems = JSON.parse(dropdownElement.getAttribute("data-items") || "[]")
 
     expect(passedItems).toHaveLength(2)
     expect(passedItems[0].label).toBe("Item 2")
     expect(passedItems[1].label).toBe("Item 3")
-    expect(
-      passedItems.find((item: { label: string }) => item.label === "Item 1")
-    ).toBeUndefined()
+    expect(passedItems.find((item: { label: string }) => item.label === "Item 1")).toBeUndefined()
     expect(mockOnClick).not.toHaveBeenCalled()
   })
 
   it("calls onClick with correct values when button is clicked", async () => {
     const user = userEvent.setup()
-    render(
-      <F0ButtonDropdown items={mockItems} value="item2" onClick={mockOnClick} />
-    )
+    render(<F0ButtonDropdown items={mockItems} value="item2" onClick={mockOnClick} />)
 
     await user.click(screen.getByTestId("button-main"))
 
@@ -126,13 +104,7 @@ describe("F0ButtonDropdown", () => {
 
   it("does not open dropdown when disabled", async () => {
     const user = userEvent.setup()
-    render(
-      <F0ButtonDropdown
-        items={mockItems}
-        disabled={true}
-        onClick={mockOnClick}
-      />
-    )
+    render(<F0ButtonDropdown items={mockItems} disabled={true} onClick={mockOnClick} />)
 
     expect(screen.getByTestId("button-main").disabled).toBe(true)
     expect(screen.getByTestId("button-menu").disabled).toBe(true)
@@ -145,9 +117,7 @@ describe("F0ButtonDropdown", () => {
 
   it.skip("changes selected value when dropdown item is clicked", async () => {
     const user = userEvent.setup()
-    render(
-      <F0ButtonDropdown items={mockItems} value="item1" onClick={mockOnClick} />
-    )
+    render(<F0ButtonDropdown items={mockItems} value="item1" onClick={mockOnClick} />)
 
     await openDropdown(user)
 

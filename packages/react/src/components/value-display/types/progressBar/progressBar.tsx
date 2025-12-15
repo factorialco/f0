@@ -18,10 +18,7 @@ export interface ProgressBarValue extends WithPlaceholder {
 
 export type ProgressBarCellValue = number | undefined | ProgressBarValue
 
-export const ProgressBarCell = (
-  args: ProgressBarCellValue,
-  _meta: ValueDisplayRendererContext
-) => {
+export const ProgressBarCell = (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => {
   const resolvedValue = resolveValue<number>(args, "value")
   const isPlaceholder = isShowingPlaceholder(args, "value")
 
@@ -31,10 +28,7 @@ export const ProgressBarCell = (
 
   if (isPlaceholder) {
     return (
-      <span
-        className="text-f1-foreground-secondary"
-        data-cell-type="progressBar"
-      >
+      <span className="text-f1-foreground-secondary" data-cell-type="progressBar">
         {resolvedValue}
       </span>
     )
@@ -42,23 +36,16 @@ export const ProgressBarCell = (
 
   // After placeholder check, we know it's a number
   const value = resolvedValue as number
-  const max =
-    typeof args === "object" && "max" in args ? (args.max ?? 100) : 100
-  const label =
-    typeof args === "object" && "label" in args ? args.label : undefined
-  const hideLabel =
-    typeof args === "object" && "hideLabel" in args ? args.hideLabel : undefined
-  const color =
-    typeof args === "object" && "color" in args ? args.color : undefined
+  const max = typeof args === "object" && "max" in args ? (args.max ?? 100) : 100
+  const label = typeof args === "object" && "label" in args ? args.label : undefined
+  const hideLabel = typeof args === "object" && "hideLabel" in args ? args.hideLabel : undefined
+  const color = typeof args === "object" && "color" in args ? args.color : undefined
 
   const barColor = color ? getColor(color) : getColor("categorical-1")
   const percentage = (value / max) * 100
 
   return (
-    <div
-      className="flex w-full items-center gap-2"
-      data-cell-type="progressBar"
-    >
+    <div className="flex w-full items-center gap-2" data-cell-type="progressBar">
       <div className="min-w-16 flex-grow">
         <Progress
           color={barColor}
@@ -70,9 +57,7 @@ export const ProgressBarCell = (
         />
       </div>
       {!hideLabel && (
-        <div className="flex-shrink-0 text-sm font-medium text-f1-foreground">
-          {label}
-        </div>
+        <div className="flex-shrink-0 text-sm font-medium text-f1-foreground">{label}</div>
       )}
     </div>
   )

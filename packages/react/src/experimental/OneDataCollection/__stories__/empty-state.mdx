@@ -13,8 +13,8 @@ import * as EmptyState from "./empty-states.stories"
 
 ## Introduction
 
-In some cases the data collection might not have any data to display. In this
-case it will show a empty state instead of the data collection visualization.
+In some cases the data collection might not have any data to display. In this case it will show a
+empty state instead of the data collection visualization.
 
 There are 3 types of empty states:
 
@@ -36,19 +36,18 @@ When the data fetch returns an error
 
 <Canvas of={EmptyState.ErrorExample} />
 
-By default the data collection will provides default empty states for each of
-the types. (title, description, emoji, actions like clear filters, reload, etc)
+By default the data collection will provides default empty states for each of the types. (title,
+description, emoji, actions like clear filters, reload, etc)
 
-So you dont need to provide any empty states if you are happy with the default
-ones.
+So you dont need to provide any empty states if you are happy with the default ones.
 
 ## Customizing the empty states
 
-You can customize the empty states by passing the `emptyStates` prop to the data
-collection to override the default empty states values.
+You can customize the empty states by passing the `emptyStates` prop to the data collection to
+override the default empty states values.
 
-You can override only the values you want to customize, for example if you want
-to change the actions of the `no data`` empty state you can do the following:
+You can override only the values you want to customize, for example if you want to change the
+actions of the `no data`` empty state you can do the following:
 
 ```tsx
 const emptyStates = {
@@ -71,8 +70,7 @@ const emptyStates = {
 />
 ```
 
-This will keep the default empty states for the other types, the title,
-description, emoji, etc of the `no data` empty state and only change the actions
-of the `no data` empty state.
+This will keep the default empty states for the other types, the title, description, emoji, etc of
+the `no data` empty state and only change the actions of the `no data` empty state.
 
 <Canvas of={EmptyState.CustomMessagesAndActions} />

@@ -17,8 +17,7 @@ const meta = {
     layout: "padded",
     docs: {
       description: {
-        component:
-          "Kanban view visualization. Displays records distributed across lanes.",
+        component: "Kanban view visualization. Displays records distributed across lanes.",
       },
     },
   },
@@ -113,9 +112,7 @@ export const BasicKanbanVisualization: Story = {
         defaultSelectedItems={{
           allSelected: false,
           items: new Map(
-            items
-              .slice(0, 3)
-              .map((item) => [item.id, { id: item.id, checked: true }])
+            items.slice(0, 3).map((item) => [item.id, { id: item.id, checked: true }])
           ),
           groups: new Map(),
         }}

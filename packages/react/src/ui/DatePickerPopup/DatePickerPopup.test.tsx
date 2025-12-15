@@ -53,9 +53,7 @@ describe("OneDatePickerPopup", () => {
 
     await user.click(screen.getByText("Open Date Picker"))
     expect(screen.getByRole("option", { name: "Today" })).toBeInTheDocument()
-    expect(
-      screen.getByRole("option", { name: "Yesterday" })
-    ).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "Yesterday" })).toBeInTheDocument()
   })
 
   it("calls onSelect when a preset is selected", async () => {
@@ -71,12 +69,7 @@ describe("OneDatePickerPopup", () => {
 
   it("shows granularity selector when multiple granularities are provided", async () => {
     const user = userEvent.setup()
-    render(
-      <DatePickerPopup
-        {...defaultProps}
-        granularities={["day", "week", "month"]}
-      />
-    )
+    render(<DatePickerPopup {...defaultProps} granularities={["day", "week", "month"]} />)
 
     await user.click(screen.getByText("Open Date Picker"))
     // Check for the presence of granularity options by text
@@ -100,9 +93,7 @@ describe("OneDatePickerPopup", () => {
     const minDate = new Date("2024-01-01")
     const maxDate = new Date("2024-12-31")
 
-    render(
-      <DatePickerPopup {...defaultProps} minDate={minDate} maxDate={maxDate} />
-    )
+    render(<DatePickerPopup {...defaultProps} minDate={minDate} maxDate={maxDate} />)
 
     await user.click(screen.getByText("Open Date Picker"))
     // Note: This is a basic test. In a real scenario, you'd want to verify

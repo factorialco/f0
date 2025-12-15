@@ -6,13 +6,7 @@ export type CalloutAction = {
   icon?: IconType
 }
 
-export const variants = [
-  "ai",
-  "critical",
-  "positive",
-  "info",
-  "warning",
-] as const
+export const variants = ["ai", "critical", "positive", "info", "warning"] as const
 export type CalloutVariant = (typeof variants)[number]
 
 export interface CalloutInternalProps {

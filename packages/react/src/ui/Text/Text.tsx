@@ -4,16 +4,10 @@ import { cn } from "@/lib/utils"
 import type React from "react"
 import { createElement, forwardRef } from "react"
 import { type AsAllowedList } from "./types"
-import {
-  defaultTag,
-  textVariants,
-  type TextVariant,
-  type TextVariants,
-} from "./variants"
+import { defaultTag, textVariants, type TextVariant, type TextVariants } from "./variants"
 
 export interface TextProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "className">,
-    React.RefAttributes<HTMLElement> {
+  extends Omit<React.HTMLAttributes<HTMLElement>, "className">, React.RefAttributes<HTMLElement> {
   /**
    * Content to be rendered
    */
@@ -70,17 +64,7 @@ export interface TextProps
  */
 export const Text = forwardRef<HTMLElement, TextProps>(
   (
-    {
-      content,
-      variant,
-      align,
-      className,
-      as,
-      ellipsis,
-      noEllipsisTooltip,
-      markdown,
-      ...htmlProps
-    },
+    { content, variant, align, className, as, ellipsis, noEllipsisTooltip, markdown, ...htmlProps },
     forwardedRef
   ) => {
     const asTag = as ?? defaultTag[variant ?? "body"]

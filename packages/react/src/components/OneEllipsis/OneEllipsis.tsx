@@ -1,11 +1,6 @@
 import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
 
 export const tags = [
@@ -124,9 +119,7 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
           lineClamp: lines > 1 ? lines : undefined,
         },
         ...props,
-        ...(markdown && html
-          ? { dangerouslySetInnerHTML: { __html: html } }
-          : {}),
+        ...(markdown && html ? { dangerouslySetInnerHTML: { __html: html } } : {}),
       },
       markdown ? undefined : children
     )

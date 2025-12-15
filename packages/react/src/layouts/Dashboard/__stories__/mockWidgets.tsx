@@ -12,15 +12,8 @@ const getRandomArrayElement = <T,>(array: readonly T[]): T => {
   return array[Math.floor(Math.random() * array.length)]
 }
 
-const generateRandomData = (
-  length: number,
-  min: number = 0,
-  max: number = 100
-): number[] => {
-  return Array.from(
-    { length },
-    () => Math.floor(Math.random() * (max - min + 1)) + min
-  )
+const generateRandomData = (length: number, min: number = 0, max: number = 100): number[] => {
+  return Array.from({ length }, () => Math.floor(Math.random() * (max - min + 1)) + min)
 }
 
 const months = [
@@ -87,11 +80,7 @@ const getRandomBarChartOptions = (): ChartOptions => {
         {
           name: "Data",
           type: "bar",
-          data: generateRandomData(
-            getRandomArrayElement([departments, locations]).length,
-            5,
-            150
-          ),
+          data: generateRandomData(getRandomArrayElement([departments, locations]).length, 5, 150),
         },
       ],
     }
@@ -111,11 +100,7 @@ const getRandomBarChartOptions = (): ChartOptions => {
       },
       xAxis: {
         type: "category",
-        data: getRandomArrayElement([
-          departments,
-          locations,
-          shortMonths.slice(0, 6),
-        ]),
+        data: getRandomArrayElement([departments, locations, shortMonths.slice(0, 6)]),
       },
       yAxis: {
         type: "value",
@@ -124,11 +109,7 @@ const getRandomBarChartOptions = (): ChartOptions => {
         name,
         type: "bar" as const,
         data: generateRandomData(
-          getRandomArrayElement([
-            departments,
-            locations,
-            shortMonths.slice(0, 6),
-          ]).length,
+          getRandomArrayElement([departments, locations, shortMonths.slice(0, 6)]).length,
           0,
           150
         ),
@@ -235,11 +216,7 @@ const getRandomLineChartOptions = (): ChartOptions => {
 }
 
 const getRandomAreaChartOptions = (): ChartOptions => {
-  const variant = getRandomArrayElement([
-    "single",
-    "multiple",
-    "dashed",
-  ] as const)
+  const variant = getRandomArrayElement(["single", "multiple", "dashed"] as const)
   const categories = shortMonths.slice(0, 6)
 
   if (variant === "single") {
@@ -338,11 +315,7 @@ const getRandomAreaChartOptions = (): ChartOptions => {
 }
 
 const getRandomPieChartOptions = (): ChartOptions => {
-  const variant = getRandomArrayElement([
-    "simple",
-    "donut",
-    "withLabels",
-  ] as const)
+  const variant = getRandomArrayElement(["simple", "donut", "withLabels"] as const)
 
   const pieDataSets = [
     [
@@ -370,11 +343,7 @@ const getRandomPieChartOptions = (): ChartOptions => {
     return {
       series: [
         {
-          name: getRandomArrayElement([
-            "Gender Distribution",
-            "Work Location",
-            "Employment Type",
-          ]),
+          name: getRandomArrayElement(["Gender Distribution", "Work Location", "Employment Type"]),
           type: "pie",
           radius: "60%",
           data,
@@ -459,11 +428,7 @@ const getRandomFunnelChartOptions = (): ChartOptions => {
 
   return {
     title: {
-      text: getRandomArrayElement([
-        "Recruitment Pipeline",
-        "Sales Pipeline",
-        "Conversion Funnel",
-      ]),
+      text: getRandomArrayElement(["Recruitment Pipeline", "Sales Pipeline", "Conversion Funnel"]),
     },
     tooltip: {
       trigger: "item",
@@ -516,9 +481,7 @@ const getRandomRadarChartOptions = (): ChartOptions => {
         name: "Budget vs spending",
         type: "radar",
         data: names.map((name) => ({
-          value: selectedIndicators.map((ind) =>
-            Math.floor(Math.random() * ind.max)
-          ),
+          value: selectedIndicators.map((ind) => Math.floor(Math.random() * ind.max)),
           name,
         })),
       },
@@ -545,11 +508,7 @@ const getRandomHorizontalBarChartOptions = (): ChartOptions => {
       },
       series: [
         {
-          name: getRandomArrayElement([
-            "Successful hires",
-            "Performance",
-            "Sales",
-          ]),
+          name: getRandomArrayElement(["Successful hires", "Performance", "Sales"]),
           type: "bar",
           data: generateRandomData(10, 10, 30),
           label: {
@@ -620,10 +579,7 @@ export const TableWidget = () => {
   const mockVisualizations = getMockVisualizations()
   return (
     <div className="flex h-full flex-1">
-      <OneDataCollectionExampleComponent
-        fullHeight
-        visualizations={[mockVisualizations.table]}
-      />
+      <OneDataCollectionExampleComponent fullHeight visualizations={[mockVisualizations.table]} />
     </div>
   )
 }

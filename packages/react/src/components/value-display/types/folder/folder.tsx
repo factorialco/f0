@@ -10,6 +10,4 @@ interface FolderValue {
 }
 export type FolderCellValue = FolderValue
 
-export const FolderCell = (args: FolderCellValue) => (
-  <IconCell icon={Folder} label={args.name} />
-)
+export const FolderCell = (args: FolderCellValue) => <IconCell icon={Folder} label={args.name} />

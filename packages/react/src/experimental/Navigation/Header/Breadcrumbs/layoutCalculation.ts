@@ -12,10 +12,7 @@ const RIGHT_PADDING = 8
  * @param breadcrumbWidths - Widths of individual breadcrumb items
  * @returns Number of items that can be displayed (minimum 2)
  */
-function calculateVisibleCount(
-  containerWidth: number,
-  breadcrumbWidths: number[]
-): number {
+function calculateVisibleCount(containerWidth: number, breadcrumbWidths: number[]): number {
   const totalItems = breadcrumbWidths.length
   if (totalItems <= 2) return totalItems
 
@@ -72,10 +69,7 @@ function calcMinWidth(breadcrumbWidths: number[] = []): number | undefined {
   }
 }
 
-function estimateMinWidth(
-  breadcrumbCount: number,
-  hasCollapsedItem: boolean
-): number {
+function estimateMinWidth(breadcrumbCount: number, hasCollapsedItem: boolean): number {
   return (
     AVERAGE_ITEM_WIDTH * breadcrumbCount +
     (hasCollapsedItem ? COLLAPSED_ITEM_WIDTH : 0) +
@@ -100,10 +94,7 @@ export function calculateBreadcrumbState(
       tailItems: breadcrumbs.slice(breadcrumbs.length - 1),
       collapsedItems: breadcrumbs.slice(1, breadcrumbs.length - 1),
       isOnly: breadcrumbs.length === 1,
-      minWidth: estimateMinWidth(
-        minimalBreadcrumbCount,
-        breadcrumbs.length > 2
-      ),
+      minWidth: estimateMinWidth(minimalBreadcrumbCount, breadcrumbs.length > 2),
     }
   }
 
@@ -126,13 +117,8 @@ export function calculateBreadcrumbState(
   return {
     visibleCount,
     headItem: breadcrumbs[0] || null,
-    tailItems: breadcrumbs.slice(
-      Math.max(1, breadcrumbs.length - (visibleCount - 1))
-    ),
-    collapsedItems: breadcrumbs.slice(
-      1,
-      breadcrumbs.length - (visibleCount - 1)
-    ),
+    tailItems: breadcrumbs.slice(Math.max(1, breadcrumbs.length - (visibleCount - 1))),
+    collapsedItems: breadcrumbs.slice(1, breadcrumbs.length - (visibleCount - 1)),
     isOnly: breadcrumbs.length === 1,
     minWidth: calcMinWidth(breadcrumbWidths),
   }

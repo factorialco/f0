@@ -10,8 +10,7 @@ const defaultMessages = {
   },
   successMessage: {
     title: "Request submitted!",
-    description:
-      "One of our experts will contact you as soon as possible with all the details.",
+    description: "One of our experts will contact you as soon as possible with all the details.",
     buttonLabel: "Discover more products",
     buttonOnClick: () => {
       console.log("buttonOnClick")
@@ -67,9 +66,7 @@ const createStory = (success: boolean) => {
           if (success) {
             await new Promise((resolve) => setTimeout(resolve, 1000))
           } else {
-            await new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("fail")), 1000)
-            )
+            await new Promise((_, reject) => setTimeout(() => reject(new Error("fail")), 1000))
           }
           setIsOpen(true)
         } catch {

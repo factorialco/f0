@@ -16,10 +16,7 @@ export const Thinking = ({ messages }: ThinkingProps) => {
   const translations = useI18n()
 
   return (
-    <AiCollapsibleMessage
-      icon={Lightbulb}
-      title={translations.ai.thoughtsGroupTitle}
-    >
+    <AiCollapsibleMessage icon={Lightbulb} title={translations.ai.thoughtsGroupTitle}>
       <div className="flex flex-col gap-2 pl-7">
         {messages.map((message, index) => (
           <div key={index}>

@@ -36,10 +36,7 @@ describe("RestrictComponent", () => {
 
     render(
       <UserPlatformProvider isDev>
-        <OneRestrictComponent
-          identifier="test-component"
-          allowedRoutes={["/allowed-path"]}
-        >
+        <OneRestrictComponent identifier="test-component" allowedRoutes={["/allowed-path"]}>
           <TestContent />
         </OneRestrictComponent>
       </UserPlatformProvider>
@@ -53,10 +50,7 @@ describe("RestrictComponent", () => {
 
     render(
       <UserPlatformProvider isDev>
-        <OneRestrictComponent
-          identifier="test-component"
-          allowedRoutes={["/allowed-path"]}
-        >
+        <OneRestrictComponent identifier="test-component" allowedRoutes={["/allowed-path"]}>
           <TestContent />
         </OneRestrictComponent>
       </UserPlatformProvider>
@@ -70,10 +64,7 @@ describe("RestrictComponent", () => {
 
     render(
       <UserPlatformProvider isDev>
-        <OneRestrictComponent
-          identifier="test-component"
-          disallowedRoutes={["/disallowed-path"]}
-        >
+        <OneRestrictComponent identifier="test-component" disallowedRoutes={["/disallowed-path"]}>
           <TestContent />
         </OneRestrictComponent>
       </UserPlatformProvider>
@@ -87,10 +78,7 @@ describe("RestrictComponent", () => {
 
     render(
       <UserPlatformProvider isDev>
-        <OneRestrictComponent
-          identifier="test-component"
-          disallowedRoutes={["/disallowed-path"]}
-        >
+        <OneRestrictComponent identifier="test-component" disallowedRoutes={["/disallowed-path"]}>
           <TestContent />
         </OneRestrictComponent>
       </UserPlatformProvider>
@@ -122,11 +110,7 @@ describe("RestrictComponent", () => {
 
     render(
       <UserPlatformProvider isDev>
-        <OneRestrictComponent
-          identifier="test-component"
-          allowedRoutes={[]}
-          disallowedRoutes={[]}
-        >
+        <OneRestrictComponent identifier="test-component" allowedRoutes={[]} disallowedRoutes={[]}>
           <TestContent />
         </OneRestrictComponent>
       </UserPlatformProvider>

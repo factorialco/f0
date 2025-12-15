@@ -1,9 +1,6 @@
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { useI18n } from "@/lib/providers/i18n"
-import {
-  BaseQuestion,
-  BaseQuestionPropsForOtherQuestionComponents,
-} from "../BaseQuestion"
+import { BaseQuestion, BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
@@ -11,15 +8,11 @@ export type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   value?: number | null
 }
 
-export type NumericQuestionProps =
-  BaseQuestionPropsForOtherQuestionComponents & {
-    value?: number | null
-  }
+export type NumericQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+  value?: number | null
+}
 
-export const NumericQuestion = ({
-  value,
-  ...baseQuestionComponentProps
-}: NumericQuestionProps) => {
+export const NumericQuestion = ({ value, ...baseQuestionComponentProps }: NumericQuestionProps) => {
   const { t } = useI18n()
 
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()

@@ -7,16 +7,7 @@ import {
   ChartTooltipContent,
 } from "@/ui/chart"
 import { ForwardedRef } from "react"
-import {
-  Bar,
-  CartesianGrid,
-  ComposedChart,
-  LabelList,
-  Line,
-  Scatter,
-  XAxis,
-  YAxis,
-} from "recharts"
+import { Bar, CartesianGrid, ComposedChart, LabelList, Line, Scatter, XAxis, YAxis } from "recharts"
 
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
@@ -64,10 +55,7 @@ const createScatter = (categoryKey: string) => {
         strokeWidth={2}
         ref={(el) => {
           if (el?.parentElement) {
-            el.parentElement.setAttribute(
-              "aria-label",
-              `Data point: ${getScatterValue()}`
-            )
+            el.parentElement.setAttribute("aria-label", `Data point: ${getScatterValue()}`)
           }
         }}
       />
@@ -102,16 +90,15 @@ type LineChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
   lineType?: "natural" | "linear"
 }
 
-export type ComboChartProps<K extends ChartConfig = ChartConfig> =
-  ChartPropsBase<K> & {
-    label?: boolean
-    legend?: boolean
-    showValueUnderLabel?: boolean
-    bar?: ChartTypeConfig<K>
-    line?: LineChartTypeConfig<K>
-    scatter?: ChartTypeConfig<K>
-    onClick?: (data: ChartDataPoint<K>) => void
-  }
+export type ComboChartProps<K extends ChartConfig = ChartConfig> = ChartPropsBase<K> & {
+  label?: boolean
+  legend?: boolean
+  showValueUnderLabel?: boolean
+  bar?: ChartTypeConfig<K>
+  line?: LineChartTypeConfig<K>
+  scatter?: ChartTypeConfig<K>
+  onClick?: (data: ChartDataPoint<K>) => void
+}
 
 const _ComboChart = <K extends ChartConfig>(
   {
@@ -150,29 +137,17 @@ const _ComboChart = <K extends ChartConfig>(
       : [scatter.categories]
     : []
 
-  const allChartKeys = [
-    ...barCategories,
-    ...lineCategories,
-    ...scatterCategories,
-  ]
+  const allChartKeys = [...barCategories, ...lineCategories, ...scatterCategories]
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       allChartKeys.map((key) =>
-        measureTextWidth(
-          yAxis?.tickFormatter
-            ? yAxis.tickFormatter(`${el[key]}`)
-            : `${el[key]}`
-        )
+        measureTextWidth(yAxis?.tickFormatter ? yAxis.tickFormatter(`${el[key]}`) : `${el[key]}`)
       )
     )
   )
 
-  const leftAxisCharts = [bar, line, scatter].filter(
-    (chart) => chart?.axisPosition === "left"
-  )
-  const rightAxisCharts = [bar, line, scatter].filter(
-    (chart) => chart?.axisPosition === "right"
-  )
+  const leftAxisCharts = [bar, line, scatter].filter((chart) => chart?.axisPosition === "left")
+  const rightAxisCharts = [bar, line, scatter].filter((chart) => chart?.axisPosition === "right")
 
   return (
     <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
@@ -206,9 +181,7 @@ const _ComboChart = <K extends ChartConfig>(
         {!hideTooltip && (
           <ChartTooltip
             {...chartTooltipProps()}
-            content={
-              <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
-            }
+            content={<ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />}
           />
         )}
         {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
@@ -221,9 +194,7 @@ const _ComboChart = <K extends ChartConfig>(
               yAxis.width ??
               maxLabelWidth +
                 20 +
-                (rightAxisCharts.length > 0 && leftAxisCharts[0]?.axisLabel
-                  ? 20
-                  : 0)
+                (rightAxisCharts.length > 0 && leftAxisCharts[0]?.axisLabel ? 20 : 0)
             }
             hide={yAxis.hide || leftAxisCharts.some((chart) => chart?.hideAxis)}
             label={
@@ -248,13 +219,9 @@ const _ComboChart = <K extends ChartConfig>(
               yAxis.width ??
               maxLabelWidth +
                 20 +
-                (leftAxisCharts.length > 0 && rightAxisCharts[0]?.axisLabel
-                  ? 20
-                  : 0)
+                (leftAxisCharts.length > 0 && rightAxisCharts[0]?.axisLabel ? 20 : 0)
             }
-            hide={
-              yAxis.hide || rightAxisCharts.some((chart) => chart?.hideAxis)
-            }
+            hide={yAxis.hide || rightAxisCharts.some((chart) => chart?.hideAxis)}
             label={
               rightAxisCharts[0]?.axisLabel
                 ? {
@@ -273,13 +240,10 @@ const _ComboChart = <K extends ChartConfig>(
             showValueUnderLabel
               ? (props) => {
                   const { x, y, payload } = props
-                  const values =
-                    data.find((d) => d.label === payload.value)?.values || ""
+                  const values = data.find((d) => d.label === payload.value)?.values || ""
 
                   const value =
-                    Object.keys(values).length === 1
-                      ? Object.values(values)?.[0]
-                      : undefined
+                    Object.keys(values).length === 1 ? Object.values(values)?.[0] : undefined
 
                   const normalizedValue =
                     value !== undefined && yAxis.tickFormatter
@@ -364,9 +328,7 @@ const _ComboChart = <K extends ChartConfig>(
             fill={
               dataConfig[category].color
                 ? getColor(dataConfig[category].color)
-                : getCategoricalColor(
-                    barCategories.length + lineCategories.length + index
-                  )
+                : getCategoricalColor(barCategories.length + lineCategories.length + index)
             }
             r={4}
             isAnimationActive={false}

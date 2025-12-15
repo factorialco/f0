@@ -11,10 +11,7 @@ export interface L10nProviderProps {
   l10n: L10nContextValue
 }
 
-export function L10nProvider({
-  children,
-  l10n,
-}: L10nProviderProps): JSX.Element {
+export function L10nProvider({ children, l10n }: L10nProviderProps): JSX.Element {
   return <L10nContext.Provider value={l10n}>{children}</L10nContext.Provider>
 }
 

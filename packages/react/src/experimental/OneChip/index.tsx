@@ -60,14 +60,7 @@ export type ChipProps = BaseChipProps &
     variant?: "default" | "selected"
   }
 
-export const Chip = ({
-  label,
-  variant,
-  onClick,
-  onClose,
-  avatar,
-  icon,
-}: ChipProps) => {
+export const Chip = ({ label, variant, onClick, onClose, avatar, icon }: ChipProps) => {
   return (
     <div
       className={cn(

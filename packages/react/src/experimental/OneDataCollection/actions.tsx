@@ -1,9 +1,6 @@
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown/internal.tsx"
 
-export type PrimaryActionItemDefinition = Pick<
-  DropdownItemObject,
-  "label" | "icon"
-> & {
+export type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon"> & {
   loading?: boolean
   onClick?: () => void | Promise<void>
   disabled?: boolean
@@ -74,9 +71,7 @@ const isSecondaryActionItem = (
   return "label" in item && !("items" in item)
 }
 
-const normalizeSecondaryActions = (
-  items: SecondaryActionsItems
-): SecondaryActionGroup[] => {
+const normalizeSecondaryActions = (items: SecondaryActionsItems): SecondaryActionGroup[] => {
   if (items.every(isSecondaryActionGroup)) {
     return items
   }
@@ -94,10 +89,7 @@ const normalizeSecondaryActions = (
   })) satisfies SecondaryActionGroup[]
 }
 
-type Enumerate<
-  N extends number,
-  Acc extends number[] = [],
-> = Acc["length"] extends N
+type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N
   ? [...Acc, N][number]
   : Enumerate<N, [...Acc, Acc["length"]]>
 
@@ -131,14 +123,10 @@ export const getSecondaryActions = (
  * @param actions - The actions to filter
  * @returns An array of filtered actions
  */
-export const filterActions = (
-  groups: SecondaryActionGroup[]
-): SecondaryActionGroup[] =>
+export const filterActions = (groups: SecondaryActionGroup[]): SecondaryActionGroup[] =>
   groups.map((group) => {
     return {
       ...group,
-      items: group.items.filter(
-        (action) => action.enabled === undefined || action.enabled
-      ),
+      items: group.items.filter((action) => action.enabled === undefined || action.enabled),
     }
   })

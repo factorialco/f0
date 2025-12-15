@@ -12,9 +12,8 @@ import * as MetadataStories from "./Metadata/index.stories"
 
 ### Definition
 
-The Resource header is a structural component that provides context and key
-actions for a resource page. It helps users understand where they are and what
-actions they can perform.
+The Resource header is a structural component that provides context and key actions for a resource
+page. It helps users understand where they are and what actions they can perform.
 
 ### Purpose
 
@@ -52,8 +51,8 @@ actions they can perform.
 
 ## Variants
 
-The Resource header is designed to adapt to different resource types, ensuring a
-clear and contextually relevant presentation of the information.
+The Resource header is designed to adapt to different resource types, ensuring a clear and
+contextually relevant presentation of the information.
 
 ### Person
 
@@ -79,9 +78,8 @@ Designed to display information about a team.
 
 - Keep titles concise and descriptive, with 2-5 words and no punctuation
 - Write descriptions with meaningful context in 1-2 sentences
-- Use action verbs in [verb + noun] format (e.g., "Edit profile" instead of
-  "Profile edition"). Capitalize only the first word unless it's a proper noun
-  (e.g., "Add to Factorial")
+- Use action verbs in [verb + noun] format (e.g., "Edit profile" instead of "Profile edition").
+  Capitalize only the first word unless it's a proper noun (e.g., "Add to Factorial")
 - Ensure metadata labels are clear and consistent across the application
 
 ### Design best practices
@@ -121,12 +119,12 @@ Designed to display information about a team.
 
 #### Layout
 
-- Elements are arranged to prioritize information hierarchy and visual clarity,
-  maintaining a logical order.
-- Predictable alignment reinforces hierarchy, improves navigation, and reduces
-  cognitive load across views.
-- Mandatory components establish a consistent framework, while optional elements
-  that provide flexibility.
+- Elements are arranged to prioritize information hierarchy and visual clarity, maintaining a
+  logical order.
+- Predictable alignment reinforces hierarchy, improves navigation, and reduces cognitive load across
+  views.
+- Mandatory components establish a consistent framework, while optional elements that provide
+  flexibility.
 
 <img
   src="docs/headers/resource-header-layout.png"
@@ -135,13 +133,11 @@ Designed to display information about a team.
 
 ## Resource metadata
 
-Metadata are key elements for displaying contextual information about a
-resource, allowing users to identify and interact with related data efficiently.
-These actions are displayed in the header section and vary depending on the
-context.
+Metadata are key elements for displaying contextual information about a resource, allowing users to
+identify and interact with related data efficiently. These actions are displayed in the header
+section and vary depending on the context.
 
-The metadata section displays key-value pairs with the following
-characteristics:
+The metadata section displays key-value pairs with the following characteristics:
 
 - Label-Data pairs displayed horizontally
 - Each pair consists of a label (grey text) followed by the corresponding data
@@ -152,22 +148,19 @@ characteristics:
 
 ### Variants
 
-1. **Text**: Display a descriptive piece of information or a textual identifier
-   related to the resource.
-2. **Avatar**: Represents entities that can be visualized with an avatar icon.
-   (User, company and team)
-3. **Status**: Represent a state or situation associated with the resource, such
-   as "Active," "Inactive," "Pending.", etc.
-4. **List**: Display team members, task owners, or people associated with a
-   specific resource.
-5. **Data List**: Display a vertical list of related data elements or values
-   associated with the resource. Useful for showing multiple pieces of
-   information in a stacked format.
+1. **Text**: Display a descriptive piece of information or a textual identifier related to the
+   resource.
+2. **Avatar**: Represents entities that can be visualized with an avatar icon. (User, company and
+   team)
+3. **Status**: Represent a state or situation associated with the resource, such as "Active,"
+   "Inactive," "Pending.", etc.
+4. **List**: Display team members, task owners, or people associated with a specific resource.
+5. **Data List**: Display a vertical list of related data elements or values associated with the
+   resource. Useful for showing multiple pieces of information in a stacked format.
 6. **Tag List**: Identify or classify a resource with a generic labels.
 7. **Dot Tag**: Same as TagList, allows to set the color of the tag.
-8. **Date**: Display temporal information in a standardized format. Can show
-   dates like creation dates, due dates, or any other relevant timestamps for
-   the resource.
+8. **Date**: Display temporal information in a standardized format. Can show dates like creation
+   dates, due dates, or any other relevant timestamps for the resource.
 
 ### Guidelines
 
@@ -183,18 +176,17 @@ characteristics:
 
 #### Hover interactions
 
-The metadata fields reveal action options on hover. Each metadata can be
-configured to show relevant actions based on the content type and use case.
+The metadata fields reveal action options on hover. Each metadata can be configured to show relevant
+actions based on the content type and use case.
 
 <Canvas of={MetadataStories.WithActions} />
 
-When hovering over a metadata field, one or more of these actions may be
-displayed:
+When hovering over a metadata field, one or more of these actions may be displayed:
 
 - **Inline Edit**: Enables direct editing of the field content
-- **Quick Copy**: Provides one-click copying of exact values (ideal for
-  financial data, IBANs, account numbers)  
-  By default, the copy button will be placed on the right and the edit button on
-  the left whenever they appear together within the same metadata.
+- **Quick Copy**: Provides one-click copying of exact values (ideal for financial data, IBANs,
+  account numbers)  
+  By default, the copy button will be placed on the right and the edit button on the left whenever
+  they appear together within the same metadata.
 - **Side Panel**: Opens a detailed view or complex editing interface
 - **Tooltip Info**: Shows additional information or context when needed

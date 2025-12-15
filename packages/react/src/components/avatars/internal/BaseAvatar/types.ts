@@ -7,10 +7,7 @@ export const avatarSizes = ["xs", "sm", "md", "lg", "xl", "2xl"] as const
 
 export type AvatarSize = (typeof avatarSizes)[number]
 
-export const sizesMapping: Record<
-  NonNullable<InternalAvatarProps["size"]>,
-  AvatarSize
-> = {
+export const sizesMapping: Record<NonNullable<InternalAvatarProps["size"]>, AvatarSize> = {
   xxlarge: "2xl",
   xlarge: "xl",
   large: "lg",

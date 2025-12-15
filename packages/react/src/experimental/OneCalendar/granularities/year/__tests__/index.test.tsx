@@ -132,11 +132,7 @@ describe("yearGranularity", () => {
     })
 
     it("formats leap year correctly with long format", () => {
-      const result = yearGranularity.toString(
-        new Date(2024, 1, 29),
-        i18n,
-        "long"
-      ) // February 29, 2024 (leap year)
+      const result = yearGranularity.toString(new Date(2024, 1, 29), i18n, "long") // February 29, 2024 (leap year)
       expect(result).toBe("2024")
     })
 
@@ -153,21 +149,11 @@ describe("yearGranularity", () => {
     })
 
     it("formats various single years correctly with long format", () => {
-      expect(
-        yearGranularity.toString(new Date(2020, 5, 15), i18n, "long")
-      ).toBe("2020")
-      expect(
-        yearGranularity.toString(new Date(2021, 5, 15), i18n, "long")
-      ).toBe("2021")
-      expect(
-        yearGranularity.toString(new Date(2022, 5, 15), i18n, "long")
-      ).toBe("2022")
-      expect(
-        yearGranularity.toString(new Date(2023, 5, 15), i18n, "long")
-      ).toBe("2023")
-      expect(
-        yearGranularity.toString(new Date(2024, 5, 15), i18n, "long")
-      ).toBe("2024")
+      expect(yearGranularity.toString(new Date(2020, 5, 15), i18n, "long")).toBe("2020")
+      expect(yearGranularity.toString(new Date(2021, 5, 15), i18n, "long")).toBe("2021")
+      expect(yearGranularity.toString(new Date(2022, 5, 15), i18n, "long")).toBe("2022")
+      expect(yearGranularity.toString(new Date(2023, 5, 15), i18n, "long")).toBe("2023")
+      expect(yearGranularity.toString(new Date(2024, 5, 15), i18n, "long")).toBe("2024")
     })
   })
 

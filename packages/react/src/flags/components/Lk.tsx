@@ -1,18 +1,8 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgLk = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 512 512"
-    ref={ref}
-    {...props}
-  >
-    <path
-      fill="#FFD250"
-      d="M0 0H512V512H0z"
-      vectorEffect="non-scaling-stroke"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 512 512" ref={ref} {...props}>
+    <path fill="#FFD250" d="M0 0H512V512H0z" vectorEffect="non-scaling-stroke" />
     <path
       fill="#FFD250"
       d="M503.171 88.0005H8.82894C6.48779 88.0005 4.24252 88.9304 2.58698 90.5858C0.931445 92.2411 0.00124176 94.4863 0.000976562 96.8275L0.000976563 414.619C0.00124172 416.96 0.931413 419.206 2.58692 420.861C4.24243 422.517 6.4877 423.447 8.82894 423.447H503.172C505.513 423.447 507.758 422.517 509.414 420.861C511.069 419.206 512 416.96 512 414.619V96.8275C511.999 94.4863 511.069 92.2413 509.413 90.586C507.757 88.9308 505.512 88.0008 503.171 88.0005Z"

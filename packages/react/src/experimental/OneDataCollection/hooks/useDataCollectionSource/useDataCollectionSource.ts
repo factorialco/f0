@@ -16,10 +16,7 @@ import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../../item-actions"
 import { navigationFilterTypes } from "../../navigationFilters"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "../../navigationFilters/types"
+import { NavigationFiltersDefinition, NavigationFiltersState } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
 import { DataCollectionSource, DataCollectionSourceDefinition } from "./types"
 
@@ -29,8 +26,7 @@ export const useDataCollectionSource = <
   Sortings extends SortingsDefinition = SortingsDefinition,
   Summaries extends SummariesDefinition = SummariesDefinition,
   ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>,
-  NavigationFilters extends
-    NavigationFiltersDefinition = NavigationFiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
 >(
   source: DataCollectionSourceDefinition<

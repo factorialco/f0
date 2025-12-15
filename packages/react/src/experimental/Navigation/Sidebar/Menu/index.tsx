@@ -5,13 +5,7 @@ import { Counter } from "@/experimental/Information/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import {
-  ChevronDown,
-  Delete,
-  EllipsisHorizontal,
-  MoveDown,
-  MoveUp,
-} from "@/icons/app"
+import { ChevronDown, Delete, EllipsisHorizontal, MoveDown, MoveUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { Link, useNavigation } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
@@ -19,15 +13,7 @@ import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn, focusRing } from "@/lib/utils"
 import { Collapsible, CollapsibleContent } from "@/ui/collapsible"
 import { LayoutGroup, motion, Reorder, useDragControls } from "motion/react"
-import {
-  ReactNode,
-  RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { ReactNode, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DragProvider, useDragContext } from "./DragContext"
 
 export interface MenuItem extends NavigationItem {
@@ -65,23 +51,14 @@ export interface MenuProps {
   onFavoritesChange?: (favorites: FavoriteMenuItem[]) => void
 }
 
-const MenuItemContent = ({
-  item,
-  active,
-}: {
-  item: MenuItem
-  active: boolean
-}) => {
+const MenuItemContent = ({ item, active }: { item: MenuItem; active: boolean }) => {
   return (
     <div className="flex w-full items-center justify-between">
       <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
         <F0Icon
           icon={item.icon}
           size="md"
-          className={cn(
-            "transition-colors",
-            active ? "text-f1-icon-bold" : "text-f1-icon"
-          )}
+          className={cn("transition-colors", active ? "text-f1-icon-bold" : "text-f1-icon")}
         />
         <span>{item.label}</span>
       </div>
@@ -135,8 +112,7 @@ const FavoriteItem = ({
 }) => {
   const t = useI18n()
 
-  const { isDragging, setIsDragging, draggedItemId, setDraggedItemId } =
-    useDragContext()
+  const { isDragging, setIsDragging, draggedItemId, setDraggedItemId } = useDragContext()
   const { isActive } = useNavigation()
   const active = isActive(item.href, { exact: item.exactMatch })
   const wasDragging = useRef(false)
@@ -227,10 +203,7 @@ const FavoriteItem = ({
                 <F0Icon
                   icon={item.icon}
                   size="md"
-                  className={cn(
-                    "transition-colors",
-                    active ? "text-f1-icon-bold" : "text-f1-icon"
-                  )}
+                  className={cn("transition-colors", active ? "text-f1-icon-bold" : "text-f1-icon")}
                 />
               ) : item.avatar ? (
                 <F0Avatar size="xs" avatar={item.avatar} />
@@ -254,11 +227,7 @@ const FavoriteItem = ({
             isItemDragging && "opacity-100"
           )}
         >
-          <Dropdown
-            open={isDropdownOpen}
-            onOpenChange={setIsDropdownOpen}
-            items={dropdownItems}
-          >
+          <Dropdown open={isDropdownOpen} onOpenChange={setIsDropdownOpen} items={dropdownItems}>
             <div className="flex items-center justify-center" role="list">
               <F0Icon icon={EllipsisHorizontal} size="sm" />
             </div>
@@ -343,11 +312,7 @@ const BaseCategory = ({
               transition={{ duration: shouldReduceMotion ? 0 : 0.1 }}
               className="h-3 w-3"
             >
-              <F0Icon
-                icon={ChevronDown}
-                size="xs"
-                className="text-f1-icon-secondary"
-              />
+              <F0Icon icon={ChevronDown} size="xs" className="text-f1-icon-secondary" />
             </motion.div>
           </div>
         </div>
@@ -478,17 +443,9 @@ const CategoryItem = ({
   )
 }
 
-export function Menu({
-  tree,
-  onCollapse,
-  onSort,
-  onFavoritesChange,
-  favorites,
-}: MenuProps) {
+export function Menu({ tree, onCollapse, onSort, onFavoritesChange, favorites }: MenuProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const nonSortableItems = tree.filter(
-    (category) => category.isSortable === false
-  )
+  const nonSortableItems = tree.filter((category) => category.isSortable === false)
   const [sortableItems, setSortableItems] = useState(
     tree.filter((category) => category.isSortable !== false)
   )
@@ -555,17 +512,14 @@ function MenuContent({
 
   const { isDragging } = useDragContext()
   const hasRoot = nonSortableItems.some((category) => category.isRoot)
-  const hasNonSortableItems =
-    nonSortableItems.filter((category) => !category.isRoot).length > 0
+  const hasNonSortableItems = nonSortableItems.filter((category) => !category.isRoot).length > 0
   const hasSortableItems = sortableItems.length > 0
   const favoritesRef = useRef<HTMLDivElement>(null)
-  const [internalFavorites, setInternalFavorites] =
-    useState<FavoriteMenuItem[]>(favorites)
+  const [internalFavorites, setInternalFavorites] = useState<FavoriteMenuItem[]>(favorites)
   const hasFavorites = favorites.length > 0
 
   useEffect(() => {
-    const hasChanged =
-      JSON.stringify(favorites) !== JSON.stringify(internalFavorites)
+    const hasChanged = JSON.stringify(favorites) !== JSON.stringify(internalFavorites)
 
     if (hasChanged) {
       setInternalFavorites(favorites)
@@ -638,16 +592,13 @@ function MenuContent({
   const favoritesContentWrapperClasses = "flex flex-col gap-0.5"
   const favoriteLabelsToIndex = useMemo(
     () =>
-      internalFavorites.reduce<Record<string, Array<number>>>(
-        (acc, item, idx) => {
-          if (!(item.label in acc)) {
-            acc[item.label] = []
-          }
-          acc[item.label].push(idx)
-          return acc
-        },
-        {}
-      ),
+      internalFavorites.reduce<Record<string, Array<number>>>((acc, item, idx) => {
+        if (!(item.label in acc)) {
+          acc[item.label] = []
+        }
+        acc[item.label].push(idx)
+        return acc
+      }, {}),
     [internalFavorites]
   )
 
@@ -657,11 +608,7 @@ function MenuContent({
       internalFavorites.map((item, idx) => (
         <FavoriteItem
           isSortable={!disableDragging}
-          tooltip={
-            (favoriteLabelsToIndex[item.label] ?? []).length > 1
-              ? item.tooltip
-              : undefined
-          }
+          tooltip={(favoriteLabelsToIndex[item.label] ?? []).length > 1 ? item.tooltip : undefined}
           key={`${item.href}-${item.label}`}
           item={item}
           dragConstraints={favoritesRef}
@@ -704,22 +651,13 @@ function MenuContent({
   }, [sortableItems, disableDragging, containerRef, onCollapse, onDragEnd])
 
   return (
-    <div
-      className={cn(
-        "relative",
-        isDragging && "cursor-grabbing [&_*]:cursor-grabbing"
-      )}
-    >
+    <div className={cn("relative", isDragging && "cursor-grabbing [&_*]:cursor-grabbing")}>
       {hasRoot && (
         <div className="flex w-full flex-col gap-3 bg-transparent px-3">
           {nonSortableItems
             .filter((category) => category.isRoot)
             .map((category, index) => (
-              <CategoryItem
-                key={`fixed-${index}`}
-                category={category}
-                onCollapse={onCollapse}
-              />
+              <CategoryItem key={`fixed-${index}`} category={category} onCollapse={onCollapse} />
             ))}
         </div>
       )}
@@ -729,9 +667,7 @@ function MenuContent({
           <BaseCategory title={t.favorites.favorites}>
             <div ref={favoritesRef}>
               {disableDragging ? (
-                <div className={favoritesContentWrapperClasses}>
-                  {favoritesContent}
-                </div>
+                <div className={favoritesContentWrapperClasses}>{favoritesContent}</div>
               ) : (
                 <Reorder.Group
                   axis="y"
@@ -752,26 +688,18 @@ function MenuContent({
           {nonSortableItems
             .filter((category) => !category.isRoot)
             .map((category, index) => (
-              <CategoryItem
-                key={`fixed-${index}`}
-                category={category}
-                onCollapse={onCollapse}
-              />
+              <CategoryItem key={`fixed-${index}`} category={category} onCollapse={onCollapse} />
             ))}
         </div>
       )}
 
       {hasSortableItems && (
         <div
-          className={cn(
-            "mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none"
-          )}
+          className={cn("mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none")}
           ref={containerRef}
         >
           {disableDragging ? (
-            <div className={sortableItemsContentWrapperClasses}>
-              {sortableItemsContent}
-            </div>
+            <div className={sortableItemsContentWrapperClasses}>{sortableItemsContent}</div>
           ) : (
             <Reorder.Group
               axis="y"
@@ -789,10 +717,5 @@ function MenuContent({
   )
 }
 
-const OptionalTooltip = ({
-  tooltip,
-  children,
-}: {
-  tooltip?: string
-  children: React.ReactNode
-}) => (tooltip ? <Tooltip description={tooltip}>{children}</Tooltip> : children)
+const OptionalTooltip = ({ tooltip, children }: { tooltip?: string; children: React.ReactNode }) =>
+  tooltip ? <Tooltip description={tooltip}>{children}</Tooltip> : children

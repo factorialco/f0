@@ -1,9 +1,5 @@
 import { Action } from "../../../../components/F0Select/components/SelectBottomActions"
-import {
-  EntitySelectEntity,
-  EntitySelectNamedGroup,
-  EntitySelectSubEntity,
-} from "../types"
+import { EntitySelectEntity, EntitySelectNamedGroup, EntitySelectSubEntity } from "../types"
 import { MainContent } from "./MainContent"
 import { SecondaryContent } from "./SecondaryContent"
 
@@ -33,14 +29,8 @@ export const Content = ({
   search: string
   onSelect: (entity: EntitySelectEntity) => void
   onRemove: (entity: EntitySelectEntity) => void
-  onSubItemRemove: (
-    parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
-  onSubItemSelect: (
-    parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
+  onSubItemRemove: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void
+  onSubItemSelect: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void
   onClear: () => void
   onSelectAll: () => void
   onSearch: (search: string) => void
@@ -62,8 +52,7 @@ export const Content = ({
   onCreate?: (partialName: string) => void
   onCreateLabel?: string
 }) => {
-  const blockSecondaryContent =
-    (width ?? totalDefaultWidth) < breakpointToShowEmployeeList
+  const blockSecondaryContent = (width ?? totalDefaultWidth) < breakpointToShowEmployeeList
   const isExpanded = !loading && !singleSelector && !blockSecondaryContent
   const defaultWidth = width ?? totalDefaultWidth
   const finalWidthMain = isExpanded ? defaultWidth - asideWidth : defaultWidth
@@ -72,10 +61,7 @@ export const Content = ({
     <div
       className="relative overflow-hidden"
       style={{
-        height:
-          singleSelector && (!actions || actions.length === 0)
-            ? "435px"
-            : "473px",
+        height: singleSelector && (!actions || actions.length === 0) ? "435px" : "473px",
         width: defaultWidth,
       }}
     >
@@ -95,10 +81,7 @@ export const Content = ({
           hiddenAvatar={hiddenAvatar}
         />
       </div>
-      <div
-        className="absolute left-0"
-        style={{ width: finalWidthMain + 1 + "px" }}
-      >
+      <div className="absolute left-0" style={{ width: finalWidthMain + 1 + "px" }}>
         <MainContent
           {...props}
           groupView={groupView}

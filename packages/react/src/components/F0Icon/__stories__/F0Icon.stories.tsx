@@ -82,11 +82,7 @@ export const Animated: Story = {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <F0Icon
-          icon={icon}
-          state={isHovered ? "animate" : "normal"}
-          size={size}
-        />
+        <F0Icon icon={icon} state={isHovered ? "animate" : "normal"} size={size} />
       </div>
     )
   },

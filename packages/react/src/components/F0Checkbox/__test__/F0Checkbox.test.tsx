@@ -122,12 +122,7 @@ describe("F0Checkbox", () => {
 
   it("maintains accessibility attributes", () => {
     render(
-      <F0Checkbox
-        title="Accessible checkbox"
-        id="accessible-id"
-        checked={true}
-        disabled={false}
-      />
+      <F0Checkbox title="Accessible checkbox" id="accessible-id" checked={true} disabled={false} />
     )
 
     const checkbox = screen.getByRole("checkbox")

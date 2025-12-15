@@ -1,7 +1,4 @@
-import {
-  DropdownItemObject,
-  DropdownItemSeparator,
-} from "../Navigation/Dropdown/internal"
+import { DropdownItemObject, DropdownItemSeparator } from "../Navigation/Dropdown/internal"
 
 import { RecordType } from "@/hooks/datasource"
 
@@ -28,8 +25,5 @@ export const filterItemActions = <T extends RecordType>(
   item: T
 ) =>
   ((actions && actions(item)) || []).filter(
-    (action) =>
-      action.type === "separator" ||
-      action.enabled === undefined ||
-      action.enabled
+    (action) => action.type === "separator" || action.enabled === undefined || action.enabled
   )

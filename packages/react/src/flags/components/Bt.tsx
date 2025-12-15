@@ -1,29 +1,11 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgBt = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 512 512"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 512 512" ref={ref} {...props}>
     <g clipPath="url(#a)">
-      <path
-        fill="#82AFFF"
-        d="M0 0H512V512H0z"
-        vectorEffect="non-scaling-stroke"
-      />
-      <path
-        fill="#FFE15A"
-        d="M0-6H512V88H0z"
-        vectorEffect="non-scaling-stroke"
-      />
-      <path
-        fill="#FF6E55"
-        d="M0 413H512V512H0z"
-        vectorEffect="non-scaling-stroke"
-      />
+      <path fill="#82AFFF" d="M0 0H512V512H0z" vectorEffect="non-scaling-stroke" />
+      <path fill="#FFE15A" d="M0-6H512V88H0z" vectorEffect="non-scaling-stroke" />
+      <path fill="#FF6E55" d="M0 413H512V512H0z" vectorEffect="non-scaling-stroke" />
       <path
         fill="#FF6E55"
         d="M503.172 88H8.828C6.48675 88.0003 4.24147 88.9305 2.58595 90.586C0.930441 92.2415 0.000265162 94.4868 0 96.828L0 414.62C0.000265162 416.961 0.930441 419.207 2.58595 420.862C4.24147 422.518 6.48675 423.448 8.828 423.448H503.173C505.514 423.448 507.76 422.518 509.415 420.862C511.071 419.207 512.001 416.961 512.001 414.62V96.828C512 94.4867 514.656 89.6555 513 88C511.5 88 505.513 88.0003 503.172 88Z"
@@ -122,11 +104,7 @@ const SvgBt = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     </g>
     <defs>
       <clipPath id="a">
-        <path
-          fill="currentColor"
-          d="M0 0H512V512H0z"
-          vectorEffect="non-scaling-stroke"
-        />
+        <path fill="currentColor" d="M0 0H512V512H0z" vectorEffect="non-scaling-stroke" />
       </clipPath>
     </defs>
   </svg>

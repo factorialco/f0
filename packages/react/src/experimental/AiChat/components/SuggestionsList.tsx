@@ -1,10 +1,7 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { RenderSuggestionsListProps } from "@copilotkit/react-ui"
 
-export const SuggestionsList = ({
-  suggestions,
-  onSuggestionClick,
-}: RenderSuggestionsListProps) => {
+export const SuggestionsList = ({ suggestions, onSuggestionClick }: RenderSuggestionsListProps) => {
   return (
     <div>
       {suggestions.map((s, i) => (

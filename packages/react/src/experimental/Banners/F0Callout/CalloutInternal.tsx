@@ -37,10 +37,7 @@ const variantTitleColors: Record<string, string> = {
 }
 
 export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
-  function CalloutInternal(
-    { title, onClose, children, actions = [], variant },
-    ref
-  ) {
+  function CalloutInternal({ title, onClose, children, actions = [], variant }, ref) {
     // Validate actions limit
     if (actions.length > 2) {
       throw new Error(
@@ -50,24 +47,11 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
 
     const hasActions = actions.length > 0
     return (
-      <div
-        ref={ref}
-        className={calloutVariants({ variant })}
-        data-testid="sdm-callout"
-      >
+      <div ref={ref} className={calloutVariants({ variant })} data-testid="sdm-callout">
         <div className="flex flex-row items-center justify-between px-4 py-2">
-          <div
-            className={cn(
-              "flex flex-row items-center gap-2",
-              variantTitleColors[variant]
-            )}
-          >
-            {variantIcons[variant] && (
-              <F0Icon icon={variantIcons[variant]} size="sm" aria-hidden />
-            )}
-            <OneEllipsis
-              className={variantTitleColors[variant] || "font-medium"}
-            >
+          <div className={cn("flex flex-row items-center gap-2", variantTitleColors[variant])}>
+            {variantIcons[variant] && <F0Icon icon={variantIcons[variant]} size="sm" aria-hidden />}
+            <OneEllipsis className={variantTitleColors[variant] || "font-medium"}>
               {title}
             </OneEllipsis>
           </div>
@@ -112,16 +96,9 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
   }
 )
 
-export const CalloutSkeleton = ({
-  compact,
-  variant = "ai",
-}: CalloutSkeletonProps) => {
+export const CalloutSkeleton = ({ compact, variant = "ai" }: CalloutSkeletonProps) => {
   return (
-    <div
-      className={calloutVariants({ variant })}
-      aria-busy="true"
-      aria-live="polite"
-    >
+    <div className={calloutVariants({ variant })} aria-busy="true" aria-live="polite">
       <div className="flex flex-row items-center justify-between px-4 py-2">
         <Skeleton className="h-5 w-32 rounded-md" />
       </div>

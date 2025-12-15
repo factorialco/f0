@@ -110,8 +110,6 @@ describe("KanbanCollection - item click", () => {
     const cards = await screen.findAllByTestId("card")
     await user.click(cards[0])
     expect(onItemClick).toHaveBeenCalledTimes(1)
-    expect(onItemClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, name: "John" })
-    )
+    expect(onItemClick).toHaveBeenCalledWith(expect.objectContaining({ id: 1, name: "John" }))
   })
 })

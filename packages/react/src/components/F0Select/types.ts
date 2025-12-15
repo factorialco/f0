@@ -50,10 +50,7 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
  * @template T - The type of the emitted value
  * @template R - The type of the record/item data (used with data source)
  */
-export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
-  T,
-  R
-> & // Single select not clearable
+export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T, R> & // Single select not clearable
   (
     | {
         clearable?: false
@@ -103,10 +100,7 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
          * - When allSelected is true/indeterminate: excluded items are those with checked=false
          * - When allSelected is false: included items are those with checked=true
          */
-        onSelectItems?: OnSelectItemsCallback<
-          ResolvedRecordType<R>,
-          FiltersDefinition
-        >
+        onSelectItems?: OnSelectItemsCallback<ResolvedRecordType<R>, FiltersDefinition>
         /**
          * Disables the "Select All" functionality, forcing manual selection of items one by one.
          * When enabled, the allSelected state will always be false and users must select items individually.
@@ -122,18 +116,13 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
           SortingsDefinition,
           GroupingDefinition<ResolvedRecordType<R>>
         >
-        mapOptions: (
-          item: ResolvedRecordType<R>
-        ) => F0SelectItemProps<T, ResolvedRecordType<R>>
+        mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>
         options?: never
       }
     | {
         source?: never
         mapOptions?: never
-        searchFn?: (
-          option: F0SelectItemProps<T, unknown>,
-          search?: string
-        ) => boolean | undefined
+        searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined
         options: F0SelectItemProps<T, unknown>[]
       }
   ) &
@@ -166,8 +155,6 @@ export type F0SelectItemObject<T, R = unknown> = {
   disabled?: boolean
 }
 
-export type F0SelectItemProps<T, R = unknown> =
-  | F0SelectItemObject<T, R>
-  | { type: "separator" }
+export type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R> | { type: "separator" }
 
 export const selectSizes = INPUTFIELD_SIZES

@@ -32,14 +32,8 @@ interface MainContentProps {
   search: string
   onSelect: (entity: EntitySelectEntity) => void
   onRemove: (entity: EntitySelectEntity) => void
-  onSubItemRemove: (
-    parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
-  onSubItemSelect: (
-    parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
+  onSubItemRemove: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void
+  onSubItemSelect: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void
   onClear: () => void
   onSelectAll: () => void
   onSearch: (search: string) => void
@@ -96,10 +90,7 @@ export const MainContent: React.FC<MainContentProps> = ({
   const totalFilteredEntities = useMemo(
     () =>
       groupView
-        ? entities.reduce(
-            (acc, entity) => acc + (entity.subItems?.length ?? 0),
-            0
-          )
+        ? entities.reduce((acc, entity) => acc + (entity.subItems?.length ?? 0), 0)
         : entities.length,
     [entities, groupView]
   )
@@ -145,13 +136,10 @@ export const MainContent: React.FC<MainContentProps> = ({
       }
 
       const selectedSubItems = (entity.subItems ?? []).filter((subItem) =>
-        selectedEntity?.subItems?.some(
-          (selectedSubItem) => selectedSubItem.subId === subItem.subId
-        )
+        selectedEntity?.subItems?.some((selectedSubItem) => selectedSubItem.subId === subItem.subId)
       )
 
-      const selected =
-        (entity.subItems?.length ?? 0) === selectedSubItems.length
+      const selected = (entity.subItems?.length ?? 0) === selectedSubItems.length
       const partialSelected = !selected && selectedSubItems.length > 0
 
       return { selected, partialSelected }
@@ -230,10 +218,7 @@ export const MainContent: React.FC<MainContentProps> = ({
         }))
       : entities
           .flatMap((entity) => {
-            const foundSelected = findSelectedEntity(
-              selectedEntities ?? [],
-              entity.id
-            )
+            const foundSelected = findSelectedEntity(selectedEntities ?? [], entity.id)
             return [
               {
                 parent: null,
@@ -258,8 +243,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           .filter(
             (el) =>
               (!el.parent || el.parent.expanded) &&
-              (!!el.parent ||
-                (!!el.subItem.subItems && el.subItem.subItems.length > 0))
+              (!!el.parent || (!!el.subItem.subItems && el.subItem.subItems.length > 0))
           )
   }, [groupView, entities, selectedEntities])
 
@@ -288,18 +272,13 @@ export const MainContent: React.FC<MainContentProps> = ({
           expanded: subItem.expanded,
           searchKeys: subItem.subSearchKeys,
         }
-        const selectedEntity = findSelectedEntity(
-          selectedEntities,
-          recoveredEntity.id
+        const selectedEntity = findSelectedEntity(selectedEntities, recoveredEntity.id)
+        const selectedSubItems = (recoveredEntity?.subItems ?? []).filter((subItem) =>
+          selectedEntity?.subItems?.some(
+            (selectedSubItem) => selectedSubItem.subId === subItem.subId
+          )
         )
-        const selectedSubItems = (recoveredEntity?.subItems ?? []).filter(
-          (subItem) =>
-            selectedEntity?.subItems?.some(
-              (selectedSubItem) => selectedSubItem.subId === subItem.subId
-            )
-        )
-        const selected =
-          (recoveredEntity.subItems?.length ?? 0) === selectedSubItems.length
+        const selected = (recoveredEntity.subItems?.length ?? 0) === selectedSubItems.length
         const partialSelected = !selected && selectedSubItems.length > 0
 
         return (
@@ -313,10 +292,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             onRemove={onRemove}
             selected={selected}
             partialSelected={partialSelected}
-            showGroupIcon={
-              groups.find((el) => el.value === selectedGroup)?.groupType ===
-              "team"
-            }
+            showGroupIcon={groups.find((el) => el.value === selectedGroup)?.groupType === "team"}
             singleSelector={singleSelector}
             goToFirst={goToFirst}
             goToLast={goToLast}
@@ -329,10 +305,7 @@ export const MainContent: React.FC<MainContentProps> = ({
 
       let selected = !!findSelectedEntity(selectedEntities, subItem.subId)
       if (!selected) {
-        const selectedParentEntity = findSelectedEntity(
-          selectedEntities,
-          parent.id
-        )
+        const selectedParentEntity = findSelectedEntity(selectedEntities, parent.id)
         const selectedSubItems = (parent?.subItems ?? []).filter((subItem) =>
           selectedParentEntity?.subItems?.some(
             (selectedSubItem) => selectedSubItem.subId === subItem.subId
@@ -405,22 +378,18 @@ export const MainContent: React.FC<MainContentProps> = ({
     } else {
       const selectedSubIds = new Set(
         [...selectedEntitiesMap.values()].flatMap(
-          (selParent) =>
-            selParent.subItems?.map((selectedSub) => selectedSub.subId) ?? []
+          (selParent) => selParent.subItems?.map((selectedSub) => selectedSub.subId) ?? []
         )
       )
 
       entities.forEach((fe) => {
         const subItems = fe.subItems ?? []
         visibleCount += subItems.length
-        selectedVisibleCount += subItems.filter((sub) =>
-          selectedSubIds.has(sub.subId)
-        ).length
+        selectedVisibleCount += subItems.filter((sub) => selectedSubIds.has(sub.subId)).length
       })
     }
 
-    const allSelected =
-      visibleCount > 0 && selectedVisibleCount === visibleCount
+    const allSelected = visibleCount > 0 && selectedVisibleCount === visibleCount
     const anySelected = selectedVisibleCount > 0
 
     return [allSelected, anySelected]
@@ -428,11 +397,9 @@ export const MainContent: React.FC<MainContentProps> = ({
 
   const totalFlattenedItems = flattenedList.length
 
-  const anySelectOrClearAction =
-    !singleSelector && (selectAllLabel || clearLabel)
+  const anySelectOrClearAction = !singleSelector && (selectAllLabel || clearLabel)
   const anyAction = actions && actions.length > 0
-  const showFooter =
-    !loading && ((!singleSelector && anySelectOrClearAction) || anyAction)
+  const showFooter = !loading && ((!singleSelector && anySelectOrClearAction) || anyAction)
 
   return (
     <div
@@ -493,9 +460,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             }}
           >
             <span className="text-lg font-medium">{notFoundTitle}</span>
-            <span className="text-center text-f1-foreground-secondary">
-              {notFoundSubtitle}
-            </span>
+            <span className="text-center text-f1-foreground-secondary">{notFoundSubtitle}</span>
           </div>
         )}
         {!loading && (!!totalFilteredEntities || onCreate) && (
@@ -546,9 +511,6 @@ const findSelectedEntity = (entities: EntitySelectEntity[], id: EntityId) => {
   return entities.find((el) => el.id === id)
 }
 
-const isTeamGroup = (
-  groups: EntitySelectNamedGroup[],
-  selectedGroup: string
-) => {
+const isTeamGroup = (groups: EntitySelectNamedGroup[], selectedGroup: string) => {
   return groups.find((el) => el.value === selectedGroup)?.groupType === "team"
 }

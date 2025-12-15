@@ -122,21 +122,9 @@ export const Snapshot: Story = {
       <section>
         <h4 className="text-lg font-semibold">Heading Alignment</h4>
         <div className="flex w-96 flex-col gap-2">
-          <F0Heading
-            variant="heading"
-            align="left"
-            content="Left aligned heading"
-          />
-          <F0Heading
-            variant="heading"
-            align="center"
-            content="Center aligned heading"
-          />
-          <F0Heading
-            variant="heading"
-            align="right"
-            content="Right aligned heading"
-          />
+          <F0Heading variant="heading" align="left" content="Left aligned heading" />
+          <F0Heading variant="heading" align="center" content="Center aligned heading" />
+          <F0Heading variant="heading" align="right" content="Right aligned heading" />
         </div>
       </section>
 

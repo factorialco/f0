@@ -120,18 +120,10 @@ describe("quarterGranularity", () => {
     })
 
     it("formats all quarters correctly with long format", () => {
-      expect(
-        quarterGranularity.toString(new Date(2024, 0, 15), i18n, "long")
-      ).toBe("Q1 2024") // January - Q1
-      expect(
-        quarterGranularity.toString(new Date(2024, 3, 15), i18n, "long")
-      ).toBe("Q2 2024") // April - Q2
-      expect(
-        quarterGranularity.toString(new Date(2024, 6, 15), i18n, "long")
-      ).toBe("Q3 2024") // July - Q3
-      expect(
-        quarterGranularity.toString(new Date(2024, 9, 15), i18n, "long")
-      ).toBe("Q4 2024") // October - Q4
+      expect(quarterGranularity.toString(new Date(2024, 0, 15), i18n, "long")).toBe("Q1 2024") // January - Q1
+      expect(quarterGranularity.toString(new Date(2024, 3, 15), i18n, "long")).toBe("Q2 2024") // April - Q2
+      expect(quarterGranularity.toString(new Date(2024, 6, 15), i18n, "long")).toBe("Q3 2024") // July - Q3
+      expect(quarterGranularity.toString(new Date(2024, 9, 15), i18n, "long")).toBe("Q4 2024") // October - Q4
     })
 
     it("formats quarter boundaries correctly with long format", () => {
@@ -219,13 +211,10 @@ describe("quarterGranularity", () => {
 
   describe("getPrevNext", () => {
     it("returns correct prev/next dates within bounds", () => {
-      const result = quarterGranularity.getPrevNext(
-        quarterGranularity.toRange(baseDate),
-        {
-          min: new Date(2023, 9, 1),
-          max: new Date(2024, 8, 30),
-        }
-      )
+      const result = quarterGranularity.getPrevNext(quarterGranularity.toRange(baseDate), {
+        min: new Date(2023, 9, 1),
+        max: new Date(2024, 8, 30),
+      })
 
       expect(result).toEqual({
         prev: {

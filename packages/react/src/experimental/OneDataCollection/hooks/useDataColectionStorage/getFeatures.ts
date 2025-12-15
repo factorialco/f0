@@ -11,9 +11,7 @@ const ALL_FEATURES_TOKENS = ["*", "all"]
  * @param features
  * @returns
  */
-export const getFeatures = (
-  features: DataCollectionStorageFeaturesDefinition | undefined
-) => {
+export const getFeatures = (features: DataCollectionStorageFeaturesDefinition | undefined) => {
   const res: Set<DataCollectionStorageFeature> = new Set()
   if (!features) {
     return []

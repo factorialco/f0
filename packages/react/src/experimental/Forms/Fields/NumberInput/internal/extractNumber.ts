@@ -20,10 +20,7 @@ export interface Options {
  *
  * TODO: Make internationalization-friendly to support grouping character
  */
-export function extractNumber(
-  input: string,
-  { maxDecimals }: Options
-): ExtractedNumber | null {
+export function extractNumber(input: string, { maxDecimals }: Options): ExtractedNumber | null {
   if (!input || input === "-") {
     return {
       formattedValue: input ?? "",
@@ -42,8 +39,7 @@ export function extractNumber(
     decimals = ""
   }
 
-  integers =
-    integers?.replace(/^0+(\d)/, (_substring, firstDigit) => firstDigit) ?? ""
+  integers = integers?.replace(/^0+(\d)/, (_substring, firstDigit) => firstDigit) ?? ""
 
   const formattedValue = `${sign}${integers}${
     maxDecimals !== 0 ? `${separator ?? ""}${decimals ?? ""}` : ""

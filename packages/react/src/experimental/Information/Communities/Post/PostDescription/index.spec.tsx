@@ -191,9 +191,7 @@ describe("PostDescription XSS Protection", () => {
   it("should handle empty or null content safely", () => {
     render(<BasePostDescription content="" />)
     // Should not throw any errors
-    expect(
-      document.querySelector(".FactorialOneTextEditor")
-    ).toBeInTheDocument()
+    expect(document.querySelector(".FactorialOneTextEditor")).toBeInTheDocument()
   })
 
   it("should apply collapsed class when collapsed prop is true", () => {

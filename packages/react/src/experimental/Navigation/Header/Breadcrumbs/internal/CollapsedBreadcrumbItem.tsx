@@ -12,21 +12,20 @@ interface CollapsedBreadcrumbItemProps {
 /**
  * Renders the collapsed breadcrumb items as a dropdown
  */
-const CollapsedBreadcrumbItem = forwardRef<
-  HTMLLIElement,
-  CollapsedBreadcrumbItemProps
->(({ className, items }, ref) => (
-  <ShadBreadcrumbItem ref={ref} className={className}>
-    <div className="flex items-center">
-      <BreadcrumbSeparator />
-      <DropdownInternal items={items}>
-        <button className="rounded-sm px-1.5 py-0.5 font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary">
-          ...
-        </button>
-      </DropdownInternal>
-    </div>
-  </ShadBreadcrumbItem>
-))
+const CollapsedBreadcrumbItem = forwardRef<HTMLLIElement, CollapsedBreadcrumbItemProps>(
+  ({ className, items }, ref) => (
+    <ShadBreadcrumbItem ref={ref} className={className}>
+      <div className="flex items-center">
+        <BreadcrumbSeparator />
+        <DropdownInternal items={items}>
+          <button className="rounded-sm px-1.5 py-0.5 font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary">
+            ...
+          </button>
+        </DropdownInternal>
+      </div>
+    </ShadBreadcrumbItem>
+  )
+)
 
 CollapsedBreadcrumbItem.displayName = "CollapsedBreadcrumbItem"
 

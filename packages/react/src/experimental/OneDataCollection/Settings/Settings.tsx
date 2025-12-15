@@ -15,10 +15,7 @@ import { useMemo, useState } from "react"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
-import {
-  collectionVisualizations,
-  Visualization,
-} from "../visualizations/collection"
+import { collectionVisualizations, Visualization } from "../visualizations/collection"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { VisualizationSelector } from "./components/VisualizationSelector"
@@ -38,15 +35,7 @@ type SettingsProps<
   Grouping extends GroupingDefinition<R>,
 > = {
   visualizations: ReadonlyArray<
-    Visualization<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
+    Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
   >
   currentVisualization: number
   onVisualizationChange: (index: number) => void
@@ -78,15 +67,7 @@ export const Settings = <
   sortings,
   currentSortings,
   onSortingsChange,
-}: SettingsProps<
-  R,
-  Filters,
-  Sortings,
-  Summaries,
-  ItemActions,
-  NavigationFilters,
-  Grouping
->) => {
+}: SettingsProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>) => {
   const i18n = useI18n()
 
   const groupByOptions = grouping
@@ -100,9 +81,7 @@ export const Settings = <
     onVisualizationChange(index)
   }
 
-  const handleGroupingChange = (
-    grouping: GroupingState<R, Grouping> | undefined
-  ) => {
+  const handleGroupingChange = (grouping: GroupingState<R, Grouping> | undefined) => {
     onGroupingChange(grouping)
   }
 
@@ -189,10 +168,7 @@ export const Settings = <
             ),
             hasGrouping &&
               !grouping?.hideSelector &&
-              !(
-                !!grouping.mandatory &&
-                Object.entries(grouping.groupBy).length < 2
-              ) && (
+              !(!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2) && (
                 <div className="p-3">
                   <GroupingSelector
                     key="grouping"
@@ -220,10 +196,7 @@ export const Settings = <
                 {visualizacionSettings}
               </section>
             ),
-            <section
-              key="reset"
-              className="border-0 border-t border-solid border-t-f1-border p-3"
-            >
+            <section key="reset" className="border-0 border-t border-solid border-t-f1-border p-3">
               <F0Button
                 size="sm"
                 variant="ghost"

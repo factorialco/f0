@@ -8,33 +8,20 @@ type InFlightRecord<TResult> = {
 
 type MoveCoordinatorApi = {
   getMoveKey: (sourceId: string, initialLaneId: string) => string
-  perform: <TResult>(
-    key: string,
-    executor?: MoveExecutor<TResult>
-  ) => Promise<TResult>
+  perform: <TResult>(key: string, executor?: MoveExecutor<TResult>) => Promise<TResult>
   leave: <TResult>(key: string) => Promise<TResult>
-  insert: <TResult>(
-    key: string,
-    executor: MoveExecutor<TResult>
-  ) => Promise<TResult>
+  insert: <TResult>(key: string, executor: MoveExecutor<TResult>) => Promise<TResult>
 }
 
 const MoveCoordinatorContext = createContext<MoveCoordinatorApi | null>(null)
 
 export function useMoveCoordinator(): MoveCoordinatorApi {
   const ctx = useContext(MoveCoordinatorContext)
-  if (!ctx)
-    throw new Error(
-      "useMoveCoordinator must be used within MoveCoordinatorProvider"
-    )
+  if (!ctx) throw new Error("useMoveCoordinator must be used within MoveCoordinatorProvider")
   return ctx
 }
 
-export function MoveCoordinatorProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export function MoveCoordinatorProvider({ children }: { children: React.ReactNode }) {
   const inFlightRef = useRef<Map<string, InFlightRecord<unknown>>>(new Map())
 
   const getMoveKey = useCallback((sourceId: string, initialLaneId: string) => {
@@ -42,13 +29,8 @@ export function MoveCoordinatorProvider({
   }, [])
 
   const perform = useCallback(
-    async <TResult,>(
-      key: string,
-      executor?: MoveExecutor<TResult>
-    ): Promise<TResult> => {
-      const existing = inFlightRef.current.get(key) as
-        | InFlightRecord<TResult>
-        | undefined
+    async <TResult,>(key: string, executor?: MoveExecutor<TResult>): Promise<TResult> => {
+      const existing = inFlightRef.current.get(key) as InFlightRecord<TResult> | undefined
       if (existing) {
         return existing.promise
       }
@@ -59,9 +41,7 @@ export function MoveCoordinatorProvider({
         return new Promise<TResult>((resolve, reject) => {
           const waitKey = key
           const check = () => {
-            const inflight = inFlightRef.current.get(waitKey) as
-              | InFlightRecord<TResult>
-              | undefined
+            const inflight = inFlightRef.current.get(waitKey) as InFlightRecord<TResult> | undefined
             if (inflight) {
               inflight.promise.then(resolve, reject)
               return true
@@ -107,9 +87,5 @@ export function MoveCoordinatorProvider({
     [getMoveKey, perform]
   )
 
-  return (
-    <MoveCoordinatorContext.Provider value={value}>
-      {children}
-    </MoveCoordinatorContext.Provider>
-  )
+  return <MoveCoordinatorContext.Provider value={value}>{children}</MoveCoordinatorContext.Provider>
 }

@@ -16,10 +16,11 @@ export type ItemDefinition = {
   avatar?: AvatarVariant
 }
 
-export type ListPropertyDefinition<
+export type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting<
   R,
-  Sortings extends SortingsDefinition,
-> = WithOptionalSorting<R, Sortings> & PropertyDefinition<R>
+  Sortings
+> &
+  PropertyDefinition<R>
 
 export type ListVisualizationOptions<
   R extends RecordType,

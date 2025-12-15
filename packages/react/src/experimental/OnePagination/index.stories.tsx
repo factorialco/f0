@@ -38,8 +38,7 @@ const meta: Meta<typeof OnePagination> = {
       control: "text",
     },
     visibleRange: {
-      description:
-        "The number of pages to show on each side of the current page.",
+      description: "The number of pages to show on each side of the current page.",
       defaultValue: { summary: 3 },
       control: "number",
     },
@@ -64,13 +63,7 @@ type Story = StoryObj<typeof OnePagination>
 export const Default: Story = {
   render: (args) => {
     const [currentPage, setCurrentPage] = useState(args.currentPage)
-    return (
-      <OnePagination
-        {...args}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    )
+    return <OnePagination {...args} currentPage={currentPage} onPageChange={setCurrentPage} />
   },
 }
 
@@ -80,13 +73,7 @@ export const LongList: Story = {
   },
   render: (args) => {
     const [currentPage, setCurrentPage] = useState(args.currentPage)
-    return (
-      <OnePagination
-        {...args}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    )
+    return <OnePagination {...args} currentPage={currentPage} onPageChange={setCurrentPage} />
   },
 }
 
@@ -97,13 +84,7 @@ export const WithoutControls: Story = {
   },
   render: (args) => {
     const [currentPage, setCurrentPage] = useState(args.currentPage)
-    return (
-      <OnePagination
-        {...args}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    )
+    return <OnePagination {...args} currentPage={currentPage} onPageChange={setCurrentPage} />
   },
 }
 
@@ -114,13 +95,7 @@ export const CustomVisibleRange: Story = {
   },
   render: (args) => {
     const [currentPage, setCurrentPage] = useState(args.currentPage)
-    return (
-      <OnePagination
-        {...args}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    )
+    return <OnePagination {...args} currentPage={currentPage} onPageChange={setCurrentPage} />
   },
 }
 

@@ -5,11 +5,9 @@ import { CalloutInternalProps, CalloutSkeletonProps } from "./types"
 
 export type F0CalloutProps = CalloutInternalProps
 
-const F0CalloutBase = forwardRef<HTMLDivElement, F0CalloutProps>(
-  (props, ref) => {
-    return <CalloutInternal ref={ref} {...props} />
-  }
-)
+const F0CalloutBase = forwardRef<HTMLDivElement, F0CalloutProps>((props, ref) => {
+  return <CalloutInternal ref={ref} {...props} />
+})
 
 const F0CalloutSkeleton = ({ compact, variant }: CalloutSkeletonProps) => {
   return <CalloutSkeleton compact={compact} variant={variant} />

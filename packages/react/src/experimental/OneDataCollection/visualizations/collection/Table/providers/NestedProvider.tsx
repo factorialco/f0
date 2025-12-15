@@ -7,18 +7,10 @@ interface NestedDataContextValue<R extends RecordType> {
   updateFetchedData: (rowId: string, data: ChildrenResponse<R>) => void
 }
 
-const NestedDataContext = createContext<
-  NestedDataContextValue<RecordType> | undefined
->(undefined)
+const NestedDataContext = createContext<NestedDataContextValue<RecordType> | undefined>(undefined)
 
-export const NestedDataProvider = <R extends RecordType>({
-  children,
-}: {
-  children: ReactNode
-}) => {
-  const [fetchedData, setFetchedData] = useState<
-    Record<string, ChildrenResponse<R>>
-  >({})
+export const NestedDataProvider = <R extends RecordType>({ children }: { children: ReactNode }) => {
+  const [fetchedData, setFetchedData] = useState<Record<string, ChildrenResponse<R>>>({})
 
   const updateFetchedData = (rowId: string, data: ChildrenResponse<R>) => {
     setFetchedData((prev) => ({
@@ -29,9 +21,7 @@ export const NestedDataProvider = <R extends RecordType>({
 
   return (
     <NestedDataContext.Provider
-      value={
-        { fetchedData, updateFetchedData } as NestedDataContextValue<RecordType>
-      }
+      value={{ fetchedData, updateFetchedData } as NestedDataContextValue<RecordType>}
     >
       {children}
     </NestedDataContext.Provider>
@@ -41,9 +31,7 @@ export const NestedDataProvider = <R extends RecordType>({
 export const useNestedDataContext = <R extends RecordType>() => {
   const context = useContext(NestedDataContext)
   if (!context) {
-    throw new Error(
-      "useNestedDataContext must be used within NestedDataProvider"
-    )
+    throw new Error("useNestedDataContext must be used within NestedDataProvider")
   }
   return context as NestedDataContextValue<R>
 }

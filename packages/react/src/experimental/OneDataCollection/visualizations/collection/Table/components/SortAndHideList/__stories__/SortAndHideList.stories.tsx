@@ -216,8 +216,7 @@ export const LongLabels: Story = {
     items: [
       {
         id: "long1",
-        label:
-          "This is a very long column name that might wrap to multiple lines",
+        label: "This is a very long column name that might wrap to multiple lines",
         sortable: true,
         canHide: true,
         visible: true,
@@ -225,8 +224,7 @@ export const LongLabels: Story = {
       },
       {
         id: "long2",
-        label:
-          "Another extremely long column header that tests text overflow behavior",
+        label: "Another extremely long column header that tests text overflow behavior",
         sortable: false,
         canHide: true,
         visible: false,

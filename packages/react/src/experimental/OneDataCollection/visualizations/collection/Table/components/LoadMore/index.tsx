@@ -21,22 +21,11 @@ const LoadMoreRowInner = <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     onLoadMoreChildren: () => void
     rowRef: React.RefObject<HTMLTableRowElement>
   },
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: ((element: HTMLTableRowElement | null) => void) | React.RefObject<HTMLTableRowElement> | null
 ) => {
   const loadMoreRowRef = useRef<HTMLTableRowElement | null>(null)
   const rowRefCurrent = props.rowRef?.current
@@ -87,15 +76,7 @@ export const LoadMoreRow = forwardRef(LoadMoreRowInner) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: RowProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    ItemActions,
-    NavigationFilters,
-    Grouping
-  > & {
+  props: RowProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
     onLoadMoreChildren: () => void
     rowRef: React.RefObject<HTMLTableRowElement>
   } & {

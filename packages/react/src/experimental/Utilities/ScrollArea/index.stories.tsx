@@ -80,15 +80,11 @@ const StackWithOverflow = ({ length = 20 }: { length?: number }) => (
     <F0Button
       label="Some button"
       onClick={() =>
-        alert(
-          "This button is needed so the content can be focused for accessibility purposes."
-        )
+        alert("This button is needed so the content can be focused for accessibility purposes.")
       }
     />
     {Array.from({ length }).map((_, i) => (
-      <Placeholder key={i}>
-        Element {i + 1} in a scrollable placeholder
-      </Placeholder>
+      <Placeholder key={i}>Element {i + 1} in a scrollable placeholder</Placeholder>
     ))}
   </div>
 )

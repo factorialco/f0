@@ -39,16 +39,12 @@ export const NestedCell = ({
     firstCell,
     !!nestedRowProps?.rowWithChildren
   )
-  const firstCellWithDepth = isFirstCellWithDepth(
+  const firstCellWithDepth = isFirstCellWithDepth(firstCell, nestedRowProps?.depth ?? 0)
+  const firstCellWithNoChildrenAndTableChildren = isFirstCellWithNoChildrenAndTableChildren(
     firstCell,
-    nestedRowProps?.depth ?? 0
+    !!nestedRowProps?.rowWithChildren,
+    !!nestedRowProps?.tableWithChildren
   )
-  const firstCellWithNoChildrenAndTableChildren =
-    isFirstCellWithNoChildrenAndTableChildren(
-      firstCell,
-      !!nestedRowProps?.rowWithChildren,
-      !!nestedRowProps?.tableWithChildren
-    )
   const detailedVariant = isFirstCellDetailed(firstCell, nestedRowProps)
 
   const onLoadMoreChildren = nestedRowProps?.onLoadMoreChildren
@@ -122,22 +118,15 @@ export const NestedCell = ({
           >
             {firstCellWithChildren &&
               (nestedRowProps?.expanded ? (
-                <ChevronDown
-                  className="pointer-events-none shrink-0"
-                  size={CHEVRON_SIZE}
-                />
+                <ChevronDown className="pointer-events-none shrink-0" size={CHEVRON_SIZE} />
               ) : (
-                <ChevronRight
-                  className="pointer-events-none shrink-0"
-                  size={CHEVRON_SIZE}
-                />
+                <ChevronRight className="pointer-events-none shrink-0" size={CHEVRON_SIZE} />
               ))}
           </div>
           <div
             className={cn(
               firstCellWithChildren && "min-w-0",
-              firstCellWithNoChildrenAndTableChildren &&
-                "pl-[var(--spacing-factor)]",
+              firstCellWithNoChildrenAndTableChildren && "pl-[var(--spacing-factor)]",
               "relative"
             )}
           >

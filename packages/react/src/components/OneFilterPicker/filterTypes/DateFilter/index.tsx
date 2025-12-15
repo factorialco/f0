@@ -11,13 +11,8 @@ const isEmpty = (
 ): value is undefined => {
   return (
     !value ||
-    ("from" in value &&
-      !value.from &&
-      context.schema.options.mode === "single") ||
-    ("from" in value &&
-      !value.from &&
-      !value.to &&
-      context.schema.options.mode === "range")
+    ("from" in value && !value.from && context.schema.options.mode === "single") ||
+    ("from" in value && !value.from && !value.to && context.schema.options.mode === "range")
   )
 }
 
@@ -26,10 +21,7 @@ const defaults: DateFilterOptions = {
   view: "day",
 }
 
-export const dateFilter: FilterTypeDefinition<
-  Date | DateRange | undefined,
-  DateFilterOptions
-> = {
+export const dateFilter: FilterTypeDefinition<Date | DateRange | undefined, DateFilterOptions> = {
   emptyValue: undefined,
   render: (props) => {
     const options = getOptionsWithDefaults(props.schema.options, defaults)

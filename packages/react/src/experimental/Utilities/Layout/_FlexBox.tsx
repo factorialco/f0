@@ -82,8 +82,7 @@ const boxVariants = cva({
 })
 
 export type BoxRef = HTMLDivElement
-export type BoxProps = React.HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof boxVariants>
+export type BoxProps = React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof boxVariants>
 
 export const FlexBox = forwardRef<
   HTMLDivElement,

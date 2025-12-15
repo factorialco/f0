@@ -38,10 +38,7 @@ export interface LiveCompanionConfig {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     liveCompanion: {
-      insertLiveCompanion: (
-        data: LiveCompanionData,
-        config?: LiveCompanionConfig
-      ) => ReturnType
+      insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType
     }
   }
 }
@@ -89,9 +86,7 @@ export const LiveCompanionView: React.FC<NodeViewProps> = ({
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-3">
-                <p className="text-f1-text-primary text-lg font-semibold">
-                  {data.title}
-                </p>
+                <p className="text-f1-text-primary text-lg font-semibold">{data.title}</p>
               </div>
               <p className="text-f1-text-secondary text-sm">
                 {data.topics.length}{" "}
@@ -109,9 +104,7 @@ export const LiveCompanionView: React.FC<NodeViewProps> = ({
               variant="outline"
               hideLabel
               label={
-                isOpen
-                  ? config.labels?.collapse || "Collapse"
-                  : config.labels?.expand || "Expand"
+                isOpen ? config.labels?.collapse || "Collapse" : config.labels?.expand || "Expand"
               }
               icon={isOpen ? ChevronUp : ChevronDown}
               size="sm"
@@ -124,19 +117,12 @@ export const LiveCompanionView: React.FC<NodeViewProps> = ({
           <div className="text-f1-text-primary flex flex-col gap-4">
             {data.topics.map((topic, topicIndex) => (
               <div key={topicIndex} className="flex flex-col">
-                <h3 className="text-f1-text-primary text-md font-semibold">
-                  {topic.title}
-                </h3>
+                <h3 className="text-f1-text-primary text-md font-semibold">{topic.title}</h3>
                 <div className="ml-4 flex flex-col gap-2">
                   {topic.comments.map((comment, commentIndex) => (
-                    <div
-                      key={commentIndex}
-                      className="flex flex-row items-start gap-2"
-                    >
+                    <div key={commentIndex} className="flex flex-row items-start gap-2">
                       <p className="text-f1-text-primary text-md">
-                        <span className="text-f1-text-secondary font-medium">
-                          {comment.user}:
-                        </span>{" "}
+                        <span className="text-f1-text-secondary font-medium">{comment.user}:</span>{" "}
                         <span className="text-f1-text-secondary font-normal italic">
                           {comment.comment}
                         </span>
@@ -214,11 +200,7 @@ export const LiveCompanion = Node.create({
         class: "live-companion-block",
         "data-live-companion": JSON.stringify(data),
       },
-      [
-        "div",
-        { class: "live-companion-content" },
-        `Live Companion: ${data.title}`,
-      ],
+      ["div", { class: "live-companion-content" }, `Live Companion: ${data.title}`],
     ]
   },
 

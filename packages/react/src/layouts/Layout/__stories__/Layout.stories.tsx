@@ -36,9 +36,7 @@ const meta = {
       <div className="flex h-[800px] flex-col items-center justify-center bg-f1-foreground-info text-f1-foreground-inverse">
         Main
         <FocusableElement />
-        <p>
-          Should the the first focusable element even if main is on right side
-        </p>
+        <p>Should the the first focusable element even if main is on right side</p>
       </div>
     ),
     header: (
@@ -102,9 +100,7 @@ export const ProfileExample: Story = {
     aside: (
       <Layout.Block>
         <DetailsItemsList
-          {...(DetailsItemsListStories.default.args as ComponentProps<
-            typeof DetailsItemsList
-          >)}
+          {...(DetailsItemsListStories.default.args as ComponentProps<typeof DetailsItemsList>)}
         />
       </Layout.Block>
     ),
@@ -138,31 +134,21 @@ export const WithContentBlocks: Story = {
           variant="full-width"
         >
           <div className="grid grid-cols-2 gap-4">
-            <button className="rounded border bg-f1-background-secondary p-4">
-              Action 1
-            </button>
-            <button className="rounded border bg-f1-background-secondary p-4">
-              Action 2
-            </button>
+            <button className="rounded border bg-f1-background-secondary p-4">Action 1</button>
+            <button className="rounded border bg-f1-background-secondary p-4">Action 2</button>
           </div>
         </Layout.BlockContent>
 
         <Layout.BlockContent title="System Status" titleLevel="h4">
-          <div className="text-sm text-f1-foreground-secondary">
-            All systems operational ✅
-          </div>
+          <div className="text-sm text-f1-foreground-secondary">All systems operational ✅</div>
         </Layout.BlockContent>
 
         <Layout.Group sortable>
           <Layout.BlockContent title="System Status" titleLevel="h4">
-            <div className="text-sm text-f1-foreground-secondary">
-              All systems operational ✅
-            </div>
+            <div className="text-sm text-f1-foreground-secondary">All systems operational ✅</div>
           </Layout.BlockContent>
           <Layout.BlockContent title="System Status 2" titleLevel="h4">
-            <div className="text-sm text-f1-foreground-secondary">
-              All systems operational 2✅
-            </div>
+            <div className="text-sm text-f1-foreground-secondary">All systems operational 2✅</div>
           </Layout.BlockContent>
         </Layout.Group>
       </>
@@ -224,9 +210,7 @@ export const WithGroupMasonry: Story = {
                   titleLevel="h4"
                   className="w-100 min-w-full bg-[#00ff0030]"
                 >
-                  <div className="text-sm text-f1-foreground-secondary">
-                    Block 2 (full width)
-                  </div>
+                  <div className="text-sm text-f1-foreground-secondary">Block 2 (full width)</div>
                 </Layout.BlockContent>
               ),
             },
@@ -238,9 +222,7 @@ export const WithGroupMasonry: Story = {
                   titleLevel="h4"
                   className="min-w-[100px] bg-[#0000ff30]"
                 >
-                  <div className="text-sm text-f1-foreground-secondary">
-                    Block 3
-                  </div>
+                  <div className="text-sm text-f1-foreground-secondary">Block 3</div>
                 </Layout.BlockContent>
               ),
             },
@@ -296,9 +278,7 @@ export const WithGroupGrid: Story = {
     }, [])
 
     const widgetWrapper = useCallback(
-      (children: React.ReactNode) => (
-        <div className="h-full bg-[#ff000030] p-4">{children}</div>
-      ),
+      (children: React.ReactNode) => <div className="h-full bg-[#ff000030] p-4">{children}</div>,
       []
     )
 

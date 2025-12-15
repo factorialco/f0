@@ -2,10 +2,7 @@ import { forwardRef, PropsWithoutRef } from "react"
 import { useComponentXRay } from "../xray"
 import { ComponentMetadata } from "./types"
 
-export const Component = <
-  R extends HTMLElement | SVGElement,
-  P extends React.RefAttributes<R>,
->(
+export const Component = <R extends HTMLElement | SVGElement, P extends React.RefAttributes<R>>(
   meta: ComponentMetadata,
   Component: React.FC<PropsWithoutRef<P>>
 ) => {

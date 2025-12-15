@@ -2,10 +2,7 @@ import { ComponentProps } from "react"
 import { XAxis, YAxis } from "recharts"
 import { AxisConfig } from "./types"
 
-export function measureTextWidth(
-  text: string,
-  font = "12px Inter, sans-serif"
-): number {
+export function measureTextWidth(text: string, font = "12px Inter, sans-serif"): number {
   const canvas = document.createElement("canvas")
   const context = canvas.getContext("2d")
   if (context) {
@@ -15,9 +12,7 @@ export function measureTextWidth(
   return 0
 }
 
-export const xAxisProps = (
-  config?: AxisConfig
-): Partial<ComponentProps<typeof XAxis>> => ({
+export const xAxisProps = (config?: AxisConfig): Partial<ComponentProps<typeof XAxis>> => ({
   dataKey: "x",
   domain: config?.domain,
   tickLine: false,
@@ -28,9 +23,7 @@ export const xAxisProps = (
   tickFormatter: config?.tickFormatter,
 })
 
-export const yAxisProps = (
-  config?: AxisConfig
-): Partial<ComponentProps<typeof YAxis>> => ({
+export const yAxisProps = (config?: AxisConfig): Partial<ComponentProps<typeof YAxis>> => ({
   tickLine: false,
   axisLine: false,
   domain: config?.domain,

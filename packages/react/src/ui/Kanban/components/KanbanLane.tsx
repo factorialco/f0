@@ -3,14 +3,7 @@ import { useDndEvents, useDroppableList } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
 import { DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
-import {
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react"
+import { cloneElement, isValidElement, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Lane } from "../../Lane"
 import type { LaneProps } from "../../Lane/types"
 import { KanbanOnMoveParam } from "../types"
@@ -50,8 +43,7 @@ export function KanbanLane<TRecord extends RecordType>({
   const [isDragging, setIsDragging] = useState(false)
   const [forcedIndex, setForcedIndex] = useState<number | null>(null)
   const [forcedEdge, setForcedEdge] = useState<"top" | "bottom" | null>(null)
-  const [showEmptyLanePlaceholder, setShowEmptyLanePlaceholder] =
-    useState(false)
+  const [showEmptyLanePlaceholder, setShowEmptyLanePlaceholder] = useState(false)
   const [draggedItemIndex, setDraggedItemIndex] = useState<number>(-1)
 
   useDroppableList(
@@ -84,11 +76,7 @@ export function KanbanLane<TRecord extends RecordType>({
       rafRef.current = window.requestAnimationFrame(step)
     }
 
-    if (
-      rafRef.current == null &&
-      isDragging &&
-      speedPxPerSecRef.current !== 0
-    ) {
+    if (rafRef.current == null && isDragging && speedPxPerSecRef.current !== 0) {
       lastTimeRef.current = null
       rafRef.current = window.requestAnimationFrame(step)
     }
@@ -146,8 +134,7 @@ export function KanbanLane<TRecord extends RecordType>({
         // Get source info
         const sourceId = String((source.data as { id?: string }).id)
         const sourceLaneIdFromPayload = String(
-          (source.data as unknown as { data?: { laneId?: string } }).data
-            ?.laneId ?? ""
+          (source.data as unknown as { data?: { laneId?: string } }).data?.laneId ?? ""
         )
         const initialLaneId =
           sourceLaneIdFromPayload ||
@@ -204,10 +191,7 @@ export function KanbanLane<TRecord extends RecordType>({
               const maxDistance = rect.height / 2
               let speed = 0
               if (Math.abs(delta) > deadZone) {
-                const effective = Math.min(
-                  Math.abs(delta) - deadZone,
-                  maxDistance
-                )
+                const effective = Math.min(Math.abs(delta) - deadZone, maxDistance)
                 const normalized = effective / maxDistance
                 speed = Math.sign(delta) * maxSpeed * normalized
               }
@@ -223,9 +207,7 @@ export function KanbanLane<TRecord extends RecordType>({
                 const root = laneRef.current
                 if (root) {
                   const cards = Array.from(
-                    root.querySelectorAll(
-                      `[data-kanban-card="true"][data-lane-id="${id}"]`
-                    )
+                    root.querySelectorAll(`[data-kanban-card="true"][data-lane-id="${id}"]`)
                   ) as HTMLDivElement[]
                   if (cards.length > 0) {
                     let nearestIdx = -1
@@ -251,14 +233,11 @@ export function KanbanLane<TRecord extends RecordType>({
                       // 1. Above itself
                       ((nearestIdx === sourceIndex && nearestEdge === "top") ||
                         // 2. Below itself
-                        (nearestIdx === sourceIndex &&
-                          nearestEdge === "bottom") ||
+                        (nearestIdx === sourceIndex && nearestEdge === "bottom") ||
                         // 3. Below the card above (stays in same position)
-                        (nearestIdx === sourceIndex - 1 &&
-                          nearestEdge === "bottom") ||
+                        (nearestIdx === sourceIndex - 1 && nearestEdge === "bottom") ||
                         // 4. Above the card below (stays in same position)
-                        (nearestIdx === sourceIndex + 1 &&
-                          nearestEdge === "top"))
+                        (nearestIdx === sourceIndex + 1 && nearestEdge === "top"))
 
                     if (wouldBeUselessDrop) {
                       // Don't show indicator for useless drops
@@ -301,8 +280,7 @@ export function KanbanLane<TRecord extends RecordType>({
         })
 
         const sourceLaneIdFromPayload = String(
-          (source.data as unknown as { data?: { laneId?: string } }).data
-            ?.laneId ?? ""
+          (source.data as unknown as { data?: { laneId?: string } }).data?.laneId ?? ""
         )
         const initialLaneId =
           sourceLaneIdFromPayload ||
@@ -327,8 +305,10 @@ export function KanbanLane<TRecord extends RecordType>({
           if (cardTarget) {
             const targetIndex = (cardTarget.data as { index?: number }).index
             // Extract edge info from cardTarget
-            const edge = (cardTarget.data as { closestEdge?: string })
-              .closestEdge as "top" | "bottom" | undefined
+            const edge = (cardTarget.data as { closestEdge?: string }).closestEdge as
+              | "top"
+              | "bottom"
+              | undefined
 
             if (targetIndex !== undefined && edge) {
               // Check if this would be a useless drop based on target card and edge
@@ -337,16 +317,10 @@ export function KanbanLane<TRecord extends RecordType>({
               if (targetIndex === resourceIndexOnLane) {
                 // Dropping on same card - always useless
                 wouldBeUselessDrop = true
-              } else if (
-                targetIndex === resourceIndexOnLane - 1 &&
-                edge === "bottom"
-              ) {
+              } else if (targetIndex === resourceIndexOnLane - 1 && edge === "bottom") {
                 // Dropping below card above = stays in same position
                 wouldBeUselessDrop = true
-              } else if (
-                targetIndex === resourceIndexOnLane + 1 &&
-                edge === "top"
-              ) {
+              } else if (targetIndex === resourceIndexOnLane + 1 && edge === "top") {
                 // Dropping above card below = stays in same position
                 wouldBeUselessDrop = true
               }
@@ -363,8 +337,7 @@ export function KanbanLane<TRecord extends RecordType>({
           const wouldBeUselessDrop =
             (forcedIndex === resourceIndexOnLane && forcedEdge === "top") ||
             (forcedIndex === resourceIndexOnLane && forcedEdge === "bottom") ||
-            (forcedIndex === resourceIndexOnLane - 1 &&
-              forcedEdge === "bottom") ||
+            (forcedIndex === resourceIndexOnLane - 1 && forcedEdge === "bottom") ||
             (forcedIndex === resourceIndexOnLane + 1 && forcedEdge === "top")
 
           if (wouldBeUselessDrop) {
@@ -384,18 +357,12 @@ export function KanbanLane<TRecord extends RecordType>({
         }
 
         let onMoveParams: KanbanOnMoveParam | null = null
-        const { type: typeOfDrop, cardTarget } = findTypeOfDrop(
-          location.current.dropTargets
-        )
+        const { type: typeOfDrop, cardTarget } = findTypeOfDrop(location.current.dropTargets)
 
         // Only compute params; do not mutate items locally. Parent will update lanes.
         if (!isCrossLane) {
           // Same-lane reorder
-          if (
-            typeOfDrop === "sameLaneOverCard" &&
-            cardTarget &&
-            cardTarget.data
-          ) {
+          if (typeOfDrop === "sameLaneOverCard" && cardTarget && cardTarget.data) {
             onMoveParams = optimisticSameLaneOverCard<TRecord>({
               resourceIndexOnLane,
               cardTarget,
@@ -495,9 +462,7 @@ export function KanbanLane<TRecord extends RecordType>({
     const resolve = () => {
       const root = laneRef.current
       if (!root) return null
-      viewportRef.current = root.querySelector(
-        "[data-scroll-container]"
-      ) as HTMLDivElement | null
+      viewportRef.current = root.querySelector("[data-scroll-container]") as HTMLDivElement | null
       return viewportRef.current
     }
     resolve()
@@ -552,8 +517,7 @@ export function KanbanLane<TRecord extends RecordType>({
       void onMove?.(detail).catch(() => {})
     }
     window.addEventListener("kanban-test-move", handler as EventListener)
-    return () =>
-      window.removeEventListener("kanban-test-move", handler as EventListener)
+    return () => window.removeEventListener("kanban-test-move", handler as EventListener)
   }, [id, onMove])
 
   // Calculate dynamic height based on content and container
@@ -602,10 +566,7 @@ export function KanbanLane<TRecord extends RecordType>({
       }
 
       // Only update if height changed by more than 1px (avoid unnecessary re-renders)
-      if (
-        lastCalculatedHeight === null ||
-        Math.abs(finalHeight - lastCalculatedHeight) > 1
-      ) {
+      if (lastCalculatedHeight === null || Math.abs(finalHeight - lastCalculatedHeight) > 1) {
         lastCalculatedHeight = finalHeight
         setCalculatedHeight(finalHeight)
       }
@@ -654,13 +615,9 @@ export function KanbanLane<TRecord extends RecordType>({
     >
       <div
         ref={laneRef}
-        className={
-          "relative flex h-full w-full flex-col gap-0 rounded-xl border transition-colors"
-        }
+        className={"relative flex h-full w-full flex-col gap-0 rounded-xl border transition-colors"}
         style={{
-          backgroundColor: isOver
-            ? "hsla(210, 91%, 22%, 0.08)"
-            : "hsla(210, 91%, 22%, 0.02)",
+          backgroundColor: isOver ? "hsla(210, 91%, 22%, 0.08)" : "hsla(210, 91%, 22%, 0.02)",
         }}
       >
         {/* Debug overlay (non-interactive) */}
@@ -676,9 +633,7 @@ export function KanbanLane<TRecord extends RecordType>({
           <Lane<TRecord>
             {...laneProps}
             dropPlaceholderIndex={
-              showEmptyLanePlaceholder && laneProps.items.length === 0
-                ? 0
-                : undefined
+              showEmptyLanePlaceholder && laneProps.items.length === 0 ? 0 : undefined
             }
             renderCard={(item, index) => {
               const node = laneProps.renderCard(item, index)
@@ -702,13 +657,10 @@ export function KanbanLane<TRecord extends RecordType>({
                   }
                 }
 
-                return cloneElement(
-                  node as React.ReactElement<Record<string, unknown>>,
-                  {
-                    forcedEdge: edge,
-                    disabledEdges,
-                  }
-                )
+                return cloneElement(node as React.ReactElement<Record<string, unknown>>, {
+                  forcedEdge: edge,
+                  disabledEdges,
+                })
               }
               return node
             }}

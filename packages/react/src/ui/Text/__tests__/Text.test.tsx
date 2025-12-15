@@ -27,10 +27,7 @@ describe("Text base component", () => {
     it("renders heading variant with h2 tag", () => {
       render(<Text variant="heading" content="Heading" />)
       expect(screen.getByText("Heading").tagName).toBe("H2")
-      expect(screen.getByText("Heading")).toHaveClass(
-        "text-lg",
-        "font-semibold"
-      )
+      expect(screen.getByText("Heading")).toHaveClass("text-lg", "font-semibold")
     })
   })
 
@@ -54,9 +51,7 @@ describe("Text base component", () => {
   describe("Ellipsis", () => {
     it("renders with single line ellipsis classes when ellipsis is true", () => {
       const { container } = render(<Text content="Long text" ellipsis={true} />)
-      const ellipsisElement = container.querySelector(
-        '[data-testid="one-ellipsis"]'
-      )
+      const ellipsisElement = container.querySelector('[data-testid="one-ellipsis"]')
       expect(ellipsisElement).toHaveClass("text-ellipsis", "whitespace-nowrap")
     })
   })

@@ -4,25 +4,21 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # useDataSource
 
-The `useDataSource` hook is the foundation of the datasource system. It creates
-and manages a data source with comprehensive state management for filters,
-search, sorting, navigation filters, and grouping. This hook is intentionally
-separated from rendering components to enable sharing the same data source
-across multiple visualizations.
+The `useDataSource` hook is the foundation of the datasource system. It creates and manages a data
+source with comprehensive state management for filters, search, sorting, navigation filters, and
+grouping. This hook is intentionally separated from rendering components to enable sharing the same
+data source across multiple visualizations.
 
 ## Overview
 
-`useDataSource` creates a reusable data source that can be shared across
-different visualizations and components. It manages all the configuration and
-state needed for data collection functionality.
+`useDataSource` creates a reusable data source that can be shared across different visualizations
+and components. It manages all the configuration and state needed for data collection functionality.
 
 ### Key Benefits
 
 1. **Reusability** - Share the same data source across multiple components
-2. **State Management** - Centralized state for filters, search, sorting, and
-   grouping
-3. **Separation of Concerns** - Clean separation between data management and UI
-   rendering
+2. **State Management** - Centralized state for filters, search, sorting, and grouping
+3. **Separation of Concerns** - Clean separation between data management and UI rendering
 4. **Type Safety** - Full TypeScript support with generic types
 
 ## API Reference
@@ -43,8 +39,7 @@ useDataSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, G
 - `Sortings` - Sorting definitions extending `SortingsDefinition`
 - `Summaries` - Summary definitions extending `SummariesDefinition`
 - `ItemActions` - Item action definitions extending `ItemActionsDefinition<R>`
-- `NavigationFilters` - Navigation filter definitions extending
-  `NavigationFiltersDefinition`
+- `NavigationFilters` - Navigation filter definitions extending `NavigationFiltersDefinition`
 - `Grouping` - Grouping definitions extending `GroupingDefinition<R>`
 
 ### Configuration Options
@@ -129,8 +124,7 @@ useDataSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, G
 
 ### Return Value
 
-The hook returns a `DataSource` object with all the configuration and state
-management functions:
+The hook returns a `DataSource` object with all the configuration and state management functions:
 
 ```tsx
 type DataSource<R, Filters, ...> = {
@@ -382,8 +376,8 @@ const dataSource = useDataSource({
 
 ## Multi-Visualization Usage
 
-One of the key benefits of `useDataSource` is the ability to share the same data
-source across multiple visualizations:
+One of the key benefits of `useDataSource` is the ability to share the same data source across
+multiple visualizations:
 
 ```tsx
 function Dashboard() {
@@ -535,12 +529,9 @@ const dataSource = useDataSource<User, typeof filters>({
 
 ## Related Hooks
 
-- [`useData`](/?path=/docs/hooks-datasource-usedata--docs) - For data fetching
-  and pagination
-- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For
-  selection management
-- [`useGroups`](/?path=/docs/hooks-datasource-usegroups--docs) - For group state
-  management
+- [`useData`](/?path=/docs/hooks-datasource-usedata--docs) - For data fetching and pagination
+- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For selection management
+- [`useGroups`](/?path=/docs/hooks-datasource-usegroups--docs) - For group state management
 
 ## Common Patterns
 

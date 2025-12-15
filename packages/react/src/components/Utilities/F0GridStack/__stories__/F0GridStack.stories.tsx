@@ -76,9 +76,7 @@ const meta = {
   },
   decorators: [
     (Story, { args }) => {
-      const [widgets, setWidgets] = useState<GridStackReactWidget[]>(
-        args.widgets
-      )
+      const [widgets, setWidgets] = useState<GridStackReactWidget[]>(args.widgets)
       return (
         <div className="h-full w-full">
           <Story
@@ -113,9 +111,8 @@ type Story = StoryObj<typeof meta>
 
 const mockComponents = [
   <div key="1">
-    This is a long text that will be truncated with an ellipsis if it
-    doesn&apos;t fit in the container width. Hover over it to see the full text
-    in a tooltip.
+    This is a long text that will be truncated with an ellipsis if it doesn&apos;t fit in the
+    container width. Hover over it to see the full text in a tooltip.
   </div>,
   <div key="2">
     <F0AvatarAlert type="info" size="sm" />
@@ -184,9 +181,7 @@ export const WithMethods: Story = {
             title: `New Widget ${newId}`,
           },
           content: (
-            <div className="h-full rounded-md bg-f1-background-accent p-4">
-              New Widget {newId}
-            </div>
+            <div className="h-full rounded-md bg-f1-background-accent p-4">New Widget {newId}</div>
           ),
         },
       ])

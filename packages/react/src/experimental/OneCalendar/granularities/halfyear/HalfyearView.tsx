@@ -1,16 +1,9 @@
 import { cn, focusRing } from "@/lib/utils"
-import {
-  endOfMonth,
-  isAfter,
-  isBefore,
-  isWithinInterval,
-  startOfMonth,
-} from "date-fns"
+import { endOfMonth, isAfter, isBefore, isWithinInterval, startOfMonth } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import { CalendarMode, DateRange } from "../../types"
 
-export const getHalfYearFromMonth = (month: number): number =>
-  month < 6 ? 1 : 2
+export const getHalfYearFromMonth = (month: number): number => (month < 6 ? 1 : 2)
 
 export const getHalfYearRange = (halfYear: number, year: number): DateRange => {
   const firstMonth = halfYear === 1 ? 0 : 6 // Jan for H1, Jul for H2
@@ -50,9 +43,7 @@ export const HalfYearView = ({
 
   // Check if a value is a DateRange
   const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
+    return Boolean(value && typeof value === "object" && ("from" in value || "to" in value))
   }
 
   // Handle click on a half year
@@ -128,8 +119,7 @@ export const HalfYearView = ({
         // Check if any part of the half-year is within the selected range
         const isWithinRange =
           isWithinInterval(halfYearRange.from, { start: from, end: to }) ||
-          (!!halfYearRange.to &&
-            isWithinInterval(halfYearRange.to, { start: from, end: to })) ||
+          (!!halfYearRange.to && isWithinInterval(halfYearRange.to, { start: from, end: to })) ||
           (isBefore(halfYearRange.from, from) &&
             !!halfYearRange.to &&
             isAfter(halfYearRange.to, to))
@@ -193,10 +183,7 @@ export const HalfYearView = ({
         transition={{ duration: 0.15, ease: [0.455, 0.03, 0.515, 0.955] }}
       >
         {years.map((yearValue) => (
-          <div
-            key={yearValue}
-            className="flex items-center justify-center gap-3 pl-1.5"
-          >
+          <div key={yearValue} className="flex items-center justify-center gap-3 pl-1.5">
             <div className="text-medium text-right text-sm tabular-nums text-f1-foreground-secondary">
               {yearValue}
             </div>
@@ -210,9 +197,7 @@ export const HalfYearView = ({
                 const halfYearRange = getHalfYearRange(halfYear, yearValue)
                 const disabled =
                   (minDate && isBefore(halfYearRange.from, minDate)) ||
-                  (maxDate &&
-                    halfYearRange.to &&
-                    isAfter(halfYearRange.to, maxDate))
+                  (maxDate && halfYearRange.to && isAfter(halfYearRange.to, maxDate))
 
                 return (
                   <button
@@ -222,8 +207,7 @@ export const HalfYearView = ({
                     className={cn(
                       "relative isolate flex h-10 flex-1 items-center justify-center rounded-md p-2 tabular-nums",
                       "after:absolute after:inset-x-1 after:inset-y-0 after:z-0 after:rounded-md after:ring-1 after:ring-inset after:ring-f1-border-secondary after:transition-all after:duration-100 after:content-['']",
-                      disabled &&
-                        "cursor-not-allowed text-f1-foreground-secondary",
+                      disabled && "cursor-not-allowed text-f1-foreground-secondary",
                       !disabled && "hover:after:bg-f1-background-hover",
                       focusRing(),
                       (isStart || isEnd) && "after:inset-x-0",

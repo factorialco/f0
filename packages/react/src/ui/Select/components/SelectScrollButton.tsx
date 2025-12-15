@@ -18,9 +18,7 @@ const SelectScrollButton = ({ variant, ...props }: Props) => {
     React.ComponentPropsWithoutRef<ScrollButton>
   >(({ className, ...props }, ref) => {
     const WrapperComponent =
-      variant === "up"
-        ? SelectPrimitive.ScrollUpButton
-        : SelectPrimitive.ScrollDownButton
+      variant === "up" ? SelectPrimitive.ScrollUpButton : SelectPrimitive.ScrollDownButton
 
     return (
       <WrapperComponent

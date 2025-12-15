@@ -1,9 +1,4 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
 import { ForwardedRef } from "react"
 
 import { getCategoricalColor, getColor } from "../utils/colors"
@@ -31,15 +26,11 @@ const _CategoryBarChart = (
         <div className="flex h-2 gap-1 overflow-hidden">
           {data.map((category, index) => {
             const percentage = (category.value / total) * 100
-            const color = category.color
-              ? getColor(category.color)
-              : getCategoricalColor(index)
+            const color = category.color ? getColor(category.color) : getCategoricalColor(index)
 
             const formatPercentage = (value: number): string => {
               const percentage = (value / total) * 100
-              return percentage % 1 === 0
-                ? percentage.toFixed(0)
-                : percentage.toFixed(1)
+              return percentage % 1 === 0 ? percentage.toFixed(0) : percentage.toFixed(1)
             }
 
             if (percentage === 0) {
@@ -82,25 +73,13 @@ const _CategoryBarChart = (
         </div>
       </div>
       {legend && (
-        <div
-          className="mt-2 flex w-full flex-wrap gap-x-2.5 gap-y-0.5"
-          role="list"
-        >
+        <div className="mt-2 flex w-full flex-wrap gap-x-2.5 gap-y-0.5" role="list">
           {data.map((category, index) => {
-            const color = category.color
-              ? getColor(category.color)
-              : getCategoricalColor(index)
+            const color = category.color ? getColor(category.color) : getCategoricalColor(index)
 
             return (
-              <div
-                key={category.name}
-                className="flex items-center gap-1.5"
-                role="listitem"
-              >
-                <div
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: color }}
-                />
+              <div key={category.name} className="flex items-center gap-1.5" role="listitem">
+                <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                 <span className="text-f1-foreground">{category.name}</span>
               </div>
             )

@@ -37,9 +37,7 @@ const PageLayoutContentBlockComponent = ({
           {title}
         </TitleTag>
 
-        {description && (
-          <p className="text-sm text-f1-foreground-secondary">{description}</p>
-        )}
+        {description && <p className="text-sm text-f1-foreground-secondary">{description}</p>}
       </div>
 
       <div className="flex-1">{children}</div>
@@ -48,7 +46,4 @@ const PageLayoutContentBlockComponent = ({
 }
 
 // Create the component using the helper function
-export const BlockContent = createPageLayoutBlock(
-  "BlockContent",
-  PageLayoutContentBlockComponent
-)
+export const BlockContent = createPageLayoutBlock("BlockContent", PageLayoutContentBlockComponent)

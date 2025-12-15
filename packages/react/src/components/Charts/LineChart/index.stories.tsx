@@ -64,9 +64,7 @@ const timeToHireBySeniorityDataConfig = {
   },
 }
 
-export const MultipleLines: Meta<
-  typeof LineChart<typeof timeToHireBySeniorityDataConfig>
-> = {
+export const MultipleLines: Meta<typeof LineChart<typeof timeToHireBySeniorityDataConfig>> = {
   args: {
     dataConfig: timeToHireBySeniorityDataConfig,
     xAxis: {

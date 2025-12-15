@@ -48,10 +48,7 @@ const AcceptChanges = ({
         onClick={(e) => {
           e.preventDefault()
           editor.chain().focus().undo().run()
-          handleEnhanceWithAI(
-            lastIntent?.selectedIntent,
-            lastIntent?.customIntent
-          )
+          handleEnhanceWithAI(lastIntent?.selectedIntent, lastIntent?.customIntent)
         }}
         size="sm"
         variant="outline"

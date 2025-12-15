@@ -44,9 +44,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
 
       const resolved = await Promise.all(
         entries.map(async ([key, value]) => {
-          const filterDef = filters[key as keyof Filters] as
-            | FilterDefinition
-            | undefined
+          const filterDef = filters[key as keyof Filters] as FilterDefinition | undefined
           const filterLabel = filterDef?.label ?? key
 
           if (!filterDef || !filterDef.type) {
@@ -63,9 +61,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
             return {
               key,
               label: filterLabel,
-              displayText: Array.isArray(value)
-                ? value.join(", ")
-                : String(value),
+              displayText: Array.isArray(value) ? value.join(", ") : String(value),
             }
           }
 
@@ -78,9 +74,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
             })
             /* eslint-enable @typescript-eslint/no-explicit-any */
             const displayText =
-              typeof chipLabelResult === "string"
-                ? chipLabelResult
-                : chipLabelResult.label
+              typeof chipLabelResult === "string" ? chipLabelResult : chipLabelResult.label
 
             return {
               key,
@@ -92,9 +86,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
             return {
               key,
               label: filterLabel,
-              displayText: Array.isArray(value)
-                ? value.join(", ")
-                : String(value),
+              displayText: Array.isArray(value) ? value.join(", ") : String(value),
             }
           }
         })

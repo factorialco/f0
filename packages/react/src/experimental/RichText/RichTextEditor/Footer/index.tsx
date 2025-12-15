@@ -1,19 +1,11 @@
 import { F0Button } from "@/components/F0Button"
-import {
-  Toolbar,
-  ToolbarDivider,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
+import { Toolbar, ToolbarDivider, ToolbarLabels } from "@/experimental/RichText/CoreEditor"
 import { Paperclip, TextSize } from "@/icons/app"
 import { Editor } from "@tiptap/react"
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { EnhanceActivator } from "../Enhance"
-import {
-  enhanceConfig,
-  primaryActionType,
-  secondaryActionsType,
-} from "../utils/types"
+import { enhanceConfig, primaryActionType, secondaryActionsType } from "../utils/types"
 import { ActionsMenu } from "./ActionsMenu"
 
 interface FooterProps {
@@ -23,10 +15,7 @@ interface FooterProps {
   primaryAction: primaryActionType | undefined
   fileInputRef: React.RefObject<HTMLInputElement>
   canUseFiles: boolean
-  onEnhanceWithAI: (
-    selectedIntent?: string,
-    customIntent?: string
-  ) => Promise<void>
+  onEnhanceWithAI: (selectedIntent?: string, customIntent?: string) => Promise<void>
   isLoadingEnhance: boolean
   disableButtons: boolean
   enhanceConfig: enhanceConfig | undefined
@@ -61,8 +50,7 @@ const Footer = ({
   isToolbarOpen,
   plainHtmlMode,
 }: FooterProps) => {
-  const [toolbarAnimationComplete, setToolbarAnimationComplete] =
-    useState(false)
+  const [toolbarAnimationComplete, setToolbarAnimationComplete] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
 
@@ -142,9 +130,7 @@ const Footer = ({
                 if (fileInputRef?.current) {
                   fileInputRef.current.click()
                 } else {
-                  const fileInput = document.getElementById(
-                    "rich-text-editor-upload-button"
-                  )
+                  const fileInput = document.getElementById("rich-text-editor-upload-button")
                   fileInput?.click()
                 }
               }}

@@ -20,9 +20,7 @@ export const UserPlatformProvider = ({
   isDev = false,
   showExperimentalWarnings = false,
 }: UserPlatformProviderProps) => {
-  const [userPlatform, setUserPlatform] = useState<Platform>(
-    platform ?? "unknown"
-  )
+  const [userPlatform, setUserPlatform] = useState<Platform>(platform ?? "unknown")
 
   useEffect(() => {
     if (platform === undefined) {
@@ -57,9 +55,7 @@ export function useUserPlatform(): Platform {
   const context = useContext(PlatformContext)
 
   if (context === null) {
-    throw new Error(
-      "useUserPlatform must be used within an UserPlatformProvider"
-    )
+    throw new Error("useUserPlatform must be used within an UserPlatformProvider")
   }
 
   return context.platform
@@ -68,9 +64,7 @@ export function useShowExperimentalWarnings(): boolean {
   const context = useContext(PlatformContext)
 
   if (context === null) {
-    console.warn(
-      "useShowExperimentalWarnings must be used within an UserPlatformProvider"
-    )
+    console.warn("useShowExperimentalWarnings must be used within an UserPlatformProvider")
     return false
   }
 

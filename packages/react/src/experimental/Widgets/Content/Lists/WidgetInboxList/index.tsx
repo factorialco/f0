@@ -1,9 +1,6 @@
 import { VerticalOverflowList } from "@/ui/VerticalOverflowList"
 import { ComponentProps } from "react"
-import {
-  WidgetInboxListItem,
-  WidgetInboxListItemProps,
-} from "../../ListItems/WidgetInboxListItem"
+import { WidgetInboxListItem, WidgetInboxListItemProps } from "../../ListItems/WidgetInboxListItem"
 
 type Props<Id extends string | number = string | number> = {
   items: Omit<WidgetInboxListItemProps<Id>, "onClick">[]

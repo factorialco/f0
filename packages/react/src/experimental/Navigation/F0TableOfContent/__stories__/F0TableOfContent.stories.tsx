@@ -121,8 +121,7 @@ const meta: Meta<typeof F0TableOfContent> = {
     },
     className: {
       control: "text",
-      description:
-        "Additional CSS classes to apply to the table of contents container",
+      description: "Additional CSS classes to apply to the table of contents container",
     },
     collapsible: {
       control: "boolean",

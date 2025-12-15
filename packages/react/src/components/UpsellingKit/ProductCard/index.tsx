@@ -85,11 +85,7 @@ export function ProductCard({
       <div>
         <div className="p-2">
           <div style={getWrapperStyles()}>
-            <div
-              className={getCardClassName()}
-              style={getCardStyles()}
-              onClick={onClick}
-            >
+            <div className={getCardClassName()} style={getCardStyles()} onClick={onClick}>
               <>
                 {type === "one-campaign" ? (
                   <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
@@ -97,19 +93,14 @@ export function ProductCard({
                   </div>
                 ) : (
                   <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                    <F0AvatarModule
-                      module={props.module as ModuleId}
-                      size="lg"
-                    />
+                    <F0AvatarModule module={props.module as ModuleId} size="lg" />
                   </div>
                 )}
 
                 <div className="flex flex-1 flex-col">
                   <div>
                     <h3 className="text-lg font-medium">{title}</h3>
-                    <p className="text-f1-foreground-secondary">
-                      {description}
-                    </p>
+                    <p className="text-f1-foreground-secondary">{description}</p>
                   </div>
                 </div>
               </>

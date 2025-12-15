@@ -52,14 +52,9 @@ export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
 
     const calculateHeight = () => {
       const lastRowHeight =
-        nestedVariant === "basic"
-          ? heightForLastBasicRow()
-          : heightForLastDetailedRow()
+        nestedVariant === "basic" ? heightForLastBasicRow() : heightForLastDetailedRow()
 
-      const height =
-        lastRowHeight -
-        firstRow.getBoundingClientRect().top +
-        previousRowHeight()
+      const height = lastRowHeight - firstRow.getBoundingClientRect().top + previousRowHeight()
 
       setCalculatedHeight(height)
     }

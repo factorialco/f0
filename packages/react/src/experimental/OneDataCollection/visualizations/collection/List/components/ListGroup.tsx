@@ -1,9 +1,5 @@
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { GroupingDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { DataCollectionSource } from "../../../../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../../../../item-actions"

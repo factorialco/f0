@@ -7,7 +7,4 @@ export type EventName =
 
 export type EventParams = Record<string, EventScalar | Array<EventScalar>>
 
-export type EventCatcherFunction = (
-  eventName: EventName,
-  params: EventParams
-) => void
+export type EventCatcherFunction = (eventName: EventName, params: EventParams) => void

@@ -23,9 +23,7 @@ export const TagCounter = ({ count, list }: Props) => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <button
-          className={cn("inline-flex flex-shrink-0 items-center", focusRing())}
-        >
+        <button className={cn("inline-flex flex-shrink-0 items-center", focusRing())}>
           {counter}
         </button>
       </PopoverTrigger>
@@ -50,10 +48,7 @@ export const TagCounter = ({ count, list }: Props) => {
               )}
             </div>
           ))}
-          <ScrollBar
-            orientation="vertical"
-            className="[&_div]:bg-f1-background"
-          />
+          <ScrollBar orientation="vertical" className="[&_div]:bg-f1-background" />
         </ScrollArea>
       </PopoverContent>
     </Popover>

@@ -1,16 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgInfoCircleLine = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgInfoCircleLine = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       stroke="currentColor"
       strokeLinecap="round"
@@ -18,13 +9,7 @@ const SvgInfoCircleLine = (
       d="M12 12V15"
       vectorEffect="non-scaling-stroke"
     />
-    <circle
-      cx={12}
-      cy={12}
-      r={8}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={12} r={8} stroke="currentColor" vectorEffect="non-scaling-stroke" />
     <path
       stroke="currentColor"
       strokeLinecap="round"

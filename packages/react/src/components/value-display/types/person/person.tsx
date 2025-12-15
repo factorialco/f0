@@ -18,10 +18,7 @@ interface PersonValue {
 
 export type PersonCellValue = WithAvatarBadge<PersonValue>
 
-export const PersonCell = (
-  args: PersonCellValue,
-  meta: ValueDisplayRendererContext
-) => {
+export const PersonCell = (args: PersonCellValue, meta: ValueDisplayRendererContext) => {
   const fullName = `${args.firstName.toString()} ${args.lastName.toString()}`
   return (
     <div

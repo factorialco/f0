@@ -12,12 +12,7 @@ const meta: Meta<typeof F0AvatarTeam> = {
   title: "Avatars/AvatarTeam",
   tags: ["autodocs"],
   argTypes: {
-    ...getBaseAvatarArgTypes([
-      "size",
-      "aria-label",
-      "aria-labelledby",
-      "badge",
-    ]),
+    ...getBaseAvatarArgTypes(["size", "aria-label", "aria-labelledby", "badge"]),
   },
   args: {
     name: "Design",

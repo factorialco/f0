@@ -48,9 +48,7 @@ export const OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
                 status={step.status}
                 approvers={step.approvers}
               />
-              {index !== steps.length - 1 && (
-                <div className="h-px w-full bg-f1-border-secondary" />
-              )}
+              {index !== steps.length - 1 && <div className="h-px w-full bg-f1-border-secondary" />}
             </>
           ))}
         </div>

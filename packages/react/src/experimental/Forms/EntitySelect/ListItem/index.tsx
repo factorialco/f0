@@ -25,14 +25,9 @@ interface Props {
   hiddenAvatar?: boolean
 }
 
-export function focusNextFocusable(
-  currentElement: HTMLElement,
-  goToFirst?: () => void
-) {
+export function focusNextFocusable(currentElement: HTMLElement, goToFirst?: () => void) {
   const focusableSelectors = '[data-avatarname-navigator-element="true"]'
-  const allFocusable = Array.from(
-    document.querySelectorAll(focusableSelectors)
-  ) as HTMLElement[]
+  const allFocusable = Array.from(document.querySelectorAll(focusableSelectors)) as HTMLElement[]
 
   const currentIndex = allFocusable.indexOf(currentElement)
   if (currentIndex >= 0 && currentIndex < allFocusable.length - 1) {
@@ -42,14 +37,9 @@ export function focusNextFocusable(
   }
 }
 
-export function focusPreviousFocusable(
-  currentElement: HTMLElement,
-  goToLast?: () => void
-) {
+export function focusPreviousFocusable(currentElement: HTMLElement, goToLast?: () => void) {
   const focusableSelectors = '[data-avatarname-navigator-element="true"]'
-  const allFocusable = Array.from(
-    document.querySelectorAll(focusableSelectors)
-  ) as HTMLElement[]
+  const allFocusable = Array.from(document.querySelectorAll(focusableSelectors)) as HTMLElement[]
 
   const currentIndex = allFocusable.indexOf(currentElement)
   if (currentIndex > 0) {
@@ -117,21 +107,12 @@ export const ListItemSingleContent = ({
         )}
       >
         {!hiddenAvatar && (
-          <F0AvatarPerson
-            src={entity.avatar}
-            firstName={firstName}
-            lastName={lastName}
-            size="xs"
-          />
+          <F0AvatarPerson src={entity.avatar} firstName={firstName} lastName={lastName} size="xs" />
         )}
 
         <div className="flex flex-1 flex-col">
           <div className="flex flex-1 flex-row items-center gap-2 break-all">
-            <HighlightText
-              text={entity.name}
-              search={search}
-              searchKeys={entity.searchKeys}
-            />
+            <HighlightText text={entity.name} search={search} searchKeys={entity.searchKeys} />
           </div>
         </div>
 
@@ -141,18 +122,11 @@ export const ListItemSingleContent = ({
           disabled={disabled}
           onClick={handleLabelClick}
           onKeyDown={handleKeyDown}
-          className={cn(
-            "pointer-events-none ml-auto",
-            singleSelector ? "opacity-0" : ""
-          )}
+          className={cn("pointer-events-none ml-auto", singleSelector ? "opacity-0" : "")}
         />
 
         {singleSelector && selected && (
-          <F0Icon
-            className="text-f1-icon-selected"
-            icon={CheckCircle}
-            size="md"
-          />
+          <F0Icon className="text-f1-icon-selected" icon={CheckCircle} size="md" />
         )}
       </label>
     </div>
@@ -300,9 +274,7 @@ const EntitySelectListItem = ({
         </label>
       </div>
 
-      {!hideLine && !expanded && (
-        <div className="h-[1px] w-full bg-f1-border-secondary" />
-      )}
+      {!hideLine && !expanded && <div className="h-[1px] w-full bg-f1-border-secondary" />}
     </>
   )
 }

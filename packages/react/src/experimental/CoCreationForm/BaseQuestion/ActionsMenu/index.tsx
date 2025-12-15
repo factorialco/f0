@@ -1,14 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
-import {
-  AlertCircleLine,
-  Check,
-  Delete,
-  Ellipsis,
-  Hub,
-  LayersFront,
-} from "@/icons/app"
+import { AlertCircleLine, Check, Delete, Ellipsis, Hub, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -51,12 +44,7 @@ const ToggleItem = ({
     <div className="flex w-full flex-row items-center gap-2">
       <F0Icon icon={icon} color="default" />
       <span className="flex-1">{label}</span>
-      <Switch
-        title={label}
-        checked={checked}
-        onCheckedChange={onChange}
-        hideLabel
-      />
+      <Switch title={label} checked={checked} onCheckedChange={onChange} hideLabel />
     </div>
   </DropdownMenuItem>
 )
@@ -74,9 +62,7 @@ const SubMenuItem = <Value extends string>({
   icon: IconType
   onSelect: (value: Value) => void
 }) => {
-  const selectedOptionLabel = options.find(
-    (option) => option.value === value
-  )?.label
+  const selectedOptionLabel = options.find((option) => option.value === value)?.label
 
   return (
     <DropdownMenuSub>
@@ -94,16 +80,11 @@ const SubMenuItem = <Value extends string>({
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           {options.map((option) => (
-            <DropdownMenuItem
-              key={option.value}
-              onClick={() => onSelect(option.value)}
-            >
+            <DropdownMenuItem key={option.value} onClick={() => onSelect(option.value)}>
               <div className="flex w-full flex-row items-center gap-2">
                 <F0Icon icon={option.icon} color="default" />
                 <span className="flex-1">{option.label}</span>
-                {value === option.value && (
-                  <F0Icon icon={Check} color="default" />
-                )}
+                {value === option.value && <F0Icon icon={Check} color="default" />}
               </div>
             </DropdownMenuItem>
           ))}
@@ -160,10 +141,7 @@ export function ActionsMenu({
     disallowOptionalQuestions,
   } = useCoCreationFormContext()
 
-  const question = useMemo(
-    () => getQuestionById(questionId),
-    [questionId, getQuestionById]
-  )
+  const question = useMemo(() => getQuestionById(questionId), [questionId, getQuestionById])
 
   const questionTypes = useQuestionTypes()
 
@@ -172,9 +150,7 @@ export function ActionsMenu({
       id: questionId,
       type: questionType,
       required: checked,
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
+    } as Parameters<NonNullable<CoCreationFormCallbacks["onQuestionChange"]>>[0])
   }
 
   const handleSelectQuestionType = (newQuestionType: QuestionType) => {
@@ -193,9 +169,7 @@ export function ActionsMenu({
       ...(changingType && {
         ...getDefaultParamsForQuestionType(newQuestionType),
       }),
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
+    } as Parameters<NonNullable<CoCreationFormCallbacks["onQuestionChange"]>>[0])
   }
 
   const handleDuplicateQuestion = () => {

@@ -45,8 +45,7 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
   }
 }
 
-export const getNewElementId = (type: "section" | "question") =>
-  `new-${type}-${Date.now()}`
+export const getNewElementId = (type: "section" | "question") => `new-${type}-${Date.now()}`
 
 const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "text",
@@ -58,16 +57,12 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "date",
 ]
 
-export const getDefaultQuestionTypeToAdd = (
-  allowedQuestionTypes?: QuestionType[]
-) => {
+export const getDefaultQuestionTypeToAdd = (allowedQuestionTypes?: QuestionType[]) => {
   if (!allowedQuestionTypes) {
     return DEFAULT_QUESTION_TYPES[0]
   }
 
-  const result = DEFAULT_QUESTION_TYPES.find((type) =>
-    allowedQuestionTypes?.includes(type)
-  )
+  const result = DEFAULT_QUESTION_TYPES.find((type) => allowedQuestionTypes?.includes(type))
 
   if (!result) {
     throw new Error(

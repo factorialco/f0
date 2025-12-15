@@ -7,9 +7,7 @@ export const getNormalizedRemainingMinutes = (
   remainingMinutes: ClockInControlsProps["remainingMinutes"]
 ) => {
   const res =
-    (remainingMinutes ?? 0) < -1 * (trackedMinutes ?? 0)
-      ? -1 * trackedMinutes
-      : remainingMinutes
+    (remainingMinutes ?? 0) < -1 * (trackedMinutes ?? 0) ? -1 * trackedMinutes : remainingMinutes
 
   return res ?? 0
 }
@@ -22,11 +20,7 @@ export const getInfo = ({
   canSeeRemainingTime = true,
 }: Pick<
   ClockInControlsProps,
-  | "data"
-  | "labels"
-  | "trackedMinutes"
-  | "remainingMinutes"
-  | "canSeeRemainingTime"
+  "data" | "labels" | "trackedMinutes" | "remainingMinutes" | "canSeeRemainingTime"
 >) => {
   const lastEntry = data[data.length - 1]
   const status = lastEntry?.variant || "clocked-out"

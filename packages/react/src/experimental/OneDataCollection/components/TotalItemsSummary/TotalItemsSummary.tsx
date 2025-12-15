@@ -7,10 +7,7 @@ type TotalItemsSummaryProps = {
   totalItemSummaryResult?: string | null
 }
 
-export const TotalItemsSummary = ({
-  isReady,
-  totalItemSummaryResult,
-}: TotalItemsSummaryProps) => {
+export const TotalItemsSummary = ({ isReady, totalItemSummaryResult }: TotalItemsSummaryProps) => {
   return (
     <div className="flex flex-1 flex-shrink items-center gap-4 text-lg font-semibold">
       {!isReady ? (

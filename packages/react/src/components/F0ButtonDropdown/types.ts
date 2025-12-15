@@ -44,10 +44,7 @@ export type F0ButtonDropdownProps<T = string> = {
   /**
    * The items to display in the dropdown.
    */
-  items:
-    | ButtonDropdownItem<T>[]
-    | ButtonDropdownGroup<T>[]
-    | ButtonDropdownGroup<T>
+  items: ButtonDropdownItem<T>[] | ButtonDropdownGroup<T>[] | ButtonDropdownGroup<T>
   /**
    * The variant of the button.
    * @default "default"

@@ -1,2 +1,6 @@
 packages/react/icons/*
 packages/react/CHANGELOG.md
+packages/react/node_modules
+packages/react/dist
+packages/react/build
+packages/react/storybook-static

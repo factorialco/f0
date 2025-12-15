@@ -54,9 +54,7 @@ export const validateStorageKey = (key: string): boolean => {
  * @param key - The storage key to parse
  * @returns Object with name and version, or null if invalid
  */
-export const parseStorageKey = (
-  key: string
-): { name: string; version: string } | null => {
+export const parseStorageKey = (key: string): { name: string; version: string } | null => {
   if (!validateStorageKey(key)) {
     return null
   }

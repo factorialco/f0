@@ -1,9 +1,6 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgBarChart = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
+const SvgBarChart = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
   <svg
     width="366"
     height="146"
@@ -14,57 +11,19 @@ const SvgBarChart = (
     {...props}
   >
     <g filter="url(#filter0_b_378_17717)">
-      <rect
-        y="60"
-        width="40"
-        height="86"
-        rx="10"
-        fill="#F5A51C"
-        fillOpacity="0.1"
-      />
+      <rect y="60" width="40" height="86" rx="10" fill="#F5A51C" fillOpacity="0.1" />
     </g>
     <g filter="url(#filter1_b_378_17717)">
-      <rect
-        x="80"
-        y="33"
-        width="40"
-        height="113"
-        rx="10"
-        fill="#F5A51C"
-        fillOpacity="0.1"
-      />
+      <rect x="80" y="33" width="40" height="113" rx="10" fill="#F5A51C" fillOpacity="0.1" />
     </g>
     <g filter="url(#filter2_b_378_17717)">
-      <rect
-        x="162"
-        y="60"
-        width="40"
-        height="86"
-        rx="10"
-        fill="#F5A51C"
-        fillOpacity="0.1"
-      />
+      <rect x="162" y="60" width="40" height="86" rx="10" fill="#F5A51C" fillOpacity="0.1" />
     </g>
     <g filter="url(#filter3_b_378_17717)">
-      <rect
-        x="244"
-        y="38"
-        width="40"
-        height="108"
-        rx="10"
-        fill="#F5A51C"
-        fillOpacity="0.1"
-      />
+      <rect x="244" y="38" width="40" height="108" rx="10" fill="#F5A51C" fillOpacity="0.1" />
     </g>
     <g filter="url(#filter4_b_378_17717)">
-      <rect
-        x="326"
-        width="40"
-        height="146"
-        rx="10"
-        fill="#F5A51C"
-        fillOpacity="0.1"
-      />
+      <rect x="326" width="40" height="146" rx="10" fill="#F5A51C" fillOpacity="0.1" />
     </g>
     <defs>
       <filter
@@ -78,11 +37,7 @@ const SvgBarChart = (
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImageFix" stdDeviation="20" />
-        <feComposite
-          in2="SourceAlpha"
-          operator="in"
-          result="effect1_backgroundBlur_378_17717"
-        />
+        <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_378_17717" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -101,11 +56,7 @@ const SvgBarChart = (
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImageFix" stdDeviation="20" />
-        <feComposite
-          in2="SourceAlpha"
-          operator="in"
-          result="effect1_backgroundBlur_378_17717"
-        />
+        <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_378_17717" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -124,11 +75,7 @@ const SvgBarChart = (
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImageFix" stdDeviation="20" />
-        <feComposite
-          in2="SourceAlpha"
-          operator="in"
-          result="effect1_backgroundBlur_378_17717"
-        />
+        <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_378_17717" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -147,11 +94,7 @@ const SvgBarChart = (
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImageFix" stdDeviation="20" />
-        <feComposite
-          in2="SourceAlpha"
-          operator="in"
-          result="effect1_backgroundBlur_378_17717"
-        />
+        <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_378_17717" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -170,11 +113,7 @@ const SvgBarChart = (
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImageFix" stdDeviation="20" />
-        <feComposite
-          in2="SourceAlpha"
-          operator="in"
-          result="effect1_backgroundBlur_378_17717"
-        />
+        <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_378_17717" />
         <feBlend
           mode="normal"
           in="SourceGraphic"

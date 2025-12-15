@@ -1,7 +1,4 @@
-import {
-  createDataSourceDefinition,
-  type PaginatedFetchOptions,
-} from "@/hooks/datasource"
+import { createDataSourceDefinition, type PaginatedFetchOptions } from "@/hooks/datasource"
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import { FiltersDefinition, PresetsDefinition } from "../types"
 
@@ -273,9 +270,7 @@ const DataSourceFilterOptions: InFilterOptions<
 
         // Apply pagination
         const perPage = options.pagination?.perPage || 20
-        const cursor = options.pagination?.cursor
-          ? parseInt(options.pagination.cursor)
-          : 0
+        const cursor = options.pagination?.cursor ? parseInt(options.pagination.cursor) : 0
         const startIndex = cursor
         const endIndex = startIndex + perPage
 

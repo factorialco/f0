@@ -10,10 +10,7 @@ const reported: Record<string, { uses: number; usesReported: number }> = {}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const copyStaticProperties = (source: any, target: any): void => {
   // Get all property names including non-enumerable ones
-  const allKeys = [
-    ...Object.getOwnPropertyNames(source),
-    ...Object.getOwnPropertySymbols(source),
-  ]
+  const allKeys = [...Object.getOwnPropertyNames(source), ...Object.getOwnPropertySymbols(source)]
 
   for (const key of allKeys) {
     // Skip properties that should not be copied

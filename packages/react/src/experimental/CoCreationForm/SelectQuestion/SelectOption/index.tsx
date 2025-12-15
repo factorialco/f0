@@ -25,8 +25,7 @@ export const SelectOption = ({
 }: SelectOptionProps) => {
   const { value, label } = option
 
-  const { isDragging, setIsDragging, setDraggedItemId, draggedItemId } =
-    useDragContext()
+  const { isDragging, setIsDragging, setDraggedItemId, draggedItemId } = useDragContext()
   const { t } = useI18n()
 
   const isDraggingThisItem = isDragging && draggedItemId === value

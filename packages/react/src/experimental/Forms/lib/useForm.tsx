@@ -31,22 +31,17 @@ type OnSubmitHandler<
   TTransformedValues extends FieldValues | undefined = undefined,
 > = (
   data: ReturnType<UseFormHandleSubmit<TFieldValues, TTransformedValues>>
-) =>
-  | Promise<Success | FormError<TFieldValues>>
-  | Success
-  | FormError<TFieldValues>
+) => Promise<Success | FormError<TFieldValues>> | Success | FormError<TFieldValues>
 
-export type FormType<
-  T extends SchemaType,
-  FormType extends InferSchema<T>,
-> = UseFormReturn<FormType, unknown, undefined> & {
+export type FormType<T extends SchemaType, FormType extends InferSchema<T>> = UseFormReturn<
+  FormType,
+  unknown,
+  undefined
+> & {
   onSubmit: ReturnType<UseFormHandleSubmit<FormType>>
 }
 
-export function useFormSchema<
-  Schema extends SchemaType,
-  FormData extends InferSchema<Schema>,
->(
+export function useFormSchema<Schema extends SchemaType, FormData extends InferSchema<Schema>>(
   schema: Schema,
   options: UseFormProps<FormData>,
   onSubmit: OnSubmitHandler<FormData>

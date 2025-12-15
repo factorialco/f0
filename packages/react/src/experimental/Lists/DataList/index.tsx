@@ -14,11 +14,7 @@ export type DataListProps = {
   isHorizontal?: boolean
 }
 
-type Items =
-  | typeof Item
-  | typeof PersonItem
-  | typeof CompanyItem
-  | typeof TeamItem
+type Items = typeof Item | typeof PersonItem | typeof CompanyItem | typeof TeamItem
 
 const _DataList = forwardRef<HTMLUListElement, DataListProps>(
   ({ children, label, isHorizontal = false }, ref) => {
@@ -56,10 +52,7 @@ export type ItemProps = {
   action?: ActionType
 }
 
-export type ActionType =
-  | CopyActionType
-  | NavigateActionType
-  | OpenLinkActionType
+export type ActionType = CopyActionType | NavigateActionType | OpenLinkActionType
 
 export type CopyActionType = {
   type: "copy"
@@ -76,18 +69,11 @@ export type OpenLinkActionType = {
   href: string
 }
 
-const Item = forwardRef<HTMLLIElement, ItemProps>(
-  ({ text, icon, action }, ref) => {
-    return (
-      <ItemContainer
-        ref={ref}
-        text={text}
-        leftIcon={icon}
-        action={getInternalAction(action, text)}
-      />
-    )
-  }
-)
+const Item = forwardRef<HTMLLIElement, ItemProps>(({ text, icon, action }, ref) => {
+  return (
+    <ItemContainer ref={ref} text={text} leftIcon={icon} action={getInternalAction(action, text)} />
+  )
+})
 
 Item.displayName = "DataList.Item"
 
@@ -107,12 +93,7 @@ const PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
       <ItemContainer
         ref={ref}
         leftIcon={() => (
-          <F0AvatarPerson
-            size="xs"
-            src={avatarUrl}
-            firstName={firstName}
-            lastName={lastName}
-          />
+          <F0AvatarPerson size="xs" src={avatarUrl} firstName={firstName} lastName={lastName} />
         )}
         text={fullName}
         action={getInternalAction(action, fullName)}
@@ -133,9 +114,7 @@ const CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
     return (
       <ItemContainer
         ref={ref}
-        leftIcon={() => (
-          <F0AvatarCompany name={name} size="xs" src={avatarUrl} />
-        )}
+        leftIcon={() => <F0AvatarCompany name={name} size="xs" src={avatarUrl} />}
         text={name}
         action={getInternalAction(action, name)}
       />
@@ -150,32 +129,28 @@ type TeamItemProps = {
   action?: ActionType
 }
 
-const TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
-  ({ action, name }, ref) => {
-    return (
-      <ItemContainer
-        ref={ref}
-        leftIcon={() => <F0AvatarTeam name={name} size="xs" />}
-        text={name}
-        action={getInternalAction(action, name)}
-      />
-    )
-  }
-)
+const TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(({ action, name }, ref) => {
+  return (
+    <ItemContainer
+      ref={ref}
+      leftIcon={() => <F0AvatarTeam name={name} size="xs" />}
+      text={name}
+      action={getInternalAction(action, name)}
+    />
+  )
+})
 
 TeamItem.displayName = "TeamItem"
 
 type DotTagItemProps = TagDotProps
 
-const DotTagItem = forwardRef<HTMLLIElement, DotTagItemProps>(
-  ({ ...props }, ref) => {
-    return (
-      <li ref={ref} className="flex items-start pt-1">
-        <F0TagDot {...props} />
-      </li>
-    )
-  }
-)
+const DotTagItem = forwardRef<HTMLLIElement, DotTagItemProps>(({ ...props }, ref) => {
+  return (
+    <li ref={ref} className="flex items-start pt-1">
+      <F0TagDot {...props} />
+    </li>
+  )
+})
 
 DotTagItem.displayName = "DotTagItem"
 

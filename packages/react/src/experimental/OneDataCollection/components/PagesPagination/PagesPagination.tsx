@@ -15,12 +15,7 @@ export const PagesPagination = ({
   const t = useI18n()
   return (
     isPageBasedPagination(paginationInfo) && (
-      <div
-        className={cn(
-          "flex w-full items-center justify-between px-4",
-          className
-        )}
-      >
+      <div className={cn("flex w-full items-center justify-between px-4", className)}>
         <span className="shrink-0 text-f1-foreground-secondary">
           {paginationInfo.total > 0 &&
             `${(paginationInfo.currentPage - 1) * paginationInfo.perPage + 1}-${Math.min(

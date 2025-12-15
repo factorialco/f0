@@ -37,10 +37,7 @@ export const TwoColumnsList = forwardRef<HTMLDivElement, TwoColumnsListType>(
               <div>{title}</div>
               {titleTooltip && (
                 <div className="flex h-4 w-4 items-center text-f1-foreground-tertiary hover:cursor-help">
-                  <Tooltip
-                    label={titleTooltip.label}
-                    description={titleTooltip.description}
-                  >
+                  <Tooltip label={titleTooltip.label} description={titleTooltip.description}>
                     <F0Icon icon={InfoCircleLine} size="sm" />
                   </Tooltip>
                 </div>

@@ -41,9 +41,7 @@ export const BaseTag = forwardRef<HTMLDivElement, Props>(
           {text}
         </span>
       )}
-      {additionalAccesibleText && (
-        <span className="sr-only">{additionalAccesibleText}</span>
-      )}
+      {additionalAccesibleText && <span className="sr-only">{additionalAccesibleText}</span>}
       {right}
     </div>
   )

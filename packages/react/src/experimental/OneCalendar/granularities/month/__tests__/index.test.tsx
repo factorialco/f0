@@ -120,29 +120,17 @@ describe("monthGranularity", () => {
     })
 
     it("formats first month of year correctly with long format", () => {
-      const result = monthGranularity.toString(
-        new Date(2024, 0, 15),
-        i18n,
-        "long"
-      ) // January 2024
+      const result = monthGranularity.toString(new Date(2024, 0, 15), i18n, "long") // January 2024
       expect(result).toBe("Jan 2024")
     })
 
     it("formats last month of year correctly with long format", () => {
-      const result = monthGranularity.toString(
-        new Date(2024, 11, 15),
-        i18n,
-        "long"
-      ) // December 2024
+      const result = monthGranularity.toString(new Date(2024, 11, 15), i18n, "long") // December 2024
       expect(result).toBe("Dec 2024")
     })
 
     it("formats leap year February correctly with long format", () => {
-      const result = monthGranularity.toString(
-        new Date(2024, 1, 15),
-        i18n,
-        "long"
-      ) // February 2024 (leap year)
+      const result = monthGranularity.toString(new Date(2024, 1, 15), i18n, "long") // February 2024 (leap year)
       expect(result).toBe("Feb 2024")
     })
   })

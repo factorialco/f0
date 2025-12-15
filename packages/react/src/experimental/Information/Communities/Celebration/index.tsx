@@ -51,8 +51,7 @@ export const BaseCelebration = ({
   }
 
   const shouldReduceMotion = useReducedMotion()
-  const { canvasRef, handleMouseEnter, handleMouseLeave } =
-    useConfetti(shouldReduceMotion)
+  const { canvasRef, handleMouseEnter, handleMouseLeave } = useConfetti(shouldReduceMotion)
 
   const emoji = EmojiImage({
     emoji: EMOJI_MAP[type as keyof typeof EMOJI_MAP],
@@ -70,10 +69,7 @@ export const BaseCelebration = ({
       onMouseEnter={shouldReduceMotion ? undefined : handleMouseEnter}
       onMouseLeave={shouldReduceMotion ? undefined : handleMouseLeave}
     >
-      <canvas
-        ref={canvasRef}
-        className="pointer-events-none absolute inset-0 z-50 h-full w-full"
-      />
+      <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-50 h-full w-full" />
       <div className="basis-2/3 px-1 pt-1">
         <CelebrationAvatar
           firstName={firstName}

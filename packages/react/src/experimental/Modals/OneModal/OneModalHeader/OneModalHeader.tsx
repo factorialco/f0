@@ -54,9 +54,7 @@ const Titles = ({
     <div className="flex flex-col gap-1">
       {!!title && <DialogTitle className={titleClassName}>{title}</DialogTitle>}
       {!!description && (
-        <DialogDescription className={descriptionClassName}>
-          {description}
-        </DialogDescription>
+        <DialogDescription className={descriptionClassName}>{description}</DialogDescription>
       )}
     </div>
   ) : null
@@ -68,19 +66,13 @@ export const OneModalHeader = ({
   module,
   otherActions,
 }: OneModalHeaderProps) => {
-  const {
-    onClose,
-    shownBottomSheet,
-    position: modalPosition,
-    contentPadding,
-  } = useOneModal()
+  const { onClose, shownBottomSheet, position: modalPosition, contentPadding } = useOneModal()
 
   const Divider = () => {
     return <div className="h-4 w-px self-center bg-f1-background-secondary" />
   }
 
-  const otherActionItems =
-    otherActions?.filter((action) => action.type !== "separator") ?? []
+  const otherActionItems = otherActions?.filter((action) => action.type !== "separator") ?? []
 
   const Actions = () => {
     if (!otherActionItems.length || !otherActions) return null
@@ -124,10 +116,7 @@ export const OneModalHeader = ({
     )
   }
 
-  const containerClassName = cn(
-    "flex flex-col gap-3",
-    classesByContentPadding[contentPadding]
-  )
+  const containerClassName = cn("flex flex-col gap-3", classesByContentPadding[contentPadding])
 
   const drawerTitleClassName = cn(
     "font-semibold text-f1-foreground",
@@ -159,11 +148,7 @@ export const OneModalHeader = ({
             />
           </div>
         </div>
-        <Titles
-          title={title}
-          description={description}
-          context={{ position: modalPosition }}
-        />
+        <Titles title={title} description={description} context={{ position: modalPosition }} />
       </div>
     )
   }
@@ -172,19 +157,13 @@ export const OneModalHeader = ({
     <div className={containerClassName}>
       <div className="flex flex-row items-center justify-between">
         {!shownBottomSheet ? (
-          <Titles
-            title={title}
-            description={description}
-            context={{ position: modalPosition }}
-          />
+          <Titles title={title} description={description} context={{ position: modalPosition }} />
         ) : (
           <>
             {module ? (
               <Module />
             ) : (
-              <DrawerTitle className={drawerTitleClassName}>
-                {title}
-              </DrawerTitle>
+              <DrawerTitle className={drawerTitleClassName}>{title}</DrawerTitle>
             )}
           </>
         )}
@@ -200,14 +179,10 @@ export const OneModalHeader = ({
           />
         </div>
       </div>
-      {module && !!title && (
-        <DrawerTitle className={drawerTitleClassName}>{title}</DrawerTitle>
-      )}
+      {module && !!title && <DrawerTitle className={drawerTitleClassName}>{title}</DrawerTitle>}
 
       {!!description && (
-        <DrawerDescription className={drawerDescriptionClassName}>
-          {description}
-        </DrawerDescription>
+        <DrawerDescription className={drawerDescriptionClassName}>{description}</DrawerDescription>
       )}
     </div>
   )

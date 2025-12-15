@@ -60,8 +60,7 @@ export const predefinedPresets: Record<string, DatePreset> = {
   lastQuarter: {
     label: "Last quarter",
     granularity: "quarter",
-    value: () =>
-      granularityDefinitions.quarter.toRange(subMonths(new Date(), 3)),
+    value: () => granularityDefinitions.quarter.toRange(subMonths(new Date(), 3)),
   },
   thisHalfYear: {
     label: "This half year",
@@ -71,8 +70,7 @@ export const predefinedPresets: Record<string, DatePreset> = {
   lastHalfYear: {
     label: "Last half year",
     granularity: "halfyear",
-    value: () =>
-      granularityDefinitions.halfyear.toRange(subMonths(new Date(), 6)),
+    value: () => granularityDefinitions.halfyear.toRange(subMonths(new Date(), 6)),
   },
   lastYear: {
     label: "Last year",

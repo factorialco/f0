@@ -27,13 +27,7 @@ type Props = {
   separator?: "top" | "bottom"
 }
 
-export const SectionHeader = ({
-  title,
-  description,
-  action,
-  link,
-  separator,
-}: Props) => {
+export const SectionHeader = ({ title, description, action, link, separator }: Props) => {
   const layout = useLayout()
   return (
     <div

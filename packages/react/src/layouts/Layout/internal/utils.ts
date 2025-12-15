@@ -13,9 +13,7 @@ export const isPageLayoutBlockComponent = (
   ) {
     return false
   }
-  return (
-    "__isPageLayoutBlock" in (child.type as unknown as Record<string, unknown>)
-  )
+  return "__isPageLayoutBlock" in (child.type as unknown as Record<string, unknown>)
 }
 
 // Utility to check if a component is a valid PageLayoutGroup
@@ -30,9 +28,7 @@ export const isPageLayoutGroupComponent = (
   ) {
     return false
   }
-  return (
-    "__isPageLayoutGroup" in (child.type as unknown as Record<string, unknown>)
-  )
+  return "__isPageLayoutGroup" in (child.type as unknown as Record<string, unknown>)
 }
 
 // Utility to validate all children are PageLayoutBlock components

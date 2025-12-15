@@ -10,9 +10,7 @@ interface LayoutProviderProps {
 }
 
 export function LayoutProvider({ children, layout }: LayoutProviderProps) {
-  return (
-    <LayoutContext.Provider value={layout}>{children}</LayoutContext.Provider>
-  )
+  return <LayoutContext.Provider value={layout}>{children}</LayoutContext.Provider>
 }
 
 export function useLayout(): LayoutType {

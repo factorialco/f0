@@ -62,10 +62,7 @@ interface AIBlockData {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     aiBlock: {
-      insertAIBlock: (
-        data: AIBlockData,
-        config: AIBlockConfigWithLabels
-      ) => ReturnType
+      insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType
     }
   }
 }
@@ -197,10 +194,7 @@ const useAIBlockState = (data: AIBlockData | undefined) => {
   return { isLoading, setIsLoading }
 }
 
-const useDisplayInfo = (
-  data: AIBlockData | undefined,
-  config: AIBlockConfig
-) => {
+const useDisplayInfo = (data: AIBlockData | undefined, config: AIBlockConfig) => {
   return useMemo(() => {
     // Use saved data if available
     if (data?.selectedTitle || data?.selectedEmoji) {
@@ -231,9 +225,7 @@ const AIButtonsSection = ({
   onButtonClick: (type: string) => void
 }) => (
   <div className="flex flex-col gap-2">
-    {config.title && (
-      <div className="text-f1-foreground-secondary">{config.title}</div>
-    )}
+    {config.title && <div className="text-f1-foreground-secondary">{config.title}</div>}
     <div className="relative flex flex-row flex-wrap items-center gap-2">
       {config.buttons?.map((button, index) => (
         <F0Button
@@ -264,17 +256,8 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
 
   const blockId = useRef(Math.random().toString(36).substr(2, 9)).current
   const { isLoading, setIsLoading } = useAIBlockState(data)
-  const { title: displayTitle, emoji: displayEmoji } = useDisplayInfo(
-    data,
-    config
-  )
-  const contentEditor = useContentEditor(
-    data,
-    isLoading,
-    blockId,
-    updateAttributes,
-    config
-  )
+  const { title: displayTitle, emoji: displayEmoji } = useDisplayInfo(data, config)
+  const contentEditor = useContentEditor(data, isLoading, blockId, updateAttributes, config)
 
   // Handle pushing editable content to main editor
   useEffect(() => {
@@ -284,37 +267,21 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
         deleteNode()
         setTimeout(() => {
           if (data.content) {
-            mainEditor
-              .chain()
-              .focus()
-              .setTextSelection(pos)
-              .insertContent(data.content)
-              .run()
+            mainEditor.chain().focus().setTextSelection(pos).insertContent(data.content).run()
           }
         }, 10)
       }
     }
-  }, [
-    data?.content,
-    data?.isEditable,
-    mainEditor,
-    getPos,
-    node.nodeSize,
-    deleteNode,
-  ])
+  }, [data?.content, data?.isEditable, mainEditor, getPos, node.nodeSize, deleteNode])
 
   // Ensure button metadata is persisted for copy/paste
   useEffect(() => {
     if (data?.selectedAction && config?.buttons) {
       const needsUpdate =
-        !data?.selectedTitle ||
-        !data?.selectedEmoji ||
-        data?.isEditable === undefined
+        !data?.selectedTitle || !data?.selectedEmoji || data?.isEditable === undefined
 
       if (needsUpdate) {
-        const selectedButton = config.buttons.find(
-          (button) => button.type === data.selectedAction
-        )
+        const selectedButton = config.buttons.find((button) => button.type === data.selectedAction)
 
         if (selectedButton) {
           updateAttributes({
@@ -332,9 +299,7 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
 
   const handleClick = useCallback(
     async (type: string) => {
-      const selectedButton = config.buttons?.find(
-        (button) => button.type === type
-      )
+      const selectedButton = config.buttons?.find((button) => button.type === type)
       const buttonData = {
         selectedAction: type,
         selectedTitle: selectedButton?.label || type,
@@ -382,9 +347,7 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
     if (shouldShowBanner) {
       return (
         <F0AiBanner
-          title={
-            displayEmoji ? `${displayEmoji} ${displayTitle}` : displayTitle
-          }
+          title={displayEmoji ? `${displayEmoji} ${displayTitle}` : displayTitle}
           content={contentEditor?.getHTML() ?? ""}
           onClose={() => deleteNode()}
         />
@@ -396,11 +359,7 @@ export const AIBlockView: React.FC<NodeViewProps> = ({
         className="editor-ai-block mb-3 flex w-full flex-col gap-4 rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <AIButtonsSection
-          config={config}
-          isLoading={isLoading}
-          onButtonClick={handleClick}
-        />
+        <AIButtonsSection config={config} isLoading={isLoading} onButtonClick={handleClick} />
       </div>
     )
   }

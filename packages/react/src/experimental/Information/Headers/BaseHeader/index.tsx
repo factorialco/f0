@@ -14,11 +14,7 @@ import {
   PrimaryDropdownAction,
   SecondaryAction,
 } from "@/experimental/Information/utils"
-import {
-  Dropdown,
-  DropdownItem,
-  MobileDropdown,
-} from "@/experimental/Navigation/Dropdown"
+import { Dropdown, DropdownItem, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
 import { Fragment } from "react"
 
@@ -48,8 +44,7 @@ interface BaseHeaderProps {
   metadata?: MetadataProps["items"]
 }
 
-const isVisible = (action: { isVisible?: boolean }) =>
-  action.isVisible !== false
+const isVisible = (action: { isVisible?: boolean }) => action.isVisible !== false
 
 export function BaseHeader({
   title,
@@ -111,18 +106,14 @@ export function BaseHeader({
             <div className="flex items-start">
               <F0Avatar
                 avatar={{
-                  ...(avatar.type === "generic"
-                    ? { ...avatar, type: "company" }
-                    : avatar),
+                  ...(avatar.type === "generic" ? { ...avatar, type: "company" } : avatar),
                 }}
                 size="xl"
               />
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <span className="text-2xl font-semibold text-f1-foreground">
-              {title}
-            </span>
+            <span className="text-2xl font-semibold text-f1-foreground">{title}</span>
             {description && <Description description={description} />}
           </div>
         </div>
@@ -206,10 +197,9 @@ export function BaseHeader({
               </div>
             </Fragment>
           ))}
-          {isPrimaryActionVisible &&
-            (hasSecondaryActions || hasOtherActions) && (
-              <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-            )}
+          {isPrimaryActionVisible && (hasSecondaryActions || hasOtherActions) && (
+            <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+          )}
           {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) && (
             <div className="hidden md:block">
               <F0Button

@@ -1,9 +1,6 @@
 import { zeroRender } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
-import {
-  GridStackWidgetContext,
-  useGridStackWidgetContext,
-} from "../grid-stack-widget-context"
+import { GridStackWidgetContext, useGridStackWidgetContext } from "../grid-stack-widget-context"
 
 describe("grid-stack-widget-context", () => {
   describe("useGridStackWidgetContext", () => {

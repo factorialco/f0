@@ -15,9 +15,7 @@ type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never
 
 // recursive type that limits nesting to exactly 4 levels
 export type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
-  children?: NextDepth<Depth> extends never
-    ? never
-    : TOCItem<NextDepth<Depth>>[]
+  children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[]
 }
 
 export type TOCItemAction =

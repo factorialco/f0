@@ -109,11 +109,7 @@ export const Snapshot: Story = {
       {avatarFileSizes.map((size) => (
         <div key={size} className="flex flex-row gap-2">
           {fileTypes.map((fileType, index) => (
-            <F0AvatarFile
-              key={`${size}-${index}`}
-              size={size}
-              file={fileType}
-            />
+            <F0AvatarFile key={`${size}-${index}`} size={size} file={fileType} />
           ))}
         </div>
       ))}

@@ -1,11 +1,7 @@
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { BadgeProps } from "@/experimental/Information/Badge"
-import {
-  Check as CheckIcon,
-  Cross as CrossIcon,
-  Question as QuestionIcon,
-} from "@/icons/app"
+import { Check as CheckIcon, Cross as CrossIcon, Question as QuestionIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { FC, useMemo } from "react"
 
@@ -60,9 +56,7 @@ const badgePriority: Record<NonNullable<BadgeProps["type"]>, number> = {
 }
 
 const getAvatarBadge = (status: Status): Required<BadgeProps> => {
-  return status in badgeMap
-    ? badgeMap[status as keyof typeof badgeMap]
-    : defaultBadge
+  return status in badgeMap ? badgeMap[status as keyof typeof badgeMap] : defaultBadge
 }
 
 function getAvatarPriority(badgeType?: BadgeProps["type"]): number {
@@ -98,10 +92,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
           badge,
         }
       })
-      .sort(
-        (a, b) =>
-          getAvatarPriority(b.badge?.type) - getAvatarPriority(a.badge?.type)
-      )
+      .sort((a, b) => getAvatarPriority(b.badge?.type) - getAvatarPriority(a.badge?.type))
   }, [approvers])
 
   return (
@@ -109,9 +100,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
       <div className="flex flex-row items-start justify-between">
         <div>
           <p className="font-medium text-f1-foreground">{title}</p>
-          <p className="text-f1-foreground-secondary">
-            {displayApprovalsRequired}
-          </p>
+          <p className="text-f1-foreground-secondary">{displayApprovalsRequired}</p>
         </div>
         <F0TagStatus text={displayStatus} variant={statusTagVariants[status]} />
       </div>

@@ -4,16 +4,15 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # useGroups
 
-The `useGroups` hook manages group expand/collapse state for grouped data
-collections. It provides functionality to control which groups are open or
-closed, with support for default states and smooth animations.
+The `useGroups` hook manages group expand/collapse state for grouped data collections. It provides
+functionality to control which groups are open or closed, with support for default states and smooth
+animations.
 
 ## Overview
 
-`useGroups` is a lightweight hook that manages the visibility state of groups in
-a data collection. It works with the grouped data structure provided by
-`useData` and enables users to expand or collapse groups to show or hide their
-contents.
+`useGroups` is a lightweight hook that manages the visibility state of groups in a data collection.
+It works with the grouped data structure provided by `useData` and enables users to expand or
+collapse groups to show or hide their contents.
 
 ### Key Features
 
@@ -62,8 +61,7 @@ interface UseGroupsReturn {
 
 #### `getAnimationVariants(options?: AnimationVariantsOptions)`
 
-Returns animation variants for use with framer-motion or similar animation
-libraries:
+Returns animation variants for use with framer-motion or similar animation libraries:
 
 ```tsx
 interface AnimationVariantsOptions {
@@ -897,12 +895,12 @@ function AnimatedGroupedList() {
 
 ## Related Hooks
 
-- [`useDataSource`](/?path=/docs/hooks-datasource-usedatasource--docs) - For
-  creating data sources with grouping configuration
-- [`useData`](/?path=/docs/hooks-datasource-usedata--docs) - For data fetching
-  and getting grouped data
-- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For
-  selection management within groups
+- [`useDataSource`](/?path=/docs/hooks-datasource-usedatasource--docs) - For creating data sources
+  with grouping configuration
+- [`useData`](/?path=/docs/hooks-datasource-usedata--docs) - For data fetching and getting grouped
+  data
+- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For selection management
+  within groups
 
 ## Common Patterns
 

@@ -18,13 +18,9 @@ export const ChatHeader = (props: HeaderProps) => {
 
   return (
     <header
-      className={cn(
-        "flex justify-between border-0 border-solid border-f1-border-secondary p-3"
-      )}
+      className={cn("flex justify-between border-0 border-solid border-f1-border-secondary p-3")}
     >
-      <h2 className="text-f1-foreground">
-        {hasDefaultTitle ? "" : labels.title}
-      </h2>
+      <h2 className="text-f1-foreground">{hasDefaultTitle ? "" : labels.title}</h2>
       <motion.div layout className="flex items-center" {...props}>
         {hasMessages && (
           <ButtonInternal

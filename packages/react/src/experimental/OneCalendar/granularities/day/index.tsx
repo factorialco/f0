@@ -22,9 +22,9 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { DayView } from "./DayView"
 
-export function toDayGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(date: T): T extends Date | DateRange ? DateRangeComplete : T {
+export function toDayGranularityDateRange<T extends Date | DateRange | undefined | null>(
+  date: T
+): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfDay, endOfDay)
 }
 
@@ -81,12 +81,8 @@ export const dayGranularity: GranularityDefinition = {
     const maxWithGranularity = options.max && endOfDay(options.max)
 
     return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
+      prev: isAfterOrEqual(prevFrom, minWithGranularity) ? { from: prevFrom, to: prevTo } : false,
+      next: isBeforeOrEqual(nextTo, maxWithGranularity) ? { from: nextFrom, to: nextTo } : false,
     }
   },
   toRange: (date) => toDayGranularityDateRange(date),

@@ -22,9 +22,7 @@ export const F0AvatarPerson = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
-      icon={
-        deactivated ? { icon: PersonNegative, color: "secondary" } : undefined
-      }
+      icon={deactivated ? { icon: PersonNegative, color: "secondary" } : undefined}
     />
   )
 }

@@ -49,8 +49,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   if (
     !showSearchBox &&
     !filters &&
-    (!grouping ||
-      (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2))
+    (!grouping || (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2))
   ) {
     return null
   }

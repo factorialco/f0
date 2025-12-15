@@ -1,12 +1,6 @@
-import {
-  SortingsDefinition,
-  SortingsState,
-} from "@/hooks/datasource/types/sortings.typings"
+import { SortingsDefinition, SortingsState } from "@/hooks/datasource/types/sortings.typings"
 import { useCallback, useRef } from "react"
-import {
-  FiltersDefinition,
-  FiltersState,
-} from "../../components/OneFilterPicker/types"
+import { FiltersDefinition, FiltersState } from "../../components/OneFilterPicker/types"
 import { EventScalar, useF0EventCatcher } from "../../lib/providers/events"
 
 type UseEventEmitterParams<Sortings extends SortingsDefinition> = {
@@ -27,12 +21,12 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
   defaultFilters,
   defaultSorting,
 }: UseEventEmitterParams<Sortings>) => {
-  const latestFilters = useRef<
-    UseEventEmitterParams<Sortings>["defaultFilters"] | undefined
-  >(defaultFilters)
-  const latestSortings = useRef<
-    UseEventEmitterParams<Sortings>["defaultSorting"] | undefined
-  >(defaultSorting)
+  const latestFilters = useRef<UseEventEmitterParams<Sortings>["defaultFilters"] | undefined>(
+    defaultFilters
+  )
+  const latestSortings = useRef<UseEventEmitterParams<Sortings>["defaultSorting"] | undefined>(
+    defaultSorting
+  )
 
   const { onEvent } = useF0EventCatcher()
 

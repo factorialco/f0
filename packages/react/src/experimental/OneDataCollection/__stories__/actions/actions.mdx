@@ -19,28 +19,26 @@ import * as IndexStories from "../index.stories"
 
 Data Collection provides a hierarchy of actions for data operations:
 
-- **Primary action**: The main action, visually emphasized, designed for the
-  most common operation (such as “adding a new resource”).
-- **Secondary action**: Complementary actions with less visual prominence. If
-  there are multiple secondary actions, they should be grouped within the "More
-  options" (ellipsis) menu, to avoid adding a second button. The goal is to
-  minimize the toolbar space as much as possible to allow room for other
-  elements and to avoid overwhelming the user.
-- **"More options" button**: A dropdown menu containing additional actions,
-  optimizing space and maintaining a clean interface.
+- **Primary action**: The main action, visually emphasized, designed for the most common operation
+  (such as “adding a new resource”).
+- **Secondary action**: Complementary actions with less visual prominence. If there are multiple
+  secondary actions, they should be grouped within the "More options" (ellipsis) menu, to avoid
+  adding a second button. The goal is to minimize the toolbar space as much as possible to allow
+  room for other elements and to avoid overwhelming the user.
+- **"More options" button**: A dropdown menu containing additional actions, optimizing space and
+  maintaining a clean interface.
 
 Data collection allows you to define actions in different levels:
 
 ### Collection actions
 
-Are displayed in the top right and allows to perform actions related to the
-collection but not to any specific items.
+Are displayed in the top right and allows to perform actions related to the collection but not to
+any specific items.
 
 There 2 types of collection actions:
 
-- **Primary actions**: Are displayed in the top right button. (only one per data
-  collection). Primary actions are defined in the `primaryActions` property of
-  the useDataCollectionSource hook.
+- **Primary actions**: Are displayed in the top right button. (only one per data collection).
+  Primary actions are defined in the `primaryActions` property of the useDataCollectionSource hook.
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -59,8 +57,8 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
-You can also pass an array of actions and they will be rendered as a
-F0ButtonDropdown, with the first action as main action.
+You can also pass an array of actions and they will be rendered as a F0ButtonDropdown, with the
+first action as main action.
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -84,15 +82,13 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
-> ⚠️ The disabled or loading state of the action is not supported in the
-> F0ButtonDropdown component yet so this only works when the actions is a single
-> action.
+> ⚠️ The disabled or loading state of the action is not supported in the F0ButtonDropdown component
+> yet so this only works when the actions is a single action.
 
-- **Secondary actions**: Are an array of actions and by defualt are displayed a
-  dropdown. But you can define the number of actions to display as a secondary
-  button using the `expanded` property. You can also hide the label of the
-  action when it's expanded using the `hideLabelWhenExpanded` property in the
-  action definition.
+- **Secondary actions**: Are an array of actions and by defualt are displayed a dropdown. But you
+  can define the number of actions to display as a secondary button using the `expanded` property.
+  You can also hide the label of the action when it's expanded using the `hideLabelWhenExpanded`
+  property in the action definition.
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -138,8 +134,8 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
-> ⚠️ The disabled or loading state of the action is not supported in the
-> F0Dropdown component yet so this only works for the expanded actions.
+> ⚠️ The disabled or loading state of the action is not supported in the F0Dropdown component yet so
+> this only works for the expanded actions.
 
 ### Examples
 
@@ -163,14 +159,13 @@ const dataSource = useDataCollectionSource({
 
 The items provide a streamlined interaction approach:
 
-- Primary interaction is navigational - clicking a row opens the associated
-  resource, side panel or modal.
+- Primary interaction is navigational - clicking a row opens the associated resource, side panel or
+  modal.
 - Do not support individual cell-level actions
 
-The actions are defined in the `itemActions` prop of the
-`useDataCollectionSource` hook via a function that get the item and returns an
-array of actions, that allows you to define diffrent actions for each item, or
-for specific items.
+The actions are defined in the `itemActions` prop of the `useDataCollectionSource` hook via a
+function that get the item and returns an array of actions, that allows you to define diffrent
+actions for each item, or for specific items.
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -206,9 +201,8 @@ const dataSource = useDataCollectionSource({
 
 ## ItemUrl
 
-Navigate to the item detail page, is a common pattern in data collections. You
-can also the target url for each item using the `itemUrl` property of the
-`useDataCollectionSource` hook.
+Navigate to the item detail page, is a common pattern in data collections. You can also the target
+url for each item using the `itemUrl` property of the `useDataCollectionSource` hook.
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -216,7 +210,7 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
-This property is a funtion that get the item and returns a string with the url
-of the item (or undefined to not link the item).
+This property is a funtion that get the item and returns a string with the url of the item (or
+undefined to not link the item).
 
 <Canvas of={IndexStories.WithLinkedItems} />

@@ -131,20 +131,12 @@ describe("weekGranularity", () => {
     })
 
     it("formats first week of year correctly with long format", () => {
-      const result = weekGranularity.toString(
-        new Date(2024, 0, 1),
-        i18n,
-        "long"
-      ) // January 1, 2024 (W1)
+      const result = weekGranularity.toString(new Date(2024, 0, 1), i18n, "long") // January 1, 2024 (W1)
       expect(result).toBe("Week of 1 Jan 2024")
     })
 
     it("formats last week of year correctly with long format", () => {
-      const result = weekGranularity.toString(
-        new Date(2024, 11, 30),
-        i18n,
-        "long"
-      ) // December 30, 2024
+      const result = weekGranularity.toString(new Date(2024, 11, 30), i18n, "long") // December 30, 2024
       expect(result).toBe("Week of 30 Dec 2024")
     })
   })

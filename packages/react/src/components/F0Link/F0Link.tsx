@@ -10,14 +10,7 @@ export type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 }
 
 export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
-  {
-    className,
-    children,
-    stopPropagation = false,
-    "aria-label": ariaLabel,
-    href,
-    ...props
-  },
+  { className, children, stopPropagation = false, "aria-label": ariaLabel, href, ...props },
   ref
 ) {
   const { target } = props

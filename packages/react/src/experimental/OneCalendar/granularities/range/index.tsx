@@ -40,12 +40,8 @@ export const rangeGranularity: GranularityDefinition = {
     const maxWithGranularity = options.max && endOfDay(options.max)
 
     return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
+      prev: isAfterOrEqual(prevFrom, minWithGranularity) ? { from: prevFrom, to: prevTo } : false,
+      next: isBeforeOrEqual(nextTo, maxWithGranularity) ? { from: nextFrom, to: nextTo } : false,
     }
   },
   calendarView: "day",

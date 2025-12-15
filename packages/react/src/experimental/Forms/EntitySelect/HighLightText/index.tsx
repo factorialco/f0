@@ -12,26 +12,14 @@ export const HighlightText = ({
   semiBold?: boolean
 }) => {
   if (!search) {
-    return (
-      <span className={cn("line-clamp-1", semiBold ? "font-semibold" : "")}>
-        {text}
-      </span>
-    )
+    return <span className={cn("line-clamp-1", semiBold ? "font-semibold" : "")}>{text}</span>
   }
 
   if (text.toLowerCase().indexOf(search.toLowerCase()) === -1) {
-    if (
-      searchKeys.find(
-        (el) => el.toLowerCase().indexOf(search.toLowerCase().trim()) >= 0
-      )
-    ) {
+    if (searchKeys.find((el) => el.toLowerCase().indexOf(search.toLowerCase().trim()) >= 0)) {
       search = text.split(" ")[0]
     } else {
-      return (
-        <span className={cn("line-clamp-1", semiBold ? "font-semibold" : "")}>
-          {text}
-        </span>
-      )
+      return <span className={cn("line-clamp-1", semiBold ? "font-semibold" : "")}>{text}</span>
     }
   }
 

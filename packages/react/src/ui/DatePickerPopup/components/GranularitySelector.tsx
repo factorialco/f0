@@ -8,11 +8,7 @@ interface GranularitySelectorProps {
   onChange: (granularity: GranularityDefinitionKey) => void
 }
 
-export function GranularitySelector({
-  granularities,
-  value,
-  onChange,
-}: GranularitySelectorProps) {
+export function GranularitySelector({ granularities, value, onChange }: GranularitySelectorProps) {
   const i18n = useI18n()
 
   const handleChange = (granularity: GranularityDefinitionKey) => {
@@ -26,12 +22,9 @@ export function GranularitySelector({
         <SelectContent>
           {granularities.map((granularity) => (
             <SelectItem key={granularity} value={granularity}>
-              {(
-                i18n.date.granularities as Record<
-                  GranularityDefinitionKey,
-                  { label: string }
-                >
-              )[granularity]?.label || granularity}
+              {(i18n.date.granularities as Record<GranularityDefinitionKey, { label: string }>)[
+                granularity
+              ]?.label || granularity}
             </SelectItem>
           ))}
         </SelectContent>

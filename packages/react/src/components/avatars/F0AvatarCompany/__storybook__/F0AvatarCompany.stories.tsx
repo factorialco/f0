@@ -10,16 +10,10 @@ const meta: Meta<typeof F0AvatarCompany> = {
   title: "Avatars/AvatarCompany",
   tags: ["autodocs"],
   argTypes: {
-    ...getBaseAvatarArgTypes([
-      "size",
-      "aria-label",
-      "aria-labelledby",
-      "badge",
-    ]),
+    ...getBaseAvatarArgTypes(["size", "aria-label", "aria-labelledby", "badge"]),
     name: {
       control: "text",
-      description:
-        "The company name to display (used for initials if no image provided)",
+      description: "The company name to display (used for initials if no image provided)",
     },
     src: {
       control: "text",
@@ -30,9 +24,7 @@ const meta: Meta<typeof F0AvatarCompany> = {
   parameters: {
     docs: {
       description: {
-        component: ["A company avatar component."]
-          .map((line) => `<p>${line}</p>`)
-          .join(""),
+        component: ["A company avatar component."].map((line) => `<p>${line}</p>`).join(""),
       },
     },
   },

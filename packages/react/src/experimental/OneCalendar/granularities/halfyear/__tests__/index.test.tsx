@@ -106,24 +106,12 @@ describe("halfyearGranularity", () => {
     })
 
     it("formats both half-years correctly with long format", () => {
-      expect(
-        halfyearGranularity.toString(new Date(2024, 0, 15), i18n, "long")
-      ).toBe("H1 2024") // January - H1
-      expect(
-        halfyearGranularity.toString(new Date(2024, 3, 15), i18n, "long")
-      ).toBe("H1 2024") // April - H1
-      expect(
-        halfyearGranularity.toString(new Date(2024, 5, 15), i18n, "long")
-      ).toBe("H1 2024") // June - H1
-      expect(
-        halfyearGranularity.toString(new Date(2024, 6, 15), i18n, "long")
-      ).toBe("H2 2024") // July - H2
-      expect(
-        halfyearGranularity.toString(new Date(2024, 9, 15), i18n, "long")
-      ).toBe("H2 2024") // October - H2
-      expect(
-        halfyearGranularity.toString(new Date(2024, 11, 15), i18n, "long")
-      ).toBe("H2 2024") // December - H2
+      expect(halfyearGranularity.toString(new Date(2024, 0, 15), i18n, "long")).toBe("H1 2024") // January - H1
+      expect(halfyearGranularity.toString(new Date(2024, 3, 15), i18n, "long")).toBe("H1 2024") // April - H1
+      expect(halfyearGranularity.toString(new Date(2024, 5, 15), i18n, "long")).toBe("H1 2024") // June - H1
+      expect(halfyearGranularity.toString(new Date(2024, 6, 15), i18n, "long")).toBe("H2 2024") // July - H2
+      expect(halfyearGranularity.toString(new Date(2024, 9, 15), i18n, "long")).toBe("H2 2024") // October - H2
+      expect(halfyearGranularity.toString(new Date(2024, 11, 15), i18n, "long")).toBe("H2 2024") // December - H2
     })
 
     it("formats half-year boundaries correctly with long format 2", () => {

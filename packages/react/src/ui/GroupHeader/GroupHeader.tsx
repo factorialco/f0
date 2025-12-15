@@ -64,11 +64,7 @@ export const GroupHeader = ({
         />
       )}
       <Await resolve={label} fallback={<Skeleton className="h-4 w-24" />}>
-        {(label) => (
-          <h6 className="text-base font-semibold text-f1-foreground">
-            {label}
-          </h6>
-        )}
+        {(label) => <h6 className="text-base font-semibold text-f1-foreground">{label}</h6>}
       </Await>
       <Await resolve={itemCount} fallback={<Skeleton className="h-4 w-5" />}>
         {(count) => count !== undefined && <Counter value={count} />}

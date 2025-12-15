@@ -13,9 +13,7 @@ export function DragProvider({ children }: { children: React.ReactNode }) {
   const [isDragging, setIsDragging] = useState(false)
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
   return (
-    <DragContext.Provider
-      value={{ isDragging, setIsDragging, draggedItemId, setDraggedItemId }}
-    >
+    <DragContext.Provider value={{ isDragging, setIsDragging, draggedItemId, setDraggedItemId }}>
       {children}
     </DragContext.Provider>
   )

@@ -30,9 +30,7 @@ export function CelebrationAvatar({
         "relative h-32 w-full overflow-hidden rounded-md bg-f1-background",
         !src
           ? BACKGROUND_COLORS[
-              getAvatarColor(
-                [firstName, lastName].join("")
-              ) as keyof typeof BACKGROUND_COLORS
+              getAvatarColor([firstName, lastName].join("")) as keyof typeof BACKGROUND_COLORS
             ]
           : ""
       )}
@@ -55,20 +53,12 @@ export function CelebrationAvatar({
                 : {}
             }
           >
-            <F0AvatarPerson
-              src={src}
-              firstName={firstName}
-              lastName={lastName}
-              size="2xl"
-            />
+            <F0AvatarPerson src={src} firstName={firstName} lastName={lastName} size="2xl" />
           </div>
           {canReact && (
             <div
               ref={pickerRef}
-              className={cn(
-                "absolute -right-0.5",
-                src ? "bottom-0.5" : "-bottom-[3px]"
-              )}
+              className={cn("absolute -right-0.5", src ? "bottom-0.5" : "-bottom-[3px]")}
             >
               <Picker
                 lastEmojiReaction={lastEmojiReaction}

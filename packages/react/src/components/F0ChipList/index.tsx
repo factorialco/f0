@@ -45,11 +45,7 @@ const _F0ChipList = ({
         renderOverflowIndicator={(count) => (
           <ChipCounter
             count={(initialRemainingCount ?? 0) + count}
-            list={
-              initialRemainingCount
-                ? undefined
-                : chips.slice(chips.length - count)
-            }
+            list={initialRemainingCount ? undefined : chips.slice(chips.length - count)}
           />
         )}
         overflowIndicatorWithPopover={false}
@@ -84,7 +80,4 @@ _F0ChipList.displayName = "F0ChipList"
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0ChipList = experimentalComponent<typeof _F0ChipList>(
-  "F0ChipList",
-  _F0ChipList
-)
+export const F0ChipList = experimentalComponent<typeof _F0ChipList>("F0ChipList", _F0ChipList)

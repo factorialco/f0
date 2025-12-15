@@ -59,11 +59,7 @@ export const Default: Story = {
         emoji: "🎉",
         initialCount: 3,
         hasReacted: true,
-        users: [
-          { name: "John Doe" },
-          { name: "Jane Smith" },
-          { name: "Michael Johnson" },
-        ],
+        users: [{ name: "John Doe" }, { name: "Jane Smith" }, { name: "Michael Johnson" }],
       },
       {
         emoji: "🚀",

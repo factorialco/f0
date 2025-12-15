@@ -53,9 +53,7 @@ export function MonthView({
 
   // Check if a value is a DateRange
   const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
+    return Boolean(value && typeof value === "object" && ("from" in value || "to" in value))
   }
 
   // Handle click on a month
@@ -89,9 +87,7 @@ export function MonthView({
           })
         } else {
           // Create a range between the two months
-          const start = isBefore(fromDate, selectedDate)
-            ? fromDate
-            : selectedDate
+          const start = isBefore(fromDate, selectedDate) ? fromDate : selectedDate
           const end = isBefore(fromDate, selectedDate) ? selectedDate : fromDate
 
           onSelect?.({
@@ -119,9 +115,7 @@ export function MonthView({
     if (!selected) return false
 
     if (!isDateRange(selected)) {
-      return (
-        selected.getMonth() === monthIndex && selected.getFullYear() === year
-      )
+      return selected.getMonth() === monthIndex && selected.getFullYear() === year
     } else {
       if (selected.from && selected.to) {
         const current = new Date(year, monthIndex, 15)
@@ -130,10 +124,7 @@ export function MonthView({
           end: selected.to,
         })
       } else if (selected.from) {
-        return (
-          selected.from.getMonth() === monthIndex &&
-          selected.from.getFullYear() === year
-        )
+        return selected.from.getMonth() === monthIndex && selected.from.getFullYear() === year
       }
     }
 
@@ -144,20 +135,14 @@ export function MonthView({
   const isRangeStart = (monthIndex: number): boolean => {
     if (!selected || !isDateRange(selected) || !selected.from) return false
 
-    return (
-      selected.from.getMonth() === monthIndex &&
-      selected.from.getFullYear() === year
-    )
+    return selected.from.getMonth() === monthIndex && selected.from.getFullYear() === year
   }
 
   // Check if the month is the end of the range
   const isRangeEnd = (monthIndex: number): boolean => {
     if (!selected || !isDateRange(selected) || !selected.to) return false
 
-    return (
-      selected.to.getMonth() === monthIndex &&
-      selected.to.getFullYear() === year
-    )
+    return selected.to.getMonth() === monthIndex && selected.to.getFullYear() === year
   }
 
   const motionVariants = {
@@ -176,10 +161,7 @@ export function MonthView({
     <AnimatePresence mode="popLayout" initial={false} custom={motionDirection}>
       <motion.div
         key={year}
-        className={cn(
-          "grid gap-y-3",
-          compact ? "grid-cols-2 gap-y-2" : "grid-cols-3"
-        )}
+        className={cn("grid gap-y-3", compact ? "grid-cols-2 gap-y-2" : "grid-cols-3")}
         custom={motionDirection}
         variants={motionVariants}
         initial="hidden"
@@ -201,8 +183,7 @@ export function MonthView({
           const monthEnd = endOfMonth(selectedDate)
 
           const disabled =
-            (minDate && isBefore(monthStart, minDate)) ||
-            (maxDate && isAfter(monthEnd, maxDate))
+            (minDate && isBefore(monthStart, minDate)) || (maxDate && isAfter(monthEnd, maxDate))
 
           return (
             <button
@@ -212,9 +193,7 @@ export function MonthView({
               disabled={disabled}
               className={cn(
                 "relative isolate flex items-center justify-center font-medium text-f1-foreground transition-colors duration-100 after:absolute after:inset-0 after:z-0 after:bg-f1-background-selected-bold after:opacity-0 after:transition-all after:duration-100 after:content-['']",
-                compact
-                  ? "h-8 rounded-sm after:rounded-sm"
-                  : "h-10 rounded-md after:rounded-md",
+                compact ? "h-8 rounded-sm after:rounded-sm" : "h-10 rounded-md after:rounded-md",
                 !disabled &&
                   "hover:bg-f1-background-hover hover:after:bg-f1-background-selected-bold-hover",
                 disabled && "cursor-not-allowed text-f1-foreground-secondary",
@@ -233,13 +212,8 @@ export function MonthView({
                 (isStart || isEnd) &&
                   mode === "range" &&
                   "rounded-none bg-f1-background-selected after:opacity-100 [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
-                isStart &&
-                  mode === "range" &&
-                  isEnd &&
-                  (compact ? "rounded-s-sm" : "rounded-s-md"),
-                isEnd &&
-                  mode === "range" &&
-                  (compact ? "rounded-e-sm" : "rounded-e-md")
+                isStart && mode === "range" && isEnd && (compact ? "rounded-s-sm" : "rounded-s-md"),
+                isEnd && mode === "range" && (compact ? "rounded-e-sm" : "rounded-e-md")
               )}
             >
               <span>{month.name}</span>

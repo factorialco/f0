@@ -74,19 +74,17 @@ describe("Select", () => {
     Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
       value: 800,
     })
-    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
-      () => ({
-        width: 120,
-        height: 120,
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-        x: 0,
-        y: 0,
-        toJSON: () => {},
-      })
-    )
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(() => ({
+      width: 120,
+      height: 120,
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    }))
   })
 
   const openSelect = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -116,13 +114,7 @@ describe("Select", () => {
 
   it("shows options when clicked", async () => {
     const user = userEvent.setup()
-    render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-      />
-    )
+    render(<F0Select {...defaultSelectProps} options={mockOptions} onChange={() => {}} />)
 
     await openSelect(user)
 
@@ -133,9 +125,7 @@ describe("Select", () => {
   })
 
   it("should display selected value", async () => {
-    render(
-      <F0Select {...defaultSelectProps} options={mockOptions} value="option1" />
-    )
+    render(<F0Select {...defaultSelectProps} options={mockOptions} value="option1" />)
 
     await waitFor(() => {
       expect(screen.getByText("Option 1")).toBeInTheDocument()
@@ -162,41 +152,27 @@ describe("Select", () => {
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-        showSearchBox
-      />
+      <F0Select {...defaultSelectProps} options={mockOptions} onChange={() => {}} showSearchBox />
     )
 
     await openSelect(user)
     await user.type(screen.getByRole("searchbox"), "1")
 
     expect(screen.getByText("Option 1")).toBeInTheDocument()
-    await waitFor(() =>
-      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
-    )
+    await waitFor(() => expect(screen.queryByText("Option 2")).not.toBeInTheDocument())
   })
 
   it("should not lose the focus when the search input is focused and the list changes", async () => {
     const user = userEvent.setup({ delay: 100 })
     render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-        showSearchBox
-      />
+      <F0Select {...defaultSelectProps} options={mockOptions} onChange={() => {}} showSearchBox />
     )
 
     await openSelect(user)
     await user.type(screen.getByRole("searchbox"), "Option 1")
 
     expect(screen.getByText("Option 1")).toBeInTheDocument()
-    await waitFor(() =>
-      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
-    )
+    await waitFor(() => expect(screen.queryByText("Option 2")).not.toBeInTheDocument())
   })
 
   it("shows empty message when no options match search", async () => {
@@ -259,14 +235,7 @@ describe("Select", () => {
   })
 
   it("disables select when disabled prop is true", async () => {
-    render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-        disabled
-      />
-    )
+    render(<F0Select {...defaultSelectProps} options={mockOptions} onChange={() => {}} disabled />)
 
     await waitFor(() => {
       expect(screen.getByRole("combobox")).toBeDisabled()
@@ -275,11 +244,7 @@ describe("Select", () => {
 
   it("renders with custom trigger", () => {
     render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
-      >
+      <F0Select {...defaultSelectProps} options={mockOptions} onChange={() => {}}>
         <button>Custom Trigger</button>
       </F0Select>
     )
@@ -291,13 +256,7 @@ describe("Select", () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={handleChange}
-      />
-    )
+    render(<F0Select {...defaultSelectProps} options={mockOptions} onChange={handleChange} />)
 
     await openSelect(user)
     await user.click(screen.getByText("Option 1"))
@@ -337,13 +296,7 @@ describe("Select", () => {
       },
     ]
 
-    render(
-      <F0Select
-        {...defaultSelectProps}
-        options={mockOptions}
-        onChange={handleChange}
-      />
-    )
+    render(<F0Select {...defaultSelectProps} options={mockOptions} onChange={handleChange} />)
 
     await openSelect(user)
     await user.click(screen.getByText("Option 1"))
@@ -403,9 +356,7 @@ describe("Select", () => {
 
     // Find the clear button using the same approach as InputField tests
     // The clear button should be visible when there's a value
-    const clearButton = container.querySelector(
-      "button[data-testid='clear-button']"
-    )
+    const clearButton = container.querySelector("button[data-testid='clear-button']")
     expect(clearButton).toBeInTheDocument()
 
     // Click the clear button using fireEvent directly

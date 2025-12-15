@@ -120,9 +120,7 @@ export type DataSource<
   /** Current state of applied sortings */
   currentSortings: SortingsState<Sortings>
   /** Function to update the current sortings state */
-  setCurrentSortings: React.Dispatch<
-    React.SetStateAction<SortingsState<Sortings>>
-  >
+  setCurrentSortings: React.Dispatch<React.SetStateAction<SortingsState<Sortings>>>
   /*******************************************************/
 
   /***** SEARCH ***************************************************/
@@ -142,16 +140,11 @@ export type DataSource<
     ? Exclude<GroupingState<R, Grouping>, undefined>
     : GroupingState<R, Grouping>
   /** Function to update the current grouping state */
-  setCurrentGrouping: React.Dispatch<
-    React.SetStateAction<GroupingState<R, Grouping>>
-  >
+  setCurrentGrouping: React.Dispatch<React.SetStateAction<GroupingState<R, Grouping>>>
   /*******************************************************/
 
   /** Function to provide an id for a record, necessary for append mode */
-  idProvider?: <Item extends R>(
-    item: Item,
-    index?: number
-  ) => string | number | symbol
+  idProvider?: <Item extends R>(item: Item, index?: number) => string | number | symbol
 
   /** Item filter that can be used to filter the items before they are displayed */
   itemPreFilter?: (item: R) => boolean

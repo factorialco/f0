@@ -53,21 +53,9 @@ export const LaneSelectProvider = <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: LaneSelectProviderProps<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >
+  props: LaneSelectProviderProps<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>
 ) => {
-  const { selectedItems, handleSelectItemChange } = useSelectable<
-    R,
-    Filters,
-    Sortings,
-    Grouping
-  >({
+  const { selectedItems, handleSelectItemChange } = useSelectable<R, Filters, Sortings, Grouping>({
     data: props.data || { type: "flat", records: [], groups: [] },
     paginationInfo: props.paginationInfo,
     source: props.source,

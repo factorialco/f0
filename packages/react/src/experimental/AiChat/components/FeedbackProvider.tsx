@@ -1,11 +1,5 @@
 import { AIMessage } from "@copilotkit/shared"
-import {
-  createContext,
-  FC,
-  PropsWithChildren,
-  useContext,
-  useState,
-} from "react"
+import { createContext, FC, PropsWithChildren, useContext, useState } from "react"
 
 const FeedbackContext = createContext<FeedbackModal | null>(null)
 
@@ -35,8 +29,7 @@ export type FeedbackModalState = {
 } | null
 
 export const FeedbackModalProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [feedbackModalState, setFeedbackModalState] =
-    useState<FeedbackModalState>(null)
+  const [feedbackModalState, setFeedbackModalState] = useState<FeedbackModalState>(null)
 
   const value: FeedbackModal = feedbackModalState
     ? {
@@ -56,20 +49,14 @@ export const FeedbackModalProvider: FC<PropsWithChildren> = ({ children }) => {
         close: () => setFeedbackModalState(null),
       }
 
-  return (
-    <FeedbackContext.Provider value={value}>
-      {children}
-    </FeedbackContext.Provider>
-  )
+  return <FeedbackContext.Provider value={value}>{children}</FeedbackContext.Provider>
 }
 
 export const useFeedbackModal = (): FeedbackModal => {
   const context = useContext(FeedbackContext)
 
   if (context === null) {
-    throw new Error(
-      "useFeedbackModal must be used within a FeedbackModalProvider"
-    )
+    throw new Error("useFeedbackModal must be used within a FeedbackModalProvider")
   }
 
   return context

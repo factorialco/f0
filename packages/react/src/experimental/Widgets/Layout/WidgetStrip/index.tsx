@@ -14,10 +14,7 @@ const Container: React.FC<{ children: ReactNode }> = ({ children }) => (
 )
 
 export const WidgetStrip = withSkeleton(
-  forwardRef<HTMLDivElement, DashboardProps>(function WidgetStrip(
-    { children },
-    ref
-  ) {
+  forwardRef<HTMLDivElement, DashboardProps>(function WidgetStrip({ children }, ref) {
     return (
       <ScrollArea ref={ref} showBar={false}>
         <Container>{children}</Container>

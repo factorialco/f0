@@ -9,12 +9,7 @@ interface ItemDropDownProps {
   disabled?: boolean
 }
 
-export function ItemDropDown({
-  otherActions,
-  open,
-  setOpen,
-  disabled,
-}: ItemDropDownProps) {
+export function ItemDropDown({ otherActions, open, setOpen, disabled }: ItemDropDownProps) {
   return (
     <Dropdown
       items={otherActions.map((action): DropdownItem => {

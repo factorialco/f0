@@ -1,12 +1,6 @@
 import { TranslationsType } from "@/lib/providers/i18n"
 import { ReactNode } from "react"
-import {
-  CalendarMode,
-  CalendarView,
-  DateRange,
-  DateRangeComplete,
-  DateRangeString,
-} from "../types"
+import { CalendarMode, CalendarView, DateRange, DateRangeComplete, DateRangeString } from "../types"
 
 export type DateNavigationOptions = {
   min?: Date
@@ -46,10 +40,7 @@ export interface GranularityDefinition {
   // Calculate the maximum width of the string representation of the date
   toStringMaxWidth: () => number
   // Parse the date range string to a date range
-  fromString: (
-    dateStr: string | DateRangeString,
-    i18n: TranslationsType
-  ) => DateRange | null
+  fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null
   // Calculate the next date form the UI View (e.g for day granularity, this will be the next month)
   navigateUIView: (viewDate: Date, direction: -1 | 1) => Date
   // Calculate the next date form the selected date (e.g for day granularity, this will be the next day)
@@ -73,13 +64,7 @@ export interface GranularityDefinition {
   // Adds a delta to a date range
   add: (date: DateRangeComplete, delta: number) => DateRangeComplete
   // Gets the previous and next date range from a date range
-  getPrevNext(
-    date: DateRange,
-    options: DateNavigationOptions
-  ): PrevNextDateNavigation
+  getPrevNext(date: DateRange, options: DateNavigationOptions): PrevNextDateNavigation
 }
 
-export type GranularityDefinitionSimple = Pick<
-  GranularityDefinition,
-  "toRangeString" | "toString"
->
+export type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">

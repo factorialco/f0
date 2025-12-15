@@ -1,7 +1,4 @@
-import {
-  FiltersDefinition,
-  FiltersState,
-} from "@/components/OneFilterPicker/types"
+import { FiltersDefinition, FiltersState } from "@/components/OneFilterPicker/types"
 import { WithGroupId } from "../useData"
 import { RecordType } from "./records.typings"
 
@@ -24,10 +21,7 @@ export type SelectedItemsState<R extends RecordType> = {
   groups: Map<SelectedState["id"], SelectedState>
 }
 
-export type SelectedItemsDetailedStatus<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> = {
+export type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
   allSelected: boolean | "indeterminate"
   /** Status of items that have been loaded. Items not yet loaded won't appear here. */
   itemsStatus: ReadonlyArray<{ item: R; checked: boolean }>
@@ -38,10 +32,7 @@ export type SelectedItemsDetailedStatus<
   selectedCount: number
 }
 
-export type OnSelectItemsCallback<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-> = (
+export type OnSelectItemsCallback<R extends RecordType, Filters extends FiltersDefinition> = (
   selectedItems: SelectedItemsDetailedStatus<R, Filters> & {
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>
   },

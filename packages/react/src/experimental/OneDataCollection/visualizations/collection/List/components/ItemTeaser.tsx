@@ -14,9 +14,7 @@ export const ItemTeaser = ({ title, avatar, description }: ItemTeaserProps) => {
       <div className="flex flex-1 flex-col gap-0.5">
         <header>
           <h3>
-            <OneEllipsis className="text-base font-medium text-f1-foreground">
-              {title}
-            </OneEllipsis>
+            <OneEllipsis className="text-base font-medium text-f1-foreground">{title}</OneEllipsis>
           </h3>
         </header>
         <aside>
@@ -25,9 +23,7 @@ export const ItemTeaser = ({ title, avatar, description }: ItemTeaserProps) => {
               {description.map((item, index) => (
                 <div key={index} className="flex min-w-0 gap-1">
                   <OneEllipsis>{item}</OneEllipsis>
-                  {index < description.length - 1 && (
-                    <span className="hidden md:inline"> · </span>
-                  )}
+                  {index < description.length - 1 && <span className="hidden md:inline"> · </span>}
                 </div>
               ))}
             </div>

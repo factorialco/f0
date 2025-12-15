@@ -25,9 +25,7 @@ import {
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartPropsBase } from "../utils/types"
 
-const getMaxValueByKey = (
-  data: ({ x: unknown } & Record<string, number>)[]
-): string => {
+const getMaxValueByKey = (data: ({ x: unknown } & Record<string, number>)[]): string => {
   const clonedData = cloneDeep(data)
 
   let label: string = ""
@@ -36,14 +34,12 @@ const getMaxValueByKey = (
   clonedData.forEach((datapoint) => {
     delete datapoint.x
 
-    Object.entries(datapoint as Record<string, number>).forEach(
-      ([newLabel, value]) => {
-        if (max < value) {
-          max = value
-          label = newLabel
-        }
+    Object.entries(datapoint as Record<string, number>).forEach(([newLabel, value]) => {
+      if (max < value) {
+        max = value
+        label = newLabel
       }
-    )
+    })
   })
 
   return label
@@ -51,12 +47,11 @@ const getMaxValueByKey = (
 
 type ValueFormatter = (value: string | number | undefined) => string | number
 
-export type VerticalBarChartProps<K extends ChartConfig = ChartConfig> =
-  ChartPropsBase<K> & {
-    label?: boolean
-    showRatio?: boolean
-    valueFormatter?: ValueFormatter
-  }
+export type VerticalBarChartProps<K extends ChartConfig = ChartConfig> = ChartPropsBase<K> & {
+  label?: boolean
+  showRatio?: boolean
+  valueFormatter?: ValueFormatter
+}
 
 const _VBarChart = <K extends ChartConfig>(
   {
@@ -75,15 +70,10 @@ const _VBarChart = <K extends ChartConfig>(
 ) => {
   const bars = Object.keys(dataConfig) as (keyof ChartConfig)[]
   const preparedData = prepareData<K>(data)
-  const maxLabelWidth = Math.max(
-    ...preparedData.map((el) => measureTextWidth(`${el.x}`))
-  )
+  const maxLabelWidth = Math.max(...preparedData.map((el) => measureTextWidth(`${el.x}`)))
   const totalCategories = bars.reduce(
     (acc, key) => {
-      acc[key] = data.reduce(
-        (sum, item) => sum + (item.values[key] as number),
-        0
-      )
+      acc[key] = data.reduce((sum, item) => sum + (item.values[key] as number), 0)
       return acc
     },
     {} as Record<string, number>
@@ -115,24 +105,14 @@ const _VBarChart = <K extends ChartConfig>(
         {!hideTooltip && (
           <ChartTooltip
             {...chartTooltipProps(true)}
-            content={
-              <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
-            }
+            content={<ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />}
           />
         )}
         {!hideGrid && (
-          <CartesianGrid
-            {...cartesianGridProps()}
-            vertical={true}
-            horizontal={false}
-          />
+          <CartesianGrid {...cartesianGridProps()} vertical={true} horizontal={false} />
         )}
         <XAxis {...xAxisProps} hide={xAxis?.hide} />
-        <YAxis
-          {...yAxisProps}
-          hide={yAxis?.hide}
-          width={yAxis?.width ?? maxLabelWidth + 20}
-        />
+        <YAxis {...yAxisProps} hide={yAxis?.hide} width={yAxis?.width ?? maxLabelWidth + 20} />
 
         {bars.map((key, index) => {
           return (
@@ -205,11 +185,7 @@ const CustomLabel = ({
   return (
     <g transform={`translate(${gx},${gy + 4})`}>
       {showLabel && (
-        <text
-          x={0}
-          textAnchor="start"
-          className="fill-f1-foreground-secondary text-sm font-medium"
-        >
+        <text x={0} textAnchor="start" className="fill-f1-foreground-secondary text-sm font-medium">
           {firstText}
         </text>
       )}

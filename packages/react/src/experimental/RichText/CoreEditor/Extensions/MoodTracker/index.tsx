@@ -1,8 +1,4 @@
-import {
-  Pulse,
-  pulseIcon,
-  pulseIconColor,
-} from "@/components/avatars/F0AvatarPulse"
+import { Pulse, pulseIcon, pulseIconColor } from "@/components/avatars/F0AvatarPulse"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
@@ -39,10 +35,7 @@ export interface MoodTrackerConfig {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     moodTracker: {
-      insertMoodTracker: (
-        data: MoodTrackerData,
-        config?: MoodTrackerConfig
-      ) => ReturnType
+      insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType
     }
   }
 }
@@ -90,9 +83,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-3">
-                <p className="text-f1-text-primary text-lg font-semibold">
-                  {data.title}
-                </p>
+                <p className="text-f1-text-primary text-lg font-semibold">{data.title}</p>
                 <div className="flex flex-row items-center">
                   {data.days.map((day, index) => (
                     <div
@@ -123,9 +114,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
               variant="outline"
               hideLabel
               label={
-                isOpen
-                  ? config.labels?.collapse || "Collapse"
-                  : config.labels?.expand || "Expand"
+                isOpen ? config.labels?.collapse || "Collapse" : config.labels?.expand || "Expand"
               }
               icon={isOpen ? ChevronUp : ChevronDown}
               size="sm"
@@ -139,15 +128,10 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
             {data.days.map((day, index) => (
               <div className="flex flex-row items-center gap-2" key={index}>
                 <div className="flex items-center justify-center rounded-full">
-                  <F0Icon
-                    icon={pulseIcon[day.mood]}
-                    size="lg"
-                    color={pulseIconColor[day.mood]}
-                  />
+                  <F0Icon icon={pulseIcon[day.mood]} size="lg" color={pulseIconColor[day.mood]} />
                 </div>
                 <p className="text-f1-text-primary text-md font-normal">
-                  <span className="font-semibold">{day.day}:</span>{" "}
-                  {day.comment || "-"}
+                  <span className="font-semibold">{day.day}:</span> {day.comment || "-"}
                 </p>
               </div>
             ))}

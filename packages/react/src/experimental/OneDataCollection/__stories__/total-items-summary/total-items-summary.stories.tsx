@@ -48,9 +48,7 @@ export const TotalItemsSummaryCustom: Story = {
   },
   render: () => (
     <ExampleComponent
-      totalItemSummary={(totalItems) =>
-        `Total items in the datacollection: ${totalItems}`
-      }
+      totalItemSummary={(totalItems) => `Total items in the datacollection: ${totalItems}`}
     />
   ),
 }
@@ -73,9 +71,7 @@ export const TotalItemsSummaryWithFilters: Story = {
   render: () => (
     <ExampleComponent
       hideFilters={true}
-      totalItemSummary={(totalItems) =>
-        `Total items in the datacollection: ${totalItems}`
-      }
+      totalItemSummary={(totalItems) => `Total items in the datacollection: ${totalItems}`}
     />
   ),
 }

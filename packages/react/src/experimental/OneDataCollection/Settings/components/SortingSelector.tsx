@@ -32,8 +32,7 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
     })),
   ]
 
-  const [localSortings, setLocalSortings] =
-    useState<SortingsState<Sortings>>(currentSortings)
+  const [localSortings, setLocalSortings] = useState<SortingsState<Sortings>>(currentSortings)
 
   useEffect(() => {
     if (!currentSortings) {

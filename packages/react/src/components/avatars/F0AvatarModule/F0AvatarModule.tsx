@@ -47,11 +47,7 @@ const squirclePath =
  * @experimental
  * @returns
  */
-export function F0AvatarModule({
-  size = "md",
-  module,
-  ...props
-}: F0AvatarModuleProps) {
+export function F0AvatarModule({ size = "md", module, ...props }: F0AvatarModuleProps) {
   const IconComponent = modules[module as ModuleId]
 
   if (!IconComponent) {
@@ -69,11 +65,7 @@ export function F0AvatarModule({
       aria-label={props["aria-label"]}
       aria-labelledby={props["aria-labelledby"]}
     >
-      <svg
-        viewBox="0 0 100 100"
-        className="absolute h-full w-full"
-        preserveAspectRatio="none"
-      >
+      <svg viewBox="0 0 100 100" className="absolute h-full w-full" preserveAspectRatio="none">
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FF355E" />
@@ -83,9 +75,7 @@ export function F0AvatarModule({
         </defs>
         <path d={squirclePath} fill={`url(#${gradientId})`} />
       </svg>
-      {IconComponent && (
-        <IconComponent className={iconSizeVariants({ size })} />
-      )}
+      {IconComponent && <IconComponent className={iconSizeVariants({ size })} />}
     </div>
   )
 }

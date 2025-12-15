@@ -11,12 +11,7 @@ const meta: Meta<typeof F0AvatarPerson> = {
   title: "Avatars/AvatarPerson",
   tags: ["autodocs"],
   argTypes: {
-    ...getBaseAvatarArgTypes([
-      "size",
-      "aria-label",
-      "aria-labelledby",
-      "badge",
-    ]),
+    ...getBaseAvatarArgTypes(["size", "aria-label", "aria-labelledby", "badge"]),
   },
 } satisfies Meta<typeof F0AvatarPerson>
 
@@ -77,12 +72,7 @@ export const Snapshot: Story = {
         <h4 className="text-lg font-semibold">Without Image</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size) => (
-            <F0AvatarPerson
-              key={size}
-              size={size}
-              firstName="Juanito"
-              lastName="Perez"
-            />
+            <F0AvatarPerson key={size} size={size} firstName="Juanito" lastName="Perez" />
           ))}
         </div>
       </section>

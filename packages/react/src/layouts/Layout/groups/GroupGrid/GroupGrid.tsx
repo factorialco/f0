@@ -58,11 +58,7 @@ export const GroupGrid = <
   deps: dependencyValues,
 }: GroupGridProps<Widget, Deps>) => {
   const AnimatedWidgetWrapper = useCallback(
-    (
-      children: React.ReactNode,
-      meta: Record<string, unknown> | undefined,
-      editMode: boolean
-    ) => (
+    (children: React.ReactNode, meta: Record<string, unknown> | undefined, editMode: boolean) => (
       <motion.div
         className="h-full w-full"
         initial={{ opacity: 0, scale: 0.8, filter: "blur(8px)" }}
@@ -104,18 +100,11 @@ export const GroupGrid = <
     widget: Optional<GroupGridWidget, "x" | "y">,
     dependencyValues?: Deps
   ): React.ReactNode => {
-    if (
-      typeof widget.content === "function" &&
-      widget.deps &&
-      dependencyValues
-    ) {
+    if (typeof widget.content === "function" && widget.deps && dependencyValues) {
       // Create an object from widget's deps keys and dependencyValues
       const depsObject: Record<string, Deps[keyof Deps]> = {}
       widget.deps.forEach((depKey) => {
-        if (
-          typeof depKey === "string" &&
-          dependencyValues[depKey] !== undefined
-        ) {
+        if (typeof depKey === "string" && dependencyValues[depKey] !== undefined) {
           depsObject[depKey] = dependencyValues[depKey] as Deps[keyof Deps]
         }
       })
@@ -187,10 +176,7 @@ export const GroupGrid = <
         // Resolve keys from dependencyValues object
         const resolvedDeps = widget.deps
           .map((depKey) => {
-            if (
-              typeof depKey === "string" &&
-              dependencyValues[depKey] !== undefined
-            ) {
+            if (typeof depKey === "string" && dependencyValues[depKey] !== undefined) {
               return dependencyValues[depKey]
             }
             return depKey
@@ -212,9 +198,7 @@ export const GroupGrid = <
         onChange(
           gridWidgets.map((widget) => {
             // Find the original widget to preserve deps and content function
-            const originalWidget = widgetsRef.current.find(
-              (w) => w.id === widget.id
-            )
+            const originalWidget = widgetsRef.current.find((w) => w.id === widget.id)
             return {
               id: widget.id,
               w: widget.w ?? 1,
@@ -260,8 +244,7 @@ export const GroupGrid = <
         Object.keys(prevDependencyValuesRef.current).length !==
           Object.keys(dependencyValues).length ||
         Object.keys(dependencyValues).some(
-          (key) =>
-            prevDependencyValuesRef.current?.[key] !== dependencyValues[key]
+          (key) => prevDependencyValuesRef.current?.[key] !== dependencyValues[key]
         ))
 
     // Check for dependency changes using resolved dependency values
@@ -271,10 +254,7 @@ export const GroupGrid = <
         // Compare resolved dependency values, not the keys
         const prevResolvedDeps = prevDepsRef.current.get(widget.id)
         const currentResolvedDeps = resolvedDepsMap.get(widget.id)
-        depsChangedMap.set(
-          widget.id,
-          depsChanged(prevResolvedDeps, currentResolvedDeps)
-        )
+        depsChangedMap.set(widget.id, depsChanged(prevResolvedDeps, currentResolvedDeps))
         // Update stored resolved deps
         if (currentResolvedDeps) {
           prevDepsRef.current.set(widget.id, currentResolvedDeps)
@@ -293,8 +273,7 @@ export const GroupGrid = <
     })
 
     const hasDepsChanges =
-      Array.from(depsChangedMap.values()).some((changed) => changed) ||
-      dependencyValuesChanged
+      Array.from(depsChangedMap.values()).some((changed) => changed) || dependencyValuesChanged
 
     if (editModeChanged && !widgetsReferenceChanged && !hasDepsChanges) {
       // Only editMode changed: update noMove/noResize in place without changing array reference
@@ -316,20 +295,14 @@ export const GroupGrid = <
             locked: widgetFromProp.locked,
             meta: widgetFromProp.meta,
             _originalContent: content,
-            content: AnimatedWidgetWrapper(
-              content,
-              widgetFromProp.meta,
-              editMode
-            ),
+            content: AnimatedWidgetWrapper(content, widgetFromProp.meta, editMode),
           }
         })
       )
     } else if (widgetsReferenceChanged || hasDepsChanges) {
       // Widgets prop changed or dependencies changed: merge with current state to preserve sizes/positions if widget exists
       setGridWidgets((currentGridWidgets) => {
-        const currentWidgetsMap = new Map(
-          currentGridWidgets.map((w) => [w.id, w])
-        )
+        const currentWidgetsMap = new Map(currentGridWidgets.map((w) => [w.id, w]))
         return widgets.map((widget) => {
           const currentWidget = currentWidgetsMap.get(widget.id)
           const widgetDepsChanged = depsChangedMap.get(widget.id) ?? false
@@ -341,9 +314,7 @@ export const GroupGrid = <
             content = getWidgetContent(widget, dependencyValues)
           } else {
             // Preserve existing content if deps haven't changed
-            content =
-              currentWidget._originalContent ??
-              getWidgetContent(widget, dependencyValues)
+            content = currentWidget._originalContent ?? getWidgetContent(widget, dependencyValues)
           }
 
           // Preserve size/position from current state if widget exists, otherwise use prop
@@ -378,13 +349,7 @@ export const GroupGrid = <
     prevWidgetsRef.current = widgets
     prevDependencyValuesRef.current = dependencyValues
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    widgets,
-    editMode,
-    AnimatedWidgetWrapper,
-    resolvedDepsMap,
-    dependencyValues,
-  ])
+  }, [widgets, editMode, AnimatedWidgetWrapper, resolvedDepsMap, dependencyValues])
 
   return (
     <F0GridStack

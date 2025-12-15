@@ -28,9 +28,7 @@ export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
 const defaultEmptyValue = ""
 
 const defaultIsEmpty = (value: string | number | undefined | null) => {
-  return value === defaultEmptyValue || value
-    ? value.toString().length === 0
-    : true
+  return value === defaultEmptyValue || value ? value.toString().length === 0 : true
 }
 const defaultLengthProvider = (value: string | number | undefined | null) =>
   value ? value.toString().length : 0
@@ -177,9 +175,7 @@ export type InputFieldProps<T> = {
     onFocus?: () => void
     onBlur?: () => void
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
-    onChange?: (
-      value: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => void
+    onChange?: (value: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
     value?: T
   }
   icon?: IconType
@@ -296,8 +292,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const handleChange = (
       value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
-      let v =
-        (typeof value === "string" ? value : value.target.value) ?? emptyValue
+      let v = (typeof value === "string" ? value : value.target.value) ?? emptyValue
 
       if (maxLength && lengthProvider(v) > maxLength) {
         if (typeof v === "string") {
@@ -338,9 +333,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
      * Detect if the input is being autofilled
      */
     const [isAutofilled, setIsAutofilled] = useState(false)
-    const handleAnimationStart = (
-      e: React.AnimationEvent<HTMLInputElement>
-    ) => {
+    const handleAnimationStart = (e: React.AnimationEvent<HTMLInputElement>) => {
       if (e.animationName === "autofill") {
         setIsAutofilled(true)
       }
@@ -348,10 +341,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
     const localInputRef = useRef<HTMLElement>(null)
-    const inputRef = useMemo(
-      () => props.inputRef ?? localInputRef,
-      [props.inputRef, localInputRef]
-    )
+    const inputRef = useMemo(() => props.inputRef ?? localInputRef, [props.inputRef, localInputRef])
 
     useEffect(() => {
       if (isAutofilled && !intervalRef.current) {
@@ -363,8 +353,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               : null
           if (element) {
             const stillAutofilled =
-              element.matches(":-webkit-autofill") ||
-              element.matches(":autofill")
+              element.matches(":-webkit-autofill") || element.matches(":autofill")
             if (!stillAutofilled) {
               setIsAutofilled(false)
               if (intervalRef.current) {
@@ -399,16 +388,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         ref={ref}
       >
         {((!hideLabel && label) || maxLength) && (
-          <div
-            className={cn(
-              "flex max-w-full items-center",
-              inputFieldWrapperVariants({ size })
-            )}
-          >
-            <div
-              className={cn("flex min-w-0 flex-1 flex-row gap-4")}
-              data-testid="input-field-top"
-            >
+          <div className={cn("flex max-w-full items-center", inputFieldWrapperVariants({ size }))}>
+            <div className={cn("flex min-w-0 flex-1 flex-row gap-4")} data-testid="input-field-top">
               {!hideLabel && label && (
                 <Label
                   label={label}
@@ -456,20 +437,11 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   size === "md" && "left-3 top-[9px]"
                 )}
               >
-                {icon && (
-                  <F0Icon
-                    onClick={handleClickContent}
-                    icon={icon}
-                    color="default"
-                  />
-                )}
+                {icon && <F0Icon onClick={handleClickContent} icon={icon} color="default" />}
                 {avatar && <F0Avatar avatar={avatar} size="xs" />}
               </div>
             )}
-            <div
-              onClick={handleClickChildren}
-              className="w-full min-w-0 flex-1"
-            >
+            <div onClick={handleClickChildren} className="w-full min-w-0 flex-1">
               {cloneElement(children as React.ReactElement, {
                 onChange: handleChange,
                 onBlur: props.onBlur,
@@ -505,10 +477,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),
-                  placeholder &&
-                    !hidePlaceholder &&
-                    isEmpty(localValue) &&
-                    !isAutofilled
+                  placeholder && !hidePlaceholder && isEmpty(localValue) && !isAutofilled
                     ? "opacity-100"
                     : "opacity-0"
                 )}
@@ -547,11 +516,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           handleClear()
                         }}
                       >
-                        <F0Icon
-                          icon={CrossedCircle}
-                          color="default"
-                          size="md"
-                        />
+                        <F0Icon icon={CrossedCircle} color="default" size="md" />
                       </motion.button>
                     )}
                   </AnimatePresence>

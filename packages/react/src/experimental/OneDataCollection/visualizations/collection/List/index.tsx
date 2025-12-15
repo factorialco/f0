@@ -71,25 +71,15 @@ export const ListCollection = <
   NavigationFilters,
   Grouping
 >) => {
-  const {
-    data,
-    paginationInfo,
-    setPage,
-    isInitialLoading,
-    isLoadingMore,
-    loadMore,
-  } = useDataCollectionData<
-    Record,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(source, {
-    onError: (error) => {
-      onLoadError(error)
-    },
-  })
+  const { data, paginationInfo, setPage, isInitialLoading, isLoadingMore, loadMore } =
+    useDataCollectionData<Record, Filters, Sortings, Summaries, NavigationFilters, Grouping>(
+      source,
+      {
+        onError: (error) => {
+          onLoadError(error)
+        },
+      }
+    )
 
   useEffect(() => {
     onLoadData({
@@ -115,19 +105,15 @@ export const ListCollection = <
   /**
    * Item selection
    */
-  const {
-    selectedItems,
-    groupAllSelectedStatus,
-    handleSelectItemChange,
-    handleSelectGroupChange,
-  } = useSelectable({
-    data,
-    paginationInfo,
-    source,
-    onSelectItems,
-    selectionMode: "multi",
-    selectedState: source.defaultSelectedItems,
-  })
+  const { selectedItems, groupAllSelectedStatus, handleSelectItemChange, handleSelectGroupChange } =
+    useSelectable({
+      data,
+      paginationInfo,
+      source,
+      onSelectItems,
+      selectionMode: "multi",
+      selectedState: source.defaultSelectedItems,
+    })
 
   /*
    * Groups
@@ -145,14 +131,7 @@ export const ListCollection = <
   })
 
   if (showInitialLoading) {
-    return (
-      <ListSkeleton
-        source={source}
-        fields={fields}
-        count={30}
-        isInitialLoading
-      />
-    )
+    return <ListSkeleton source={source} fields={fields} count={30} isInitialLoading />
   }
 
   // Enforce that sorting is only used when sortings are defined
@@ -167,15 +146,11 @@ export const ListCollection = <
   }
 
   const showFullscreenLoading =
-    isInitialLoading ||
-    (isLoading && source.dataAdapter.paginationType === "pages")
+    isInitialLoading || (isLoading && source.dataAdapter.paginationType === "pages")
 
   return (
     <div
-      className={cn(
-        "flex max-h-full min-h-0 flex-1 flex-col gap-4 py-2",
-        tmpFullWidth && "px-0"
-      )}
+      className={cn("flex max-h-full min-h-0 flex-1 flex-col gap-4 py-2", tmpFullWidth && "px-0")}
     >
       <div
         className={cn(
@@ -205,9 +180,7 @@ export const ListCollection = <
                           ? "indeterminate"
                           : false
                     }
-                    onSelectChange={(checked) =>
-                      handleSelectGroupChange(group, checked)
-                    }
+                    onSelectChange={(checked) => handleSelectGroupChange(group, checked)}
                     showOpenChange={collapsible}
                     label={group.label}
                     itemCount={itemCount}
@@ -231,9 +204,7 @@ export const ListCollection = <
                           handleSelectItemChange={handleSelectItemChange}
                           fields={fields}
                           itemDefinition={itemDefinition}
-                          isLoadingMore={
-                            isLoadingMore && index === data.groups.length - 1
-                          }
+                          isLoadingMore={isLoadingMore && index === data.groups.length - 1}
                         />
                       </motion.div>
                     )}
@@ -256,14 +227,9 @@ export const ListCollection = <
           {isInfiniteScrollPagination(paginationInfo) && isLoadingMore && (
             <ListSkeleton source={source} fields={fields} count={5} />
           )}
-          {isInfiniteScrollPagination(paginationInfo) &&
-            paginationInfo.hasMore && (
-              <div
-                ref={loadingIndicatorRef}
-                className="w-full"
-                aria-hidden="true"
-              />
-            )}
+          {isInfiniteScrollPagination(paginationInfo) && paginationInfo.hasMore && (
+            <div ref={loadingIndicatorRef} className="w-full" aria-hidden="true" />
+          )}
         </div>
       </div>
       <PagesPagination paginationInfo={paginationInfo} setPage={setPage} />

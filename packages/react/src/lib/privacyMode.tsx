@@ -1,11 +1,5 @@
 import * as React from "react"
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from "react"
+import { createContext, ReactNode, useCallback, useContext, useState } from "react"
 
 export const PrivacyModeContext = createContext<{
   enabled: boolean
@@ -43,8 +37,7 @@ export const PrivacyModeProvider: React.FC<{
 export const usePrivacyMode = () => {
   const context = useContext(PrivacyModeContext)
 
-  if (!context)
-    throw "usePrivacyMode requires wrapping the component in a PrivacyModeProvider"
+  if (!context) throw "usePrivacyMode requires wrapping the component in a PrivacyModeProvider"
 
   return context
 }

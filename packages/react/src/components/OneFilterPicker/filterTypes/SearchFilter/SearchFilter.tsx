@@ -40,17 +40,10 @@ export type SearchFilterComponentProps = FilterTypeComponentProps<
  * />
  * ```
  */
-export function SearchFilter({
-  schema,
-  value,
-  onChange,
-}: SearchFilterComponentProps) {
+export function SearchFilter({ schema, value, onChange }: SearchFilterComponentProps) {
   const userOptions = "options" in schema ? schema.options : undefined
   const defaultStrict =
-    (userOptions &&
-      "defaultStrict" in userOptions &&
-      userOptions.defaultStrict) ??
-    false
+    (userOptions && "defaultStrict" in userOptions && userOptions.defaultStrict) ?? false
 
   const options = {
     strictToggle: userOptions ? userOptions.strictToggle : false,
@@ -99,10 +92,7 @@ export function SearchFilter({
         buttonToggle={
           options.strictToggle
             ? {
-                label: [
-                  i18n.filters.search.relaxed,
-                  i18n.filters.search.strict,
-                ],
+                label: [i18n.filters.search.relaxed, i18n.filters.search.strict],
                 icon: [EqualApproximately, Equal],
                 selected: isStrict,
                 onChange: handleStrictChange,

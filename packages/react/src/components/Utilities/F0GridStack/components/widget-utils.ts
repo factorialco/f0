@@ -9,9 +9,7 @@ import type { GridStackReactWidget } from "../F0GridStack"
  * @param widget - The React widget with potential React element content
  * @returns A widget with content converted to a function (returns empty div)
  */
-export function convertWidgetForGridStack(
-  widget: GridStackReactWidget
-): GridStackWidget {
+export function convertWidgetForGridStack(widget: GridStackReactWidget): GridStackWidget {
   const { content, ...rest } = widget
 
   // If content is a React element, convert it to a function
@@ -39,9 +37,7 @@ export function convertWidgetForGridStack(
  * @param widget - The widget to convert (may contain subGridOpts with children)
  * @returns A widget with all React content converted to functions
  */
-export function convertWidgetRecursive(
-  widget: GridStackReactWidget
-): GridStackWidget {
+export function convertWidgetRecursive(widget: GridStackReactWidget): GridStackWidget {
   const converted = convertWidgetForGridStack(widget)
 
   // Handle sub-grids recursively

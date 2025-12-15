@@ -65,18 +65,14 @@ describe("Filters", () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
 
-      render(
-        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
-      )
+      render(<OneFilterPicker filters={definition} value={{}} onChange={onChange} />)
 
       // Open filter popover
       await openFilterPopover(user)
 
       // Wait for the popover to open and check that the first filter (Department) is selected
       await waitFor(() => {
-        const departmentButton = screen
-          .getByText("Department")
-          .closest("button")
+        const departmentButton = screen.getByText("Department").closest("button")
         expect(departmentButton).toHaveClass("bg-f1-background-secondary")
       })
     })
@@ -196,12 +192,7 @@ describe("Presets", () => {
     ]
 
     render(
-      <OneFilterPicker
-        filters={definition}
-        value={{}}
-        presets={presets}
-        onChange={onChange}
-      />
+      <OneFilterPicker filters={definition} value={{}} presets={presets} onChange={onChange} />
     )
 
     // Verify preset buttons are rendered
@@ -224,12 +215,7 @@ describe("Presets", () => {
     ]
 
     render(
-      <OneFilterPicker
-        filters={definition}
-        value={{}}
-        presets={presets}
-        onChange={onChange}
-      />
+      <OneFilterPicker filters={definition} value={{}} presets={presets} onChange={onChange} />
     )
 
     // Click on a preset
@@ -264,9 +250,7 @@ describe("Presets", () => {
     )
 
     // Get the preset elements
-    const engineeringPreset = screen
-      .getByText("Engineering Only")
-      .closest("label")
+    const engineeringPreset = screen.getByText("Engineering Only").closest("label")
     const designPreset = screen.getByText("Design Only").closest("label")
 
     // Verify the Engineering preset has the selected class
@@ -293,12 +277,7 @@ describe("Presets", () => {
     ]
 
     const { rerender } = render(
-      <OneFilterPicker
-        filters={definition}
-        value={{}}
-        presets={presets}
-        onChange={onChange}
-      />
+      <OneFilterPicker filters={definition} value={{}} presets={presets} onChange={onChange} />
     )
 
     // Click on the first preset
@@ -336,12 +315,7 @@ describe("Presets", () => {
     ]
 
     const { rerender } = render(
-      <OneFilterPicker
-        filters={definition}
-        value={{}}
-        presets={presets}
-        onChange={onChange}
-      />
+      <OneFilterPicker filters={definition} value={{}} presets={presets} onChange={onChange} />
     )
 
     // Apply a preset
@@ -394,12 +368,7 @@ describe("Presets", () => {
     ]
 
     render(
-      <OneFilterPicker
-        filters={definition}
-        value={{}}
-        presets={presets}
-        onChange={onChange}
-      />
+      <OneFilterPicker filters={definition} value={{}} presets={presets} onChange={onChange} />
     )
 
     // Click on the preset

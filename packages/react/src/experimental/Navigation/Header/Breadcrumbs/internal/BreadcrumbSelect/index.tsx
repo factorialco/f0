@@ -9,10 +9,9 @@ import { ChevronDown } from "@/icons/app"
 import { motion } from "motion/react"
 import { useState } from "react"
 
-export type BreadcrumbSelectProps<
-  T extends string,
-  R = unknown,
-> = F0SelectProps<T, R> & { multiple?: false }
+export type BreadcrumbSelectProps<T extends string, R = unknown> = F0SelectProps<T, R> & {
+  multiple?: false
+}
 
 export function BreadcrumbSelect<T extends string, R = unknown>({
   ...props
@@ -24,9 +23,7 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
     props.onOpenChange?.(open)
   }
 
-  const [selectedLabel, setSelectedLabel] = useState(
-    props.placeholder || props.label
-  )
+  const [selectedLabel, setSelectedLabel] = useState(props.placeholder || props.label)
 
   const handleChange = (
     value: T,
@@ -57,10 +54,7 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
       >
         <span className="block grow text-f1-foreground">{selectedLabel}</span>
         <div className="ml-2">
-          <motion.div
-            animate={{ rotate: localOpen ? 180 : 0 }}
-            className="h-[16px] w-[16px]"
-          >
+          <motion.div animate={{ rotate: localOpen ? 180 : 0 }} className="h-[16px] w-[16px]">
             <F0Icon
               icon={ChevronDown}
               size="sm"

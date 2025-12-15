@@ -1,18 +1,11 @@
 import { TOCItem } from "./types"
 
-export function findExpandedPath(
-  items: TOCItem[],
-  activeItemId?: string
-): Set<string> {
+export function findExpandedPath(items: TOCItem[], activeItemId?: string): Set<string> {
   const expandedIds = new Set<string>()
 
   if (!activeItemId) return expandedIds
 
-  function findPath(
-    items: TOCItem[],
-    targetId: string,
-    currentPath: string[] = []
-  ): boolean {
+  function findPath(items: TOCItem[], targetId: string, currentPath: string[] = []): boolean {
     for (const item of items) {
       if (item.id === targetId) {
         // Found the target, add all parents to expanded set
@@ -60,10 +53,7 @@ export function filterTree(items: TOCItem[], searchQuery: string): TOCItem[] {
     if (itemMatches || (filteredChildren && filteredChildren.length > 0)) {
       return {
         ...item,
-        children:
-          filteredChildren && filteredChildren.length > 0
-            ? filteredChildren
-            : undefined,
+        children: filteredChildren && filteredChildren.length > 0 ? filteredChildren : undefined,
       }
     }
 

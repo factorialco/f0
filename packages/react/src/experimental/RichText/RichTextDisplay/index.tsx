@@ -16,23 +16,14 @@ interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
 
 type RichTextDisplayHandle = HTMLDivElement
 
-const PROCESSOR = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkRehype)
-  .use(rehypeStringify)
+const PROCESSOR = unified().use(remarkParse).use(remarkGfm).use(remarkRehype).use(rehypeStringify)
 
 const RichTextDisplay = forwardRef<RichTextDisplayHandle, RichTextDisplayProps>(
-  function RichTextDisplay(
-    { content, className, format = "html", ...props },
-    ref
-  ) {
+  function RichTextDisplay({ content, className, format = "html", ...props }, ref) {
     const sanitized = useMemo(
       () =>
         DOMPurify.sanitize(
-          format === "markdown"
-            ? String(PROCESSOR.processSync(content))
-            : content,
+          format === "markdown" ? String(PROCESSOR.processSync(content)) : content,
           {
             ADD_ATTR: ["target"],
             ALLOWED_ATTR: ["href", "target", "rel", "class"],
@@ -45,11 +36,7 @@ const RichTextDisplay = forwardRef<RichTextDisplayHandle, RichTextDisplayProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          "rich-text-display-container",
-          !isHtml && "whitespace-pre-wrap",
-          className
-        )}
+        className={cn("rich-text-display-container", !isHtml && "whitespace-pre-wrap", className)}
         dangerouslySetInnerHTML={{
           __html: sanitized,
         }}

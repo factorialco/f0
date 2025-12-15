@@ -81,11 +81,9 @@ export const Footer = ({
   onSelectAll,
   onClear,
 }: Props) => {
-  const anySelectOrClearAction =
-    !singleSelector && (selectAllLabel || clearLabel)
+  const anySelectOrClearAction = !singleSelector && (selectAllLabel || clearLabel)
   const anyAction = actions && actions.length > 0
-  const showFooter =
-    !loading && ((!singleSelector && anySelectOrClearAction) || anyAction)
+  const showFooter = !loading && ((!singleSelector && anySelectOrClearAction) || anyAction)
 
   if (!showFooter) return null
 
@@ -122,27 +120,13 @@ export const Footer = ({
         secondaryActions={secondaryAction ? [secondaryAction] : []}
       />
     )
-    rightButtons = (
-      <ListButtons
-        primaryAction={actions[0]}
-        secondaryActions={actions.slice(1)}
-      />
-    )
+    rightButtons = <ListButtons primaryAction={actions[0]} secondaryActions={actions.slice(1)} />
   } else if (anyAction) {
-    leftButtons = (
-      <ListButtons
-        primaryAction={actions[0]}
-        secondaryActions={actions.slice(1)}
-      />
-    )
+    leftButtons = <ListButtons primaryAction={actions[0]} secondaryActions={actions.slice(1)} />
   } else if (anySelectOrClearAction) {
-    leftButtons = (
-      <ListButtons primaryAction={primaryAction!} secondaryActions={[]} />
-    )
+    leftButtons = <ListButtons primaryAction={primaryAction!} secondaryActions={[]} />
     if (secondaryAction) {
-      rightButtons = (
-        <ListButtons primaryAction={secondaryAction} secondaryActions={[]} />
-      )
+      rightButtons = <ListButtons primaryAction={secondaryAction} secondaryActions={[]} />
     }
   }
 

@@ -13,11 +13,7 @@ interface OverflowIndicatorProps {
   count: number
 }
 
-const OverflowIndicator: FC<OverflowIndicatorProps> = ({
-  count,
-  totalItemsCount,
-  isOpen,
-}) => {
+const OverflowIndicator: FC<OverflowIndicatorProps> = ({ count, totalItemsCount, isOpen }) => {
   const i18n = useI18n()
 
   return (

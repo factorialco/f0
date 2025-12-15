@@ -1,8 +1,4 @@
-import {
-  Home as HomeIcon,
-  Office as OfficeIcon,
-  Suitcase as SuitcaseIcon,
-} from "@/icons/app"
+import { Home as HomeIcon, Office as OfficeIcon, Suitcase as SuitcaseIcon } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ClockInControls } from "./index"
 

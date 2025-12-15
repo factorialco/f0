@@ -88,13 +88,7 @@ describe.skip("BreadcrumbSelect", () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <BreadcrumbSelect
-        label="Select an option"
-        options={mockOptions}
-        onChange={onChange}
-      />
-    )
+    render(<BreadcrumbSelect label="Select an option" options={mockOptions} onChange={onChange} />)
 
     await openSelect(user)
 

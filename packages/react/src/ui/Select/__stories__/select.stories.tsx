@@ -10,16 +10,9 @@ import {
   SelectValue,
 } from "../index"
 
-const SelectWithHooks = ({
-  options,
-  placeholder,
-  as,
-  ...props
-}: SelectProps) => {
+const SelectWithHooks = ({ options, placeholder, as, ...props }: SelectProps) => {
   const { value, multiple } = props
-  const [localValue, setLocalValue] = useState<string | string[] | undefined>(
-    value
-  )
+  const [localValue, setLocalValue] = useState<string | string[] | undefined>(value)
 
   const RenderSelect = (
     props: Omit<SelectProps, "value"> & {
@@ -31,9 +24,7 @@ const SelectWithHooks = ({
     const { value: initialValue, defaultValue: _, multiple, ...rest } = props
 
     if (multiple) {
-      const [value, setValue] = useState<string[] | undefined>(
-        initialValue as string[] | undefined
-      )
+      const [value, setValue] = useState<string[] | undefined>(initialValue as string[] | undefined)
       const handleChange = (value: string[]) => {
         console.log("value", value)
         setValue(value)
@@ -45,23 +36,14 @@ const SelectWithHooks = ({
         </Select>
       )
     } else {
-      const [value, setValue] = useState<string | undefined>(
-        props.value as string | undefined
-      )
+      const [value, setValue] = useState<string | undefined>(props.value as string | undefined)
       const handleChange = (value: string) => {
         console.log("value", value)
         setValue(value)
         props.onValueChange(value)
       }
 
-      return (
-        <Select
-          {...rest}
-          value={value}
-          onValueChange={handleChange}
-          multiple={false}
-        />
-      )
+      return <Select {...rest} value={value} onValueChange={handleChange} multiple={false} />
     }
   }
 
@@ -147,8 +129,7 @@ export const AsList: Story = {
   parameters: {
     docs: {
       description: {
-        component:
-          "Renders the select as a list. Removes the triger and keeps it always open.",
+        component: "Renders the select as a list. Removes the triger and keeps it always open.",
       },
     },
   },
@@ -188,9 +169,7 @@ export const WithTopContent: Story = {
         <SelectTrigger>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent
-          top={<div className="border-b border-f1-border p-3">Top Content</div>}
-        >
+        <SelectContent top={<div className="border-b border-f1-border p-3">Top Content</div>}>
           {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
@@ -211,11 +190,7 @@ export const WithBottomContent: Story = {
         <SelectTrigger>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent
-          bottom={
-            <div className="border-t border-f1-border p-3">Bottom Content</div>
-          }
-        >
+        <SelectContent bottom={<div className="border-t border-f1-border p-3">Bottom Content</div>}>
           {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
@@ -237,11 +212,7 @@ export const WithBothTopAndBottom: Story = {
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent
-          top={
-            <div className="border-b border-f1-border p-3">
-              Search or Filter
-            </div>
-          }
+          top={<div className="border-b border-f1-border p-3">Search or Filter</div>}
           bottom={
             <div className="border-t border-f1-border p-3">
               <button className="w-full text-center text-f1-foreground-secondary hover:text-f1-foreground">

@@ -4,35 +4,29 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # useData
 
-The `useData` hook handles data fetching, state management, and pagination
-within the Collections ecosystem. It consumes a data source created by
-`useDataSource` and provides the actual data along with loading states and
-pagination controls.
+The `useData` hook handles data fetching, state management, and pagination within the Collections
+ecosystem. It consumes a data source created by `useDataSource` and provides the actual data along
+with loading states and pagination controls.
 
 ## Overview
 
-`useData` is a core React hook that manages data fetching and state management.
-It exists as a separate hook to enable visualization-specific customization
-while maintaining consistent data fetching patterns across different components.
+`useData` is a core React hook that manages data fetching and state management. It exists as a
+separate hook to enable visualization-specific customization while maintaining consistent data
+fetching patterns across different components.
 
 ### Why a Separate Hook?
 
-1. **Visualization-Specific Needs**: Different visualizations have unique data
-   requirements (e.g., grid-aligned pagination for cards, row-optimized for
-   tables)
-2. **Separation of Concerns**: Clear boundaries between data source
-   configuration and data fetching
-3. **Extensibility**: New visualizations can customize data consumption without
-   modifying core logic
+1. **Visualization-Specific Needs**: Different visualizations have unique data requirements (e.g.,
+   grid-aligned pagination for cards, row-optimized for tables)
+2. **Separation of Concerns**: Clear boundaries between data source configuration and data fetching
+3. **Extensibility**: New visualizations can customize data consumption without modifying core logic
 
 ### Key Features
 
 - **Multi-Source Support**: Handles synchronous data, Promises, and Observables
 - **Pagination Management**: Automatic page handling with state management
-- **Loading States**: Consistent loading states (`isInitialLoading`,
-  `isLoading`, `isLoadingMore`)
-- **Error Handling**: Standardized error handling with detailed error
-  information
+- **Loading States**: Consistent loading states (`isInitialLoading`, `isLoading`, `isLoadingMore`)
+- **Error Handling**: Standardized error handling with detailed error information
 - **Automatic Cleanup**: Prevents memory leaks by cleaning up subscriptions
 - **Data Transformation**: Supports grouped and flat data structures
 
@@ -51,8 +45,8 @@ useData<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>(
 
 #### `source: DataSource`
 
-The data source object created by `useDataSource`. Contains all configuration
-and state management for data fetching.
+The data source object created by `useDataSource`. Contains all configuration and state management
+for data fetching.
 
 #### `options?: UseDataOptions<Filters>`
 
@@ -724,12 +718,9 @@ function UserList() {
 
 ## Related Hooks
 
-- [`useDataSource`](/?path=/docs/hooks-datasource-usedatasource--docs) - For
-  creating data sources
-- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For
-  selection management
-- [`useGroups`](/?path=/docs/hooks-datasource-usegroups--docs) - For group state
-  management
+- [`useDataSource`](/?path=/docs/hooks-datasource-usedatasource--docs) - For creating data sources
+- [`useSelectable`](/?path=/docs/hooks-datasource-useselectable--docs) - For selection management
+- [`useGroups`](/?path=/docs/hooks-datasource-usegroups--docs) - For group state management
 
 ## Common Patterns
 

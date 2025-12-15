@@ -32,8 +32,7 @@ const ExampleComponent = (props: {
         <DialogHeader>
           <DialogTitle>Dialog Title</DialogTitle>
           <DialogDescription>
-            This is a dialog description. It provides additional context about
-            the dialog content.
+            This is a dialog description. It provides additional context about the dialog content.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -84,9 +83,7 @@ export const Simple: Story = {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Simple Dialog</DialogTitle>
-            <DialogDescription>
-              This is a simple dialog with minimal content.
-            </DialogDescription>
+            <DialogDescription>This is a simple dialog with minimal content.</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <p>Dialog content goes here.</p>
@@ -115,15 +112,12 @@ export const WithHeaderAndFooter: Story = {
           <DialogHeader>
             <DialogTitle>Dialog with Header and Footer</DialogTitle>
             <DialogDescription>
-              This dialog demonstrates the use of DialogHeader, DialogTitle,
-              DialogDescription, and DialogFooter components.
+              This dialog demonstrates the use of DialogHeader, DialogTitle, DialogDescription, and
+              DialogFooter components.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <p>
-              This is the main content area of the dialog. You can place any
-              content here.
-            </p>
+            <p>This is the main content area of the dialog. You can place any content here.</p>
           </div>
           <DialogFooter>
             <DialogClose asChild>
@@ -150,8 +144,7 @@ export const CustomContent: Story = {
           <div className="p-6">
             <h2 className="mb-2 text-lg font-semibold">Custom Content</h2>
             <p className="mb-4">
-              This dialog uses custom content without the standard header and
-              footer structure.
+              This dialog uses custom content without the standard header and footer structure.
             </p>
             <div className="flex justify-end gap-2">
               <DialogClose asChild>
@@ -177,9 +170,7 @@ export const WithoutAnimation: Story = {
         <DialogContent withTranslateAnimation={false}>
           <DialogHeader>
             <DialogTitle>Dialog Without Translate Animation</DialogTitle>
-            <DialogDescription>
-              This dialog has translate animations disabled.
-            </DialogDescription>
+            <DialogDescription>This dialog has translate animations disabled.</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <p>Only fade and zoom animations are applied.</p>
@@ -208,82 +199,81 @@ export const LargeContent: Story = {
           <DialogHeader>
             <DialogTitle>Dialog with Large Content</DialogTitle>
             <DialogDescription>
-              This dialog demonstrates how the component handles larger content
-              areas.
+              This dialog demonstrates how the component handles larger content areas.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua.
             </p>
             <p>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur.
             </p>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua.
             </p>
             <p>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur.
             </p>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua.
             </p>
             <p>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur.
             </p>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua.
             </p>
             <p>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur.
             </p>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua.
             </p>
             <p>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur.
             </p>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua.
             </p>
             <p>
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur.
             </p>
           </div>
           <DialogFooter>

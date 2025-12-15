@@ -46,8 +46,7 @@ export const Warning: Story = {
   args: {
     header: {
       title: "Top up account",
-      description:
-        "Your account balance is under 1.000,00 €. Top up to avoid failed payments.",
+      description: "Your account balance is under 1.000,00 €. Top up to avoid failed payments.",
       type: "warning",
     },
     actions: {
@@ -67,8 +66,7 @@ export const Info: Story = {
   args: {
     header: {
       title: "Account number is missing",
-      description:
-        "Hellen the HR’s account number is missing. Review now to avoid failed payroll.",
+      description: "Hellen the HR’s account number is missing. Review now to avoid failed payroll.",
       type: "info",
     },
     actions: {

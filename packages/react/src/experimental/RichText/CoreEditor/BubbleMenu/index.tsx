@@ -29,9 +29,7 @@ export const EditorBubbleMenu = ({
         placement: "top",
         hideOnClick: false,
         appendTo: () =>
-          isFullscreen
-            ? document.body
-            : document.getElementById(editorId) || document.body,
+          isFullscreen ? document.body : document.getElementById(editorId) || document.body,
         zIndex: 9999,
       }}
       editor={editor}
@@ -45,18 +43,11 @@ export const EditorBubbleMenu = ({
         const isEmptyTextBlock =
           !doc.textBetween(from, to).length && isTextSelection(state.selection)
 
-        const isChildOfMenu = document
-          .getElementById(editorId)
-          ?.contains(document.activeElement)
+        const isChildOfMenu = document.getElementById(editorId)?.contains(document.activeElement)
 
         const hasEditorFocus = view.hasFocus() || isChildOfMenu
 
-        if (
-          !hasEditorFocus ||
-          empty ||
-          isEmptyTextBlock ||
-          !editor.isEditable
-        ) {
+        if (!hasEditorFocus || empty || isEmptyTextBlock || !editor.isEditable) {
           return false
         }
 

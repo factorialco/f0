@@ -5,11 +5,7 @@ import { cva } from "cva"
 import * as React from "react"
 import { useImageContext } from "../../lib/imageHandler"
 import { cn } from "../../lib/utils"
-import {
-  internalAvatarColors,
-  internalAvatarSizes,
-  internalAvatarTypes,
-} from "./types"
+import { internalAvatarColors, internalAvatarSizes, internalAvatarTypes } from "./types"
 
 const avatarVariants = cva({
   base: "relative flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold ring-1 ring-inset ring-f1-border-secondary",
@@ -47,25 +43,22 @@ const avatarVariants = cva({
   },
 })
 
-export type InternalAvatarProps = React.ComponentPropsWithoutRef<
-  typeof AvatarPrimitive.Root
-> & {
+export type InternalAvatarProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
   size?: (typeof internalAvatarSizes)[number]
   type?: (typeof internalAvatarTypes)[number]
   color?: (typeof internalAvatarColors)[number]
 }
 
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  InternalAvatarProps
->(({ size, type, color, className, ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    data-a11y-color-contrast-ignore
-    className={cn(avatarVariants({ size, type, color, className }))}
-    {...props}
-  />
-))
+const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, InternalAvatarProps>(
+  ({ size, type, color, className, ...props }, ref) => (
+    <AvatarPrimitive.Root
+      ref={ref}
+      data-a11y-color-contrast-ignore
+      className={cn(avatarVariants({ size, type, color, className }))}
+      {...props}
+    />
+  )
+)
 Avatar.displayName = AvatarPrimitive.Root.displayName
 
 const AvatarImage = React.forwardRef<
@@ -74,8 +67,7 @@ const AvatarImage = React.forwardRef<
 >(({ className, ...props }, ref) => {
   const { src: imageSrcContext } = useImageContext()
 
-  const extraProps =
-    props.src && imageSrcContext ? imageSrcContext(props) : props
+  const extraProps = props.src && imageSrcContext ? imageSrcContext(props) : props
 
   return (
     <AvatarPrimitive.Image

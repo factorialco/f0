@@ -110,8 +110,7 @@ export function PageHeader({
   productUpdates,
   favorites,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar, isLastToggleInvokedByUser } =
-    useSidebar()
+  const { sidebarState, toggleSidebar, isLastToggleInvokedByUser } = useSidebar()
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -127,9 +126,7 @@ export function PageHeader({
   const hasActions = !embedded && actions.length > 0
   const hasProductUpdates = !embedded && !!productUpdates?.isVisible
   const lastBreadcrumb = breadcrumbsTree[breadcrumbsTree.length - 1]
-  const parentBreadcrumb = hasNavigation
-    ? breadcrumbsTree[breadcrumbsTree.length - 2]
-    : null
+  const parentBreadcrumb = hasNavigation ? breadcrumbsTree[breadcrumbsTree.length - 2] : null
 
   return (
     <div
@@ -170,22 +167,19 @@ export function PageHeader({
             embedded && hasNavigation && "justify-center"
           )}
         >
-          {embedded &&
-            hasNavigation &&
-            parentBreadcrumb &&
-            !("loading" in parentBreadcrumb) && (
-              <div className="absolute left-4">
-                <Link href={parentBreadcrumb.href}>
-                  <F0Button
-                    variant="ghost"
-                    hideLabel
-                    label="Back"
-                    icon={ChevronLeft}
-                    onClick={(e) => e.preventDefault()}
-                  />
-                </Link>
-              </div>
-            )}
+          {embedded && hasNavigation && parentBreadcrumb && !("loading" in parentBreadcrumb) && (
+            <div className="absolute left-4">
+              <Link href={parentBreadcrumb.href}>
+                <F0Button
+                  variant="ghost"
+                  hideLabel
+                  label="Back"
+                  icon={ChevronLeft}
+                  onClick={(e) => e.preventDefault()}
+                />
+              </Link>
+            </div>
+          )}
           {embedded && hasNavigation ? (
             <div className="text-lg font-semibold text-f1-foreground">
               {"loading" in lastBreadcrumb ? (
@@ -229,11 +223,9 @@ export function PageHeader({
             )}
           </div>
         )}
-        {!embedded &&
-          hasStatus &&
-          (navigation || hasActions || hasProductUpdates) && (
-            <div className="h-4 w-px bg-f1-border-secondary" />
-          )}
+        {!embedded && hasStatus && (navigation || hasActions || hasProductUpdates) && (
+          <div className="h-4 w-px bg-f1-border-secondary" />
+        )}
         {navigation && (
           <div className="flex items-center gap-3">
             {navigation.counter && (
@@ -257,17 +249,12 @@ export function PageHeader({
             </div>
           </div>
         )}
-        {navigation && hasActions && (
-          <div className="h-4 w-px bg-f1-border-secondary" />
-        )}
+        {navigation && hasActions && <div className="h-4 w-px bg-f1-border-secondary" />}
         {(hasProductUpdates || hasActions) && (
           <div className="flex items-center gap-2">
             {hasProductUpdates && (
               <div className="items-right flex gap-2">
-                <ProductUpdates
-                  {...productUpdates}
-                  currentModule={module.name}
-                />
+                <ProductUpdates {...productUpdates} currentModule={module.name} />
               </div>
             )}
             {hasActions && (
@@ -308,12 +295,7 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
   }
 
   return (
-    <Link
-      href={action.href}
-      title={action.label}
-      aria-label={action.label}
-      ref={ref}
-    >
+    <Link href={action.href} title={action.label} aria-label={action.label} ref={ref}>
       <F0Button
         size="md"
         variant="outline"

@@ -44,13 +44,7 @@ export const ItemActionsDropdown = ({
           onOpenChange?.(open)
         }}
       >
-        <ButtonInternal
-          icon={Ellipsis}
-          label={label}
-          hideLabel
-          variant="ghost"
-          pressed={open}
-        />
+        <ButtonInternal icon={Ellipsis} label={label} hideLabel variant="ghost" pressed={open} />
       </Dropdown>
     </div>
   )

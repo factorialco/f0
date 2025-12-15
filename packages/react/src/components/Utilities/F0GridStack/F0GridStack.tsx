@@ -1,8 +1,4 @@
-import {
-  GridItemHTMLElement,
-  GridStackOptions,
-  GridStackWidget,
-} from "gridstack"
+import { GridItemHTMLElement, GridStackOptions, GridStackWidget } from "gridstack"
 import "gridstack/dist/gridstack.css"
 import { useMemo } from "react"
 import { GridStackProvider } from "./components/grid-stack-provider"
@@ -13,8 +9,7 @@ export type GridStackReactOptions = Omit<GridStackOptions, "children">
 
 export type GridStackReactSize = { w: number; h: number }
 
-export interface GridStackReactWidget
-  extends Omit<GridStackWidget, "content" | "id"> {
+export interface GridStackReactWidget extends Omit<GridStackWidget, "content" | "id"> {
   id: Required<GridStackWidget>["id"]
   allowedSizes?: GridStackReactSize[]
   content?: React.ReactElement
@@ -30,12 +25,7 @@ export interface F0GridStackProps {
   className?: string
 }
 
-export const F0GridStack = ({
-  options,
-  widgets,
-  onChange,
-  className,
-}: F0GridStackProps) => {
+export const F0GridStack = ({ options, widgets, onChange, className }: F0GridStackProps) => {
   const widgetsSignature = useMemo(() => {
     return JSON.stringify(
       widgets.map((widget) => ({
@@ -69,11 +59,7 @@ export const F0GridStack = ({
    * @param allowed - The allowed sizes of the widget
    * @returns The closest allowed size
    */
-  const closestAllowed = (
-    w: number,
-    h: number,
-    allowed: { w: number; h: number }[]
-  ) => {
+  const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
     let best = allowed[0],
       bestDist = Infinity
     for (const a of allowed) {

@@ -15,13 +15,7 @@ const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
 }
 
-export const Section = ({
-  id,
-  title,
-  description,
-  questions = [],
-  locked,
-}: SectionProps) => {
+export const Section = ({ id, title, description, questions = [], locked }: SectionProps) => {
   const { onSectionChange, isEditMode, deleteElement, onDuplicateElement } =
     useCoCreationFormContext()
 
@@ -41,9 +35,7 @@ export const Section = ({
     onSectionChange?.({ ...baseOnChangeParams, title: event.target.value })
   }
 
-  const handleChangeDescription = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
+  const handleChangeDescription = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     onSectionChange?.({
       ...baseOnChangeParams,
       description: event.target.value,
@@ -135,12 +127,7 @@ export const Section = ({
         />
       </div>
       <DragProvider>
-        <Reorder.Group
-          axis="y"
-          values={questions}
-          onReorder={handleReorderQuestions}
-          as="div"
-        >
+        <Reorder.Group axis="y" values={questions} onReorder={handleReorderQuestions} as="div">
           <div className="group/section-list flex flex-col gap-4">
             {questions.map((question) => (
               <Item key={question.id} question={question} />

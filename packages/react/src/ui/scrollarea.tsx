@@ -51,10 +51,7 @@ const ScrollArea = forwardRef<
         }
 
         // Check if scrolled to bottom
-        if (
-          scrollTop + clientHeight + scrollMargin >= scrollHeight &&
-          onScrollBottom
-        ) {
+        if (scrollTop + clientHeight + scrollMargin >= scrollHeight && onScrollBottom) {
           onScrollBottom()
         }
       }

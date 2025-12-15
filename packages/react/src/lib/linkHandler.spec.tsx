@@ -28,9 +28,7 @@ describe("useLink", () => {
       </LinkProvider>
     )
 
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "true"
-    )
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual("true")
   })
 
   test("isActive returns true if the current path starts with href including trailing slash", async () => {
@@ -40,9 +38,7 @@ describe("useLink", () => {
       </LinkProvider>
     )
 
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "true"
-    )
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual("true")
   })
 
   test("isActive returns true if the current path starts with href with no trailing slash", async () => {
@@ -52,9 +48,7 @@ describe("useLink", () => {
       </LinkProvider>
     )
 
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "false"
-    )
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual("false")
   })
 
   test("isActive returns false if the current path is not contained in the href", async () => {
@@ -64,9 +58,7 @@ describe("useLink", () => {
       </LinkProvider>
     )
 
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "false"
-    )
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual("false")
   })
 
   test("isActive returns false if the current path doesn't match with href", async () => {
@@ -76,8 +68,6 @@ describe("useLink", () => {
       </LinkProvider>
     )
 
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "false"
-    )
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual("false")
   })
 })

@@ -26,12 +26,7 @@ export const ListTag = ({
         )}
         left={
           !hiddenAvatar && (
-            <BaseAvatar
-              src={entity.subAvatar}
-              name={entity.subName}
-              size="xs"
-              type="rounded"
-            />
+            <BaseAvatar src={entity.subAvatar} name={entity.subName} size="xs" type="rounded" />
           )
         }
         right={

@@ -11,10 +11,7 @@ import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SortingsDefinition, SummariesDefinition } from "../../types"
 
-import {
-  collectionVisualizations,
-  Visualization,
-} from "../../visualizations/collection"
+import { collectionVisualizations, Visualization } from "../../visualizations/collection"
 
 /**
  * A component that renders a selector for switching between different visualization types.
@@ -44,15 +41,7 @@ export const VisualizationSelector = <
   onVisualizationChange,
 }: {
   visualizations: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
+    Visualization<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
   >
   currentVisualization: number
   onVisualizationChange: (index: number) => void

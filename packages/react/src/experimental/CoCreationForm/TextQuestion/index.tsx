@@ -1,10 +1,7 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { Textarea } from "@/experimental/Forms/Fields/TextArea"
 import { useI18n } from "@/lib/providers/i18n"
-import {
-  BaseQuestion,
-  BaseQuestionPropsForOtherQuestionComponents,
-} from "../BaseQuestion"
+import { BaseQuestion, BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
@@ -18,10 +15,7 @@ export type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   value?: string | null
 }
 
-export const TextQuestion = ({
-  value,
-  ...baseQuestionComponentProps
-}: TextQuestionProps) => {
+export const TextQuestion = ({ value, ...baseQuestionComponentProps }: TextQuestionProps) => {
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
 
   const { t } = useI18n()

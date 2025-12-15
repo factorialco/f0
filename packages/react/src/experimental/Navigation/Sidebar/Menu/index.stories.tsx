@@ -69,9 +69,7 @@ export const Default: Story = {
       },
     ],
     onCollapse: (category, isOpen) => {
-      console.log(
-        `Category "${category.title}" is now ${isOpen ? "open" : "closed"}`
-      )
+      console.log(`Category "${category.title}" is now ${isOpen ? "open" : "closed"}`)
     },
     onSort: (categories) => {
       console.log("Categories sorted:", categories)

@@ -3,18 +3,14 @@ import { enhancedTextResponse, enhanceTextParams } from ".."
 
 function extractTextToEnhance(editor: Editor) {
   const selectedRange =
-    editor.state.selection.to !== editor.state.selection.from
-      ? editor.state.selection
-      : null
+    editor.state.selection.to !== editor.state.selection.from ? editor.state.selection : null
 
   const fullContent = editor.getHTML()
   const from = selectedRange?.from ?? 0
   const to = selectedRange?.to ?? editor.state.doc.content.size
 
   // Get text based on selection or full content
-  let textToEnhance = selectedRange
-    ? editor.state.doc.textBetween(from, to, " ")
-    : fullContent
+  let textToEnhance = selectedRange ? editor.state.doc.textBetween(from, to, " ") : fullContent
 
   // Limit text to 5000 characters
   if (textToEnhance.length > 5000) {
@@ -59,12 +55,7 @@ function applyEnhancedText(
   if (isFullDocumentSelected) {
     editor.chain().focus().setContent(enhancedText).run()
   } else {
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from, to })
-      .insertContent(enhancedText)
-      .run()
+    editor.chain().focus().deleteRange({ from, to }).insertContent(enhancedText).run()
   }
 }
 
@@ -91,12 +82,7 @@ async function handleEnhanceWithAIFunction({
   onSuccess,
   onError,
 }: EnhanceWithAIParams): Promise<void> {
-  const {
-    text: textToEnhance,
-    from,
-    to,
-    isFullDocumentSelected,
-  } = extractTextToEnhance(editor)
+  const { text: textToEnhance, from, to, isFullDocumentSelected } = extractTextToEnhance(editor)
 
   if (!isValidForEnhancement(textToEnhance)) return
 
@@ -118,8 +104,7 @@ async function handleEnhanceWithAIFunction({
         text,
         from,
         to,
-        isFullDocumentSelected ||
-          textToEnhance.toString() === editor.getHTML().toString()
+        isFullDocumentSelected || textToEnhance.toString() === editor.getHTML().toString()
       )
       onSuccess()
     } else {

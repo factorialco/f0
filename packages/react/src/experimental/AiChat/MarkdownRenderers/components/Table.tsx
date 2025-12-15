@@ -5,10 +5,7 @@ import { cn } from "@/lib/utils"
 import { useRef } from "react"
 import { downloadTableAsExcel } from "../../utils/tableExport"
 
-export function Table({
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLTableElement>) {
+export function Table({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) {
   const { ai } = useI18n()
   const ref = useRef<HTMLTableElement>(null)
 
@@ -18,10 +15,7 @@ export function Table({
         <table
           ref={ref}
           {...props}
-          className={cn(
-            "w-full border-separate border-spacing-0",
-            props.className
-          )}
+          className={cn("w-full border-separate border-spacing-0", props.className)}
         >
           {children}
         </table>
@@ -33,8 +27,7 @@ export function Table({
           label={ai.exportTable}
           icon={DownloadIcon}
           onClick={() => {
-            if (ref.current)
-              downloadTableAsExcel(ref.current, ai.generatedTableFilename)
+            if (ref.current) downloadTableAsExcel(ref.current, ai.generatedTableFilename)
           }}
         />
       </div>
@@ -42,10 +35,7 @@ export function Table({
   )
 }
 
-export function Th({
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLTableCellElement>) {
+export function Th({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       {...props}
@@ -59,10 +49,7 @@ export function Th({
   )
 }
 
-export function Td({
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLTableCellElement>) {
+export function Td({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
       {...props}

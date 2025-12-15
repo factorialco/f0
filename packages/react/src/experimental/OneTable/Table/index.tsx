@@ -31,9 +31,7 @@ function TableBase({ children, loading = false }: TableProps) {
 
     const handleScroll = () => {
       setIsScrolled(container.scrollLeft > 0)
-      setIsScrolledRight(
-        container.scrollWidth - container.scrollLeft - container.clientWidth > 0
-      )
+      setIsScrolledRight(container.scrollWidth - container.scrollLeft - container.clientWidth > 0)
     }
 
     handleScroll()
@@ -92,11 +90,7 @@ function TableSkeleton({ columns = 5 }: TableSkeletonProps) {
         setIsScrolledRight: () => {},
       }}
     >
-      <TableRoot
-        className="cursor-progress"
-        role="presentation"
-        aria-hidden="true"
-      >
+      <TableRoot className="cursor-progress" role="presentation" aria-hidden="true">
         <TableHeader>
           <TableRow>
             {Array.from({ length: columns }).map((_, i) => (

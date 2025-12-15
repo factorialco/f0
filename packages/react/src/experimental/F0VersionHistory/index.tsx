@@ -49,9 +49,4 @@ export function F0VersionHistory({
   )
 }
 
-export type {
-  CurrentVersion,
-  F0VersionHistoryProps,
-  Version,
-  VersionAuthor,
-} from "./types"
+export type { CurrentVersion, F0VersionHistoryProps, Version, VersionAuthor } from "./types"

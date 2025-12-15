@@ -50,10 +50,9 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
             const filterType = getFilterType(filterSchema.type)
             type FilterType = FilterDefinitionsByType[typeof filterSchema.type]
 
-            const typedFilterType =
-              filterType as unknown as FilterTypeDefinition<
-                FilterValue<FilterType>
-              >
+            const typedFilterType = filterType as unknown as FilterTypeDefinition<
+              FilterValue<FilterType>
+            >
 
             if (
               typedFilterType.isEmpty(currentValue, {
@@ -77,12 +76,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
         </AnimatePresence>
       </div>
 
-      <F0Button
-        variant="ghost"
-        label={i18n.actions.clear}
-        size="sm"
-        onClick={onClearAll}
-      />
+      <F0Button variant="ghost" label={i18n.actions.clear} size="sm" onClick={onClearAll} />
     </div>
   )
 }

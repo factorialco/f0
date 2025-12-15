@@ -28,13 +28,7 @@ export const HILActionConfirmation = ({
           onClick={onConfirm}
           label={confirmationText}
         />
-        <F0Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          label={cancelText}
-        />
+        <F0Button type="button" variant="ghost" size="sm" onClick={onCancel} label={cancelText} />
       </div>
     </div>
   )

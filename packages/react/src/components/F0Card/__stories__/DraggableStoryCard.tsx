@@ -59,11 +59,7 @@ export function DraggableStoryCard({
       {overEdge === "top" && (
         <div className="absolute inset-x-0 top-0 z-10 mt-[-2px] h-[4px] bg-f1-border-hover" />
       )}
-      <DraggableF0Card
-        title={title}
-        description={description}
-        drag={{ id, type: "list-card" }}
-      />
+      <DraggableF0Card title={title} description={description} drag={{ id, type: "list-card" }} />
       {overEdge === "bottom" && (
         <div className="absolute inset-x-0 bottom-0 z-10 mb-[-2px] h-[4px] bg-f1-border-hover" />
       )}

@@ -72,10 +72,7 @@ export function OnePagination({
 
   const handlePageChange = useCallback(
     (page: number) => {
-      if (
-        onPageChange &&
-        (isIndeterminate || (page >= 1 && page <= totalPages))
-      ) {
+      if (onPageChange && (isIndeterminate || (page >= 1 && page <= totalPages))) {
         onPageChange(page)
       }
     },
@@ -102,12 +99,7 @@ export function OnePagination({
     if (currentPage <= sidePages + 2) {
       rangeStart = 2
       rangeEnd = rangeStart + visibleRange - 1
-      pages.push(
-        ...Array.from(
-          { length: rangeEnd - rangeStart + 1 },
-          (_, i) => i + rangeStart
-        )
-      )
+      pages.push(...Array.from({ length: rangeEnd - rangeStart + 1 }, (_, i) => i + rangeStart))
       pages.push("...")
     }
 
@@ -116,20 +108,13 @@ export function OnePagination({
       rangeStart = totalPages - visibleRange - 1
       rangeEnd = totalPages - 1
       pages.push("...")
-      pages.push(
-        ...Array.from(
-          { length: rangeEnd - rangeStart + 1 },
-          (_, i) => i + rangeStart
-        )
-      )
+      pages.push(...Array.from({ length: rangeEnd - rangeStart + 1 }, (_, i) => i + rangeStart))
     }
 
     // Handle middle cases
     else {
       pages.push("...")
-      pages.push(
-        ...Array.from({ length: visibleRange }, (_, i) => i + rangeStart)
-      )
+      pages.push(...Array.from({ length: visibleRange }, (_, i) => i + rangeStart))
       pages.push("...")
     }
 
@@ -149,9 +134,7 @@ export function OnePagination({
               tabIndex={currentPage === 1 ? -1 : 0}
               className={cn(
                 !isIndeterminate && "mr-1",
-                currentPage === 1 || disabled
-                  ? "pointer-events-none opacity-50"
-                  : ""
+                currentPage === 1 || disabled ? "pointer-events-none opacity-50" : ""
               )}
               onClick={() => handlePageChange(currentPage - 1)}
               onKeyDown={(e) => {
@@ -197,18 +180,10 @@ export function OnePagination({
           <PaginationItem>
             <PaginationNext
               aria-disabled={
-                (!isIndeterminate
-                  ? currentPage === totalPages
-                  : !hasNextPage) || disabled
+                (!isIndeterminate ? currentPage === totalPages : !hasNextPage) || disabled
               }
               tabIndex={
-                !isIndeterminate
-                  ? currentPage === totalPages
-                    ? -1
-                    : 0
-                  : !hasNextPage
-                    ? -1
-                    : 0
+                !isIndeterminate ? (currentPage === totalPages ? -1 : 0) : !hasNextPage ? -1 : 0
               }
               className={cn(
                 !isIndeterminate && "ml-1",

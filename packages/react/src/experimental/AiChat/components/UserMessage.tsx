@@ -18,10 +18,7 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
 
     return (
       <div className="copilotKitMessage copilotKitUserMessage">
-        <ImageRenderer
-          image={imageMessage.image!}
-          content={imageMessage.content}
-        />
+        <ImageRenderer image={imageMessage.image!} content={imageMessage.content} />
       </div>
     )
   }

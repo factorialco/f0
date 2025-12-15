@@ -26,8 +26,7 @@ const daytimePageVariants = cva({
   },
 })
 
-export interface DaytimePageProps
-  extends VariantProps<typeof daytimePageVariants> {
+export interface DaytimePageProps extends VariantProps<typeof daytimePageVariants> {
   children?: React.ReactNode
   header?: {
     title: string
@@ -41,12 +40,7 @@ export interface DaytimePageProps
   embedded?: boolean
 }
 
-export function DaytimePage({
-  children,
-  header,
-  period,
-  embedded = false,
-}: DaytimePageProps) {
+export function DaytimePage({ children, header, period, embedded = false }: DaytimePageProps) {
   const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
 
   return (
@@ -68,12 +62,7 @@ export function DaytimePage({
                 hideLabel
               />
             )}
-            <div
-              className={cn(
-                "flex flex-row items-center",
-                isSmallScreen ? "gap-1.5" : "gap-3"
-              )}
-            >
+            <div className={cn("flex flex-row items-center", isSmallScreen ? "gap-1.5" : "gap-3")}>
               {header?.onPulseClick ? (
                 <F0AvatarPulse
                   src={header.employeeAvatar}
@@ -87,13 +76,7 @@ export function DaytimePage({
                   src={header.employeeAvatar}
                   firstName={header.employeeFirstName}
                   lastName={header.employeeLastName}
-                  size={
-                    isSmallScreen
-                      ? "small"
-                      : header.description
-                        ? "large"
-                        : "medium"
-                  }
+                  size={isSmallScreen ? "small" : header.description ? "large" : "medium"}
                 />
               )}
               <div className="flex flex-col">

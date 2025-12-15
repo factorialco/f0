@@ -46,10 +46,7 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
       if (error instanceof Error && error.message === "Request aborted") {
         setMessages((prev) => [...prev, `AI: Request was cancelled by user.`])
       } else {
-        setMessages((prev) => [
-          ...prev,
-          `AI: An error occurred while processing your message.`,
-        ])
+        setMessages((prev) => [...prev, `AI: An error occurred while processing your message.`])
       }
     } finally {
       setIsProcessing(false)
@@ -88,11 +85,7 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
         )}
       </div>
 
-      <ChatTextarea
-        inProgress={isProcessing}
-        onSend={handleSend}
-        onStop={handleStop}
-      />
+      <ChatTextarea inProgress={isProcessing} onSend={handleSend} onStop={handleStop} />
     </div>
   )
 }

@@ -35,9 +35,9 @@ const statuses: Record<
 const InputMessages = ({ status }: InputMessagesProps) => {
   if (!status) return null
 
-  const messages = (
-    Array.isArray(status.message) ? status.message : [status.message]
-  ).filter(Boolean)
+  const messages = (Array.isArray(status.message) ? status.message : [status.message]).filter(
+    Boolean
+  )
 
   const icon = statuses[status.type].icon
 
@@ -46,18 +46,12 @@ const InputMessages = ({ status }: InputMessagesProps) => {
       <div className="flex gap-1">
         {icon && (
           <div className="-translate-y-[2px]">
-            <F0Icon
-              icon={icon}
-              color={statuses[status.type].iconColor || "currentColor"}
-            />
+            <F0Icon icon={icon} color={statuses[status.type].iconColor || "currentColor"} />
           </div>
         )}
         <ul className="list-none">
           {messages.map((message) => (
-            <li
-              key={message}
-              className={cn("text-sm font-medium", statuses[status.type].color)}
-            >
+            <li key={message} className={cn("text-sm font-medium", statuses[status.type].color)}>
               {message}
             </li>
           ))}

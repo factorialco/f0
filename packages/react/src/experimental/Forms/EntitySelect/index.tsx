@@ -4,19 +4,10 @@ import { useDebounceValue } from "usehooks-ts"
 import { cn } from "../../../lib/utils"
 import { Content } from "./Content"
 import { Trigger } from "./Trigger"
-import {
-  EntityId,
-  EntitySelectEntity,
-  EntitySelectProps,
-  EntitySelectSubEntity,
-} from "./types"
+import { EntityId, EntitySelectEntity, EntitySelectProps, EntitySelectSubEntity } from "./types"
 
-export const EntitySelect = <T,>(
-  props: EntitySelectProps<T> & { children?: React.ReactNode }
-) => {
-  const [open, setOpen] = useState(
-    (props.alwaysOpen || props.defaultOpen) ?? false
-  )
+export const EntitySelect = <T,>(props: EntitySelectProps<T> & { children?: React.ReactNode }) => {
+  const [open, setOpen] = useState((props.alwaysOpen || props.defaultOpen) ?? false)
 
   const onOpenChange = (open: boolean) => {
     setOpen(open)
@@ -31,18 +22,13 @@ export const EntitySelect = <T,>(
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when this prop changes
   }, [props.defaultOpen])
 
-  const [filteredEntities, setFilteredEntities] = useState<
-    EntitySelectEntity[]
-  >(props.entities)
+  const [filteredEntities, setFilteredEntities] = useState<EntitySelectEntity[]>(props.entities)
 
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useDebounceValue("", 300)
 
   const groupView = useMemo(
-    () =>
-      props.entities.some(
-        (entity) => entity.subItems && entity.subItems.length > 0
-      ),
+    () => props.entities.some((entity) => entity.subItems && entity.subItems.length > 0),
     [props.entities]
   )
 
@@ -62,9 +48,7 @@ export const EntitySelect = <T,>(
       return
     }
 
-    const visibleSubIds = new Set(
-      (filteredEntity.subItems ?? []).map((s) => s.subId)
-    )
+    const visibleSubIds = new Set((filteredEntity.subItems ?? []).map((s) => s.subId))
 
     const parentIdsToUpdate = new Set<EntityId>([filteredEntity.id])
     filteredEntities.forEach((possibleParent) => {
@@ -94,9 +78,7 @@ export const EntitySelect = <T,>(
       if (!filteredParent) return
 
       const newVisibleSubItems =
-        filteredParent.subItems?.filter((sub) =>
-          visibleSubIds.has(sub.subId)
-        ) ?? []
+        filteredParent.subItems?.filter((sub) => visibleSubIds.has(sub.subId)) ?? []
 
       const oldIndex = newSelectedEntities.findIndex((x) => x.id === parentId)
       if (oldIndex >= 0) {
@@ -123,10 +105,7 @@ export const EntitySelect = <T,>(
     props.onSelect(newSelectedEntities)
   }
 
-  function onSubItemSelect(
-    parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) {
+  function onSubItemSelect(parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) {
     if (props.singleSelector) {
       props.onSelect({ ...parentEntity, subItems: [{ ...entity }] })
 
@@ -156,24 +135,16 @@ export const EntitySelect = <T,>(
           const oldSubItems = selectedSubItemsMap.get(parent.id) ?? []
 
           let mergedSubItems = [...oldSubItems]
-          const parentContainsNewSub = parent.subItems?.some(
-            (p) => p.subId === entity.subId
-          )
+          const parentContainsNewSub = parent.subItems?.some((p) => p.subId === entity.subId)
           if (parentContainsNewSub) {
-            const alreadyHasIt = mergedSubItems.some(
-              (x) => x.subId === entity.subId
-            )
+            const alreadyHasIt = mergedSubItems.some((x) => x.subId === entity.subId)
             if (!alreadyHasIt) {
               mergedSubItems.push(entity)
             }
           }
 
-          const realSubIds = new Set(
-            (parent.subItems ?? []).map((sub) => sub.subId)
-          )
-          mergedSubItems = mergedSubItems.filter((sub) =>
-            realSubIds.has(sub.subId)
-          )
+          const realSubIds = new Set((parent.subItems ?? []).map((sub) => sub.subId))
+          mergedSubItems = mergedSubItems.filter((sub) => realSubIds.has(sub.subId))
 
           newSelectedEntities.push({
             ...parent,
@@ -196,18 +167,14 @@ export const EntitySelect = <T,>(
     const prevSelected = props.selectedEntities ?? []
 
     if (groupView) {
-      const parentElement = filteredEntities.find(
-        (fe) => fe.id === entityToRemove.id
-      )
+      const parentElement = filteredEntities.find((fe) => fe.id === entityToRemove.id)
 
       if (!parentElement) {
         // This should never happen as a element not visible cannot be selected
         return
       }
 
-      const subIdsRemoved = new Set(
-        (parentElement.subItems ?? []).map((sub) => sub.subId)
-      )
+      const subIdsRemoved = new Set((parentElement.subItems ?? []).map((sub) => sub.subId))
 
       for (const selectedParent of prevSelected) {
         const selectedParentSubItems = (selectedParent.subItems ?? []).filter(
@@ -230,10 +197,7 @@ export const EntitySelect = <T,>(
     props.onSelect(newSelectedEntities)
   }
 
-  function onSubItemRemove(
-    _parentEntity: EntitySelectEntity,
-    subEntity: EntitySelectSubEntity
-  ) {
+  function onSubItemRemove(_parentEntity: EntitySelectEntity, subEntity: EntitySelectSubEntity) {
     if (props.singleSelector) {
       props.onSelect(null)
       return
@@ -245,8 +209,7 @@ export const EntitySelect = <T,>(
     const newSelectedEntities: EntitySelectEntity[] = []
 
     for (const parent of prevSelected) {
-      const filteredSubItems =
-        parent.subItems?.filter((s) => s.subId !== subIdToRemove) ?? []
+      const filteredSubItems = parent.subItems?.filter((s) => s.subId !== subIdToRemove) ?? []
 
       if (filteredSubItems.length > 0) {
         newSelectedEntities.push({
@@ -271,9 +234,7 @@ export const EntitySelect = <T,>(
 
     if (groupView) {
       const visibleSubIds = new Set<EntityId>(
-        filteredEntities.flatMap((ent) =>
-          (ent.subItems ?? []).map((sub) => sub.subId)
-        )
+        filteredEntities.flatMap((ent) => (ent.subItems ?? []).map((sub) => sub.subId))
       )
 
       for (const selectedEntity of prevSelected) {
@@ -289,9 +250,7 @@ export const EntitySelect = <T,>(
         }
       }
     } else {
-      const visibleIds = new Set<EntityId>(
-        filteredEntities.map((ent) => ent.id)
-      )
+      const visibleIds = new Set<EntityId>(filteredEntities.map((ent) => ent.id))
       newSelected = (prevSelected ?? []).filter((el) => !visibleIds.has(el.id))
     }
 
@@ -311,10 +270,7 @@ export const EntitySelect = <T,>(
         })
       } else {
         const mergedSubItems = Array.from(
-          new Set([
-            ...(existingEntity.subItems ?? []),
-            ...(entity.subItems ?? []),
-          ])
+          new Set([...(existingEntity.subItems ?? []), ...(entity.subItems ?? [])])
         )
         existingEntity.subItems = mergedSubItems
       }
@@ -331,9 +287,7 @@ export const EntitySelect = <T,>(
   const onToggleExpand = (entity: EntitySelectEntity, expanded: boolean) => {
     props.onItemExpandedChange(entity.id, expanded)
     setFilteredEntities(
-      filteredEntities.map((e) =>
-        e.id === entity.id ? { ...e, expanded: !entity.expanded } : e
-      )
+      filteredEntities.map((e) => (e.id === entity.id ? { ...e, expanded: !entity.expanded } : e))
     )
   }
 
@@ -350,10 +304,7 @@ export const EntitySelect = <T,>(
         const filteredSubItems = entity.subItems
           ?.map((el) => ({
             ...el,
-            score: getMatchScore(
-              debouncedSearch,
-              el.subSearchKeys ?? [el.subName]
-            ),
+            score: getMatchScore(debouncedSearch, el.subSearchKeys ?? [el.subName]),
           }))
           .filter((subEntity) => subEntity.score < Infinity)
           .sort((a, b) => a.score - b.score)
@@ -374,10 +325,7 @@ export const EntitySelect = <T,>(
     } else {
       const nextEntities = props.entities
         .map((entity) => {
-          const entityScore = getMatchScore(
-            debouncedSearch,
-            entity.searchKeys ?? [entity.name]
-          )
+          const entityScore = getMatchScore(debouncedSearch, entity.searchKeys ?? [entity.name])
           return { ...entity, score: entityScore }
         })
         .filter((entity) => entity.score < Infinity)
@@ -385,13 +333,7 @@ export const EntitySelect = <T,>(
 
       setFilteredEntities(nextEntities)
     }
-  }, [
-    debouncedSearch,
-    props.entities,
-    props.applySearchToGroup,
-    groupView,
-    setFilteredEntities,
-  ])
+  }, [debouncedSearch, props.entities, props.applySearchToGroup, groupView, setFilteredEntities])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -573,10 +515,7 @@ function getBestScoreForEntity(entity: EntitySelectEntity, search: string) {
   let bestSubItemScore = Infinity
   if (entity.subItems?.length) {
     bestSubItemScore = entity.subItems.reduce((minScore, subItem) => {
-      const current = getMatchScore(
-        search,
-        subItem.subSearchKeys ?? [subItem.subName]
-      )
+      const current = getMatchScore(search, subItem.subSearchKeys ?? [subItem.subName])
       return Math.min(minScore, current)
     }, Infinity)
   }

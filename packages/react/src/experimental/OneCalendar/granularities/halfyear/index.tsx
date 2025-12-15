@@ -56,9 +56,9 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
   }
 }
 
-export function toHalfYearGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(date: T): T extends Date | DateRange ? DateRangeComplete : T {
+export function toHalfYearGranularityDateRange<T extends Date | DateRange | undefined | null>(
+  date: T
+): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(
     date,
     (date) => {
@@ -67,8 +67,7 @@ export function toHalfYearGranularityDateRange<
       }
       return startOfMonth(setMonth(date, 6))
     },
-    (date) =>
-      getMonth(date) < 6 ? endOfMonth(setMonth(date, 5)) : endOfYear(date)
+    (date) => (getMonth(date) < 6 ? endOfMonth(setMonth(date, 5)) : endOfYear(date))
   )
 }
 
@@ -125,12 +124,8 @@ export const halfyearGranularity: GranularityDefinition = {
     const maxWithGranularity = options.max && endOfMonth(options.max)
 
     return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
+      prev: isAfterOrEqual(prevFrom, minWithGranularity) ? { from: prevFrom, to: prevTo } : false,
+      next: isBeforeOrEqual(nextTo, maxWithGranularity) ? { from: nextFrom, to: nextTo } : false,
     }
   },
   toRangeString: (date) => toRangeString(date),

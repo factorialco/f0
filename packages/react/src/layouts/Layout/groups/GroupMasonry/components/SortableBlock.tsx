@@ -8,8 +8,7 @@ export interface SortableBlockProps {
 }
 
 export const SortableBlock = ({ id, children }: SortableBlockProps) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id })
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id })
 
   const style = {
     transform: CSS.Translate.toString(transform),

@@ -5,10 +5,7 @@ import { ActivityItemList } from "@/experimental/Information/Activity/ActivityIt
 import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
-import {
-  OnePersonListItem,
-  OnePersonListItemProps,
-} from "@/experimental/Lists/OnePersonListItem"
+import { OnePersonListItem, OnePersonListItemProps } from "@/experimental/Lists/OnePersonListItem"
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
 import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
@@ -64,9 +61,7 @@ const meta: Meta<typeof OneModal> = {
 
       return (
         <ApplicationFrame
-          {...(ApplicationFrameStoryMeta.args as ComponentProps<
-            typeof ApplicationFrame
-          >)}
+          {...(ApplicationFrameStoryMeta.args as ComponentProps<typeof ApplicationFrame>)}
         >
           <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
             <F0Button label="Open modal" onClick={handleOpen} />
@@ -116,10 +111,7 @@ const OTHER_ACTIONS = [
 const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
   <div className="flex flex-col gap-4 p-4">
     {Array.from({ length: itemsCount }, (_, i) => (
-      <div
-        key={i}
-        className="rounded-sm border border-solid border-f1-border-secondary p-4"
-      >
+      <div key={i} className="rounded-sm border border-solid border-f1-border-secondary p-4">
         List Item {i + 1}
       </div>
     ))}
@@ -190,15 +182,10 @@ export const WithDescription: Story = {
   },
 }
 
-const ExamplePersonList: FC<{ numberOfItems?: number }> = ({
-  numberOfItems = 20,
-}) => (
+const ExamplePersonList: FC<{ numberOfItems?: number }> = ({ numberOfItems = 20 }) => (
   <div className="flex flex-col gap-0.5 p-2">
     {Array.from({ length: numberOfItems }, (_, i) => (
-      <OnePersonListItem
-        key={i}
-        {...(OnePersonListItemDefault.args as OnePersonListItemProps)}
-      />
+      <OnePersonListItem key={i} {...(OnePersonListItemDefault.args as OnePersonListItemProps)} />
     ))}
   </div>
 )
@@ -226,9 +213,7 @@ export const WithLeftPosition: Story = {
         <OneModal.Header title="Activity" otherActions={OTHER_ACTIONS} />
         <OneModal.Content>
           <ActivityItemList
-            {...(ActivityItemListDefault.args as ComponentProps<
-              typeof ActivityItemList
-            >)}
+            {...(ActivityItemListDefault.args as ComponentProps<typeof ActivityItemList>)}
           />
         </OneModal.Content>
       </>
@@ -261,17 +246,8 @@ export const WithFullscreenPositionAndActions: Story = {
         </OneModal.Content>
         <OneModal.Footer>
           <div className="flex flex-1 flex-row gap-3">
-            <ButtonInternal
-              label="Approve"
-              icon={CheckDoubleIcon}
-              onClick={() => {}}
-            />
-            <ButtonInternal
-              label="Reject"
-              icon={CrossIcon}
-              variant="critical"
-              onClick={() => {}}
-            />
+            <ButtonInternal label="Approve" icon={CheckDoubleIcon} onClick={() => {}} />
+            <ButtonInternal label="Reject" icon={CrossIcon} variant="critical" onClick={() => {}} />
           </div>
         </OneModal.Footer>
       </>
@@ -324,9 +300,7 @@ export const WithResourceHeader: Story = {
         />
         <OneModal.Content withPadding>
           <ResourceHeader
-            {...(ResourceHeaderDefault.args as ComponentProps<
-              typeof ResourceHeader
-            >)}
+            {...(ResourceHeaderDefault.args as ComponentProps<typeof ResourceHeader>)}
             primaryAction={undefined}
             secondaryActions={undefined}
             otherActions={undefined}
@@ -356,17 +330,8 @@ export const WithFewItems: Story = {
         </OneModal.Content>
         <OneModal.Footer>
           <div className="flex flex-1 flex-row gap-3">
-            <ButtonInternal
-              label="Approve"
-              icon={CheckDoubleIcon}
-              onClick={() => {}}
-            />
-            <ButtonInternal
-              label="Reject"
-              icon={CrossIcon}
-              variant="critical"
-              onClick={() => {}}
-            />
+            <ButtonInternal label="Approve" icon={CheckDoubleIcon} onClick={() => {}} />
+            <ButtonInternal label="Reject" icon={CrossIcon} variant="critical" onClick={() => {}} />
           </div>
         </OneModal.Footer>
       </>
@@ -407,8 +372,7 @@ export const WithSelectInput: Story = {
         <OneModal.Content withPadding>
           <div className="space-y-4">
             <p className="text-sm text-f1-foreground-secondary">
-              This demonstrates the Select component inside a modal with long
-              text options.
+              This demonstrates the Select component inside a modal with long text options.
             </p>
             <F0Select
               label="Choose an option (long text test)"

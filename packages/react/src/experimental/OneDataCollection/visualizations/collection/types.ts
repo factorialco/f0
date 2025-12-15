@@ -7,11 +7,7 @@ import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
-import type {
-  GroupingDefinition,
-  OnLoadDataCallback,
-  OnLoadErrorCallback,
-} from "../../types"
+import type { GroupingDefinition, OnLoadDataCallback, OnLoadErrorCallback } from "../../types"
 import type { CardVisualizationOptions } from "./Card"
 import type { KanbanVisualizationOptions } from "./Kanban"
 import { ListVisualizationOptions } from "./List/types"
@@ -86,15 +82,7 @@ export type Visualization<
  * Represents the type of visualization.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type VisualizationType = Visualization<
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any
->["type"]
+export type VisualizationType = Visualization<any, any, any, any, any, any, any>["type"]
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
@@ -116,15 +104,7 @@ export type VisualizationProps<
 > = {
   /** Array of available visualization configurations */
   visualizations?: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
+    Visualization<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
   >
 }
 
@@ -150,10 +130,7 @@ type InferFilters<S> = S extends {
 export type CustomVisualizationProps<
   Source extends { dataAdapter: DataCollectionDataAdapter<any, any, any> },
 > = {
-  onSelectItems: OnSelectItemsCallback<
-    InferRecord<Source>,
-    InferFilters<Source>
-  >
+  onSelectItems: OnSelectItemsCallback<InferRecord<Source>, InferFilters<Source>>
   onLoadData: OnLoadDataCallback<InferRecord<Source>, InferFilters<Source>>
   onLoadError: OnLoadErrorCallback
   source: Source

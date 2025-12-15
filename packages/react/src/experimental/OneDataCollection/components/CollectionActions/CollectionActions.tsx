@@ -93,12 +93,7 @@ export const CollectionActions = ({
       ))}
 
       {dropdownItems.length > 0 && (
-        <Dropdown
-          items={dropdownItems}
-          align="end"
-          open={open}
-          onOpenChange={onOpenChange}
-        >
+        <Dropdown items={dropdownItems} align="end" open={open} onOpenChange={onOpenChange}>
           <ButtonInternal
             variant="outline"
             icon={Ellipsis}

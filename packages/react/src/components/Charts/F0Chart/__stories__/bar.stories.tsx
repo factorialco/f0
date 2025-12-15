@@ -18,15 +18,7 @@ export const SingleBar: Story = {
     options: {
       xAxis: {
         type: "category",
-        data: [
-          "Marketing",
-          "Sales",
-          "Engineering",
-          "Product",
-          "Design",
-          "Finance",
-          "Legal",
-        ],
+        data: ["Marketing", "Sales", "Engineering", "Product", "Design", "Finance", "Legal"],
       },
       yAxis: {
         type: "value",

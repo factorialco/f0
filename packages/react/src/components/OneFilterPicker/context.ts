@@ -1,10 +1,5 @@
 import { createContext } from "react"
-import {
-  FiltersDefinition,
-  FiltersMode,
-  FiltersState,
-  PresetsDefinition,
-} from "./types"
+import { FiltersDefinition, FiltersMode, FiltersState, PresetsDefinition } from "./types"
 
 export type FiltersContextType<Definition extends FiltersDefinition> = {
   filters: Definition | undefined
@@ -20,9 +15,7 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   mode?: FiltersMode
 }
 
-export const FiltersContext = createContext<
-  FiltersContextType<FiltersDefinition>
->({
+export const FiltersContext = createContext<FiltersContextType<FiltersDefinition>>({
   filters: {},
   value: {},
   presets: [],

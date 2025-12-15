@@ -5,15 +5,16 @@ import { BaseTabs, TabsSkeleton } from "./index"
 
 // Mock the linkHandler module
 vi.mock("@/lib/linkHandler", () => ({
-  Link: forwardRef<HTMLAnchorElement, PropsWithChildren<ComponentProps<"a">>>(
-    function Link({ children, ...props }, ref) {
-      return (
-        <a ref={ref} {...props}>
-          {children}
-        </a>
-      )
-    }
-  ),
+  Link: forwardRef<HTMLAnchorElement, PropsWithChildren<ComponentProps<"a">>>(function Link(
+    { children, ...props },
+    ref
+  ) {
+    return (
+      <a ref={ref} {...props}>
+        {children}
+      </a>
+    )
+  }),
   useNavigation: () => ({
     isActive: (href: string) => href === "/active",
   }),
@@ -89,9 +90,7 @@ describe("Tabs", () => {
   })
 
   it("does not render icons in primary tabs when variant is 'default' or undefined", () => {
-    render(
-      <BaseTabs tabs={secondaryTabsWithoutUpsellIcons} secondary={false} />
-    )
+    render(<BaseTabs tabs={secondaryTabsWithoutUpsellIcons} secondary={false} />)
 
     const icons = document.querySelectorAll("svg")
     expect(icons).toHaveLength(0)

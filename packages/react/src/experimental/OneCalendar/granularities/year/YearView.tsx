@@ -1,12 +1,5 @@
 import { cn, focusRing } from "@/lib/utils"
-import {
-  endOfYear,
-  isAfter,
-  isBefore,
-  isSameYear,
-  isWithinInterval,
-  startOfYear,
-} from "date-fns"
+import { endOfYear, isAfter, isBefore, isSameYear, isWithinInterval, startOfYear } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import { CalendarMode, DateRange } from "../../types"
 
@@ -33,9 +26,7 @@ export function YearView({
 
   // Check if a value is a DateRange
   const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
+    return Boolean(value && typeof value === "object" && ("from" in value || "to" in value))
   }
 
   // Generate years for a decade
@@ -73,12 +64,8 @@ export function YearView({
           })
         } else {
           // Create a range between the two years
-          const start = isBefore(selected.from, selectedDate)
-            ? selected.from
-            : selectedDate
-          const end = isBefore(selected.from, selectedDate)
-            ? selectedDate
-            : selected.from
+          const start = isBefore(selected.from, selectedDate) ? selected.from : selectedDate
+          const end = isBefore(selected.from, selectedDate) ? selectedDate : selected.from
 
           onSelect?.({
             from: startOfYear(start),
@@ -187,8 +174,7 @@ export function YearView({
                   "hover:bg-f1-background-hover hover:after:bg-f1-background-selected-bold-hover",
                 disabled && "cursor-not-allowed text-f1-foreground-secondary",
                 focusRing(),
-                isOutside &&
-                  "[&>span]:font-normal [&>span]:text-f1-foreground-secondary",
+                isOutside && "[&>span]:font-normal [&>span]:text-f1-foreground-secondary",
                 isSelected &&
                   mode === "single" &&
                   "bg-f1-background-selected-bold after:opacity-100 hover:bg-f1-background-selected-bold-hover [&>span]:z-10 [&>span]:text-f1-foreground-inverse [&>span]:opacity-100",

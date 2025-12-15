@@ -1,9 +1,5 @@
 import { useMemo } from "react"
-import {
-  Calendar,
-  DottedCircle,
-  InProgressTask,
-} from "../../../../../icons/app"
+import { Calendar, DottedCircle, InProgressTask } from "../../../../../icons/app"
 import { WidgetSimpleListItem } from "../../ListItems/WidgetSimpleListItem"
 
 export type TaskStatus = "in-progress" | "todo"
@@ -21,12 +17,7 @@ export type TaskItemProps = {
   hideIcon?: boolean
 }
 
-export function TaskItem({
-  task,
-  status,
-  onClick,
-  hideIcon = false,
-}: TaskItemProps) {
+export function TaskItem({ task, status, onClick, hideIcon = false }: TaskItemProps) {
   const handleOnClick = () => {
     onClick?.(task)
   }

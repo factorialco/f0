@@ -45,10 +45,7 @@ const PersonAnimated = React.forwardRef<SVGSVGElement, PersonProps>(
           animate={animate}
           vectorEffect="non-scaling-stroke"
         />
-        <path
-          d="M7 18C7 18 8.5 16 12 16C15.5 16 17 18 17 18"
-          vectorEffect="non-scaling-stroke"
-        />
+        <path d="M7 18C7 18 8.5 16 12 16C15.5 16 17 18 17 18" vectorEffect="non-scaling-stroke" />
       </svg>
     )
   }

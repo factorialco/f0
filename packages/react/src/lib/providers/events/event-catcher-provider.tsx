@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-} from "react"
+import { createContext, ReactNode, useCallback, useContext, useMemo } from "react"
 import { EventCatcherFunction } from "./types"
 
 type ContextType = { onEvent: EventCatcherFunction }
@@ -40,11 +34,7 @@ export function F0EventCatcherProvider({
 
   const value = useMemo(() => ({ onEvent: handleEvent }), [handleEvent])
 
-  return (
-    <EventCatcherContext.Provider value={value}>
-      {children}
-    </EventCatcherContext.Provider>
-  )
+  return <EventCatcherContext.Provider value={value}>{children}</EventCatcherContext.Provider>
 }
 
 export function useF0EventCatcher() {

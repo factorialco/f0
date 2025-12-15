@@ -26,9 +26,7 @@ export const GridStackContext = createContext<{
 export function useGridStackContext() {
   const context = useContext(GridStackContext)
   if (!context) {
-    throw new Error(
-      "useGridStackContext must be used within a GridStackProvider"
-    )
+    throw new Error("useGridStackContext must be used within a GridStackProvider")
   }
   return context
 }

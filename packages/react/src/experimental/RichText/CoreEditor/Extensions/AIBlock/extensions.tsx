@@ -44,16 +44,19 @@ export const createAIBlockEditorExtensions = (
   transcriptLabels?: TranscriptLabels
 ) => {
   // Create enhanced MoodTracker config with labels
-  const enhancedMoodTrackerConfig: MoodTrackerConfig | undefined =
-    moodTrackerLabels ? { labels: moodTrackerLabels } : undefined
+  const enhancedMoodTrackerConfig: MoodTrackerConfig | undefined = moodTrackerLabels
+    ? { labels: moodTrackerLabels }
+    : undefined
 
   // Create enhanced LiveCompanion config with labels
-  const enhancedLiveCompanionConfig: LiveCompanionConfig | undefined =
-    liveCompanionLabels ? { labels: liveCompanionLabels } : undefined
+  const enhancedLiveCompanionConfig: LiveCompanionConfig | undefined = liveCompanionLabels
+    ? { labels: liveCompanionLabels }
+    : undefined
 
   // Create enhanced Transcript config with labels
-  const enhancedTranscriptConfig: TranscriptConfig | undefined =
-    transcriptLabels ? { labels: transcriptLabels } : undefined
+  const enhancedTranscriptConfig: TranscriptConfig | undefined = transcriptLabels
+    ? { labels: transcriptLabels }
+    : undefined
 
   return [
     StarterKitExtension,

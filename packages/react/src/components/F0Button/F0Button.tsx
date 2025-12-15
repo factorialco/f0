@@ -16,17 +16,11 @@ const privateProps = [
   "style",
 ] as const
 
-export type F0ButtonProps = Omit<
-  ButtonInternalProps,
-  (typeof privateProps)[number] | "variant"
-> & {
+export type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number] | "variant"> & {
   variant?: Exclude<ButtonInternalProps["variant"], "ai">
 }
 
-const F0Button = forwardRef<
-  HTMLButtonElement | HTMLAnchorElement,
-  F0ButtonProps
->((props, ref) => {
+const F0Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, F0ButtonProps>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest

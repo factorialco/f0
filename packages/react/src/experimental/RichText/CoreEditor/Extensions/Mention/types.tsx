@@ -23,8 +23,6 @@ export type MentionedUser = {
 }
 
 export type MentionsConfig = {
-  onMentionQueryStringChanged?: (
-    queryString: string
-  ) => Promise<MentionedUser[]> | undefined
+  onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined
   users: MentionedUser[]
 }

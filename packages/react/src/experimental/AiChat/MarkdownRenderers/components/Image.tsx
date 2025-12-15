@@ -2,11 +2,7 @@ import { F0Button } from "@/components/F0Button"
 import DownloadIcon from "@/icons/app/Download"
 import { cn } from "@/lib/utils"
 
-export function Image({
-  src,
-  alt,
-  ...props
-}: React.ImgHTMLAttributes<HTMLImageElement>) {
+export function Image({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) {
   const handleDownload = () => {
     if (src) {
       const link = document.createElement("a")

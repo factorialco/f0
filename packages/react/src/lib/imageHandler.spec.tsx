@@ -31,9 +31,7 @@ describe("ImageProvider", () => {
     )
 
     const img = screen.getByAltText("test")
-    expect(img.getAttribute("srcset")).toEqual(
-      "image-1x.jpg 1x, image-2x.jpg 2x"
-    )
+    expect(img.getAttribute("srcset")).toEqual("image-1x.jpg 1x, image-2x.jpg 2x")
     expect(img.getAttribute("sizes")).toEqual("100vw")
   })
 })
@@ -54,13 +52,7 @@ describe("Image", () => {
           src: `transformed-${props.src}`,
         })}
       >
-        <Image
-          src="original.jpg"
-          alt="test"
-          className="custom-class"
-          width={100}
-          height={100}
-        />
+        <Image src="original.jpg" alt="test" className="custom-class" width={100} height={100} />
       </ImageProvider>
     )
 

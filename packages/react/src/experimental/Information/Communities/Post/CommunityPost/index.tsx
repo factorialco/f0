@@ -3,11 +3,7 @@ import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
-import {
-  Comment as CommentIcon,
-  EllipsisHorizontal,
-  Person as PersonIcon,
-} from "@/icons/app"
+import { Comment as CommentIcon, EllipsisHorizontal, Person as PersonIcon } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
@@ -76,9 +72,7 @@ export const BaseCommunityPost = ({
   noReactionsButton = false,
   noVideoPreload = false,
 }: CommunityPostProps) => {
-  const countersDisplay = [counters.views, counters.comments]
-    .filter(Boolean)
-    .join(" · ")
+  const countersDisplay = [counters.views, counters.comments].filter(Boolean).join(" · ")
 
   const date = getDisplayDateBasedOnDuration(createdAt)
 
@@ -90,9 +84,7 @@ export const BaseCommunityPost = ({
     event.stopPropagation()
   }
 
-  const authorFullName = author
-    ? `${author.firstName} ${author.lastName}`
-    : undefined
+  const authorFullName = author ? `${author.firstName} ${author.lastName}` : undefined
 
   return (
     <div
@@ -101,11 +93,7 @@ export const BaseCommunityPost = ({
     >
       <div className="hidden md:block">
         {author ? (
-          <F0Link
-            href={author.url || "#"}
-            title={authorFullName}
-            stopPropagation
-          >
+          <F0Link href={author.url || "#"} title={authorFullName} stopPropagation>
             <F0AvatarPerson
               firstName={author.firstName}
               lastName={author.lastName}
@@ -151,12 +139,7 @@ export const BaseCommunityPost = ({
                   <F0AvatarIcon icon={PersonIcon} size="sm" />
                 </div>
               )}
-              <span
-                className={cn(
-                  "text-f1-foreground-secondary",
-                  !author && "capitalize"
-                )}
-              >
+              <span className={cn("text-f1-foreground-secondary", !author && "capitalize")}>
                 {inLabel}
               </span>
               <F0Link
@@ -168,20 +151,14 @@ export const BaseCommunityPost = ({
               >
                 {group.title}
               </F0Link>
-              <span className="hidden text-f1-foreground-secondary md:inline">
-                ·
-              </span>
+              <span className="hidden text-f1-foreground-secondary md:inline">·</span>
               <span className="text-f1-foreground-secondary">{date}</span>
             </div>
 
             <div className="flex flex-row gap-2">
               <div className="hidden flex-row gap-2 md:flex">
                 {dropdownItems?.length && (
-                  <Dropdown
-                    items={dropdownItems}
-                    icon={EllipsisHorizontal}
-                    size="sm"
-                  />
+                  <Dropdown items={dropdownItems} icon={EllipsisHorizontal} size="sm" />
                 )}
               </div>
               <div className="md:hidden">
@@ -253,10 +230,7 @@ export type CommunityPostSkeletonProps = {
   withImage?: boolean
 }
 
-export const CommunityPostSkeleton = ({
-  withEvent,
-  withImage,
-}: CommunityPostSkeletonProps) => (
+export const CommunityPostSkeleton = ({ withEvent, withImage }: CommunityPostSkeletonProps) => (
   <div className="flex w-full cursor-wait flex-row gap-3 rounded-xl p-3 pt-2 md:pb-4 md:pt-3">
     <div className="hidden md:block">
       <Skeleton className="aspect-square w-8 rounded-full" />
@@ -291,7 +265,4 @@ export const CommunityPostSkeleton = ({
   </div>
 )
 
-export const CommunityPost = withSkeleton(
-  BaseCommunityPost,
-  CommunityPostSkeleton
-)
+export const CommunityPost = withSkeleton(BaseCommunityPost, CommunityPostSkeleton)

@@ -11,12 +11,7 @@ import { useEffect, useRef, useState } from "react"
 import { fn } from "storybook/internal/test"
 import { Lane } from "../Lane"
 import type { LaneProps } from "../types"
-import {
-  additionalMockTasks,
-  allMockTasks,
-  MockTask,
-  mockTasks,
-} from "./mockData"
+import { additionalMockTasks, allMockTasks, MockTask, mockTasks } from "./mockData"
 
 const FETCH_DELAY = 1500
 
@@ -31,18 +26,14 @@ const meta = {
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story, context) => {
-      const containerHeight =
-        context.parameters?.containerHeight || "calc(100vh-32px)"
+      const containerHeight = context.parameters?.containerHeight || "calc(100vh-32px)"
       const containerMaxWidth = context.parameters?.containerMaxWidth || "400px"
       return (
         <div
           className="flex w-full items-center justify-center p-4"
           style={{ height: containerHeight as string }}
         >
-          <div
-            className="w-full"
-            style={{ maxWidth: containerMaxWidth as string }}
-          >
+          <div className="w-full" style={{ maxWidth: containerMaxWidth as string }}>
             <Story />
           </div>
         </div>
@@ -186,9 +177,7 @@ export const WithFetchMore: Story = {
 
     return (
       <div
-        className={
-          "relative flex h-full w-fit flex-col gap-0 rounded-xl border transition-colors"
-        }
+        className={"relative flex h-full w-fit flex-col gap-0 rounded-xl border transition-colors"}
         style={{
           backgroundColor: "hsla(210, 91%, 22%, 0.02)",
           height: "600px",
@@ -230,18 +219,14 @@ export const CustomEmptyState: Story = {
     getKey: (task: RecordType) => (task as MockTask).id,
     renderCard: (task) => {
       const mockTask = task as MockTask
-      return (
-        <F0Card title={mockTask.title} description={mockTask.description} />
-      )
+      return <F0Card title={mockTask.title} description={mockTask.description} />
     },
     emptyState: (
       <section
         aria-label="Empty lane"
         className="flex flex-col items-center justify-center py-8 text-center"
       >
-        <h2 className="mb-2 text-base font-medium text-f1-foreground">
-          No tasks in backlog
-        </h2>
+        <h2 className="mb-2 text-base font-medium text-f1-foreground">No tasks in backlog</h2>
         <p className="text-sm text-f1-foreground-secondary">
           Tasks will appear here when added to the backlog
         </p>
@@ -294,16 +279,14 @@ export const WithImages: Story = {
         id: "project-1",
         title: "E-commerce Redesign",
         description: "Complete overhaul of the online store interface",
-        image:
-          "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
         team: "Design Team",
       },
       {
         id: "project-2",
         title: "Mobile App Launch",
         description: "Release new mobile application for iOS and Android",
-        image:
-          "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=200&fit=crop",
         team: "Development Team",
       },
     ] as Array<{
@@ -358,13 +341,7 @@ export const TwoLanesDnD: Story = {
     const [left, setLeft] = useState(mockTasks.slice(0, 3))
     const [right, setRight] = useState(mockTasks.slice(3, 6))
 
-    function LaneDroppable({
-      id,
-      children,
-    }: {
-      id: string
-      children: React.ReactNode
-    }) {
+    function LaneDroppable({ id, children }: { id: string; children: React.ReactNode }) {
       const ref = useRef<HTMLDivElement | null>(null)
       useDroppableList({
         ref: ref as React.RefObject<HTMLElement>,
@@ -453,8 +430,7 @@ export const TwoLanesDnD: Story = {
               const inRight = prev.find((t) => t.id === sourceId)
               if (toLane === "lane-right" && !inRight) {
                 const from =
-                  left.find((t) => t.id === sourceId) ||
-                  right.find((t) => t.id === sourceId)
+                  left.find((t) => t.id === sourceId) || right.find((t) => t.id === sourceId)
                 return from ? [...prev, from] : prev
               }
               if (toLane === "lane-left" && inRight) {
@@ -466,8 +442,7 @@ export const TwoLanesDnD: Story = {
               const inLeft = prev.find((t) => t.id === sourceId)
               if (toLane === "lane-left" && !inLeft) {
                 const from =
-                  right.find((t) => t.id === sourceId) ||
-                  left.find((t) => t.id === sourceId)
+                  right.find((t) => t.id === sourceId) || left.find((t) => t.id === sourceId)
                 return from ? [...prev, from] : prev
               }
               if (toLane === "lane-right" && inLeft) {
@@ -506,12 +481,10 @@ function MoveMonitor({
 
         const sourceId = String((source.data as { id?: string }).id ?? "")
         const fromLane = String(
-          initialTargets.find((t) => t.data?.type === "list-droppable")?.data
-            ?.id ?? ""
+          initialTargets.find((t) => t.data?.type === "list-droppable")?.data?.id ?? ""
         )
         const toLane = String(
-          currentTargets.find((t) => t.data?.type === "list-droppable")?.data
-            ?.id ?? ""
+          currentTargets.find((t) => t.data?.type === "list-droppable")?.data?.id ?? ""
         )
         if (!toLane || !fromLane || !sourceId) return
         onMove(sourceId, fromLane, toLane)

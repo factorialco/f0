@@ -17,10 +17,7 @@ export type {
 /**
  * All the available filter types
  */
-export type FilterDefinitionsByType<
-  T = unknown,
-  R extends RecordType = RecordType,
-> = {
+export type FilterDefinitionsByType<T = unknown, R extends RecordType = RecordType> = {
   in: InFilterDefinition<T, R>
   search: SearchFilterDefinition
   date: DateFilterDefinition
@@ -73,8 +70,7 @@ export type BaseFilterDefinition<T extends FilterTypeKey> = {
  * Used to define possible filter configurations in a collection.
  * @template T - Type of values for the InFilterDefinition
  */
-export type FilterDefinition =
-  FilterDefinitionsByType[keyof FilterDefinitionsByType]
+export type FilterDefinition = FilterDefinitionsByType[keyof FilterDefinitionsByType]
 
 // This type ensures each filter follows FilterTypeDefinition while preserving its specific type
 type ValidateFilterType<T> = T extends {

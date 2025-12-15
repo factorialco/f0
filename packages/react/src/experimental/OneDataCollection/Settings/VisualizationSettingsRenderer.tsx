@@ -27,9 +27,7 @@ export const getVisualizationTypeRegistry = <
     return null
   }
 
-  const visualizationType = collectionVisualizations[
-    type
-  ] as VisualizacionTypeDefinition<
+  const visualizationType = collectionVisualizations[type] as VisualizacionTypeDefinition<
     CollectionProps<
       R,
       Filters,
@@ -123,9 +121,7 @@ export const hasVisualizacionSettings = <
   if (settingsRenderer) {
     return (
       settingsRenderer(
-        visualization.options as unknown as Parameters<
-          typeof settingsRenderer
-        >[0]
+        visualization.options as unknown as Parameters<typeof settingsRenderer>[0]
       ) !== null
     )
   }

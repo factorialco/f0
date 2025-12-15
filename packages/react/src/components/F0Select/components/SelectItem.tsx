@@ -6,11 +6,7 @@ import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 import { F0SelectItemObject } from "../types"
 
-export const SelectItem = <T extends string, R>({
-  item,
-}: {
-  item: F0SelectItemObject<T, R>
-}) => {
+export const SelectItem = <T extends string, R>({ item }: { item: F0SelectItemObject<T, R> }) => {
   return (
     <SelectItemPrimitive value={item.value} disabled={item.disabled}>
       <div className="flex w-full items-start gap-1.5">

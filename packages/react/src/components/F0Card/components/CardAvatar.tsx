@@ -47,20 +47,14 @@ const AvatarRender = ({
   return <F0Avatar avatar={avatar} size={compact ? "sm" : "lg"} />
 }
 
-export function CardAvatar({
-  avatar,
-  overlay = false,
-  compact = false,
-}: CardAvatarProps) {
+export function CardAvatar({ avatar, overlay = false, compact = false }: CardAvatarProps) {
   const isRounded = avatar.type === "person"
 
   return (
     <div
       className={cn(
         "mb-1.5 flex h-fit w-fit",
-        overlay &&
-          !compact &&
-          "absolute -top-9 left-0 rounded-md ring-[3px] ring-f1-background",
+        overlay && !compact && "absolute -top-9 left-0 rounded-md ring-[3px] ring-f1-background",
         overlay && isRounded && "rounded-full",
         compact && "mb-0"
       )}

@@ -3,17 +3,9 @@ import type { BaseFilterDefinition } from ".."
 import { FilterTypeDefinition } from "../types"
 import { InFilter } from "./InFilter"
 import { InFilterOptions } from "./types"
-import {
-  cacheLabel,
-  getCacheKey,
-  getCachedLabel,
-  loadOptions,
-} from "./useLoadOptions"
+import { cacheLabel, getCacheKey, getCachedLabel, loadOptions } from "./useLoadOptions"
 
-export const inFilter: FilterTypeDefinition<
-  string[],
-  InFilterOptions<string>
-> = {
+export const inFilter: FilterTypeDefinition<string[], InFilterOptions<string>> = {
   emptyValue: [],
   isEmpty: (value) => (value || []).length === 0,
   render: (props) => <InFilter {...props} />,
@@ -59,28 +51,20 @@ export const inFilter: FilterTypeDefinition<
       return hasMultipleSelections ? `${label} +${remainingCount}` : label
     }
 
-    const optionsProp =
-      "options" in schema.options ? schema.options.options : []
+    const optionsProp = "options" in schema.options ? schema.options.options : []
 
-    const withSource =
-      "source" in schema.options ? schema.options.source : undefined
+    const withSource = "source" in schema.options ? schema.options.source : undefined
 
     if (withSource && "mapOptions" in schema.options) {
       const firstValue = value[0]
       const remainingCount = value.length - 1
       const hasMultipleSelections = remainingCount > 0
 
-      return hasMultipleSelections
-        ? `${String(firstValue)} +${remainingCount}`
-        : String(firstValue)
+      return hasMultipleSelections ? `${String(firstValue)} +${remainingCount}` : String(firstValue)
     }
 
     // For static options, load from cache or options array
-    const options = await loadOptions(
-      cacheKey,
-      optionsProp,
-      schema.options.cache
-    )
+    const options = await loadOptions(cacheKey, optionsProp, schema.options.cache)
 
     const selectedLabels = value.map((v) => {
       const option = options.find((opt) => opt.value === v)

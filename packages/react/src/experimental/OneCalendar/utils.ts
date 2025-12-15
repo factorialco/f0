@@ -12,9 +12,7 @@ export const getLocale = (localeKey: string) => {
   return locales[key as keyof typeof locales]
 }
 
-export const toDateRange = (
-  value: Date | DateRange | undefined | null
-): DateRange | undefined => {
+export const toDateRange = (value: Date | DateRange | undefined | null): DateRange | undefined => {
   if (value instanceof Date) {
     return { from: value }
   }
@@ -116,9 +114,7 @@ export const formatDateToString = (
   return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
 }
 
-export function toGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(
+export function toGranularityDateRange<T extends Date | DateRange | undefined | null>(
   date: Date | DateRange | undefined | null,
   fromFn: (date: Date) => Date,
   toFn: (date: Date) => Date
@@ -198,10 +194,7 @@ export const isActiveDate = (
     (!!dateWithGranularity?.from &&
       isValidDate(dateWithGranularity.from) &&
       (!minDateWithGranularity?.from ||
-        isAfterOrEqual(
-          dateWithGranularity.from,
-          minDateWithGranularity.from
-        )) &&
+        isAfterOrEqual(dateWithGranularity.from, minDateWithGranularity.from)) &&
       (!maxDateWithGranularity?.to ||
         isBeforeOrEqual(dateWithGranularity.to, maxDateWithGranularity.to)))
   )

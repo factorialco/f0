@@ -29,19 +29,14 @@ interface OneCalendarInternalProps {
   compact?: boolean
 }
 
-export type OneCalendarProps = Omit<
-  OneCalendarInternalProps,
-  (typeof privateProps)[number]
->
+export type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps)[number]>
 
 export const getGranularitySimpleDefinition = (
   granularityKey: GranularityDefinitionKey
 ): GranularityDefinitionSimple => {
   const granularity = granularityDefinitions[granularityKey]
   if (!granularity) {
-    throw new Error(
-      `Granularity simple definition for view ${granularityKey} not found`
-    )
+    throw new Error(`Granularity simple definition for view ${granularityKey} not found`)
   }
   return {
     toRangeString: granularity.toRangeString,
@@ -75,9 +70,7 @@ const OneCalendarInternal = ({
 
   const [viewDate, setViewDate] = useState<Date>(defaultMonth)
 
-  const [selected, setSelectedInternal] = useState<Date | DateRange | null>(
-    defaultSelected
-  )
+  const [selected, setSelectedInternal] = useState<Date | DateRange | null>(defaultSelected)
 
   const [motionDirection, setMotionDirection] = useState(1)
 
@@ -158,10 +151,7 @@ const OneCalendarInternal = ({
     [granularity, minDate, maxDate]
   )
 
-  const setSelectFromInput = (
-    input: "from" | "to",
-    inputValue: DateRangeString
-  ) => {
+  const setSelectFromInput = (input: "from" | "to", inputValue: DateRangeString) => {
     const newDate = granularity.fromString(inputValue, i18n)
     const error = !isSelectableDate(newDate?.[input])
 
@@ -183,9 +173,7 @@ const OneCalendarInternal = ({
 
       // Convert the range to the correct granularity reducing the range to the correct granularity
       const newRange =
-        mode === "range"
-          ? granularity.toRange(range)
-          : granularity.toRange(range.from)
+        mode === "range" ? granularity.toRange(range) : granularity.toRange(range.from)
 
       handleSelect(newRange)
     },
@@ -211,9 +199,7 @@ const OneCalendarInternal = ({
     const currentDate = inputValue[input]
       ? granularity.fromString(inputValue[input], i18n)
       : undefined
-    const newDate = currentDate
-      ? granularity.navigate(currentDate.from, direction)
-      : undefined
+    const newDate = currentDate ? granularity.navigate(currentDate.from, direction) : undefined
 
     if (isSelectableDate(newDate)) {
       const newInputValue = {
@@ -270,18 +256,8 @@ const OneCalendarInternal = ({
         </div>
       )}
       {showNavigation && (
-        <div
-          className={cn(
-            "flex items-center justify-between",
-            compact ? "mx-2 pb-2" : "pb-3"
-          )}
-        >
-          <div
-            className={cn(
-              "font-medium text-f1-foreground",
-              compact ? "text-md" : "text-lg"
-            )}
-          >
+        <div className={cn("flex items-center justify-between", compact ? "mx-2 pb-2" : "pb-3")}>
+          <div className={cn("font-medium text-f1-foreground", compact ? "text-md" : "text-lg")}>
             {getHeaderLabel()}
           </div>
           <div className="flex items-center gap-2">

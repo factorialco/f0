@@ -75,9 +75,7 @@ const createMockDataSource = (
         total: result.records.length,
         currentPage: options.pagination?.currentPage ?? 1,
         perPage: options.pagination?.perPage ?? 10,
-        pagesCount: Math.ceil(
-          result.records.length / (options.pagination?.perPage ?? 10)
-        ),
+        pagesCount: Math.ceil(result.records.length / (options.pagination?.perPage ?? 10)),
         type: "pages",
       }
     },
@@ -124,10 +122,7 @@ describe("useData", () => {
     })
 
     it("should handle synchronous paginated data", async () => {
-      const source = createMockDataSource(
-        () => ({ records: mockData }),
-        "pages"
-      )
+      const source = createMockDataSource(() => ({ records: mockData }), "pages")
 
       const { result } = renderHook(() => useData(source))
 
@@ -296,27 +291,25 @@ describe("useData", () => {
 
       // Create a source with a fetchData function that returns an observable
       const source = createMockDataSource(() => {
-        return new Observable<PromiseState<BaseResponse<TestRecord>>>(
-          (subscriber) => {
-            subscriptionCount++
-            subscriber.next({ loading: true, data: null, error: null })
+        return new Observable<PromiseState<BaseResponse<TestRecord>>>((subscriber) => {
+          subscriptionCount++
+          subscriber.next({ loading: true, data: null, error: null })
 
-            // Simulate async data loading
-            setTimeout(() => {
-              subscriber.next({
-                loading: false,
-                data: { records: mockData },
-                error: null,
-              })
-              subscriber.complete()
-            }, 10)
+          // Simulate async data loading
+          setTimeout(() => {
+            subscriber.next({
+              loading: false,
+              data: { records: mockData },
+              error: null,
+            })
+            subscriber.complete()
+          }, 10)
 
-            // Return unsubscribe function that tracks when it's called
-            return () => {
-              unsubscribeCalls++
-            }
+          // Return unsubscribe function that tracks when it's called
+          return () => {
+            unsubscribeCalls++
           }
-        )
+        })
       })
 
       // Render the hook with initial filters
@@ -325,9 +318,7 @@ describe("useData", () => {
         {
           initialProps: {
             source,
-            filters: { search: "initial" } as Partial<
-              FiltersState<TestFilters>
-            >,
+            filters: { search: "initial" } as Partial<FiltersState<TestFilters>>,
           },
         }
       )
@@ -366,38 +357,38 @@ describe("useData", () => {
       const source = {
         dataAdapter: {
           fetchData: () => {
-            return new Observable<
-              PromiseState<PageBasedPaginatedResponse<TestRecord>>
-            >((subscriber) => {
-              subscriptionCount++
-              subscriber.next({
-                loading: true,
-                data: null,
-                error: null,
-              })
-
-              // Simulate async data loading
-              setTimeout(() => {
+            return new Observable<PromiseState<PageBasedPaginatedResponse<TestRecord>>>(
+              (subscriber) => {
+                subscriptionCount++
                 subscriber.next({
-                  loading: false,
-                  data: {
-                    records: mockData,
-                    total: mockData.length,
-                    currentPage: 1,
-                    perPage: 10,
-                    pagesCount: 1,
-                    type: "pages",
-                  },
+                  loading: true,
+                  data: null,
                   error: null,
                 })
-                subscriber.complete()
-              }, 10)
 
-              // Return unsubscribe function that tracks when it's called
-              return () => {
-                unsubscribeCalls++
+                // Simulate async data loading
+                setTimeout(() => {
+                  subscriber.next({
+                    loading: false,
+                    data: {
+                      records: mockData,
+                      total: mockData.length,
+                      currentPage: 1,
+                      perPage: 10,
+                      pagesCount: 1,
+                      type: "pages",
+                    },
+                    error: null,
+                  })
+                  subscriber.complete()
+                }, 10)
+
+                // Return unsubscribe function that tracks when it's called
+                return () => {
+                  unsubscribeCalls++
+                }
               }
-            })
+            )
           },
           paginationType: "pages" as const,
           perPage: 10,

@@ -15,8 +15,9 @@ export type SortingsState<Definition extends SortingsDefinition> = {
 /**
  * Type helper to extract keys from a SortingsDefinition
  */
-export type SortingKey<Definition extends SortingsDefinition> =
-  Definition extends readonly string[] ? Definition[number] : keyof Definition
+export type SortingKey<Definition extends SortingsDefinition> = Definition extends readonly string[]
+  ? Definition[number]
+  : keyof Definition
 
 /**
  * Type helper to create a multiple sortings state (the main sorting and the grouping sorting)

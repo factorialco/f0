@@ -57,9 +57,7 @@ const teamsByOfficeDataConfig = {
   },
 }
 
-export const MultipleBars: Meta<
-  typeof BarChart<typeof teamsByOfficeDataConfig>
-> = {
+export const MultipleBars: Meta<typeof BarChart<typeof teamsByOfficeDataConfig>> = {
   args: {
     dataConfig: teamsByOfficeDataConfig,
     data: [
@@ -126,9 +124,7 @@ const financialDataConfig = {
   },
 }
 
-export const FinancialValues: Meta<
-  typeof BarChart<typeof financialDataConfig>
-> = {
+export const FinancialValues: Meta<typeof BarChart<typeof financialDataConfig>> = {
   args: {
     type: "stacked-by-sign",
     dataConfig: financialDataConfig,

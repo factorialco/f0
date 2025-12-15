@@ -38,9 +38,7 @@ export type InFilterOptions<T, _R extends RecordType = RecordType> = {
   | {
       options:
         | Array<InFilterOptionItem<T>>
-        | (() =>
-            | Array<InFilterOptionItem<T>>
-            | Promise<Array<InFilterOptionItem<T>>>)
+        | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>)
     }
   | {
       // Accept any DataSourceDefinition with any record type
@@ -62,7 +60,4 @@ export type InFilterOptions<T, _R extends RecordType = RecordType> = {
  * Represents the component props for the InFilter component.
  * @template T - Type of the underlying value
  */
-export type InFilterComponentProps = FilterTypeComponentProps<
-  string[],
-  InFilterOptions<string>
->
+export type InFilterComponentProps = FilterTypeComponentProps<string[], InFilterOptions<string>>

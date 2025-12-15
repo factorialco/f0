@@ -40,15 +40,14 @@ type ActivePayload<K> = Array<{
   value: number
 }>
 
-export type BarChartProps<K extends ChartConfig = ChartConfig> =
-  ChartPropsBase<K> & {
-    type?: "simple" | "stacked" | "stacked-by-sign"
-    label?: boolean
-    legend?: boolean
-    showValueUnderLabel?: boolean
-    highlightLastBar?: boolean
-    onClick?: (data: ChartDataPoint<K>) => void
-  }
+export type BarChartProps<K extends ChartConfig = ChartConfig> = ChartPropsBase<K> & {
+  type?: "simple" | "stacked" | "stacked-by-sign"
+  label?: boolean
+  legend?: boolean
+  showValueUnderLabel?: boolean
+  highlightLastBar?: boolean
+  onClick?: (data: ChartDataPoint<K>) => void
+}
 
 const _BarChart = <K extends ChartConfig>(
   {
@@ -74,9 +73,7 @@ const _BarChart = <K extends ChartConfig>(
       return {
         ...item,
         fill:
-          index === array.length - 1
-            ? getCategoricalColor(index)
-            : getCategoricalColor(index, 0.5),
+          index === array.length - 1 ? getCategoricalColor(index) : getCategoricalColor(index, 0.5),
       }
     }
 
@@ -85,11 +82,7 @@ const _BarChart = <K extends ChartConfig>(
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       bars.map((key) =>
-        measureTextWidth(
-          yAxis?.tickFormatter
-            ? yAxis.tickFormatter(`${el[key]}`)
-            : `${el[key]}`
-        )
+        measureTextWidth(yAxis?.tickFormatter ? yAxis.tickFormatter(`${el[key]}`) : `${el[key]}`)
       )
     )
   )
@@ -126,9 +119,7 @@ const _BarChart = <K extends ChartConfig>(
         {!hideTooltip && (
           <ChartTooltip
             {...chartTooltipProps()}
-            content={
-              <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
-            }
+            content={<ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />}
           />
         )}
         {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
@@ -145,13 +136,10 @@ const _BarChart = <K extends ChartConfig>(
             showValueUnderLabel
               ? (props) => {
                   const { x, y, payload } = props
-                  const values =
-                    data.find((d) => d.label === payload.value)?.values || ""
+                  const values = data.find((d) => d.label === payload.value)?.values || ""
 
                   const value =
-                    Object.keys(values).length === 1
-                      ? Object.values(values)?.[0]
-                      : undefined
+                    Object.keys(values).length === 1 ? Object.values(values)?.[0] : undefined
 
                   const normalizedValue =
                     value !== undefined && yAxis.tickFormatter
@@ -192,11 +180,7 @@ const _BarChart = <K extends ChartConfig>(
             key={`bar-${key}`}
             isAnimationActive={false}
             dataKey={key}
-            stackId={
-              type === "stacked" || type === "stacked-by-sign"
-                ? "stack"
-                : undefined
-            }
+            stackId={type === "stacked" || type === "stacked-by-sign" ? "stack" : undefined}
             fill={
               highlightLastBar
                 ? (((data: { fill: string }) => data.fill) as unknown as string)

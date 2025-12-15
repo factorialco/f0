@@ -1,11 +1,7 @@
 import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeDefinition } from "../types"
 import { getOptionsWithDefaults } from "../utils"
-import {
-  NumberFilter,
-  NumberFilterOptions,
-  NumberFilterValue,
-} from "./NumberFilter"
+import { NumberFilter, NumberFilterOptions, NumberFilterValue } from "./NumberFilter"
 
 const isEmpty = (value: NumberFilterValue | undefined): value is undefined => {
   return (
@@ -22,10 +18,7 @@ const defaults: NumberFilterOptions = {
   max: undefined,
 }
 
-export const numberFilter: FilterTypeDefinition<
-  NumberFilterValue,
-  NumberFilterOptions
-> = {
+export const numberFilter: FilterTypeDefinition<NumberFilterValue, NumberFilterOptions> = {
   emptyValue: undefined,
   render: (props) => {
     const options = getOptionsWithDefaults(props.schema.options, defaults)

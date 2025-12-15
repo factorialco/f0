@@ -60,11 +60,7 @@ const createSlashCommandExtension = (
               const endPos = to
 
               // Delete the entire query range first
-              editor
-                .chain()
-                .focus()
-                .deleteRange({ from: startPos, to: endPos })
-                .run()
+              editor.chain().focus().deleteRange({ from: startPos, to: endPos }).run()
             } else {
               // Fallback to the provided range if we can't find the slash
               editor.chain().focus().deleteRange(range).run()
@@ -92,15 +88,13 @@ const createSlashCommandExtension = (
           items: ({ query }: { query: string }) => {
             // Exact search: the query with spaces must match exactly
             const normalizedQuery = query.toLowerCase().trim()
-            const results = availableCommands(labels, aiBlockConfig).filter(
-              (item: CommandItem) => {
-                const normalizedTitle = item.title.toLowerCase()
-                // If query is empty, show all commands
-                if (!normalizedQuery) return true
-                // Exact string matching (including spaces)
-                return normalizedTitle.includes(normalizedQuery)
-              }
-            )
+            const results = availableCommands(labels, aiBlockConfig).filter((item: CommandItem) => {
+              const normalizedTitle = item.title.toLowerCase()
+              // If query is empty, show all commands
+              if (!normalizedQuery) return true
+              // Exact string matching (including spaces)
+              return normalizedTitle.includes(normalizedQuery)
+            })
             return results.length > 0 ? results : []
           },
           render: () => {
@@ -187,11 +181,7 @@ const createSlashCommandExtension = (
                 if (props.items.length === 0) return
 
                 // Get grouped commands for better organization
-                const groupedCommands = getGroupedCommands(
-                  labels,
-                  finalGroupLabels,
-                  aiBlockConfig
-                )
+                const groupedCommands = getGroupedCommands(labels, finalGroupLabels, aiBlockConfig)
 
                 // Filter groups based on query if available
                 let filteredGroups = groupedCommands
@@ -249,11 +239,7 @@ const createSlashCommandExtension = (
                 if (!component || !container || !popoverRoot) return
 
                 // Get filtered groups for update
-                const groupedCommands = getGroupedCommands(
-                  labels,
-                  finalGroupLabels,
-                  aiBlockConfig
-                )
+                const groupedCommands = getGroupedCommands(labels, finalGroupLabels, aiBlockConfig)
                 let filteredGroups = groupedCommands
                 if (props.query && props.query.trim()) {
                   const normalizedQuery = props.query.toLowerCase().trim()

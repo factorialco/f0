@@ -48,11 +48,7 @@ describe("getValueByPath", () => {
 
     it("should return arrays and objects", () => {
       expect(getValueByPath(testObject, "b.g")).toEqual([1, 2, 3])
-      expect(getValueByPath(testObject, "arrayValue")).toEqual([
-        "item1",
-        "item2",
-        "item3",
-      ])
+      expect(getValueByPath(testObject, "arrayValue")).toEqual(["item1", "item2", "item3"])
       expect(getValueByPath(testObject, "b.c")).toEqual({
         d: "nested value",
         e: null,
@@ -85,16 +81,12 @@ describe("getValueByPath", () => {
     it("should return undefined when traversing through non-object values", () => {
       expect(getValueByPath(testObject, "a.b.c")).toBe(undefined)
       expect(getValueByPath(testObject, "stringValue.length")).toBe(undefined)
-      expect(getValueByPath(testObject, "booleanValue.toString")).toBe(
-        undefined
-      )
+      expect(getValueByPath(testObject, "booleanValue.toString")).toBe(undefined)
     })
 
     it("should return undefined for paths that go beyond available nesting", () => {
       expect(getValueByPath(testObject, "b.c.d.e.f")).toBe(undefined)
-      expect(getValueByPath(testObject, "emptyObject.nonExistent.deep")).toBe(
-        undefined
-      )
+      expect(getValueByPath(testObject, "emptyObject.nonExistent.deep")).toBe(undefined)
     })
   })
 
@@ -178,34 +170,18 @@ describe("getValueByPath", () => {
     }
 
     it("should handle complex nested object structures", () => {
-      expect(getValueByPath(complexObject, "user.profile.personal.name")).toBe(
-        "John Doe"
+      expect(getValueByPath(complexObject, "user.profile.personal.name")).toBe("John Doe")
+      expect(getValueByPath(complexObject, "user.profile.personal.age")).toBe(30)
+      expect(getValueByPath(complexObject, "user.profile.preferences.theme")).toBe("dark")
+      expect(getValueByPath(complexObject, "user.profile.preferences.notifications.email")).toBe(
+        true
       )
-      expect(getValueByPath(complexObject, "user.profile.personal.age")).toBe(
-        30
+      expect(getValueByPath(complexObject, "user.profile.preferences.notifications.push")).toBe(
+        false
       )
-      expect(
-        getValueByPath(complexObject, "user.profile.preferences.theme")
-      ).toBe("dark")
-      expect(
-        getValueByPath(
-          complexObject,
-          "user.profile.preferences.notifications.email"
-        )
-      ).toBe(true)
-      expect(
-        getValueByPath(
-          complexObject,
-          "user.profile.preferences.notifications.push"
-        )
-      ).toBe(false)
       expect(getValueByPath(complexObject, "user.permissions.read")).toBe(true)
-      expect(
-        getValueByPath(complexObject, "user.permissions.admin.users")
-      ).toBe(true)
-      expect(
-        getValueByPath(complexObject, "user.permissions.admin.settings")
-      ).toBe(false)
+      expect(getValueByPath(complexObject, "user.permissions.admin.users")).toBe(true)
+      expect(getValueByPath(complexObject, "user.permissions.admin.settings")).toBe(false)
       expect(getValueByPath(complexObject, "data.items")).toEqual([
         { id: 1, name: "Item 1" },
         { id: 2, name: "Item 2" },

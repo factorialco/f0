@@ -65,8 +65,7 @@ export const TableSettings = ({
     )
   }
 
-  const showHideToggleAllColumns =
-    allowHiding && items.filter((item) => item.canHide).length > 1
+  const showHideToggleAllColumns = allowHiding && items.filter((item) => item.canHide).length > 1
 
   return (
     <div className="relative -mr-2 flex h-[200px] flex-col gap-2">

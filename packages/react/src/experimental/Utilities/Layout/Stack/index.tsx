@@ -14,17 +14,12 @@ const stackVariants = cva({
   defaultVariants: {},
 })
 
-export const Stack = forwardRef<
-  BoxRef,
-  BoxProps & VariantProps<typeof stackVariants>
->(function Stack({ className, gap, children, ...props }, ref) {
-  return (
-    <FlexBox
-      className={cn(stackVariants({ gap }), className)}
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </FlexBox>
-  )
-})
+export const Stack = forwardRef<BoxRef, BoxProps & VariantProps<typeof stackVariants>>(
+  function Stack({ className, gap, children, ...props }, ref) {
+    return (
+      <FlexBox className={cn(stackVariants({ gap }), className)} ref={ref} {...props}>
+        {children}
+      </FlexBox>
+    )
+  }
+)

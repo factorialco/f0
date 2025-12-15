@@ -31,10 +31,7 @@ export const mergeLanesSelectItemsStatus = <
       }),
       {}
     ),
-    selectedCount: lanesStatus.reduce(
-      (acc, status) => acc + status.selectedCount,
-      0
-    ),
+    selectedCount: lanesStatus.reduce((acc, status) => acc + status.selectedCount, 0),
     selectedIds: lanesStatus.flatMap((status) => status.selectedIds),
   }
 }

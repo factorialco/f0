@@ -31,9 +31,7 @@ export const TmpFullWidth: Story = {
     <ExampleComponent
       hideFilters={true}
       tmpFullWidth={true}
-      totalItemSummary={(totalItems) =>
-        `Total items in the datacollection: ${totalItems}`
-      }
+      totalItemSummary={(totalItems) => `Total items in the datacollection: ${totalItems}`}
     />
   ),
 }

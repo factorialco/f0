@@ -41,10 +41,7 @@ const meta: Meta<typeof DataList> = {
             href: "/avatars/person07.jpg",
           }}
         />
-        <DataList.CompanyItem
-          name="Factorial"
-          avatarUrl="/avatars/factorial.png"
-        />
+        <DataList.CompanyItem name="Factorial" avatarUrl="/avatars/factorial.png" />
         <DataList.TeamItem name="Foundations" />
       </>
     ),

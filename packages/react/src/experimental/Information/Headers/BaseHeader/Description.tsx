@@ -39,10 +39,7 @@ export const Description = ({ description }: { description: string }) => {
           duration: needsTruncation ? 0.15 : 0,
           ease: [0.165, 0.84, 0.44, 1],
         }}
-        className={cn(
-          isExpanded ? "overflow-y-scroll" : "overflow-clip",
-          "relative max-h-80"
-        )}
+        className={cn(isExpanded ? "overflow-y-scroll" : "overflow-clip", "relative max-h-80")}
       >
         <div
           ref={measureRef}
@@ -53,10 +50,7 @@ export const Description = ({ description }: { description: string }) => {
         </div>
         <div
           ref={descriptionRef}
-          className={cn(
-            "text-lg text-f1-foreground-secondary",
-            !isExpanded && "line-clamp-2"
-          )}
+          className={cn("text-lg text-f1-foreground-secondary", !isExpanded && "line-clamp-2")}
         >
           {description}
         </div>
@@ -66,9 +60,7 @@ export const Description = ({ description }: { description: string }) => {
           onClick={() => setIsExpanded((current) => !current)}
           className="relative w-fit font-medium text-f1-foreground after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-[1.5px] after:bg-f1-border after:transition-all after:content-[''] hover:after:bg-f1-border-hover"
         >
-          {isExpanded
-            ? translations.actions.showLess
-            : translations.actions.showAll}
+          {isExpanded ? translations.actions.showLess : translations.actions.showAll}
         </button>
       )}
     </div>

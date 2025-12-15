@@ -1,19 +1,9 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgAi = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 512 512"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 512 512" ref={ref} {...props}>
     <g clipPath="url(#a)">
-      <path
-        fill="#41479B"
-        d="M512 0H0V512H512V0Z"
-        vectorEffect="non-scaling-stroke"
-      />
+      <path fill="#41479B" d="M512 0H0V512H512V0Z" vectorEffect="non-scaling-stroke" />
       <path
         fill="#F5F5F5"
         d="M247.172 88H231.839L150.069 141.573V88H105.931V141.573L24.1609 88H8.82789C6.48664 88.0003 4.24136 88.9304 2.58584 90.586C0.93033 92.2415 0.000154711 94.4868 -0.000110451 96.828V103.83L70.1549 149.793H-0.000110451V193.931H70.1549L-0.000110451 239.895V246.896C-0.0369536 248.078 0.164151 249.256 0.591262 250.359C1.01837 251.462 1.66278 252.468 2.48622 253.317C3.30966 254.166 4.29534 254.841 5.38474 255.302C6.47413 255.763 7.64503 256 8.82789 256H24.1609L105.931 202.427V256H150.069V202.427L231.838 256H247.171C249.512 256 251.757 255.07 253.413 253.414C255.068 251.759 255.999 249.513 255.999 247.172V240.17L185.845 194.207H255.999V150.069H185.844L255.999 104.106V97.104C256.036 95.9217 255.835 94.744 255.408 93.6409C254.981 92.5378 254.337 91.5318 253.514 90.6825C252.69 89.8333 251.704 89.1582 250.615 88.6974C249.526 88.2366 248.355 87.9994 247.172 88Z"
@@ -112,11 +102,7 @@ const SvgAi = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     </g>
     <defs>
       <clipPath id="a">
-        <path
-          fill="currentColor"
-          d="M0 0H512V512H0z"
-          vectorEffect="non-scaling-stroke"
-        />
+        <path fill="currentColor" d="M0 0H512V512H0z" vectorEffect="non-scaling-stroke" />
       </clipPath>
     </defs>
   </svg>

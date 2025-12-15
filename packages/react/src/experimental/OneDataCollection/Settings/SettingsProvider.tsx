@@ -48,31 +48,24 @@ export interface DataCollectionSettingsContextType {
   ) => void
 }
 
-const DataCollectionSettingsContext =
-  createContext<DataCollectionSettingsContextType>({
-    setSettings: () => {},
-    settings: {
-      // To avoid circular dependency initializating the settings (the value is provided in the provider)
-      visualization: {} as VisualizationSettings,
-    },
-    setVisualizationSettings: () => {},
-  })
+const DataCollectionSettingsContext = createContext<DataCollectionSettingsContextType>({
+  setSettings: () => {},
+  settings: {
+    // To avoid circular dependency initializating the settings (the value is provided in the provider)
+    visualization: {} as VisualizationSettings,
+  },
+  setVisualizationSettings: () => {},
+})
 
 export const useDataCollectionSettings = () => {
   const context = useContext(DataCollectionSettingsContext)
   if (!context) {
-    throw new Error(
-      "useTableSettings must be used within a TableSettingsProvider"
-    )
+    throw new Error("useTableSettings must be used within a TableSettingsProvider")
   }
   return context
 }
 
-export const DataCollectionSettingsProvider = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
+export const DataCollectionSettingsProvider = ({ children }: { children: React.ReactNode }) => {
   const [settings, setSettings] = useState<DataCollectionSettings>({
     visualization: generateInitialVisualizationSettings(),
   })

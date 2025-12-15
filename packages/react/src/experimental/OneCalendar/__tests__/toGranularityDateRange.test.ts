@@ -99,8 +99,6 @@ describe("toGranularityDateRange", () => {
 
     expect(result?.from).toBeInstanceOf(Date)
     expect(result?.to).toBeInstanceOf(Date)
-    expect(result?.from.getTime()).toBeLessThanOrEqual(
-      result?.to?.getTime() || 0
-    )
+    expect(result?.from.getTime()).toBeLessThanOrEqual(result?.to?.getTime() || 0)
   })
 })

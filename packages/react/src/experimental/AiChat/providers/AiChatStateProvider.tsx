@@ -56,13 +56,9 @@ type AiChatProviderReturnValue = {
    * The initial message to display in the chat
    */
   initialMessage?: string | string[]
-  setInitialMessage: React.Dispatch<
-    React.SetStateAction<string | string[] | undefined>
-  >
+  setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>
   welcomeScreenSuggestions: WelcomeScreenSuggestion[]
-  setWelcomeScreenSuggestions: React.Dispatch<
-    React.SetStateAction<WelcomeScreenSuggestion[]>
-  >
+  setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -106,30 +102,23 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
-  const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
-    useState(true)
+  const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] = useState(true)
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
   >(initialWelcomeScreenSuggestions)
   const i18n = useI18n()
-  const [placeholders, setPlaceholders] = useState<string[]>([
-    i18n.t("ai.inputPlaceholder"),
-  ])
+  const [placeholders, setPlaceholders] = useState<string[]>([i18n.t("ai.inputPlaceholder")])
 
-  const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
-    DEFAULT_MINUTES_TO_RESET
+  const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(DEFAULT_MINUTES_TO_RESET)
+  const [initialMessage, setInitialMessage] = useState<string | string[] | undefined>(
+    initialInitialMessage
   )
-  const [initialMessage, setInitialMessage] = useState<
-    string | string[] | undefined
-  >(initialInitialMessage)
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
   // Store the sendMessage function from CopilotKit
-  const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
-    null
-  )
+  const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(null)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -139,9 +128,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     clearFunctionRef.current = clearFn
   }
 
-  const setSendMessageFunction = (
-    sendFn: ((message: Message) => void) | null
-  ) => {
+  const setSendMessageFunction = (sendFn: ((message: Message) => void) | null) => {
     sendMessageFunctionRef.current = sendFn
   }
 
@@ -179,9 +166,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   useEffect(() => {
     if (!open) {
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       setShouldPlayEntranceAnimation(!prefersReducedMotion)
     }
   }, [open])

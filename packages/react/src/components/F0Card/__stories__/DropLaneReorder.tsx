@@ -43,9 +43,7 @@ export function DropLaneReorder({
         const indexOfTarget: number = cardTarget
           ? Number(cardTarget.data.index)
           : getIndexById(sourceId)
-        const closestEdge = cardTarget
-          ? extractClosestEdge(cardTarget.data)
-          : null
+        const closestEdge = cardTarget ? extractClosestEdge(cardTarget.data) : null
         const startIndex = getIndexById(sourceId)
         if (startIndex === -1) return
         const finishIndex = getReorderDestinationIndex({

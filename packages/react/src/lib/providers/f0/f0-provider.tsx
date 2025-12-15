@@ -1,11 +1,5 @@
 import { MotionConfig } from "motion/react"
-import {
-  ComponentProps,
-  createContext,
-  useContext,
-  useRef,
-  useState,
-} from "react"
+import { ComponentProps, createContext, useContext, useRef, useState } from "react"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
 import { I18nProvider, I18nProviderProps } from "../i18n"
 import { L10nProvider, L10nProviderProps } from "../l10n"
@@ -24,9 +18,7 @@ interface LayoutProps {
   addBodyClasses?: boolean
 }
 
-const LayoutContext = createContext<{ element: HTMLElement | null } | null>(
-  null
-)
+const LayoutContext = createContext<{ element: HTMLElement | null } | null>(null)
 
 export const useLayout = () => {
   const context = useContext(LayoutContext)
@@ -37,9 +29,10 @@ export const useLayout = () => {
   }
 }
 
-export const LayoutProvider: React.FC<
-  { children: React.ReactNode } & LayoutProps
-> = ({ children, fullScreen = true }) => {
+export const LayoutProvider: React.FC<{ children: React.ReactNode } & LayoutProps> = ({
+  children,
+  fullScreen = true,
+}) => {
   const ref = useRef<HTMLDivElement>(null)
   const [element, setElement] = useState(ref.current)
 
@@ -53,8 +46,7 @@ export const LayoutProvider: React.FC<
         ref={ref}
         id="f0-layout"
         className={cn({
-          "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]":
-            fullScreen,
+          "flex h-screen w-screen flex-col bg-[#F5F6F8] dark:bg-[#0D1625]": fullScreen,
         })}
       >
         {children}
@@ -63,9 +55,7 @@ export const LayoutProvider: React.FC<
   )
 }
 
-const MotionProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const MotionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>
 }
 
@@ -94,22 +84,15 @@ export const F0Provider: React.FC<{
 }) => {
   return (
     <MotionProvider>
-      <UserPlatformProvider
-        isDev={isDev}
-        showExperimentalWarnings={showExperimentalWarnings}
-      >
+      <UserPlatformProvider isDev={isDev} showExperimentalWarnings={showExperimentalWarnings}>
         <L10nProvider {...l10n}>
           <I18nProvider {...i18n}>
             <LinkProvider {...link}>
               <LayoutProvider {...layout}>
                 <XRayProvider>
-                  <PrivacyModeProvider
-                    initiallyEnabled={privacyModeInitiallyEnabled}
-                  >
+                  <PrivacyModeProvider initiallyEnabled={privacyModeInitiallyEnabled}>
                     <ImageProvider {...image}>
-                      <DataCollectionStorageProvider
-                        handler={dataCollectionStorageHandler}
-                      >
+                      <DataCollectionStorageProvider handler={dataCollectionStorageHandler}>
                         {children}
                       </DataCollectionStorageProvider>
                     </ImageProvider>

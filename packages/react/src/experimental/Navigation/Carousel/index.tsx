@@ -93,35 +93,17 @@ export const Carousel = ({
         <div className="relative">
           <CarouselContent>
             {React.Children.map(childrenArray, (child, index) => {
-              const doubleColumn = doubleColumns?.find(
-                (column) => column.index === index
-              )
+              const doubleColumn = doubleColumns?.find((column) => column.index === index)
 
               return (
                 <CarouselItem
                   key={index}
                   className={carouselItemVariants({
                     default: getVariantValue(columns.default, showPeek),
-                    xs: getVariantValue(
-                      columns.xs,
-                      showPeek,
-                      doubleColumn?.sizes?.includes("xs")
-                    ),
-                    sm: getVariantValue(
-                      columns.sm,
-                      showPeek,
-                      doubleColumn?.sizes?.includes("sm")
-                    ),
-                    md: getVariantValue(
-                      columns.md,
-                      showPeek,
-                      doubleColumn?.sizes?.includes("md")
-                    ),
-                    lg: getVariantValue(
-                      columns.lg,
-                      showPeek,
-                      doubleColumn?.sizes?.includes("lg")
-                    ),
+                    xs: getVariantValue(columns.xs, showPeek, doubleColumn?.sizes?.includes("xs")),
+                    sm: getVariantValue(columns.sm, showPeek, doubleColumn?.sizes?.includes("sm")),
+                    md: getVariantValue(columns.md, showPeek, doubleColumn?.sizes?.includes("md")),
+                    lg: getVariantValue(columns.lg, showPeek, doubleColumn?.sizes?.includes("lg")),
                     peek: showPeek,
                   })}
                 >

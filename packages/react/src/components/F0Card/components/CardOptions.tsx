@@ -82,12 +82,7 @@ export function CardOptions({
       )}
       {selectable && (
         <div className="flex items-center justify-center">
-          <F0Checkbox
-            title={title}
-            checked={selected}
-            onCheckedChange={onSelect}
-            hideLabel
-          />
+          <F0Checkbox title={title} checked={selected} onCheckedChange={onSelect} hideLabel />
         </div>
       )}
     </div>

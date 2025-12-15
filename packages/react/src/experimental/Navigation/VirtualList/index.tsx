@@ -17,11 +17,7 @@ const VirtualList = forwardRef<HTMLDivElement, VirtualListProps>(
   ) => {
     const parentRef = React.useRef<HTMLDivElement | null>(null)
 
-    React.useImperativeHandle(
-      ref,
-      () => parentRef.current as HTMLDivElement,
-      []
-    )
+    React.useImperativeHandle(ref, () => parentRef.current as HTMLDivElement, [])
 
     const rowVirtualizer = useVirtualizer({
       count: itemCount,

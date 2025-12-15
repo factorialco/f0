@@ -1,9 +1,6 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
-import {
-  BaseQuestion,
-  BaseQuestionPropsForOtherQuestionComponents,
-} from "../BaseQuestion"
+import { BaseQuestion, BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
 import { BaseQuestionOnChangeParams } from "../types"
 
@@ -15,10 +12,7 @@ export type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   value?: string | null
 }
 
-export const LinkQuestion = ({
-  value,
-  ...baseQuestionComponentProps
-}: LinkQuestionProps) => {
+export const LinkQuestion = ({ value, ...baseQuestionComponentProps }: LinkQuestionProps) => {
   const { t } = useI18n()
 
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()

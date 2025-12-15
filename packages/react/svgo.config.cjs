@@ -30,22 +30,16 @@ module.exports = {
           element: {
             enter: (node) => {
               if (
-                [
-                  "path",
-                  "circle",
-                  "rect",
-                  "line",
-                  "polyline",
-                  "polygon",
-                  "ellipse",
-                ].includes(node.name)
+                ["path", "circle", "rect", "line", "polyline", "polygon", "ellipse"].includes(
+                  node.name,
+                )
               ) {
-                node.attributes["vector-effect"] = "non-scaling-stroke"
+                node.attributes["vector-effect"] = "non-scaling-stroke";
               }
             },
           },
-        }
+        };
       },
     },
   ],
-}
+};

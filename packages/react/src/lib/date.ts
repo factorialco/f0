@@ -51,10 +51,7 @@ export function getDisplayDateBasedOnDuration(
 
 type DateGroup = "today" | "yesterday" | "lastWeek" | "lastMonth" | number
 
-export const categorizeItemsByDate = <
-  T extends Record<D, Date>,
-  D extends keyof T,
->(
+export const categorizeItemsByDate = <T extends Record<D, Date>, D extends keyof T>(
   items: T[],
   dateField: D
 ) => {

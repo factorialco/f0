@@ -1,12 +1,6 @@
 import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/ui/InputField/InputField"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from "react"
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react"
 import { Search } from "../../../../icons/app"
 
 type F1SearchBoxProps = {

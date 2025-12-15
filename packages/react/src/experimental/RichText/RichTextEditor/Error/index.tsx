@@ -11,13 +11,7 @@ interface ErrorProps {
   setError: (error: string | null) => void
 }
 
-const Error = ({
-  error,
-  closeErrorButtonLabel,
-  editor,
-  errorConfig,
-  setError,
-}: ErrorProps) => {
+const Error = ({ error, closeErrorButtonLabel, editor, errorConfig, setError }: ErrorProps) => {
   return (
     <div className="flex w-max max-w-full items-center gap-10 rounded-md bg-f1-background-critical p-1 drop-shadow-sm">
       <div className="flex w-full flex-row items-center gap-2">

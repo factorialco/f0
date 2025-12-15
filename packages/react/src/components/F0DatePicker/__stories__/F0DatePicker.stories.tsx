@@ -6,10 +6,7 @@ import { subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
 import { fn } from "storybook/internal/test"
-import {
-  CalendarView,
-  DateRange,
-} from "../../../experimental/OneCalendar/types"
+import { CalendarView, DateRange } from "../../../experimental/OneCalendar/types"
 import { F0DatePicker } from "../F0DatePicker"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"
@@ -73,8 +70,7 @@ const meta = {
       control: "function",
       table: {
         type: {
-          summary:
-            "(value: DatePickerValue | undefined, stringValue: string | undefined) => void",
+          summary: "(value: DatePickerValue | undefined, stringValue: string | undefined) => void",
         },
       },
     },
@@ -83,8 +79,7 @@ const meta = {
       control: "boolean",
     },
     onOpenChange: {
-      description:
-        "The function to call when the date picker is opened or closed",
+      description: "The function to call when the date picker is opened or closed",
       control: "function",
       table: {
         type: {
@@ -314,19 +309,10 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <F0DatePicker
-                size={size}
-                label="Label text here"
-                onChange={fn()}
-              />
+              <F0DatePicker size={size} label="Label text here" onChange={fn()} />
               {snapshotVariants.map((variant, index) => (
-                <div
-                  key={`${size}-${index}`}
-                  className={variant.open ? "mb-[400px]" : ""}
-                >
-                  <p className="mb-3 text-sm">
-                    Variant: {JSON.stringify(variant)}
-                  </p>
+                <div key={`${size}-${index}`} className={variant.open ? "mb-[400px]" : ""}>
+                  <p className="mb-3 text-sm">Variant: {JSON.stringify(variant)}</p>
                   <div style={{ width: "300px" }}>
                     <F0DatePicker size={size} {...variant} onChange={fn()} />
                   </div>

@@ -33,9 +33,7 @@ export const Default: Story = {
   decorators: [
     (Story) => (
       <div className="flex flex-col items-center justify-center gap-4">
-        <span className="font-weight-bold text-xl">
-          List of 100.000 elements
-        </span>
+        <span className="font-weight-bold text-xl">List of 100.000 elements</span>
         <div className="w-[250px]">
           <Story />
         </div>

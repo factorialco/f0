@@ -33,10 +33,7 @@ type UpsellingBannerProps = Omit<
 }
 
 export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
-  function UpsellingBanner(
-    { primaryAction, secondaryAction, ...baseProps },
-    ref
-  ) {
+  function UpsellingBanner({ primaryAction, secondaryAction, ...baseProps }, ref) {
     const renderAction = (action: DefaultAction | PromoteAction) => {
       if (action.variant === "promote") {
         return (
@@ -68,10 +65,8 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
       )
     }
 
-    const basePrimaryAction =
-      primaryAction?.variant !== "promote" ? primaryAction : undefined
-    const baseSecondaryAction =
-      secondaryAction?.variant !== "promote" ? secondaryAction : undefined
+    const basePrimaryAction = primaryAction?.variant !== "promote" ? primaryAction : undefined
+    const baseSecondaryAction = secondaryAction?.variant !== "promote" ? secondaryAction : undefined
 
     return (
       <BaseBanner
@@ -81,8 +76,7 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
         secondaryAction={baseSecondaryAction}
       >
         {primaryAction?.variant === "promote" && renderAction(primaryAction)}
-        {secondaryAction?.variant === "promote" &&
-          renderAction(secondaryAction)}
+        {secondaryAction?.variant === "promote" && renderAction(secondaryAction)}
       </BaseBanner>
     )
   }

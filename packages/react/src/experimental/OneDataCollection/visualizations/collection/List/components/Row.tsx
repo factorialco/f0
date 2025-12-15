@@ -63,21 +63,10 @@ export const Row = <
   handleSelectItemChange,
   fields,
   itemDefinition,
-}: RowProps<
-  Record,
-  Filters,
-  Sortings,
-  Summaries,
-  ItemActions,
-  NavigationFilters,
-  Grouping
->) => {
+}: RowProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>) => {
   const i18n = useI18n()
   const { actions } = i18n
-  const renderCell = (
-    item: Record,
-    property: ListPropertyDefinition<Record, Sortings>
-  ) => {
+  const renderCell = (item: Record, property: ListPropertyDefinition<Record, Sortings>) => {
     return renderProperty(item, property, "list", i18n)
   }
 
@@ -102,19 +91,14 @@ export const Row = <
       )}
     >
       {/* This div is a click capture layer get the clicks in the row */}
-      <div
-        onClick={itemOnClick}
-        className="pointer-events-auto absolute inset-0"
-      ></div>
+      <div onClick={itemOnClick} className="pointer-events-auto absolute inset-0"></div>
       <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
         {source.selectable && id !== undefined && (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
           <div className="pointer-events-auto z-10 hidden items-center justify-end md:flex">
             <F0Checkbox
               checked={selectedItems.has(id)}
-              onCheckedChange={(checked) =>
-                handleSelectItemChange(item, checked)
-              }
+              onCheckedChange={(checked) => handleSelectItemChange(item, checked)}
               title={`Select ${source.selectable(item)}`}
               hideLabel
             />

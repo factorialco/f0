@@ -88,17 +88,7 @@ type primaryActionType = {
   subActions?: subActionType[]
 }
 
-type heightType =
-  | "xxs"
-  | "xs"
-  | "sm"
-  | "md"
-  | "lg"
-  | "xl"
-  | "2xl"
-  | "3xl"
-  | "full"
-  | "auto"
+type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto"
 
 type lastIntentType = {
   selectedIntent?: string

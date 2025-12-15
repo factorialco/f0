@@ -66,10 +66,7 @@ export function PrimitiveItem({
           }}
           label={translations.actions.toggle}
           hideLabel
-          className={cn(
-            "text-f1-icon transition-all",
-            !isExpanded && "-rotate-90"
-          )}
+          className={cn("text-f1-icon transition-all", !isExpanded && "-rotate-90")}
           icon={ChevronDown}
         ></ButtonInternal>
       )}

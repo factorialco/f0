@@ -1,9 +1,6 @@
 import { cn } from "@/lib/utils"
 
-export function Pre({
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLPreElement>) {
+export function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) {
   return (
     <pre
       {...props}
@@ -17,10 +14,7 @@ export function Pre({
   )
 }
 
-export function Blockquote({
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLQuoteElement>) {
+export function Blockquote({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>) {
   return (
     <blockquote
       {...props}
@@ -36,9 +30,6 @@ export function Blockquote({
 
 export function Hr({ ...props }: React.HTMLAttributes<HTMLHRElement>) {
   return (
-    <hr
-      {...props}
-      className={cn("my-3 border-0 border-t border-f1-border", props.className)}
-    />
+    <hr {...props} className={cn("my-3 border-0 border-t border-f1-border", props.className)} />
   )
 }

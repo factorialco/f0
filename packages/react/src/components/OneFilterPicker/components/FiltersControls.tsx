@@ -34,9 +34,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   hideLabel,
   mode = "default",
 }: FiltersControlsProps<Filters>) {
-  const [selectedFilterKey, setSelectedFilterKey] = useState<
-    keyof Filters | null
-  >(null)
+  const [selectedFilterKey, setSelectedFilterKey] = useState<keyof Filters | null>(null)
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const i18n = useI18n()
 
@@ -156,10 +154,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       <>
         {selectedFilterKey && (
           <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-            <F0Button
-              onClick={handleApplyFiltersSelection}
-              label={i18n.filters.applySelection}
-            />
+            <F0Button onClick={handleApplyFiltersSelection} label={i18n.filters.applySelection} />
           </div>
         )}
       </>
@@ -225,9 +220,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                         definition={filters}
                         tempFilters={localFiltersValue}
                         selectedFilterKey={selectedFilterKey}
-                        onFilterSelect={(key: keyof Filters) =>
-                          setSelectedFilterKey(key)
-                        }
+                        onFilterSelect={(key: keyof Filters) => setSelectedFilterKey(key)}
                         onClickApplyFilters={handleApplyFilters}
                         isCompactMode
                       />
@@ -274,9 +267,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                 definition={filters}
                 tempFilters={localFiltersValue}
                 selectedFilterKey={selectedFilterKey}
-                onFilterSelect={(key: keyof Filters) =>
-                  setSelectedFilterKey(key)
-                }
+                onFilterSelect={(key: keyof Filters) => setSelectedFilterKey(key)}
                 onClickApplyFilters={handleApplyFilters}
               />
               {selectedFilterKey && (
@@ -289,10 +280,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               )}
             </div>
             <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
-              <F0Button
-                onClick={handleApplyFilters}
-                label={i18n.filters.applyFilters}
-              />
+              <F0Button onClick={handleApplyFilters} label={i18n.filters.applyFilters} />
             </div>
           </div>
         </PopoverContent>

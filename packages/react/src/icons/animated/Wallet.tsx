@@ -70,25 +70,14 @@ const WalletAnimated = React.forwardRef<SVGSVGElement, WalletProps>(
             transition={defaultTransition}
             animate={animate}
           >
-            <circle
-              cx="16.25"
-              cy="13.75"
-              r="1.25"
-              vectorEffect="non-scaling-stroke"
-            />
+            <circle cx="16.25" cy="13.75" r="1.25" vectorEffect="non-scaling-stroke" />
             <path
               d="M12 9H17C18.6569 9 20 10.3431 20 12V16C20 17.6569 18.6569 19 17 19H12"
               vectorEffect="non-scaling-stroke"
             />
           </motion.g>
-          <path
-            d="M12 19H7C5.34315 19 4 17.6569 4 16V7"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d="M12 9H6C4.89543 9 4 8.10457 4 7V7"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d="M12 19H7C5.34315 19 4 17.6569 4 16V7" vectorEffect="non-scaling-stroke" />
+          <path d="M12 9H6C4.89543 9 4 8.10457 4 7V7" vectorEffect="non-scaling-stroke" />
           <motion.path
             id="walletBack"
             d="M17 9V7C17 5.89543 16.1046 5 15 5H10"
@@ -98,10 +87,7 @@ const WalletAnimated = React.forwardRef<SVGSVGElement, WalletProps>(
             animate={animate}
             vectorEffect="non-scaling-stroke"
           />
-          <path
-            d="M11 5H6C4.89543 5 4 5.89543 4 7V7.5"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d="M11 5H6C4.89543 5 4 5.89543 4 7V7.5" vectorEffect="non-scaling-stroke" />
         </motion.g>
       </svg>
     )

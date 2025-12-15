@@ -7,8 +7,7 @@ import { useCoCreationFormContext } from "../../Context"
 import { QuestionType } from "../../types"
 
 export const AddButton = () => {
-  const { isEditMode, onAddNewElement, lastElementId } =
-    useCoCreationFormContext()
+  const { isEditMode, onAddNewElement, lastElementId } = useCoCreationFormContext()
 
   const questionTypes = useQuestionTypes()
 
@@ -47,12 +46,7 @@ export const AddButton = () => {
 
   return (
     <div className="ml-[26px] flex justify-center">
-      <Dropdown
-        items={newQuestionDropdownItems}
-        icon={Add}
-        size="md"
-        align="center"
-      />
+      <Dropdown items={newQuestionDropdownItems} icon={Add} size="md" align="center" />
     </div>
   )
 }

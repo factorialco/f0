@@ -1,8 +1,4 @@
-import {
-  Folder as FolderIcon,
-  Money as MoneyIcon,
-  PalmTree as PalmTreeIcon,
-} from "@/icons/app"
+import { Folder as FolderIcon, Money as MoneyIcon, PalmTree as PalmTreeIcon } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { addSeconds, subDays } from "date-fns"
 import MockDate from "mockdate"

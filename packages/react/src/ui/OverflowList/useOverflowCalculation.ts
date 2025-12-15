@@ -88,10 +88,7 @@ export function useOverflowCalculation<T>(
       }
 
       // Return the actual count without enforcing a minimum of 1
-      return Math.max(
-        options?.min ?? 0,
-        Math.min(visibleCount, options?.max ?? items.length)
-      )
+      return Math.max(options?.min ?? 0, Math.min(visibleCount, options?.max ?? items.length))
     },
     [options?.max, options?.min, items.length]
   )

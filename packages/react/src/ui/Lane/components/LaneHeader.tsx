@@ -10,12 +10,7 @@ type LaneHeaderProps = {
   onPrimaryAction?: () => void
 }
 
-export const LaneHeader = ({
-  label,
-  variant,
-  count,
-  onPrimaryAction,
-}: LaneHeaderProps) => {
+export const LaneHeader = ({ label, variant, count, onPrimaryAction }: LaneHeaderProps) => {
   const showPrimary = Boolean(onPrimaryAction)
 
   return (

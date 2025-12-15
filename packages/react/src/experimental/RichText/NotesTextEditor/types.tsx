@@ -42,9 +42,4 @@ type MetadataItemValue =
       src?: string
     }
 
-export type {
-  actionType,
-  MetadataItemValue,
-  NotesTextEditorHandle,
-  secondaryActionsType,
-}
+export type { actionType, MetadataItemValue, NotesTextEditorHandle, secondaryActionsType }

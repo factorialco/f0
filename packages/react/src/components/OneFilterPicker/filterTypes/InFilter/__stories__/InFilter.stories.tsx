@@ -1,8 +1,5 @@
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
-import {
-  generateMockUsers,
-  MockUser,
-} from "@/experimental/OneDataCollection/__stories__/mockData"
+import { generateMockUsers, MockUser } from "@/experimental/OneDataCollection/__stories__/mockData"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
@@ -68,9 +65,7 @@ export const WithSelectedValues: Story = {
 
 // Interactive example
 const InteractiveExample = () => {
-  const [selectedValues, setSelectedValues] = useState<string[]>([
-    "engineering",
-  ])
+  const [selectedValues, setSelectedValues] = useState<string[]>(["engineering"])
 
   const handleChange = (value: string[]) => {
     setSelectedValues(value)
@@ -142,9 +137,7 @@ const AsyncOptionsWithSearchExample = () => {
   const [selectedValues, setSelectedValues] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [options, setOptions] = useState<InFilterOptionItem<string>[]>([])
-  const [filteredOptions, setFilteredOptions] = useState<
-    InFilterOptionItem<string>[]
-  >([])
+  const [filteredOptions, setFilteredOptions] = useState<InFilterOptionItem<string>[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   const handleChange = (value: string[]) => {
@@ -356,9 +349,7 @@ const dataSourceFilterOptions: InFilterOptions<string, MockUser> = {
         const endIndex = startIndex + perPage
 
         const users = search
-          ? mockUsers.filter((user) =>
-              user.name.toLowerCase().includes(search.toLowerCase())
-            )
+          ? mockUsers.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
           : mockUsers
 
         const paginatedUsers = users.slice(startIndex, endIndex)

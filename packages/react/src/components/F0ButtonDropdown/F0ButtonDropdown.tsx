@@ -1,8 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
-import {
-  DropdownInternal,
-  DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { DropdownInternal, DropdownItem } from "@/experimental/Navigation/Dropdown/internal.tsx"
 import { ChevronDown } from "@/icons/app/index.ts"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
@@ -43,10 +40,7 @@ const normalizeItems = (
 
 export type F0DropdownButtonProps<T = string> = {
   size?: ButtonDropdownSize
-  items:
-    | ButtonDropdownItem<T>[]
-    | ButtonDropdownGroup<T>[]
-    | ButtonDropdownGroup<T>
+  items: ButtonDropdownItem<T>[] | ButtonDropdownGroup<T>[] | ButtonDropdownGroup<T>
   variant?: ButtonDropdownVariant
   value?: T
   disabled?: boolean
@@ -60,11 +54,7 @@ function isButtonDropdownItem<T = string>(
   return "value" in item
 }
 
-const F0ButtonDropdown = ({
-  onClick,
-  value,
-  ...props
-}: F0ButtonDropdownProps) => {
+const F0ButtonDropdown = ({ onClick, value, ...props }: F0ButtonDropdownProps) => {
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -80,10 +70,7 @@ const F0ButtonDropdown = ({
     return items.flatMap((item) => item.items)
   }, [items])
 
-  const localValue = useMemo(
-    () => value || flattenedItems[0]?.value,
-    [value, flattenedItems]
-  )
+  const localValue = useMemo(() => value || flattenedItems[0]?.value, [value, flattenedItems])
 
   const selectedItem = useMemo(
     () => flattenedItems.find((item) => item.value === localValue),
@@ -123,11 +110,7 @@ const F0ButtonDropdown = ({
   )
 
   const dropdownSize =
-    props.size === "sm"
-      ? "[&_.main]:w-6"
-      : props.size === "lg"
-        ? "[&_.main]:w-10"
-        : "[&_.main]:w-8"
+    props.size === "sm" ? "[&_.main]:w-6" : props.size === "lg" ? "[&_.main]:w-10" : "[&_.main]:w-8"
 
   return (
     selectedItem && (
@@ -169,10 +152,7 @@ const F0ButtonDropdown = ({
             >
               <div className="main flex items-center justify-center gap-1">
                 <span className="sr-only">{t.actions.more}</span>
-                <F0Icon
-                  icon={ChevronDown}
-                  size={props.size === "sm" ? "sm" : "md"}
-                />
+                <F0Icon icon={ChevronDown} size={props.size === "sm" ? "sm" : "md"} />
               </div>
             </button>
           </DropdownInternal>

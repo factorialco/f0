@@ -35,10 +35,7 @@ export const WelcomeScreen = ({
 }) => {
   const { sendMessage } = useCopilotChatInternal()
 
-  const pickedSuggestions = useMemo(
-    () => pickRandomSuggestions(suggestions),
-    [suggestions]
-  )
+  const pickedSuggestions = useMemo(() => pickRandomSuggestions(suggestions), [suggestions])
 
   return (
     <AnimatePresence mode="popLayout">

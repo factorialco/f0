@@ -97,9 +97,7 @@ export function TableHead({
           align === "right" && "flex-row-reverse"
         )}
       >
-        <div className={cn("truncate", width !== "auto" && "overflow-hidden")}>
-          {children}
-        </div>
+        <div className={cn("truncate", width !== "auto" && "overflow-hidden")}>{children}</div>
         {hasContent && (
           <div className="flex items-center">
             {info && (
@@ -205,8 +203,7 @@ export function TableHead({
     >
       <div className="absolute inset-x-0 top-0 z-[1] h-px w-full bg-f1-border-secondary" />
       <AnimatePresence>
-        {((isStickyLeft && isScrolled) ||
-          (isStickyRight && isScrolledRight)) && (
+        {((isStickyLeft && isScrolled) || (isStickyRight && isScrolledRight)) && (
           <motion.div
             key="shadow-gradient"
             className={cn(

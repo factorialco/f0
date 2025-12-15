@@ -72,8 +72,7 @@ export const WithGrouping: Story = {
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
               await new Promise((resolve) => setTimeout(resolve, 1000))
-              return mockUsers.filter((user) => user.department === groupId)
-                .length
+              return mockUsers.filter((user) => user.department === groupId).length
             },
           },
           role: {
@@ -87,18 +86,14 @@ export const WithGrouping: Story = {
             name: "Read",
             label: (groupId) => (groupId ? "Read Access" : "No Access"),
             itemCount: (groupId) => {
-              return mockUsers.filter(
-                (user) => user.permissions?.read === groupId
-              ).length
+              return mockUsers.filter((user) => user.permissions?.read === groupId).length
             },
           },
           "permissions.write": {
             name: "Write",
             label: (groupId) => (groupId ? "Write Access" : "No Write Access"),
             itemCount: (groupId) => {
-              return mockUsers.filter(
-                (user) => user.permissions?.read === groupId
-              ).length
+              return mockUsers.filter((user) => user.permissions?.read === groupId).length
             },
           },
         },
@@ -118,8 +113,7 @@ export const WithOptionalGrouping: Story = {
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
               await new Promise((resolve) => setTimeout(resolve, 1000))
-              return mockUsers.filter((user) => user.department === groupId)
-                .length
+              return mockUsers.filter((user) => user.department === groupId).length
             },
           },
         },
@@ -141,8 +135,7 @@ export const CollapsibleGrouping: Story = {
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
               await new Promise((resolve) => setTimeout(resolve, 1000))
-              return mockUsers.filter((user) => user.department === groupId)
-                .length
+              return mockUsers.filter((user) => user.department === groupId).length
             },
           },
         },
@@ -168,17 +161,14 @@ export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
           },
           itemCount: async (groupId) => {
             await new Promise((resolve) => setTimeout(resolve, 1500))
-            return paginatedMockUsers.filter(
-              (user) => user.department === groupId
-            ).length
+            return paginatedMockUsers.filter((user) => user.department === groupId).length
           },
         },
         role: {
           name: "Role",
           label: (groupId) => groupId,
           itemCount: (groupId) => {
-            return paginatedMockUsers.filter((user) => user.role === groupId)
-              .length
+            return paginatedMockUsers.filter((user) => user.role === groupId).length
           },
         },
       },
@@ -295,17 +285,14 @@ export const WithPaginationAndGrouping: Story = {
           },
           itemCount: async (groupId) => {
             await new Promise((resolve) => setTimeout(resolve, 1500))
-            return paginatedMockUsers.filter(
-              (user) => user.department === groupId
-            ).length
+            return paginatedMockUsers.filter((user) => user.department === groupId).length
           },
         },
         role: {
           name: "Role",
           label: (groupId) => groupId,
           itemCount: (groupId) => {
-            return paginatedMockUsers.filter((user) => user.role === groupId)
-              .length
+            return paginatedMockUsers.filter((user) => user.role === groupId).length
           },
         },
       },
@@ -417,17 +404,14 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
           },
           itemCount: async (groupId) => {
             await new Promise((resolve) => setTimeout(resolve, 1500))
-            return paginatedMockUsers.filter(
-              (user) => user.department === groupId
-            ).length
+            return paginatedMockUsers.filter((user) => user.department === groupId).length
           },
         },
         role: {
           name: "Role",
           label: (groupId) => groupId,
           itemCount: (groupId) => {
-            return paginatedMockUsers.filter((user) => user.role === groupId)
-              .length
+            return paginatedMockUsers.filter((user) => user.role === groupId).length
           },
         },
       },
@@ -533,8 +517,7 @@ export const SelectableGrouping: Story = {
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
               await new Promise((resolve) => setTimeout(resolve, 1000))
-              return mockUsers.filter((user) => user.department === groupId)
-                .length
+              return mockUsers.filter((user) => user.department === groupId).length
             },
           },
         },
@@ -611,8 +594,7 @@ export const SelectableGroupingAndActions: Story = {
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
               await new Promise((resolve) => setTimeout(resolve, 1000))
-              return mockUsers.filter((user) => user.department === groupId)
-                .length
+              return mockUsers.filter((user) => user.department === groupId).length
             },
           },
         },

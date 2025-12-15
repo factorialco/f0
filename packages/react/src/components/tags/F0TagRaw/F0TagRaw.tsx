@@ -16,16 +16,7 @@ export const F0TagRaw = forwardRef<HTMLDivElement, Props>(
           !noBorder && "border-[1px] border-solid border-f1-border-secondary",
           className
         )}
-        left={
-          icon ? (
-            <F0Icon
-              icon={icon}
-              size="sm"
-              className="text-f1-icon"
-              aria-hidden
-            />
-          ) : null
-        }
+        left={icon ? <F0Icon icon={icon} size="sm" className="text-f1-icon" aria-hidden /> : null}
         text={text}
         additionalAccesibleText={additionalAccesibleText}
       />

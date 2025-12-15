@@ -19,9 +19,7 @@ export const ChipCounter = ({ count, list }: Props) => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <button className={focusRing("inline-flex flex-shrink-0 items-center")}>
-          {counter}
-        </button>
+        <button className={focusRing("inline-flex flex-shrink-0 items-center")}>{counter}</button>
       </PopoverTrigger>
       <PopoverContent
         className="rounded-md border border-solid border-f1-border-secondary p-1 shadow-md"
@@ -36,10 +34,7 @@ export const ChipCounter = ({ count, list }: Props) => {
               <Chip {...chip} />
             </div>
           ))}
-          <ScrollBar
-            orientation="vertical"
-            className="[&_div]:bg-f1-background"
-          />
+          <ScrollBar orientation="vertical" className="[&_div]:bg-f1-background" />
         </ScrollArea>
       </PopoverContent>
     </Popover>

@@ -31,16 +31,13 @@ export function useSelectable<
   onSelectItems,
   disableSelectAll = false,
   isSearchActive = false,
-}: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
-  R,
-  Filters
-> {
+}: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters> {
   const isGrouped = data.type === "grouped"
   const isMultiSelection = selectionMode === "multi"
 
-  const [localSelectedState, setLocalSelectedState] = useState<
-    SelectedItemsState<R>
-  >(parseSelectedState(selectedState))
+  const [localSelectedState, setLocalSelectedState] = useState<SelectedItemsState<R>>(
+    parseSelectedState(selectedState)
+  )
 
   const totalKnownItemsCount = useMemo(() => {
     return paginationInfo ? paginationInfo.total : data.records?.length
@@ -122,13 +119,7 @@ export function useSelectable<
       return allSelectedCheck && checkedCount > 0
     }
     return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
-  }, [
-    disableSelectAll,
-    allSelectedCheck,
-    areAllKnownItemsSelected,
-    checkedCount,
-    isSearchActive,
-  ])
+  }, [disableSelectAll, allSelectedCheck, areAllKnownItemsSelected, checkedCount, isSearchActive])
 
   const allSelectedState = useMemo(() => {
     if (disableSelectAll) {
@@ -170,10 +161,7 @@ export function useSelectable<
       const newSelectedState = parseSelectedState(selectedState)
 
       setLocalSelectedState((current) => {
-        const mergedItems = new Map<
-          SelectedItemState<R>["id"],
-          SelectedItemState<R>
-        >()
+        const mergedItems = new Map<SelectedItemState<R>["id"], SelectedItemState<R>>()
 
         // First, preserve ALL existing items from current state (user changes)
         for (const [id, itemState] of current.items?.entries() || []) {
@@ -182,10 +170,7 @@ export function useSelectable<
 
         // Then, update/add items from the incoming selectedState
         // Only update if the item doesn't exist OR if we're updating the item data
-        for (const [
-          itemStateId,
-          itemState,
-        ] of newSelectedState.items?.entries() || []) {
+        for (const [itemStateId, itemState] of newSelectedState.items?.entries() || []) {
           const existingItem = mergedItems.get(itemStateId)
           const item = getItemById(itemStateId)
 
@@ -219,10 +204,7 @@ export function useSelectable<
         }
 
         const mergedGroups = new Map<string, SelectedItemState<R>>()
-        for (const [
-          groupId,
-          groupState,
-        ] of newSelectedState.groups?.entries() || []) {
+        for (const [groupId, groupState] of newSelectedState.groups?.entries() || []) {
           mergedGroups.set(String(groupId), {
             id: groupId,
             checked: groupState.checked,
@@ -245,21 +227,18 @@ export function useSelectable<
    * This is used to detect real changes in the selectedState prop,
    * avoiding false positives from Map object reference changes.
    */
-  const getSelectedStateKey = useCallback(
-    (state: SelectedItemsState<R> | undefined): string => {
-      if (!state) return ""
-      const itemsKeys = Array.from(state.items?.entries() || [])
-        .map(([id, item]) => `${id}:${item.checked}`)
-        .sort()
-        .join(",")
-      const groupsKeys = Array.from(state.groups?.entries() || [])
-        .map(([id, group]) => `${id}:${group.checked}`)
-        .sort()
-        .join(",")
-      return `${state.allSelected}|${itemsKeys}|${groupsKeys}`
-    },
-    []
-  )
+  const getSelectedStateKey = useCallback((state: SelectedItemsState<R> | undefined): string => {
+    if (!state) return ""
+    const itemsKeys = Array.from(state.items?.entries() || [])
+      .map(([id, item]) => `${id}:${item.checked}`)
+      .sort()
+      .join(",")
+    const groupsKeys = Array.from(state.groups?.entries() || [])
+      .map(([id, group]) => `${id}:${group.checked}`)
+      .sort()
+      .join(",")
+    return `${state.allSelected}|${itemsKeys}|${groupsKeys}`
+  }, [])
 
   // Track the previous selectedState key to detect real changes
   const previousSelectedStateKey = useRef<string>("")
@@ -383,10 +362,7 @@ export function useSelectable<
   /**
    * Calculate the selection status for each group
    */
-  const groupAllSelectedStatus = useMemo((): Record<
-    string,
-    AllSelectionStatus
-  > => {
+  const groupAllSelectedStatus = useMemo((): Record<string, AllSelectionStatus> => {
     if (!isGrouped || data.type !== "grouped") {
       return {}
     }
@@ -413,10 +389,8 @@ export function useSelectable<
       }
 
       const totalItems = groupItemIds.length
-      const isAllGroupItemsSelected =
-        selectedCount === totalItems && totalItems > 0
-      const isPartiallySelected =
-        selectedCount > 0 && selectedCount < totalItems
+      const isAllGroupItemsSelected = selectedCount === totalItems && totalItems > 0
+      const isPartiallySelected = selectedCount > 0 && selectedCount < totalItems
 
       result[group.key] = {
         checked: isAllGroupItemsSelected || isPartiallySelected,
@@ -433,9 +407,7 @@ export function useSelectable<
   /**
    * Helper to check if a value is a RecordType (item)
    */
-  const isRecordItem = (
-    value: R | SelectionId | readonly SelectionId[]
-  ): value is R => {
+  const isRecordItem = (value: R | SelectionId | readonly SelectionId[]): value is R => {
     return (
       typeof value === "object" &&
       value !== null &&
@@ -463,8 +435,7 @@ export function useSelectable<
     setLocalSelectedState((current) => {
       // For single selection when checking a new item, start with empty map
       // to replace the previous selection entirely
-      const newItemsState =
-        !isMultiSelection && checked ? new Map() : new Map(current.items)
+      const newItemsState = !isMultiSelection && checked ? new Map() : new Map(current.items)
 
       let updated = 0
 
@@ -649,9 +620,7 @@ export function useSelectable<
         const recordId = source.selectable?.(record)
         if (recordId === undefined) continue
 
-        const groupId = (record as WithGroupId<R>)[GROUP_ID_SYMBOL] as
-          | string
-          | undefined
+        const groupId = (record as WithGroupId<R>)[GROUP_ID_SYMBOL] as string | undefined
         if (groupId) {
           const groupState = groupsState.get(groupId)
           if (groupState?.checked) {
@@ -665,11 +634,7 @@ export function useSelectable<
       // In single selection mode, don't auto-select items when data changes
       if (isMultiSelection) {
         // Use the ref value to avoid dependency on isAllSelected
-        handleSelectItemChangeInternal(
-          recordIds,
-          isAllSelectedRef.current,
-          true
-        )
+        handleSelectItemChangeInternal(recordIds, isAllSelectedRef.current, true)
       }
     }
 
@@ -706,14 +671,7 @@ export function useSelectable<
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we use refs and stable keys
-  }, [
-    data.records,
-    data.groups,
-    source.selectable,
-    getAllRecords,
-    isGrouped,
-    groupsState,
-  ])
+  }, [data.records, data.groups, source.selectable, getAllRecords, isGrouped, groupsState])
 
   // Control the allSelectedCheck state
   // If all items are selected, we need to set the allSelectedCheck state to true
@@ -794,10 +752,7 @@ export function useSelectable<
         itemsStatus,
         selectedIds,
         groupsStatus: Object.fromEntries(
-          Array.from(groupsState.values()).map(({ group, checked }) => [
-            group.key,
-            !!checked,
-          ])
+          Array.from(groupsState.values()).map(({ group, checked }) => [group.key, !!checked])
         ),
         filters: source.currentFilters || {},
         selectedCount: selectedItemsCount,
@@ -833,10 +788,7 @@ export function useSelectable<
       checkedItems: Array.from(checkedItems.values()),
       uncheckedItems: Array.from(uncheckedItems.values()),
       groupsStatus: Object.fromEntries(
-        Array.from(groupsState.values()).map(({ group, checked }) => [
-          group.key,
-          !!checked,
-        ])
+        Array.from(groupsState.values()).map(({ group, checked }) => [group.key, !!checked])
       ),
       filters: source.currentFilters || {},
       selectedCount: selectedItemsCount,

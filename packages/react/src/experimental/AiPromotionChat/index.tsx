@@ -53,16 +53,8 @@ const AiPromotionChatProviderCmp = ({
 }
 
 const AiPromotionChatCmp = () => {
-  const {
-    enabled,
-    greeting,
-    title,
-    description,
-    benefits,
-    actions,
-    setOpen,
-    onHide,
-  } = useAiPromotionChat()
+  const { enabled, greeting, title, description, benefits, actions, setOpen, onHide } =
+    useAiPromotionChat()
 
   const handleClose = () => {
     setOpen(false)
@@ -78,13 +70,7 @@ const AiPromotionChatCmp = () => {
       <ChatWindow clickOutsideToClose hitEscapeToClose shortcut="">
         {/* Close button header */}
         <div className="flex items-center justify-end p-3 pb-0">
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label=""
-            icon={Cross}
-            onClick={handleClose}
-          />
+          <ButtonInternal variant="ghost" hideLabel label="" icon={Cross} onClick={handleClose} />
         </div>
 
         <div className="flex-1 content-center overflow-y-auto">
@@ -93,21 +79,13 @@ const AiPromotionChatCmp = () => {
             <div className="flex flex-col gap-4">
               <OneIcon spin size="lg" />
               <div>
-                <p className="text-lg font-medium text-f1-foreground-secondary">
-                  {greeting}
-                </p>
-                <h1 className="text-2xl font-semibold text-f1-foreground">
-                  {title}
-                </h1>
+                <p className="text-lg font-medium text-f1-foreground-secondary">{greeting}</p>
+                <h1 className="text-2xl font-semibold text-f1-foreground">{title}</h1>
               </div>
             </div>
 
             {/* Description */}
-            {description && (
-              <p className="text-md text-f1-foreground-secondary">
-                {description}
-              </p>
-            )}
+            {description && <p className="text-md text-f1-foreground-secondary">{description}</p>}
 
             {/* Benefits list */}
             {benefits?.length && (
@@ -127,11 +105,7 @@ const AiPromotionChatCmp = () => {
             {actions?.length && (
               <div className="flex flex-col gap-3 pt-2">
                 {actions.map((action, index) => (
-                  <CustomButton
-                    key={index}
-                    action={action}
-                    onClose={() => setOpen(false)}
-                  />
+                  <CustomButton key={index} action={action} onClose={() => setOpen(false)} />
                 ))}
               </div>
             )}
@@ -150,10 +124,7 @@ const AiPromotionChatCmp = () => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const AiPromotionChat = experimentalComponent(
-  "AiPromotionChat",
-  AiPromotionChatCmp
-)
+const AiPromotionChat = experimentalComponent("AiPromotionChat", AiPromotionChatCmp)
 
 const AiPromotionChatProvider = experimentalComponent(
   "AiPromotionChatProvider",

@@ -44,16 +44,10 @@ const ExtensionsConfiguration = ({
     TextAlignExtension,
     LinkExtension,
     PersistSelection,
-    ...(!plainHtmlMode
-      ? [TaskListExtension, CustomTaskExtension, HighlightExtension]
-      : []),
+    ...(!plainHtmlMode ? [TaskListExtension, CustomTaskExtension, HighlightExtension] : []),
     createPlaceholderExtension(placeholder),
     createCharacterCountExtension(maxCharacters),
-    ...createMentionExtensions(
-      mentionSuggestions,
-      setMentionSuggestions,
-      mentionsConfig
-    ),
+    ...createMentionExtensions(mentionSuggestions, setMentionSuggestions, mentionsConfig),
     createAccessibilityExtension(placeholder),
   ]
 }

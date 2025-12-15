@@ -3,11 +3,7 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { InputField, InputFieldProps } from "@/ui/InputField"
 import { useMemo } from "react"
-import {
-  EntitySelectEntity,
-  EntitySelectSubEntity,
-  FlattenedItem,
-} from "../types"
+import { EntitySelectEntity, EntitySelectSubEntity, FlattenedItem } from "../types"
 
 export const Trigger = ({
   placeholder,
@@ -56,10 +52,7 @@ export const Trigger = ({
   | "size"
 >) => {
   const groupView = useMemo(
-    () =>
-      selectedEntities.some(
-        (entity) => entity.subItems && entity.subItems.length > 0
-      ),
+    () => selectedEntities.some((entity) => entity.subItems && entity.subItems.length > 0),
     [selectedEntities]
   )
   const flattenedList = useMemo<FlattenedItem[]>(() => {
@@ -87,8 +80,7 @@ export const Trigger = ({
         ? flattenedList[0].subItem.subName
         : flattenedList.length + " " + selected
 
-  const avatar =
-    flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
+  const avatar = flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
 
   return (
     <InputField
@@ -136,9 +128,7 @@ export const Trigger = ({
           "my-auto flex items-center pr-1",
           placeholder && "text-f1-foreground-secondary",
           value && "text-f1-foreground",
-          (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
-            ? "pl-8"
-            : "pl-2"
+          (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value) ? "pl-8" : "pl-2"
         )}
       >
         <OneEllipsis tag="span">

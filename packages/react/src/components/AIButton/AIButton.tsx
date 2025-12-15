@@ -19,17 +19,11 @@ const privateProps = [
   "emoji",
 ] as const
 
-export type AIButtonProps = Omit<
-  ButtonInternalProps,
-  (typeof privateProps)[number] | "icon"
-> & {
+export type AIButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number] | "icon"> & {
   icon?: AIIconType
 }
 
-const AIButton = forwardRef<
-  HTMLButtonElement | HTMLAnchorElement,
-  AIButtonProps
->((props, ref) => {
+const AIButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, AIButtonProps>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest

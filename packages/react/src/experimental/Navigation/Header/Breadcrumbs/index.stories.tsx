@@ -3,12 +3,7 @@ import { IconType } from "@/components/F0Icon"
 import { F0SelectItemProps } from "@/components/F0Select/types"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
 import { PaginatedFetchOptions } from "@/hooks/datasource"
-import {
-  FIRST_NAMES_MOCK,
-  getMockValue,
-  MOCK_ICONS,
-  SURNAMES_MOCK,
-} from "@/mocks"
+import { FIRST_NAMES_MOCK, getMockValue, MOCK_ICONS, SURNAMES_MOCK } from "@/mocks"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { Breadcrumbs, BreadcrumbsProps } from "./index"
@@ -130,15 +125,10 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
               const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
 
               const results = mockItemsLargeDataset.filter(
-                (item) =>
-                  !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
+                (item) => !search || item.label.toLowerCase().includes(search.toLowerCase())
               )
 
-              const paginatedResults = results.slice(
-                cursor ? Number(cursor) : 0,
-                nextCursor
-              )
+              const paginatedResults = results.slice(cursor ? Number(cursor) : 0, nextCursor)
 
               const res = {
                 type: "infinite-scroll" as const,
@@ -175,9 +165,7 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
             searchbox: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             source: source as any,
-            mapOptions: (
-              item
-            ): F0SelectItemProps<string, MockItemLargeDataset> => ({
+            mapOptions: (item): F0SelectItemProps<string, MockItemLargeDataset> => ({
               value: item.value as string,
               label: item.label as string,
               icon: item.icon as IconType,
@@ -289,18 +277,13 @@ export const Interactive: Story = {
       },
     ]
 
-    const [currentSection, setCurrentSection] = useState<
-      "recruitment" | "documents"
-    >("recruitment")
-    const [breadcrumbs, setBreadcrumbs] = useState<
-      BreadcrumbsProps["breadcrumbs"]
-    >(recruitmentBreadcrumbs)
+    const [currentSection, setCurrentSection] = useState<"recruitment" | "documents">("recruitment")
+    const [breadcrumbs, setBreadcrumbs] =
+      useState<BreadcrumbsProps["breadcrumbs"]>(recruitmentBreadcrumbs)
 
     const handleAdd = () => {
       const sourceBreadcrumbs =
-        currentSection === "recruitment"
-          ? recruitmentBreadcrumbs
-          : documentsBreadcrumbs
+        currentSection === "recruitment" ? recruitmentBreadcrumbs : documentsBreadcrumbs
       if (breadcrumbs.length < sourceBreadcrumbs.length) {
         setBreadcrumbs((prev) => [...prev, sourceBreadcrumbs[prev.length]])
       }
@@ -311,14 +294,9 @@ export const Interactive: Story = {
     }
 
     const handleSwitch = () => {
-      const newSection =
-        currentSection === "recruitment" ? "documents" : "recruitment"
+      const newSection = currentSection === "recruitment" ? "documents" : "recruitment"
       setCurrentSection(newSection)
-      setBreadcrumbs(
-        newSection === "recruitment"
-          ? recruitmentBreadcrumbs
-          : documentsBreadcrumbs
-      )
+      setBreadcrumbs(newSection === "recruitment" ? recruitmentBreadcrumbs : documentsBreadcrumbs)
     }
 
     return (
@@ -341,16 +319,9 @@ export const Interactive: Story = {
             variant="outline"
             label="Remove Breadcrumb"
           ></F0Button>
-          <F0Button
-            onClick={handleSwitch}
-            variant="outline"
-            label="Switch Section"
-          ></F0Button>
+          <F0Button onClick={handleSwitch} variant="outline" label="Switch Section"></F0Button>
         </div>
-        <div
-          className="flex w-full items-center"
-          data-testid="breadcrumbs-container"
-        >
+        <div className="flex w-full items-center" data-testid="breadcrumbs-container">
           <Breadcrumbs key={currentSection} breadcrumbs={breadcrumbs} />
         </div>
       </div>

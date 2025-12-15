@@ -86,9 +86,7 @@ const mockUsers = [
   },
 ]
 
-const createUserActions = (): ItemActionsDefinition<
-  (typeof mockUsers)[number]
-> => {
+const createUserActions = (): ItemActionsDefinition<(typeof mockUsers)[number]> => {
   return (user: (typeof mockUsers)[number]) => {
     if (user.id === "user-1") {
       return undefined
@@ -143,10 +141,9 @@ export const BasicActionsExample: Story = {
         <div>
           <h2 className="mb-2 text-xl font-semibold">Items Actions Example</h2>
           <p className="mb-4 text-f1-foreground-secondary">
-            This example demonstrates various types of actions that can be used
-            in Collections. Click in the top right button or top right actions
-            menu (three dots) to see the available actions for the data
-            collection.
+            This example demonstrates various types of actions that can be used in Collections.
+            Click in the top right button or top right actions menu (three dots) to see the
+            available actions for the data collection.
           </p>
         </div>
 
@@ -166,8 +163,7 @@ export const BasicActionsExample: Story = {
                     render: (item) => ({
                       type: "status",
                       value: {
-                        status:
-                          item.status === "active" ? "positive" : "warning",
+                        status: item.status === "active" ? "positive" : "warning",
                         label: item.status,
                       },
                     }),
@@ -203,9 +199,7 @@ export const CardActionsExample: Story = {
     return (
       <div className="space-y-8">
         <div>
-          <h2 className="mb-2 text-xl font-semibold">
-            Card Item Actions Example
-          </h2>
+          <h2 className="mb-2 text-xl font-semibold">Card Item Actions Example</h2>
           <p className="mb-4 text-f1-foreground-secondary">
             This example shows how actions work with card visualization.
           </p>
@@ -227,8 +221,7 @@ export const CardActionsExample: Story = {
                     render: (item) => ({
                       type: "status",
                       value: {
-                        status:
-                          item.status === "active" ? "positive" : "warning",
+                        status: item.status === "active" ? "positive" : "warning",
                         label: item.status,
                       },
                     }),

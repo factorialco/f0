@@ -1,8 +1,5 @@
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
-import {
-  F0AvatarAlert,
-  type AlertAvatarProps,
-} from "@/components/avatars/F0AvatarAlert"
+import { F0AvatarAlert, type AlertAvatarProps } from "@/components/avatars/F0AvatarAlert"
 import {
   Dialog,
   DialogContent,
@@ -54,10 +51,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
     }, [onClose])
 
     return (
-      <Dialog
-        open={open && !closing}
-        onOpenChange={(open) => !open && handleClose?.()}
-      >
+      <Dialog open={open && !closing} onOpenChange={(open) => !open && handleClose?.()}>
         <DialogContent
           ref={ref}
           className="bottom-3 top-auto max-w-[400px] translate-y-0 sm:bottom-auto sm:top-[50%] sm:translate-y-[-50%]"
@@ -65,9 +59,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
           <DialogHeader className="flex flex-col gap-4 px-4 py-5">
             <F0AvatarAlert type={header.type} size="lg" />
             <div className="flex flex-col gap-0.5">
-              <DialogTitle className="text-xl sm:text-lg">
-                {header.title}
-              </DialogTitle>
+              <DialogTitle className="text-xl sm:text-lg">{header.title}</DialogTitle>
               <DialogDescription className="text-lg sm:text-base">
                 {header.description}
               </DialogDescription>
@@ -77,10 +69,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
             <DialogFooter className="px-4 pb-4 pt-2">
               <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3 [&>div]:w-full">
                 <F0Button variant="outline" {...actions.secondary} />
-                <F0Button
-                  {...actions.primary}
-                  variant={actions.primary.variant || "default"}
-                />
+                <F0Button {...actions.primary} variant={actions.primary.variant || "default"} />
               </div>
               <div className="flex flex-col-reverse gap-2 sm:hidden [&>div]:w-full">
                 <F0Button variant="outline" {...actions.secondary} size="lg" />

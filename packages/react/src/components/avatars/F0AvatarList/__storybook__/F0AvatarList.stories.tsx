@@ -55,11 +55,7 @@ const dummyCompanies = [
   },
 ]
 
-const dummyTeams = [
-  { name: "Designers" },
-  { name: "Engineering" },
-  { name: "Product Management" },
-]
+const dummyTeams = [{ name: "Designers" }, { name: "Engineering" }, { name: "Product Management" }]
 
 const dummyFiles = [
   { file: { name: "document.pdf", type: "application/pdf" } },
@@ -71,9 +67,7 @@ const dummyFlags = [
   { name: "flag", flag: "fr" },
 ]
 
-function getDummyAvatar<
-  T extends "person" | "company" | "team" | "flag" | "file" = "person",
->(
+function getDummyAvatar<T extends "person" | "company" | "team" | "flag" | "file" = "person">(
   type: T,
   index: number
 ): T extends "person"
@@ -99,10 +93,7 @@ function getDummyAvatar<
 
   return {
     ...mockItem,
-    src:
-      "src" in mockItem && mockItem.src
-        ? mockItem.src + "?t=" + index
-        : undefined,
+    src: "src" in mockItem && mockItem.src ? mockItem.src + "?t=" + index : undefined,
   } as T extends "person"
     ? PersonAvatarVariant
     : T extends "company"
@@ -116,9 +107,7 @@ function getDummyAvatar<
             : never
 }
 
-function getDummyAvatars<
-  T extends "person" | "company" | "team" | "flag" | "file" = "person",
->(
+function getDummyAvatars<T extends "person" | "company" | "team" | "flag" | "file" = "person">(
   count: number,
   type: T
 ): T extends "person"
@@ -132,9 +121,7 @@ function getDummyAvatars<
         : T extends "file"
           ? FileAvatarVariant[]
           : never {
-  const mockList = Array.from({ length: count }, (_, index) =>
-    getDummyAvatar(type, index)
-  )
+  const mockList = Array.from({ length: count }, (_, index) => getDummyAvatar(type, index))
 
   return mockList as unknown as T extends "person"
     ? PersonAvatarVariant[]
@@ -162,9 +149,7 @@ const meta: Meta<typeof F0AvatarList> = {
   parameters: {
     docs: {
       description: {
-        component: [
-          "An avatar component that displays a list of avatars of the same type.",
-        ]
+        component: ["An avatar component that displays a list of avatars of the same type."]
           .map((line) => `<p>${line}</p>`)
           .join(""),
       },
@@ -280,10 +265,7 @@ export const Snapshot: Story = {
         {avatarVariants.map((type) => (
           <div key={`overflow-${type}`} className="flex w-fit flex-col gap-2">
             {avatarListSizes.map((size, idx) => (
-              <div
-                key={`${type}-${size}-10-${idx}`}
-                className="mb-3 max-w-[270px]"
-              >
+              <div key={`${type}-${size}-10-${idx}`} className="mb-3 max-w-[270px]">
                 <F0AvatarList
                   size={size}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any

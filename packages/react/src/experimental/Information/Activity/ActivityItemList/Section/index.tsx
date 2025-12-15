@@ -9,29 +9,16 @@ export type SectionProps = {
   onItemVisible?: (id: string) => void
 }
 
-const SectionWrapper = ({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) => (
+const SectionWrapper = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div>
     <div className="pb-2 pl-2 pt-1">
-      <p className="text-sm font-medium text-f1-foreground-secondary">
-        {title}
-      </p>
+      <p className="text-sm font-medium text-f1-foreground-secondary">{title}</p>
     </div>
     <div className="flex flex-col gap-1">{children}</div>
   </div>
 )
 
-const BaseSection = ({
-  title,
-  items,
-  onClickItem,
-  onItemVisible,
-}: SectionProps) => (
+const BaseSection = ({ title, items, onClickItem, onItemVisible }: SectionProps) => (
   <SectionWrapper title={title}>
     {items.map((item) => (
       <ActivityItem
@@ -44,13 +31,7 @@ const BaseSection = ({
   </SectionWrapper>
 )
 
-const SectionSkeleton = ({
-  title,
-  numItems,
-}: {
-  title: string
-  numItems: number
-}) => (
+const SectionSkeleton = ({ title, numItems }: { title: string; numItems: number }) => (
   <SectionWrapper title={title}>
     {Array.from({ length: numItems }).map((_, index) => (
       <ActivityItem.Skeleton key={index} />

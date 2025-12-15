@@ -102,8 +102,7 @@ export const Toolbar = ({
       key: "heading1",
       icon: Heading1,
       active: (editor) => editor.isActive("heading", { level: 1 }),
-      onClick: (editor) =>
-        editor.chain().focus().toggleHeading({ level: 1 }).run(),
+      onClick: (editor) => editor.chain().focus().toggleHeading({ level: 1 }).run(),
       tooltip: {
         label: `# ${labels.heading1}`,
         shortcut: ["cmd", "1"],
@@ -113,8 +112,7 @@ export const Toolbar = ({
       key: "heading2",
       icon: Heading2,
       active: (editor) => editor.isActive("heading", { level: 2 }),
-      onClick: (editor) =>
-        editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      onClick: (editor) => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       tooltip: {
         label: `## ${labels.heading2}`,
         shortcut: ["cmd", "2"],
@@ -124,8 +122,7 @@ export const Toolbar = ({
       key: "heading3",
       icon: Heading3,
       active: (editor) => editor.isActive("heading", { level: 3 }),
-      onClick: (editor) =>
-        editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      onClick: (editor) => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       tooltip: {
         label: `### ${labels.heading3}`,
         shortcut: ["cmd", "3"],
@@ -161,8 +158,7 @@ export const Toolbar = ({
             key: "taskList",
             icon: CheckDouble,
             active: (editor: Editor) => editor.isActive("taskList"),
-            onClick: (editor: Editor) =>
-              editor.chain().focus().toggleTaskList().run(),
+            onClick: (editor: Editor) => editor.chain().focus().toggleTaskList().run(),
             tooltip: {
               label: `[ ] ${labels.taskList}`,
               shortcut: ["cmd", "alt", "t"],
@@ -172,8 +168,7 @@ export const Toolbar = ({
             key: "highlight",
             icon: Pencil,
             active: (editor: Editor) => editor.isActive("highlight"),
-            onClick: (editor: Editor) =>
-              editor.chain().focus().toggleHighlight().run(),
+            onClick: (editor: Editor) => editor.chain().focus().toggleHighlight().run(),
             tooltip: {
               label: `==${labels.highlight}==`,
               shortcut: ["cmd", "alt", "h"],
@@ -278,12 +273,7 @@ export const Toolbar = ({
   )
 
   const linkGroup = [
-    <LinkPopup
-      key="link-popup"
-      editor={editor}
-      disabled={disableButtons}
-      labels={labels}
-    />,
+    <LinkPopup key="link-popup" editor={editor} disabled={disableButtons} labels={labels} />,
   ]
 
   const emojiGroup = (
@@ -322,9 +312,7 @@ export const Toolbar = ({
       <div
         className={cn(
           "flex grow flex-row items-center",
-          animationComplete
-            ? "scrollbar-macos overflow-x-auto"
-            : "overflow-hidden"
+          animationComplete ? "scrollbar-macos overflow-x-auto" : "overflow-hidden"
         )}
       >
         {intersperse(groups, <ToolbarDivider />)}

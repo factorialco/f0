@@ -56,10 +56,7 @@ export function CompanySelector({
   if (companies.length + (additionalOptions?.length || 0) === 1) {
     return (
       <div className="p-1.5" style={{ maxWidth: "168px" }}>
-        <SelectedCompanyLabel
-          company={selectedCompany}
-          withNotification={withNotification}
-        />
+        <SelectedCompanyLabel company={selectedCompany} withNotification={withNotification} />
       </div>
     )
   }
@@ -72,10 +69,7 @@ export function CompanySelector({
         onChange={onChange}
         additionalOptions={additionalOptions}
       >
-        <SelectedCompanyLabel
-          company={selectedCompany}
-          withNotification={withNotification}
-        />
+        <SelectedCompanyLabel company={selectedCompany} withNotification={withNotification} />
       </Selector>
     </div>
   )
@@ -177,9 +171,7 @@ const SelectedCompanyLabel = ({
         name={company?.name?.[0]}
         src={company?.logo}
         size="sm"
-        badge={
-          withNotification ? { icon: Circle, type: "highlight" } : undefined
-        }
+        badge={withNotification ? { icon: Circle, type: "highlight" } : undefined}
       />
       <OneEllipsis tag="span">{company?.name ?? ""}</OneEllipsis>
     </div>

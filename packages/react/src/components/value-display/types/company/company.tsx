@@ -14,10 +14,7 @@ interface CompanyValue {
 }
 export type CompanyCellValue = WithAvatarBadge<CompanyValue>
 
-export const CompanyCell = (
-  args: CompanyCellValue,
-  meta: ValueDisplayRendererContext
-) => (
+export const CompanyCell = (args: CompanyCellValue, meta: ValueDisplayRendererContext) => (
   <div
     className={cn(
       "flex items-center gap-2",

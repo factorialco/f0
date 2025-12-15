@@ -15,10 +15,7 @@ const linkClickHandler = (e: Event) => {
   e.stopPropagation()
 }
 
-export const BasePostDescription = ({
-  content,
-  collapsed,
-}: PostDescriptionProps) => {
+export const BasePostDescription = ({ content, collapsed }: PostDescriptionProps) => {
   const className = "FactorialOneTextEditor"
 
   document.querySelectorAll(`.${className} a`).forEach((a) => {
@@ -41,7 +38,4 @@ export const PostDescriptionSkeleton = () => (
   </div>
 )
 
-export const PostDescription = withSkeleton(
-  BasePostDescription,
-  PostDescriptionSkeleton
-)
+export const PostDescription = withSkeleton(BasePostDescription, PostDescriptionSkeleton)

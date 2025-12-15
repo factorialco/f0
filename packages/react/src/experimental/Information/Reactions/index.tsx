@@ -14,12 +14,7 @@ export interface ReactionsProps {
   }
 }
 
-export function Reactions({
-  items,
-  onInteraction,
-  locale,
-  action,
-}: ReactionsProps) {
+export function Reactions({ items, onInteraction, locale, action }: ReactionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {action && (

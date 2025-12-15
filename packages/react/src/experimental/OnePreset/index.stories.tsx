@@ -33,13 +33,7 @@ export const Default: Story = {
   render: (args) => {
     const [isSelected, setIsSelected] = useState(false)
 
-    return (
-      <Preset
-        {...args}
-        selected={isSelected}
-        onClick={() => setIsSelected(!isSelected)}
-      />
-    )
+    return <Preset {...args} selected={isSelected} onClick={() => setIsSelected(!isSelected)} />
   },
 }
 
@@ -53,13 +47,7 @@ export const NoNumber: Story = {
   render: (args) => {
     const [isSelected, setIsSelected] = useState(false)
 
-    return (
-      <Preset
-        {...args}
-        selected={isSelected}
-        onClick={() => setIsSelected(!isSelected)}
-      />
-    )
+    return <Preset {...args} selected={isSelected} onClick={() => setIsSelected(!isSelected)} />
   },
 }
 

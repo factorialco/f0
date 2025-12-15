@@ -144,9 +144,7 @@ export const WithPresets: Story = {
           {
             label: "Yesterday",
             granularity: "day",
-            value: granularityDefinitions.day.toRange(
-              addDays(new Date(2025, 6, 30), -1)
-            ),
+            value: granularityDefinitions.day.toRange(addDays(new Date(2025, 6, 30), -1)),
           },
         ],
       },

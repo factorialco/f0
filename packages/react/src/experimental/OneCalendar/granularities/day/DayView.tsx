@@ -1,10 +1,7 @@
 import { useL10n } from "@/lib/providers/l10n"
 import { Calendar } from "@/ui/calendar"
 import { AnimatePresence, motion } from "motion/react"
-import {
-  SelectRangeEventHandler,
-  SelectSingleEventHandler,
-} from "react-day-picker"
+import { SelectRangeEventHandler, SelectSingleEventHandler } from "react-day-picker"
 import { CalendarMode, DateRange } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"
 
@@ -49,11 +46,7 @@ export function DayView({
 
   if (mode === "single") {
     return (
-      <AnimatePresence
-        mode="popLayout"
-        initial={false}
-        custom={motionDirection}
-      >
+      <AnimatePresence mode="popLayout" initial={false} custom={motionDirection}>
         <motion.div
           key={month.toISOString()}
           variants={motionVariants}

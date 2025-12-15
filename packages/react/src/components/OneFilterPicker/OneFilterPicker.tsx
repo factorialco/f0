@@ -172,9 +172,7 @@ const FiltersControls = () => {
   } = useContext(FiltersContext)
 
   const shownFilters = filters
-    ? Object.fromEntries(
-        Object.entries(filters).filter(([_, filter]) => !filter.hideSelector)
-      )
+    ? Object.fromEntries(Object.entries(filters).filter(([_, filter]) => !filter.hideSelector))
     : undefined
 
   const handleFilterChange = (filters: FiltersState<FiltersDefinition>) => {
@@ -234,14 +232,8 @@ FiltersPresets.displayName = "Filters.Presets"
  * Filter chips list
  */
 const FiltersChipsList = () => {
-  const {
-    value,
-    filters,
-    setIsFiltersOpen,
-    presets,
-    removeFilterValue,
-    setFiltersValue,
-  } = useContext(FiltersContext)
+  const { value, filters, setIsFiltersOpen, presets, removeFilterValue, setFiltersValue } =
+    useContext(FiltersContext)
 
   const isPresetFilter = useMemo(() => {
     return (presets || []).some((preset) => {
@@ -273,10 +265,7 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
   return (
     <FiltersRoot {...props}>
       <div
-        className={cn(
-          "flex items-center justify-between gap-4",
-          !props.filters && "justify-end"
-        )}
+        className={cn("flex items-center justify-between gap-4", !props.filters && "justify-end")}
       >
         {props.filters && (
           <div className="flex min-w-0 flex-1 gap-1">
@@ -284,11 +273,7 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
             <FiltersPresets />
           </div>
         )}
-        {props.children && (
-          <div className="flex shrink-0 items-center gap-2">
-            {props.children}
-          </div>
-        )}
+        {props.children && <div className="flex shrink-0 items-center gap-2">{props.children}</div>}
       </div>
       {(!props.mode || props.mode === "default") && <FiltersChipsList />}
     </FiltersRoot>

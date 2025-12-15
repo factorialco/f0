@@ -11,20 +11,18 @@ import * as DataCollectionNavigationFiltersStories from "./navigation-filters.st
 
 ### Definition
 
-Navigation filters are filters that are used to filter the data in correlative
-chunks in the collection but they are not the same as the filters. Opposite to
-the filters those are not mandatory, navigation filters are mandatory (data
-always must be filtered by the navigation filter value(s)). Navigation filters
-also allow to navigate to the next or previous chunk of data.
+Navigation filters are filters that are used to filter the data in correlative chunks in the
+collection but they are not the same as the filters. Opposite to the filters those are not
+mandatory, navigation filters are mandatory (data always must be filtered by the navigation filter
+value(s)). Navigation filters also allow to navigate to the next or previous chunk of data.
 
-They are displayed in the top left of the collection. For example, a date
-navigator is a filter that allows you to filter the data by date, and using the
-arrow keys you can navigate through the dates.
+They are displayed in the top left of the collection. For example, a date navigator is a filter that
+allows you to filter the data by date, and using the arrow keys you can navigate through the dates.
 
 ### Usage
 
-Navigation filters are defined on the `navigationFilters` prop of the
-`useDataCollectionSource` hook.
+Navigation filters are defined on the `navigationFilters` prop of the `useDataCollectionSource`
+hook.
 
 #### Example
 
@@ -42,11 +40,11 @@ const dataSource = useDataCollectionSource({
 })
 ```
 
-As the navigation filters are not nullable the initial value is mandatory. The
-`options` property depends on the type of the navigation filter.
+As the navigation filters are not nullable the initial value is mandatory. The `options` property
+depends on the type of the navigation filter.
 
-The current value of the filter is passed to the `dataAdapter.fetchData`
-function on the `useDataCollectionSource` hook as `filterValues` parameter.
+The current value of the filter is passed to the `dataAdapter.fetchData` function on the
+`useDataCollectionSource` hook as `filterValues` parameter.
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -59,31 +57,28 @@ const dataSource = useDataCollectionSource({
 
 #### Why is not a regular filter?
 
-We decided to keep this filter separate from the regular filters because it has
-a different semantics. But you can use it as a regular filter.
+We decided to keep this filter separate from the regular filters because it has a different
+semantics. But you can use it as a regular filter.
 
 ## DateNavigation (type: "date-navigator")
 
-The DateNavigation filter is a navigation filter that allows you to filter the
-data by date defining a granularity (day, week, month, year) or a custom range
-of dates.
+The DateNavigation filter is a navigation filter that allows you to filter the data by date defining
+a granularity (day, week, month, year) or a custom range of dates.
 
-Except for a custom range of dates, user is choosing the minimum date chunk the
-granularity represents, but this can be translated into a range of dates
-(datetimes).
+Except for a custom range of dates, user is choosing the minimum date chunk the granularity
+represents, but this can be translated into a range of dates (datetimes).
 
-With this criteria, a week is a range of 7 days (starting on the first day of
-the week at 00:00:00 and ending on the last day of the week at 23:59:59), a
-month is a range of 30 days (starting on the first day of the month at 00:00:00
-and ending on the last day of the month at 23:59:59), etc.
+With this criteria, a week is a range of 7 days (starting on the first day of the week at 00:00:00
+and ending on the last day of the week at 23:59:59), a month is a range of 30 days (starting on the
+first day of the month at 00:00:00 and ending on the last day of the month at 23:59:59), etc.
 
 ### Options
 
-- `granularity`: The granularity of the date navigation filter. It can be a
-  single value or an array of values. if is an array with more than one item,
-  the filter will be displayed as a select with the available granularities.
-- `defaultGranularity`: The default granularity of the date navigation filter.
-  It is used when the filter is created.
+- `granularity`: The granularity of the date navigation filter. It can be a single value or an array
+  of values. if is an array with more than one item, the filter will be displayed as a select with
+  the available granularities.
+- `defaultGranularity`: The default granularity of the date navigation filter. It is used when the
+  filter is created.
 - `min`: The minimum date of the date navigation filter.
 - `max`: The maximum date of the date navigation filter.
 
@@ -108,20 +103,17 @@ const dataSource = useDataCollectionSource({
 
 ### dataFetch values
 
-The DateNavigation pass to the `dataFetch` function the following values via
-`navigationFilters` property:
+The DateNavigation pass to the `dataFetch` function the following values via `navigationFilters`
+property:
 
-- `value`: A range of dates in days that represents the current value of the
-  date navigation filter.
-- `valueString`: The string representation of the current value of the date
-  navigation filter.
+- `value`: A range of dates in days that represents the current value of the date navigation filter.
+- `valueString`: The string representation of the current value of the date navigation filter.
 - `granularity`: The granularity of the date navigation filter.
 
 ### Add a new granularity
 
-If you need to add a new granularity level, you can add a new granularity
-definition in the `granularityDefinitions` object in the file
-`OneCalendar/granularities/index.tsx`.
+If you need to add a new granularity level, you can add a new granularity definition in the
+`granularityDefinitions` object in the file `OneCalendar/granularities/index.tsx`.
 
 ### Examples
 
@@ -176,12 +168,11 @@ definition in the `granularityDefinitions` object in the file
 
 ### Adding a new navigation filter
 
-> Remember navigation filters always need a value and cannot be empty by
-> definition.
+> Remember navigation filters always need a value and cannot be empty by definition.
 
 To add a new navigation filter, you need to create a folder in
-`OneDataCollection/navigationFilters/filterTypes/[your navigation filter name]`
-and add the following files:
+`OneDataCollection/navigationFilters/filterTypes/[your navigation filter name]` and add the
+following files:
 
 - `index.ts`: The entry point of the filter.
 - `types.ts`: The types of the filter.
@@ -219,8 +210,8 @@ export type MyFilterDefinition = NavigationFilterDefinitionBase<
 } & MyFilterOptions
 ```
 
-Then modify the the `OneDataCollection/navigationFilters/index.ts` file to add
-the new filter to the `navigationFilterTypes` object.
+Then modify the the `OneDataCollection/navigationFilters/index.ts` file to add the new filter to the
+`navigationFilterTypes` object.
 
 ```tsx
 export const navigationFilterTypes = {
@@ -229,11 +220,10 @@ export const navigationFilterTypes = {
 } as const
 ```
 
-> [!NOTE] The `[your filter name]` must be unique and the same used in the
-> `MyFilterDefinition`type
+> [!NOTE] The `[your filter name]` must be unique and the same used in the `MyFilterDefinition`type
 
-You must also declare the types: Modify the
-`OneDataCollection/navigationFilters/types.ts` file to add the new filter type.
+You must also declare the types: Modify the `OneDataCollection/navigationFilters/types.ts` file to
+add the new filter type.
 
 ```tsx
 export type NavigationFilterDefinition = ... | MyFilterDefinition

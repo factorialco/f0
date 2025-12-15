@@ -29,8 +29,7 @@ export const connectorVariables = (
     tableWithChildren?: boolean
   }
 ) => {
-  const { rowWithChildren, nestedVariant, onLoadMoreChildren } =
-    nestedRowProps ?? {}
+  const { rowWithChildren, nestedVariant, onLoadMoreChildren } = nestedRowProps ?? {}
 
   const isDetailedVariant = nestedVariant === "detailed"
 
@@ -76,25 +75,14 @@ export const horizontalConnectorStyles =
   "after:content-[''] " +
   "after:shadow-[inset_1px_-1px_0_0_hsl(var(--neutral-30))]"
 
-export const TreeConnector = ({
-  firstCell,
-  nestedRowProps,
-}: TreeConnectorProps) => {
-  const firstCellWithDepth = isFirstCellWithDepth(
-    firstCell,
-    nestedRowProps?.depth ?? 0
-  )
-  const firstCellExpanded = isFirstCellExpanded(
-    nestedRowProps?.expanded ?? false,
-    firstCell
-  )
-  const typeBasic =
-    nestedRowProps === undefined || nestedRowProps?.nestedVariant === "basic"
+export const TreeConnector = ({ firstCell, nestedRowProps }: TreeConnectorProps) => {
+  const firstCellWithDepth = isFirstCellWithDepth(firstCell, nestedRowProps?.depth ?? 0)
+  const firstCellExpanded = isFirstCellExpanded(nestedRowProps?.expanded ?? false, firstCell)
+  const typeBasic = nestedRowProps === undefined || nestedRowProps?.nestedVariant === "basic"
   const typeDetailed = nestedRowProps?.nestedVariant === "detailed"
 
   const basicOrWithChildren = typeBasic || nestedRowProps?.rowWithChildren
-  const detailedWithLoadMore =
-    typeDetailed && nestedRowProps?.onLoadMoreChildren
+  const detailedWithLoadMore = typeDetailed && nestedRowProps?.onLoadMoreChildren
 
   const marginLeft = firstCellWithDepth
     ? getNestedMarginLeft({
@@ -106,11 +94,7 @@ export const TreeConnector = ({
     ? `${nestedRowProps?.connectorHeight}px`
     : "0px"
 
-  if (
-    !firstCellExpanded &&
-    !firstCellWithDepth &&
-    !nestedRowProps?.rowWithChildren
-  ) {
+  if (!firstCellExpanded && !firstCellWithDepth && !nestedRowProps?.rowWithChildren) {
     return null
   }
 
@@ -118,9 +102,7 @@ export const TreeConnector = ({
     <div
       className={cn(
         "absolute inset-0 h-full",
-        nestedRowProps?.parentHasChildren &&
-          firstCellExpanded &&
-          verticalConnectorStyles,
+        nestedRowProps?.parentHasChildren && firstCellExpanded && verticalConnectorStyles,
         nestedRowProps?.parentHasChildren &&
           firstCellWithDepth &&
           basicOrWithChildren &&

@@ -14,8 +14,7 @@ type ItemProps = {
 export const Item = ({ question }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
 
-  const { isEditMode, getSectionContainingQuestion } =
-    useCoCreationFormContext()
+  const { isEditMode, getSectionContainingQuestion } = useCoCreationFormContext()
 
   const containingSection = getSectionContainingQuestion(question.id)
 

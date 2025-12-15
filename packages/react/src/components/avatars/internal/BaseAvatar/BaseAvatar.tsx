@@ -10,13 +10,7 @@ import {
 } from "@/ui/Avatar"
 import { forwardRef, useMemo } from "react"
 import { AvatarSize, avatarSizes, BaseAvatarProps, sizesMapping } from "./types"
-import {
-  getAvatarColor,
-  getAvatarSize,
-  getBadgeSize,
-  getInitials,
-  getMask,
-} from "./utils"
+import { getAvatarColor, getAvatarSize, getBadgeSize, getInitials, getMask } from "./utils"
 
 const DEFAULT_SIZE = "md"
 
@@ -46,23 +40,17 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
     ref
   ) => {
     const reversedSizesMapping = useMemo(
-      () =>
-        Object.fromEntries(
-          Object.entries(sizesMapping).map(([key, value]) => [value, key])
-        ),
+      () => Object.fromEntries(Object.entries(sizesMapping).map(([key, value]) => [value, key])),
       []
     )
 
-    const isSize = (
-      size: AvatarSize | InternalAvatarProps["size"]
-    ): size is AvatarSize => avatarSizes.includes(size as AvatarSize)
+    const isSize = (size: AvatarSize | InternalAvatarProps["size"]): size is AvatarSize =>
+      avatarSizes.includes(size as AvatarSize)
 
     // Check if size is a valid avatar size
     let mappedSize: AvatarSize = DEFAULT_SIZE
     if (size && !isSize(size)) {
-      console.warn(
-        `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`
-      )
+      console.warn(`The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`)
       mappedSize = sizesMapping[size] ?? DEFAULT_SIZE
     } else {
       mappedSize = size ?? DEFAULT_SIZE
@@ -70,9 +58,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
 
     const initials = getInitials(name, mappedSize)
     const avatarColor =
-      color === "random"
-        ? getAvatarColor(Array.isArray(name) ? name.join("") : name)
-        : color
+      color === "random" ? getAvatarColor(Array.isArray(name) ? name.join("") : name) : color
 
     const hasAria = Boolean(ariaLabel || ariaLabelledby)
 
@@ -113,9 +99,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
           >
             <AvatarComponent
               size={
-                (reversedSizesMapping[
-                  mappedSize
-                ] as InternalAvatarProps["size"]) ||
+                (reversedSizesMapping[mappedSize] as InternalAvatarProps["size"]) ||
                 ("small" as InternalAvatarProps["size"])
               }
               type={type}
@@ -136,11 +120,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
               }
             >
               {icon ? (
-                <F0Icon
-                  icon={icon.icon}
-                  color={icon.color}
-                  size={iconSize[mappedSize]}
-                />
+                <F0Icon icon={icon.icon} color={icon.color} size={iconSize[mappedSize]} />
               ) : (
                 <>
                   {!flag ? (
@@ -148,10 +128,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
                   ) : (
                     <span className="absolute inset-0">{flag}</span>
                   )}
-                  <AvatarFallback
-                    data-a11y-color-contrast-ignore
-                    className="select-none"
-                  >
+                  <AvatarFallback data-a11y-color-contrast-ignore className="select-none">
                     {initials}
                   </AvatarFallback>
                 </>

@@ -1,16 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgOrganization = (
-  props: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+const SvgOrganization = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       fill="currentColor"
       d="M14.5057 8.98926C14.5057 9.63685 14.3816 10.2554 14.1559 10.8226C14.6351 11.0802 15.1831 11.2264 15.7653 11.2264C17.6448 11.2264 19.1685 9.70275 19.1685 7.82322C19.1685 5.94368 17.6448 4.42001 15.7653 4.42001C14.7299 4.42001 13.8025 4.88238 13.1783 5.61189C14.0019 6.49743 14.5057 7.68452 14.5057 8.98926Z"

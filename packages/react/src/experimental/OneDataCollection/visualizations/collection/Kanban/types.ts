@@ -28,9 +28,7 @@ export type KanbanVisualizationOptions<
   title?: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
-  metadata?: (
-    record: Record
-  ) => ReadonlyArray<{ icon: IconType; property: CardMetadataProperty }>
+  metadata?: (record: Record) => ReadonlyArray<{ icon: IconType; property: CardMetadataProperty }>
   onMove?: KanbanOnMove<Record>
   onCreate?: KanbanOnCreate
 }

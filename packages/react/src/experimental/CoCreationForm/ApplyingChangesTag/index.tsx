@@ -40,9 +40,7 @@ const ApplyingChangesTag = () => {
           },
         }}
       />
-      <span className="font-medium">
-        {i18n.t("coCreationForm.labels.applyingChanges")}
-      </span>
+      <span className="font-medium">{i18n.t("coCreationForm.labels.applyingChanges")}</span>
     </div>
   )
 }

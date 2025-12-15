@@ -40,12 +40,10 @@ const meta = {
   component: Await,
   argTypes: {
     fallback: {
-      description:
-        "Fallback to display when the promise is pending. It can be a ReactNode",
+      description: "Fallback to display when the promise is pending. It can be a ReactNode",
     },
     resolve: {
-      description:
-        "Value to await for, it can be a promise or a primitive value",
+      description: "Value to await for, it can be a promise or a primitive value",
     },
     error: {
       description: "Error to display when the promise is rejected",

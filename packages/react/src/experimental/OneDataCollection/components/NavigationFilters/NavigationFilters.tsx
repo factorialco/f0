@@ -1,23 +1,14 @@
 import React from "react"
 import { navigationFilterTypes } from "../../navigationFilters"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "../../navigationFilters/types"
+import { NavigationFiltersDefinition, NavigationFiltersState } from "../../navigationFilters/types"
 
-type NavigationFiltersProps<
-  NavigationFilters extends NavigationFiltersDefinition,
-> = {
+type NavigationFiltersProps<NavigationFilters extends NavigationFiltersDefinition> = {
   navigationFilters?: NavigationFilters
   currentNavigationFilters: NavigationFiltersState<NavigationFilters>
-  onChangeNavigationFilters: (
-    value: NavigationFiltersState<NavigationFilters>
-  ) => void
+  onChangeNavigationFilters: (value: NavigationFiltersState<NavigationFilters>) => void
 }
 
-export const NavigationFilters = <
-  NavigationFilters extends NavigationFiltersDefinition,
->({
+export const NavigationFilters = <NavigationFilters extends NavigationFiltersDefinition>({
   navigationFilters,
   currentNavigationFilters,
   onChangeNavigationFilters,

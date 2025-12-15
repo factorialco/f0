@@ -24,16 +24,12 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
     const { type: fileType, color: fileColor } = getFileTypeInfo(file)
 
     const reversedSizesMapping = useMemo(
-      () =>
-        Object.fromEntries(
-          Object.entries(sizesMapping).map(([key, value]) => [value, key])
-        ),
+      () => Object.fromEntries(Object.entries(sizesMapping).map(([key, value]) => [value, key])),
       []
     )
 
-    const mappedSize: InternalAvatarProps["size"] = (reversedSizesMapping[
-      props.size as string
-    ] ?? "small") as InternalAvatarProps["size"]
+    const mappedSize: InternalAvatarProps["size"] = (reversedSizesMapping[props.size as string] ??
+      "small") as InternalAvatarProps["size"]
 
     const badgeSize = getBadgeSize(props.size)
     const moduleAvatarSize = getAvatarSize(props.size)
@@ -70,9 +66,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
         {...props}
         size={mappedSize}
       >
-        <AvatarFallback
-          className={cn("select-none font-semibold", textSize, fileColor)}
-        >
+        <AvatarFallback className={cn("select-none font-semibold", textSize, fileColor)}>
           {fileType}
         </AvatarFallback>
         {badge && (

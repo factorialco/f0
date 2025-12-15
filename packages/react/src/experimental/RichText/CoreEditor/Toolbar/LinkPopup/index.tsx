@@ -3,13 +3,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon } from "@/components/F0Icon"
 import { Badge } from "@/experimental/Information/Badge"
-import {
-  Alert,
-  Check,
-  Cross,
-  CrossedCircle,
-  Link as LinkIcon,
-} from "@/icons/app"
+import { Alert, Check, Cross, CrossedCircle, Link as LinkIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import * as Popover from "@radix-ui/react-popover"
@@ -37,10 +31,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
 
   const checkIfUrlIsValid = (url: string) => {
     const trimmedUrl = url.trim()
-    const isValidUrl =
-      /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i.test(
-        trimmedUrl
-      )
+    const isValidUrl = /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i.test(trimmedUrl)
     return isValidUrl
   }
 
@@ -48,12 +39,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
     const trimmedUrl = url.trim()
     if (!trimmedUrl) return
     if (!checkIfUrlIsValid(trimmedUrl)) return
-    editor
-      .chain()
-      .focus()
-      .extendMarkRange("link")
-      .setLink({ href: trimmedUrl })
-      .run()
+    editor.chain().focus().extendMarkRange("link").setLink({ href: trimmedUrl }).run()
 
     setOpenLinkPopover(false)
   }
@@ -130,8 +116,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                     className={cn(
                       "flex w-80 appearance-none items-center gap-2 rounded border-0 bg-f1-background py-1 pl-2 pr-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary",
                       !editor.isActive("link")
-                        ? focusRing("focus:ring-f1-border-hover") +
-                            "hover:ring-f1-border-hover"
+                        ? focusRing("focus:ring-f1-border-hover") + "hover:ring-f1-border-hover"
                         : "cursor-auto"
                     )}
                   >
@@ -142,20 +127,8 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                       )}
                     >
                       <Badge
-                        icon={
-                          url.length > 0
-                            ? checkIfUrlIsValid(url)
-                              ? Check
-                              : Alert
-                            : LinkIcon
-                        }
-                        type={
-                          url
-                            ? checkIfUrlIsValid(url)
-                              ? "positive"
-                              : "warning"
-                            : "neutral"
-                        }
+                        icon={url.length > 0 ? (checkIfUrlIsValid(url) ? Check : Alert) : LinkIcon}
+                        type={url ? (checkIfUrlIsValid(url) ? "positive" : "warning") : "neutral"}
                         size={url.length > 0 ? "sm" : "lg"}
                       />
                     </div>

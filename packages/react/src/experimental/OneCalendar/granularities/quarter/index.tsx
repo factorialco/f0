@@ -20,9 +20,9 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { QuarterView } from "./QuarterView"
 
-export function toQuarterGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(date: T): T extends Date | DateRange ? DateRangeComplete : T {
+export function toQuarterGranularityDateRange<T extends Date | DateRange | undefined | null>(
+  date: T
+): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfQuarter, endOfQuarter)
 }
 
@@ -74,12 +74,8 @@ export const quarterGranularity: GranularityDefinition = {
     const maxWithGranularity = options.max && endOfQuarter(options.max)
 
     return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
+      prev: isAfterOrEqual(prevFrom, minWithGranularity) ? { from: prevFrom, to: prevTo } : false,
+      next: isBeforeOrEqual(nextTo, maxWithGranularity) ? { from: nextFrom, to: nextTo } : false,
     }
   },
   toRangeString: (date) => formatDateRange(date, "'Q'Q yyyy"),

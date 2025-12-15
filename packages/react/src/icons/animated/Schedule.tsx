@@ -61,14 +61,7 @@ const ScheduleAnimated = React.forwardRef<SVGSVGElement, ScheduleProps>(
           initial="normal"
           transition={clockTransition}
         >
-          <rect
-            x="13"
-            y="11"
-            width="9"
-            height="9"
-            rx="4.5"
-            vectorEffect="non-scaling-stroke"
-          />
+          <rect x="13" y="11" width="9" height="9" rx="4.5" vectorEffect="non-scaling-stroke" />
           <path
             d="M17.5 14V15.054C17.5 15.3326 17.6393 15.5928 17.8711 15.7474L19 16.5"
             vectorEffect="non-scaling-stroke"

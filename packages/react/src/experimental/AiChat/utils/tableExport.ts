@@ -15,9 +15,7 @@ function extractTableData(table: HTMLTableElement) {
   }
 
   const tbody = table.querySelector("tbody")
-  const dataRows = tbody
-    ? tbody.querySelectorAll("tr")
-    : table.querySelectorAll("tr")
+  const dataRows = tbody ? tbody.querySelectorAll("tr") : table.querySelectorAll("tr")
   const startIndex = headerCells.length > 0 ? 0 : 1
 
   dataRows.forEach((row, i) => {
@@ -35,10 +33,7 @@ function extractTableData(table: HTMLTableElement) {
   return { headers, rows }
 }
 
-export function downloadTableAsExcel(
-  table: HTMLTableElement,
-  filename = "table-export"
-) {
+export function downloadTableAsExcel(table: HTMLTableElement, filename = "table-export") {
   const { headers, rows } = extractTableData(table)
   if (headers.length === 0 && rows.length === 0) return
 

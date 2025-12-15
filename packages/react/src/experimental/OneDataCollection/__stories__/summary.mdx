@@ -15,14 +15,12 @@ import * as SummaryStories from "./summary.stories"
 
 ## Introduction
 
-The Summary feature provides a way to display aggregated data at the bottom of
-your data collection tables. This powerful tool lets you quickly visualize
-totals, averages, or counts for numeric columns, giving users valuable insights
-at a glance without requiring additional calculations.
+The Summary feature provides a way to display aggregated data at the bottom of your data collection
+tables. This powerful tool lets you quickly visualize totals, averages, or counts for numeric
+columns, giving users valuable insights at a glance without requiring additional calculations.
 
-This feature is particularly useful for financial data, inventory management,
-performance metrics, and any scenario where aggregated values provide meaningful
-context to the tabular data.
+This feature is particularly useful for financial data, inventory management, performance metrics,
+and any scenario where aggregated values provide meaningful context to the tabular data.
 
 ## Examples
 
@@ -32,8 +30,8 @@ context to the tabular data.
 
 ## Setting Up Summary Rows
 
-To enable the Summary feature in your data collection component, provide the
-`summary` attribute in the source prop:
+To enable the Summary feature in your data collection component, provide the `summary` attribute in
+the source prop:
 
 ```tsx
 const dataSource = useDataCollectionSource({
@@ -65,9 +63,9 @@ const dataSource = useDataCollectionSource({
 
 ### Infinite Scroll with Sticky Summary Row
 
-For data collections with large datasets, you can combine infinite scroll
-pagination with a sticky summary row. This keeps the summary information visible
-at the bottom of the table while users scroll through the data.
+For data collections with large datasets, you can combine infinite scroll pagination with a sticky
+summary row. This keeps the summary information visible at the bottom of the table while users
+scroll through the data.
 
 <Canvas
   of={SummaryStories.WithInfiniteScrollSummarySticky}

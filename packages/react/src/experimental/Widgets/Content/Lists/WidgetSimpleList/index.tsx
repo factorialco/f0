@@ -14,13 +14,7 @@ type Props<Id extends string | number = string | number> = {
 
 export type WidgetSimpleListProps = Props
 
-export function WidgetSimpleList({
-  items,
-  gap,
-  minSize = 184,
-  onClickItem,
-  showAllItems,
-}: Props) {
+export function WidgetSimpleList({ items, gap, minSize = 184, onClickItem, showAllItems }: Props) {
   if (showAllItems) {
     return (
       <div className="flex flex-col" style={{ minHeight: `${minSize}px` }}>

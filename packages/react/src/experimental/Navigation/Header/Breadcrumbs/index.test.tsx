@@ -57,9 +57,7 @@ describe("Breadcrumbs", async () => {
     // Check if all non-last breadcrumb items are rendered as links
     for (const item of breadcrumbs.slice(0, -1)) {
       const links = await within(nav!).findAllByRole("link")
-      const matchingLink = links.find((link) =>
-        link.textContent?.includes(item.label)
-      )
+      const matchingLink = links.find((link) => link.textContent?.includes(item.label))
       expect(matchingLink).toBeDefined()
     }
 
@@ -92,9 +90,7 @@ describe("Breadcrumbs", async () => {
 
     // First item should be a link
     const links = within(nav!).getAllByRole("link")
-    const firstLink = links.find((link) =>
-      link.textContent?.includes(home.label)
-    )
+    const firstLink = links.find((link) => link.textContent?.includes(home.label))
     expect(firstLink).toBeDefined()
 
     // Last item should be text
@@ -127,9 +123,7 @@ describe("Breadcrumbs", async () => {
 
     // Check if first item is rendered as a link with icon
     const links = within(nav!).getAllByRole("link")
-    const homeLink = links.find((link) =>
-      link.textContent?.includes(home.label)
-    )
+    const homeLink = links.find((link) => link.textContent?.includes(home.label))
     expect(homeLink).toBeDefined()
 
     // Check if last item is rendered as text
@@ -156,9 +150,7 @@ describe("Breadcrumbs", async () => {
 
     // Check non-last items are links
     const links = within(nav!).getAllByRole("link")
-    const firstLink = links.find((link) =>
-      link.textContent?.includes(home.label)
-    )
+    const firstLink = links.find((link) => link.textContent?.includes(home.label))
     expect(firstLink).toHaveAttribute("href", home.href)
 
     // Last item should be text
@@ -193,9 +185,7 @@ describe("Breadcrumbs", async () => {
       expect(textItems[1]).toHaveTextContent(products.label)
 
       // Verify loading items
-      const loadingItems = items.filter((item) =>
-        item.querySelector(".h-4.w-24")
-      )
+      const loadingItems = items.filter((item) => item.querySelector(".h-4.w-24"))
       expect(loadingItems).toHaveLength(1)
     })
 
@@ -216,9 +206,7 @@ describe("Breadcrumbs", async () => {
       expect(textItems[0]).toHaveTextContent(home.label)
 
       // Verify loading items
-      const loadingItems = items.filter((item) =>
-        item.querySelector(".h-4.w-24")
-      )
+      const loadingItems = items.filter((item) => item.querySelector(".h-4.w-24"))
       expect(loadingItems).toHaveLength(2)
     })
 
@@ -233,9 +221,7 @@ describe("Breadcrumbs", async () => {
 
       // Ensure loading items are not interactive
       const items = within(nav!).getAllByRole("listitem")
-      const loadingItems = items.filter((item) =>
-        item.querySelector(".h-4.w-24")
-      )
+      const loadingItems = items.filter((item) => item.querySelector(".h-4.w-24"))
 
       loadingItems.forEach((item) => {
         expect(item.closest("a")).toBeNull()
@@ -281,9 +267,7 @@ describe("Breadcrumbs", async () => {
     const breadcrumbs = [home, products]
     const appendElement = <span>Append</span>
 
-    const { container } = render(
-      <Breadcrumbs breadcrumbs={breadcrumbs} append={appendElement} />
-    )
+    const { container } = render(<Breadcrumbs breadcrumbs={breadcrumbs} append={appendElement} />)
     const nav: HTMLElement = container.querySelector("nav>ol:last-child")
     const append = await within(nav!).findByText("Append")
     expect(append).toBeInTheDocument()
@@ -302,9 +286,7 @@ describe("Breadcrumbs", async () => {
     const breadcrumbs = [home, electronics, products]
     const appendElement = <span>Append</span>
 
-    const { container } = render(
-      <Breadcrumbs breadcrumbs={breadcrumbs} append={appendElement} />
-    )
+    const { container } = render(<Breadcrumbs breadcrumbs={breadcrumbs} append={appendElement} />)
     const nav: HTMLElement = container.querySelector("nav>ol:last-child")
     const append = await within(nav!).findByText("Append")
     expect(append).toBeInTheDocument()

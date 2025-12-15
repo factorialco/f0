@@ -1,14 +1,7 @@
 import { Text, TextProps, type TextTags } from "@/ui/Text"
 import { forwardRef } from "react"
 
-const _allowedVariants = [
-  "body",
-  "description",
-  "small",
-  "inverse",
-  "code",
-  "label",
-] as const
+const _allowedVariants = ["body", "description", "small", "inverse", "code", "label"] as const
 
 export type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
   variant?: (typeof _allowedVariants)[number]

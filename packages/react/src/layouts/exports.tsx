@@ -5,10 +5,7 @@ import {
   TwoColumnLayoutProps,
 } from "./TwoColumnLayout"
 
-import {
-  StandardLayout as StandardLayoutComponent,
-  StandardLayoutProps,
-} from "./StandardLayout"
+import { StandardLayout as StandardLayoutComponent, StandardLayoutProps } from "./StandardLayout"
 
 export type { StandardLayoutProps, TwoColumnLayoutProps }
 
@@ -36,10 +33,6 @@ export const HomeLayout = Component(
   HomeLayoutComponent
 )
 
-export {
-  Dashboard,
-  type DashboardProps,
-  type DashboardWidget,
-} from "./Dashboard"
+export { Dashboard, type DashboardProps, type DashboardWidget } from "./Dashboard"
 
 export * from "./Layout"

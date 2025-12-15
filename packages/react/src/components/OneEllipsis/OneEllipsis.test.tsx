@@ -54,8 +54,7 @@ describe("OneEllipsis", () => {
 
     render(
       <OneEllipsis>
-        This is a very long text that should definitely overflow and show an
-        ellipsis
+        This is a very long text that should definitely overflow and show an ellipsis
       </OneEllipsis>
     )
 
@@ -80,8 +79,7 @@ describe("OneEllipsis", () => {
 
     render(
       <OneEllipsis lines={2}>
-        This is a very long text that should definitely overflow and show an
-        ellipsis
+        This is a very long text that should definitely overflow and show an ellipsis
       </OneEllipsis>
     )
 

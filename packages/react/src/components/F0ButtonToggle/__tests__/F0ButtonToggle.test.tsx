@@ -40,12 +40,7 @@ describe("F0ButtonToggle", () => {
     })
 
     it("renders with dual icons (array)", () => {
-      zeroRender(
-        <F0ButtonToggle
-          label="Dual icon toggle"
-          icon={[MockIconOff, MockIconOn]}
-        />
-      )
+      zeroRender(<F0ButtonToggle label="Dual icon toggle" icon={[MockIconOff, MockIconOn]} />)
 
       const button = screen.getByRole("button", { name: "Dual icon toggle" })
       expect(button).toBeInTheDocument()
@@ -73,13 +68,7 @@ describe("F0ButtonToggle", () => {
     })
 
     it("respects initial selected state", () => {
-      zeroRender(
-        <F0ButtonToggle
-          label="Test toggle"
-          icon={MockSingleIcon}
-          selected={true}
-        />
-      )
+      zeroRender(<F0ButtonToggle label="Test toggle" icon={MockSingleIcon} selected={true} />)
 
       const button = screen.getByRole("button")
       expect(button).toHaveAttribute("aria-pressed", "true")
@@ -157,13 +146,7 @@ describe("F0ButtonToggle", () => {
 
   describe("Disabled State", () => {
     it("respects disabled prop", () => {
-      zeroRender(
-        <F0ButtonToggle
-          label="Test toggle"
-          icon={MockSingleIcon}
-          disabled={true}
-        />
-      )
+      zeroRender(<F0ButtonToggle label="Test toggle" icon={MockSingleIcon} disabled={true} />)
 
       const button = screen.getByRole("button")
       expect(button).toBeDisabled()
@@ -194,22 +177,14 @@ describe("F0ButtonToggle", () => {
 
   describe("Accessibility", () => {
     it("has proper aria-label", () => {
-      zeroRender(
-        <F0ButtonToggle label="Toggle microphone" icon={MockSingleIcon} />
-      )
+      zeroRender(<F0ButtonToggle label="Toggle microphone" icon={MockSingleIcon} />)
 
       const button = screen.getByRole("button", { name: "Toggle microphone" })
       expect(button).toHaveAttribute("aria-label", "Toggle microphone")
     })
 
     it("has proper aria-pressed attribute", () => {
-      zeroRender(
-        <F0ButtonToggle
-          label="Test toggle"
-          icon={MockSingleIcon}
-          selected={true}
-        />
-      )
+      zeroRender(<F0ButtonToggle label="Test toggle" icon={MockSingleIcon} selected={true} />)
 
       const button = screen.getByRole("button")
       expect(button).toHaveAttribute("aria-pressed", "true")
@@ -226,36 +201,28 @@ describe("F0ButtonToggle", () => {
 
   describe("Size Variants", () => {
     it("applies small size classes", () => {
-      zeroRender(
-        <F0ButtonToggle label="Small toggle" icon={MockSingleIcon} size="sm" />
-      )
+      zeroRender(<F0ButtonToggle label="Small toggle" icon={MockSingleIcon} size="sm" />)
 
       const button = screen.getByRole("button")
       expect(button).toHaveClass("h-6")
     })
 
     it("applies medium size classes (default)", () => {
-      zeroRender(
-        <F0ButtonToggle label="Medium toggle" icon={MockSingleIcon} size="md" />
-      )
+      zeroRender(<F0ButtonToggle label="Medium toggle" icon={MockSingleIcon} size="md" />)
 
       const button = screen.getByRole("button")
       expect(button).toHaveClass("h-8")
     })
 
     it("applies large size classes", () => {
-      zeroRender(
-        <F0ButtonToggle label="Large toggle" icon={MockSingleIcon} size="lg" />
-      )
+      zeroRender(<F0ButtonToggle label="Large toggle" icon={MockSingleIcon} size="lg" />)
 
       const button = screen.getByRole("button")
       expect(button).toHaveClass("h-10")
     })
 
     it("defaults to medium size when size prop is not provided", () => {
-      zeroRender(
-        <F0ButtonToggle label="Default size toggle" icon={MockSingleIcon} />
-      )
+      zeroRender(<F0ButtonToggle label="Default size toggle" icon={MockSingleIcon} />)
 
       const button = screen.getByRole("button")
       expect(button).toHaveClass("h-8")
@@ -265,11 +232,7 @@ describe("F0ButtonToggle", () => {
   describe("Icon Handling", () => {
     it("displays single icon consistently", () => {
       const { rerender } = zeroRender(
-        <F0ButtonToggle
-          label="Single icon"
-          icon={MockSingleIcon}
-          selected={false}
-        />
+        <F0ButtonToggle label="Single icon" icon={MockSingleIcon} selected={false} />
       )
 
       let button = screen.getByRole("button")
@@ -278,13 +241,7 @@ describe("F0ButtonToggle", () => {
       expect(screen.getByTestId("mock-single-icon")).toBeInTheDocument()
 
       // Toggle state and check icon remains consistent
-      rerender(
-        <F0ButtonToggle
-          label="Single icon"
-          icon={MockSingleIcon}
-          selected={true}
-        />
-      )
+      rerender(<F0ButtonToggle label="Single icon" icon={MockSingleIcon} selected={true} />)
 
       button = screen.getByRole("button")
       expect(button).toBeInTheDocument()
@@ -294,11 +251,7 @@ describe("F0ButtonToggle", () => {
 
     it("handles dual icons correctly based on state", () => {
       const { rerender } = zeroRender(
-        <F0ButtonToggle
-          label="Dual icons"
-          icon={[MockIconOff, MockIconOn]}
-          selected={false}
-        />
+        <F0ButtonToggle label="Dual icons" icon={[MockIconOff, MockIconOn]} selected={false} />
       )
 
       let button = screen.getByRole("button")
@@ -309,11 +262,7 @@ describe("F0ButtonToggle", () => {
 
       // Toggle to selected state
       rerender(
-        <F0ButtonToggle
-          label="Dual icons"
-          icon={[MockIconOff, MockIconOn]}
-          selected={true}
-        />
+        <F0ButtonToggle label="Dual icons" icon={[MockIconOff, MockIconOn]} selected={true} />
       )
 
       button = screen.getByRole("button")
@@ -324,12 +273,7 @@ describe("F0ButtonToggle", () => {
     })
 
     it("switches icons when user clicks dual icon toggle", () => {
-      zeroRender(
-        <F0ButtonToggle
-          label="Clickable dual icons"
-          icon={[MockIconOff, MockIconOn]}
-        />
-      )
+      zeroRender(<F0ButtonToggle label="Clickable dual icons" icon={[MockIconOff, MockIconOn]} />)
 
       const button = screen.getByRole("button")
 
@@ -356,32 +300,20 @@ describe("F0ButtonToggle", () => {
   describe("State Management", () => {
     it("updates local state when selected prop changes", () => {
       const { rerender } = zeroRender(
-        <F0ButtonToggle
-          label="Controlled toggle"
-          icon={MockSingleIcon}
-          selected={false}
-        />
+        <F0ButtonToggle label="Controlled toggle" icon={MockSingleIcon} selected={false} />
       )
 
       let button = screen.getByRole("button")
       expect(button).toHaveAttribute("aria-pressed", "false")
 
-      rerender(
-        <F0ButtonToggle
-          label="Controlled toggle"
-          icon={MockSingleIcon}
-          selected={true}
-        />
-      )
+      rerender(<F0ButtonToggle label="Controlled toggle" icon={MockSingleIcon} selected={true} />)
 
       button = screen.getByRole("button")
       expect(button).toHaveAttribute("aria-pressed", "true")
     })
 
     it("maintains internal state for uncontrolled usage", () => {
-      zeroRender(
-        <F0ButtonToggle label="Uncontrolled toggle" icon={MockSingleIcon} />
-      )
+      zeroRender(<F0ButtonToggle label="Uncontrolled toggle" icon={MockSingleIcon} />)
 
       const button = screen.getByRole("button")
 
@@ -399,11 +331,7 @@ describe("F0ButtonToggle", () => {
     it("handles undefined onSelectedChange gracefully", () => {
       expect(() => {
         zeroRender(
-          <F0ButtonToggle
-            label="No callback"
-            icon={MockSingleIcon}
-            onSelectedChange={undefined}
-          />
+          <F0ButtonToggle label="No callback" icon={MockSingleIcon} onSelectedChange={undefined} />
         )
 
         const button = screen.getByRole("button")

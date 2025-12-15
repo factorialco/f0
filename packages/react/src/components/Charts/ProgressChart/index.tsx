@@ -4,13 +4,12 @@ import { getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartPropsBase } from "../utils/types"
 
-export type ProgressBarProps<K extends ChartConfig = ChartConfig> =
-  ChartPropsBase<K> & {
-    value: number
-    max?: number
-    label?: string
-    color?: string
-  }
+export type ProgressBarProps<K extends ChartConfig = ChartConfig> = ChartPropsBase<K> & {
+  value: number
+  max?: number
+  label?: string
+  color?: string
+}
 
 const _ProgressBar = <K extends ChartConfig>(
   { value, max = 100, label, color }: ProgressBarProps<K>,
@@ -32,9 +31,7 @@ const _ProgressBar = <K extends ChartConfig>(
           aria-label={`${percentage.toFixed(1)}%`}
         />
       </div>
-      {label && (
-        <div className="flex-shrink-0 text-sm font-medium">{label}</div>
-      )}
+      {label && <div className="flex-shrink-0 text-sm font-medium">{label}</div>}
     </div>
   )
 }

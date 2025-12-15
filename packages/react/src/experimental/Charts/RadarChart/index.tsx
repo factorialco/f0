@@ -14,10 +14,7 @@ import {
   Radar,
   RadarChart as RadarChartPrimitive,
 } from "recharts"
-import {
-  getCategoricalColor,
-  getColor,
-} from "../../../components/Charts/utils/colors"
+import { getCategoricalColor, getColor } from "../../../components/Charts/utils/colors"
 import { fixedForwardRef } from "../../../components/Charts/utils/forwardRef"
 import { ChartConfig, ChartItem } from "../../../components/Charts/utils/types"
 
@@ -40,12 +37,7 @@ export const _RadarChart = <K extends ChartConfig>(
   }))
 
   return (
-    <ChartContainer
-      config={dataConfig}
-      ref={ref}
-      aspect={aspect}
-      data-chromatic="ignore"
-    >
+    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-chromatic="ignore">
       <RadarChartPrimitive accessibilityLayer data={preparedData}>
         <ChartTooltip
           cursor
@@ -67,14 +59,10 @@ export const _RadarChart = <K extends ChartConfig>(
             key={key}
             dataKey={key}
             fill={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
+              dataConfig[key].color ? getColor(dataConfig[key].color) : getCategoricalColor(index)
             }
             stroke={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
+              dataConfig[key].color ? getColor(dataConfig[key].color) : getCategoricalColor(index)
             }
             strokeWidth={1.5}
             fillOpacity={0.3}

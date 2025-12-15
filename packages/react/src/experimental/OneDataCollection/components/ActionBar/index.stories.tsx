@@ -1,14 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import {
-  Delete,
-  EyeInvisible,
-  EyeVisible,
-  LayersFront,
-  Settings,
-  Share,
-  Upload,
-} from "@/icons/app"
+import { Delete, EyeInvisible, EyeVisible, LayersFront, Settings, Share, Upload } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { fn } from "storybook/test"
@@ -112,11 +104,7 @@ export const Default: Story = {
     const hasSelectedItems = selectedItems.length > 0
 
     const toggleItem = (id: string) => {
-      setItems(
-        items.map((item) =>
-          item.id === id ? { ...item, selected: !item.selected } : item
-        )
-      )
+      setItems(items.map((item) => (item.id === id ? { ...item, selected: !item.selected } : item)))
     }
 
     const handleUnselect = () => {

@@ -6,10 +6,7 @@ import type {
   GranularityDefinition,
 } from "@/experimental/OneCalendar"
 import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
-import {
-  isAfterOrEqual,
-  isBeforeOrEqual,
-} from "@/experimental/OneCalendar/utils"
+import { isAfterOrEqual, isBeforeOrEqual } from "@/experimental/OneCalendar/utils"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -33,10 +30,7 @@ type DateNavigatorTriggerProps = {
   hideGoToCurrent?: boolean
 }
 
-const DateNavigatorTrigger = forwardRef<
-  HTMLDivElement,
-  DateNavigatorTriggerProps
->(
+const DateNavigatorTrigger = forwardRef<HTMLDivElement, DateNavigatorTriggerProps>(
   (
     {
       value,
@@ -150,20 +144,14 @@ const DateNavigatorTrigger = forwardRef<
           "inline-flex cursor-auto appearance-none gap-1 rounded-md border-0 bg-f1-background px-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary hover:ring-f1-border-hover",
           "[%>*] py-1",
           focusRing("focus:ring-f1-border-hover"),
-          disabled &&
-            "cursor-not-allowed bg-f1-background-secondary opacity-50",
+          disabled && "cursor-not-allowed bg-f1-background-secondary opacity-50",
           error && "ring-f1-border-critical-bold",
           className
         )}
         // Prevent the date picker from being triggered when the user clicks on the input
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className={cn(
-            "flex flex-1 gap-1",
-            navigation ? "justify-between" : "justify-center"
-          )}
-        >
+        <div className={cn("flex flex-1 gap-1", navigation ? "justify-between" : "justify-center")}>
           {navigation && (
             <F0Button
               size="sm"
@@ -205,9 +193,8 @@ const DateNavigatorTrigger = forwardRef<
               size="sm"
               variant="ghost"
               label={
-                (i18n.date.granularities as GranularityTranslations)[
-                  value?.granularity ?? "day"
-                ]?.currentDate
+                (i18n.date.granularities as GranularityTranslations)[value?.granularity ?? "day"]
+                  ?.currentDate
               }
               onClick={handleClickCurrentDate}
             />

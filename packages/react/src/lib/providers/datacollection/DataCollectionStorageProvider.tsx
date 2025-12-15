@@ -6,8 +6,7 @@ const noopHandler = {
   set: () => Promise.resolve(),
 }
 
-const DataCollectionStorageContext =
-  createContext<DataCollectionStorageHandler>(noopHandler)
+const DataCollectionStorageContext = createContext<DataCollectionStorageHandler>(noopHandler)
 
 export const DataCollectionStorageProvider = ({
   children,
@@ -24,9 +23,7 @@ export const DataCollectionStorageProvider = ({
 export const useDataCollectionStorage = () => {
   const context = useContext(DataCollectionStorageContext)
   if (!context) {
-    throw new Error(
-      "useDataCollectionStorage must be used within a DataCollectionStorageProvider"
-    )
+    throw new Error("useDataCollectionStorage must be used within a DataCollectionStorageProvider")
   }
 
   return context

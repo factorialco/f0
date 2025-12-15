@@ -44,8 +44,7 @@ const meta = {
     },
     primaryAction: {
       control: "object",
-      description:
-        "Configures the primary action button and optional dropdown actions",
+      description: "Configures the primary action button and optional dropdown actions",
     },
     secondaryAction: {
       control: "object",
@@ -68,18 +67,7 @@ const meta = {
     },
     height: {
       control: "select",
-      options: [
-        "xxs",
-        "xs",
-        "sm",
-        "md",
-        "lg",
-        "xl",
-        "2xl",
-        "3xl",
-        "full",
-        "auto",
-      ],
+      options: ["xxs", "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "full", "auto"],
       description: "Controls the initial height of the editor",
       defaultValue: "auto",
     },

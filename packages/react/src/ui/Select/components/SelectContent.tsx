@@ -24,9 +24,7 @@ const VIEWBOX_VERTICAL_PADDING = 8
  * Select Content component
  */
 // Define two different prop types for the two mutually exclusive scenarios
-type SelectItemProps = ComponentPropsWithoutRef<
-  typeof SelectPrimitive.Content
-> & {
+type SelectItemProps = ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
   top?: ReactNode
   bottom?: ReactNode
   emptyMessage?: string
@@ -53,10 +51,7 @@ type SelectContentWithChildrenProps = Omit<SelectItemProps, "children"> & {
 }
 
 // Union the types to create a discriminated union to avoid use children and items at the same time
-type SelectContentProps = (
-  | SelectContentWithItemsProps
-  | SelectContentWithChildrenProps
-) & {
+type SelectContentProps = (SelectContentWithItemsProps | SelectContentWithChildrenProps) & {
   onScrollBottom?: () => void
   onScrollTop?: () => void
   isLoadingMore?: boolean
@@ -66,10 +61,7 @@ type SelectContentProps = (
   taller?: boolean
   portalContainer?: HTMLElement | null
 }
-const SelectContent = forwardRef<
-  ElementRef<typeof SelectPrimitive.Content>,
-  SelectContentProps
->(
+const SelectContent = forwardRef<ElementRef<typeof SelectPrimitive.Content>, SelectContentProps>(
   (
     {
       items = undefined,
@@ -115,19 +107,11 @@ const SelectContent = forwardRef<
     const asList = asSelectProp === "list"
 
     const valueArray = useMemo(() => {
-      return new Set(
-        (Array.isArray(value) ? value : [value]).filter(
-          (item) => item !== undefined
-        )
-      )
+      return new Set((Array.isArray(value) ? value : [value]).filter((item) => item !== undefined))
     }, [value])
 
     const positionIndex = useMemo(() => {
-      return (
-        items?.findIndex(
-          (item) => item.value !== undefined && valueArray.has(item.value)
-        ) || 0
-      )
+      return items?.findIndex((item) => item.value !== undefined && valueArray.has(item.value)) || 0
     }, [items, valueArray])
 
     const virtualizer = useVirtualizer({
@@ -234,10 +218,7 @@ const SelectContent = forwardRef<
         // or other focus-trapping container.
         onCloseAutoFocus={(event) => {
           // Call user's handler if provided
-          if (
-            props.onCloseAutoFocus &&
-            typeof props.onCloseAutoFocus === "function"
-          ) {
+          if (props.onCloseAutoFocus && typeof props.onCloseAutoFocus === "function") {
             props.onCloseAutoFocus(event)
           }
           // Always prevent the default behavior - the browser will naturally
@@ -315,7 +296,7 @@ const SelectContent = forwardRef<
     ) : (
       <SelectPrimitive.Portal container={portalContainer}>
         <>
-          {/* 
+          {/*
             Overlay to prevent clicks from propagating.
             Only render when NOT using a custom portal container to avoid
             conflicts with modal focus management.

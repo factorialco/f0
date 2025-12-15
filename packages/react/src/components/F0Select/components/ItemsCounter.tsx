@@ -16,9 +16,7 @@ type ItemsCounterProps = {
 const ItemContent = ({ item }: { item: F0SelectItemObject<string> }) => (
   <div className="flex min-w-0 items-center gap-1.5">
     {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-    {item.icon && (
-      <F0Icon icon={item.icon} size="sm" className="shrink-0 text-f1-icon" />
-    )}
+    {item.icon && <F0Icon icon={item.icon} size="sm" className="shrink-0 text-f1-icon" />}
     <span className="truncate text-sm">{item.label}</span>
   </div>
 )
@@ -26,11 +24,7 @@ const ItemContent = ({ item }: { item: F0SelectItemObject<string> }) => (
 /**
  * Counter component with optional hover card showing remaining items
  */
-export const ItemsCounter = ({
-  count,
-  items,
-  prefix = "+",
-}: ItemsCounterProps) => {
+export const ItemsCounter = ({ count, items, prefix = "+" }: ItemsCounterProps) => {
   const counter = (
     <AnimatePresence mode="popLayout">
       <motion.div
@@ -85,10 +79,7 @@ export const ItemsCounter = ({
                 )}
               </div>
             ))}
-            <ScrollBar
-              orientation="vertical"
-              className="[&_div]:bg-f1-background"
-            />
+            <ScrollBar orientation="vertical" className="[&_div]:bg-f1-background" />
           </ScrollArea>
         </HoverCardContent>
       </HoverCard>

@@ -229,9 +229,7 @@ export const BasicTableView: Story = {
           label: item.isStarred ? "Remove Star" : "Star User",
           icon: Star,
           onClick: () => console.log(`Toggling star for ${item.name}`),
-          description: item.isStarred
-            ? "Remove from favorites"
-            : "Add to favorites",
+          description: item.isStarred ? "Remove from favorites" : "Add to favorites",
         },
         {
           label: "Delete",
@@ -239,8 +237,7 @@ export const BasicTableView: Story = {
           onClick: () => console.log(`Deleting ${item.name}`),
           critical: true,
           description: "Permanently remove user",
-          enabled:
-            item.department === "Engineering" && item.status === "active",
+          enabled: item.department === "Engineering" && item.status === "active",
         },
       ],
       primaryActions: () => ({
@@ -366,9 +363,7 @@ export const WithLinkedItems: Story = {
           label: item.isStarred ? "Remove Star" : "Star User",
           icon: Star,
           onClick: () => console.log(`Toggling star for ${item.name}`),
-          description: item.isStarred
-            ? "Remove from favorites"
-            : "Add to favorites",
+          description: item.isStarred ? "Remove from favorites" : "Add to favorites",
           type: "secondary",
         },
         {
@@ -377,8 +372,7 @@ export const WithLinkedItems: Story = {
           onClick: () => console.log(`Deleting ${item.name}`),
           critical: true,
           description: "Permanently remove user",
-          enabled:
-            item.department === "Engineering" && item.status === "active",
+          enabled: item.department === "Engineering" && item.status === "active",
         },
       ],
     })
@@ -513,12 +507,7 @@ export const BasicCardView: Story = {
       ],
     })
 
-    return (
-      <OneDataCollection
-        source={dataSource}
-        visualizations={[mockVisualizations.card]}
-      />
-    )
+    return <OneDataCollection source={dataSource} visualizations={[mockVisualizations.card]} />
   },
 }
 
@@ -785,11 +774,8 @@ export const CustomCardProperties: Story = {
                   render: (item) => ({
                     type: "status",
                     value: {
-                      status:
-                        item.status === "active" ? "positive" : "critical",
-                      label:
-                        item.status.charAt(0).toUpperCase() +
-                        item.status.slice(1),
+                      status: item.status === "active" ? "positive" : "critical",
+                      label: item.status.charAt(0).toUpperCase() + item.status.slice(1),
                     },
                   }),
                 },
@@ -1047,12 +1033,7 @@ export const WithCardVisualization: Story = {
       }),
     })
 
-    return (
-      <OneDataCollection
-        source={source}
-        visualizations={[mockVisualizations.card]}
-      />
-    )
+    return <OneDataCollection source={source} visualizations={[mockVisualizations.card]} />
   },
 }
 
@@ -1280,12 +1261,7 @@ export const WithSynchronousData: Story = {
         fetchData: ({ filters, sortings, navigationFilters }) => {
           // Ensure sortings are properly applied
           return {
-            records: filterUsers(
-              mockUsers,
-              filters,
-              sortings,
-              navigationFilters
-            ),
+            records: filterUsers(mockUsers, filters, sortings, navigationFilters),
           }
         },
       },
@@ -1370,9 +1346,7 @@ export const WithAdvancedActions: Story = {
           label: item.isStarred ? "Remove Star" : "Add Star",
           icon: Star,
           onClick: () => console.log(`Toggling star for ${item.name}`),
-          description: item.isStarred
-            ? "Remove from favorites"
-            : "Add to favorites",
+          description: item.isStarred ? "Remove from favorites" : "Add to favorites",
         },
         // Copy action
         {
@@ -1431,11 +1405,8 @@ export const TableColumnProperties: Story = {
       status: index % 4 === 0 ? "inactive" : "active",
       isStarred: index % 5 === 0,
       salary: 50000 + index * 1000,
-      location:
-        index % 3 === 0 ? "Remote" : index % 3 === 1 ? "Office" : "Hybrid",
-      startDate: getMockValue(START_DATE_MOCK, index)
-        .toISOString()
-        .split("T")[0],
+      location: index % 3 === 0 ? "Remote" : index % 3 === 1 ? "Office" : "Hybrid",
+      startDate: getMockValue(START_DATE_MOCK, index).toISOString().split("T")[0],
       performance: getMockValue(PERFORMANCE_LITERAL_MOCK, index),
       yearsExperience: getMockValue(YEARS_OF_EXPERIENCIE_MOCK, index),
       team: getMockValue(TEAMS_MOCK, index),
@@ -1444,12 +1415,8 @@ export const TableColumnProperties: Story = {
       languages: getMockValue(LANGUAGES_MOCK, index),
       projects: getMockValue(PROJECTS_MOCK, index),
       performanceScore: getMockValue(PERFORMANCE_LITERAL_MOCK, index),
-      lastReview: new Date(2023, index % 12, 1 + (index % 28))
-        .toISOString()
-        .split("T")[0],
-      nextReview: new Date(2024, index % 12, 1 + (index % 28))
-        .toISOString()
-        .split("T")[0],
+      lastReview: new Date(2023, index % 12, 1 + (index % 28)).toISOString().split("T")[0],
+      nextReview: new Date(2024, index % 12, 1 + (index % 28)).toISOString().split("T")[0],
     }))
 
     // Define extended sortings for the example
@@ -1639,9 +1606,7 @@ export const TableWithNoFiltersAndSearch: Story = {
           label: item.isStarred ? "Remove Star" : "Star User",
           icon: Star,
           onClick: () => console.log(`Toggling star for ${item.name}`),
-          description: item.isStarred
-            ? "Remove from favorites"
-            : "Add to favorites",
+          description: item.isStarred ? "Remove from favorites" : "Add to favorites",
         },
         {
           label: "Delete",
@@ -1730,9 +1695,7 @@ export const TableWithNoFilters: Story = {
           label: item.isStarred ? "Remove Star" : "Star User",
           icon: Star,
           onClick: () => console.log(`Toggling star for ${item.name}`),
-          description: item.isStarred
-            ? "Remove from favorites"
-            : "Add to favorites",
+          description: item.isStarred ? "Remove from favorites" : "Add to favorites",
         },
         {
           label: "Delete",

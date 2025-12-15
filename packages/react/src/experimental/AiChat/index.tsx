@@ -41,13 +41,7 @@ export type AiChatProviderProps = {
   ) => void
 } & Pick<
   CopilotKitProps,
-  | "agent"
-  | "credentials"
-  | "children"
-  | "runtimeUrl"
-  | "showDevConsole"
-  | "threadId"
-  | "headers"
+  "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers"
 >
 
 const AiChatProviderCmp = ({
@@ -78,10 +72,7 @@ const AiChatProviderCmp = ({
   )
 }
 
-const AiChatKitWrapper = ({
-  children,
-  ...copilotKitProps
-}: Omit<CopilotKitProps, "agent">) => {
+const AiChatKitWrapper = ({ children, ...copilotKitProps }: Omit<CopilotKitProps, "agent">) => {
   const { agent } = useAiChat()
 
   return (
@@ -234,9 +225,6 @@ const AiChatCmp = () => {
  */
 const AiChat = experimentalComponent("AiChat", AiChatCmp)
 
-const AiChatProvider = experimentalComponent(
-  "AiChatProvider",
-  AiChatProviderCmp
-)
+const AiChatProvider = experimentalComponent("AiChatProvider", AiChatProviderCmp)
 
 export { AiChat, AiChatProvider }

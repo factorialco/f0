@@ -11,10 +11,7 @@ import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
 import { DataCollectionSource, Lane } from "../useDataCollectionSource"
-import {
-  UseDataCollectionData,
-  useDataCollectionData,
-} from "./useDataCollectionData"
+import { UseDataCollectionData, useDataCollectionData } from "./useDataCollectionData"
 import { mergeFiltersWithIntersection } from "./utils"
 
 type LaneProviderProps<
@@ -54,30 +51,19 @@ const LaneProvider = <
   lane,
   onError,
   onHookUpdate,
-}: LaneProviderProps<
-  R,
-  Filters,
-  Sortings,
-  Summaries,
-  NavigationFilters,
-  Grouping
->) => {
+}: LaneProviderProps<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>) => {
   const mergedFilters = useMemo(
     () => mergeFiltersWithIntersection(source.currentFilters, lane.filters),
     [source.currentFilters, lane.filters]
   )
 
-  const hook = useDataCollectionData<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(source, {
-    filters: mergedFilters,
-    onError,
-  })
+  const hook = useDataCollectionData<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>(
+    source,
+    {
+      filters: mergedFilters,
+      onError,
+    }
+  )
 
   useEffect(() => {
     onHookUpdate?.(hook)
@@ -114,9 +100,9 @@ export function useDataCollectionLanesData<
     throw new Error("Lanes has not been configured on data source")
   }
 
-  const [lanesHooks, setLanesHooks] = useState<
-    Record<string | symbol, UseDataCollectionData<R>>
-  >({})
+  const [lanesHooks, setLanesHooks] = useState<Record<string | symbol, UseDataCollectionData<R>>>(
+    {}
+  )
 
   const handleHookUpdate = useCallback(
     (laneId: string | symbol, value: UseDataCollectionData<R>) => {
@@ -146,10 +132,7 @@ export function useDataCollectionLanesData<
     () => JSON.stringify(source.currentSearch),
     [source.currentSearch]
   )
-  const groupingSignature = useMemo(
-    () => JSON.stringify(source.grouping),
-    [source.grouping]
-  )
+  const groupingSignature = useMemo(() => JSON.stringify(source.grouping), [source.grouping])
 
   // Track dataAdapter changes to force refetch when cache updates
   const dataAdapterSignature = useMemo(
@@ -160,14 +143,7 @@ export function useDataCollectionLanesData<
   const lanesProvider = useMemo(
     () => {
       return (lanes || []).map((lane) => (
-        <LaneProvider<
-          R,
-          Filters,
-          Sortings,
-          Summaries,
-          NavigationFilters,
-          Grouping
-        >
+        <LaneProvider<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>
           key={lane.id}
           lane={lane}
           onError={options.onError}

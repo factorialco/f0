@@ -97,11 +97,7 @@ const renderIsRendererDefinition = (
  * @returns
  */
 
-export const metadataRenderer: ValueDisplayRenderer = (
-  def,
-  context,
-  undefinedValue
-): ReactNode => {
+export const metadataRenderer: ValueDisplayRenderer = (def, context, undefinedValue): ReactNode => {
   const { type, value } = renderIsRendererDefinition(def)
     ? def
     : ({

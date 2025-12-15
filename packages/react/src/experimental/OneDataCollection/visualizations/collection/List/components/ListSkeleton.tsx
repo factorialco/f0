@@ -1,10 +1,6 @@
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { GroupingDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { ItemActionsDefinition } from "../../../../item-actions"

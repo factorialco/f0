@@ -55,13 +55,7 @@ const pieces = [
 ]
 
 const OneIcon = (
-  {
-    spin = false,
-    size = "md",
-    background,
-    hover = false,
-    ...svgProps
-  }: OneIconProps,
+  { spin = false, size = "md", background, hover = false, ...svgProps }: OneIconProps,
   ref: Ref<SVGSVGElement>
 ) => {
   const clipPathId = useId()
@@ -137,9 +131,7 @@ const OneIcon = (
                 "--scale": hover ? 8 : 1,
                 "--rotate": hover ? "90deg" : "0deg",
                 opacity: hover ? (piece.id === "left" ? 1 : 0) : 1,
-                filter: spin
-                  ? ["blur(0px)", "blur(8px)", "blur(0px)"]
-                  : undefined,
+                filter: spin ? ["blur(0px)", "blur(8px)", "blur(0px)"] : undefined,
               }}
               transition={{
                 "--rotate3d-angle": {

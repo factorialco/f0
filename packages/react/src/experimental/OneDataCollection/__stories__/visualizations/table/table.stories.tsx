@@ -99,9 +99,7 @@ export const TableWithNestedRecords: Story = {
 }
 
 export const TableColumnOrdering: Story = {
-  render: () => (
-    <ExampleComponent frozenColumns={2} tableAllowColumnReordering />
-  ),
+  render: () => <ExampleComponent frozenColumns={2} tableAllowColumnReordering />,
 }
 
 export const TableColumnHidden: Story = {

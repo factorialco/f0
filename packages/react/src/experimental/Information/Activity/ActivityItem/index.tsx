@@ -54,16 +54,10 @@ export const BaseActivityItem = ({
     >
       <F0AvatarIcon icon={icon ?? BellIcon} />
       <div className="flex-1">
-        <p
-          className="line-clamp-2 font-medium text-f1-foreground"
-          title={title}
-        >
+        <p className="line-clamp-2 font-medium text-f1-foreground" title={title}>
           {title}
         </p>
-        <p
-          className="line-clamp-2 text-f1-foreground-secondary"
-          title={description}
-        >
+        <p className="line-clamp-2 text-f1-foreground-secondary" title={description}>
           {description}
         </p>
         <div className="mt-1.5 flex flex-row">
@@ -71,9 +65,7 @@ export const BaseActivityItem = ({
         </div>
       </div>
       <div className="ml-1">
-        {isUnread && (
-          <div className="mt-1.5 size-2 rounded-full bg-f1-icon-accent" />
-        )}
+        {isUnread && <div className="mt-1.5 size-2 rounded-full bg-f1-icon-accent" />}
       </div>
     </div>
   )

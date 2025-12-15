@@ -17,9 +17,7 @@ export const F0TagList = <T extends TagType>({
   layout = "compact",
 }: Props<T>) => {
   // Convert tags to TagVariant
-  const tagVariants = tags.map(
-    (tagData) => ({ type, ...tagData }) as TagVariant
-  )
+  const tagVariants = tags.map((tagData) => ({ type, ...tagData }) as TagVariant)
 
   if (layout === "fill") {
     return (
@@ -43,11 +41,7 @@ export const F0TagList = <T extends TagType>({
         renderOverflowIndicator={(count) => (
           <TagCounter
             count={(initialRemainingCount ?? 0) + count}
-            list={
-              initialRemainingCount
-                ? undefined
-                : tagVariants.slice(tagVariants.length - count)
-            }
+            list={initialRemainingCount ? undefined : tagVariants.slice(tagVariants.length - count)}
           />
         )}
         overflowIndicatorWithPopover={false}

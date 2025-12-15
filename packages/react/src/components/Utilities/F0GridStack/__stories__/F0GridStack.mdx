@@ -10,44 +10,41 @@ import * as GridStackStories from "./F0GridStack.stories"
 
 ### Definition
 
-F0GridStack is a React wrapper for the GridStack library that enables the
-creation of resizable and draggable grid layouts. It provides a flexible,
-interactive grid system where widgets can be dynamically arranged, resized, and
-repositioned by users or programmatically through ref methods.
+F0GridStack is a React wrapper for the GridStack library that enables the creation of resizable and
+draggable grid layouts. It provides a flexible, interactive grid system where widgets can be
+dynamically arranged, resized, and repositioned by users or programmatically through ref methods.
 
 ### Purpose
 
 The purpose of F0GridStack in our design system is as follows:
 
-- **Interactive Layouts**: Enables users to customize their dashboard or
-  workspace layouts by dragging and resizing widgets
-- **Dynamic Content Management**: Allows programmatic addition and removal of
-  widgets at runtime
-- **Responsive Grid System**: Provides a flexible grid that adapts to different
-  screen sizes and widget configurations
-- **Layout Persistence**: Supports saving and restoring widget positions and
-  sizes through the onChange callback
+- **Interactive Layouts**: Enables users to customize their dashboard or workspace layouts by
+  dragging and resizing widgets
+- **Dynamic Content Management**: Allows programmatic addition and removal of widgets at runtime
+- **Responsive Grid System**: Provides a flexible grid that adapts to different screen sizes and
+  widget configurations
+- **Layout Persistence**: Supports saving and restoring widget positions and sizes through the
+  onChange callback
 - **Nested Grids**: Supports sub-grids for complex, hierarchical layouts
 
 ## Basic Usage
 
-The default GridStack configuration demonstrates a simple grid layout with
-multiple widgets that can be dragged and resized.
+The default GridStack configuration demonstrates a simple grid layout with multiple widgets that can
+be dragged and resized.
 
 <Canvas of={GridStackStories.Default} />
 <Controls of={GridStackStories.Default} />
 
 ## Programmatic Control with Ref Methods
 
-F0GridStack exposes several methods through a ref that allow you to
-programmatically control the grid layout. This is useful for dynamic widget
-management, such as adding or removing widgets based on user actions or
-application state.
+F0GridStack exposes several methods through a ref that allow you to programmatically control the
+grid layout. This is useful for dynamic widget management, such as adding or removing widgets based
+on user actions or application state.
 
 ### Accessing Ref Methods
 
-To use the ref methods, create a ref using `useRef<F0GridStackRef>(null)` and
-attach it to the `F0GridStack` component:
+To use the ref methods, create a ref using `useRef<F0GridStackRef>(null)` and attach it to the
+`F0GridStack` component:
 
 ```tsx
 import { useRef } from "react"
@@ -113,13 +110,12 @@ gridRef.current?.removeWidget("widget-1")
 
 #### `addSubGrid`
 
-Adds a nested grid (sub-grid) to the main grid. This is useful for creating
-hierarchical layouts where widgets can be grouped within a parent widget.
+Adds a nested grid (sub-grid) to the main grid. This is useful for creating hierarchical layouts
+where widgets can be grouped within a parent widget.
 
 **Parameters:**
 
-- `subGrid`: A `GridStackReactWidget` with additional `subGridOpts` property
-  containing:
+- `subGrid`: A `GridStackReactWidget` with additional `subGridOpts` property containing:
   - `children`: Array of widgets that will be placed inside the sub-grid
 
 **Example:**
@@ -174,18 +170,16 @@ This example shows:
 
 ## Best Practices
 
-1. **Widget IDs**: Always use unique, stable IDs for widgets to ensure proper
-   tracking and removal
-2. **Layout Persistence**: Use the `onChange` callback to save widget positions
-   and restore them on component mount
-3. **Performance**: For large numbers of widgets, consider debouncing the
-   `onChange` callback
-4. **Responsive Design**: Configure appropriate column counts for different
-   screen sizes using the `options.column` property
-5. **Widget Constraints**: Use `allowedSizes` to restrict widget dimensions to
-   specific size combinations
-6. **Metadata**: Store widget-specific data in the `meta` property for easy
-   retrieval and persistence
+1. **Widget IDs**: Always use unique, stable IDs for widgets to ensure proper tracking and removal
+2. **Layout Persistence**: Use the `onChange` callback to save widget positions and restore them on
+   component mount
+3. **Performance**: For large numbers of widgets, consider debouncing the `onChange` callback
+4. **Responsive Design**: Configure appropriate column counts for different screen sizes using the
+   `options.column` property
+5. **Widget Constraints**: Use `allowedSizes` to restrict widget dimensions to specific size
+   combinations
+6. **Metadata**: Store widget-specific data in the `meta` property for easy retrieval and
+   persistence
 
 ## Props
 
@@ -197,16 +191,15 @@ Configuration object for the grid layout.
 - `row`: Number of rows in the grid (optional)
 - `margin`: Margin between widgets in pixels (optional)
 - `draggable`: Whether widgets can be dragged (default: true)
-- `acceptWidgets`: Whether the grid can accept widgets from other grids
-  (default: false)
+- `acceptWidgets`: Whether the grid can accept widgets from other grids (default: false)
 
 ### `widgets`
 
-Array of initial widgets to render in the grid. Each widget follows the
-`GridStackReactWidget` interface.
+Array of initial widgets to render in the grid. Each widget follows the `GridStackReactWidget`
+interface.
 
 ### `onChange`
 
-Callback function that is called whenever the layout changes (widget moved,
-resized, added, or removed). Receives an array of `GridStackWidgetPosition`
-objects containing the current state of all widgets.
+Callback function that is called whenever the layout changes (widget moved, resized, added, or
+removed). Receives an array of `GridStackWidgetPosition` objects containing the current state of all
+widgets.

@@ -15,10 +15,7 @@ const sizes = {
   xl: "w-14 h-14 rounded-lg",
 }
 
-const imageSizes: Record<
-  (typeof avatarEmojiSizes)[number],
-  EmojiImageProps["size"]
-> = {
+const imageSizes: Record<(typeof avatarEmojiSizes)[number], EmojiImageProps["size"]> = {
   sm: "xs",
   md: "sm",
   lg: "md",

@@ -64,8 +64,7 @@ function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
 }
 
 export function SidebarIcon() {
-  const { prevSidebarState, sidebarState, toggleSidebar, isSmallScreen } =
-    useSidebar()
+  const { prevSidebarState, sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {

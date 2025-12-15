@@ -20,10 +20,7 @@ function Selector({
     >
       {icon && <F0Icon icon={icon} className="text-f1-icon" />}
       <span
-        className={cn(
-          "font-medium",
-          text ? "text-f1-foreground" : "text-f1-foreground-secondary"
-        )}
+        className={cn("font-medium", text ? "text-f1-foreground" : "text-f1-foreground-secondary")}
       >
         {text ?? placeholder}
       </span>

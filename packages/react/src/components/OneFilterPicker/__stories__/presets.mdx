@@ -15,15 +15,13 @@ import * as OneFiltersPickerStories from "./OneFilterPicker.stories"
 
 ## Introduction
 
-The presets are predefined configurations that allow users to quickly access
-frequently used filtered data views. This simplifies navigation, as there is no
-need to manually adjust the filters every time you want to change the table
-view.
+The presets are predefined configurations that allow users to quickly access frequently used
+filtered data views. This simplifies navigation, as there is no need to manually adjust the filters
+every time you want to change the table view.
 
-To ensure an optimal user experience, it is recommended to carefully select the
-presets, prioritizing those that display the most relevant and frequently
-consulted information. It is essential to avoid overloading the table with too
-many preconfigured filters.
+To ensure an optimal user experience, it is recommended to carefully select the presets,
+prioritizing those that display the most relevant and frequently consulted information. It is
+essential to avoid overloading the table with too many preconfigured filters.
 
 ## Examples
 
@@ -42,8 +40,8 @@ many preconfigured filters.
 
 ## Setting Presets
 
-To enable presets in your data collection component, supply the presets
-attribute in the source prop.
+To enable presets in your data collection component, supply the presets attribute in the source
+prop.
 
 ```tsx
 <OneFiltersPicker>
@@ -86,8 +84,8 @@ The filter of the preset value associated with the preset.
 
 `(value: FiltersState<Filters>) => number`
 
-The items count of the preset. This is a function that returns a promise or a
-value It gets the current filters value as an argument.
+The items count of the preset. This is a function that returns a promise or a value It gets the
+current filters value as an argument.
 
-> itemCount function is called on render, so it should be a pure function and
-> you should cache the result.
+> itemCount function is called on render, so it should be a pure function and you should cache the
+> result.

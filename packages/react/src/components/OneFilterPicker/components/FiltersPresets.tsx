@@ -33,9 +33,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         label={preset.label}
         selected={isSelected}
         onClick={() =>
-          onPresetsChange?.(
-            isSelected ? ({} as FiltersState<Filters>) : preset.filter
-          )
+          onPresetsChange?.(isSelected ? ({} as FiltersState<Filters>) : preset.filter)
         }
         data-visible={isVisible}
         number={preset.itemsCount?.(value) ?? undefined}
@@ -43,24 +41,18 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     )
   }
 
-  const renderDropdownPresetItem = (
-    preset: NonNullable<typeof presets>[number],
-    index: number
-  ) => {
+  const renderDropdownPresetItem = (preset: NonNullable<typeof presets>[number], index: number) => {
     const isSelected = JSON.stringify(preset.filter) === JSON.stringify(value)
     return (
       <button
         key={index}
         className={cn(
           "flex w-full cursor-pointer items-center justify-between rounded-sm p-2 text-left font-medium text-f1-foreground hover:bg-f1-background-secondary",
-          isSelected &&
-            "bg-f1-background-selected hover:bg-f1-background-selected",
+          isSelected && "bg-f1-background-selected hover:bg-f1-background-selected",
           focusRing()
         )}
         onClick={() =>
-          onPresetsChange?.(
-            isSelected ? ({} as FiltersState<Filters>) : preset.filter
-          )
+          onPresetsChange?.(isSelected ? ({} as FiltersState<Filters>) : preset.filter)
         }
         data-visible={true}
       >
@@ -74,11 +66,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   }
 
   const renderSkeletonItem = (_: number, index: number, isVisible = true) => (
-    <Skeleton
-      key={index}
-      className="h-8 w-32 rounded-md"
-      data-visible={isVisible}
-    />
+    <Skeleton key={index} className="h-8 w-32 rounded-md" data-visible={isVisible} />
   )
 
   const renderDropdownSkeletonItem = (_: number, index: number) => (
@@ -94,10 +82,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
 
   // Show skeleton when loading
   if (presetsLoading) {
-    const skeletonItems = Array.from(
-      { length: NUMBER_OF_SKELETON_ITEMS },
-      (_, index) => index
-    )
+    const skeletonItems = Array.from({ length: NUMBER_OF_SKELETON_ITEMS }, (_, index) => index)
     return (
       <OverflowList
         items={skeletonItems}

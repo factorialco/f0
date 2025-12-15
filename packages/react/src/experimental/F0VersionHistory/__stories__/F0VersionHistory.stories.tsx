@@ -135,8 +135,7 @@ export const WithClickableCurrentVersion: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Version history with clickable current version indicator and custom title.",
+        story: "Version history with clickable current version indicator and custom title.",
       },
     },
   },

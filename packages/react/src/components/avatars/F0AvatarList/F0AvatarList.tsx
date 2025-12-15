@@ -73,46 +73,31 @@ export const F0AvatarList = ({
             style={
               index !== avatars.length - 1
                 ? {
-                    clipPath:
-                      CLIP_MASK[type === "person" ? "rounded" : "base"][size],
+                    clipPath: CLIP_MASK[type === "person" ? "rounded" : "base"][size],
                   }
                 : undefined
             }
           >
-            <F0Avatar
-              avatar={{ ...avatar, type } as AvatarVariant}
-              size={size}
-            />
+            <F0Avatar avatar={{ ...avatar, type } as AvatarVariant} size={size} />
           </div>
         )
 
         return (
           <div key={index}>
-            {noTooltip ? (
-              clippedAvatar
-            ) : (
-              <Tooltip label={displayName}>{clippedAvatar}</Tooltip>
-            )}
+            {noTooltip ? clippedAvatar : <Tooltip label={displayName}>{clippedAvatar}</Tooltip>}
           </div>
         )
       }}
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}
       renderOverflowIndicator={(count) => (
-        <div
-          className="flex h-fit w-fit items-center"
-          style={{ marginLeft: gap }}
-        >
+        <div className="flex h-fit w-fit items-center" style={{ marginLeft: gap }}>
           <MaxCounter
             count={(initialRemainingCount ?? 0) + count}
             size={size}
             type={type === "person" ? "rounded" : "base"}
             avatarType={type}
-            list={
-              initialRemainingCount
-                ? undefined
-                : avatars.slice(avatars.length - count)
-            }
+            list={initialRemainingCount ? undefined : avatars.slice(avatars.length - count)}
           />
         </div>
       )}

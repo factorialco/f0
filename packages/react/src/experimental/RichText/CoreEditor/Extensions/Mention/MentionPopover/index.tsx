@@ -8,11 +8,7 @@ interface MentionPopoverProps {
   editor: Editor
 }
 
-export const MentionPopover = ({
-  content,
-  anchorRect,
-  editor,
-}: MentionPopoverProps) => {
+export const MentionPopover = ({ content, anchorRect, editor }: MentionPopoverProps) => {
   const anchorStyle: React.CSSProperties = {
     position: "absolute",
     top: anchorRect.bottom + window.scrollY,

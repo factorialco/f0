@@ -28,8 +28,7 @@ const meta = {
       defaultValue: 0,
     },
     debounceTime: {
-      description:
-        "Debouce time in ms. It avoids to make repeated calls when the value changes",
+      description: "Debouce time in ms. It avoids to make repeated calls when the value changes",
       defaultValue: 0,
     },
   },
@@ -93,8 +92,7 @@ export const WithDebounce: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Check console to see onChange updates. It will only happens every 3s",
+        story: "Check console to see onChange updates. It will only happens every 3s",
       },
     },
   },

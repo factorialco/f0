@@ -73,9 +73,7 @@ vi.mock("../components/grid-stack-render-provider", () => ({
 }))
 
 vi.mock("../components/grid-stack-render", () => ({
-  GridStackRender: () => (
-    <div data-testid="grid-stack-render">Grid Content</div>
-  ),
+  GridStackRender: () => <div data-testid="grid-stack-render">Grid Content</div>,
 }))
 
 describe("F0GridStack", () => {
@@ -133,9 +131,7 @@ describe("F0GridStack", () => {
     })
 
     it("should render with empty nodes array", () => {
-      const { getByTestId } = zeroRender(
-        <F0GridStack options={mockOptions} widgets={[]} />
-      )
+      const { getByTestId } = zeroRender(<F0GridStack options={mockOptions} widgets={[]} />)
 
       expect(getByTestId("grid-stack-provider")).toBeTruthy()
     })
@@ -216,11 +212,7 @@ describe("F0GridStack", () => {
     it("should pass onChange callback to provider", () => {
       const onChange = vi.fn()
       const { getByTestId } = zeroRender(
-        <F0GridStack
-          options={mockOptions}
-          widgets={mockWidgets}
-          onChange={onChange}
-        />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} onChange={onChange} />
       )
 
       const provider = getByTestId("grid-stack-provider")
@@ -250,11 +242,7 @@ describe("F0GridStack", () => {
     it("should handle resize with allowedSizes constraint", () => {
       // Import the component to access the internal logic
       // We'll test the closest allowed logic separately
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowed: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
         let best = allowed[0],
           bestDist = Infinity
         for (const a of allowed) {
@@ -282,11 +270,7 @@ describe("F0GridStack", () => {
     })
 
     it("should find closest allowed size - exact match", () => {
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowed: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
         let best = allowed[0],
           bestDist = Infinity
         for (const a of allowed) {
@@ -311,11 +295,7 @@ describe("F0GridStack", () => {
     })
 
     it("should find closest allowed size - between two options", () => {
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowed: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
         let best = allowed[0],
           bestDist = Infinity
         for (const a of allowed) {
@@ -340,11 +320,7 @@ describe("F0GridStack", () => {
     })
 
     it("should handle single allowed size", () => {
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowed: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
         let best = allowed[0],
           bestDist = Infinity
         for (const a of allowed) {
@@ -365,11 +341,7 @@ describe("F0GridStack", () => {
     })
 
     it("should calculate distance correctly for diagonal differences", () => {
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowed: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
         let best = allowed[0],
           bestDist = Infinity
         for (const a of allowed) {
@@ -500,11 +472,7 @@ describe("F0GridStack", () => {
       } as unknown as GridItemHTMLElement
 
       // If current size is 3x1 and closest is also 3x1, update should not be called
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowed: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowed: { w: number; h: number }[]) => {
         let best = allowed[0],
           bestDist = Infinity
         for (const a of allowed) {
@@ -676,11 +644,7 @@ describe("F0GridStack", () => {
       const allowed = node.allowedSizes ?? []
       if (allowed.length === 0) return
 
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowedSizes: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowedSizes: { w: number; h: number }[]) => {
         let best = allowedSizes[0],
           bestDist = Infinity
         for (const a of allowedSizes) {
@@ -728,11 +692,7 @@ describe("F0GridStack", () => {
       const allowed = node.allowedSizes ?? []
       if (allowed.length === 0) return
 
-      const closestAllowed = (
-        w: number,
-        h: number,
-        allowedSizes: { w: number; h: number }[]
-      ) => {
+      const closestAllowed = (w: number, h: number, allowedSizes: { w: number; h: number }[]) => {
         let best = allowedSizes[0],
           bestDist = Infinity
         for (const a of allowedSizes) {
@@ -810,29 +770,15 @@ describe("F0GridStack", () => {
     it("should handle callback updates", () => {
       const onChange1 = vi.fn()
       const { rerender, getByTestId } = zeroRender(
-        <F0GridStack
-          options={mockOptions}
-          widgets={mockWidgets}
-          onChange={onChange1}
-        />
+        <F0GridStack options={mockOptions} widgets={mockWidgets} onChange={onChange1} />
       )
 
-      expect(
-        getByTestId("grid-stack-provider").getAttribute("data-onchange")
-      ).toBe("defined")
+      expect(getByTestId("grid-stack-provider").getAttribute("data-onchange")).toBe("defined")
 
       const onChange2 = vi.fn()
-      rerender(
-        <F0GridStack
-          options={mockOptions}
-          widgets={mockWidgets}
-          onChange={onChange2}
-        />
-      )
+      rerender(<F0GridStack options={mockOptions} widgets={mockWidgets} onChange={onChange2} />)
 
-      expect(
-        getByTestId("grid-stack-provider").getAttribute("data-onchange")
-      ).toBe("defined")
+      expect(getByTestId("grid-stack-provider").getAttribute("data-onchange")).toBe("defined")
     })
 
     it("should handle widget property changes", () => {

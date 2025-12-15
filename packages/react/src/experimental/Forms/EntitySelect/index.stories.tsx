@@ -6,17 +6,9 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import { ComponentProps, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
 import { famousEmployees } from "./entity-select-name.factory"
-import {
-  teamsWithEmployees,
-  workplaceWithEmployees,
-} from "./groups-avatar-name.factory"
+import { teamsWithEmployees, workplaceWithEmployees } from "./groups-avatar-name.factory"
 import { EntitySelect } from "./index"
-import {
-  EntityId,
-  EntitySelectEntity,
-  EntitySelectNamedGroup,
-  EntitySelectProps,
-} from "./types"
+import { EntityId, EntitySelectEntity, EntitySelectNamedGroup, EntitySelectProps } from "./types"
 
 const GROUP_DATA = {
   all: famousEmployees,
@@ -71,9 +63,7 @@ const meta: Meta<typeof EntitySelect> = {
   } satisfies EntitySelectProps<string>,
   render: (props) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     return (
       <div className="w-64">
@@ -105,9 +95,7 @@ export const Default = {
       },
       { ...famousEmployees[1] },
     ])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
       if (expanded) {
@@ -156,9 +144,7 @@ export const Default = {
     await userEvent.click(button)
     await new Promise((resolve) => setTimeout(resolve, 600))
 
-    const popover = document.querySelector(
-      "[data-radix-popper-content-wrapper]"
-    )
+    const popover = document.querySelector("[data-radix-popper-content-wrapper]")
     expect(popover).toBeInTheDocument()
 
     // Test search functionality
@@ -171,9 +157,7 @@ export const Default = {
     const popoverContent = within(popover as HTMLElement)
 
     // Find the main content section (left side) where the list is
-    const mainContent = popoverContent
-      .getByRole("dialog")
-      .querySelector(".absolute.left-0")
+    const mainContent = popoverContent.getByRole("dialog").querySelector(".absolute.left-0")
     expect(mainContent).toBeInTheDocument()
 
     // Use within to scope our search to just the main content
@@ -230,9 +214,7 @@ export const WithSelectedGroup = {
       },
       { ...famousEmployees[1] },
     ])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
       if (expanded) {
@@ -282,9 +264,7 @@ export const SingleSelector = {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [selected, setSelected] = useState<EntitySelectEntity | undefined>()
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
       if (expanded) {
@@ -318,9 +298,7 @@ export const SingleSelector = {
         selectedEntities={!selected ? [] : [selected]}
         onSelect={(selection) => {
           if (selectedGroup != "all") {
-            const found = GROUP_DATA["all"].find(
-              (el) => el.id === selection?.subItems?.[0]?.subId
-            )
+            const found = GROUP_DATA["all"].find((el) => el.id === selection?.subItems?.[0]?.subId)
             setSelected(found)
           } else {
             setSelected(selection ?? undefined)
@@ -348,9 +326,7 @@ export const AlwaysOpen = {
       },
       { ...famousEmployees[1] },
     ])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
       if (expanded) {
@@ -409,9 +385,7 @@ export const AlwaysOpenInForm = {
       },
       { ...famousEmployees[1] },
     ])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
       if (expanded) {
@@ -457,9 +431,7 @@ export const WithCustomTrigger = {
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [loading, setLoading] = useState<boolean>(props.loading ?? true)
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
     const [selected, setSelected] = useState<EntitySelectEntity[]>([
       {
         ...famousEmployees[0],
@@ -534,9 +506,7 @@ export const WithSearch = {
     await userEvent.click(canvas.getByRole("button"))
     await new Promise((resolve) => setTimeout(resolve, 600))
 
-    const popover = document.querySelector(
-      "[data-radix-popper-content-wrapper]"
-    )
+    const popover = document.querySelector("[data-radix-popper-content-wrapper]")
     const popoverContent = within(popover as HTMLElement)
     const input = popoverContent.getByRole("textbox")
     expect(input).toBeInTheDocument()
@@ -582,9 +552,7 @@ export const LoadingState = {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     // Find the popover and verify it exists
-    const popover = document.querySelector(
-      "[data-radix-popper-content-wrapper]"
-    )
+    const popover = document.querySelector("[data-radix-popper-content-wrapper]")
     expect(popover).toBeInTheDocument()
 
     // Use within to scope our queries to the popover
@@ -624,9 +592,7 @@ export const HiddenAvatar = {
       },
       { ...famousEmployees[1] },
     ])
-    const [selectedGroup, setSelectedGroup] = useState<string>(
-      props.selectedGroup ?? "all"
-    )
+    const [selectedGroup, setSelectedGroup] = useState<string>(props.selectedGroup ?? "all")
 
     const onItemExpandedChange = (id: EntityId, expanded: boolean) => {
       if (expanded) {
@@ -667,9 +633,7 @@ export const HiddenAvatar = {
 export const WithActions = {
   args: {
     ...defaultArgs,
-    actions: [
-      { label: "New employee", onClick: fn(), variant: "ghost", icon: Plus },
-    ],
+    actions: [{ label: "New employee", onClick: fn(), variant: "ghost", icon: Plus }],
   },
   render: (props: ComponentProps<typeof EntitySelect>) => {
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])

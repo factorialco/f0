@@ -33,10 +33,7 @@ const pieces = [
   },
 ]
 
-const OneIcon = (
-  svgProps: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
-) => {
+const OneIcon = (svgProps: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => {
   const clipPathId = useId()
   const {
     onAnimationStart: _onAnimationStart,
@@ -154,6 +151,4 @@ const OneIcon = (
     </div>
   )
 }
-export const ChatSpinner = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(
-  OneIcon
-)
+export const ChatSpinner = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(OneIcon)

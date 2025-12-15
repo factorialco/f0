@@ -59,14 +59,8 @@ describe("grid-stack-render", () => {
 
     const { createPortal } = await import("react-dom")
     expect(vi.mocked(createPortal)).toHaveBeenCalledTimes(2)
-    expect(vi.mocked(createPortal)).toHaveBeenCalledWith(
-      <div>Widget 1 Content</div>,
-      container1
-    )
-    expect(vi.mocked(createPortal)).toHaveBeenCalledWith(
-      <div>Widget 2 Content</div>,
-      container2
-    )
+    expect(vi.mocked(createPortal)).toHaveBeenCalledWith(<div>Widget 1 Content</div>, container1)
+    expect(vi.mocked(createPortal)).toHaveBeenCalledWith(<div>Widget 2 Content</div>, container2)
   })
 
   it("should call getWidgetContainer for each widget", () => {
@@ -121,10 +115,7 @@ describe("grid-stack-render", () => {
     })
 
     // Set null content (though Map doesn't typically store null, testing edge case)
-    mockReactContentMap.set(
-      "widget-null",
-      null as unknown as React.ReactElement
-    )
+    mockReactContentMap.set("widget-null", null as unknown as React.ReactElement)
 
     zeroRender(<GridStackRender />)
 

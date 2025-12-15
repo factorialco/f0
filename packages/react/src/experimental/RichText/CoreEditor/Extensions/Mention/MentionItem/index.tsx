@@ -21,9 +21,7 @@ export const MentionItem = ({ item, selected }: MentionItemProps) => {
         src={item.image_url ?? undefined}
         size="sm"
       />
-      <p className="text-neutral-100 text-md truncate text-ellipsis font-medium">
-        {item.label}
-      </p>
+      <p className="text-neutral-100 text-md truncate text-ellipsis font-medium">{item.label}</p>
     </div>
   )
 }

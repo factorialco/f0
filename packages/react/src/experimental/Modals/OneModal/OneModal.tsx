@@ -2,15 +2,7 @@ import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 import { cva } from "cva"
-import {
-  ComponentProps,
-  FC,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { ComponentProps, FC, ReactElement, useCallback, useMemo, useRef, useState } from "react"
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
@@ -33,14 +25,8 @@ export type OneModalProps = {
   width?: ModalWidth
   /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
   children:
-    | ReactElement<
-        | ComponentProps<typeof OneModalHeader>
-        | ComponentProps<typeof OneModalContent>
-      >
-    | ReactElement<
-        | ComponentProps<typeof OneModalHeader>
-        | ComponentProps<typeof OneModalContent>
-      >[]
+    | ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>
+    | ReactElement<ComponentProps<typeof OneModalHeader> | ComponentProps<typeof OneModalContent>>[]
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 const modalWrapperClassName = cva({
@@ -109,8 +95,7 @@ export const OneModal: FC<OneModalProps> = ({
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
   // correct portalContainer after the modal content mounts.
-  const [containerElement, setContainerElement] =
-    useState<HTMLDivElement | null>(null)
+  const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(null)
 
   const portalContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -150,9 +135,7 @@ export const OneModal: FC<OneModalProps> = ({
       return "sm"
     }
     if (width && position !== "center") {
-      console.warn(
-        "OneModal: `width` prop is only applicable to center position"
-      )
+      console.warn("OneModal: `width` prop is only applicable to center position")
     }
 
     return width

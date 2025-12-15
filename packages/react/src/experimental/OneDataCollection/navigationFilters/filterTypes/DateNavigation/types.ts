@@ -1,10 +1,7 @@
 import { DateRange, DateRangeComplete } from "@/experimental/OneCalendar"
 import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities/index"
 import { DatePreset } from "@/ui/DatePickerPopup"
-import {
-  NavigationFilterComponentProps,
-  NavigationFilterDefinitionBase,
-} from "../../types"
+import { NavigationFilterComponentProps, NavigationFilterDefinitionBase } from "../../types"
 export type DateNavigationOptions = {
   granularity?: GranularityDefinitionKey[] | GranularityDefinitionKey
   defaultGranularity?: GranularityDefinitionKey

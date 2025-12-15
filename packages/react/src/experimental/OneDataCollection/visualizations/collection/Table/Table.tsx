@@ -71,17 +71,7 @@ export const TableCollection = <
   const t = useI18n()
   // Created a motion component for the row
   const [MotionRow] = useState(() =>
-    motion.create(
-      Row<
-        R,
-        Filters,
-        Sortings,
-        Summaries,
-        ItemActions,
-        NavigationFilters,
-        Grouping
-      >
-    )
+    motion.create(Row<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>)
   )
 
   const { settings } = useDataCollectionSettings()
@@ -103,14 +93,7 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
-  } = useDataCollectionData<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(source, {
+  } = useDataCollectionData<R, Filters, Sortings, Summaries, NavigationFilters, Grouping>(source, {
     onError: (error) => {
       onLoadError(error)
     },
@@ -185,9 +168,7 @@ export const TableCollection = <
       return "none"
     }
 
-    return currentSortings.field === columnSorting
-      ? currentSortings.order
-      : "none"
+    return currentSortings.field === columnSorting ? currentSortings.order : "none"
   }
 
   /**
@@ -231,9 +212,7 @@ export const TableCollection = <
     !!source.selectable
   )
 
-  const tableWithChildren = data?.records.some((item) =>
-    source.itemsWithChildren?.(item)
-  )
+  const tableWithChildren = data?.records.some((item) => source.itemsWithChildren?.(item))
 
   /*
    * Initial loading
@@ -259,21 +238,13 @@ export const TableCollection = <
         <TableHeader sticky={true}>
           <TableRow>
             {source.selectable && (
-              <TableHead
-                width={checkColumnWidth}
-                sticky={{ left: 0 }}
-                align="right"
-              >
+              <TableHead width={checkColumnWidth} sticky={{ left: 0 }} align="right">
                 <div className="flex w-full items-center justify-end">
                   <F0Checkbox
-                    checked={
-                      allSelectedStatus.selectedCount > 0 ||
-                      allSelectedStatus.checked
-                    }
+                    checked={allSelectedStatus.selectedCount > 0 || allSelectedStatus.checked}
                     indeterminate={
                       allSelectedStatus.indeterminate ||
-                      (allSelectedStatus.selectedCount > 0 &&
-                        !allSelectedStatus.checked)
+                      (allSelectedStatus.selectedCount > 0 && !allSelectedStatus.checked)
                     }
                     onCheckedChange={handleSelectAll}
                     title={t.actions.selectAll}
@@ -286,11 +257,7 @@ export const TableCollection = <
             {columns.map(({ sorting, label, ...column }, index) => (
               <TableHead
                 key={`table-head-${index}`}
-                sortState={getColumnSortState(
-                  sorting,
-                  source.sortings,
-                  currentSortings
-                )}
+                sortState={getColumnSortState(sorting, source.sortings, currentSortings)}
                 width={column.width}
                 align={column.align}
                 sticky={getStickyPosition(index)}
@@ -337,19 +304,13 @@ export const TableCollection = <
                   <TableRow key={`group-header-${group.key}`} sticky>
                     <TableCell
                       sticky={{ left: 0 }}
-                      colSpan={
-                        (frozenColumnsLeft || 1) + (source.selectable ? 1 : 0)
-                      }
+                      colSpan={(frozenColumnsLeft || 1) + (source.selectable ? 1 : 0)}
                     >
                       <GroupHeader
                         className="px-3"
                         selectable={!!source.selectable}
-                        select={statusToChecked(
-                          groupAllSelectedStatus[group.key]
-                        )}
-                        onSelectChange={(checked) =>
-                          handleSelectGroupChange(group, checked)
-                        }
+                        select={statusToChecked(groupAllSelectedStatus[group.key])}
+                        onSelectChange={(checked) => handleSelectGroupChange(group, checked)}
                         showOpenChange={collapsible}
                         label={group.label}
                         itemCount={itemCount}
@@ -359,9 +320,7 @@ export const TableCollection = <
                     </TableCell>
                     <TableCell
                       colSpan={
-                        columns.length -
-                        (frozenColumnsLeft || 1) +
-                        (source.selectable ? 1 : 0)
+                        columns.length - (frozenColumnsLeft || 1) + (source.selectable ? 1 : 0)
                       }
                     >
                       &nbsp;
@@ -385,9 +344,7 @@ export const TableCollection = <
                             item={item}
                             index={index}
                             groupIndex={groupIndex}
-                            onCheckedChange={(checked) =>
-                              handleSelectItemChange(item, checked)
-                            }
+                            onCheckedChange={(checked) => handleSelectItemChange(item, checked)}
                             selectedItems={selectedItems}
                             columns={columns}
                             frozenColumnsLeft={frozenColumnsLeft}
@@ -408,9 +365,7 @@ export const TableCollection = <
                   source={source}
                   item={item}
                   index={index}
-                  onCheckedChange={(checked) =>
-                    handleSelectItemChange(item, checked)
-                  }
+                  onCheckedChange={(checked) => handleSelectItemChange(item, checked)}
                   selectedItems={selectedItems}
                   columns={columns}
                   frozenColumnsLeft={frozenColumnsLeft}
@@ -430,17 +385,16 @@ export const TableCollection = <
                 ))}
               </TableRow>
             ))}
-          {isInfiniteScrollPagination(paginationInfo) &&
-            paginationInfo.hasMore && (
-              <tr>
-                <td
-                  colSpan={columns.length + (source.selectable ? 1 : 0) + 1}
-                  ref={loadingIndicatorRef}
-                  className="h-10"
-                  aria-hidden="true"
-                ></td>
-              </tr>
-            )}
+          {isInfiniteScrollPagination(paginationInfo) && paginationInfo.hasMore && (
+            <tr>
+              <td
+                colSpan={columns.length + (source.selectable ? 1 : 0) + 1}
+                ref={loadingIndicatorRef}
+                className="h-10"
+                aria-hidden="true"
+              ></td>
+            </tr>
+          )}
         </TableBody>
         {/* TODO: maybe as new component? */}
         {summaryData && (
@@ -468,19 +422,12 @@ export const TableCollection = <
                   width={column.width}
                   sticky={getStickyPosition(cellIndex)}
                 >
-                  {cellIndex === 0 &&
-                  !source.selectable &&
-                  summaryData.label ? (
+                  {cellIndex === 0 && !source.selectable && summaryData.label ? (
                     <div className="font-medium text-f1-foreground-secondary">
                       {summaryData.label}
                     </div>
                   ) : (
-                    <div
-                      className={cn(
-                        column.align === "right" ? "justify-end" : "",
-                        "flex"
-                      )}
-                    >
+                    <div className={cn(column.align === "right" ? "justify-end" : "", "flex")}>
                       {column.summary &&
                       source.summaries &&
                       source.summaries[column.summary]?.type === "sum" ? (
@@ -516,11 +463,7 @@ export const TableCollection = <
           </TableFooter>
         )}
       </OneTable>
-      <PagesPagination
-        paginationInfo={paginationInfo}
-        setPage={setPage}
-        className="pb-4"
-      />
+      <PagesPagination paginationInfo={paginationInfo} setPage={setPage} className="pb-4" />
     </div>
   )
 }

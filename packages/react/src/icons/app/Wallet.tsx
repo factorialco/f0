@@ -1,13 +1,7 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
 const SvgWallet = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    ref={ref}
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" ref={ref} {...props}>
     <path
       stroke="currentColor"
       strokeLinejoin="round"
@@ -20,13 +14,7 @@ const SvgWallet = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       d="M6 5H15C16.1046 5 17 5.89543 17 7V9H6C4.89543 9 4 8.10457 4 7C4 5.89543 4.89543 5 6 5Z"
       vectorEffect="non-scaling-stroke"
     />
-    <circle
-      cx={16.25}
-      cy={13.75}
-      r={1.25}
-      fill="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={16.25} cy={13.75} r={1.25} fill="currentColor" vectorEffect="non-scaling-stroke" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgWallet)

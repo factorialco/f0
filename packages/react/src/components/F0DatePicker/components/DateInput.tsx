@@ -1,7 +1,4 @@
-import type {
-  GranularityDefinition,
-  GranularityDefinitionKey,
-} from "@/experimental/OneCalendar"
+import type { GranularityDefinition, GranularityDefinitionKey } from "@/experimental/OneCalendar"
 import { isActiveDate } from "@/experimental/OneCalendar/utils"
 import { Calendar } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -25,16 +22,7 @@ type DateInputProps = {
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
   (
-    {
-      value,
-      onDateChange,
-      granularity,
-      onOpenChange,
-      minDate,
-      maxDate,
-      onClear,
-      ...inputProps
-    },
+    { value, onDateChange, granularity, onOpenChange, minDate, maxDate, onClear, ...inputProps },
     ref
   ) => {
     const [inputValue, setInputValue] = useState("")
@@ -66,9 +54,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         return
       }
 
-      const range = granularity.toRange(
-        granularity.fromString(inputValue, i18n)
-      )
+      const range = granularity.toRange(granularity.fromString(inputValue, i18n))
 
       if (range && isValidDate(range?.from) && isValidDate(range?.to)) {
         onDateChange?.({

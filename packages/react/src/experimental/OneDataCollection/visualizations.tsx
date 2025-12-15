@@ -1,11 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import {
-  GroupingDefinition,
-  OnSelectItemsCallback,
-  RecordType,
-} from "@/hooks/datasource"
+import { GroupingDefinition, OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { Kanban, Sliders, Table } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -99,15 +95,7 @@ export type VisualizationProps<
 > = {
   /** Array of available visualization configurations */
   visualizations?: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
+    Visualization<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
   >
 }
 
@@ -139,15 +127,7 @@ export const VisualizationSelector = <
   onVisualizationChange,
 }: {
   visualizations: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
+    Visualization<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>
   >
   currentVisualization: number
   onVisualizationChange: (index: number) => void
@@ -164,13 +144,7 @@ export const VisualizationSelector = <
     <div className="flex gap-2">
       <Popover open={open}>
         <PopoverTrigger asChild onClick={() => setOpen(!open)}>
-          <F0Button
-            variant="outline"
-            label="Filters"
-            icon={Sliders}
-            onClick={() => {}}
-            hideLabel
-          />
+          <F0Button variant="outline" label="Filters" icon={Sliders} onClick={() => {}} hideLabel />
         </PopoverTrigger>
         <PopoverContent
           className="w-[280px] rounded-md border border-solid border-f1-border-secondary p-2"
@@ -197,8 +171,7 @@ export const VisualizationSelector = <
                 <button
                   className={cn(
                     "flex w-full flex-col items-center justify-center gap-1 rounded-sm p-2 font-medium text-f1-foreground-secondary transition-colors",
-                    isSelected &&
-                      "bg-f1-background-secondary text-f1-foreground",
+                    isSelected && "bg-f1-background-secondary text-f1-foreground",
                     focusRing()
                   )}
                   key={visualization.type}

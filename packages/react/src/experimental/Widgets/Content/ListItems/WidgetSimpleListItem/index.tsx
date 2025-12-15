@@ -5,9 +5,7 @@ import { Counter } from "@/experimental/Information/Counter"
 import { cn } from "@/lib/utils"
 import { ComponentProps } from "react"
 
-export type WidgetSimpleListItemProps<
-  Id extends string | number = string | number,
-> = {
+export type WidgetSimpleListItemProps<Id extends string | number = string | number> = {
   id: Id
   title: string
   icon?: IconType
@@ -64,20 +62,10 @@ export function WidgetSimpleListItem({
   return (
     <Wrapper onClick={handleOnClick} className={className}>
       <div className="flex flex-1 flex-row items-start gap-1">
-        {icon && (
-          <F0Icon
-            icon={icon}
-            size="md"
-            className={cn("mt-0.5", iconClassName)}
-          />
-        )}
+        {icon && <F0Icon icon={icon} size="md" className={cn("mt-0.5", iconClassName)} />}
         <p className="mt-0.5 line-clamp-2 font-medium">{title}</p>
         {rightIcon && (
-          <F0Icon
-            icon={rightIcon}
-            size="md"
-            className={cn("mt-0.5", rightIconClassName)}
-          />
+          <F0Icon icon={rightIcon} size="md" className={cn("mt-0.5", rightIconClassName)} />
         )}
       </div>
       <div className="flex flex-row items-center gap-2">

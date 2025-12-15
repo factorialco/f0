@@ -22,9 +22,9 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { WeekView } from "./WeekView"
 
-export function toWeekGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(date: T): T extends Date | DateRange ? DateRangeComplete : T {
+export function toWeekGranularityDateRange<T extends Date | DateRange | undefined | null>(
+  date: T
+): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfISOWeek, endOfISOWeek)
 }
 
@@ -67,10 +67,8 @@ const toStringLong = (
     return ""
   }
 
-  const toI18nString = (
-    dateString: string,
-    type: "singular" | "plural" = "singular"
-  ) => (i18nStrings[type] || "").replace("{{date}}", dateString)
+  const toI18nString = (dateString: string, type: "singular" | "plural" = "singular") =>
+    (i18nStrings[type] || "").replace("{{date}}", dateString)
 
   // Single date
   if (!dateRange.to || isSameISOWeek(dateRange.from, dateRange.to)) {
@@ -111,12 +109,8 @@ export const weekGranularity: GranularityDefinition = {
     const maxWithGranularity = options.max && endOfISOWeek(options.max)
 
     return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
+      prev: isAfterOrEqual(prevFrom, minWithGranularity) ? { from: prevFrom, to: prevTo } : false,
+      next: isBeforeOrEqual(nextTo, maxWithGranularity) ? { from: nextFrom, to: nextTo } : false,
     }
   },
   toRangeString: (date) => {

@@ -34,10 +34,7 @@ interface SlashCommandGroupLabels {
   [key: string]: string
 }
 
-const availableCommands = (
-  labels: ToolbarLabels,
-  aiBlockConfig?: AIBlockConfig
-): CommandItem[] => {
+const availableCommands = (labels: ToolbarLabels, aiBlockConfig?: AIBlockConfig): CommandItem[] => {
   // Get grouped commands and flatten them for backward compatibility
   const defaultGroupLabels: SlashCommandGroupLabels = {
     textStyles: "Text Styles",
@@ -108,29 +105,20 @@ const getGroupedCommands = (
 
                       if (lastAIBlockPos !== null) {
                         // Update the specific AIBlock with the generated content
-                        const tr = state.tr.setNodeMarkup(
-                          lastAIBlockPos,
-                          undefined,
-                          {
-                            data: {
-                              selectedAction: button.type,
-                              content: content,
-                            },
-                            config: aiBlockConfig,
-                          }
-                        )
+                        const tr = state.tr.setNodeMarkup(lastAIBlockPos, undefined, {
+                          data: {
+                            selectedAction: button.type,
+                            content: content,
+                          },
+                          config: aiBlockConfig,
+                        })
                         editor.view.dispatch(tr)
 
                         // Position cursor in the paragraph after the AIBlock
                         const node = doc.nodeAt(lastAIBlockPos)
                         if (node) {
-                          const paragraphPos =
-                            lastAIBlockPos + node.nodeSize + 1
-                          editor
-                            .chain()
-                            .focus()
-                            .setTextSelection(paragraphPos)
-                            .run()
+                          const paragraphPos = lastAIBlockPos + node.nodeSize + 1
+                          editor.chain().focus().setTextSelection(paragraphPos).run()
                         }
                       }
                     }, 50)
@@ -154,17 +142,13 @@ const getGroupedCommands = (
                       })
 
                       if (lastAIBlockPos !== null) {
-                        const tr = state.tr.setNodeMarkup(
-                          lastAIBlockPos,
-                          undefined,
-                          {
-                            data: {
-                              selectedAction: button.type,
-                              content: null,
-                            },
-                            config: aiBlockConfig,
-                          }
-                        )
+                        const tr = state.tr.setNodeMarkup(lastAIBlockPos, undefined, {
+                          data: {
+                            selectedAction: button.type,
+                            content: null,
+                          },
+                          config: aiBlockConfig,
+                        })
                         editor.view.dispatch(tr)
                       }
                     }, 50)
@@ -184,12 +168,7 @@ const getGroupedCommands = (
         title: labels.heading1,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleHeading({ level: 1 })
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleHeading({ level: 1 }).run()
         },
         icon: Heading1,
       },
@@ -197,12 +176,7 @@ const getGroupedCommands = (
         title: labels.heading2,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleHeading({ level: 2 })
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleHeading({ level: 2 }).run()
         },
         icon: Heading2,
       },
@@ -210,12 +184,7 @@ const getGroupedCommands = (
         title: labels.heading3,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleHeading({ level: 3 })
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleHeading({ level: 3 }).run()
         },
         icon: Heading3,
       },
@@ -228,12 +197,7 @@ const getGroupedCommands = (
         title: labels.bulletList,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleBulletList()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleBulletList().run()
         },
         icon: List,
       },
@@ -241,12 +205,7 @@ const getGroupedCommands = (
         title: labels.orderedList,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleOrderedList()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleOrderedList().run()
         },
         icon: OlList,
       },
@@ -254,12 +213,7 @@ const getGroupedCommands = (
         title: labels.taskList,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleTaskList()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleTaskList().run()
         },
         icon: CheckDouble,
       },
@@ -272,12 +226,7 @@ const getGroupedCommands = (
         title: labels.details,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .setDetails()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).setDetails().run()
         },
         icon: ChevronDown,
       },
@@ -285,12 +234,7 @@ const getGroupedCommands = (
         title: labels.codeBlock,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleCodeBlock()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleCodeBlock().run()
         },
         icon: Code,
       },
@@ -298,12 +242,7 @@ const getGroupedCommands = (
         title: labels.quote,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .toggleBlockquote()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).toggleBlockquote().run()
         },
         icon: Quote,
       },
@@ -311,12 +250,7 @@ const getGroupedCommands = (
         title: labels.divider,
         command: (editor) => {
           const { from, to } = editor.state.selection
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from, to })
-            .setHorizontalRule()
-            .run()
+          editor.chain().focus().setTextSelection({ from, to }).setHorizontalRule().run()
         },
         icon: Minus,
       },
@@ -325,9 +259,4 @@ const getGroupedCommands = (
 ]
 
 export { availableCommands, getGroupedCommands }
-export type {
-  AIBlockConfig,
-  CommandGroup,
-  CommandItem,
-  SlashCommandGroupLabels,
-}
+export type { AIBlockConfig, CommandGroup, CommandItem, SlashCommandGroupLabels }

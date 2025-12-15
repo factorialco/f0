@@ -15,10 +15,7 @@ export type ActionButtonVariant = (typeof actionButtonVariants)[number]
 export const actionLinkVariants = ["link", "unstyled", "mention"] as const
 export type ActionLinkVariant = (typeof actionLinkVariants)[number]
 
-export const actionVariants = [
-  ...actionButtonVariants,
-  ...actionLinkVariants,
-] as const
+export const actionVariants = [...actionButtonVariants, ...actionLinkVariants] as const
 export type ActionVariant = (typeof actionVariants)[number]
 
 export const actionSizes = ["sm", "md", "lg"] as const

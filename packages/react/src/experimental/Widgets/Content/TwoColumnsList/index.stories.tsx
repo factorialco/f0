@@ -85,8 +85,7 @@ export const TitleWithTooltip: Story = {
     titleValue: "+10h",
     titleTooltip: {
       label: "Balance",
-      description:
-        "Difference between the hours an employee worked and the scheduled hours.",
+      description: "Difference between the hours an employee worked and the scheduled hours.",
     },
     list: [
       {

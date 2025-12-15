@@ -10,14 +10,7 @@ import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus"
 
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { OnePagination } from "@/experimental/OnePagination"
-import {
-  OneTable,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./index"
+import { OneTable, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./index"
 
 const meta: Meta<typeof OneTable> = {
   title: "Table",
@@ -115,10 +108,7 @@ export const Default: Story = {
             </TableCell>
             <TableCell>
               <div className="w-fit">
-                <F0TagStatus
-                  text={row.status.label}
-                  variant={row.status.variant}
-                />
+                <F0TagStatus text={row.status.label} variant={row.status.variant} />
               </div>
             </TableCell>
           </TableRow>
@@ -130,17 +120,14 @@ export const Default: Story = {
 
 export const Check: Story = {
   render: () => {
-    const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
-      () => ({
-        [sampleData[0].id]: true,
-        [sampleData[2].id]: true,
-      })
-    )
+    const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(() => ({
+      [sampleData[0].id]: true,
+      [sampleData[2].id]: true,
+    }))
 
     const selectedCount = Object.values(selectedRows).filter(Boolean).length
     const isAllSelected = selectedCount === sampleData.length
-    const isPartiallySelected =
-      selectedCount > 0 && selectedCount < sampleData.length
+    const isPartiallySelected = selectedCount > 0 && selectedCount < sampleData.length
 
     const handleSelectAll = (checked: boolean) => {
       const newSelected = {} as Record<string, boolean>
@@ -202,9 +189,7 @@ export const InfoHeader: Story = {
         <TableRow>
           <TableHead info="Legal name of the employee">Name</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead info="This is the current status of the employee">
-            Status
-          </TableHead>
+          <TableHead info="This is the current status of the employee">Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -236,12 +221,7 @@ export const Sortable: Story = {
     const handleSort = (column: SortColumn) => {
       setSortConfig((current) => ({
         column,
-        order:
-          current.column === column
-            ? current.order === "asc"
-              ? "desc"
-              : "asc"
-            : "asc",
+        order: current.column === column ? (current.order === "asc" ? "desc" : "asc") : "asc",
       }))
     }
 
@@ -264,25 +244,19 @@ export const Sortable: Story = {
           <TableRow>
             <TableHead
               onSortClick={() => handleSort("name")}
-              sortState={
-                sortConfig.column === "name" ? sortConfig.order : undefined
-              }
+              sortState={sortConfig.column === "name" ? sortConfig.order : undefined}
             >
               Name
             </TableHead>
             <TableHead
               onSortClick={() => handleSort("email")}
-              sortState={
-                sortConfig.column === "email" ? sortConfig.order : undefined
-              }
+              sortState={sortConfig.column === "email" ? sortConfig.order : undefined}
             >
               Email
             </TableHead>
             <TableHead
               onSortClick={() => handleSort("role")}
-              sortState={
-                sortConfig.column === "role" ? sortConfig.order : undefined
-              }
+              sortState={sortConfig.column === "role" ? sortConfig.order : undefined}
             >
               Status
             </TableHead>
@@ -342,10 +316,7 @@ export const StickyColumn: Story = {
             <TableCell>{row.manager}</TableCell>
             <TableCell>
               <div className="w-fit">
-                <F0TagStatus
-                  text={row.status.label}
-                  variant={row.status.variant}
-                />
+                <F0TagStatus text={row.status.label} variant={row.status.variant} />
               </div>
             </TableCell>
             <TableCell>{row.name}</TableCell>
@@ -425,19 +396,13 @@ export const Summatory: Story = {
               <span className="font-medium">{row.day}</span>
             </TableCell>
             <TableCell>
-              <div className="w-full text-right tabular-nums">
-                {row.productA}
-              </div>
+              <div className="w-full text-right tabular-nums">{row.productA}</div>
             </TableCell>
             <TableCell>
-              <div className="w-full text-right tabular-nums">
-                {row.productB}
-              </div>
+              <div className="w-full text-right tabular-nums">{row.productB}</div>
             </TableCell>
             <TableCell>
-              <div className="w-full text-right tabular-nums">
-                {row.productC}
-              </div>
+              <div className="w-full text-right tabular-nums">{row.productC}</div>
             </TableCell>
           </TableRow>
         ))}
@@ -502,10 +467,7 @@ export const Footer: Story = {
               </TableCell>
               <TableCell>
                 <div className="w-fit">
-                  <F0TagStatus
-                    text={row.status.label}
-                    variant={row.status.variant}
-                  />
+                  <F0TagStatus text={row.status.label} variant={row.status.variant} />
                 </div>
               </TableCell>
             </TableRow>
@@ -513,9 +475,7 @@ export const Footer: Story = {
         </TableBody>
       </OneTable>
       <div className="flex w-full items-center justify-between py-3">
-        <span className="shrink-0 text-f1-foreground-secondary">
-          1-4 of 100
-        </span>
+        <span className="shrink-0 text-f1-foreground-secondary">1-4 of 100</span>
         <div className="flex items-center">
           <OnePagination totalPages={10} currentPage={1} />
         </div>
@@ -559,10 +519,7 @@ export const Actions: Story = {
             </TableCell>
             <TableCell>
               <div className="w-fit">
-                <F0TagStatus
-                  text={row.status.label}
-                  variant={row.status.variant}
-                />
+                <F0TagStatus text={row.status.label} variant={row.status.variant} />
               </div>
             </TableCell>
             <TableCell>
@@ -638,10 +595,7 @@ export const WithLinks: Story = {
             </TableCell>
             <TableCell href="/">
               <div className="w-fit">
-                <F0TagStatus
-                  text={row.status.label}
-                  variant={row.status.variant}
-                />
+                <F0TagStatus text={row.status.label} variant={row.status.variant} />
               </div>
             </TableCell>
             <TableCell href="/">
@@ -724,10 +678,7 @@ export const Loading: Story = {
                 </TableCell>
                 <TableCell>
                   <div className="w-fit">
-                    <F0TagStatus
-                      text={row.status.label}
-                      variant={row.status.variant}
-                    />
+                    <F0TagStatus text={row.status.label} variant={row.status.variant} />
                   </div>
                 </TableCell>
               </TableRow>
@@ -785,10 +736,7 @@ export const WithOnClick: Story = {
               </TableCell>
               <TableCell onClick={action}>
                 <div className="w-fit">
-                  <F0TagStatus
-                    text={row.status.label}
-                    variant={row.status.variant}
-                  />
+                  <F0TagStatus text={row.status.label} variant={row.status.variant} />
                 </div>
               </TableCell>
               <TableCell onClick={action}>

@@ -65,9 +65,7 @@ describe("GroupHeader", () => {
   })
 
   it("applies custom className", () => {
-    render(
-      <GroupHeader label="Test Group" itemCount={5} className="custom-class" />
-    )
+    render(<GroupHeader label="Test Group" itemCount={5} className="custom-class" />)
 
     const header = screen.getByText("Test Group").closest("div")
     expect(header).toHaveClass("custom-class")

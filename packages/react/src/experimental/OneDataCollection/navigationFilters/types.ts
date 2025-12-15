@@ -1,8 +1,5 @@
 import { TranslationsType } from "@/lib/providers/i18n"
-import {
-  DateNavigatorFilterDefinition,
-  DateValue,
-} from "./filterTypes/DateNavigation/types"
+import { DateNavigatorFilterDefinition, DateValue } from "./filterTypes/DateNavigation/types"
 
 export type NavigationFilter<T, InitialValue = T> = {
   /**
@@ -65,8 +62,7 @@ export type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition
  * This represents the active filter selections at any given time.
  * @template Definition - Record of filter definitions
  */
-export type NavigationFiltersState<
-  Definition extends Record<string, NavigationFilterDefinition>,
-> = {
-  [K in keyof Definition]?: NavigationFilterValue<Definition[K]>
-}
+export type NavigationFiltersState<Definition extends Record<string, NavigationFilterDefinition>> =
+  {
+    [K in keyof Definition]?: NavigationFilterValue<Definition[K]>
+  }

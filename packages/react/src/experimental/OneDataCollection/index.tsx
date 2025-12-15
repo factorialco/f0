@@ -1,15 +1,8 @@
-import {
-  FiltersDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
+import { FiltersDefinition, RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { experimentalComponent } from "@/lib/experimental"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
-import {
-  OneDataCollectionComp,
-  OneDataCollectionProps,
-} from "./OneDatacollection"
+import { OneDataCollectionComp, OneDataCollectionProps } from "./OneDatacollection"
 import { DataCollectionSettingsProvider } from "./Settings/SettingsProvider"
 import { SummariesDefinition } from "./summary"
 import { GroupingDefinition } from "./types"
@@ -44,9 +37,6 @@ const DataCollection = <
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const OneDataCollection = experimentalComponent(
-  "OneDataCollection",
-  DataCollection
-)
+const OneDataCollection = experimentalComponent("OneDataCollection", DataCollection)
 
 export { OneDataCollection }

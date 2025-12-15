@@ -3,12 +3,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils.ts"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerOverlay,
-  DrawerTrigger,
-} from "@/ui/drawer"
+import { Drawer, DrawerContent, DrawerOverlay, DrawerTrigger } from "@/ui/drawer"
 import { useState } from "react"
 import { DropdownItemContent } from "./DropdownItem"
 import {
@@ -20,10 +15,7 @@ import {
 
 const privateProps = [] as const
 
-type DropdownProps = Omit<
-  DropdownInternalProps,
-  (typeof privateProps)[number]
-> & {
+type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps)[number]> & {
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
@@ -98,10 +90,7 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
               >
                 {item.icon && (
                   <span
-                    className={cn(
-                      "h-5 w-5 text-f1-icon",
-                      item.critical && "text-f1-icon-critical"
-                    )}
+                    className={cn("h-5 w-5 text-f1-icon", item.critical && "text-f1-icon-critical")}
                   >
                     <F0Icon icon={item.icon} size="md" />
                   </span>
@@ -109,9 +98,7 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
                 <span
                   className={cn(
                     "font-medium",
-                    item.critical
-                      ? "text-f1-foreground-critical"
-                      : "text-f1-foreground"
+                    item.critical ? "text-f1-foreground-critical" : "text-f1-foreground"
                   )}
                 >
                   {item.label}

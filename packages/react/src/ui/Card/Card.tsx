@@ -8,12 +8,7 @@ import InfoCircleLine from "@/icons/app/InfoCircleLine"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../tooltip"
 
 /**
  * Card component Root
@@ -62,31 +57,25 @@ Card.displayName = "Card"
 /**
  * Card Header
  */
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-row gap-1.5", className)}
-    {...props}
-  />
-))
+const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("flex flex-row gap-1.5", className)} {...props} />
+  )
+)
 CardHeader.displayName = "CardHeader"
 
 /**
  * Card Title
  */
-const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn("text-base font-medium text-f1-foreground", className)}
-    {...props}
-  />
-))
+const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
+    <h3
+      ref={ref}
+      className={cn("text-base font-medium text-f1-foreground", className)}
+      {...props}
+    />
+  )
+)
 CardTitle.displayName = "CardTitle"
 
 /**
@@ -98,10 +87,7 @@ const CardSubtitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn(
-      "line-clamp-1 text-base font-normal text-f1-foreground-secondary",
-      className
-    )}
+    className={cn("line-clamp-1 text-base font-normal text-f1-foreground-secondary", className)}
     {...props}
   />
 ))
@@ -110,29 +96,25 @@ CardSubtitle.displayName = "CardSubtitle"
 /**
  * Card Info
  */
-const CardInfo = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, content }, ref) => (
-  <div
-    ref={ref}
-    className={cn("-ml-1 flex h-6 w-6 items-center justify-center", className)}
-  >
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger
-          className="h-5 w-5 cursor-help text-f1-foreground-secondary"
-          aria-label={content}
-        >
-          <F0Icon icon={InfoCircleLine} size="md" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{content}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  </div>
-))
+const CardInfo = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, content }, ref) => (
+    <div ref={ref} className={cn("-ml-1 flex h-6 w-6 items-center justify-center", className)}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger
+            className="h-5 w-5 cursor-help text-f1-foreground-secondary"
+            aria-label={content}
+          >
+            <F0Icon icon={InfoCircleLine} size="md" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{content}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  )
+)
 CardInfo.displayName = "CardInfo"
 
 /**
@@ -165,44 +147,31 @@ CardLink.displayName = "CardLink"
 /**
  * Card Content
  */
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("relative flex grow flex-col", className)}
-    {...props}
-  />
-))
+const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("relative flex grow flex-col", className)} {...props} />
+  )
+)
 CardContent.displayName = "CardContent"
 
 /**
  * Card Footer
  */
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("flex items-center", className)} {...props} />
-))
+const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("flex items-center", className)} {...props} />
+  )
+)
 CardFooter.displayName = "CardFooter"
 
 /**
  * Card Comment
  */
-const CardComment = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(function CardComment({ className, ...props }, ref) {
-  return (
-    <div
-      ref={ref}
-      className={cn("flex text-3xl font-semibold", className)}
-      {...props}
-    />
-  )
-})
+const CardComment = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  function CardComment({ className, ...props }, ref) {
+    return <div ref={ref} className={cn("flex text-3xl font-semibold", className)} {...props} />
+  }
+)
 CardFooter.displayName = "CardComment"
 
 export {

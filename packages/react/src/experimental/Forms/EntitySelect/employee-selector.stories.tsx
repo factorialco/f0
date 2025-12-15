@@ -216,9 +216,7 @@ export const Default: Story = {
     const [fetchEmployees, setFetchEmployees] = useState<FetchEmployee[]>([])
     const [selectedGroup, setSelectedGroup] = useState<string>("all")
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
-    const [selectedEmployees, setSelectedEmployees] = useState<
-      EntitySelectEntity[]
-    >([])
+    const [selectedEmployees, setSelectedEmployees] = useState<EntitySelectEntity[]>([])
 
     const onOpenChange = (open: boolean) => {
       if (open) {
@@ -297,9 +295,7 @@ export const WithActions: Story = {
     const [fetchEmployees, setFetchEmployees] = useState<FetchEmployee[]>([])
     const [selectedGroup, setSelectedGroup] = useState<string>("all")
     const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
-    const [selectedEmployees, setSelectedEmployees] = useState<
-      EntitySelectEntity[]
-    >([])
+    const [selectedEmployees, setSelectedEmployees] = useState<EntitySelectEntity[]>([])
 
     const onOpenChange = (open: boolean) => {
       if (open) {

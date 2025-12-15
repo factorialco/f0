@@ -44,10 +44,9 @@ export type FilterValueByKey<
  * This represents the active filter selections at any given time.
  * @template Definition - Record of filter definitions
  */
-export type FiltersState<Definition extends Record<string, FilterDefinition>> =
-  {
-    [K in keyof Definition]?: FilterValue<Definition[K]>
-  }
+export type FiltersState<Definition extends Record<string, FilterDefinition>> = {
+  [K in keyof Definition]?: FilterValue<Definition[K]>
+}
 
 export type FiltersMode = "default" | "compact"
 
@@ -57,20 +56,14 @@ export type FiltersMode = "default" | "compact"
  * Used to configure the available filters for a collection.
  * @template Keys - String literal type for filter keys
  */
-export type FiltersDefinition<Keys extends string = string> = Record<
-  Keys,
-  FilterDefinition
->
+export type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>
 
 /**
  * Configuration options for filters in a collection.
  * Defines the structure and behavior of available filters.
  * @template FilterKeys - String literal type for filter keys
  */
-export type FilterOptions<FilterKeys extends string> = Record<
-  FilterKeys,
-  FilterDefinition
->
+export type FilterOptions<FilterKeys extends string> = Record<FilterKeys, FilterDefinition>
 
 /**
  * Extracts the current filters type from filter options.
@@ -96,10 +89,7 @@ export type PresetDefinition<Filters extends FiltersDefinition> = {
   /** Filter configuration to apply when this preset is selected */
   filter: FiltersState<Filters>
   /** Function to count the number of items that match the filter */
-  itemsCount?: (
-    filters: FiltersState<Filters>
-  ) => Promise<number | undefined> | number | undefined
+  itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined
 }
 
-export type PresetsDefinition<Filters extends FiltersDefinition> =
-  PresetDefinition<Filters>[]
+export type PresetsDefinition<Filters extends FiltersDefinition> = PresetDefinition<Filters>[]

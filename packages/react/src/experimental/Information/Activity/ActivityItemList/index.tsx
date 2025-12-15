@@ -24,18 +24,13 @@ const sortGroups = (groups: GroupEntry[]) => {
   })
 }
 
-export type ActivityItemListProps = Pick<
-  SectionProps,
-  "items" | "onClickItem"
-> & {
+export type ActivityItemListProps = Pick<SectionProps, "items" | "onClickItem"> & {
   onEndReached?: () => void
   onEndReachedItemsThreshold?: number
   loadingMoreItems?: boolean
 }
 
-const Separator = () => (
-  <div className="-mx-2 h-px bg-f1-background-secondary" />
-)
+const Separator = () => <div className="-mx-2 h-px bg-f1-background-secondary" />
 
 export const BaseActivityItemList = ({
   items,
@@ -59,9 +54,7 @@ export const BaseActivityItemList = ({
     }
   }, 1000)
 
-  const groups = sortGroups(
-    Object.entries(categorizedItems).filter(([_, items]) => !!items.length)
-  )
+  const groups = sortGroups(Object.entries(categorizedItems).filter(([_, items]) => !!items.length))
 
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -70,9 +63,7 @@ export const BaseActivityItemList = ({
           <Section
             title={
               group in translations.date.groups
-                ? translations.date.groups[
-                    group as keyof typeof translations.date.groups
-                  ]
+                ? translations.date.groups[group as keyof typeof translations.date.groups]
                 : group
             }
             items={items}
@@ -97,20 +88,11 @@ export const ActivityItemListSkeleton = () => {
     <div className="flex flex-col gap-2 p-2">
       <Section.Skeleton title={translations.date.groups.today} numItems={1} />
       <Separator />
-      <Section.Skeleton
-        title={translations.date.groups.yesterday}
-        numItems={3}
-      />
+      <Section.Skeleton title={translations.date.groups.yesterday} numItems={3} />
       <Separator />
-      <Section.Skeleton
-        title={translations.date.groups.lastMonth}
-        numItems={5}
-      />
+      <Section.Skeleton title={translations.date.groups.lastMonth} numItems={5} />
     </div>
   )
 }
 
-export const ActivityItemList = withSkeleton(
-  BaseActivityItemList,
-  ActivityItemListSkeleton
-)
+export const ActivityItemList = withSkeleton(BaseActivityItemList, ActivityItemListSkeleton)

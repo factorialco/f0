@@ -11,8 +11,7 @@ const meta = {
       description: "The items to display in the list.",
     },
     renderListItem: {
-      description:
-        "What to render as a list item (items outside of the overflow list).",
+      description: "What to render as a list item (items outside of the overflow list).",
     },
     className: {
       description: "Additional styling for the container.",

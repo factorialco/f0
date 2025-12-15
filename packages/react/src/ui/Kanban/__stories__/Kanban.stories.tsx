@@ -116,13 +116,7 @@ export const ProjectStatuses: Story = {
               return lane?.items.findIndex((item) => item.id === id) ?? -1
             },
             onMove: async (fromLaneId, toLaneId, source, destiny) => {
-              await console.log(
-                "DND onMove",
-                fromLaneId,
-                toLaneId,
-                source,
-                destiny
-              )
+              await console.log("DND onMove", fromLaneId, toLaneId, source, destiny)
               // Simulate optimistic lock conflict when moving to 'review'
               if (toLaneId === "review") {
                 await new Promise((r) => setTimeout(r, 50))
@@ -141,9 +135,7 @@ export const ProjectStatuses: Story = {
                     if (lane.id === fromLaneId) {
                       return {
                         ...lane,
-                        items: lane.items.filter(
-                          (item) => item.id !== source.id
-                        ),
+                        items: lane.items.filter((item) => item.id !== source.id),
                       }
                     }
                     if (lane.id === toLaneId) {
@@ -176,9 +168,7 @@ export const ProjectStatuses: Story = {
                       )
                       if (targetIndex >= 0) {
                         const insertIndex =
-                          destiny.position === "above"
-                            ? targetIndex
-                            : targetIndex + 1
+                          destiny.position === "above" ? targetIndex : targetIndex + 1
                         newItems.splice(insertIndex, 0, source)
                       } else {
                         newItems.push(source)
@@ -331,16 +321,10 @@ export const SimpleOnMoveTest: Story = {
 
         if (fromLane && toLane) {
           // Remover de la lane origen
-          fromLane.items = fromLane.items.filter(
-            (item) => item.id !== sourceRecord.id
-          )
+          fromLane.items = fromLane.items.filter((item) => item.id !== sourceRecord.id)
 
           // Añadir a la lane destino
-          if (
-            destinyRecord &&
-            destinyRecord.record &&
-            destinyRecord.record.id
-          ) {
+          if (destinyRecord && destinyRecord.record && destinyRecord.record.id) {
             // Si hay un record destino, posicionar relativamente
             const targetIndex = toLane.items.findIndex(
               (item) => item.id === destinyRecord.record.id
@@ -373,8 +357,7 @@ export const SimpleOnMoveTest: Story = {
     const simulateMoveToLaneWithItems = () => {
       const fromLane = lanes.find((l) => l.id === "target-empty")
       const sourceRecord = fromLane?.items[0]
-      const targetRecord = lanes.find((l) => l.id === "target-with-items")
-        ?.items[0]
+      const targetRecord = lanes.find((l) => l.id === "target-with-items")?.items[0]
       if (sourceRecord && targetRecord) {
         void handleMove("target-empty", "target-with-items", sourceRecord, {
           record: targetRecord,
@@ -402,9 +385,7 @@ export const SimpleOnMoveTest: Story = {
           </button>
         </div>
         <div className="bg-gray-100 rounded p-4">
-          <h3 className="mb-2 font-semibold">
-            Callback Calls ({callbackCalls.length}):
-          </h3>
+          <h3 className="mb-2 font-semibold">Callback Calls ({callbackCalls.length}):</h3>
           {callbackCalls.length === 0 ? (
             <p className="text-gray-500" data-testid="no-calls">
               No moves triggered yet
@@ -445,12 +426,7 @@ export const SimpleOnMoveTest: Story = {
               getIndexById,
               onMove: handleMove,
             }}
-            renderCard={(
-              item: Task,
-              index: number,
-              total: number,
-              laneId?: string
-            ) => (
+            renderCard={(item: Task, index: number, total: number, laneId?: string) => (
               <KanbanCard<Task>
                 drag={{
                   id: item.id,

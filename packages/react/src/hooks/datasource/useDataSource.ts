@@ -106,19 +106,15 @@ export function useDataSource<
   deps: ReadonlyArray<unknown> = []
 ): DataSource<R, FiltersSchema, Sortings, Grouping> {
   /******************* FILTERS STATE***************************************************/
-  const [currentFilters, _setCurrentFilters] = useState<
-    FiltersState<FiltersSchema>
-  >(externalCurrentFilters ?? defaultFilters ?? {})
+  const [currentFilters, _setCurrentFilters] = useState<FiltersState<FiltersSchema>>(
+    externalCurrentFilters ?? defaultFilters ?? {}
+  )
 
-  const setCurrentFilters: Dispatch<
-    SetStateAction<FiltersState<FiltersSchema>>
-  > = (value) => {
+  const setCurrentFilters: Dispatch<SetStateAction<FiltersState<FiltersSchema>>> = (value) => {
     if (typeof value === "function") {
       _setCurrentFilters((prev) => {
         const next = (
-          value as (
-            prevState: FiltersState<FiltersSchema>
-          ) => FiltersState<FiltersSchema>
+          value as (prevState: FiltersState<FiltersSchema>) => FiltersState<FiltersSchema>
         )(prev)
         return JSON.stringify(next) === JSON.stringify(prev) ? prev : next
       })
@@ -136,10 +132,9 @@ export function useDataSource<
   }, [externalCurrentFilters])
 
   /******************* SORTINGS ***************************************************/
-  const [currentSortings, setCurrentSortings] =
-    useState<SortingsState<Sortings> | null>(
-      externalCurrentSortings ?? defaultSortings ?? null
-    )
+  const [currentSortings, setCurrentSortings] = useState<SortingsState<Sortings> | null>(
+    externalCurrentSortings ?? defaultSortings ?? null
+  )
 
   useDeepCompareEffect(() => {
     if (!externalCurrentSortings) return
@@ -154,9 +149,10 @@ export function useDataSource<
 
   const [currentSearch, setCurrentSearch] = useState<string | undefined>()
 
-  const [debouncedCurrentSearch, setDebouncedCurrentSearch] = useDebounceValue<
-    string | undefined
-  >(currentSearch, 200)
+  const [debouncedCurrentSearch, setDebouncedCurrentSearch] = useDebounceValue<string | undefined>(
+    currentSearch,
+    200
+  )
 
   useEffect(() => {
     if (searchOptions.sync) return
@@ -180,9 +176,7 @@ export function useDataSource<
     () =>
       grouping?.mandatory
         ? {
-            field: Object.keys(
-              grouping.groupBy
-            )[0] as keyof typeof grouping.groupBy,
+            field: Object.keys(grouping.groupBy)[0] as keyof typeof grouping.groupBy,
             order: "asc" as const,
           }
         : undefined,
@@ -190,15 +184,13 @@ export function useDataSource<
     [JSON.stringify(grouping)]
   )
 
-  const [currentGrouping, setCurrentGrouping] = useState<
-    GroupingState<R, Grouping>
-  >(externalCurrentGrouping ?? externalDefaultGrouping ?? defaultGrouping)
+  const [currentGrouping, setCurrentGrouping] = useState<GroupingState<R, Grouping>>(
+    externalCurrentGrouping ?? externalDefaultGrouping ?? defaultGrouping
+  )
 
   useEffect(() => {
     if (grouping?.mandatory && !currentGrouping?.field) {
-      setCurrentGrouping(
-        externalCurrentGrouping ?? externalDefaultGrouping ?? defaultGrouping
-      )
+      setCurrentGrouping(externalCurrentGrouping ?? externalDefaultGrouping ?? defaultGrouping)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grouping?.mandatory, currentGrouping?.field, defaultGrouping])

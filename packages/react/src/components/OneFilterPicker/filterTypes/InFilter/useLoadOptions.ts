@@ -27,10 +27,7 @@ export function cacheLabel<T>(cacheKey: string, value: T, label: string): void {
 /**
  * Get a cached label for a specific value in a schema
  */
-export function getCachedLabel<T>(
-  cacheKey: string,
-  value: T
-): string | undefined {
+export function getCachedLabel<T>(cacheKey: string, value: T): string | undefined {
   const labelKey = `${cacheKey}:${String(value)}`
   return labelCache.get(labelKey)
 }
@@ -60,8 +57,7 @@ export async function loadOptions<T>(
     return optionsCache.get(cacheKey) as InFilterOptionItem<T>[]
   }
 
-  const optionsProvider =
-    typeof optionsDef === "function" ? optionsDef : () => optionsDef
+  const optionsProvider = typeof optionsDef === "function" ? optionsDef : () => optionsDef
 
   const options = await optionsProvider()
 
@@ -84,8 +80,7 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const optionsProp =
-    "options" in schema.options ? schema.options.options : undefined
+  const optionsProp = "options" in schema.options ? schema.options.options : undefined
   const source = "source" in schema.options ? schema.options.source : undefined
 
   const dataSource = useDataSource(
@@ -107,8 +102,11 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
     [source]
   )
 
-  const { data, isInitialLoading, loadMore, isLoadingMore, paginationInfo } =
-    useData({ ...dataSource, currentSearch: search }, {}, [source])
+  const { data, isInitialLoading, loadMore, isLoadingMore, paginationInfo } = useData(
+    { ...dataSource, currentSearch: search },
+    {},
+    [source]
+  )
 
   const materializeOptions = useCallback(
     async (clearCache = false) => {
@@ -122,16 +120,10 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
       try {
         setIsLoading(true)
         setError(null)
-        const result = await loadOptions(
-          cacheKey,
-          optionsProp,
-          schema.options.cache
-        )
+        const result = await loadOptions(cacheKey, optionsProp, schema.options.cache)
         setOptions(result)
       } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Failed to load options")
-        )
+        setError(err instanceof Error ? err : new Error("Failed to load options"))
       } finally {
         setIsLoading(false)
       }
@@ -148,11 +140,7 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
         const mappedOptions = data.records.map(schema.options.mapOptions)
         setOptions(mappedOptions)
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to map options from source")
-        )
+        setError(err instanceof Error ? err : new Error("Failed to map options from source"))
       }
     }
   }, [data.records, schema.options])
@@ -163,9 +151,7 @@ export function useLoadOptions<T, R extends RecordType = RecordType>({
     }
   }, [materializeOptions, source])
 
-  const isActuallyLoading = source
-    ? isInitialLoading || isLoadingMore
-    : isLoading
+  const isActuallyLoading = source ? isInitialLoading || isLoadingMore : isLoading
 
   return {
     options,

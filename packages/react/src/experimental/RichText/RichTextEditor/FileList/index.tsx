@@ -1,10 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { FileItem } from "../../FileItem"
-import {
-  getAcceptFileTypeString,
-  handleAddFiles,
-  handleRemoveFile,
-} from "../utils/files"
+import { getAcceptFileTypeString, handleAddFiles, handleRemoveFile } from "../utils/files"
 import { filesConfig } from "../utils/types"
 
 interface FileListProps {
@@ -15,13 +11,7 @@ interface FileListProps {
   fileInputRef: React.RefObject<HTMLInputElement>
 }
 
-const FileList = ({
-  filesConfig,
-  files,
-  setFiles,
-  disabled,
-  fileInputRef,
-}: FileListProps) => {
+const FileList = ({ filesConfig, files, setFiles, disabled, fileInputRef }: FileListProps) => {
   if (!filesConfig) return null
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,9 +19,7 @@ const FileList = ({
     if (selectedFiles && selectedFiles.length > 0) {
       let fileArray = Array.from(selectedFiles)
       if (filesConfig?.maxFileSize) {
-        fileArray = fileArray.filter(
-          (file) => file.size <= filesConfig.maxFileSize!
-        )
+        fileArray = fileArray.filter((file) => file.size <= filesConfig.maxFileSize!)
       }
       handleAddFiles(fileArray, files, filesConfig, setFiles)
     }
@@ -69,8 +57,7 @@ const FileList = ({
                   actions={[
                     {
                       label: "Delete",
-                      onClick: () =>
-                        handleRemoveFile(index, files, filesConfig, setFiles),
+                      onClick: () => handleRemoveFile(index, files, filesConfig, setFiles),
                     },
                   ]}
                   disabled={disabled}

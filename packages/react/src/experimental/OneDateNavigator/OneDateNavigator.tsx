@@ -1,7 +1,4 @@
-import {
-  DatePickerPopup,
-  DatePickerPopupProps,
-} from "@/ui/DatePickerPopup/DatePickerPopup"
+import { DatePickerPopup, DatePickerPopupProps } from "@/ui/DatePickerPopup/DatePickerPopup"
 import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
 import { useEffect, useMemo, useState } from "react"
 import { granularityDefinitions } from "../OneCalendar"
@@ -9,8 +6,7 @@ import { DateRange, DateRangeComplete } from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 
-export interface OneDatePickerProps
-  extends Omit<DatePickerPopupProps, "children"> {
+export interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children"> {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }
@@ -28,9 +24,7 @@ export function OneDateNavigator({
   value,
   ...props
 }: OneDatePickerProps) {
-  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
-    defaultValue ?? value
-  )
+  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(defaultValue ?? value)
 
   useEffect(() => {
     if (isSameDatePickerValue(value, localValue)) {

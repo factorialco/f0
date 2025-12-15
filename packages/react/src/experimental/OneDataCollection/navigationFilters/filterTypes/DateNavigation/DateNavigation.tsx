@@ -4,11 +4,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { type DatePickerValue } from "@/ui/DatePickerPopup"
 import { DateNavigationProps } from "./types"
 
-export function DateNavigation({
-  filter,
-  value,
-  onChange,
-}: DateNavigationProps) {
+export function DateNavigation({ filter, value, onChange }: DateNavigationProps) {
   const i18n = useI18n()
   const options = {
     granularity: "day" as const,

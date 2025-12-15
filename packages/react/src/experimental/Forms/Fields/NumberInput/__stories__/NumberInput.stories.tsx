@@ -60,14 +60,7 @@ export const WithStep: Story = {
   },
   render: (props) => {
     const [value, setValue] = useState<number | null>(props.value ?? 1)
-    return (
-      <NumberInput
-        {...props}
-        value={value}
-        onChange={setValue}
-        units={props.units}
-      />
-    )
+    return <NumberInput {...props} value={value} onChange={setValue} units={props.units} />
   },
 }
 

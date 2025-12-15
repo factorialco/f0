@@ -21,80 +21,43 @@ describe("isSameDatePickerValue", () => {
   })
 
   it("returns false when one value is undefined and the other is not", () => {
-    const value = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31)
-    )
+    const value = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31))
 
     expect(isSameDatePickerValue(undefined, value)).toBe(false)
     expect(isSameDatePickerValue(value, undefined)).toBe(false)
   })
 
   it("returns true when both values have the same dates and granularity", () => {
-    const value1 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31),
-      "month"
-    )
-    const value2 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31),
-      "month"
-    )
+    const value1 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31), "month")
+    const value2 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31), "month")
 
     expect(isSameDatePickerValue(value1, value2)).toBe(true)
   })
 
   it("returns false when dates are different", () => {
-    const value1 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31)
-    )
-    const value2 = createDatePickerValue(
-      new Date(2023, 1, 1),
-      new Date(2023, 1, 28)
-    )
+    const value1 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31))
+    const value2 = createDatePickerValue(new Date(2023, 1, 1), new Date(2023, 1, 28))
 
     expect(isSameDatePickerValue(value1, value2)).toBe(false)
   })
 
   it("returns false when from dates are different", () => {
-    const value1 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31)
-    )
-    const value2 = createDatePickerValue(
-      new Date(2023, 0, 2),
-      new Date(2023, 0, 31)
-    )
+    const value1 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31))
+    const value2 = createDatePickerValue(new Date(2023, 0, 2), new Date(2023, 0, 31))
 
     expect(isSameDatePickerValue(value1, value2)).toBe(false)
   })
 
   it("returns false when to dates are different", () => {
-    const value1 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31)
-    )
-    const value2 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 30)
-    )
+    const value1 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31))
+    const value2 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 30))
 
     expect(isSameDatePickerValue(value1, value2)).toBe(false)
   })
 
   it("returns false when granularities are different", () => {
-    const value1 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31),
-      "month"
-    )
-    const value2 = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31),
-      "day"
-    )
+    const value1 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31), "month")
+    const value2 = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31), "day")
 
     expect(isSameDatePickerValue(value1, value2)).toBe(false)
   })
@@ -114,10 +77,7 @@ describe("isSameDatePickerValue", () => {
   })
 
   it("returns false when one value has no date range", () => {
-    const validValue = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 31)
-    )
+    const validValue = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 31))
 
     // Create a value with undefined date range (this might not be realistic in real usage but tests the function's robustness)
     const invalidValue: DatePickerValue = {
@@ -130,16 +90,8 @@ describe("isSameDatePickerValue", () => {
   })
 
   it("handles values with different granularity types correctly", () => {
-    const weekValue = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 7),
-      "week"
-    )
-    const monthValue = createDatePickerValue(
-      new Date(2023, 0, 1),
-      new Date(2023, 0, 7),
-      "month"
-    )
+    const weekValue = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 7), "week")
+    const monthValue = createDatePickerValue(new Date(2023, 0, 1), new Date(2023, 0, 7), "month")
 
     expect(isSameDatePickerValue(weekValue, monthValue)).toBe(false)
   })

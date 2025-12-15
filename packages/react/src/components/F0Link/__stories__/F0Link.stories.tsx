@@ -71,12 +71,7 @@ export const InteractiveExamples: Story = {
       <F0Link {...args} variant="link" href="/internal">
         Internal link
       </F0Link>
-      <F0Link
-        {...args}
-        variant="link"
-        href="https://example.com"
-        target="_blank"
-      >
+      <F0Link {...args} variant="link" href="https://example.com" target="_blank">
         External link
       </F0Link>
     </div>

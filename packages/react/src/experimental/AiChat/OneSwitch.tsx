@@ -1,11 +1,6 @@
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { motion } from "motion/react"
 import { useState } from "react"
@@ -51,9 +46,7 @@ export const OneSwitch = ({
                   setOpen(val)
                 }}
                 checked={open}
-                aria-label={
-                  open ? translations.ai.closeChat : translations.ai.openChat
-                }
+                aria-label={open ? translations.ai.closeChat : translations.ai.openChat}
                 className={cn(
                   "group relative h-8 w-12 rounded-full border-none bg-f1-background-inverse-secondary transition-all hover:bg-f1-background-hover",
                   "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.04)] data-[state=checked]:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.6)]",
@@ -72,16 +65,11 @@ export const OneSwitch = ({
                     "block h-[1.375rem] w-[1.375rem] translate-x-[0.3125rem] rounded-full transition-transform duration-300 data-[state=checked]:translate-x-[1.3125rem]"
                   )}
                   style={{
-                    transitionTimingFunction:
-                      "cubic-bezier(0.175,0.885,0.32,1.5)",
+                    transitionTimingFunction: "cubic-bezier(0.175,0.885,0.32,1.5)",
                   }}
                 >
                   <div>
-                    <OneIcon
-                      size="sm"
-                      background={open ? "white" : undefined}
-                      hover={isHover}
-                    />
+                    <OneIcon size="sm" background={open ? "white" : undefined} hover={isHover} />
                   </div>
                 </SwitchPrimitive.Thumb>
               </SwitchPrimitive.Root>

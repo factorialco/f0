@@ -1,16 +1,6 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from "react"
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react"
 import { MentionItem } from "../MentionItem"
-import {
-  MentionedUser,
-  MentionItemComponentProps,
-  MentionListRef,
-} from "../types"
+import { MentionedUser, MentionItemComponentProps, MentionListRef } from "../types"
 
 export interface MentionListProps {
   items: MentionedUser[]
@@ -74,9 +64,7 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
       <div className="flex max-h-72 w-60 flex-col gap-2 overflow-y-auto rounded-md border border-solid border-f1-border bg-f1-background p-0.5 drop-shadow-sm">
         {items.length === 0 ? (
           <div className="p-2">
-            <p className="text-neutral-40 text-sm font-medium">
-              No results found
-            </p>
+            <p className="text-neutral-40 text-sm font-medium">No results found</p>
           </div>
         ) : (
           items.map((item, index) => (
@@ -86,11 +74,7 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
               onMouseEnter={() => setSelectedIndex(index)}
               className="cursor-pointer bg-f1-background"
             >
-              <Component
-                item={item}
-                index={index}
-                selected={index === selectedIndex}
-              />
+              <Component item={item} index={index} selected={index === selectedIndex} />
             </div>
           ))
         )}

@@ -7,15 +7,14 @@ import * as OneFiltersPickerStories from "./OneFilterPicker.stories"
 
 ## Introduction
 
-Filters let users narrow down the results in the dataset by one or more
-criteria.
+Filters let users narrow down the results in the dataset by one or more criteria.
 
 <Canvas of={OneFiltersPickerStories.Default} meta={OneFiltersPickerStories} />
 
 ## Presets
 
-Presets are predefined filter combinations. For example, if you have a
-department filter, you can create a preset to show only the Engineering team
+Presets are predefined filter combinations. For example, if you have a department filter, you can
+create a preset to show only the Engineering team
 
 <Canvas
   of={OneFiltersPickerStories.WithPresets}
@@ -24,9 +23,9 @@ department filter, you can create a preset to show only the Engineering team
 
 ## Setting Filters, presets and use them in the data source
 
-To enable filters in your data collection component, supply the filter attribute
-in the source prop, for the presets use the presets attribute, remember you need
-to define the filters first and apply a preset over an existing filter.
+To enable filters in your data collection component, supply the filter attribute in the source prop,
+for the presets use the presets attribute, remember you need to define the filters first and apply a
+preset over an existing filter.
 
 Example:
 
@@ -57,8 +56,7 @@ const presets: PresetsDefinition<typeof filters> = [
 
 ### Default layout
 
-The default layout is a single component that renders the filters, presets and
-chips list.
+The default layout is a single component that renders the filters, presets and chips list.
 
 ```tsx
 <OneFiltersPicker
@@ -84,12 +82,10 @@ The `in` filter is used to filter the data by a list of values.
 
 #### Options
 
-- `options`:
-  `() => (Promise<{value: string, label: T}[]> | {value: string, label: T}[])`
-  The list of options to filter the data. NOTE: By default the options are not
-  cached so each time the filter is opened, the options will be loaded again
-  (and to generate the chip label the options will be loaded again) You can
-  cache it by yourself or use the `cache` option.
+- `options`: `() => (Promise<{value: string, label: T}[]> | {value: string, label: T}[])` The list
+  of options to filter the data. NOTE: By default the options are not cached so each time the filter
+  is opened, the options will be loaded again (and to generate the chip label the options will be
+  loaded again) You can cache it by yourself or use the `cache` option.
 - `cache?`: `boolean` Whether to cache the options.
 
 ```tsx
@@ -113,17 +109,15 @@ This returns an array of values.
 
 ### Date
 
-The `date` filter is used to filter the data by a date value. The filter allows
-limit user select to a min and max date.
+The `date` filter is used to filter the data by a date value. The filter allows limit user select to
+a min and max date.
 
 #### Options
 
 - `minDate?`: The minimum date that the user can select.
 - `maxDate?`: The maximum date that the user can select.
-- `mode?`: The mode of the date filter, can be `single` (default), `range` or
-  `multiple`.
-- `view?`: The view of the date filter, can be `day` (default), `week`, `month`
-  or `year`.
+- `mode?`: The mode of the date filter, can be `single` (default), `range` or `multiple`.
+- `view?`: The view of the date filter, can be `day` (default), `week`, `month` or `year`.
 
 ```tsx
 const filters: FiltersDefinition<typeof mockUsers> = {
@@ -152,17 +146,15 @@ const filters: FiltersDefinition<typeof mockUsers> = {
 
 ### Number
 
-The `number` filter is used to filter the data by a number value. The filter
-allows limit user select to a min and max number.
+The `number` filter is used to filter the data by a number value. The filter allows limit user
+select to a min and max number.
 
 #### Options
 
 - `min?`: The minimum number that the user can select.
 - `max?`: The maximum number that the user can select.
-- `modes?`: The modes of the number filter, can be `range` (default) or/and
-  `single`.
-- `openCloseToggle?`: Whether to show a toggle to open and close the range.
-  Default is `false`.
+- `modes?`: The modes of the number filter, can be `range` (default) or/and `single`.
+- `openCloseToggle?`: Whether to show a toggle to open and close the range. Default is `false`.
 
 ```tsx
 const filters: FiltersDefinition<typeof mockUsers> = {
@@ -226,8 +218,7 @@ To add a new filter type follow these steps:
 1. Create a folder in the `OneFiltersPicker/filters/FilterTypes` folder. (e.g.
    `OneFiltersPicker/filters/FilterTypes/myFilterType`)
 
-2. Create a `index.tsx` file in the new folder and export the filter type
-   definition.
+2. Create a `index.tsx` file in the new folder and export the filter type definition.
 
 ```tsx
 export const myFilter: FilterTypeDefinition<number> = {
@@ -244,8 +235,8 @@ export const myFilter: FilterTypeDefinition<number> = {
 export type MyFilterDefinition = BaseFilterDefinition<"myFilter">
 ```
 
-3. Import the new filter type in the `OneFiltersPicker/filters/filters.ts` file
-   and add it to the `filterTypes` object.
+3. Import the new filter type in the `OneFiltersPicker/filters/filters.ts` file and add it to the
+   `filterTypes` object.
 
 ```tsx
 import { myFilter, MyFilterDefinition } from "./FilterTypes/myFilter"

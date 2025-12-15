@@ -15,16 +15,11 @@ const meta: Meta<typeof SelectQuestion> = {
       { type: "question" as const, question: args },
     ])
 
-    const question =
-      elements[0] && "question" in elements[0] ? elements[0].question : {}
+    const question = elements[0] && "question" in elements[0] ? elements[0].question : {}
 
     return (
       <div className="max-w-[750px]">
-        <CoCreationFormProvider
-          elements={elements}
-          onChange={setElements}
-          isEditMode
-        >
+        <CoCreationFormProvider elements={elements} onChange={setElements} isEditMode>
           <SelectQuestion {...args} {...question} />
         </CoCreationFormProvider>
       </div>

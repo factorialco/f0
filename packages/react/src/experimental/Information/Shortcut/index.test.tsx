@@ -7,10 +7,7 @@ import {
 } from "../../../lib/providers/user-platafform/UserPlatformProvider"
 import { Shortcut } from "./index"
 
-const renderShortcut = (
-  keys: string[],
-  { platform = "mac" }: { platform?: Platform } = {}
-) => {
+const renderShortcut = (keys: string[], { platform = "mac" }: { platform?: Platform } = {}) => {
   return render(
     <UserPlatformProvider platform={platform}>
       <I18nProvider translations={defaultTranslations}>

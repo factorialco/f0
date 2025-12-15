@@ -61,9 +61,7 @@ const headcountProjectionDataConfig = {
   },
 }
 
-export const DashedArea: Meta<
-  typeof AreaChart<typeof headcountProjectionDataConfig>
-> = {
+export const DashedArea: Meta<typeof AreaChart<typeof headcountProjectionDataConfig>> = {
   args: {
     dataConfig: headcountProjectionDataConfig,
     xAxis: {
@@ -96,9 +94,7 @@ const teamHeadcountDataConfig = {
   },
 }
 
-export const MultipleAreas: Meta<
-  typeof AreaChart<typeof teamHeadcountDataConfig>
-> = {
+export const MultipleAreas: Meta<typeof AreaChart<typeof teamHeadcountDataConfig>> = {
   args: {
     dataConfig: teamHeadcountDataConfig,
     xAxis: {

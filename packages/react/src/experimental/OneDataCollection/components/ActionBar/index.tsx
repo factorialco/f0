@@ -1,9 +1,6 @@
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
-import {
-  ButtonDropdownGroup,
-  F0ButtonDropdown,
-} from "@/components/F0ButtonDropdown"
+import { ButtonDropdownGroup, F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
@@ -28,9 +25,7 @@ export type ActionBarGroup = {
 
 export type ActionBarItem = ActionType
 
-function isActionGroup(
-  item: ActionBarItem | ActionBarGroup
-): item is ActionBarGroup {
+function isActionGroup(item: ActionBarItem | ActionBarGroup): item is ActionBarGroup {
   return "items" in item
 }
 
@@ -111,9 +106,7 @@ export const ActionBar = ({
   const i18n = useI18n()
 
   const selectedText =
-    selectedNumber === 1
-      ? i18n.status.selected.singular
-      : i18n.status.selected.plural
+    selectedNumber === 1 ? i18n.status.selected.singular : i18n.status.selected.plural
 
   const visibleSecondaryActions = secondaryActions.slice(0, 2)
   const dropdownActions = secondaryActions.slice(2).map((action) => ({
@@ -157,9 +150,7 @@ export const ActionBar = ({
 
   const getActionByValue = useCallback(
     (value: string) => {
-      return primaryActions
-        .flatMap((group) => group.items)
-        .find((item) => item.label === value)
+      return primaryActions.flatMap((group) => group.items).find((item) => item.label === value)
     },
     [primaryActions]
   )
@@ -235,9 +226,7 @@ export const ActionBar = ({
                 <Alert message={warningMessage} />
               ) : (
                 <Fragment key="desktop-actions">
-                  {dropdownActions.length > 0 && (
-                    <Dropdown items={dropdownActions} />
-                  )}
+                  {dropdownActions.length > 0 && <Dropdown items={dropdownActions} />}
                   {visibleSecondaryActions
                     .slice()
                     .reverse()

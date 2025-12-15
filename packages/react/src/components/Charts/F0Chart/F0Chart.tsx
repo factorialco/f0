@@ -11,10 +11,7 @@ export interface F0ChartProps {
   options?: Partial<Omit<echarts.EChartsOption, "grid" | "emphasis">>
 }
 
-export const F0Chart = ({
-  showLegend = true,
-  options: customOptions = {},
-}: F0ChartProps) => {
+export const F0Chart = ({ showLegend = true, options: customOptions = {} }: F0ChartProps) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const chart = useRef<echarts.ECharts | null>(null)
@@ -61,8 +58,7 @@ export const F0Chart = ({
       tooltip: {
         trigger:
           Array.isArray(customOptions.series) &&
-          (customOptions.series[0]?.type === "pie" ||
-            customOptions.series[0]?.type === "radar")
+          (customOptions.series[0]?.type === "pie" || customOptions.series[0]?.type === "radar")
             ? "item"
             : "axis",
       },

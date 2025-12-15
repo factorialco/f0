@@ -30,23 +30,17 @@ const TestProviders = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <UserPlatformProvider showExperimentalWarnings={false}>
-        <I18nProvider translations={defaultTranslations}>
-          {children}
-        </I18nProvider>
+        <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
       </UserPlatformProvider>
     </DataCollectionStorageProvider>
   )
 }
 
-const zeroRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, "wrapper">
-): RenderResult => render(ui, { wrapper: TestProviders, ...options })
+const zeroRender = (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">): RenderResult =>
+  render(ui, { wrapper: TestProviders, ...options })
 
 type RendererableContainer = ReactDOMClient.Container
-type HydrateableContainer = Parameters<
-  (typeof ReactDOMClient)["hydrateRoot"]
->[0]
+type HydrateableContainer = Parameters<(typeof ReactDOMClient)["hydrateRoot"]>[0]
 
 const zeroRenderHook = <
   Result,
@@ -57,7 +51,6 @@ const zeroRenderHook = <
 >(
   render: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> | undefined
-): RenderHookResult<Result, Props> =>
-  renderHook(render, { wrapper: TestProviders, ...options })
+): RenderHookResult<Result, Props> => renderHook(render, { wrapper: TestProviders, ...options })
 
 export { TestProviders, userEvent, zeroRender, zeroRenderHook }

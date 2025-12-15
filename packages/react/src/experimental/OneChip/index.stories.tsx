@@ -29,8 +29,7 @@ const meta = {
       description: "If defined, an icon will be displayed in the chip",
     },
     onClose: {
-      description:
-        "If defined, the close icon will be displayed and the chip will be clickable",
+      description: "If defined, the close icon will be displayed and the chip will be clickable",
     },
   },
 } satisfies Meta<typeof Chip>

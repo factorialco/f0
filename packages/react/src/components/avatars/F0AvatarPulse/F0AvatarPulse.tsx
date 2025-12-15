@@ -15,13 +15,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
 import { BaseAvatar } from "../internal/BaseAvatar"
 
-export const pulses = [
-  "superNegative",
-  "negative",
-  "neutral",
-  "positive",
-  "superPositive",
-] as const
+export const pulses = ["superNegative", "negative", "neutral", "positive", "superPositive"] as const
 export type Pulse = (typeof pulses)[number]
 
 export const pulseIcon: Record<Pulse, IconType> = {
@@ -164,11 +158,7 @@ export const F0AvatarPulse = ({
                   }}
                   aria-label={translations.actions.edit}
                 >
-                  <F0Icon
-                    icon={pulseIcon[pulse]}
-                    color={pulseIconColor[pulse]}
-                    size="sm"
-                  />
+                  <F0Icon icon={pulseIcon[pulse]} color={pulseIconColor[pulse]} size="sm" />
                 </Action>
               </div>
             ) : (

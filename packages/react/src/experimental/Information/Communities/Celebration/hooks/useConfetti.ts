@@ -31,9 +31,7 @@ export function useConfetti(shouldReduceMotion: boolean) {
         ticks: 80,
         startVelocity: 1,
         disableForReducedMotion: shouldReduceMotion,
-        colors: [
-          confettiColors[Math.floor(Math.random() * confettiColors.length)],
-        ],
+        colors: [confettiColors[Math.floor(Math.random() * confettiColors.length)]],
       })
     }, 100)
   }, [shouldReduceMotion])

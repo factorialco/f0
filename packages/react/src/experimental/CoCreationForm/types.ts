@@ -32,10 +32,7 @@ type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement"
 export type QuestionElement =
   | Omit<TextQuestionProps, QuestionPropsToOmit>
   | Omit<RatingQuestionProps & { type: "rating" }, QuestionPropsToOmit>
-  | Omit<
-      SelectQuestionProps & { type: "select" | "multi-select" },
-      QuestionPropsToOmit
-    >
+  | Omit<SelectQuestionProps & { type: "select" | "multi-select" }, QuestionPropsToOmit>
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>

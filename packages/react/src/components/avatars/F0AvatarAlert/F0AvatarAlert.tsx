@@ -7,13 +7,10 @@ const alertAvatarVariants = cva({
   base: "flex items-center justify-center border border-solid",
   variants: {
     type: {
-      critical:
-        "border-f1-border-critical bg-f1-background-critical text-f1-icon-critical",
-      warning:
-        "border-f1-border-warning bg-f1-background-warning text-f1-icon-warning",
+      critical: "border-f1-border-critical bg-f1-background-critical text-f1-icon-critical",
+      warning: "border-f1-border-warning bg-f1-background-warning text-f1-icon-warning",
       info: "border-f1-border-info bg-f1-background-info text-f1-icon-info",
-      positive:
-        "border-f1-border-positive bg-f1-background-positive text-f1-icon-positive",
+      positive: "border-f1-border-positive bg-f1-background-positive text-f1-icon-positive",
     },
     size: {
       sm: "h-6 w-6 rounded-sm",
@@ -27,12 +24,7 @@ const alertAvatarVariants = cva({
   },
 })
 
-export const alertAvatarTypes = [
-  "critical",
-  "warning",
-  "info",
-  "positive",
-] as const
+export const alertAvatarTypes = ["critical", "warning", "info", "positive"] as const
 export const alertAvatarSizes = ["sm", "md", "lg"] as const
 export type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
   type: (typeof alertAvatarTypes)[number]

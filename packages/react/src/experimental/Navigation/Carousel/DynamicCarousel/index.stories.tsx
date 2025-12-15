@@ -24,10 +24,7 @@ const SLIDES_RANDOM = [
     const randomHeight = randomClasses[Math.floor(i / 2)]
     const randomWidth = randomClasses[Math.floor(i / 2) + 3]
     return (
-      <Placeholder
-        key={`widget${i + 2}`}
-        className={`${randomHeight} ${randomWidth}`}
-      >
+      <Placeholder key={`widget${i + 2}`} className={`${randomHeight} ${randomWidth}`}>
         Slide {i + 1} ({randomHeight} {randomWidth})
       </Placeholder>
     )

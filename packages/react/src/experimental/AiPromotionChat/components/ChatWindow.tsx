@@ -4,12 +4,8 @@ import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiPromotionChat } from "../providers/AiPromotionChatStateProvider"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
-  const {
-    open,
-    shouldPlayEntranceAnimation,
-    setShouldPlayEntranceAnimation,
-    autoClearMinutes,
-  } = useAiPromotionChat()
+  const { open, shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation, autoClearMinutes } =
+    useAiPromotionChat()
   useAutoClear({
     reset: () => {},
     isOpen: open,
@@ -23,9 +19,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           key="chat-window"
           aria-hidden={!open}
           className="relative flex h-full max-w-[360px] flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
-          initial={
-            shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
-          }
+          initial={shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false}
           animate={{ opacity: 1, width: 360 }}
           exit={{ opacity: 0, width: 0 }}
           transition={{

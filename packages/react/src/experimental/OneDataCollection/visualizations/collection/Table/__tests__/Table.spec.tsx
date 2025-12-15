@@ -267,9 +267,7 @@ describe("TableCollection", () => {
       expect(screen.getAllByRole("columnheader")).toHaveLength(2)
 
       // Verify error state
-      const { result } = zeroRenderHook(() =>
-        useDataCollectionData(createTestSource([], error))
-      )
+      const { result } = zeroRenderHook(() => useDataCollectionData(createTestSource([], error)))
       await waitFor(() => {
         expect(result.current.error).toEqual({
           message: "Error fetching data",
@@ -315,13 +313,10 @@ describe("TableCollection", () => {
         paginationType,
         perPage: itemsPerPage,
         fetchData: async (
-          options:
-            | BaseFetchOptions<TestFilters>
-            | PaginatedFetchOptions<TestFilters>
+          options: BaseFetchOptions<TestFilters> | PaginatedFetchOptions<TestFilters>
         ) => {
           // Handle both BaseFetchOptions and PaginatedFetchOptions
-          const currentPage =
-            "pagination" in options ? (options.pagination?.currentPage ?? 1) : 1
+          const currentPage = "pagination" in options ? (options.pagination?.currentPage ?? 1) : 1
           const pagesCount = Math.ceil(totalItems / itemsPerPage)
           const startIndex = (currentPage - 1) * itemsPerPage
           const endIndex = startIndex + itemsPerPage
@@ -374,9 +369,7 @@ describe("TableCollection", () => {
     })
 
     it("should not render pagination controls when infinite scroll pagination is enabled", async () => {
-      expect(new IntersectionObserver((entries) => entries)).toBeInstanceOf(
-        IntersectionObserver
-      )
+      expect(new IntersectionObserver((entries) => entries)).toBeInstanceOf(IntersectionObserver)
       render(
         <TableCollection<
           Person,
@@ -583,9 +576,7 @@ describe("TableCollection", () => {
 
       // Get the header cells - we need to find the th element that contains the name text
       const headerCells = screen.getAllByRole("columnheader")
-      const nameHeader = headerCells.find((cell) =>
-        cell.textContent?.includes("name")
-      )
+      const nameHeader = headerCells.find((cell) => cell.textContent?.includes("name"))
 
       // Verify column headers have sort buttons and aria-sort attribute
       expect(nameHeader).toHaveAttribute("aria-sort", "none")
@@ -900,14 +891,10 @@ describe("TableCollection", () => {
 
       // Verify visible column header is present
       const headers = screen.getAllByRole("columnheader")
-      expect(
-        headers.some((h) => h.textContent?.includes("Visible Column"))
-      ).toBe(true)
+      expect(headers.some((h) => h.textContent?.includes("Visible Column"))).toBe(true)
 
       // Verify hidden column header is NOT present
-      expect(
-        headers.some((h) => h.textContent?.includes("Hidden Column"))
-      ).toBe(false)
+      expect(headers.some((h) => h.textContent?.includes("Hidden Column"))).toBe(false)
 
       // Verify data from visible column is shown
       expect(screen.getByText(testData[0].name)).toBeInTheDocument()
@@ -971,9 +958,7 @@ describe("TableCollection", () => {
       })
 
       // Verify primary action is rendered as button
-      expect(
-        screen.getByRole("button", { name: /edit user/i })
-      ).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: /edit user/i })).toBeInTheDocument()
 
       // Secondary actions go to dropdown (just verify dropdown exists)
       // ItemActionsRenderer renders both desktop and mobile versions,

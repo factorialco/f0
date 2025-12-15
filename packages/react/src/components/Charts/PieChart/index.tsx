@@ -74,9 +74,7 @@ export const _PieChart = (
           paddingAngle={2.5}
         >
           {preparedData.map((entry, index) => {
-            const value = tickFormatter
-              ? tickFormatter(String(entry.value))
-              : entry.value
+            const value = tickFormatter ? tickFormatter(String(entry.value)) : entry.value
             return (
               <Cell
                 key={`cell-${index}`}
@@ -89,12 +87,7 @@ export const _PieChart = (
             content={({ viewBox }) => {
               if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                 return (
-                  <text
-                    x={viewBox.cx}
-                    y={viewBox.cy}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                  >
+                  <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
                     <tspan
                       x={viewBox.cx}
                       y={(viewBox.cy || 0) + 8}

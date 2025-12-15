@@ -12,9 +12,9 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { YearView } from "./YearView"
 
-export function toYearGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(date: T): T extends Date | DateRange ? DateRangeComplete : T {
+export function toYearGranularityDateRange<T extends Date | DateRange | undefined | null>(
+  date: T
+): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfYear, endOfYear)
 }
 
@@ -43,13 +43,11 @@ export const yearGranularity: GranularityDefinition = {
 
     return {
       prev:
-        isAfterOrEqual(prevFrom, minWithGranularity) &&
-        isAfterOrEqual(prevTo, minWithGranularity)
+        isAfterOrEqual(prevFrom, minWithGranularity) && isAfterOrEqual(prevTo, minWithGranularity)
           ? { from: prevFrom, to: prevTo }
           : false,
       next:
-        isBeforeOrEqual(nextTo, maxWithGranularity) &&
-        isBeforeOrEqual(nextFrom, maxWithGranularity)
+        isBeforeOrEqual(nextTo, maxWithGranularity) && isBeforeOrEqual(nextFrom, maxWithGranularity)
           ? { from: nextFrom, to: nextTo }
           : false,
     }

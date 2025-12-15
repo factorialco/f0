@@ -39,10 +39,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
   }
 
   return (
-    <AiCollapsibleMessage
-      icon={Search}
-      title={translations.ai.resourcesGroupTitle}
-    >
+    <AiCollapsibleMessage icon={Search} title={translations.ai.resourcesGroupTitle}>
       <div className="flex flex-col gap-1 rounded-lg border border-solid border-f1-border-secondary p-2">
         {sources.map((source, index) => {
           const sourceIcon = <SourceIcon iconName={source.icon} />

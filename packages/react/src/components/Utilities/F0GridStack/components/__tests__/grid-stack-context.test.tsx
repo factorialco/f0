@@ -54,9 +54,7 @@ describe("grid-stack-context", () => {
             <div data-testid="has-gridstack">
               {context.gridStack ? "has-gridstack" : "no-gridstack"}
             </div>
-            <div data-testid="has-options">
-              {context.options ? "has-options" : "no-options"}
-            </div>
+            <div data-testid="has-options">{context.options ? "has-options" : "no-options"}</div>
           </div>
         )
       }
@@ -126,24 +124,16 @@ describe("grid-stack-context", () => {
         const context = useGridStackContext()
         return (
           <div>
-            <div data-testid="gridstack-exists">
-              {context.gridStack ? "yes" : "no"}
-            </div>
-            <div data-testid="options-column">
-              {context.options.column?.toString()}
-            </div>
+            <div data-testid="gridstack-exists">{context.gridStack ? "yes" : "no"}</div>
+            <div data-testid="options-column">{context.options.column?.toString()}</div>
             <div data-testid="has-gridstack-setter">
               {typeof context._gridStack.set === "function" ? "yes" : "no"}
             </div>
             <div data-testid="has-raw-map-setter">
-              {typeof context._rawWidgetMetaMap.set === "function"
-                ? "yes"
-                : "no"}
+              {typeof context._rawWidgetMetaMap.set === "function" ? "yes" : "no"}
             </div>
             <div data-testid="has-react-map-setter">
-              {typeof context._reactContentMap.set === "function"
-                ? "yes"
-                : "no"}
+              {typeof context._reactContentMap.set === "function" ? "yes" : "no"}
             </div>
           </div>
         )

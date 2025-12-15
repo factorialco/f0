@@ -158,8 +158,7 @@ const meta = {
     layout: "centered",
     docs: {
       description: {
-        component:
-          "TagList displays a collection of tags of a single type with overflow handling.",
+        component: "TagList displays a collection of tags of a single type with overflow handling.",
       },
     },
   },

@@ -22,16 +22,14 @@ import * as PageHeaderStories from "./PageHeader/index.stories"
 
 ### Definition
 
-The PageHeader is a navigation component that provides context about the current
-location and available actions within the application. It serves as a consistent
-element at the top of pages to orient users and provide access to key
-functionality.
+The PageHeader is a navigation component that provides context about the current location and
+available actions within the application. It serves as a consistent element at the top of pages to
+orient users and provide access to key functionality.
 
 ### Purpose
 
 - Provide clear context about the current section or module the user is viewing
-- Display navigation breadcrumbs to show location within the application
-  hierarchy
+- Display navigation breadcrumbs to show location within the application hierarchy
 - Present relevant actions and status information related to the current context
 - Enable navigation between related items in a sequence
 - Create consistency across the application with a standardized header pattern
@@ -49,8 +47,8 @@ functionality.
 </div>
 <Controls of={PageHeaderStories.WithProductUpdate} />
 
-The PageHeader combines several interactive elements to create a comprehensive
-navigation experience:
+The PageHeader combines several interactive elements to create a comprehensive navigation
+experience:
 
 ### Common elements
 
@@ -88,8 +86,7 @@ navigation experience:
 
 ### Default
 
-The basic header displays only the module information without additional
-elements.
+The basic header displays only the module information without additional elements.
 
 <div
   className="header-container"
@@ -103,8 +100,7 @@ elements.
 
 ### With Breadcrumbs
 
-Displays the navigation path, helping users understand their location in the
-application hierarchy.
+Displays the navigation path, helping users understand their location in the application hierarchy.
 
 <div
   className="header-container"
@@ -118,8 +114,7 @@ application hierarchy.
 
 ### With Status
 
-Shows the current state of content with an optional tooltip for additional
-information.
+Shows the current state of content with an optional tooltip for additional information.
 
 <div
   className="header-container"
@@ -161,8 +156,7 @@ Enables moving between related items, such as sequential records.
 
 ### With Select Breadcrumb
 
-Includes a dropdown selection within the breadcrumb path for quick navigation
-between related items.
+Includes a dropdown selection within the breadcrumb path for quick navigation between related items.
 
 <div
   className="header-container"
@@ -211,17 +205,15 @@ between related items.
 ### Layout
 
 - The module indicator always appears first, establishing the root of navigation
-- Breadcrumbs follow the module indicator, showing increasing specificity from
-  left to right
+- Breadcrumbs follow the module indicator, showing increasing specificity from left to right
 - Status indicators and actions appear on the right side, with natural grouping
 - When present, navigation controls are placed at the far right
-- In embedded mode, the header adapts to a more compact format with centered
-  content
+- In embedded mode, the header adapts to a more compact format with centered content
 
 ## Embedded variant
 
-The PageHeader supports an embedded mode for use within panels or modals,
-providing a more compact presentation.
+The PageHeader supports an embedded mode for use within panels or modals, providing a more compact
+presentation.
 
 <div
   className="header-container"
@@ -245,8 +237,7 @@ In embedded mode:
 
 ## Props
 
-The PageHeader accepts several prop groups that control its appearance and
-behavior:
+The PageHeader accepts several prop groups that control its appearance and behavior:
 
 - **module**: Core information about the current module (required)
 - **breadcrumbs**: Array of navigation items showing the path
