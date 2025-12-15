@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.306.4](https://github.com/factorialco/f0/compare/f0-react-v1.306.3...f0-react-v1.306.4) (2025-12-15)
+
+
+### Bug Fixes
+
+* get rid of chattextarea focus issue ([#3136](https://github.com/factorialco/f0/issues/3136)) ([e39aea6](https://github.com/factorialco/f0/commit/e39aea60880835e9a9f26e168e85900748c29d99))
+
 ## [1.306.3](https://github.com/factorialco/f0/compare/f0-react-v1.306.2...f0-react-v1.306.3) (2025-12-15)
 
 
