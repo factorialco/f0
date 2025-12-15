@@ -22,7 +22,7 @@ import {
   Target,
   Upload,
 } from "@/icons/app"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import {
   CERTIFICATIONS_MOCK,
   DOT_TAG_COLORS_MOCK,
@@ -924,6 +924,14 @@ const useJsonDataSource = () =>
     filters,
     sortings,
     presets: filterPresets,
+    navigationFilters: {
+      date: {
+        type: "date-navigator",
+        defaultValue: new Date(),
+        granularity: ["day"],
+        min: new Date(),
+      },
+    },
     dataAdapter: {
       fetchData: createPromiseDataFetch(),
     },
@@ -1886,7 +1894,6 @@ export const TableWithSecondaryActions: Story = {
 
 // Example showcasing progressBar in different visualizations (Training Module style)
 export const WithProgressBar: Story = {
-  parameters: withSkipA11y({}),
   render: () => {
     // Mock training modules data
     const trainingModules = [
