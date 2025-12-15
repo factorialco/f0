@@ -1,0 +1,20 @@
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { Ref, forwardRef } from "react";
+const SvgFlask = (props: SvgProps, ref: Ref<Svg>) => (
+  <Svg
+    fill="none"
+    viewBox="0 0 24 24"
+    className={props.className}
+    ref={ref}
+    {...props}
+  >
+    <Path
+      stroke="currentColor"
+      d="M9 9.445V4h5.804v5.445a5 5 0 0 0 .881 2.836l3.157 4.585c.914 1.327-.036 3.134-1.647 3.134H6.609c-1.611 0-2.56-1.807-1.647-3.134l3.156-4.585A5 5 0 0 0 9 9.445Z"
+    />
+    <Path stroke="currentColor" strokeLinecap="round" d="M8 4h8M6.61 14.5H17" />
+  </Svg>
+);
+const ForwardRef = forwardRef(SvgFlask);
+export default ForwardRef;

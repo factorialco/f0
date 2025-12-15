@@ -23,10 +23,40 @@ storybook-static
 *.njsproj
 *.sln
 *.sw?
-.husky
 
 *storybook.log
 
 dist
 /packages/react/icons
 .nyc_output
+*.tgz
+package
+
+# React Native/Expo
+*.expo/
+*ios/
+*android/
+web-build/
+*.tar.gz
+*.app
+
+# Native files (certificates, keys, provisioning profiles)
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Metro bundler
+.metro-health-check*
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files
+.env*.local
+
+# Expo generated files
+expo-env.d.ts

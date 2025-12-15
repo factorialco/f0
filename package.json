@@ -27,7 +27,20 @@
   },
   "pnpm": {
     "overrides": {
-      "esm-env": "npm:esm-env-runtime@^0.1.1"
-    }
+      "esm-env": "npm:esm-env-runtime@^0.1.1",
+      "expo": "54.0.27",
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
+      "react-test-renderer": "19.1.0",
+      "react-native": "0.81.5",
+      "react-native-reanimated": "3.19.4",
+      "react-native-safe-area-context": "5.4.0",
+      "react-native-svg": "15.12.1"
+    },
+    "publicHoistPattern": [
+      "react",
+      "react-dom",
+      "react-native"
+    ]
   }
 }
