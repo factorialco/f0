@@ -5,138 +5,139 @@ import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+import { useAiChat } from "../providers/AiChatStateProvider"
 
-// interface TypewriterPlaceholderProps {
-//   placeholders: string[]
-//   defaultPlaceholder: string
-//   inputValue: string
-//   inProgress: boolean
-// }
+interface TypewriterPlaceholderProps {
+  placeholders: string[]
+  defaultPlaceholder: string
+  inputValue: string
+  inProgress: boolean
+}
 
-// const TypewriterPlaceholder = ({
-//   placeholders,
-//   defaultPlaceholder,
-//   inputValue,
-//   inProgress,
-// }: TypewriterPlaceholderProps) => {
-//   const [displayedPlaceholder, setDisplayedPlaceholder] = useState("")
-//   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0)
-//   const [isTyping, setIsTyping] = useState(false)
-//   const placeholderTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-//   const typeIntervalRef = useRef<NodeJS.Timeout | null>(null)
-//   const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null)
+const TypewriterPlaceholder = ({
+  placeholders,
+  defaultPlaceholder,
+  inputValue,
+  inProgress,
+}: TypewriterPlaceholderProps) => {
+  const [displayedPlaceholder, setDisplayedPlaceholder] = useState("")
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0)
+  const [isTyping, setIsTyping] = useState(false)
+  const placeholderTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const typeIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-//   const placeholderText =
-//     placeholders[currentPlaceholderIndex] ?? defaultPlaceholder
+  const placeholderText =
+    placeholders[currentPlaceholderIndex] ?? defaultPlaceholder
 
-//   useEffect(() => {
-//     const clearAllIntervals = () => {
-//       if (typeIntervalRef.current) {
-//         clearInterval(typeIntervalRef.current)
-//         typeIntervalRef.current = null
-//       }
-//       if (deleteIntervalRef.current) {
-//         clearInterval(deleteIntervalRef.current)
-//         deleteIntervalRef.current = null
-//       }
-//       if (placeholderTimeoutRef.current) {
-//         clearTimeout(placeholderTimeoutRef.current)
-//         placeholderTimeoutRef.current = null
-//       }
-//     }
+  useEffect(() => {
+    const clearAllIntervals = () => {
+      if (typeIntervalRef.current) {
+        clearInterval(typeIntervalRef.current)
+        typeIntervalRef.current = null
+      }
+      if (deleteIntervalRef.current) {
+        clearInterval(deleteIntervalRef.current)
+        deleteIntervalRef.current = null
+      }
+      if (placeholderTimeoutRef.current) {
+        clearTimeout(placeholderTimeoutRef.current)
+        placeholderTimeoutRef.current = null
+      }
+    }
 
-//     if (inputValue.length > 0 || inProgress) {
-//       setIsTyping(false)
-//       setDisplayedPlaceholder("")
-//       clearAllIntervals()
-//       return
-//     }
+    if (inputValue.length > 0 || inProgress) {
+      setIsTyping(false)
+      setDisplayedPlaceholder("")
+      clearAllIntervals()
+      return
+    }
 
-//     setIsTyping(true)
-//     setDisplayedPlaceholder("")
+    setIsTyping(true)
+    setDisplayedPlaceholder("")
 
-//     let currentIndex = 0
-//     const typeSpeed = 50
-//     const deleteSpeed = 30
-//     const pauseBeforeDelete = 2000
-//     const pauseBeforeNext = 1000
+    let currentIndex = 0
+    const typeSpeed = 50
+    const deleteSpeed = 30
+    const pauseBeforeDelete = 2000
+    const pauseBeforeNext = 1000
 
-//     typeIntervalRef.current = setInterval(() => {
-//       if (currentIndex < placeholderText.length) {
-//         setDisplayedPlaceholder(placeholderText.slice(0, currentIndex + 1))
-//         currentIndex++
-//       } else {
-//         if (typeIntervalRef.current) {
-//           clearInterval(typeIntervalRef.current)
-//           typeIntervalRef.current = null
-//         }
-//         placeholderTimeoutRef.current = setTimeout(() => {
-//           deleteIntervalRef.current = setInterval(() => {
-//             if (currentIndex > 0) {
-//               currentIndex--
-//               setDisplayedPlaceholder(placeholderText.slice(0, currentIndex))
-//             } else {
-//               if (deleteIntervalRef.current) {
-//                 clearInterval(deleteIntervalRef.current)
-//                 deleteIntervalRef.current = null
-//               }
-//               placeholderTimeoutRef.current = setTimeout(() => {
-//                 const nextIndex =
-//                   (currentPlaceholderIndex + 1) %
-//                   Math.max(placeholders.length, 1)
-//                 setCurrentPlaceholderIndex(nextIndex)
-//               }, pauseBeforeNext)
-//             }
-//           }, deleteSpeed)
-//         }, pauseBeforeDelete)
-//       }
-//     }, typeSpeed)
+    typeIntervalRef.current = setInterval(() => {
+      if (currentIndex < placeholderText.length) {
+        setDisplayedPlaceholder(placeholderText.slice(0, currentIndex + 1))
+        currentIndex++
+      } else {
+        if (typeIntervalRef.current) {
+          clearInterval(typeIntervalRef.current)
+          typeIntervalRef.current = null
+        }
+        placeholderTimeoutRef.current = setTimeout(() => {
+          deleteIntervalRef.current = setInterval(() => {
+            if (currentIndex > 0) {
+              currentIndex--
+              setDisplayedPlaceholder(placeholderText.slice(0, currentIndex))
+            } else {
+              if (deleteIntervalRef.current) {
+                clearInterval(deleteIntervalRef.current)
+                deleteIntervalRef.current = null
+              }
+              placeholderTimeoutRef.current = setTimeout(() => {
+                const nextIndex =
+                  (currentPlaceholderIndex + 1) %
+                  Math.max(placeholders.length, 1)
+                setCurrentPlaceholderIndex(nextIndex)
+              }, pauseBeforeNext)
+            }
+          }, deleteSpeed)
+        }, pauseBeforeDelete)
+      }
+    }, typeSpeed)
 
-//     return () => {
-//       clearAllIntervals()
-//     }
-//   }, [
-//     inputValue,
-//     inProgress,
-//     placeholderText,
-//     currentPlaceholderIndex,
-//     placeholders.length,
-//   ])
+    return () => {
+      clearAllIntervals()
+    }
+  }, [
+    inputValue,
+    inProgress,
+    placeholderText,
+    currentPlaceholderIndex,
+    placeholders.length,
+  ])
 
-//   if (inputValue.length > 0 || inProgress) {
-//     return null
-//   }
+  if (inputValue.length > 0 || inProgress) {
+    return null
+  }
 
-//   return (
-//     <AnimatePresence>
-//       <motion.div
-//         initial={{ opacity: 0 }}
-//         animate={{ opacity: 1 }}
-//         exit={{ opacity: 0 }}
-//         transition={{ duration: 0.4 }}
-//         className={cn(
-//           "pointer-events-none col-start-1 row-start-1",
-//           "mb-0 mt-3 max-h-[240px] whitespace-pre-wrap break-words px-3",
-//           "text-f1-foreground-secondary"
-//         )}
-//       >
-//         {displayedPlaceholder}
-//         {isTyping && (
-//           <motion.span
-//             animate={{ opacity: [1, 0] }}
-//             transition={{
-//               duration: 0.8,
-//               repeat: Infinity,
-//               ease: "easeInOut",
-//             }}
-//           >
-//             |
-//           </motion.span>
-//         )}
-//       </motion.div>
-//     </AnimatePresence>
-//   )
-// }
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        className={cn(
+          "pointer-events-none col-start-1 row-start-1",
+          "mb-0 mt-3 max-h-[240px] whitespace-pre-wrap break-words px-3",
+          "text-f1-foreground-secondary"
+        )}
+      >
+        {displayedPlaceholder}
+        {isTyping && (
+          <motion.span
+            animate={{ opacity: [1, 0] }}
+            transition={{
+              duration: 0.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            |
+          </motion.span>
+        )}
+      </motion.div>
+    </AnimatePresence>
+  )
+}
 
 type ChatTextareaProps = InputProps & {
   submitLabel?: string
@@ -153,7 +154,7 @@ export const ChatTextarea = ({
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const translation = useI18n()
-  // const { placeholders } = useAiChat()
+  const { placeholders } = useAiChat()
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -188,7 +189,7 @@ export const ChatTextarea = ({
     }
   }
 
-  // const multiplePlaceholders = placeholders.length > 1
+  const multiplePlaceholders = placeholders.length > 1
 
   return (
     <motion.form
@@ -251,7 +252,7 @@ export const ChatTextarea = ({
           name="one-ai-input"
           ref={textareaRef}
           value={inputValue}
-          // placeholder={placeholders?.[0]}
+          placeholder={placeholders?.[0]}
           onChange={(e) => {
             setInputValue(e.target.value)
           }}
@@ -263,23 +264,23 @@ export const ChatTextarea = ({
             "text-f1-foreground",
             hasScrollbar
               ? "scrollbar-macos overflow-y-scroll"
-              : "overflow-y-hidden"
-            // inputValue || !multiplePlaceholders
-            //   ? "caret-f1-foreground"
-            //   : "caret-transparent",
-            // multiplePlaceholders
-            //   ? "placeholder:text-transparent"
-            //   : "placeholder:text-f1-foreground-secondary"
+              : "overflow-y-hidden",
+            inputValue || !multiplePlaceholders
+              ? "caret-f1-foreground"
+              : "caret-transparent",
+            multiplePlaceholders
+              ? "placeholder:text-transparent"
+              : "placeholder:text-f1-foreground-secondary"
           )}
         />
-        {/* {multiplePlaceholders && (
+        {multiplePlaceholders && (
           <TypewriterPlaceholder
             placeholders={placeholders}
             defaultPlaceholder={translation.ai.inputPlaceholder}
             inputValue={inputValue}
             inProgress={inProgress}
           />
-        )} */}
+        )}
       </div>
 
       <div className="flex flex-row-reverse p-3 pt-0">
