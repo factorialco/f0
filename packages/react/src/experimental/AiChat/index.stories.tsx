@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import { Lightbulb, ThumbsUp } from "@/icons/app"
+import { Lightbulb, ThumbsDown, ThumbsUp } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect } from "react"
 import { AiChat, AiChatProvider } from "./index"
@@ -20,6 +20,12 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
         message: "Share feedback",
         prompt:
           "Share feedback and help shape One with your feedback in the next message (optional)",
+      },
+      {
+        icon: ThumbsDown,
+        message: "Very long message to test the layout of the suggestions list",
+        prompt:
+          "Very long message to test the layout of the suggestions list and help shape One with your feedback in the next message (optional)",
       },
     ])
   }, [setWelcomeScreenSuggestions])
