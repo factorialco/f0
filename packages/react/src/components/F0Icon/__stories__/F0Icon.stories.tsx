@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
+import * as AIIcons from "@/icons/ai"
 import * as AnimatedIcons from "@/icons/animated"
 import * as Icons from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
@@ -108,10 +109,16 @@ export const Special: Story = {
   },
 }
 
-export const WithTooltip: Story = {
+export const AI: Story = {
   args: {
     size: "md",
-    icon: Icons.ChartLine,
-    tooltip: "Tooltip",
+    icon: AIIcons.Summary,
+  },
+  argTypes: {
+    icon: {
+      control: "select",
+      options: Object.keys(AIIcons),
+      mapping: AIIcons,
+    },
   },
 }

@@ -8,6 +8,7 @@ export const actionButtonVariants = [
   "ghost",
   "promote",
   "outlinePromote",
+  "ai",
 ] as const
 export type ActionButtonVariant = (typeof actionButtonVariants)[number]
 
@@ -22,6 +23,8 @@ export type ActionVariant = (typeof actionVariants)[number]
 
 export const actionSizes = ["sm", "md", "lg"] as const
 export type ActionSize = (typeof actionSizes)[number]
+export const fontSizes = ["sm", "md", "lg"] as const
+export type FontSize = (typeof fontSizes)[number]
 
 export interface ActionCommonProps {
   /**
@@ -76,6 +79,10 @@ export interface ActionCommonProps {
    */
   size?: ActionSize
   /**
+   * The font size of the action.
+   */
+  fontSize?: FontSize
+  /**
    * The render mode.
    * @default "default"
    */
@@ -100,6 +107,16 @@ export interface ActionCommonProps {
    * The tab index of the action.
    */
   tabIndex?: number
+
+  /**
+   * Mouse enter event handler.
+   */
+  onMouseEnter?: React.MouseEventHandler<HTMLElement>
+
+  /**
+   * Mouse leave event handler.
+   */
+  onMouseLeave?: React.MouseEventHandler<HTMLElement>
 }
 
 export const buttonTypes = ["button", "submit", "reset"] as const

@@ -1,9 +1,6 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { F0SelectItemObject, F0SelectItemProps } from "@/components/F0Select"
 import { FiltersDefinition } from "@/components/OneFilterPicker"
-import {
-  SelectItemObject,
-  SelectItemProps,
-} from "@/experimental/Forms/Fields/Select"
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import {
@@ -34,7 +31,7 @@ export type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
   externalSearch?: boolean
   onChange: BreadcrumbSelectProps<string, RecordType>["onChange"]
   value?: string
-  defaultItem?: SelectItemObject<string, RecordType>
+  defaultItem?: F0SelectItemObject<string, RecordType>
 } & (
     | {
         source: DataSourceDefinition<
@@ -43,13 +40,13 @@ export type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
           SortingsDefinition,
           GroupingDefinition<RecordType>
         >
-        mapOptions: (item: RecordType) => SelectItemProps<string>
+        mapOptions: (item: RecordType) => F0SelectItemProps<string>
         options?: never
       }
     | {
         source?: never
         mapOptions?: never
-        options: SelectItemProps<string, RecordType>[]
+        options: F0SelectItemProps<string, RecordType>[]
       }
   )
 

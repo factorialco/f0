@@ -3,8 +3,16 @@ import { RecordType } from "@/hooks/datasource"
 import dateFilter, { DateFilterDefinition } from "./DateFilter"
 import inFilter, { InFilterDefinition } from "./InFilter"
 import { numberFilter, NumberFilterDefinition } from "./NumberFilter"
+import { NumberFilterValue } from "./NumberFilter/NumberFilter"
 import searchFilter, { SearchFilterDefinition } from "./SearchFilter"
 import { FilterTypeDefinition } from "./types"
+
+export type {
+  DateFilterDefinition,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+}
 
 /**
  * All the available filter types
@@ -42,7 +50,7 @@ export type FilterValue<T extends FilterDefinition> =
       : T extends DateFilterDefinition
         ? DateRange | Date | undefined
         : T extends NumberFilterDefinition
-          ? [number | undefined, number | undefined] | undefined
+          ? NumberFilterValue | undefined
           : never
 
 /**

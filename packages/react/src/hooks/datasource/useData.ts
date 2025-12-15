@@ -84,6 +84,8 @@ export type WithGroupId<RecordType> = RecordType & {
  */
 export interface UseDataReturn<R extends RecordType> {
   data: Data<R>
+  search: string | undefined
+  setSearch: (search: string | undefined) => void
   isInitialLoading: boolean
   isLoading: boolean
   isLoadingMore: boolean
@@ -245,6 +247,7 @@ export function useData<
     currentSortings,
     search,
     currentSearch,
+    setCurrentSearch,
     isLoading,
     setIsLoading,
     currentGrouping,
@@ -319,7 +322,7 @@ export function useData<
       ? undefined
       : search?.sync
         ? currentSearch
-        : deferredSearch
+        : deferredSearch || currentSearch
   }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
 
   /**
@@ -767,6 +770,8 @@ export function useData<
 
   return {
     data,
+    search: currentSearch,
+    setSearch: setCurrentSearch,
     isInitialLoading,
     isLoading,
     isLoadingMore,

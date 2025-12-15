@@ -70,7 +70,7 @@ export function FilterList<Definition extends FiltersDefinition>({
         <F1SearchBox
           key="filter-list-search"
           name="filter-list-search"
-          placeholder={i18n.toc.search}
+          placeholder={i18n.filters.searchPlaceholder}
           value={searchValue}
           onChange={setSearchValue}
           autoFocus={!selectedFilterKey}
@@ -79,7 +79,7 @@ export function FilterList<Definition extends FiltersDefinition>({
       </div>
       <div
         className={cn(
-          "flex h-full w-full flex-col gap-1 overflow-y-auto p-2 pt-0",
+          "flex h-full w-full flex-col gap-1 overflow-y-auto overflow-x-hidden p-2 pt-0",
           isCompactMode && "px-1 py-0"
         )}
       >
@@ -98,9 +98,10 @@ export function FilterList<Definition extends FiltersDefinition>({
 
             type FilterType = FilterDefinitionsByType[typeof filter.type]
             const currentValue = tempFilters[key] as FilterValue<FilterType>
-            const typedFilterType = filterType as FilterTypeDefinition<
-              FilterValue<FilterType>
-            >
+            const typedFilterType =
+              filterType as unknown as FilterTypeDefinition<
+                FilterValue<FilterType>
+              >
 
             return (
               <button

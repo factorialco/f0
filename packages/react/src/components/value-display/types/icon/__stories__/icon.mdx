@@ -1,0 +1,85 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as IconStories from "./icon.stories"
+
+<Meta of={IconStories} />
+
+### icon
+
+Renders an icon with a label
+
+#### Value type
+
+```
+type value = {
+  icon: IconType,
+  label: string,
+  tooltip?: string,
+  hideLabel?: boolean
+}
+```
+
+| Property    | Type     | Description                                                                    |
+| ----------- | -------- | ------------------------------------------------------------------------------ |
+| `icon`      | IconType | The icon component to display                                                  |
+| `label`     | string   | The label text (used as aria-label when hidden)                                |
+| `tooltip`   | string?  | Optional tooltip text displayed on hover                                       |
+| `hideLabel` | boolean? | When true, hides the label visually but keeps it accessible for screen readers |
+
+<Canvas
+  of={IconStories.IconType}
+  source={{
+    code: `
+// Example with icon and label
+render: (item) => ({
+    type: 'icon',
+    value: {
+        icon: Placeholder,
+        label: 'Icon'
+    }
+})
+`,
+  }}
+/>
+
+#### Icon with hidden label
+
+When `hideLabel` is true, the label is visually hidden but remains accessible to
+screen readers via `aria-label`.
+
+<Canvas
+  of={IconStories.IconWithHiddenLabel}
+  source={{
+    code: `
+// Example with hidden label (icon only)
+render: (item) => ({
+    type: 'icon',
+    value: {
+        icon: Placeholder,
+        label: 'Status indicator',
+        hideLabel: true
+    }
+})
+`,
+  }}
+/>
+
+#### Icon with tooltip
+
+Use the `tooltip` prop to display additional information on hover.
+
+<Canvas
+  of={IconStories.IconWithTooltip}
+  source={{
+    code: `
+// Example with tooltip
+render: (item) => ({
+    type: 'icon',
+    value: {
+        icon: Placeholder,
+        label: 'Icon',
+        tooltip: 'This is a helpful tooltip describing the icon'
+    }
+})
+`,
+  }}
+/>

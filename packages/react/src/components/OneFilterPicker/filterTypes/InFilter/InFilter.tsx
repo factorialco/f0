@@ -11,7 +11,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
-import { useLoadOptions } from "./useLoadOptions"
+import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
 
 /**
  * Props for the InFilter component.
@@ -90,6 +90,8 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     search: searchTerm,
   })
 
+  const cacheKey = getCacheKey(schema)
+
   useEffect(() => {
     let timeout: NodeJS.Timeout
     if (isLoading) {
@@ -160,13 +162,14 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   const showSearch = options.length > 0
 
   const handleSelectAll = () => {
-    const allValues = filteredOptions.map((option) => option.value)
     const currentValues = value ?? []
     const newValues = [...currentValues]
 
-    allValues.forEach((value) => {
-      if (!newValues.includes(value)) {
-        newValues.push(value)
+    filteredOptions.forEach((option) => {
+      if (!newValues.includes(option.value)) {
+        newValues.push(option.value)
+        // Cache the label when selecting all
+        cacheLabel(cacheKey, option.value, option.label)
       }
     })
 
@@ -210,7 +213,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       {showSearch && (
         <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
           <F1SearchBox
-            placeholder={i18n.toc.search}
+            placeholder={i18n.filters.inFilter.searchPlaceholder}
             value={searchTerm}
             onChange={setSearchTerm}
             clearable
@@ -222,14 +225,14 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       )}
       <div
         className={cn(
-          "overflow-y-scroll px-2",
+          "overflow-y-auto px-2",
           isCompactMode && "px-1",
           isCompactMode ? "max-h-[360px]" : "h-full"
         )}
         onScroll={handleScroll}
       >
         {isCompactMode && (
-          <div className="sticky bottom-0 left-0 right-0 flex w-full flex-1 items-center justify-between gap-1 rounded p-2 py-1 pr-1">
+          <div className="sticky left-0 right-0 top-0 z-10 flex w-full flex-1 items-center justify-between gap-1 rounded bg-f1-background/80 p-2 py-1 pr-1 backdrop-blur-[8px]">
             <span className="max-w-[250px] flex-1 whitespace-nowrap">
               <OneEllipsis className="text-f1-foreground-secondary">
                 {selectedText}
@@ -237,7 +240,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             </span>
             <F0Checkbox
               id="select-all"
-              title="Select all"
+              title={i18n.actions.selectAll}
               checked={value.length === filteredOptions.length}
               onCheckedChange={handleCheckSelectAll}
               presentational
@@ -258,6 +261,10 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 focusRing()
               )}
               onClick={() => {
+                if (!isSelected) {
+                  // Cache the label when selecting an option
+                  cacheLabel(cacheKey, option.value, option.label)
+                }
                 onChange(
                   isSelected
                     ? value.filter((v) => v !== option.value)
@@ -288,7 +295,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
           <F0Button
             variant="outline"
-            label="Select all"
+            label={i18n.filters.selectAll}
             onClick={handleSelectAll}
             disabled={
               filteredOptions.length === 0 ||
@@ -298,7 +305,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           />
           <F0Button
             variant="ghost"
-            label="Clear"
+            label={i18n.filters.clear}
             onClick={handleClear}
             disabled={!Array.isArray(value) || value.length === 0}
             size="sm"

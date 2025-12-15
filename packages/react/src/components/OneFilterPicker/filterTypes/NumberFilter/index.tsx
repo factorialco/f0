@@ -7,8 +7,14 @@ import {
   NumberFilterValue,
 } from "./NumberFilter"
 
-const isEmpty = (value: NumberFilterValue): value is undefined => {
-  return !value || (value[0] === undefined && value[1] === undefined)
+const isEmpty = (value: NumberFilterValue | undefined): value is undefined => {
+  return (
+    !value ||
+    (value?.mode === "range" &&
+      value?.from?.value === value?.to?.value &&
+      value?.from?.value === undefined) ||
+    (value?.mode === "single" && value?.value === undefined)
+  )
 }
 
 const defaults: NumberFilterOptions = {
@@ -20,7 +26,7 @@ export const numberFilter: FilterTypeDefinition<
   NumberFilterValue,
   NumberFilterOptions
 > = {
-  emptyValue: [undefined, undefined],
+  emptyValue: undefined,
   render: (props) => {
     const options = getOptionsWithDefaults(props.schema.options, defaults)
     return <NumberFilter {...props} schema={{ ...props.schema, options }} />
@@ -28,16 +34,51 @@ export const numberFilter: FilterTypeDefinition<
   isEmpty,
   chipLabel: (value, context) => {
     const i18n = context.i18n
-    if (value?.[0] !== undefined && value?.[1] !== undefined) {
-      return i18n.t("filters.range", { min: value?.[0], max: value?.[1] })
+
+    // Single value
+    if (value?.mode === "single" || value?.mode === undefined) {
+      if (value?.value === undefined) {
+        return ""
+      }
+      return i18n.t("filters.number.equalShort", {
+        value: value?.value?.toString(),
+      })
     }
 
-    if (value?.[1] !== undefined) {
-      return `<= ${value?.[1]}`
-    }
+    if (value?.mode === "range") {
+      // Range value
+      if (value?.from?.value !== undefined && value?.to?.value !== undefined) {
+        return i18n.t("filters.number.range", {
+          min: value?.from?.value,
+          max: value?.to?.value,
+          minStrict: !value?.from?.closed ? ">" : "≥",
+          maxStrict: !value?.to?.closed ? "<" : "≤",
+        })
+      }
 
-    if (value?.[0] !== undefined) {
-      return `>= ${value?.[0]}`
+      if (value?.to?.value !== undefined) {
+        if (value?.to?.closed) {
+          return i18n.t("filters.number.lessThanOrEqualShort", {
+            value: value?.to?.value,
+          })
+        } else {
+          return i18n.t("filters.number.lessThanShort", {
+            value: value?.to?.value,
+          })
+        }
+      }
+
+      if (value?.from?.value !== undefined) {
+        if (value?.from?.closed) {
+          return i18n.t("filters.number.greaterThanOrEqualShort", {
+            value: value?.from?.value,
+          })
+        } else {
+          return i18n.t("filters.number.greaterThanShort", {
+            value: value?.from?.value,
+          })
+        }
+      }
     }
 
     return ""

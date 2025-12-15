@@ -1,5 +1,6 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
+import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { CrossedCircle } from "@/icons/app"
@@ -201,6 +202,16 @@ export type InputFieldProps<T> = {
      */
     offset?: number
   }
+  /**
+   * Renders a button toggle inside the input field
+   */
+  buttonToggle?: {
+    label: string | [string, string]
+    icon: IconType | [IconType, IconType]
+    selected: boolean
+    disabled?: boolean
+    onChange: (selected: boolean) => void
+  }
 }
 
 const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -241,6 +252,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       avatar,
       "aria-controls": ariaControls,
       "aria-expanded": ariaExpanded,
+      buttonToggle,
       ...props
     }: InputFieldProps<string>,
     ref
@@ -374,6 +386,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }, [isAutofilled, inputRef])
     /**********************/
 
+    const hasAppend = append || appendTag || buttonToggle
+
     return (
       <div
         className={cn(
@@ -495,7 +509,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                     !hidePlaceholder &&
                     isEmpty(localValue) &&
                     !isAutofilled
-                    ? "opacity-1"
+                    ? "opacity-100"
                     : "opacity-0"
                 )}
                 onClick={handleClickPlaceholder}
@@ -504,7 +518,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 {placeholder}
               </div>
             )}
-            {(clearable || append || appendTag || loading) && (
+            {(clearable || hasAppend || loading) && (
               <div
                 className={cn(
                   "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
@@ -524,6 +538,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                           focusRing()
                         )}
+                        aria-label="Clear"
                         type="button"
                         tabIndex={0}
                         data-testid="clear-button"
@@ -542,10 +557,20 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   </AnimatePresence>
                 )}
 
-                {(append || appendTag) && (
+                {hasAppend && (
                   <div className="flex min-h-6 min-w-6 items-center justify-center self-center">
                     {append}
                     {appendTag && <AppendTag text={appendTag} />}
+                    {buttonToggle && (
+                      <F0ButtonToggle
+                        label={buttonToggle.label}
+                        icon={buttonToggle.icon}
+                        selected={buttonToggle.selected}
+                        disabled={buttonToggle.disabled}
+                        onSelectedChange={buttonToggle.onChange}
+                        size="sm"
+                      />
+                    )}
                   </div>
                 )}
 

@@ -1,8 +1,9 @@
 import { F0Icon } from "@/components/F0Icon"
 import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
-import { motion } from "motion/react"
+import { cn } from "@/lib/utils"
 import { ChatSpinner } from "./components/ChatSpinner"
+import "./styles.css"
 
 export interface ActionItemProps {
   title: string
@@ -37,21 +38,9 @@ export const ActionItem = ({ title, status, inGroup }: ActionItemProps) => {
           />
         </div>
       )}
-      <motion.p
-        key={title}
-        initial={{ opacity: 0, x: 100 }}
-        animate={{
-          opacity: 1,
-          x: 0,
-        }}
-        transition={{
-          ease: "easeOut",
-          duration: 0.3,
-        }}
-        className="text-pretty"
-      >
+      <p className={cn("text-pretty", status === "executing" && "shine-text")}>
         {title}
-      </motion.p>
+      </p>
     </div>
   )
 }

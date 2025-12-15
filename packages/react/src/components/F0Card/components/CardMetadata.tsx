@@ -1,5 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { valueDisplayRenderers } from "@/components/value-display"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import React from "react"
 import { CardMetadata as CardMetadataType } from "../types"
 
@@ -19,6 +20,7 @@ export const cardPropertyRenderers = {
   dotTag: valueDisplayRenderers.dotTag,
   file: valueDisplayRenderers.file,
   folder: valueDisplayRenderers.folder,
+  progressBar: valueDisplayRenderers.progressBar,
 } as const
 
 export type CardPropertyType = keyof typeof cardPropertyRenderers
@@ -51,12 +53,11 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
   return (
     <div className="flex h-8 items-center gap-1.5">
       {"icon" in metadata && (
-        <F0Icon
-          icon={metadata.icon}
-          color="default"
-          size="md"
-          tooltip={metadata.tooltip}
-        />
+        <div className="pointer-events-auto flex items-center">
+          <Tooltip label={metadata.tooltip}>
+            <F0Icon icon={metadata.icon} color="default" size="md" />
+          </Tooltip>
+        </div>
       )}
       {typedRenderer(value, { visualization: "card" })}
     </div>

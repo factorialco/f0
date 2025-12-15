@@ -16,7 +16,7 @@ export const OneModalFooter = ({ children }: OneModalFooterProps) => {
   return (
     <div
       className={cn(
-        "flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background",
+        "flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
         classesByContentPadding[contentPadding]
       )}
     >

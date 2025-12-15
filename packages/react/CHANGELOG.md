@@ -1,46 +1,648 @@
 # Changelog
 
-## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
+## [1.307.0](https://github.com/factorialco/f0/compare/f0-react-v1.306.4...f0-react-v1.307.0) (2025-12-15)
 
 
 ### Features
 
-* **RichTextEditor:** fix full screen mode on modals ([#2955](https://github.com/factorialco/f0/issues/2955)) ([ff68ad3](https://github.com/factorialco/f0/commit/ff68ad3cd699a158c07f52583716ea25d083f230))
+* button toggle group ([#3130](https://github.com/factorialco/f0/issues/3130)) ([629de58](https://github.com/factorialco/f0/commit/629de583c03aa2baf45819430b18f9dad15e61a4))
 
-## [1.260.0](https://github.com/factorialco/f0/compare/f0-react-v1.259.1...f0-react-v1.260.0) (2025-11-10)
-
-
-### Features
-
-* add tooltip on F0Icon and CardMetadata ([#2947](https://github.com/factorialco/f0/issues/2947)) ([878de24](https://github.com/factorialco/f0/commit/878de2423ab10cf73c41fe2d5d16d39e15e82800))
-
-## [1.259.1](https://github.com/factorialco/f0/compare/f0-react-v1.259.0...f0-react-v1.259.1) (2025-11-10)
+## [1.306.4](https://github.com/factorialco/f0/compare/f0-react-v1.306.3...f0-react-v1.306.4) (2025-12-15)
 
 
 ### Bug Fixes
 
-* **sidebar:** company selector ([#2946](https://github.com/factorialco/f0/issues/2946)) ([4c255e7](https://github.com/factorialco/f0/commit/4c255e71e44ca0eab156259e0e4794e4e2ee2fe9))
+* get rid of chattextarea focus issue ([#3136](https://github.com/factorialco/f0/issues/3136)) ([e39aea6](https://github.com/factorialco/f0/commit/e39aea60880835e9a9f26e168e85900748c29d99))
+
+## [1.306.3](https://github.com/factorialco/f0/compare/f0-react-v1.306.2...f0-react-v1.306.3) (2025-12-15)
+
+
+### Bug Fixes
+
+* ai chat suggestion buttons align ([#3137](https://github.com/factorialco/f0/issues/3137)) ([11ecd91](https://github.com/factorialco/f0/commit/11ecd919142b95e6d2be22ea7350ea0165c64db7))
+* dialog position ([#3134](https://github.com/factorialco/f0/issues/3134)) ([61afa02](https://github.com/factorialco/f0/commit/61afa024b83b7cb090bf3e0910a6eb1fcec87806))
+
+## [1.306.2](https://github.com/factorialco/f0/compare/f0-react-v1.306.1...f0-react-v1.306.2) (2025-12-12)
+
+
+### Bug Fixes
+
+* prevent deselection in single select mode when not clearable ([#3123](https://github.com/factorialco/f0/issues/3123)) ([cc6504a](https://github.com/factorialco/f0/commit/cc6504ac9a4820f7f0a8d589943d1728578d65bf))
+
+## [1.306.1](https://github.com/factorialco/f0/compare/f0-react-v1.306.0...f0-react-v1.306.1) (2025-12-12)
+
+
+### Bug Fixes
+
+* export AiChatTextarea component ([#3120](https://github.com/factorialco/f0/issues/3120)) ([7fc9f39](https://github.com/factorialco/f0/commit/7fc9f3941b23fed40af033a899d4687444042f82))
+
+## [1.306.0](https://github.com/factorialco/f0/compare/f0-react-v1.305.0...f0-react-v1.306.0) (2025-12-11)
+
+
+### Features
+
+* **gridgroup:** dashboard content update ([#3100](https://github.com/factorialco/f0/issues/3100)) ([50ff1f9](https://github.com/factorialco/f0/commit/50ff1f9bccf8c4b9de74548f60e5708223c3934d))
+
+## [1.305.0](https://github.com/factorialco/f0/compare/f0-react-v1.304.1...f0-react-v1.305.0) (2025-12-11)
+
+
+### Features
+
+* **modal:** sizes ([#3104](https://github.com/factorialco/f0/issues/3104)) ([48c9b3d](https://github.com/factorialco/f0/commit/48c9b3d8c25bbcac5206ea3fa40d50e0e333b472))
+
+## [1.304.1](https://github.com/factorialco/f0/compare/f0-react-v1.304.0...f0-react-v1.304.1) (2025-12-11)
+
+
+### Bug Fixes
+
+* **InputField:** change placeholder color ([#3086](https://github.com/factorialco/f0/issues/3086)) ([f1be155](https://github.com/factorialco/f0/commit/f1be15519fb34cd7461e632b16e738e86ad0dac5))
+
+## [1.304.0](https://github.com/factorialco/f0/compare/f0-react-v1.303.6...f0-react-v1.304.0) (2025-12-10)
+
+
+### Features
+
+* add support to change placeholder of one chat ([#3110](https://github.com/factorialco/f0/issues/3110)) ([549a5ff](https://github.com/factorialco/f0/commit/549a5fff500a25496f563139ac8804176d56e28f))
+
+## [1.303.6](https://github.com/factorialco/f0/compare/f0-react-v1.303.5...f0-react-v1.303.6) (2025-12-10)
+
+
+### Bug Fixes
+
+* lock CoCreationForm while One is applying changes ([#3106](https://github.com/factorialco/f0/issues/3106)) ([ce30714](https://github.com/factorialco/f0/commit/ce30714ad1af5bb60ff288938281dab2a856bf61))
+
+## [1.303.5](https://github.com/factorialco/f0/compare/f0-react-v1.303.4...f0-react-v1.303.5) (2025-12-10)
+
+
+### Bug Fixes
+
+* add missing moduleIcon ([#3107](https://github.com/factorialco/f0/issues/3107)) ([ec51f8c](https://github.com/factorialco/f0/commit/ec51f8c2311e103f344c8e35bbecbd5466b2e7d1))
+
+## [1.303.4](https://github.com/factorialco/f0/compare/f0-react-v1.303.3...f0-react-v1.303.4) (2025-12-10)
+
+
+### Bug Fixes
+
+* date navigator text size ([#3099](https://github.com/factorialco/f0/issues/3099)) ([c10d148](https://github.com/factorialco/f0/commit/c10d148beaf44a1bf16aca9f039924f6c44c3a79))
+
+## [1.303.3](https://github.com/factorialco/f0/compare/f0-react-v1.303.2...f0-react-v1.303.3) (2025-12-10)
+
+
+### Bug Fixes
+
+* prevent AI suggestions reloading randomly ([#3102](https://github.com/factorialco/f0/issues/3102)) ([1fda7bf](https://github.com/factorialco/f0/commit/1fda7bf98d056ea6295651a29ba9f93ef63b650b))
+
+## [1.303.2](https://github.com/factorialco/f0/compare/f0-react-v1.303.1...f0-react-v1.303.2) (2025-12-10)
+
+
+### Bug Fixes
+
+* prevent unwanted behavior when having select questions with same values in the options ([#3101](https://github.com/factorialco/f0/issues/3101)) ([86111da](https://github.com/factorialco/f0/commit/86111da80a1042219f6a098fecd44771ecea125e))
+
+## [1.303.1](https://github.com/factorialco/f0/compare/f0-react-v1.303.0...f0-react-v1.303.1) (2025-12-05)
+
+
+### Bug Fixes
+
+* export dashboard and layout ([#3090](https://github.com/factorialco/f0/issues/3090)) ([c80d06e](https://github.com/factorialco/f0/commit/c80d06ea62f8367da677af479edc4d76842540c3))
+
+## [1.303.0](https://github.com/factorialco/f0/compare/f0-react-v1.302.3...f0-react-v1.303.0) (2025-12-05)
+
+
+### Features
+
+* nested tables design improvements ([#3089](https://github.com/factorialco/f0/issues/3089)) ([b75a1ea](https://github.com/factorialco/f0/commit/b75a1ea994f62200f79ae7f7c6e6fc4e6a3294db))
+
+## [1.302.3](https://github.com/factorialco/f0/compare/f0-react-v1.302.2...f0-react-v1.302.3) (2025-12-05)
+
+
+### Bug Fixes
+
+* return search from useDataCollectionData ([#3087](https://github.com/factorialco/f0/issues/3087)) ([e5f28d5](https://github.com/factorialco/f0/commit/e5f28d593fffb014c08e93158b252867edd80398))
+
+## [1.302.2](https://github.com/factorialco/f0/compare/f0-react-v1.302.1...f0-react-v1.302.2) (2025-12-05)
+
+
+### Bug Fixes
+
+* align elements inside button ([#3094](https://github.com/factorialco/f0/issues/3094)) ([42ddb57](https://github.com/factorialco/f0/commit/42ddb57c78ac1bccc5bfb0bef1a586b085cf0153))
+
+## [1.302.1](https://github.com/factorialco/f0/compare/f0-react-v1.302.0...f0-react-v1.302.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* improve empty state layout in SelectContent component ([#3092](https://github.com/factorialco/f0/issues/3092)) ([ff1f8f9](https://github.com/factorialco/f0/commit/ff1f8f94e3cadad7728f5871f28b98986057aebe))
+
+## [1.302.0](https://github.com/factorialco/f0/compare/f0-react-v1.301.0...f0-react-v1.302.0) (2025-12-04)
+
+
+### Features
+
+* add disableSelectAll prop to F0Select for manual item selection ([#3082](https://github.com/factorialco/f0/issues/3082)) ([f35e596](https://github.com/factorialco/f0/commit/f35e596afa5a0e8d72e2d9e7e280457232cea2bb))
+
+## [1.301.0](https://github.com/factorialco/f0/compare/f0-react-v1.300.0...f0-react-v1.301.0) (2025-12-04)
+
+
+### Features
+
+* layout grid ([#2989](https://github.com/factorialco/f0/issues/2989)) ([b1fc994](https://github.com/factorialco/f0/commit/b1fc9947a3259800847473481748a8238e055dd8))
+
+## [1.300.0](https://github.com/factorialco/f0/compare/f0-react-v1.299.4...f0-react-v1.300.0) (2025-12-04)
+
+
+### Features
+
+* enhance F0Select component with item caching ([#3084](https://github.com/factorialco/f0/issues/3084)) ([1c5bf96](https://github.com/factorialco/f0/commit/1c5bf96ad512d42e14ee18837f7c1d3dc86197d0))
+
+## [1.299.4](https://github.com/factorialco/f0/compare/f0-react-v1.299.3...f0-react-v1.299.4) (2025-12-04)
+
+
+### Bug Fixes
+
+* adjust max-height calculations in SelectContent component ([#3080](https://github.com/factorialco/f0/issues/3080)) ([f222cae](https://github.com/factorialco/f0/commit/f222caec1d059b82ab04d876ca541d685c2a8b1e))
+
+## [1.299.3](https://github.com/factorialco/f0/compare/f0-react-v1.299.2...f0-react-v1.299.3) (2025-12-04)
+
+
+### Bug Fixes
+
+* co-creation form small improvements ([#3073](https://github.com/factorialco/f0/issues/3073)) ([51e2f2a](https://github.com/factorialco/f0/commit/51e2f2afba83135bb872330456e37f5a0d984ec2))
+
+## [1.299.2](https://github.com/factorialco/f0/compare/f0-react-v1.299.1...f0-react-v1.299.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* aria values in ProgressBar value-display ([#3077](https://github.com/factorialco/f0/issues/3077)) ([0f4bb29](https://github.com/factorialco/f0/commit/0f4bb29c7c2b8089282b78fd797ddcd233889fad))
+
+## [1.299.1](https://github.com/factorialco/f0/compare/f0-react-v1.299.0...f0-react-v1.299.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* add support to disallow optional questions in co-creation form ([#3043](https://github.com/factorialco/f0/issues/3043)) ([7d3d6ff](https://github.com/factorialco/f0/commit/7d3d6ffd65d713d5f8b0f5abfb0d498b2e7edb60))
+
+## [1.299.0](https://github.com/factorialco/f0/compare/f0-react-v1.298.2...f0-react-v1.299.0) (2025-12-03)
+
+
+### Features
+
+* add tooltip to icon value display ([#3056](https://github.com/factorialco/f0/issues/3056)) ([325f5e2](https://github.com/factorialco/f0/commit/325f5e259f8f1cee3f2927124728e2922d6f473c))
+
+## [1.298.2](https://github.com/factorialco/f0/compare/f0-react-v1.298.1...f0-react-v1.298.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* OneModal add modalRef prop for external content reference ([#3072](https://github.com/factorialco/f0/issues/3072)) ([49699c0](https://github.com/factorialco/f0/commit/49699c03a7149a856763ce1e41002bcf99347428))
+
+## [1.298.1](https://github.com/factorialco/f0/compare/f0-react-v1.298.0...f0-react-v1.298.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* add support to only allow certain question types in co-creation form ([#3044](https://github.com/factorialco/f0/issues/3044)) ([47bd674](https://github.com/factorialco/f0/commit/47bd674b2bcd1e25c4bf012fc1226a95679a3dd1))
+
+## [1.298.0](https://github.com/factorialco/f0/compare/f0-react-v1.297.0...f0-react-v1.298.0) (2025-12-03)
+
+
+### Features
+
+* value display add progress bar ([#3053](https://github.com/factorialco/f0/issues/3053)) ([1becf8f](https://github.com/factorialco/f0/commit/1becf8f528e5ada5e85ae52fd0a915680c57d4e3))
+
+## [1.297.0](https://github.com/factorialco/f0/compare/f0-react-v1.296.0...f0-react-v1.297.0) (2025-12-03)
+
+
+### Features
+
+* **AIButton:** One animated icon ([#3069](https://github.com/factorialco/f0/issues/3069)) ([58e73e2](https://github.com/factorialco/f0/commit/58e73e229ff725c95a09f698cf21d7f70ff03b12))
+
+## [1.296.0](https://github.com/factorialco/f0/compare/f0-react-v1.295.0...f0-react-v1.296.0) (2025-12-02)
+
+
+### Features
+
+* create F0ActionBar component ([#3067](https://github.com/factorialco/f0/issues/3067)) ([30b3c72](https://github.com/factorialco/f0/commit/30b3c7282168737147f4a116a27c5f978f184111))
+
+## [1.295.0](https://github.com/factorialco/f0/compare/f0-react-v1.294.0...f0-react-v1.295.0) (2025-12-02)
+
+### Features
+
+- (select) multiselection with paginated datasource
+  ([#3041](https://github.com/factorialco/f0/issues/3041))
+  ([ee8f24b](https://github.com/factorialco/f0/commit/ee8f24bc936460bef612c0eb6c277b24434a19ed))
+
+## [1.294.0](https://github.com/factorialco/f0/compare/f0-react-v1.293.0...f0-react-v1.294.0) (2025-12-02)
+
+### Features
+
+- **AIButton:** new AI Button component
+  ([#3062](https://github.com/factorialco/f0/issues/3062))
+  ([2638aa9](https://github.com/factorialco/f0/commit/2638aa90b23258570ecf67b625813f9f76dddf96))
+
+## [1.293.0](https://github.com/factorialco/f0/compare/f0-react-v1.292.0...f0-react-v1.293.0) (2025-12-02)
+
+### Features
+
+- **Table:** update nested row handling and improve layout
+  ([#3054](https://github.com/factorialco/f0/issues/3054))
+  ([ac541d2](https://github.com/factorialco/f0/commit/ac541d22d733314c136733fa5ba72e067273ff3f))
+
+## [1.292.0](https://github.com/factorialco/f0/compare/f0-react-v1.291.1...f0-react-v1.292.0) (2025-12-02)
+
+### Features
+
+- AIChat add download button for markdown table
+  ([#3055](https://github.com/factorialco/f0/issues/3055))
+  ([33ec11c](https://github.com/factorialco/f0/commit/33ec11c8668e78f1660126b68fb99b1c3aac9416))
+
+## [1.291.1](https://github.com/factorialco/f0/compare/f0-react-v1.291.0...f0-react-v1.291.1) (2025-12-01)
+
+### Bug Fixes
+
+- remove fixing min-w-[40px]
+  ([#3058](https://github.com/factorialco/f0/issues/3058))
+  ([aeb4ef6](https://github.com/factorialco/f0/commit/aeb4ef6783464c4eb3d02595226983c5532ad331))
+
+## [1.291.0](https://github.com/factorialco/f0/compare/f0-react-v1.290.0...f0-react-v1.291.0) (2025-11-27)
+
+### Features
+
+- f0select multiselection
+  ([#2959](https://github.com/factorialco/f0/issues/2959))
+  ([cc653ae](https://github.com/factorialco/f0/commit/cc653ae5dbd54471a31f91b4db67cf595bd9fc06))
+
+## [1.290.0](https://github.com/factorialco/f0/compare/f0-react-v1.289.0...f0-react-v1.290.0) (2025-11-27)
+
+### Features
+
+- **NestedRow:** enhance nested row component with data fetching and …
+  ([#3049](https://github.com/factorialco/f0/issues/3049))
+  ([36339fe](https://github.com/factorialco/f0/commit/36339fed5ff406e89fa5d161f1ff99665ae12453))
+
+## [1.289.0](https://github.com/factorialco/f0/compare/f0-react-v1.288.0...f0-react-v1.289.0) (2025-11-26)
+
+### Features
+
+- **FilterPicker:** number filter open close
+  ([#3017](https://github.com/factorialco/f0/issues/3017))
+  ([0efc8e3](https://github.com/factorialco/f0/commit/0efc8e38872e2b0bb4f973cd59997a8dd96c9dab))
+
+## [1.288.0](https://github.com/factorialco/f0/compare/f0-react-v1.287.0...f0-react-v1.288.0) (2025-11-25)
+
+### Features
+
+- **Icons:** add time (ClockPlus & Sleep) icons
+  ([#3040](https://github.com/factorialco/f0/issues/3040))
+  ([af6ec70](https://github.com/factorialco/f0/commit/af6ec70e69c05b9bd2978738f4d222b6203ee515))
+
+## [1.287.0](https://github.com/factorialco/f0/compare/f0-react-v1.286.0...f0-react-v1.287.0) (2025-11-25)
+
+### Features
+
+- **Icons:** IT computer and tablet icons
+  ([#3035](https://github.com/factorialco/f0/issues/3035))
+  ([2b7fc15](https://github.com/factorialco/f0/commit/2b7fc1503b1a62f3b17a79616926c4b62d3d4eba))
+
+## [1.286.0](https://github.com/factorialco/f0/compare/f0-react-v1.285.0...f0-react-v1.286.0) (2025-11-25)
+
+### Features
+
+- expose hideMaxLength prop in experimental Input component
+  ([#3037](https://github.com/factorialco/f0/issues/3037))
+  ([f758b57](https://github.com/factorialco/f0/commit/f758b57935b1fed880ccb5d0adfe05580915f200))
+
+## [1.285.0](https://github.com/factorialco/f0/compare/f0-react-v1.284.0...f0-react-v1.285.0) (2025-11-25)
+
+### Features
+
+- **Icons:** add new module Salary Advance icons
+  ([#3032](https://github.com/factorialco/f0/issues/3032))
+  ([5c61e02](https://github.com/factorialco/f0/commit/5c61e02e53f3e6119be621f57055870cdc819b72))
+
+## [1.284.0](https://github.com/factorialco/f0/compare/f0-react-v1.283.0...f0-react-v1.284.0) (2025-11-25)
+
+### Features
+
+- **ChatHeader:** add start new chat button
+  ([#3001](https://github.com/factorialco/f0/issues/3001))
+  ([1fbf97e](https://github.com/factorialco/f0/commit/1fbf97e3ca53737ff129284e49ca5c247636720b))
+
+## [1.283.0](https://github.com/factorialco/f0/compare/f0-react-v1.282.0...f0-react-v1.283.0) (2025-11-24)
+
+### Features
+
+- **OneAlert:** enhance responsiveness
+  ([#2983](https://github.com/factorialco/f0/issues/2983))
+  ([8cf4f67](https://github.com/factorialco/f0/commit/8cf4f67332b611725dc3b36d2056c099a7fce809))
+
+## [1.282.0](https://github.com/factorialco/f0/compare/f0-react-v1.281.0...f0-react-v1.282.0) (2025-11-24)
+
+### Features
+
+- **Table:** implement detailed nested row support and enhance data f…
+  ([#3026](https://github.com/factorialco/f0/issues/3026))
+  ([399d32f](https://github.com/factorialco/f0/commit/399d32f96daf7e9439dbdd1805e03196a074e83d))
+
+## [1.281.0](https://github.com/factorialco/f0/compare/f0-react-v1.280.0...f0-react-v1.281.0) (2025-11-24)
+
+### Features
+
+- create all needed components for new co-creation form
+  ([#2958](https://github.com/factorialco/f0/issues/2958))
+  ([ac0e3e8](https://github.com/factorialco/f0/commit/ac0e3e85652c3cdc4479e90c87c4911a355dbf21))
+
+## [1.280.0](https://github.com/factorialco/f0/compare/f0-react-v1.279.2...f0-react-v1.280.0) (2025-11-24)
+
+### Features
+
+- add F0Text and F0Heading components
+  ([#2408](https://github.com/factorialco/f0/issues/2408))
+  ([63b6f42](https://github.com/factorialco/f0/commit/63b6f42040fd4283580c35d30fe4ca71f404a108))
+
+## [1.279.2](https://github.com/factorialco/f0/compare/f0-react-v1.279.1...f0-react-v1.279.2) (2025-11-24)
+
+### Bug Fixes
+
+- make more permissive flag code prop type to allow any string
+  ([#3020](https://github.com/factorialco/f0/issues/3020))
+  ([d5d61ff](https://github.com/factorialco/f0/commit/d5d61ffe046ba27441591d24bd9750b312cf12e8))
+
+## [1.279.1](https://github.com/factorialco/f0/compare/f0-react-v1.279.0...f0-react-v1.279.1) (2025-11-24)
+
+### Bug Fixes
+
+- add support to get selected label from datasource options
+  ([#3019](https://github.com/factorialco/f0/issues/3019))
+  ([584f67f](https://github.com/factorialco/f0/commit/584f67f7c80dfcf35a7708b3ce9f857b8200ca20))
+
+## [1.279.0](https://github.com/factorialco/f0/compare/f0-react-v1.278.0...f0-react-v1.279.0) (2025-11-24)
+
+### Features
+
+- **Table:** enhance row rendering with nested children support and u…
+  ([#3010](https://github.com/factorialco/f0/issues/3010))
+  ([0efc63b](https://github.com/factorialco/f0/commit/0efc63bcacc5191a1f2628e7ac597404c86736d9))
+
+## [1.278.0](https://github.com/factorialco/f0/compare/f0-react-v1.277.1...f0-react-v1.278.0) (2025-11-24)
+
+### Features
+
+- **Icons:** math icons (greater, less...)
+  ([#3016](https://github.com/factorialco/f0/issues/3016))
+  ([49571e1](https://github.com/factorialco/f0/commit/49571e12ecc1dcade7b496cd4a70c8b753f62cb9))
+
+## [1.277.1](https://github.com/factorialco/f0/compare/f0-react-v1.277.0...f0-react-v1.277.1) (2025-11-21)
+
+### Bug Fixes
+
+- **button:** when label is undefined
+  ([#3013](https://github.com/factorialco/f0/issues/3013))
+  ([ef16474](https://github.com/factorialco/f0/commit/ef16474e972b79c8e57916c32c2743d2c748219e))
+
+## [1.277.0](https://github.com/factorialco/f0/compare/f0-react-v1.276.3...f0-react-v1.277.0) (2025-11-21)
+
+### Features
+
+- country value-display ([#3009](https://github.com/factorialco/f0/issues/3009))
+  ([decce16](https://github.com/factorialco/f0/commit/decce169cec00dac4e2ad8282f5936e9f1715915))
+
+## [1.276.3](https://github.com/factorialco/f0/compare/f0-react-v1.276.2...f0-react-v1.276.3) (2025-11-21)
+
+### Bug Fixes
+
+- typing issue for multiple employee filters
+  ([#3006](https://github.com/factorialco/f0/issues/3006))
+  ([77aca10](https://github.com/factorialco/f0/commit/77aca10c5ba67b3bfed44362d0c73650af88bcfb))
+
+## [1.276.2](https://github.com/factorialco/f0/compare/f0-react-v1.276.1...f0-react-v1.276.2) (2025-11-21)
+
+### Bug Fixes
+
+- **AvatarPerson:** change icon size for sm size
+  ([#3005](https://github.com/factorialco/f0/issues/3005))
+  ([2b85c06](https://github.com/factorialco/f0/commit/2b85c0625e7c70c6b91ecaa6dd7122309785976c))
+
+## [1.276.1](https://github.com/factorialco/f0/compare/f0-react-v1.276.0...f0-react-v1.276.1) (2025-11-21)
+
+### Bug Fixes
+
+- select when search ([#3003](https://github.com/factorialco/f0/issues/3003))
+  ([5d12f5a](https://github.com/factorialco/f0/commit/5d12f5a10d7f0da74ee67b7a319d2c6061614a36))
+
+## [1.276.0](https://github.com/factorialco/f0/compare/f0-react-v1.275.0...f0-react-v1.276.0) (2025-11-20)
+
+### Features
+
+- add F0GridStack component
+  ([#2994](https://github.com/factorialco/f0/issues/2994))
+  ([c1e7853](https://github.com/factorialco/f0/commit/c1e78533e42693bd4e9cecc93b25d6029ee50933))
+
+## [1.275.0](https://github.com/factorialco/f0/compare/f0-react-v1.274.0...f0-react-v1.275.0) (2025-11-20)
+
+### Features
+
+- **Datacollection:** add hide show all columns toggle
+  ([#2999](https://github.com/factorialco/f0/issues/2999))
+  ([f1261f4](https://github.com/factorialco/f0/commit/f1261f4453390192b80df2e5a5684bda435376cb))
+
+## [1.274.0](https://github.com/factorialco/f0/compare/f0-react-v1.273.1...f0-react-v1.274.0) (2025-11-20)
+
+### Features
+
+- ellipsis in F0Buttons ([#2997](https://github.com/factorialco/f0/issues/2997))
+  ([353f0cf](https://github.com/factorialco/f0/commit/353f0cfbf07f199231089a61111a14ef68cc7a35))
+
+## [1.273.1](https://github.com/factorialco/f0/compare/f0-react-v1.273.0...f0-react-v1.273.1) (2025-11-19)
+
+### Bug Fixes
+
+- **OneModal:** fix state management
+  ([#2995](https://github.com/factorialco/f0/issues/2995))
+  ([6412784](https://github.com/factorialco/f0/commit/6412784da32b42f0a0ba29e78c5321359aeff5db))
+
+## [1.273.0](https://github.com/factorialco/f0/compare/f0-react-v1.272.1...f0-react-v1.273.0) (2025-11-19)
+
+### Features
+
+- **Charts:** visible label for Bar, Area and Line
+  ([#2992](https://github.com/factorialco/f0/issues/2992))
+  ([1286fb2](https://github.com/factorialco/f0/commit/1286fb2e22f24ec160c260c9da23ad653b3b74cd))
+
+## [1.272.1](https://github.com/factorialco/f0/compare/f0-react-v1.272.0...f0-react-v1.272.1) (2025-11-19)
+
+### Bug Fixes
+
+- echarts theme on build
+  ([#2990](https://github.com/factorialco/f0/issues/2990))
+  ([27dbc71](https://github.com/factorialco/f0/commit/27dbc714dc9c96995d0a4553ab7745b3f519f9f9))
+
+## [1.272.0](https://github.com/factorialco/f0/compare/f0-react-v1.271.0...f0-react-v1.272.0) (2025-11-19)
+
+### Features
+
+- **Charts:** F0Chart component
+  ([#2961](https://github.com/factorialco/f0/issues/2961))
+  ([fc77088](https://github.com/factorialco/f0/commit/fc77088d861c417144fb1cff971bdec9536dd3f8))
+
+## [1.271.0](https://github.com/factorialco/f0/compare/f0-react-v1.270.1...f0-react-v1.271.0) (2025-11-18)
+
+### Features
+
+- **ActionItem:** add shine effect to executing status
+  ([#2986](https://github.com/factorialco/f0/issues/2986))
+  ([ae0f1ee](https://github.com/factorialco/f0/commit/ae0f1ee85c77fad27c7f836eb59142cc63a56b80))
+
+## [1.270.1](https://github.com/factorialco/f0/compare/f0-react-v1.270.0...f0-react-v1.270.1) (2025-11-17)
+
+### Bug Fixes
+
+- number filter range ([#2978](https://github.com/factorialco/f0/issues/2978))
+  ([4e13663](https://github.com/factorialco/f0/commit/4e13663315f3f245ce34d17d0a31a426fed2b6a3))
+
+## [1.270.0](https://github.com/factorialco/f0/compare/f0-react-v1.269.0...f0-react-v1.270.0) (2025-11-17)
+
+### Features
+
+- **F0VersionHistory:** add version history component
+  ([#2972](https://github.com/factorialco/f0/issues/2972))
+  ([e4a828b](https://github.com/factorialco/f0/commit/e4a828bd4809a2370b1bdfd493f88124e0ad4bef))
+
+## [1.269.0](https://github.com/factorialco/f0/compare/f0-react-v1.268.2...f0-react-v1.269.0) (2025-11-17)
+
+### Features
+
+- **tooltip:** add instant prop for immediate tooltip interaction
+  ([#2981](https://github.com/factorialco/f0/issues/2981))
+  ([46a5e07](https://github.com/factorialco/f0/commit/46a5e079c2fdcae134b0a3f7862ec2d79903bdd6))
+
+## [1.268.2](https://github.com/factorialco/f0/compare/f0-react-v1.268.1...f0-react-v1.268.2) (2025-11-17)
+
+### Bug Fixes
+
+- **tooltip:** add pointer-events-none to prevent tooltip interference
+  ([#2979](https://github.com/factorialco/f0/issues/2979))
+  ([696e558](https://github.com/factorialco/f0/commit/696e5583b003a81ed9c6fe951adea306d30133ac))
+
+## [1.268.1](https://github.com/factorialco/f0/compare/f0-react-v1.268.0...f0-react-v1.268.1) (2025-11-17)
+
+### Bug Fixes
+
+- solve issue with Select used inside modal
+  ([#2976](https://github.com/factorialco/f0/issues/2976))
+  ([4515d04](https://github.com/factorialco/f0/commit/4515d0497b285bb95ba234ef8e0989046b8deebf))
+
+## [1.268.0](https://github.com/factorialco/f0/compare/f0-react-v1.267.0...f0-react-v1.268.0) (2025-11-17)
+
+### Features
+
+- loading and disable in datacollection actions
+  ([#2974](https://github.com/factorialco/f0/issues/2974))
+  ([af1bdd6](https://github.com/factorialco/f0/commit/af1bdd657d65ae3de676ee16154d2bb43d792397))
+
+## [1.267.0](https://github.com/factorialco/f0/compare/f0-react-v1.266.0...f0-react-v1.267.0) (2025-11-17)
+
+### Features
+
+- datacollection temp fullWith
+  ([#2970](https://github.com/factorialco/f0/issues/2970))
+  ([efe153b](https://github.com/factorialco/f0/commit/efe153b957561e37f6f5c98b70fdfddd6d5870e2))
+
+## [1.266.0](https://github.com/factorialco/f0/compare/f0-react-v1.265.0...f0-react-v1.266.0) (2025-11-12)
+
+### Features
+
+- datacollection allow to disable persistence
+  ([#2968](https://github.com/factorialco/f0/issues/2968))
+  ([1e5f973](https://github.com/factorialco/f0/commit/1e5f973cf52c459ca8f26f81395171b585e7d676))
+
+## [1.265.0](https://github.com/factorialco/f0/compare/f0-react-v1.264.1...f0-react-v1.265.0) (2025-11-12)
+
+### Features
+
+- **RichTextEditor:** add BlockIdExtension
+  ([#2964](https://github.com/factorialco/f0/issues/2964))
+  ([805493c](https://github.com/factorialco/f0/commit/805493cf4154d3e555844300b91305b12c25977f))
+
+## [1.264.1](https://github.com/factorialco/f0/compare/f0-react-v1.264.0...f0-react-v1.264.1) (2025-11-12)
+
+### Bug Fixes
+
+- **AiChat:** targetBlank to MessageSources and consistency in loading states
+  ([#2944](https://github.com/factorialco/f0/issues/2944))
+  ([d562d4c](https://github.com/factorialco/f0/commit/d562d4c499c80ac1bec98621b65f6c56330e0e81))
+
+## [1.264.0](https://github.com/factorialco/f0/compare/f0-react-v1.263.0...f0-react-v1.264.0) (2025-11-11)
+
+### Features
+
+- **RichTextEditor:** add secondary actions and person metadata support
+  ([#2940](https://github.com/factorialco/f0/issues/2940))
+  ([d223a6a](https://github.com/factorialco/f0/commit/d223a6a6f9af6d80745af5635744133dfae520d3))
+
+## [1.263.0](https://github.com/factorialco/f0/compare/f0-react-v1.262.0...f0-react-v1.263.0) (2025-11-11)
+
+### Features
+
+- list icon avatar ([#2953](https://github.com/factorialco/f0/issues/2953))
+  ([efa338e](https://github.com/factorialco/f0/commit/efa338e5e4e35d6138f2be25a793434b93d04865))
+
+## [1.262.0](https://github.com/factorialco/f0/compare/f0-react-v1.261.0...f0-react-v1.262.0) (2025-11-11)
+
+### Features
+
+- Display deactivated persons in OneDataCollection tables
+  ([#2952](https://github.com/factorialco/f0/issues/2952))
+  ([0d1eb2b](https://github.com/factorialco/f0/commit/0d1eb2b7d055c48316f15a978bcd18004d3d42f2))
+
+## [1.261.0](https://github.com/factorialco/f0/compare/f0-react-v1.260.0...f0-react-v1.261.0) (2025-11-10)
+
+### Features
+
+- **RichTextEditor:** fix full screen mode on modals
+  ([#2955](https://github.com/factorialco/f0/issues/2955))
+  ([ff68ad3](https://github.com/factorialco/f0/commit/ff68ad3cd699a158c07f52583716ea25d083f230))
+
+## [1.260.0](https://github.com/factorialco/f0/compare/f0-react-v1.259.1...f0-react-v1.260.0) (2025-11-10)
+
+### Features
+
+- add tooltip on F0Icon and CardMetadata
+  ([#2947](https://github.com/factorialco/f0/issues/2947))
+  ([878de24](https://github.com/factorialco/f0/commit/878de2423ab10cf73c41fe2d5d16d39e15e82800))
+
+## [1.259.1](https://github.com/factorialco/f0/compare/f0-react-v1.259.0...f0-react-v1.259.1) (2025-11-10)
+
+### Bug Fixes
+
+- **sidebar:** company selector
+  ([#2946](https://github.com/factorialco/f0/issues/2946))
+  ([4c255e7](https://github.com/factorialco/f0/commit/4c255e71e44ca0eab156259e0e4794e4e2ee2fe9))
 
 ## [1.259.0](https://github.com/factorialco/f0/compare/f0-react-v1.258.0...f0-react-v1.259.0) (2025-11-10)
 
-
 ### Features
 
-* input password visibility ([#2936](https://github.com/factorialco/f0/issues/2936)) ([be2c4fc](https://github.com/factorialco/f0/commit/be2c4fc955f5be1cb738960ed7b8133e4a825322))
+- input password visibility
+  ([#2936](https://github.com/factorialco/f0/issues/2936))
+  ([be2c4fc](https://github.com/factorialco/f0/commit/be2c4fc955f5be1cb738960ed7b8133e4a825322))
 
 ## [1.258.0](https://github.com/factorialco/f0/compare/f0-react-v1.257.0...f0-react-v1.258.0) (2025-11-10)
 
-
 ### Features
 
-* **WelcomeScreen:** enhance WelcomeScreen with prompt and message  ([#2924](https://github.com/factorialco/f0/issues/2924)) ([1079fb2](https://github.com/factorialco/f0/commit/1079fb22dd1bff405d215781b95f8c6b41dac7c9))
+- **WelcomeScreen:** enhance WelcomeScreen with prompt and message
+  ([#2924](https://github.com/factorialco/f0/issues/2924))
+  ([1079fb2](https://github.com/factorialco/f0/commit/1079fb22dd1bff405d215781b95f8c6b41dac7c9))
 
 ## [1.257.0](https://github.com/factorialco/f0/compare/f0-react-v1.256.0...f0-react-v1.257.0) (2025-11-07)
 
-
 ### Features
 
-* use oneellipsis component for the text ([#2921](https://github.com/factorialco/f0/issues/2921)) ([25c7548](https://github.com/factorialco/f0/commit/25c75487421c0793323c677003638e5c2f91e91c))
+- use oneellipsis component for the text
+  ([#2921](https://github.com/factorialco/f0/issues/2921))
+  ([25c7548](https://github.com/factorialco/f0/commit/25c75487421c0793323c677003638e5c2f91e91c))
 
 ## [1.256.0](https://github.com/factorialco/f0/compare/f0-react-v1.255.1...f0-react-v1.256.0) (2025-11-06)
 

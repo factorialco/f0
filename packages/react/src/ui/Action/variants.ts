@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import { cva } from "cva"
 
 const baseButton =
-  "group relative inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border-none p-0 text-base font-medium shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] transition-colors [&_.main]:transform-gpu [&_.main]:transition-transform [&_.main]:duration-100 active:[&_.main]:translate-y-px [&_.main]:flex [&_.main]:items-center [&_.main]:justify-center disabled:opacity-30 disabled:cursor-not-allowed no-underline"
+  "group relative inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border-none p-0 text-base font-medium shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] transition-colors [&_.main]:transform-gpu [&_.main]:transition-transform [&_.main]:duration-100 active:[&_.main]:translate-y-px [&_.main]:flex [&_.main]:items-center [&_.main]:justify-center disabled:opacity-30 disabled:cursor-not-allowed no-underline [&_.main]:z-20"
 
 const baseLink =
   "relative flex-row font-medium [&[aria-disabled=true]]:pointer-events-none [&[aria-disabled=true]]:cursor-not-allowed [&[aria-disabled=true]]:opacity-30 transition-colors"
@@ -68,6 +68,17 @@ export const actionVariants = cva({
         "active:bg-f1-background-selected-hover active:shadow-[inset_0_2px_4px_0_rgba(13,22,37,.1)]",
         "data-[pressed=true]:bg-f1-background-selected-hover data-[pressed=true]:shadow-[inset_0_2px_4px_0_rgba(13,22,37,.1)]"
       ),
+      ai: cn(
+        baseButton,
+        "bg-f1-border text-f1-foreground transition-all duration-200",
+        "[--gradient-angle:0deg]",
+        "hover:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] hover:before:opacity-100",
+        "hover:animate-rotate-gradient",
+        "before:pointer-events-none before:absolute before:inset-px before:z-10 before:rounded-[9px] before:bg-f1-background before:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] before:content-['']",
+        "after:pointer-events-none after:absolute after:inset-0 after:translate-y-px after:scale-90 after:animate-rotate-gradient after:rounded after:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] after:opacity-0 after:blur-sm after:content-[''] after:[transition:transform_200ms,opacity_200ms] hover:after:scale-100 hover:after:opacity-80",
+        "active:bg-f1-background-tertiary active:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)]",
+        "data-[pressed=true]:bg-f1-background-tertiary data-[pressed=true]:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] data-[pressed=true]:after:opacity-70 data-[pressed=true]:after:ring-f1-border-hover"
+      ),
     },
     pressed: {
       true: "[&_.main]:translate-y-px",
@@ -83,9 +94,9 @@ export const actionVariants = cva({
 export const buttonSizeVariants = cva({
   variants: {
     size: {
-      sm: "rounded-sm text-sm [&_.main]:h-6 [&_.main]:px-2",
-      md: "rounded text-base [&_.main]:h-8 [&_.main]:px-3",
-      lg: "rounded-md text-lg [&_.main]:h-10 [&_.main]:px-4",
+      sm: "rounded-sm text-sm before:rounded-[7px] [&_.main]:h-6 [&_.main]:px-2",
+      md: "rounded text-base before:rounded-[9px] [&_.main]:h-8 [&_.main]:px-3",
+      lg: "rounded-md text-lg before:rounded-[11px] [&_.main]:h-10 [&_.main]:px-4",
     },
   },
   defaultVariants: { size: "md" },
@@ -114,6 +125,7 @@ export const iconVariants = cva({
       ghost: "",
       promote: "",
       outlinePromote: "",
+      ai: "",
       link: "",
       mention: "",
       selected: "",
@@ -128,104 +140,118 @@ export const iconVariants = cva({
     {
       variant: "default",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-inverse dark:[&>svg]:text-f1-icon-bold/80",
+      class:
+        "[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:[&_svg:not([data-has-color])]:text-f1-icon-bold/80",
     },
     {
       variant: "outline",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "neutral",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "critical",
       mode: "default",
       class:
-        "[&>svg]:text-f1-icon-critical-bold group-hover:[&>svg]:text-f1-icon-inverse group-active:[&>svg]:text-f1-icon-inverse group-data-[pressed=true]:[&>svg]:text-f1-icon-inverse dark:group-hover:[&>svg]:text-f1-icon-bold/80 dark:group-active:[&>svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&>svg]:text-f1-icon-bold/80",
+        "[&_svg:not([data-has-color])]:text-f1-icon-critical-bold group-hover:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-active:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:group-hover:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-active:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-bold/80",
     },
     {
       variant: "ghost",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "promote",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "outlinePromote",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
+    },
+    {
+      variant: "ai",
+      mode: "default",
+      class:
+        "[&_svg>circle]:[stroke:url(#ai-gradient)] [&_svg>path]:[fill:url(#ai-gradient)] [&_svg>rect]:[fill:url(#ai-gradient)]",
     },
     {
       variant: "link",
       mode: "default",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "mention",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "unstyled",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "default",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-inverse dark:[&>svg]:text-f1-icon-bold",
+      class:
+        "[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "outline",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-bold",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "neutral",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-bold",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "critical",
       mode: "only",
       class:
-        "[&>svg]:text-f1-icon-critical-bold group-hover:[&>svg]:text-f1-icon-inverse group-active:[&>svg]:text-f1-icon-inverse group-data-[pressed=true]:[&>svg]:text-f1-icon-inverse dark:group-hover:[&>svg]:text-f1-icon-bold/80 dark:group-active:[&>svg]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&>svg]:text-f1-icon-bold/80",
+        "[&_svg:not([data-has-color])]:text-f1-icon-critical-bold group-hover:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-active:[&_svg:not([data-has-color])]:text-f1-icon-inverse group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-inverse dark:group-hover:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-active:[&_svg:not([data-has-color])]:text-f1-icon-bold/80 dark:group-data-[pressed=true]:[&_svg:not([data-has-color])]:text-f1-icon-bold/80",
     },
     {
       variant: "ghost",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-bold",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-bold",
     },
     {
       variant: "promote",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "outlinePromote",
       mode: "only",
-      class: "[&>svg]:text-f1-icon-promote",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-promote",
     },
     {
       variant: "link",
       mode: "only",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "unstyled",
       mode: "only",
-      class: "[&>svg]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "mention",
       mode: "default",
-      class: "[&>svg]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
+    },
+    {
+      variant: "ai",
+      mode: "only",
+      class:
+        "[&_svg>circle]:[stroke:url(#ai-gradient)] [&_svg>path]:[fill:url(#ai-gradient)] [&_svg>rect]:[fill:url(#ai-gradient)]",
     },
   ],
   defaultVariants: {
@@ -250,6 +276,7 @@ export const loadingVariants = cva({
       ghost: "border-f1-foreground border-t-transparent",
       promote: "border-f1-icon-promote border-t-transparent",
       outlinePromote: "border-f1-icon-promote border-t-transparent",
+      ai: "border-f1-foreground border-t-transparent",
       unstyled: "",
     },
   },

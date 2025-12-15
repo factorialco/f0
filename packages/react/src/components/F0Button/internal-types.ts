@@ -1,6 +1,11 @@
 import { IconType } from "@/components/F0Icon"
-import { ActionProps, ButtonType, NavTarget } from "@/ui/Action"
-import { ButtonSize, ButtonVariant } from "./types"
+import {
+  ActionButtonVariant,
+  ActionProps,
+  ButtonType,
+  NavTarget,
+} from "@/ui/Action"
+import { ButtonSize } from "./types"
 
 export type { ButtonType }
 
@@ -11,8 +16,8 @@ export type ButtonInternalProps = Pick<
   | "className"
   | "pressed"
   | "compact"
-  | "variant"
   | "tooltip"
+  | "fontSize"
 > &
   DataAttributes & {
     /**
@@ -22,7 +27,7 @@ export type ButtonInternalProps = Pick<
     /**
      * The variant of the button.
      */
-    variant?: ButtonVariant
+    variant?: ActionButtonVariant
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
@@ -81,6 +86,12 @@ export type ButtonInternalProps = Pick<
      * If true, the button will not automatically add a title based label
      */
     noTitle?: boolean
+
+    /**
+     * @private
+     * If true, the button will rotate the icon when the button is hovered.
+     */
+    iconRotate?: boolean
 
     /**
      * @private

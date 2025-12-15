@@ -64,6 +64,7 @@ type SelectContentProps = (
   forceMinHeight?: boolean
   scrollMargin?: number
   taller?: boolean
+  portalContainer?: HTMLElement | null
 }
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
@@ -85,6 +86,7 @@ const SelectContent = forwardRef<
       forceMinHeight,
       showLoadingIndicator,
       asChild,
+      portalContainer,
       ...props
     },
     ref
@@ -112,15 +114,13 @@ const SelectContent = forwardRef<
 
     const asList = asSelectProp === "list"
 
-    const valueArray = useMemo(
-      () =>
-        new Set(
-          (Array.isArray(value) ? value : [value]).filter(
-            (item) => item !== undefined
-          )
-        ),
-      [value]
-    )
+    const valueArray = useMemo(() => {
+      return new Set(
+        (Array.isArray(value) ? value : [value]).filter(
+          (item) => item !== undefined
+        )
+      )
+    }, [value])
 
     const positionIndex = useMemo(() => {
       return (
@@ -148,17 +148,21 @@ const SelectContent = forwardRef<
     }, [open])
 
     useEffect(() => {
-      // Measure the items when the animation is finished and scroll to item
+      // Measure the items when the animation is finished
       virtualizer.measure()
+    }, [virtualizer, animationStarted, asList])
+
+    useEffect(() => {
+      // Scroll to selected item when position changes
       virtualizer.scrollToIndex(positionIndex)
-    }, [virtualizer, positionIndex, animationStarted, asList])
+    }, [virtualizer, positionIndex])
 
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <p className={cn("flex items-center justify-center p-2", "min-h-[80px]")}>
-        {emptyMessage || "-"}
-      </p>
+      <div className="flex h-full w-full items-center justify-center p-2">
+        <p className="text-center">{emptyMessage || "-"}</p>
+      </div>
     ) : isVirtual ? (
       <div
         className={cn(
@@ -225,6 +229,21 @@ const SelectContent = forwardRef<
         position={asList ? "item-aligned" : position}
         collisionPadding={16}
         {...props}
+        // Prevent the default focus restoration when the select closes.
+        // This avoids infinite focus loops when the select is inside a modal
+        // or other focus-trapping container.
+        onCloseAutoFocus={(event) => {
+          // Call user's handler if provided
+          if (
+            props.onCloseAutoFocus &&
+            typeof props.onCloseAutoFocus === "function"
+          ) {
+            props.onCloseAutoFocus(event)
+          }
+          // Always prevent the default behavior - the browser will naturally
+          // return focus to the last focused element before the select opened
+          event.preventDefault()
+        }}
         onAnimationStart={() => {
           // Set the animation state to started as the elements are visible
           setAnimationStarted(true)
@@ -250,14 +269,19 @@ const SelectContent = forwardRef<
               viewportRef={parentRef}
               className={cn(
                 "flex flex-col overflow-y-auto",
+                // Dynamic max-height: min of desired height and available viewport space minus top/bottom content
                 asList
                   ? "max-h-full"
                   : taller
-                    ? "max-h-[440px]"
-                    : "max-h-[320px]",
-                loadingNewContent &&
-                  "select-none opacity-10 transition-opacity",
-                forceMinHeight && "min-h-[450px]"
+                    ? "max-h-[min(460px,calc(var(--radix-select-content-available-height,460px)-110px))]"
+                    : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]",
+                // Apply min-height when filters are present to maintain consistent size
+                !asList &&
+                  forceMinHeight &&
+                  "min-h-[min(450px,calc(var(--radix-select-content-available-height,450px)-110px))]",
+                // Center content vertically when empty
+                isEmpty && "justify-center",
+                loadingNewContent && "select-none opacity-10 transition-opacity"
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
@@ -272,7 +296,8 @@ const SelectContent = forwardRef<
                     "p-1",
                     !asList &&
                       position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] w-full"
+                      "h-[var(--radix-select-trigger-height)] w-full",
+                    isEmpty && "flex h-full"
                   )}
                 >
                   {viewportContent}
@@ -288,17 +313,21 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal>
+      <SelectPrimitive.Portal container={portalContainer}>
         <>
-          {/* Overlay to prevent clicks on the content */}
-          {open && (
+          {/* 
+            Overlay to prevent clicks from propagating.
+            Only render when NOT using a custom portal container to avoid
+            conflicts with modal focus management.
+          */}
+          {open && !portalContainer && (
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
               }}
-            ></div>
+            />
           )}
           {content}
         </>

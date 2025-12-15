@@ -1,30 +1,34 @@
-.preserved-selection {
-  @apply bg-f1-background-selected-bold/20;
+.preserved-selection,
+.notes-text-editor-title::selection {
+  @apply bg-f1-background-selected-hover;
+}
+
+.notes-text-editor *::selection {
+  background-color: transparent !important;
 }
 
 .notes-text-editor p {
-  @apply relative mb-2 p-0 text-[16px] font-normal leading-[24px];
+  @apply relative mb-2 p-0 text-[16px] font-normal leading-[24px] tracking-[-0.16px];
 }
 
 .notes-text-editor p:last-child {
-  margin-bottom: 0;
+  @apply mb-0;
 }
 
 .notes-text-editor h1 {
-  @apply mb-2.5 p-0 text-[29px] font-semibold leading-[39px];
+  @apply mb-2.5 p-0 text-[29px] font-semibold leading-[39px] tracking-[-0.58px];
 }
 
 .notes-text-editor h2 {
-  @apply mb-2 p-0 text-[24px] font-semibold leading-[32px];
+  @apply mb-2 p-0 text-[24px] font-semibold leading-[32px] tracking-[-0.48px];
 }
 
 .notes-text-editor h3 {
-  @apply mb-[7px] p-0 text-[19px] font-semibold leading-[26px];
+  @apply mb-[7px] p-0 text-[19px] font-semibold leading-[26px] tracking-[-0.19px];
 }
 
 .notes-text-editor ul {
-  @apply m-0 mb-2;
-  list-style: disc;
+  @apply m-0 mb-2 list-disc;
 }
 
 .notes-text-editor ol {
@@ -104,10 +108,6 @@
 
 .notes-text-editor ul[data-type="taskList"] {
   @apply pl-0;
-}
-
-.shadow-editor-tools {
-  box-shadow: 0px -4px 20px 0px #0d162514;
 }
 
 .f1-task-item {
@@ -221,7 +221,7 @@ Placeholder component
 
 .notes-text-editor table td,
 .notes-text-editor table th {
-  @apply relative box-border min-w-4 border border-solid border-f1-border-secondary p-2 align-top;
+  @apply relative box-border min-w-4 border border-solid border-f1-border px-3 py-2.5 align-top;
 }
 
 .notes-text-editor table td > *,
@@ -235,16 +235,6 @@ Placeholder component
 
 .notes-text-editor table th > * {
   @apply font-medium text-f1-foreground-secondary;
-}
-
-.notes-text-editor table td:first-child,
-.notes-text-editor table th:first-child {
-  @apply border-l-0;
-}
-
-.notes-text-editor table td:last-child,
-.notes-text-editor table th:last-child {
-  @apply border-r-0;
 }
 
 .notes-text-editor table .selectedCell:after {

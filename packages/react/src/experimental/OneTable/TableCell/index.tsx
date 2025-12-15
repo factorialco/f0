@@ -1,3 +1,5 @@
+import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
+import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
@@ -6,6 +8,14 @@ import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
 import { useTable } from "../utils/TableContext"
 import { getColWidth } from "../utils/colWidth"
+import { NestedCell } from "./NestedCell"
+import { TreeConnector } from "./TreeConnector"
+import {
+  emptyDetailedCellClassName,
+  isFirstCellWithChildren,
+  isFirstCellWithTableChildren,
+  SPACING_FACTOR,
+} from "./utils/nested"
 
 interface TableCellProps {
   children: React.ReactNode
@@ -46,6 +56,20 @@ interface TableCellProps {
    * The class name of the cell
    */
   className?: string
+
+  /**
+   * Defines if the cell is loading
+   * @default false
+   */
+
+  loading?: boolean
+  /**
+   * The props for the nested row
+   */
+  nestedRowProps?: NestedRowProps & {
+    rowWithChildren?: boolean
+    tableWithChildren?: boolean
+  }
 }
 
 export function TableCell({
@@ -57,6 +81,8 @@ export function TableCell({
   sticky,
   colSpan,
   className,
+  loading = false,
+  nestedRowProps,
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -70,11 +96,21 @@ export function TableCell({
   const colWidth = getColWidth(width)
 
   const linkRef = useRef<HTMLAnchorElement>(null)
+  const depth = nestedRowProps?.depth ?? 0
+  const isDetailedVariant = nestedRowProps?.nestedVariant === "detailed"
+
+  const firstCellMarginLeft = isFirstCellWithTableChildren(
+    firstCell,
+    !!nestedRowProps?.tableWithChildren
+  ) && {
+    marginLeft: `${(depth + (isDetailedVariant ? 0 : 1)) * SPACING_FACTOR}px`,
+  }
 
   return (
     <TableCellRoot
       colSpan={colSpan}
       className={cn(
+        "h-full",
         firstCell && "peer font-medium",
         isSticky &&
           isScrolled &&
@@ -110,56 +146,89 @@ export function TableCell({
           />
         )}
       </AnimatePresence>
-      <div
-        className={cn(
-          "[&:has([role=checkbox])]:relative [&:has([role=checkbox])]:z-[1]",
-          "[&:has([type=button])]:relative [&:has([type=button])]:z-[1]",
-          "[&:has(a)]:relative [&:has(a)]:z-[1]",
-          "pointer-events-none"
-        )}
-      >
-        <div
-          className={
-            (cn(width !== "auto" && "overflow-hidden"), "relative z-[1]")
-          }
-          onClick={() => {
-            // Force the link to be clicked even if the element pointer-events: auto
-            linkRef.current?.click()
-            onClick?.()
-          }}
-        >
-          {children}
-        </div>
-      </div>
-      {href && (
-        <Link
-          ref={linkRef}
-          href={href}
-          className="pointer-events-auto absolute inset-0 !z-0 block"
-          tabIndex={firstCell ? undefined : -1}
-        >
-          <span className="sr-only">{actions.view}</span>
-        </Link>
+
+      {firstCell && nestedRowProps?.tableWithChildren && (
+        <TreeConnector firstCell={firstCell} nestedRowProps={nestedRowProps} />
       )}
-      {onClick && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onClick()
-          }}
-          data-testid="table-cell-action-button"
-          className="table-cell-action-button absolute inset-0 !z-0 block"
-          tabIndex={firstCell ? undefined : -1}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              onClick()
-            }
-          }}
-        >
-          <span className="sr-only">{actions.view}</span>
-        </button>
+
+      {loading && (
+        <div style={{ ...firstCellMarginLeft }}>
+          <Skeleton className="h-4 w-full" />
+        </div>
+      )}
+
+      {!loading && (
+        <>
+          <div
+            className={cn(
+              "[&:has([role=checkbox])]:relative [&:has([role=checkbox])]:z-[1]",
+              "[&:has([type=button])]:relative [&:has([type=button])]:z-[1]",
+              "[&:has(a)]:relative [&:has(a)]:z-[1]",
+              "pointer-events-none h-full items-start"
+            )}
+          >
+            {isFirstCellWithChildren(
+              firstCell,
+              !!nestedRowProps?.rowWithChildren
+            ) ? (
+              <NestedCell
+                linkRef={linkRef}
+                firstCell={firstCell}
+                nestedRowProps={nestedRowProps}
+              >
+                {children}
+              </NestedCell>
+            ) : (
+              <div
+                className={cn(
+                  width !== "auto" && "overflow-hidden",
+                  emptyDetailedCellClassName(nestedRowProps),
+                  "relative z-[1]"
+                )}
+                style={{
+                  ...firstCellMarginLeft,
+                }}
+                onClick={() => {
+                  // Force the link to be clicked even if the element pointer-events: auto
+                  linkRef.current?.click()
+                  onClick?.()
+                }}
+              >
+                {children}
+              </div>
+            )}
+          </div>
+          {href && (
+            <Link
+              ref={linkRef}
+              href={href}
+              className="pointer-events-auto absolute inset-0 !z-0 block"
+              tabIndex={firstCell ? undefined : -1}
+            >
+              <span className="sr-only">{actions.view}</span>
+            </Link>
+          )}
+          {onClick && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onClick()
+              }}
+              data-testid="table-cell-action-button"
+              className="table-cell-action-button absolute inset-0 !z-0 block"
+              tabIndex={firstCell ? undefined : -1}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  onClick()
+                }
+              }}
+            >
+              <span className="sr-only">{actions.view}</span>
+            </button>
+          )}
+        </>
       )}
     </TableCellRoot>
   )

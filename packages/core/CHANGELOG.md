@@ -1,5 +1,68 @@
 # Changelog
 
+## [1.42.1](https://github.com/factorialco/f0/compare/f0-core-v1.42.0...f0-core-v1.42.1) (2025-12-11)
+
+
+### Bug Fixes
+
+* **InputField:** change placeholder color ([#3086](https://github.com/factorialco/f0/issues/3086)) ([f1be155](https://github.com/factorialco/f0/commit/f1be15519fb34cd7461e632b16e738e86ad0dac5))
+
+## [1.42.0](https://github.com/factorialco/f0/compare/f0-core-v1.41.0...f0-core-v1.42.0) (2025-12-03)
+
+
+### Features
+
+* **AIButton:** One animated icon ([#3069](https://github.com/factorialco/f0/issues/3069)) ([58e73e2](https://github.com/factorialco/f0/commit/58e73e229ff725c95a09f698cf21d7f70ff03b12))
+
+## [1.41.0](https://github.com/factorialco/f0/compare/f0-core-v1.40.0...f0-core-v1.41.0) (2025-12-02)
+
+
+### Features
+
+* **AIButton:** new AI Button component ([#3062](https://github.com/factorialco/f0/issues/3062)) ([2638aa9](https://github.com/factorialco/f0/commit/2638aa90b23258570ecf67b625813f9f76dddf96))
+
+## [1.40.0](https://github.com/factorialco/f0/compare/f0-core-v1.39.0...f0-core-v1.40.0) (2025-11-26)
+
+
+### Features
+
+* **FilterPicker:** number filter open close ([#3017](https://github.com/factorialco/f0/issues/3017)) ([0efc8e3](https://github.com/factorialco/f0/commit/0efc8e38872e2b0bb4f973cd59997a8dd96c9dab))
+
+## [1.39.0](https://github.com/factorialco/f0/compare/f0-core-v1.38.0...f0-core-v1.39.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add time (ClockPlus & Sleep) icons ([#3040](https://github.com/factorialco/f0/issues/3040)) ([af6ec70](https://github.com/factorialco/f0/commit/af6ec70e69c05b9bd2978738f4d222b6203ee515))
+
+## [1.38.0](https://github.com/factorialco/f0/compare/f0-core-v1.37.0...f0-core-v1.38.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** IT computer and tablet icons ([#3035](https://github.com/factorialco/f0/issues/3035)) ([2b7fc15](https://github.com/factorialco/f0/commit/2b7fc1503b1a62f3b17a79616926c4b62d3d4eba))
+
+## [1.37.0](https://github.com/factorialco/f0/compare/f0-core-v1.36.0...f0-core-v1.37.0) (2025-11-25)
+
+
+### Features
+
+* **Icons:** add new module Salary Advance icons ([#3032](https://github.com/factorialco/f0/issues/3032)) ([5c61e02](https://github.com/factorialco/f0/commit/5c61e02e53f3e6119be621f57055870cdc819b72))
+
+## [1.36.0](https://github.com/factorialco/f0/compare/f0-core-v1.35.0...f0-core-v1.36.0) (2025-11-24)
+
+
+### Features
+
+* **OneAlert:** enhance responsiveness ([#2983](https://github.com/factorialco/f0/issues/2983)) ([8cf4f67](https://github.com/factorialco/f0/commit/8cf4f67332b611725dc3b36d2056c099a7fce809))
+
+## [1.35.0](https://github.com/factorialco/f0/compare/f0-core-v1.34.0...f0-core-v1.35.0) (2025-11-24)
+
+
+### Features
+
+* **Icons:** math icons (greater, less...) ([#3016](https://github.com/factorialco/f0/issues/3016)) ([49571e1](https://github.com/factorialco/f0/commit/49571e12ecc1dcade7b496cd4a70c8b753f62cb9))
+
 ## [1.34.0](https://github.com/factorialco/f0/compare/f0-core-v1.33.0...f0-core-v1.34.0) (2025-11-06)
 
 

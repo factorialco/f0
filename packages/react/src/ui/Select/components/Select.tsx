@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { toArray } from "@/lib/toArray.ts"
+import { useEffect, useMemo, useState } from "react"
 import { SelectContext, SelectContextType } from "../SelectContext.tsx"
 import * as SelectPrimitive from "./radix-ui"
 import { SelectPrimitiveProps } from "./radix-ui/select.tsx"
@@ -39,13 +40,6 @@ const Select = <T extends string = string>(props: SelectProps<T>) => {
     props.onOpenChange?.(open)
   }
 
-  const toArray = (value: T | T[] | undefined) => {
-    if (value === undefined) {
-      return []
-    }
-    return Array.isArray(value) ? value : [value]
-  }
-
   const [localValue, setLocalValue] = useState(toArray(props.value))
 
   /**
@@ -60,12 +54,18 @@ const Select = <T extends string = string>(props: SelectProps<T>) => {
     [JSON.stringify(props.value)]
   )
 
-  const contextValue: SelectContextType = {
-    value: localValue,
-    open: isOpen,
-    as: props.as,
-    multiple: props.multiple || false,
-  }
+  // Memoize the context value to prevent infinite re-renders
+  // Use props.value directly when available to avoid stale values with portals
+  const contextValue: SelectContextType = useMemo(
+    () => ({
+      value: props.value !== undefined ? toArray(props.value) : localValue,
+      open: isOpen,
+      as: props.as,
+      multiple: props.multiple || false,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(props.value), localValue, isOpen, props.as, props.multiple]
+  )
 
   const commonProps = {
     ...props,

@@ -8,12 +8,13 @@ interface OneIconProps extends SVGProps<SVGSVGElement> {
   spin?: boolean
   hover?: boolean
   background?: string
-  size?: "sm" | "md" | "lg"
+  size?: "xs" | "sm" | "md" | "lg"
 }
 
 const sizeVariants = cva({
   variants: {
     size: {
+      xs: "h-4 w-4",
       sm: "h-[1.375rem] w-[1.375rem]",
       md: "h-8 w-8",
       lg: "h-10 w-10",

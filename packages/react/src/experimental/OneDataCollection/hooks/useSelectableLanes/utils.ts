@@ -35,5 +35,6 @@ export const mergeLanesSelectItemsStatus = <
       (acc, status) => acc + status.selectedCount,
       0
     ),
+    selectedIds: lanesStatus.flatMap((status) => status.selectedIds),
   }
 }

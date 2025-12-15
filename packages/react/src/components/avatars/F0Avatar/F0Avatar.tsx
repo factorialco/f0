@@ -3,6 +3,7 @@ import { F0AvatarCompany, F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarEmoji, F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFile, F0AvatarFileProps } from "../F0AvatarFile"
 import { F0AvatarFlag, F0AvatarFlagProps } from "../F0AvatarFlag"
+import { F0AvatarIcon, F0AvatarIconProps } from "../F0AvatarIcon"
 import { F0AvatarPerson, F0AvatarPersonProps } from "../F0AvatarPerson"
 import { F0AvatarTeam, F0AvatarTeamProps } from "../F0AvatarTeam"
 import { AvatarSize } from "../internal/BaseAvatar"
@@ -19,6 +20,7 @@ export type AvatarVariant =
   | ({ type: "file" } & Omit<F0AvatarFileProps, "size">)
   | ({ type: "flag" } & Omit<F0AvatarFlagProps, "size">)
   | ({ type: "emoji" } & Omit<F0AvatarEmojiProps, "size">)
+  | ({ type: "icon" } & Omit<F0AvatarIconProps, "size">)
 
 export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
   switch (avatar.type) {
@@ -82,6 +84,15 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
         <F0AvatarEmoji
           emoji={avatar.emoji}
           size={size as ComponentProps<typeof F0AvatarEmoji>["size"]}
+          aria-label={avatar["aria-label"]}
+          aria-labelledby={avatar["aria-labelledby"]}
+        />
+      )
+    case "icon":
+      return (
+        <F0AvatarIcon
+          icon={avatar.icon}
+          size={size as ComponentProps<typeof F0AvatarIcon>["size"]}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
         />

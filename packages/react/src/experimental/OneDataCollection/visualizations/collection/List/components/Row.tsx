@@ -72,14 +72,14 @@ export const Row = <
   NavigationFilters,
   Grouping
 >) => {
+  const i18n = useI18n()
+  const { actions } = i18n
   const renderCell = (
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "list")
+    return renderProperty(item, property, "list", i18n)
   }
-
-  const { actions } = useI18n()
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined

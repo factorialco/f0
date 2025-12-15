@@ -21,13 +21,11 @@ export const Default: Story = {
         label: "Create",
         onClick: () => console.log("Create clicked"),
         icon: Icons.Add,
-        description: "New creation process",
       },
       {
         label: "Edit",
         onClick: () => console.log("Edit clicked"),
         icon: Icons.Pencil,
-        description: "Edit item's information",
       },
       {
         label: "Save",
