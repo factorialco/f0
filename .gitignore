@@ -30,3 +30,4 @@ storybook-static
 dist
 /packages/react/icons
 .nyc_output
+.cache
