@@ -41,7 +41,7 @@
     "generate-ai-icons": "npx @svgr/cli --out-dir src/icons/ai node_modules/@factorialco/f0-core/assets/icons/ai",
     "build-storybook": "storybook build",
     "serve-storybook": "http-server storybook-static",
-    "test-storybook": "vitest --project=storybook",
+    "test-storybook": "test-storybook --testTimeout=60000",
     "prettier:format": "prettier --write \"src/**/*.{ts,tsx,js,md,mdx,css,yaml}\"",
     "prettier:check:ci": "prettier --check \"src/**/*.{ts,tsx,js,md,mdx,css,yaml}\"",
     "tsc": "tsc --noEmit",

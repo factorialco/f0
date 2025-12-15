@@ -1,5 +1,3 @@
-import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
-import { playwright } from "@vitest/browser-playwright"
 import { fileURLToPath } from "node:url"
 import path from "path"
 import { defineConfig } from "vitest/config"
@@ -41,7 +39,6 @@ export default defineConfig({
         "**/node_modules/**",
         "**/dist/**",
       ],
-      // you can include other reporters, but 'json-summary' is required, json is recommended
       reporter: ["text", "json-summary", "json", "html"],
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
@@ -51,46 +48,6 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-        },
-      },
-      {
-        extends: true,
-        plugins: [
-          // The plugin will run tests for the stories defined in your Storybook config
-          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-          storybookTest({
-            configDir: path.join(dirname, ".storybook"),
-          }),
-        ],
-        optimizeDeps: {
-          include: ["react", "react-dom", "react/jsx-dev-runtime"],
-        },
-        test: {
-          name: "storybook",
-          maxWorkers: 1,
-          testTimeout: 120000, // 120 seconds timeout per test
-          hookTimeout: 90000, // 90 seconds timeout for hooks
-          retry: 2, // Retry failed tests up to 2 times
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright({
-              // pass Playwright launch options: avoid sandboxing crashes on GH Actions
-              launchOptions: {
-                args: [
-                  "--no-sandbox",
-                  "--disable-setuid-sandbox",
-                  "--disable-dev-shm-usage",
-                ],
-              },
-            }),
-            instances: [
-              {
-                browser: "chromium",
-              },
-            ],
-          },
-          setupFiles: [".storybook/vitest.setup.ts"],
         },
       },
     ],

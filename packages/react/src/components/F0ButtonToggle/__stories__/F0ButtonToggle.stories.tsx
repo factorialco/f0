@@ -100,13 +100,13 @@ export const Snapshot: Story = {
       {buttonToggleSizes.map((size) => (
         <>
           <F0ButtonToggle
-            key={size}
+            key={`unselected-${size}`}
             size={size}
             label="Toggle me"
             icon={[MicrophoneNegative, Microphone]}
           />
           <F0ButtonToggle
-            key={size}
+            key={`selected-${size}`}
             size={size}
             label="Toggle me"
             selected={true}
