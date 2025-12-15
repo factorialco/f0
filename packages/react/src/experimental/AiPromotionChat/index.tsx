@@ -139,7 +139,7 @@ const AiPromotionChatCmp = () => {
         </div>
 
         {/* Disabled chat input fixed at the bottom */}
-        <div className="flex-shrink-0">
+        <div className="m-3 mt-2 flex-shrink-0">
           <ChatTextarea />
         </div>
       </ChatWindow>

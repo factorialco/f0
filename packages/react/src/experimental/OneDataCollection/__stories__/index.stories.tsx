@@ -22,7 +22,7 @@ import {
   Target,
   Upload,
 } from "@/icons/app"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import {
   CERTIFICATIONS_MOCK,
   DOT_TAG_COLORS_MOCK,
@@ -1886,6 +1886,7 @@ export const TableWithSecondaryActions: Story = {
 
 // Example showcasing progressBar in different visualizations (Training Module style)
 export const WithProgressBar: Story = {
+  parameters: withSkipA11y({}),
   render: () => {
     // Mock training modules data
     const trainingModules = [

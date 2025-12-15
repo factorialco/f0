@@ -60,3 +60,4 @@ web-build/
 
 # Expo generated files
 expo-env.d.ts
+.cache
