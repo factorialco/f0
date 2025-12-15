@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { useAiChat } from "../providers/AiChatStateProvider"
 
 interface TypewriterPlaceholderProps {
   placeholders: string[]
@@ -154,7 +153,7 @@ export const ChatTextarea = ({
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const translation = useI18n()
-  const { placeholders } = useAiChat()
+  // const { placeholders } = useAiChat()
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -169,6 +168,7 @@ export const ChatTextarea = ({
   }, [inputValue])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log("handleSubmit")
     e.preventDefault()
     if (inProgress) {
       onStop?.()
@@ -189,7 +189,7 @@ export const ChatTextarea = ({
     }
   }
 
-  const multiplePlaceholders = placeholders.length > 1
+  // const multiplePlaceholders = placeholders.length > 1
 
   return (
     <motion.form
@@ -252,7 +252,7 @@ export const ChatTextarea = ({
           name="one-ai-input"
           ref={textareaRef}
           value={inputValue}
-          placeholder={placeholders?.[0]}
+          // placeholder={placeholders?.[0]}
           onChange={(e) => {
             setInputValue(e.target.value)
           }}
@@ -264,23 +264,23 @@ export const ChatTextarea = ({
             "text-f1-foreground",
             hasScrollbar
               ? "scrollbar-macos overflow-y-scroll"
-              : "overflow-y-hidden",
-            inputValue || !multiplePlaceholders
-              ? "caret-f1-foreground"
-              : "caret-transparent",
-            multiplePlaceholders
-              ? "placeholder:text-transparent"
-              : "placeholder:text-f1-foreground-secondary"
+              : "overflow-y-hidden"
+            // inputValue || !multiplePlaceholders
+            //   ? "caret-f1-foreground"
+            //   : "caret-transparent",
+            // multiplePlaceholders
+            //   ? "placeholder:text-transparent"
+            //   : "placeholder:text-f1-foreground-secondary"
           )}
         />
-        {multiplePlaceholders && (
+        {/* {multiplePlaceholders && (
           <TypewriterPlaceholder
             placeholders={placeholders}
             defaultPlaceholder={translation.ai.inputPlaceholder}
             inputValue={inputValue}
             inProgress={inProgress}
           />
-        )}
+        )} */}
       </div>
 
       <div className="flex flex-row-reverse p-3 pt-0">
