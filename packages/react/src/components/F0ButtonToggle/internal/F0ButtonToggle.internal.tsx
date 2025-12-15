@@ -109,6 +109,16 @@ export const F0ButtonToggleInternal = forwardRef<
 
     const localLabel = state.selected ? labelOn : labelOff
 
+    const localSize = useMemo(() => {
+      if (variant === "expanded" && size === "lg") {
+        console.warn(
+          "F0ButtonToggle: lg size is not supported for expanded variant"
+        )
+        return "md"
+      }
+      return size
+    }, [size, variant])
+
     return (
       <TogglePrimitive.Root
         ref={ref}
@@ -122,9 +132,9 @@ export const F0ButtonToggleInternal = forwardRef<
           "flex flex-col items-center justify-center gap-2",
           focusRing(),
           actionVariants({ variant: state.selected ? "selected" : "ghost" }),
-          buttonSizeVariants({ size }),
+          buttonSizeVariants({ size: localSize }),
           buttonToggleVariants({
-            size,
+            size: localSize,
             variant,
             withBorder,
             selected: state.selected,
@@ -140,7 +150,7 @@ export const F0ButtonToggleInternal = forwardRef<
                 key="icon-on"
                 {...animationProps}
               >
-                <F0Icon icon={iconOn} size={size} />
+                <F0Icon icon={iconOn} size={localSize} />
               </motion.div>
             ) : (
               <motion.div
@@ -148,7 +158,7 @@ export const F0ButtonToggleInternal = forwardRef<
                 key="icon-off"
                 {...animationProps}
               >
-                <F0Icon icon={iconOff} size={size} />
+                <F0Icon icon={iconOff} size={localSize} />
               </motion.div>
             )}
           </div>
@@ -157,7 +167,10 @@ export const F0ButtonToggleInternal = forwardRef<
         {variant === "expanded" && (
           <AnimatePresence initial={false}>
             <span
-              className={cn("max-w-full truncate", labelSizeVariants({ size }))}
+              className={cn(
+                "max-w-full truncate",
+                labelSizeVariants({ size: localSize })
+              )}
             >
               {localLabel}
             </span>

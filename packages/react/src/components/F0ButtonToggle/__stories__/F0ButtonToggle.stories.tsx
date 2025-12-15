@@ -1,5 +1,5 @@
 import { Microphone, MicrophoneNegative } from "@/icons/app"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "storybook/internal/preview-api"
 import { buttonToggleSizes, buttonToggleVariants } from "../"
@@ -145,7 +145,7 @@ export const UncontrolledWithDefaultSelected: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSnapshot({}),
+  parameters: withSkipA11y(withSnapshot({})),
   args: {
     label: "Toggle me",
     icon: [MicrophoneNegative, Microphone],
@@ -157,7 +157,7 @@ export const Snapshot: Story = {
           <h4 className="mb-3 text-lg font-semibold">Variant: {variant}</h4>
           <div className="flex flex-row gap-2">
             {buttonToggleSizes.map((size) => (
-              <>
+              <div key={size}>
                 <F0ButtonToggle
                   key={`${size}-unselected`}
                   size={size}
@@ -173,7 +173,7 @@ export const Snapshot: Story = {
                   icon={Microphone}
                   variant={variant}
                 />
-              </>
+              </div>
             ))}
           </div>
         </div>
