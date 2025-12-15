@@ -329,6 +329,7 @@ const F0SelectComponent = forwardRef(function Select<
     onSelectItems: onSelectItems,
     selectedState: initialSelectedState,
     disableSelectAll: disableSelectAll,
+    isSearchActive: !!currentSearch,
   })
 
   /**
@@ -379,6 +380,11 @@ const F0SelectComponent = forwardRef(function Select<
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
+      // Prevent deselection in single select mode when not clearable
+      if (!multiple && !clearable && !checked && localValue[0] === value) {
+        return
+      }
+
       hasUserInteracted.current = true
       handleSelectItemChange(value, checked)
 
@@ -394,7 +400,14 @@ const F0SelectComponent = forwardRef(function Select<
         onChangeSelectedOption?.(item.option, checked)
       }
     },
-    [onChangeSelectedOption, itemsByValue, handleSelectItemChange]
+    [
+      onChangeSelectedOption,
+      itemsByValue,
+      handleSelectItemChange,
+      multiple,
+      clearable,
+      localValue,
+    ]
   )
 
   // Mark user interaction when select all is used
@@ -714,7 +727,7 @@ const F0SelectComponent = forwardRef(function Select<
                   currentFilters={localSource.currentFilters}
                   onFiltersChange={localSource.setCurrentFilters}
                 />
-                {multiple && !disableSelectAll && (
+                {multiple && !disableSelectAll && !currentSearch && (
                   <SelectAll
                     selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={

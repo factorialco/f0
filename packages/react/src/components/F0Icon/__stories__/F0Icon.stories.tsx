@@ -122,11 +122,3 @@ export const AI: Story = {
     },
   },
 }
-
-export const WithTooltip: Story = {
-  args: {
-    size: "md",
-    icon: Icons.ChartLine,
-    tooltip: "Tooltip",
-  },
-}

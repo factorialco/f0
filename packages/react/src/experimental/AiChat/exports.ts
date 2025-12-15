@@ -10,3 +10,6 @@ export {
   MessageSources,
   type MessageSourcesProps,
 } from "./components/MessageSources"
+
+export { ChatTextarea as AiChatTextarea } from "./components/ChatTextarea"
+export { default as AiChatOneIcon } from "./OneIcon"

@@ -96,23 +96,23 @@ export const Snapshot: Story = {
     icon: [MicrophoneNegative, Microphone],
   },
   render: () => (
-    <div className="flex w-fit flex-row gap-2">
+    <div className="flex w-fit flex-col gap-2">
       {buttonToggleSizes.map((size) => (
-        <>
+        <div key={`${size}-container`} className="flex flex-row gap-2">
           <F0ButtonToggle
-            key={size}
+            key={`${size}-unselected`}
             size={size}
             label="Toggle me"
             icon={[MicrophoneNegative, Microphone]}
           />
           <F0ButtonToggle
-            key={size}
+            key={`${size}-selected`}
             size={size}
             label="Toggle me"
             selected={true}
             icon={Microphone}
           />
-        </>
+        </div>
       ))}
     </div>
   ),
