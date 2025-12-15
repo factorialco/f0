@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.307.0](https://github.com/factorialco/f0/compare/f0-react-v1.306.4...f0-react-v1.307.0) (2025-12-15)
+
+
+### Features
+
+* button toggle group ([#3130](https://github.com/factorialco/f0/issues/3130)) ([629de58](https://github.com/factorialco/f0/commit/629de583c03aa2baf45819430b18f9dad15e61a4))
+
 ## [1.306.4](https://github.com/factorialco/f0/compare/f0-react-v1.306.3...f0-react-v1.306.4) (2025-12-15)
 
 
