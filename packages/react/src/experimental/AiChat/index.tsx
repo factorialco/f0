@@ -87,6 +87,7 @@ const AiChatKitWrapper = ({
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
+      <SendMessageFunctionInjector />
       {children}
     </CopilotKit>
   )
@@ -102,6 +103,22 @@ const ResetFunctionInjector = () => {
       setClearFunction(null)
     }
   }, [setClearFunction, reset])
+
+  return null
+}
+
+const SendMessageFunctionInjector = () => {
+  const { setSendMessageFunction } = useAiChat()
+  const { sendMessage } = useCopilotChatInternal()
+
+  useEffect(() => {
+    if (sendMessage) {
+      setSendMessageFunction(sendMessage)
+    }
+    return () => {
+      setSendMessageFunction(null)
+    }
+  }, [setSendMessageFunction, sendMessage])
 
   return null
 }

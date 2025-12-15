@@ -168,7 +168,6 @@ export const ChatTextarea = ({
   }, [inputValue])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    console.log("handleSubmit")
     e.preventDefault()
     if (inProgress) {
       onStop?.()
