@@ -15,6 +15,7 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
+import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField } from "@/ui/InputField"
 import {
@@ -98,6 +99,7 @@ const F0SelectComponent = forwardRef(function Select<
     multiple,
     portalContainer,
     alwaysOpen,
+    alwaysOpenHeight = "md",
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -665,7 +667,14 @@ const F0SelectComponent = forwardRef(function Select<
   // When alwaysOpen is true, render only the content without a trigger
   if (alwaysOpen) {
     return (
-      <div className="h-[450px] w-full rounded-md border border-solid border-f1-border-secondary">
+      <div
+        className={cn(
+          "w-full rounded-md border border-solid border-f1-border-secondary",
+          alwaysOpenHeight === "sm" && "h-[320px]",
+          alwaysOpenHeight === "md" && "h-[420px]",
+          alwaysOpenHeight === "lg" && "h-[500px]"
+        )}
+      >
         <SelectPrimitive {...selectPrimitiveProps}>
           {selectContent}
         </SelectPrimitive>

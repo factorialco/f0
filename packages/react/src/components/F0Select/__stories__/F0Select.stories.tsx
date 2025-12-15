@@ -789,25 +789,9 @@ export const AlwaysOpenWithDataSource: Story = {
       value: item.value,
       label: item.label,
       avatar: item.avatar,
-      // description: `${item.jobTitle} · ${item.departmentName}`,
     }),
+    alwaysOpenHeight: "sm",
   },
-  decorators: [
-    (Story, { args }) => {
-      const [localValue, setLocalValue] = useState<string | undefined>("5")
-      return (
-        <div className="">
-          <Story
-            args={{
-              ...args,
-              value: localValue,
-              onChange: setLocalValue,
-            }}
-          />
-        </div>
-      )
-    },
-  ],
 }
 
 export const Snapshot: Story = {
