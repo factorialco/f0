@@ -48,11 +48,13 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
+import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText';
+import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -412,6 +414,8 @@ declare type AIButton = {
  */
 export declare const AiChat: () => JSX_2.Element | null;
 
+export declare const AiChatOneIcon: ForwardRefExoticComponent<Omit<OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
+
 export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare type AiChatProviderProps = {
@@ -467,6 +471,12 @@ declare type AiChatProviderReturnValue = {
      */
     clear: () => void;
     /* Excluded from this release type: setClearFunction */
+    /**
+     * Send a message to the chat
+     * @param message - The message content as a string, or a full Message object
+     */
+    sendMessage: (message: string | Message_2) => void;
+    /* Excluded from this release type: setSendMessageFunction */
 } & Pick<AiChatState, "greeting" | "agent">;
 
 declare interface AiChatState {
@@ -486,6 +496,8 @@ declare interface AiChatState {
         feedback: string;
     }) => void;
 }
+
+export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -546,7 +558,7 @@ declare interface AiPromotionChatState {
 }
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
-    variant?: "info" | "positive" | "warning" | "destructive" | undefined;
+    variant?: "info" | "warning" | "positive" | "destructive" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -565,7 +577,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "positive" | "critical" | "warning" | undefined;
+    type?: "info" | "critical" | "warning" | "positive" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -597,7 +609,7 @@ export declare const AlertTitle: React_2.ForwardRefExoticComponent<React_2.HTMLA
 declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 declare const alertVariants: (props?: ({
-    variant?: "info" | "positive" | "critical" | "warning" | "neutral" | undefined;
+    variant?: "info" | "critical" | "warning" | "positive" | "neutral" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -714,7 +726,7 @@ export declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
+    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -1396,6 +1408,10 @@ declare type ChartItem<K extends ChartConfig> = {
 
 export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>;
 
+declare type ChatTextareaProps = InputProps_2 & {
+    submitLabel?: string;
+};
+
 export declare type ChatWidgetEmptyStateProps = Props_5;
 
 declare type ChildrenPaginationInfo = {
@@ -1670,7 +1686,7 @@ declare type CounterProps = {
 
 declare const counterVariants: (props?: ({
     size?: "md" | "sm" | undefined;
-    type?: "bold" | "selected" | "default" | undefined;
+    type?: "bold" | "default" | "selected" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -2550,16 +2566,16 @@ actions?: {
 primary: {
 label: string;
 onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined;
 icon?: IconType_2 | undefined;
+disabled?: boolean | undefined;
 } & {
 variant?: "default" | "critical" | "neutral";
 };
 secondary: {
 label: string;
 onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined;
 icon?: IconType_2 | undefined;
+disabled?: boolean | undefined;
 };
 };
 open?: boolean;
@@ -2930,7 +2946,6 @@ export declare type F0CalloutProps = CalloutInternalProps;
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
-    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -3054,7 +3069,7 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "onFocus" | "onBlur" | "disabled" | "placeholder" | "size" | "loading" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "name" | "onFocus" | "onBlur" | "size" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -3667,7 +3682,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "disabled" | "maxLength" | "required" | "size" | "loading" | "error" | "icon" | "append" | "hideLabel" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "size" | "icon" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -4576,6 +4591,13 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
 };
+
+declare interface OneIconProps extends SVGProps<SVGSVGElement> {
+    spin?: boolean;
+    hover?: boolean;
+    background?: string;
+    size?: "xs" | "sm" | "md" | "lg";
+}
 
 export declare const OneModal: OneModalComponent;
 
@@ -5889,7 +5911,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "icon" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "icon" | "maxLength" | "placeholder" | "error" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
@@ -5960,7 +5982,7 @@ declare type toggleActionType = {
 
 export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<ToggleGroupPrimitive.ToggleGroupSingleProps & React_2.RefAttributes<HTMLDivElement>, "ref"> | Omit<ToggleGroupPrimitive.ToggleGroupMultipleProps & React_2.RefAttributes<HTMLDivElement>, "ref">) & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
-    size?: "default" | "lg" | "sm" | undefined;
+    size?: "lg" | "sm" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -5971,7 +5993,7 @@ export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<Toggl
 
 export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<ToggleGroupPrimitive.ToggleGroupItemProps & React_2.RefAttributes<HTMLButtonElement>, "ref"> & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
-    size?: "default" | "lg" | "sm" | undefined;
+    size?: "lg" | "sm" | "default" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -6484,8 +6506,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -6493,8 +6515,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }

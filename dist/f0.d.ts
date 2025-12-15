@@ -30,7 +30,6 @@ import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
-import { F0IconProps as F0IconProps_2 } from './F0Icon';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FileCellValue } from '../../value-display/types/file';
@@ -249,7 +248,7 @@ declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
 declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
 
 declare const alertAvatarVariants: (props?: ({
-    type?: "info" | "positive" | "critical" | "warning" | undefined;
+    type?: "info" | "critical" | "warning" | "positive" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
 } & ({
     class?: ClassValue;
@@ -379,7 +378,7 @@ declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
 }
 
 declare const badgeVariants: (props?: ({
-    type?: "positive" | "critical" | "warning" | "neutral" | "highlight" | undefined;
+    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
     size?: "lg" | "md" | "sm" | "xs" | undefined;
 } & ({
     class?: ClassValue;
@@ -1008,7 +1007,7 @@ declare type ChipVariants = {
 };
 
 declare const chipVariants: (props?: ({
-    variant?: "selected" | "default" | undefined;
+    variant?: "default" | "selected" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -2357,11 +2356,10 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
-export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps_2, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
-    tooltip?: string;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
@@ -4296,7 +4294,7 @@ declare type TextVariant = NonNullable<TextVariants["variant"]>;
 declare type TextVariants = VariantProps<typeof textVariants>;
 
 declare const textVariants: (props?: ({
-    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "selected" | "positive" | "inverse" | "critical" | "warning" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
+    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
     align?: "center" | "left" | "right" | undefined;
 } & ({
     class?: ClassValue;
@@ -4608,7 +4606,7 @@ export declare const usePrivacyMode: () => {
 
 export declare const useReducedMotion: () => boolean;
 
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -4622,6 +4620,12 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * When true, allSelected will always be false even if all items are checked.
      */
     disableSelectAll?: boolean;
+    /**
+     * Indicates if search is currently active.
+     * When true, selecting all visible items won't trigger "all selected" state,
+     * because the visible items are a filtered subset.
+     */
+    isSearchActive?: boolean;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -4779,8 +4783,8 @@ declare global {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
@@ -4788,8 +4792,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
         };
     }
 }
