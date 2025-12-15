@@ -23,7 +23,7 @@ const reactSettings = {
 export default [
   // Ignore dist and other config files
   {
-    ignores: ["**/dist", "**/.eslintrc.cjs", "**/babel.config.cjs", "**/*.cjs"],
+    ignores: ["**/dist", "**/.eslintrc.cjs", "**/babel.config.cjs", "**/ios/**", "**/android/**", "**/.expo/**", "**/node_modules/**"],
   },
 
   // Main React Native configuration

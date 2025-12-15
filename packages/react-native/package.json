@@ -45,7 +45,7 @@
   "scripts": {
     "build": "echo 'we ship source code as is'; exit 0",
     "lint": "eslint -c eslint.config.mjs . --report-unused-disable-directives --max-warnings 0",
-    "lint-fix": "pnpm run lint -- --fix",
+    "lint-fix": "eslint -c eslint.config.mjs . --fix --report-unused-disable-directives --max-warnings 0",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --coverageReporters=text --coverageReporters=lcov",
