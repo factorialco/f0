@@ -35,6 +35,47 @@ const meta = {
     open: true,
   },
   tags: ["autodocs", "experimental"],
+  decorators: [
+    (Story, { args }) => {
+      const [isOpen, setIsOpen] = useState(true)
+
+      return (
+        <div className="flex h-full w-full items-center justify-center">
+          <F0Button
+            variant="critical"
+            icon={Delete}
+            label="Open dialog"
+            onClick={() => setIsOpen(true)}
+          />
+          <Story
+            args={{
+              ...args,
+              open: isOpen,
+              onClose: () => setIsOpen(false),
+              actions: {
+                primary: {
+                  ...args.actions?.primary,
+                  label: args.actions?.primary?.label || "",
+                  onClick: (e) => {
+                    args.actions?.primary?.onClick?.(e)
+                    setIsOpen(false)
+                  },
+                },
+                secondary: {
+                  ...args.actions?.secondary,
+                  label: args.actions?.secondary?.label || "",
+                  onClick: (e) => {
+                    args.actions?.secondary?.onClick?.(e)
+                    setIsOpen(false)
+                  },
+                },
+              },
+            }}
+          />
+        </div>
+      )
+    },
+  ],
 } satisfies Meta<typeof Dialog>
 
 export default meta
