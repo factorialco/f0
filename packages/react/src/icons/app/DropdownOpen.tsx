@@ -22,7 +22,7 @@ const SvgDropdownOpen = (
       vectorEffect="non-scaling-stroke"
     />
     <path
-      stroke="#0D1625"
+      stroke="currentColor"
       d="M15.5 13.75L12 10.25L8.5 13.75"
       vectorEffect="non-scaling-stroke"
     />
