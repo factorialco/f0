@@ -10,7 +10,9 @@
     "build:dev:android": "eas build --profile development --platform android --local",
     "prebuild": "expo prebuild --clean",
     "postinstall": "pnpm --filter @factorialco/f0-react-native build && npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
-    "storybook-generate": "sb-rn-get-stories"
+    "storybook-generate": "sb-rn-get-stories",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@factorialco/f0-core": "workspace:*",
