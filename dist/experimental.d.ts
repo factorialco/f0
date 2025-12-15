@@ -2976,6 +2976,10 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * Useful for inline selection lists or embedded selectors.
      */
     alwaysOpen?: boolean;
+    /**
+     * Height of the list container when alwaysOpen is true.
+     */
+    alwaysOpenHeight?: "sm" | "md" | "lg";
 };
 
 declare type F0SelectItemObject<T, R = unknown> = {
@@ -6475,15 +6479,15 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
