@@ -1,4 +1,4 @@
-export interface KpiProps {
+export interface BigNumberProps {
   value: number
   label: string
   comparison: {
