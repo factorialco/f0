@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.306.3](https://github.com/factorialco/f0/compare/f0-react-v1.306.2...f0-react-v1.306.3) (2025-12-15)
+
+
+### Bug Fixes
+
+* ai chat suggestion buttons align ([#3137](https://github.com/factorialco/f0/issues/3137)) ([11ecd91](https://github.com/factorialco/f0/commit/11ecd919142b95e6d2be22ea7350ea0165c64db7))
+* dialog position ([#3134](https://github.com/factorialco/f0/issues/3134)) ([61afa02](https://github.com/factorialco/f0/commit/61afa024b83b7cb090bf3e0910a6eb1fcec87806))
+
 ## [1.306.2](https://github.com/factorialco/f0/compare/f0-react-v1.306.1...f0-react-v1.306.2) (2025-12-12)
 
 
