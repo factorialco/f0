@@ -4,7 +4,7 @@ import {
   useCopilotAction,
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
-import { CopilotSidebar } from "@copilotkit/react-ui"
+import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
@@ -198,6 +198,14 @@ const AiChatCmp = () => {
     },
   })
 
+  const InputComponent = ({ ...props }: InputProps) => {
+    return (
+      <div className="m-3 mt-2">
+        <ChatTextarea {...props} />
+      </div>
+    )
+  }
+
   if (!enabled) {
     return null
   }
@@ -213,7 +221,7 @@ const AiChatCmp = () => {
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={ChatButton}
-      Input={ChatTextarea}
+      Input={InputComponent}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
       RenderSuggestionsList={SuggestionsList}
