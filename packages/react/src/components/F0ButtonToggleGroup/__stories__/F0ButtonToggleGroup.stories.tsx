@@ -1,12 +1,9 @@
-import {
-  buttonToggleSizes,
-  buttonToggleVariants,
-} from "@/components/F0ButtonToggle"
+import { buttonToggleVariants } from "@/components/F0ButtonToggle"
 import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { F0ButtonToggleGroup } from "../index"
+import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
 import type {
   F0ButtonToggleGroupItem,
   F0ButtonToggleGroupProps,
@@ -28,9 +25,8 @@ const meta = {
   argTypes: {
     size: {
       control: "select",
-      options: ["sm", "md", "lg"],
-      description:
-        "Sets the button size. 'lg' for mobile, 'md' for desktop, 'sm' for compact/secondary actions.",
+      options: buttonToggleGroupSizes,
+      description: "Sets the buttons size",
     },
     multiple: {
       control: "boolean",
@@ -210,7 +206,6 @@ export const Sizes: Story = {
   render: () => {
     const [valueSm, setValueSm] = useState<string>("")
     const [valueMd, setValueMd] = useState<string>("")
-    const [valueLg, setValueLg] = useState<string>("")
 
     return (
       <div className="flex flex-col items-center gap-6">
@@ -234,17 +229,6 @@ export const Sizes: Story = {
             required={false}
             value={valueMd}
             onChange={setValueMd}
-          />
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <div style={{ fontWeight: 600 }}>Large (lg)</div>
-          <F0ButtonToggleGroup
-            items={mockItems}
-            size="lg"
-            multiple={false}
-            required={false}
-            value={valueLg}
-            onChange={setValueLg}
           />
         </div>
       </div>
@@ -316,7 +300,7 @@ export const Snapshot: Story = {
     return (
       <div className="flex max-w-96 flex-col gap-6">
         {buttonToggleVariants.map((variant) => {
-          return buttonToggleSizes.map((size) => {
+          return buttonToggleGroupSizes.map((size) => {
             return (
               <section
                 key={`${size}-${variant}`}

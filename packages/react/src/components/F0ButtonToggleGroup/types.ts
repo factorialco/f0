@@ -1,8 +1,4 @@
-import {
-  ButtonToggleSize,
-  ButtonToggleVariant,
-  F0ButtonToggleProps,
-} from "../F0ButtonToggle"
+import { ButtonToggleVariant, F0ButtonToggleProps } from "../F0ButtonToggle"
 
 export type F0ButtonToggleGroupItem = Pick<
   F0ButtonToggleProps,
@@ -11,13 +7,16 @@ export type F0ButtonToggleGroupItem = Pick<
   value: string
 }
 
+export const buttonToggleGroupSizes = ["sm", "md"] as const
+export type ButtonToggleGroupSize = (typeof buttonToggleGroupSizes)[number]
+
 export type F0ButtonToggleGroupProps = {
   items: F0ButtonToggleGroupItem[]
   /**
    * The size of the buttons.
    * @default "md"
    */
-  size?: ButtonToggleSize
+  size?: ButtonToggleGroupSize
 
   /**
    * Whether multiple selections are allowed.

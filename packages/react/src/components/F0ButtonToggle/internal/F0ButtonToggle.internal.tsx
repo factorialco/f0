@@ -31,17 +31,12 @@ const buttonToggleVariants = cva({
     {
       variant: "expanded",
       size: "sm",
-      class: "h-[56px] w-20 [&_.main]:h-4",
+      class: "h-[52px] w-[63px] [&_.main]:h-4",
     },
     {
       variant: "expanded",
       size: "md",
-      class: "h-18 w-24 [&_.main]:h-5",
-    },
-    {
-      variant: "expanded",
-      size: "lg",
-      class: "h-20 w-28 [&_.main]:h-6",
+      class: "h-[60px] w-[70px] [&_.main]:h-5",
     },
     // With border and selected
     {
