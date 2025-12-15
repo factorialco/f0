@@ -33,6 +33,7 @@
     ".husky",
     "coverage",
     "storybook-static",
+    ".scripts",
     "**/*.test.ts",
     "**/*.test.tsx"
   ],
