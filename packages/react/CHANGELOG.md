@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.309.0](https://github.com/factorialco/f0/compare/f0-react-v1.308.1...f0-react-v1.309.0) (2025-12-16)
+
+
+### Features
+
+* improve rich editor fullpage mode ([#3117](https://github.com/factorialco/f0/issues/3117)) ([189668c](https://github.com/factorialco/f0/commit/189668c961cd8dbbeb6fd0b21887005159dc39ac))
+
 ## [1.308.1](https://github.com/factorialco/f0/compare/f0-react-v1.308.0...f0-react-v1.308.1) (2025-12-16)
 
 
