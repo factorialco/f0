@@ -94,10 +94,7 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
     let additionalAccessibleText = ""
     let status: BalanceStatus | "null" = "null"
     let hintText: string | undefined = hint
-    if (
-      isEmptyNumeric(amountFinalValue) ||
-      isEmptyNumeric(percentageFinalValue)
-    ) {
+    if (isEmptyNumeric(amountFinalValue)) {
       text = nullText ?? "N/A"
       hintText = undefined
     } else {
@@ -109,14 +106,17 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
           ).toString() as "-1" | "0" | "1"
         ]
 
-      const percentageText = percentageDef.formatter(
-        {
-          ...percentageDef.numericValue,
-          units: "%",
-          unitsPosition: "append",
-        },
-        percentageDef.formatterOptions
-      )
+      const percentageText = !isEmptyNumeric(percentageFinalValue)
+        ? percentageDef.formatter(
+            {
+              ...percentageDef.numericValue,
+              units: "%",
+              unitsPosition: "append",
+            },
+            percentageDef.formatterOptions
+          )
+        : null
+
       const amountText = amountDef.formatter(
         amountDef.numericValue,
         amountDef.formatterOptions

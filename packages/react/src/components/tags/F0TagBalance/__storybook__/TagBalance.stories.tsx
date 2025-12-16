@@ -194,7 +194,10 @@ export const Snapshot: Story = {
       {
         title: "with locale",
         percentage: 10,
-        amount: { numericValue: 1000, formatterOptions: { locale: "es-ES" } },
+        amount: {
+          numericValue: 1000.1234,
+          formatterOptions: { locale: "es-ES" },
+        },
       },
     ]
     return (

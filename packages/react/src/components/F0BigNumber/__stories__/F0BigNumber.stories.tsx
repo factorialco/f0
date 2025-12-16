@@ -18,6 +18,44 @@ const meta: Meta<typeof F0BigNumber> = {
     },
   },
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    value: {
+      control: "object",
+      description: "The value of the big number",
+      table: {
+        type: { summary: "NumericWithFormatter | Numeric" },
+      },
+    },
+    label: {
+      control: "text",
+      description: "The label of the big number",
+      table: {
+        type: { summary: "string" },
+      },
+    },
+    comparisonHint: {
+      control: "text",
+      description: "The hint text to display next to the comparison value",
+      table: {
+        type: { summary: "string" },
+      },
+    },
+    comparison: {
+      control: "object",
+      description: "The comparison of the big number",
+      table: {
+        type: { summary: "NumericWithFormatter | Numeric" },
+      },
+    },
+    trend: {
+      control: "object",
+      description:
+        "Whether to show the trend and trend configuration (the invert status). Requires a comparison value. It will render the percentage of change between the value and the comparison value.",
+      table: {
+        type: { summary: "boolean | TrendConfig" },
+      },
+    },
+  },
   decorators: [
     (Story) => (
       <div className="h-60 w-80">
@@ -32,15 +70,73 @@ type Story = StoryObj<typeof F0BigNumber>
 
 export const Default: Story = {
   args: {
-    formatter: (value: number | null) => value?.toLocaleString() ?? "-",
     value: {
-      numericValue: 1000000,
-      units: "USD",
-      unitsPosition: "left",
+      value: 1000000,
+      units: "$",
+      unitsPosition: "prepend" as const,
     },
     label: "Total Revenue",
+  },
+}
+
+export const WithComparison: Story = {
+  args: {
+    value: {
+      value: 1000000,
+      units: "$",
+      unitsPosition: "prepend" as const,
+    },
+    label: "Total Revenue",
+    comparisonHint: "vs last month",
     comparison: {
-      numericValue: 1000000,
+      numericValue: {
+        value: 900000,
+        units: "$",
+        unitsPosition: "prepend" as const,
+      },
+    },
+  },
+}
+
+export const WithTrend: Story = {
+  args: {
+    value: {
+      value: 1000000,
+      units: "$",
+      unitsPosition: "prepend" as const,
+    },
+    label: "Total Revenue",
+    trend: true,
+    comparisonHint: "vs last month",
+    comparison: {
+      numericValue: {
+        value: 900000,
+        units: "$",
+        unitsPosition: "prepend" as const,
+      },
+    },
+  },
+}
+
+export const WithTrendInvertStatus: Story = {
+  args: {
+    value: {
+      value: 1000000,
+      units: "$",
+      unitsPosition: "prepend" as const,
+    },
+    label: "Total Revenue",
+    trend: {
+      show: true,
+      invertStatus: true,
+    },
+    comparisonHint: "vs last month",
+    comparison: {
+      numericValue: {
+        value: 900000,
+        units: "$",
+        unitsPosition: "prepend" as const,
+      },
     },
   },
 }
