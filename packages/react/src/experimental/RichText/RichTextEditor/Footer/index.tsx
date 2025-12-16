@@ -171,6 +171,8 @@ const Footer = ({
               onClose={() => {
                 setIsToolbarOpen(false)
                 setToolbarAnimationComplete(false)
+                // Restore focus after state update to trigger BubbleMenu
+                queueMicrotask(() => editor.commands.focus())
               }}
               animationComplete={toolbarAnimationComplete}
               plainHtmlMode={plainHtmlMode}

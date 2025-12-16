@@ -237,7 +237,7 @@ const RichTextEditorComponent = forwardRef<
   if (!editor) return null
 
   const editorContent = (
-    <FocusScope trapped={isFullscreen}>
+    <FocusScope trapped={false}>
       <div
         ref={containerRef}
         id={editorId}
@@ -249,7 +249,7 @@ const RichTextEditorComponent = forwardRef<
         )}
       >
         {isFullscreen && (
-          <div className="pointer-events-auto fixed inset-0 z-40" />
+          <div className="pointer-events-none fixed inset-0 z-40" />
         )}
 
         <Head
@@ -263,8 +263,18 @@ const RichTextEditorComponent = forwardRef<
         <div
           className="relative z-50 w-full flex-grow overflow-hidden"
           onClick={(e) => {
-            e?.preventDefault()
-            editor?.commands.focus()
+            // Only focus if clicking directly on the editor area, not on interactive elements
+            const target = e.target as HTMLElement
+            if (
+              !target.closest("button") &&
+              !target.closest('[role="button"]') &&
+              !target.closest("input") &&
+              !target.closest("textarea") &&
+              !target.closest("[data-radix-popper-content-wrapper]")
+            ) {
+              e?.preventDefault()
+              editor?.commands.focus()
+            }
           }}
         >
           <div
@@ -321,15 +331,23 @@ const RichTextEditorComponent = forwardRef<
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="pointer-events-none absolute bottom-10 left-0 right-0 z-[60] flex w-full items-center justify-center"
+                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+                style={{ pointerEvents: "none" }}
               >
-                <div className="pointer-events-auto flex w-max items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-lg">
+                <div
+                  className="flex w-max items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-lg"
+                  style={{ pointerEvents: "auto" }}
+                >
                   <Toolbar
                     labels={toolbarLabels}
                     editor={editor}
                     isFullscreen={isFullscreen}
                     disableButtons={disableAllButtons}
-                    onClose={() => setIsToolbarOpen(false)}
+                    onClose={() => {
+                      setIsToolbarOpen(false)
+                      // Restore focus after state update to trigger BubbleMenu
+                      queueMicrotask(() => editor.commands.focus())
+                    }}
                     plainHtmlMode={plainHtmlMode}
                   />
                 </div>
