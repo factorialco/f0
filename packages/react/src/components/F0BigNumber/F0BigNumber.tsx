@@ -1,21 +1,20 @@
 import { F0Heading } from "@/components/F0Heading"
+import { numericFormatter } from "@/lib/numeric"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 import type { BigNumberProps } from "./types"
 
-
-const defaultFormatter = (value: number) => {
-  
-}
-
-const F0BigNumberCmp = ({ label, value, comparison, formatter = defaultFormatter }: BigNumberProps) => {
-
+const F0BigNumberCmp = ({
+  label,
+  value,
+  comparison,
+  formatter = numericFormatter,
+}: BigNumberProps) => {
   const formattedValue = formatter(value)
 
   return (
     <div className="flex flex-col gap-2">
       <F0Heading content={value} />
-
     </div>
   )
 }

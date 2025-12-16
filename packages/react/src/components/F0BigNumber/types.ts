@@ -1,7 +1,9 @@
+import { Numeric } from "@/lib/numeric"
+
 export interface BigNumberProps {
-  value: number
+  value: Numeric
   label: string
   comparison: {
-    value: number
+    value: Numeric
   }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { numericFormatter } from "../numericFormatter"
-import type { NumericValue } from "../types"
+import type { Numeric, NumericValue } from "../types"
 
 describe("numericFormatter", () => {
   describe("basic number formatting", () => {
@@ -208,6 +208,163 @@ describe("numericFormatter", () => {
     })
   })
 
+  describe("Numeric type - direct number values", () => {
+    it("should format a direct number value", () => {
+      const value: Numeric = 123.456
+      const result = numericFormatter(value)
+      expect(result).toBe("123.46")
+    })
+
+    it("should format a direct whole number", () => {
+      const value: Numeric = 100
+      const result = numericFormatter(value)
+      expect(result).toBe("100")
+    })
+
+    it("should format a direct negative number", () => {
+      const value: Numeric = -123.456
+      const result = numericFormatter(value)
+      expect(result).toBe("-123.46")
+    })
+
+    it("should format a direct number without units", () => {
+      const value: Numeric = 123.45
+      const result = numericFormatter(value)
+      expect(result).toBe("123.45")
+    })
+
+    it("should format a direct number with custom decimal places", () => {
+      const value: Numeric = 123.456789
+      const result = numericFormatter(value, { decimalPlaces: 4 })
+      expect(result).toBe("123.4568")
+    })
+  })
+
+  describe("Numeric type - undefined and null values", () => {
+    it("should return empty string for undefined", () => {
+      const value: Numeric = undefined
+      const result = numericFormatter(value)
+      expect(result).toBe("")
+    })
+
+    it("should return empty string for null", () => {
+      const value: Numeric = null
+      const result = numericFormatter(value)
+      expect(result).toBe("")
+    })
+
+    it("should return custom emptyPlaceholder for undefined", () => {
+      const value: Numeric = undefined
+      const result = numericFormatter(value, { emptyPlaceholder: "-" })
+      expect(result).toBe("-")
+    })
+
+    it("should return custom emptyPlaceholder for null", () => {
+      const value: Numeric = null
+      const result = numericFormatter(value, { emptyPlaceholder: "N/A" })
+      expect(result).toBe("N/A")
+    })
+
+    it("should return custom emptyPlaceholder with custom text", () => {
+      const value: Numeric = null
+      const result = numericFormatter(value, { emptyPlaceholder: "No data" })
+      expect(result).toBe("No data")
+    })
+  })
+
+  describe("hideUnits option", () => {
+    it("should hide units when hideUnits is true", () => {
+      const value: NumericValue = { value: 123.45, units: "€" }
+      const result = numericFormatter(value, { hideUnits: true })
+      expect(result).toBe("123.45")
+    })
+
+    it("should show units when hideUnits is false", () => {
+      const value: NumericValue = { value: 123.45, units: "€" }
+      const result = numericFormatter(value, { hideUnits: false })
+      expect(result).toBe("123.45€")
+    })
+
+    it("should hide units even when unitsPosition is prepend", () => {
+      const value: NumericValue = {
+        value: 123.45,
+        units: "$",
+        unitsPosition: "prepend",
+      }
+      const result = numericFormatter(value, { hideUnits: true })
+      expect(result).toBe("123.45")
+    })
+
+    it("should hide units with value_x100", () => {
+      const value: NumericValue = {
+        value_x100: 12345,
+        units: "€",
+      }
+      const result = numericFormatter(value, { hideUnits: true })
+      expect(result).toBe("123.45")
+    })
+  })
+
+  describe("compact option", () => {
+    it("should format with compact notation when compact is true", () => {
+      const value: NumericValue = { value: 1234567 }
+      const result = numericFormatter(value, {
+        compact: true,
+        decimalPlaces: 1,
+      })
+      expect(result).toBe("1.2M")
+    })
+
+    it("should format with standard notation when compact is false", () => {
+      const value: NumericValue = { value: 1234567 }
+      const result = numericFormatter(value, { compact: false })
+      expect(result).toBe("1234567")
+    })
+
+    it("should format large numbers with compact notation", () => {
+      const value: NumericValue = { value: 1000000 }
+      const result = numericFormatter(value, { compact: true })
+      expect(result).toBe("1M")
+    })
+
+    it("should format thousands with compact notation", () => {
+      const value: NumericValue = { value: 5000 }
+      const result = numericFormatter(value, { compact: true })
+      expect(result).toBe("5K")
+    })
+
+    it("should format with compact notation and units", () => {
+      const value: NumericValue = { value: 1234567, units: "€" }
+      const result = numericFormatter(value, {
+        compact: true,
+        decimalPlaces: 1,
+      })
+      expect(result).toBe("1.2M€")
+    })
+
+    it("should format with compact notation and prepend units", () => {
+      const value: NumericValue = {
+        value: 1234567,
+        units: "$",
+        unitsPosition: "prepend",
+      }
+      const result = numericFormatter(value, {
+        compact: true,
+        decimalPlaces: 1,
+      })
+      expect(result).toBe("$1.2M")
+    })
+
+    it("should format value_x100 with compact notation", () => {
+      const value: NumericValue = { value_x100: 123456700 }
+      const result = numericFormatter(value, {
+        compact: true,
+        decimalPlaces: 1,
+      })
+      expect(result).toBe("1.2M")
+    })
+  })
+
   describe("options merging", () => {
     it("should merge options with defaults", () => {
       const value: NumericValue = { value: 123.456 }
@@ -229,6 +386,25 @@ describe("numericFormatter", () => {
       })
       expect(result).toBe("1234,6")
     })
+
+    it("should combine multiple options", () => {
+      const value: NumericValue = { value: 1234567.89, units: "€" }
+      const result = numericFormatter(value, {
+        compact: true,
+        decimalPlaces: 1,
+        hideUnits: false,
+      })
+      expect(result).toBe("1.2M€")
+    })
+
+    it("should combine compact with hideUnits", () => {
+      const value: NumericValue = { value: 1234567, units: "$" }
+      const result = numericFormatter(value, {
+        compact: true,
+        hideUnits: true,
+        decimalPlaces: 1,
+      })
+      expect(result).toBe("1.2M")
+    })
   })
 })
-

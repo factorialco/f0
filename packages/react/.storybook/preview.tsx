@@ -135,7 +135,8 @@ const preview: Preview = {
           "introduction",
           "how-to-contribute",
           "foundations",
-          "playground",
+          "library",
+          "hooks",
         ]
 
         const aId = a.title.toLowerCase()

@@ -48,6 +48,8 @@ export type NumericValue = {
     }
 )
 
+export type Numeric = NumericValue | number | undefined | null
+
 /**
  * Configuration options for the numeric formatter.
  */
@@ -66,4 +68,23 @@ export type NumericFormatterOptions = {
    * @default 2
    */
   decimalPlaces?: number
+
+  /**
+   * Whether to hide the units from the formatted value.
+   *
+   * @default false
+   */
+  hideUnits?: boolean
+
+  /**
+   * Whether to use compact notation for the formatted value.
+   *
+   * @default false
+   */
+  compact?: boolean
+
+  /**
+   *
+   */
+  emptyPlaceholder?: string
 }
