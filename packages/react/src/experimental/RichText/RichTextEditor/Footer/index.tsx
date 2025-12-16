@@ -81,6 +81,70 @@ const Footer = ({
 
   const useLittleMode = containerWidth < 500
 
+  const handleFileClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault()
+    if (fileInputRef?.current) {
+      fileInputRef.current.click()
+    } else {
+      const fileInput = document.getElementById(
+        "rich-text-editor-upload-button"
+      )
+      fileInput?.click()
+    }
+  }
+
+  const renderToolbarButton = () => (
+    <F0Button
+      onClick={(e) => {
+        e?.preventDefault()
+        setIsToolbarOpen(true)
+      }}
+      variant="outline"
+      size="md"
+      label="Toolbar"
+      disabled={disableButtons}
+      hideLabel
+      icon={TextSize}
+    />
+  )
+
+  const renderActionButtons = () => (
+    <>
+      {canUseFiles && (
+        <F0Button
+          icon={Paperclip}
+          onClick={handleFileClick}
+          hideLabel
+          label="Add Attachment"
+          variant="outline"
+          disabled={disableButtons}
+        />
+      )}
+
+      {enhanceConfig && (
+        <>
+          <ToolbarDivider />
+          <EnhanceActivator
+            editor={editor}
+            onEnhanceWithAI={onEnhanceWithAI}
+            isLoadingEnhance={isLoadingEnhance}
+            enhanceConfig={enhanceConfig}
+            disableButtons={disableButtons}
+            hideLabel={useLittleMode}
+            setLastIntent={setLastIntent}
+            position="top"
+          />
+        </>
+      )}
+
+      {maxCharacters && !useLittleMode && (
+        <p className="text-sm font-normal text-f1-foreground-secondary">
+          {editor.storage.characterCount.characters()}/{maxCharacters}
+        </p>
+      )}
+    </>
+  )
+
   return (
     <div ref={containerRef} className="flex max-w-full items-center gap-2 py-3">
       <div className="relative flex flex-grow items-center gap-2">
@@ -96,7 +160,7 @@ const Footer = ({
             onAnimationComplete={() =>
               setToolbarAnimationComplete(isToolbarOpen)
             }
-            className="absolute left-0 top-0 z-10 h-full bg-f1-background"
+            className="absolute left-0 top-0 z-10 h-full overflow-hidden bg-f1-background"
             aria-label="Rich text editor toolbar"
           >
             <Toolbar
@@ -127,78 +191,17 @@ const Footer = ({
               ease: "easeInOut",
             }}
           >
-            <F0Button
-              onClick={(e) => {
-                e?.preventDefault()
-                setIsToolbarOpen(true)
-              }}
-              variant="outline"
-              size="md"
-              label="Toolbar"
-              disabled={disableButtons}
-              hideLabel
-              icon={TextSize}
-            />
+            {renderToolbarButton()}
+            {renderActionButtons()}
           </motion.div>
         )}
 
-        {isFullscreen && !isToolbarOpen && (
-          <F0Button
-            onClick={(e) => {
-              e?.preventDefault()
-              setIsToolbarOpen(true)
-            }}
-            variant="outline"
-            size="md"
-            label="Toolbar"
-            disabled={disableButtons}
-            hideLabel
-            icon={TextSize}
-          />
+        {isFullscreen && (
+          <div className="flex items-center gap-2">
+            {!isToolbarOpen && renderToolbarButton()}
+            {renderActionButtons()}
+          </div>
         )}
-
-        <div className="flex items-center gap-2">
-          {canUseFiles && (
-            <F0Button
-              icon={Paperclip}
-              onClick={(e) => {
-                e.preventDefault()
-                if (fileInputRef?.current) {
-                  fileInputRef.current.click()
-                } else {
-                  const fileInput = document.getElementById(
-                    "rich-text-editor-upload-button"
-                  )
-                  fileInput?.click()
-                }
-              }}
-              hideLabel
-              label="Add Attachment"
-              variant="outline"
-              disabled={disableButtons}
-            />
-          )}
-          {enhanceConfig && (
-            <>
-              <ToolbarDivider />
-              <EnhanceActivator
-                editor={editor}
-                onEnhanceWithAI={onEnhanceWithAI}
-                isLoadingEnhance={isLoadingEnhance}
-                enhanceConfig={enhanceConfig}
-                disableButtons={disableButtons}
-                hideLabel={useLittleMode}
-                setLastIntent={setLastIntent}
-                position="top"
-              />
-            </>
-          )}
-          {maxCharacters && !useLittleMode && (
-            <p className="text-sm font-normal text-f1-foreground-secondary">
-              {editor.storage.characterCount.characters()}/{maxCharacters}
-            </p>
-          )}
-        </div>
       </div>
 
       <ActionsMenu
