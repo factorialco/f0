@@ -146,7 +146,10 @@ const Footer = ({
   )
 
   return (
-    <div ref={containerRef} className="flex max-w-full items-center gap-2 py-3">
+    <div
+      ref={containerRef}
+      className="flex min-h-[56px] max-w-full items-center gap-2 py-3"
+    >
       <div className="relative flex flex-grow items-center gap-2">
         {!isFullscreen && (
           <motion.div
