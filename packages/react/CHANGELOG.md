@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.308.0](https://github.com/factorialco/f0/compare/f0-react-v1.307.0...f0-react-v1.308.0) (2025-12-16)
+
+
+### Features
+
+* stabilise tags components ([#2543](https://github.com/factorialco/f0/issues/2543)) ([e52bb2a](https://github.com/factorialco/f0/commit/e52bb2ae9316daf3021e1971399d971fb9ed387b))
+
 ## [1.307.0](https://github.com/factorialco/f0/compare/f0-react-v1.306.4...f0-react-v1.307.0) (2025-12-15)
 
 
