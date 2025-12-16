@@ -1,4 +1,5 @@
 import { isEmptyNumeric } from "./isEmptyNumeric"
+import { numericFinalValue } from "./numericFinalValue"
 import { Numeric, NumericFormatter, NumericFormatterOptions } from "./types"
 
 /**
@@ -29,12 +30,8 @@ export const numericFormatter: NumericFormatter = (
     value = { value }
   }
 
-  const valueToFormat =
-    "value" in value
-      ? value.value
-      : value.value_x100
-        ? value.value_x100 / 100
-        : undefined
+  const valueToFormat = numericFinalValue(value)
+
   if (valueToFormat === undefined) {
     return options.emptyPlaceholder || ""
   }

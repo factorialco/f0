@@ -1,6 +1,11 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { ArrowDown, ArrowUp } from "@/icons/app"
-import { normalizeNumericWithFormatter, toNumericValue } from "@/lib/numeric/"
+import {
+  normalizeNumericWithFormatter,
+  Numeric,
+  numericFinalValue,
+  toNumericValue,
+} from "@/lib/numeric/"
 import { isEmptyNumeric } from "@/lib/numeric/isEmptyNumeric"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
@@ -51,13 +56,14 @@ const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
 
 export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
   ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
+    console.log("amount", amount)
     const amountDef = normalizeNumericWithFormatter(amount, {
       formatterOptions: {
         decimalPlaces: 2,
       },
     })
 
-    const _percentage = toNumericValue(percentage)
+    const _percentage = toNumericValue(percentage as Numeric)
 
     const percentageDef = normalizeNumericWithFormatter(
       {
@@ -73,32 +79,34 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
       }
     )
 
+    const percentageFinalValue = numericFinalValue(percentageDef.numericValue)
+    const amountFinalValue = numericFinalValue(amountDef.numericValue)
     let text = ""
     let icon = null
     let additionalAccessibleText = ""
     let status: BalanceStatus | "null" = "null"
     let hintText: string | undefined = hint
     if (
-      isEmptyNumeric(amountDef.value) ||
-      isEmptyNumeric(percentageDef.value)
+      isEmptyNumeric(amountFinalValue) ||
+      isEmptyNumeric(percentageFinalValue)
     ) {
       text = nullText ?? "N/A"
       hintText = undefined
     } else {
-      const sign = Math.sign(percentageDef.value).toString()
+      const sign = Math.sign(percentageFinalValue ?? 0).toString()
       status =
         statusMap[
           Math.sign(
-            percentageDef.value * (invertStatus ? -1 : 1)
+            (percentageFinalValue ?? 0) * (invertStatus ? -1 : 1)
           ).toString() as "-1" | "0" | "1"
         ]
 
       const percentageText = percentageDef.formatter(
-        percentageDef.value,
+        percentageDef.numericValue,
         percentageDef.formatterOptions
       )
       const amountText = amountDef.formatter(
-        amountDef.value,
+        amountDef.numericValue,
         amountDef.formatterOptions
       )
 

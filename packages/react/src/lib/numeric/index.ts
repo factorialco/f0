@@ -1,4 +1,5 @@
 export { normalizeNumericWithFormatter } from "./normalizeValueWithFormatter"
+export { numericFinalValue } from "./numericFinalValue"
 export { numericFormatter } from "./numericFormatter"
 export { toNumericValue } from "./toNumericValue"
 export * from "./types"

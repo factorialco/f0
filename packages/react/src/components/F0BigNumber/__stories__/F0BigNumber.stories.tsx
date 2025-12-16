@@ -34,13 +34,13 @@ export const Default: Story = {
   args: {
     formatter: (value: number | null) => value?.toLocaleString() ?? "-",
     value: {
-      value: 1000000,
+      numericValue: 1000000,
       units: "USD",
       unitsPosition: "left",
     },
     label: "Total Revenue",
     comparison: {
-      value: 1000000,
+      numericValue: 1000000,
     },
   },
 }

@@ -15,7 +15,7 @@ const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <span className="font-bold text-2xl">{formattedValue}</span>
-        <F0TagBalance percentage={0} value={value} />
+        <F0TagBalance percentage={0} amount={value} />
       </div>
 
       {label && <div>{label}</div>}

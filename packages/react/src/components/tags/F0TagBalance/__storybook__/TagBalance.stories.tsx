@@ -36,7 +36,7 @@ const meta: Meta = {
         "The amount of the balance, it can be a number or an object with the numeric value that allows to define the decimal places, units, units position and locale.",
       table: {
         type: {
-          summary: "number | NumericValue",
+          summary: "number | NumericWithFormatter | Numeric",
         },
       },
     },
@@ -46,7 +46,7 @@ const meta: Meta = {
     hint: "vs last month",
     percentage: 2,
     amount: {
-      value: {
+      numericValue: {
         value: 1522.48,
         units: "€",
         unitsPosition: "append",
@@ -75,7 +75,7 @@ export const NegativeBalanceTag: Story = {
   args: {
     percentage: -17,
     amount: {
-      value: {
+      numericValue: {
         value: -1522.48,
         units: "€",
         unitsPosition: "append",
@@ -125,56 +125,59 @@ export const Snapshot: Story = {
       {
         title: "custom null text",
         percentage: null,
-        value: null,
+        amount: null,
         nullText: "Desi says no salary",
       },
       {
         title: "custom null text and info",
         percentage: null,
-        value: null,
+        amount: null,
         nullText: "Desi says no salary",
         info: "This is a balance tag with info",
       },
       {
         title: "with info",
         percentage: 10,
-        value: 1000,
+        amount: 1000,
         info: "This is a balance tag with info",
       },
       {
         title: "with hint",
         percentage: 10,
-        value: 1000,
+        amount: 1000,
         hint: "vs last month",
       },
       {
         title: "with hint and info",
         percentage: 10,
-        value: 1000,
+        amount: 1000,
         hint: "vs last month",
         info: "This is a balance tag with info",
       },
       {
         title: "with invert status",
         percentage: 10,
-        value: 1000,
+        amount: 1000,
         invertStatus: true,
       },
       {
         title: "with decimal places",
-        percentage: { value: 10, formatterOptions: { decimalPlaces: 2 } },
-        value: 1000,
+        percentage: {
+          numericValue: 10,
+          formatterOptions: { decimalPlaces: 2 },
+        },
+        amount: 1000,
       },
       {
         title: "with units",
         percentage: 10,
-        value: { value: { value: 1000, units: "€" } },
+        amount: { numericValue: { value: 1000, units: "€" } },
       },
       {
         title: "with units position",
         percentage: 10,
-        value: {
-          value: {
+        amount: {
+          numericValue: {
             value: 1000,
             unitsPosition: "prepend" as const,
             units: "$",
@@ -187,7 +190,7 @@ export const Snapshot: Story = {
       {
         title: "with locale",
         percentage: 10,
-        value: { value: 1000, formatterOptions: { locale: "es-ES" } },
+        amount: { numericValue: 1000, formatterOptions: { locale: "es-ES" } },
       },
     ]
     return (
@@ -196,7 +199,7 @@ export const Snapshot: Story = {
           ({
             title,
             percentage,
-            value,
+            amount,
             info,
             hint,
             invertStatus,
@@ -211,7 +214,7 @@ export const Snapshot: Story = {
                 invertStatus={invertStatus}
                 nullText={nullText}
                 percentage={percentage}
-                value={value}
+                amount={amount}
               />
             </div>
           )

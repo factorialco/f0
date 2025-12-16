@@ -1,4 +1,8 @@
-import { Numeric, NumericWithFormatter } from "@/lib/numeric"
+import {
+  Numeric,
+  NumericWithFormatter,
+  RelaxedNumericWithFormatter,
+} from "@/lib/numeric"
 
 export const statuses = ["positive", "neutral", "negative"] as const
 export type BalanceStatus = (typeof statuses)[number]
@@ -37,7 +41,7 @@ export type F0TagBalanceProps = {
 } & (
   | {
       percentage:
-        | (Omit<NumericWithFormatter, "value"> & {
+        | (Omit<RelaxedNumericWithFormatter, "value"> & {
             value: Omit<Numeric, "units" | "unitsPosition">
           })
         | Omit<Numeric, "units" | "unitsPosition">

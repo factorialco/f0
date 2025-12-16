@@ -1,9 +1,11 @@
 import { numericFormatter } from "./numericFormatter"
+import { toNumericValue } from "./toNumericValue"
 import {
   Numeric,
   NumericFormatter,
   NumericFormatterOptions,
   NumericWithFormatter,
+  RelaxedNumericWithFormatter,
 } from "./types"
 
 /*
@@ -13,7 +15,7 @@ import {
  * @returns The numeric value as a NumericWithFormatter object or undefined if the value is null or undefined.
  */
 export const normalizeNumericWithFormatter = (
-  value: Numeric | NumericWithFormatter,
+  value: Numeric | RelaxedNumericWithFormatter,
   defaults?: {
     formatter?: NumericFormatter
     formatterOptions?: NumericFormatterOptions
@@ -21,7 +23,7 @@ export const normalizeNumericWithFormatter = (
 ): Required<NumericWithFormatter> => {
   if (value === null || value === undefined) {
     return {
-      value: undefined,
+      numericValue: { value: undefined },
       formatter: defaults?.formatter || numericFormatter,
       formatterOptions: defaults?.formatterOptions || {},
     }
@@ -31,12 +33,21 @@ export const normalizeNumericWithFormatter = (
     formatter: defaults?.formatter || numericFormatter,
     formatterOptions: defaults?.formatterOptions || {},
   }
+
   if (typeof value === "number") {
-    return { value, ..._defaults }
+    return { numericValue: { value }, ..._defaults }
   }
 
-  if (typeof value === "object" && value !== null && "value" in value) {
-    return { ..._defaults, value: value.value }
+  if (typeof value === "object" && value !== null && "numericValue" in value) {
+    return { ..._defaults, numericValue: toNumericValue(value.numericValue) }
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    ("value" in value || "value_x100" in value)
+  ) {
+    return { ..._defaults, numericValue: value }
   }
 
   return { ..._defaults, value }

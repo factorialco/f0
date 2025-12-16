@@ -116,7 +116,15 @@ export type NumericFormatter = (
  * @param formatterOptions - The formatting options.
  */
 export type NumericWithFormatter = {
-  value: Numeric
+  numericValue: NumericValue
   formatter?: NumericFormatter
   formatterOptions?: NumericFormatterOptions
+}
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
+ */
+export type RelaxedNumericWithFormatter = NumericWithFormatter & {
+  numericValue: Numeric
 }
