@@ -53,7 +53,7 @@
     "generate-app-icons": "npx @svgr/cli --out-dir src/icons/app --native --svg-props className={props.className} ../../packages/core/assets/icons/app",
     "generate-module-icons": "npx @svgr/cli --out-dir src/icons/modules --native --svg-props className={props.className} ../../packages/core/assets/icons/modules",
     "prettier:format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "tsc-check": "tsc --noEmit"
+    "tsc": "tsc --noEmit"
   },
   "keywords": [
     "factorial",
@@ -111,5 +111,14 @@
     "tailwindcss": "^3.4.19",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "expo": "54.0.27",
+      "react-native": "0.81.5",
+      "react-native-reanimated": "3.19.4",
+      "react-native-safe-area-context": "5.4.0",
+      "react-native-svg": "15.12.1"
+    }
   }
 }
