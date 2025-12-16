@@ -1,3 +1,4 @@
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0BigNumber } from ".."
 
@@ -138,5 +139,41 @@ export const WithTrendInvertStatus: Story = {
         unitsPosition: "prepend" as const,
       },
     },
+  },
+}
+
+export const Skeleton: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <F0BigNumber.Skeleton />
+    </div>
+  ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    const args = {
+      default: Default.args,
+      withComparison: WithComparison.args,
+      withTrend: WithTrend.args,
+      withTrendInvertStatus: WithTrendInvertStatus.args,
+    }
+    return (
+      <div className="flex flex-col gap-4">
+        {Object.entries(args).map(([key, value]) => (
+          <div key={key} className="flex flex-col gap-2">
+            <h3 className="mb-2 text-lg font-semibold">{key}</h3>
+            <F0BigNumber {...value} />
+          </div>
+        ))}
+
+        <div className="flex flex-col gap-2">
+          <h3 className="mb-2 text-lg font-semibold">Skeleton</h3>
+          <F0BigNumber.Skeleton />
+        </div>
+      </div>
+    )
   },
 }

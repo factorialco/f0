@@ -72,12 +72,11 @@ const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
 
 const F0BigNumberSkeleton = () => {
   return (
-    <div className="relative flex h-full w-full cursor-progress flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
-      <div className="flex h-12 w-full items-center px-4">
-        <Skeleton className="h-3 w-full max-w-16 rounded-md" />
-      </div>
-      <div className="flex flex-1 items-end gap-2 px-4 pb-4">
-        <Skeleton className="h-1/2 w-full rounded-sm" />
+    <div className="relative flex h-full w-full cursor-progress flex-col gap-2">
+      <Skeleton className="h-3 w-full max-w-16 rounded-md" />
+      <div className="flex flex-row flex-wrap items-end gap-2">
+        <Skeleton className="h-8 w-full max-w-36 rounded-sm" />
+        <Skeleton className="h-6 w-full max-w-18 rounded-sm" />
       </div>
     </div>
   )
