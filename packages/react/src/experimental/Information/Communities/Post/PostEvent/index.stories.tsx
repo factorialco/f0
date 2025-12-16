@@ -1,6 +1,7 @@
 import cat from "@storybook-static/avatars/person04.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { PostEvent, type PostEventProps } from "./index"
+import type { ComponentProps } from "react"
+import { PostEvent } from "./index"
 
 const meta: Meta<typeof PostEvent> = {
   component: PostEvent,
@@ -10,7 +11,7 @@ const meta: Meta<typeof PostEvent> = {
 
 export default meta
 
-type Story = StoryObj<PostEventProps>
+type Story = StoryObj<ComponentProps<typeof PostEvent>>
 
 // Fixed date for the example stories
 const eventDate = new Date(2024, 11, 13, 20, 0)
