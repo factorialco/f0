@@ -31,7 +31,7 @@ describe("numericFormatter", () => {
     it("should format large numbers", () => {
       const value: NumericValue = { value: 1234567.89 }
       const result = numericFormatter(value)
-      expect(result).toBe("1234567.89")
+      expect(result).toBe("1,234,567.89")
     })
   })
 
@@ -97,19 +97,19 @@ describe("numericFormatter", () => {
     it("should use default locale (en-US)", () => {
       const value: NumericValue = { value: 1234.56 }
       const result = numericFormatter(value)
-      expect(result).toBe("1234.56")
+      expect(result).toBe("1,234.56")
     })
 
     it("should respect custom locale", () => {
       const value: NumericValue = { value: 1234.56 }
       const result = numericFormatter(value, { locale: "es-ES" })
-      expect(result).toBe("1234,56")
+      expect(result).toBe("1.234,56")
     })
 
     it("should handle different locales", () => {
       const value: NumericValue = { value: 1234.56 }
       const result = numericFormatter(value, { locale: "de-DE" })
-      expect(result).toBe("1234,56")
+      expect(result).toBe("1.234,56")
     })
   })
 
@@ -192,7 +192,7 @@ describe("numericFormatter", () => {
     it("should handle very large numbers", () => {
       const value: NumericValue = { value: 999999999.99 }
       const result = numericFormatter(value)
-      expect(result).toBe("999999999.99")
+      expect(result).toBe("999,999,999.99")
     })
 
     it("should handle value_x100 with very small values", () => {
@@ -204,7 +204,7 @@ describe("numericFormatter", () => {
     it("should handle value_x100 with very large values", () => {
       const value: NumericValue = { value_x100: 99999999999 }
       const result = numericFormatter(value)
-      expect(result).toBe("999999999.99")
+      expect(result).toBe("999,999,999.99")
     })
   })
 
@@ -318,7 +318,7 @@ describe("numericFormatter", () => {
     it("should format with standard notation when compact is false", () => {
       const value: NumericValue = { value: 1234567 }
       const result = numericFormatter(value, { compact: false })
-      expect(result).toBe("1234567")
+      expect(result).toBe("1,234,567")
     })
 
     it("should format large numbers with compact notation", () => {
@@ -375,7 +375,7 @@ describe("numericFormatter", () => {
     it("should override default locale", () => {
       const value: NumericValue = { value: 1234.56 }
       const result = numericFormatter(value, { locale: "fr-FR" })
-      expect(result).toBe("1234,56")
+      expect(result).toBe("1\u202f234,56")
     })
 
     it("should override both locale and decimal places", () => {
@@ -384,7 +384,7 @@ describe("numericFormatter", () => {
         locale: "es-ES",
         decimalPlaces: 1,
       })
-      expect(result).toBe("1234,6")
+      expect(result).toBe("1.234,6")
     })
 
     it("should combine multiple options", () => {
@@ -405,6 +405,80 @@ describe("numericFormatter", () => {
         decimalPlaces: 1,
       })
       expect(result).toBe("1.2M")
+    })
+  })
+
+  describe("edge case - valueToFormat undefined", () => {
+    it("should return emptyPlaceholder when valueToFormat is undefined", () => {
+      // This case occurs when isEmptyNumeric returns false but numericFinalValue returns undefined
+      // This can happen with an invalid NumericValue object
+      const value = { value: undefined } as NumericValue
+      const result = numericFormatter(value)
+      expect(result).toBe("")
+    })
+
+    it("should return custom emptyPlaceholder when valueToFormat is undefined", () => {
+      const value = { value: undefined } as NumericValue
+      const result = numericFormatter(value, { emptyPlaceholder: "N/A" })
+      expect(result).toBe("N/A")
+    })
+
+    it("should handle value_x100 undefined case", () => {
+      const value = { value_x100: undefined } as NumericValue
+      const result = numericFormatter(value)
+      expect(result).toBe("")
+    })
+
+    it("should handle value_x100 null case", () => {
+      const value = { value_x100: null as unknown as undefined } as NumericValue
+      const result = numericFormatter(value)
+      expect(result).toBe("")
+    })
+  })
+
+  describe("unitsSpaced option", () => {
+    it("should add space before units when unitsSpaced is true and unitsPosition is prepend", () => {
+      const value: NumericValue = {
+        value: 123.45,
+        units: "$",
+        unitsPosition: "prepend",
+      }
+      const result = numericFormatter(value, { unitsSpaced: true })
+      expect(result).toBe(" $123.45")
+    })
+
+    it("should add space after units when unitsSpaced is true and unitsPosition is append", () => {
+      const value: NumericValue = {
+        value: 123.45,
+        units: "€",
+        unitsPosition: "append",
+      }
+      const result = numericFormatter(value, { unitsSpaced: true })
+      expect(result).toBe("123.45 €")
+    })
+
+    it("should not add space when unitsSpaced is false", () => {
+      const value: NumericValue = {
+        value: 123.45,
+        units: "€",
+        unitsPosition: "append",
+      }
+      const result = numericFormatter(value, { unitsSpaced: false })
+      expect(result).toBe("123.45€")
+    })
+  })
+
+  describe("useGrouping option", () => {
+    it("should use grouping when useGrouping is true", () => {
+      const value: NumericValue = { value: 1234567.89 }
+      const result = numericFormatter(value, { useGrouping: true })
+      expect(result).toBe("1,234,567.89")
+    })
+
+    it("should not use grouping when useGrouping is false", () => {
+      const value: NumericValue = { value: 1234567.89 }
+      const result = numericFormatter(value, { useGrouping: false })
+      expect(result).toBe("1234567.89")
     })
   })
 })

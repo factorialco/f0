@@ -6,6 +6,7 @@ import type {
   NumericFormatter,
   NumericFormatterOptions,
   NumericWithFormatter,
+  RelaxedNumericWithFormatter,
 } from "../types"
 
 describe("normalizeNumericWithFormatter", () => {
@@ -129,11 +130,13 @@ describe("normalizeNumericWithFormatter", () => {
       expect(result.formatterOptions).toEqual({})
     })
 
-    it("should return undefined for NumericValue with value_x100 property (falls through to value.numericValue which doesn't exist)", () => {
+    it("should return the NumericValue object for NumericValue with value_x100 property", () => {
       const input: Numeric = { value_x100: 12345 }
       const result = normalizeNumericWithFormatter(input)
       // Since input doesn't have "value" property, it falls through to line 42 which tries value.numericValue (undefined)
-      expect(result.numericValue).toBeUndefined()
+      expect(result.numericValue).toEqual({
+        value_x100: 12345,
+      })
       expect(result.formatter).toBe(numericFormatter)
       expect(result.formatterOptions).toEqual({})
     })
@@ -191,51 +194,51 @@ describe("normalizeNumericWithFormatter", () => {
       expect(result.formatterOptions).toEqual({})
     })
 
-    it("should extract numericValue from NumericWithFormatter object", () => {
-      const input: NumericWithFormatter = {
+    it("should extract numericValue from RelaxedNumericWithFormatter object", () => {
+      const input: RelaxedNumericWithFormatter = {
         numericValue: 456.78,
       }
       const result = normalizeNumericWithFormatter(input)
       // Since input doesn't have "value" property, it falls through to return the whole value
-      expect(result.numericValue).toBe(456.78)
+      expect(result.numericValue).toEqual({ value: 456.78 })
       expect(result.formatter).toBe(numericFormatter)
       expect(result.formatterOptions).toEqual({})
     })
 
     it("should preserve formatter from NumericWithFormatter if provided", () => {
       const customFormatter: NumericFormatter = () => "preserved"
-      const input: NumericWithFormatter = {
+      const input: RelaxedNumericWithFormatter = {
         numericValue: 100,
         formatter: customFormatter,
       }
       const result = normalizeNumericWithFormatter(input)
       // Note: The function uses defaults, not the input's formatter
-      expect(result.formatter).toBe(numericFormatter)
-      expect(result.numericValue).toBe(100)
+      expect(result.formatter).toBe(customFormatter)
+      expect(result.numericValue).toEqual({ value: 100 })
     })
 
-    it("should preserve formatterOptions from NumericWithFormatter if provided", () => {
+    it("should preserve formatterOptions from RelaxedNumericWithFormatter if provided", () => {
       const customOptions: NumericFormatterOptions = {
         locale: "it-IT",
         decimalPlaces: 5,
       }
-      const input: NumericWithFormatter = {
+      const input: RelaxedNumericWithFormatter = {
         numericValue: 200,
         formatterOptions: customOptions,
       }
       const result = normalizeNumericWithFormatter(input)
       // Note: The function uses defaults, not the input's formatterOptions
-      expect(result.formatterOptions).toEqual({})
-      expect(result.numericValue).toBe(200)
+      expect(result.formatterOptions).toEqual(customOptions)
+      expect(result.numericValue).toEqual({ value: 200 })
     })
 
-    it("should use defaults over input's formatter/formatterOptions", () => {
+    it("should use input's formatter/formatterOptions over defaults", () => {
       const inputFormatter: NumericFormatter = () => "input"
       const inputOptions: NumericFormatterOptions = { locale: "ja-JP" }
       const defaultFormatter: NumericFormatter = () => "default"
       const defaultOptions: NumericFormatterOptions = { locale: "en-US" }
 
-      const input: NumericWithFormatter = {
+      const input: RelaxedNumericWithFormatter = {
         numericValue: 300,
         formatter: inputFormatter,
         formatterOptions: inputOptions,
@@ -246,9 +249,9 @@ describe("normalizeNumericWithFormatter", () => {
         formatterOptions: defaultOptions,
       })
 
-      expect(result.formatter).toBe(defaultFormatter)
-      expect(result.formatterOptions).toEqual(defaultOptions)
-      expect(result.numericValue).toBe(300)
+      expect(result.formatter).toBe(inputFormatter)
+      expect(result.formatterOptions).toEqual(inputOptions)
+      expect(result.numericValue).toEqual({ value: 300 })
     })
   })
 
@@ -264,7 +267,7 @@ describe("normalizeNumericWithFormatter", () => {
       const input: Numeric = { value_x100: undefined }
       const result = normalizeNumericWithFormatter(input)
       // Since input doesn't have "value" property, it falls through to line 42 which tries value.numericValue (undefined)
-      expect(result.numericValue).toBeUndefined()
+      expect(result.numericValue).toEqual({ value_x100: undefined })
     })
 
     it("should handle empty formatterOptions object", () => {

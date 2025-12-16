@@ -112,7 +112,7 @@ export type NumericFormatterOptions = {
  */
 export type NumericFormatter = (
   value: Numeric,
-  options: NumericFormatterOptions
+  options?: NumericFormatterOptions
 ) => string
 
 /**
@@ -132,6 +132,9 @@ export type NumericWithFormatter = {
  * A numeric value that can be formatted with an optional formatter and options.
  * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
  */
-export type RelaxedNumericWithFormatter = NumericWithFormatter & {
+export type RelaxedNumericWithFormatter = Omit<
+  NumericWithFormatter,
+  "numericValue"
+> & {
   numericValue: Numeric
 }

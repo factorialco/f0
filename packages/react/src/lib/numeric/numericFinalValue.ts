@@ -10,7 +10,7 @@ export const numericFinalValue = (
 ): number | undefined => {
   return "value" in numericValue
     ? numericValue.value
-    : numericValue.value_x100
+    : numericValue.value_x100 !== undefined && numericValue.value_x100 !== null
       ? numericValue.value_x100 / 100
       : undefined
 }
