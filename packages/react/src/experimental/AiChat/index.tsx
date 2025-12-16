@@ -4,13 +4,13 @@ import {
   useCopilotAction,
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
-import { CopilotSidebar } from "@copilotkit/react-ui"
+import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
-import { useEffect } from "react"
+import { useCallback, useEffect } from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -87,6 +87,7 @@ const AiChatKitWrapper = ({
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
+      <SendMessageFunctionInjector />
       {children}
     </CopilotKit>
   )
@@ -102,6 +103,22 @@ const ResetFunctionInjector = () => {
       setClearFunction(null)
     }
   }, [setClearFunction, reset])
+
+  return null
+}
+
+const SendMessageFunctionInjector = () => {
+  const { setSendMessageFunction } = useAiChat()
+  const { sendMessage } = useCopilotChatInternal()
+
+  useEffect(() => {
+    if (sendMessage) {
+      setSendMessageFunction(sendMessage)
+    }
+    return () => {
+      setSendMessageFunction(null)
+    }
+  }, [setSendMessageFunction, sendMessage])
 
   return null
 }
@@ -181,6 +198,15 @@ const AiChatCmp = () => {
     },
   })
 
+  const InputComponent = useCallback(
+    ({ ...props }: InputProps) => (
+      <div className="m-3 mt-2">
+        <ChatTextarea {...props} />
+      </div>
+    ),
+    []
+  )
+
   if (!enabled) {
     return null
   }
@@ -196,7 +222,7 @@ const AiChatCmp = () => {
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={ChatButton}
-      Input={ChatTextarea}
+      Input={InputComponent}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
       RenderSuggestionsList={SuggestionsList}

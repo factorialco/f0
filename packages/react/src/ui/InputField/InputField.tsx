@@ -430,7 +430,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         <div
           className={cn(
             "relative h-fit transition-all",
-            "border-[1px] border-solid border-f1-border-secondary bg-f1-background",
+            "border-[1px] border-solid border-f1-border bg-f1-background",
             !noEdit && !disabled && "hover:border-f1-border-hover",
             "group focus-within:border-f1-border-hover focus-within:ring-1 focus-within:ring-f1-border-hover",
             "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
@@ -509,7 +509,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                     !hidePlaceholder &&
                     isEmpty(localValue) &&
                     !isAutofilled
-                    ? "opacity-1"
+                    ? "opacity-100"
                     : "opacity-0"
                 )}
                 onClick={handleClickPlaceholder}

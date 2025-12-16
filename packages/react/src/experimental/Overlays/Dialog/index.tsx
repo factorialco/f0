@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/ui/dialog"
+} from "@/ui/Dialog/dialog"
 import { forwardRef, useCallback, useState } from "react"
 
 type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
@@ -58,10 +58,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
         open={open && !closing}
         onOpenChange={(open) => !open && handleClose?.()}
       >
-        <DialogContent
-          ref={ref}
-          className="bottom-3 top-auto max-w-[400px] translate-y-0 sm:bottom-auto sm:top-[50%] sm:translate-y-[-50%]"
-        >
+        <DialogContent ref={ref} className="bottom-3 top-auto max-w-[400px]">
           <DialogHeader className="flex flex-col gap-4 px-4 py-5">
             <F0AvatarAlert type={header.type} size="lg" />
             <div className="flex flex-col gap-0.5">
