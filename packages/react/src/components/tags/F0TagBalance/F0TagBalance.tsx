@@ -1,46 +1,47 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { ArrowDown, ArrowUp } from "@/icons/app"
-import { numberFormat } from "@/lib/numberFormat"
+import { normalizeNumericWithFormatter, toNumericValue } from "@/lib/numeric/"
+import { isEmptyNumeric } from "@/lib/numeric/isEmptyNumeric"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
 import { BaseTag } from "../internal/BaseTag"
-import type { BalanceStatus, F0TagBalanceProps, NumericValue } from "./types"
+import type { BalanceStatus, F0TagBalanceProps } from "./types"
 
 const iconMap: Record<string, IconType> = {
   "-1": ArrowDown,
   "1": ArrowUp,
 }
 
-const toNumericValue = (
-  value: number | NumericValue | null | undefined,
-  decimalPlaces: number,
-  units: string,
-  unitsPosition: "left" | "right",
-  locale: string = "en-US"
-): Required<NumericValue> | undefined => {
-  if (value === null || value === undefined) {
-    return undefined
-  }
-  if (typeof value === "number") {
-    return { number: value, decimalPlaces, units, unitsPosition, locale }
-  }
-  // Default options if not provided
-  return { decimalPlaces, units, unitsPosition, locale, ...value }
-}
+// const toNumericValue = (
+//   value: number | NumericValue | null | undefined,
+//   decimalPlaces: number,
+//   units: string,
+//   unitsPosition: "left" | "right",
+//   locale: string = "en-US"
+// ): Required<NumericValue> | undefined => {
+//   if (value === null || value === undefined) {
+//     return undefined
+//   }
+//   if (typeof value === "number") {
+//     return { number: value, decimalPlaces, units, unitsPosition, locale }
+//   }
+//   // Default options if not provided
+//   return { decimalPlaces, units, unitsPosition, locale, ...value }
+// }
 
-const numericFormatter = (
-  value: Required<NumericValue>,
-  spaceBetweenUnits: boolean = false
-) => {
-  const space = spaceBetweenUnits ? " " : ""
-  return [
-    value.unitsPosition === "left" && value.units ? value.units : "",
-    numberFormat(value.number, value.decimalPlaces, value.locale),
-    value.unitsPosition === "right" && value.units ? value.units : "",
-  ]
-    .filter(Boolean)
-    .join(space)
-}
+// const numericFormatter = (
+//   value: Required<NumericValue>,
+//   spaceBetweenUnits: boolean = false
+// ) => {
+//   const space = spaceBetweenUnits ? " " : ""
+//   return [
+//     value.unitsPosition === "left" && value.units ? value.units : "",
+//     numberFormat(value.number, value.decimalPlaces, value.locale),
+//     value.unitsPosition === "right" && value.units ? value.units : "",
+//   ]
+//     .filter(Boolean)
+//     .join(space)
+// }
 
 const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
   "-1": "negative",
@@ -50,30 +51,58 @@ const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
 
 export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
   ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
+    const amountDef = normalizeNumericWithFormatter(amount, {
+      formatterOptions: {
+        decimalPlaces: 2,
+      },
+    })
+
+    const _percentage = toNumericValue(percentage)
+
+    const percentageDef = normalizeNumericWithFormatter(
+      {
+        ..._percentage,
+        units: "%",
+        unitsPosition: "append",
+      },
+      {
+        formatterOptions: {
+          decimalPlaces: 2,
+          emptyPlaceholder: nullText ?? "N/A",
+        },
+      }
+    )
+
     let text = ""
     let icon = null
     let additionalAccessibleText = ""
     let status: BalanceStatus | "null" = "null"
     let hintText: string | undefined = hint
-    if (percentage === null || percentage === undefined) {
+    if (
+      isEmptyNumeric(amountDef.value) ||
+      isEmptyNumeric(percentageDef.value)
+    ) {
       text = nullText ?? "N/A"
       hintText = undefined
     } else {
-      const percentageDef = toNumericValue(percentage, 2, "%", "right")!
-      const amountDef = toNumericValue(amount, 2, "", "right")!
-
-      const sign = Math.sign(percentageDef.number).toString()
+      const sign = Math.sign(percentageDef.value).toString()
       status =
         statusMap[
           Math.sign(
-            percentageDef.number * (invertStatus ? -1 : 1)
+            percentageDef.value * (invertStatus ? -1 : 1)
           ).toString() as "-1" | "0" | "1"
         ]
 
-      const perventageText = numericFormatter(percentageDef, false)
-      const amountText = numericFormatter(amountDef, true)
+      const percentageText = percentageDef.formatter(
+        percentageDef.value,
+        percentageDef.formatterOptions
+      )
+      const amountText = amountDef.formatter(
+        amountDef.value,
+        amountDef.formatterOptions
+      )
 
-      text = [perventageText, amountText].filter(Boolean).join(" · ")
+      text = [percentageText, amountText].filter(Boolean).join(" · ")
       additionalAccessibleText = `${status} balance`
 
       icon =

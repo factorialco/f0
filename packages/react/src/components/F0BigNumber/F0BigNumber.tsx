@@ -1,20 +1,24 @@
-import { F0Heading } from "@/components/F0Heading"
-import { numericFormatter } from "@/lib/numeric"
+import { normalizeNumericWithFormatter } from "@/lib/numeric/numericFormatter"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
+import { F0TagBalance } from "../tags/F0TagBalance"
 import type { BigNumberProps } from "./types"
 
-const F0BigNumberCmp = ({
-  label,
-  value,
-  comparison,
-  formatter = numericFormatter,
-}: BigNumberProps) => {
-  const formattedValue = formatter(value)
+const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
+  const value = normalizeNumericWithFormatter(props.value)
+  const comparison = props.comparison
+    ? normalizeNumericWithFormatter(props.comparison)
+    : undefined
+  const formattedValue = value.formatter(value.value, value.formatterOptions)
 
   return (
     <div className="flex flex-col gap-2">
-      <F0Heading content={value} />
+      <div className="flex items-center gap-2">
+        <span className="font-bold text-2xl">{formattedValue}</span>
+        <F0TagBalance percentage={0} value={value} />
+      </div>
+
+      {label && <div>{label}</div>}
     </div>
   )
 }

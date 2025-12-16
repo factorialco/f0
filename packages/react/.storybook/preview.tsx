@@ -139,8 +139,8 @@ const preview: Preview = {
           "hooks",
         ]
 
-        const aId = a.title.toLowerCase()
-        const bId = b.title.toLowerCase()
+        const aId = a.id.split("-")?.[0].toLowerCase()
+        const bId = b.id.split("-")?.[0].toLowerCase()
 
         const aIndex = topLevelOrder.indexOf(aId)
         const bIndex = topLevelOrder.indexOf(bId)

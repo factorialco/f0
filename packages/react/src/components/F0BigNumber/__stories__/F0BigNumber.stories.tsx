@@ -34,7 +34,7 @@ export const Default: Story = {
   args: {
     formatter: (value: number | null) => value?.toLocaleString() ?? "-",
     value: {
-      amount: 1000000,
+      value: 1000000,
       units: "USD",
       unitsPosition: "left",
     },

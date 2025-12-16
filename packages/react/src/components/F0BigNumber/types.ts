@@ -1,9 +1,11 @@
-import { Numeric } from "@/lib/numeric"
+import { Numeric, NumericWithFormatter } from "@/lib/numeric"
 
-export interface BigNumberProps {
-  value: Numeric
+export type NumberWithFormatter = NumericWithFormatter & {
+  animated?: boolean
+}
+
+export type BigNumberProps = {
+  value: Numeric | NumberWithFormatter | number
   label: string
-  comparison: {
-    value: Numeric
-  }
+  comparison: Numeric | NumberWithFormatter | number
 }

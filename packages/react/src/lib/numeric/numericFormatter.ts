@@ -1,33 +1,49 @@
-import { Numeric, NumericFormatterOptions } from "./types"
+import { isEmptyNumeric } from "./isEmptyNumeric"
+import { Numeric, NumericFormatter, NumericFormatterOptions } from "./types"
 
-export const numericFormatter = (
+/**
+ * Formats a numeric value according to the provided options.
+ * @param value - The numeric value to format.
+ * @param options - The formatting options.
+ * @returns The formatted value as a string.
+ */
+export const numericFormatter: NumericFormatter = (
   value: Numeric,
   options: NumericFormatterOptions = {}
 ) => {
+  if (isEmptyNumeric(value)) {
+    return options.emptyPlaceholder || ""
+  }
+
   options = {
     locale: "en-US",
     decimalPlaces: 2,
     hideUnits: false,
     compact: false,
     emptyPlaceholder: "",
+    useGrouping: true,
     ...options,
-  }
-
-  if (value === undefined || value === null) {
-    return options.emptyPlaceholder
   }
 
   if (typeof value === "number") {
     value = { value }
   }
 
-  const valueToFormat = "value" in value ? value.value : value.value_x100 / 100
+  const valueToFormat =
+    "value" in value
+      ? value.value
+      : value.value_x100
+        ? value.value_x100 / 100
+        : undefined
+  if (valueToFormat === undefined) {
+    return options.emptyPlaceholder || ""
+  }
 
   const formattedValue = new Intl.NumberFormat(options.locale, {
     maximumFractionDigits: options.decimalPlaces,
     notation: options.compact ? "compact" : "standard",
     compactDisplay: options.compact ? "short" : undefined,
-    useGrouping: false,
+    useGrouping: options.useGrouping,
   }).format(valueToFormat)
 
   if (options.hideUnits || !value.units) {

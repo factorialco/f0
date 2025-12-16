@@ -33,7 +33,7 @@ export type NumericValue = {
       /**
        * Direct numeric value to format.
        */
-      value: number
+      value: number | undefined
     }
   | {
       /**
@@ -44,7 +44,7 @@ export type NumericValue = {
        * @example
        * value_x100: 12345 represents 123.45
        */
-      value_x100: number
+      value_x100: number | undefined
     }
 )
 
@@ -87,4 +87,36 @@ export type NumericFormatterOptions = {
    *
    */
   emptyPlaceholder?: string
+
+  /**
+   * Whether to use grouping for the formatted value.
+   *
+   * @default true
+   */
+  useGrouping?: boolean
+}
+
+/**
+ * Formats a numeric value according to the provided options.
+ *
+ * @param value - The numeric value to format.
+ * @param options - The formatting options.
+ * @returns The formatted value as a string.
+ */
+export type NumericFormatter = (
+  value: Numeric,
+  options: NumericFormatterOptions
+) => string
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ *
+ * @param value - The numeric value to format.
+ * @param formatter - The formatter to use.
+ * @param formatterOptions - The formatting options.
+ */
+export type NumericWithFormatter = {
+  value: Numeric
+  formatter?: NumericFormatter
+  formatterOptions?: NumericFormatterOptions
 }

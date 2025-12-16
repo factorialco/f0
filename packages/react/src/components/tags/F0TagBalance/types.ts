@@ -1,3 +1,5 @@
+import { Numeric, NumericWithFormatter } from "@/lib/numeric"
+
 export const statuses = ["positive", "neutral", "negative"] as const
 export type BalanceStatus = (typeof statuses)[number]
 
@@ -29,14 +31,19 @@ export type F0TagBalanceProps = {
   nullText?: string
 
   /**
-   * Amount to display next to the tag
+   * Value to display next to the tag can be a number, a Numeric or a NumericWithFormatter
    */
-  amount?: number | NumericValue | null
+  amount: NumericWithFormatter | Numeric
 } & (
   | {
-      percentage: number | Omit<NumericValue, "units" | "unitsPosition">
+      percentage:
+        | (Omit<NumericWithFormatter, "value"> & {
+            value: Omit<Numeric, "units" | "unitsPosition">
+          })
+        | Omit<Numeric, "units" | "unitsPosition">
     }
   | {
       percentage?: null
+      formatterOptions?: undefined
     }
 )
