@@ -12,6 +12,8 @@ export const toNumericValue = (value: Numeric): NumericValue => {
     }
   }
 
+  console.log("typeof value", typeof value, value)
+
   if (typeof value === "number") {
     return { value }
   }

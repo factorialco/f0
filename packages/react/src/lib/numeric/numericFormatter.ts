@@ -23,6 +23,7 @@ export const numericFormatter: NumericFormatter = (
     compact: false,
     emptyPlaceholder: "",
     useGrouping: true,
+    unitsSpaced: false,
     ...options,
   }
 
@@ -47,7 +48,9 @@ export const numericFormatter: NumericFormatter = (
     return formattedValue
   }
 
+  const space = options.unitsSpaced ? " " : ""
+
   return value.unitsPosition === "prepend"
-    ? `${value.units}${formattedValue}`
-    : `${formattedValue}${value.units}`
+    ? `${space}${value.units}${formattedValue}`
+    : `${formattedValue}${space}${value.units}`
 }

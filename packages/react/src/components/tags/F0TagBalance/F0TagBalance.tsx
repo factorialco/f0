@@ -4,6 +4,8 @@ import {
   normalizeNumericWithFormatter,
   Numeric,
   numericFinalValue,
+  NumericValue,
+  NumericWithFormatter,
   toNumericValue,
 } from "@/lib/numeric/"
 import { isEmptyNumeric } from "@/lib/numeric/isEmptyNumeric"
@@ -54,26 +56,32 @@ const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
   1: "positive",
 }
 
+const toNumericValueFromNumeric = (
+  value: Numeric | NumericWithFormatter
+): NumericValue => {
+  if (typeof value === "number") {
+    return { value }
+  }
+
+  if (value && "numericValue" in value) {
+    return toNumericValue(value.numericValue)
+  }
+
+  return toNumericValue(value)
+}
 export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
   ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
-    console.log("amount", amount)
     const amountDef = normalizeNumericWithFormatter(amount, {
       formatterOptions: {
         decimalPlaces: 2,
       },
     })
 
-    const _percentage = toNumericValue(percentage as Numeric)
-
     const percentageDef = normalizeNumericWithFormatter(
-      {
-        ..._percentage,
-        units: "%",
-        unitsPosition: "append",
-      },
+      percentage as Numeric | NumericWithFormatter,
       {
         formatterOptions: {
-          decimalPlaces: 2,
+          decimalPlaces: 0,
           emptyPlaceholder: nullText ?? "N/A",
         },
       }
@@ -102,7 +110,11 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
         ]
 
       const percentageText = percentageDef.formatter(
-        percentageDef.numericValue,
+        {
+          ...percentageDef.numericValue,
+          units: "%",
+          unitsPosition: "append",
+        },
         percentageDef.formatterOptions
       )
       const amountText = amountDef.formatter(

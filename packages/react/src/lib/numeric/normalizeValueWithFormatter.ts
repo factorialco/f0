@@ -39,7 +39,14 @@ export const normalizeNumericWithFormatter = (
   }
 
   if (typeof value === "object" && value !== null && "numericValue" in value) {
-    return { ..._defaults, numericValue: toNumericValue(value.numericValue) }
+    return {
+      numericValue: toNumericValue(value.numericValue),
+      formatter: value.formatter ? value.formatter : _defaults.formatter,
+      formatterOptions: {
+        ..._defaults.formatterOptions,
+        ...value.formatterOptions,
+      },
+    }
   }
 
   if (
@@ -50,5 +57,5 @@ export const normalizeNumericWithFormatter = (
     return { ..._defaults, numericValue: value }
   }
 
-  return { ..._defaults, value }
+  return { ..._defaults, numericValue: value }
 }

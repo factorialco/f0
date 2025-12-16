@@ -161,29 +161,33 @@ export const Snapshot: Story = {
         invertStatus: true,
       },
       {
-        title: "with decimal places",
+        title: "with decimal places in percent",
         percentage: {
-          numericValue: 10,
+          numericValue: 10.23,
           formatterOptions: { decimalPlaces: 2 },
         },
-        amount: 1000,
+        amount: 1000.12345678,
       },
       {
-        title: "with units",
-        percentage: 10,
-        amount: { numericValue: { value: 1000, units: "€" } },
+        title: "with decimal places in amount",
+        percentage: 10.123,
+        amount: {
+          numericValue: { value: 1000.23, units: "€", unitsPosition: "append" },
+          formatterOptions: { decimalPlaces: 1, unitsSpaced: true },
+        },
       },
       {
         title: "with units position",
         percentage: 10,
         amount: {
           numericValue: {
-            value: 1000,
+            value: 1000.12345678,
             unitsPosition: "prepend" as const,
             units: "$",
           },
           formatterOptions: {
             decimalPlaces: 2,
+            unitsSpaced: true,
           },
         },
       },

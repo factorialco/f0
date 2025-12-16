@@ -77,6 +77,13 @@ export type NumericFormatterOptions = {
   hideUnits?: boolean
 
   /**
+   * Whether to space the units from the formatted value.
+   *
+   * @default false
+   */
+  unitsSpaced?: boolean
+
+  /**
    * Whether to use compact notation for the formatted value.
    *
    * @default false
