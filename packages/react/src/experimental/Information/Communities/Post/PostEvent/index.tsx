@@ -1,23 +1,28 @@
 import { Skeleton } from "@/ui/skeleton"
-import { f1Colors } from "@factorialco/f0-core"
+import { f1Colors } from "../../../../../../../core/src/tokens/colors"
 import { formatTime } from "../../../../../lib/date"
 import { withSkeleton } from "../../../../../lib/skeleton"
 import { CalendarEvent } from "../../../../Widgets/Content/CalendarEvent"
+import { isVideo } from "../CommunityPost/video"
 
 export type PostEventProps = {
   title: string
-  imageUrl?: string
+  mediaUrl?: string
   place?: string
   date: Date
 }
 
 export const BasePostEvent = ({
   title,
-  imageUrl,
+  mediaUrl,
   place,
   date,
 }: PostEventProps) => {
   let description = formatTime(date)
+
+  const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
+    event.stopPropagation()
+  }
 
   if (place) {
     description = `${description} · ${place}`
@@ -25,14 +30,25 @@ export const BasePostEvent = ({
 
   return (
     <div className="flex w-full flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary p-1 shadow">
-      {imageUrl && (
+      {mediaUrl && (
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
-          <img
-            src={imageUrl}
-            role="presentation"
-            loading="lazy"
-            className="aspect-video h-full w-full object-cover"
-          />
+          {isVideo(mediaUrl) ? (
+            <video
+              controls
+              className="aspect-video h-full w-full object-cover"
+              onClick={handleVideoClick}
+              preload="auto"
+            >
+              <source src={mediaUrl} />
+            </video>
+          ) : (
+            <img
+              src={mediaUrl}
+              role="presentation"
+              loading="lazy"
+              className="aspect-video h-full w-full object-cover"
+            />
+          )}
           <Skeleton className="absolute inset-0 h-full w-full" />
         </div>
       )}

@@ -40,7 +40,7 @@ export const Default: Story = {
     event: {
       title: "Sevilla Tour",
       place: "Sevilla",
-      imageUrl: "landscape03.jpg",
+      mediaUrl: "landscape03.jpg",
       date: eventDate,
     },
     counters: {
@@ -131,6 +131,21 @@ export const WithVideo: Story = {
     event: undefined,
     mediaUrl:
       "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    noVideoPreload: true,
+  },
+}
+
+export const WithEventAndVideo: Story = {
+  decorators: Default.decorators,
+  args: {
+    ...Default.args,
+    event: {
+      title: "Sevilla Tour",
+      place: "Sevilla",
+      mediaUrl:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      date: eventDate,
+    },
     noVideoPreload: true,
   },
 }
