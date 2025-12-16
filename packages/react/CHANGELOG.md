@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.308.1](https://github.com/factorialco/f0/compare/f0-react-v1.308.0...f0-react-v1.308.1) (2025-12-16)
+
+
+### Bug Fixes
+
+* add support to show video for event community post ([#3142](https://github.com/factorialco/f0/issues/3142)) ([2fb17f3](https://github.com/factorialco/f0/commit/2fb17f38a24dc941b1a9fa6c8c188586e7df0d42))
+
 ## [1.308.0](https://github.com/factorialco/f0/compare/f0-react-v1.307.0...f0-react-v1.308.0) (2025-12-16)
 
 
