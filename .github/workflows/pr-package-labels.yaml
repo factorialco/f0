@@ -1,0 +1,96 @@
+name: PR Package Labels
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  add-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: |
+            package_react: 
+              - 'packages/react/**'
+              - 'packages/core/**'
+            package_react_native: 
+              - 'packages/react-native/**'
+            package_core: 
+              - 'packages/core/**'
+      - name: Add package labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const labelsToAdd = [];
+
+            // Determine which labels to add based on detected changes
+            if ('${{ steps.changes.outputs.package_react }}' === 'true') {
+              labelsToAdd.push('react');
+            }
+
+            if ('${{ steps.changes.outputs.package_react_native }}' === 'true') {
+              labelsToAdd.push('react-native');
+            }
+
+            if ('${{ steps.changes.outputs.package_core }}' === 'true') {
+              labelsToAdd.push('core');
+            }
+
+            if (labelsToAdd.length === 0) {
+              core.info('No package labels to add');
+              return;
+            }
+
+            // Get current PR labels
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            const currentLabels = pr.labels.map(label => label.name);
+            const packageLabels = ['react', 'react-native', 'core'];
+
+            // Remove existing package labels that are no longer applicable
+            const labelsToRemove = packageLabels.filter(
+              label => currentLabels.includes(label) && !labelsToAdd.includes(label)
+            );
+
+            // Add new labels that aren't already present
+            const labelsToAddNew = labelsToAdd.filter(
+              label => !currentLabels.includes(label)
+            );
+
+            // Remove labels that are no longer applicable
+            if (labelsToRemove.length > 0) {
+              core.info(`Removing labels: ${labelsToRemove.join(', ')}`);
+              for (const label of labelsToRemove) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: label,
+                });
+              }
+            }
+
+            // Add new labels
+            if (labelsToAddNew.length > 0) {
+              core.info(`Adding labels: ${labelsToAddNew.join(', ')}`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: labelsToAddNew,
+              });
+            } else {
+              core.info('All applicable labels are already present');
+            }
