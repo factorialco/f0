@@ -6,6 +6,7 @@ on:
 
 permissions:
   pull-requests: write
+  issues: write
 
 jobs:
   add-labels:
@@ -24,6 +25,53 @@ jobs:
               - 'packages/react-native/**'
             package_core: 
               - 'packages/core/**'
+      - name: Ensure labels exist with correct colors
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Define labels with their colors
+            const labelConfigs = [
+              { name: 'react', color: '61DBFB', description: 'Changes affect packages/react' },
+              { name: 'react-native', color: '1C79C0', description: 'Changes affect packages/react-native' },
+              { name: 'core', color: 'FF0000', description: 'Changes affect packages/core' },
+            ];
+
+            // Get all existing labels
+            const { data: existingLabels } = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingLabelNames = existingLabels.map(label => label.name);
+
+            // Create or update labels
+            for (const labelConfig of labelConfigs) {
+              try {
+                if (existingLabelNames.includes(labelConfig.name)) {
+                  // Update existing label
+                  await github.rest.issues.updateLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelConfig.name,
+                    color: labelConfig.color,
+                    description: labelConfig.description,
+                  });
+                  core.info(`Updated label: ${labelConfig.name}`);
+                } else {
+                  // Create new label
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelConfig.name,
+                    color: labelConfig.color,
+                    description: labelConfig.description,
+                  });
+                  core.info(`Created label: ${labelConfig.name}`);
+                }
+              } catch (error) {
+                core.warning(`Failed to create/update label ${labelConfig.name}: ${error.message}`);
+              }
+            }
       - name: Add package labels
         uses: actions/github-script@v7
         with:
