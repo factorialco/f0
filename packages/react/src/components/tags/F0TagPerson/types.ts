@@ -1,5 +1,4 @@
-export interface Props {
+export type F0TagPersonProps = {
+  src?: string
   name: string
-  avatarUrl: string
-  onClick?: () => void
 }

@@ -123,19 +123,20 @@ export const WelcomeScreen = ({
                 },
               }}
             >
-              <ButtonInternal
-                className="w-full items-start justify-start overflow-x-hidden"
-                variant="ghost"
-                label={suggestion.message}
-                icon={suggestion.icon}
-                onClick={() =>
-                  sendMessage({
-                    id: randomId(),
-                    role: "user",
-                    content: suggestion.prompt || suggestion.message,
-                  })
-                }
-              />
+              <div>
+                <ButtonInternal
+                  variant="ghost"
+                  label={suggestion.message}
+                  icon={suggestion.icon}
+                  onClick={() =>
+                    sendMessage({
+                      id: randomId(),
+                      role: "user",
+                      content: suggestion.prompt || suggestion.message,
+                    })
+                  }
+                />
+              </div>
             </motion.div>
           ))}
         </div>
