@@ -1,4 +1,4 @@
-import cat from "@storybook-static/avatars/person04.jpg"
+import { mockImage } from "@/testing/mocks/images"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentProps } from "react"
 import { BasePostEvent, PostEvent } from "./index"
@@ -27,7 +27,7 @@ export const Default: Story = {
   args: {
     title: "End of the Year Dinner!",
     place: "Poble Espanyol",
-    mediaUrl: cat,
+    mediaUrl: mockImage("person", 4),
     date: eventDate,
   },
 }

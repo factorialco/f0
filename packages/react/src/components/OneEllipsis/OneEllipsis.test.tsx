@@ -6,16 +6,41 @@ describe("OneEllipsis", () => {
   let resizeCallback: (() => void) | undefined
 
   beforeEach(() => {
-    // Mock ResizeObserver
-    const mockResizeObserver = vi.fn()
-    mockResizeObserver.mockImplementation((callback) => {
-      resizeCallback = callback
-      return {
-        observe: vi.fn(),
-        disconnect: vi.fn(),
+    // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work
+    // This implementation captures the callback for testing purposes
+    class MockResizeObserver {
+      private callback: ResizeObserverCallback
+
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback
+        resizeCallback = () => {
+          // Create a mock entry for the callback
+          const mockEntry = {
+            contentRect: {
+              width: 0,
+              height: 0,
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              x: 0,
+              y: 0,
+              toJSON: () => ({}),
+            },
+            target: document.body,
+            borderBoxSize: [],
+            contentBoxSize: [],
+            devicePixelContentBoxSize: [],
+          } as ResizeObserverEntry
+          callback([mockEntry], this)
+        }
       }
-    })
-    window.ResizeObserver = mockResizeObserver
+
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+    }
+    window.ResizeObserver = MockResizeObserver as typeof ResizeObserver
 
     // Mock getComputedStyle
     const mockGetComputedStyle = vi.fn()
