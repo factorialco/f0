@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.311.2](https://github.com/factorialco/f0/compare/f0-react-v1.311.1...f0-react-v1.311.2) (2025-12-17)
+
+
+### Bug Fixes
+
+* remove isdev from useFormatterEnforcer ([#3155](https://github.com/factorialco/f0/issues/3155)) ([22ec60c](https://github.com/factorialco/f0/commit/22ec60cc3fd74a6630c6afabeff079eac1fbf2f9))
+
 ## [1.311.1](https://github.com/factorialco/f0/compare/f0-react-v1.311.0...f0-react-v1.311.1) (2025-12-17)
 
 
