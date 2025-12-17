@@ -1,4 +1,5 @@
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   GroupingDefinition,
@@ -41,6 +42,14 @@ export function useSelectable<
   const [localSelectedState, setLocalSelectedState] = useState<
     SelectedItemsState<R>
   >(parseSelectedState(selectedState))
+
+  useDeepCompareEffect(() => {
+    setLocalSelectedState({
+      allSelected: false,
+      items: new Map(),
+      groups: new Map(),
+    })
+  }, [source.currentFilters, source.currentGrouping])
 
   const totalKnownItemsCount = useMemo(() => {
     return paginationInfo ? paginationInfo.total : data.records?.length
