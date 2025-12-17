@@ -1,7 +1,7 @@
 import { Tabs, TabsProps } from "@/experimental/Navigation/Tabs"
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-import { useEffect } from "react"
+import { useLayoutEffect } from "react"
 import { useOneModal } from "../OneModalProvider"
 import { useIsSmallScreen } from "../utils"
 
@@ -21,7 +21,7 @@ export const OneModalContent = ({
 
   const isSmallScreen = useIsSmallScreen()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHasTabs(!!tabs)
     return () => setHasTabs(false)
   }, [tabs, setHasTabs])
