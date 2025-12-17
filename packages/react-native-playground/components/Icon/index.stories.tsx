@@ -5,7 +5,7 @@ import { Text } from "react-native";
 import { TextInput } from "react-native";
 import { TouchableOpacity } from "react-native";
 import type { Meta, StoryObj } from "@storybook/react";
-import { Icon, AppIcons, ModuleIcons } from "@factorialco/f0-react-native";
+import { Icon, AppIcons, ModuleIcons, IconType } from "@factorialco/f0-react-native";
 import { type IconColorName } from "@factorialco/f0-react-native/src/lib/colors";
 
 const meta = {
@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>;
 
 // Helper components with proper TypeScript types
 interface IconDisplayProps {
-  icon: any; // Using any to avoid import errors
+  icon: IconType;
   name: string;
 }
 
@@ -69,21 +69,17 @@ const StyledIconDisplay = ({ icon, name, color }: StyledIconDisplayProps) => (
   </View>
 );
 
-type IconType = "app" | "module";
+type IconCategoryType = "app" | "module";
 
-export const IconsShowcase: Story = {
-  args: {
-    icon: AppIcons.Archive,
-  },
-  render: () => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedType, setSelectedType] = useState<IconType>("app");
-    const [appIconList, setAppIconList] = useState<
-      Array<{ name: string; icon: any }>
-    >([]);
-    const [moduleIconList, setModuleIconList] = useState<
-      Array<{ name: string; icon: any }>
-    >([]);
+const IconsShowcaseComponent = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState<IconCategoryType>("app");
+  const [appIconList, setAppIconList] = useState<
+    Array<{ name: string; icon: IconType }>
+  >([]);
+  const [moduleIconList, setModuleIconList] = useState<
+    Array<{ name: string; icon: IconType }>
+  >([]);
 
     // Generate icon lists on component mount
     useEffect(() => {
@@ -110,15 +106,15 @@ export const IconsShowcase: Story = {
       item.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
-    const TabButton = ({
-      type,
-      label,
-      count,
-    }: {
-      type: IconType;
-      label: string;
-      count: number;
-    }) => (
+  const TabButton = ({
+    type,
+    label,
+    count,
+  }: {
+    type: IconCategoryType;
+    label: string;
+    count: number;
+  }) => (
       <View className="flex-1">
         <TouchableOpacity
           onPress={() => setSelectedType(type)}
@@ -182,13 +178,19 @@ export const IconsShowcase: Story = {
         ) : (
           <View className="items-center justify-center p-10">
             <Text className="text-lg text-f1-foreground">
-              No icons found matching "{searchTerm}"
+              No icons found matching &quot;{searchTerm}&quot;
             </Text>
           </View>
         )}
       </ScrollView>
     );
+};
+
+export const IconsShowcase: Story = {
+  args: {
+    icon: AppIcons.Archive,
   },
+  render: () => <IconsShowcaseComponent />,
 };
 
 export const SizeVariants: Story = {

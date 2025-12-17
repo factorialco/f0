@@ -8,4 +8,5 @@ module.exports = {
     "./components/**/*.{ts,tsx}",
     "./node_modules/@factorialco/f0-react-native/**/*.{ts,tsx}",
   ],
+  presets: [require("nativewind/preset"), ...(baseConfig.presets || [])],
 };

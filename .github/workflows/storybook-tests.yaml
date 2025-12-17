@@ -25,17 +25,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node-pnpm
-      - name: Install Playwright
+      - name: Get Playwright version
+        id: playwright-version
         run: |
           PLAYWRIGHT_VERSION=$(pnpm why @playwright/test -r --json | jq -r '.[] | select(.devDependencies["@playwright/test"]) | .devDependencies["@playwright/test"].version')
           echo "PLAYWRIGHT_VERSION: $PLAYWRIGHT_VERSION"
-          pnpx playwright@$PLAYWRIGHT_VERSION install --with-deps
+          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
+          restore-keys: |
+            playwright-browsers-${{ steps.playwright-version.outputs.version }}-
+            playwright-browsers-
+      - name: Install Playwright
+        run: |
+          pnpx playwright@${{ steps.playwright-version.outputs.version }} install --with-deps
       - name: Build Storybook
         run: |
           pnpm --filter @factorialco/f0-core build
           pnpm --filter @factorialco/f0-react run build-storybook --quiet
+
       - name: Serve Storybook and run tests
+        env:
+          DEBUG: vite
+          VITEST_LOG_LEVEL: debug
         run: |
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
-            "pnpx wait-on tcp:6006 && pnpm --filter @factorialco/f0-react test-storybook"
+             "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
+             "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook"

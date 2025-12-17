@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.310.0](https://github.com/factorialco/f0/compare/f0-react-v1.309.1...f0-react-v1.310.0) (2025-12-17)
+
+
+### Features
+
+* **react-native:** upgrade to Expo SDK 54, React 19, and React Nativ… ([#3132](https://github.com/factorialco/f0/issues/3132)) ([1877d24](https://github.com/factorialco/f0/commit/1877d2457b1ef76eb9b6e855f1e9a7289a7aec32))
+
+## [1.309.1](https://github.com/factorialco/f0/compare/f0-react-v1.309.0...f0-react-v1.309.1) (2025-12-17)
+
+
+### Bug Fixes
+
+* resolve useSelectable issues ([#3147](https://github.com/factorialco/f0/issues/3147)) ([b8da623](https://github.com/factorialco/f0/commit/b8da6233586c50682cc1b7e8a11315a932ec7420))
+
+## [1.309.0](https://github.com/factorialco/f0/compare/f0-react-v1.308.1...f0-react-v1.309.0) (2025-12-16)
+
+
+### Features
+
+* improve rich editor fullpage mode ([#3117](https://github.com/factorialco/f0/issues/3117)) ([189668c](https://github.com/factorialco/f0/commit/189668c961cd8dbbeb6fd0b21887005159dc39ac))
+
+## [1.308.1](https://github.com/factorialco/f0/compare/f0-react-v1.308.0...f0-react-v1.308.1) (2025-12-16)
+
+
+### Bug Fixes
+
+* add support to show video for event community post ([#3142](https://github.com/factorialco/f0/issues/3142)) ([2fb17f3](https://github.com/factorialco/f0/commit/2fb17f38a24dc941b1a9fa6c8c188586e7df0d42))
+
 ## [1.308.0](https://github.com/factorialco/f0/compare/f0-react-v1.307.0...f0-react-v1.308.0) (2025-12-16)
 
 
