@@ -20,7 +20,6 @@ jobs:
           filters: |
             package_react: 
               - 'packages/react/**'
-              - 'packages/core/**'
             package_react_native: 
               - 'packages/react-native/**'
             package_core: 
