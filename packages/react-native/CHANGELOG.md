@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.20.1...f0-react-native-v0.21.0) (2025-12-17)
+
+
+### Features
+
+* **react-native:** upgrade to Expo SDK 54, React 19, and React Nativ… ([#3132](https://github.com/factorialco/f0/issues/3132)) ([1877d24](https://github.com/factorialco/f0/commit/1877d2457b1ef76eb9b6e855f1e9a7289a7aec32))
+
 ## [0.20.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.20.0...f0-react-native-v0.20.1) (2025-10-09)
 
 

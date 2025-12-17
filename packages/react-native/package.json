@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react-native",
-  "version": "0.20.1",
+  "version": "0.21.0",
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "src/index.ts",
