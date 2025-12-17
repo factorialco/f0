@@ -41,7 +41,7 @@ const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
   const valueValue = numericFinalValue(value.numericValue)
 
   const trendPercentage = useMemo(() => {
-    if (!comparison || !trendConfig.show) {
+    if (!comparisonValue || !trendConfig.show) {
       return undefined
     }
 
@@ -50,7 +50,7 @@ const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
     }
 
     return ((valueValue - comparisonValue) / comparisonValue) * 100
-  }, [value, comparison, trendConfig.show])
+  }, [valueValue, comparisonValue, trendConfig.show])
 
   return (
     <div className="flex flex-col gap-2">

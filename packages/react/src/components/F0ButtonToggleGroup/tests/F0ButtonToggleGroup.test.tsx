@@ -23,7 +23,6 @@ const MockF0ButtonToggleInternal = vi.hoisted(() => {
   return vi.fn(
     ({
       label,
-      icon,
       disabled,
       size,
       variant,
