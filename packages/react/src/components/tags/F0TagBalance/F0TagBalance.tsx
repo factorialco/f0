@@ -4,9 +4,7 @@ import {
   normalizeNumericWithFormatter,
   Numeric,
   numericFinalValue,
-  NumericValue,
   NumericWithFormatter,
-  toNumericValue,
 } from "@/lib/numeric/"
 import { isEmptyNumeric } from "@/lib/numeric/isEmptyNumeric"
 import { cn } from "@/lib/utils"
@@ -56,19 +54,6 @@ const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
   1: "positive",
 }
 
-const toNumericValueFromNumeric = (
-  value: Numeric | NumericWithFormatter
-): NumericValue => {
-  if (typeof value === "number") {
-    return { value }
-  }
-
-  if (value && "numericValue" in value) {
-    return toNumericValue(value.numericValue)
-  }
-
-  return toNumericValue(value)
-}
 export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
   ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
     const amountDef = normalizeNumericWithFormatter(amount, {
