@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.311.3](https://github.com/factorialco/f0/compare/f0-react-v1.311.2...f0-react-v1.311.3) (2025-12-17)
+
+
+### Bug Fixes
+
+* remove selection on filter or grouping change ([#3148](https://github.com/factorialco/f0/issues/3148)) ([5b04d1d](https://github.com/factorialco/f0/commit/5b04d1df94714a1b3b2b793039b29254c3e9b362))
+
 ## [1.311.2](https://github.com/factorialco/f0/compare/f0-react-v1.311.1...f0-react-v1.311.2) (2025-12-17)
 
 
