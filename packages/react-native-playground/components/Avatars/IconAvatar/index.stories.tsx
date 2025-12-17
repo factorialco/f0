@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, View, Text } from "react-native";
 import type { Meta, StoryObj } from "@storybook/react";
-import { IconAvatar, AppIcons } from "@factorialco/f0-react-native";
+import { IconAvatar, AppIcons, IconType } from "@factorialco/f0-react-native";
 
 const meta = {
   title: "Components/Avatars/IconAvatar",
@@ -31,7 +31,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 interface AvatarDisplayProps {
-  icon: any;
+  icon: IconType;
   size: "sm" | "md" | "lg";
   className?: string;
   label?: string;

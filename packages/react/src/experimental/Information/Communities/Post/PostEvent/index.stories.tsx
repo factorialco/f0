@@ -1,6 +1,7 @@
 import { mockImage } from "@/testing/mocks/images"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { PostEvent } from "./index"
+import type { ComponentProps } from "react"
+import { BasePostEvent, PostEvent } from "./index"
 
 const meta: Meta<typeof PostEvent> = {
   component: PostEvent,
@@ -10,7 +11,7 @@ const meta: Meta<typeof PostEvent> = {
 
 export default meta
 
-type Story = StoryObj<typeof PostEvent>
+type Story = StoryObj<ComponentProps<typeof BasePostEvent>>
 
 // Fixed date for the example stories
 const eventDate = new Date(2024, 11, 13, 20, 0)
