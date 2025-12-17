@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.311.1](https://github.com/factorialco/f0/compare/f0-react-v1.311.0...f0-react-v1.311.1) (2025-12-17)
+
+
+### Bug Fixes
+
+* enhance OneModal styles and simplify logic ([#3152](https://github.com/factorialco/f0/issues/3152)) ([e88641f](https://github.com/factorialco/f0/commit/e88641fb39a2282395cdaff7b0b411fb145b606e))
+
 ## [1.311.0](https://github.com/factorialco/f0/compare/f0-react-v1.310.0...f0-react-v1.311.0) (2025-12-17)
 
 
