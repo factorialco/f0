@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.309.0](https://github.com/factorialco/f0/compare/f0-react-v1.308.1...f0-react-v1.309.0) (2025-12-16)
+
+
+### Features
+
+* improve rich editor fullpage mode ([#3117](https://github.com/factorialco/f0/issues/3117)) ([189668c](https://github.com/factorialco/f0/commit/189668c961cd8dbbeb6fd0b21887005159dc39ac))
+
+## [1.308.1](https://github.com/factorialco/f0/compare/f0-react-v1.308.0...f0-react-v1.308.1) (2025-12-16)
+
+
+### Bug Fixes
+
+* add support to show video for event community post ([#3142](https://github.com/factorialco/f0/issues/3142)) ([2fb17f3](https://github.com/factorialco/f0/commit/2fb17f38a24dc941b1a9fa6c8c188586e7df0d42))
+
+## [1.308.0](https://github.com/factorialco/f0/compare/f0-react-v1.307.0...f0-react-v1.308.0) (2025-12-16)
+
+
+### Features
+
+* stabilise tags components ([#2543](https://github.com/factorialco/f0/issues/2543)) ([e52bb2a](https://github.com/factorialco/f0/commit/e52bb2ae9316daf3021e1971399d971fb9ed387b))
+
+## [1.307.0](https://github.com/factorialco/f0/compare/f0-react-v1.306.4...f0-react-v1.307.0) (2025-12-15)
+
+
+### Features
+
+* button toggle group ([#3130](https://github.com/factorialco/f0/issues/3130)) ([629de58](https://github.com/factorialco/f0/commit/629de583c03aa2baf45819430b18f9dad15e61a4))
+
+## [1.306.4](https://github.com/factorialco/f0/compare/f0-react-v1.306.3...f0-react-v1.306.4) (2025-12-15)
+
+
+### Bug Fixes
+
+* get rid of chattextarea focus issue ([#3136](https://github.com/factorialco/f0/issues/3136)) ([e39aea6](https://github.com/factorialco/f0/commit/e39aea60880835e9a9f26e168e85900748c29d99))
+
+## [1.306.3](https://github.com/factorialco/f0/compare/f0-react-v1.306.2...f0-react-v1.306.3) (2025-12-15)
+
+
+### Bug Fixes
+
+* ai chat suggestion buttons align ([#3137](https://github.com/factorialco/f0/issues/3137)) ([11ecd91](https://github.com/factorialco/f0/commit/11ecd919142b95e6d2be22ea7350ea0165c64db7))
+* dialog position ([#3134](https://github.com/factorialco/f0/issues/3134)) ([61afa02](https://github.com/factorialco/f0/commit/61afa024b83b7cb090bf3e0910a6eb1fcec87806))
+
 ## [1.306.2](https://github.com/factorialco/f0/compare/f0-react-v1.306.1...f0-react-v1.306.2) (2025-12-12)
 
 

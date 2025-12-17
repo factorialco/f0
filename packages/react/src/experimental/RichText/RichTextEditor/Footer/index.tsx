@@ -81,100 +81,132 @@ const Footer = ({
 
   const useLittleMode = containerWidth < 500
 
-  return (
-    <div ref={containerRef} className="flex max-w-full items-center gap-2 py-3">
-      <div className="relative flex flex-grow items-center gap-2">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: isToolbarOpen ? "100%" : 0 }}
-          transition={{
-            duration: 0.3,
-            delay: isToolbarOpen ? 0.15 : 0,
-            ease: "easeInOut",
-          }}
-          onAnimationComplete={() => setToolbarAnimationComplete(isToolbarOpen)}
-          className="absolute left-0 top-0 z-10 h-full bg-f1-background"
-          aria-label="Rich text editor toolbar"
-        >
-          <Toolbar
-            labels={toolbarLabels}
-            editor={editor}
-            isFullscreen={isFullscreen}
-            disableButtons={disableButtons}
-            onClose={() => {
-              setIsToolbarOpen(false)
-              setToolbarAnimationComplete(false)
-            }}
-            animationComplete={toolbarAnimationComplete}
-            plainHtmlMode={plainHtmlMode}
-          />
-        </motion.div>
+  const handleFileClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault()
+    if (fileInputRef?.current) {
+      fileInputRef.current.click()
+    } else {
+      const fileInput = document.getElementById(
+        "rich-text-editor-upload-button"
+      )
+      fileInput?.click()
+    }
+  }
 
-        <motion.div
-          className="flex items-center gap-2 overflow-hidden"
-          initial={{ opacity: 1 }}
-          animate={{
-            opacity: isToolbarOpen ? 0 : 1,
-          }}
-          transition={{
-            duration: isToolbarOpen ? 0.15 : 0.25,
-            delay: isToolbarOpen ? 0 : 0.2,
-            ease: "easeInOut",
-          }}
-        >
-          <F0Button
-            onClick={(e) => {
-              e?.preventDefault()
-              setIsToolbarOpen(true)
-            }}
-            variant="outline"
-            size="md"
-            label="Toolbar"
-            disabled={disableButtons}
-            hideLabel
-            icon={TextSize}
+  const renderToolbarButton = () => (
+    <F0Button
+      onClick={(e) => {
+        e?.preventDefault()
+        setIsToolbarOpen(true)
+      }}
+      variant="outline"
+      size="md"
+      label="Toolbar"
+      disabled={disableButtons}
+      hideLabel
+      icon={TextSize}
+    />
+  )
+
+  const renderActionButtons = () => (
+    <>
+      {canUseFiles && (
+        <F0Button
+          icon={Paperclip}
+          onClick={handleFileClick}
+          hideLabel
+          label="Add Attachment"
+          variant="outline"
+          disabled={disableButtons}
+        />
+      )}
+
+      {enhanceConfig && (
+        <>
+          <ToolbarDivider />
+          <EnhanceActivator
+            editor={editor}
+            onEnhanceWithAI={onEnhanceWithAI}
+            isLoadingEnhance={isLoadingEnhance}
+            enhanceConfig={enhanceConfig}
+            disableButtons={disableButtons}
+            hideLabel={useLittleMode}
+            setLastIntent={setLastIntent}
+            position="top"
           />
-          {canUseFiles && (
-            <F0Button
-              icon={Paperclip}
-              onClick={(e) => {
-                e.preventDefault()
-                if (fileInputRef?.current) {
-                  fileInputRef.current.click()
-                } else {
-                  const fileInput = document.getElementById(
-                    "rich-text-editor-upload-button"
-                  )
-                  fileInput?.click()
-                }
+        </>
+      )}
+
+      {maxCharacters && !useLittleMode && (
+        <p className="text-sm font-normal text-f1-foreground-secondary">
+          {editor.storage.characterCount.characters()}/{maxCharacters}
+        </p>
+      )}
+    </>
+  )
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex min-h-[56px] max-w-full items-center gap-2 py-3"
+    >
+      <div className="relative flex flex-grow items-center gap-2">
+        {!isFullscreen && (
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: isToolbarOpen ? "100%" : 0 }}
+            transition={{
+              duration: 0.3,
+              delay: isToolbarOpen ? 0.15 : 0,
+              ease: "easeInOut",
+            }}
+            onAnimationComplete={() =>
+              setToolbarAnimationComplete(isToolbarOpen)
+            }
+            className="absolute left-0 top-0 z-10 h-full overflow-hidden bg-f1-background"
+            aria-label="Rich text editor toolbar"
+          >
+            <Toolbar
+              labels={toolbarLabels}
+              editor={editor}
+              isFullscreen={isFullscreen}
+              disableButtons={disableButtons}
+              onClose={() => {
+                setIsToolbarOpen(false)
+                setToolbarAnimationComplete(false)
+                // Restore focus after state update to trigger BubbleMenu
+                queueMicrotask(() => editor.commands.focus())
               }}
-              hideLabel
-              label="Add Attachment"
-              variant="outline"
-              disabled={disableButtons}
+              animationComplete={toolbarAnimationComplete}
+              plainHtmlMode={plainHtmlMode}
             />
-          )}
-          {enhanceConfig && (
-            <>
-              <ToolbarDivider />
-              <EnhanceActivator
-                editor={editor}
-                onEnhanceWithAI={onEnhanceWithAI}
-                isLoadingEnhance={isLoadingEnhance}
-                enhanceConfig={enhanceConfig}
-                disableButtons={disableButtons}
-                hideLabel={useLittleMode}
-                setLastIntent={setLastIntent}
-                position="top"
-              />
-            </>
-          )}
-          {maxCharacters && !useLittleMode && (
-            <p className="text-sm font-normal text-f1-foreground-secondary">
-              {editor.storage.characterCount.characters()}/{maxCharacters}
-            </p>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
+
+        {!isFullscreen && (
+          <motion.div
+            className="flex items-center gap-2 overflow-hidden"
+            initial={{ opacity: 1 }}
+            animate={{
+              opacity: isToolbarOpen ? 0 : 1,
+            }}
+            transition={{
+              duration: isToolbarOpen ? 0.15 : 0.25,
+              delay: isToolbarOpen ? 0 : 0.2,
+              ease: "easeInOut",
+            }}
+          >
+            {renderToolbarButton()}
+            {renderActionButtons()}
+          </motion.div>
+        )}
+
+        {isFullscreen && (
+          <div className="flex items-center gap-2">
+            {!isToolbarOpen && renderToolbarButton()}
+            {renderActionButtons()}
+          </div>
+        )}
       </div>
 
       <ActionsMenu

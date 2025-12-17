@@ -271,7 +271,7 @@ function runDpdmOnCommit(
   try {
     // Validate commitSha to prevent command injection
     if (!/^[0-9a-f]{7,40}$/i.test(commitSha)) {
-      throw new Error(`Invalid commit SHA: ${commitSha}`);
+      throw new Error(`Invalid commit SHA: ${commitSha}`)
     }
     // Extract the commit to a temporary directory using git archive
     mkdirSync(tempDir, { recursive: true })
@@ -596,8 +596,8 @@ function main(): void {
     consola.log("")
     consola.error(
       "Please resolve these circular dependencies before committing.\n" +
-      "For guidance on resolving circular dependencies, see: https://nodejs.org/api/modules.html#cycles\n" +
-      "Or refer to the project's documentation on dependency management."
+        "For guidance on resolving circular dependencies, see: https://nodejs.org/api/modules.html#cycles\n" +
+        "Or refer to the project's documentation on dependency management."
     )
     process.exit(1)
   } else if (cyclesDecreased) {

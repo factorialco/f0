@@ -1,6 +1,6 @@
 import type { SVGProps } from "react"
 import { Ref, forwardRef } from "react"
-const SvgEqualAproximately = (
+const SvgEqualApproximately = (
   props: SVGProps<SVGSVGElement>,
   ref: Ref<SVGSVGElement>
 ) => (
@@ -27,5 +27,5 @@ const SvgEqualAproximately = (
     />
   </svg>
 )
-const ForwardRef = forwardRef(SvgEqualAproximately)
+const ForwardRef = forwardRef(SvgEqualApproximately)
 export default ForwardRef

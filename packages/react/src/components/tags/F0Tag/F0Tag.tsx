@@ -1,12 +1,12 @@
 import { ComponentProps, ReactNode } from "react"
-import { F0TagAlert } from "./F0TagAlert"
-import { F0TagBalance } from "./F0TagBalance"
-import { F0TagCompany } from "./F0TagCompany"
-import { F0TagDot, type TagDotProps } from "./F0TagDot"
-import { F0TagPerson } from "./F0TagPerson"
-import { F0TagRaw, type TagRawProps } from "./F0TagRaw"
-import { F0TagStatus, type TagStatusProps } from "./F0TagStatus"
-import { F0TagTeam } from "./F0TagTeam"
+import { F0TagAlert } from "../F0TagAlert"
+import { F0TagBalance } from "../F0TagBalance"
+import { F0TagCompany } from "../F0TagCompany"
+import { F0TagDot, type TagDotProps } from "../F0TagDot"
+import { F0TagPerson } from "../F0TagPerson"
+import { F0TagRaw, type TagRawProps } from "../F0TagRaw"
+import { F0TagStatus, type TagStatusProps } from "../F0TagStatus"
+import { F0TagTeam } from "../F0TagTeam"
 
 type PersonTagProps = ComponentProps<typeof F0TagPerson>
 type TeamTagProps = ComponentProps<typeof F0TagTeam>
