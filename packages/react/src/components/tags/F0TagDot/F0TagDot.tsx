@@ -6,7 +6,11 @@ import type { Props } from "./types"
 
 export const F0TagDot = forwardRef<HTMLDivElement, Props>(
   ({ text, ...props }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      text,
+      { disallowEmpty: true },
+      { componentName: "F0TagDot" }
+    )
 
     const dotColor =
       "color" in props && props.color
