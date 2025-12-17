@@ -6,7 +6,11 @@ import type { F0TagRawProps } from "./types"
 
 export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
   ({ text, additionalAccessibleText, icon, onlyIcon }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      text,
+      { disallowEmpty: true },
+      { componentName: "F0TagRaw" }
+    )
 
     return (
       <BaseTag

@@ -16,6 +16,10 @@ const config: StorybookConfig = {
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
     {
+      directory: "../src/lib",
+      titlePrefix: "Library",
+    },
+    {
       directory: "../src/components",
       titlePrefix: "Components",
     },

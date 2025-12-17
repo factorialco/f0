@@ -36,7 +36,7 @@ const meta: Meta = {
         "The amount of the balance, it can be a number or an object with the numeric value that allows to define the decimal places, units, units position and locale.",
       table: {
         type: {
-          summary: "number | NumericValue",
+          summary: "number | NumericWithFormatter | Numeric",
         },
       },
     },
@@ -46,11 +46,15 @@ const meta: Meta = {
     hint: "vs last month",
     percentage: 2,
     amount: {
-      number: 1522.48,
-      decimalPlaces: 2,
-      units: "€",
-      unitsPosition: "right",
-      locale: "en-US",
+      numericValue: {
+        value: 1522.48,
+        units: "€",
+        unitsPosition: "append",
+      },
+      formatterOptions: {
+        decimalPlaces: 2,
+        locale: "en-US",
+      },
     },
   },
 }
@@ -71,11 +75,15 @@ export const NegativeBalanceTag: Story = {
   args: {
     percentage: -17,
     amount: {
-      number: -1522.48,
-      decimalPlaces: 2,
-      units: "€",
-      unitsPosition: "right",
-      locale: "es-ES",
+      numericValue: {
+        value: -1522.48,
+        units: "€",
+        unitsPosition: "append",
+      },
+      formatterOptions: {
+        decimalPlaces: 2,
+        locale: "es-ES",
+      },
     },
   },
 }
@@ -153,29 +161,47 @@ export const Snapshot: Story = {
         invertStatus: true,
       },
       {
-        title: "with decimal places",
-        percentage: { number: 10, decimalPlaces: 2 },
-        amount: 1000,
+        title: "with decimal places in percent",
+        percentage: {
+          numericValue: 10.23,
+          formatterOptions: { decimalPlaces: 2 },
+        },
+        amount: 1000.12345678,
       },
       {
-        title: "with units",
-        percentage: 10,
-        amount: { number: 1000, units: "€" },
+        title: "with decimal places in amount",
+        percentage: 10.123,
+        amount: {
+          numericValue: {
+            value: 1000.23,
+            units: "€",
+            unitsPosition: "append" as const,
+          },
+          formatterOptions: { decimalPlaces: 1, unitsSpaced: true },
+        },
       },
       {
         title: "with units position",
         percentage: 10,
         amount: {
-          number: 1000,
-          unitsPosition: "left" as const,
-          decimalPlaces: 2,
-          units: "$",
+          numericValue: {
+            value: 1000.12345678,
+            unitsPosition: "prepend" as const,
+            units: "$",
+          },
+          formatterOptions: {
+            decimalPlaces: 2,
+            unitsSpaced: true,
+          },
         },
       },
       {
         title: "with locale",
         percentage: 10,
-        amount: { number: 1000, locale: "es-ES" },
+        amount: {
+          numericValue: 1000.1234,
+          formatterOptions: { locale: "es-ES" },
+        },
       },
     ]
     return (

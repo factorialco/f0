@@ -11,7 +11,11 @@ type Props = {
 
 export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
   ({ avatar, text }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      text,
+      { disallowEmpty: true },
+      { componentName: "F0TagAvatar" }
+    )
 
     return (
       <BaseTag

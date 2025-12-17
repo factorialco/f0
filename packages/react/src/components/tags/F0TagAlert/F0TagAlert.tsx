@@ -15,7 +15,11 @@ const iconMap: Record<Level, IconType> = {
 
 export const F0TagAlert = forwardRef<HTMLDivElement, Props>(
   ({ text, level }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      text,
+      { disallowEmpty: true, disallowEmojis: true },
+      { componentName: "F0TagAlert" }
+    )
 
     const iconColors: Record<Level, F0IconProps["color"]> = {
       info: "info",
