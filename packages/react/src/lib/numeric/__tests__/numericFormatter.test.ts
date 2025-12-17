@@ -444,7 +444,7 @@ describe("numericFormatter", () => {
         unitsPosition: "prepend",
       }
       const result = numericFormatter(value, { unitsSpaced: true })
-      expect(result).toBe(" $123.45")
+      expect(result).toBe("$ 123.45")
     })
 
     it("should add space after units when unitsSpaced is true and unitsPosition is append", () => {
