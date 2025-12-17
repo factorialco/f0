@@ -172,7 +172,11 @@ export const Snapshot: Story = {
         title: "with decimal places in amount",
         percentage: 10.123,
         amount: {
-          numericValue: { value: 1000.23, units: "€", unitsPosition: "append" },
+          numericValue: {
+            value: 1000.23,
+            units: "€",
+            unitsPosition: "append" as const,
+          },
           formatterOptions: { decimalPlaces: 1, unitsSpaced: true },
         },
       },

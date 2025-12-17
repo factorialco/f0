@@ -82,6 +82,6 @@ const F0BigNumberSkeleton = () => {
   )
 }
 
-F0BigNumberCmp.displayName = "F0KpiCmp"
+F0BigNumberCmp.displayName = "F0BigNumber"
 
 export const F0BigNumber = withSkeleton(F0BigNumberCmp, F0BigNumberSkeleton)

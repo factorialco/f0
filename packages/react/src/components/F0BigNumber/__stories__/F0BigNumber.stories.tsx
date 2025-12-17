@@ -1,6 +1,7 @@
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0BigNumber } from ".."
+import type { BigNumberProps } from "../types"
 
 const meta: Meta<typeof F0BigNumber> = {
   component: F0BigNumber,
@@ -165,7 +166,7 @@ export const Snapshot: Story = {
         {Object.entries(args).map(([key, value]) => (
           <div key={key} className="flex flex-col gap-2">
             <h3 className="mb-2 text-lg font-semibold">{key}</h3>
-            <F0BigNumber {...value} />
+            <F0BigNumber {...(value as BigNumberProps)} />
           </div>
         ))}
 

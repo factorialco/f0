@@ -17,37 +17,6 @@ const iconMap: Record<string, IconType> = {
   "1": ArrowUp,
 }
 
-// const toNumericValue = (
-//   value: number | NumericValue | null | undefined,
-//   decimalPlaces: number,
-//   units: string,
-//   unitsPosition: "left" | "right",
-//   locale: string = "en-US"
-// ): Required<NumericValue> | undefined => {
-//   if (value === null || value === undefined) {
-//     return undefined
-//   }
-//   if (typeof value === "number") {
-//     return { number: value, decimalPlaces, units, unitsPosition, locale }
-//   }
-//   // Default options if not provided
-//   return { decimalPlaces, units, unitsPosition, locale, ...value }
-// }
-
-// const numericFormatter = (
-//   value: Required<NumericValue>,
-//   spaceBetweenUnits: boolean = false
-// ) => {
-//   const space = spaceBetweenUnits ? " " : ""
-//   return [
-//     value.unitsPosition === "left" && value.units ? value.units : "",
-//     numberFormat(value.number, value.decimalPlaces, value.locale),
-//     value.unitsPosition === "right" && value.units ? value.units : "",
-//   ]
-//     .filter(Boolean)
-//     .join(space)
-// }
-
 const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
   "-1": "negative",
   0: "neutral",
