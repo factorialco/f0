@@ -27,7 +27,7 @@ export const Default: Story = {
   args: {
     title: "End of the Year Dinner!",
     place: "Poble Espanyol",
-    imageUrl: cat,
+    mediaUrl: cat,
     date: eventDate,
   },
 }
