@@ -1,12 +1,12 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { ArrowDown, ArrowUp } from "@/icons/app"
+import { isEmptyNumeric } from "@/lib/numeric"
 import {
-  normalizeNumericWithFormatter,
   Numeric,
   numericFinalValue,
   NumericWithFormatter,
 } from "@/lib/numeric/"
-import { isEmptyNumeric } from "@/lib/numeric/isEmptyNumeric"
+import { useNormalizeNumericValueWithFormatter } from "@/lib/numeric/hooks/useNormalizeNumericValueWithFormatter"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
 import { BaseTag } from "../internal/BaseTag"
@@ -25,6 +25,9 @@ const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
 
 export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
   ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
+    const normalizeNumericWithFormatter =
+      useNormalizeNumericValueWithFormatter()
+
     const amountDef = normalizeNumericWithFormatter(amount, {
       formatterOptions: {
         decimalPlaces: 2,

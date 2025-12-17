@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { numericFormatter } from "../numericFormatter"
 import type { Numeric, NumericValue } from "../types"
+import { numericFormatter } from "../utils/numericFormatter"
 
 describe("numericFormatter", () => {
   describe("basic number formatting", () => {

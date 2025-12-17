@@ -1,10 +1,13 @@
 # Numeric Formatter
 
-A utility library for formatting numeric values with support for units, custom locales, and decimal precision.
+A utility library for formatting numeric values with support for units, custom
+locales, and decimal precision.
 
 ## Overview
 
-The numeric formatter provides a flexible way to format numbers with optional units, supporting both direct numeric values and values stored as integers multiplied by 100 (useful for avoiding floating-point precision issues).
+The numeric formatter provides a flexible way to format numbers with optional
+units, supporting both direct numeric values and values stored as integers
+multiplied by 100 (useful for avoiding floating-point precision issues).
 
 ## Features
 
@@ -20,8 +23,8 @@ The numeric formatter provides a flexible way to format numbers with optional un
 ### Basic Usage
 
 ```tsx
-import { numericFormatter } from "@/lib/numeric/numericFormatter"
-import type { NumericValue } from "@/lib/numeric/types"
+import { numericFormatter } from "@/lib/numeric"
+import type { NumericValue } from "@/lib/numeric"
 
 // Format a simple number
 const value: NumericValue = { value: 123.456 }
@@ -49,7 +52,8 @@ const formatted = numericFormatter(valueWithPrepend)
 
 ### Using value_x100 Format
 
-The `value_x100` format is useful when you need to avoid floating-point precision issues by storing values as integers:
+The `value_x100` format is useful when you need to avoid floating-point
+precision issues by storing values as integers:
 
 ```tsx
 // Store 123.45 as 12345 (integer)
@@ -97,6 +101,7 @@ Formats a numeric value according to the provided options.
 #### Parameters
 
 - `value` (`NumericValue`): The numeric value to format. Can be either:
+
   - `{ value: number }`: Direct numeric value
   - `{ value_x100: number }`: Value stored as integer × 100
   - Both formats support optional `units` and `unitsPosition` properties
@@ -109,6 +114,76 @@ Formats a numeric value according to the provided options.
 
 - `string`: The formatted number as a string, with units if provided
 
+## Hooks
+
+### `useNumericFormatter()`
+
+A React hook that returns a formatter function configured with the current
+locale from the l10n provider. This hook automatically uses the locale context,
+so you don't need to pass it manually.
+
+#### Returns
+
+- `(value: NumericValue) => string`: A formatter function that formats numeric
+  values using the current locale
+
+#### Example
+
+```tsx
+import { useNumericFormatter } from "@/lib/numeric"
+
+function MyComponent() {
+  const formatNumeric = useNumericFormatter()
+
+  const value = { value: 1234.56, units: "€" }
+  const formatted = formatNumeric(value)
+  // Result: "1234.56€" (or formatted according to current locale)
+
+  return <div>{formatted}</div>
+}
+```
+
+### `useNormalizeValueWithFormatter()`
+
+A React hook that returns a normalize function configured with the current
+locale from the l10n provider. This function converts various numeric input
+formats (number, `Numeric`, or `RelaxedNumericWithFormatter`) into a
+standardized `NumericWithFormatter` object.
+
+#### Returns
+
+- `(value: Numeric | RelaxedNumericWithFormatter) => Required<NumericWithFormatter>`:
+  A normalize function that converts numeric values to a standardized format
+  using the current locale
+
+#### Example
+
+```tsx
+import { useNormalizeValueWithFormatter } from "@/lib/numeric"
+
+function MyComponent() {
+  const normalizeNumeric = useNormalizeValueWithFormatter()
+
+  // Can accept various formats
+  const normalized1 = normalizeNumeric(123.45)
+  const normalized2 = normalizeNumeric({ value: 123.45, units: "€" })
+  const normalized3 = normalizeNumeric({
+    numericValue: { value: 123.45 },
+    formatterOptions: { decimalPlaces: 1 },
+  })
+
+  // All return a NumericWithFormatter object with locale configured
+  return (
+    <div>
+      {normalized1.formatter(
+        normalized1.numericValue,
+        normalized1.formatterOptions
+      )}
+    </div>
+  )
+}
+```
+
 ## Type Definitions
 
 ### `NumericValue`
@@ -117,10 +192,7 @@ Formats a numeric value according to the provided options.
 type NumericValue = {
   units?: string
   unitsPosition?: "prepend" | "append"
-} & (
-  | { value: number }
-  | { value_x100: number }
-)
+} & ({ value: number } | { value_x100: number })
 ```
 
 ### `NumericFormatterOptions`
@@ -186,8 +258,9 @@ numericFormatter(germanValue, { locale: "de-DE" })
 
 ## Notes
 
-- The formatter uses `Intl.NumberFormat` internally, which provides reliable internationalization support
-- Grouping separators (thousands separators) are disabled by default (`useGrouping: false`)
+- The formatter uses `Intl.NumberFormat` internally, which provides reliable
+  internationalization support
+- Grouping separators (thousands separators) are disabled by default
+  (`useGrouping: false`)
 - Values are rounded to the specified number of decimal places
 - The `value_x100` format automatically divides by 100 before formatting
-

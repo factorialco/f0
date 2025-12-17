@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { toNumericValue } from "../toNumericValue"
 import type { NumericValue } from "../types"
+import { toNumericValue } from "../utils/toNumericValue"
 
 describe("toNumericValue", () => {
   describe("null and undefined values", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { numericFinalValue } from "../numericFinalValue"
 import type { NumericValue } from "../types"
+import { numericFinalValue } from "../utils/numericFinalValue"
 
 describe("numericFinalValue", () => {
   describe("value property", () => {
