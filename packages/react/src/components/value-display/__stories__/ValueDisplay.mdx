@@ -2,6 +2,7 @@ import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { FeatureGrid } from "~/docs/components/FeatureGrid"
 import {
   AlignTextLeft,
+  ArrowCycle,
   List,
   Numbers,
   Calendar,
@@ -89,6 +90,13 @@ The way a value must be rendered is defined in the render `type`
         description:
           "Renders a status tag with different variants to indicate the current state or condition of items.",
         href: "/?path=/docs/components-value-display-status--documentation",
+      },
+      {
+        icon: ArrowCycle,
+        title: "Sync Status",
+        description:
+          "Renders a sync status icon with tooltip. Displays synchronization state with colored icons for synced, syncing, pending, partially synced, outdated, and failed states.",
+        href: "/?path=/docs/components-value-display-sync-status--documentation",
       },
       {
         icon: Person,
