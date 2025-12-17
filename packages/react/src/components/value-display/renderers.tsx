@@ -1,6 +1,5 @@
-import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults.ts"
 import { ReactNode } from "react"
-import { ValueDisplayVisualizationType } from "./types.ts"
+import { ValueDisplayRendererContext } from "./types.ts"
 import { AlertTagCell } from "./types/alertTag"
 import { AmountCell } from "./types/amount"
 import { AvatarListCell } from "./types/avatarList"
@@ -17,15 +16,14 @@ import { PercentageCell } from "./types/percentage"
 import { PersonCell } from "./types/person"
 import { ProgressBarCell } from "./types/progressBar"
 import { StatusCell } from "./types/status"
+import { SyncStatusCell } from "./types/syncStatus"
 import { TagCell } from "./types/tag"
 import { TagListCell } from "./types/tagList"
 import { TeamCell } from "./types/team"
 import { TextCell } from "./types/text"
 
-export type ValueDisplayRendererContext = {
-  visualization: ValueDisplayVisualizationType
-  i18n: TranslationsType
-}
+// Re-export for backward compatibility
+export type { ValueDisplayRendererContext }
 
 /**
  * The renderer function to use for a property.
@@ -58,6 +56,7 @@ export const valueDisplayRenderers = {
   file: FileCell,
   folder: FolderCell,
   country: CountryCell,
+  syncStatus: SyncStatusCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**
