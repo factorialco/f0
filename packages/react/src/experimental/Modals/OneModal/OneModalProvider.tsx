@@ -1,4 +1,4 @@
-import { createContext, RefObject, useContext } from "react"
+import { createContext, RefObject, useContext, useState } from "react"
 import { ContentPadding, ModalPosition } from "./types"
 
 type OneModalContextType = {
@@ -18,6 +18,14 @@ type OneModalContextType = {
    * to ensure dropdowns render inside the modal.
    */
   portalContainer: HTMLDivElement | null
+  /**
+   * Whether the modal content has tabs
+   */
+  hasTabs: boolean
+  /**
+   * Function to set whether the modal content has tabs
+   */
+  setHasTabs: (hasTabs: boolean) => void
 }
 
 export const OneModalContext = createContext<OneModalContextType>({
@@ -28,6 +36,8 @@ export const OneModalContext = createContext<OneModalContextType>({
   shownBottomSheet: false,
   portalContainerRef: { current: null },
   portalContainer: null,
+  hasTabs: false,
+  setHasTabs: () => {},
 })
 
 export const OneModalProvider = ({
@@ -49,6 +59,8 @@ export const OneModalProvider = ({
   portalContainerRef: RefObject<HTMLDivElement | null>
   portalContainer: HTMLDivElement | null
 }) => {
+  const [hasTabs, setHasTabs] = useState(false)
+
   return (
     <OneModalContext.Provider
       value={{
@@ -59,6 +71,8 @@ export const OneModalProvider = ({
         contentPadding,
         portalContainerRef,
         portalContainer,
+        hasTabs,
+        setHasTabs,
       }}
     >
       {children}
