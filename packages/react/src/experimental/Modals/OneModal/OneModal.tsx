@@ -203,6 +203,7 @@ export const OneModal: FC<OneModalProps> = ({
             position,
           })}
           className={contentClassName}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {children}
         </DialogContent>
