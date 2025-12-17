@@ -13,6 +13,7 @@ import {
 } from "@/icons/app"
 import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
+import { motion } from "motion/react"
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../types"
 
@@ -27,6 +28,7 @@ export type SyncStatusType =
 type SyncStatusConfig = {
   icon: IconType
   colorClass: string
+  animated?: boolean
 }
 
 const syncStatusConfig: Record<SyncStatusType, SyncStatusConfig> = {
@@ -37,10 +39,12 @@ const syncStatusConfig: Record<SyncStatusType, SyncStatusConfig> = {
   syncing: {
     icon: ArrowCycle,
     colorClass: "text-f1-icon-info",
+    animated: true,
   },
   pending: {
     icon: DottedCircle,
     colorClass: "text-f1-icon-secondary",
+    animated: true,
   },
   partiallySynced: {
     icon: PartiallyCompleted,
@@ -70,6 +74,8 @@ export const SyncStatusCell = (
   const defaultTooltip = context.i18n.syncStatus[args.status]
   const tooltipText = args.tooltip ?? defaultTooltip
 
+  const icon = <F0Icon icon={config.icon} aria-label={tooltipText} />
+
   return (
     <div
       className={cn(
@@ -80,7 +86,22 @@ export const SyncStatusCell = (
     >
       <TooltipWrapper tooltip={tooltipText}>
         <div className={cn("inline-flex items-center", config.colorClass)}>
-          <F0Icon icon={config.icon} aria-label={tooltipText} />
+          {config.animated ? (
+            <motion.div
+              className="flex items-center justify-center"
+              style={{ originX: 0.5, originY: 0.5 }}
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 2,
+                ease: "linear",
+                repeat: Infinity,
+              }}
+            >
+              {icon}
+            </motion.div>
+          ) : (
+            icon
+          )}
         </div>
       </TooltipWrapper>
     </div>

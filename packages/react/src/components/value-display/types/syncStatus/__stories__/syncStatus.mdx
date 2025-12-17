@@ -24,14 +24,14 @@ type value = {
 
 #### Status Types
 
-| Status            | Icon               | Color  | Default Tooltip                                       |
-| ----------------- | ------------------ | ------ | ----------------------------------------------------- |
-| `synced`          | CheckCircle        | Green  | Sync completed successfully.                          |
-| `syncing`         | ArrowCycle         | Blue   | Sync in progress.                                     |
-| `pending`         | DottedCircle       | Gray   | Not yet started.                                      |
-| `partiallySynced` | PartiallyCompleted | Orange | All aggregated data was synced but at least 1 failed. |
-| `outdated`        | Warning            | Orange | Data might need to be synced again.                   |
-| `failed`          | CrossedCircle      | Red    | Sync failed.                                          |
+| Status            | Icon               | Color  | Animated | Default Tooltip                                       |
+| ----------------- | ------------------ | ------ | -------- | ----------------------------------------------------- |
+| `synced`          | CheckCircle        | Green  | No       | Sync completed successfully.                          |
+| `syncing`         | ArrowCycle         | Blue   | Yes      | Sync in progress.                                     |
+| `pending`         | DottedCircle       | Gray   | Yes      | Not yet started.                                      |
+| `partiallySynced` | PartiallyCompleted | Orange | No       | All aggregated data was synced but at least 1 failed. |
+| `outdated`        | Warning            | Orange | No       | Data might need to be synced again.                   |
+| `failed`          | CrossedCircle      | Red    | No       | Sync failed.                                          |
 
 <Canvas
   of={SyncStatusStories.Synced}
