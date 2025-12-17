@@ -7,6 +7,8 @@ import {
   RenderHookResult,
   type RenderOptions,
   type RenderResult,
+  screen,
+  within,
 } from "@testing-library/react"
 import * as ReactDOMClient from "react-dom/client"
 
@@ -18,6 +20,7 @@ import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
 export * from "@testing-library/react"
 
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
+import { L10nProvider } from "@/lib/providers/l10n"
 import { MotionGlobalConfig } from "motion"
 MotionGlobalConfig.skipAnimations = true
 
@@ -30,9 +33,11 @@ const TestProviders = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <UserPlatformProvider showExperimentalWarnings={false}>
-        <I18nProvider translations={defaultTranslations}>
-          {children}
-        </I18nProvider>
+        <L10nProvider l10n={{ locale: "en-US" }}>
+          <I18nProvider translations={defaultTranslations}>
+            {children}
+          </I18nProvider>
+        </L10nProvider>
       </UserPlatformProvider>
     </DataCollectionStorageProvider>
   )
@@ -60,4 +65,4 @@ const zeroRenderHook = <
 ): RenderHookResult<Result, Props> =>
   renderHook(render, { wrapper: TestProviders, ...options })
 
-export { TestProviders, userEvent, zeroRender, zeroRenderHook }
+export { screen, TestProviders, userEvent, within, zeroRender, zeroRenderHook }

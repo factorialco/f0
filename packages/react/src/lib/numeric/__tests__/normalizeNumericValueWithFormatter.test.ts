@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest"
-import { normalizeNumericWithFormatter } from "../normalizeValueWithFormatter"
-import { numericFormatter } from "../numericFormatter"
 import type {
   Numeric,
   NumericFormatter,
@@ -8,6 +6,8 @@ import type {
   NumericWithFormatter,
   RelaxedNumericWithFormatter,
 } from "../types"
+import { normalizeNumericWithFormatter } from "../utils/normalizeValueWithFormatter"
+import { numericFormatter } from "../utils/numericFormatter"
 
 describe("normalizeNumericWithFormatter", () => {
   describe("null and undefined values", () => {

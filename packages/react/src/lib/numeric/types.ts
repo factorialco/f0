@@ -91,7 +91,7 @@ export type NumericFormatterOptions = {
   compact?: boolean
 
   /**
-   *
+   * Placeholder text to return when value is undefined or null.
    */
   emptyPlaceholder?: string
 

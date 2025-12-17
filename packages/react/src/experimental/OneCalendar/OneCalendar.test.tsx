@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react"
+import { zeroRender as render, screen, within } from "@/testing/test-utils"
 import React from "react"
 import { describe, expect, it, vi } from "vitest"
 import { defaultTranslations, I18nProvider } from "../../lib/providers/i18n"

@@ -1,12 +1,12 @@
-import { numericFormatter } from "./numericFormatter"
-import { toNumericValue } from "./toNumericValue"
 import {
   Numeric,
   NumericFormatter,
   NumericFormatterOptions,
   NumericWithFormatter,
   RelaxedNumericWithFormatter,
-} from "./types"
+} from "../types"
+import { numericFormatter } from "./numericFormatter"
+import { toNumericValue } from "./toNumericValue"
 
 /*
  * Converts a numeric value (number, Numeric or NumericWithFormatter) to a NumericWithFormatter object.

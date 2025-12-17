@@ -30,20 +30,19 @@ vi.mock("@/components/tags/F0TagBalance", () => ({
 }))
 
 // Mock numeric utilities
-const mockNormalizeNumericWithFormatter = vi.fn()
+const mockNormalizeFunction = vi.fn()
 const mockNumericFormatter = vi.fn()
 const mockNumericFinalValue = vi.fn()
 
-vi.mock("@/lib/numeric/normalizeValueWithFormatter", () => ({
-  normalizeNumericWithFormatter: (...args: unknown[]) =>
-    mockNormalizeNumericWithFormatter(...args),
+vi.mock("@/lib/numeric", () => ({
+  useNormalizeValueWithFormatter: () => mockNormalizeFunction,
 }))
 
-vi.mock("@/lib/numeric/numericFormatter", () => ({
+vi.mock("@/lib/numeric/utils/numericFormatter", () => ({
   numericFormatter: (...args: unknown[]) => mockNumericFormatter(...args),
 }))
 
-vi.mock("@/lib/numeric/numericFinalValue", () => ({
+vi.mock("@/lib/numeric/utils/numericFinalValue", () => ({
   numericFinalValue: (...args: unknown[]) => mockNumericFinalValue(...args),
 }))
 
@@ -68,24 +67,34 @@ describe("F0BigNumber", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Setup default mocks
-    mockNormalizeNumericWithFormatter.mockImplementation((value) => {
+    // Setup default mocks for the hook
+    // The hook returns a function, so we mock it to return a function that can be configured
+    mockNormalizeFunction.mockImplementation((value, options) => {
       const mockFormatter = vi.fn((val) => String(val?.value ?? val ?? ""))
 
       if (value === null || value === undefined) {
-        return createNormalizedNumeric({ value: undefined })
+        return createNormalizedNumeric(
+          { value: undefined },
+          options?.formatterOptions || {}
+        )
       }
       if (typeof value === "number") {
-        return createNormalizedNumeric({ value })
+        return createNormalizedNumeric(
+          { value },
+          options?.formatterOptions || {}
+        )
       }
       if (typeof value === "object" && "numericValue" in value) {
         return {
           numericValue: value.numericValue || { value: value.value },
           formatter: value.formatter || mockFormatter,
-          formatterOptions: value.formatterOptions || {},
+          formatterOptions: {
+            ...(options?.formatterOptions || {}),
+            ...value.formatterOptions,
+          },
         }
       }
-      return createNormalizedNumeric(value)
+      return createNormalizedNumeric(value, options?.formatterOptions || {})
     })
 
     mockNumericFormatter.mockImplementation((value, options) => {
@@ -103,12 +112,20 @@ describe("F0BigNumber", () => {
       return numericValue.value
     })
 
-    // Mock Intl.NumberFormat
+    // Mock Intl.NumberFormat - use class syntax to ensure it works as a constructor
+    class MockNumberFormat {
+      format = mockFormat
+
+      constructor() {
+        // Constructor can be empty, format is set as instance property
+      }
+
+      static supportedLocalesOf = OriginalIntl.NumberFormat.supportedLocalesOf
+    }
+
     global.Intl = {
       ...OriginalIntl,
-      NumberFormat: vi.fn().mockImplementation(() => ({
-        format: mockFormat,
-      })),
+      NumberFormat: MockNumberFormat as unknown as typeof Intl.NumberFormat,
     } as typeof Intl
 
     mockFormat.mockImplementation((value: number) => String(value))
@@ -125,10 +142,10 @@ describe("F0BigNumber", () => {
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -148,10 +165,10 @@ describe("F0BigNumber", () => {
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -169,10 +186,10 @@ describe("F0BigNumber", () => {
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -196,10 +213,10 @@ describe("F0BigNumber", () => {
         comparison: 1000000,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1234567.89 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000000 })
       )
       mockNumericFormatter.mockReturnValueOnce("1,234,567.89")
@@ -221,13 +238,13 @@ describe("F0BigNumber", () => {
         comparison: 4000,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric(
           { value: 5000, units: "$", unitsPosition: "prepend" },
           { decimalPlaces: 2 }
         )
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 4000 })
       )
       mockNumericFormatter.mockReturnValueOnce("$5,000")
@@ -248,13 +265,13 @@ describe("F0BigNumber", () => {
         comparison: 6000,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric(
           { value: 7500, units: "€", unitsPosition: "append" },
           { decimalPlaces: 0 }
         )
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 6000 })
       )
       mockNumericFormatter.mockReturnValueOnce("7,500€")
@@ -274,10 +291,10 @@ describe("F0BigNumber", () => {
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -296,10 +313,10 @@ describe("F0BigNumber", () => {
         comparison: undefined as unknown as number,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: undefined })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -318,10 +335,10 @@ describe("F0BigNumber", () => {
         trend: true,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 800 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -343,10 +360,10 @@ describe("F0BigNumber", () => {
         trend: true,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 800 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 })
       )
       mockNumericFormatter.mockReturnValueOnce("800")
@@ -368,11 +385,11 @@ describe("F0BigNumber", () => {
         trend: true,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce({
+      mockNormalizeFunction.mockReturnValueOnce({
         numericValue: { value: 1000 },
         formatterOptions: { decimalPlaces: 2 },
       })
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce({
+      mockNormalizeFunction.mockReturnValueOnce({
         numericValue: { value: 1000 },
         formatterOptions: {},
       })
@@ -395,10 +412,10 @@ describe("F0BigNumber", () => {
         comparisonHint: "vs last month",
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -422,10 +439,10 @@ describe("F0BigNumber", () => {
         trend: true,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -447,10 +464,10 @@ describe("F0BigNumber", () => {
         trend: false,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -473,10 +490,10 @@ describe("F0BigNumber", () => {
         trend: { show: true, invertStatus: false },
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -499,10 +516,10 @@ describe("F0BigNumber", () => {
         trend: { show: true, invertStatus: true },
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -524,10 +541,10 @@ describe("F0BigNumber", () => {
         trend: { show: false },
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -549,10 +566,10 @@ describe("F0BigNumber", () => {
         trend: undefined,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -574,10 +591,10 @@ describe("F0BigNumber", () => {
         trend: { invertStatus: true },
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -601,10 +618,10 @@ describe("F0BigNumber", () => {
         comparison: 0,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 0 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 0 })
       )
       mockNumericFormatter.mockReturnValueOnce("0")
@@ -624,10 +641,10 @@ describe("F0BigNumber", () => {
         comparison: -800,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: -1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: -800 })
       )
       mockNumericFormatter.mockReturnValueOnce("-1000")
@@ -645,11 +662,11 @@ describe("F0BigNumber", () => {
         comparison: null as unknown as number,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
       // When comparison is null, normalizeNumericWithFormatter returns object with undefined value
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: undefined })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -668,10 +685,10 @@ describe("F0BigNumber", () => {
         comparison: undefined as unknown as number,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: undefined })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -689,10 +706,10 @@ describe("F0BigNumber", () => {
         comparison: { value: undefined } as unknown as number,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: undefined })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -711,10 +728,10 @@ describe("F0BigNumber", () => {
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: undefined }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("")
@@ -736,10 +753,10 @@ describe("F0BigNumber", () => {
         comparison: 888888888888,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 999999999999 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 888888888888 })
       )
       mockNumericFormatter.mockReturnValueOnce("999,999,999,999")
@@ -757,10 +774,10 @@ describe("F0BigNumber", () => {
         comparison: 1000.123,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1234.567 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000.123 })
       )
       mockNumericFormatter.mockReturnValueOnce("1,234.57")
@@ -799,16 +816,16 @@ describe("F0BigNumber", () => {
   })
 
   describe("Component integration", () => {
-    it("should call normalizeNumericWithFormatter with correct parameters for value", () => {
+    it("should call useNormalizeValueWithFormatter hook with correct parameters for value", () => {
       const props: BigNumberProps = {
         value: 1000,
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -818,23 +835,23 @@ describe("F0BigNumber", () => {
       zeroRender(<F0BigNumber {...props} />)
 
       // Should be called with value and default formatterOptions
-      expect(mockNormalizeNumericWithFormatter).toHaveBeenCalledWith(1000, {
+      expect(mockNormalizeFunction).toHaveBeenCalledWith(1000, {
         formatterOptions: {
           decimalPlaces: 2,
         },
       })
     })
 
-    it("should call normalizeNumericWithFormatter with correct parameters for comparison", () => {
+    it("should call useNormalizeValueWithFormatter hook with correct parameters for comparison", () => {
       const props: BigNumberProps = {
         value: 1000,
         comparison: 900,
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 900 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")
@@ -844,7 +861,7 @@ describe("F0BigNumber", () => {
       zeroRender(<F0BigNumber {...props} />)
 
       // Should be called with comparison value
-      expect(mockNormalizeNumericWithFormatter).toHaveBeenCalledWith(900)
+      expect(mockNormalizeFunction).toHaveBeenCalledWith(900)
     })
 
     it("should pass correct props to F0TagBalance", () => {
@@ -855,10 +872,10 @@ describe("F0BigNumber", () => {
         comparisonHint: "vs last period",
       }
 
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 1000 }, { decimalPlaces: 2 })
       )
-      mockNormalizeNumericWithFormatter.mockReturnValueOnce(
+      mockNormalizeFunction.mockReturnValueOnce(
         createNormalizedNumeric({ value: 800 })
       )
       mockNumericFormatter.mockReturnValueOnce("1000")

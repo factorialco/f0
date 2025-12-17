@@ -1,4 +1,4 @@
-import { Numeric, NumericValue } from "./types"
+import { Numeric, NumericValue } from "../types"
 
 /**
  * Converts a numeric value to a NumericValue object.

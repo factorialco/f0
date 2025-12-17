@@ -1,6 +1,6 @@
-import { normalizeNumericWithFormatter } from "@/lib/numeric/normalizeValueWithFormatter"
-import { numericFinalValue } from "@/lib/numeric/numericFinalValue"
-import { numericFormatter } from "@/lib/numeric/numericFormatter"
+import { useNormalizeValueWithFormatter } from "@/lib/numeric"
+import { numericFinalValue } from "@/lib/numeric/utils/numericFinalValue"
+import { numericFormatter } from "@/lib/numeric/utils/numericFormatter"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 import { useMemo } from "react"
@@ -24,14 +24,16 @@ const normalizeTrend = (
 }
 
 const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
-  const value = normalizeNumericWithFormatter(props.value, {
+  const normalizeValueWithFormatter = useNormalizeValueWithFormatter()
+
+  const value = normalizeValueWithFormatter(props.value, {
     formatterOptions: {
       decimalPlaces: 2,
     },
   })
   const trendConfig = normalizeTrend(props.trend)
 
-  const comparison = normalizeNumericWithFormatter(props.comparison)
+  const comparison = normalizeValueWithFormatter(props.comparison)
   const formattedValue = numericFormatter(
     value.numericValue,
     value.formatterOptions

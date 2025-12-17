@@ -1,6 +1,6 @@
+import { Numeric, NumericFormatter, NumericFormatterOptions } from "../types"
 import { isEmptyNumeric } from "./isEmptyNumeric"
 import { numericFinalValue } from "./numericFinalValue"
-import { Numeric, NumericFormatter, NumericFormatterOptions } from "./types"
 
 /**
  * Formats a numeric value according to the provided options.
@@ -51,6 +51,6 @@ export const numericFormatter: NumericFormatter = (
   const space = options.unitsSpaced ? " " : ""
 
   return value.unitsPosition === "prepend"
-    ? `${space}${value.units}${formattedValue}`
+    ? `${value.units}${space}${formattedValue}`
     : `${formattedValue}${space}${value.units}`
 }
