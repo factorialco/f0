@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.311.0](https://github.com/factorialco/f0/compare/f0-react-v1.310.0...f0-react-v1.311.0) (2025-12-17)
+
+
+### Features
+
+* add f0bignumber component ([#3144](https://github.com/factorialco/f0/issues/3144)) ([cc289d7](https://github.com/factorialco/f0/commit/cc289d7b187e04af2b8a962cb0385a4ce068fde8))
+
 ## [1.310.0](https://github.com/factorialco/f0/compare/f0-react-v1.309.1...f0-react-v1.310.0) (2025-12-17)
 
 
