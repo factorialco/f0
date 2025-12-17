@@ -49,35 +49,37 @@ export const Default: Story = {
   },
 };
 
+const WithCloseComponent = () => {
+  const [chips, setChips] = useState([
+    { id: 1, label: "First Chip" },
+    { id: 2, label: "Second Chip" },
+    { id: 3, label: "Third Chip" },
+  ]);
+
+  const handleClose = (id: number) => {
+    setChips((prevChips) => prevChips.filter((chip) => chip.id !== id));
+  };
+
+  return (
+    <View className="flex flex-row flex-wrap gap-2">
+      {chips.map((chip) => (
+        <OneChip
+          key={chip.id}
+          label={chip.label}
+          variant="default"
+          onClose={() => handleClose(chip.id)}
+        />
+      ))}
+    </View>
+  );
+};
+
 export const WithClose: Story = {
   args: {
     label: "Label",
     variant: "default",
   },
-  render: () => {
-    const [chips, setChips] = useState([
-      { id: 1, label: "First Chip" },
-      { id: 2, label: "Second Chip" },
-      { id: 3, label: "Third Chip" },
-    ]);
-
-    const handleClose = (id: number) => {
-      setChips((prevChips) => prevChips.filter((chip) => chip.id !== id));
-    };
-
-    return (
-      <View className="flex flex-row flex-wrap gap-2">
-        {chips.map((chip) => (
-          <OneChip
-            key={chip.id}
-            label={chip.label}
-            variant="default"
-            onClose={() => handleClose(chip.id)}
-          />
-        ))}
-      </View>
-    );
-  },
+  render: () => <WithCloseComponent />,
 };
 
 export const WithIcon: Story = {
@@ -87,33 +89,35 @@ export const WithIcon: Story = {
   },
 };
 
+const SelectedWithCloseComponent = () => {
+  const [chips, setChips] = useState([
+    { id: 1, label: "First Chip" },
+    { id: 2, label: "Second Chip" },
+    { id: 3, label: "Third Chip" },
+  ]);
+
+  const handleClose = (id: number) => {
+    setChips((prevChips) => prevChips.filter((chip) => chip.id !== id));
+  };
+
+  return (
+    <View className="flex flex-row flex-wrap gap-2">
+      {chips.map((chip) => (
+        <OneChip
+          key={chip.id}
+          label={chip.label}
+          variant="selected"
+          onClose={() => handleClose(chip.id)}
+        />
+      ))}
+    </View>
+  );
+};
+
 export const SelectedWithClose: Story = {
   args: {
     label: "Label",
     variant: "selected",
   },
-  render: () => {
-    const [chips, setChips] = useState([
-      { id: 1, label: "First Chip" },
-      { id: 2, label: "Second Chip" },
-      { id: 3, label: "Third Chip" },
-    ]);
-
-    const handleClose = (id: number) => {
-      setChips((prevChips) => prevChips.filter((chip) => chip.id !== id));
-    };
-
-    return (
-      <View className="flex flex-row flex-wrap gap-2">
-        {chips.map((chip) => (
-          <OneChip
-            key={chip.id}
-            label={chip.label}
-            variant="selected"
-            onClose={() => handleClose(chip.id)}
-          />
-        ))}
-      </View>
-    );
-  },
+  render: () => <SelectedWithCloseComponent />,
 };

@@ -1,0 +1,19 @@
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { Ref, forwardRef } from "react";
+const SvgPersonPlus = (props: SvgProps, ref: Ref<Svg>) => (
+  <Svg
+    fill="none"
+    viewBox="0 0 24 24"
+    className={props.className}
+    ref={ref}
+    {...props}
+  >
+    <Path
+      fill="currentColor"
+      d="M18 15.35a.65.65 0 0 1 .65.65v1.35H20l.13.013a.65.65 0 0 1 0 1.274l-.13.013h-1.35V20l-.013.13a.65.65 0 0 1-1.274 0L17.35 20v-1.35H16a.65.65 0 0 1 0-1.3h1.35V16a.65.65 0 0 1 .65-.65m-6 0c.834 0 1.569.106 2.208.274l.268.075.122.051a.65.65 0 0 1-.368 1.22l-.129-.026-.222-.062a7.4 7.4 0 0 0-1.88-.232c-1.618 0-2.751.46-3.47.904a4.7 4.7 0 0 0-.79.602 3 3 0 0 0-.216.23l-.006.008v-.002a.649.649 0 0 1-1.037-.782l.359.269-.359-.27.002-.002.002-.003.007-.01.02-.025.07-.083c.06-.067.146-.16.258-.267a6 6 0 0 1 1.008-.773c.905-.557 2.272-1.096 4.153-1.096m0-11a4.65 4.65 0 1 1 0 9.301 4.65 4.65 0 0 1 0-9.301m0 1.3a3.35 3.35 0 1 0 0 6.7 3.35 3.35 0 0 0 0-6.7"
+    />
+  </Svg>
+);
+const ForwardRef = forwardRef(SvgPersonPlus);
+export default ForwardRef;

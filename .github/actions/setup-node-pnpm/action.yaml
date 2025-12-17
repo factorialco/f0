@@ -1,18 +1,18 @@
-name: 'Setup Node and pnpm'
-description: 'Setup Node.js and pnpm, install dependencies and build'
+name: "Setup Node and pnpm"
+description: "Setup Node.js and pnpm, install dependencies and build"
 inputs:
   node-version:
-    description: 'Node.js version'
+    description: "Node.js version"
     required: false
-    default: '22.x'
+    default: "22.x"
   registry:
-    description: 'Registry URL'
+    description: "Registry URL"
     required: false
-    default: 'https://registry.npmjs.org/'
+    default: "https://registry.npmjs.org/"
   scope:
-    description: 'Scope'
+    description: "Scope"
     required: false
-    default: '@factorialco'
+    default: "@factorialco"
 
 runs:
   using: "composite"

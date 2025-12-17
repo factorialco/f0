@@ -1,7 +1,5 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
-import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 import { AnimatePresence, motion } from "motion/react"
@@ -26,11 +24,7 @@ const ItemContent = ({ item }: { item: F0SelectItemObject<string> }) => (
 /**
  * Counter component with optional hover card showing remaining items
  */
-export const ItemsCounter = ({
-  count,
-  items,
-  prefix = "+",
-}: ItemsCounterProps) => {
+export const ItemsCounter = ({ count, items }: ItemsCounterProps) => {
   const counter = (
     <AnimatePresence mode="popLayout">
       <motion.div
@@ -40,7 +34,7 @@ export const ItemsCounter = ({
         exit={{ opacity: 0, y: 8, scale: 0.9 }}
         transition={{ type: "spring", duration: 0.3, bounce: 0.2 }}
       >
-        <F0TagRaw text={`${prefix}${count}`} />
+        +{count}
       </motion.div>
     </AnimatePresence>
   )
@@ -76,13 +70,7 @@ export const ItemsCounter = ({
                 key={item.value ?? index}
                 className="flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
               >
-                {item.description ? (
-                  <Tooltip label={item.description}>
-                    <ItemContent item={item} />
-                  </Tooltip>
-                ) : (
-                  <ItemContent item={item} />
-                )}
+                <ItemContent item={item} />
               </div>
             ))}
             <ScrollBar

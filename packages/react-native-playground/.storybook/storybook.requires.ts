@@ -13,7 +13,7 @@ const normalizedStories = [
     files: "**/*.stories.?(ts|tsx)",
     importPathMatcher:
       /^\.(?:(?:^|\/|(?:(?:(?!(?:^|\/)\.).)*?)\/)(?!\.)(?=.)[^/]*?\.stories\.(?:ts|tsx)?)$/,
-    // @ts-ignore
+    // @ts-expect-error - require.context is a webpack feature not available in TypeScript
     req: require.context(
       "../components",
       true,
@@ -26,7 +26,7 @@ const normalizedStories = [
     files: "**/*.stories.?(ts|tsx)",
     importPathMatcher:
       /^\.(?:(?:^|\/|(?:(?:(?!(?:^|\/)\.).)*?)\/)(?!\.)(?=.)[^/]*?\.stories\.(?:ts|tsx)?)$/,
-    // @ts-ignore
+    // @ts-expect-error - require.context is a webpack feature not available in TypeScript
     req: require.context(
       "../modules",
       true,
@@ -39,7 +39,7 @@ const normalizedStories = [
     files: "**/*.stories.?(ts|tsx|js|jsx)",
     importPathMatcher:
       /^\.(?:(?:^|\/|(?:(?:(?!(?:^|\/)\.).)*?)\/)(?!\.)(?=.)[^/]*?\.stories\.(?:ts|tsx|js|jsx)?)$/,
-    // @ts-ignore
+    // @ts-expect-error - require.context is a webpack feature not available in TypeScript
     req: require.context(
       "./stories",
       true,
@@ -49,7 +49,9 @@ const normalizedStories = [
 ];
 
 declare global {
+  // eslint-disable-next-line no-var
   var view: ReturnType<typeof start>;
+  // eslint-disable-next-line no-var
   var STORIES: typeof normalizedStories;
 }
 
@@ -61,7 +63,7 @@ const annotations = [
 
 global.STORIES = normalizedStories;
 
-// @ts-ignore
+// @ts-expect-error - module.hot is a webpack feature not available in TypeScript
 module?.hot?.accept?.();
 
 if (!global.view) {
