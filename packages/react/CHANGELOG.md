@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.312.0](https://github.com/factorialco/f0/compare/f0-react-v1.311.3...f0-react-v1.312.0) (2025-12-17)
+
+
+### Features
+
+* sync status value-display ([#3157](https://github.com/factorialco/f0/issues/3157)) ([d16626f](https://github.com/factorialco/f0/commit/d16626ff56aed2ababd1869e7b23e33cff5943aa))
+
 ## [1.311.3](https://github.com/factorialco/f0/compare/f0-react-v1.311.2...f0-react-v1.311.3) (2025-12-17)
 
 
