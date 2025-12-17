@@ -12,6 +12,7 @@ import {
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
 import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
+import { Placeholder } from "@/icons/app"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
 import DeleteIcon from "@/icons/app/Delete"
@@ -114,7 +115,7 @@ const OTHER_ACTIONS = [
 ]
 
 const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
-  <div className="flex flex-col gap-4 p-4">
+  <div className="flex flex-col gap-4">
     {Array.from({ length: itemsCount }, (_, i) => (
       <div
         key={i}
@@ -133,9 +134,18 @@ export const Default: Story = {
     children: (
       <>
         <OneModal.Header title="Team Status" otherActions={OTHER_ACTIONS} />
-        <OneModal.Content tabs={TABS}>
+        <OneModal.Content withPadding>
           <ExampleList itemsCount={2} />
         </OneModal.Content>
+        <OneModal.Footer>
+          <div className="flex w-full items-end justify-end">
+            <ButtonInternal
+              label="submit"
+              icon={Placeholder}
+              onClick={() => {}}
+            />
+          </div>
+        </OneModal.Footer>
       </>
     ),
   },

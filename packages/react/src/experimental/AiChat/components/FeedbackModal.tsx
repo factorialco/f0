@@ -50,15 +50,10 @@ export const FeedbackModal = ({
   }, [handleSubmit])
 
   return (
-    <OneModal
-      position="center"
-      isOpen
-      onClose={handleClose}
-      contentPadding="sm"
-    >
-      <OneModal.Header title={title}></OneModal.Header>
-      <OneModal.Content>
-        <div className="flex flex-col gap-6 p-4">
+    <OneModal position="center" isOpen onClose={handleClose} width="sm">
+      <OneModal.Header title={title} />
+      <OneModal.Content withPadding>
+        <div className="flex flex-col gap-6">
           <Input
             autoFocus
             label={label}
