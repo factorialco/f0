@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.309.1](https://github.com/factorialco/f0/compare/f0-react-v1.309.0...f0-react-v1.309.1) (2025-12-17)
+
+
+### Bug Fixes
+
+* resolve useSelectable issues ([#3147](https://github.com/factorialco/f0/issues/3147)) ([b8da623](https://github.com/factorialco/f0/commit/b8da6233586c50682cc1b7e8a11315a932ec7420))
+
 ## [1.309.0](https://github.com/factorialco/f0/compare/f0-react-v1.308.1...f0-react-v1.309.0) (2025-12-16)
 
 
