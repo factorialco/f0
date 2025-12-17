@@ -8,10 +8,9 @@ import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/int
 import CrossIcon from "@/icons/app/Cross"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
-import { DialogDescription, DialogTitle } from "@/ui/Dialog/dialog"
-import { DrawerDescription, DrawerTitle } from "@/ui/drawer"
+import { DialogTitle } from "@/ui/Dialog/dialog"
+import { DrawerDescription } from "@/ui/drawer"
 import { useOneModal } from "../OneModalProvider"
-import { ContentPadding, ModalPosition } from "../types"
 
 export type OneModalHeaderProps = {
   title?: string
@@ -28,52 +27,13 @@ export type OneModalHeaderProps = {
   otherActions?: DropdownInternalProps["items"]
 }
 
-const classesByContentPadding: Record<ContentPadding, string> = {
-  sm: "py-3 px-4",
-  md: "p-5 pb-3",
-}
-
-const Titles = ({
-  title,
-  description,
-  context,
-}: {
-  title?: string
-  description?: string
-  context: { position: ModalPosition }
-}) => {
-  const titleClassName = cn(
-    "font-semibold text-f1-foreground",
-    context.position === "center" ? "text-lg" : "text-xl"
-  )
-  const descriptionClassName = cn(
-    "text-f1-foreground-secondary",
-    context.position === "center" ? "text-base" : "text-lg"
-  )
-  return title || description ? (
-    <div className="flex flex-col gap-1">
-      {!!title && <DialogTitle className={titleClassName}>{title}</DialogTitle>}
-      {!!description && (
-        <DialogDescription className={descriptionClassName}>
-          {description}
-        </DialogDescription>
-      )}
-    </div>
-  ) : null
-}
-
 export const OneModalHeader = ({
   title,
   description,
   module,
   otherActions,
 }: OneModalHeaderProps) => {
-  const {
-    onClose,
-    shownBottomSheet,
-    position: modalPosition,
-    contentPadding,
-  } = useOneModal()
+  const { onClose, hasTabs } = useOneModal()
 
   const Divider = () => {
     return <div className="h-4 w-px self-center bg-f1-background-secondary" />
@@ -124,91 +84,41 @@ export const OneModalHeader = ({
     )
   }
 
-  const containerClassName = cn(
-    "flex flex-col gap-3",
-    classesByContentPadding[contentPadding]
-  )
-
-  const drawerTitleClassName = cn(
-    "font-semibold text-f1-foreground",
-    modalPosition === "center" ? "text-lg" : "text-xl"
-  )
-  const drawerDescriptionClassName = cn(
-    "text-f1-foreground-secondary",
-    modalPosition === "center" ? "text-base" : "text-lg"
-  )
-
-  if (module && !shownBottomSheet) {
-    return (
-      <div className={containerClassName}>
-        <div className="flex flex-row justify-between">
-          {module ? <Module /> : <Actions />}
-          <div className="flex flex-row gap-2">
-            {module && (
-              <>
-                <Actions />
-                {otherActions && <Divider />}
-              </>
-            )}
-            <ButtonInternal
-              variant="outline"
-              icon={CrossIcon}
-              onClick={onClose}
-              label="Close modal"
-              hideLabel
-            />
-          </div>
-        </div>
-        <Titles
-          title={title}
-          description={description}
-          context={{ position: modalPosition }}
+  return (
+    <div
+      className={cn(
+        "flex flex-row items-start justify-between gap-3 px-4 py-3",
+        !hasTabs &&
+          "border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary"
+      )}
+    >
+      <div className="flex flex-col gap-1">
+        {module ? (
+          <Module />
+        ) : (
+          title && (
+            <DialogTitle className="py-1 text-lg font-semibold text-f1-foreground">
+              {title}
+            </DialogTitle>
+          )
+        )}
+        {!!description && (
+          <DrawerDescription className="text-base text-f1-foreground-secondary">
+            {description}
+          </DrawerDescription>
+        )}
+      </div>
+      <div className="flex flex-row gap-2">
+        <Actions />
+        {otherActions && <Divider />}
+        <ButtonInternal
+          variant="outline"
+          icon={CrossIcon}
+          onClick={onClose}
+          label="Close modal"
+          hideLabel
         />
       </div>
-    )
-  }
-
-  return (
-    <div className={containerClassName}>
-      <div className="flex flex-row items-center justify-between">
-        {!shownBottomSheet ? (
-          <Titles
-            title={title}
-            description={description}
-            context={{ position: modalPosition }}
-          />
-        ) : (
-          <>
-            {module ? (
-              <Module />
-            ) : (
-              <DrawerTitle className={drawerTitleClassName}>
-                {title}
-              </DrawerTitle>
-            )}
-          </>
-        )}
-        <div className="flex flex-row gap-2">
-          <Actions />
-          {otherActions && <Divider />}
-          <ButtonInternal
-            variant="outline"
-            icon={CrossIcon}
-            onClick={onClose}
-            label="Close modal"
-            hideLabel
-          />
-        </div>
-      </div>
-      {module && !!title && (
-        <DrawerTitle className={drawerTitleClassName}>{title}</DrawerTitle>
-      )}
-
-      {!!description && (
-        <DrawerDescription className={drawerDescriptionClassName}>
-          {description}
-        </DrawerDescription>
-      )}
     </div>
   )
 }

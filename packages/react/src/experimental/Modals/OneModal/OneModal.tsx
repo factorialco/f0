@@ -14,7 +14,7 @@ import {
 import { OneModalContent } from "./OneModalContent/OneModalContent"
 import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
 import { OneModalProvider } from "./OneModalProvider"
-import { ContentPadding, ModalPosition, ModalWidth } from "./types"
+import { ModalPosition, ModalWidth } from "./types"
 import { useIsSmallScreen } from "./utils"
 
 export type OneModalProps = {
@@ -24,9 +24,6 @@ export type OneModalProps = {
   onClose: () => void
   /** Whether to render the modal as a bottom sheet on mobile */
   asBottomSheetInMobile?: boolean
-  /** the padding of internal content areas (header, content, footer) */
-  contentPadding?: ContentPadding
-
   /** The position of the modal */
   position?: ModalPosition
   /** The width of the modal. Only applies to center position but we can NOT use narrowing as position undefined is valid */
@@ -102,7 +99,6 @@ export const OneModal: FC<OneModalProps> = ({
   position = "center",
   onClose,
   isOpen,
-  contentPadding = "md",
   children,
   width = "md",
 }) => {
@@ -172,7 +168,6 @@ export const OneModal: FC<OneModalProps> = ({
         isOpen={isOpen}
         onClose={onClose}
         position={position}
-        contentPadding={contentPadding}
         portalContainerRef={portalContainerRef}
         portalContainer={containerElement}
         shownBottomSheet
@@ -192,7 +187,6 @@ export const OneModal: FC<OneModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       position={position}
-      contentPadding={contentPadding}
       portalContainerRef={portalContainerRef}
       portalContainer={containerElement}
     >
@@ -209,6 +203,7 @@ export const OneModal: FC<OneModalProps> = ({
             position,
           })}
           className={contentClassName}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {children}
         </DialogContent>
