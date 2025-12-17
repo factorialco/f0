@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { parse } from "twemoji-parser"
-import { useIsDev } from "./providers/user-platafform"
 
 type Rules = {
   disallowEmpty?: boolean
@@ -69,14 +68,12 @@ export const useTextFormatEnforcer = (
     componentName: "",
   }
 ) => {
-  const isDev = useIsDev()
-
   useEffect(() => {
     if (text !== undefined && rules) {
-      const warn = options.warn ?? !isDev
+      const warn = options.warn ?? true
       textFormatEnforcer(text, rules, warn, options.componentName)
     }
-  }, [text, rules, options, isDev])
+  }, [text, rules, options])
 }
 
 export { containsEmojis }
