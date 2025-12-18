@@ -38,7 +38,8 @@ const tabNavigationVariants = cva({
 })
 
 interface TabNavigationProps
-  extends React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Root>,
     VariantProps<typeof tabNavigationVariants> {}
 
 const TabNavigation = React.forwardRef<
@@ -87,7 +88,8 @@ const tabNavigationLinkVariants = cva({
 })
 
 interface TabNavigationLinkProps
-  extends Omit<
+  extends
+    Omit<
       React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitives.Link>,
       "onSelect"
     >,

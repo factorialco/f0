@@ -17,8 +17,10 @@ export interface CardSecondaryAction {
   onClick: () => void
 }
 
-export interface CardSecondaryLink
-  extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
+export interface CardSecondaryLink extends Pick<
+  F0LinkProps,
+  "href" | "target" | "disabled"
+> {
   label: string
 }
 
