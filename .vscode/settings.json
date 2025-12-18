@@ -2,10 +2,14 @@
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": "vscode-vfs://github%2B7b2276223a312c22726566223a7b2274797065223a362c226964223a226d61696e227d7d/josepjaume/factorial-one/.github/workflows/deploy.yaml"
   },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+   "oxc.fmt.experimental": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",  
   "editor.formatOnSave": true,
   "[mdx]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxfmt": "always"
   },
   "editor.quickSuggestions": {
     "strings": "on"
@@ -16,7 +20,7 @@
     ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
   "[svg]": {
-    "editor.defaultFormatter": "jock.svg"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#65c89b",
@@ -37,5 +41,6 @@
     "titleBar.inactiveBackground": "#42b88399",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#42b883"
+  "peacock.color": "#42b883",
+ 
 }
