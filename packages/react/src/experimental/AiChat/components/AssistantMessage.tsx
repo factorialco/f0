@@ -27,6 +27,12 @@ export const AssistantMessage = ({
     message.toolCalls?.find(
       (tool) => tool.function.name === "orchestratorThinking"
     )
+
+  // Check if messageSources tool is present - if so, message is complete
+  const hasMessageSourcesTool =
+    message?.role === "assistant" &&
+    message.toolCalls?.find((tool) => tool.function.name === "messageSources")
+
   const subComponent = message?.generativeUI?.(
     isThinkingTool
       ? {
@@ -68,7 +74,8 @@ export const AssistantMessage = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {isLoading && !subComponent && (
+      {/* Don't show loading if messageSources tool is present (means message is complete) */}
+      {isLoading && !subComponent && !hasMessageSourcesTool && (
         <ActionItem title={translations.ai.thinking} status="executing" />
       )}
       {message && (
@@ -81,8 +88,8 @@ export const AssistantMessage = ({
           </div>
 
           <div
+            // add paddings to make the area bigger and avoid flickering when the mouse is over the actions
             className={cn(
-              // add paddings to make the area bigger and avoid flickering when the mouse is over the actions
               "invisible absolute left-0 top-full py-1 pr-4 focus-within:visible",
               isHovered && !isGenerating && "visible"
             )}
