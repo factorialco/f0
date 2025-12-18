@@ -6,8 +6,8 @@
   "trailingComma": "es5",
   "jsxSingleQuote": false,
   "printWidth": 80,
-  "experimentalSortPackageJson": true,
-  "experimentalSortImports": {},
+  // "experimentalSortPackageJson": true,
+  // "experimentalSortImports": {},
 
   /*
   Oxfmt doesnt support js plugins yet, but there an initiative to add tailwind formatter to ithttps://github.com/oxc-project/oxc/issues/16542
