@@ -106,14 +106,13 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: "content",
-      values: [
-        { name: "content", value: "hsl(var(--neutral-0))" },
-        { name: "page", value: "hsl(var(--page))" },
-      ],
+      options: {
+        content: { name: "content", value: "hsl(var(--neutral-0))" },
+        page: { name: "page", value: "hsl(var(--page))" },
+      },
     },
     viewport: {
-      viewports: {
+      options: {
         ...INITIAL_VIEWPORTS,
       },
     },
@@ -183,7 +182,14 @@ const preview: Preview = {
       stylePreview: true,
     },
   },
+
   tags: ["autodocs"],
+
+  initialGlobals: {
+    backgrounds: {
+      value: "content",
+    },
+  },
 }
 
 export default preview

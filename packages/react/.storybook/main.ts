@@ -1,7 +1,11 @@
+// This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/react-vite"
+import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import remarkGfm from "remark-gfm"
+
+const require = createRequire(import.meta.url)
 
 // We should add the STORYBOOK_ prefix to make sure that the environment variables are in browser mode (for example manager.ts file)
 if (process.env.PUBLIC_BUILD) {
