@@ -1,6 +1,6 @@
 import * as AIIcons from "@/icons/ai";
 import { forwardRef } from "react";
-import { ButtonInternal } from "@/f0/F0Button/internal";
+import { ButtonInternal } from "../F0Button/internal";
 import { ButtonInternalProps } from "../F0Button/internal-types";
 
 // Create a type that only includes AI icon types
