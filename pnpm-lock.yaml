@@ -598,6 +598,9 @@ importers:
       dpdm:
         specifier: ^3.14.0
         version: 3.14.0
+      dpdm-fast:
+        specifier: ^1.0.14
+        version: 1.0.14
       emoji-mart:
         specifier: ^5.6.0
         version: 5.6.0
@@ -8068,6 +8071,10 @@ packages:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
+  dpdm-fast@1.0.14:
+    resolution: {integrity: sha512-eX+Zlm602ZvvPBKpV8muKUORkE2XC5E4uL9MqVJ/S97S+PJOTuYCUleOS0omNITJcu6b5XeXdGzGbMB7/V2WdQ==}
+    hasBin: true
+
   dpdm@3.14.0:
     resolution: {integrity: sha512-YJzsFSyEtj88q5eTELg3UWU7TVZkG1dpbF4JDQ3t1b07xuzXmdoGeSz9TKOke1mUuOpWlk4q+pBh+aHzD6GBTg==}
     hasBin: true
@@ -12011,10 +12018,6 @@ packages:
     resolution: {integrity: sha512-ZtAp5XTO5HRzQctjPU0ybY0RRCQO19X/8fxn3w7y2VVTUbGHDKULPTL4ky3vB05euSgG5NpALhEhDPvQ56wvXg==}
     peerDependencies:
       typescript: '>= 4.3.x'
-
-  react-docgen@8.0.0:
-    resolution: {integrity: sha512-kmob/FOTwep7DUWf9KjuenKX0vyvChr3oTdvvPt09V60Iz75FJp+T/0ZeHMbAfJj2WaVWqAPP5Hmm3PYzSPPKg==}
-    engines: {node: ^20.9.0 || >=22}
 
   react-docgen@8.0.2:
     resolution: {integrity: sha512-+NRMYs2DyTP4/tqWz371Oo50JqmWltR1h2gcdgUMAWZJIAvrd0/SqlCfx7tpzpl/s36rzw6qH2MjoNrxtRNYhA==}
@@ -20065,7 +20068,7 @@ snapshots:
       empathic: 2.0.0
       magic-string: 0.30.21
       react: 18.3.1
-      react-docgen: 8.0.0
+      react-docgen: 8.0.2
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.10
       storybook: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -22956,6 +22959,16 @@ snapshots:
       dotenv: 16.4.7
 
   dotenv@16.4.7: {}
+
+  dpdm-fast@1.0.14:
+    dependencies:
+      chalk: 4.1.2
+      fs-extra: 11.3.0
+      glob: 10.4.5
+      ora: 5.4.1
+      tslib: 2.8.1
+      typescript: 5.9.3
+      yargs: 17.7.2
 
   dpdm@3.14.0:
     dependencies:
@@ -28236,21 +28249,6 @@ snapshots:
   react-docgen-typescript@2.4.0(typescript@5.8.2):
     dependencies:
       typescript: 5.8.2
-
-  react-docgen@8.0.0:
-    dependencies:
-      '@babel/core': 7.28.5
-      '@babel/traverse': 7.28.5
-      '@babel/types': 7.28.5
-      '@types/babel__core': 7.20.5
-      '@types/babel__traverse': 7.20.7
-      '@types/doctrine': 0.0.9
-      '@types/resolve': 1.20.6
-      doctrine: 3.0.0
-      resolve: 1.22.10
-      strip-indent: 4.0.0
-    transitivePeerDependencies:
-      - supports-color
 
   react-docgen@8.0.2:
     dependencies:
