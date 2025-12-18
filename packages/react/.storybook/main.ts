@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import { fileURLToPath } from "node:url"
 import remarkGfm from "remark-gfm"
+import { Preset } from "storybook/internal/types"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -55,7 +56,9 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-links"),
     getAbsolutePath("@storybook/addon-a11y"),
     getAbsolutePath("@storybook/addon-themes"),
-    getAbsolutePath("@vueless/storybook-dark-mode"),
+    process.env.STORYBOOK_PUBLIC_BUILD
+      ? undefined
+      : getAbsolutePath("@vueless/storybook-dark-mode"),
     getAbsolutePath("@chromatic-com/storybook"),
     {
       name: getAbsolutePath("@storybook/addon-docs"),
@@ -69,7 +72,7 @@ const config: StorybookConfig = {
     },
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-vitest"),
-  ],
+  ].filter(Boolean) as Preset[],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},

@@ -523,6 +523,9 @@ importers:
       '@storybook/react-vite':
         specifier: ^10.1.10
         version: 10.1.10(esbuild@0.27.2)(msw@2.10.4(@types/node@22.15.21)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.53.5)(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(vite@7.3.0(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.7.0))(webpack@5.99.5(@swc/core@1.11.13(@swc/helpers@0.5.17))(esbuild@0.27.2))
+      '@storybook/test':
+        specifier: ^8.6.14
+        version: 8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@storybook/test-runner':
         specifier: ^0.24.2
         version: 0.24.2(@swc/helpers@0.5.17)(@types/node@22.15.21)(esbuild-register@3.6.0(esbuild@0.27.2))(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -673,9 +676,6 @@ importers:
       storybook:
         specifier: ^10.1.10
         version: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      storybook-addon-tag-badges:
-        specifier: ^2.0.2
-        version: 2.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       tsup:
         specifier: ^8.3.5
         version: 8.3.6(@microsoft/api-extractor@7.52.8(@types/node@22.15.21))(@swc/core@1.11.13(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.7.0)
@@ -12375,12 +12375,6 @@ packages:
   store2@2.14.4:
     resolution: {integrity: sha512-srTItn1GOvyvOycgxjAnPA63FZNwy0PTyUBFMHRM+hVFltAeoh0LmNBz9SZqUS9mMqGk8rfyWyXn3GH5ReJ8Zw==}
 
-  storybook-addon-tag-badges@2.0.2:
-    resolution: {integrity: sha512-vttxTOAg6p6jdcPQ/6egJMPEwG40j4AY6eyMjpID1UaDLl2o99k8wHR2UJT6E6DWeEvVx8x5nMIlcr1mBXvT2w==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      storybook: ^9.0.0
-
   storybook@10.1.10:
     resolution: {integrity: sha512-oK0t0jEogiKKfv5Z1ao4Of99+xWw1TMUGuGRYDQS4kp2yyBsJQEgu7NI7OLYsCDI6gzt5p3RPtl1lqdeVLUi8A==}
     hasBin: true
@@ -19184,6 +19178,12 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
+  '@storybook/instrumenter@8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@vitest/utils': 2.1.9
+      storybook: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+
   '@storybook/instrumenter@8.6.14(storybook@8.6.14(prettier@2.8.8))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -19368,6 +19368,17 @@ snapshots:
       - node-notifier
       - supports-color
       - ts-node
+
+  '@storybook/test@8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@storybook/instrumenter': 8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@testing-library/dom': 10.4.0
+      '@testing-library/jest-dom': 6.5.0
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
+      '@vitest/expect': 2.0.5
+      '@vitest/spy': 2.0.5
+      storybook: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@storybook/test@8.6.14(storybook@8.6.14(prettier@2.8.8))':
     dependencies:
@@ -19572,7 +19583,6 @@ snapshots:
       dom-accessibility-api: 0.5.16
       lz-string: 1.5.0
       pretty-format: 27.5.1
-    optional: true
 
   '@testing-library/dom@10.4.1':
     dependencies:
@@ -19594,7 +19604,6 @@ snapshots:
       dom-accessibility-api: 0.6.3
       lodash: 4.17.21
       redent: 3.0.0
-    optional: true
 
   '@testing-library/jest-dom@6.6.3':
     dependencies:
@@ -19631,7 +19640,6 @@ snapshots:
   '@testing-library/user-event@14.5.2(@testing-library/dom@10.4.0)':
     dependencies:
       '@testing-library/dom': 10.4.0
-    optional: true
 
   '@testing-library/user-event@14.6.1(@testing-library/dom@10.4.1)':
     dependencies:
@@ -20356,7 +20364,6 @@ snapshots:
       '@vitest/utils': 2.0.5
       chai: 5.3.3
       tinyrainbow: 1.2.0
-    optional: true
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -20396,12 +20403,10 @@ snapshots:
   '@vitest/pretty-format@2.0.5':
     dependencies:
       tinyrainbow: 1.2.0
-    optional: true
 
   '@vitest/pretty-format@2.1.9':
     dependencies:
       tinyrainbow: 1.2.0
-    optional: true
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -20429,7 +20434,6 @@ snapshots:
   '@vitest/spy@2.0.5':
     dependencies:
       tinyspy: 3.0.2
-    optional: true
 
   '@vitest/spy@3.2.4':
     dependencies:
@@ -20454,14 +20458,12 @@ snapshots:
       estree-walker: 3.0.3
       loupe: 3.2.1
       tinyrainbow: 1.2.0
-    optional: true
 
   '@vitest/utils@2.1.9':
     dependencies:
       '@vitest/pretty-format': 2.1.9
       loupe: 3.2.1
       tinyrainbow: 1.2.0
-    optional: true
 
   '@vitest/utils@3.2.4':
     dependencies:
@@ -28250,14 +28252,6 @@ snapshots:
 
   store2@2.14.4: {}
 
-  storybook-addon-tag-badges@2.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
-    dependencies:
-      '@storybook/icons': 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      storybook: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    transitivePeerDependencies:
-      - react
-      - react-dom
-
   storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@storybook/global': 5.0.0
@@ -28663,15 +28657,13 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
-  tinyrainbow@1.2.0:
-    optional: true
+  tinyrainbow@1.2.0: {}
 
   tinyrainbow@2.0.0: {}
 
   tinyrainbow@3.0.3: {}
 
-  tinyspy@3.0.2:
-    optional: true
+  tinyspy@3.0.2: {}
 
   tinyspy@4.0.3: {}
 

@@ -178,9 +178,9 @@ const preview: Preview = {
         return a.title.localeCompare(b.title)
       },
     },
-    darkMode: {
-      stylePreview: true,
-    },
+    // darkMode: {
+    //   stylePreview: true,
+    // },
   },
 
   tags: ["autodocs"],

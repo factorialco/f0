@@ -1,8 +1,8 @@
 import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
 import { Delete, Pencil, Plus } from "@/icons/app"
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { fn } from "@storybook/test"
 import { useMemo, useRef, useState } from "react"
+import { fn } from "storybook/test"
 import {
   createDataAdapter,
   ExampleComponent,
