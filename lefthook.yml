@@ -7,7 +7,8 @@ pre-commit:
   commands:
     format:
       glob: "**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
-      run: pnpm exec oxfmt --no-error-on-unmatched-pattern {staged_files}
+      run: pnpm --filter @factorialco/f0-react oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
+
     cycle-dependencies:
       run: pnpm exec tsx packages/react/.scripts/check-cycle-dependencies.ts --pre-commit
