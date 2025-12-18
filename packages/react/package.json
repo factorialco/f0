@@ -143,8 +143,8 @@
     "chalk": "^5.4.1",
     "chromatic": "^11.28.0",
     "consola": "^3.4.0",
-    "dpdm": "^3.14.0",
     "dotenv": "^16.4.7",
+    "dpdm": "^3.14.0",
     "emoji-mart": "^5.6.0",
     "eslint": "^9.27.0",
     "eslint-plugin-react": "^7.37.5",
@@ -174,7 +174,7 @@
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "user-agent-data-types": "^0.4.2",
-    "vite": "^6.3.5",
+    "vite": "^7.3.0",
     "vite-plugin-dts": "4.3.0",
     "vite-plugin-lib-inject-css": "^2.2.1",
     "vitest": "^4.0.15"
