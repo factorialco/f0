@@ -7,7 +7,7 @@
   "env": {
     "builtin": true
   },
-  "jsPlugins": ["eslint-plugin-react-refresh", "eslint-plugin-react"],
+  "jsPlugins": ["eslint-plugin-react-refresh"],
   "overrides": [
     {
       "files": ["eslint.config.mjs"],
@@ -101,13 +101,7 @@
         ],
         "react/react-in-jsx-scope": "off",
         "react/prop-types": "off",
-        "react/display-name": ["error", {}],
-        "no-console": [
-          "error",
-          {
-            "allow": ["warn", "error", "assert"]
-          }
-        ]
+        "react/display-name": ["error", {}]
       },
       "globals": {
         "AbortController": "readonly",
@@ -1240,6 +1234,28 @@
         "XSLTProcessor": "readonly"
       },
       "plugins": ["react", "typescript"]
+    },
+    {
+      "files": ["**/*.{js,jsx,ts,tsx}"],
+      "rules": {
+        "no-console": [
+          "error",
+          {
+            "allow": ["warn", "error", "assert"]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "**/*.stories.*",
+        "**/__stories__/**",
+        "**/*.test.*",
+        "**/__tests__/**"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
     },
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
