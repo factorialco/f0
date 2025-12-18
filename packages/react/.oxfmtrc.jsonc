@@ -1,0 +1,22 @@
+{
+  "endOfLine": "lf",
+  "semi": false,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "jsxSingleQuote": false,
+  "printWidth": 80,
+  "experimentalSortPackageJson": true,
+  "experimentalSortImports": {},
+
+  /*
+  Oxfmt doesnt support js plugins yet, but there an initiative to add tailwind formatter to ithttps://github.com/oxc-project/oxc/issues/16542
+  "plugins": [
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  "tailwindFunctions": ["cva"],
+  "organizeImportsSkipDestructiveCodeActions": false,
+  "proseWrap": "always",
+  */
+}
