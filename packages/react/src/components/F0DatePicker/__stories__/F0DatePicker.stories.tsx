@@ -2,10 +2,10 @@ import { Placeholder } from "@/icons/app"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { fn } from "@storybook/test"
 import { subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { fn } from "storybook/internal/test"
 import {
   CalendarView,
   DateRange,
