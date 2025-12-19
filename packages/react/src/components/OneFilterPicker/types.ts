@@ -95,12 +95,6 @@ export type PresetDefinition<Filters extends FiltersDefinition> = {
   label: string
   /** Filter configuration to apply when this preset is selected */
   filter: FiltersState<Filters>
-  /**
-   * How the preset is applied when clicked:
-   * - 'replace' (default): Replace all current filters with preset's filter
-   * - 'additive': Merge preset's filter with current filters, preserving existing selections
-   */
-  mode?: "replace" | "additive"
   /** Function to count the number of items that match the filter */
   itemsCount?: (
     filters: FiltersState<Filters>

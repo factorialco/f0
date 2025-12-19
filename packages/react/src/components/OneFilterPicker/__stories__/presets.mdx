@@ -20,6 +20,9 @@ frequently used filtered data views. This simplifies navigation, as there is no
 need to manually adjust the filters every time you want to change the table
 view.
 
+Presets merge their filter with the current filters when selected, preserving
+existing selections. When deselected, only the preset's filter keys are removed.
+
 To ensure an optimal user experience, it is recommended to carefully select the
 presets, prioritizing those that display the most relevant and frequently
 consulted information. It is essential to avoid overloading the table with too
@@ -91,71 +94,3 @@ value It gets the current filters value as an argument.
 
 > itemCount function is called on render, so it should be a pure function and
 > you should cache the result.
-
-### mode
-
-`'replace' | 'additive'` (optional, default: `'replace'`)
-
-Controls how the preset is applied when clicked:
-
-- **`'replace'`** (default): Replaces all current filters with the preset's
-  filter. This is the traditional behavior where clicking a preset clears any
-  existing selections.
-- **`'additive'`**: Merges the preset's filter with current filters, preserving
-  existing selections. This is useful for status filters or other filters that
-  should combine with the user's current selection.
-
-## Additive Presets
-
-Additive presets are particularly useful when you want users to quickly apply a
-filter (like status) while preserving their other filter selections.
-
-### Example
-
-<Canvas
-  of={OneFiltersPickerStories.WithAdditivePresets}
-  meta={OneFiltersPickerStories}
-/>
-
-### Usage
-
-```tsx
-const presets = [
-  {
-    label: "Status: Pending",
-    filter: { status: ["pending"] },
-    mode: "additive", // Merges with existing filters
-  },
-  {
-    label: "Status: Approved",
-    filter: { status: ["approved"] },
-    mode: "additive",
-  },
-  {
-    label: "Status: Paid",
-    filter: { status: ["paid"] },
-    mode: "additive",
-  },
-]
-```
-
-### Behavior
-
-When using additive presets:
-
-1. **Selecting**: Clicking an unselected additive preset merges its filter with
-   your current selections
-2. **Deselecting**: Clicking an already-selected additive preset removes only
-   the preset's filter keys, preserving other filters
-3. **Selection indicator**: An additive preset shows as "selected" when all its
-   filter keys match the current filter state, even if there are additional
-   filters active
-
-### When to use additive presets
-
-- **Status filters**: Users often want to filter by status while keeping their
-  other selections (e.g., department, date range)
-- **Quick toggles**: Any filter that acts as a toggle on top of existing
-  selections
-- **Category filters**: When users want to narrow down results within their
-  current view

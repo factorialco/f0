@@ -17,7 +17,6 @@ import {
   updateUrlWithFilters,
 } from "../utils"
 import {
-  additivePresets,
   filterDefinition,
   generateCountries,
   getPresetMock,
@@ -43,7 +42,7 @@ const meta = {
           </div>
           <p>
             Filters:
-            <pre className="font-mono text-sm">
+            <pre className="font-mono mt-2 rounded bg-f1-background-secondary p-4 text-sm">
               {JSON.stringify(filters, null, 2)}
             </pre>
           </p>
@@ -55,142 +54,52 @@ const meta = {
 
 export default meta
 
-const FiltersWithState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
+export const Interactive: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {
       name: "John",
       department: ["engineering"],
-    }
-  )
-
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
-}
-
-export const Interactive: StoryObj = {
-  render: () => <FiltersWithState />,
-}
-
-// Example of pre-populated filters
-const FiltersWithInitialState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      department: ["engineering", "marketing"],
-      name: "John",
-      manager: ["alice"],
-    }
-  )
-
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
-}
-
-export const WithInitialFilters: StoryObj = {
-  render: () => <FiltersWithInitialState />,
-}
-
-// Example with presets
-const FiltersWithPresets = ({
-  presets = getPresetMock(false),
-}: {
-  presets?: OneFilterPicker.PresetsDefinition<typeof filterDefinition>
-}) => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {}
-  )
-
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      presets={presets}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
-}
-
-export const WithPresets: StoryObj = {
-  render: () => <FiltersWithPresets />,
-}
-
-export const WithPreselectedFiltersAndItemCount: StoryObj = {
-  render: () => {
-    const presets = getPresetMock(true)
-    return <FiltersWithPresets presets={presets} />
+    },
   },
 }
 
-// Example with presets and initial filters
-const FiltersWithPresetsAndInitialState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      department: ["engineering"],
-      role: ["engineer"],
-    }
-  )
+export const WithInitialFilters: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {
+      department: ["engineering", "marketing"],
+      name: "John",
+      manager: ["alice"],
+    },
+  },
+}
 
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      presets={samplePresets}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
+export const WithPresets: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {},
+    presets: getPresetMock(false),
+  },
+}
+
+export const WithPreselectedFiltersAndItemCount: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {},
+    presets: getPresetMock(true),
+  },
 }
 
 export const WithPresetsAndInitialFilters: StoryObj = {
-  render: () => <FiltersWithPresetsAndInitialState />,
-}
-
-/**
- * Additive presets merge their filter with existing selections instead of replacing them.
- * This is useful for status filters or other filters that should combine with the user's
- * current selection.
- *
- * Try this:
- * 1. Select a Department (e.g., "Engineering")
- * 2. Click on a location preset (e.g., "London Office")
- * 3. Notice both filters are now active - the preset merged with your selection
- * 4. Click the same preset again to remove only the location filter
- */
-const FiltersWithAdditivePresets = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {}
-  )
-
-  return (
-    <div className="w-[800px]">
-      <p className="mb-4 text-sm text-f1-foreground-secondary">
-        These presets use <code>mode: &quot;additive&quot;</code> - they merge
-        with your existing filters instead of replacing them. Try selecting a
-        department first, then click a location preset.
-      </p>
-      <OneFilterPickerComponent
-        filters={filterDefinition}
-        value={filters}
-        presets={additivePresets}
-        onChange={setFilters}
-      />
-      <pre className="font-mono mt-4 rounded bg-f1-background-secondary p-4 text-sm">
-        {JSON.stringify(filters, null, 2)}
-      </pre>
-    </div>
-  )
-}
-
-export const WithAdditivePresets: StoryObj = {
-  render: () => <FiltersWithAdditivePresets />,
+  args: {
+    filters: filterDefinition,
+    value: {
+      department: ["engineering"],
+      role: ["engineer"],
+    },
+    presets: samplePresets,
+  },
 }
 
 type Story = StoryObj<typeof OneFilterPicker.Root>
