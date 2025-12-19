@@ -43,7 +43,7 @@ const meta = {
           </div>
           <p>
             Filters:
-            <pre className="font-mono text-sm">
+            <pre className="font-mono mt-2 rounded bg-f1-background-secondary p-4 text-sm">
               {JSON.stringify(filters, null, 2)}
             </pre>
           </p>
@@ -55,102 +55,52 @@ const meta = {
 
 export default meta
 
-const FiltersWithState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
+export const Interactive: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {
       name: "John",
       department: ["engineering"],
-    }
-  )
-
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
-}
-
-export const Interactive: StoryObj = {
-  render: () => <FiltersWithState />,
-}
-
-// Example of pre-populated filters
-const FiltersWithInitialState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      department: ["engineering", "marketing"],
-      name: "John",
-      manager: ["alice"],
-    }
-  )
-
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
-}
-
-export const WithInitialFilters: StoryObj = {
-  render: () => <FiltersWithInitialState />,
-}
-
-// Example with presets
-const FiltersWithPresets = ({
-  presets = getPresetMock(false),
-}: {
-  presets?: OneFilterPicker.PresetsDefinition<typeof filterDefinition>
-}) => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {}
-  )
-
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      presets={presets}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
-}
-
-export const WithPresets: StoryObj = {
-  render: () => <FiltersWithPresets />,
-}
-
-export const WithPreselectedFiltersAndItemCount: StoryObj = {
-  render: () => {
-    const presets = getPresetMock(true)
-    return <FiltersWithPresets presets={presets} />
+    },
   },
 }
 
-// Example with presets and initial filters
-const FiltersWithPresetsAndInitialState = () => {
-  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
-    {
-      department: ["engineering"],
-      role: ["engineer"],
-    }
-  )
+export const WithInitialFilters: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {
+      department: ["engineering", "marketing"],
+      name: "John",
+      manager: ["alice"],
+    },
+  },
+}
 
-  return (
-    <OneFilterPickerComponent
-      filters={filterDefinition}
-      value={filters}
-      presets={samplePresets}
-      onChange={setFilters}
-    ></OneFilterPickerComponent>
-  )
+export const WithPresets: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {},
+    presets: getPresetMock(false),
+  },
+}
+
+export const WithPreselectedFiltersAndItemCount: StoryObj = {
+  args: {
+    filters: filterDefinition,
+    value: {},
+    presets: getPresetMock(true),
+  },
 }
 
 export const WithPresetsAndInitialFilters: StoryObj = {
-  render: () => <FiltersWithPresetsAndInitialState />,
+  args: {
+    filters: filterDefinition,
+    value: {
+      department: ["engineering"],
+      role: ["engineer"],
+    },
+    presets: samplePresets,
+  },
 }
 
 /**
