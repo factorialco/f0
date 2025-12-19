@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { fn } from "storybook/internal/test"
+import { fn } from "storybook/test"
 import {
   CalendarView,
   DateRange,

@@ -27,7 +27,7 @@
  *    - Quickly compare against any historical commit
  *    - Automatically clean up cache files older than 30 days
  *
- * 3. **Cycle Detection**: Uses `dpdm` (Dependency Mapper) to analyze entry points
+ * 3. **Cycle Detection**: Uses `dpdm-fast` (Dependency Mapper) to analyze entry points
  *    (`src/f0.ts` and `src/experimental.ts`) and detect circular import chains.
  *
  * 4. **Comparison Logic**: Only cycles that exist in the current state but NOT in
@@ -114,7 +114,7 @@
  *
  * ## Technical Details
  *
- * - Uses `dpdm` for dependency analysis
+ * - Uses `dpdm-fast` for dependency analysis
  * - Entry points: `src/f0.ts` and `src/experimental.ts`
  * - Only analyzes `.ts` and `.tsx` files in `packages/react/`
  * - Baseline format: JSON array of `CycleDependency` objects
@@ -160,7 +160,7 @@ function getBaselineFilePath(sha: string): string {
 }
 
 /**
- * Parse dpdm output text into structured JSON format
+ * Parse dpdm-fast output text into structured JSON format
  */
 function parseDpdmOutput(output: string): CycleDependency[] {
   const lines = output.split("\n").filter((line) => line.trim())
@@ -250,7 +250,7 @@ function parseArgs(): {
 }
 
 /**
- * Run dpdm on a specific git commit
+ * Run dpdm-fast on a specific git commit
  */
 function runDpdmOnCommit(
   commitSha: string,
@@ -300,7 +300,7 @@ function runDpdmOnCommit(
       }
       try {
         const output = execSync(
-          `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
+          `dpdm-fast --circular --no-tree --no-warning ${entryPoint} 2>&1`,
           {
             cwd: tempReactPath,
             encoding: "utf-8",
@@ -308,7 +308,7 @@ function runDpdmOnCommit(
         )
         result.push(...parseDpdmOutput(output))
       } catch (error: unknown) {
-        // dpdm exits with non-zero when cycles are found, but we still want the output
+        // dpdm-fast exits with non-zero when cycles are found, but we still want the output
         let output = ""
         if (error && typeof error === "object") {
           const execError = error as {
@@ -348,7 +348,7 @@ function runDpdmOnCommit(
 }
 
 /**
- * Run dpdm and return parsed cycles
+ * Run dpdm-fast and return parsed cycles
  */
 function runDpdm(entryPoints?: string[], silent = false): CycleDependency[] {
   // reactPackagePath should be the packages/react directory, not the workspace root
@@ -372,7 +372,7 @@ function runDpdm(entryPoints?: string[], silent = false): CycleDependency[] {
     }
     try {
       const output = execSync(
-        `npx dpdm --circular --no-tree --no-warning ${entryPoint} 2>&1`,
+        `dpdm-fast --circular --no-tree --no-warning ${entryPoint} 2>&1`,
         {
           cwd: reactPackagePath,
           encoding: "utf-8",
@@ -380,7 +380,7 @@ function runDpdm(entryPoints?: string[], silent = false): CycleDependency[] {
       )
       result.push(...parseDpdmOutput(output))
     } catch (error: unknown) {
-      // dpdm exits with non-zero when cycles are found, but we still want the output
+      // dpdm-fast exits with non-zero when cycles are found, but we still want the output
       // In Node.js execSync, stdout is available in error.stdout when encoding is set
       let output = ""
       if (error && typeof error === "object") {
@@ -546,13 +546,13 @@ function main(): void {
         `No baseline found for commit (${colorize("yellow", baselineSha)}), creating baseline from commit...`
       )
     }
-    // Run dpdm on the specified commit
+    // Run dpdm-fast on the specified commit
     baseline = runDpdmOnCommit(baselineSha, undefined, ci)
 
     saveBaseline(baselineFile, baseline)
   }
 
-  // Run dpdm on current state
+  // Run dpdm-fast on current state
   const current = runDpdm(undefined, ci)
 
   // Find new cycles

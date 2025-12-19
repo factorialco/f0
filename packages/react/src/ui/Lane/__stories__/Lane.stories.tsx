@@ -8,7 +8,7 @@ import { useDroppableList } from "@/lib/dnd/hooks"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef, useState } from "react"
-import { fn } from "storybook/internal/test"
+import { fn } from "storybook/test"
 import { Lane } from "../Lane"
 import type { LaneProps } from "../types"
 import {
