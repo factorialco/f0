@@ -15,7 +15,7 @@ importers:
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.7.1
-        version: 19.8.0(@types/node@25.0.3)(typescript@5.9.3)
+        version: 19.8.0(@types/node@22.15.21)(typescript@5.9.3)
       '@commitlint/config-conventional':
         specifier: ^19.7.1
         version: 19.8.0
@@ -523,9 +523,6 @@ importers:
       '@storybook/react-vite':
         specifier: ^10.1.10
         version: 10.1.10(esbuild@0.27.2)(msw@2.10.4(@types/node@22.15.21)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.53.5)(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(vite@7.3.0(@types/node@22.15.21)(jiti@2.4.2)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.7.0))(webpack@5.99.5(@swc/core@1.11.13(@swc/helpers@0.5.17))(esbuild@0.27.2))
-      '@storybook/test':
-        specifier: ^8.6.14
-        version: 8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@storybook/test-runner':
         specifier: ^0.24.2
         version: 0.24.2(@swc/helpers@0.5.17)(@types/node@22.15.21)(esbuild-register@3.6.0(esbuild@0.27.2))(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -15007,19 +15004,6 @@ snapshots:
       - '@types/node'
       - typescript
 
-  '@commitlint/cli@19.8.0(@types/node@25.0.3)(typescript@5.9.3)':
-    dependencies:
-      '@commitlint/format': 19.8.0
-      '@commitlint/lint': 19.8.0
-      '@commitlint/load': 19.8.0(@types/node@25.0.3)(typescript@5.9.3)
-      '@commitlint/read': 19.8.0
-      '@commitlint/types': 19.8.0
-      tinyexec: 0.3.2
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - '@types/node'
-      - typescript
-
   '@commitlint/config-conventional@19.8.0':
     dependencies:
       '@commitlint/types': 19.8.0
@@ -15067,22 +15051,6 @@ snapshots:
       chalk: 5.4.1
       cosmiconfig: 9.0.0(typescript@5.9.3)
       cosmiconfig-typescript-loader: 6.1.0(@types/node@22.15.21)(cosmiconfig@9.0.0(typescript@5.9.3))(typescript@5.9.3)
-      lodash.isplainobject: 4.0.6
-      lodash.merge: 4.6.2
-      lodash.uniq: 4.5.0
-    transitivePeerDependencies:
-      - '@types/node'
-      - typescript
-
-  '@commitlint/load@19.8.0(@types/node@25.0.3)(typescript@5.9.3)':
-    dependencies:
-      '@commitlint/config-validator': 19.8.0
-      '@commitlint/execute-rule': 19.8.0
-      '@commitlint/resolve-extends': 19.8.0
-      '@commitlint/types': 19.8.0
-      chalk: 5.4.1
-      cosmiconfig: 9.0.0(typescript@5.9.3)
-      cosmiconfig-typescript-loader: 6.1.0(@types/node@25.0.3)(cosmiconfig@9.0.0(typescript@5.9.3))(typescript@5.9.3)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -19178,12 +19146,6 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@storybook/instrumenter@8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
-    dependencies:
-      '@storybook/global': 5.0.0
-      '@vitest/utils': 2.1.9
-      storybook: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-
   '@storybook/instrumenter@8.6.14(storybook@8.6.14(prettier@2.8.8))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -19368,17 +19330,6 @@ snapshots:
       - node-notifier
       - supports-color
       - ts-node
-
-  '@storybook/test@8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
-    dependencies:
-      '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 8.6.14(storybook@10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      '@testing-library/dom': 10.4.0
-      '@testing-library/jest-dom': 6.5.0
-      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
-      '@vitest/expect': 2.0.5
-      '@vitest/spy': 2.0.5
-      storybook: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.5.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@storybook/test@8.6.14(storybook@8.6.14(prettier@2.8.8))':
     dependencies:
@@ -19583,6 +19534,7 @@ snapshots:
       dom-accessibility-api: 0.5.16
       lz-string: 1.5.0
       pretty-format: 27.5.1
+    optional: true
 
   '@testing-library/dom@10.4.1':
     dependencies:
@@ -19604,6 +19556,7 @@ snapshots:
       dom-accessibility-api: 0.6.3
       lodash: 4.17.21
       redent: 3.0.0
+    optional: true
 
   '@testing-library/jest-dom@6.6.3':
     dependencies:
@@ -19640,6 +19593,7 @@ snapshots:
   '@testing-library/user-event@14.5.2(@testing-library/dom@10.4.0)':
     dependencies:
       '@testing-library/dom': 10.4.0
+    optional: true
 
   '@testing-library/user-event@14.6.1(@testing-library/dom@10.4.1)':
     dependencies:
@@ -20075,6 +20029,7 @@ snapshots:
   '@types/node@25.0.3':
     dependencies:
       undici-types: 7.16.0
+    optional: true
 
   '@types/prop-types@15.7.14': {}
 
@@ -20364,6 +20319,7 @@ snapshots:
       '@vitest/utils': 2.0.5
       chai: 5.3.3
       tinyrainbow: 1.2.0
+    optional: true
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -20403,10 +20359,12 @@ snapshots:
   '@vitest/pretty-format@2.0.5':
     dependencies:
       tinyrainbow: 1.2.0
+    optional: true
 
   '@vitest/pretty-format@2.1.9':
     dependencies:
       tinyrainbow: 1.2.0
+    optional: true
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -20434,6 +20392,7 @@ snapshots:
   '@vitest/spy@2.0.5':
     dependencies:
       tinyspy: 3.0.2
+    optional: true
 
   '@vitest/spy@3.2.4':
     dependencies:
@@ -20458,12 +20417,14 @@ snapshots:
       estree-walker: 3.0.3
       loupe: 3.2.1
       tinyrainbow: 1.2.0
+    optional: true
 
   '@vitest/utils@2.1.9':
     dependencies:
       '@vitest/pretty-format': 2.1.9
       loupe: 3.2.1
       tinyrainbow: 1.2.0
+    optional: true
 
   '@vitest/utils@3.2.4':
     dependencies:
@@ -21617,13 +21578,6 @@ snapshots:
   cosmiconfig-typescript-loader@6.1.0(@types/node@22.15.21)(cosmiconfig@9.0.0(typescript@5.9.3))(typescript@5.9.3):
     dependencies:
       '@types/node': 22.15.21
-      cosmiconfig: 9.0.0(typescript@5.9.3)
-      jiti: 2.4.2
-      typescript: 5.9.3
-
-  cosmiconfig-typescript-loader@6.1.0(@types/node@25.0.3)(cosmiconfig@9.0.0(typescript@5.9.3))(typescript@5.9.3):
-    dependencies:
-      '@types/node': 25.0.3
       cosmiconfig: 9.0.0(typescript@5.9.3)
       jiti: 2.4.2
       typescript: 5.9.3
@@ -28657,13 +28611,15 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
-  tinyrainbow@1.2.0: {}
+  tinyrainbow@1.2.0:
+    optional: true
 
   tinyrainbow@2.0.0: {}
 
   tinyrainbow@3.0.3: {}
 
-  tinyspy@3.0.2: {}
+  tinyspy@3.0.2:
+    optional: true
 
   tinyspy@4.0.3: {}
 
@@ -28903,7 +28859,8 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.16.0: {}
+  undici-types@7.16.0:
+    optional: true
 
   undici@6.21.2: {}
 
