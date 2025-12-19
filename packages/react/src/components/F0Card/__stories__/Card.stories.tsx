@@ -19,7 +19,7 @@ import image from "@storybook-static/avatars/person04.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { fn } from "storybook/test"
-import { F0Card } from "../F0Card"
+import { F0Card, type CardImageFit } from "../F0Card"
 import { DraggableStoryCard } from "./DraggableStoryCard"
 import { DropLaneCancel } from "./DropLaneCancel"
 import { DropLaneEnter } from "./DropLaneEnter"
@@ -33,6 +33,17 @@ const SlotComponent = () => {
   )
 }
 
+// Different image types for demonstration - shared across stories
+const imageTypes = {
+  // Use picsum.photos for guaranteed square images
+  squared: "https://picsum.photos/400/400",
+  small: "https://picsum.photos/50/50",
+  // Use different Unsplash photos to ensure they're visually distinct
+  wide: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop",
+  vertical:
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=450&h=800&fit=crop",
+} as const
+
 const meta = {
   component: F0Card,
   title: "Card",
@@ -42,6 +53,29 @@ const meta = {
     },
   },
   tags: ["autodocs", "stable"],
+  argTypes: {
+    imageFit: {
+      control: "select",
+      options: ["contain", "fit-width", "fit-height", "scale-down"],
+      description:
+        "How the image should be displayed/fitted within its container",
+      table: {
+        defaultValue: { summary: "fit-width" },
+      },
+    },
+    imageHeight: {
+      control: "select",
+      options: ["h-24", "h-32", "h-40", "h-48", "h-64"],
+      description: "Height of the image container (Tailwind height class)",
+      table: {
+        defaultValue: { summary: "h-32" },
+      },
+    },
+  },
+  args: {
+    imageFit: "fit-width",
+    imageHeight: "h-32",
+  },
   decorators: [
     (Story, context) => {
       if (context.parameters?.noMetaLayout) {
@@ -59,7 +93,13 @@ const meta = {
 } satisfies Meta<typeof F0Card>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<
+  typeof meta & {
+    imageFit?: CardImageFit
+    imageHeight?: string
+    imageType?: "squared" | "small" | "wide" | "vertical"
+  }
+>
 
 export const Default: Story = {
   args: {
@@ -427,6 +467,129 @@ export const IntentsShowcase: Story = {
           </div>
         </div>
       </DndProvider>
+    )
+  },
+}
+
+export const WithImageControls: StoryObj<
+  typeof meta & {
+    imageFit?: CardImageFit
+    imageHeight?: string
+    imageType?: "squared" | "small" | "wide" | "vertical"
+  }
+> = {
+  parameters: {
+    layout: "fullscreen",
+    noMetaLayout: true,
+  },
+  argTypes: {
+    imageType: {
+      control: "select",
+      options: ["squared", "small", "wide", "vertical"],
+      description: "Type of image to use for demonstration",
+      table: {
+        defaultValue: { summary: "wide" },
+      },
+    },
+  } as never,
+  args: {
+    ...Default.args,
+    imageFit: "fit-width",
+    imageHeight: "h-32",
+    imageType: "wide",
+  } as never,
+  render: (args) => {
+    const typedArgs = args as {
+      imageFit?: CardImageFit
+      imageHeight?: string
+      imageType?: keyof typeof imageTypes
+    }
+    const imageFit = (typedArgs.imageFit || "fit-width") as CardImageFit
+    const imageHeight = typedArgs.imageHeight || "h-32"
+    const imageType = (typedArgs.imageType || "wide") as keyof typeof imageTypes
+    const selectedImage = imageTypes[imageType]
+
+    return (
+      <div className="w-full p-4">
+        <div className="mx-auto max-w-[372px]">
+          <F0Card
+            {...Default.args}
+            image={selectedImage}
+            imageFit={imageFit}
+            imageHeight={imageHeight}
+          />
+        </div>
+      </div>
+    )
+  },
+}
+
+export const ImageFitOptions: StoryObj<
+  typeof meta & {
+    imageFit?: CardImageFit
+    imageHeight?: string
+    imageType?: "squared" | "small" | "wide" | "vertical"
+  }
+> = {
+  parameters: {
+    layout: "fullscreen",
+    noMetaLayout: true,
+  },
+  argTypes: {
+    imageType: {
+      control: "select",
+      options: ["squared", "small", "wide", "vertical"],
+      description: "Type of image to use for demonstration",
+      table: {
+        defaultValue: { summary: "wide" },
+      },
+    },
+    // Hide all other F0Card props from controls
+    avatar: { table: { disable: true } },
+    compact: { table: { disable: true } },
+    title: { table: { disable: true } },
+    description: { table: { disable: true } },
+    metadata: { table: { disable: true } },
+    link: { table: { disable: true } },
+    selectable: { table: { disable: true } },
+    selected: { table: { disable: true } },
+    onSelect: { table: { disable: true } },
+    image: { table: { disable: true } },
+    children: { table: { disable: true } },
+    primaryActions: { table: { disable: true } },
+    secondaryActions: { table: { disable: true } },
+    otherActions: { table: { disable: true } },
+    progressBar: { table: { disable: true } },
+    onClick: { table: { disable: true } },
+  } as never,
+  args: {
+    ...Default.args,
+    imageFit: "fit-width",
+    imageHeight: "h-32",
+    imageType: "wide",
+  } as never,
+  render: (args) => {
+    const typedArgs = args as {
+      imageFit?: CardImageFit
+      imageHeight?: string
+      imageType?: keyof typeof imageTypes
+    }
+    const imageFit = (typedArgs.imageFit || "fit-width") as CardImageFit
+    const imageHeight = typedArgs.imageHeight || "h-32"
+    const imageType = (typedArgs.imageType || "wide") as keyof typeof imageTypes
+    const selectedImage = imageTypes[imageType]
+
+    return (
+      <div className="w-full p-4">
+        <div className="mx-auto max-w-[372px]">
+          <F0Card
+            {...Default.args}
+            image={selectedImage}
+            imageFit={imageFit}
+            imageHeight={imageHeight}
+          />
+        </div>
+      </div>
     )
   },
 }

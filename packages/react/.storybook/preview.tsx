@@ -64,9 +64,18 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
         ),
       }}
       image={{
-        src: ({ src, width, height }) => ({
-          src: src?.startsWith("data:") ? src : `${src}?w=${width}&h=${height}`,
-        }),
+        src: ({ src, width, height }) => {
+          if (!src || src.startsWith("data:")) return { src }
+          const hasQuery = src.includes("?")
+          const separator = hasQuery ? "&" : "?"
+          const params = []
+          if (width !== undefined) params.push(`w=${width}`)
+          if (height !== undefined) params.push(`h=${height}`)
+          return {
+            src:
+              params.length > 0 ? `${src}${separator}${params.join("&")}` : src,
+          }
+        },
       }}
       isDev={parameters.isDev ?? false}
       dataCollectionStorageHandler={dataCollectionLocalStorageHandler}

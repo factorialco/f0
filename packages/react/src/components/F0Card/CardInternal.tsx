@@ -23,6 +23,12 @@ import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import { type CardMetadata as CardMetadataType } from "./types"
 
+export type CardImageFit =
+  | "contain" // Show entire image, no crop
+  | "fit-width" // Fill width, crop top/bottom if needed (default value)
+  | "fit-height" // Fill height, crop left/right if needed
+  | "scale-down" // Prevent upscaling
+
 export interface CardInternalProps {
   /**
    * Whether the card has a compact layout
@@ -38,6 +44,18 @@ export interface CardInternalProps {
    * Whether the card has an image
    */
   image?: string
+
+  /**
+   * How the image should be displayed/fitted within its container
+   * @default "fit-width"
+   */
+  imageFit?: CardImageFit
+
+  /**
+   * Height of the image container (Tailwind height class)
+   * @default "h-32"
+   */
+  imageHeight?: string
 
   /**
    * The title of the card
@@ -117,12 +135,27 @@ export interface CardInternalProps {
   disableOverlayLink?: boolean
 }
 
+function getImageFitClassName(imageFit: CardImageFit): string {
+  switch (imageFit) {
+    case "contain":
+      return "object-contain h-full w-full"
+    case "fit-width":
+      return "object-cover h-full w-full"
+    case "fit-height":
+      return "object-contain h-full w-auto"
+    case "scale-down":
+      return "object-scale-down h-full w-full"
+  }
+}
+
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
   function CardInternal(
     {
       compact = false,
       avatar,
       image,
+      imageFit = "fit-width",
+      imageHeight = "h-32",
       title,
       description,
       metadata,
@@ -184,14 +217,16 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {image && (
           <div
             className={cn(
-              "relative -mx-3 -mt-3 mb-4 h-32 overflow-hidden rounded-md",
-              compact && "-mx-2 -mt-2 mb-3"
+              "relative -mx-3 -mt-3 mb-4 overflow-hidden rounded-md",
+              imageHeight,
+              compact && "-mx-2 -mt-2 mb-3",
+              imageFit === "fit-height" && "flex items-center justify-center"
             )}
           >
             <Image
               src={image}
               alt={title}
-              className="h-full w-full object-cover"
+              className={cn(getImageFitClassName(imageFit as CardImageFit))}
             />
             <CardOptions
               otherActions={otherActions}

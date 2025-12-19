@@ -1,4 +1,4 @@
-import { F0Card } from "@/components/F0Card"
+import { F0Card, type CardImageFit } from "@/components/F0Card"
 import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetadata"
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
@@ -39,6 +39,8 @@ export type CardVisualizationOptions<
   description?: (record: T) => string
   avatar?: (record: T) => CardAvatarVariant
   image?: (record: T) => string
+  imageFit?: CardImageFit
+  imageHeight?: string
   compact?: boolean
 }
 
@@ -121,6 +123,8 @@ type GroupCardsProps<
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
   image?: (record: Record) => string
+  imageFit?: CardImageFit
+  imageHeight?: string
   compact?: boolean
   tmpFullWidth?: boolean
 }
@@ -143,6 +147,8 @@ const GroupCards = <
   description,
   avatar,
   image,
+  imageFit,
+  imageHeight,
   compact,
   tmpFullWidth,
 }: GroupCardsProps<
@@ -266,6 +272,8 @@ const GroupCards = <
               description={description ? description(item) : undefined}
               avatar={avatar ? avatar(item) : undefined}
               image={image ? image(item) : undefined}
+              imageFit={imageFit}
+              imageHeight={imageHeight}
               selected={selectable && selectedItems.has(id)}
               onSelect={(selected) => handleSelectItemChange(item, selected)}
               secondaryActions={secondaryActions}
@@ -298,6 +306,8 @@ export const CardCollection = <
   description,
   avatar,
   image,
+  imageFit,
+  imageHeight,
   compact,
   source,
   onSelectItems,
@@ -448,6 +458,8 @@ export const CardCollection = <
                           description={description}
                           avatar={avatar}
                           image={image}
+                          imageFit={imageFit}
+                          imageHeight={imageHeight}
                           compact={compact}
                           tmpFullWidth={tmpFullWidth}
                         />
@@ -468,6 +480,8 @@ export const CardCollection = <
                 description={description}
                 avatar={avatar}
                 image={image}
+                imageFit={imageFit}
+                imageHeight={imageHeight}
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
               />
