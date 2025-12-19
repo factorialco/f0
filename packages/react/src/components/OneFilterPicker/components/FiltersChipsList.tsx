@@ -17,6 +17,8 @@ interface FiltersChipsListProps<Filters extends FiltersDefinition> {
   onFilterSelect: (key: keyof Filters) => void
   onFilterRemove: (key: keyof Filters) => void
   onClearAll: () => void
+  /** Filter keys to exclude from chip display (e.g., keys covered by presets) */
+  excludedKeys?: Set<string>
 }
 
 export function FiltersChipsList<Filters extends FiltersDefinition>({
@@ -25,12 +27,18 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   onFilterSelect,
   onFilterRemove,
   onClearAll,
+  excludedKeys = new Set(),
 }: FiltersChipsListProps<Filters>) {
   const i18n = useI18n()
 
   const activeFilterKeys = getActiveFilterKeys(filters, value, i18n)
 
-  if (activeFilterKeys.length === 0) {
+  // Filter out keys that are covered by presets
+  const visibleFilterKeys = activeFilterKeys.filter(
+    (key) => !excludedKeys.has(String(key))
+  )
+
+  if (visibleFilterKeys.length === 0) {
     return null
   }
 
@@ -38,7 +46,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
     <div className="mt-2 flex items-start justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <AnimatePresence presenceAffectsLayout initial={false}>
-          {activeFilterKeys.map((key) => {
+          {visibleFilterKeys.map((key) => {
             const filterSchema = filters[key]
 
             if (!filters[key]) {

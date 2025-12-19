@@ -416,6 +416,139 @@ describe("Presets", () => {
   })
 })
 
+describe("Presets - Chip Visibility", () => {
+  it("hides chips when preset is selected", async () => {
+    const onChange = vi.fn()
+    const presets = [
+      {
+        label: "Engineering Only",
+        filter: { department: ["engineering" as const] },
+      },
+    ]
+
+    // Render with filters matching the preset
+    render(
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["engineering"] }}
+        presets={presets}
+        onChange={onChange}
+      />
+    )
+
+    // Chip for department should NOT be visible (covered by preset)
+    expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
+
+    // Preset should be shown as selected
+    const engineeringPreset = screen
+      .getByText("Engineering Only")
+      .closest("label")
+    expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
+  })
+
+  it("shows chips for manual filters added on top of preset", async () => {
+    const onChange = vi.fn()
+    const presets = [
+      {
+        label: "Engineering Only",
+        filter: { department: ["engineering" as const] },
+      },
+    ]
+
+    // Render with preset filter + manual filter
+    render(
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["engineering"], search: "test query" }}
+        presets={presets}
+        onChange={onChange}
+      />
+    )
+
+    // Wait for async chip label to load, then verify search chip is visible
+    await waitFor(() => {
+      expect(screen.getByText(/search:/i)).toBeInTheDocument()
+    })
+
+    // Department chip should NOT be visible (covered by preset)
+    expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
+
+    // Preset should still be shown as selected
+    const engineeringPreset = screen
+      .getByText("Engineering Only")
+      .closest("label")
+    expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
+  })
+
+  it("shows chips when preset value is modified", async () => {
+    const onChange = vi.fn()
+    const presets = [
+      {
+        label: "Engineering Only",
+        filter: { department: ["engineering" as const] },
+      },
+    ]
+
+    // Render with modified value (design instead of engineering)
+    render(
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["design"] }}
+        presets={presets}
+        onChange={onChange}
+      />
+    )
+
+    // Wait for async chip label to load
+    await waitFor(() => {
+      // Department chip SHOULD be visible (preset value was modified, no longer matches)
+      expect(screen.getByText(/department:/i)).toBeInTheDocument()
+    })
+
+    // Preset should NOT be shown as selected
+    const engineeringPreset = screen
+      .getByText("Engineering Only")
+      .closest("label")
+    expect(engineeringPreset).not.toHaveClass(
+      "bg-f1-background-selected-secondary"
+    )
+  })
+
+  it("shows chips when multi-filter preset is partially modified", async () => {
+    const onChange = vi.fn()
+    const multiFilterPresets = [
+      {
+        label: "Engineering Search",
+        filter: {
+          department: ["engineering" as const],
+          search: "code",
+        },
+      },
+    ]
+
+    // Render with only one filter matching (search modified)
+    render(
+      <OneFilterPicker
+        filters={definition}
+        value={{ department: ["engineering"], search: "different" }}
+        presets={multiFilterPresets}
+        onChange={onChange}
+      />
+    )
+
+    // Wait for async chip labels to load
+    await waitFor(() => {
+      // Both chips SHOULD be visible (preset partially matches, so not "selected")
+      expect(screen.getByText(/department:/i)).toBeInTheDocument()
+      expect(screen.getByText(/search:/i)).toBeInTheDocument()
+    })
+
+    // Preset should NOT be shown as selected
+    const preset = screen.getByText("Engineering Search").closest("label")
+    expect(preset).not.toHaveClass("bg-f1-background-selected-secondary")
+  })
+})
+
 // Type safety tests
 describe("Filters Type Safety", () => {
   it.skip("should enforce type safety in props", () => {
