@@ -1,12 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "noImplicitAny": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "checkJs": false,
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
     "types": ["vite/client", "@testing-library/jest-dom", "vitest/globals"],
+    "files": ["vitest.shims.d.ts"],
+    "typeRoots": ["./node_modules/@types", "."],
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -19,6 +23,7 @@
     "src/**/__tests__/**/*.ts",
     "src/**/__tests__/**/*.tsx",
     "vitest.setup.ts",
-    "vite/vitest.setup.ts"
+    "vite/vitest.setup.ts",
+    "vitest.shims.d.ts"
   ]
 }
