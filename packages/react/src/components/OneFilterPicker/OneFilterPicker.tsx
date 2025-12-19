@@ -3,6 +3,7 @@ import { FiltersChipsList as FiltersChipsListComponent } from "./components/Filt
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
+import { getPresetCoveredKeys } from "./internal/getPresetCoveredKeys"
 import { PresetsDefinition } from "./types"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
@@ -243,21 +244,20 @@ const FiltersChipsList = () => {
     setFiltersValue,
   } = useContext(FiltersContext)
 
-  const isPresetFilter = useMemo(() => {
-    return (presets || []).some((preset) => {
-      return JSON.stringify(value) === JSON.stringify(preset.filter)
-    })
+  // Get filter keys that are covered by currently selected presets
+  const presetCoveredKeys = useMemo(() => {
+    return getPresetCoveredKeys(presets, value)
   }, [presets, value])
 
   return (
-    filters &&
-    !isPresetFilter && (
+    filters && (
       <FiltersChipsListComponent
         filters={filters}
         value={value}
         onFilterSelect={() => setIsFiltersOpen(true)}
         onFilterRemove={removeFilterValue}
         onClearAll={() => setFiltersValue({})}
+        excludedKeys={presetCoveredKeys}
       />
     )
   )

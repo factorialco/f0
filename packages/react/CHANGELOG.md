@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.313.0](https://github.com/factorialco/f0/compare/f0-react-v1.312.0...f0-react-v1.313.0) (2025-12-19)
+
+
+### Features
+
+* add additive mode to filter presets ([#3048](https://github.com/factorialco/f0/issues/3048)) ([f210f09](https://github.com/factorialco/f0/commit/f210f09afb09f70b386f6dfed5b7a349a621f544))
+
 ## [1.312.0](https://github.com/factorialco/f0/compare/f0-react-v1.311.3...f0-react-v1.312.0) (2025-12-17)
 
 
