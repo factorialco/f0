@@ -78,7 +78,7 @@ const createTestSource = (
   isLoading: false,
   setIsLoading: vi.fn(),
   dataAdapter: {
-    fetchData: async ({ filters: _filters }) => {
+    fetchData: async ({ filters: _filters }: BaseFetchOptions<TestFilters>) => {
       if (error) throw error
       return { records: data }
     },

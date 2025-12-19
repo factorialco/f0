@@ -106,14 +106,13 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: "content",
-      values: [
-        { name: "content", value: "hsl(var(--neutral-0))" },
-        { name: "page", value: "hsl(var(--page))" },
-      ],
+      options: {
+        content: { name: "content", value: "hsl(var(--neutral-0))" },
+        page: { name: "page", value: "hsl(var(--page))" },
+      },
     },
     viewport: {
-      viewports: {
+      options: {
         ...INITIAL_VIEWPORTS,
       },
     },
@@ -179,11 +178,18 @@ const preview: Preview = {
         return a.title.localeCompare(b.title)
       },
     },
-    darkMode: {
-      stylePreview: true,
+    // darkMode: {
+    //   stylePreview: true,
+    // },
+  },
+
+  tags: ["autodocs"],
+
+  initialGlobals: {
+    backgrounds: {
+      value: "content",
     },
   },
-  tags: ["autodocs"],
 }
 
 export default preview
