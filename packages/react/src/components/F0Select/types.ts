@@ -42,6 +42,16 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   actions?: Action[]
   /** Container element to render the portal content into */
   portalContainer?: HTMLElement | null
+  /**
+   * When true, displays the select as an always-visible list without a trigger.
+   * The component renders only the content area (options list) without the input field.
+   * Useful for inline selection lists or embedded selectors.
+   */
+  alwaysOpen?: boolean
+  /**
+   * Height of the list container when alwaysOpen is true.
+   */
+  alwaysOpenHeight?: "sm" | "md" | "lg"
 }
 
 /**
