@@ -246,437 +246,447 @@ export const getMockVisualizations = (options?: {
     NavigationFiltersDefinition,
     GroupingDefinition<MockUser>
   >
-> => ({
-  table: {
-    type: "table",
-    options: {
-      allowColumnHiding: options?.table?.allowColumnHiding,
-      allowColumnReordering: options?.table?.allowColumnReordering,
-      frozenColumns:
-        options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
-      columns: [
-        {
-          label: "Name",
-          width: 140,
-          render: (item) =>
-            !item.children && item.detailed
-              ? ""
-              : {
-                  type: "person",
-                  value: {
-                    firstName: item.name.split(" ")[0],
-                    lastName: item.name.split(" ")[1],
+> =>
+  ({
+    table: {
+      type: "table",
+      options: {
+        allowColumnHiding: options?.table?.allowColumnHiding,
+        allowColumnReordering: options?.table?.allowColumnReordering,
+        frozenColumns:
+          options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
+        columns: [
+          {
+            label: "Name",
+            width: 140,
+            render: (item) =>
+              !item.children && item.detailed
+                ? ""
+                : {
+                    type: "person",
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
                   },
-                },
-          id: "name",
-          sorting: options?.table?.noSorting ? undefined : "name",
-          hidden: options?.table?.allowColumnHiding ? true : undefined,
-          order: options?.table?.allowColumnReordering ? 3 : undefined,
-        },
-        {
-          label: "Email",
-          render: (item) => item.email,
-          sorting: options?.table?.noSorting ? undefined : "email",
-          id: "email",
-        },
-        {
-          label: "Role",
-          render: (item) => item.role,
-          sorting: options?.table?.noSorting ? undefined : "role",
-          id: "role",
-          order: options?.table?.allowColumnReordering ? 2 : undefined,
-          noHiding: options?.table?.allowColumnHiding,
-        },
-        {
-          id: "department",
-          label: "Department",
-          render: (item) => item.department,
-          sorting: options?.table?.noSorting ? undefined : "department",
-          order: options?.table?.allowColumnReordering ? 4 : undefined,
-        },
-        {
-          id: "email2",
-          label: "Email 2",
-          render: (item) => item.email,
-          sorting: options?.table?.noSorting ? undefined : "email",
-          order: options?.table?.allowColumnReordering ? 1 : undefined,
-        },
-        {
-          id: "role2",
-          label: "Role 2",
-          render: (item) => item.role,
-          sorting: options?.table?.noSorting ? undefined : "role",
-        },
-        {
-          id: "department2",
-          label: "Department 2",
-          render: (item) => item.department,
-          sorting: options?.table?.noSorting ? undefined : "department",
-          order: options?.table?.allowColumnReordering ? 10 : undefined,
-        },
-        {
-          id: "email3",
-          label: "Email 3",
-          render: (item) => item.email,
-          sorting: options?.table?.noSorting ? undefined : "email",
-        },
-        {
-          id: "role3",
-          label: "Role 3",
-          render: (item) => item.role,
-          sorting: options?.table?.noSorting ? undefined : "role",
-        },
-        {
-          label: "Department 3",
-          render: (item) => item.department,
-          sorting: options?.table?.noSorting ? undefined : "department",
-          id: "department3",
-        },
-        {
-          label: "Email 4",
-          render: (item) => item.email,
-          sorting: options?.table?.noSorting ? undefined : "email",
-          id: "email4",
-        },
-        {
-          label: "Role 4",
-          render: (item) => item.role,
-          sorting: options?.table?.noSorting ? undefined : "role",
-          id: "role4",
-        },
-        {
-          label: "Long",
-          render: () => ({
-            type: "longText",
-            value: {
-              text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
-              lines: 4,
-            },
-          }),
-          id: "longText",
-        },
-        {
-          label: "Permissions",
-          render: (item) =>
-            [
-              item.permissions?.read ? "Read" : "",
-              item.permissions?.write ? "Write" : "",
-              item.permissions?.delete ? "Delete" : "",
-            ]
-              .filter(Boolean)
-              .join(", "),
-          sorting: options?.table?.noSorting ? undefined : "permissions.read",
-          id: "permissions",
-          order: options?.table?.allowColumnReordering ? 4 : undefined,
-        },
-      ],
-    },
-  },
-  card: {
-    type: "card",
-    options: {
-      title: (item) => item.name,
-      description: (item) => item.role,
-      avatar: (item) => ({
-        type: "person",
-        firstName: item.name.split(" ")[0],
-        lastName: item.name.split(" ")[1],
-      }),
-      image: (item) => item.image,
-      cardProperties: [
-        {
-          label: "Email",
-          icon: Envelope,
-          tooltip: "Email",
-          render: (item) => item.email,
-          hide: (item) => !item.email,
-        },
-        {
-          label: "Role",
-          icon: Briefcase,
-          render: (item) => item.role,
-        },
-        {
-          label: "Department",
-          icon: Building,
-          render: (item) => item.department,
-        },
-        {
-          label: "Manager",
-          icon: Person,
-          render: (item) => ({
-            type: "person",
-            value: {
-              firstName: item.manager.split(" ")[0],
-              lastName: item.manager.split(" ")[1],
-            },
-          }),
-          hide: (item) => item.name.startsWith("D"),
-        },
-        {
-          label: "Teammates",
-          icon: Person,
-          render: (item) => ({
-            type: "avatarList",
-            value: {
-              avatarList: [
-                {
-                  type: "person",
-                  firstName: item.name,
-                  lastName: "Doe",
-                  src: "/avatars/person01.jpg",
-                },
-                {
-                  type: "person",
-                  firstName: "Dani",
-                  lastName: "Moreno",
-                  src: "/avatars/person04.jpg",
-                },
-                {
-                  type: "person",
-                  firstName: "Sergio",
-                  lastName: "Carracedo",
-                  src: "/avatars/person05.jpg",
-                },
-              ],
-            },
-          }),
-        },
-        {
-          label: "Status",
-          icon: CheckCircle,
-          render: (item) => ({
-            type: "status",
-            value: {
-              status: item.status === "active" ? "positive" : "critical",
-              label: item.status.charAt(0).toUpperCase() + item.status.slice(1),
-            },
-          }),
-        },
-      ],
-    },
-  },
-  list: {
-    type: "list",
-    options: {
-      itemDefinition: (item) => {
-        const getMockAvatar = (index: number): AvatarVariant => {
-          const avatars = [
-            {
-              type: "person" as const,
-              firstName: item.name.split(" ")[0],
-              lastName: item.name.split(" ")[1],
-              badge: {
-                type: "module" as const,
-                module: "inbox" as const,
-                tooltip: "Inbox",
+            id: "name",
+            sorting: options?.table?.noSorting ? undefined : "name",
+            hidden: options?.table?.allowColumnHiding ? true : undefined,
+            order: options?.table?.allowColumnReordering ? 3 : undefined,
+          },
+          {
+            label: "Email",
+            render: (item) => item.email,
+            sorting: options?.table?.noSorting ? undefined : "email",
+            id: "email",
+          },
+          {
+            label: "Role",
+            render: (item) => item.role,
+            sorting: options?.table?.noSorting ? undefined : "role",
+            id: "role",
+            order: options?.table?.allowColumnReordering ? 2 : undefined,
+            noHiding: options?.table?.allowColumnHiding,
+          },
+          {
+            id: "department",
+            label: "Department",
+            render: (item) => item.department,
+            sorting: options?.table?.noSorting ? undefined : "department",
+            order: options?.table?.allowColumnReordering ? 4 : undefined,
+          },
+          {
+            id: "email2",
+            label: "Email 2",
+            render: (item) => item.email,
+            sorting: options?.table?.noSorting ? undefined : "email",
+            order: options?.table?.allowColumnReordering ? 1 : undefined,
+          },
+          {
+            id: "role2",
+            label: "Role 2",
+            render: (item) => item.role,
+            sorting: options?.table?.noSorting ? undefined : "role",
+          },
+          {
+            id: "department2",
+            label: "Department 2",
+            render: (item) => item.department,
+            sorting: options?.table?.noSorting ? undefined : "department",
+            order: options?.table?.allowColumnReordering ? 10 : undefined,
+          },
+          {
+            id: "email3",
+            label: "Email 3",
+            render: (item) => item.email,
+            sorting: options?.table?.noSorting ? undefined : "email",
+          },
+          {
+            id: "role3",
+            label: "Role 3",
+            render: (item) => item.role,
+            sorting: options?.table?.noSorting ? undefined : "role",
+          },
+          {
+            label: "Department 3",
+            render: (item) => item.department,
+            sorting: options?.table?.noSorting ? undefined : "department",
+            id: "department3",
+          },
+          {
+            label: "Email 4",
+            render: (item) => item.email,
+            sorting: options?.table?.noSorting ? undefined : "email",
+            id: "email4",
+          },
+          {
+            label: "Role 4",
+            render: (item) => item.role,
+            sorting: options?.table?.noSorting ? undefined : "role",
+            id: "role4",
+          },
+          {
+            label: "Long",
+            render: () => ({
+              type: "longText",
+              value: {
+                text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+                lines: 4,
               },
-              src: mockImage("person", index),
-            },
-            {
-              type: "company" as const,
-              name: getMockValue(COMPANY_NAMES_MOCK, item.index),
-              src: mockImage("company", index),
-            },
-            {
-              type: "team" as const,
-              name: getMockValue(TEAMS_MOCK, item.index),
-              src: mockImage("team", index),
-            },
-            {
-              type: "icon" as const,
-              icon: getMockValue(MOCK_ICONS, item.index),
-            },
-          ]
-
-          return avatars[index % avatars.length]
-        }
-        return {
-          title: item.name,
-          description: [item.email, item.role],
-          avatar: getMockAvatar(item.index),
-        }
+            }),
+            id: "longText",
+          },
+          {
+            label: "Permissions",
+            render: (item) =>
+              [
+                item.permissions?.read ? "Read" : "",
+                item.permissions?.write ? "Write" : "",
+                item.permissions?.delete ? "Delete" : "",
+              ]
+                .filter(Boolean)
+                .join(", "),
+            sorting: options?.table?.noSorting ? undefined : "permissions.read",
+            id: "permissions",
+            order: options?.table?.allowColumnReordering ? 4 : undefined,
+          },
+        ],
       },
-      fields: [
-        {
-          label: "Email",
-          render: (item) => item.email,
-          sorting: "email",
-        },
-        {
-          label: "Role",
-          render: (item) => item.role,
-          sorting: "role",
-        },
-        {
-          label: "Teammates",
-          render: (item) => ({
-            type: "avatarList",
-            value: {
-              max: 1,
-              avatarList: [
-                {
-                  type: "person",
-                  firstName: item.name,
-                  lastName: "Doe",
-                  src: "/avatars/person01.jpg",
-                },
-                {
-                  type: "person",
-                  firstName: "Dani",
-                  lastName: "Moreno",
-                  src: "/avatars/person04.jpg",
-                },
-                {
-                  type: "person",
-                  firstName: "Sergio",
-                  lastName: "Carracedo",
-                  src: "/avatars/person05.jpg",
-                },
-              ],
-            },
-          }),
-          sorting: "role",
-        },
-        {
-          label: "Email 2",
-          render: (item) => item.email,
-          sorting: "email",
-        },
-        {
-          label: "Role 2",
-          render: (item) => item.role,
-          sorting: "role",
-        },
-        {
-          label: "Manager",
-          render: (item) => ({
-            type: "person",
-            value: {
-              firstName: item.manager.split(" ")[0],
-              lastName: item.manager.split(" ")[1],
-            },
-          }),
-          hide: (item) => item.name.startsWith("D"),
-        },
-
-        {
-          label: "Department",
-          render: (item) => ({
-            type: "dotTag",
-            value: {
-              color: "yellow",
-              label: item.department,
-            },
-          }),
-        },
-      ],
     },
-  },
-  kanban: {
-    type: "kanban",
-    options: {
-      onCreate: (a) => {
-        console.log("onCreate", a)
+    card: {
+      type: "card",
+      options: {
+        title: (item) => item.name,
+        description: (item) => item.role,
+        avatar: (item) => ({
+          type: "person",
+          firstName: item.name.split(" ")[0],
+          lastName: item.name.split(" ")[1],
+        }),
+        image: (item) => item.image,
+        cardProperties: [
+          {
+            label: "Email",
+            icon: Envelope,
+            tooltip: "Email",
+            render: (item) => item.email,
+            hide: (item) => !item.email,
+          },
+          {
+            label: "Role",
+            icon: Briefcase,
+            render: (item) => item.role,
+          },
+          {
+            label: "Department",
+            icon: Building,
+            render: (item) => item.department,
+          },
+          {
+            label: "Manager",
+            icon: Person,
+            render: (item) => ({
+              type: "person",
+              value: {
+                firstName: item.manager.split(" ")[0],
+                lastName: item.manager.split(" ")[1],
+              },
+            }),
+            hide: (item) => item.name.startsWith("D"),
+          },
+          {
+            label: "Teammates",
+            icon: Person,
+            render: (item) => ({
+              type: "avatarList",
+              value: {
+                avatarList: [
+                  {
+                    type: "person",
+                    firstName: item.name,
+                    lastName: "Doe",
+                    src: "/avatars/person01.jpg",
+                  },
+                  {
+                    type: "person",
+                    firstName: "Dani",
+                    lastName: "Moreno",
+                    src: "/avatars/person04.jpg",
+                  },
+                  {
+                    type: "person",
+                    firstName: "Sergio",
+                    lastName: "Carracedo",
+                    src: "/avatars/person05.jpg",
+                  },
+                ],
+              },
+            }),
+          },
+          {
+            label: "Status",
+            icon: CheckCircle,
+            render: (item) => ({
+              type: "status",
+              value: {
+                status: item.status === "active" ? "positive" : "critical",
+                label:
+                  item.status.charAt(0).toUpperCase() + item.status.slice(1),
+              },
+            }),
+          },
+        ],
       },
-      lanes: [
-        {
-          id: "eng",
-          title: "Engineering",
-          variant: "info",
-        },
-        {
-          id: "prod",
-          title: "Product",
-          variant: "neutral",
-        },
-        {
-          id: "design",
-          title: "Design",
-          variant: "positive",
-        },
-        {
-          id: "other",
-          title: "Other",
-          variant: "warning",
-        },
-      ],
-      title: (u) => u.name,
-      description: (u) => u.role,
-      avatar: (u) => ({
-        type: "person",
-        firstName: u.name.split(" ")[0] ?? "",
-        lastName: u.name.split(" ")[1] ?? "",
-      }),
-      metadata: (u) => [
-        {
-          icon: Envelope,
-          tooltip: "Email",
-          property: { type: "text", value: u.email },
-        },
-        {
-          icon: Building,
-          tooltip: "Department",
-          property: { type: "text", value: u.department },
-        },
-        {
-          icon: Briefcase,
-          tooltip: "Role",
-          property: { type: "text", value: u.role },
-        },
-        { icon: Star, tooltip: "ID", property: { type: "text", value: u.id } },
-      ],
-      onMove: options?.cache
-        ? async (
-            _fromLaneId: string,
-            toLaneId: string,
-            sourceRecord: MockUser,
-            _destinyRecord: {
-              record: MockUser
-              position: "above" | "below"
-            } | null
-          ): Promise<MockUser> => {
-            // Map lane ID to department
-            console.log(
-              "onMove",
-              _fromLaneId,
-              toLaneId,
-              sourceRecord,
-              _destinyRecord
-            )
+    },
+    list: {
+      type: "list",
+      options: {
+        itemDefinition: (item) => {
+          const getMockAvatar = (index: number): AvatarVariant => {
+            const avatars = [
+              {
+                type: "person" as const,
+                firstName: item.name.split(" ")[0],
+                lastName: item.name.split(" ")[1],
+                badge: {
+                  type: "module" as const,
+                  module: "inbox" as const,
+                  tooltip: "Inbox",
+                },
+                src: mockImage("person", index),
+              },
+              {
+                type: "company" as const,
+                name: getMockValue(COMPANY_NAMES_MOCK, item.index),
+                src: mockImage("company", index),
+              },
+              {
+                type: "team" as const,
+                name: getMockValue(TEAMS_MOCK, item.index),
+                src: mockImage("team", index),
+              },
+              {
+                type: "icon" as const,
+                icon: getMockValue(MOCK_ICONS, item.index),
+              },
+            ]
 
-            const laneToDepartment: Record<string, string> = {
-              eng: "Engineering",
-              prod: "Product",
-              design: "Design",
-              other: "Marketing",
-            }
-
-            const newDepartment = laneToDepartment[toLaneId]
-
-            // Update cache IMMEDIATELY (before async delay) - simulates Apollo Optimistic Response
-            if (newDepartment && options.cache) {
-              options.cache.updateItemDepartment(sourceRecord.id, newDepartment)
-            }
-
-            // Simulate API call delay AFTER cache update (very short for better UX)
-            await new Promise((resolve) => setTimeout(resolve, 50))
-
-            if (newDepartment) {
-              // Return the updated record
-              return {
-                ...sourceRecord,
-                department: newDepartment as (typeof DEPARTMENTS_MOCK)[number],
-              }
-            }
-
-            // Fallback if no cache
-            return sourceRecord
+            return avatars[index % avatars.length]
           }
-        : undefined,
+          return {
+            title: item.name,
+            description: [item.email, item.role],
+            avatar: getMockAvatar(item.index),
+          }
+        },
+        fields: [
+          {
+            label: "Email",
+            render: (item) => item.email,
+            sorting: "email",
+          },
+          {
+            label: "Role",
+            render: (item) => item.role,
+            sorting: "role",
+          },
+          {
+            label: "Teammates",
+            render: (item) => ({
+              type: "avatarList",
+              value: {
+                max: 1,
+                avatarList: [
+                  {
+                    type: "person",
+                    firstName: item.name,
+                    lastName: "Doe",
+                    src: "/avatars/person01.jpg",
+                  },
+                  {
+                    type: "person",
+                    firstName: "Dani",
+                    lastName: "Moreno",
+                    src: "/avatars/person04.jpg",
+                  },
+                  {
+                    type: "person",
+                    firstName: "Sergio",
+                    lastName: "Carracedo",
+                    src: "/avatars/person05.jpg",
+                  },
+                ],
+              },
+            }),
+            sorting: "role",
+          },
+          {
+            label: "Email 2",
+            render: (item) => item.email,
+            sorting: "email",
+          },
+          {
+            label: "Role 2",
+            render: (item) => item.role,
+            sorting: "role",
+          },
+          {
+            label: "Manager",
+            render: (item) => ({
+              type: "person",
+              value: {
+                firstName: item.manager.split(" ")[0],
+                lastName: item.manager.split(" ")[1],
+              },
+            }),
+            hide: (item) => item.name.startsWith("D"),
+          },
+
+          {
+            label: "Department",
+            render: (item) => ({
+              type: "dotTag",
+              value: {
+                color: "yellow",
+                label: item.department,
+              },
+            }),
+          },
+        ],
+      },
     },
-  },
-})
+    kanban: {
+      type: "kanban",
+      options: {
+        onCreate: (a) => {
+          console.log("onCreate", a)
+        },
+        lanes: [
+          {
+            id: "eng",
+            title: "Engineering",
+            variant: "info",
+          },
+          {
+            id: "prod",
+            title: "Product",
+            variant: "neutral",
+          },
+          {
+            id: "design",
+            title: "Design",
+            variant: "positive",
+          },
+          {
+            id: "other",
+            title: "Other",
+            variant: "warning",
+          },
+        ],
+        title: (u) => u.name,
+        description: (u) => u.role,
+        avatar: (u) => ({
+          type: "person",
+          firstName: u.name.split(" ")[0] ?? "",
+          lastName: u.name.split(" ")[1] ?? "",
+        }),
+        metadata: (u) => [
+          {
+            icon: Envelope,
+            tooltip: "Email",
+            property: { type: "text", value: u.email },
+          },
+          {
+            icon: Building,
+            tooltip: "Department",
+            property: { type: "text", value: u.department },
+          },
+          {
+            icon: Briefcase,
+            tooltip: "Role",
+            property: { type: "text", value: u.role },
+          },
+          {
+            icon: Star,
+            tooltip: "ID",
+            property: { type: "text", value: u.id },
+          },
+        ],
+        onMove: options?.cache
+          ? async (
+              _fromLaneId: string,
+              toLaneId: string,
+              sourceRecord: MockUser,
+              _destinyRecord: {
+                record: MockUser
+                position: "above" | "below"
+              } | null
+            ): Promise<MockUser> => {
+              // Map lane ID to department
+              console.log(
+                "onMove",
+                _fromLaneId,
+                toLaneId,
+                sourceRecord,
+                _destinyRecord
+              )
+
+              const laneToDepartment: Record<string, string> = {
+                eng: "Engineering",
+                prod: "Product",
+                design: "Design",
+                other: "Marketing",
+              }
+
+              const newDepartment = laneToDepartment[toLaneId]
+
+              // Update cache IMMEDIATELY (before async delay) - simulates Apollo Optimistic Response
+              if (newDepartment && options.cache) {
+                options.cache.updateItemDepartment(
+                  sourceRecord.id,
+                  newDepartment
+                )
+              }
+
+              // Simulate API call delay AFTER cache update (very short for better UX)
+              await new Promise((resolve) => setTimeout(resolve, 50))
+
+              if (newDepartment) {
+                // Return the updated record
+                return {
+                  ...sourceRecord,
+                  department:
+                    newDepartment as (typeof DEPARTMENTS_MOCK)[number],
+                }
+              }
+
+              // Fallback if no cache
+              return sourceRecord
+            }
+          : undefined,
+      },
+    },
+  })
 // Example of using the object-based approach (recommended)
 export const sortings = {
   name: {

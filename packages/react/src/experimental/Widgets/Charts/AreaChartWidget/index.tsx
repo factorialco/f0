@@ -6,8 +6,7 @@ import {
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 
-export interface AreaChartWidgetProps
-  extends ComposeChartContainerProps<AreaChartProps> {
+export interface AreaChartWidgetProps extends ComposeChartContainerProps<AreaChartProps> {
   canBeBlurred?: boolean
 }
 

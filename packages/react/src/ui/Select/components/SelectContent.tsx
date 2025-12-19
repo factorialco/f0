@@ -315,7 +315,7 @@ const SelectContent = forwardRef<
     ) : (
       <SelectPrimitive.Portal container={portalContainer}>
         <>
-          {/* 
+          {/*
             Overlay to prevent clicks from propagating.
             Only render when NOT using a custom portal container to avoid
             conflicts with modal focus management.

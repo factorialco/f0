@@ -146,9 +146,9 @@ export function formatDateValue(value: unknown): string {
 function isDateLike(value: unknown): boolean {
   return Boolean(
     value instanceof Date ||
-      (value &&
-        typeof value === "object" &&
-        ("toLocaleDateString" in value || "getTime" in value))
+    (value &&
+      typeof value === "object" &&
+      ("toLocaleDateString" in value || "getTime" in value))
   )
 }
 

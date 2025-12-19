@@ -26,8 +26,9 @@ const daytimePageVariants = cva({
   },
 })
 
-export interface DaytimePageProps
-  extends VariantProps<typeof daytimePageVariants> {
+export interface DaytimePageProps extends VariantProps<
+  typeof daytimePageVariants
+> {
   children?: React.ReactNode
   header?: {
     title: string

@@ -52,9 +52,8 @@ describe("Dashboard", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    const module = await import(
-      "../../../components/Utilities/F0GridStack/F0GridStack"
-    )
+    const module =
+      await import("../../../components/Utilities/F0GridStack/F0GridStack")
     mockF0GridStack = vi.mocked(module.F0GridStack)
   })
 

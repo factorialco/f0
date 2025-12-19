@@ -3,8 +3,9 @@ import { cva, type VariantProps } from "cva"
 import React from "react"
 import { LayoutProvider } from "../LayoutProvider"
 
-export interface StandardLayoutProps
-  extends VariantProps<typeof layoutVariants> {
+export interface StandardLayoutProps extends VariantProps<
+  typeof layoutVariants
+> {
   children?: React.ReactNode
 }
 

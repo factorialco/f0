@@ -101,7 +101,6 @@ Formats a numeric value according to the provided options.
 #### Parameters
 
 - `value` (`NumericValue`): The numeric value to format. Can be either:
-
   - `{ value: number }`: Direct numeric value
   - `{ value_x100: number }`: Value stored as integer × 100
   - Both formats support optional `units` and `unitsPosition` properties

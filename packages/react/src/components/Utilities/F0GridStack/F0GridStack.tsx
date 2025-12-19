@@ -13,8 +13,10 @@ export type GridStackReactOptions = Omit<GridStackOptions, "children">
 
 export type GridStackReactSize = { w: number; h: number }
 
-export interface GridStackReactWidget
-  extends Omit<GridStackWidget, "content" | "id"> {
+export interface GridStackReactWidget extends Omit<
+  GridStackWidget,
+  "content" | "id"
+> {
   id: Required<GridStackWidget>["id"]
   allowedSizes?: GridStackReactSize[]
   content?: React.ReactElement

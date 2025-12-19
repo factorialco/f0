@@ -12,7 +12,8 @@ import {
 } from "./variants"
 
 export interface TextProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "className">,
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, "className">,
     React.RefAttributes<HTMLElement> {
   /**
    * Content to be rendered

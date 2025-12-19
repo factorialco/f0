@@ -166,8 +166,8 @@ export type BaseDataAdapter<
 export type PaginatedDataAdapter<
   R extends RecordType,
   Filters extends FiltersDefinition,
-  Options extends
-    PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>,
+  Options extends PaginatedFetchOptions<Filters> =
+    PaginatedFetchOptions<Filters>,
   FetchReturn = PaginatedResponse<R>,
 > = {
   /** Indicates this adapter uses page-based pagination */
