@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.314.0](https://github.com/factorialco/f0/compare/f0-react-v1.313.0...f0-react-v1.314.0) (2025-12-20)
+
+
+### Features
+
+* add useBubbleMenu prop to NotesTextEditor ([#3160](https://github.com/factorialco/f0/issues/3160)) ([c034259](https://github.com/factorialco/f0/commit/c0342593d187238ad5faa1a86dbd225155c32f28))
+
 ## [1.313.0](https://github.com/factorialco/f0/compare/f0-react-v1.312.0...f0-react-v1.313.0) (2025-12-19)
 
 
