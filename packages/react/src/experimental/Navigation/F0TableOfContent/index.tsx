@@ -1,5 +1,7 @@
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
@@ -39,17 +41,19 @@ function renderTOCItem(
     }
   }
 
+  const componentProps = {
+    key: item.id,
+    item: item,
+    isActive: activeItem === item.id,
+    collapsible: collapsible && item.children && item.children.length > 0,
+    isExpanded: isExpanded,
+    onToggleExpanded: onToggleExpanded,
+    sortable: sortable,
+    hideChildrenCounter: hideChildrenCounter,
+  }
+
   return (
-    <Component
-      key={item.id}
-      item={item}
-      isActive={activeItem === item.id}
-      collapsible={collapsible && item.children && item.children.length > 0}
-      isExpanded={isExpanded}
-      onToggleExpanded={onToggleExpanded}
-      sortable={sortable}
-      hideChildrenCounter={hideChildrenCounter}
-    >
+    <Component {...componentProps}>
       {item.children &&
         (Component === ItemSectionHeader || isExpanded) &&
         (sortable ? (
@@ -104,10 +108,13 @@ function TOCContent({
   searchPlaceholder,
   onReorder,
   hideChildrenCounter = false,
+  addItemActions,
 }: TOCProps) {
   const i18n = useI18n()
 
   const [searchValue, setSearchValue] = useState("")
+  const [isHovered, setIsHovered] = useState(false)
+  const [addDropdownOpen, setAddDropdownOpen] = useState(false)
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value)
@@ -197,6 +204,8 @@ function TOCContent({
       )}
       aria-label={title}
       ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex-shrink-0 pb-2 pl-5 pr-4 pt-5">
         {showSearchBox && (
@@ -258,6 +267,41 @@ function TOCContent({
                 handleUpdateItem
               )
             )
+          )}
+          {addItemActions && addItemActions.length > 0 && (
+            <div
+              className={cn(
+                "mt-1 transition-opacity duration-200",
+                isHovered || addDropdownOpen ? "opacity-100" : "opacity-0"
+              )}
+              onMouseEnter={() => setIsHovered(true)}
+            >
+              <Dropdown
+                items={addItemActions.map((action): DropdownItem => {
+                  if ("type" in action && action.type === "separator") {
+                    return action as DropdownItem
+                  }
+                  return {
+                    ...action,
+                    type: "item" as const,
+                  } as DropdownItem
+                })}
+                open={addDropdownOpen}
+                onOpenChange={setAddDropdownOpen}
+              >
+                <button
+                  className={cn(
+                    "group flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-transparent text-sm font-medium text-f1-foreground-tertiary transition-all",
+                    "hover:border-f1-border hover:bg-f1-background-hover hover:text-f1-foreground-secondary",
+                    addDropdownOpen &&
+                      "border-f1-border bg-f1-background-hover text-f1-foreground-secondary"
+                  )}
+                >
+                  <Add className="h-4 w-4" />
+                  <span className="text-[13px]">Add item</span>
+                </button>
+              </Dropdown>
+            </div>
           )}
         </div>
       </ScrollArea>

@@ -238,3 +238,36 @@ export const HideChildrenCounter: Story = {
     },
   },
 }
+
+export const WithAddItemActions: Story = {
+  args: {
+    addItemActions: [
+      {
+        label: "Add Page",
+        onClick: fn(),
+        icon: Placeholder,
+      },
+      {
+        label: "Add Section",
+        onClick: fn(),
+        icon: Placeholder,
+      },
+      {
+        type: "separator",
+      },
+      {
+        label: "Add Quiz",
+        onClick: fn(),
+        icon: Placeholder,
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Shows a '+' button at the end of all items that appears on hover over the component. The button stays visible when hovering over it to allow interaction.",
+      },
+    },
+  },
+}

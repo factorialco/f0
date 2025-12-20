@@ -46,4 +46,6 @@ export interface TOCProps {
   showSearchBox?: boolean
   searchPlaceholder?: string
   hideChildrenCounter?: boolean
+  onAddItem?: (afterId: string) => void
+  addItemActions?: TOCItemAction[]
 }
