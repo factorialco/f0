@@ -1,6 +1,10 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { Toolbar, ToolbarLabels } from "@/experimental/RichText/CoreEditor"
+import {
+  EditorBubbleMenu,
+  Toolbar,
+  ToolbarLabels,
+} from "@/experimental/RichText/CoreEditor"
 import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
 import { Handle, Plus } from "@/icons/app"
 import { ScrollArea } from "@/ui/scrollarea"
@@ -52,6 +56,7 @@ interface NotesTextEditorProps {
   secondaryActions?: secondaryActionsType[]
   metadata?: MetadataItemValue[]
   withPadding?: boolean
+  showBubbleMenu?: boolean
 }
 
 const NotesTextEditorComponent = forwardRef<
@@ -69,7 +74,8 @@ const NotesTextEditorComponent = forwardRef<
     actions,
     secondaryActions,
     metadata,
-    withPadding: _withPadding = false,
+    withPadding = true,
+    showBubbleMenu = false,
   },
   ref
 ) {
@@ -81,7 +87,6 @@ const NotesTextEditorComponent = forwardRef<
     liveCompanionLabels,
     transcriptLabels,
   } = labels
-
   const containerRef = useRef<HTMLDivElement>(null)
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
   const editorId = useId()
@@ -244,7 +249,7 @@ const NotesTextEditorComponent = forwardRef<
           secondaryActions={secondaryActions}
         />
       )}
-      {!readonly && (
+      {!readonly && !showBubbleMenu && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
           <Toolbar
             labels={toolbarLabels}
@@ -257,7 +262,9 @@ const NotesTextEditorComponent = forwardRef<
       )}
       <ScrollArea className="h-full gap-6">
         {showTitle && (
-          <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-4 pt-5 transition-all duration-300">
+          <div
+            className={`mx-auto flex w-full max-w-[824px] flex-col pb-4 pt-5 transition-all duration-300 ${withPadding ? "px-14" : "pl-12"}`}
+          >
             <input
               disabled={!onTitleChange || readonly}
               value={title}
@@ -302,10 +309,21 @@ const NotesTextEditorComponent = forwardRef<
 
           <EditorContent
             editor={editor}
-            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14 [&>div]:transition-[padding] [&>div]:duration-300"
+            className={`pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 ${withPadding ? "[&>div]:px-14" : "[&>div]:pl-12"}`}
           />
         </div>
       </ScrollArea>
+      {!readonly && (
+        <EditorBubbleMenu
+          editorId={editorId}
+          editor={editor}
+          disableButtons={false}
+          toolbarLabels={toolbarLabels}
+          isToolbarOpen={!showBubbleMenu}
+          isFullscreen
+          plainHtmlMode={false}
+        />
+      )}
     </div>
   )
 })
