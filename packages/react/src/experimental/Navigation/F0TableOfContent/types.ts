@@ -48,4 +48,5 @@ export interface TOCProps {
   hideChildrenCounter?: boolean
   onAddItem?: (afterId: string) => void
   addItemActions?: TOCItemAction[]
+  addItemLabel?: string
 }

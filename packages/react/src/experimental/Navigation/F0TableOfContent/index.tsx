@@ -109,6 +109,7 @@ function TOCContent({
   onReorder,
   hideChildrenCounter = false,
   addItemActions,
+  addItemLabel = "Add item",
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -298,7 +299,7 @@ function TOCContent({
                   )}
                 >
                   <Add className="h-4 w-4" />
-                  <span className="text-[13px]">Add item</span>
+                  <span className="text-[13px]">{addItemLabel}</span>
                 </button>
               </Dropdown>
             </div>

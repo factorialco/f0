@@ -261,12 +261,27 @@ export const WithAddItemActions: Story = {
         icon: Placeholder,
       },
     ],
+    addItemLabel: "Add item",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Shows a '+' button at the end of all items that appears on hover over the component. The button stays visible when hovering over it to allow interaction.",
+          "Shows a '+' button at the end of all items that appears on hover over the component. The button stays visible when hovering over it to allow interaction. You can customize the button label with the addItemLabel prop.",
+      },
+    },
+  },
+}
+
+export const WithCustomAddLabel: Story = {
+  args: {
+    ...WithAddItemActions.args,
+    addItemLabel: "Add new content",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Example with a custom label for the add button.",
       },
     },
   },
