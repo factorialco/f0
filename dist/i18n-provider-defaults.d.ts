@@ -164,6 +164,14 @@ export declare const defaultTranslations: {
             readonly all: "All selected";
         };
     };
+    readonly syncStatus: {
+        readonly synced: "Sync completed successfully.";
+        readonly syncing: "Sync in progress.";
+        readonly pending: "Not yet started.";
+        readonly partiallySynced: "All aggregated data was synced but at least 1 failed.";
+        readonly outdated: "Data might need to be synced again.";
+        readonly failed: "Sync failed.";
+    };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
         readonly inFilter: {

@@ -79,6 +79,7 @@ import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from '../../value-display/types/status';
 import { SVGProps } from 'react';
+import { SyncStatusCellValue } from './types/syncStatus';
 import { TagCellValue } from './types/tag';
 import { TagCellValue as TagCellValue_2 } from '../../value-display/types/tag';
 import { TagListCellValue } from './types/tagList';
@@ -815,7 +816,7 @@ export declare const BaseCelebration: ({ link, firstName, lastName, src, onClick
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, dropdownItems, noReactionsButton, noVideoPreload, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1406,13 +1407,13 @@ declare type ChartItem<K extends ChartConfig> = {
     };
 };
 
-export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>;
+export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
 
 declare type ChatTextareaProps = InputProps_2 & {
     submitLabel?: string;
 };
 
-export declare type ChatWidgetEmptyStateProps = Props_5;
+export declare type ChatWidgetEmptyStateProps = Props_4;
 
 declare type ChildrenPaginationInfo = {
     total: number;
@@ -1567,7 +1568,7 @@ declare const columnWidths: {
     readonly fit: 1;
 };
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, dropdownItems, noReactionsButton, noVideoPreload, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -1669,8 +1670,6 @@ declare type Content = (ComponentProps<typeof DataList.Item> & {
 }) | (ComponentProps<typeof DataList.DotTagItem> & {
     type: "dot-tag";
 });
-
-declare type ContentPadding = (typeof modalContentPaddings)[number];
 
 declare type CopyActionType = {
     type: "copy";
@@ -2278,6 +2277,14 @@ declare const defaultTranslations: {
             readonly plural: "Selected";
             readonly all: "All selected";
         };
+    };
+    readonly syncStatus: {
+        readonly synced: "Sync completed successfully.";
+        readonly syncing: "Sync in progress.";
+        readonly pending: "Not yet started.";
+        readonly partiallySynced: "All aggregated data was synced but at least 1 failed.";
+        readonly outdated: "Data might need to be synced again.";
+        readonly failed: "Sync failed.";
     };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
@@ -3051,9 +3058,26 @@ export { F0SelectProps as SelectProps }
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 
-declare const F0TagAlert: ForwardRefExoticComponent<Props_8 & RefAttributes<HTMLDivElement>>;
+declare const F0TagAlert: ForwardRefExoticComponent<Props_7 & RefAttributes<HTMLDivElement>>;
 
-declare const F0TagRaw: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
+declare const F0TagRaw: ForwardRefExoticComponent<F0TagRawProps & RefAttributes<HTMLDivElement>>;
+
+declare type F0TagRawProps = {
+    /**
+     * The label to display in the tag or used for accessible text
+     */
+    text: string;
+    /**
+     * Additional accessible text to display in the tag
+     */
+    additionalAccessibleText?: string;
+} & ({
+    icon: IconType;
+    onlyIcon: true;
+} | {
+    icon?: IconType;
+    onlyIcon?: boolean;
+});
 
 export declare function F0VersionHistory({ title, versions, currentVersion, activeVersionId, }: F0VersionHistoryProps): JSX_2.Element;
 
@@ -3602,7 +3626,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "size" | "icon" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "labelIcon" | "onClickContent" | "hint" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "size" | "icon" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -3776,7 +3800,9 @@ export declare type lastIntentType = {
     customIntent?: string;
 } | null;
 
-declare type Level = "info" | "warning" | "critical" | "positive";
+declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: LineChartProps;
@@ -3994,8 +4020,6 @@ declare interface MetadataProps {
 
 export declare const MobileDropdown: ({ items, children }: DropdownProps) => JSX_2.Element;
 
-declare const modalContentPaddings: readonly ["sm", "md"];
-
 declare type ModalPosition = (typeof modalPositions)[number];
 
 declare const modalPositions: readonly ["center", "left", "right", "fullscreen"];
@@ -4187,7 +4211,7 @@ declare type NestedResponseWithType<R extends RecordType> = {
 
 declare type NestedVariant = "basic" | "detailed";
 
-declare type NewColor = Extract<BaseColor, "viridian" | "malibu" | "yellow" | "purple" | "lilac" | "barbie" | "smoke" | "army" | "flubber" | "indigo" | "camel">;
+declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
 
 declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
 
@@ -4233,6 +4257,7 @@ export declare interface NotesTextEditorProps {
     secondaryActions?: secondaryActionsType_2[];
     metadata?: MetadataItemValue_2[];
     withPadding?: boolean;
+    showBubbleMenu?: boolean;
 }
 
 export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
@@ -4566,8 +4591,6 @@ declare type OneModalProps = {
     onClose: () => void;
     /** Whether to render the modal as a bottom sheet on mobile */
     asBottomSheetInMobile?: boolean;
-    /** the padding of internal content areas (header, content, footer) */
-    contentPadding?: ContentPadding;
     /** The position of the modal */
     position?: ModalPosition;
     /** The width of the modal. Only applies to center position but we can NOT use narrowing as position undefined is valid */
@@ -4631,7 +4654,7 @@ export declare type OnePersonListItemProps = {
         avatarBadge?: AvatarBadge;
     };
     description?: string;
-    bottomTags: Omit<Props_4, "noBorder">[];
+    bottomTags: Omit<F0TagRawProps, "noBorder">[];
     rightTag?: Props_3;
     actions?: {
         primary?: {
@@ -4827,7 +4850,7 @@ declare type PostDescriptionProps = {
 
 declare type PostEventProps = {
     title: string;
-    imageUrl?: string;
+    mediaUrl?: string;
     place?: string;
     date: Date;
 };
@@ -4843,6 +4866,12 @@ export declare type PresetDefinition<Filters extends FiltersDefinition> = {
     label: string;
     /** Filter configuration to apply when this preset is selected */
     filter: FiltersState<Filters>;
+    /**
+     * How the preset is applied when clicked:
+     * - 'replace' (default): Replace all current filters with preset's filter
+     * - 'additive': Merge preset's filter with current filters, preserving existing selections
+     */
+    mode?: "replace" | "additive";
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
@@ -4997,14 +5026,6 @@ declare type PropertyDefinition_2<T> = {
 
 declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status">;
 
-declare type Props_10<Id extends string | number = string | number> = {
-    items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
-    minSize?: number;
-    gap?: number;
-    onClickItem?: (id: Id) => void;
-    showAllItems?: boolean;
-};
-
 declare type Props_2 = {
     /** Main heading text */
     title: string;
@@ -5033,14 +5054,6 @@ declare type Props_3 = {
 });
 
 declare interface Props_4 {
-    text?: string;
-    additionalAccesibleText?: string;
-    icon?: IconType;
-    noBorder?: boolean;
-    className?: string;
-}
-
-declare interface Props_5 {
     title: string;
     content: string;
     buttonLabel?: string;
@@ -5049,7 +5062,7 @@ declare interface Props_5 {
     type: Type;
 }
 
-declare type Props_6 = {
+declare type Props_5 = {
     label: string;
     icon: IconType;
     iconClassName?: string;
@@ -5057,7 +5070,7 @@ declare type Props_6 = {
     onClick?: () => void;
 };
 
-declare type Props_7<Id extends string | number = string | number> = {
+declare type Props_6<Id extends string | number = string | number> = {
     id: Id;
     module?: ModuleId;
     title: string;
@@ -5065,17 +5078,25 @@ declare type Props_7<Id extends string | number = string | number> = {
     onClick?: (id: Id) => void;
 };
 
-declare type Props_8<Text extends string = string> = {
+declare type Props_7<Text extends string = string> = {
     text: Text extends "" ? never : Text;
     level: Level;
 };
 
-declare type Props_9<Id extends string | number = string | number> = {
+declare type Props_8<Id extends string | number = string | number> = {
     items: Omit<WidgetInboxListItemProps<Id>, "onClick">[];
     minSize?: number;
     onClickItem?: (id: Id) => void;
     showAllItems?: boolean;
 } & Pick<ComponentProps<typeof VerticalOverflowList>, "onVisibleItemsChange">;
+
+declare type Props_9<Id extends string | number = string | number> = {
+    items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
+    minSize?: number;
+    gap?: number;
+    onClickItem?: (id: Id) => void;
+    showAllItems?: boolean;
+};
 
 declare type Pulse = (typeof pulses)[number];
 
@@ -5570,6 +5591,8 @@ className?: ClassValue;
 
 declare type Status = "waiting" | "pending" | "approved" | "rejected";
 
+declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
 declare type StatusVariant = Variant;
 
 declare interface StepItemProps {
@@ -5789,6 +5812,8 @@ declare type Tag = {
     description?: string;
 };
 
+declare const tagDotColors: ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
+
 declare interface Task {
     id: number | string;
     text: string;
@@ -5831,7 +5856,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "icon" | "maxLength" | "placeholder" | "error" | "hideLabel" | "labelIcon" | "hint" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "icon" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 
@@ -6168,11 +6193,12 @@ declare const valueDisplayRenderers: {
     readonly file: (args: FileCellValue) => JSX_2.Element;
     readonly folder: (args: FolderCellValue) => JSX_2.Element;
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly syncStatus: (args: SyncStatusCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
 };
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
-declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
+declare type Variant = (typeof statuses)[number];
 
 declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
 
@@ -6311,15 +6337,15 @@ export declare type WidgetEmptyStateProps = {
     actions?: Action_2[];
 };
 
-export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_6): JSX_2.Element;
+export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_5): JSX_2.Element;
 
-export declare function WidgetInboxList({ items, minSize, onClickItem, showAllItems, onVisibleItemsChange, }: Props_9): JSX_2.Element;
+export declare function WidgetInboxList({ items, minSize, onClickItem, showAllItems, onVisibleItemsChange, }: Props_8): JSX_2.Element;
 
-export declare function WidgetInboxListItem({ id, title, subtitle, onClick, module, }: Props_7): JSX_2.Element;
+export declare function WidgetInboxListItem({ id, title, subtitle, onClick, module, }: Props_6): JSX_2.Element;
 
-export declare type WidgetInboxListItemProps<Id extends string | number = string | number> = Props_7<Id>;
+export declare type WidgetInboxListItemProps<Id extends string | number = string | number> = Props_6<Id>;
 
-export declare type WidgetInboxListProps = Props_9;
+export declare type WidgetInboxListProps = Props_8;
 
 export declare interface WidgetProps {
     header?: {
@@ -6357,7 +6383,7 @@ children?: ReactNode | undefined;
 title?: string;
 } & RefAttributes<HTMLDivElement>>;
 
-export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_10): JSX_2.Element;
+export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_9): JSX_2.Element;
 
 export declare function WidgetSimpleListItem({ id, title, alert, rawTag, count, icon, rightIcon, iconClassName, rightIconClassName, onClick, }: WidgetSimpleListItemProps): JSX_2.Element;
 
@@ -6374,7 +6400,7 @@ export declare type WidgetSimpleListItemProps<Id extends string | number = strin
     onClick?: (id: Id) => void;
 };
 
-export declare type WidgetSimpleListProps = Props_10;
+export declare type WidgetSimpleListProps = Props_9;
 
 export declare type WidgetSkeletonProps = {
     header?: {

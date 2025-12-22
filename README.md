@@ -81,6 +81,6 @@ import "@factorialco/f0-react/dist/styles.css"
 
 You can then utilize any of its components:
 
-```
+```tsx
 import { Button } from "@factorialco/f0-react"
 ```

@@ -10,6 +10,7 @@ import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { AvatarProps as AvatarProps_2 } from '@radix-ui/react-avatar';
 import { baseColors } from '@factorialco/f0-core';
+import { BigNumberProps as BigNumberProps_2 } from './types';
 import { BlockContentExtraProps } from './blocks/BlockContent';
 import { BlockProps } from './blocks/Block';
 import { CategoryBarProps } from './CategoryBarChart';
@@ -79,6 +80,7 @@ import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from '../../value-display/types/status';
 import { StatusCellValue as StatusCellValue_2 } from './types/status';
 import { SVGProps } from 'react';
+import { SyncStatusCellValue } from './types/syncStatus';
 import { TagCellValue } from '../../value-display/types/tag';
 import { TagCellValue as TagCellValue_2 } from './types/tag';
 import { TagListCellValue } from '../../value-display/types/tagList';
@@ -561,6 +563,14 @@ declare type BaseTag<T extends {
     type: string;
 }> = T & WithTooltipDescription;
 
+export declare type BigNumberProps = {
+    value: Numeric | NumberWithFormatter | number;
+    label?: string;
+    trend?: boolean | TrendConfig;
+    comparisonHint?: string;
+    comparison: Numeric | NumberWithFormatter | number;
+};
+
 export declare const buildTranslations: (translations: TranslationsType) => TranslationsType;
 
 /**
@@ -727,6 +737,10 @@ export declare const buttonSizes: readonly ["sm", "md", "lg"];
 export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
 
 export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonToggleVariant = (typeof buttonToggleVariants)[number];
+
+export declare const buttonToggleVariants: readonly ["compact", "expanded"];
 
 declare type ButtonType = (typeof buttonTypes)[number];
 
@@ -1641,6 +1655,14 @@ export declare const defaultTranslations: {
             readonly all: "All selected";
         };
     };
+    readonly syncStatus: {
+        readonly synced: "Sync completed successfully.";
+        readonly syncing: "Sync in progress.";
+        readonly pending: "Not yet started.";
+        readonly partiallySynced: "All aggregated data was synced but at least 1 failed.";
+        readonly outdated: "Data might need to be synced again.";
+        readonly failed: "Sync failed.";
+    };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
         readonly inFilter: {
@@ -2208,6 +2230,13 @@ export declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
+export declare const F0BigNumber: {
+    ({ label, ...props }: BigNumberProps_2): JSX_2.Element;
+    displayName: string;
+} & {
+    Skeleton: () => JSX_2.Element;
+};
+
 export declare const F0Button: ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 } & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>;
@@ -2262,15 +2291,7 @@ export declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privatePro
 
 export declare const F0ButtonToggle: ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>;
 
-export declare interface F0ButtonToggleProps {
-    /**
-     * Whether the button is in selected/active state.
-     */
-    selected?: boolean;
-    /**
-     * Callback fired when the button is selected.
-     */
-    onSelectedChange?: (selected: boolean) => void;
+declare type F0ButtonToggleInternalProps = {
     /**
      * The accessible label for the button.
      */
@@ -2288,7 +2309,29 @@ export declare interface F0ButtonToggleProps {
      * @default "md"
      */
     size?: ButtonToggleSize;
-}
+    /**
+     * The variant of the button.
+     * @default "compact"
+     * "compact" - The button will only show the icon.
+     * "expanded" - The button will show the icon and the label.
+     */
+    variant?: ButtonToggleVariant;
+    /**
+     * @private
+     * Whether to show a border around the button toggle.
+     */
+    withBorder?: boolean;
+} & ({
+    selected: boolean;
+    onSelectedChange: (selected: boolean) => void;
+    defaultSelected?: undefined;
+} | {
+    defaultSelected?: boolean;
+    selected?: undefined;
+    onSelectedChange?: undefined;
+});
+
+export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
 
 export declare const F0Card: ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: ({ compact }: {
@@ -2296,7 +2339,7 @@ export declare const F0Card: ForwardRefExoticComponent<F0CardProps & RefAttribut
     }) => JSX_2.Element;
 };
 
-export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_2)[number]>;
+export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -2578,11 +2621,16 @@ export declare const F0TagCompany: ForwardRefExoticComponent<TagCompanyProps & R
 export declare const F0TagDot: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLDivElement>>;
 
 export declare const F0TagList: {
-    <T extends TagType>({ type, tags, max, remainingCount: initialRemainingCount, layout, }: TagListProps<T>): JSX_2.Element;
+    <T extends TagType>({ type, tags, max, remainingCount: initialRemainingCount, }: TagListProps<T>): JSX_2.Element;
     displayName: string;
 };
 
-export declare const F0TagPerson: ForwardRefExoticComponent<TagPersonProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>;
+
+export declare type F0TagPersonProps = {
+    src?: string;
+    name: string;
+};
 
 export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
 
@@ -3225,7 +3273,9 @@ declare const layoutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare type Level = "info" | "warning" | "critical" | "positive";
+export declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
@@ -3395,7 +3445,7 @@ declare type NestedResponseWithType<R extends RecordType> = {
 
 declare type NestedVariant = "basic" | "detailed";
 
-export declare type NewColor = Extract<BaseColor, "viridian" | "malibu" | "yellow" | "purple" | "lilac" | "barbie" | "smoke" | "army" | "flubber" | "indigo" | "camel">;
+export declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
 
 export declare interface NextStepsProps {
     title: string;
@@ -3427,6 +3477,129 @@ declare type NumberFilterValue = {
         closed: boolean;
     };
 } | undefined;
+
+export declare type NumberWithFormatter = NumericWithFormatter & {
+    animated?: boolean;
+};
+
+declare type Numeric = NumericValue | number | undefined | null;
+
+/**
+ * Formats a numeric value according to the provided options.
+ *
+ * @param value - The numeric value to format.
+ * @param options - The formatting options.
+ * @returns The formatted value as a string.
+ */
+declare type NumericFormatter = (value: Numeric, options?: NumericFormatterOptions) => string;
+
+/**
+ * Configuration options for the numeric formatter.
+ */
+declare type NumericFormatterOptions = {
+    /**
+     * Locale string for number formatting (e.g., "en-US", "es-ES", "de-DE").
+     * Determines the decimal separator and other locale-specific formatting rules.
+     *
+     * @default "en-US"
+     */
+    locale?: string;
+    /**
+     * Maximum number of decimal places to display.
+     * The formatter will round the number to this precision.
+     *
+     * @default 2
+     */
+    decimalPlaces?: number;
+    /**
+     * Whether to hide the units from the formatted value.
+     *
+     * @default false
+     */
+    hideUnits?: boolean;
+    /**
+     * Whether to space the units from the formatted value.
+     *
+     * @default false
+     */
+    unitsSpaced?: boolean;
+    /**
+     * Whether to use compact notation for the formatted value.
+     *
+     * @default false
+     */
+    compact?: boolean;
+    /**
+     * Placeholder text to return when value is undefined or null.
+     */
+    emptyPlaceholder?: string;
+    /**
+     * Whether to use grouping for the formatted value.
+     *
+     * @default true
+     */
+    useGrouping?: boolean;
+};
+
+/**
+ * Represents a numeric value that can be formatted with optional units.
+ *
+ * The value can be provided in two formats:
+ * - `value`: Direct numeric value (e.g., 123.45)
+ * - `value_x100`: Value stored as integer multiplied by 100 (e.g., 12345 represents 123.45)
+ *
+ * @example
+ * ```ts
+ * // Direct value
+ * const directValue: NumericValue = { value: 123.45, units: "€" }
+ *
+ * // Value stored as x100 (useful for avoiding floating point precision issues)
+ * const x100Value: NumericValue = { value_x100: 12345, units: "€" }
+ * ```
+ */
+declare type NumericValue = {
+    /**
+     * Optional unit string to append or prepend to the formatted number.
+     * Common examples: "€", "$", "kg", "%", etc.
+     */
+    units?: string;
+    /**
+     * Position of the units relative to the number.
+     * - "prepend": Units appear before the number (e.g., "$123.45")
+     * - "append": Units appear after the number (e.g., "123.45€")
+     *
+     * @default "append"
+     */
+    unitsPosition?: "prepend" | "append";
+} & ({
+    /**
+     * Direct numeric value to format.
+     */
+    value: number | undefined;
+} | {
+    /**
+     * Numeric value stored as an integer multiplied by 100.
+     * This format is useful for avoiding floating-point precision issues.
+     * The formatter will automatically divide by 100 before formatting.
+     *
+     * @example
+     * value_x100: 12345 represents 123.45
+     */
+    value_x100: number | undefined;
+});
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ *
+ * @param value - The numeric value to format.
+ * @param formatter - The formatter to use.
+ * @param formatterOptions - The formatting options.
+ */
+declare type NumericWithFormatter = {
+    numericValue: NumericValue;
+    formatter?: NumericFormatter;
+    formatterOptions?: NumericFormatterOptions;
+};
 
 declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
@@ -3585,6 +3758,12 @@ export declare type PresetDefinition<Filters extends FiltersDefinition> = {
     label: string;
     /** Filter configuration to apply when this preset is selected */
     filter: FiltersState<Filters>;
+    /**
+     * How the preset is applied when clicked:
+     * - 'replace' (default): Replace all current filters with preset's filter
+     * - 'additive': Merge preset's filter with current filters, preserving existing selections
+     */
+    mode?: "replace" | "additive";
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
@@ -3615,7 +3794,9 @@ export declare const PrivacyModeProvider: React_2.FC<{
 
 declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
 
-declare const privateProps_2: readonly ["forceVerticalMetadata", "disableOverlayLink"];
+declare const privateProps_2: readonly ["withBorder"];
+
+declare const privateProps_3: readonly ["forceVerticalMetadata", "disableOverlayLink"];
 
 export declare const ProductBlankslate: ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>;
 
@@ -3833,6 +4014,14 @@ declare type RegularAction = BaseAction & {
     variant: ButtonVariant;
 };
 
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
+ */
+declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericValue"> & {
+    numericValue: Numeric;
+};
+
 declare type RendererDefinition = ValueDisplayRendererDefinition;
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
@@ -3975,7 +4164,11 @@ export declare interface StandardLayoutProps extends VariantProps<typeof layoutV
     children?: default_2.ReactNode;
 }
 
-export declare type Status = "positive" | "neutral" | "negative";
+export declare type Status = (typeof statuses_2)[number];
+
+declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
+declare const statuses_2: readonly ["positive", "neutral", "negative"];
 
 export declare type StatusVariant = Variant;
 
@@ -4109,20 +4302,48 @@ declare type TableVisualizationSettings = {
     hidden: ColId[];
 };
 
+export declare const Tag: ({ tag }: {
+    tag: TagVariant;
+}) => ReactNode;
+
 export declare type TagAlertProps<Text extends string = string> = {
     text: Text extends "" ? never : Text;
     level: Level;
 };
 
-export declare interface TagBalanceProps {
-    text: string;
-    status: Status;
-}
+export declare type TagBalanceProps = {
+    /**
+     * Inverts the balance status color. Is useful when a negative percent mean something positive.
+     */
+    invertStatus?: boolean;
+    /**
+     * Hint text to display next to the tag (This text is not displayed when the balance is null or undefined)
+     */
+    hint?: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+    /**
+     * Text to display when the balance is null or undefined
+     */
+    nullText?: string;
+    /**
+     * Value to display next to the tag can be a number, a Numeric or a NumericWithFormatter
+     */
+    amount: RelaxedNumericWithFormatter | Numeric;
+} & ({
+    percentage: (Omit<RelaxedNumericWithFormatter, "value"> & {
+        value: Omit<Numeric, "units" | "unitsPosition">;
+    }) | Omit<Numeric, "units" | "unitsPosition">;
+} | {
+    percentage?: null;
+    formatterOptions?: undefined;
+});
 
 export declare interface TagCompanyProps {
-    companyName: string;
-    companyImageUrl: string;
-    onClick?: () => void;
+    name: string;
+    src?: string;
 }
 
 export declare const TagCounter: {
@@ -4136,7 +4357,7 @@ declare type TagDataType<T extends string> = Omit<Extract<TagVariant, {
     type: T;
 }>, "type" | "description">;
 
-export declare const tagDotColors: NewColor[];
+export declare const tagDotColors: ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
 export declare type TagDotProps = {
     text: string;
@@ -4154,7 +4375,7 @@ export declare type TagListProps<T extends TagType> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T] & WithTooltipDescription_2>;
+    tags: Array<TagTypeMapping[T]>;
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -4164,28 +4385,24 @@ export declare type TagListProps<T extends TagType> = {
      * The remaining number to display.
      */
     remainingCount?: number;
-    /**
-     * The layout of the tag list.
-     * - "fill" - Tags will expand to fill the available width, with overflow items shown in a counter
-     * - "compact" - Tags will be stacked together up to the max limit, with remaining shown in counter
-     * @default "compact"
-     */
-    layout?: "fill" | "compact";
 };
 
-export declare interface TagPersonProps {
-    name: string;
-    avatarUrl: string;
-    onClick?: () => void;
-}
-
-export declare interface TagRawProps {
-    text?: string;
-    additionalAccesibleText?: string;
+export declare type TagRawProps = {
+    /**
+     * The label to display in the tag or used for accessible text
+     */
+    text: string;
+    /**
+     * Additional accessible text to display in the tag
+     */
+    additionalAccessibleText?: string;
+} & ({
+    icon: IconType;
+    onlyIcon: true;
+} | {
     icon?: IconType;
-    noBorder?: boolean;
-    className?: string;
-}
+    onlyIcon?: boolean;
+});
 
 export declare interface TagStatusProps {
     text: string;
@@ -4194,16 +4411,15 @@ export declare interface TagStatusProps {
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
      */
-    additionalAccesibleText?: string;
+    additionalAccessibleText?: string;
 }
 
 export declare interface TagTeamProps {
-    teamName: string;
-    teamImageUrl: string;
-    onClick?: () => void;
+    name: string;
+    src?: string;
 }
 
-export declare type TagType = keyof TagTypeMapping;
+export declare type TagType = (typeof tagTypes)[number];
 
 declare type TagTypeMapping = {
     dot: TagDataType<"dot">;
@@ -4216,7 +4432,9 @@ declare type TagTypeMapping = {
     raw: TagDataType<"raw">;
 };
 
-declare type TagVariant = BaseTag<{
+declare const tagTypes: readonly ["dot", "person", "team", "company", "alert", "status", "balance", "raw"];
+
+export declare type TagVariant = BaseTag<{
     type: "dot";
 } & TagDotProps> | BaseTag<{
     type: "person";
@@ -4311,6 +4529,11 @@ declare type TranslationShape<T> = {
 };
 
 export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
+
+export declare type TrendConfig = {
+    show?: boolean;
+    invertStatus?: boolean;
+};
 
 export declare const TwoColumnLayout: ForwardRefExoticComponent<Omit<TwoColumnLayoutProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
@@ -4710,11 +4933,12 @@ declare const valueDisplayRenderers: {
     readonly file: (args: FileCellValue_2) => JSX_2.Element;
     readonly folder: (args: FolderCellValue_2) => JSX_2.Element;
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly syncStatus: (args: SyncStatusCellValue, context: ValueDisplayRendererContext_2) => JSX_2.Element;
 };
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
-export declare type Variant = "neutral" | "info" | "positive" | "warning" | "critical";
+export declare type Variant = (typeof statuses)[number];
 
 export declare const VerticalBarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
@@ -4763,10 +4987,6 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
-
-declare type WithTooltipDescription_2 = {
-    description?: string;
-};
 
 export { }
 
