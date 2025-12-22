@@ -532,14 +532,15 @@ export function useSelectable<
    * Clears all selections
    */
   const clearSelectedItems = useCallback(() => {
-    handleSelectAll(false)
+    setAllSelectedCheck(false)
+    wasExplicitSelectAll.current = false
     setSelectAllTotal(null)
+    setGroupsState(new Map())
     setLocalSelectedState(() => ({
       allSelected: false,
       items: new Map(),
       groups: new Map(),
     }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Sync allSelected state back to localSelectedState
@@ -574,12 +575,15 @@ export function useSelectable<
       return
     }
 
-    if (previousFilters.current !== source.currentFilters) {
+    // Deep comparison of filters to detect changes
+    const currentFiltersKey = JSON.stringify(source.currentFilters)
+    const previousFiltersKey = JSON.stringify(previousFilters.current)
+
+    if (currentFiltersKey !== previousFiltersKey) {
       clearSelectedItems()
       previousFilters.current = source.currentFilters
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source.currentFilters])
+  }, [source.currentFilters, clearSelectedItems])
 
   // Store isAllSelected in ref to avoid circular dependencies
   useEffect(() => {
