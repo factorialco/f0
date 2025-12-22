@@ -1266,7 +1266,13 @@ declare type CardAvatarVariant = AvatarVariant | {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
-declare type CardImageFit = "contain" | "fit-width" | "fit-height" | "scale-down";
+declare type CardImageFit = (typeof cardImageFits)[number];
+
+declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-height", "scale-down"];
+
+declare type CardImageSize = (typeof cardImageSizes)[number];
+
+declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
 
 /**
  * Card metadata property renderers.
@@ -1312,7 +1318,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
     avatar?: (record: T) => CardAvatarVariant;
     image?: (record: T) => string;
     imageFit?: CardImageFit;
-    imageHeight?: string;
+    imageSize?: CardImageSize;
     compact?: boolean;
 };
 
@@ -6452,6 +6458,23 @@ declare global {
     }
 }
 
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
+}
+
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -6476,23 +6499,6 @@ declare module "@tiptap/core" {
         transcript: {
             insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
-    }
-}
-
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
     }
 }
 

@@ -770,7 +770,13 @@ declare type CardAvatarVariant = AvatarVariant | {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
-export declare type CardImageFit = "contain" | "fit-width" | "fit-height" | "scale-down";
+export declare type CardImageFit = (typeof cardImageFits)[number];
+
+export declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-height", "scale-down"];
+
+export declare type CardImageSize = (typeof cardImageSizes)[number];
+
+export declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
 
 declare interface CardInternalProps {
     /**
@@ -791,10 +797,10 @@ declare interface CardInternalProps {
      */
     imageFit?: CardImageFit;
     /**
-     * Height of the image container (Tailwind height class)
-     * @default "h-32"
+     * Size of the image container
+     * @default "sm"
      */
-    imageHeight?: string;
+    imageSize?: CardImageSize;
     /**
      * The title of the card
      */
@@ -931,7 +937,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
     avatar?: (record: T) => CardAvatarVariant;
     image?: (record: T) => string;
     imageFit?: CardImageFit;
-    imageHeight?: string;
+    imageSize?: CardImageSize;
     compact?: boolean;
 };
 
@@ -4934,6 +4940,23 @@ declare global {
     }
 }
 
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
+}
+
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -4958,23 +4981,6 @@ declare module "@tiptap/core" {
         transcript: {
             insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
-    }
-}
-
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
     }
 }
 
