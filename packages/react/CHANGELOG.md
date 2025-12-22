@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.315.0](https://github.com/factorialco/f0/compare/f0-react-v1.314.0...f0-react-v1.315.0) (2025-12-22)
+
+
+### Features
+
+* refactor and document useSelectable ([#3150](https://github.com/factorialco/f0/issues/3150)) ([c4d1aa6](https://github.com/factorialco/f0/commit/c4d1aa6ad4504b9cbe7cd9ec241fff4220f030c8))
+
 ## [1.314.0](https://github.com/factorialco/f0/compare/f0-react-v1.313.0...f0-react-v1.314.0) (2025-12-20)
 
 
