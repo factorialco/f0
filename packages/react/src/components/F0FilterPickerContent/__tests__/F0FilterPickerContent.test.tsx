@@ -2,8 +2,8 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import "@testing-library/jest-dom/vitest"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { FilterPickerContent } from "../components/FilterPickerContent"
-import type { FiltersDefinition } from "../types"
+import type { FiltersDefinition } from "../../OneFilterPicker/types"
+import { F0FilterPickerContent } from "../F0FilterPickerContent"
 
 const definition = {
   department: {
@@ -34,13 +34,13 @@ const definition = {
   },
 } as const satisfies FiltersDefinition
 
-describe("FilterPickerContent", () => {
+describe("F0FilterPickerContent", () => {
   describe("Rendering", () => {
     it("renders the filter list and content", async () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -59,7 +59,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -78,7 +78,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       const { container } = render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -94,7 +94,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -118,7 +118,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -145,7 +145,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -175,7 +175,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -202,7 +202,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -230,7 +230,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -269,7 +269,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{ department: ["engineering", "design"] }}
           onChange={onChange}
@@ -300,7 +300,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{ location: ["nyc"] }}
           onChange={onChange}
@@ -318,7 +318,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{ department: ["engineering"] }}
           onChange={onChange}
@@ -343,7 +343,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -370,7 +370,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{ department: ["engineering", "design"], location: ["nyc"] }}
           onChange={onChange}
@@ -400,7 +400,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -422,7 +422,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -448,7 +448,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}
@@ -481,7 +481,7 @@ describe("FilterPickerContent", () => {
       const onChange = vi.fn()
 
       render(
-        <FilterPickerContent
+        <F0FilterPickerContent
           filters={definition}
           value={{}}
           onChange={onChange}

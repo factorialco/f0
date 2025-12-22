@@ -1,41 +1,22 @@
 "use client"
 
+/**
+ * Public implementation of the FilterPickerInternal component.
+ * F0FilterPickerContent component.
+ */
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
-import { getFilterType } from "../filterTypes"
-import type { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
-import type { FiltersDefinition, FiltersState } from "../types"
-import { FilterPickerInner } from "./FilterPickerInner"
+import { getFilterType } from "../OneFilterPicker/filterTypes"
+import type {
+  FilterTypeContext,
+  FilterTypeSchema,
+} from "../OneFilterPicker/filterTypes/types"
+import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
+import { FilterPickerInternal } from "./internal"
+import type { F0FilterPickerContentProps } from "./types"
 
 const DEFAULT_FORM_HEIGHT = 388
-
-/**
- * Props for the FilterPickerContent component.
- * @template Filters - The type defining the structure of available filters
- */
-export interface FilterPickerContentProps<Filters extends FiltersDefinition> {
-  /** The schema defining available filters and their configurations */
-  filters: Filters
-  /** Current state of applied filters */
-  value: FiltersState<Filters>
-  /**
-   * Callback fired when filters change.
-   * - With apply button (default): called when Apply button is clicked
-   * - Without apply button: called immediately on every selection
-   */
-  onChange: (value: FiltersState<Filters>) => void
-  /** Height of the content panel */
-  height?: number
-  /** Width of the content panel */
-  width?: number
-  /** Optional className for the container */
-  className?: string
-  /** Whether to show the apply button (default: true) */
-  showApplyButton?: boolean
-  /** Custom label for the apply button */
-  applyButtonLabel?: string
-}
 
 /**
  * A standalone dual-pane filter picker content component.
@@ -56,7 +37,7 @@ export interface FilterPickerContentProps<Filters extends FiltersDefinition> {
  * @example
  * ```tsx
  * // Embed directly in a modal or page
- * <FilterPickerContent
+ * <F0FilterPickerContent
  *   filters={{
  *     department: {
  *       type: "in",
@@ -84,7 +65,7 @@ export interface FilterPickerContentProps<Filters extends FiltersDefinition> {
  * />
  * ```
  */
-export function FilterPickerContent<Filters extends FiltersDefinition>({
+export function F0FilterPickerContent<Filters extends FiltersDefinition>({
   filters,
   value,
   onChange,
@@ -93,7 +74,7 @@ export function FilterPickerContent<Filters extends FiltersDefinition>({
   className,
   showApplyButton = true,
   applyButtonLabel,
-}: FilterPickerContentProps<Filters>) {
+}: F0FilterPickerContentProps<Filters>) {
   const i18n = useI18n()
 
   const [selectedFilterKey, setSelectedFilterKey] = useState<
@@ -171,7 +152,7 @@ export function FilterPickerContent<Filters extends FiltersDefinition>({
       )}
       style={{ width }}
     >
-      <FilterPickerInner
+      <FilterPickerInternal
         filters={filters}
         tempFilters={localFiltersValue}
         selectedFilterKey={selectedFilterKey}
@@ -186,4 +167,4 @@ export function FilterPickerContent<Filters extends FiltersDefinition>({
   )
 }
 
-FilterPickerContent.displayName = "FilterPickerContent"
+F0FilterPickerContent.displayName = "F0FilterPickerContent"

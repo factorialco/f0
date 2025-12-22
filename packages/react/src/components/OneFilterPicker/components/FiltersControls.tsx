@@ -1,5 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { FilterPickerInternal } from "@/components/F0FilterPickerContent/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -12,7 +13,6 @@ import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
-import { FilterPickerInner } from "./FilterPickerInner"
 
 interface FiltersControlsProps<Filters extends FiltersDefinition> {
   filters: Filters
@@ -266,7 +266,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           side="bottom"
           aria-id={id}
         >
-          <FilterPickerInner
+          <FilterPickerInternal
             filters={filters}
             tempFilters={localFiltersValue}
             selectedFilterKey={selectedFilterKey}

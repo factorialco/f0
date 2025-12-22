@@ -3,42 +3,16 @@
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import type { FiltersDefinition, FiltersState } from "../types"
-import { FilterContent } from "./FilterContent"
-import { FilterList } from "./FilterList"
-
-/**
- * Props for the FilterPickerInner component.
- * This is an internal component used by both FilterPickerContent and FiltersControls.
- */
-export interface FilterPickerInnerProps<Filters extends FiltersDefinition> {
-  /** The schema defining available filters */
-  filters: Filters
-  /** Current temporary state of filters being configured */
-  tempFilters: FiltersState<Filters>
-  /** Currently selected filter key */
-  selectedFilterKey: keyof Filters | null
-  /** Callback when a filter is selected */
-  onFilterSelect: (key: keyof Filters) => void
-  /** Callback when a filter value changes */
-  onFilterChange: (key: keyof Filters, value: unknown) => void
-  /** Callback when apply button is clicked */
-  onApply: () => void
-  /** Height of the inner content */
-  height?: number
-  /** Whether to show the apply button */
-  showApplyButton?: boolean
-  /** Custom label for the apply button */
-  applyButtonLabel?: string
-  /** Optional className */
-  className?: string
-}
+import { FilterContent } from "../OneFilterPicker/components/FilterContent"
+import { FilterList } from "../OneFilterPicker/components/FilterList"
+import type { FiltersDefinition } from "../OneFilterPicker/types"
+import type { FilterPickerInternalProps } from "./internal-types"
 
 /**
  * Internal component that renders the filter picker content.
- * Used by both FilterPickerContent and FiltersControls to avoid code duplication.
+ * Used by both F0FilterPickerContent and FiltersControls to avoid code duplication.
  */
-export function FilterPickerInner<Filters extends FiltersDefinition>({
+export function FilterPickerInternal<Filters extends FiltersDefinition>({
   filters,
   tempFilters,
   selectedFilterKey,
@@ -49,7 +23,7 @@ export function FilterPickerInner<Filters extends FiltersDefinition>({
   showApplyButton = true,
   applyButtonLabel,
   className,
-}: FilterPickerInnerProps<Filters>) {
+}: FilterPickerInternalProps<Filters>) {
   const i18n = useI18n()
 
   return (
@@ -86,4 +60,4 @@ export function FilterPickerInner<Filters extends FiltersDefinition>({
   )
 }
 
-FilterPickerInner.displayName = "FilterPickerInner"
+FilterPickerInternal.displayName = "FilterPickerInternal"
