@@ -74,7 +74,6 @@ export const BaseCommunityPost = ({
   comment,
   dropdownItems,
   noReactionsButton = false,
-  noVideoPreload = false,
 }: CommunityPostProps) => {
   const countersDisplay = [counters.views, counters.comments]
     .filter(Boolean)
@@ -209,21 +208,22 @@ export const BaseCommunityPost = ({
             {isVideo(mediaUrl) ? (
               <video
                 controls
-                className="h-full w-full object-cover"
+                className="aspect-video h-full w-full bg-f1-background-secondary object-cover"
                 onClick={handleVideoClick}
-                preload={noVideoPreload ? "none" : "auto"}
               >
                 <source src={mediaUrl} />
               </video>
             ) : (
-              <img
-                src={mediaUrl}
-                role="presentation"
-                loading="lazy"
-                className="aspect-video h-full w-full object-cover"
-              />
+              <>
+                <img
+                  src={mediaUrl}
+                  role="presentation"
+                  loading="lazy"
+                  className="aspect-video h-full w-full object-cover"
+                />
+                <Skeleton className="absolute inset-0 -z-10 h-full w-full" />
+              </>
             )}
-            <Skeleton className="absolute inset-0 -z-10 h-full w-full" />
           </div>
         )}
         {event && (

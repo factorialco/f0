@@ -20,23 +20,46 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   onPresetsChange,
   presetsLoading = false,
 }: FilterPresetsProps<Filters>) => {
+  /**
+   * Computes the selection state and click handler for a preset.
+   * Presets merge with current filters when selected and remove only their keys when deselected.
+   */
+  const getPresetState = (preset: NonNullable<typeof presets>[number]) => {
+    // Check if all preset filters are present in current value
+    const isSelected = Object.entries(preset.filter).every(
+      ([key, val]) => JSON.stringify(value[key]) === JSON.stringify(val)
+    )
+
+    const handleClick = () => {
+      if (isSelected) {
+        // Remove only preset's keys from current filters
+        const newFilters = { ...value }
+        Object.keys(preset.filter).forEach((key) => {
+          delete newFilters[key as keyof typeof newFilters]
+        })
+        onPresetsChange?.(newFilters)
+      } else {
+        // Merge preset's filter with current filters
+        onPresetsChange?.({ ...value, ...preset.filter })
+      }
+    }
+
+    return { isSelected, handleClick }
+  }
+
   const renderListPresetItem = (
     preset: NonNullable<typeof presets>[number],
     index: number,
     isVisible = true
   ) => {
-    const isSelected = JSON.stringify(preset.filter) === JSON.stringify(value)
+    const { isSelected, handleClick } = getPresetState(preset)
 
     return (
       <Preset
         key={index}
         label={preset.label}
         selected={isSelected}
-        onClick={() =>
-          onPresetsChange?.(
-            isSelected ? ({} as FiltersState<Filters>) : preset.filter
-          )
-        }
+        onClick={handleClick}
         data-visible={isVisible}
         number={preset.itemsCount?.(value) ?? undefined}
       />
@@ -47,7 +70,8 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     preset: NonNullable<typeof presets>[number],
     index: number
   ) => {
-    const isSelected = JSON.stringify(preset.filter) === JSON.stringify(value)
+    const { isSelected, handleClick } = getPresetState(preset)
+
     return (
       <button
         key={index}
@@ -57,11 +81,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
             "bg-f1-background-selected hover:bg-f1-background-selected",
           focusRing()
         )}
-        onClick={() =>
-          onPresetsChange?.(
-            isSelected ? ({} as FiltersState<Filters>) : preset.filter
-          )
-        }
+        onClick={handleClick}
         data-visible={true}
       >
         {preset.label}

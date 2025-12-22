@@ -1,6 +1,7 @@
 export * from "../layouts/exports"
 export * from "./avatars/exports"
 export * from "./Charts/exports"
+export * from "./F0BigNumber"
 export * from "./F0Button"
 export * from "./F0ButtonDropdown"
 export * from "./F0ButtonToggle"

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { zeroRender as render, screen } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 import { ClockInControls } from "./index"
 

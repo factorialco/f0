@@ -62,26 +62,29 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  parameters: {
+  args: meta.args,
+  globals: {
     viewport: {
-      defaultViewport: "reset",
+      value: "reset",
+      isRotated: false,
     },
   },
-  args: meta.args,
 }
 
 export const Mobile: Story = {
-  parameters: {
+  globals: {
     viewport: {
-      defaultViewport: "iphone14pro",
+      value: "iphone14pro",
+      isRotated: false,
     },
   },
 }
 
 export const Tablet: Story = {
-  parameters: {
+  globals: {
     viewport: {
-      defaultViewport: "ipad",
+      value: "ipad",
+      isRotated: false,
     },
   },
 }

@@ -1,6 +1,6 @@
 import { zeroRender } from "@/testing/test-utils"
 import { fireEvent, screen } from "@testing-library/react"
-import React from "react"
+import React, { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
@@ -107,6 +107,7 @@ describe("F0ButtonToggle", () => {
         <F0ButtonToggle
           label="Test toggle"
           icon={MockSingleIcon}
+          selected={false}
           onSelectedChange={onSelectedChange}
         />
       )
@@ -123,13 +124,27 @@ describe("F0ButtonToggle", () => {
     it("calls onSelectedChange with correct values on multiple toggles", () => {
       const onSelectedChange = vi.fn()
 
-      zeroRender(
-        <F0ButtonToggle
-          label="Test toggle"
-          icon={MockSingleIcon}
-          onSelectedChange={onSelectedChange}
-        />
-      )
+      // We need a wrapper component because hooks (useState) can only be called
+      // inside React components, not in test functions
+      const TestWrapper = () => {
+        const [selected, setSelected] = useState(false)
+
+        const handleSelectedChange = (newSelected: boolean) => {
+          setSelected(newSelected)
+          onSelectedChange(newSelected)
+        }
+
+        return (
+          <F0ButtonToggle
+            label="Test toggle"
+            icon={MockSingleIcon}
+            selected={selected}
+            onSelectedChange={handleSelectedChange}
+          />
+        )
+      }
+
+      zeroRender(<TestWrapper />)
 
       // Clear the initial call that happens on mount
       onSelectedChange.mockClear()
@@ -391,6 +406,54 @@ describe("F0ButtonToggle", () => {
       expect(button).toHaveAttribute("aria-pressed", "true")
 
       fireEvent.click(button)
+      expect(button).toHaveAttribute("aria-pressed", "false")
+    })
+
+    it("respects defaultSelected prop for initial state", () => {
+      zeroRender(
+        <F0ButtonToggle
+          label="Default selected toggle"
+          icon={MockSingleIcon}
+          defaultSelected={true}
+        />
+      )
+
+      const button = screen.getByRole("button")
+      // Should start selected when defaultSelected is true
+      expect(button).toHaveAttribute("aria-pressed", "true")
+
+      // Should be able to toggle from defaultSelected state
+      fireEvent.click(button)
+      expect(button).toHaveAttribute("aria-pressed", "false")
+
+      fireEvent.click(button)
+      expect(button).toHaveAttribute("aria-pressed", "true")
+    })
+
+    it("defaults to false when defaultSelected is not provided", () => {
+      zeroRender(
+        <F0ButtonToggle
+          label="No defaultSelected toggle"
+          icon={MockSingleIcon}
+        />
+      )
+
+      const button = screen.getByRole("button")
+      // Should default to false (unselected) when defaultSelected is not provided
+      expect(button).toHaveAttribute("aria-pressed", "false")
+    })
+
+    it("defaults to false when defaultSelected is explicitly false", () => {
+      zeroRender(
+        <F0ButtonToggle
+          label="Explicitly false defaultSelected"
+          icon={MockSingleIcon}
+          defaultSelected={false}
+        />
+      )
+
+      const button = screen.getByRole("button")
+      // Should be false when defaultSelected is explicitly false
       expect(button).toHaveAttribute("aria-pressed", "false")
     })
   })

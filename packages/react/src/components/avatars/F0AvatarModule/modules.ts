@@ -31,7 +31,7 @@ export const modules = {
   goals: ModuleIcons.Goals,
   home: ModuleIcons.Home,
   hub: ModuleIcons.Hub,
-  it_management: ModuleIcons.ITManagement,
+  it_management: ModuleIcons.ItManagement,
   kudos: ModuleIcons.Kudos,
   meetings: ModuleIcons.Meetings,
   my_benefits: ModuleIcons.Benefits,

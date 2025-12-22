@@ -63,14 +63,15 @@ const textFormatEnforcer = (
 export const useTextFormatEnforcer = (
   text?: string,
   rules?: Rules,
-  options: { warn: boolean; componentName: string } = {
-    warn: false,
+  options: { warn?: boolean; componentName: string } = {
+    warn: undefined,
     componentName: "",
   }
 ) => {
   useEffect(() => {
     if (text !== undefined && rules) {
-      textFormatEnforcer(text, rules, options.warn, options.componentName)
+      const warn = options.warn ?? true
+      textFormatEnforcer(text, rules, warn, options.componentName)
     }
   }, [text, rules, options])
 }

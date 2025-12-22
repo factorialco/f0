@@ -1,0 +1,442 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+<Meta title="Numeric" />
+
+# Numeric Type and Formatter
+
+The Numeric type system provides a flexible way to represent and format numeric
+values with optional units. It's designed to handle various numeric formats
+while avoiding floating-point precision issues.
+
+## Overview
+
+The Numeric type system consists of:
+
+- **`NumericValue`**: A structured type for numeric values with optional units
+- **`Numeric`**: A union type that accepts `NumericValue`, `number`,
+  `undefined`, or `null`
+- **`numericFormatter`**: A utility function to format numeric values according
+  to specified options
+
+## NumericValue Type
+
+`NumericValue` represents a numeric value that can be formatted with optional
+units. It supports two value formats:
+
+### Direct Value Format
+
+Use the `value` property for direct numeric values:
+
+```tsx
+import type { NumericValue } from "@/lib/numeric"
+
+const price: NumericValue = {
+  value: 123.45,
+  units: "€",
+  unitsPosition: "append",
+}
+// Result: "123.45€"
+```
+
+### Value x100 Format
+
+Use the `value_x100` property to store values as integers multiplied by 100.
+This format is useful for avoiding floating-point precision issues:
+
+```tsx
+import type { NumericValue } from "@/lib/numeric"
+
+const price: NumericValue = {
+  value_x100: 12345, // Represents 123.45
+  units: "€",
+}
+// Result: "123.45€"
+```
+
+### Properties
+
+<Unstyled>
+  <table className="mb-8 dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Property</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <pre className="inline">value</pre>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>Direct numeric value to format</td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">value_x100</pre>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          Numeric value stored as an integer multiplied by 100. Useful for
+          avoiding floating-point precision issues
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">units</pre>
+        </td>
+        <td>
+          <code>string?</code>
+        </td>
+        <td>
+          Optional unit string to append or prepend to the formatted number
+          (e.g., "€", "$", "kg", "%")
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">unitsPosition</pre>
+        </td>
+        <td>
+          <code>"prepend" | "append"?</code>
+        </td>
+        <td>Position of units relative to the number. Defaults to "append"</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Numeric Type
+
+`Numeric` is a union type that accepts:
+
+- `NumericValue` - Structured numeric value with optional units
+- `number` - Direct numeric value
+- `undefined` - Undefined value
+- `null` - Null value
+
+This flexibility allows the formatter to handle various input scenarios:
+
+```tsx
+import type { Numeric } from "@/lib/numeric"
+import { numericFormatter } from "@/lib/numeric"
+
+// Direct number
+const result1 = numericFormatter(123.45)
+// Result: "123.45"
+
+// NumericValue with units
+const result2 = numericFormatter({ value: 123.45, units: "€" })
+// Result: "123.45€"
+
+// Undefined (returns empty placeholder)
+const result3 = numericFormatter(undefined)
+// Result: ""
+
+// Null with custom placeholder
+const result4 = numericFormatter(null, { emptyPlaceholder: "N/A" })
+// Result: "N/A"
+```
+
+## NumericFormatter Options
+
+The `numericFormatter` function accepts an optional `NumericFormatterOptions`
+object to customize formatting behavior:
+
+<Unstyled>
+  <table className="mb-8 dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Option</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <pre className="inline">locale</pre>
+        </td>
+        <td>
+          <code>string?</code>
+        </td>
+        <td>"en-US"</td>
+        <td>
+          Locale string for number formatting (e.g., "en-US", "es-ES", "de-DE").
+          Determines decimal separator and locale-specific formatting
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">decimalPlaces</pre>
+        </td>
+        <td>
+          <code>number?</code>
+        </td>
+        <td>2</td>
+        <td>
+          Maximum number of decimal places to display. The formatter will round
+          to this precision
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">hideUnits</pre>
+        </td>
+        <td>
+          <code>boolean?</code>
+        </td>
+        <td>false</td>
+        <td>Whether to hide units from the formatted value</td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">compact</pre>
+        </td>
+        <td>
+          <code>boolean?</code>
+        </td>
+        <td>false</td>
+        <td>
+          Whether to use compact notation (e.g., "1.2M" instead of "1200000")
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <pre className="inline">emptyPlaceholder</pre>
+        </td>
+        <td>
+          <code>string?</code>
+        </td>
+        <td>""</td>
+        <td>Placeholder text to return when value is undefined or null</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Usage Examples
+
+### Basic Formatting
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+// Simple number
+numericFormatter(123.456)
+// Result: "123.46"
+
+// With units
+numericFormatter({ value: 123.45, units: "€" })
+// Result: "123.45€"
+
+// Prepend units
+numericFormatter({
+  value: 123.45,
+  units: "$",
+  unitsPosition: "prepend",
+})
+// Result: "$123.45"
+```
+
+### Using value_x100 Format
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+// Avoid floating-point precision issues
+numericFormatter({ value_x100: 12345 })
+// Result: "123.45"
+
+// With units
+numericFormatter({ value_x100: 12345, units: "€" })
+// Result: "123.45€"
+```
+
+### Custom Decimal Places
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+numericFormatter(123.456789, { decimalPlaces: 4 })
+// Result: "123.4568"
+
+numericFormatter(123.456789, { decimalPlaces: 0 })
+// Result: "123"
+```
+
+### Locale Formatting
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+// US locale (default)
+numericFormatter(1234.56)
+// Result: "1234.56"
+
+// Spanish locale
+numericFormatter(1234.56, { locale: "es-ES" })
+// Result: "1234,56"
+
+// German locale
+numericFormatter(1234.56, { locale: "de-DE" })
+// Result: "1234,56"
+```
+
+### Compact Notation
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+numericFormatter(1234567, { compact: true, decimalPlaces: 1 })
+// Result: "1.2M"
+
+numericFormatter(5000, { compact: true })
+// Result: "5K"
+
+numericFormatter(1000000, { compact: true })
+// Result: "1M"
+```
+
+### Hiding Units
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+numericFormatter({ value: 123.45, units: "€" }, { hideUnits: true })
+// Result: "123.45"
+```
+
+### Handling Empty Values
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+// Default empty placeholder
+numericFormatter(undefined)
+// Result: ""
+
+numericFormatter(null)
+// Result: ""
+
+// Custom empty placeholder
+numericFormatter(undefined, { emptyPlaceholder: "-" })
+// Result: "-"
+
+numericFormatter(null, { emptyPlaceholder: "N/A" })
+// Result: "N/A"
+```
+
+### Combining Options
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+numericFormatter(
+  { value: 1234567.89, units: "€" },
+  {
+    compact: true,
+    decimalPlaces: 1,
+    locale: "es-ES",
+  }
+)
+// Result: "1,2M€"
+
+numericFormatter(
+  { value: 1234567, units: "$" },
+  {
+    compact: true,
+    hideUnits: true,
+    decimalPlaces: 1,
+  }
+)
+// Result: "1.2M"
+```
+
+## Common Use Cases
+
+### Currency Formatting
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+// Euro formatting
+const formatEuro = (amount: number) =>
+  numericFormatter({ value: amount, units: "€" })
+
+formatEuro(123.45)
+// Result: "123.45€"
+
+// Dollar formatting with prepend
+const formatDollar = (amount: number) =>
+  numericFormatter({
+    value: amount,
+    units: "$",
+    unitsPosition: "prepend",
+  })
+
+formatDollar(123.45)
+// Result: "$123.45"
+```
+
+### Percentage Formatting
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+const formatPercentage = (value: number) =>
+  numericFormatter({ value, units: "%" })
+
+formatPercentage(45.67)
+// Result: "45.67%"
+```
+
+### Weight/Mass Formatting
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+const formatWeight = (weight: number) =>
+  numericFormatter({ value: weight, units: "kg" })
+
+formatWeight(75.5)
+// Result: "75.5kg"
+```
+
+### Large Number Display
+
+```tsx
+import { numericFormatter } from "@/lib/numeric"
+
+const formatLargeNumber = (value: number) =>
+  numericFormatter(value, { compact: true, decimalPlaces: 1 })
+
+formatLargeNumber(1234567)
+// Result: "1.2M"
+
+formatLargeNumber(5000)
+// Result: "5K"
+```
+
+## Best Practices
+
+1. **Use `value_x100` for financial calculations**: Avoid floating-point
+   precision issues by storing values as integers multiplied by 100.
+
+2. **Provide meaningful empty placeholders**: Use custom `emptyPlaceholder`
+   values that make sense in your context (e.g., "-", "N/A", "—").
+
+3. **Consistent locale usage**: Use the same locale throughout your application
+   for consistent number formatting.
+
+4. **Consider compact notation for large numbers**: Use compact notation for
+   better readability when displaying large numbers in limited space.
+
+5. **Type safety**: Always use the `Numeric` type when accepting numeric values
+   to ensure type safety and flexibility.

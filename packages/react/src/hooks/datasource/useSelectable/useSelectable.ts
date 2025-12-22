@@ -1,4 +1,5 @@
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   GroupingDefinition,
@@ -42,14 +43,20 @@ export function useSelectable<
     SelectedItemsState<R>
   >(parseSelectedState(selectedState))
 
+  useDeepCompareEffect(() => {
+    setLocalSelectedState({
+      allSelected: false,
+      items: new Map(),
+      groups: new Map(),
+    })
+  }, [source.currentFilters, source.currentGrouping])
+
   const totalKnownItemsCount = useMemo(() => {
     return paginationInfo ? paginationInfo.total : data.records?.length
   }, [paginationInfo, data.records?.length])
 
   /**
    * Get the item by id from the local selected state or the data records
-   * @param id
-   * @returns
    */
   const getItemById = (id: SelectionId) => {
     const item =
@@ -714,20 +721,6 @@ export function useSelectable<
     isGrouped,
     groupsState,
   ])
-
-  // Control the allSelectedCheck state
-  // If all items are selected, we need to set the allSelectedCheck state to true
-  // If there are no selected items, we need to set the allSelectedCheck state to false
-  // If some items are selected, we need to keep the state as is to know if we will need to check the next page items
-  // IMPORTANT: Don't auto-trigger allSelectedCheck during search, because visible items
-  // are a filtered subset and selecting all of them shouldn't mean "select all"
-  useEffect(() => {
-    if (areAllKnownItemsSelected && !isSearchActive) {
-      setAllSelectedCheck(true)
-      // This is auto-detection, not explicit user action
-      // wasExplicitSelectAll remains false
-    }
-  }, [areAllKnownItemsSelected, isSearchActive])
 
   useEffect(() => {
     if (checkedCount === 0) {

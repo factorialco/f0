@@ -10,7 +10,7 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
-import { useEffect } from "react"
+import { useCallback, useEffect } from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -198,13 +198,14 @@ const AiChatCmp = () => {
     },
   })
 
-  const InputComponent = ({ ...props }: InputProps) => {
-    return (
+  const InputComponent = useCallback(
+    ({ ...props }: InputProps) => (
       <div className="m-3 mt-2">
         <ChatTextarea {...props} />
       </div>
-    )
-  }
+    ),
+    []
+  )
 
   if (!enabled) {
     return null

@@ -3,7 +3,7 @@ import { ScrollView } from "react-native";
 import { View } from "react-native";
 import { Text } from "react-native";
 import type { Meta, StoryObj } from "@storybook/react";
-import { ModuleAvatar, ModuleIcons } from "@factorialco/f0-react-native";
+import { ModuleAvatar, ModuleIcons, IconType } from "@factorialco/f0-react-native";
 
 const meta = {
   title: "Components/Avatars/ModuleAvatar",
@@ -32,13 +32,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 interface SizeVariantProps {
-  icon: any;
+  icon: IconType;
   name: string;
   size: "sm" | "md" | "lg" | "xl";
 }
 
 interface IconDisplayProps {
-  icon: any;
+  icon: IconType;
   name: string;
 }
 

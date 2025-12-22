@@ -1,21 +1,23 @@
-import { BaseTag } from "@/components/tags/BaseTag"
+import { BaseTag } from "@/components/tags/internal/BaseTag"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { baseColors } from "@factorialco/f0-core"
 import { forwardRef } from "react"
-import type { NewColor, Props } from "./types"
-
-export const tagDotColors = Object.keys(baseColors) as NewColor[]
+import type { Props } from "./types"
 
 export const F0TagDot = forwardRef<HTMLDivElement, Props>(
   ({ text, ...props }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      text,
+      { disallowEmpty: true },
+      { componentName: "F0TagDot" }
+    )
 
-    const backgroundColor =
+    const dotColor =
       "color" in props && props.color
         ? `hsl(${baseColors[props.color][50]})`
         : "customColor" in props && props.customColor
 
-    if (!backgroundColor) return null
+    if (!dotColor) return null
 
     return (
       <BaseTag
@@ -25,7 +27,7 @@ export const F0TagDot = forwardRef<HTMLDivElement, Props>(
           <div
             className="m-1 aspect-square w-2 rounded-full"
             style={{
-              backgroundColor,
+              backgroundColor: dotColor,
             }}
             aria-hidden
           />

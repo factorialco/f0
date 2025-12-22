@@ -1,9 +1,9 @@
-import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import { AlertCircle, CheckCircle, InfoCircle, Warning } from "@/icons/app"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
-import { BaseTag } from "../BaseTag"
+import { BaseTag } from "../internal/BaseTag"
 import type { Level, Props } from "./types"
 
 const iconMap: Record<Level, IconType> = {
@@ -15,7 +15,20 @@ const iconMap: Record<Level, IconType> = {
 
 export const F0TagAlert = forwardRef<HTMLDivElement, Props>(
   ({ text, level }, ref) => {
-    useTextFormatEnforcer(text, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      text,
+      { disallowEmpty: true, disallowEmojis: true },
+      { componentName: "F0TagAlert" }
+    )
+
+    const iconColors: Record<Level, F0IconProps["color"]> = {
+      info: "info",
+      warning: "warning",
+      critical: "critical",
+      positive: "positive",
+    }
+
+    const iconColor = iconColors[level]
 
     return (
       <BaseTag
@@ -34,14 +47,7 @@ export const F0TagAlert = forwardRef<HTMLDivElement, Props>(
             icon={iconMap[level]}
             size="md"
             aria-hidden
-            className={cn(
-              {
-                info: "text-f1-icon-info",
-                warning: "text-f1-icon-warning",
-                critical: "text-f1-icon-critical",
-                positive: "text-f1-icon-positive",
-              }[level]
-            )}
+            color={iconColor}
           />
         }
         text={text}

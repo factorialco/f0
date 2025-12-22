@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { IconType } from "@/components/F0Icon/F0Icon"
+import { IconType } from "@/components/F0Icon"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import { useMemo } from "react"
@@ -123,19 +123,20 @@ export const WelcomeScreen = ({
                 },
               }}
             >
-              <ButtonInternal
-                className="w-full items-start justify-start overflow-x-hidden"
-                variant="ghost"
-                label={suggestion.message}
-                icon={suggestion.icon}
-                onClick={() =>
-                  sendMessage({
-                    id: randomId(),
-                    role: "user",
-                    content: suggestion.prompt || suggestion.message,
-                  })
-                }
-              />
+              <div>
+                <ButtonInternal
+                  variant="ghost"
+                  label={suggestion.message}
+                  icon={suggestion.icon}
+                  onClick={() =>
+                    sendMessage({
+                      id: randomId(),
+                      role: "user",
+                      content: suggestion.prompt || suggestion.message,
+                    })
+                  }
+                />
+              </div>
             </motion.div>
           ))}
         </div>

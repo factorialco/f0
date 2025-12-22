@@ -7,7 +7,11 @@ type Props = PropsWithChildren & {
 
 export const WidgetSection = forwardRef<HTMLDivElement, Props>(
   ({ title, children }, ref) => {
-    useTextFormatEnforcer(title, { disallowEmpty: true })
+    useTextFormatEnforcer(
+      title,
+      { disallowEmpty: true },
+      { componentName: "WidgetSection" }
+    )
 
     return (
       <div ref={ref} className="flex flex-col gap-2">

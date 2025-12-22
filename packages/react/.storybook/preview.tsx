@@ -92,6 +92,11 @@ const preview: Preview = {
           },
         ],
       },
+
+      // 'todo' - show a11y violations in the test UI only
+      // 'error' - fail CI on a11y violations
+      // 'off' - skip a11y checks entirely
+      test: "todo",
     },
     html: {
       root: "#f0-layout",
@@ -101,14 +106,13 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: "content",
-      values: [
-        { name: "content", value: "hsl(var(--neutral-0))" },
-        { name: "page", value: "hsl(var(--page))" },
-      ],
+      options: {
+        content: { name: "content", value: "hsl(var(--neutral-0))" },
+        page: { name: "page", value: "hsl(var(--page))" },
+      },
     },
     viewport: {
-      viewports: {
+      options: {
         ...INITIAL_VIEWPORTS,
       },
     },
@@ -135,11 +139,12 @@ const preview: Preview = {
           "introduction",
           "how-to-contribute",
           "foundations",
-          "playground",
+          "library",
+          "hooks",
         ]
 
-        const aId = a.title.toLowerCase()
-        const bId = b.title.toLowerCase()
+        const aId = a.id.split("-")?.[0].toLowerCase()
+        const bId = b.id.split("-")?.[0].toLowerCase()
 
         const aIndex = topLevelOrder.indexOf(aId)
         const bIndex = topLevelOrder.indexOf(bId)
@@ -173,11 +178,18 @@ const preview: Preview = {
         return a.title.localeCompare(b.title)
       },
     },
-    darkMode: {
-      stylePreview: true,
+    // darkMode: {
+    //   stylePreview: true,
+    // },
+  },
+
+  tags: ["autodocs"],
+
+  initialGlobals: {
+    backgrounds: {
+      value: "content",
     },
   },
-  tags: ["autodocs"],
 }
 
 export default preview
