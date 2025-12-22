@@ -2337,6 +2337,86 @@ export declare type F0DropdownButtonProps<T = string> = {
 
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
+/**
+ * A standalone dual-pane filter picker content component.
+ *
+ * This component renders the filter picker interface (left panel with filter list,
+ * right panel with filter content) without any popover wrapper, allowing it to be
+ * embedded directly in modals, sidebars, or other containers.
+ *
+ * Features:
+ * - Left panel showing filter categories with search
+ * - Right panel showing filter options for the selected filter
+ * - Multi-select with checkboxes for "in" type filters
+ * - Support for search, date, number, and custom filter types
+ * - Select All and Clear actions
+ *
+ * @template Filters - The type defining the structure of available filters
+ *
+ * @example
+ * ```tsx
+ * // Embed directly in a modal or page
+ * <F0FilterPickerContent
+ *   filters={{
+ *     department: {
+ *       type: "in",
+ *       label: "Department",
+ *       options: {
+ *         options: [
+ *           { value: "engineering", label: "Engineering" },
+ *           { value: "marketing", label: "Marketing" },
+ *         ]
+ *       }
+ *     },
+ *     location: {
+ *       type: "in",
+ *       label: "Location",
+ *       options: {
+ *         options: [
+ *           { value: "nyc", label: "New York" },
+ *           { value: "sf", label: "San Francisco" },
+ *         ]
+ *       }
+ *     }
+ *   }}
+ *   value={selectedFilters}
+ *   onChange={setSelectedFilters}
+ * />
+ * ```
+ */
+export declare function F0FilterPickerContent<Filters extends FiltersDefinition>({ filters, value, onChange, height, width, className, showApplyButton, applyButtonLabel, }: F0FilterPickerContentProps<Filters>): JSX_2.Element | null;
+
+export declare namespace F0FilterPickerContent {
+    var displayName: string;
+}
+
+/**
+ * Props for the F0FilterPickerContent component.
+ * @template Filters - The type defining the structure of available filters
+ */
+export declare interface F0FilterPickerContentProps<Filters extends FiltersDefinition> {
+    /** The schema defining available filters and their configurations */
+    filters: Filters;
+    /** Current state of applied filters */
+    value: FiltersState<Filters>;
+    /**
+     * Callback fired when filters change.
+     * - With apply button (default): called when Apply button is clicked
+     * - Without apply button: called immediately on every selection
+     */
+    onChange: (value: FiltersState<Filters>) => void;
+    /** Height of the content panel */
+    height?: number;
+    /** Width of the content panel */
+    width?: number;
+    /** Optional className for the container */
+    className?: string;
+    /** Whether to show the apply button (default: true) */
+    showApplyButton?: boolean;
+    /** Custom label for the apply button */
+    applyButtonLabel?: string;
+}
+
 export declare const F0GridStack: {
     ({ options, widgets, onChange, className, }: F0GridStackProps_2): JSX_2.Element;
     displayName: string;
@@ -2550,86 +2630,6 @@ declare type FilterDefinitionsByType<T = unknown, R extends RecordType = RecordT
  * @template FilterKeys - String literal type for filter keys
  */
 export declare type FilterOptions<FilterKeys extends string> = Record<FilterKeys, FilterDefinition>;
-
-/**
- * A standalone dual-pane filter picker content component.
- *
- * This component renders the filter picker interface (left panel with filter list,
- * right panel with filter content) without any popover wrapper, allowing it to be
- * embedded directly in modals, sidebars, or other containers.
- *
- * Features:
- * - Left panel showing filter categories with search
- * - Right panel showing filter options for the selected filter
- * - Multi-select with checkboxes for "in" type filters
- * - Support for search, date, number, and custom filter types
- * - Select All and Clear actions
- *
- * @template Filters - The type defining the structure of available filters
- *
- * @example
- * ```tsx
- * // Embed directly in a modal or page
- * <FilterPickerContent
- *   filters={{
- *     department: {
- *       type: "in",
- *       label: "Department",
- *       options: {
- *         options: [
- *           { value: "engineering", label: "Engineering" },
- *           { value: "marketing", label: "Marketing" },
- *         ]
- *       }
- *     },
- *     location: {
- *       type: "in",
- *       label: "Location",
- *       options: {
- *         options: [
- *           { value: "nyc", label: "New York" },
- *           { value: "sf", label: "San Francisco" },
- *         ]
- *       }
- *     }
- *   }}
- *   value={selectedFilters}
- *   onChange={setSelectedFilters}
- * />
- * ```
- */
-export declare function FilterPickerContent<Filters extends FiltersDefinition>({ filters, value, onChange, height, width, className, showApplyButton, applyButtonLabel, }: FilterPickerContentProps<Filters>): JSX_2.Element | null;
-
-export declare namespace FilterPickerContent {
-    var displayName: string;
-}
-
-/**
- * Props for the FilterPickerContent component.
- * @template Filters - The type defining the structure of available filters
- */
-export declare interface FilterPickerContentProps<Filters extends FiltersDefinition> {
-    /** The schema defining available filters and their configurations */
-    filters: Filters;
-    /** Current state of applied filters */
-    value: FiltersState<Filters>;
-    /**
-     * Callback fired when filters change.
-     * - With apply button (default): called when Apply button is clicked
-     * - Without apply button: called immediately on every selection
-     */
-    onChange: (value: FiltersState<Filters>) => void;
-    /** Height of the content panel */
-    height?: number;
-    /** Width of the content panel */
-    width?: number;
-    /** Optional className for the container */
-    className?: string;
-    /** Whether to show the apply button (default: true) */
-    showApplyButton?: boolean;
-    /** Custom label for the apply button */
-    applyButtonLabel?: string;
-}
 
 /**
  * Record of filter definitions for a collection.
@@ -4780,12 +4780,20 @@ declare global {
     }
 }
 
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
-        };
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
     }
 }
 
@@ -4801,26 +4809,18 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
         };
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        };
     }
 }
 
