@@ -23,6 +23,12 @@ const images = {
     "/avatars/team04.jpg",
     "/avatars/team05.jpg",
   ],
+  card: [
+    "/cards/squared.jpg",
+    "/cards/small.jpg",
+    "/cards/wide.jpeg",
+    "/cards/vertical.jpeg",
+  ],
 }
 
 export const mockImage = (type: keyof typeof images, index: number) => {

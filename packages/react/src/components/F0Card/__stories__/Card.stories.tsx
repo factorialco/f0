@@ -15,11 +15,18 @@ import {
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { mockImage } from "@/testing/mocks/images"
 import image from "@storybook-static/avatars/person04.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { fn } from "storybook/test"
-import { F0Card, type CardImageFit } from "../F0Card"
+import {
+  cardImageFits,
+  cardImageSizes,
+  F0Card,
+  type CardImageFit,
+  type CardImageSize,
+} from "../F0Card"
 import { DraggableStoryCard } from "./DraggableStoryCard"
 import { DropLaneCancel } from "./DropLaneCancel"
 import { DropLaneEnter } from "./DropLaneEnter"
@@ -33,15 +40,11 @@ const SlotComponent = () => {
   )
 }
 
-// Different image types for demonstration - shared across stories
 const imageTypes = {
-  // Use picsum.photos for guaranteed square images
-  squared: "https://picsum.photos/400/400",
-  small: "https://picsum.photos/50/50",
-  // Use different Unsplash photos to ensure they're visually distinct
-  wide: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop",
-  vertical:
-    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=450&h=800&fit=crop",
+  squared: mockImage("card", 0), // /cards/squared.jpg
+  small: mockImage("card", 1), // /cards/small.jpg
+  wide: mockImage("card", 2), // /cards/wide.jpg
+  vertical: mockImage("card", 3), // /cards/vertical.jpg
 } as const
 
 const meta = {
@@ -56,25 +59,25 @@ const meta = {
   argTypes: {
     imageFit: {
       control: "select",
-      options: ["contain", "fit-width", "fit-height", "scale-down"],
+      options: cardImageFits,
       description:
         "How the image should be displayed/fitted within its container",
       table: {
         defaultValue: { summary: "fit-width" },
       },
     },
-    imageHeight: {
+    imageSize: {
       control: "select",
-      options: ["h-24", "h-32", "h-40", "h-48", "h-64"],
-      description: "Height of the image container (Tailwind height class)",
+      options: cardImageSizes,
+      description: "Size of the image container",
       table: {
-        defaultValue: { summary: "h-32" },
+        defaultValue: { summary: "sm" },
       },
     },
   },
   args: {
     imageFit: "fit-width",
-    imageHeight: "h-32",
+    imageSize: "sm",
   },
   decorators: [
     (Story, context) => {
@@ -96,7 +99,7 @@ export default meta
 type Story = StoryObj<
   typeof meta & {
     imageFit?: CardImageFit
-    imageHeight?: string
+    imageSize?: CardImageSize
     imageType?: "squared" | "small" | "wide" | "vertical"
   }
 >
@@ -474,7 +477,7 @@ export const IntentsShowcase: Story = {
 export const WithImageControls: StoryObj<
   typeof meta & {
     imageFit?: CardImageFit
-    imageHeight?: string
+    imageSize?: CardImageSize
     imageType?: "squared" | "small" | "wide" | "vertical"
   }
 > = {
@@ -495,17 +498,17 @@ export const WithImageControls: StoryObj<
   args: {
     ...Default.args,
     imageFit: "fit-width",
-    imageHeight: "h-32",
+    imageSize: "sm",
     imageType: "wide",
   } as never,
   render: (args) => {
     const typedArgs = args as {
       imageFit?: CardImageFit
-      imageHeight?: string
+      imageSize?: CardImageSize
       imageType?: keyof typeof imageTypes
     }
     const imageFit = (typedArgs.imageFit || "fit-width") as CardImageFit
-    const imageHeight = typedArgs.imageHeight || "h-32"
+    const imageSize = typedArgs.imageSize || "sm"
     const imageType = (typedArgs.imageType || "wide") as keyof typeof imageTypes
     const selectedImage = imageTypes[imageType]
 
@@ -516,7 +519,7 @@ export const WithImageControls: StoryObj<
             {...Default.args}
             image={selectedImage}
             imageFit={imageFit}
-            imageHeight={imageHeight}
+            imageSize={imageSize}
           />
         </div>
       </div>
@@ -527,7 +530,7 @@ export const WithImageControls: StoryObj<
 export const ImageFitOptions: StoryObj<
   typeof meta & {
     imageFit?: CardImageFit
-    imageHeight?: string
+    imageSize?: CardImageSize
     imageType?: "squared" | "small" | "wide" | "vertical"
   }
 > = {
@@ -565,17 +568,17 @@ export const ImageFitOptions: StoryObj<
   args: {
     ...Default.args,
     imageFit: "fit-width",
-    imageHeight: "h-32",
+    imageSize: "sm",
     imageType: "wide",
   } as never,
   render: (args) => {
     const typedArgs = args as {
       imageFit?: CardImageFit
-      imageHeight?: string
+      imageSize?: CardImageSize
       imageType?: keyof typeof imageTypes
     }
     const imageFit = (typedArgs.imageFit || "fit-width") as CardImageFit
-    const imageHeight = typedArgs.imageHeight || "h-32"
+    const imageSize = typedArgs.imageSize || "sm"
     const imageType = (typedArgs.imageType || "wide") as keyof typeof imageTypes
     const selectedImage = imageTypes[imageType]
 
@@ -586,7 +589,7 @@ export const ImageFitOptions: StoryObj<
             {...Default.args}
             image={selectedImage}
             imageFit={imageFit}
-            imageHeight={imageHeight}
+            imageSize={imageSize}
           />
         </div>
       </div>

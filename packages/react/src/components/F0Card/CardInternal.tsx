@@ -23,11 +23,27 @@ import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import { type CardMetadata as CardMetadataType } from "./types"
 
-export type CardImageFit =
-  | "contain" // Show entire image, no crop
-  | "fit-width" // Fill width, crop top/bottom if needed (default value)
-  | "fit-height" // Fill height, crop left/right if needed
-  | "scale-down" // Prevent upscaling
+export const cardImageFits = [
+  "contain", // Show entire image, no crop
+  "cover", // Fill container, crop to maintain aspect ratio
+  "fit-width", // Fill width, may have empty space on top/bottom (default value)
+  "fit-height", // Fill height, crop left/right if needed
+  "scale-down", // Prevent upscaling
+] as const
+
+export type CardImageFit = (typeof cardImageFits)[number]
+
+export const cardImageSizes = ["xs", "sm", "md", "lg", "xl"] as const
+
+export type CardImageSize = (typeof cardImageSizes)[number]
+
+const imageSizeClassMap: Record<CardImageSize, string> = {
+  xs: "h-24",
+  sm: "h-32",
+  md: "h-40",
+  lg: "h-48",
+  xl: "h-64",
+}
 
 export interface CardInternalProps {
   /**
@@ -52,10 +68,10 @@ export interface CardInternalProps {
   imageFit?: CardImageFit
 
   /**
-   * Height of the image container (Tailwind height class)
-   * @default "h-32"
+   * Size of the image container
+   * @default "sm"
    */
-  imageHeight?: string
+  imageSize?: CardImageSize
 
   /**
    * The title of the card
@@ -135,17 +151,19 @@ export interface CardInternalProps {
   disableOverlayLink?: boolean
 }
 
+const imageFitClassMap: Record<CardImageFit, string> = {
+  contain: "object-contain h-full w-full",
+  cover: "object-cover h-full w-full",
+  "fit-width": "w-full h-auto",
+  "fit-height": "object-contain h-full w-auto",
+  "scale-down": "object-scale-down h-full w-full",
+}
+
+/**
+ * Returns the appropriate object-fit className for the given image fit option
+ */
 function getImageFitClassName(imageFit: CardImageFit): string {
-  switch (imageFit) {
-    case "contain":
-      return "object-contain h-full w-full"
-    case "fit-width":
-      return "object-cover h-full w-full"
-    case "fit-height":
-      return "object-contain h-full w-auto"
-    case "scale-down":
-      return "object-scale-down h-full w-full"
-  }
+  return imageFitClassMap[imageFit]
 }
 
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
@@ -155,7 +173,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       avatar,
       image,
       imageFit = "fit-width",
-      imageHeight = "h-32",
+      imageSize = "sm",
       title,
       description,
       metadata,
@@ -217,10 +235,16 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {image && (
           <div
             className={cn(
-              "relative -mx-3 -mt-3 mb-4 overflow-hidden rounded-md",
-              imageHeight,
+              "relative -mx-3 -mt-3 mb-4 rounded-md",
+              imageSizeClassMap[imageSize],
               compact && "-mx-2 -mt-2 mb-3",
-              imageFit === "fit-height" && "flex items-center justify-center"
+              imageFit === "fit-height" &&
+                "flex items-center justify-center overflow-hidden",
+              imageFit === "fit-width" &&
+                "flex items-center justify-center overflow-hidden",
+              imageFit !== "fit-width" &&
+                imageFit !== "fit-height" &&
+                "overflow-hidden"
             )}
           >
             <Image
