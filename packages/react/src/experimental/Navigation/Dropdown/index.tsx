@@ -15,6 +15,7 @@ import {
   DropdownInternal,
   DropdownInternalProps,
   DropdownItem,
+  DropdownItemLabel,
   DropdownItemObject,
 } from "./internal"
 
@@ -45,7 +46,7 @@ export const Dropdown = (props: DropdownProps) => {
   )
 }
 
-export type { DropdownItem, DropdownItemObject }
+export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
 
 export const MobileDropdown = ({ items, children }: DropdownProps) => {
   const [open, setOpen] = useState(false)
@@ -67,25 +68,44 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
       <DrawerOverlay className="bg-f1-background-overlay" />
       <DrawerContent className="bg-f1-background">
         <div className="flex flex-col px-2 pb-3 pt-2">
-          {items.map((item, index) =>
-            item.type === "separator" ? (
-              <div
-                key={`separator-${index}`}
-                className="mx-[-8px] my-2 h-px w-[calc(100%+16px)] bg-f1-border-secondary"
-              />
-            ) : item.href ? (
-              <Link
-                {...item}
-                href={item.href}
-                className={cn(
-                  "flex w-full items-start gap-1.5",
-                  item.critical && "text-f1-foreground-critical",
-                  "text-f1-foreground no-underline hover:cursor-pointer"
-                )}
-              >
-                <DropdownItemContent item={item} />
-              </Link>
-            ) : (
+          {items.map((item, index) => {
+            if (item.type === "separator") {
+              return (
+                <div
+                  key={`separator-${index}`}
+                  className="mx-[-8px] my-2 h-px w-[calc(100%+16px)] bg-f1-border-secondary"
+                />
+              )
+            }
+
+            if (item.type === "label") {
+              return (
+                <span
+                  key={`label-${index}`}
+                  className="flex-1 px-3 py-2 text-xs font-medium leading-4 text-f1-foreground-secondary"
+                >
+                  {item.text}
+                </span>
+              )
+            }
+
+            if (item.href) {
+              return (
+                <Link
+                  key={`link-${index}`}
+                  href={item.href}
+                  className={cn(
+                    "flex w-full items-start gap-1.5",
+                    item.critical && "text-f1-foreground-critical",
+                    "text-f1-foreground no-underline hover:cursor-pointer"
+                  )}
+                >
+                  <DropdownItemContent item={item} />
+                </Link>
+              )
+            }
+
+            return (
               <button
                 key={item.label}
                 onClick={(e) => {
@@ -118,7 +138,7 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
                 </span>
               </button>
             )
-          )}
+          })}
         </div>
       </DrawerContent>
     </Drawer>
