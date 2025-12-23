@@ -23,6 +23,28 @@ import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import { type CardMetadata as CardMetadataType } from "./types"
 
+export const cardImageFits = [
+  "contain", // Show entire image, no crop
+  "cover", // Fill container, crop to maintain aspect ratio
+  "fit-width", // Fill width, may have empty space on top/bottom (default value)
+  "fit-height", // Fill height, crop left/right if needed
+  "scale-down", // Prevent upscaling
+] as const
+
+export type CardImageFit = (typeof cardImageFits)[number]
+
+export const cardImageSizes = ["xs", "sm", "md", "lg", "xl"] as const
+
+export type CardImageSize = (typeof cardImageSizes)[number]
+
+const imageSizeClassMap: Record<CardImageSize, string> = {
+  xs: "h-24",
+  sm: "h-32",
+  md: "h-40",
+  lg: "h-48",
+  xl: "h-64",
+}
+
 export interface CardInternalProps {
   /**
    * Whether the card has a compact layout
@@ -38,6 +60,18 @@ export interface CardInternalProps {
    * Whether the card has an image
    */
   image?: string
+
+  /**
+   * How the image should be displayed/fitted within its container
+   * @default "fit-width"
+   */
+  imageFit?: CardImageFit
+
+  /**
+   * Size of the image container
+   * @default "sm"
+   */
+  imageSize?: CardImageSize
 
   /**
    * The title of the card
@@ -117,12 +151,29 @@ export interface CardInternalProps {
   disableOverlayLink?: boolean
 }
 
+const imageFitClassMap: Record<CardImageFit, string> = {
+  contain: "object-contain h-full w-full",
+  cover: "object-cover h-full w-full",
+  "fit-width": "w-full h-auto",
+  "fit-height": "object-contain h-full w-auto",
+  "scale-down": "object-scale-down h-full w-full",
+}
+
+/**
+ * Returns the appropriate object-fit className for the given image fit option
+ */
+function getImageFitClassName(imageFit: CardImageFit): string {
+  return imageFitClassMap[imageFit]
+}
+
 export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
   function CardInternal(
     {
       compact = false,
       avatar,
       image,
+      imageFit = "fit-width",
+      imageSize = "sm",
       title,
       description,
       metadata,
@@ -184,14 +235,22 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {image && (
           <div
             className={cn(
-              "relative -mx-3 -mt-3 mb-4 h-32 overflow-hidden rounded-md",
-              compact && "-mx-2 -mt-2 mb-3"
+              "relative -mx-3 -mt-3 mb-4 rounded-md",
+              imageSizeClassMap[imageSize],
+              compact && "-mx-2 -mt-2 mb-3",
+              imageFit === "fit-height" &&
+                "flex items-center justify-center overflow-hidden",
+              imageFit === "fit-width" &&
+                "flex items-center justify-center overflow-hidden",
+              imageFit !== "fit-width" &&
+                imageFit !== "fit-height" &&
+                "overflow-hidden"
             )}
           >
             <Image
               src={image}
               alt={title}
-              className="h-full w-full object-cover"
+              className={cn(getImageFitClassName(imageFit as CardImageFit))}
             />
             <CardOptions
               otherActions={otherActions}
