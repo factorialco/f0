@@ -1047,6 +1047,7 @@ export const ExampleComponent = ({
   frozenColumns = 0,
   selectable,
   defaultSelectedItems,
+  pageOnlySelection,
   bulkActions,
   currentGrouping,
   currentSortings,
@@ -1107,6 +1108,7 @@ export const ExampleComponent = ({
   >
   defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
+  pageOnlySelection?: boolean
   bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
@@ -1232,6 +1234,7 @@ export const ExampleComponent = ({
       ],
       selectable,
       defaultSelectedItems,
+      pageOnlySelection,
       bulkActions,
       totalItemSummary,
       search:
