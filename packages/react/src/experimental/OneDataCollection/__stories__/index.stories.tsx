@@ -876,6 +876,64 @@ export const WithSelectableAndBulkActions: Story = {
   ),
 }
 
+export const WithPageOnlySelection: Story = {
+  render: () => {
+    const paginatedMockUsers = generateMockUsers(50)
+
+    return (
+      <ExampleComponent
+        selectable={(item) => item.id}
+        pageOnlySelection={true} // Default behavior - selection resets on page change
+        dataAdapter={createDataAdapter({
+          data: paginatedMockUsers,
+          delay: 500,
+          paginationType: "pages",
+        })}
+        bulkActions={({ selectedCount }) => ({
+          primary: [
+            {
+              label: `Delete ${selectedCount} item${selectedCount > 1 ? "s" : ""} from current page`,
+              icon: Delete,
+              id: "delete-page",
+              critical: true,
+            },
+          ],
+        })}
+      />
+    )
+  },
+}
+
+export const WithCrossPageSelection: Story = {
+  render: () => {
+    const paginatedMockUsers = generateMockUsers(50)
+
+    return (
+      <ExampleComponent
+        selectable={(item) => item.id}
+        pageOnlySelection={false} // Maintain selection across pages
+        dataAdapter={createDataAdapter({
+          data: paginatedMockUsers,
+          delay: 500,
+          paginationType: "pages",
+        })}
+        bulkActions={({ allSelected, selectedCount }) => ({
+          primary: [
+            {
+              label: allSelected
+                ? "Delete all items"
+                : `Delete ${selectedCount} selected item${selectedCount > 1 ? "s" : ""}`,
+              icon: Delete,
+              id: "delete-all",
+              critical: true,
+            },
+          ],
+        })}
+      />
+    )
+  },
+}
+
 export const WithSelectableAndDefaultSelectedItems: Story = {
   render: () => (
     <ExampleComponent

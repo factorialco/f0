@@ -64,6 +64,12 @@ export type DataSourceDefinition<
   selectable?: (item: R) => string | number | undefined
   /** Default selected items */
   defaultSelectedItems?: SelectedItemsState<R>
+  /**
+   * When true, selection state is scoped to the current page only.
+   * - Selection state resets when navigating between pages
+   * - itemStatus only includes items from the current page
+   */
+  pageOnlySelection?: boolean
 
   /***** GROUPING ***************************************************/
   /** Grouping configuration */
