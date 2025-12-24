@@ -80,27 +80,29 @@ export const useColumns = <
   allowHiding?: boolean
 ): UseColumnsReturn<R, Sortings, Summaries> => {
   const [colsHidden, setColsHidden] = useState<ColId[]>(
-    (allowHiding ? settings?.hidden : undefined) ??
-      getColsHiddenFromDefinition(originalColumns)
+    (allowHiding && settings?.hidden !== undefined
+      ? settings.hidden
+      : undefined) ?? getColsHiddenFromDefinition(originalColumns)
   )
   const [colsOrder, setColsOrder] = useState<ColId[]>(
-    (allowSorting ? settings?.order : undefined) ??
-      getColsOrderFromDefinition(originalColumns)
+    (allowSorting && settings?.order !== undefined
+      ? settings.order
+      : undefined) ?? getColsOrderFromDefinition(originalColumns)
   )
 
   useEffect(() => {
-    if (settings?.hidden) {
+    if (allowHiding && settings?.hidden !== undefined) {
       setColsHidden(settings.hidden)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
-  }, [JSON.stringify(settings?.hidden)])
+  }, [JSON.stringify(settings?.hidden), allowHiding])
 
   useEffect(() => {
-    if (settings?.order) {
+    if (allowSorting && settings?.order !== undefined) {
       setColsOrder(settings.order)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
-  }, [JSON.stringify(settings?.order)])
+  }, [JSON.stringify(settings?.order), allowSorting])
 
   const columnsWithStatus = useMemo(() => {
     const cols = [...originalColumns]
@@ -121,11 +123,14 @@ export const useColumns = <
       // The rest of the columns are sorted and hidden using the status in colsOrder and colsHidden
       ...cols
         .slice(nonEditableColumns)
-        .sort(
-          (a, b) =>
-            colsOrder.indexOf(getColumnId(a)) -
-            colsOrder.indexOf(getColumnId(b))
-        )
+        .sort((a, b) => {
+          const aIndex = colsOrder.indexOf(getColumnId(a))
+          const bIndex = colsOrder.indexOf(getColumnId(b))
+          // Columns not in saved order (indexOf === -1) should appear at the end
+          const aPos = aIndex === -1 ? colsOrder.length : aIndex
+          const bPos = bIndex === -1 ? colsOrder.length : bIndex
+          return aPos - bPos
+        })
         .map((column, index) => ({
           column: {
             ...column,

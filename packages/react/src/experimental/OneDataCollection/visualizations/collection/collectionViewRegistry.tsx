@@ -139,10 +139,7 @@ export const collectionVisualizations: CollectionVisualizations<
     settings: {
       renderer: tableSettingsRenderer,
       resetHandler: handleTableResetSettings,
-      default: {
-        order: [],
-        hidden: [],
-      },
+      default: {},
     },
   },
   list: {
