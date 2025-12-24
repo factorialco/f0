@@ -3,6 +3,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
   DropdownInternalProps,
+  DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
 import CrossIcon from "@/icons/app/Cross"
@@ -40,7 +41,10 @@ export const OneModalHeader = ({
   }
 
   const otherActionItems =
-    otherActions?.filter((action) => action.type !== "separator") ?? []
+    otherActions?.filter(
+      (action): action is DropdownItemObject =>
+        action.type !== "separator" && action.type !== "label"
+    ) ?? []
 
   const Actions = () => {
     if (!otherActionItems.length || !otherActions) return null

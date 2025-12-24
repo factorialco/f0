@@ -30,7 +30,7 @@ export const ItemActionsDropdown = ({
       <Dropdown
         align={align}
         items={items.map((item) => {
-          if (item.type === "separator") {
+          if (item.type === "separator" || item.type === "label") {
             return item
           }
           return {

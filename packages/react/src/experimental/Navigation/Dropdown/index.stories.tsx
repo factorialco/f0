@@ -16,6 +16,7 @@ type Story = StoryObj<typeof Dropdown>
 
 export const Default: Story = {
   args: {
+    label: "",
     items: [
       {
         label: "Create",
@@ -190,6 +191,32 @@ export const WithAvatars: Story = {
           src: "/avatars/person05.jpg",
           "aria-label": "Saúl Domínguez avatar",
         },
+      },
+    ],
+  },
+}
+
+export const WithLabels: Story = {
+  args: {
+    items: [
+      { type: "label", text: "Quick actions" },
+      {
+        label: "Create",
+        onClick: () => console.log("Create clicked"),
+        icon: Icons.Add,
+      },
+      {
+        label: "Edit",
+        onClick: () => console.log("Edit clicked"),
+        icon: Icons.Pencil,
+      },
+      { type: "separator" },
+      { type: "label", text: "Danger zone" },
+      {
+        label: "Delete",
+        onClick: () => console.log("Delete clicked"),
+        critical: true,
+        icon: Icons.Delete,
       },
     ],
   },
