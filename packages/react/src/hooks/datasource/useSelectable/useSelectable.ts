@@ -129,11 +129,12 @@ export function useSelectable<
     string,
     AllSelectionStatus
   > => {
-    if (!isGrouped || data.type !== "grouped") return {}
+    if (!isGrouped || data.type !== "grouped" || !data.groups) return {}
 
     const result: Record<string, AllSelectionStatus> = {}
 
     for (const group of data.groups) {
+      if (!group || !group.records || !group.key) continue
       const groupItemIds = group.records
         .map((record) => getSelectable?.(record))
         .filter((id): id is SelectionId => id !== undefined)
@@ -191,11 +192,11 @@ export function useSelectable<
     const items = localSelectedState.items || new Map()
 
     const itemsStatus = Array.from(items.values())
-      .filter((itemState) => itemState.item !== undefined)
+      .filter((itemState) => itemState && itemState.item !== undefined)
       .map(({ item, checked }) => ({ item: item as R, checked }))
 
     const selectedIds = Array.from(items.entries())
-      .filter(([, itemState]) => itemState.checked)
+      .filter(([, itemState]) => itemState && itemState.checked)
       .map(([id]) => id)
 
     return { itemsStatus, selectedIds }
@@ -204,10 +205,9 @@ export function useSelectable<
   const groupsStatus = useMemo(
     () =>
       Object.fromEntries(
-        Array.from(groupsState.values()).map(({ group, checked }) => [
-          group.key,
-          !!checked,
-        ])
+        Array.from(groupsState.values())
+          .filter(({ group }) => group && group.key)
+          .map(({ group, checked }) => [group!.key, !!checked])
       ),
     [groupsState]
   )
@@ -249,7 +249,7 @@ export function useSelectable<
     (id: SelectionId) => {
       return (
         localSelectedState.items?.get(id)?.item ??
-        data.records.find((record) => {
+        data.records?.find((record) => {
           const itemId = getSelectable?.(record)
           return itemId !== undefined && itemId === id
         })
@@ -259,20 +259,22 @@ export function useSelectable<
   )
 
   const getAllRecords = useCallback(() => {
-    if (data.type === "grouped") {
-      return data.groups.flatMap((group) => group.records)
+    if (data.type === "grouped" && data.groups) {
+      return data.groups.flatMap((group) => group?.records || [])
     }
-    return data.records
+    return data.records || []
   }, [data])
 
   const getSelectedStateKey = useCallback(
     (state: SelectedItemsState<R> | undefined): string => {
       if (!state) return ""
       const itemsKeys = Array.from(state.items?.entries() || [])
+        .filter(([, item]) => item)
         .map(([id, item]) => `${id}:${item.checked}`)
         .sort()
         .join(",")
       const groupsKeys = Array.from(state.groups?.entries() || [])
+        .filter(([, group]) => group)
         .map(([id, group]) => `${id}:${group.checked}`)
         .sort()
         .join(",")
@@ -295,13 +297,16 @@ export function useSelectable<
         >()
 
         for (const [id, itemState] of current.items?.entries() || []) {
-          mergedItems.set(id, itemState)
+          if (itemState) {
+            mergedItems.set(id, itemState)
+          }
         }
 
         for (const [
           itemStateId,
           itemState,
         ] of newSelectedState.items?.entries() || []) {
+          if (!itemState) continue
           const existingItem = mergedItems.get(itemStateId)
           const item = getItemById(itemStateId)
 
@@ -311,7 +316,11 @@ export function useSelectable<
               checked: itemState.checked,
               item,
             })
-          } else if (existingItem.item === undefined && item !== undefined) {
+          } else if (
+            existingItem &&
+            existingItem.item === undefined &&
+            item !== undefined
+          ) {
             mergedItems.set(itemStateId, {
               ...existingItem,
               item,
@@ -319,14 +328,16 @@ export function useSelectable<
           }
         }
 
-        for (const record of data.records) {
-          const id = getSelectable?.(record)
-          if (id && !mergedItems.has(id)) {
-            mergedItems.set(id, {
-              id,
-              checked: allSelectedCheck,
-              item: record,
-            })
+        if (data.records) {
+          for (const record of data.records) {
+            const id = getSelectable?.(record)
+            if (id && !mergedItems.has(id)) {
+              mergedItems.set(id, {
+                id,
+                checked: allSelectedCheck,
+                item: record,
+              })
+            }
           }
         }
 
@@ -335,6 +346,7 @@ export function useSelectable<
           groupId,
           groupState,
         ] of newSelectedState.groups?.entries() || []) {
+          if (!groupState) continue
           mergedGroups.set(String(groupId), {
             id: groupId,
             checked: groupState.checked,
@@ -342,7 +354,7 @@ export function useSelectable<
         }
 
         return {
-          allSelected: current.allSelected,
+          allSelected: current?.allSelected ?? false,
           items: mergedItems,
           groups: mergedGroups,
         }
@@ -369,9 +381,12 @@ export function useSelectable<
       )
 
       setLocalSelectedState((current) => {
+        if (!current) return current
         // Single selection: replace previous selection entirely
         const newItemsState =
-          !isMultiSelection && checked ? new Map() : new Map(current.items)
+          !isMultiSelection && checked
+            ? new Map()
+            : new Map(current.items || new Map())
 
         let updated = 0
 
@@ -384,7 +399,7 @@ export function useSelectable<
           const existingItem = current.items?.get(id)?.item
           const item =
             existingItem ??
-            data.records.find((record) => {
+            data.records?.find((record) => {
               const recordId = getSelectable?.(record)
               return recordId !== undefined && recordId === id
             })
@@ -411,21 +426,27 @@ export function useSelectable<
       groupOrId: GroupRecord<R> | SelectionId | readonly SelectionId[],
       checked: boolean
     ) => {
-      if (!isGrouped || data.type !== "grouped") return
+      if (!isGrouped || data.type !== "grouped" || !data.groups) return
 
       const groupIds: SelectionId[] = isGroupRecord(groupOrId)
         ? [groupOrId.key]
         : Array.isArray(groupOrId)
-          ? [...groupOrId]
-          : [groupOrId]
+          ? [...(groupOrId || [])]
+          : groupOrId !== null && groupOrId !== undefined
+            ? [groupOrId]
+            : []
 
-      const groups = data.groups.filter((group) => groupIds.includes(group.key))
+      const groups = data.groups.filter(
+        (group) => group && group.key && groupIds.includes(group.key)
+      )
       if (groups.length === 0) return
 
       const groupItemIds = groups.flatMap((group) =>
-        group.records
-          .map((record) => getSelectable?.(record))
-          .filter((id): id is SelectionId => id !== undefined)
+        group?.records
+          ? group.records
+              .map((record) => getSelectable?.(record))
+              .filter((id): id is SelectionId => id !== undefined)
+          : []
       )
 
       if (groupItemIds.length > 0) {
@@ -435,7 +456,9 @@ export function useSelectable<
       setGroupsState((current) => {
         const newState = new Map(current)
         for (const group of groups) {
-          newState.set(group.key, { group, checked })
+          if (group && group.key) {
+            newState.set(group.key, { group, checked })
+          }
         }
         return newState
       })
@@ -481,12 +504,15 @@ export function useSelectable<
         setSelectAllTotal(null)
       }
 
-      if (isGrouped && data.type === "grouped") {
-        const allGroupIds = data.groups.map((group) => group.key)
+      if (isGrouped && data.type === "grouped" && data.groups) {
+        const allGroupIds = data.groups
+          .map((group) => group?.key)
+          .filter((key): key is string => key !== undefined) as SelectionId[]
         if (allGroupIds.length > 0) {
           handleSelectGroupChange(allGroupIds, checked)
         }
       } else {
+        if (!data.records) return
         const allItemIds = data.records
           .map((record) => getSelectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)
@@ -497,11 +523,12 @@ export function useSelectable<
 
         // Update items not in current page (e.g., items selected before pagination/filtering)
         setLocalSelectedState((current) => {
-          const newItems = new Map(current.items)
+          if (!current) return current
+          const newItems = new Map(current.items || new Map())
           let hasChanges = false
 
           for (const [id, itemState] of newItems.entries()) {
-            if (itemState.checked !== checked) {
+            if (itemState && itemState.checked !== checked) {
               newItems.set(id, { ...itemState, checked })
               hasChanges = true
             }
@@ -546,7 +573,7 @@ export function useSelectable<
   // Sync allSelected state back to localSelectedState
   useEffect(() => {
     setLocalSelectedState((current) => ({
-      ...current,
+      ...(current || {}),
       allSelected: allSelectedState,
     }))
   }, [allSelectedState])
@@ -608,6 +635,7 @@ export function useSelectable<
 
     if (isGrouped) {
       for (const record of allRecords) {
+        if (!record) continue
         const recordId = getSelectable?.(record)
         if (recordId === undefined) continue
 
@@ -633,16 +661,18 @@ export function useSelectable<
 
     // Populate item references for pre-selected items (selected before data loaded)
     setLocalSelectedState((current) => {
+      if (!current) return current
       let hasChanges = false
-      const updatedItems = new Map(current.items)
+      const updatedItems = new Map(current.items || new Map())
 
       for (const [id, itemState] of updatedItems.entries()) {
-        if (itemState.item === undefined) {
+        if (itemState && itemState.item === undefined) {
           const foundItem = allRecords.find((record) => {
+            if (!record) return false
             const recordId = getSelectable?.(record)
             return recordId !== undefined && recordId === id
           })
-          if (foundItem) {
+          if (foundItem && itemState) {
             updatedItems.set(id, {
               ...itemState,
               item: foundItem as WithGroupId<R>,
