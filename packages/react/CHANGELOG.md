@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.316.1](https://github.com/factorialco/f0/compare/f0-react-v1.316.0...f0-react-v1.316.1) (2025-12-29)
+
+
+### Bug Fixes
+
+* Prevent null/undefined errors in FiltersPresets during initial load ([#3177](https://github.com/factorialco/f0/issues/3177)) ([ca93c03](https://github.com/factorialco/f0/commit/ca93c0307317e227b6497ad80e2d7535d61cb79e))
+
 ## [1.316.0](https://github.com/factorialco/f0/compare/f0-react-v1.315.0...f0-react-v1.316.0) (2025-12-29)
 
 
