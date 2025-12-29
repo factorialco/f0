@@ -3,6 +3,7 @@ import { Preset } from "@/experimental/OnePreset"
 import { cn, focusRing } from "@/lib/utils"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
+import { useMemo } from "react"
 import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
@@ -20,6 +21,13 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   onPresetsChange,
   presetsLoading = false,
 }: FilterPresetsProps<Filters>) => {
+  // Ensure value is always a valid object, never null or undefined
+  const safeValue = useMemo(() => {
+    return value != null && typeof value === "object" && !Array.isArray(value)
+      ? value
+      : ({} as FiltersState<Filters>)
+  }, [value])
+
   /**
    * Computes the selection state and click handler for a preset.
    * Presets merge with current filters when selected and remove only their keys when deselected.
@@ -27,20 +35,20 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   const getPresetState = (preset: NonNullable<typeof presets>[number]) => {
     // Check if all preset filters are present in current value
     const isSelected = Object.entries(preset.filter).every(
-      ([key, val]) => JSON.stringify(value[key]) === JSON.stringify(val)
+      ([key, val]) => JSON.stringify(safeValue[key]) === JSON.stringify(val)
     )
 
     const handleClick = () => {
       if (isSelected) {
         // Remove only preset's keys from current filters
-        const newFilters = { ...value }
+        const newFilters = { ...safeValue }
         Object.keys(preset.filter).forEach((key) => {
           delete newFilters[key as keyof typeof newFilters]
         })
         onPresetsChange?.(newFilters)
       } else {
         // Merge preset's filter with current filters
-        onPresetsChange?.({ ...value, ...preset.filter })
+        onPresetsChange?.({ ...safeValue, ...preset.filter })
       }
     }
 
@@ -61,7 +69,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         selected={isSelected}
         onClick={handleClick}
         data-visible={isVisible}
-        number={preset.itemsCount?.(value) ?? undefined}
+        number={preset.itemsCount?.(safeValue) ?? undefined}
       />
     )
   }
