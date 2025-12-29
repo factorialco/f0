@@ -201,45 +201,26 @@ export function useSelectable<
     return { itemsStatus, selectedIds }
   }, [localSelectedState.items])
 
-  const groupsStatus = useMemo(() => {
-    try {
-      return (
-        Object.fromEntries(
-          Array.from(groupsState.values())
-            .filter(({ group }) => group && group.key)
-            .map(({ group, checked }) => [group!.key, !!checked])
-        ) || {}
-      )
-    } catch {
-      return {}
-    }
-  }, [groupsState])
+  const groupsStatus = useMemo(
+    () =>
+      Object.fromEntries(
+        Array.from(groupsState.values()).map(({ group, checked }) => [
+          group.key,
+          !!checked,
+        ])
+      ),
+    [groupsState]
+  )
 
   const selectionStatus = useMemo((): SelectionStatus<R, Filters> => {
-    // Ensure filters is always a valid object, never null or undefined
-    const filters =
-      source.currentFilters != null &&
-      typeof source.currentFilters === "object" &&
-      !Array.isArray(source.currentFilters)
-        ? source.currentFilters
-        : {}
-
-    // Ensure groupsStatus is always a valid object, never null or undefined
-    const safeGroupsStatus =
-      groupsStatus != null &&
-      typeof groupsStatus === "object" &&
-      !Array.isArray(groupsStatus)
-        ? groupsStatus
-        : {}
-
     return {
       allChecked: allSelectedState,
       itemsStatus,
       selectedIds,
       checkedItems: Array.from(checkedItems.values()),
       uncheckedItems: Array.from(uncheckedItems.values()),
-      groupsStatus: safeGroupsStatus,
-      filters,
+      groupsStatus,
+      filters: source.currentFilters || {},
       selectedCount: selectedItemsCount,
       totalKnownItemsCount,
     }
@@ -713,29 +694,13 @@ export function useSelectable<
     }
     previousSelectionState.current = stateKey
 
-    // Ensure filters is always a valid object, never null or undefined
-    const filters =
-      source.currentFilters != null &&
-      typeof source.currentFilters === "object" &&
-      !Array.isArray(source.currentFilters)
-        ? source.currentFilters
-        : {}
-
-    // Ensure groupsStatus is always a valid object, never null or undefined
-    const safeGroupsStatus =
-      groupsStatus != null &&
-      typeof groupsStatus === "object" &&
-      !Array.isArray(groupsStatus)
-        ? groupsStatus
-        : {}
-
     onSelectItems?.(
       {
         allSelected: allSelectedState,
         itemsStatus,
         selectedIds,
-        groupsStatus: safeGroupsStatus,
-        filters,
+        groupsStatus,
+        filters: source.currentFilters || {},
         selectedCount: selectedItemsCount,
       },
       clearSelectedItems

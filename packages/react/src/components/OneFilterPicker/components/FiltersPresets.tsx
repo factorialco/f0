@@ -33,8 +33,16 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
    * Presets merge with current filters when selected and remove only their keys when deselected.
    */
   const getPresetState = (preset: NonNullable<typeof presets>[number]) => {
+    // Ensure preset.filter is always a valid object, never null or undefined
+    const safePresetFilter =
+      preset.filter != null &&
+      typeof preset.filter === "object" &&
+      !Array.isArray(preset.filter)
+        ? preset.filter
+        : ({} as FiltersState<Filters>)
+
     // Check if all preset filters are present in current value
-    const isSelected = Object.entries(preset.filter).every(
+    const isSelected = Object.entries(safePresetFilter).every(
       ([key, val]) => JSON.stringify(safeValue[key]) === JSON.stringify(val)
     )
 
@@ -42,13 +50,13 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
       if (isSelected) {
         // Remove only preset's keys from current filters
         const newFilters = { ...safeValue }
-        Object.keys(preset.filter).forEach((key) => {
+        Object.keys(safePresetFilter).forEach((key) => {
           delete newFilters[key as keyof typeof newFilters]
         })
         onPresetsChange?.(newFilters)
       } else {
         // Merge preset's filter with current filters
-        onPresetsChange?.({ ...safeValue, ...preset.filter })
+        onPresetsChange?.({ ...safeValue, ...safePresetFilter })
       }
     }
 
@@ -94,7 +102,13 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
       >
         {preset.label}
         <Counter
-          value={Object.keys(preset.filter).length}
+          value={
+            preset.filter != null &&
+            typeof preset.filter === "object" &&
+            !Array.isArray(preset.filter)
+              ? Object.keys(preset.filter).length
+              : 0
+          }
           type={isSelected ? "selected" : "default"}
         />
       </button>
@@ -120,6 +134,18 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     </div>
   )
 
+  // Filter out presets with invalid filters
+  const validPresets = useMemo(() => {
+    if (!presets || presets.length === 0) return []
+    return presets.filter(
+      (preset) =>
+        preset &&
+        preset.filter != null &&
+        typeof preset.filter === "object" &&
+        !Array.isArray(preset.filter)
+    )
+  }, [presets])
+
   // Show skeleton when loading
   if (presetsLoading) {
     const skeletonItems = Array.from(
@@ -137,10 +163,9 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   }
 
   return (
-    presets &&
-    presets.length > 0 && (
+    validPresets.length > 0 && (
       <OverflowList
-        items={presets}
+        items={validPresets}
         renderListItem={renderListPresetItem}
         renderDropdownItem={renderDropdownPresetItem}
         className="min-w-0 flex-1"
