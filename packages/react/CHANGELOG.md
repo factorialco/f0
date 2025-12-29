@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.316.0](https://github.com/factorialco/f0/compare/f0-react-v1.315.0...f0-react-v1.316.0) (2025-12-29)
+
+
+### Features
+
+* add label prop and DropdownMenuLabel to dropdown  ([#3171](https://github.com/factorialco/f0/issues/3171)) ([5985b36](https://github.com/factorialco/f0/commit/5985b36d9485a27a8db15d3162c625c0cd2f0377))
+
 ## [1.315.0](https://github.com/factorialco/f0/compare/f0-react-v1.314.0...f0-react-v1.315.0) (2025-12-22)
 
 
