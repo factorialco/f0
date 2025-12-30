@@ -1,4 +1,4 @@
-import { OneModalContext } from "@/experimental/Modals/OneModal/OneModalProvider"
+import { F0ModalContext } from "@/experimental/Modals/F0Modal"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -104,7 +104,7 @@ const F0SelectComponent = forwardRef(function Select<
   // If inside a OneModal and no portalContainer is provided, use the modal's container
   // only for center/fullscreen modals (which have focus trap).
   // For side panels (left/right), render in body to prevent clipping.
-  const modalContext = useContext(OneModalContext)
+  const modalContext = useContext(F0ModalContext)
   const shouldUseModalContainer =
     modalContext.portalContainer &&
     (modalContext.position === "center" ||

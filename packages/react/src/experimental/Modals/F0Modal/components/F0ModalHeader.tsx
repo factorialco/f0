@@ -1,40 +1,29 @@
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
-  DropdownInternalProps,
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
+import { Tabs } from "@/experimental/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-import { useOneModal } from "../OneModalProvider"
+import { F0ModalHeaderProps } from "../internal-types"
+import { useF0Modal } from "./F0ModalProvider"
 
-export type OneModalHeaderProps = {
-  title?: string
-  description?: string
-  /**
-   * Module configuration for the header. Only works when modal position is set to "right".
-   * Displays module icon and name in the header.
-   */
-  module?: {
-    id: ModuleId
-    label: string
-    href: string
-  }
-  otherActions?: DropdownInternalProps["items"]
-}
-
-export const OneModalHeader = ({
+export const F0ModalHeader = ({
   title,
   description,
   module,
   otherActions,
-}: OneModalHeaderProps) => {
-  const { onClose, hasTabs } = useOneModal()
+  tabs,
+  activeTabId,
+  setActiveTabId,
+}: F0ModalHeaderProps) => {
+  const { onClose } = useF0Modal()
+  const hasTabs = !!tabs
 
   const Divider = () => {
     return <div className="h-4 w-px self-center bg-f1-background-secondary" />
@@ -89,40 +78,51 @@ export const OneModalHeader = ({
   }
 
   return (
-    <div
-      className={cn(
-        "flex flex-row items-start justify-between gap-3 px-4 py-3",
-        !hasTabs &&
-          "border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary"
+    <>
+      <div
+        className={cn(
+          "flex flex-row items-start justify-between gap-3 px-4 py-3",
+          !hasTabs &&
+            "border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary"
+        )}
+      >
+        <div className="flex flex-col gap-1">
+          {module ? (
+            <Module />
+          ) : (
+            title && (
+              <DialogTitle className="py-1 text-lg font-semibold text-f1-foreground">
+                {title}
+              </DialogTitle>
+            )
+          )}
+          {!!description && (
+            <DrawerDescription className="text-base text-f1-foreground-secondary">
+              {description}
+            </DrawerDescription>
+          )}
+        </div>
+        <div className="flex flex-row gap-2">
+          <Actions />
+          {otherActions && <Divider />}
+          <ButtonInternal
+            variant="outline"
+            icon={CrossIcon}
+            onClick={onClose}
+            label="Close modal"
+            hideLabel
+          />
+        </div>
+      </div>
+      {tabs && (
+        <div className="-mx-2">
+          <Tabs
+            tabs={tabs}
+            activeTabId={activeTabId}
+            setActiveTabId={setActiveTabId}
+          />
+        </div>
       )}
-    >
-      <div className="flex flex-col gap-1">
-        {module ? (
-          <Module />
-        ) : (
-          title && (
-            <DialogTitle className="py-1 text-lg font-semibold text-f1-foreground">
-              {title}
-            </DialogTitle>
-          )
-        )}
-        {!!description && (
-          <DrawerDescription className="text-base text-f1-foreground-secondary">
-            {description}
-          </DrawerDescription>
-        )}
-      </div>
-      <div className="flex flex-row gap-2">
-        <Actions />
-        {otherActions && <Divider />}
-        <ButtonInternal
-          variant="outline"
-          icon={CrossIcon}
-          onClick={onClose}
-          label="Close modal"
-          hideLabel
-        />
-      </div>
-    </div>
+    </>
   )
 }

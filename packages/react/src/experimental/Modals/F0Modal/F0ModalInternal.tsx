@@ -1,44 +1,13 @@
-import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 import { cva } from "cva"
-import {
-  ComponentProps,
-  FC,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
-import { OneModalContent } from "./OneModalContent/OneModalContent"
-import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
-import { OneModalProvider } from "./OneModalProvider"
-import { ModalPosition, ModalWidth } from "./types"
+import { FC, useCallback, useMemo, useRef, useState } from "react"
+import { F0ModalContent } from "./components/F0ModalContent"
+import { F0ModalFooter } from "./components/F0ModalFooter"
+import { F0ModalHeader } from "./components/F0ModalHeader"
+import { F0ModalProvider } from "./components/F0ModalProvider"
+import { F0ModalInternalProps } from "./internal-types"
 import { useIsSmallScreen } from "./utils"
-
-export type OneModalProps = {
-  /** Whether the modal is open */
-  isOpen: boolean
-  /** Callback when modal is closed */
-  onClose: () => void
-  /** Whether to render the modal as a bottom sheet on mobile */
-  asBottomSheetInMobile?: boolean
-  /** The position of the modal */
-  position?: ModalPosition
-  /** The width of the modal. Only applies to center position but we can NOT use narrowing as position undefined is valid */
-  width?: ModalWidth
-  /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
-  children:
-    | ReactElement<
-        | ComponentProps<typeof OneModalHeader>
-        | ComponentProps<typeof OneModalContent>
-      >
-    | ReactElement<
-        | ComponentProps<typeof OneModalHeader>
-        | ComponentProps<typeof OneModalContent>
-      >[]
-} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 const modalWrapperClassName = cva({
   variants: {
@@ -94,13 +63,23 @@ const modalContentClassName = cva({
   },
 })
 
-export const OneModal: FC<OneModalProps> = ({
+export const F0ModalInternal: FC<F0ModalInternalProps> = ({
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
   isOpen,
   children,
   width = "md",
+  primaryAction,
+  secondaryAction,
+  title,
+  description,
+  module,
+  otherActions,
+  withPadding = false,
+  tabs,
+  activeTabId,
+  setActiveTabId,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -147,7 +126,7 @@ export const OneModal: FC<OneModalProps> = ({
     }
     if (width && position !== "center") {
       console.warn(
-        "OneModal: `width` prop is only applicable to center position"
+        "F0Modal: `width` prop is only applicable to center position"
       )
     }
 
@@ -162,9 +141,19 @@ export const OneModal: FC<OneModalProps> = ({
     })
   }, [variant, position, localWidth])
 
+  const headerProps = {
+    title,
+    description,
+    module,
+    otherActions,
+    tabs,
+    activeTabId,
+    setActiveTabId,
+  }
+
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
-      <OneModalProvider
+      <F0ModalProvider
         isOpen={isOpen}
         onClose={onClose}
         position={position}
@@ -175,15 +164,22 @@ export const OneModal: FC<OneModalProps> = ({
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
-            {children}
+            <F0ModalHeader {...headerProps} />
+            <F0ModalContent withPadding={withPadding}>
+              {children}
+            </F0ModalContent>
+            <F0ModalFooter
+              primaryAction={primaryAction}
+              secondaryAction={secondaryAction}
+            />
           </DrawerContent>
         </Drawer>
-      </OneModalProvider>
+      </F0ModalProvider>
     )
   }
 
   return (
-    <OneModalProvider
+    <F0ModalProvider
       isOpen={isOpen}
       onClose={onClose}
       position={position}
@@ -205,9 +201,14 @@ export const OneModal: FC<OneModalProps> = ({
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          {children}
+          <F0ModalHeader {...headerProps} />
+          <F0ModalContent withPadding={withPadding}>{children}</F0ModalContent>
+          <F0ModalFooter
+            primaryAction={primaryAction}
+            secondaryAction={secondaryAction}
+          />
         </DialogContent>
       </Dialog>
-    </OneModalProvider>
+    </F0ModalProvider>
   )
 }
