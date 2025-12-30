@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.316.3](https://github.com/factorialco/f0/compare/f0-react-v1.316.2...f0-react-v1.316.3) (2025-12-30)
+
+
+### Bug Fixes
+
+* prevent restoring selections after filter change ([#3181](https://github.com/factorialco/f0/issues/3181)) ([4197938](https://github.com/factorialco/f0/commit/4197938c6c6caaa845bbbd3f09ea133c534d8762))
+
 ## [1.316.2](https://github.com/factorialco/f0/compare/f0-react-v1.316.1...f0-react-v1.316.2) (2025-12-30)
 
 
