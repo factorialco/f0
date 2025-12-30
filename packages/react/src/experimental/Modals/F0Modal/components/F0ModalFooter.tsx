@@ -23,6 +23,7 @@ export const F0ModalFooter = ({
             variant="outline"
             icon={secondaryAction.icon}
             disabled={secondaryAction.disabled}
+            loading={secondaryAction.loading}
           />
         )}
         {hasPrimaryAction && (
@@ -32,6 +33,7 @@ export const F0ModalFooter = ({
             variant="default"
             icon={primaryAction.icon}
             disabled={primaryAction.disabled}
+            loading={primaryAction.loading}
           />
         )}
       </div>

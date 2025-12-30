@@ -11,6 +11,7 @@ export type F0ModalPrimaryAction = {
   icon?: IconType
   onClick: () => void
   disabled?: boolean
+  loading?: boolean
 }
 
 export type F0ModalSecondaryAction = {
@@ -18,6 +19,7 @@ export type F0ModalSecondaryAction = {
   icon?: IconType
   onClick: () => void
   disabled?: boolean
+  loading?: boolean
 }
 
 export type F0ModalActionsProps = {
