@@ -59,6 +59,12 @@ export type UseSelectableProps<
    * because the visible items are a filtered subset.
    */
   isSearchActive?: boolean
+  /**
+   * When true, selection state is scoped to the current page only.
+   * - Selection state resets when navigating between pages
+   * - itemStatus only includes items from the current page
+   */
+  pageOnlySelection?: boolean
 }
 
 export type SelectionMeta<R extends RecordType> = {

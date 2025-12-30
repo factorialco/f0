@@ -98,6 +98,53 @@ const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
 })
 ```
 
+### pageOnlySelection
+
+By default, the selection state is scoped to the current page only
+(`pageOnlySelection: true`). This means:
+
+- Selection state resets when navigating between pages
+- `itemsStatus` only includes items from the current page
+- `selectedCount` and `totalKnownItemsCount` are based on current page only
+- Useful for bulk actions that should only affect the current page
+
+If you need to maintain selection across all pages (like the backend manages the
+selection), you can set `pageOnlySelection: false` in your data source:
+
+```tsx
+const { source } = useDataCollectionSource({
+  ...
+  selectable: (item) => item.id,
+  pageOnlySelection: false, // Maintain selection across all pages
+  ...
+})
+```
+
+**With pageOnlySelection (default behavior):**
+
+- Navigate to page 1, select 2 items
+- Navigate to page 2 → previous selections are cleared
+- Select 3 items on page 2
+- Only the 3 items from page 2 are selected
+
+<Canvas
+  of={DataCollectionStories.WithPageOnlySelection}
+  meta={DataCollectionStories}
+/>
+
+**Without pageOnlySelection:**
+
+- Navigate to page 1, select 2 items
+- Navigate to page 2 → previous selections are maintained
+- Select 3 items on page 2
+- All 5 items (2 from page 1 + 3 from page 2) are selected
+- You need to manage the full selection state in your backend
+
+<Canvas
+  of={DataCollectionStories.WithCrossPageSelection}
+  meta={DataCollectionStories}
+/>
+
 #### Examples
 
 **Default selected items**
