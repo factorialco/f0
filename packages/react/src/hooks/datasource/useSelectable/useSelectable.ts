@@ -66,6 +66,7 @@ export function useSelectable<
   const previousDataRecordsKey = useRef<string>("")
   const previousSelectionState = useRef<string>("")
   const isAllSelectedRef = useRef(false)
+  const justClearedByFilterChange = useRef(false)
 
   // Computed Values
 
@@ -536,6 +537,7 @@ export function useSelectable<
     wasExplicitSelectAll.current = false
     setSelectAllTotal(null)
     setGroupsState(new Map())
+    isAllSelectedRef.current = false
     setLocalSelectedState(() => ({
       allSelected: false,
       items: new Map(),
@@ -580,6 +582,8 @@ export function useSelectable<
     const previousFiltersKey = JSON.stringify(previousFilters.current)
 
     if (currentFiltersKey !== previousFiltersKey) {
+      // Mark that we're clearing due to filter change to prevent data sync from restoring selections
+      justClearedByFilterChange.current = true
       clearSelectedItems()
       previousFilters.current = source.currentFilters
     }
@@ -605,6 +609,12 @@ export function useSelectable<
       return
     }
     previousDataRecordsKey.current = currentKey
+
+    // If we just cleared due to filter change, don't restore selections
+    if (justClearedByFilterChange.current) {
+      justClearedByFilterChange.current = false
+      return
+    }
 
     if (isGrouped) {
       for (const record of allRecords) {
