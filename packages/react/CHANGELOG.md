@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.316.2](https://github.com/factorialco/f0/compare/f0-react-v1.316.1...f0-react-v1.316.2) (2025-12-30)
+
+
+### Bug Fixes
+
+* bubble menu editor ([#3179](https://github.com/factorialco/f0/issues/3179)) ([a0d80b9](https://github.com/factorialco/f0/commit/a0d80b9af77e1fe51dc967bb907a02550731b490))
+
 ## [1.316.1](https://github.com/factorialco/f0/compare/f0-react-v1.316.0...f0-react-v1.316.1) (2025-12-29)
 
 
