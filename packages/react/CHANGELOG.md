@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.316.4](https://github.com/factorialco/f0/compare/f0-react-v1.316.3...f0-react-v1.316.4) (2025-12-31)
+
+
+### Bug Fixes
+
+* **OneCalendar:** use year-start reference date for ISO week parsing ([#3184](https://github.com/factorialco/f0/issues/3184)) ([197bd0b](https://github.com/factorialco/f0/commit/197bd0be1c3422fffe1ef70e829f4ed181f4be39))
+
 ## [1.316.3](https://github.com/factorialco/f0/compare/f0-react-v1.316.2...f0-react-v1.316.3) (2025-12-30)
 
 
