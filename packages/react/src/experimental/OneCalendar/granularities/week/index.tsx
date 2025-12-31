@@ -149,7 +149,7 @@ export const weekGranularity: GranularityDefinition = {
       const year = isNaN(Number(yearStr)) ? new Date().getFullYear() : +yearStr
 
       const week = Number(weekStr.replace(/[wW\s]/g, ""))
-      return parse(`${week}`, "I", new Date().setFullYear(year))
+      return parse(`${week}`, "I", new Date(year, 0, 1))
     }
 
     return toWeekGranularityDateRange({
