@@ -45,6 +45,7 @@ export type CardVisualizationOptions<
   image?: (record: T) => string
   imageFit?: CardImageFit
   imageSize?: CardImageSize
+  blurredBackground?: boolean
   compact?: boolean
 }
 
@@ -129,6 +130,7 @@ type GroupCardsProps<
   image?: (record: Record) => string
   imageFit?: CardImageFit
   imageSize?: CardImageSize
+  blurredBackground?: boolean
   compact?: boolean
   tmpFullWidth?: boolean
 }
@@ -153,6 +155,7 @@ const GroupCards = <
   image,
   imageFit,
   imageSize,
+  blurredBackground,
   compact,
   tmpFullWidth,
 }: GroupCardsProps<
@@ -278,6 +281,7 @@ const GroupCards = <
               image={image ? image(item) : undefined}
               imageFit={imageFit}
               imageSize={imageSize}
+              blurredBackground={blurredBackground}
               selected={selectable && selectedItems.has(id)}
               onSelect={(selected) => handleSelectItemChange(item, selected)}
               secondaryActions={secondaryActions}
@@ -312,6 +316,7 @@ export const CardCollection = <
   image,
   imageFit,
   imageSize,
+  blurredBackground,
   compact,
   source,
   onSelectItems,
@@ -464,6 +469,7 @@ export const CardCollection = <
                           image={image}
                           imageFit={imageFit}
                           imageSize={imageSize}
+                          blurredBackground={blurredBackground}
                           compact={compact}
                           tmpFullWidth={tmpFullWidth}
                         />
@@ -486,6 +492,7 @@ export const CardCollection = <
                 image={image}
                 imageFit={imageFit}
                 imageSize={imageSize}
+                blurredBackground={blurredBackground}
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
               />
