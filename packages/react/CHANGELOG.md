@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.316.3](https://github.com/factorialco/f0/compare/f0-react-v1.316.2...f0-react-v1.316.3) (2025-12-30)
+
+
+### Bug Fixes
+
+* prevent restoring selections after filter change ([#3181](https://github.com/factorialco/f0/issues/3181)) ([4197938](https://github.com/factorialco/f0/commit/4197938c6c6caaa845bbbd3f09ea133c534d8762))
+
+## [1.316.2](https://github.com/factorialco/f0/compare/f0-react-v1.316.1...f0-react-v1.316.2) (2025-12-30)
+
+
+### Bug Fixes
+
+* bubble menu editor ([#3179](https://github.com/factorialco/f0/issues/3179)) ([a0d80b9](https://github.com/factorialco/f0/commit/a0d80b9af77e1fe51dc967bb907a02550731b490))
+
+## [1.316.1](https://github.com/factorialco/f0/compare/f0-react-v1.316.0...f0-react-v1.316.1) (2025-12-29)
+
+
+### Bug Fixes
+
+* Prevent null/undefined errors in FiltersPresets during initial load ([#3177](https://github.com/factorialco/f0/issues/3177)) ([ca93c03](https://github.com/factorialco/f0/commit/ca93c0307317e227b6497ad80e2d7535d61cb79e))
+
+## [1.316.0](https://github.com/factorialco/f0/compare/f0-react-v1.315.0...f0-react-v1.316.0) (2025-12-29)
+
+
+### Features
+
+* add label prop and DropdownMenuLabel to dropdown  ([#3171](https://github.com/factorialco/f0/issues/3171)) ([5985b36](https://github.com/factorialco/f0/commit/5985b36d9485a27a8db15d3162c625c0cd2f0377))
+
+## [1.315.0](https://github.com/factorialco/f0/compare/f0-react-v1.314.0...f0-react-v1.315.0) (2025-12-22)
+
+
+### Features
+
+* refactor and document useSelectable ([#3150](https://github.com/factorialco/f0/issues/3150)) ([c4d1aa6](https://github.com/factorialco/f0/commit/c4d1aa6ad4504b9cbe7cd9ec241fff4220f030c8))
+
 ## [1.314.0](https://github.com/factorialco/f0/compare/f0-react-v1.313.0...f0-react-v1.314.0) (2025-12-20)
 
 
