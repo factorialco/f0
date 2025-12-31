@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.317.0](https://github.com/factorialco/f0/compare/f0-react-v1.316.4...f0-react-v1.317.0) (2025-12-31)
+
+
+### Features
+
+* image fit options for card view ([#3168](https://github.com/factorialco/f0/issues/3168)) ([cfca155](https://github.com/factorialco/f0/commit/cfca15551bbe91f1d32ab8dac18eeaeec41f8cad))
+
 ## [1.316.4](https://github.com/factorialco/f0/compare/f0-react-v1.316.3...f0-react-v1.316.4) (2025-12-31)
 
 
