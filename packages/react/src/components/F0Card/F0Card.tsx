@@ -1,10 +1,21 @@
 import { withSkeleton } from "@/lib/skeleton"
 import { forwardRef } from "react"
-import { CardInternal, CardInternalProps, CardSkeleton } from "./CardInternal"
+import {
+  CardInternal,
+  CardInternalProps,
+  CardSkeleton,
+  cardImageFits,
+  cardImageSizes,
+  type CardImageFit,
+  type CardImageSize,
+} from "./CardInternal"
 
 const privateProps = ["forceVerticalMetadata", "disableOverlayLink"] as const
 
 export type F0CardProps = Omit<CardInternalProps, (typeof privateProps)[number]>
+
+export { cardImageFits, cardImageSizes }
+export type { CardImageFit, CardImageSize }
 
 const F0CardBase = forwardRef<HTMLDivElement, F0CardProps>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
