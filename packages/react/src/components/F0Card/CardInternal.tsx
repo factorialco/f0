@@ -74,6 +74,12 @@ export interface CardInternalProps {
   imageSize?: CardImageSize
 
   /**
+   * Whether to show a blurred background image when the image doesn't fill the container
+   * @default true
+   */
+  blurredBackground?: boolean
+
+  /**
    * The title of the card
    */
   title?: string
@@ -174,6 +180,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       image,
       imageFit = "fit-width",
       imageSize = "sm",
+      blurredBackground = true,
       title,
       description,
       metadata,
@@ -247,6 +254,24 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 "overflow-hidden"
             )}
           >
+            {blurredBackground &&
+              (imageFit === "contain" ||
+                imageFit === "fit-width" ||
+                imageFit === "fit-height" ||
+                imageFit === "scale-down") && (
+                <div
+                  className="absolute inset-0 z-0 rounded-md"
+                  style={{
+                    backgroundImage: `url(${image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    filter: "blur(20px)",
+                    opacity: 0.4,
+                    transform: "scale(1.1)",
+                  }}
+                  aria-hidden="true"
+                />
+              )}
             <Image
               src={image}
               alt={title}
