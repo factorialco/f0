@@ -145,6 +145,7 @@ export const WithSmWidth: Story = {
   args: {
     isOpen: true,
     width: "sm",
+    withPadding: true,
     onClose: () => {},
     title: "Team Status",
     otherActions: OTHER_ACTIONS,
@@ -170,6 +171,7 @@ export const WithLgWidth: Story = {
 export const WithDescription: Story = {
   args: {
     isOpen: true,
+    withPadding: true,
     onClose: () => {},
     title: "Team Status",
     description:
@@ -183,7 +185,7 @@ export const WithDescription: Story = {
 const ExamplePersonList: FC<{ numberOfItems?: number }> = ({
   numberOfItems = 20,
 }) => (
-  <div className="flex flex-col gap-0.5 p-2">
+  <div className="flex flex-col gap-0.5">
     {Array.from({ length: numberOfItems }, (_, i) => (
       <OnePersonListItem
         key={i}

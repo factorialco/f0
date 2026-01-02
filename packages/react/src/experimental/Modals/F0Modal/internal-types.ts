@@ -62,8 +62,8 @@ export type F0ModalInternalProps = {
   // Actions to render in the footer
   primaryAction?: F0ModalPrimaryAction
   secondaryAction?: F0ModalSecondaryAction
-  // Title of the modal. Required.
-  title: string
+  // Title of the modal
+  title?: string
   // Description of the modal
   description?: string
   // Module configuration for the header. Only works when modal position is set to "right". Displays module icon and name in the header.
