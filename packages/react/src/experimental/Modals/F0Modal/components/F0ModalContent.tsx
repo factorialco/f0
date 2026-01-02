@@ -20,7 +20,7 @@ export const F0ModalContent = ({
       className={cn(
         "[*[data-state=visible]_div]:bg-f1-background flex flex-1 flex-col",
         "[&_.resource-header]:p-0 [&_.resource-header]:pr-1",
-        withPadding && "p-4",
+        withPadding && "px-4 [&>div]:py-4",
         !isSmallScreen && position === "center" && "max-h-[512px]"
       )}
     >
