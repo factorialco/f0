@@ -23,7 +23,7 @@ interface TreeConnectorProps {
 }
 
 export const connectorVariables = (
-  height: string,
+  height: number,
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
@@ -45,14 +45,18 @@ export const connectorVariables = (
         ? CONNECTOR_WIDTH - 6
         : CONNECTOR_WIDTH
 
+  const lineHeight =
+    height !== 0 &&
+    `calc(${height}px - ${CHEVRON_PARENT_SIZE + PADDING_TOP}px )`
+
   return {
     "--line-left": `-${2 * CHEVRON_SIZE}px`,
     "--line-width": LINE_WIDTH,
     "--horizontal-offset": `${horizontalOffset}px`,
     "--horizontal-left": `4px`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
-    "--line-height": `calc(${height} - ${CHEVRON_PARENT_SIZE + PADDING_TOP}px )`,
     "--connector-width": `${connectorWidth}px`,
+    ...(lineHeight ? { "--line-height": lineHeight } : {}),
   }
 }
 
@@ -102,9 +106,7 @@ export const TreeConnector = ({
         padding: 0,
       })
     : undefined
-  const connectorHeight = nestedRowProps?.connectorHeight
-    ? `${nestedRowProps?.connectorHeight}px`
-    : "0px"
+  const connectorHeight = nestedRowProps?.connectorHeight ?? 0
 
   if (
     !firstCellExpanded &&
