@@ -580,9 +580,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
-      dpdm:
-        specifier: ^3.14.0
-        version: 3.14.0
+      dpdm-fast:
+        specifier: ^1.0.14
+        version: 1.0.14
       emoji-mart:
         specifier: ^5.6.0
         version: 5.6.0
@@ -8087,8 +8087,8 @@ packages:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
-  dpdm@3.14.0:
-    resolution: {integrity: sha512-YJzsFSyEtj88q5eTELg3UWU7TVZkG1dpbF4JDQ3t1b07xuzXmdoGeSz9TKOke1mUuOpWlk4q+pBh+aHzD6GBTg==}
+  dpdm-fast@1.0.14:
+    resolution: {integrity: sha512-eX+Zlm602ZvvPBKpV8muKUORkE2XC5E4uL9MqVJ/S97S+PJOTuYCUleOS0omNITJcu6b5XeXdGzGbMB7/V2WdQ==}
     hasBin: true
 
   dset@3.1.4:
@@ -17351,7 +17351,7 @@ snapshots:
   '@jridgewell/source-map@0.3.10':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.12
-      '@jridgewell/trace-mapping': 0.3.29
+      '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/source-map@0.3.11':
     dependencies:
@@ -22922,14 +22922,14 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  dpdm@3.14.0:
+  dpdm-fast@1.0.14:
     dependencies:
       chalk: 4.1.2
       fs-extra: 11.3.0
       glob: 10.4.5
       ora: 5.4.1
       tslib: 2.8.1
-      typescript: 5.8.2
+      typescript: 5.9.3
       yargs: 17.7.2
 
   dset@3.1.4: {}

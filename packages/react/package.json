@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.313.0",
+  "version": "1.317.1",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -139,7 +139,7 @@
     "chromatic": "^11.28.0",
     "consola": "^3.4.0",
     "dotenv": "^16.4.7",
-    "dpdm": "^3.14.0",
+    "dpdm-fast": "^1.0.14",
     "emoji-mart": "^5.6.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "http-server": "^14.1.1",

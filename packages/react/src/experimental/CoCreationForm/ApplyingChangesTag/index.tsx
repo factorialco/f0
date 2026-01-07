@@ -9,7 +9,7 @@ const ApplyingChangesTag = () => {
   const i18n = useI18n()
 
   return (
-    <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-row items-center gap-1 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2 py-1.5 pr-2.5 shadow-md">
+    <div className="flex flex-row items-center gap-1 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2 py-1.5 pr-2.5 shadow-md">
       <IconMotion
         size="xs"
         animate={{

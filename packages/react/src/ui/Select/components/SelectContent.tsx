@@ -168,7 +168,7 @@ const SelectContent = forwardRef<
         className={cn(
           !asList && "transition-opacity delay-100",
           asList || virtualReady ? "" : "opacity-0",
-          !asList && forceMinHeight ? "min-h-[450px]" : ""
+          !asList && forceMinHeight ? "min-h-[412px]" : ""
         )}
         style={{
           height: virtualizer.getTotalSize() + VIEWBOX_VERTICAL_PADDING,
@@ -221,7 +221,7 @@ const SelectContent = forwardRef<
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           !asList &&
             position === "popper" &&
-            "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),450px)]",
+            "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),412px)]",
           className,
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0"
@@ -273,12 +273,12 @@ const SelectContent = forwardRef<
                 asList
                   ? "max-h-full"
                   : taller
-                    ? "max-h-[min(460px,calc(var(--radix-select-content-available-height,460px)-110px))]"
+                    ? "max-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]"
                     : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]",
                 // Apply min-height when filters are present to maintain consistent size
                 !asList &&
                   forceMinHeight &&
-                  "min-h-[min(450px,calc(var(--radix-select-content-available-height,450px)-110px))]",
+                  "min-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]",
                 // Center content vertically when empty
                 isEmpty && "justify-center",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
