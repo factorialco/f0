@@ -1,6 +1,6 @@
+import { zeroRender as render } from "@/testing/test-utils"
 import { screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { zeroRender as render } from "../../../testing/test-utils"
 import { OneDateNavigator } from "../OneDateNavigator"
 
 describe("OneDateNavigator", () => {
