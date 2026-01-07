@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.317.1](https://github.com/factorialco/f0/compare/f0-react-v1.317.0...f0-react-v1.317.1) (2026-01-07)
+
+
+### Bug Fixes
+
+* prevent applying changes tag in co-creation form to disappear when scrolling ([#3187](https://github.com/factorialco/f0/issues/3187)) ([1b3397e](https://github.com/factorialco/f0/commit/1b3397e4aca3757a64f5eae54fe1c08fbfe24099))
+
 ## [1.317.0](https://github.com/factorialco/f0/compare/f0-react-v1.316.4...f0-react-v1.317.0) (2025-12-31)
 
 
