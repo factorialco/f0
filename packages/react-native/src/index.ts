@@ -14,6 +14,5 @@ export * from "./components/experimental/Lists/DataList";
 export * from "./components/experimental/Lists/DetailsItem";
 export * from "./components/experimental/Lists/DetailsItemsList";
 
-//
 // Export icons
 export * from "./icons";
