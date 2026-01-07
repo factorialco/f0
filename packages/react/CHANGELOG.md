@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.318.0](https://github.com/factorialco/f0/compare/f0-react-v1.317.2...f0-react-v1.318.0) (2026-01-07)
+
+
+### Features
+
+* **OneFilterPicker:** add and export FilterPickerContent for always-… ([#3124](https://github.com/factorialco/f0/issues/3124)) ([5d3a446](https://github.com/factorialco/f0/commit/5d3a446e8310411e52436f33beef526786ec7712))
+
 ## [1.317.2](https://github.com/factorialco/f0/compare/f0-react-v1.317.1...f0-react-v1.317.2) (2026-01-07)
 
 
