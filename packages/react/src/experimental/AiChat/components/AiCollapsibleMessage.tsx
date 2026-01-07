@@ -1,7 +1,6 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"
-import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { ReactNode, useState } from "react"
 import {
@@ -14,21 +13,19 @@ export type AiCollapsibleMessageProps = {
   icon: IconType
   title: string
   children: ReactNode
-  withTopPadding?: boolean
 }
 
 export const AiCollapsibleMessage = ({
   icon,
   title,
   children,
-  withTopPadding = false,
 }: AiCollapsibleMessageProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 
   return (
     <Collapsible
-      className={cn("mb-1 w-full", withTopPadding && "mt-5")}
+      className="mb-1 w-full"
       open={isExpanded}
       onOpenChange={setIsExpanded}
     >
