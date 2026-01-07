@@ -33,7 +33,7 @@ export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
   useLayoutEffect(() => {
     const previousRow = firstRow?.previousElementSibling
 
-    if (!firstRow || !lastRow || !previousRow) {
+    if (!firstRow || !lastRow || firstRow === lastRow || !previousRow) {
       setCalculatedHeight(0)
       return
     }
