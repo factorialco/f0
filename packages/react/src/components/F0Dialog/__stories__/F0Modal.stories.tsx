@@ -17,12 +17,12 @@ import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
-import { F0Modal } from "../index"
-import { modalPositions, modalWidths } from "../types"
+import { F0Dialog } from "../index"
+import { dialogPositions, dialogWidths } from "../types"
 
-const meta: Meta<typeof F0Modal> = {
-  title: "Modal",
-  component: F0Modal,
+const meta: Meta<typeof F0Dialog> = {
+  title: "Dialog",
+  component: F0Dialog,
   parameters: {
     layout: "fullscreen",
     docs: {
@@ -32,17 +32,18 @@ const meta: Meta<typeof F0Modal> = {
   tags: ["autodocs", "experimental"],
   argTypes: {
     position: {
-      description: "The position of the modal",
+      description: "The position of the dialog",
       control: {
         type: "select",
-        options: modalPositions,
+        options: dialogPositions,
       },
     },
     width: {
-      description: "The width of the modal. ⚠️ Only applies to center position",
+      description:
+        "The width of the dialog. ⚠️ Only applies to center position",
       control: {
         type: "select",
-        options: modalWidths,
+        options: dialogWidths,
       },
       table: {
         type: { summary: "sm | md | lg" },
@@ -68,7 +69,7 @@ const meta: Meta<typeof F0Modal> = {
           >)}
         >
           <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-            <F0Button label="Open modal" onClick={handleOpen} />
+            <F0Button label="Open dialog" onClick={handleOpen} />
             <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
           </div>
         </ApplicationFrame>
@@ -78,7 +79,7 @@ const meta: Meta<typeof F0Modal> = {
 }
 
 export default meta
-type Story = StoryObj<typeof F0Modal>
+type Story = StoryObj<typeof F0Dialog>
 
 const TABS = [
   {
@@ -131,7 +132,6 @@ export const Default: Story = {
     onClose: () => {},
     title: "Team Status",
     otherActions: OTHER_ACTIONS,
-    withPadding: true,
     primaryAction: {
       label: "submit",
       icon: Placeholder,
@@ -145,7 +145,6 @@ export const WithSmWidth: Story = {
   args: {
     isOpen: true,
     width: "sm",
-    withPadding: true,
     onClose: () => {},
     title: "Team Status",
     otherActions: OTHER_ACTIONS,
@@ -171,7 +170,6 @@ export const WithLgWidth: Story = {
 export const WithDescription: Story = {
   args: {
     isOpen: true,
-    withPadding: true,
     onClose: () => {},
     title: "Team Status",
     description:
@@ -256,7 +254,6 @@ export const WithActionsProp: Story = {
     isOpen: true,
     onClose: () => {},
     title: "Team Status",
-    withPadding: true,
     primaryAction: {
       label: "Save",
       icon: CheckDoubleIcon,
@@ -272,7 +269,7 @@ export const WithActionsProp: Story = {
     docs: {
       description: {
         story:
-          "This story demonstrates the new `actions` prop which provides a structured way to add primary, secondary, and other actions to the modal footer. The primary action uses the 'default' variant, secondary uses 'outline' variant, and other actions are shown in a dropdown.",
+          "This story demonstrates the new `actions` prop which provides a structured way to add primary, secondary, and other actions to the dialog footer. The primary action uses the 'default' variant, secondary uses 'outline' variant, and other actions are shown in a dropdown.",
       },
     },
   },
@@ -306,7 +303,6 @@ export const WithResourceHeader: Story = {
     ...Default.args,
     position: "right",
     title: "Resource Header",
-    withPadding: true,
     module: {
       id: "timeoff",
       label: "Time Off",

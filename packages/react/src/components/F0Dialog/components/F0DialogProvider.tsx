@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react"
-import { F0ModalContextType, F0ModalProviderProps } from "../internal-types"
+import { F0DialogContextType, F0DialogProviderProps } from "../internal-types"
 
-export const F0ModalContext = createContext<F0ModalContextType>({
+export const F0DialogContext = createContext<F0DialogContextType>({
   open: false,
   onClose: () => {},
   position: "center",
@@ -10,7 +10,7 @@ export const F0ModalContext = createContext<F0ModalContextType>({
   portalContainer: null,
 })
 
-export const F0ModalProvider = ({
+export const F0DialogProvider = ({
   isOpen,
   onClose,
   shownBottomSheet = false,
@@ -18,9 +18,9 @@ export const F0ModalProvider = ({
   children,
   portalContainerRef,
   portalContainer,
-}: F0ModalProviderProps) => {
+}: F0DialogProviderProps) => {
   return (
-    <F0ModalContext.Provider
+    <F0DialogContext.Provider
       value={{
         open: isOpen,
         onClose,
@@ -31,11 +31,11 @@ export const F0ModalProvider = ({
       }}
     >
       {children}
-    </F0ModalContext.Provider>
+    </F0DialogContext.Provider>
   )
 }
 
-export const useF0Modal = () => {
-  const context = useContext(F0ModalContext)
+export const useF0Dialog = () => {
+  const context = useContext(F0DialogContext)
   return context
 }

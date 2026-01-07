@@ -6,14 +6,15 @@ import {
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
 import { Tabs } from "@/experimental/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-import { F0ModalHeaderProps } from "../internal-types"
-import { useF0Modal } from "./F0ModalProvider"
+import { F0DialogHeaderProps } from "../internal-types"
+import { useF0Dialog } from "./F0DialogProvider"
 
-export const F0ModalHeader = ({
+export const F0DialogHeader = ({
   title,
   description,
   module,
@@ -21,8 +22,10 @@ export const F0ModalHeader = ({
   tabs,
   activeTabId,
   setActiveTabId,
-}: F0ModalHeaderProps) => {
-  const { onClose } = useF0Modal()
+}: F0DialogHeaderProps) => {
+  const translations = useI18n()
+
+  const { onClose } = useF0Dialog()
   const hasTabs = !!tabs
 
   const Divider = () => {
@@ -109,7 +112,7 @@ export const F0ModalHeader = ({
             variant="outline"
             icon={CrossIcon}
             onClick={onClose}
-            label="Close modal"
+            label={translations.actions.close}
             hideLabel
           />
         </div>

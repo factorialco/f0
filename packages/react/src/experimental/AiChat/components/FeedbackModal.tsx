@@ -1,5 +1,5 @@
+import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
-import { F0Modal } from "@/experimental/Modals/F0Modal"
 import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
@@ -49,7 +49,7 @@ export const FeedbackModal = ({
   }, [handleSubmit])
 
   return (
-    <F0Modal
+    <F0Dialog
       position="center"
       isOpen
       onClose={handleClose}
@@ -76,6 +76,6 @@ export const FeedbackModal = ({
           type="text"
         />
       </div>
-    </F0Modal>
+    </F0Dialog>
   )
 }

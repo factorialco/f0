@@ -2,14 +2,14 @@ import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 import { cva } from "cva"
 import { FC, useCallback, useMemo, useRef, useState } from "react"
-import { F0ModalContent } from "./components/F0ModalContent"
-import { F0ModalFooter } from "./components/F0ModalFooter"
-import { F0ModalHeader } from "./components/F0ModalHeader"
-import { F0ModalProvider } from "./components/F0ModalProvider"
-import { F0ModalInternalProps } from "./internal-types"
+import { F0DialogContent } from "./components/F0DialogContent"
+import { F0DialogFooter } from "./components/F0DialogFooter"
+import { F0DialogHeader } from "./components/F0DialogHeader"
+import { F0DialogProvider } from "./components/F0DialogProvider"
+import { F0DialogInternalProps } from "./internal-types"
 import { useIsSmallScreen } from "./utils"
 
-const modalWrapperClassName = cva({
+const dialogWrapperClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
@@ -30,7 +30,7 @@ const modalWrapperClassName = cva({
   },
 })
 
-const modalContentClassName = cva({
+const dialogContentClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
@@ -63,7 +63,7 @@ const modalContentClassName = cva({
   },
 })
 
-export const F0ModalInternal: FC<F0ModalInternalProps> = ({
+export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
@@ -76,14 +76,14 @@ export const F0ModalInternal: FC<F0ModalInternalProps> = ({
   description,
   module,
   otherActions,
-  withPadding = false,
+  withPadding = true,
   tabs,
   activeTabId,
   setActiveTabId,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
-  // correct portalContainer after the modal content mounts.
+  // correct portalContainer after the dialog content mounts.
   const [containerElement, setContainerElement] =
     useState<HTMLDivElement | null>(null)
 
@@ -126,7 +126,7 @@ export const F0ModalInternal: FC<F0ModalInternalProps> = ({
     }
     if (width && position !== "center") {
       console.warn(
-        "F0Modal: `width` prop is only applicable to center position"
+        "F0Dialog: `width` prop is only applicable to center position"
       )
     }
 
@@ -134,7 +134,7 @@ export const F0ModalInternal: FC<F0ModalInternalProps> = ({
   }, [variant, width, position])
 
   const contentClassName = useMemo(() => {
-    return modalContentClassName({
+    return dialogContentClassName({
       variant,
       position,
       width: localWidth,
@@ -153,7 +153,7 @@ export const F0ModalInternal: FC<F0ModalInternalProps> = ({
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
-      <F0ModalProvider
+      <F0DialogProvider
         isOpen={isOpen}
         onClose={onClose}
         position={position}
@@ -164,22 +164,22 @@ export const F0ModalInternal: FC<F0ModalInternalProps> = ({
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
-            <F0ModalHeader {...headerProps} />
-            <F0ModalContent withPadding={withPadding}>
+            <F0DialogHeader {...headerProps} />
+            <F0DialogContent withPadding={withPadding}>
               {children}
-            </F0ModalContent>
-            <F0ModalFooter
+            </F0DialogContent>
+            <F0DialogFooter
               primaryAction={primaryAction}
               secondaryAction={secondaryAction}
             />
           </DrawerContent>
         </Drawer>
-      </F0ModalProvider>
+      </F0DialogProvider>
     )
   }
 
   return (
-    <F0ModalProvider
+    <F0DialogProvider
       isOpen={isOpen}
       onClose={onClose}
       position={position}
@@ -194,21 +194,23 @@ export const F0ModalInternal: FC<F0ModalInternalProps> = ({
         <DialogContent
           ref={setContentRef}
           withTranslateAnimation={!isSidePosition}
-          wrapperClassName={modalWrapperClassName({
+          wrapperClassName={dialogWrapperClassName({
             variant,
             position,
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <F0ModalHeader {...headerProps} />
-          <F0ModalContent withPadding={withPadding}>{children}</F0ModalContent>
-          <F0ModalFooter
+          <F0DialogHeader {...headerProps} />
+          <F0DialogContent withPadding={withPadding}>
+            {children}
+          </F0DialogContent>
+          <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}
           />
         </DialogContent>
       </Dialog>
-    </F0ModalProvider>
+    </F0DialogProvider>
   )
 }

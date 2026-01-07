@@ -1,18 +1,18 @@
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 import { useIsSmallScreen } from "../utils"
-import { useF0Modal } from "./F0ModalProvider"
+import { useF0Dialog } from "./F0DialogProvider"
 
-export type F0ModalContentProps = {
+export type F0DialogContentProps = {
   children: React.ReactNode
   withPadding?: boolean
 }
 
-export const F0ModalContent = ({
+export const F0DialogContent = ({
   children,
-  withPadding = false,
-}: F0ModalContentProps) => {
-  const { position } = useF0Modal()
+  withPadding = true,
+}: F0DialogContentProps) => {
+  const { position } = useF0Dialog()
   const isSmallScreen = useIsSmallScreen()
 
   return (
