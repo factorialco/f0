@@ -270,7 +270,6 @@ export const getMockVisualizations = (options?: {
                 },
           id: "name",
           sorting: options?.table?.noSorting ? undefined : "name",
-          hidden: options?.table?.allowColumnHiding ? true : undefined,
           order: options?.table?.allowColumnReordering ? 3 : undefined,
         },
         {
@@ -285,7 +284,6 @@ export const getMockVisualizations = (options?: {
           sorting: options?.table?.noSorting ? undefined : "role",
           id: "role",
           order: options?.table?.allowColumnReordering ? 2 : undefined,
-          noHiding: options?.table?.allowColumnHiding,
         },
         {
           id: "department",
@@ -300,12 +298,14 @@ export const getMockVisualizations = (options?: {
           render: (item) => item.email,
           sorting: options?.table?.noSorting ? undefined : "email",
           order: options?.table?.allowColumnReordering ? 1 : undefined,
+          hidden: options?.table?.allowColumnHiding ? true : undefined,
         },
         {
           id: "role2",
           label: "Role 2",
           render: (item) => item.role,
           sorting: options?.table?.noSorting ? undefined : "role",
+          hidden: options?.table?.allowColumnHiding ? true : undefined,
         },
         {
           id: "department2",
@@ -313,6 +313,7 @@ export const getMockVisualizations = (options?: {
           render: (item) => item.department,
           sorting: options?.table?.noSorting ? undefined : "department",
           order: options?.table?.allowColumnReordering ? 10 : undefined,
+          hidden: options?.table?.allowColumnHiding ? true : undefined,
         },
         {
           id: "email3",

@@ -50,10 +50,11 @@ export const TableSettings = ({
   )
 
   const onChangeSettings = (newOrder: SortAndHideListItem[]) => {
-    setVisualizationSettings("table", {
+    setVisualizationSettings("table", (prev) => ({
+      ...prev,
       order: newOrder.map((item) => item.id),
       hidden: newOrder.filter((item) => !item.visible).map((item) => item.id),
-    })
+    }))
   }
 
   const toggleAllColumns = (visible: boolean) => {
