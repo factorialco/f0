@@ -1,7 +1,7 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { TabsProps } from "@/experimental/Navigation/Tabs"
-import { ReactNode, RefObject } from "react"
+import { ReactNode } from "react"
 import {
   DialogPosition,
   DialogWidth,
@@ -40,7 +40,6 @@ export type F0DialogProviderProps = {
   shownBottomSheet?: boolean
   position: DialogPosition
   children: ReactNode
-  portalContainerRef: RefObject<HTMLDivElement | null>
   portalContainer: HTMLDivElement | null
 }
 

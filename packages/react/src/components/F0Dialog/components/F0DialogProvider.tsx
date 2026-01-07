@@ -6,7 +6,6 @@ export const F0DialogContext = createContext<F0DialogContextType>({
   onClose: () => {},
   position: "center",
   shownBottomSheet: false,
-  portalContainerRef: { current: null },
   portalContainer: null,
 })
 
@@ -16,7 +15,6 @@ export const F0DialogProvider = ({
   shownBottomSheet = false,
   position,
   children,
-  portalContainerRef,
   portalContainer,
 }: F0DialogProviderProps) => {
   return (
@@ -26,7 +24,6 @@ export const F0DialogProvider = ({
         onClose,
         position,
         shownBottomSheet,
-        portalContainerRef,
         portalContainer,
       }}
     >

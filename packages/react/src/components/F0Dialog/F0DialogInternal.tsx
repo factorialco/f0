@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 import { cva } from "cva"
-import { FC, useCallback, useMemo, useRef, useState } from "react"
+import { FC, useCallback, useMemo, useState } from "react"
 import { F0DialogContent } from "./components/F0DialogContent"
 import { F0DialogFooter } from "./components/F0DialogFooter"
 import { F0DialogHeader } from "./components/F0DialogHeader"
@@ -87,11 +87,8 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   const [containerElement, setContainerElement] =
     useState<HTMLDivElement | null>(null)
 
-  const portalContainerRef = useRef<HTMLDivElement | null>(null)
-
   // Callback ref to update both the ref and state
   const setContentRef = useCallback((node: HTMLDivElement | null) => {
-    portalContainerRef.current = node
     // Update state to trigger re-render so children get the new container
     setContainerElement(node)
   }, [])
@@ -157,7 +154,6 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         isOpen={isOpen}
         onClose={onClose}
         position={position}
-        portalContainerRef={portalContainerRef}
         portalContainer={containerElement}
         shownBottomSheet
       >
@@ -183,7 +179,6 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       position={position}
-      portalContainerRef={portalContainerRef}
       portalContainer={containerElement}
     >
       <Dialog
