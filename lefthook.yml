@@ -5,9 +5,14 @@ commit-msg:
       run: pnpm exec commitlint --edit {1}
 pre-commit:
   commands:
-    format:
-      glob: "**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
+    format-react:
+      glob: "packages/react/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
       run: pnpm --filter @factorialco/f0-react oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+
+    format-react-native:
+      glob: "packages/react-native/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
+      run: pnpm --filter @factorialco/f0-react-native exec prettier --write {staged_files}
       stage_fixed: true
 
     cycle-dependencies:
