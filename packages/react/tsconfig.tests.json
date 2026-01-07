@@ -22,7 +22,6 @@
     "src/**/*.test.tsx",
     "src/**/__tests__/**/*.ts",
     "src/**/__tests__/**/*.tsx",
-    "vitest.setup.ts",
     "vite/vitest.setup.ts",
     "vitest.shims.d.ts"
   ]
