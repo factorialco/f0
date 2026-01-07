@@ -15,6 +15,8 @@ import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
 import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
+import SaveIcon from "@/icons/app/Save"
+import ShareIcon from "@/icons/app/Share"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 import { F0Dialog } from "../index"
@@ -249,16 +251,31 @@ export const WithFullscreenPositionAndActions: Story = {
   },
 }
 
-export const WithActionsProp: Story = {
+export const WithMultiplePrimaryActions: Story = {
   args: {
     isOpen: true,
     onClose: () => {},
-    title: "Team Status",
-    primaryAction: {
-      label: "Save",
-      icon: CheckDoubleIcon,
-      onClick: () => {},
-    },
+    title: "Document Editor",
+    description: "Edit your document and choose how to save it.",
+    primaryAction: [
+      {
+        value: "save",
+        label: "Save",
+        icon: SaveIcon,
+        onClick: () => console.log("Save clicked"),
+      },
+      {
+        value: "save-draft",
+        label: "Save as draft",
+        onClick: () => console.log("Save as draft clicked"),
+      },
+      {
+        value: "save-publish",
+        label: "Save and publish",
+        icon: ShareIcon,
+        onClick: () => console.log("Save and publish clicked"),
+      },
+    ],
     secondaryAction: {
       label: "Cancel",
       onClick: () => {},
@@ -269,7 +286,7 @@ export const WithActionsProp: Story = {
     docs: {
       description: {
         story:
-          "This story demonstrates the new `actions` prop which provides a structured way to add primary, secondary, and other actions to the dialog footer. The primary action uses the 'default' variant, secondary uses 'outline' variant, and other actions are shown in a dropdown.",
+          "When `primaryAction` receives an array of actions, it renders a `F0ButtonDropdown` allowing the user to select between multiple primary actions.",
       },
     },
   },
