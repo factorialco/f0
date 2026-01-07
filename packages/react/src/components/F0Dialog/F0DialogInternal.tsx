@@ -1,46 +1,15 @@
-import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 import { cva } from "cva"
-import {
-  ComponentProps,
-  FC,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
-import { OneModalContent } from "./OneModalContent/OneModalContent"
-import { OneModalHeader } from "./OneModalHeader/OneModalHeader"
-import { OneModalProvider } from "./OneModalProvider"
-import { ModalPosition, ModalWidth } from "./types"
+import { FC, useCallback, useMemo, useState } from "react"
+import { F0DialogContent } from "./components/F0DialogContent"
+import { F0DialogFooter } from "./components/F0DialogFooter"
+import { F0DialogHeader } from "./components/F0DialogHeader"
+import { F0DialogProvider } from "./components/F0DialogProvider"
+import { F0DialogInternalProps } from "./internal-types"
 import { useIsSmallScreen } from "./utils"
 
-export type OneModalProps = {
-  /** Whether the modal is open */
-  isOpen: boolean
-  /** Callback when modal is closed */
-  onClose: () => void
-  /** Whether to render the modal as a bottom sheet on mobile */
-  asBottomSheetInMobile?: boolean
-  /** The position of the modal */
-  position?: ModalPosition
-  /** The width of the modal. Only applies to center position but we can NOT use narrowing as position undefined is valid */
-  width?: ModalWidth
-  /** Custom content to render in the modal. Only accepts OneModal.Header and OneModal.Content components */
-  children:
-    | ReactElement<
-        | ComponentProps<typeof OneModalHeader>
-        | ComponentProps<typeof OneModalContent>
-      >
-    | ReactElement<
-        | ComponentProps<typeof OneModalHeader>
-        | ComponentProps<typeof OneModalContent>
-      >[]
-} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
-
-const modalWrapperClassName = cva({
+const dialogWrapperClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
@@ -61,7 +30,7 @@ const modalWrapperClassName = cva({
   },
 })
 
-const modalContentClassName = cva({
+const dialogContentClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
@@ -94,25 +63,31 @@ const modalContentClassName = cva({
   },
 })
 
-export const OneModal: FC<OneModalProps> = ({
+export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
   isOpen,
   children,
   width = "md",
+  primaryAction,
+  secondaryAction,
+  title,
+  description,
+  module,
+  otherActions,
+  tabs,
+  activeTabId,
+  setActiveTabId,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
-  // correct portalContainer after the modal content mounts.
+  // correct portalContainer after the dialog content mounts.
   const [containerElement, setContainerElement] =
     useState<HTMLDivElement | null>(null)
 
-  const portalContainerRef = useRef<HTMLDivElement | null>(null)
-
   // Callback ref to update both the ref and state
   const setContentRef = useCallback((node: HTMLDivElement | null) => {
-    portalContainerRef.current = node
     // Update state to trigger re-render so children get the new container
     setContainerElement(node)
   }, [])
@@ -147,7 +122,7 @@ export const OneModal: FC<OneModalProps> = ({
     }
     if (width && position !== "center") {
       console.warn(
-        "OneModal: `width` prop is only applicable to center position"
+        "F0Dialog: `width` prop is only applicable to center position"
       )
     }
 
@@ -155,39 +130,52 @@ export const OneModal: FC<OneModalProps> = ({
   }, [variant, width, position])
 
   const contentClassName = useMemo(() => {
-    return modalContentClassName({
+    return dialogContentClassName({
       variant,
       position,
       width: localWidth,
     })
   }, [variant, position, localWidth])
 
+  const headerProps = {
+    title,
+    description,
+    module,
+    otherActions,
+    tabs,
+    activeTabId,
+    setActiveTabId,
+  }
+
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
-      <OneModalProvider
+      <F0DialogProvider
         isOpen={isOpen}
         onClose={onClose}
         position={position}
-        portalContainerRef={portalContainerRef}
         portalContainer={containerElement}
         shownBottomSheet
       >
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
-            {children}
+            <F0DialogHeader {...headerProps} />
+            <F0DialogContent>{children}</F0DialogContent>
+            <F0DialogFooter
+              primaryAction={primaryAction}
+              secondaryAction={secondaryAction}
+            />
           </DrawerContent>
         </Drawer>
-      </OneModalProvider>
+      </F0DialogProvider>
     )
   }
 
   return (
-    <OneModalProvider
+    <F0DialogProvider
       isOpen={isOpen}
       onClose={onClose}
       position={position}
-      portalContainerRef={portalContainerRef}
       portalContainer={containerElement}
     >
       <Dialog
@@ -198,16 +186,21 @@ export const OneModal: FC<OneModalProps> = ({
         <DialogContent
           ref={setContentRef}
           withTranslateAnimation={!isSidePosition}
-          wrapperClassName={modalWrapperClassName({
+          wrapperClassName={dialogWrapperClassName({
             variant,
             position,
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          {children}
+          <F0DialogHeader {...headerProps} />
+          <F0DialogContent>{children}</F0DialogContent>
+          <F0DialogFooter
+            primaryAction={primaryAction}
+            secondaryAction={secondaryAction}
+          />
         </DialogContent>
       </Dialog>
-    </OneModalProvider>
+    </F0DialogProvider>
   )
 }
