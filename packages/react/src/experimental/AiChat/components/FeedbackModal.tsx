@@ -55,7 +55,6 @@ export const FeedbackModal = ({
       onClose={handleClose}
       width="sm"
       title={title}
-      withPadding
       primaryAction={{
         label: translations.actions.send,
         onClick: handleSubmit,

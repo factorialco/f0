@@ -76,7 +76,6 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   description,
   module,
   otherActions,
-  withPadding = true,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -161,9 +160,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
             <F0DialogHeader {...headerProps} />
-            <F0DialogContent withPadding={withPadding}>
-              {children}
-            </F0DialogContent>
+            <F0DialogContent>{children}</F0DialogContent>
             <F0DialogFooter
               primaryAction={primaryAction}
               secondaryAction={secondaryAction}
@@ -197,9 +194,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <F0DialogHeader {...headerProps} />
-          <F0DialogContent withPadding={withPadding}>
-            {children}
-          </F0DialogContent>
+          <F0DialogContent>{children}</F0DialogContent>
           <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}

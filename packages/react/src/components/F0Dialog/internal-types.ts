@@ -65,11 +65,6 @@ export type F0DialogInternalProps = {
   module?: F0DialogHeaderProps["module"]
   // Other actions to display in the header
   otherActions?: F0DialogHeaderProps["otherActions"]
-  /**
-   * Whether to add padding to the content
-   * @deprecated by default we should have padding
-   */
-  withPadding?: boolean
   // Custom content to render in the dialog
   children: ReactNode
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
