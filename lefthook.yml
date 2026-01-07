@@ -12,7 +12,7 @@ pre-commit:
 
     format-react-native:
       glob: "packages/react-native/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
-      run: pnpm --filter @factorialco/f0-react-native exec prettier --write {staged_files}
+      run: pnpm --filter @factorialco/f0-react-native prettier --write {staged_files}
       stage_fixed: true
 
     cycle-dependencies:
