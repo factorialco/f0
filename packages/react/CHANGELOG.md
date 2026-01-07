@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.318.1](https://github.com/factorialco/f0/compare/f0-react-v1.318.0...f0-react-v1.318.1) (2026-01-07)
+
+
+### Bug Fixes
+
+* remove unnecessary motion ([#3116](https://github.com/factorialco/f0/issues/3116)) ([b6b18a0](https://github.com/factorialco/f0/commit/b6b18a00cc19117b1e0522ceb9d20adb3d22221d))
+
 ## [1.318.0](https://github.com/factorialco/f0/compare/f0-react-v1.317.2...f0-react-v1.318.0) (2026-01-07)
 
 
