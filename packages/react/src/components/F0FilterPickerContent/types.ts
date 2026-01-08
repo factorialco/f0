@@ -5,8 +5,9 @@ import type { FilterPickerBaseProps } from "./internal-types"
  * Props for the F0FilterPickerContent component.
  * @template Filters - The type defining the structure of available filters
  */
-export interface F0FilterPickerContentProps<Filters extends FiltersDefinition>
-  extends FilterPickerBaseProps<Filters> {
+export interface F0FilterPickerContentProps<
+  Filters extends FiltersDefinition,
+> extends FilterPickerBaseProps<Filters> {
   /** Current state of applied filters */
   value: FiltersState<Filters>
   /**

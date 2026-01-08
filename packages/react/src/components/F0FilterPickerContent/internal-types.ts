@@ -22,8 +22,9 @@ export interface FilterPickerBaseProps<Filters extends FiltersDefinition> {
  * Props for the FilterPickerInternal component.
  * This is an internal component used by both F0FilterPickerContent and FiltersControls.
  */
-export interface FilterPickerInternalProps<Filters extends FiltersDefinition>
-  extends FilterPickerBaseProps<Filters> {
+export interface FilterPickerInternalProps<
+  Filters extends FiltersDefinition,
+> extends FilterPickerBaseProps<Filters> {
   /** Current temporary state of filters being configured */
   tempFilters: FiltersState<Filters>
   /** Currently selected filter key */
