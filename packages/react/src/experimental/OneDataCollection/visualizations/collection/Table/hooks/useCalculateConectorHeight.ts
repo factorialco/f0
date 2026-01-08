@@ -1,8 +1,14 @@
-import { PADDING_TOP } from "@/experimental/OneTable/TableCell/utils/nested"
+import {
+  BUTTON_PADDING,
+  PADDING_TOP,
+} from "@/experimental/OneTable/TableCell/utils/nested"
 import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
-export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
+export const useCalculateConectorHeight = (
+  nestedVariant: NestedVariant,
+  withHasMore: boolean
+) => {
   const [firstRow, setFirstRow] = useState<HTMLTableRowElement | null>(null)
   const [lastRow, setLastRow] = useState<HTMLTableRowElement | null>(null)
   const [calculatedHeight, setCalculatedHeight] = useState(0)
@@ -33,21 +39,39 @@ export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
   useLayoutEffect(() => {
     const previousRow = firstRow?.previousElementSibling
 
-    if (!firstRow || !lastRow || firstRow === lastRow || !previousRow) {
+    if (!firstRow || !previousRow) {
       setCalculatedHeight(0)
       return
     }
 
+    const noLastRow = !lastRow || lastRow.getBoundingClientRect().top === 0
+
     const heightForLastBasicRow = () => {
-      return lastRow.getBoundingClientRect().top
+      if (noLastRow) {
+        return (firstRow.getBoundingClientRect().top ?? 0) - PADDING_TOP / 2
+      }
+
+      return (lastRow?.getBoundingClientRect().top ?? 0) - PADDING_TOP / 2
     }
 
     const heightForLastDetailedRow = () => {
-      return lastRow.getBoundingClientRect().bottom - PADDING_TOP
+      if (noLastRow) {
+        return firstRow.getBoundingClientRect().bottom - PADDING_TOP
+      }
+
+      return (lastRow?.getBoundingClientRect().bottom ?? 0) - PADDING_TOP
+    }
+
+    const firstRowTop = () => {
+      return firstRow.getBoundingClientRect().top ?? 0 - PADDING_TOP
     }
 
     const previousRowHeight = () => {
       return previousRow.getBoundingClientRect().height
+    }
+
+    const hasMoreHeight = () => {
+      return withHasMore ? BUTTON_PADDING : 0
     }
 
     const calculateHeight = () => {
@@ -57,9 +81,7 @@ export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
           : heightForLastDetailedRow()
 
       const height =
-        lastRowHeight -
-        firstRow.getBoundingClientRect().top +
-        previousRowHeight()
+        lastRowHeight - firstRowTop() + previousRowHeight() + hasMoreHeight()
 
       setCalculatedHeight(height)
     }
@@ -84,7 +106,10 @@ export const useCalculateConectorHeight = (nestedVariant: NestedVariant) => {
     })
 
     resizeObserver.observe(firstRow)
-    resizeObserver.observe(lastRow)
+
+    if (lastRow) {
+      resizeObserver.observe(lastRow)
+    }
 
     return () => {
       observer.disconnect()
