@@ -183,18 +183,12 @@ export const CoCreationForm = ({
         </motion.div>
         {applyingChanges && (
           <motion.div
-            className="fixed z-50 flex h-screen w-full items-center justify-center"
-            style={{
-              inset: 0,
-            }}
+            className="sticky z-50 flex w-full items-center justify-center bottom-1/2 left-0"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
-            {/* Needed offset to compensate the height of the header */}
-            <div className="translate-y-48">
-              <ApplyingChangesTag />
-            </div>
+            <ApplyingChangesTag />
           </motion.div>
         )}
       </div>
