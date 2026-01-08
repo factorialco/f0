@@ -50,13 +50,21 @@ Some components like `src/components/F0Button` has some private properties, in t
 ## Component props
 - Ensure the props are and have a funcional meaning. e.g. `only-icon` instead of having `hide-icon` and `hide-label`
 - Avoid `className` in public components (can be a private prop)
-
+- Avoid union types like `export type Color = 'a' | 'b'| 'c'`, use:
+  ```ts
+  export const colors = ['a', 'b', 'c'] as const
+  export type Color = (typeof colors)[number]
+  ```
+  Ensure the const is exported as well
+  
 
 
 ### `src/ui/`
 Ensure those components are no reexported
 
 ## TypeScript Standards
+
+
 
 ### Type Safety
 - Use **strict** TypeScript configuration
@@ -179,6 +187,20 @@ Ensure those components are no reexported
 
 - Ensure the components have at leat one story file
 - Ensure the story docs covers all the properties
+- For properties with with limited and well know options use the const array for the select values from the component. Avoid repeating the values in the story
+  ```ts
+  export const colors = ['a', 'b', 'c'] as const
+  export type Color = (typeof colors)[number]
+  ```
+- For union types use table in argtypes:
+```
+ table: {
+        type: {
+          summary: "[The TYPE, e.g Color = 'a'| 'b'| 'c']",
+        },
+      }
+```
+
 - Ensure there is a story called Snapshot which includes `parameters: withSnapshot({}),` to ensure the component has visual regresions tests in chromatic
   e.g.
     ```
