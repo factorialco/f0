@@ -1,6 +1,5 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
-import { OneModal } from "@/experimental/Modals/OneModal"
 import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
@@ -50,34 +49,32 @@ export const FeedbackModal = ({
   }, [handleSubmit])
 
   return (
-    <OneModal position="center" isOpen onClose={handleClose} width="sm">
-      <OneModal.Header title={title} />
-      <OneModal.Content withPadding>
-        <div className="flex flex-col gap-6">
-          <Input
-            autoFocus
-            label={label}
-            placeholder={placeholder}
-            value={text}
-            onChange={(value) => setText(value.trim())}
-            size="md"
-            type="text"
-          />
-        </div>
-      </OneModal.Content>
-      <OneModal.Footer>
-        <div className="flex flex-1 flex-row-reverse gap-3">
-          <ButtonInternal
-            onClick={handleSubmit}
-            label={translations.actions.send}
-          />
-          <ButtonInternal
-            onClick={handleClose}
-            label={translations.actions.cancel}
-            variant="outline"
-          />
-        </div>
-      </OneModal.Footer>
-    </OneModal>
+    <F0Dialog
+      position="center"
+      isOpen
+      onClose={handleClose}
+      width="sm"
+      title={title}
+      primaryAction={{
+        label: translations.actions.send,
+        onClick: handleSubmit,
+      }}
+      secondaryAction={{
+        label: translations.actions.cancel,
+        onClick: handleClose,
+      }}
+    >
+      <div className="flex flex-col gap-6">
+        <Input
+          autoFocus
+          label={label}
+          placeholder={placeholder}
+          value={text}
+          onChange={(value) => setText(value.trim())}
+          size="md"
+          type="text"
+        />
+      </div>
+    </F0Dialog>
   )
 }

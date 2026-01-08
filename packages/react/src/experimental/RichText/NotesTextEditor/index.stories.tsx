@@ -215,6 +215,5 @@ export const Skeleton: SkeletonStory = {
   args: {
     withHeader: true,
     withTitle: true,
-    withPadding: true,
   },
 }

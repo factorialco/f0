@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.318.1](https://github.com/factorialco/f0/compare/f0-react-v1.318.0...f0-react-v1.318.1) (2026-01-07)
+
+
+### Bug Fixes
+
+* remove unnecessary motion ([#3116](https://github.com/factorialco/f0/issues/3116)) ([b6b18a0](https://github.com/factorialco/f0/commit/b6b18a00cc19117b1e0522ceb9d20adb3d22221d))
+
+## [1.318.0](https://github.com/factorialco/f0/compare/f0-react-v1.317.2...f0-react-v1.318.0) (2026-01-07)
+
+
+### Features
+
+* **OneFilterPicker:** add and export FilterPickerContent for always-… ([#3124](https://github.com/factorialco/f0/issues/3124)) ([5d3a446](https://github.com/factorialco/f0/commit/5d3a446e8310411e52436f33beef526786ec7712))
+
+## [1.317.2](https://github.com/factorialco/f0/compare/f0-react-v1.317.1...f0-react-v1.317.2) (2026-01-07)
+
+
+### Bug Fixes
+
+* improve connector height calculation in TreeConnector ([#3191](https://github.com/factorialco/f0/issues/3191)) ([ec1643c](https://github.com/factorialco/f0/commit/ec1643c4c0954569b6caf097a8494b8991574b4e))
+
 ## [1.317.1](https://github.com/factorialco/f0/compare/f0-react-v1.317.0...f0-react-v1.317.1) (2026-01-07)
 
 

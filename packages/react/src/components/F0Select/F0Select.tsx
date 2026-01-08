@@ -1,4 +1,4 @@
-import { OneModalContext } from "@/experimental/Modals/OneModal/OneModalProvider"
+import { F0DialogContext } from "@/components/F0Dialog"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -101,20 +101,20 @@ const F0SelectComponent = forwardRef(function Select<
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
-  // If inside a OneModal and no portalContainer is provided, use the modal's container
-  // only for center/fullscreen modals (which have focus trap).
+  // If inside a OneDialog and no portalContainer is provided, use the dialog's container
+  // only for center/fullscreen dialogs (which have focus trap).
   // For side panels (left/right), render in body to prevent clipping.
-  const modalContext = useContext(OneModalContext)
-  const shouldUseModalContainer =
-    modalContext.portalContainer &&
-    (modalContext.position === "center" ||
-      modalContext.position === "fullscreen")
+  const dialogContext = useContext(F0DialogContext)
+  const shouldUseDialogContainer =
+    dialogContext.portalContainer &&
+    (dialogContext.position === "center" ||
+      dialogContext.position === "fullscreen")
 
   const effectivePortalContainer =
     portalContainer !== undefined
       ? portalContainer
-      : shouldUseModalContainer
-        ? modalContext.portalContainer
+      : shouldUseDialogContainer
+        ? dialogContext.portalContainer
         : undefined
 
   // Extract onSelectItems and disableSelectAll from props for multiple selection
