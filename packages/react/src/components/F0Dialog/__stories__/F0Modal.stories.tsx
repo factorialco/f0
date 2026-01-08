@@ -41,8 +41,7 @@ const meta: Meta<typeof F0Dialog> = {
       },
     },
     width: {
-      description:
-        "The width of the dialog. ⚠️ Only applies to center position",
+      description: "The width of the dialog. ⚠️ Only applies to center position",
       control: {
         type: "select",
         options: dialogWidths,

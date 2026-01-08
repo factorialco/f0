@@ -9,8 +9,10 @@ import { DateRange, DateRangeComplete } from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 
-export interface OneDatePickerProps
-  extends Omit<DatePickerPopupProps, "children"> {
+export interface OneDatePickerProps extends Omit<
+  DatePickerPopupProps,
+  "children"
+> {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }

@@ -59,8 +59,7 @@ function useChart() {
 }
 
 interface ChartContainerComponentProps
-  extends React.ComponentProps<"div">,
-    VariantProps<typeof variants> {
+  extends React.ComponentProps<"div">, VariantProps<typeof variants> {
   config: ChartConfig
   children: React.ComponentProps<
     typeof RechartsPrimitive.ResponsiveContainer

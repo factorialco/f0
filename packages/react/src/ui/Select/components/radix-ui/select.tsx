@@ -568,7 +568,8 @@ type FocusScopeProps = React.ComponentPropsWithoutRef<typeof FocusScope>
 type SelectPopperPrivateProps = { onPlaced?: PopperContentProps["onPlaced"] }
 
 interface SelectContentImplProps
-  extends Omit<SelectPopperPositionProps, keyof SelectPopperPrivateProps>,
+  extends
+    Omit<SelectPopperPositionProps, keyof SelectPopperPrivateProps>,
     Omit<SelectItemAlignedPositionProps, keyof SelectPopperPrivateProps> {
   /**
    * Event handler called when auto-focusing on close.
@@ -946,8 +947,7 @@ const ITEM_ALIGNED_POSITION_NAME = "SelectItemAlignedPosition"
 
 type SelectItemAlignedPositionElement = React.ElementRef<typeof Primitive.div>
 interface SelectItemAlignedPositionProps
-  extends PrimitiveDivProps,
-    SelectPopperPrivateProps {}
+  extends PrimitiveDivProps, SelectPopperPrivateProps {}
 
 const SelectItemAlignedPosition = React.forwardRef<
   SelectItemAlignedPositionElement,
@@ -1036,7 +1036,12 @@ const SelectItemAlignedPosition = React.forwardRef<
         10
       )
       const contentPaddingBottom = parseInt(contentStyles.paddingBottom, 10)
-      const fullContentHeight = contentBorderTopWidth + contentPaddingTop + itemsHeight + contentPaddingBottom + contentBorderBottomWidth; // prettier-ignore
+      const fullContentHeight =
+        contentBorderTopWidth +
+        contentPaddingTop +
+        itemsHeight +
+        contentPaddingBottom +
+        contentBorderBottomWidth // prettier-ignore
       const minContentHeight = Math.min(
         selectedItem.offsetHeight * 5,
         fullContentHeight
@@ -1190,8 +1195,7 @@ type PopperContentProps = React.ComponentPropsWithoutRef<
   typeof PopperPrimitive.Content
 >
 interface SelectPopperPositionProps
-  extends PopperContentProps,
-    SelectPopperPrivateProps {}
+  extends PopperContentProps, SelectPopperPrivateProps {}
 
 const SelectPopperPosition = React.forwardRef<
   SelectPopperPositionElement,
@@ -1663,8 +1667,10 @@ const SCROLL_UP_BUTTON_NAME = "SelectScrollUpButton"
 
 type SelectScrollUpButtonElement = SelectScrollButtonImplElement
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface SelectScrollUpButtonProps
-  extends Omit<SelectScrollButtonImplProps, "onAutoScroll"> {}
+interface SelectScrollUpButtonProps extends Omit<
+  SelectScrollButtonImplProps,
+  "onAutoScroll"
+> {}
 
 const SelectScrollUpButton = React.forwardRef<
   SelectScrollUpButtonElement,
@@ -1721,8 +1727,10 @@ const SCROLL_DOWN_BUTTON_NAME = "SelectScrollDownButton"
 
 type SelectScrollDownButtonElement = SelectScrollButtonImplElement
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface SelectScrollDownButtonProps
-  extends Omit<SelectScrollButtonImplProps, "onAutoScroll"> {}
+interface SelectScrollDownButtonProps extends Omit<
+  SelectScrollButtonImplProps,
+  "onAutoScroll"
+> {}
 
 const SelectScrollDownButton = React.forwardRef<
   SelectScrollDownButtonElement,

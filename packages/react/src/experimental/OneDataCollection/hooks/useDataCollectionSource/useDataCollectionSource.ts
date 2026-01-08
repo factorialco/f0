@@ -29,8 +29,8 @@ export const useDataCollectionSource = <
   Sortings extends SortingsDefinition = SortingsDefinition,
   Summaries extends SummariesDefinition = SummariesDefinition,
   ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>,
-  NavigationFilters extends
-    NavigationFiltersDefinition = NavigationFiltersDefinition,
+  NavigationFilters extends NavigationFiltersDefinition =
+    NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
 >(
   source: DataCollectionSourceDefinition<

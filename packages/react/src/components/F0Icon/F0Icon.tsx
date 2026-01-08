@@ -41,8 +41,7 @@ type NestedKeyOf<T> = {
 }[keyof T & string]
 
 export interface F0IconProps
-  extends SVGProps<SVGSVGElement>,
-    VariantProps<typeof iconVariants> {
+  extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
   icon: IconType
   size?: "lg" | "md" | "sm" | "xs"
   state?: "normal" | "animate"
