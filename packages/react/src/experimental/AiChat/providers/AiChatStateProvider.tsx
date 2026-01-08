@@ -183,6 +183,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         "(prefers-reduced-motion: reduce)"
       ).matches
       setShouldPlayEntranceAnimation(!prefersReducedMotion)
+      setPlaceholders([i18n.t("ai.inputPlaceholder")])
     }
   }, [open])
 
