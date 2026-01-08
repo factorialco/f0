@@ -110,17 +110,17 @@ const NestedRowContent = <
       source: props.source,
     })
 
+  const shouldShowLoading = open && isLoading
+  const shouldShowChildren = open
+  const shouldShowLoadMore = open && paginationInfo?.hasMore
+
   /**
    * useCalculateConectorHeight manages the visual tree connector lines
    * It calculates the height between first and last visible child to draw
    * the vertical line connecting them to their parent
    */
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
-    useCalculateConectorHeight(childrenType)
-
-  const shouldShowLoading = open && isLoading
-  const shouldShowChildren = open
-  const shouldShowLoadMore = open && paginationInfo?.hasMore
+    useCalculateConectorHeight(childrenType, !!shouldShowLoadMore)
 
   /**
    * Combine internal and external refs
