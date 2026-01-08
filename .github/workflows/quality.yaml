@@ -23,14 +23,14 @@ jobs:
       - uses: ./.github/actions/setup-node-pnpm
       - name: Check formatting
         run: pnpm --filter @factorialco/f0-react run format:check
-  eslint:
+  lint:
     needs: detect-changes
     # Prevents running on the release-please branch
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    name: "[⚛️ REACT] Eslint"
+    name: "[⚛️ REACT] Linting"
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
         run: pnpm install
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
-      - name: Check linting with eslint
+      - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
   eslint-react-native:
     needs: detect-changes
