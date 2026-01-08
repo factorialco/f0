@@ -1,13 +1,13 @@
-import { Dialog, DialogContent } from "@/ui/Dialog/dialog";
-import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer";
-import { cva } from "cva";
-import { FC, useCallback, useMemo, useState } from "react";
-import { F0DialogContent } from "./components/F0DialogContent";
-import { F0DialogFooter } from "./components/F0DialogFooter";
-import { F0DialogHeader } from "./components/F0DialogHeader";
-import { F0DialogProvider } from "./components/F0DialogProvider";
-import { F0DialogInternalProps } from "./internal-types";
-import { useIsSmallScreen } from "./utils";
+import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
+import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
+import { cva } from "cva"
+import { FC, useCallback, useMemo, useState } from "react"
+import { F0DialogContent } from "./components/F0DialogContent"
+import { F0DialogFooter } from "./components/F0DialogFooter"
+import { F0DialogHeader } from "./components/F0DialogHeader"
+import { F0DialogProvider } from "./components/F0DialogProvider"
+import { F0DialogInternalProps } from "./internal-types"
+import { useIsSmallScreen } from "./utils"
 
 const dialogWrapperClassName = cva({
   variants: {
@@ -27,7 +27,7 @@ const dialogWrapperClassName = cva({
   defaultVariants: {
     variant: "center",
   },
-});
+})
 
 const dialogContentClassName = cva({
   variants: {
@@ -60,7 +60,7 @@ const dialogContentClassName = cva({
   defaultVariants: {
     variant: "center",
   },
-});
+})
 
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   asBottomSheetInMobile = true,
@@ -83,58 +83,58 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   // when it's set. This ensures child components like F0Select get the
   // correct portalContainer after the dialog content mounts.
   const [containerElement, setContainerElement] =
-    useState<HTMLDivElement | null>(null);
+    useState<HTMLDivElement | null>(null)
 
   // Callback ref to update both the ref and state
   const setContentRef = useCallback((node: HTMLDivElement | null) => {
     // Update state to trigger re-render so children get the new container
-    setContainerElement(node);
-  }, []);
+    setContainerElement(node)
+  }, [])
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
-  const isSmallScreen = useIsSmallScreen();
+  const isSmallScreen = useIsSmallScreen()
 
-  const isSidePosition = position === "left" || position === "right";
+  const isSidePosition = position === "left" || position === "right"
 
   const variant = useMemo(() => {
     if (position === "fullscreen") {
-      return "fullscreen";
+      return "fullscreen"
     }
     if (isSmallScreen && asBottomSheetInMobile) {
-      return "bottomSheet";
+      return "bottomSheet"
     }
     if (isSidePosition) {
-      return "sidePosition";
+      return "sidePosition"
     }
-    return "center";
-  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position]);
+    return "center"
+  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position])
 
   // Forces the width to be "sm" for sidePosition variants
   const localWidth = useMemo(() => {
     if (variant === "sidePosition") {
-      return "sm";
+      return "sm"
     }
     if (width && position !== "center") {
       console.warn(
         "F0Dialog: `width` prop is only applicable to center position"
-      );
+      )
     }
 
-    return width;
-  }, [variant, width, position]);
+    return width
+  }, [variant, width, position])
 
   const contentClassName = useMemo(() => {
     return dialogContentClassName({
       variant,
       position,
       width: localWidth,
-    });
-  }, [variant, position, localWidth]);
+    })
+  }, [variant, position, localWidth])
 
   const headerProps = {
     title,
@@ -144,7 +144,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     tabs,
     activeTabId,
     setActiveTabId,
-  };
+  }
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
@@ -167,7 +167,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           </DrawerContent>
         </Drawer>
       </F0DialogProvider>
-    );
+    )
   }
 
   return (
@@ -201,5 +201,5 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         </DialogContent>
       </Dialog>
     </F0DialogProvider>
-  );
-};
+  )
+}
