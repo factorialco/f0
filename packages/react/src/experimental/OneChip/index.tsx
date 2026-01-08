@@ -33,6 +33,8 @@ interface BaseChipProps extends VariantProps<typeof chipVariants> {
    * If defined, the close icon will be displayed and the chip will be clickable
    * */
   onClose?: () => void
+
+  deactivated?: boolean
 }
 
 type ChipVariants =
@@ -61,6 +63,7 @@ export type ChipProps = BaseChipProps &
   }
 
 export const Chip = ({
+  deactivated,
   label,
   variant,
   onClick,
@@ -90,7 +93,9 @@ export const Chip = ({
       {avatar && <F0Avatar avatar={avatar} size="xs" />}
       <div className="flex items-center gap-0.5">
         {icon && <F0Icon icon={icon} size="sm" className="text-f1-icon" />}
-        {label}
+        <span className={deactivated ? "text-f1-foreground/[0.61]" : undefined}>
+          {label}
+        </span>
       </div>
       {onClose && (
         <button
