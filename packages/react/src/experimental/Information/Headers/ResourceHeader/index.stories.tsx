@@ -560,6 +560,7 @@ export const DeactivatedEmployee: Story = {
   args: {
     ...PersonHeader.args,
     title: "John Doe",
+    deactivated: true,
     description: "Software Engineer",
     avatar: {
       type: "person",

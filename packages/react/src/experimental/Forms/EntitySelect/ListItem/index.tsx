@@ -122,11 +122,17 @@ export const ListItemSingleContent = ({
             firstName={firstName}
             lastName={lastName}
             size="xs"
+            deactivated={entity.deactivated}
           />
         )}
 
         <div className="flex flex-1 flex-col">
-          <div className="flex flex-1 flex-row items-center gap-2 break-all">
+          <div
+            className={cn(
+              "flex flex-1 flex-row items-center gap-2 break-all",
+              entity.deactivated ? "text-f1-foreground/[0.61]" : undefined
+            )}
+          >
             <HighlightText
               text={entity.name}
               search={search}

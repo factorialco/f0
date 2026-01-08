@@ -13,6 +13,7 @@ type Props = {} & Pick<
   | "otherActions"
   | "metadata"
   | "status"
+  | "deactivated"
 >
 
 export const ResourceHeader = ({
@@ -24,6 +25,7 @@ export const ResourceHeader = ({
   otherActions,
   status,
   metadata,
+  deactivated,
 }: Props) => {
   return (
     <BaseHeader
@@ -35,6 +37,7 @@ export const ResourceHeader = ({
       otherActions={otherActions}
       status={status}
       metadata={metadata}
+      deactivated={deactivated}
     />
   )
 }
