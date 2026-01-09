@@ -860,12 +860,13 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, description, primaryAction, secondaryActions, otherActions, status, metadata, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
 declare interface BaseHeaderProps_2 {
     title: string;
+    deactivated?: boolean;
     avatar?: {
         type: "generic";
         name: string;
@@ -2762,6 +2763,7 @@ export declare type EntitySelectEntity = {
     avatar?: string;
     expanded?: boolean;
     searchKeys?: string[];
+    deactivated?: boolean;
     subItems?: EntitySelectSubEntity[];
 };
 
@@ -4978,7 +4980,7 @@ declare type PropertyDefinition_2<T> = {
     hide?: (item: T) => boolean;
 };
 
-declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status">;
+declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated">;
 
 declare type Props_2 = {
     /** Main heading text */
@@ -5148,7 +5150,7 @@ declare type RendererDefinition = ValueDisplayRendererDefinition;
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, }: Props) => JSX_2.Element;
+export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, }: Props) => JSX_2.Element;
 
 export declare type resultType = {
     value: string | null;
@@ -6403,23 +6405,6 @@ declare global {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
-}
-
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -6447,9 +6432,21 @@ declare module "@tiptap/core" {
     }
 }
 
-
-declare namespace Calendar {
-    var displayName: string;
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
 }
 
 
@@ -6459,4 +6456,9 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
