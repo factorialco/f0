@@ -48,7 +48,7 @@ Some components like `src/components/F0Button` has some private properties, in t
 
 
 ## Component props
-- Ensure the props are and have a funcional meaning. e.g. `only-icon` instead of having `hide-icon` and `hide-label`
+- Ensure props have clear and functional meanings. e.g. `only-icon` instead of having `hide-icon` and `hide-label`
 - Avoid `className` in public components (can be a private prop)
 - Avoid union types like `export type Color = 'a' | 'b'| 'c'`, use:
   ```ts
