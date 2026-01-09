@@ -7,11 +7,11 @@ pre-commit:
   commands:
     format-react:
       glob: "packages/react/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
-      run: pnpm --filter @factorialco/f0-react format {staged_files}
+      run: sh -c 'pnpm --filter @factorialco/f0-react format $(echo "{staged_files}" | sed "s|packages/react/||g")'
       stage_fixed: true
     lint-react:
       glob: "packages/react/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
-      run: pnpm --filter @factorialco/f0-react lint:fix {staged_files}
+      run: sh -c 'pnpm --filter @factorialco/f0-react lint:fix $(echo "{staged_files}" | sed "s|packages/react/||g")'
       stage_fixed: true
 
 
