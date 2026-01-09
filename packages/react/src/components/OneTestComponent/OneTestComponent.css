@@ -1,0 +1,92 @@
+/* Main component styles */
+.one-test-component {
+  border-radius: 0.5rem;
+  border: 1px solid;
+}
+
+.one-test-component--default {
+  background-color: transparent;
+}
+
+.one-test-component--outlined {
+  border-width: 2px;
+  border-color: #d1d5db;
+}
+
+.one-test-component--filled {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+/* Header styles */
+.test-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.test-header__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+
+.test-header__subtitle {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+/* Content styles */
+.test-content {
+  /* padding handled by modifiers */
+}
+
+.test-content--padding-none {
+  padding: 0;
+}
+
+.test-content--padding-small {
+  padding: 0.5rem;
+}
+
+.test-content--padding-medium {
+  padding: 1rem;
+}
+
+.test-content--padding-large {
+  padding: 1.5rem;
+}
+
+/* Footer styles */
+.test-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+  display: flex;
+}
+
+.test-footer--align-left {
+  justify-content: flex-start;
+}
+
+.test-footer--align-center {
+  justify-content: center;
+}
+
+.test-footer--align-right {
+  justify-content: flex-end;
+}
+
+/* Sidebar styles */
+.test-sidebar {
+  width: 12rem;
+  border-right: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.test-sidebar--position-left {
+  order: -1;
+}
+
+.test-sidebar--position-right {
+  order: 999;
+}
