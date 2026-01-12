@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.319.1](https://github.com/factorialco/f0/compare/f0-react-v1.319.0...f0-react-v1.319.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* change syncing icon and do not rotate pending one (syncStatus) ([#3205](https://github.com/factorialco/f0/issues/3205)) ([7cc7d61](https://github.com/factorialco/f0/commit/7cc7d61ca9d0331f9beb270ae6a185e387388090))
+
 ## [1.319.0](https://github.com/factorialco/f0/compare/f0-react-v1.318.1...f0-react-v1.319.0) (2026-01-12)
 
 
