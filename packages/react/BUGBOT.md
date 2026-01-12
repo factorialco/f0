@@ -32,7 +32,7 @@ Each component (in folders `components` and `experimental`) should fit this orga
     - `hooks/` if the component has hook files (`useXXXX.ts`) should be in this folder
     - `components/` if the component have internal subcomponents should be in this folder
 
-Ensure elements `componentes/`, `internal-types` and `internal` files are not exported
+Ensure elements in `components/`, `internal-types.ts`, and `internal` files are not exported
 
 - We will try to have one component per file, unless very simple subcomponents
 
