@@ -90,8 +90,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator':
-        specifier: ^3.2.5
-        version: 3.2.5(@types/react@18.3.18)(react@18.3.1)
+        specifier: ^3.2.10
+        version: 3.2.10(@types/react@18.3.18)(react@18.3.1)
       '@copilotkit/react-core':
         specifier: ^1.10.6
         version: 1.10.6(@types/react@18.3.18)(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1033,6 +1033,11 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
+  '@atlaskit/atlassian-context@0.6.0':
+    resolution: {integrity: sha512-TjaV1OIjP8DaOyaqzPI5OkYvVckn3hYwE92v8RcdnpOiMKI0taedg1sLXD7x0nPx5MtXPmCJNNVJJprDN7pmxQ==}
+    peerDependencies:
+      react: ^18.2.0
+
   '@atlaskit/css@0.12.2':
     resolution: {integrity: sha512-9JCMv+eS9wKupeqtSnNmiOXPV92torqNZVjd3XInyX867dvqksbgAkg74GgKxRrflw2hjsZuOhG57ffdJQ1F/g==}
     peerDependencies:
@@ -1043,8 +1048,16 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
+  '@atlaskit/ds-lib@5.3.0':
+    resolution: {integrity: sha512-j3DLHqBACSJsG3XqSgCIwZqvJhYkpSC8i+24n/JYCRjIxYEJMsuSXOtdeu0qBajREwgzmAFP6AVfVZh1zAWG/A==}
+    peerDependencies:
+      react: ^18.2.0
+
   '@atlaskit/feature-gate-js-client@5.5.5':
     resolution: {integrity: sha512-uuF/gK35LZoyEUtoVcjxXtbls9fb0RiF5kxp9kYfVwuT6XkZxrYAGuQMPq8tnHKpZE3m70tdMuANyIlMddLzqw==}
+
+  '@atlaskit/feature-gate-js-client@5.5.7':
+    resolution: {integrity: sha512-m2ATuJChdHLJdFxpfm5HPnBzjtg8yJFLdZmZguP24oFJI1562y7JbOSEmrRtbzyOIuuqjSUrcNA/el3+srkjrw==}
 
   '@atlaskit/motion@5.3.0':
     resolution: {integrity: sha512-gCRs7DCc2LVFMDVkQfmvBCd7j4EIq2wJV5brGkKyJ2EeOUeB2GKVktBVecsfYh2WPEF5XbFw1Wt+QG27r31fTw==}
@@ -1054,14 +1067,17 @@ packages:
   '@atlaskit/platform-feature-flags@1.1.1':
     resolution: {integrity: sha512-YKuy3RsqCEoNALiMHVma0GGHkzZMSIBsEgZlV/2TPw65QRzOWJvKA3ZIKucmXzr3m7AUqg1XHwXvVlUuNZhUgg==}
 
+  '@atlaskit/platform-feature-flags@1.1.2':
+    resolution: {integrity: sha512-PM+fVkV4Yn4/0keiN6ioAap2Y+odTyw1Z4uf+TA0zMmg3/lp/rVNJEc4a24dvd8DfVs5m9bxa/hbO1qJarhCBw==}
+
   '@atlaskit/pragmatic-drag-and-drop-flourish@2.0.4':
     resolution: {integrity: sha512-qyNfe4fyiaToqrbSfPETx8LPjpDZgxC/kyrFQMZdVx9rLVZ9wEhm3wuWsaJZ2fBnKtge0LMAPHclk55FKYLcRQ==}
 
   '@atlaskit/pragmatic-drag-and-drop-hitbox@1.1.0':
     resolution: {integrity: sha512-JWt6eVp6Br2FPHRM8s0dUIHQk/jFInGP1f3ti5CdtM1Ji5/pt8Akm44wDC063Gv2i5RGseixtbW0z/t6RYtbdg==}
 
-  '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator@3.2.5':
-    resolution: {integrity: sha512-XNpZH0m1k9PiXAmm49NZqCAalsLc0VIFsUAjKkwoRfzNlCmHObv/B9vbwAVX+Zf7afUvBwi1RBEWjdjRHcYpNA==}
+  '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator@3.2.10':
+    resolution: {integrity: sha512-teIu0XsYPb3Jh23Psq+CFEppyH0Y5huVxR2nWtqhTu/uWmYUVwWvKyhQWNg+1hyGu3i3RRJlFp+2VjexdyTY+w==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -1070,6 +1086,11 @@ packages:
 
   '@atlaskit/tokens@6.0.0':
     resolution: {integrity: sha512-KofyBwF86HsQPoldfihaukihE9tPqe4cbjgYDmSl8KOXDdAQDpGg9TnUAGknxu3p8EsLZpViG53HfwWvLjs+pQ==}
+    peerDependencies:
+      react: ^18.2.0
+
+  '@atlaskit/tokens@9.1.0':
+    resolution: {integrity: sha512-mkmlQLfbSH5BqLYzC0mUlB1Exbp+lZvtyPgIC0G+c7Pt7FewmyZOGnCjW7Ef+fMU57rTZ/xpaT6hvlkhCZK4QQ==}
     peerDependencies:
       react: ^18.2.0
 
@@ -5408,8 +5429,14 @@ packages:
   '@statsig/client-core@3.24.4':
     resolution: {integrity: sha512-MnECJMfcl/OxBwzRZc/qM5tD2STdKI48gj4JPinqqXxhR6+XY0g+a7XPKU5J+D9RdgoDjnSmy+B9PYThQFH0kQ==}
 
+  '@statsig/client-core@3.31.0':
+    resolution: {integrity: sha512-SuxQD6TmVszPG7FoMKwTk/uyBuVFk7XnxI3T/E0uyb7PL7GNjONtfsoh+NqBBVUJVse0CUeSFfgJPoZy1ZOslQ==}
+
   '@statsig/js-client@3.24.4':
     resolution: {integrity: sha512-H7OdO/KvXp63hFAYNdfNfkaiH6RGMJ6TyDlQrltoHHWJS6WLTEuJJfljzwRvausjEetcLcU35P0osLSTBRQWrg==}
+
+  '@statsig/js-client@3.31.0':
+    resolution: {integrity: sha512-LFa5E0LjT6sTfZv3sNGoyRLSZ1078+agdgOA+Vm1ecjG+KbSOfBLTW7hMwimrJ29slRwbYDzbtKaPJo/R37N2g==}
 
   '@storybook/addon-a11y@10.1.11':
     resolution: {integrity: sha512-3sr6HmcDgW1+TQAV9QtWBE3HlGyfFXVZY3RECTNLNH6fRC+rYQCItisvQIVxQpyftLSQ8EAMN9JQzs495MjWNg==}
@@ -7715,6 +7742,9 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   cva@1.0.0-beta.3:
     resolution: {integrity: sha512-CZa8pTkpEygxJRLH9aod/wfnSgK5z/0GJqG/NNehlwam+S8llqCWUXS3eCenvAiW5sTUpwTWE6bJaeeZ/b4pzA==}
@@ -14235,10 +14265,15 @@ snapshots:
       '@babel/runtime': 7.28.4
       react: 18.3.1
 
+  '@atlaskit/atlassian-context@0.6.0(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.28.4
+      react: 18.3.1
+
   '@atlaskit/css@0.12.2(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/tokens': 6.0.0(@types/react@18.3.18)(react@18.3.1)
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.4
       '@compiled/react': 0.18.6(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
@@ -14248,7 +14283,18 @@ snapshots:
   '@atlaskit/ds-lib@5.0.0(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/platform-feature-flags': 1.1.1(react@18.3.1)
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.4
+      bind-event-listener: 3.0.0
+      react: 18.3.1
+      react-uid: 2.4.0(@types/react@18.3.18)(react@18.3.1)
+      tiny-invariant: 1.3.3
+    transitivePeerDependencies:
+      - '@types/react'
+
+  '@atlaskit/ds-lib@5.3.0(@types/react@18.3.18)(react@18.3.1)':
+    dependencies:
+      '@atlaskit/platform-feature-flags': 1.1.2(react@18.3.1)
+      '@babel/runtime': 7.28.4
       bind-event-listener: 3.0.0
       react: 18.3.1
       react-uid: 2.4.0(@types/react@18.3.18)(react@18.3.1)
@@ -14262,6 +14308,16 @@ snapshots:
       '@babel/runtime': 7.28.4
       '@statsig/client-core': 3.24.4
       '@statsig/js-client': 3.24.4
+      eventemitter3: 4.0.7
+    transitivePeerDependencies:
+      - react
+
+  '@atlaskit/feature-gate-js-client@5.5.7(react@18.3.1)':
+    dependencies:
+      '@atlaskit/atlassian-context': 0.6.0(react@18.3.1)
+      '@babel/runtime': 7.28.4
+      '@statsig/client-core': 3.31.0
+      '@statsig/js-client': 3.31.0
       eventemitter3: 4.0.7
     transitivePeerDependencies:
       - react
@@ -14282,7 +14338,14 @@ snapshots:
   '@atlaskit/platform-feature-flags@1.1.1(react@18.3.1)':
     dependencies:
       '@atlaskit/feature-gate-js-client': 5.5.5(react@18.3.1)
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.4
+    transitivePeerDependencies:
+      - react
+
+  '@atlaskit/platform-feature-flags@1.1.2(react@18.3.1)':
+    dependencies:
+      '@atlaskit/feature-gate-js-client': 5.5.7(react@18.3.1)
+      '@babel/runtime': 7.28.4
     transitivePeerDependencies:
       - react
 
@@ -14301,12 +14364,12 @@ snapshots:
       '@atlaskit/pragmatic-drag-and-drop': 1.7.4
       '@babel/runtime': 7.27.6
 
-  '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator@3.2.5(@types/react@18.3.18)(react@18.3.1)':
+  '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator@3.2.10(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/pragmatic-drag-and-drop': 1.7.4
       '@atlaskit/pragmatic-drag-and-drop-hitbox': 1.1.0
-      '@atlaskit/tokens': 6.0.0(@types/react@18.3.18)(react@18.3.1)
-      '@babel/runtime': 7.27.6
+      '@atlaskit/tokens': 9.1.0(@types/react@18.3.18)(react@18.3.1)
+      '@babel/runtime': 7.28.4
       '@compiled/react': 0.18.6(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
@@ -14326,6 +14389,19 @@ snapshots:
       '@babel/runtime': 7.27.6
       '@babel/traverse': 7.28.0
       '@babel/types': 7.28.0
+      bind-event-listener: 3.0.0
+      react: 18.3.1
+    transitivePeerDependencies:
+      - '@types/react'
+      - supports-color
+
+  '@atlaskit/tokens@9.1.0(@types/react@18.3.18)(react@18.3.1)':
+    dependencies:
+      '@atlaskit/ds-lib': 5.3.0(@types/react@18.3.18)(react@18.3.1)
+      '@atlaskit/platform-feature-flags': 1.1.2(react@18.3.1)
+      '@babel/runtime': 7.28.4
+      '@babel/traverse': 7.28.5
+      '@babel/types': 7.28.5
       bind-event-listener: 3.0.0
       react: 18.3.1
     transitivePeerDependencies:
@@ -15686,7 +15762,7 @@ snapshots:
 
   '@compiled/react@0.18.6(react@18.3.1)':
     dependencies:
-      csstype: 3.1.3
+      csstype: 3.2.3
       react: 18.3.1
 
   '@copilotkit/react-core@1.10.6(@types/react@18.3.18)(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -19838,9 +19914,15 @@ snapshots:
 
   '@statsig/client-core@3.24.4': {}
 
+  '@statsig/client-core@3.31.0': {}
+
   '@statsig/js-client@3.24.4':
     dependencies:
       '@statsig/client-core': 3.24.4
+
+  '@statsig/js-client@3.31.0':
+    dependencies:
+      '@statsig/client-core': 3.31.0
 
   '@storybook/addon-a11y@10.1.11(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
     dependencies:
@@ -22584,6 +22666,8 @@ snapshots:
 
   csstype@3.1.3: {}
 
+  csstype@3.2.3: {}
+
   cva@1.0.0-beta.3(typescript@5.8.2):
     dependencies:
       clsx: 2.1.1
@@ -22798,7 +22882,7 @@ snapshots:
   dom-helpers@5.2.1:
     dependencies:
       '@babel/runtime': 7.28.4
-      csstype: 3.1.3
+      csstype: 3.2.3
 
   dom-serializer@0.2.2:
     dependencies:
@@ -24493,7 +24577,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.3
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.13.2)
+      retry-axios: 2.6.0(axios@1.13.2(debug@4.4.3))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -28520,7 +28604,7 @@ snapshots:
 
   react-transition-group@4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.27.6
+      '@babel/runtime': 7.28.4
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
@@ -28811,7 +28895,7 @@ snapshots:
       onetime: 5.1.2
       signal-exit: 3.0.7
 
-  retry-axios@2.6.0(axios@1.13.2):
+  retry-axios@2.6.0(axios@1.13.2(debug@4.4.3)):
     dependencies:
       axios: 1.13.2(debug@4.4.3)
 
