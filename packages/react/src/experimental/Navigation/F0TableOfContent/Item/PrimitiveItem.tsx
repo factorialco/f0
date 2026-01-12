@@ -5,7 +5,7 @@ import { Counter } from "@/experimental/Information/Counter"
 import { ChevronDown, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { AnimatePresence, DragControls, motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { ReactNode } from "react"
 import { TOCItem } from "../types"
 import { ItemDropDown } from "./ItemDropDown"
@@ -18,7 +18,6 @@ interface PrimitiveItemProps {
   collapsible?: boolean
   isExpanded?: boolean
   onToggleExpanded?: (id: string) => void
-  dragControls: DragControls
   children?: ReactNode
   open: boolean
   setOpen: (open: boolean) => void
@@ -34,7 +33,6 @@ export function PrimitiveItem({
   collapsible = false,
   isExpanded = false,
   onToggleExpanded = () => {},
-  dragControls,
   children,
   open,
   setOpen,
@@ -102,11 +100,6 @@ export function PrimitiveItem({
                 >
                   <div
                     className="flex flex-shrink-0 cursor-grab items-center justify-center text-f1-icon active:cursor-grabbing"
-                    onPointerDown={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      dragControls?.start(e)
-                    }}
                     aria-label="Drag to reorder"
                   >
                     <F0Icon icon={Handle} size="xs" />
