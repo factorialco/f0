@@ -4,7 +4,7 @@ This file configures automated code review rules for the `packages/react` packag
 
 ## Component Structure
 
-- ban new components in `experimental` folder, they should be in `components` folder and use the experimentalComponent function from `@/lib/experimental.ts`
+- New components should not be added to the `experimental` folder; instead, add them to the `components` folder and use the experimentalComponent function from `@/lib/experimental.ts`
 
 ### Imports
 - **NEVER** import entire React via `import * as React from "react"`
