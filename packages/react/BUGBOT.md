@@ -60,7 +60,7 @@ Some components like `src/components/F0Button` has some private properties, in t
 
 
 ### `src/ui/`
-Ensure those components are no reexported
+Ensure those components are not re-exported
 
 ## TypeScript Standards
 
