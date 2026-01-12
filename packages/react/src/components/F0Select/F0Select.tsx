@@ -700,6 +700,11 @@ const F0SelectComponent = forwardRef(function Select<
                     }
                     allSelected={selectedState.allSelected}
                     selection={getDisplayItemsForSelection}
+                    onDeselect={
+                      multiple
+                        ? (value) => onItemCheckChange(value, false)
+                        : undefined
+                    }
                   />
                 )}
               </button>
