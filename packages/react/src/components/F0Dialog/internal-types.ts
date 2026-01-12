@@ -67,4 +67,6 @@ export type F0DialogInternalProps = {
   otherActions?: F0DialogHeaderProps["otherActions"]
   // Custom content to render in the dialog
   children: ReactNode
+  // Disable the default padding from the dialog content area
+  disableContentPadding?: boolean
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
