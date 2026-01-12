@@ -201,7 +201,7 @@ Ensure those components are not re-exported
       }
 ```
 
-- Ensure there is a story called Snapshot which includes `parameters: withSnapshot({}),` to ensure the component has visual regresions tests in chromatic
+- Ensure there is a story called Snapshot which includes `parameters: withSnapshot({}),` to ensure the component has visual regression tests in chromatic
   e.g.
     ```
     export const Snapshot: Story = {
