@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.319.2](https://github.com/factorialco/f0/compare/f0-react-v1.319.1...f0-react-v1.319.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* **F0Dialog:** add disableContentPadding prop and adjust dialog content ([#3214](https://github.com/factorialco/f0/issues/3214)) ([f9f4f07](https://github.com/factorialco/f0/commit/f9f4f075b4fa0d29696acb94644173d3a1269175))
+
 ## [1.319.1](https://github.com/factorialco/f0/compare/f0-react-v1.319.0...f0-react-v1.319.1) (2026-01-12)
 
 
