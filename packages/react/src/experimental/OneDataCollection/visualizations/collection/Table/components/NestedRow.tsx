@@ -159,11 +159,22 @@ const NestedRowContent = <
     connectorHeight: calculatedHeight,
   }
 
+  /**
+   * Border logic for hierarchical rows:
+   * - Border should only appear on the "last visible element" of the tree
+   * - If this item is the last child and is closed → show border (noBorder = false)
+   * - If this item is the last child and is open → hide border (noBorder = true), its children will show the border
+   * - If this item is NOT the last child → hide border (noBorder = true)
+   */
+  const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
+  const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
+  const shouldHideBorder = open || !isLastChild
+
   return (
     <>
       <Row
         {...props}
-        noBorder={open || (props.nestedRowProps?.depth ?? 0) > 0}
+        noBorder={shouldHideBorder}
         ref={combinedRowRef}
         nestedRowProps={{
           ...sharedNestedRowProps,
@@ -172,6 +183,7 @@ const NestedRowContent = <
           parentHasChildren:
             props.nestedRowProps?.parentHasChildren ?? children.length > 0,
           hasLoadedChildren: false,
+          isLastChild,
         }}
         tableWithChildren={props.tableWithChildren}
       />
@@ -181,7 +193,7 @@ const NestedRowContent = <
           const childItem = child as R
           const childHasChildren = props.source.itemsWithChildren?.(childItem)
           const isFirstChild = childIndex === 0
-          const isLastChild = childIndex === children.length - 1
+          const isLastChildInLevel = childIndex === children.length - 1
 
           const depth = (props.nestedRowProps?.depth ?? 0) + 1
 
@@ -200,13 +212,26 @@ const NestedRowContent = <
               return (el: HTMLTableRowElement | null) => {
                 setFirstChildRef(el)
               }
-            } else if (isLastChild && !shouldShowLoadMore) {
+            } else if (isLastChildInLevel && !shouldShowLoadMore) {
               return (el: HTMLTableRowElement | null) => {
                 setLastChildRef(el)
               }
             }
             return undefined
           }
+
+          /**
+           * Determine if this child is the last visible element in the tree
+           *
+           * A child is the "last in tree" only if:
+           * 1. It's the last child in its current level
+           * 2. Its parent is also the last in the tree (isLastChild from props)
+           * 3. There's no LoadMore button (which would add more elements)
+           *
+           * This ensures the border "bubbles down" to the deepest last visible element
+           */
+          const childIsLastInTree =
+            isLastChildInLevel && isLastChild && !shouldShowLoadMore
 
           // Recursive case: Child has its own children
           if (childHasChildren) {
@@ -222,18 +247,22 @@ const NestedRowContent = <
                   ...props.nestedRowProps,
                   parentHasChildren: true,
                   depth: depth,
+                  isLastChild: childIsLastInTree,
                 }}
               />
             )
           } else {
             // Base case: Leaf node with no children
+            // For leaf nodes, border is shown only if it's the last visible element in the tree
+            const leafShouldHideBorder = !childIsLastInTree
+
             return (
               <Row
                 {...props}
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
-                noBorder
+                noBorder={leafShouldHideBorder}
                 ref={getChildRef()}
                 nestedRowProps={{
                   ...props.nestedRowProps,
@@ -241,6 +270,7 @@ const NestedRowContent = <
                   parentHasChildren: true,
                   nestedVariant: childrenType,
                   onExpand: handleExpand,
+                  isLastChild: childIsLastInTree,
                 }}
                 tableWithChildren={props.tableWithChildren}
               />
@@ -258,6 +288,7 @@ const NestedRowContent = <
           }}
           paginationInfo={paginationInfo}
           ref={setLastChildRef}
+          shouldHideBorder={!isLastChild}
         />
       )}
 
