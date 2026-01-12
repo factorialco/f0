@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.319.0](https://github.com/factorialco/f0/compare/f0-react-v1.318.1...f0-react-v1.319.0) (2026-01-12)
+
+
+### Features
+
+* show deactivated employees ([#3201](https://github.com/factorialco/f0/issues/3201)) ([26e539a](https://github.com/factorialco/f0/commit/26e539a97842ee64c9b3f5326b368cbbca84d851))
+
+
+### Bug Fixes
+
+* **ChatTextarea:** adjust padding and height for improved layout ([#3200](https://github.com/factorialco/f0/issues/3200)) ([20e94a8](https://github.com/factorialco/f0/commit/20e94a8ee6d63c59d212fb3e785194beab5a08f8))
+* **NestedRow:** improve connector height calculation ([#3202](https://github.com/factorialco/f0/issues/3202)) ([688fc15](https://github.com/factorialco/f0/commit/688fc15954aa92fa939f58d2d39a6da7a507f07f))
+* set correct applying changes button positioning ([#3204](https://github.com/factorialco/f0/issues/3204)) ([7f130b8](https://github.com/factorialco/f0/commit/7f130b88348593e862096e19e66c6e757272afa3))
+
 ## [1.318.1](https://github.com/factorialco/f0/compare/f0-react-v1.318.0...f0-react-v1.318.1) (2026-01-07)
 
 
