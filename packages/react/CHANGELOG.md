@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.319.3](https://github.com/factorialco/f0/compare/f0-react-v1.319.2...f0-react-v1.319.3) (2026-01-12)
+
+
+### Bug Fixes
+
+* **Table:** add isLastChild prop to NestedRow for improved border logic ([#3216](https://github.com/factorialco/f0/issues/3216)) ([6d486b2](https://github.com/factorialco/f0/commit/6d486b29f8fe48d29d56ebbdc58005fe1f412898))
+
 ## [1.319.2](https://github.com/factorialco/f0/compare/f0-react-v1.319.1...f0-react-v1.319.2) (2026-01-12)
 
 
