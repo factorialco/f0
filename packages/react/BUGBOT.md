@@ -187,7 +187,7 @@ Ensure those components are no reexported
 
 - Ensure the components have at leat one story file
 - Ensure the story docs covers all the properties
-- For properties with with limited and well know options use the const array for the select values from the component. Avoid repeating the values in the story
+- For properties with limited and well know options use the const array for the select values from the component. Avoid repeating the values in the story
   ```ts
   export const colors = ['a', 'b', 'c'] as const
   export type Color = (typeof colors)[number]
