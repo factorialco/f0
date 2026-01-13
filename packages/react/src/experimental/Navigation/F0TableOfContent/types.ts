@@ -36,7 +36,8 @@ export type IdStructure = {
 }
 
 export interface TOCProps {
-  title: string
+  /** Optional title displayed at the top of the menu */
+  title?: string
   items: TOCItem[]
   className?: string
   activeItem?: string

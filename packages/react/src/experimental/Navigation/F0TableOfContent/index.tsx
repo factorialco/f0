@@ -198,26 +198,30 @@ function TOCContent({
       aria-label={title}
       ref={containerRef}
     >
-      <div className="flex-shrink-0 pb-2 pl-5 pr-4 pt-5">
-        {showSearchBox && (
-          <div className="mb-4">
-            <F1SearchBox
-              placeholder={searchPlaceholder ?? i18n.toc.search}
-              onChange={handleSearchChange}
-              value={searchValue}
-              clearable
-            />
-          </div>
-        )}
+      {(title || showSearchBox) && (
+        <div className="flex-shrink-0 pb-2 pl-5 pr-4 pt-5">
+          {showSearchBox && (
+            <div className={title ? "mb-4" : ""}>
+              <F1SearchBox
+                placeholder={searchPlaceholder ?? i18n.toc.search}
+                onChange={handleSearchChange}
+                value={searchValue}
+                clearable
+              />
+            </div>
+          )}
 
-        <OneEllipsis
-          lines={1}
-          tag="h2"
-          className="text-[14px] font-medium text-f1-foreground-secondary"
-        >
-          {title}
-        </OneEllipsis>
-      </div>
+          {title && (
+            <OneEllipsis
+              lines={1}
+              tag="h2"
+              className="text-[14px] font-medium text-f1-foreground-secondary"
+            >
+              {title}
+            </OneEllipsis>
+          )}
+        </div>
+      )}
 
       <ScrollArea className="h-full min-h-0">
         <div className="px-3 pb-2">
