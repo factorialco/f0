@@ -106,6 +106,7 @@ export const useLoadChildren = <
       item,
       filters: source.currentFilters,
       pagination: paginationInfo,
+      sortings: source.currentSortings,
     })
     const loadedChildren = getChildren(data)
 

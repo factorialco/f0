@@ -370,7 +370,7 @@ To enable nested tables, you need to provide three methods in your data source:
     dataAdapter: myDataAdapter,
     itemsWithChildren: (item) => !!item.children?.length,
     childrenCount: ({ item }) => item.children?.length,
-    fetchChildren: async ({ item, filters, pagination }) => {
+    fetchChildren: async ({ item, filters, pagination, sortings }) => {
       const children = await fetchChildrenFromAPI(item.id)
       return {
         records: children,
