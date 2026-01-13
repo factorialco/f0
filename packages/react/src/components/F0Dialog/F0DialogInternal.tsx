@@ -13,14 +13,13 @@ const dialogWrapperClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
-      sidePosition:
-        "absolute bottom-3 top-3 flex w-full translate-x-0 translate-y-0 flex-col rounded-md border border-solid border-f1-border-secondary",
+      sidePosition: "absolute flex flex-col rounded-md w-full",
       center: "flex",
       fullscreen: "",
     },
     position: {
-      right: "left-auto right-3 items-end",
-      left: "left-3 items-start",
+      right: "left-auto right-0 items-end p-3",
+      left: "left-0 items-start p-3",
       center: "",
       fullscreen: "inset-6",
     },
