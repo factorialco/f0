@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.320.0](https://github.com/factorialco/f0/compare/f0-react-v1.319.3...f0-react-v1.320.0) (2026-01-13)
+
+
+### Features
+
+* **F0Select:** add onDeselect functionality to F0Select preview ([#3213](https://github.com/factorialco/f0/issues/3213)) ([fd20f62](https://github.com/factorialco/f0/commit/fd20f629c6626bd5c6cfb69944e405bee8e371f0))
+
 ## [1.319.3](https://github.com/factorialco/f0/compare/f0-react-v1.319.2...f0-react-v1.319.3) (2026-01-12)
 
 
