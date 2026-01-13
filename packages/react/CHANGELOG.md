@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.321.1](https://github.com/factorialco/f0/compare/f0-react-v1.321.0...f0-react-v1.321.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* only allow dragging items in co-creation when long pressing handlers ([#3219](https://github.com/factorialco/f0/issues/3219)) ([78ec14a](https://github.com/factorialco/f0/commit/78ec14a1c5a9dc830f12f384bd9679fbbd2daa0e))
+
 ## [1.321.0](https://github.com/factorialco/f0/compare/f0-react-v1.320.1...f0-react-v1.321.0) (2026-01-13)
 
 
