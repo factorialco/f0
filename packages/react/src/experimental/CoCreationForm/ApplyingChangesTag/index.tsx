@@ -1,4 +1,4 @@
-import OneIcon from "@/experimental/AiChat/OneIcon"
+import OneIcon from "@/ai/AiChat/OneIcon"
 import { useI18n } from "@/lib/providers/i18n"
 import { motion } from "motion/react"
 import { memo } from "react"
