@@ -27,6 +27,7 @@ export type HeaderSecondaryAction = SecondaryAction & {
 }
 interface BaseHeaderProps {
   title: string
+  deactivated?: boolean
   avatar?:
     | {
         type: "generic"
@@ -54,6 +55,7 @@ const isVisible = (action: { isVisible?: boolean }) =>
 export function BaseHeader({
   title,
   avatar,
+  deactivated,
   description,
   primaryAction,
   secondaryActions = [],
@@ -120,7 +122,12 @@ export function BaseHeader({
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <span className="text-2xl font-semibold text-f1-foreground">
+            <span
+              className={cn(
+                "text-2xl font-semibold",
+                deactivated ? "text-f1-foreground/[0.61]" : "text-f1-foreground"
+              )}
+            >
               {title}
             </span>
             {description && <Description description={description} />}

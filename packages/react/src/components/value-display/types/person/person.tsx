@@ -41,7 +41,13 @@ export const PersonCell = (
         }}
         size="xs"
       />
-      <OneEllipsis className="min-w-0 flex-1 text-f1-foreground" tag="span">
+      <OneEllipsis
+        className={cn(
+          "min-w-0 flex-1",
+          args.deactivated ? "text-f1-foreground/[0.61]" : "text-f1-foreground"
+        )}
+        tag="span"
+      >
         {fullName}
       </OneEllipsis>
     </div>

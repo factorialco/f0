@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Dialog } from "./index"
 
 const meta = {
-  title: "Dialog",
+  title: "Overlays/Dialog",
   component: Dialog,
   parameters: {
     layout: "fullscreen",

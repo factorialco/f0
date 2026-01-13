@@ -111,6 +111,26 @@ export const WithAvatar: Story = {
   ),
 }
 
+export const WithDeactivatedAvatarAndLabel: Story = {
+  args: {
+    label: "Deactivated User",
+    variant: "default",
+    deactivated: true,
+    avatar: {
+      type: "person",
+      deactivated: true,
+      firstName: "Deactivated",
+      lastName: "User",
+      src: "/avatars/person01.jpg",
+    },
+  },
+  render: ({ icon: _icon, ...args }) => (
+    <div className="flex flex-wrap gap-2">
+      <Chip {...args} />
+    </div>
+  ),
+}
+
 export const WithIcon: Story = {
   args: {
     label: "Label",

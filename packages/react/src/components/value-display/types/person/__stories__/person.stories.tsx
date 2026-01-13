@@ -39,6 +39,24 @@ export const PersonType: Story = {
   },
 }
 
+export const DeactivatedPersonType: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Person",
+      render: (item) => ({
+        type: "person",
+        value: {
+          firstName: item.firstName,
+          lastName: item.lastName,
+          src: item.avatar,
+          deactivated: true,
+        },
+      }),
+    },
+  },
+}
+
 export const PersonTypeWithBadge: Story = {
   args: {
     item: mockItem,

@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.319.3](https://github.com/factorialco/f0/compare/f0-react-v1.319.2...f0-react-v1.319.3) (2026-01-12)
+
+
+### Bug Fixes
+
+* **Table:** add isLastChild prop to NestedRow for improved border logic ([#3216](https://github.com/factorialco/f0/issues/3216)) ([6d486b2](https://github.com/factorialco/f0/commit/6d486b29f8fe48d29d56ebbdc58005fe1f412898))
+
+## [1.319.2](https://github.com/factorialco/f0/compare/f0-react-v1.319.1...f0-react-v1.319.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* **F0Dialog:** add disableContentPadding prop and adjust dialog content ([#3214](https://github.com/factorialco/f0/issues/3214)) ([f9f4f07](https://github.com/factorialco/f0/commit/f9f4f075b4fa0d29696acb94644173d3a1269175))
+
+## [1.319.1](https://github.com/factorialco/f0/compare/f0-react-v1.319.0...f0-react-v1.319.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* change syncing icon and do not rotate pending one (syncStatus) ([#3205](https://github.com/factorialco/f0/issues/3205)) ([7cc7d61](https://github.com/factorialco/f0/commit/7cc7d61ca9d0331f9beb270ae6a185e387388090))
+
+## [1.319.0](https://github.com/factorialco/f0/compare/f0-react-v1.318.1...f0-react-v1.319.0) (2026-01-12)
+
+
+### Features
+
+* show deactivated employees ([#3201](https://github.com/factorialco/f0/issues/3201)) ([26e539a](https://github.com/factorialco/f0/commit/26e539a97842ee64c9b3f5326b368cbbca84d851))
+
+
+### Bug Fixes
+
+* **ChatTextarea:** adjust padding and height for improved layout ([#3200](https://github.com/factorialco/f0/issues/3200)) ([20e94a8](https://github.com/factorialco/f0/commit/20e94a8ee6d63c59d212fb3e785194beab5a08f8))
+* **NestedRow:** improve connector height calculation ([#3202](https://github.com/factorialco/f0/issues/3202)) ([688fc15](https://github.com/factorialco/f0/commit/688fc15954aa92fa939f58d2d39a6da7a507f07f))
+* set correct applying changes button positioning ([#3204](https://github.com/factorialco/f0/issues/3204)) ([7f130b8](https://github.com/factorialco/f0/commit/7f130b88348593e862096e19e66c6e757272afa3))
+
 ## [1.318.1](https://github.com/factorialco/f0/compare/f0-react-v1.318.0...f0-react-v1.318.1) (2026-01-07)
 
 
