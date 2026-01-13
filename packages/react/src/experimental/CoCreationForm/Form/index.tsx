@@ -1,7 +1,7 @@
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { motion, Reorder } from "motion/react"
+import { motion, Reorder, useDragControls } from "motion/react"
 import { useEffect, useMemo } from "react"
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
@@ -17,6 +17,7 @@ type ItemProps = {
 
 const Item = ({ element }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
+  const dragControls = useDragControls()
 
   const { isEditMode, getSectionContainingQuestion } =
     useCoCreationFormContext()
@@ -50,7 +51,8 @@ const Item = ({ element }: ItemProps) => {
       value={element}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      dragListener={!!isEditMode && !elementLocked}
+      dragListener={false}
+      dragControls={dragControls}
       layout="position"
       as="div"
     >
@@ -58,8 +60,7 @@ const Item = ({ element }: ItemProps) => {
         <div
           className={cn(
             "group/element flex flex-row items-start gap-1",
-            isDragging && "cursor-grabbing",
-            !dragEnabled && "cursor-not-allowed"
+            isDragging && "cursor-grabbing"
           )}
         >
           {!!isEditMode && (
@@ -69,6 +70,11 @@ const Item = ({ element }: ItemProps) => {
                 !isDragging && "cursor-grab",
                 !dragEnabled && "cursor-not-allowed"
               )}
+              onPointerDown={(e) => {
+                if (dragEnabled) {
+                  dragControls.start(e)
+                }
+              }}
             >
               <F0Icon icon={Handle} size="sm" />
             </div>
