@@ -3,12 +3,17 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { Await } from "@/components/Utilities/Await"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
+import type { F0SelectItemObject } from "../types"
+import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
 
 export type SelectAllProps = {
   selectedCount: number | Promise<number>
   value: boolean
   indeterminate: boolean
   onChange: (checked: boolean) => void
+  hideCheckbox?: boolean
+  items?: F0SelectItemObject<string>[]
+  onDeselect?: (value: string) => void
 }
 
 export const SelectAll = ({
@@ -16,6 +21,9 @@ export const SelectAll = ({
   indeterminate,
   value,
   onChange,
+  hideCheckbox = false,
+  items,
+  onDeselect,
 }: SelectAllProps) => {
   const i18n = useI18n()
 
@@ -27,6 +35,13 @@ export const SelectAll = ({
     }
   }
 
+  const selectedText = (count: number) =>
+    `${count} ${
+      count === 1
+        ? i18n.status.selected.singular.toLowerCase()
+        : i18n.status.selected.plural.toLowerCase()
+    }`
+
   return (
     <div className="flex items-center gap-2 p-1 pl-4 pr-3">
       <div className="flex-1 whitespace-nowrap">
@@ -34,28 +49,34 @@ export const SelectAll = ({
           resolve={selectedCount}
           fallback={<Skeleton className="h-4 w-4" />}
         >
-          {(selectedCount: number) => (
-            <OneEllipsis className="text-f1-foreground-secondary">
-              {`${selectedCount} ${
-                selectedCount === 1
-                  ? i18n.status.selected.singular.toLowerCase()
-                  : i18n.status.selected.plural.toLowerCase()
-              }`}
-            </OneEllipsis>
-          )}
+          {(resolvedCount: number) =>
+            items && items.length > 0 ? (
+              <ItemsPreviewHoverCard items={items} onDeselect={onDeselect}>
+                <OneEllipsis className="cursor-pointer text-f1-foreground-secondary transition-colors hover:text-f1-foreground">
+                  {selectedText(resolvedCount)}
+                </OneEllipsis>
+              </ItemsPreviewHoverCard>
+            ) : (
+              <OneEllipsis className="text-f1-foreground-secondary">
+                {selectedText(resolvedCount)}
+              </OneEllipsis>
+            )
+          }
         </Await>
       </div>
-      <div className="shrink-0">
-        <F0Checkbox
-          id="select-all"
-          title={i18n.actions.selectAll}
-          checked={indeterminate || value}
-          indeterminate={indeterminate}
-          onCheckedChange={handleChange}
-          presentational
-          hideLabel
-        />
-      </div>
+      {!hideCheckbox && (
+        <div className="shrink-0">
+          <F0Checkbox
+            id="select-all"
+            title={i18n.actions.selectAll}
+            checked={indeterminate || value}
+            indeterminate={indeterminate}
+            onCheckedChange={handleChange}
+            presentational
+            hideLabel
+          />
+        </div>
+      )}
     </div>
   )
 }
