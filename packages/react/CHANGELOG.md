@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.321.0](https://github.com/factorialco/f0/compare/f0-react-v1.320.1...f0-react-v1.321.0) (2026-01-13)
+
+
+### Features
+
+* **Nested Tables:** add support for sorting in fetchChildren method  ([#3223](https://github.com/factorialco/f0/issues/3223)) ([b4c8dac](https://github.com/factorialco/f0/commit/b4c8dac589e831241d8dea0f5142dbe8f7820f5b))
+
 ## [1.320.1](https://github.com/factorialco/f0/compare/f0-react-v1.320.0...f0-react-v1.320.1) (2026-01-13)
 
 
