@@ -68,7 +68,9 @@ export const ItemsPreviewHoverCard = ({
   return (
     <HoverCard>
       <HoverCardTrigger asChild className={triggerClassName}>
-        <button onClick={(e) => e.stopPropagation()} className="flex">{children}</button>
+        <button onClick={(e) => e.stopPropagation()} className="flex">
+          {children}
+        </button>
       </HoverCardTrigger>
       <HoverCardContent
         side="top"
