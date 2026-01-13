@@ -142,7 +142,14 @@ export const CoCreationForm = ({
 
   useEffect(() => {
     if (applyingChanges) {
-      ;(document.activeElement as HTMLElement)?.blur()
+      const activeElement = document.activeElement as HTMLElement
+      // Don't blur one-ai-input elements
+      if (
+        activeElement &&
+        activeElement.getAttribute("name") !== "one-ai-input"
+      ) {
+        activeElement.blur()
+      }
     }
   }, [applyingChanges])
 
