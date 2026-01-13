@@ -5,6 +5,7 @@ import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { useI18n } from "@/lib/providers/i18n"
 
 interface TypewriterPlaceholderProps {
   placeholders: string[]

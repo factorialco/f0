@@ -12,11 +12,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
 import { isAgentStateMessage } from "../messageTypes"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
+import { useI18n } from "@/ai"
 
 type Turn = Array<Message | Array<Message>>
 
@@ -49,7 +49,7 @@ const Messages = ({
     isOpen,
   } = useFeedbackModal()
 
-  const translations = useAiChatTranslations()
+  const translations = useI18n()
   const {
     greeting,
     initialMessage,

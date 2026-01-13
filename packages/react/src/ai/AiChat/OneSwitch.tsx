@@ -1,4 +1,3 @@
-import { useAiChatTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import { cn, focusRing } from "@/lib/utils"
 import {
   Tooltip,
@@ -11,13 +10,14 @@ import { motion } from "motion/react"
 import { useState } from "react"
 import OneIcon from "./OneIcon"
 import { useAiChat } from "./providers/AiChatStateProvider"
+import { useI18n } from "@/ai"
 
 export const OneSwitch = ({
   className,
   disabled,
 }: React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>) => {
   const { enabled, setOpen, open } = useAiChat()
-  const translations = useAiChatTranslations()
+  const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
 
   if (!enabled) {

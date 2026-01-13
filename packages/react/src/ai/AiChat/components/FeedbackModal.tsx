@@ -1,9 +1,8 @@
 import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
-import { useI18n } from "@/lib/providers/i18n"
+import { useI18n } from "@/ai"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
-import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { UserReaction } from "./FeedbackProvider"
 
 interface ReactionModalProps {
@@ -20,8 +19,7 @@ export const FeedbackModal = ({
   message,
 }: ReactionModalProps) => {
   const [text, setText] = useState("")
-  const translation = useAiChatTranslations()
-  const globalTranslations = useI18n()
+  const translation = useI18n()
   const { title, label, placeholder } =
     reactionType === "like"
       ? translation.ai.feedbackModal.positive
@@ -58,11 +56,11 @@ export const FeedbackModal = ({
       width="sm"
       title={title}
       primaryAction={{
-        label: translations.actions.send,
+        label: translation.actions.send,
         onClick: handleSubmit,
       }}
       secondaryAction={{
-        label: translations.actions.cancel,
+        label: translation.actions.cancel,
         onClick: handleClose,
       }}
     >

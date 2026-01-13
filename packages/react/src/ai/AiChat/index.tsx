@@ -4,7 +4,7 @@ import {
   useCopilotAction,
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
-import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
+import { CopilotChat, CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
@@ -20,12 +20,12 @@ import {
   ChatWindow,
   MessageSources,
   MessagesContainer,
-  MessagesContainerFullscreen,
   SuggestionsList,
   UserMessage,
 } from "./components"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 
 export type AiChatProviderProps = {
   enabled?: boolean

@@ -10,12 +10,12 @@ import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useMemo, useRef } from "react"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { useAiChatTranslations } from "../providers/AiChatTranslationsProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
+import { useI18n } from "@/ai"
 
 /**
  * MessagesContainerFullscreen - Used in fullscreen chat (CopilotChat)
@@ -55,7 +55,7 @@ const Messages = ({
     isOpen,
   } = useFeedbackModal()
 
-  const translations = useAiChatTranslations()
+  const translations = useI18n()
   const {
     greeting,
     initialMessage,
