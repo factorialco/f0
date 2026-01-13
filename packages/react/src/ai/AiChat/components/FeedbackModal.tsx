@@ -1,6 +1,6 @@
 import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
-import { useI18n } from "@/lib/providers/i18n"
+import { useI18n } from "@/ai"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
 import { UserReaction } from "./FeedbackProvider"
@@ -19,11 +19,11 @@ export const FeedbackModal = ({
   message,
 }: ReactionModalProps) => {
   const [text, setText] = useState("")
-  const translations = useI18n()
+  const translation = useI18n()
   const { title, label, placeholder } =
     reactionType === "like"
-      ? translations.ai.feedbackModal.positive
-      : translations.ai.feedbackModal.negative
+      ? translation.ai.feedbackModal.positive
+      : translation.ai.feedbackModal.negative
   const handleSubmit = useCallback(() => {
     onSubmit(message, text)
   }, [text, message, onSubmit])
@@ -56,11 +56,11 @@ export const FeedbackModal = ({
       width="sm"
       title={title}
       primaryAction={{
-        label: translations.actions.send,
+        label: translation.actions.send,
         onClick: handleSubmit,
       }}
       secondaryAction={{
-        label: translations.actions.cancel,
+        label: translation.actions.cancel,
         onClick: handleClose,
       }}
     >

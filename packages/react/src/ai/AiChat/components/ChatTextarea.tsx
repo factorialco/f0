@@ -1,11 +1,11 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { useI18n } from "@/lib/providers/i18n"
 
 interface TypewriterPlaceholderProps {
   placeholders: string[]

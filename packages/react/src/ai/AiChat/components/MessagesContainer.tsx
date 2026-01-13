@@ -1,6 +1,5 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
@@ -17,6 +16,7 @@ import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
+import { useI18n } from "@/ai"
 
 type Turn = Array<Message | Array<Message>>
 
