@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.320.1](https://github.com/factorialco/f0/compare/f0-react-v1.320.0...f0-react-v1.320.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* **F0Dialog:** dialog positioning and styling ([#3203](https://github.com/factorialco/f0/issues/3203)) ([fff7292](https://github.com/factorialco/f0/commit/fff729222e67bf53ff21787375b34999e62a91f0))
+
 ## [1.320.0](https://github.com/factorialco/f0/compare/f0-react-v1.319.3...f0-react-v1.320.0) (2026-01-13)
 
 
