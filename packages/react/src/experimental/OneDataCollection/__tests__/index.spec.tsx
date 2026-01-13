@@ -33,7 +33,15 @@ import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <I18nProvider translations={{ ...defaultTranslations, ...aiTranslations }}>
+  <I18nProvider
+    translations={{
+      ...defaultTranslations,
+      ai: {
+        ...defaultTranslations.ai,
+        ...aiTranslations.ai,
+      },
+    }}
+  >
     {children}
   </I18nProvider>
 )

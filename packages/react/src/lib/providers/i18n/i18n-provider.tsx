@@ -1,6 +1,5 @@
 "use client"
 
-import { AiChatTranslationsProvider } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import { createContext, ReactNode, useContext } from "react"
 import { TranslationKey, TranslationsType } from "./i18n-provider-defaults"
 

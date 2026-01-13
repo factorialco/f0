@@ -15,6 +15,7 @@ describe("I18nProvider", () => {
     const customTranslations: TranslationsType = {
       ...defaultTranslations,
       ai: {
+        ...defaultTranslations.ai,
         ...aiTranslations.ai,
         closeChat: "CLOSE",
       },

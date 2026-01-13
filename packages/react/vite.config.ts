@@ -115,6 +115,7 @@ export default defineConfig({
       entry: {
         ["f0"]: resolve(__dirname, "src/f0.ts"),
         ["experimental"]: resolve(__dirname, "src/experimental.ts"),
+        ["ai"]: resolve(__dirname, "src/ai.ts"),
         ["i18n-provider-defaults"]: resolve(
           __dirname,
           "src/lib/providers/i18n/i18n-provider-defaults.ts"
