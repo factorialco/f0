@@ -164,6 +164,7 @@ const NestedRowContent = <
       <Row
         {...props}
         noBorder={open || (props.nestedRowProps?.depth ?? 0) > 0}
+        disableHover={true}
         ref={combinedRowRef}
         nestedRowProps={{
           ...sharedNestedRowProps,
@@ -264,6 +265,7 @@ const NestedRowContent = <
       {shouldShowLoadMore && !isLoading && (
         <LoadMoreRow
           {...props}
+          disableHover={true}
           rowRef={internalRowRef}
           onLoadMoreChildren={loadChildren}
           ref={setLastChildRef}
