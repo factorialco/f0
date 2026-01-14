@@ -18,6 +18,7 @@ import {
   ChatHeader,
   ChatTextarea,
   ChatWindow,
+  FullscreenWindow,
   MessageSources,
   MessagesContainer,
   SuggestionsList,
@@ -124,7 +125,7 @@ const SendMessageFunctionInjector = () => {
 }
 
 const AiChatCmp = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen, visualizationMode } = useAiChat()
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -200,25 +201,35 @@ const AiChatCmp = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-3 mt-2">
+      <div
+        className={cn(
+          visualizationMode === "fullscreen" ? "w-full px-4" : "m-3 mt-2"
+        )}
+      >
         <ChatTextarea {...props} />
       </div>
     ),
-    []
+    [visualizationMode]
   )
 
   if (!enabled) {
     return null
   }
 
+  // Use CopilotSidebar for both modes, with different Window and Header components
   return (
     <CopilotSidebar
-      className={cn("h-full", open && "py-1 xs:pr-1")}
+      className={cn(
+        "h-full",
+        visualizationMode === "fullscreen" ? "w-0" : open && "py-1 xs:pr-1"
+      )}
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      Window={ChatWindow}
+      Window={
+        visualizationMode === "fullscreen" ? FullscreenWindow : ChatWindow
+      }
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={ChatButton}

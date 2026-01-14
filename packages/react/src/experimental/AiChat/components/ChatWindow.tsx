@@ -58,3 +58,57 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     </AnimatePresence>
   )
 }
+
+export const FullscreenWindow = ({ children }: WindowProps) => {
+  const {
+    open,
+    shouldPlayEntranceAnimation,
+    setShouldPlayEntranceAnimation,
+    autoClearMinutes,
+  } = useAiChat()
+  const { reset } = useCopilotChatInternal()
+
+  useAutoClear({
+    reset,
+    isOpen: open,
+    autoClearMinutes,
+  })
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="fullscreen-chat-window"
+          aria-hidden={!open}
+          className="fixed top-0 left-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-f1-special-page"
+          initial={shouldPlayEntranceAnimation ? { opacity: 0 } : false}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: 0.3,
+            ease: [0, 0, 0.1, 1],
+          }}
+          onAnimationComplete={() => {
+            if (shouldPlayEntranceAnimation) {
+              setShouldPlayEntranceAnimation(false)
+            }
+          }}
+        >
+          <motion.div
+            className="relative flex h-full w-full flex-col overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+              ease: "easeOut",
+              delay: shouldPlayEntranceAnimation ? 0.2 : 0,
+            }}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}

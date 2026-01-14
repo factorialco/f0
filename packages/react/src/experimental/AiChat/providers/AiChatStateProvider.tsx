@@ -33,6 +33,8 @@ export interface AiChatState {
   ) => void
 }
 
+export type VisualizationMode = "sidepanel" | "fullscreen"
+
 type AiChatProviderReturnValue = {
   enabled: boolean
   setEnabled: React.Dispatch<React.SetStateAction<boolean>>
@@ -90,6 +92,18 @@ type AiChatProviderReturnValue = {
    * @internal
    */
   setSendMessageFunction: (sendFn: ((message: Message) => void) | null) => void
+  /**
+   * The current visualization mode of the chat
+   */
+  visualizationMode: VisualizationMode
+  /**
+   * Set the visualization mode of the chat
+   */
+  setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
+  /**
+   * Open the chat in fullscreen mode
+   */
+  openFullscreen: () => void
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -123,6 +137,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
+  const [visualizationMode, setVisualizationMode] =
+    useState<VisualizationMode>("sidepanel")
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
@@ -173,6 +189,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     sendMessageFunctionRef.current?.(messageToSend)
   }
 
+  const openFullscreen = () => {
+    setVisualizationMode("fullscreen")
+    setOpen(true)
+  }
+
   useEffect(() => {
     setEnabledInternal(enabled)
   }, [enabled])
@@ -212,6 +233,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPlaceholders,
         sendMessage,
         setSendMessageFunction,
+        visualizationMode,
+        setVisualizationMode,
+        openFullscreen,
       }}
     >
       {children}
@@ -248,6 +272,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       onThumbsDown: noopFn,
       sendMessage: noopFn,
       setSendMessageFunction: noopFn,
+      visualizationMode: "sidepanel",
+      setVisualizationMode: noopFn,
+      openFullscreen: noopFn,
     }
   }
 
