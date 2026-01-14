@@ -167,4 +167,74 @@ describe("useColumns with settings", () => {
     // Should respect user-defined order
     expect(result.current.colsOrder).toEqual(["column3", "column1", "column2"])
   })
+
+  it("should hide NEW columns with hidden: true even when user has saved preferences", () => {
+    // Scenario: User saved preferences for columns 1-3, developer adds column4 with hidden: true
+    const columnsWithNewHidden: TableColumnDefinition<unknown, never, never>[] =
+      [
+        { id: "column1", label: "Column 1" },
+        { id: "column2", label: "Column 2" },
+        { id: "column3", label: "Column 3" },
+        { id: "column4", label: "Column 4", hidden: true }, // NEW column added by developer
+      ]
+    const settings: TableVisualizationSettings = {
+      // User previously showed all columns (empty hidden array)
+      // But column4 didn't exist when user saved these settings
+      hidden: [],
+      order: ["column1", "column2", "column3"],
+    }
+    const frozenColumns = 0
+    const allowSorting = true
+    const allowHiding = true
+
+    const { result } = renderHook(() =>
+      useColumns(
+        columnsWithNewHidden,
+        frozenColumns,
+        settings,
+        allowSorting,
+        allowHiding
+      )
+    )
+
+    // column4 should be hidden because it's NEW (not in saved settings) and has hidden: true
+    expect(result.current.colsHidden).toContain("column4")
+    // Visible columns should NOT include column4
+    expect(result.current.columns.map((c) => c.id)).not.toContain("column4")
+  })
+
+  it("should NOT hide new columns that don't have hidden: true", () => {
+    const columnsWithNewVisible: TableColumnDefinition<
+      unknown,
+      never,
+      never
+    >[] = [
+      { id: "column1", label: "Column 1" },
+      { id: "column2", label: "Column 2" },
+      { id: "column3", label: "Column 3", hidden: true }, // Existing hidden
+      { id: "column4", label: "Column 4" }, // NEW column, no hidden flag
+    ]
+    const settings: TableVisualizationSettings = {
+      hidden: ["column3"],
+      order: ["column1", "column2", "column3"],
+    }
+    const frozenColumns = 0
+    const allowSorting = true
+    const allowHiding = true
+
+    const { result } = renderHook(() =>
+      useColumns(
+        columnsWithNewVisible,
+        frozenColumns,
+        settings,
+        allowSorting,
+        allowHiding
+      )
+    )
+
+    // column4 should be visible (no hidden: true)
+    expect(result.current.colsHidden).not.toContain("column4")
+    // column3 should still be hidden (from user preferences)
+    expect(result.current.colsHidden).toContain("column3")
+  })
 })

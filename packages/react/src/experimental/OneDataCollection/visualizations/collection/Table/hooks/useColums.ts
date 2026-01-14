@@ -79,11 +79,30 @@ export const useColumns = <
   allowSorting?: boolean,
   allowHiding?: boolean
 ): UseColumnsReturn<R, Sortings, Summaries> => {
-  const [colsHidden, setColsHidden] = useState<ColId[]>(
-    (allowHiding && settings?.hidden !== undefined
-      ? settings.hidden
-      : undefined) ?? getColsHiddenFromDefinition(originalColumns)
-  )
+  // Merge user preferences with developer defaults for NEW columns
+  // New columns (not in saved order) should respect their hidden: true default
+  const getMergedHidden = () => {
+    if (!allowHiding || settings?.hidden === undefined) {
+      return getColsHiddenFromDefinition(originalColumns)
+    }
+    // If we don't have saved order, we can't determine which columns are "new"
+    // In this case, just use user's hidden preferences as-is
+    if (!settings.order || settings.order.length === 0) {
+      return settings.hidden
+    }
+    // New columns = columns NOT in saved order (these were added after user saved prefs)
+    const savedOrderIds = new Set(settings.order)
+    const newHiddenColumns = originalColumns
+      .filter(
+        (col) =>
+          col.hidden && !col.noHiding && !savedOrderIds.has(getColumnId(col))
+      )
+      .map(getColumnId)
+
+    return [...settings.hidden, ...newHiddenColumns]
+  }
+
+  const [colsHidden, setColsHidden] = useState<ColId[]>(getMergedHidden())
   const [colsOrder, setColsOrder] = useState<ColId[]>(
     (allowSorting && settings?.order !== undefined
       ? settings.order
@@ -92,7 +111,7 @@ export const useColumns = <
 
   useEffect(() => {
     if (allowHiding && settings?.hidden !== undefined) {
-      setColsHidden(settings.hidden)
+      setColsHidden(getMergedHidden())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
   }, [JSON.stringify(settings?.hidden), allowHiding])
