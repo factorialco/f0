@@ -168,6 +168,40 @@ describe("useColumns with settings", () => {
     expect(result.current.colsOrder).toEqual(["column3", "column1", "column2"])
   })
 
+  it("should maintain developer-defined order when settings.order is an empty array", () => {
+    const columnsWithOrder: TableColumnDefinition<unknown, never, never>[] = [
+      { id: "column1", label: "Column 1", order: 3 },
+      { id: "column2", label: "Column 2", order: 1 },
+      { id: "column3", label: "Column 3", order: 2 },
+    ]
+    const settings: TableVisualizationSettings = {
+      order: [], // Empty array (different from undefined)
+    }
+    const frozenColumns = 0
+    const allowSorting = true
+    const allowHiding = true
+
+    const { result } = renderHook(() =>
+      useColumns(
+        columnsWithOrder,
+        frozenColumns,
+        settings,
+        allowSorting,
+        allowHiding
+      )
+    )
+
+    // Empty array means no columns in saved order, so all maintain definition order
+    // Since colsOrder is [], all columns have indexOf = -1, resulting in stable sort
+    expect(result.current.colsOrder).toEqual([])
+    // Columns should appear in their original definition order (stable sort)
+    expect(result.current.columns.map((c) => c.id)).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+  })
+
   it("should hide NEW columns with hidden: true even when user has saved preferences", () => {
     // Scenario: User saved preferences for columns 1-3, developer adds column4 with hidden: true
     const columnsWithNewHidden: TableColumnDefinition<unknown, never, never>[] =
