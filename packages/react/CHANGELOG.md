@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.322.1](https://github.com/factorialco/f0/compare/f0-react-v1.322.0...f0-react-v1.322.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* make DC hidden columns invisible initially ([#3175](https://github.com/factorialco/f0/issues/3175)) ([ac1deab](https://github.com/factorialco/f0/commit/ac1deaba18b734f02e152e3a3195311408be8ea0))
+
 ## [1.322.0](https://github.com/factorialco/f0/compare/f0-react-v1.321.1...f0-react-v1.322.0) (2026-01-14)
 
 
