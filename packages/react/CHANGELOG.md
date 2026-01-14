@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.322.0](https://github.com/factorialco/f0/compare/f0-react-v1.321.1...f0-react-v1.322.0) (2026-01-14)
+
+
+### Features
+
+* manage new mode type to decide wether to display or not labels ([#3228](https://github.com/factorialco/f0/issues/3228)) ([af2c688](https://github.com/factorialco/f0/commit/af2c68825b0fa33b8a5602ef4e0754e6da5f761e))
+
 ## [1.321.1](https://github.com/factorialco/f0/compare/f0-react-v1.321.0...f0-react-v1.321.1) (2026-01-13)
 
 
