@@ -4,15 +4,18 @@ export const aiTranslations = {
   ai: {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
+    startNewChat: "Start new chat",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Write something here…",
+    inputPlaceholder: "Ask about time, people, or company info…",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
-    thumbsUp: "Like",
-    thumbsDown: "Dislike",
+    resourcesGroupTitle: "Resources",
+    thinking: "Thinking...",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -25,6 +28,7 @@ export const aiTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    ask: "Ask One",
   },
 }
 

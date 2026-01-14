@@ -8,7 +8,6 @@ import { CopilotChat, CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
-import { cn } from "@/lib/utils"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect } from "react"
 import { ActionItem } from "./ActionItem"
@@ -200,7 +199,7 @@ const AiChatCmp = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-3 mt-2">
+      <div className="m-[16px] mt-2">
         <ChatTextarea {...props} />
       </div>
     ),
@@ -213,7 +212,7 @@ const AiChatCmp = () => {
 
   return (
     <CopilotSidebar
-      className={cn("h-full", open && "py-1 xs:pr-1")}
+      className="h-full"
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
