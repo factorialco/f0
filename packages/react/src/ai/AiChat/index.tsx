@@ -20,7 +20,6 @@ import {
   ChatWindow,
   MessageSources,
   MessagesContainer,
-  SuggestionsList,
   UserMessage,
 } from "./components"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
@@ -226,7 +225,6 @@ const AiChatCmp = () => {
       Input={InputComponent}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
-      RenderSuggestionsList={SuggestionsList}
     />
   )
 }
@@ -275,7 +273,6 @@ const AiFullscreenChatCmp = () => {
               Input={ChatTextarea}
               UserMessage={UserMessage}
               AssistantMessage={AssistantMessage}
-              RenderSuggestionsList={SuggestionsList}
             />
           </div>
         </div>

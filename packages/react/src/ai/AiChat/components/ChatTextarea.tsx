@@ -116,9 +116,10 @@ const TypewriterPlaceholder = ({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.4 }}
         className={cn(
-          "pointer-events-none col-start-1 row-start-1",
-          "mb-0 mt-3 max-h-[240px] whitespace-pre-wrap break-words px-3",
-          "text-f1-foreground-secondary"
+          "col-start-1 row-start-1",
+          "pointer-events-none",
+          "mb-0 mt-3 max-h-[240px] px-3",
+          "whitespace-pre-wrap break-words text-f1-foreground-secondary"
         )}
       >
         {displayedPlaceholder}
@@ -185,12 +186,20 @@ export const ChatTextarea = ({
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-3 mt-2 flex flex-row items-end gap-2 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text sm:flex-col sm:items-stretch sm:gap-3",
-        "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
-        "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-        "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-        "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']",
-        "py-1 pl-3 pr-1 sm:p-0"
+        "relative isolate",
+        "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3",
+        "rounded-lg border border-solid border-f1-border",
+        "transition-all hover:cursor-text",
+        "py-px pl-3 pr-0.5 sm:p-0",
+        "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
+        "before:rounded-[inherit] before:bg-f1-background before:content-['']",
+        "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
+        "after:rounded-[inherit] after:blur-[5px] after:content-['']",
+        "after:scale-90 after:opacity-0",
+        "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
+        "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
+        "after:transition-all after:delay-200 after:duration-300",
+        "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100"
       )}
       animate={{
         "--gradient-angle": ["0deg", "360deg"],
@@ -210,10 +219,22 @@ export const ChatTextarea = ({
       }}
       onSubmit={handleSubmit}
     >
-      <div className="grid min-h-[40px] flex-1 grid-cols-1 grid-rows-1">
+      <div
+        className={cn(
+          "grid flex-1 grid-cols-1 grid-rows-1",
+          "min-h-[20px] py-2.5 sm:min-h-[40px] sm:py-0"
+        )}
+      >
         <div
           aria-hidden={true}
-          className="pointer-events-none invisible col-start-1 row-start-1 max-h-[120px] min-h-[40px] whitespace-pre-wrap break-words text-[16px] leading-[40px] text-f1-foreground sm:mt-3 sm:max-h-[240px] sm:px-3 sm:text-base"
+          className={cn(
+            "col-start-1 row-start-1",
+            "pointer-events-none invisible",
+            "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px]",
+            "whitespace-pre-wrap break-words",
+            "text-[16px] text-f1-foreground sm:text-base",
+            "sm:mt-3 sm:px-3"
+          )}
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
         </div>
@@ -230,12 +251,13 @@ export const ChatTextarea = ({
           placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
-            "max-h-[120px] min-h-[40px] resize-none px-3 py-0 outline-none transition-all sm:h-auto sm:max-h-[240px]",
+            "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px] sm:h-auto",
+            "resize-none",
             "whitespace-pre-wrap break-words",
-            "text-f1-foreground placeholder:text-f1-foreground-secondary",
+            "text-[14px] leading-[20px] font-normal text-f1-foreground",
+            "px-0 sm:mt-3 sm:px-3",
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "m-0 px-0 sm:mt-3 sm:px-3",
-            "text-[16px] leading-[40px] sm:text-base",
+            "outline-none transition-all",
             inputValue || !multiplePlaceholders
               ? "caret-f1-foreground"
               : "caret-transparent",
@@ -254,7 +276,7 @@ export const ChatTextarea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-row-reverse sm:p-3 sm:pt-0 p-1">
+      <div className="flex shrink-0 flex-row-reverse p-1 sm:p-2 sm:pt-0">
         {inProgress ? (
           <ButtonInternal
             type="submit"
