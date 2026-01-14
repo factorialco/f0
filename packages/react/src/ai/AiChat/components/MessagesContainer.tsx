@@ -83,10 +83,9 @@ const Messages = ({
 
   return (
     <>
-      <motion.div
-        layout
+      <div
         className={cn(
-          "scrollbar-macos relative isolate flex flex-1 flex-col px-4 pt-3",
+          "scrollbar-macos relative isolate flex flex-1 flex-col pl-[16px] pr-[8px] pt-[16px]",
           "overflow-y-scroll"
         )}
         ref={messagesContainerRef}
@@ -187,7 +186,7 @@ const Messages = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
       {isOpen && (
         <FeedbackModal
           onSubmit={(message, feedback) => {

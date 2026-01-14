@@ -90,7 +90,7 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="-mx-2 flex flex-row gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pb-1 sm:-ml-2 sm:mr-0 sm:flex-col sm:items-start sm:gap-[6px] sm:px-0 sm:pb-0">
+        <div className="-ml-[6px] flex flex-row gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pb-1 sm:mr-0 sm:flex-col sm:items-start sm:gap-[6px] sm:px-0 sm:pb-0">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               className="w-full"
