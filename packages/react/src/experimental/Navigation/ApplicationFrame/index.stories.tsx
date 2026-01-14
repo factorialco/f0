@@ -2,7 +2,7 @@ import { Lightbulb } from "@/icons/app"
 import ExternalLink from "@/icons/app/ExternalLink"
 import { useAiChat } from "@/experimental/AiChat/providers/AiChatStateProvider"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ComponentProps, useEffect } from "react"
+import { ComponentProps, useEffect, useRef } from "react"
 import { expect, within } from "storybook/test"
 import { Page } from "../Page"
 import * as PageStories from "../Page/index.stories"
@@ -107,9 +107,13 @@ export const Default: Story = {
 const FullscreenOpener = () => {
   const { openFullscreen } = useAiChat()
 
+  const openedInFullscreen = useRef(false)
+
   useEffect(() => {
+    if (openedInFullscreen.current) return
     // Open chat in fullscreen mode on mount
     openFullscreen()
+    openedInFullscreen.current = true
   }, [openFullscreen])
 
   return null

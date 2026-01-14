@@ -2,9 +2,11 @@ import { AnimatePresence, motion } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import { useMemo } from "react"
+import { useAiChat } from "../providers/AiChatStateProvider"
 import OneIcon from "../OneIcon"
 
 export type WelcomeScreenSuggestion = {
@@ -34,20 +36,31 @@ export const WelcomeScreen = ({
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
   const { sendMessage } = useCopilotChatInternal()
+  const { visualizationMode } = useAiChat()
 
   const pickedSuggestions = useMemo(
     () => pickRandomSuggestions(suggestions),
     [suggestions]
   )
 
+  const isFullscreen = visualizationMode === "fullscreen"
+
   return (
     <AnimatePresence mode="popLayout">
       <motion.div
         key="welcome"
-        className="flex w-full flex-1 flex-col justify-end gap-4"
+        className={cn(
+          "flex w-full flex-1 flex-col justify-end gap-4",
+          isFullscreen && "justify-center items-center"
+        )}
         initial={{ opacity: 1 }}
       >
-        <div className="px-2">
+        <div
+          className={cn(
+            "px-2",
+            isFullscreen && "w-full max-w-[540px] flex flex-col"
+          )}
+        >
           <motion.div
             className="flex w-fit justify-center"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
@@ -98,7 +111,12 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="-ml-2 flex flex-col items-start gap-[6px]">
+        <div
+          className={cn(
+            "-ml-2 flex flex-col gap-[6px]",
+            isFullscreen ? "items-center w-full max-w-[540px]" : "items-start"
+          )}
+        >
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               className="w-full"

@@ -125,7 +125,20 @@ const SendMessageFunctionInjector = () => {
 }
 
 const AiChatCmp = () => {
-  const { enabled, open, setOpen, visualizationMode } = useAiChat()
+  const { enabled, open, setOpen, visualizationMode, setVisualizationMode } =
+    useAiChat()
+  const { messages } = useCopilotChatInternal()
+
+  // Switch to sidebar mode after first message is sent in fullscreen mode
+  useEffect(() => {
+    if (
+      visualizationMode === "fullscreen" &&
+      messages.length > 0 &&
+      messages.some((msg) => msg.role === "user")
+    ) {
+      setVisualizationMode("sidepanel")
+    }
+  }, [messages, visualizationMode, setVisualizationMode])
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -203,10 +216,18 @@ const AiChatCmp = () => {
     ({ ...props }: InputProps) => (
       <div
         className={cn(
-          visualizationMode === "fullscreen" ? "w-full px-4" : "m-3 mt-2"
+          visualizationMode === "fullscreen"
+            ? "w-full flex justify-center px-4"
+            : "m-3 mt-2"
         )}
       >
-        <ChatTextarea {...props} />
+        <div
+          className={cn(
+            visualizationMode === "fullscreen" && "w-full max-w-[540px]"
+          )}
+        >
+          <ChatTextarea {...props} />
+        </div>
       </div>
     ),
     [visualizationMode]
