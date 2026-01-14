@@ -683,6 +683,72 @@ export const MultiplePaginated: Story = {
 }
 
 /**
+ * Multiple selection with paginated data (2,847 employees).
+ * Use `defaultItem` to provide labels for pre-selected values not in the first page.
+ * Try the "Select All" to select all employees - the checkbox will show indeterminate state
+ * when some but not all are selected.
+ */
+export const MultiplePaginatedAsList: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["3", "42", "500", "1200"],
+    showSearchBox: true,
+    asList: true,
+    // Provide defaultItem for values not in the first page
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
+    clearable: true,
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+  render: (args) => {
+    return (
+      <div className="w-[400px] h-[500px]">
+        <F0Select {...(args as any)} />
+      </div>
+    )
+  },
+}
+
+export const AsList: Story = {
+  args: {
+    label: "Select a theme",
+    value: "dark",
+    asList: true,
+    status: { type: "info", message: "Info message" },
+  },
+  render: (args) => {
+    return (
+      <div className="w-[300px] h-max">
+        <F0Select {...(args as any)} />
+      </div>
+    )
+  },
+}
+
+/**
  * Multiple selection with manual selection only (no "Select All" button).
  * The `disableSelectAll` prop removes the "Select All" functionality,
  * forcing users to select items one by one. The `allSelected` state will
