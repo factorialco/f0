@@ -216,9 +216,8 @@ const AiChatCmp = () => {
     ({ ...props }: InputProps) => (
       <div
         className={cn(
-          visualizationMode === "fullscreen"
-            ? "w-full flex justify-center px-4"
-            : "m-3 mt-2"
+          visualizationMode === "fullscreen" &&
+            "w-full flex justify-center px-3"
         )}
       >
         <div

@@ -57,8 +57,7 @@ export const WelcomeScreen = ({
       >
         <div
           className={cn(
-            "px-2",
-            isFullscreen && "w-full max-w-[540px] flex flex-col"
+            isFullscreen ? "w-full max-w-[540px] flex flex-col" : "px-2"
           )}
         >
           <motion.div
@@ -75,7 +74,10 @@ export const WelcomeScreen = ({
           </motion.div>
           {greeting && (
             <motion.p
-              className="text-lg font-semibold text-f1-foreground-secondary"
+              className={cn(
+                "text-lg font-semibold gradient-text",
+                isFullscreen && "text-2xl"
+              )}
               initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
               transition={{
@@ -93,7 +95,10 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className="text-lg font-semibold text-f1-foreground"
+              className={cn(
+                "text-lg font-semibold text-f1-foreground",
+                isFullscreen && "text-2xl"
+              )}
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
