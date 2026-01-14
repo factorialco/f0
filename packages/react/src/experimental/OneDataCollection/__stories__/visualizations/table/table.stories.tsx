@@ -125,6 +125,7 @@ export const TableColumnHidden: Story = {
     })
     return (
       <ExampleComponent
+        frozenColumns={2}
         tableAllowColumnHiding
         visualizations={[mockVisualizations.table]}
         id="table-column-hidden/v1"
