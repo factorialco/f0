@@ -22758,15 +22758,15 @@ const Eq = {
     })
   });
 }, Oq = ({ submitLabel: t, inProgress: e, onSend: n, onStop: i }) => {
-  const [r, s] = Z(""), o = Se(null), a = Se(null), l = Ge(), { placeholders: c } = Ai(), d = r.trim().length > 0, u = (m) => {
-    m.preventDefault(), e ? i?.() : d && (n(r.trim()), s("")), a.current?.focus();
-  }, h = (m) => {
-    m.key === "Enter" && !m.shiftKey && (m.preventDefault(), e || o.current?.requestSubmit());
-  }, p = c.length > 1;
+  const [r, s] = Z(""), o = Se(null), a = Se(null), l = Ge(), { placeholders: c, visualizationMode: d } = Ai(), u = d === "fullscreen", h = r.trim().length > 0, p = (v) => {
+    v.preventDefault(), e ? i?.() : h && (n(r.trim()), s("")), a.current?.focus();
+  }, m = (v) => {
+    v.key === "Enter" && !v.shiftKey && (v.preventDefault(), e || o.current?.requestSubmit());
+  }, g = c.length > 1;
   return x(ye.form, {
     "aria-busy": e,
     ref: o,
-    className: F("relative isolate m-3 mt-2 flex flex-row items-end gap-2 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text sm:flex-col sm:items-stretch sm:gap-3", "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']", "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]", "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100", "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']", "py-1 pl-3 pr-1 sm:p-0"),
+    className: F("relative isolate mt-2 flex flex-row items-end gap-2 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text sm:flex-col sm:items-stretch sm:gap-3", "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']", "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]", "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100", "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']", "py-1 pl-3 pr-1 sm:p-0", !u && "m-3"),
     animate: {
       "--gradient-angle": ["0deg", "360deg"]
     },
@@ -22781,7 +22781,7 @@ const Eq = {
     onClick: () => {
       a.current?.focus();
     },
-    onSubmit: u,
+    onSubmit: p,
     children: [x("div", {
       className: "grid min-h-[40px] flex-1 grid-cols-1 grid-rows-1",
       children: [f("div", {
@@ -22795,13 +22795,13 @@ const Eq = {
         rows: 1,
         ref: a,
         value: r,
-        onChange: (m) => {
-          s(m.target.value);
+        onChange: (v) => {
+          s(v.target.value);
         },
-        onKeyDown: h,
+        onKeyDown: m,
         placeholder: l.ai.inputPlaceholder,
-        className: F("col-start-1 row-start-1", "max-h-[120px] min-h-[40px] resize-none px-3 py-0 outline-none transition-all sm:h-auto sm:max-h-[240px]", "whitespace-pre-wrap break-words", "text-f1-foreground placeholder:text-f1-foreground-secondary", "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", "m-0 px-0 sm:mt-3 sm:px-3", "text-[16px] leading-[40px] sm:text-base", r || !p ? "caret-f1-foreground" : "caret-transparent", p ? "placeholder:text-transparent" : "placeholder:text-f1-foreground-secondary")
-      }), p && f(Nq, {
+        className: F("col-start-1 row-start-1", "max-h-[120px] min-h-[40px] resize-none px-3 py-0 outline-none transition-all sm:h-auto sm:max-h-[240px]", "whitespace-pre-wrap break-words", "text-f1-foreground placeholder:text-f1-foreground-secondary", "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", "m-0 px-0 sm:mt-3 sm:px-3", "text-[16px] leading-[40px] sm:text-base", r || !g ? "caret-f1-foreground" : "caret-transparent", g ? "placeholder:text-transparent" : "placeholder:text-f1-foreground-secondary")
+      }), g && f(Nq, {
         placeholders: c,
         defaultPlaceholder: l.ai.inputPlaceholder,
         inputValue: r,
@@ -22817,8 +22817,8 @@ const Eq = {
         hideLabel: !0
       }) : f(Gt, {
         type: "submit",
-        disabled: !d,
-        variant: d ? "default" : "neutral",
+        disabled: !h,
+        variant: h ? "default" : "neutral",
         label: t || l.ai.sendMessage,
         icon: t ? void 0 : Fm,
         hideLabel: !t
@@ -23017,7 +23017,7 @@ const Vq = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
         opacity: 1
       },
       children: [x("div", {
-        className: F("px-2", o && "w-full max-w-[540px] flex flex-col"),
+        className: F(o ? "w-full max-w-[540px] flex flex-col" : "px-2"),
         children: [f(ye.div, {
           className: "flex w-fit justify-center",
           initial: {
@@ -23052,7 +23052,7 @@ const Vq = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
             className: "my-4"
           })
         }), t && f(ye.p, {
-          className: "text-lg font-semibold text-f1-foreground-secondary",
+          className: F("text-lg font-semibold gradient-text", o && "text-2xl"),
           initial: {
             opacity: 0,
             filter: "blur(2px)",
@@ -23082,7 +23082,7 @@ const Vq = ({ greeting: t, initialMessages: e = [], suggestions: n = [] }) => {
           },
           children: t
         }), e.map((a) => f(ye.p, {
-          className: "text-lg font-semibold text-f1-foreground",
+          className: F("text-lg font-semibold text-f1-foreground", o && "text-2xl"),
           initial: {
             opacity: 0,
             filter: "blur(2px)",
@@ -23505,7 +23505,7 @@ const Kq = (t) => KR[t] || Im, Zq = ({ iconName: t }) => t ? f("div", {
     })
   });
   const o = Qe(({ ...a }) => f("div", {
-    className: F(i === "fullscreen" ? "w-full flex justify-center px-4" : "m-3 mt-2"),
+    className: F(i === "fullscreen" && "w-full flex justify-center px-3"),
     children: f("div", {
       className: F(i === "fullscreen" && "w-full max-w-[540px]"),
       children: f(Oq, {
