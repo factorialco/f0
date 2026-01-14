@@ -153,7 +153,8 @@ export const ChatTextarea = ({
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const translation = useI18n()
-  const { placeholders } = useAiChat()
+  const { placeholders, visualizationMode } = useAiChat()
+  const isFullscreen = visualizationMode === "fullscreen"
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -185,12 +186,13 @@ export const ChatTextarea = ({
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate m-3 mt-2 flex flex-row items-end gap-2 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text sm:flex-col sm:items-stretch sm:gap-3",
+        "relative isolate mt-2 flex flex-row items-end gap-2 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text sm:flex-col sm:items-stretch sm:gap-3",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "after:transition-all after:delay-200 after:duration-300 has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
         "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']",
-        "py-1 pl-3 pr-1 sm:p-0"
+        "py-1 pl-3 pr-1 sm:p-0",
+        !isFullscreen && "m-3"
       )}
       animate={{
         "--gradient-angle": ["0deg", "360deg"],

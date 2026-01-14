@@ -41,6 +41,9 @@ const Messages = ({
 }: MessagesProps) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
+
+  const noMessages = messages.length === 0
+
   const { threadId } = useCopilotContext()
   const {
     close: closeFeedbackModal,
@@ -81,22 +84,27 @@ const Messages = ({
     return convertMessagesToTurns(messages)
   }, [messages])
 
+  const { visualizationMode } = useAiChat()
+  const isFullscreen = visualizationMode === "fullscreen"
+
   return (
     <>
       <motion.div
         layout
         className={cn(
-          "scrollbar-macos relative isolate flex flex-1 flex-col px-4 pt-3",
-          "overflow-y-scroll"
+          "scrollbar-macos relative isolate flex flex-col overflow-y-scroll",
+          isFullscreen ? "items-center px-4 pt-3" : "px-4 pt-3",
+          (!isFullscreen || !noMessages) && "flex-1"
         )}
         ref={messagesContainerRef}
       >
         <motion.div
           layout="position"
           ref={turnsContainerRef}
-          className={
-            showWelcomeBlock ? "flex flex-1 pb-3" : "flex flex-col gap-8"
-          }
+          className={cn(
+            showWelcomeBlock ? "flex flex-1 pb-3" : "flex flex-col gap-8",
+            isFullscreen && "w-full max-w-[540px]"
+          )}
         >
           {showWelcomeBlock && (
             <WelcomeScreen

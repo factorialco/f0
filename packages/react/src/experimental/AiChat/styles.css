@@ -20,3 +20,15 @@
   -webkit-text-fill-color: transparent;
   animation: shine 3s linear infinite;
 }
+
+.gradient-text {
+  background: linear-gradient(
+    270deg,
+    #e55619 80.28%,
+    #e51943 90.14%,
+    #a1ade5 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
