@@ -4,12 +4,18 @@ import {
   useCopilotAction,
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
-import { CopilotChat, CopilotSidebar, InputProps } from "@copilotkit/react-ui"
+import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 
 import { experimentalComponent } from "@/lib/experimental"
 
 import { type AIMessage } from "@copilotkit/shared"
-import { useCallback, useEffect } from "react"
+import {
+  useCallback,
+  useEffect,
+  createContext,
+  useContext,
+  useState,
+} from "react"
 import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
@@ -24,6 +30,15 @@ import {
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
+
+// Context to share input state between Messages and Input components
+export const FullscreenChatContext = createContext<{
+  inProgress: boolean
+  setInProgress: (value: boolean) => void
+}>({
+  inProgress: false,
+  setInProgress: () => {},
+})
 
 export type AiChatProviderProps = {
   enabled?: boolean
@@ -230,6 +245,41 @@ const AiChatCmp = () => {
 
 const AiFullscreenChatCmp = () => {
   const { enabled } = useAiChat()
+  const [inProgress, setInProgress] = useState(false)
+
+  // Inject global styles to prevent body scroll
+  useEffect(() => {
+    const style = document.createElement("style")
+    style.innerHTML = `
+      html, body {
+        overflow: hidden !important;
+        height: 100% !important;
+        width: 100% !important;
+        margin: 0;
+        padding: 0;
+        -webkit-overflow-scrolling: touch;
+      }
+      #root {
+        height: 100% !important;
+        width: 100% !important;
+        overflow: hidden !important;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Hide scrollbars */
+      ::-webkit-scrollbar {
+        display: none !important;
+      }
+      * {
+        -ms-overflow-style: none !important;
+        scrollbar-width: none !important;
+      }
+    `
+    document.head.appendChild(style)
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
 
   useCopilotAction({
     name: "orchestratorThinking",
@@ -261,21 +311,78 @@ const AiFullscreenChatCmp = () => {
   }
 
   return (
-    <div className="bg-white flex h-full w-full flex-col overflow-hidden">
-      <div className="relative flex flex-1 flex-col overflow-hidden">
-        {/* Use grid to reorder layout */}
-        <div className="grid h-full w-full grid-rows-[1fr_auto]">
-          {/* Messages take remaining height */}
-          <div className="overflow-y-auto">
-            <CopilotChat
-              Messages={MessagesContainerFullscreen}
-              Input={ChatTextarea}
-              UserMessage={UserMessage}
-              AssistantMessage={AssistantMessage}
-            />
-          </div>
+    <FullscreenChatContext.Provider value={{ inProgress, setInProgress }}>
+      <div
+        className="bg-white flex w-full flex-col overflow-hidden"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          overscrollBehavior: "none",
+        }}
+      >
+        <MessagesContainerFullscreen />
+
+        {/* Input section rendered outside the messages container to stay at the bottom */}
+        <div
+          className="flex-shrink-0 w-full bg-white border-t border-f1-border"
+          style={{
+            flexShrink: 0,
+            flexGrow: 0,
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            zIndex: 10,
+            paddingBottom: "env(safe-area-inset-bottom, 12px)",
+            touchAction: "none",
+          }}
+        >
+          <FullscreenChatInput />
         </div>
       </div>
+    </FullscreenChatContext.Provider>
+  )
+}
+
+const FullscreenChatInput = () => {
+  const { sendMessage } = useAiChat()
+  const { interrupt } = useCopilotChatInternal()
+  const { inProgress } = useContext(FullscreenChatContext)
+
+  const handleSend = async (text: string) => {
+    sendMessage(text)
+    return {
+      id: "",
+      role: "user" as const,
+      content: text,
+    }
+  }
+
+  const handleStop = () => {
+    if (interrupt && typeof interrupt !== "string") {
+      const stopButton = document.querySelector(
+        '[aria-label*="Stop"]'
+      ) as HTMLButtonElement
+      if (stopButton) {
+        stopButton.click()
+      }
+    }
+  }
+
+  return (
+    <div className="bg-white w-full">
+      <ChatTextarea
+        inProgress={inProgress}
+        onSend={handleSend}
+        onStop={handleStop}
+      />
     </div>
   )
 }
