@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.324.0](https://github.com/factorialco/f0/compare/f0-react-v1.323.0...f0-react-v1.324.0) (2026-01-15)
+
+
+### Features
+
+* **F0Select:** implement 'asList' prop  ([#3231](https://github.com/factorialco/f0/issues/3231)) ([aa3043e](https://github.com/factorialco/f0/commit/aa3043e5deeb4ab20084d29806d89a81c90c918e))
+
 ## [1.323.0](https://github.com/factorialco/f0/compare/f0-react-v1.322.1...f0-react-v1.323.0) (2026-01-15)
 
 
