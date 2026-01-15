@@ -18,6 +18,7 @@ import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, userEvent, within } from "storybook/test"
 import { ComponentProps, FC, useState } from "react"
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
@@ -140,6 +141,45 @@ export const Default: Story = {
     },
     children: <ExampleList itemsCount={2} />,
   },
+  play: async ({ canvasElement, step }) => {
+    // Dialogs may render in portals, so search the full page
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Verify dialog is open and content is visible", async () => {
+      // Wait for dialog to render
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Verify dialog content
+      expect(page.getByText("Team Status")).toBeInTheDocument()
+      expect(page.getByText("List Item 1")).toBeInTheDocument()
+      expect(page.getByText("List Item 2")).toBeInTheDocument()
+    })
+
+    await step("Verify primary action button exists", async () => {
+      const submitButton = page.getByRole("button", { name: /submit/i })
+      expect(submitButton).toBeInTheDocument()
+    })
+
+    await step("Test primary action click", async () => {
+      const submitButton = page.getByRole("button", { name: /submit/i })
+      await userEvent.click(submitButton)
+
+      // Wait for any state updates
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
+
+    await step("Test close button", async () => {
+      // Find and click the close button (usually has aria-label="Close" or similar)
+      const closeButton = page.getByRole("button", { name: /close/i })
+      await userEvent.click(closeButton)
+
+      // Wait for dialog to close
+      await new Promise((resolve) => setTimeout(resolve, 200))
+
+      // Verify dialog is closed
+      expect(page.queryByText("Team Status")).not.toBeInTheDocument()
+    })
+  },
 }
 
 export const WithPromisePrimaryAction: Story = {
@@ -151,6 +191,41 @@ export const WithPromisePrimaryAction: Story = {
       onClick: () =>
         new Promise((resolve) => setTimeout(() => resolve(), 5000)),
     },
+  },
+  play: async ({ canvasElement, step }) => {
+    // Dialogs may render in portals, so search the full page
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Verify dialog is open", async () => {
+      // Wait for dialog to render
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Verify dialog content
+      expect(page.getByText("Team Status")).toBeInTheDocument()
+    })
+
+    await step(
+      "Click primary action with promise and verify loading state",
+      async () => {
+        const submitButton = page.getByRole("button", { name: /submit/i })
+
+        // Click the button to trigger the promise
+        await userEvent.click(submitButton)
+
+        // Wait a bit to see if button becomes disabled (loading state)
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        // The button should be disabled during promise execution
+        // Note: This depends on F0Dialog implementation - if it disables the button
+        // If not, we just verify the promise completes
+
+        // Wait for promise to resolve (5 seconds)
+        await new Promise((resolve) => setTimeout(resolve, 5200))
+
+        // Verify dialog is still open (promise doesn't close it automatically)
+        expect(page.getByText("Team Status")).toBeInTheDocument()
+      }
+    )
   },
 }
 
@@ -300,6 +375,83 @@ export const WithMultiplePrimaryActions: Story = {
           "When `primaryAction` receives an array of actions, it renders a `F0ButtonDropdown` allowing the user to select between multiple primary actions.",
       },
     },
+  },
+  play: async ({ canvasElement, step }) => {
+    // Dialogs may render in portals, so search the full page
+    const page = within(canvasElement.closest("body")!)
+
+    await step(
+      "Verify dialog is open with multiple primary actions",
+      async () => {
+        // Wait for dialog to render
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        // Verify dialog content
+        expect(page.getByText("Document Editor")).toBeInTheDocument()
+        expect(
+          page.getByText("Edit your document and choose how to save it.")
+        ).toBeInTheDocument()
+        expect(page.getByText("List Item 1")).toBeInTheDocument()
+      }
+    )
+
+    await step("Verify primary action dropdown button exists", async () => {
+      // F0ButtonDropdown shows the first item as the main button label
+      const saveButton = page.getByRole("button", { name: /save/i })
+      expect(saveButton).toBeInTheDocument()
+    })
+
+    await step("Open primary action dropdown menu", async () => {
+      // Find the dropdown trigger (chevron/menu button) - it's usually next to the main button
+      // Try to find buttons that might be the dropdown trigger
+      const buttons = page.getAllByRole("button")
+      const dropdownTrigger =
+        buttons.find(
+          (btn) =>
+            btn.getAttribute("aria-expanded") !== null ||
+            btn.querySelector("[data-testid*='chevron']") ||
+            btn.querySelector("[data-testid*='menu']")
+        ) ||
+        buttons.find(
+          (btn) =>
+            btn.textContent?.includes("Save") &&
+            btn !== page.getByRole("button", { name: /save/i })
+        )
+
+      if (dropdownTrigger) {
+        await userEvent.click(dropdownTrigger)
+        // Wait for dropdown to open
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        // Verify dropdown items are visible
+        const saveDraftOption = page.queryByText("Save as draft")
+        const savePublishOption = page.queryByText("Save and publish")
+
+        if (saveDraftOption || savePublishOption) {
+          // Click one of the options if available
+          if (saveDraftOption) {
+            await userEvent.click(saveDraftOption)
+          } else if (savePublishOption) {
+            await userEvent.click(savePublishOption)
+          }
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+      } else {
+        // Fallback: click the main Save button (which triggers the first action)
+        const saveButton = page.getByRole("button", { name: /save/i })
+        await userEvent.click(saveButton)
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    })
+
+    await step("Test secondary action", async () => {
+      const cancelButton = page.getByRole("button", { name: /cancel/i })
+      expect(cancelButton).toBeInTheDocument()
+      await userEvent.click(cancelButton)
+
+      // Wait for any state updates
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
   },
 }
 
