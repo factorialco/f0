@@ -155,6 +155,7 @@ const meta: Meta<typeof F0TableOfContent> = {
         {...args}
         items={mockTOCData(setActiveItem)}
         activeItem={activeItem}
+        className="h-full"
         onReorder={(order) => {
           console.log("Items reordered:", order)
         }}
