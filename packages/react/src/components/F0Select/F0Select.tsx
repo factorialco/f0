@@ -705,9 +705,12 @@ const F0SelectComponent = forwardRef(function Select<
         )}
         {/* Select Container */}
         <div
-          className={asListContainerVariants({
-            status: error ? "error" : status?.type ? status?.type : "default",
-          })}
+          className={cn(
+            "flex-1 min-h-0",
+            asListContainerVariants({
+              status: error ? "error" : status?.type ? status?.type : "default",
+            })
+          )}
         >
           <SelectPrimitive {...selectPrimitiveProps}>
             {selectContent}
