@@ -18,7 +18,7 @@ import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
 import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
 import { DataCollectionStorageHandler } from "../datacollection/types"
-import { DialogsLayoutProvider } from "../dialogsLayout/DialogsLayoutProvider"
+import { DialogsLayoutProvider } from "../dialogs/DialogsLayoutProvider"
 
 interface LayoutProps {
   fullScreen?: boolean

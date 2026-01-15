@@ -3,7 +3,7 @@ import "@testing-library/jest-dom/vitest"
 import { act, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Dialogs } from "../Dialogs"
-import type { DialogDefinitionInternal } from "../../internal-types"
+import type { DialogDefinitionInternal } from "../../../../../hooks/dialog/internal-types"
 import React from "react"
 
 // Mock nanoid

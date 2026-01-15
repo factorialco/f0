@@ -1,9 +1,9 @@
-import { zeroRender, zeroRenderHook } from "@/testing/test-utils"
+import { zeroRenderHook } from "@/testing/test-utils"
 import { act, waitFor } from "@testing-library/react"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { useDialog } from "../useDialog"
-import type { DialogDefinition } from "../types"
+import type { DialogDefinition } from "../../../lib/providers/dialogs/types"
 
 // Mock nanoid
 let nanoidCounter = 0
@@ -13,10 +13,12 @@ vi.mock("nanoid", () => ({
 }))
 
 // Mock useDialogsLayoutContext
-const mockSetDialogsLayoutChildren = vi.fn()
-vi.mock("@/lib/providers/dialogsLayout/DialogsLayoutProvider", () => ({
+const mockAddDialog = vi.fn()
+const mockRemoveDialog = vi.fn()
+vi.mock("@/lib/providers/dialogs/DialogsLayoutProvider", () => ({
   useDialogsLayoutContext: () => ({
-    setDialogsLayoutChildren: mockSetDialogsLayoutChildren,
+    addDialog: mockAddDialog,
+    removeDialog: mockRemoveDialog,
   }),
 }))
 
@@ -34,18 +36,12 @@ vi.mock("@/lib/providers/i18n", async (importOriginal) => {
   }
 })
 
-// Mock Dialogs component
-const MockDialogs = vi.hoisted(() =>
-  vi.fn(() => <div data-testid="dialogs-component" />)
-)
-vi.mock("../components/Dialogs", () => ({
-  Dialogs: MockDialogs,
-}))
-
 describe("useDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     nanoidCounter = 0
+    mockAddDialog.mockClear()
+    mockRemoveDialog.mockClear()
   })
 
   describe("hook initialization", () => {
@@ -62,26 +58,11 @@ describe("useDialog", () => {
       expect(typeof result.current.closeDialog).toBe("function")
     })
 
-    it("should call setDialogsLayoutChildren with Dialogs component on mount", async () => {
+    it("should not call addDialog on mount", () => {
       zeroRenderHook(() => useDialog())
 
-      await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
-      })
-
-      // Verify that Dialogs was called with empty array
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-
-      // Render the element to verify it's the Dialogs component
-      zeroRender(dialogsElement as React.ReactElement)
-      expect(MockDialogs).toHaveBeenCalledWith(
-        { dialogs: [] },
-        expect.anything()
-      )
+      // The hook should not add any dialogs on mount
+      expect(mockAddDialog).not.toHaveBeenCalled()
     })
   })
 
@@ -103,34 +84,18 @@ describe("useDialog", () => {
       const promise = result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      // Render the element to trigger MockDialogs
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              title: "Test Dialog",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
+      // Get the dialog that was added
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        title: "Test Dialog",
+      })
 
       // Resolve the promise by clicking the action
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, true)
+        addedDialog.onClickAction(addedDialog.actions.primary, true)
       })
 
       const value = await promise
@@ -154,27 +119,14 @@ describe("useDialog", () => {
       result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
       expect(mockNanoid).toHaveBeenCalled()
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              id: "mock-id-1",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        id: "mock-id-1",
+      })
     })
 
     it("should use provided ID when given", async () => {
@@ -195,26 +147,13 @@ describe("useDialog", () => {
       result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              id: "custom-id",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        id: "custom-id",
+      })
     })
 
     it("should return promise that resolves with action value", async () => {
@@ -234,22 +173,13 @@ describe("useDialog", () => {
       const promise = result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, "test-value")
+        addedDialog.onClickAction(addedDialog.actions.primary, "test-value")
       })
 
       const value = await promise
@@ -274,39 +204,19 @@ describe("useDialog", () => {
       const promise = result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall1 =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement1 = lastCall1[0]
-      zeroRender(dialogsElement1 as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, true)
+        addedDialog.onClickAction(addedDialog.actions.primary, true)
       })
 
       await promise
 
       await waitFor(() => {
-        const lastCall2 =
-          mockSetDialogsLayoutChildren.mock.calls[
-            mockSetDialogsLayoutChildren.mock.calls.length - 1
-          ]
-        const dialogsElement2 = lastCall2[0]
-        zeroRender(dialogsElement2 as React.ReactElement)
-        expect(MockDialogs).toHaveBeenCalledWith(
-          expect.objectContaining({
-            dialogs: [],
-          }),
-          expect.anything()
-        )
+        expect(mockRemoveDialog).toHaveBeenCalledWith(addedDialog.id)
       })
     })
 
@@ -328,43 +238,20 @@ describe("useDialog", () => {
       const promise = result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall1 =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement1 = lastCall1[0]
-      zeroRender(dialogsElement1 as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, true)
+        addedDialog.onClickAction(addedDialog.actions.primary, true)
       })
 
       await promise
 
+      // Dialog should not be removed when keepOpen is true
       await waitFor(() => {
-        const lastCall2 =
-          mockSetDialogsLayoutChildren.mock.calls[
-            mockSetDialogsLayoutChildren.mock.calls.length - 1
-          ]
-        const dialogsElement2 = lastCall2[0]
-        zeroRender(dialogsElement2 as React.ReactElement)
-        expect(MockDialogs).toHaveBeenCalledWith(
-          expect.objectContaining({
-            dialogs: expect.arrayContaining([
-              expect.objectContaining({
-                id: dialog.id,
-              }),
-            ]),
-          }),
-          expect.anything()
-        )
+        expect(mockRemoveDialog).not.toHaveBeenCalled()
       })
     })
 
@@ -397,37 +284,18 @@ describe("useDialog", () => {
       const promise2 = result.current.openDialog(definition2)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalledTimes(2)
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
+      const dialog1 = mockAddDialog.mock.calls[0][0]
+      const dialog2 = mockAddDialog.mock.calls[1][0]
 
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              title: "Dialog 1",
-            }),
-            expect.objectContaining({
-              title: "Dialog 2",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
-
-      const dialogs = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs
+      expect(dialog1).toMatchObject({ title: "Dialog 1" })
+      expect(dialog2).toMatchObject({ title: "Dialog 2" })
 
       act(() => {
-        dialogs[0].onClickAction(dialogs[0].actions.primary, "value1")
-        dialogs[1].onClickAction(dialogs[1].actions.primary, "value2")
+        dialog1.onClickAction(dialog1.actions.primary, "value1")
+        dialog2.onClickAction(dialog2.actions.primary, "value2")
       })
 
       const value1 = await promise1
@@ -454,22 +322,13 @@ describe("useDialog", () => {
       const promise = result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onCloseDialog()
+        addedDialog.onCloseDialog()
       })
 
       const value = await promise
@@ -505,33 +364,18 @@ describe("useDialog", () => {
       result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              actions: expect.objectContaining({
-                primary: expect.arrayContaining([
-                  expect.objectContaining({ label: "Action 1" }),
-                  expect.objectContaining({ label: "Action 2" }),
-                ]),
-                secondary: expect.arrayContaining([
-                  expect.objectContaining({ label: "Cancel" }),
-                ]),
-              }),
-            }),
-          ]),
-        }),
-        expect.anything()
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog.actions.primary).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: "Action 1" }),
+          expect.objectContaining({ label: "Action 2" }),
+        ])
+      )
+      expect(addedDialog.actions.secondary).toEqual(
+        expect.arrayContaining([expect.objectContaining({ label: "Cancel" })])
       )
     })
   })
@@ -543,33 +387,16 @@ describe("useDialog", () => {
       const promise = result.current.alert("Alert Title", "Alert Message")
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              title: "Alert Title",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        title: "Alert Title",
+      })
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, true)
+        addedDialog.onClickAction(addedDialog.actions.primary, true)
       })
 
       const value = await promise
@@ -582,25 +409,11 @@ describe("useDialog", () => {
       result.current.alert("Title", "Message")
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      await waitFor(() => {
-        expect(MockDialogs).toHaveBeenCalled()
-      })
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
-
-      expect(dialog.actions.primary.label).toBe("OK")
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog.actions.primary.label).toBe("OK")
     })
 
     it("should use custom confirm options when provided", async () => {
@@ -614,25 +427,16 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
-
-      expect(dialog.actions.primary.label).toBe("Custom OK")
-      expect(dialog.actions.primary.value).toBe("custom-value")
+      expect(addedDialog.actions.primary.label).toBe("Custom OK")
+      expect(addedDialog.actions.primary.value).toBe("custom-value")
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, "custom-value")
+        addedDialog.onClickAction(addedDialog.actions.primary, "custom-value")
       })
 
       const value = await promise
@@ -647,26 +451,13 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              id: "custom-alert-id",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        id: "custom-alert-id",
+      })
     })
 
     it("should return promise with confirm value", async () => {
@@ -679,22 +470,13 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, "alert-result")
+        addedDialog.onClickAction(addedDialog.actions.primary, "alert-result")
       })
 
       const value = await promise
@@ -709,33 +491,16 @@ describe("useDialog", () => {
       const promise = result.current.confirm("Confirm Title", "Confirm Message")
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              title: "Confirm Title",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        title: "Confirm Title",
+      })
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, true)
+        addedDialog.onClickAction(addedDialog.actions.primary, true)
       })
 
       const value = await promise
@@ -748,22 +513,13 @@ describe("useDialog", () => {
       result.current.confirm("Title", "Message")
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
-
-      expect(dialog.actions.primary.label).toBe("OK")
-      expect(dialog.actions.secondary?.label).toBe("Cancel")
+      expect(addedDialog.actions.primary.label).toBe("OK")
+      expect(addedDialog.actions.secondary?.label).toBe("Cancel")
     })
 
     it("should use custom confirm and cancel options when provided", async () => {
@@ -781,27 +537,18 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
-
-      expect(dialog.actions.primary.label).toBe("Yes")
-      expect(dialog.actions.primary.value).toBe("yes")
-      expect(dialog.actions.secondary?.label).toBe("No")
-      expect(dialog.actions.secondary?.value).toBe("no")
+      expect(addedDialog.actions.primary.label).toBe("Yes")
+      expect(addedDialog.actions.primary.value).toBe("yes")
+      expect(addedDialog.actions.secondary?.label).toBe("No")
+      expect(addedDialog.actions.secondary?.value).toBe("no")
 
       act(() => {
-        dialog.onClickAction(dialog.actions.secondary!, "no")
+        addedDialog.onClickAction(addedDialog.actions.secondary!, "no")
       })
 
       const value = await promise
@@ -816,26 +563,13 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: expect.arrayContaining([
-            expect.objectContaining({
-              id: "custom-confirm-id",
-            }),
-          ]),
-        }),
-        expect.anything()
-      )
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+      expect(addedDialog).toMatchObject({
+        id: "custom-confirm-id",
+      })
     })
 
     it("should return promise with selected value", async () => {
@@ -844,22 +578,13 @@ describe("useDialog", () => {
       const promise = result.current.confirm("Title", "Message")
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onClickAction(dialog.actions.secondary!, false)
+        addedDialog.onClickAction(addedDialog.actions.secondary!, false)
       })
 
       const value = await promise
@@ -886,7 +611,7 @@ describe("useDialog", () => {
       result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalled()
       })
 
       act(() => {
@@ -894,18 +619,7 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        const lastCall =
-          mockSetDialogsLayoutChildren.mock.calls[
-            mockSetDialogsLayoutChildren.mock.calls.length - 1
-          ]
-        const dialogsElement = lastCall[0]
-        zeroRender(dialogsElement as React.ReactElement)
-        expect(MockDialogs).toHaveBeenCalledWith(
-          expect.objectContaining({
-            dialogs: [],
-          }),
-          expect.anything()
-        )
+        expect(mockRemoveDialog).toHaveBeenCalledWith("dialog-to-close")
       })
     })
 
@@ -916,23 +630,8 @@ describe("useDialog", () => {
         result.current.closeDialog("non-existent-id")
       })
 
-      await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
-      })
-
-      const lastCall =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement = lastCall[0]
-      zeroRender(dialogsElement as React.ReactElement)
-
-      expect(MockDialogs).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dialogs: [],
-        }),
-        expect.anything()
-      )
+      // Should call removeDialog even if dialog doesn't exist
+      expect(mockRemoveDialog).toHaveBeenCalledWith("non-existent-id")
     })
 
     it("should only close the specified dialog when multiple dialogs exist", async () => {
@@ -966,7 +665,7 @@ describe("useDialog", () => {
       result.current.openDialog(definition2)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalled()
+        expect(mockAddDialog).toHaveBeenCalledTimes(2)
       })
 
       act(() => {
@@ -974,28 +673,16 @@ describe("useDialog", () => {
       })
 
       await waitFor(() => {
-        const lastCall =
-          mockSetDialogsLayoutChildren.mock.calls[
-            mockSetDialogsLayoutChildren.mock.calls.length - 1
-          ]
-        const dialogsElement = lastCall[0]
-        zeroRender(dialogsElement as React.ReactElement)
-        expect(MockDialogs).toHaveBeenCalledWith(
-          expect.objectContaining({
-            dialogs: expect.arrayContaining([
-              expect.objectContaining({
-                id: "dialog-2",
-              }),
-            ]),
-          }),
-          expect.anything()
-        )
+        expect(mockRemoveDialog).toHaveBeenCalledWith("dialog-1")
       })
+
+      // Should not remove dialog-2
+      expect(mockRemoveDialog).not.toHaveBeenCalledWith("dialog-2")
     })
   })
 
   describe("useEffect integration", () => {
-    it("should update dialogs layout children when dialogs change", async () => {
+    it("should add and remove dialogs correctly", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
       const definition: Omit<DialogDefinition, "id"> = {
@@ -1009,29 +696,23 @@ describe("useDialog", () => {
         },
       }
 
-      result.current.openDialog(definition)
+      const promise = result.current.openDialog(definition)
 
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalledTimes(2) // Initial + dialog added
+        expect(mockAddDialog).toHaveBeenCalledTimes(1)
       })
 
-      const lastCall1 =
-        mockSetDialogsLayoutChildren.mock.calls[
-          mockSetDialogsLayoutChildren.mock.calls.length - 1
-        ]
-      const dialogsElement1 = lastCall1[0]
-      zeroRender(dialogsElement1 as React.ReactElement)
-
-      const dialog = (
-        MockDialogs.mock.calls[MockDialogs.mock.calls.length - 1] as any
-      )[0].dialogs[0]
+      const addedDialog = mockAddDialog.mock.calls[0][0]
 
       act(() => {
-        dialog.onClickAction(dialog.actions.primary, true)
+        addedDialog.onClickAction(addedDialog.actions.primary, true)
       })
 
+      await promise
+
       await waitFor(() => {
-        expect(mockSetDialogsLayoutChildren).toHaveBeenCalledTimes(3) // + dialog removed
+        expect(mockRemoveDialog).toHaveBeenCalledTimes(1)
+        expect(mockRemoveDialog).toHaveBeenCalledWith(addedDialog.id)
       })
     })
   })

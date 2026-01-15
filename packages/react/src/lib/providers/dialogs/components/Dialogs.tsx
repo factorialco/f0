@@ -51,11 +51,13 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
           if (!action.nonBlocking) {
             updateDialogBlocks(dialog.id, 1)
           }
-          const value = await materializeActionValue(action)
-          dialog.onClickAction(action, value)
-
-          if (!action.nonBlocking) {
-            updateDialogBlocks(dialog.id, -1)
+          try {
+            const value = await materializeActionValue(action)
+            dialog.onClickAction(action, value)
+          } finally {
+            if (!action.nonBlocking) {
+              updateDialogBlocks(dialog.id, -1)
+            }
           }
           return Promise.resolve()
         },

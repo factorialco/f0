@@ -1,14 +1,12 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react"
+import { Dialogs } from "@/lib/providers/dialogs/components/Dialogs"
+import { DialogDefinitionInternal } from "@/lib/providers/dialogs/internal-types"
+import { DialogId } from "@/lib/providers/dialogs/types"
+import { createContext, useContext, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 
 type DialogsLayoutContextValue = {
-  setDialogsLayoutChildren: (children: React.ReactNode) => void
+  addDialog: (dialog: DialogDefinitionInternal) => void
+  removeDialog: (id: DialogId) => void
 }
 
 const DialogsLayoutContext = createContext<DialogsLayoutContextValue | null>(
@@ -26,26 +24,27 @@ type DialogsLayoutProviderProps = {
 export const DialogsLayoutProvider = ({
   children,
 }: DialogsLayoutProviderProps) => {
-  const [dialogsLayoutChildren, _setDialogsLayoutChildren] =
-    useState<React.ReactNode>(null)
+  const [dialogs, setDialogs] = useState<DialogDefinitionInternal[]>([])
 
-  const setDialogsLayoutChildren = useCallback(
-    (children: React.ReactNode) => {
-      _setDialogsLayoutChildren(children)
-    },
-    [_setDialogsLayoutChildren]
-  )
+  const addDialog = (dialog: DialogDefinitionInternal) => {
+    setDialogs((prev) => [...prev, dialog])
+  }
+
+  const removeDialog = (id: DialogId) => {
+    setDialogs((prev) => prev.filter((d) => d.id !== id))
+  }
 
   const contextValue = useMemo<DialogsLayoutContextValue>(
     () => ({
-      setDialogsLayoutChildren,
+      addDialog,
+      removeDialog,
     }),
-    [setDialogsLayoutChildren]
+    [dialogs, setDialogs]
   )
 
   return (
     <DialogsLayoutContext.Provider value={contextValue}>
-      {createPortal(dialogsLayoutChildren, document.body)}
+      {createPortal(<Dialogs dialogs={dialogs} />, document.body)}
       {children}
     </DialogsLayoutContext.Provider>
   )

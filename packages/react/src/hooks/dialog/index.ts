@@ -1,2 +1,2 @@
 export * from "./useDialog"
-export * from "./types"
+export * from "../../lib/providers/dialogs/types"
