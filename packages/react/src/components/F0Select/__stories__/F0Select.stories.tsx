@@ -737,7 +737,6 @@ export const AsList: Story = {
     label: "Select a theme",
     value: "dark",
     asList: true,
-    status: { type: "info", message: "Info message" },
   },
   render: (args) => {
     return (
