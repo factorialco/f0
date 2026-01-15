@@ -108,6 +108,7 @@ const NestedRowContent = <
       rowId: rowId,
       item: props.item,
       source: props.source,
+      onClearFetchedData: () => setOpen(false),
     })
 
   const shouldShowLoading = open && isLoading
