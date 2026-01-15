@@ -47,7 +47,7 @@ export const WelcomeScreen = ({
         className="flex w-full flex-1 flex-col justify-end gap-4"
         initial={{ opacity: 1 }}
       >
-        <div className="px-2">
+        <div>
           <motion.div
             className="flex w-fit justify-center"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
@@ -90,7 +90,7 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="-ml-[6px] flex flex-row gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 pb-1 sm:mr-0 sm:flex-col sm:items-start sm:gap-[6px] sm:px-0 sm:pb-0">
+        <div className="-mx-4 flex flex-row gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 pb-1 sm:mx-0 sm:flex-col sm:items-start sm:gap-2 sm:px-0 sm:pb-0">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               className="w-full"
