@@ -11,10 +11,8 @@ export type DialogPosition = (typeof dialogPositions)[number]
 export const dialogWidths = ["sm", "md", "lg"] as const
 export type DialogWidth = (typeof dialogWidths)[number]
 
-export type F0DialogActionValue = string | boolean | number | undefined | null
-
 export type F0DialogAction = {
-  value?: F0DialogActionValue
+  value?: string
   label: string
   icon?: IconType
   onClick: () => void | Promise<void>

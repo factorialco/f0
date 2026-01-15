@@ -7,7 +7,6 @@ export type DialogActionValuePrimitive =
   | string
   | boolean
   | number
-  | Symbol
   | undefined
   | null
 

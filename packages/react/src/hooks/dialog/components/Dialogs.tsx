@@ -4,6 +4,7 @@ import { toArray } from "@/lib/toArray"
 import { useMemo, useState } from "react"
 import { DialogDefinitionInternal } from "../internal-types"
 import { F0DialogInternal } from "@/components/F0Dialog/F0DialogInternal"
+import { nanoid } from "nanoid"
 
 type DialogsProps = {
   dialogs: DialogDefinitionInternal[]
@@ -33,33 +34,34 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
   }
 
   /**
-   * Convert the dialogs to F0Dialog props
-   */
-  const toF0Action = (
-    dialog: DialogDefinitionInternal,
-    action: DialogAction
-  ): F0DialogAction => {
-    return {
-      ...action,
-      onClick: async () => {
-        if (!action.nonBlocking) {
-          updateDialogBlocks(dialog.id, 1)
-        }
-        const value = await materializeActionValue(action)
-        dialog.onClickAction(action, value)
-
-        if (!action.nonBlocking) {
-          updateDialogBlocks(dialog.id, -1)
-        }
-        return Promise.resolve()
-      },
-    }
-  }
-
-  /**
    * Convert the dialogs to F0Dialog props without blocking the dialog
    */
   const f0Dialogs = useMemo(() => {
+    /**
+     * Convert the dialogs to F0Dialog props
+     */
+    const toF0Action = (
+      dialog: DialogDefinitionInternal,
+      action: DialogAction
+    ): F0DialogAction => {
+      return {
+        ...action,
+        value: nanoid(),
+        onClick: async () => {
+          if (!action.nonBlocking) {
+            updateDialogBlocks(dialog.id, 1)
+          }
+          const value = await materializeActionValue(action)
+          dialog.onClickAction(action, value)
+
+          if (!action.nonBlocking) {
+            updateDialogBlocks(dialog.id, -1)
+          }
+          return Promise.resolve()
+        },
+      }
+    }
+
     return dialogs.map((dialog) => ({
       ...dialog,
       actions: {
@@ -73,20 +75,20 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
     }))
   }, [dialogs])
 
-  /**
-   * Convert the dialog actions to F0Dialog actions with blocking (disabled) the dialog state
-   */
-  const toF0ActionWithBlocks = (
-    dialogId: DialogId,
-    action: DialogAction
-  ): F0DialogAction => {
-    return {
-      ...action,
-      disabled: action.disabled || isBlocked(dialogId),
-    }
-  }
-
   const f0DialogsWithBlocks = useMemo(() => {
+    /**
+     * Convert the dialog actions to F0Dialog actions with blocking (disabled) the dialog state
+     */
+    const toF0ActionWithBlocks = (
+      dialogId: DialogId,
+      action: F0DialogAction
+    ): F0DialogAction => {
+      return {
+        ...action,
+        disabled: action.disabled || isBlocked(dialogId),
+      }
+    }
+
     return f0Dialogs.map((dialog) => ({
       ...dialog,
       actions: {
