@@ -377,7 +377,7 @@ const FullscreenChatInput = () => {
   }
 
   return (
-    <div className="bg-white w-full px-4 py-2">
+    <div className="w-full px-4 py-2">
       <ChatTextarea
         inProgress={inProgress}
         onSend={handleSend}

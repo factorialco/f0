@@ -8,7 +8,8 @@ export const aiTranslations = {
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder: "Ask about time, people, or company info…",
+    inputPlaceholder:
+      "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",

@@ -118,23 +118,31 @@ const TypewriterPlaceholder = ({
         className={cn(
           "col-start-1 row-start-1",
           "pointer-events-none",
-          "mb-0 mt-3 max-h-[240px] px-3",
-          "whitespace-pre-wrap break-words text-f1-foreground-secondary"
+          "text-f1-foreground-secondary",
+          "text-[14px] leading-[20px] font-normal",
+          "sm:pt-3 sm:px-3"
         )}
       >
-        {displayedPlaceholder}
-        {isTyping && (
-          <motion.span
-            animate={{ opacity: [1, 0] }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            |
-          </motion.span>
-        )}
+        <div
+          className={cn(
+            "overflow-hidden text-ellipsis whitespace-nowrap",
+            "sm:whitespace-pre-wrap sm:break-words sm:overflow-visible"
+          )}
+        >
+          {displayedPlaceholder}
+          {isTyping && (
+            <motion.span
+              animate={{ opacity: [1, 0] }}
+              transition={{
+                duration: 0.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              |
+            </motion.span>
+          )}
+        </div>
       </motion.div>
     </AnimatePresence>
   )
@@ -190,7 +198,7 @@ export const ChatTextarea = ({
         "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3",
         "rounded-lg border border-solid border-f1-border",
         "transition-all hover:cursor-text",
-        "py-px pl-3 pr-2 sm:p-0",
+        "py-1 pl-3 pr-1 sm:p-0",
         "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
         "before:rounded-[inherit] before:bg-f1-background before:content-['']",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
@@ -238,6 +246,21 @@ export const ChatTextarea = ({
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
         </div>
+        {!inputValue && !multiplePlaceholders && (
+          <p
+            className={cn(
+              "col-start-1 row-start-1",
+              "pointer-events-none",
+              "text-f1-foreground-secondary",
+              "text-[14px] leading-[20px] font-normal",
+              "sm:pt-3 sm:px-3",
+              "overflow-hidden text-ellipsis whitespace-nowrap",
+              "sm:whitespace-normal sm:overflow-visible"
+            )}
+          >
+            {translation.ai.inputPlaceholder}
+          </p>
+        )}
         <textarea
           autoFocus={true}
           name="one-ai-input"
@@ -248,7 +271,6 @@ export const ChatTextarea = ({
             setInputValue(e.target.value)
           }}
           onKeyDown={handleKeyDown}
-          placeholder={translation.ai.inputPlaceholder}
           className={cn(
             "col-start-1 row-start-1",
             "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px] sm:h-auto",
@@ -260,10 +282,7 @@ export const ChatTextarea = ({
             "outline-none transition-all",
             inputValue || !multiplePlaceholders
               ? "caret-f1-foreground"
-              : "caret-transparent",
-            multiplePlaceholders
-              ? "placeholder:text-transparent"
-              : "placeholder:text-f1-foreground-secondary"
+              : "caret-transparent"
           )}
         />
         {multiplePlaceholders && (

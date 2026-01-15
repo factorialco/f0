@@ -86,7 +86,7 @@ const Messages = ({
       <div
         className={cn(
           "scrollbar-macos relative isolate flex flex-1 flex-col pl-[16px] pr-[8px] pt-[16px]",
-          "overflow-y-scroll"
+          "overflow-y-scroll overflow-x-hidden"
         )}
         ref={messagesContainerRef}
       >

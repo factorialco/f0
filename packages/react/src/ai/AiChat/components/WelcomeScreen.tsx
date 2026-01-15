@@ -47,7 +47,7 @@ export const WelcomeScreen = ({
         className="flex w-full flex-1 flex-col justify-end gap-4"
         initial={{ opacity: 1 }}
       >
-        <div>
+        <div className="pl-3">
           <motion.div
             className="flex w-fit justify-center"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
