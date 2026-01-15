@@ -80,6 +80,7 @@ const AiChatSandbox = ({
         credentials="include"
         agent="one-workflow"
         enabled
+        greeting="Hello, Dan"
         welcomeScreenSuggestions={
           [
         {
