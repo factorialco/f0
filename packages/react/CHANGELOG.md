@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.326.0](https://github.com/factorialco/f0/compare/f0-react-v1.325.0...f0-react-v1.326.0) (2026-01-15)
+
+
+### Features
+
+* **Nested Table:** implement clearFetchedData functionality for filters changes ([#3236](https://github.com/factorialco/f0/issues/3236)) ([6f49085](https://github.com/factorialco/f0/commit/6f49085bf2b8fb365122b305971cb634d2c092aa))
+
 ## [1.325.0](https://github.com/factorialco/f0/compare/f0-react-v1.324.0...f0-react-v1.325.0) (2026-01-15)
 
 
