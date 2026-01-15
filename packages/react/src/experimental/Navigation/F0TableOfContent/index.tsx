@@ -2,7 +2,6 @@ import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
 import { LayoutGroup, Reorder } from "motion/react"
 import {
   ReactElement,
@@ -104,6 +103,7 @@ function TOCContent({
   searchPlaceholder,
   onReorder,
   hideChildrenCounter = false,
+  scrollable = true,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -192,14 +192,20 @@ function TOCContent({
   return (
     <nav
       className={cn(
-        "flex h-full w-[248px] flex-col overflow-hidden",
+        "w-[248px]",
+        scrollable ? "overflow-y-auto" : "overflow-hidden",
         className
       )}
       aria-label={title}
       ref={containerRef}
     >
       {(title || showSearchBox) && (
-        <div className="flex-shrink-0 pb-2 pl-5 pr-4 pt-5">
+        <div
+          className={cn(
+            "bg-f1-background pb-2 pl-5 pr-4 pt-5",
+            scrollable && "sticky top-0 z-10"
+          )}
+        >
           {showSearchBox && (
             <div className={title ? "mb-4" : ""}>
               <F1SearchBox
@@ -223,33 +229,17 @@ function TOCContent({
         </div>
       )}
 
-      <ScrollArea className="h-full min-h-0">
-        <div className="px-3 pb-2">
-          {sortable ? (
-            <Reorder.Group
-              as="div"
-              values={sortableItems}
-              onReorder={handleSort}
-              axis="y"
-              className="flex flex-col gap-0.5"
-              dragConstraints={containerRef}
-            >
-              {filteredSortableItems.map((item) =>
-                renderTOCItem(
-                  item,
-                  sortable,
-                  0,
-                  activeItem,
-                  collapsible,
-                  hideChildrenCounter,
-                  expandedItems,
-                  handleToggleExpanded,
-                  handleUpdateItem
-                )
-              )}
-            </Reorder.Group>
-          ) : (
-            filteredItems.map((item) =>
+      <div className="px-3 pb-2">
+        {sortable ? (
+          <Reorder.Group
+            as="div"
+            values={sortableItems}
+            onReorder={handleSort}
+            axis="y"
+            className="flex flex-col gap-0.5"
+            dragConstraints={containerRef}
+          >
+            {filteredSortableItems.map((item) =>
               renderTOCItem(
                 item,
                 sortable,
@@ -261,10 +251,24 @@ function TOCContent({
                 handleToggleExpanded,
                 handleUpdateItem
               )
+            )}
+          </Reorder.Group>
+        ) : (
+          filteredItems.map((item) =>
+            renderTOCItem(
+              item,
+              sortable,
+              0,
+              activeItem,
+              collapsible,
+              hideChildrenCounter,
+              expandedItems,
+              handleToggleExpanded,
+              handleUpdateItem
             )
-          )}
-        </div>
-      </ScrollArea>
+          )
+        )}
+      </div>
     </nav>
   )
 }

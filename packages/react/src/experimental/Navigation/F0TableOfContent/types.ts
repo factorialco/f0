@@ -47,4 +47,6 @@ export interface TOCProps {
   showSearchBox?: boolean
   searchPlaceholder?: string
   hideChildrenCounter?: boolean
+  /** Enable vertical scrolling when content overflows (default: true) */
+  scrollable?: boolean
 }
