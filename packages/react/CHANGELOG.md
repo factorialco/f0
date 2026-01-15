@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.327.0](https://github.com/factorialco/f0/compare/f0-react-v1.326.0...f0-react-v1.327.0) (2026-01-15)
+
+
+### Features
+
+* **F0CollapsibleMenu:** add variant prop to F0CollapsibleMenu ([#3239](https://github.com/factorialco/f0/issues/3239)) ([5236466](https://github.com/factorialco/f0/commit/5236466ca3d5fcfdcaa41b9bdf925987782dfad5))
+
 ## [1.326.0](https://github.com/factorialco/f0/compare/f0-react-v1.325.0...f0-react-v1.326.0) (2026-01-15)
 
 
