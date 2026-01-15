@@ -197,7 +197,7 @@ export const Collapsible: Story = {
 
 export const WithChildrenCounter: Story = {
   render: createStoryRender("nested-child-1"),
-  args: { showChildrenCounter: true, collapsible: true },
+  args: { showChildrenCounter: true, collapsible: true, popupAlign: "start" },
   parameters: {
     docs: {
       description: {
@@ -302,6 +302,7 @@ const courseModulesData = (setActiveItem: (id: string) => void): TOCItem[] => [
       {
         id: "mod-2-quiz-1",
         label: "What Did You Learn So Far?",
+        disabled: true,
         onClick: setActiveItem,
         icon: Question,
       },
@@ -311,23 +312,27 @@ const courseModulesData = (setActiveItem: (id: string) => void): TOCItem[] => [
     id: "mod-3",
     label: "Module 3: Mediation, Problem-Solving & Team Resilience",
     onClick: setActiveItem,
+    disabled: true,
     icon: BookOpen,
     children: [
       {
         id: "mod-3-video-1",
         label: "New video",
+        disabled: true,
         onClick: setActiveItem,
         icon: Video,
       },
       {
         id: "mod-3-page-1",
         label: "Why Mediation Matters",
+        disabled: true,
         onClick: setActiveItem,
         icon: File,
       },
       {
         id: "mod-3-quiz-1",
         label: "What Did You Learn So Far?",
+        disabled: true,
         onClick: setActiveItem,
         icon: Question,
       },

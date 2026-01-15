@@ -30,6 +30,8 @@ export interface F0CollapsibleMenuProps extends Omit<
   showChildrenCounter?: boolean
   /** Maximum height of the popup: sm (max 240px), md (max 400px), lg (max 600px). Content auto-adjusts within limit. */
   size?: PopupSize
+  /** Alignment of the popup content */
+  popupAlign?: "center" | "start" | "end"
 }
 
 export function F0CollapsibleMenu({
@@ -41,6 +43,7 @@ export function F0CollapsibleMenu({
   showChildrenCounter = false,
   barsAlign = "left",
   size = "md",
+  popupAlign = "center",
 }: F0CollapsibleMenuProps) {
   return (
     <HoverCard openDelay={OPEN_DELAY} closeDelay={CLOSE_DELAY}>
@@ -62,10 +65,10 @@ export function F0CollapsibleMenu({
       </HoverCardTrigger>
       <HoverCardContent
         side={barsAlign === "left" ? "right" : "left"}
-        align="center"
+        align={popupAlign}
         sideOffset={-28}
         className={cn(
-          "grid w-auto grid-rows-[1fr] rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-0 shadow-lg duration-100",
+          "w-auto overflow-y-auto rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-0 shadow-lg",
           sizeClasses[size]
         )}
       >
@@ -75,7 +78,8 @@ export function F0CollapsibleMenu({
           activeItem={activeItem}
           collapsible={collapsible}
           hideChildrenCounter={!showChildrenCounter}
-          className={cn("min-h-0", !title && "pt-2")}
+          scrollable={false}
+          className={!title ? "pt-2" : undefined}
         />
       </HoverCardContent>
     </HoverCard>
