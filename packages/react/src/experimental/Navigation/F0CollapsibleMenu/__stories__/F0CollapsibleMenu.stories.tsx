@@ -360,7 +360,7 @@ export const CourseModules: Story = {
 }
 
 const DarkBackgroundWrapper = ({ children }: { children: ReactNode }) => (
-  <div className="flex h-[500px] w-[400px] items-center justify-start rounded-lg bg-f1-background-bold p-8">
+  <div className="flex h-full w-full items-center justify-start rounded-lg bg-f1-background-bold p-8">
     {children}
   </div>
 )
