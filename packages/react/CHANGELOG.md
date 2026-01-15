@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.327.0](https://github.com/factorialco/f0/compare/f0-react-v1.326.0...f0-react-v1.327.0) (2026-01-15)
+
+
+### Features
+
+* **F0CollapsibleMenu:** add variant prop to F0CollapsibleMenu ([#3239](https://github.com/factorialco/f0/issues/3239)) ([5236466](https://github.com/factorialco/f0/commit/5236466ca3d5fcfdcaa41b9bdf925987782dfad5))
+
+## [1.326.0](https://github.com/factorialco/f0/compare/f0-react-v1.325.0...f0-react-v1.326.0) (2026-01-15)
+
+
+### Features
+
+* **Nested Table:** implement clearFetchedData functionality for filters changes ([#3236](https://github.com/factorialco/f0/issues/3236)) ([6f49085](https://github.com/factorialco/f0/commit/6f49085bf2b8fb365122b305971cb634d2c092aa))
+
+## [1.325.0](https://github.com/factorialco/f0/compare/f0-react-v1.324.0...f0-react-v1.325.0) (2026-01-15)
+
+
+### Features
+
+* **CollapsibleMenu:** new collapsible menu ([#3234](https://github.com/factorialco/f0/issues/3234)) ([121dcfa](https://github.com/factorialco/f0/commit/121dcfa7adb539c31dbc2a17ff60aaa499c63828))
+
+## [1.324.0](https://github.com/factorialco/f0/compare/f0-react-v1.323.0...f0-react-v1.324.0) (2026-01-15)
+
+
+### Features
+
+* **F0Select:** implement 'asList' prop  ([#3231](https://github.com/factorialco/f0/issues/3231)) ([aa3043e](https://github.com/factorialco/f0/commit/aa3043e5deeb4ab20084d29806d89a81c90c918e))
+
+## [1.323.0](https://github.com/factorialco/f0/compare/f0-react-v1.322.1...f0-react-v1.323.0) (2026-01-15)
+
+
+### Features
+
+* **Table:** add disableHover prop and remove unused N/A ([#3232](https://github.com/factorialco/f0/issues/3232)) ([162b9cd](https://github.com/factorialco/f0/commit/162b9cd1721aa4dc863c5e568eeb445dd3b63835))
+
 ## [1.322.1](https://github.com/factorialco/f0/compare/f0-react-v1.322.0...f0-react-v1.322.1) (2026-01-14)
 
 

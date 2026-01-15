@@ -628,12 +628,12 @@ const OneDataCollectionComp = <
     <div
       className={cn(
         "flex flex-col gap-4",
-        layout === "standard" && "-mx-6",
+        layout === "standard" && "-mx-[23px]",
         fullHeight && "h-full flex-1"
       )}
       style={{
         width:
-          layout === "standard" && !tmpFullWidth ? "calc(100% + 48px)" : "100%", // To counteract the -mx-6 from the layout,
+          layout === "standard" && !tmpFullWidth ? "calc(100% + 46px)" : "100%", // To counteract the -mx-[23px] from the layout,
       }}
     >
       {showTopToolbar && (
