@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.325.0](https://github.com/factorialco/f0/compare/f0-react-v1.324.0...f0-react-v1.325.0) (2026-01-15)
+
+
+### Features
+
+* **CollapsibleMenu:** new collapsible menu ([#3234](https://github.com/factorialco/f0/issues/3234)) ([121dcfa](https://github.com/factorialco/f0/commit/121dcfa7adb539c31dbc2a17ff60aaa499c63828))
+
 ## [1.324.0](https://github.com/factorialco/f0/compare/f0-react-v1.323.0...f0-react-v1.324.0) (2026-01-15)
 
 
