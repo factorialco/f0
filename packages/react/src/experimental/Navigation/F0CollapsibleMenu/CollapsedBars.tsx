@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { TOCItem } from "../F0TableOfContent"
+import { CollapsibleMenuVariant } from "./index"
 
 interface CollapsedBarsProps {
   items: TOCItem[]
@@ -7,6 +8,8 @@ interface CollapsedBarsProps {
   className?: string
   /** Alignment of the bars */
   align?: "left" | "right"
+  /** Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds */
+  variant?: CollapsibleMenuVariant
 }
 
 /**
@@ -50,6 +53,7 @@ export function CollapsedBars({
   activeItem,
   className,
   align = "left",
+  variant = "dark",
 }: CollapsedBarsProps) {
   const flatItems = flattenItems(items)
 
@@ -67,9 +71,13 @@ export function CollapsedBars({
           className={cn(
             "h-0.5 rounded-full",
             depthWidths[item.depth] ?? depthWidths[3],
-            item.id === activeItem
-              ? "bg-f1-foreground"
-              : "bg-f1-foreground-tertiary opacity-60"
+            variant === "light"
+              ? "bg-f1-foreground-inverse"
+              : "bg-f1-foreground",
+            item.id !== activeItem &&
+              (variant === "light"
+                ? "opacity-50"
+                : "bg-f1-foreground-tertiary opacity-60")
           )}
         />
       ))}
