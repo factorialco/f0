@@ -93,7 +93,7 @@ export const useDataCollectionStorage = <
               status[
                 featureName as keyof DataCollectionStatus<FiltersState<Filters>>
               ]
-            if (featureValue) {
+            if (featureValue !== undefined) {
               ;(featureProvider.setValue as (value: unknown) => void)(
                 featureValue
               )

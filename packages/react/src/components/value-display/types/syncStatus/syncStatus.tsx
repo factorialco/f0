@@ -4,7 +4,7 @@
  */
 import { F0Icon, IconType } from "@/components/F0Icon"
 import {
-  ArrowCycle,
+  Spinner,
   CheckCircle,
   CrossedCircle,
   DottedCircle,
@@ -37,14 +37,13 @@ const syncStatusConfig: Record<SyncStatusType, SyncStatusConfig> = {
     colorClass: "text-f1-icon-positive",
   },
   syncing: {
-    icon: ArrowCycle,
-    colorClass: "text-f1-icon-info",
+    icon: Spinner,
+    colorClass: "text-f1-icon-secondary",
     animated: true,
   },
   pending: {
     icon: DottedCircle,
     colorClass: "text-f1-icon-secondary",
-    animated: true,
   },
   partiallySynced: {
     icon: PartiallyCompleted,

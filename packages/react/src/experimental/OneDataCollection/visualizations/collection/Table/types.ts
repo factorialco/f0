@@ -14,8 +14,8 @@ import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
 
 export type TableVisualizationSettings = {
-  order: ColId[]
-  hidden: ColId[]
+  order?: ColId[]
+  hidden?: ColId[]
 }
 
 export type WithOptionalSorting<

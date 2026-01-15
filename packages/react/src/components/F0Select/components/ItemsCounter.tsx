@@ -1,30 +1,22 @@
-import { F0Avatar } from "@/components/avatars/F0Avatar"
-import { F0Icon } from "@/components/F0Icon"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 import { AnimatePresence, motion } from "motion/react"
 import type { F0SelectItemObject } from "../types"
+import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
 
 type ItemsCounterProps = {
   count: number
   items?: F0SelectItemObject<string>[]
   prefix?: string
+  onDeselect?: (value: string) => void
 }
-
-const ItemContent = ({ item }: { item: F0SelectItemObject<string> }) => (
-  <div className="flex min-w-0 items-center gap-1.5">
-    {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-    {item.icon && (
-      <F0Icon icon={item.icon} size="sm" className="shrink-0 text-f1-icon" />
-    )}
-    <span className="truncate text-sm">{item.label}</span>
-  </div>
-)
 
 /**
  * Counter component with optional hover card showing remaining items
  */
-export const ItemsCounter = ({ count, items }: ItemsCounterProps) => {
+export const ItemsCounter = ({
+  count,
+  items,
+  onDeselect,
+}: ItemsCounterProps) => {
   const counter = (
     <AnimatePresence mode="popLayout">
       <motion.div
@@ -59,27 +51,13 @@ export const ItemsCounter = ({ count, items }: ItemsCounterProps) => {
       exit={{ opacity: 0, scale: 0.8 }}
       transition={{ type: "spring", duration: 0.2 }}
     >
-      <HoverCard>
-        <HoverCardTrigger asChild className="[&_div]:border-none [&_div]:pr-0">
-          <button onClick={(e) => e.stopPropagation()}>{counter}</button>
-        </HoverCardTrigger>
-        <HoverCardContent side="top">
-          <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col">
-            {items.map((item, index) => (
-              <div
-                key={item.value ?? index}
-                className="flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
-              >
-                <ItemContent item={item} />
-              </div>
-            ))}
-            <ScrollBar
-              orientation="vertical"
-              className="[&_div]:bg-f1-background"
-            />
-          </ScrollArea>
-        </HoverCardContent>
-      </HoverCard>
+      <ItemsPreviewHoverCard
+        items={items}
+        onDeselect={onDeselect}
+        triggerClassName="[&_div]:border-none [&_div]:pr-0"
+      >
+        {counter}
+      </ItemsPreviewHoverCard>
     </motion.div>
   )
 }

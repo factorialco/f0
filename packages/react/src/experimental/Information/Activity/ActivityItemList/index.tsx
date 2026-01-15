@@ -64,7 +64,7 @@ export const BaseActivityItemList = ({
   )
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-2">
       {groups.map(([group, items], index) => (
         <React.Fragment key={group}>
           <Section
@@ -94,7 +94,7 @@ export const ActivityItemListSkeleton = () => {
   const translations = useI18n()
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-2">
       <Section.Skeleton title={translations.date.groups.today} numItems={1} />
       <Separator />
       <Section.Skeleton

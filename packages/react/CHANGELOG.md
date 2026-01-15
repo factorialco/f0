@@ -1,5 +1,82 @@
 # Changelog
 
+## [1.322.1](https://github.com/factorialco/f0/compare/f0-react-v1.322.0...f0-react-v1.322.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* make DC hidden columns invisible initially ([#3175](https://github.com/factorialco/f0/issues/3175)) ([ac1deab](https://github.com/factorialco/f0/commit/ac1deaba18b734f02e152e3a3195311408be8ea0))
+
+## [1.322.0](https://github.com/factorialco/f0/compare/f0-react-v1.321.1...f0-react-v1.322.0) (2026-01-14)
+
+
+### Features
+
+* manage new mode type to decide wether to display or not labels ([#3228](https://github.com/factorialco/f0/issues/3228)) ([af2c688](https://github.com/factorialco/f0/commit/af2c68825b0fa33b8a5602ef4e0754e6da5f761e))
+
+## [1.321.1](https://github.com/factorialco/f0/compare/f0-react-v1.321.0...f0-react-v1.321.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* only allow dragging items in co-creation when long pressing handlers ([#3219](https://github.com/factorialco/f0/issues/3219)) ([78ec14a](https://github.com/factorialco/f0/commit/78ec14a1c5a9dc830f12f384bd9679fbbd2daa0e))
+
+## [1.321.0](https://github.com/factorialco/f0/compare/f0-react-v1.320.1...f0-react-v1.321.0) (2026-01-13)
+
+
+### Features
+
+* **Nested Tables:** add support for sorting in fetchChildren method  ([#3223](https://github.com/factorialco/f0/issues/3223)) ([b4c8dac](https://github.com/factorialco/f0/commit/b4c8dac589e831241d8dea0f5142dbe8f7820f5b))
+
+## [1.320.1](https://github.com/factorialco/f0/compare/f0-react-v1.320.0...f0-react-v1.320.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* **F0Dialog:** dialog positioning and styling ([#3203](https://github.com/factorialco/f0/issues/3203)) ([fff7292](https://github.com/factorialco/f0/commit/fff729222e67bf53ff21787375b34999e62a91f0))
+
+## [1.320.0](https://github.com/factorialco/f0/compare/f0-react-v1.319.3...f0-react-v1.320.0) (2026-01-13)
+
+
+### Features
+
+* **F0Select:** add onDeselect functionality to F0Select preview ([#3213](https://github.com/factorialco/f0/issues/3213)) ([fd20f62](https://github.com/factorialco/f0/commit/fd20f629c6626bd5c6cfb69944e405bee8e371f0))
+
+## [1.319.3](https://github.com/factorialco/f0/compare/f0-react-v1.319.2...f0-react-v1.319.3) (2026-01-12)
+
+
+### Bug Fixes
+
+* **Table:** add isLastChild prop to NestedRow for improved border logic ([#3216](https://github.com/factorialco/f0/issues/3216)) ([6d486b2](https://github.com/factorialco/f0/commit/6d486b29f8fe48d29d56ebbdc58005fe1f412898))
+
+## [1.319.2](https://github.com/factorialco/f0/compare/f0-react-v1.319.1...f0-react-v1.319.2) (2026-01-12)
+
+
+### Bug Fixes
+
+* **F0Dialog:** add disableContentPadding prop and adjust dialog content ([#3214](https://github.com/factorialco/f0/issues/3214)) ([f9f4f07](https://github.com/factorialco/f0/commit/f9f4f075b4fa0d29696acb94644173d3a1269175))
+
+## [1.319.1](https://github.com/factorialco/f0/compare/f0-react-v1.319.0...f0-react-v1.319.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* change syncing icon and do not rotate pending one (syncStatus) ([#3205](https://github.com/factorialco/f0/issues/3205)) ([7cc7d61](https://github.com/factorialco/f0/commit/7cc7d61ca9d0331f9beb270ae6a185e387388090))
+
+## [1.319.0](https://github.com/factorialco/f0/compare/f0-react-v1.318.1...f0-react-v1.319.0) (2026-01-12)
+
+
+### Features
+
+* show deactivated employees ([#3201](https://github.com/factorialco/f0/issues/3201)) ([26e539a](https://github.com/factorialco/f0/commit/26e539a97842ee64c9b3f5326b368cbbca84d851))
+
+
+### Bug Fixes
+
+* **ChatTextarea:** adjust padding and height for improved layout ([#3200](https://github.com/factorialco/f0/issues/3200)) ([20e94a8](https://github.com/factorialco/f0/commit/20e94a8ee6d63c59d212fb3e785194beab5a08f8))
+* **NestedRow:** improve connector height calculation ([#3202](https://github.com/factorialco/f0/issues/3202)) ([688fc15](https://github.com/factorialco/f0/commit/688fc15954aa92fa939f58d2d39a6da7a507f07f))
+* set correct applying changes button positioning ([#3204](https://github.com/factorialco/f0/issues/3204)) ([7f130b8](https://github.com/factorialco/f0/commit/7f130b88348593e862096e19e66c6e757272afa3))
+
 ## [1.318.1](https://github.com/factorialco/f0/compare/f0-react-v1.318.0...f0-react-v1.318.1) (2026-01-07)
 
 

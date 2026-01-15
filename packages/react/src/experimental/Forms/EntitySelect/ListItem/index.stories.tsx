@@ -39,6 +39,12 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
+export const DefaultDeactivated: Story = {
+  args: {
+    entity: { ...famousEmployees[0], deactivated: true },
+  },
+}
+
 export const GroupViewSelected: Story = {
   args: {
     entity: teamsWithEmployees[0],

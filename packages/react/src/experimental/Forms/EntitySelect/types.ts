@@ -15,6 +15,7 @@ export type EntitySelectEntity = {
   avatar?: string
   expanded?: boolean
   searchKeys?: string[]
+  deactivated?: boolean
   subItems?: EntitySelectSubEntity[]
 }
 

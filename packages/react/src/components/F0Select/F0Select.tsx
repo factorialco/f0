@@ -700,6 +700,11 @@ const F0SelectComponent = forwardRef(function Select<
                     }
                     allSelected={selectedState.allSelected}
                     selection={getDisplayItemsForSelection}
+                    onDeselect={
+                      multiple
+                        ? (value) => onItemCheckChange(value, false)
+                        : undefined
+                    }
                   />
                 )}
               </button>
@@ -727,7 +732,7 @@ const F0SelectComponent = forwardRef(function Select<
                   currentFilters={localSource.currentFilters}
                   onFiltersChange={localSource.setCurrentFilters}
                 />
-                {multiple && !disableSelectAll && !currentSearch && (
+                {multiple && !currentSearch && (
                   <SelectAll
                     selectedCount={selectionMeta.selectedItemsCount}
                     indeterminate={
@@ -737,6 +742,9 @@ const F0SelectComponent = forwardRef(function Select<
                     }
                     value={!!selectedState.allSelected}
                     onChange={handleSelectAllWithTracking}
+                    hideCheckbox={disableSelectAll}
+                    items={getDisplayItemsForSelection}
+                    onDeselect={(value) => onItemCheckChange(value, false)}
                   />
                 )}
               </>

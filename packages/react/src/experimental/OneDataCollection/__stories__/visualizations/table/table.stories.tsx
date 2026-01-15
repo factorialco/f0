@@ -99,11 +99,37 @@ export const TableWithNestedRecords: Story = {
 }
 
 export const TableColumnOrdering: Story = {
-  render: () => (
-    <ExampleComponent frozenColumns={2} tableAllowColumnReordering />
-  ),
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        allowColumnReordering: true,
+      },
+    })
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnReordering
+        visualizations={[mockVisualizations.table]}
+        id="table-column-ordering/v1"
+      />
+    )
+  },
 }
 
 export const TableColumnHidden: Story = {
-  render: () => <ExampleComponent frozenColumns={2} tableAllowColumnHiding />,
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        allowColumnHiding: true,
+      },
+    })
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnHiding
+        visualizations={[mockVisualizations.table]}
+        id="table-column-hidden/v1"
+      />
+    )
+  },
 }

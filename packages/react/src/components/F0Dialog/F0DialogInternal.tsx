@@ -13,14 +13,13 @@ const dialogWrapperClassName = cva({
   variants: {
     variant: {
       bottomSheet: "max-h-[95vh] bg-f1-background",
-      sidePosition:
-        "absolute bottom-3 top-3 flex w-full translate-x-0 translate-y-0 flex-col rounded-md border border-solid border-f1-border-secondary",
+      sidePosition: "absolute flex flex-col rounded-md w-full",
       center: "flex",
       fullscreen: "",
     },
     position: {
-      right: "left-auto right-3 items-end",
-      left: "left-3 items-start",
+      right: "left-auto right-0 items-end p-3",
+      left: "left-0 items-start p-3",
       center: "",
       fullscreen: "inset-6",
     },
@@ -36,7 +35,7 @@ const dialogContentClassName = cva({
       bottomSheet: "max-h-[95vh] bg-f1-background",
       sidePosition:
         "flex h-full w-full flex-col rounded-md border border-solid border-f1-border-secondary",
-      center: "flex max-h-[95%] min-w-[100px] flex-1 flex-col rounded-xl",
+      center: "flex max-h-[85vh] flex-1 flex-col rounded-xl",
       fullscreen: "h-full w-full rounded-xl",
     },
     position: {
@@ -79,6 +78,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   tabs,
   activeTabId,
   setActiveTabId,
+  disableContentPadding,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -160,7 +160,9 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
             <F0DialogHeader {...headerProps} />
-            <F0DialogContent>{children}</F0DialogContent>
+            <F0DialogContent disableContentPadding={disableContentPadding}>
+              {children}
+            </F0DialogContent>
             <F0DialogFooter
               primaryAction={primaryAction}
               secondaryAction={secondaryAction}
@@ -194,7 +196,9 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <F0DialogHeader {...headerProps} />
-          <F0DialogContent>{children}</F0DialogContent>
+          <F0DialogContent disableContentPadding={disableContentPadding}>
+            {children}
+          </F0DialogContent>
           <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}

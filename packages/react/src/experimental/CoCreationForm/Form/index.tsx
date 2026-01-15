@@ -1,7 +1,7 @@
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { motion, Reorder } from "motion/react"
+import { motion, Reorder, useDragControls } from "motion/react"
 import { useEffect, useMemo } from "react"
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
@@ -17,6 +17,7 @@ type ItemProps = {
 
 const Item = ({ element }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
+  const dragControls = useDragControls()
 
   const { isEditMode, getSectionContainingQuestion } =
     useCoCreationFormContext()
@@ -50,7 +51,8 @@ const Item = ({ element }: ItemProps) => {
       value={element}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      dragListener={!!isEditMode && !elementLocked}
+      dragListener={false}
+      dragControls={dragControls}
       layout="position"
       as="div"
     >
@@ -58,8 +60,7 @@ const Item = ({ element }: ItemProps) => {
         <div
           className={cn(
             "group/element flex flex-row items-start gap-1",
-            isDragging && "cursor-grabbing",
-            !dragEnabled && "cursor-not-allowed"
+            isDragging && "cursor-grabbing"
           )}
         >
           {!!isEditMode && (
@@ -69,6 +70,11 @@ const Item = ({ element }: ItemProps) => {
                 !isDragging && "cursor-grab",
                 !dragEnabled && "cursor-not-allowed"
               )}
+              onPointerDown={(e) => {
+                if (dragEnabled) {
+                  dragControls.start(e)
+                }
+              }}
             >
               <F0Icon icon={Handle} size="sm" />
             </div>
@@ -136,7 +142,14 @@ export const CoCreationForm = ({
 
   useEffect(() => {
     if (applyingChanges) {
-      ;(document.activeElement as HTMLElement)?.blur()
+      const activeElement = document.activeElement as HTMLElement
+      // Don't blur one-ai-input elements
+      if (
+        activeElement &&
+        activeElement.getAttribute("name") !== "one-ai-input"
+      ) {
+        activeElement.blur()
+      }
     }
   }, [applyingChanges])
 
@@ -183,18 +196,12 @@ export const CoCreationForm = ({
         </motion.div>
         {applyingChanges && (
           <motion.div
-            className="fixed z-50 flex h-screen w-full items-center justify-center"
-            style={{
-              inset: 0,
-            }}
+            className="sticky z-50 flex w-full items-center justify-center bottom-1/2 left-0"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
-            {/* Needed offset to compensate the height of the header */}
-            <div className="translate-y-48">
-              <ApplyingChangesTag />
-            </div>
+            <ApplyingChangesTag />
           </motion.div>
         )}
       </div>

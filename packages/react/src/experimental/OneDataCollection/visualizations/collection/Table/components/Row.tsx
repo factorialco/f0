@@ -62,6 +62,7 @@ export type NestedRowProps = {
   depth?: number
   expanded?: boolean
   hasLoadedChildren?: boolean
+  isLastChild?: boolean
   nestedVariant?: NestedVariant
   parentHasChildren?: boolean
   onExpand?: () => void
@@ -164,7 +165,7 @@ const RowComponentInner = <
         "group transition-colors hover:bg-f1-background-hover",
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
         noBorder && "after:bg-white-100",
-        disableHover&& "hover:bg-transparent"
+        disableHover && "hover:bg-transparent"
       )}
     >
       {source.selectable && (

@@ -12,6 +12,8 @@ type SelectValueProps = {
   totalSelectedCount?: number
   /** Whether all items are selected */
   allSelected?: boolean | "indeterminate"
+  /** Callback to deselect an item by its value */
+  onDeselect?: (value: string) => void
 }
 
 /** Maximum number of labels to show before displaying count */
@@ -22,7 +24,7 @@ const MAX_VISIBLE_LABELS = 2
  */
 export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
   function SelectValue(
-    { selection, multiple, totalSelectedCount, allSelected },
+    { selection, multiple, totalSelectedCount, allSelected, onDeselect },
     ref
   ) {
     const i18n = useI18n()
@@ -64,7 +66,6 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
 
         // For small selections, show visible labels with counter for remaining
         const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
-        const remainingItems = selection.slice(MAX_VISIBLE_LABELS)
         const remainingCount = selectedCount - visibleItems.length
 
         // If no items are loaded yet but we have a count, show just the count
@@ -84,7 +85,11 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
               {visibleItems.map((item) => item.label).join(", ")}
             </OneEllipsis>
             {remainingCount > 0 && (
-              <ItemsCounter count={remainingCount} items={remainingItems} />
+              <ItemsCounter
+                count={remainingCount}
+                items={selection}
+                onDeselect={onDeselect}
+              />
             )}
           </div>
         )
@@ -92,7 +97,6 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
 
       // Show labels for small selections, count with popover for large ones
       const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
-      const remainingItems = selection.slice(MAX_VISIBLE_LABELS)
       const remainingCount = selectedCount - visibleItems.length
 
       // If no items are loaded yet but we have a count, show just the count
@@ -112,7 +116,11 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
             {visibleItems.map((item) => item.label).join(", ")}
           </OneEllipsis>
           {remainingCount > 0 && (
-            <ItemsCounter count={remainingCount} items={remainingItems} />
+            <ItemsCounter
+              count={remainingCount}
+              items={selection}
+              onDeselect={onDeselect}
+            />
           )}
         </div>
       )
