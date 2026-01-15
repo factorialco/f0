@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.323.0](https://github.com/factorialco/f0/compare/f0-react-v1.322.1...f0-react-v1.323.0) (2026-01-15)
+
+
+### Features
+
+* **Table:** add disableHover prop and remove unused N/A ([#3232](https://github.com/factorialco/f0/issues/3232)) ([162b9cd](https://github.com/factorialco/f0/commit/162b9cd1721aa4dc863c5e568eeb445dd3b63835))
+
 ## [1.322.1](https://github.com/factorialco/f0/compare/f0-react-v1.322.0...f0-react-v1.322.1) (2026-01-14)
 
 
