@@ -6,6 +6,7 @@ import { F0TableOfContent, TOCItem, TOCProps } from "../F0TableOfContent"
 import { CollapsedBars } from "./CollapsedBars"
 
 export type PopupSize = "sm" | "md" | "lg"
+export type CollapsibleMenuVariant = "dark" | "light"
 
 const sizeClasses: Record<PopupSize, string> = {
   sm: "max-h-[240px]",
@@ -32,6 +33,8 @@ export interface F0CollapsibleMenuProps extends Omit<
   size?: PopupSize
   /** Alignment of the popup content */
   popupAlign?: "center" | "start" | "end"
+  /** Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds */
+  variant?: CollapsibleMenuVariant
 }
 
 export function F0CollapsibleMenu({
@@ -44,6 +47,7 @@ export function F0CollapsibleMenu({
   barsAlign = "left",
   size = "md",
   popupAlign = "center",
+  variant = "dark",
 }: F0CollapsibleMenuProps) {
   return (
     <HoverCard openDelay={OPEN_DELAY} closeDelay={CLOSE_DELAY}>
@@ -60,6 +64,7 @@ export function F0CollapsibleMenu({
             items={items}
             activeItem={activeItem}
             align={barsAlign}
+            variant={variant}
           />
         </button>
       </HoverCardTrigger>

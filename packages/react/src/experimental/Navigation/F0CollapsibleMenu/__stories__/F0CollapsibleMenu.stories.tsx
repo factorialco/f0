@@ -138,6 +138,12 @@ const meta: Meta<typeof F0CollapsibleMenu> = {
       description:
         "Show the count of children items next to parent items (default: false)",
     },
+    variant: {
+      control: "select",
+      options: ["dark", "light"],
+      description:
+        'Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds',
+    },
   },
   decorators: [
     (Story) => (
@@ -348,6 +354,37 @@ export const CourseModules: Story = {
       description: {
         story:
           "Course modules example with collapsible sections, icons for different content types (pages, videos, quizzes), and children counter.",
+      },
+    },
+  },
+}
+
+const DarkBackgroundWrapper = ({ children }: { children: ReactNode }) => (
+  <div className="flex h-[500px] w-[400px] items-center justify-start rounded-lg bg-f1-background-bold p-8">
+    {children}
+  </div>
+)
+
+export const LightVariant: Story = {
+  render: (args) => {
+    const [activeItem, setActiveItem] = useState("nested-child-1")
+    return (
+      <DarkBackgroundWrapper>
+        <F0CollapsibleMenu
+          {...args}
+          items={mockTOCData(setActiveItem)}
+          activeItem={activeItem}
+        />
+      </DarkBackgroundWrapper>
+    )
+  },
+  args: { variant: "light" },
+  decorators: [],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Light variant with lighter colored bars, designed for dark backgrounds. The bars use inverse colors that are visible against dark surfaces.",
       },
     },
   },
