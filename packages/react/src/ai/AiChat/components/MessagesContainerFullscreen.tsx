@@ -11,7 +11,6 @@ import { AnimatePresence, motion } from "motion/react"
 import { useContext, useEffect, useMemo, useRef } from "react"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { UserMessage as F0UserMessage } from "./UserMessage"
-import { SuggestionsList as F0SuggestionsList } from "./SuggestionsList"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FullscreenChatContext } from "../index"
 import { FeedbackModal } from "./FeedbackModal"
@@ -46,8 +45,8 @@ const Messages = ({
   markdownTagRenderers,
 }: Partial<MessagesProps>) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
-  const { messages, interrupt, isLoading, suggestions } = useCopilotChat()
-  const { sendMessage } = useAiChat()
+  const { messages, interrupt, isLoading } = useCopilotChat()
+
   const inProgress = inProgressProp ?? isLoading
 
   const AssistantMessage = AssistantMessageProp ?? F0AssistantMessage
@@ -313,14 +312,6 @@ const Messages = ({
           ))}
 
           {interrupt}
-          {suggestions && suggestions.length > 0 && (
-            <div className="px-4 py-2">
-              <F0SuggestionsList
-                suggestions={suggestions}
-                onSuggestionClick={(msg) => sendMessage?.(msg)}
-              />
-            </div>
-          )}
           <div ref={messagesEndRef} className="h-2" />
         </div>
 

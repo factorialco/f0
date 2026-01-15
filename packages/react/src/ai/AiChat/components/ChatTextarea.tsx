@@ -190,7 +190,7 @@ export const ChatTextarea = ({
         "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3",
         "rounded-lg border border-solid border-f1-border",
         "transition-all hover:cursor-text",
-        "py-px pl-3 pr-0.5 sm:p-0",
+        "py-px px-3 sm:p-0",
         "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
         "before:rounded-[inherit] before:bg-f1-background before:content-['']",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",

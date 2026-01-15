@@ -8,6 +8,7 @@ import {
   defaultTranslations,
   I18nProvider,
 } from '@factorialco/f0-react/dist/ai'
+import { Lightbulb, PalmTree } from '@factorialco/f0-react/icons/app'
 import { useCoAgent } from '@copilotkit/react-core'
 import '@factorialco/f0-react/dist/styles.css'
 
@@ -79,6 +80,28 @@ const AiChatSandbox = ({
         credentials="include"
         agent="one-workflow"
         enabled
+        welcomeScreenSuggestions={
+          [
+        {
+          icon: Lightbulb,
+          message: "What is my schedule this week?",
+          prompt:
+            "What is my schedule this week?",
+        },
+        {
+          icon: PalmTree,
+          message: "Create a new task",
+          prompt:
+            "Create a new task and help shape One with your feedback in the next message (optional)",
+        },
+        {
+          icon: Lightbulb,
+          message: "Create a new project",
+          prompt:
+            "Create a new project and help shape One with your feedback in the next message (optional)",
+        }
+      ]
+        }
       >
         <AiAgentChatContent />
       </AiChatProvider>
