@@ -18,6 +18,7 @@ import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
 import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
 import { DataCollectionStorageHandler } from "../datacollection/types"
+import { DialogsLayoutProvider } from "../dialogsLayout/DialogsLayoutProvider"
 
 interface LayoutProps {
   fullScreen?: boolean
@@ -110,7 +111,9 @@ export const F0Provider: React.FC<{
                       <DataCollectionStorageProvider
                         handler={dataCollectionStorageHandler}
                       >
-                        {children}
+                        <DialogsLayoutProvider>
+                          {children}
+                        </DialogsLayoutProvider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>
                   </PrivacyModeProvider>

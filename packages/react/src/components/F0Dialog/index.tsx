@@ -10,9 +10,7 @@ export type {
   DialogPosition,
   DialogWidth,
   F0DialogActionsProps,
-  F0DialogPrimaryAction,
-  F0DialogPrimaryActionItem,
-  F0DialogSecondaryAction,
+  F0DialogAction,
 } from "./types"
 
 /**

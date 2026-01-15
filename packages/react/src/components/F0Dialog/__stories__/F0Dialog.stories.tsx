@@ -142,6 +142,20 @@ export const Default: Story = {
   },
 }
 
+export const WithPromisePrimaryAction: Story = {
+  args: {
+    ...Default.args,
+    primaryAction: {
+      label: "submit",
+      icon: Placeholder,
+      onClick: () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve("Promise resolved"), 5000)
+        ),
+    },
+  },
+}
+
 export const WithSmWidth: Story = {
   args: {
     isOpen: true,

@@ -38,6 +38,7 @@ export const defaultTranslations = {
     save: "Save",
     send: "Send",
     cancel: "Cancel",
+    ok: "Ok",
     copy: "Copy",
     close: "Close",
     showAll: "Show all",

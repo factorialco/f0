@@ -2,15 +2,14 @@ import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { ReactNode } from "react"
-import {
-  DialogPosition,
-  DialogWidth,
-  F0DialogPrimaryAction,
-  F0DialogPrimaryActionItem,
-  F0DialogSecondaryAction,
-} from "./types"
+import { DialogPosition, DialogWidth, F0DialogAction } from "./types"
 
 export type F0DialogHeaderProps = {
+  /**
+   * Disables the close button of the dialog.
+   * @internal
+   */
+  disableCloseButton?: boolean
   title?: string
   description?: string
   module?: {
@@ -44,6 +43,11 @@ export type F0DialogProviderProps = {
 }
 
 export type F0DialogInternalProps = {
+  /**
+   * Disables the close button of the dialog.
+   * @internal
+   */
+  disableCloseButton?: boolean
   // Whether the dialog is open
   isOpen: boolean
   // Callback when dialog is closed
@@ -55,8 +59,8 @@ export type F0DialogInternalProps = {
   // The width of the dialog. Only applies to center position but we can NOT use narrowing as position undefined is valid
   width?: DialogWidth
   // Actions to render in the footer
-  primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
-  secondaryAction?: F0DialogSecondaryAction
+  primaryAction?: F0DialogAction | F0DialogAction[]
+  secondaryAction?: F0DialogAction | F0DialogAction[]
   // Title of the dialog
   title?: string
   // Description of the dialog

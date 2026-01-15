@@ -65,6 +65,7 @@ const dialogContentClassName = cva({
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   asBottomSheetInMobile = true,
   position = "center",
+  disableCloseButton = false,
   onClose,
   isOpen,
   children,
@@ -145,6 +146,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     tabs,
     activeTabId,
     setActiveTabId,
+    disableCloseButton,
   }
 
   if (isSmallScreen && asBottomSheetInMobile) {
