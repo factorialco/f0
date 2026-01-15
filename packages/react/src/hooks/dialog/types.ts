@@ -14,9 +14,9 @@ export type DialogActionValue =
   | DialogActionValuePrimitive
   | (() => Promise<DialogActionValuePrimitive>)
 
-export type DialogAction = Pick<
-  F0ButtonProps,
-  "label" | "icon" | "disabled"
+export type DialogAction = Optional<
+  Pick<F0ButtonProps, "label" | "icon" | "disabled">,
+  "icon" | "disabled"
 > & {
   value: DialogActionValue
   /*
