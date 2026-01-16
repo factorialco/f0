@@ -140,9 +140,9 @@ export const TableCollection = <
   const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
-      return String(item.id)
+      return `id:${String(item.id)}`
     }
-    return String(index)
+    return `index:${String(index)}`
   }
 
   /**
