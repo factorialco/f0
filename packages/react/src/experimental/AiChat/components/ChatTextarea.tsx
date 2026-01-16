@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { type InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 interface TypewriterPlaceholderProps {
@@ -141,11 +141,6 @@ const TypewriterPlaceholder = ({
   )
 }
 
-export type AttachedFile = {
-  file: File
-  id: string
-}
-
 type ChatTextareaProps = InputProps & {
   submitLabel?: string
 }
@@ -158,14 +153,18 @@ export const ChatTextarea = ({
 }: ChatTextareaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [hasScrollbar, setHasScrollbar] = useState(false)
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const translation = useI18n()
   const { placeholders } = useAiChat()
 
-  const hasDataToSend = inputValue.trim().length > 0 || attachedFiles.length > 0
+  // Use centralized attachment state from context
+  const { attachments, addAttachments, removeAttachment, clearAttachments } =
+    useAiChat()
+
+  const hasDataToSend = inputValue.trim().length > 0 || attachments.length > 0
   const multiplePlaceholders = placeholders.length > 1
 
   useEffect(() => {
@@ -178,137 +177,79 @@ export const ChatTextarea = ({
     }
   }, [inputValue])
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || [])
 
-    // Limit file size to 2MB per file to avoid performance issues
-    const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
-    const rejectedFiles: string[] = []
-    const validFiles = files.filter((file) => {
-      if (file.size > MAX_FILE_SIZE) {
-        rejectedFiles.push(file.name)
-        return false
+      if (files.length > 0) {
+        // Validation is handled by the context (fileValidation config)
+        // If files are rejected, onFilesRejected callback will be called
+        addAttachments(files)
       }
-      return true
-    })
 
-    // Show warning if any files were rejected
-    if (rejectedFiles.length > 0) {
-      const maxSizeMB = MAX_FILE_SIZE / 1024 / 1024
-      const message =
-        rejectedFiles.length === 1
-          ? translation.ai.fileTooLarge
-              .replace("{fileName}", rejectedFiles[0])
-              .replace("{maxSize}", maxSizeMB.toString())
-          : translation.ai.filesTooLarge
-              .replace("{count}", rejectedFiles.length.toString())
-              .replace("{maxSize}", maxSizeMB.toString())
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    },
+    [addAttachments]
+  )
 
-      // Show a user-friendly error message
-      // TODO: Replace with a proper toast notification when available
-      alert(message)
-    }
-
-    if (validFiles.length > 0) {
-      const newFiles: AttachedFile[] = validFiles.map((file) => ({
-        file,
-        id: Math.random().toString(36).substring(7),
-      }))
-
-      setAttachedFiles((prev) => [...prev, ...newFiles])
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-  }
-
-  const removeFile = (id: string) => {
-    setAttachedFiles((prev) => prev.filter((f) => f.id !== id))
-  }
+  const handleRemoveFile = useCallback(
+    (index: number) => {
+      removeAttachment(index)
+    },
+    [removeAttachment]
+  )
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend) {
-      let messageContent = inputValue.trim()
-
-      if (attachedFiles.length > 0) {
-        // Generate unique message ID
-        const messageId = `msg-${Date.now()}-${Math.random().toString(36).substring(7)}`
-
-        const filesList = attachedFiles
-          .map((f) => `[File: ${f.file.name}]`)
-          .join("\n")
-        messageContent = messageContent
-          ? `${messageContent}\n\n[MessageId: ${messageId}]\n${filesList}`
-          : `[MessageId: ${messageId}]\n${filesList}`
-
-        // Convert files to base64 for Mastra - do this asynchronously to avoid blocking UI
-        const filesDataPromise = Promise.all(
-          attachedFiles.map(async (attachedFile) => {
-            const base64 = await fileToBase64(attachedFile.file)
-            return {
-              name: attachedFile.file.name,
-              type: attachedFile.file.type,
-              size: attachedFile.file.size,
-              data: base64,
-            }
-          })
-        )
-
-        // Initialize storage if needed
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!(window as any).__copilot_message_files_map__) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ;(window as any).__copilot_message_files_map__ = new Map()
-        }
-
-        // Store the promise initially, then resolve it
-        const filesData = await filesDataPromise
-
-        // Store files data for backend (via headers)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(window as any).__copilot_files__ = filesData
-
-        // Store files data for frontend (to display in UserMessage)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(window as any).__copilot_message_files_map__.set(messageId, filesData)
-
-        // Clean up files data for headers after a short delay
-        setTimeout(() => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          delete (window as any).__copilot_files__
-        }, 1000)
-      }
-
-      onSend(messageContent)
-      setInputValue("")
-      setAttachedFiles([])
+      return
     }
 
-    textareaRef.current?.focus()
-  }
+    if (!hasDataToSend || isProcessing) {
+      return
+    }
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => {
-        const result = reader.result as string
-        // Remove the data URL prefix (e.g., "data:image/png;base64,")
-        const base64 = result.split(",")[1]
-        resolve(base64)
+    setIsProcessing(true)
+
+    try {
+      const messageContent = inputValue.trim()
+
+      // If there are attachments, add file markers to the message
+      // The actual processing happens via onBeforeSend in the context
+      let finalMessage = messageContent
+
+      if (attachments.length > 0) {
+        const fileMarkers = attachments
+          .map((file) => `[Attachment: ${file.name}]`)
+          .join("\n")
+
+        finalMessage = messageContent
+          ? `${messageContent}\n\n${fileMarkers}`
+          : fileMarkers
       }
-      reader.onerror = (error) => reject(error)
-    })
+
+      // Send the message through CopilotKit
+      // Note: If onBeforeSend is registered in the context, it will process
+      // attachments before the message is actually sent to the agent
+      onSend(finalMessage)
+
+      // Clear input and attachments
+      setInputValue("")
+      clearAttachments()
+    } finally {
+      setIsProcessing(false)
+      textareaRef.current?.focus()
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      if (!inProgress) {
+      if (!inProgress && !isProcessing) {
         formRef.current?.requestSubmit()
       }
     }
@@ -316,7 +257,8 @@ export const ChatTextarea = ({
 
   return (
     <motion.form
-      aria-busy={inProgress}
+      layout
+      aria-busy={inProgress || isProcessing}
       ref={formRef}
       className={cn(
         "relative isolate m-3 mt-2 flex flex-col items-stretch gap-3 rounded-lg border border-solid border-f1-border transition-all hover:cursor-text",
@@ -350,7 +292,7 @@ export const ChatTextarea = ({
       onSubmit={handleSubmit}
     >
       <AnimatePresence>
-        {attachedFiles.length > 0 && (
+        {attachments.length > 0 && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -364,9 +306,9 @@ export const ChatTextarea = ({
             <ScrollArea className="px-3 py-3">
               <div className="flex w-full flex-row gap-2">
                 <AnimatePresence initial={false}>
-                  {attachedFiles.map((attachedFile) => (
+                  {attachments.map((file, index) => (
                     <motion.div
-                      key={attachedFile.id}
+                      key={`${file.name}-${index}`}
                       initial={{ scale: 0.7, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
@@ -377,12 +319,12 @@ export const ChatTextarea = ({
                       className="flex-1"
                     >
                       <FileItem
-                        file={attachedFile.file}
+                        file={file}
                         actions={[
                           {
                             icon: CrossedCircle,
                             label: translation.ai.removeFile,
-                            onClick: () => removeFile(attachedFile.id),
+                            onClick: () => handleRemoveFile(index),
                           },
                         ]}
                       />
@@ -421,7 +363,7 @@ export const ChatTextarea = ({
             hasScrollbar
               ? "scrollbar-macos overflow-y-scroll"
               : "overflow-y-hidden",
-            attachedFiles.length === 0 ? "mt-3" : "mt-0",
+            attachments.length === 0 ? "mt-3" : "mt-0",
             inputValue || !multiplePlaceholders
               ? "caret-f1-foreground"
               : "caret-transparent"
@@ -456,7 +398,7 @@ export const ChatTextarea = ({
           onClick={() => fileInputRef.current?.click()}
         />
         <div className="flex gap-2">
-          {inProgress ? (
+          {inProgress || isProcessing ? (
             <ButtonInternal
               type="submit"
               variant="neutral"

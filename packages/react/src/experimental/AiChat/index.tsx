@@ -88,40 +88,9 @@ const AiChatKitWrapper = ({
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
       <SendMessageFunctionInjector />
-      <FileUploadInterceptor />
       {children}
     </CopilotKit>
   )
-}
-
-// Intercepts fetch requests to add file upload headers
-const FileUploadInterceptor = () => {
-  useEffect(() => {
-    const originalFetch = window.fetch
-
-    window.fetch = async (input, init) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const files = (window as any).__copilot_files__
-
-      if (files && files.length > 0) {
-        const headers = new Headers(init?.headers)
-        headers.set("X-Copilot-Files", JSON.stringify(files))
-
-        return originalFetch(input, {
-          ...init,
-          headers,
-        })
-      }
-
-      return originalFetch(input, init)
-    }
-
-    return () => {
-      window.fetch = originalFetch
-    }
-  }, [])
-
-  return null
 }
 
 const ResetFunctionInjector = () => {
