@@ -104,11 +104,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   const isSidePosition = position === "left" || position === "right"
 
   const variant = useMemo(() => {
-    if (position === "fullscreen") {
-      return "fullscreen"
-    }
     if (isSmallScreen && asBottomSheetInMobile) {
       return "bottomSheet"
+    }
+    if (position === "fullscreen") {
+      return "fullscreen"
     }
     if (isSidePosition) {
       return "sidePosition"
