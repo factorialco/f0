@@ -62413,9 +62413,9 @@ const Qde = Zde.extend({
       }
     })];
   }
-}), m1e = 10 * 1024 * 1024, Fp = ["image/jpeg", "image/png", "image/gif", "image/webp"], g1e = ({ node: t, deleteNode: e, selected: n, extension: i }) => {
-  const { src: r, uploadStatus: s, alt: o } = t.attrs, l = i.options.uploadConfig?.labels, c = we(null), d = Ze((u) => {
-    u.preventDefault(), u.stopPropagation(), e();
+}), m1e = 10 * 1024 * 1024, Fp = ["image/jpeg", "image/png", "image/gif", "image/webp"], g1e = ({ node: t, deleteNode: e, selected: n, extension: i, editor: r }) => {
+  const { src: s, uploadStatus: o, alt: a } = t.attrs, c = i.options.uploadConfig?.labels, d = r.isEditable, u = we(null), h = Ze((p) => {
+    p.preventDefault(), p.stopPropagation(), e();
   }, [e]);
   return f(Jf, {
     contentEditable: !1,
@@ -62423,46 +62423,46 @@ const Qde = Zde.extend({
       className: F("image-block group relative my-4", {
         "is-selected": n
       }),
-      onClick: (u) => u.stopPropagation(),
-      children: [s === "uploading" && x("div", {
+      onClick: (p) => p.stopPropagation(),
+      children: [o === "uploading" && x("div", {
         className: "image-upload-overlay",
         children: [f(d1, {
           className: "h-8 w-8 animate-spin"
         }), f("span", {
           className: "text-sm text-white",
-          children: l?.uploading || "Uploading..."
+          children: c?.uploading || "Uploading..."
         })]
-      }), s === "error" && x("div", {
+      }), o === "error" && x("div", {
         className: "image-error",
         children: [f(t0, {
           className: "h-8 w-8 text-f1-foreground-critical"
         }), f("span", {
           className: "text-sm text-f1-foreground-critical",
-          children: l?.uploadError || "Upload failed"
+          children: c?.uploadError || "Upload failed"
         }), f(Wt, {
-          onClick: d,
+          onClick: h,
           variant: "outline",
           size: "sm",
-          label: l?.deleteImage || "Remove"
+          label: c?.deleteImage || "Remove"
         })]
-      }), r && s !== "error" && f("img", {
-        ref: c,
-        src: r,
-        alt: o || "",
-        className: F("max-w-full rounded-lg transition-opacity", s === "uploading" && "opacity-50"),
+      }), s && o !== "error" && f("img", {
+        ref: u,
+        src: s,
+        alt: a || "",
+        className: F("max-w-full rounded-lg transition-opacity", o === "uploading" && "opacity-50"),
         draggable: !1
-      }), !r && s === "uploading" && f("div", {
+      }), !s && o === "uploading" && f("div", {
         className: "flex h-48 w-full items-center justify-center rounded-lg bg-f1-background-secondary",
         children: f(d1, {
           className: "h-8 w-8 animate-spin"
         })
-      }), s === "success" && f("div", {
+      }), o === "success" && d && f("div", {
         className: "image-toolbar",
         children: f("button", {
           type: "button",
-          onClick: d,
+          onClick: h,
           className: "flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-f1-background-secondary",
-          title: l?.deleteImage || "Delete",
+          title: c?.deleteImage || "Delete",
           children: f(Es, {
             className: "h-5 w-5 text-f1-foreground-secondary"
           })
