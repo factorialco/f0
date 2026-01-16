@@ -1,51 +1,133 @@
-# F0 Design System
+# F0 React Native 🎨
 
-F0 is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
+React Native implementation of the F0 Design System.
 
-## Packages
+## 🚀 Quick Setup
 
-This monorepo contains the following packages:
-
-- `@factorialco/f0-core`: Core tokens and utilities shared across platforms (located in `packages/core`)
-- `@factorialco/f0-react-native`: React Native implementation of the design system (located in `packages/react-native`)
-- `@factorialco/f0-react`: React implementation of the design system (existing)
-
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm 9+
-
-### Setup
+### 1️⃣ Install Dependencies
 
 ```bash
-# Install dependencies
-pnpm install
+# Install package and peer dependencies
+pnpm add @factorialco/f0-react-native \
+  date-fns@^3.6.0 \
+  nativewind@^4.2.1 \
+  react-native-reanimated@^3.19.4 \
+  react-native-safe-area-context@^5.4.0 \
+  react-native-svg@^15.12.1 \
+  react-native-worklets-core@^1.6.2 \
+  tailwindcss@^3.4.19 \
+  twemoji-parser@^14.0.0
+
+# Install dev dependencies
+pnpm add -D tailwindcss@^3.4.19
 ```
 
-### Building
+### 2️⃣ Configure Babel
 
-```bash
-# Build all packages
-pnpm build
+**`babel.config.js`:**
 
-# Build a specific package
-pnpm --filter @factorialco/f0-core build
-pnpm --filter @factorialco/f0-react-native build
+```javascript
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }], // Expo only
+      "nativewind/babel",
+    ],
+    plugins: [
+      "react-native-worklets-core/plugin",
+      "react-native-reanimated/plugin", // MUST be last
+    ],
+  };
+};
 ```
 
-### Testing
+### 3️⃣ Configure Metro
+
+**`metro.config.js`:**
+
+```javascript
+const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require("nativewind/metro");
+
+const config = getDefaultConfig(__dirname);
+module.exports = withNativeWind(config, { input: "./global.css" });
+```
+
+### 4️⃣ Configure Tailwind
+
+**`tailwind.config.js`:**
+
+```javascript
+const f0Config = require("@factorialco/f0-react-native/tailwind.config");
+
+module.exports = {
+  ...f0Config,
+  content: [
+    ...(f0Config.content || []),
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  presets: [require("nativewind/preset"), ...(f0Config.presets || [])],
+};
+```
+
+### 5️⃣ Create Global CSS
+
+**`global.css` (root):**
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+**Import in your entry file (`App.tsx` or `index.js`):**
+
+```typescript
+import "./global.css";
+```
+
+### 6️⃣ TypeScript Support (Optional)
+
+**`nativewind-env.d.ts` (root):**
+
+```typescript
+/// <reference types="nativewind/types" />
+```
+
+## 📦 Usage
+
+```tsx
+import { Button, Icon, AppIcons } from "@factorialco/f0-react-native";
+
+export default function App() {
+  return (
+    <>
+      <Button>Click me</Button>
+      <Icon icon={AppIcons.Calendar} size="md" />
+    </>
+  );
+}
+```
+
+## 🔧 Development
 
 ```bash
-# Run tests for all packages
+# Run tests
 pnpm test
 
-# Run tests for a specific package
-pnpm --filter @factorialco/f0-core test
-pnpm --filter @factorialco/f0-react-native test
+# Type check
+pnpm tsc-check
+
+# Lint
+pnpm lint
 ```
 
-## License
+## 📚 Documentation
+
+For detailed installation guide, see [docs/INSTALLATION.md](./docs/INSTALLATION.md).
+
+## 📄 License
 
 MIT
