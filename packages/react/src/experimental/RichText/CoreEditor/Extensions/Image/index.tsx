@@ -56,10 +56,12 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
   deleteNode,
   selected,
   extension,
+  editor,
 }) => {
   const { src, uploadStatus, alt } = node.attrs as ImageAttributes
   const config = extension.options.uploadConfig as ImageUploadConfig | undefined
   const labels = config?.labels
+  const isEditable = editor.isEditable
 
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -127,8 +129,8 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
           </div>
         )}
 
-        {/* Toolbar - visible on hover via CSS */}
-        {uploadStatus === "success" && (
+        {/* Toolbar - visible on hover, only in edit mode */}
+        {uploadStatus === "success" && isEditable && (
           <div className="image-toolbar">
             <button
               type="button"
