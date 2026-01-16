@@ -1,49 +1,58 @@
-# F0 Design System
+# F0 Core
 
-F0 is a comprehensive design system for building consistent user interfaces across web and mobile platforms.
+Core tokens and utilities for the F0 Design System.
 
-## Packages
-
-This monorepo contains the following packages:
-
-- `@factorialco/f0-core`: Core tokens and utilities shared across platforms (located in `packages/core`)
-- `@factorialco/f0-react-native`: React Native implementation of the design system (located in `packages/react-native`)
-- `@factorialco/f0-react`: React implementation of the design system (existing)
-
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm 9+
-
-### Setup
+## Installation
 
 ```bash
-# Install dependencies
-pnpm install
+npm install @factorialco/f0-core
+# or
+yarn add @factorialco/f0-core
+# or
+pnpm add @factorialco/f0-core
 ```
+
+## Usage
+
+```tsx
+import { semanticColors, spacing, fontSizes } from "@factorialco/f0-core"
+
+// Use tokens in your styles
+const styles = {
+  container: {
+    padding: spacing[4],
+    backgroundColor: semanticColors.background.default.light,
+  },
+  text: {
+    fontSize: fontSizes.base,
+    color: semanticColors.foreground.default.light,
+  },
+}
+```
+
+## Available Tokens
+
+- `semanticColors`: Semantic color tokens for light and dark themes
+- `baseColors`: Raw color values
+- `spacing`: Spacing scale
+- `fontSizes`: Font size scale
+- `fontWeights`: Font weight values
+- `lineHeights`: Line height values
+- `letterSpacings`: Letter spacing values
+- `borderRadius`: Border radius values
+
+## Development
 
 ### Building
 
 ```bash
-# Build all packages
 pnpm build
-
-# Build a specific package
-pnpm --filter @factorialco/f0-core build
-pnpm --filter @factorialco/f0-react-native build
 ```
 
 ### Testing
 
 ```bash
-# Run tests for all packages
 pnpm test
-
-# Run tests for a specific package
-pnpm --filter @factorialco/f0-core test
-pnpm --filter @factorialco/f0-react-native test
 ```
 
 ## License
