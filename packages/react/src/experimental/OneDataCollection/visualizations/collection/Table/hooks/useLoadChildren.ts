@@ -16,6 +16,10 @@ import {
 } from "@/hooks/datasource/types/nested.typings"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useNestedDataContext } from "../providers/NestedProvider"
+import {
+  RefetchChildrenPayload,
+  subscribeToReloadChildren,
+} from "./childrenEvents"
 
 interface UseLoadChildrenProps<
   R extends RecordType,
@@ -151,6 +155,52 @@ export const useLoadChildren = <
 
     return loadedChildren
   }, [children, item, source, rowId, updateFetchedData, paginationInfo])
+
+  const refetchChildren = useCallback(
+    async (updatedItem: R) => {
+      setChildren([])
+      setPaginationInfo(undefined)
+      setChildrenType("basic")
+      clearFetchedData()
+      onClearFetchedData()
+
+      setIsLoading(true)
+
+      const data = await source.fetchChildren?.({
+        item: updatedItem,
+        filters: source.currentFilters,
+        pagination: undefined,
+        sortings: source.currentSortings,
+      })
+      const loadedChildren = getChildren(data)
+
+      setChildren(loadedChildren)
+
+      const updatedData: ChildrenResponse<R> = {
+        records: loadedChildren,
+        type: data?.type,
+        paginationInfo: data?.paginationInfo,
+      }
+
+      updateFetchedData(rowId, updatedData)
+      setChildrenType(getChildrenType(data))
+      setPaginationInfo(data?.paginationInfo)
+      setIsLoading(false)
+
+      return loadedChildren
+    },
+    [source, rowId, updateFetchedData, clearFetchedData, onClearFetchedData]
+  )
+
+  useEffect(() => {
+    return subscribeToReloadChildren((payload) => {
+      if (!payload.rowId || payload.rowId === rowId) {
+        const updatedItem =
+          (payload as RefetchChildrenPayload<R>).updatedItem ?? item
+        refetchChildren(updatedItem)
+      }
+    })
+  }, [rowId, item, refetchChildren])
 
   return {
     children,
