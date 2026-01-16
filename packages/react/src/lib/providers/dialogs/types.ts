@@ -66,7 +66,7 @@ export type DialogDefinition = {
   actions: DialogActions
   /*
    * The variant of the dialog.
-`   */
+   */
   variant?: DialogVariant
   /*
    * If true, the dialog will not be closed automatically when an action is clicked.
