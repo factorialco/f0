@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.327.2](https://github.com/factorialco/f0/compare/f0-react-v1.327.1...f0-react-v1.327.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* add reset to :focus-visible ([#3246](https://github.com/factorialco/f0/issues/3246)) ([57ef687](https://github.com/factorialco/f0/commit/57ef687101ba7964331764b0e7bc0491adb2887e))
+
 ## [1.327.1](https://github.com/factorialco/f0/compare/f0-react-v1.327.0...f0-react-v1.327.1) (2026-01-16)
 
 
