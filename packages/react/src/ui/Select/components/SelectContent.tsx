@@ -215,6 +215,7 @@ const SelectContent = forwardRef<
       <SelectPrimitive.Content
         ref={ref}
         asChild={asChild}
+        disableScrollLock={asList}
         className={cn(
           "relative z-50 text-f1-foreground",
           asList
@@ -264,7 +265,7 @@ const SelectContent = forwardRef<
           <div
             className={cn(
               "relative",
-              asList && "flex flex-col overflow-hidden"
+              asList && "flex flex-col overflow-hidden flex-1 min-h-0"
             )}
           >
             {!asList && props.top}
@@ -283,7 +284,7 @@ const SelectContent = forwardRef<
                 "flex flex-col",
                 // Dynamic max-height: min of desired height and available viewport space minus top/bottom content
                 asList
-                  ? "max-h-[412px]"
+                  ? "h-full"
                   : taller
                     ? "max-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]"
                     : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]",

@@ -5,8 +5,8 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 import type { F0SelectItemObject } from "../types"
 import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
-import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
+import { ButtonInternal } from "@/components/F0Button/internal"
 
 export type SelectAllProps = {
   selectedCount: number | Promise<number>
@@ -88,13 +88,14 @@ export const SelectAll = ({
           />
         </div>
       ) : (
-        items &&
-        items.length > 0 && (
-          <F0Button
+        items && (
+          <ButtonInternal
             variant="ghost"
             size="sm"
             label={i18n.actions.clear}
             onClick={() => handleChange(false)}
+            className="z-10"
+            disabled={items.length === 0}
           />
         )
       )}
