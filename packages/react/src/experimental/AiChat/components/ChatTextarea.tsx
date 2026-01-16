@@ -1,5 +1,6 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { FileItem } from "@/experimental/RichText/FileItem"
+import { ArrowUp, Paperclip, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { type InputProps } from "@copilotkit/react-ui"
@@ -152,10 +153,24 @@ export const ChatTextarea = ({
   const [inputValue, setInputValue] = useState("")
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const translation = useI18n()
-  const { placeholders } = useAiChat()
+  const { placeholders, attachments, addAttachments, removeAttachment } =
+    useAiChat()
 
-  const hasDataToSend = inputValue.trim().length > 0
+  const hasDataToSend = inputValue.trim().length > 0 || attachments.length > 0
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length > 0) {
+      addAttachments(files)
+    }
+    e.target.value = ""
+  }
+
+  const handlePaperclipClick = () => {
+    fileInputRef.current?.click()
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -210,6 +225,35 @@ export const ChatTextarea = ({
       }}
       onSubmit={handleSubmit}
     >
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        onChange={handleFileSelect}
+        className="hidden"
+        aria-label={translation.ai.attachFile}
+      />
+
+      {/* Attachments preview */}
+      {attachments.length > 0 && (
+        <div className="flex w-full gap-2 overflow-x-auto px-3 pt-3 pb-1 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {attachments.map((file, index) => (
+            <FileItem
+              key={`${file.name}-${index}`}
+              file={file}
+              actions={[
+                {
+                  label: translation.ai.removeAttachment,
+                  onClick: () => removeAttachment(index),
+                  critical: true,
+                },
+              ]}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="grid min-h-[40px] flex-1 grid-cols-1 grid-rows-1">
         <div
           aria-hidden={true}
@@ -254,7 +298,19 @@ export const ChatTextarea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-row-reverse sm:p-3 sm:pt-0 p-1">
+      <div className="flex shrink-0 items-center justify-between gap-1 p-1 sm:p-3 sm:pt-0">
+        {/* Paperclip button */}
+        <ButtonInternal
+          type="button"
+          variant="ghost"
+          label={translation.ai.attachFile}
+          icon={Paperclip}
+          hideLabel
+          onClick={handlePaperclipClick}
+          disabled={inProgress}
+        />
+
+        {/* Send/Stop button */}
         {inProgress ? (
           <ButtonInternal
             type="submit"

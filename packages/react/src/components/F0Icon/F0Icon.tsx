@@ -84,7 +84,12 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
         ref={ref}
         {...props}
         animate={state}
-        className={cn(iconVariants({ size }), "select-none", colorClass)}
+        className={cn(
+          iconVariants({ size }),
+          "select-none",
+          colorClass,
+          props.className
+        )}
         style={colorStyle}
         data-has-color={color !== "currentColor" ? "true" : undefined}
       />
@@ -95,7 +100,12 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
     <Component
       ref={ref}
       {...props}
-      className={cn("aspect-square", iconVariants({ size }), colorClass)}
+      className={cn(
+        "aspect-square",
+        iconVariants({ size }),
+        colorClass,
+        props.className
+      )}
       style={colorStyle}
       data-has-color={color !== "currentColor" ? "true" : undefined}
     />

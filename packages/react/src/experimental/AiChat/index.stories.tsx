@@ -55,7 +55,10 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <div className="h-full w-full bg-[hsl(0,0,98)]">
+        <div
+          className="h-full w-full bg-f1-background-tertiary"
+          data-theme="light"
+        >
           <AiChatProvider
             enabled
             runtimeUrl="https://mastra.local.factorial.dev/copilotkit"

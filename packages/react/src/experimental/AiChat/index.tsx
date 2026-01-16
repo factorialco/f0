@@ -24,7 +24,12 @@ import {
   UserMessage,
 } from "./components"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
-import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import {
+  AiChatStateProvider,
+  useAiChat,
+  type FileValidationConfig,
+  type RejectedFile,
+} from "./providers/AiChatStateProvider"
 
 export type AiChatProviderProps = {
   enabled?: boolean
@@ -39,6 +44,14 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  /**
+   * Callback when files are rejected during attachment (due to size or type)
+   */
+  onFilesRejected?: (rejectedFiles: RejectedFile[]) => void
+  /**
+   * Configuration for file validation. If not provided, all files are accepted.
+   */
+  fileValidation?: FileValidationConfig
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -57,6 +70,8 @@ const AiChatProviderCmp = ({
   welcomeScreenSuggestions,
   onThumbsUp,
   onThumbsDown,
+  onFilesRejected,
+  fileValidation,
   children,
   agent,
   ...copilotKitProps
@@ -70,6 +85,8 @@ const AiChatProviderCmp = ({
       initialMessage={initialMessage}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
+      onFilesRejected={onFilesRejected}
+      fileValidation={fileValidation}
       agent={agent}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
     >

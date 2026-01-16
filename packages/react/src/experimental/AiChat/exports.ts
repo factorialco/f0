@@ -3,7 +3,12 @@ export {
   type HILActionConfirmationProps,
 } from "./HILActionConfirmation"
 export { AiChat, AiChatProvider, type AiChatProviderProps } from "./index"
-export { useAiChat } from "./providers/AiChatStateProvider"
+export {
+  useAiChat,
+  type FileRejectionReason,
+  type FileValidationConfig,
+  type RejectedFile,
+} from "./providers/AiChatStateProvider"
 
 export { ActionItem, type ActionItemProps } from "./ActionItem"
 export {

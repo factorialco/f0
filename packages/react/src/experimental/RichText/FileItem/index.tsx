@@ -55,8 +55,10 @@ const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
               size="md"
               icon={singleAction.icon ?? CrossedCircle}
               className={cn(
-                "cursor-pointer text-f1-icon",
-                disabled ? "cursor-not-allowed" : "hover:text-f1-icon-bold",
+                "text-f1-icon",
+                disabled
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer hover:text-f1-icon-bold",
                 singleAction.critical && "text-f1-foreground-critical"
               )}
               onClick={disabled ? undefined : singleAction.onClick}
