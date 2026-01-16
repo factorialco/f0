@@ -106,6 +106,7 @@ export const useLoadChildren = <
   const previousSortingsRef = useRef(source.currentSortings)
 
   useEffect(() => {
+    console.warn("useEffect", source.currentFilters, source.currentSortings)
     const filtersChanged = previousFiltersRef.current !== source.currentFilters
     const sortingsChanged =
       previousSortingsRef.current !== source.currentSortings
@@ -123,6 +124,7 @@ export const useLoadChildren = <
   }, [source.currentFilters, source.currentSortings, clearFetchedData])
 
   const loadChildren = useCallback(async () => {
+    console.warn("loadChildren", children, paginationInfo)
     if (children.length > 0 && !paginationInfo?.hasMore) return children
 
     setIsLoading(true)
