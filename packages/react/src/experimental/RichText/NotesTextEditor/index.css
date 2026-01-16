@@ -253,3 +253,35 @@ Placeholder component
 .notes-text-editor .resize-cursor {
   @apply cursor-col-resize;
 }
+
+/* Image block styling */
+.notes-text-editor .image-block {
+  @apply relative my-4;
+}
+
+.notes-text-editor .image-block img {
+  @apply max-w-full rounded-lg;
+}
+
+.notes-text-editor .image-block.is-selected {
+  @apply rounded-lg outline outline-2 outline-offset-2 outline-f1-border-selected-bold;
+}
+
+.notes-text-editor .image-upload-overlay {
+  @apply absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-lg;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.notes-text-editor .image-error {
+  @apply flex flex-col items-center gap-3 rounded-lg bg-f1-background-secondary p-8;
+}
+
+.notes-text-editor .image-toolbar {
+  @apply absolute right-2 top-2 flex gap-1 rounded-md bg-f1-background p-1 opacity-0 shadow-md transition-opacity;
+}
+
+.notes-text-editor .image-block:hover .image-toolbar,
+.notes-text-editor .image-block.is-selected .image-toolbar {
+  @apply opacity-100;
+}

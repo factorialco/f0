@@ -8,6 +8,7 @@ import {
   DetailsExtension,
   DetailsSummaryExtension,
   HighlightExtension,
+  ImageBlockExtension,
   LinkExtension,
   MoodTrackerExtension,
   PersistSelection,
@@ -25,6 +26,7 @@ import {
   AIBlockExtension,
   AIBlockLabels,
 } from "@/experimental/RichText/CoreEditor/Extensions/AIBlock"
+import { ImageUploadConfig } from "@/experimental/RichText/CoreEditor/Extensions/Image"
 import {
   LiveCompanionConfig,
   LiveCompanionExtension,
@@ -49,7 +51,8 @@ export const createNotesTextEditorExtensions = (
   aiBlockLabels?: AIBlockLabels,
   moodTrackerLabels?: MoodTrackerLabels,
   liveCompanionLabels?: LiveCompanionLabels,
-  transcriptLabels?: TranscriptLabels
+  transcriptLabels?: TranscriptLabels,
+  imageUploadConfig?: ImageUploadConfig
 ) => {
   // Create enhanced config with labels if both are provided
   const enhancedAIBlockConfig =
@@ -95,6 +98,9 @@ export const createNotesTextEditorExtensions = (
     AIBlockExtension.configure({
       currentConfig: enhancedAIBlockConfig,
     }),
+    ImageBlockExtension.configure({
+      uploadConfig: imageUploadConfig,
+    }),
     BlockIdExtension, // Automatically add unique IDs to all block nodes
     PersistSelection,
     createPlaceholderExtension(placeholder),
@@ -102,7 +108,8 @@ export const createNotesTextEditorExtensions = (
     createSlashCommandExtension(
       toolbarLabels,
       groupLabels,
-      enhancedAIBlockConfig
+      enhancedAIBlockConfig,
+      imageUploadConfig
     ),
   ]
 }
