@@ -81,7 +81,7 @@
     }
   },
   "dependencies": {
-    "@factorialco/f0-core": "workspace:*",
+    "@factorialco/f0-core": "latest",
     "clsx": "^2.1.1",
     "cva": "1.0.0-beta.3",
     "expo-clipboard": "~8.0.8",
