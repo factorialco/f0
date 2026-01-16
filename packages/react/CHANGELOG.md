@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.328.0](https://github.com/factorialco/f0/compare/f0-react-v1.327.3...f0-react-v1.328.0) (2026-01-16)
+
+
+### Features
+
+* card border color ([#3252](https://github.com/factorialco/f0/issues/3252)) ([18f3964](https://github.com/factorialco/f0/commit/18f39640a6b02c952cff2c0ce85ca078b00858c1))
+
 ## [1.327.3](https://github.com/factorialco/f0/compare/f0-react-v1.327.2...f0-react-v1.327.3) (2026-01-16)
 
 
