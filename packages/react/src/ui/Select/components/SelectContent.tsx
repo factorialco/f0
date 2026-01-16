@@ -215,6 +215,7 @@ const SelectContent = forwardRef<
       <SelectPrimitive.Content
         ref={ref}
         asChild={asChild}
+        disableScrollLock={asList}
         className={cn(
           "relative z-50 text-f1-foreground",
           asList

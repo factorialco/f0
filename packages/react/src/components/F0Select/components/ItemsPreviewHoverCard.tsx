@@ -7,6 +7,7 @@ import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 import { motion } from "motion/react"
 import type { ReactNode } from "react"
 import type { F0SelectItemObject } from "../types"
+import { OneEllipsis } from "@/components/OneEllipsis"
 
 type ItemsPreviewHoverCardProps = {
   items: F0SelectItemObject<string>[]
@@ -23,12 +24,12 @@ const ItemContent = ({
   onDeselect?: (value: string) => void
 }) => (
   <div className="dark flex w-full min-w-0 items-center justify-between gap-1.5 rounded-md border border-solid border-f1-border-secondary px-1 py-0.5">
-    <div className="flex items-center gap-1.5">
+    <div className="flex min-w-0 flex-1 items-center gap-1.5">
       {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
       {item.icon && (
         <F0Icon icon={item.icon} size="sm" className="shrink-0 text-f1-icon" />
       )}
-      <span className="truncate text-sm">{item.label}</span>
+      <OneEllipsis className="text-sm">{item.label}</OneEllipsis>
     </div>
     {onDeselect && (
       <motion.button
@@ -77,7 +78,7 @@ export const ItemsPreviewHoverCard = ({
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[280px] flex-col">
+        <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[280px] max-w-[300px] flex-col">
           {items.map((item, index) => (
             <div
               key={index}
