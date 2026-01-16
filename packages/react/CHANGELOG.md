@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.327.1](https://github.com/factorialco/f0/compare/f0-react-v1.327.0...f0-react-v1.327.1) (2026-01-16)
+
+
+### Bug Fixes
+
+* dialog in mobile not showing up correctly ([#3244](https://github.com/factorialco/f0/issues/3244)) ([c0f903a](https://github.com/factorialco/f0/commit/c0f903ab8357eb26b62c4080483689334813c222))
+
 ## [1.327.0](https://github.com/factorialco/f0/compare/f0-react-v1.326.0...f0-react-v1.327.0) (2026-01-15)
 
 
