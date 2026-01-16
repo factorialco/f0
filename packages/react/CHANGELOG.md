@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.327.3](https://github.com/factorialco/f0/compare/f0-react-v1.327.2...f0-react-v1.327.3) (2026-01-16)
+
+
+### Bug Fixes
+
+* **F0Select:** improve layout on asList version ([#3243](https://github.com/factorialco/f0/issues/3243)) ([8d0c5ae](https://github.com/factorialco/f0/commit/8d0c5ae521368aa8b5affaeb15dd117a95c48b9e))
+
 ## [1.327.2](https://github.com/factorialco/f0/compare/f0-react-v1.327.1...f0-react-v1.327.2) (2026-01-16)
 
 
