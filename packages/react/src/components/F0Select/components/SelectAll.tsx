@@ -88,14 +88,14 @@ export const SelectAll = ({
           />
         </div>
       ) : (
-        items &&
-        items.length > 0 && (
+        items && (
           <ButtonInternal
             variant="ghost"
             size="sm"
             label={i18n.actions.clear}
             onClick={() => handleChange(false)}
             className="z-10"
+            disabled={items.length === 0}
           />
         )
       )}
