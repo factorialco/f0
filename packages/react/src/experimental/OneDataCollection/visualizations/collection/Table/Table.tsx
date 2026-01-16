@@ -138,6 +138,12 @@ export const TableCollection = <
   }, [paginationInfo?.total, data.records])
 
   const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
+  const getRowKey = (item: R, index: number) => {
+    if ("id" in item && item.id !== undefined && item.id !== null) {
+      return String(item.id)
+    }
+    return String(index)
+  }
 
   /**
    * Item selection
@@ -379,7 +385,7 @@ export const TableCollection = <
                             animate="visible"
                             exit="hidden"
                             custom={index}
-                            key={`row-${groupIndex}-${index}`}
+                            key={`row-${groupIndex}-${getRowKey(item, index)}`}
                             layout
                             source={source}
                             item={item}
@@ -403,7 +409,7 @@ export const TableCollection = <
             data.records.map((item, index) => {
               return (
                 <Row
-                  key={`row-${index}`}
+                  key={`row-${getRowKey(item, index)}`}
                   groupIndex={0}
                   source={source}
                   item={item}
