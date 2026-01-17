@@ -2513,6 +2513,12 @@ declare const defaultTranslations: {
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
     };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+    };
     readonly coCreationForm: {
         readonly actions: {
             readonly actions: "Actions";
@@ -3577,16 +3583,6 @@ export declare interface ImageUploadConfig {
         url: string;
         signedId?: string;
     }>;
-    maxSize?: number;
-    acceptedTypes?: string[];
-    labels?: ImageUploadLabels;
-}
-
-export declare interface ImageUploadLabels {
-    uploadError?: string;
-    uploading?: string;
-    insertImage?: string;
-    deleteImage?: string;
 }
 
 declare const Indicator: ForwardRefExoticComponent<IndicatorProps & RefAttributes<HTMLDivElement>>;

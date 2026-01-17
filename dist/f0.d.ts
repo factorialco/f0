@@ -1906,6 +1906,12 @@ export declare const defaultTranslations: {
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
     };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+    };
     readonly coCreationForm: {
         readonly actions: {
             readonly actions: "Actions";

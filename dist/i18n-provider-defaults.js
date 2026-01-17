@@ -384,6 +384,12 @@ const e = {
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}"
   },
+  imageUpload: {
+    uploading: "Uploading...",
+    uploadError: "Upload failed",
+    insertImage: "Image",
+    deleteImage: "Delete"
+  },
   coCreationForm: {
     actions: {
       actions: "Actions",
