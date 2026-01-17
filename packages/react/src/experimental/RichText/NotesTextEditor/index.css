@@ -253,3 +253,40 @@ Placeholder component
 .notes-text-editor .resize-cursor {
   @apply cursor-col-resize;
 }
+
+/* Image block styling */
+.notes-text-editor .image-block-wrapper {
+  @apply my-4 block text-center;
+}
+
+.notes-text-editor .image-block {
+  @apply relative inline-block text-left;
+}
+
+.notes-text-editor .image-block img {
+  @apply h-auto w-auto max-w-full rounded-lg;
+  display: block;
+}
+
+.notes-text-editor .image-block.is-selected {
+  @apply rounded-lg ring-2 ring-f1-border-hover;
+}
+
+.notes-text-editor .image-upload-overlay {
+  @apply absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-lg;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.notes-text-editor .image-error {
+  @apply flex flex-col items-center gap-3 rounded-lg bg-f1-background-secondary p-8;
+}
+
+.notes-text-editor .image-toolbar {
+  @apply absolute right-2 top-2 flex gap-1 rounded-md bg-f1-background p-1 opacity-0 shadow-md transition-opacity;
+}
+
+.notes-text-editor .image-block:hover .image-toolbar,
+.notes-text-editor .image-block.is-selected .image-toolbar {
+  @apply opacity-100;
+}

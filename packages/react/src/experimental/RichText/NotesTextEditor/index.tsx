@@ -23,6 +23,7 @@ import {
   useState,
 } from "react"
 import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
+import { ImageUploadConfig } from "../CoreEditor/Extensions/Image"
 import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
 import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
@@ -42,6 +43,7 @@ interface NotesTextEditorProps {
   initialEditorState?: { content?: JSONContent | string; title?: string }
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
   labels: {
     toolbarLabels: ToolbarLabels
@@ -70,6 +72,7 @@ const NotesTextEditorComponent = forwardRef<
     readonly = false,
     labels,
     aiBlockConfig,
+    imageUploadConfig,
     onTitleChange,
     actions,
     secondaryActions,
@@ -120,7 +123,8 @@ const NotesTextEditorComponent = forwardRef<
       aiBlockLabels,
       moodTrackerLabels,
       liveCompanionLabels,
-      transcriptLabels
+      transcriptLabels,
+      imageUploadConfig
     ),
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
@@ -184,6 +188,10 @@ const NotesTextEditorComponent = forwardRef<
         .focus()
         .insertContentAt(editor.state.doc.content.size, content)
         .run()
+    },
+    insertImage: (file: File) => {
+      if (!editor || !imageUploadConfig) return
+      editor.commands.insertImageBlock(file)
     },
   }))
 
@@ -408,6 +416,7 @@ export const NotesTextEditorSkeleton = ({
 }
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
+export type { ImageUploadConfig } from "./types"
 export { NotesTextEditorComponent as NotesTextEditor }
 export type {
   NotesTextEditorHandle,
