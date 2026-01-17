@@ -75,9 +75,9 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
   )
 
   return (
-    <NodeViewWrapper contentEditable={false}>
+    <NodeViewWrapper contentEditable={false} className="image-block-wrapper">
       <div
-        className={cn("image-block group relative my-4", {
+        className={cn("image-block group", {
           "is-selected": selected,
         })}
         onClick={(e) => e.stopPropagation()}

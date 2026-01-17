@@ -255,16 +255,21 @@ Placeholder component
 }
 
 /* Image block styling */
+.notes-text-editor .image-block-wrapper {
+  @apply my-4 block text-center;
+}
+
 .notes-text-editor .image-block {
-  @apply relative my-4;
+  @apply relative inline-block text-left;
 }
 
 .notes-text-editor .image-block img {
-  @apply max-w-full rounded-lg;
+  @apply h-auto w-auto max-w-full rounded-lg;
+  display: block;
 }
 
 .notes-text-editor .image-block.is-selected {
-  @apply rounded-lg outline outline-2 outline-offset-2 outline-f1-border-selected-bold;
+  @apply rounded-lg ring-2 ring-f1-border-hover;
 }
 
 .notes-text-editor .image-upload-overlay {
