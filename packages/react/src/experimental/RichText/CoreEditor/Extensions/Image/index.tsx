@@ -1,25 +1,16 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Delete, AlertCircle, Spinner } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Node, mergeAttributes } from "@tiptap/core"
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react"
 import type { NodeViewProps } from "@tiptap/react"
 import { Plugin, PluginKey } from "@tiptap/pm/state"
-import React, { useCallback, useRef } from "react"
+import React, { useCallback } from "react"
 
 // Types
 export interface ImageUploadConfig {
   onUpload: (file: File) => Promise<{ url: string; signedId?: string }>
-  maxSize?: number // bytes, default 10MB
-  acceptedTypes?: string[] // default image types
-  labels?: ImageUploadLabels
-}
-
-export interface ImageUploadLabels {
-  uploadError?: string
-  uploading?: string
-  insertImage?: string
-  deleteImage?: string
 }
 
 interface ImageAttributes {
@@ -33,14 +24,13 @@ interface ImageAttributes {
 
 // Default configuration
 const DEFAULT_MAX_SIZE = 10 * 1024 * 1024 // 10MB
-const DEFAULT_ACCEPTED_TYPES = [
+export const DEFAULT_ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
   "image/gif",
   "image/webp",
 ]
 
-// Extend TipTap commands
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     imageBlock: {
@@ -50,20 +40,15 @@ declare module "@tiptap/core" {
   }
 }
 
-// React component for rendering the image node
 const ImageBlockView: React.FC<NodeViewProps> = ({
   node,
   deleteNode,
   selected,
-  extension,
   editor,
 }) => {
   const { src, uploadStatus, alt } = node.attrs as ImageAttributes
-  const config = extension.options.uploadConfig as ImageUploadConfig | undefined
-  const labels = config?.labels
+  const { imageUpload: labels } = useI18n()
   const isEditable = editor.isEditable
-
-  const imgRef = useRef<HTMLImageElement>(null)
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
@@ -86,9 +71,7 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
         {uploadStatus === "uploading" && (
           <div className="image-upload-overlay">
             <Spinner className="h-8 w-8 animate-spin" />
-            <span className="text-sm text-white">
-              {labels?.uploading || "Uploading..."}
-            </span>
+            <span className="text-sm text-white">{labels.uploading}</span>
           </div>
         )}
 
@@ -97,13 +80,13 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
           <div className="image-error">
             <AlertCircle className="h-8 w-8 text-f1-foreground-critical" />
             <span className="text-sm text-f1-foreground-critical">
-              {labels?.uploadError || "Upload failed"}
+              {labels.uploadError}
             </span>
             <ButtonInternal
               onClick={handleDelete}
               variant="outline"
               size="sm"
-              label={labels?.deleteImage || "Remove"}
+              label={labels.deleteImage}
             />
           </div>
         )}
@@ -111,7 +94,6 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
         {/* Image display */}
         {src && uploadStatus !== "error" && (
           <img
-            ref={imgRef}
             src={src}
             alt={alt || ""}
             className={cn(
@@ -136,7 +118,7 @@ const ImageBlockView: React.FC<NodeViewProps> = ({
               type="button"
               onClick={handleDelete}
               className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-f1-background-secondary"
-              title={labels?.deleteImage || "Delete"}
+              title={labels.deleteImage}
             >
               <Delete className="h-5 w-5 text-f1-foreground-secondary" />
             </button>
@@ -244,15 +226,13 @@ export const ImageBlockExtension = Node.create({
           }
 
           // Validate file type
-          const acceptedTypes = config.acceptedTypes || DEFAULT_ACCEPTED_TYPES
-          if (!acceptedTypes.includes(file.type)) {
+          if (!DEFAULT_ACCEPTED_TYPES.includes(file.type)) {
             console.error("File type not accepted:", file.type)
             return false
           }
 
           // Validate file size
-          const maxSize = config.maxSize || DEFAULT_MAX_SIZE
-          if (file.size > maxSize) {
+          if (file.size > DEFAULT_MAX_SIZE) {
             console.error("File too large:", file.size)
             return false
           }
@@ -359,9 +339,7 @@ export const ImageBlockExtension = Node.create({
             if (!files || files.length === 0) return false
 
             const imageFiles = Array.from(files).filter((file) =>
-              (config.acceptedTypes || DEFAULT_ACCEPTED_TYPES).includes(
-                file.type
-              )
+              DEFAULT_ACCEPTED_TYPES.includes(file.type)
             )
 
             if (imageFiles.length === 0) return false
@@ -456,9 +434,7 @@ export const ImageBlockExtension = Node.create({
             const imageItems = Array.from(items).filter(
               (item) =>
                 item.kind === "file" &&
-                (config.acceptedTypes || DEFAULT_ACCEPTED_TYPES).includes(
-                  item.type
-                )
+                DEFAULT_ACCEPTED_TYPES.includes(item.type)
             )
 
             if (imageItems.length === 0) return false

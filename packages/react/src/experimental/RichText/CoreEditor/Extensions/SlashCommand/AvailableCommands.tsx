@@ -15,7 +15,7 @@ import {
 import { Editor } from "@tiptap/react"
 import { ToolbarLabels } from "../../Toolbar/types"
 import { AIBlockConfig } from "../AIBlock"
-import { ImageUploadConfig } from "../Image"
+import { DEFAULT_ACCEPTED_TYPES, ImageUploadConfig } from "../Image"
 
 interface CommandItem {
   title: string
@@ -332,19 +332,12 @@ const getGroupedCommands = (
       ...(imageUploadConfig
         ? [
             {
-              title: imageUploadConfig.labels?.insertImage || "Image",
+              title: "Image",
               command: (editor: Editor) => {
                 // Create a file input to select an image
                 const input = document.createElement("input")
                 input.type = "file"
-                input.accept = (
-                  imageUploadConfig.acceptedTypes || [
-                    "image/jpeg",
-                    "image/png",
-                    "image/gif",
-                    "image/webp",
-                  ]
-                ).join(",")
+                input.accept = DEFAULT_ACCEPTED_TYPES.join(",")
                 input.onchange = () => {
                   const file = input.files?.[0]
                   if (file) {

@@ -416,7 +416,7 @@ export const NotesTextEditorSkeleton = ({
 }
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
-export type { ImageUploadConfig, ImageUploadLabels } from "./types"
+export type { ImageUploadConfig } from "./types"
 export { NotesTextEditorComponent as NotesTextEditor }
 export type {
   NotesTextEditorHandle,

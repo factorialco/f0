@@ -97,14 +97,6 @@ export const Default: Story = {
 
     imageUploadConfig: {
       onUpload: mockImageUpload,
-      maxSize: 10 * 1024 * 1024, // We need to define the max size of the image
-      acceptedTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
-      labels: {
-        insertImage: "Image",
-        uploading: "Uploading...",
-        uploadError: "Upload failed",
-        deleteImage: "Delete",
-      },
     },
 
     aiBlockConfig: {

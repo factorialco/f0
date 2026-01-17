@@ -3,10 +3,7 @@ import { NewColor } from "@/components/tags/F0TagDot"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Message, User } from "../CoreEditor/Extensions/Transcript"
 
-export type {
-  ImageUploadConfig,
-  ImageUploadLabels,
-} from "../CoreEditor/Extensions/Image"
+export type { ImageUploadConfig } from "../CoreEditor/Extensions/Image"
 
 type NotesTextEditorHandle = {
   clear: () => void
