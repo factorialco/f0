@@ -62419,8 +62419,9 @@ const Qde = Zde.extend({
   }, [e]);
   return f(Jf, {
     contentEditable: !1,
+    className: "image-block-wrapper",
     children: x("div", {
-      className: F("image-block group relative my-4", {
+      className: F("image-block group", {
         "is-selected": n
       }),
       onClick: (p) => p.stopPropagation(),
