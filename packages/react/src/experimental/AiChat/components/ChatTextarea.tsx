@@ -161,8 +161,13 @@ export const ChatTextarea = ({
   const { placeholders } = useAiChat()
 
   // Use centralized attachment state from context
-  const { attachments, addAttachments, removeAttachment, clearAttachments } =
-    useAiChat()
+  const {
+    attachments,
+    addAttachments,
+    removeAttachment,
+    clearAttachments,
+    fileUploadsEnabled,
+  } = useAiChat()
 
   const hasDataToSend = inputValue.trim().length > 0 || attachments.length > 0
   const multiplePlaceholders = placeholders.length > 1
@@ -379,24 +384,30 @@ export const ChatTextarea = ({
         )}
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        onChange={handleFileSelect}
-        className="hidden"
-        aria-label={translation.ai.attachFiles}
-      />
+      {fileUploadsEnabled && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={handleFileSelect}
+          className="hidden"
+          aria-label={translation.ai.attachFiles}
+        />
+      )}
 
       <div className="flex items-center justify-between p-3 pt-0">
-        <ButtonInternal
-          type="button"
-          variant="outline"
-          label={translation.ai.attachFiles}
-          icon={Paperclip}
-          hideLabel
-          onClick={() => fileInputRef.current?.click()}
-        />
+        {fileUploadsEnabled ? (
+          <ButtonInternal
+            type="button"
+            variant="outline"
+            label={translation.ai.attachFiles}
+            icon={Paperclip}
+            hideLabel
+            onClick={() => fileInputRef.current?.click()}
+          />
+        ) : (
+          <div />
+        )}
         <div className="flex gap-2">
           {inProgress || isProcessing ? (
             <ButtonInternal

@@ -106,6 +106,11 @@ type AiChatProviderReturnValue = {
   placeholders: string[]
   setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>
   /**
+   * Whether file uploads are enabled. True when fileValidation is provided.
+   * Use this to conditionally show/hide file upload UI.
+   */
+  fileUploadsEnabled: boolean
+  /**
    * Set the amount of minutes after which the chat will be cleared automatically
    * Set `null` to disable auto-clearing
    *
@@ -469,6 +474,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         removeAttachment,
         clearAttachments,
         setOnBeforeSend,
+        fileUploadsEnabled: fileValidation !== undefined,
       }}
     >
       {children}
@@ -512,6 +518,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       removeAttachment: noopFn,
       clearAttachments: noopFn,
       setOnBeforeSend: noopFn,
+      fileUploadsEnabled: false,
     }
   }
 
