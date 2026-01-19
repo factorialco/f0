@@ -7,7 +7,12 @@ import {
   OneCalendar,
   granularityDefinitions,
 } from "@/experimental/OneCalendar"
-import { DateRange, DateRangeComplete } from "@/experimental/OneCalendar/types"
+import { createWeekGranularity } from "@/experimental/OneCalendar/granularities/week"
+import {
+  DateRange,
+  DateRangeComplete,
+  WeekStartsOn,
+} from "@/experimental/OneCalendar/types"
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -51,6 +56,7 @@ export interface DatePickerPopupProps {
   onCompareToChange?: (
     compareTo: DateRangeComplete | DateRangeComplete[] | undefined
   ) => void
+  weekStartsOn?: WeekStartsOn
 }
 
 const PRESET_CUSTOM = "__custom__"
@@ -67,6 +73,7 @@ export function DatePickerPopup({
   hideCalendarInput,
   value,
   asChild,
+  weekStartsOn,
   ...props
 }: DatePickerPopupProps) {
   const i18n = useI18n()
@@ -87,8 +94,14 @@ export function DatePickerPopup({
   )
 
   const granularityDefinition = useMemo(() => {
-    return granularityDefinitions[localGranularity]
-  }, [localGranularity])
+    const baseGranularity = granularityDefinitions[localGranularity]
+
+    if (localGranularity === "week" && weekStartsOn !== undefined) {
+      return createWeekGranularity(weekStartsOn)
+    }
+
+    return baseGranularity
+  }, [localGranularity, weekStartsOn])
 
   const calendarMode = useMemo(() => {
     return granularityDefinitions[localGranularity].calendarMode || "single"
@@ -264,6 +277,7 @@ export function DatePickerPopup({
                 defaultSelected={localValue?.value}
                 minDate={props.minDate}
                 maxDate={props.maxDate}
+                weekStartsOn={weekStartsOn}
               />
               {compareToOptions.length > 0 && (
                 <div className="mt-4 flex flex-col gap-2">

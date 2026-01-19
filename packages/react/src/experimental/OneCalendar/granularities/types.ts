@@ -8,6 +8,7 @@ import {
   DateRange,
   DateRangeComplete,
   DateRangeString,
+  WeekStartsOn,
 } from "../types"
 
 export type DateNavigationOptions = {
@@ -71,6 +72,7 @@ export interface GranularityDefinition {
     setViewDate: (date: Date) => void
     viewDate: Date
     compact?: boolean
+    weekStartsOn?: WeekStartsOn
   }) => ReactNode
   // Adds a delta to a date range
   add: (date: DateRangeComplete, delta: number) => DateRangeComplete

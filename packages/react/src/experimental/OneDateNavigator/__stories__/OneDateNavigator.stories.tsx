@@ -180,6 +180,31 @@ const meta = {
         detail: "function(open: boolean) => void",
       },
     },
+    weekStartsOn: {
+      description:
+        "The first day of the week. 0 = Sunday, 1 = Monday, 2 = Tuesday, ..., 6 = Saturday. Default is 1 (Monday).",
+      table: {
+        type: {
+          summary: "0 | 1 | 2 | 3 | 4 | 5 | 6",
+        },
+        defaultValue: {
+          summary: "1",
+        },
+      },
+      options: [0, 1, 2, 3, 4, 5, 6],
+      control: {
+        type: "select",
+        labels: {
+          0: "Sunday",
+          1: "Monday",
+          2: "Tuesday",
+          3: "Wednesday",
+          4: "Thursday",
+          5: "Friday",
+          6: "Saturday",
+        },
+      },
+    },
   },
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof OneDateNavigator>
@@ -210,6 +235,7 @@ export const Simple: Story = {
     defaultValue: {
       granularity: "day",
     } as DatePickerValue,
+    weekStartsOn: 1,
     // granularities: ["day", "week", "month"],
   },
 }
@@ -299,6 +325,16 @@ export const WeekView: Story = {
       granularity: "week",
     } as DatePickerValue,
     granularities: ["week"],
+  },
+}
+
+export const WeekViewSundayStart: Story = {
+  args: {
+    defaultValue: {
+      granularity: "week",
+    } as DatePickerValue,
+    granularities: ["week"],
+    weekStartsOn: 0, // Sunday
   },
 }
 

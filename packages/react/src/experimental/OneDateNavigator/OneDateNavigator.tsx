@@ -7,6 +7,7 @@ import {
 import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
 
 import { granularityDefinitions } from "../OneCalendar"
+import { createWeekGranularity } from "../OneCalendar/granularities/week"
 import { DateRange, DateRangeComplete } from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
@@ -50,8 +51,16 @@ export function OneDateNavigator({
   const [isOpen, setIsOpen] = useState(false)
 
   const granularityDefinition = useMemo(() => {
-    return granularityDefinitions[localValue?.granularity ?? "day"]
-  }, [localValue?.granularity])
+    const granularityKey = localValue?.granularity ?? "day"
+    const baseGranularity = granularityDefinitions[granularityKey]
+
+    // For week granularity, create a dynamic version with the correct weekStartsOn
+    if (granularityKey === "week" && props.weekStartsOn !== undefined) {
+      return createWeekGranularity(props.weekStartsOn)
+    }
+
+    return baseGranularity
+  }, [localValue?.granularity, props.weekStartsOn])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
     setLocalValue(value)
@@ -86,6 +95,7 @@ export function OneDateNavigator({
       compareTo={compareTo}
       defaultCompareTo={defaultCompareTo}
       onCompareToChange={handleCompareToChange}
+      weekStartsOn={props.weekStartsOn}
       asChild
     >
       <DatePickerTrigger

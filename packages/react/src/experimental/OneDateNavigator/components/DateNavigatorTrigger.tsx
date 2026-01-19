@@ -64,7 +64,9 @@ const DateNavigatorTrigger = forwardRef<
         return [i18n.date.selectDate]
       }
 
-      const granularity = granularityDefinitions[value.granularity]
+      // Use the granularity prop if provided, otherwise fall back to static definitions
+      const granularityToUse =
+        granularity || granularityDefinitions[value.granularity]
 
       const values = [
         value.value,
@@ -73,8 +75,8 @@ const DateNavigatorTrigger = forwardRef<
         .filter((v) => v !== undefined)
         .sort((a, b) => a?.from.getTime() - b?.from.getTime())
 
-      return values.map((v) => granularity.toString(v, i18n, "long"))
-    }, [value, i18n, compareToValue])
+      return values.map((v) => granularityToUse.toString(v, i18n, "long"))
+    }, [value, i18n, compareToValue, granularity])
 
     const label = useMemo(() => {
       return Object.values(currentLabel).join(" ⸱ ")

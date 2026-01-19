@@ -7,7 +7,7 @@ import {
 import { useL10n } from "@/lib/providers/l10n"
 import { Calendar } from "@/ui/calendar"
 
-import { CalendarMode, DateRange } from "../../types"
+import { CalendarMode, DateRange, WeekStartsOn } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"
 
 interface DayViewProps {
@@ -20,6 +20,7 @@ interface DayViewProps {
   minDate?: Date
   maxDate?: Date
   compact?: boolean
+  weekStartsOn?: WeekStartsOn
 }
 
 export function DayView({
@@ -32,6 +33,7 @@ export function DayView({
   minDate,
   maxDate,
   compact = false,
+  weekStartsOn = 1,
 }: DayViewProps) {
   const { locale } = useL10n()
 
@@ -72,7 +74,7 @@ export function DayView({
             onSelect={onSelect as SelectSingleEventHandler}
             month={month}
             locale={getLocale(locale)}
-            weekStartsOn={1}
+            weekStartsOn={weekStartsOn}
             compact={compact}
           />
         </motion.div>
@@ -100,7 +102,7 @@ export function DayView({
           month={month}
           onMonthChange={onMonthChange}
           locale={getLocale(locale)}
-          weekStartsOn={1}
+          weekStartsOn={weekStartsOn}
           compact={compact}
         />
       </motion.div>
