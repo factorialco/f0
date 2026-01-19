@@ -72,8 +72,6 @@ export function WeekView({
     onSelect?.(getWeekRangeFromDate(day))
   }
 
-  // Handle onSelect only for deselection (when range is null)
-  // All other clicks are handled by onDayClick
   const handleSelect: SelectRangeEventHandler = (range) => {
     if (!range) {
       onSelect?.(null)
@@ -83,7 +81,6 @@ export function WeekView({
   const selectedValue: DayPickerDateRange | undefined = useMemo(() => {
     if (!selected) return undefined
 
-    // Convert Date or DateRange to week range using the first date
     const dateToUse = selected instanceof Date ? selected : selected.from
     return getWeekRangeFromDate(dateToUse)
   }, [selected, getWeekRangeFromDate])

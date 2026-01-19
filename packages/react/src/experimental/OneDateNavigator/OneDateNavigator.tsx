@@ -54,7 +54,6 @@ export function OneDateNavigator({
     const granularityKey = localValue?.granularity ?? "day"
     const baseGranularity = granularityDefinitions[granularityKey]
 
-    // For week granularity, create a dynamic version with the correct weekStartsOn
     if (granularityKey === "week" && props.weekStartsOn !== undefined) {
       return createWeekGranularity(props.weekStartsOn)
     }
