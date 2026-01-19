@@ -5,6 +5,7 @@ import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 import { useIntersectionObserver } from "usehooks-ts"
+import { experimentalComponent } from "@/lib/experimental"
 
 export type ActivityItemProps = {
   id: string
@@ -93,4 +94,10 @@ export const ActivityItemSkeleton = () => (
   </div>
 )
 
-export const ActivityItem = withSkeleton(BaseActivityItem, ActivityItemSkeleton)
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ActivityItem = experimentalComponent(
+  "ActivityItem",
+  withSkeleton(BaseActivityItem, ActivityItemSkeleton)
+)

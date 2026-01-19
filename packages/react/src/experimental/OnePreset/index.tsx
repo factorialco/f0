@@ -1,4 +1,5 @@
 import { Await } from "@/components/Utilities/Await"
+import { experimentalComponent } from "@/lib/experimental"
 import { Skeleton } from "@/ui/skeleton"
 import { cn } from "../../lib/utils"
 import { Counter } from "../Information/Counter"
@@ -10,7 +11,7 @@ interface PresetProps {
   selected?: boolean
 }
 
-export const Preset = ({ label, number, onClick, selected }: PresetProps) => {
+const _Preset = ({ label, number, onClick, selected }: PresetProps) => {
   return (
     <label
       className={cn(
@@ -45,3 +46,8 @@ export const Preset = ({ label, number, onClick, selected }: PresetProps) => {
     </label>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Preset = experimentalComponent("Preset", _Preset)

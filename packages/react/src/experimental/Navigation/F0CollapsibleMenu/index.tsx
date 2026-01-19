@@ -4,6 +4,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { F0TableOfContent, TOCItem, TOCProps } from "../F0TableOfContent"
 import { CollapsedBars } from "./CollapsedBars"
+import { experimentalComponent } from "@/lib/experimental"
 
 export type PopupSize = "sm" | "md" | "lg"
 export type CollapsibleMenuVariant = "dark" | "light"
@@ -37,7 +38,7 @@ export interface F0CollapsibleMenuProps extends Omit<
   variant?: CollapsibleMenuVariant
 }
 
-export function F0CollapsibleMenu({
+function _F0CollapsibleMenu({
   title,
   items,
   className,
@@ -90,5 +91,13 @@ export function F0CollapsibleMenu({
     </HoverCard>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const F0CollapsibleMenu = experimentalComponent(
+  "F0CollapsibleMenu",
+  _F0CollapsibleMenu
+)
 
 export type { TOCItem as CollapsibleMenuItem }

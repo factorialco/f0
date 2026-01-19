@@ -8,6 +8,7 @@ import {
   useRef,
 } from "react"
 import { Search } from "../../../../icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 
 type F1SearchBoxProps = {
   value?: string
@@ -27,7 +28,7 @@ type F1SearchBoxProps = {
   | "name"
 >
 
-const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
+const _F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
   (
     {
       value,
@@ -117,7 +118,7 @@ const F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
   }
 )
 
-// Add display name for better debugging
-F1SearchBox.displayName = "F1SearchBox"
-
-export { F1SearchBox }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const F1SearchBox = experimentalComponent("F1SearchBox", _F1SearchBox)

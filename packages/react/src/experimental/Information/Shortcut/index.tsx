@@ -1,4 +1,5 @@
 import { type VariantProps, cva } from "cva"
+import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Icon, F0IconProps } from "@/components/F0Icon"
 import { Windows } from "@/icons/app"
@@ -56,7 +57,7 @@ const isPlatformDependentKey = (key: string): key is PlatformDependentKey => {
   return platformDependentKeys.has(key as PlatformDependentKey)
 }
 
-function Shortcut({ keys, variant }: ShortcutProps) {
+function _Shortcut({ keys, variant }: ShortcutProps) {
   const platform = useUserPlatform()
   const translations = useI18n()
 
@@ -90,5 +91,10 @@ function Shortcut({ keys, variant }: ShortcutProps) {
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const Shortcut = experimentalComponent("Shortcut", _Shortcut)
 
 export { Shortcut }

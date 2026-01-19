@@ -1,4 +1,5 @@
 import { forwardRef, ReactElement } from "react"
+import { experimentalComponent } from "@/lib/experimental"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
@@ -76,7 +77,7 @@ export type OpenLinkActionType = {
   href: string
 }
 
-const Item = forwardRef<HTMLLIElement, ItemProps>(
+const _Item = forwardRef<HTMLLIElement, ItemProps>(
   ({ text, icon, action }, ref) => {
     return (
       <ItemContainer
@@ -89,7 +90,12 @@ const Item = forwardRef<HTMLLIElement, ItemProps>(
   }
 )
 
-Item.displayName = "DataList.Item"
+_Item.displayName = "DataList.Item"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const Item = experimentalComponent("DataList.Item", _Item)
 
 type URL = string
 
@@ -100,7 +106,7 @@ type EmployeeItemProps = {
   action?: ActionType
 }
 
-const PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
+const _PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
   ({ action, avatarUrl, firstName, lastName }, ref) => {
     const fullName = `${firstName} ${lastName}`
     return (
@@ -120,7 +126,12 @@ const PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
     )
   }
 )
-PersonItem.displayName = "PersonItem"
+_PersonItem.displayName = "PersonItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const PersonItem = experimentalComponent("PersonItem", _PersonItem)
 
 type CompanyItemProps = {
   name: string
@@ -128,7 +139,7 @@ type CompanyItemProps = {
   action?: ActionType
 }
 
-const CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
+const _CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
   ({ avatarUrl, name, action }, ref) => {
     return (
       <ItemContainer
@@ -143,14 +154,19 @@ const CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
   }
 )
 
-CompanyItem.displayName = "CompanyItem"
+_CompanyItem.displayName = "CompanyItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const CompanyItem = experimentalComponent("CompanyItem", _CompanyItem)
 
 type TeamItemProps = {
   name: string
   action?: ActionType
 }
 
-const TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
+const _TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
   ({ action, name }, ref) => {
     return (
       <ItemContainer
@@ -163,11 +179,16 @@ const TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
   }
 )
 
-TeamItem.displayName = "TeamItem"
+_TeamItem.displayName = "TeamItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const TeamItem = experimentalComponent("TeamItem", _TeamItem)
 
 type DotTagItemProps = TagDotProps
 
-const DotTagItem = forwardRef<HTMLLIElement, DotTagItemProps>(
+const _DotTagItem = forwardRef<HTMLLIElement, DotTagItemProps>(
   ({ ...props }, ref) => {
     return (
       <li ref={ref} className="flex items-start pt-1">
@@ -177,7 +198,12 @@ const DotTagItem = forwardRef<HTMLLIElement, DotTagItemProps>(
   }
 )
 
-DotTagItem.displayName = "DotTagItem"
+_DotTagItem.displayName = "DotTagItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const DotTagItem = experimentalComponent("DotTagItem", _DotTagItem)
 
 /**
  * convert simplified action type received from user to internal action format
@@ -195,7 +221,12 @@ const getInternalAction = (
   return action
 }
 
-export const DataList = Object.assign(_DataList, {
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const _DataListComponent = experimentalComponent("DataList", _DataList)
+
+export const DataList = Object.assign(_DataListComponent, {
   Item,
   CompanyItem,
   PersonItem,

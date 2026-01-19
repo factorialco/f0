@@ -3,6 +3,7 @@ import type { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { cn } from "@/lib/utils"
+import { experimentalComponent } from "@/lib/experimental"
 
 type Props = {
   /** Main heading text */
@@ -27,7 +28,7 @@ type Props = {
   separator?: "top" | "bottom"
 }
 
-export const SectionHeader = ({
+const _SectionHeader = ({
   title,
   description,
   action,
@@ -82,3 +83,11 @@ export const SectionHeader = ({
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const SectionHeader = experimentalComponent(
+  "SectionHeader",
+  _SectionHeader
+)

@@ -1,12 +1,13 @@
 "use client"
 
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { experimentalComponent } from "@/lib/experimental"
 import { ScrollArea } from "@/ui/scrollarea"
 import { CurrentVersionIndicator } from "./CurrentVersionIndicator"
 import { F0VersionHistoryProps } from "./types"
 import { VersionItem } from "./VersionItem"
 
-export function F0VersionHistory({
+function _F0VersionHistory({
   title,
   versions,
   currentVersion,
@@ -48,6 +49,14 @@ export function F0VersionHistory({
     </nav>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const F0VersionHistory = experimentalComponent(
+  "F0VersionHistory",
+  _F0VersionHistory
+)
 
 export type {
   CurrentVersion,

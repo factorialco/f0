@@ -5,6 +5,7 @@ import {
 } from "../../../../components/Charts/RadialProgressChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { Widget } from "../../Widget"
+import { experimentalComponent } from "@/lib/experimental"
 
 export type RadialProgressWidgetProps = {
   header: {
@@ -16,7 +17,7 @@ export type RadialProgressWidgetProps = {
   chart: RadialProgressProps
 }
 
-export const RadialProgressWidget = withSkeleton(
+const _RadialProgressWidget = withSkeleton(
   forwardRef<HTMLDivElement, RadialProgressWidgetProps>(
     function RadialProgressWidget({ header, chart }, ref) {
       return (
@@ -29,4 +30,12 @@ export const RadialProgressWidget = withSkeleton(
     }
   ),
   Widget.Skeleton
+)
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const RadialProgressWidget = experimentalComponent(
+  "RadialProgressWidget",
+  _RadialProgressWidget
 )

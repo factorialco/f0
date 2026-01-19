@@ -6,6 +6,7 @@ import throttle from "lodash/throttle"
 import React from "react"
 import { ActivityItem } from "../ActivityItem"
 import { Section, SectionProps } from "./Section"
+import { experimentalComponent } from "@/lib/experimental"
 
 const MORE_ITEMS_LOADING_COUNT = 3
 
@@ -110,7 +111,10 @@ export const ActivityItemListSkeleton = () => {
   )
 }
 
-export const ActivityItemList = withSkeleton(
-  BaseActivityItemList,
-  ActivityItemListSkeleton
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ActivityItemList = experimentalComponent(
+  "ActivityItemList",
+  withSkeleton(BaseActivityItemList, ActivityItemListSkeleton)
 )

@@ -5,6 +5,7 @@ import { F0Icon } from "../../../components/F0Icon"
 import { Upsell } from "../../../icons/app"
 import { Link, useNavigation } from "../../../lib/linkHandler"
 import { withSkeleton } from "../../../lib/skeleton"
+import { experimentalComponent } from "@/lib/experimental"
 
 export type TabItem = {
   label: string
@@ -118,4 +119,10 @@ export const TabsSkeleton: React.FC<Pick<TabsProps, "secondary">> = ({
   )
 }
 
-export const Tabs = withSkeleton(BaseTabs, TabsSkeleton)
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Tabs = experimentalComponent(
+  "Tabs",
+  withSkeleton(BaseTabs, TabsSkeleton)
+)

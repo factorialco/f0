@@ -23,6 +23,7 @@ import { Separator } from "@/ui/separator"
 import { Skeleton as SkeletonPrimitive } from "@/ui/skeleton"
 import { cva, type VariantProps } from "cva"
 import React, { forwardRef, ReactNode, useEffect } from "react"
+import { experimentalComponent } from "@/lib/experimental"
 
 export interface WidgetProps {
   header?: {
@@ -275,4 +276,10 @@ const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
   }
 )
 
-export const Widget = withSkeleton(Container, Skeleton)
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Widget = experimentalComponent(
+  "Widget",
+  withSkeleton(Container, Skeleton)
+)

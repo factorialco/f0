@@ -3,6 +3,7 @@
  * Button component.
  */
 import { InputInternal, type InputInternalProps } from "./internal"
+import { experimentalComponent } from "@/lib/experimental"
 
 const privateProps = ["buttonToggle"] as const
 
@@ -11,7 +12,7 @@ export type InputProps<T extends string> = Omit<
   (typeof privateProps)[number]
 >
 
-export const Input = <T extends string>(props: InputProps<T>) => {
+const _Input = <T extends string>(props: InputProps<T>) => {
   const publicProps = privateProps.reduce(
     (acc, key) => {
       const { [key]: _, ...rest } = acc
@@ -22,3 +23,8 @@ export const Input = <T extends string>(props: InputProps<T>) => {
 
   return <InputInternal {...publicProps} />
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Input = experimentalComponent("Input", _Input)

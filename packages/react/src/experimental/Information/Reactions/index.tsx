@@ -2,6 +2,7 @@ import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Picker } from "./Picker"
 import { Reaction, ReactionProps } from "./reaction"
+import { experimentalComponent } from "@/lib/experimental"
 
 export interface ReactionsProps {
   items: ReactionProps[]
@@ -14,12 +15,7 @@ export interface ReactionsProps {
   }
 }
 
-export function Reactions({
-  items,
-  onInteraction,
-  locale,
-  action,
-}: ReactionsProps) {
+function _Reactions({ items, onInteraction, locale, action }: ReactionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {action && (
@@ -45,3 +41,8 @@ export function Reactions({
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Reactions = experimentalComponent("Reactions", _Reactions)

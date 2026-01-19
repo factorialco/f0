@@ -5,12 +5,13 @@ import {
 } from "../../../../components/Charts/AreaChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
+import { experimentalComponent } from "@/lib/experimental"
 
 export interface AreaChartWidgetProps extends ComposeChartContainerProps<AreaChartProps> {
   canBeBlurred?: boolean
 }
 
-export const AreaChartWidget = withSkeleton(
+const _AreaChartWidget = withSkeleton(
   forwardRef<HTMLDivElement, AreaChartWidgetProps>(function AreaChartWidget(
     { canBeBlurred, ...props },
     ref
@@ -37,4 +38,12 @@ export const AreaChartWidget = withSkeleton(
     )
   }),
   ChartContainer.Skeleton
+)
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const AreaChartWidget = experimentalComponent(
+  "AreaChartWidget",
+  _AreaChartWidget
 )

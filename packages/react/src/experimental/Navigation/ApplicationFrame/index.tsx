@@ -1,3 +1,4 @@
+import { experimentalComponent } from "@/lib/experimental"
 import {
   AnimatePresence,
   LayoutGroup,
@@ -30,7 +31,7 @@ export interface ApplicationFrameProps {
   children: React.ReactNode
 }
 
-export function ApplicationFrame({
+function _ApplicationFrame({
   children,
   sidebar,
   banner,
@@ -63,6 +64,14 @@ export function ApplicationFrame({
     </FrameProvider>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ApplicationFrame = experimentalComponent(
+  "ApplicationFrame",
+  _ApplicationFrame
+)
 
 const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   const translations = useI18n()

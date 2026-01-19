@@ -16,6 +16,7 @@ import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
 import { IdStructure, TOCItem, TOCItemAction, TOCProps } from "./types"
 import { filterTree, findExpandedPath } from "./utils"
+import { experimentalComponent } from "@/lib/experimental"
 
 function renderTOCItem(
   item: TOCItem,
@@ -207,7 +208,7 @@ function TOCContent({
           )}
         >
           {showSearchBox && (
-            <div className={title ? "mb-4" : ""}>
+            <div className="mb-4">
               <F1SearchBox
                 placeholder={searchPlaceholder ?? i18n.toc.search}
                 onChange={handleSearchChange}
@@ -273,7 +274,7 @@ function TOCContent({
   )
 }
 
-export function F0TableOfContent(props: TOCProps) {
+function _F0TableOfContent(props: TOCProps) {
   return (
     <DragProvider>
       <LayoutGroup id="table-of-contents">
@@ -282,6 +283,14 @@ export function F0TableOfContent(props: TOCProps) {
     </DragProvider>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const F0TableOfContent = experimentalComponent(
+  "F0TableOfContent",
+  _F0TableOfContent
+)
 
 export { Item, ItemSectionHeader }
 export type { TOCItem, TOCItemAction, TOCProps }

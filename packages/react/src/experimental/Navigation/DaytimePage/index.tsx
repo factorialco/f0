@@ -8,6 +8,7 @@ import Menu from "@/icons/app/Menu"
 import { cn } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
 import { ComponentProps } from "react"
+import { experimentalComponent } from "@/lib/experimental"
 
 const daytimePageVariants = cva({
   base: "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
@@ -42,7 +43,7 @@ export interface DaytimePageProps extends VariantProps<
   embedded?: boolean
 }
 
-export function DaytimePage({
+function _DaytimePage({
   children,
   header,
   period,
@@ -138,4 +139,9 @@ export function DaytimePage({
   )
 }
 
-DaytimePage.displayName = "DaytimePage"
+_DaytimePage.displayName = "DaytimePage"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const DaytimePage = experimentalComponent("DaytimePage", _DaytimePage)

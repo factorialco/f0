@@ -1,5 +1,6 @@
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
+import { experimentalComponent } from "@/lib/experimental"
 import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
@@ -62,7 +63,7 @@ export type ChipProps = BaseChipProps &
     variant?: "default" | "selected"
   }
 
-export const Chip = ({
+const _Chip = ({
   deactivated,
   label,
   variant,
@@ -119,3 +120,8 @@ export const Chip = ({
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Chip = experimentalComponent("Chip", _Chip)

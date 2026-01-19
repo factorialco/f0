@@ -2,6 +2,7 @@ import { forwardRef } from "react"
 import { BarChart, BarChartProps } from "../../../../components/Charts/BarChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
+import { experimentalComponent } from "@/lib/experimental"
 
 const BarChartContainer = forwardRef<
   HTMLDivElement,
@@ -16,7 +17,10 @@ const BarChartContainer = forwardRef<
   )
 })
 
-export const BarChartWidget = withSkeleton(
-  BarChartContainer,
-  ChartContainer.Skeleton
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const BarChartWidget = experimentalComponent(
+  "BarChartWidget",
+  withSkeleton(BarChartContainer, ChartContainer.Skeleton)
 )

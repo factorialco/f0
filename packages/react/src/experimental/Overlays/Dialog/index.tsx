@@ -3,6 +3,7 @@ import {
   F0AvatarAlert,
   type AlertAvatarProps,
 } from "@/components/avatars/F0AvatarAlert"
+import { experimentalComponent } from "@/lib/experimental"
 import {
   Dialog,
   DialogContent,
@@ -97,4 +98,9 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
 
 OneDialog.displayName = "Dialog"
 
-export { OneDialog as Dialog }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const DialogComponent = experimentalComponent("Dialog", OneDialog)
+
+export { DialogComponent as Dialog }

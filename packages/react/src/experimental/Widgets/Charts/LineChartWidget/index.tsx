@@ -5,8 +5,9 @@ import {
 } from "../../../../components/Charts/LineChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
+import { experimentalComponent } from "@/lib/experimental"
 
-export const LineChartWidget = withSkeleton(
+const _LineChartWidget = withSkeleton(
   forwardRef<HTMLDivElement, ComposeChartContainerProps<LineChartProps>>(
     function LineChartWidget(props, ref) {
       return (
@@ -19,4 +20,12 @@ export const LineChartWidget = withSkeleton(
     }
   ),
   ChartContainer.Skeleton
+)
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const LineChartWidget = experimentalComponent(
+  "LineChartWidget",
+  _LineChartWidget
 )

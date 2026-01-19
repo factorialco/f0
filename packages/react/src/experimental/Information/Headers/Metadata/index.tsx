@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { memo, useState } from "react"
 import { MetadataValue } from "./MetadataValue"
+import { experimentalComponent } from "@/lib/experimental"
 
 type MetadataItemValue =
   | { type: "text"; content: string }
@@ -262,7 +263,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
   )
 }
 
-export const Metadata = memo(function Metadata({ items }: MetadataProps) {
+const _Metadata = memo(function Metadata({ items }: MetadataProps) {
   const cleanedItems = items.filter((item) => typeof item === "object")
   return (
     <div className="flex flex-col items-start gap-x-3 gap-y-0 md:flex-row md:flex-wrap md:items-center">
@@ -280,5 +281,10 @@ export const Metadata = memo(function Metadata({ items }: MetadataProps) {
     </div>
   )
 })
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Metadata = experimentalComponent("Metadata", _Metadata)
 
 export type { MetadataAction, MetadataItem, MetadataItemValue }

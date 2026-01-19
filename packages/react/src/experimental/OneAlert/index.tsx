@@ -3,6 +3,7 @@ import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import type { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
+import { experimentalComponent } from "@/lib/experimental"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
@@ -57,7 +58,7 @@ interface AlertProps extends VariantProps<typeof alertVariants> {
   variant: AlertVariant
 }
 
-export const OneAlert = ({
+const _OneAlert = ({
   title,
   description,
   action,
@@ -115,3 +116,8 @@ export const OneAlert = ({
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OneAlert = experimentalComponent("OneAlert", _OneAlert)

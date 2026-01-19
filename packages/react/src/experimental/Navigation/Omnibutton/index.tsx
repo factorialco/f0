@@ -2,6 +2,7 @@ import { F0Icon } from "../../../components/F0Icon"
 import { Question } from "../../../icons/app"
 import { cn, focusRing } from "../../../lib/utils"
 import { Dropdown, DropdownItem } from "../Dropdown"
+import { experimentalComponent } from "@/lib/experimental"
 
 interface Option {
   title?: string
@@ -30,7 +31,7 @@ function formatDropdownItems(options: Option[]): DropdownItem[] {
     }))
 }
 
-export function OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
+function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
   return (
     <div
       className="fixed z-10"
@@ -56,3 +57,8 @@ export function OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OmniButton = experimentalComponent("OmniButton", _OmniButton)

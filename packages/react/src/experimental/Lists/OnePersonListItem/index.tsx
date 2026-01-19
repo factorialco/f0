@@ -10,6 +10,7 @@ import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import React from "react"
+import { experimentalComponent } from "@/lib/experimental"
 
 export type OnePersonListItemProps = {
   person: {
@@ -134,7 +135,10 @@ const OnePersonListItemSkeleton = () => {
 
 BaseOnePersonListItem.displayName = "OnePersonListItem"
 
-export const OnePersonListItem = withSkeleton(
-  BaseOnePersonListItem,
-  OnePersonListItemSkeleton
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OnePersonListItem = experimentalComponent(
+  "OnePersonListItem",
+  withSkeleton(BaseOnePersonListItem, OnePersonListItemSkeleton)
 )

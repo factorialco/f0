@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "cva"
 import { motion } from "motion/react"
 import { cn } from "../../../lib/utils"
+import { experimentalComponent } from "@/lib/experimental"
 
 const spinnerVariants = cva({
   base: "flex select-none items-center justify-center text-f1-foreground-secondary",
@@ -20,7 +21,7 @@ interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
   className?: string
 }
 
-function Spinner({ size, className }: SpinnerProps) {
+function _Spinner({ size, className }: SpinnerProps) {
   return (
     <div
       className={cn(spinnerVariants({ size, className }))}
@@ -66,5 +67,10 @@ function Spinner({ size, className }: SpinnerProps) {
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const Spinner = experimentalComponent("Spinner", _Spinner)
 
 export { Spinner }
