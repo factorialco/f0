@@ -12,6 +12,21 @@ const DEPARTMENTS = [
   { id: 8, name: "HR" },
   { id: 9, name: "Operations" },
   { id: 10, name: "Legal" },
+  { id: 11, name: "IT" },
+  { id: 12, name: "Data" },
+  { id: 13, name: "Security" },
+  { id: 14, name: "Research & Development" },
+  { id: 15, name: "Quality Assurance" },
+  { id: 16, name: "Facilities" },
+  { id: 17, name: "Procurement" },
+  { id: 18, name: "Communications" },
+  { id: 19, name: "Learning & Development" },
+  { id: 20, name: "Business Development" },
+  { id: 21, name: "Partnerships" },
+  { id: 22, name: "Customer Experience" },
+  { id: 23, name: "Technical Support" },
+  { id: 24, name: "Analytics" },
+  { id: 25, name: "Content" },
 ] as const
 
 // Job titles by department
@@ -63,6 +78,100 @@ const JOB_TITLES: Record<string, string[]> = {
     "Coordinator",
   ],
   Legal: ["Legal Counsel", "Compliance Officer", "Contract Manager"],
+  IT: [
+    "IT Manager",
+    "Systems Administrator",
+    "Network Engineer",
+    "IT Support Specialist",
+    "Cloud Engineer",
+  ],
+  Data: [
+    "Data Engineer",
+    "Data Scientist",
+    "Data Analyst",
+    "Machine Learning Engineer",
+    "BI Developer",
+  ],
+  Security: [
+    "Security Engineer",
+    "Security Analyst",
+    "CISO",
+    "Penetration Tester",
+    "Security Architect",
+  ],
+  "Research & Development": [
+    "R&D Manager",
+    "Research Scientist",
+    "Innovation Lead",
+    "Prototype Engineer",
+  ],
+  "Quality Assurance": [
+    "QA Lead",
+    "Test Engineer",
+    "Automation Engineer",
+    "Quality Manager",
+  ],
+  Facilities: [
+    "Facilities Manager",
+    "Office Manager",
+    "Maintenance Coordinator",
+    "Space Planner",
+  ],
+  Procurement: [
+    "Procurement Manager",
+    "Purchasing Specialist",
+    "Vendor Manager",
+    "Supply Chain Analyst",
+  ],
+  Communications: [
+    "Communications Manager",
+    "PR Specialist",
+    "Internal Communications Lead",
+    "Social Media Manager",
+  ],
+  "Learning & Development": [
+    "L&D Manager",
+    "Training Specialist",
+    "Instructional Designer",
+    "Learning Coordinator",
+  ],
+  "Business Development": [
+    "Business Development Manager",
+    "BD Representative",
+    "Strategic Partnerships Manager",
+    "Growth Specialist",
+  ],
+  Partnerships: [
+    "Partnerships Manager",
+    "Partner Success Manager",
+    "Alliance Manager",
+    "Channel Manager",
+  ],
+  "Customer Experience": [
+    "CX Manager",
+    "Customer Insights Analyst",
+    "Voice of Customer Lead",
+    "Experience Designer",
+  ],
+  "Technical Support": [
+    "Technical Support Manager",
+    "Support Engineer",
+    "Technical Account Manager",
+    "Escalation Specialist",
+  ],
+  Analytics: [
+    "Analytics Manager",
+    "Business Intelligence Analyst",
+    "Reporting Specialist",
+    "Insights Lead",
+  ],
+  Content: [
+    "Content Manager",
+    "Copywriter",
+    "Content Strategist",
+    "Editorial Lead",
+    "Video Producer",
+  ],
 }
 
 // Office locations with numeric IDs
@@ -239,7 +348,8 @@ const generateEmployee = (id: number) => {
   const seed = id * 7919 // Prime number for better distribution
 
   const firstNameIndex = Math.floor(seededRandom(seed) * FIRST_NAMES.length)
-  const lastNameIndex = Math.floor(seededRandom(seed + 1) * LAST_NAMES.length)
+  const lastNameIndex1 = Math.floor(seededRandom(seed + 1) * LAST_NAMES.length)
+  const lastNameIndex2 = Math.floor(seededRandom(seed + 9) * LAST_NAMES.length)
   const departmentIndex = Math.floor(
     seededRandom(seed + 2) * DEPARTMENTS.length
   )
@@ -247,7 +357,9 @@ const generateEmployee = (id: number) => {
   const entityIndex = Math.floor(seededRandom(seed + 4) * LEGAL_ENTITIES.length)
 
   const firstName = FIRST_NAMES[firstNameIndex]
-  const lastName = LAST_NAMES[lastNameIndex]
+  const lastName1 = LAST_NAMES[lastNameIndex1]
+  const lastName2 = LAST_NAMES[lastNameIndex2]
+  const lastName = `${lastName1} ${lastName2}`
   const department = DEPARTMENTS[departmentIndex]
   const office = OFFICES[officeIndex]
   const legalEntity = LEGAL_ENTITIES[entityIndex]
@@ -260,11 +372,11 @@ const generateEmployee = (id: number) => {
     firstName,
     lastName,
     label: `${firstName} ${lastName}`,
-    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@factorial.co`,
+    email: `${firstName.toLowerCase()}.${lastName1.toLowerCase()}@factorial.co`,
     avatar: {
       type: "person" as const,
       firstName,
-      lastName,
+      lastName: lastName1,
     },
     departmentId: department.id,
     departmentName: department.name,

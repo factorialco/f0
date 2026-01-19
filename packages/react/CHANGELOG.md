@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.328.0](https://github.com/factorialco/f0/compare/f0-react-v1.327.3...f0-react-v1.328.0) (2026-01-16)
+
+
+### Features
+
+* card border color ([#3252](https://github.com/factorialco/f0/issues/3252)) ([18f3964](https://github.com/factorialco/f0/commit/18f39640a6b02c952cff2c0ce85ca078b00858c1))
+
+## [1.327.3](https://github.com/factorialco/f0/compare/f0-react-v1.327.2...f0-react-v1.327.3) (2026-01-16)
+
+
+### Bug Fixes
+
+* **F0Select:** improve layout on asList version ([#3243](https://github.com/factorialco/f0/issues/3243)) ([8d0c5ae](https://github.com/factorialco/f0/commit/8d0c5ae521368aa8b5affaeb15dd117a95c48b9e))
+
+## [1.327.2](https://github.com/factorialco/f0/compare/f0-react-v1.327.1...f0-react-v1.327.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* add reset to :focus-visible ([#3246](https://github.com/factorialco/f0/issues/3246)) ([57ef687](https://github.com/factorialco/f0/commit/57ef687101ba7964331764b0e7bc0491adb2887e))
+
+## [1.327.1](https://github.com/factorialco/f0/compare/f0-react-v1.327.0...f0-react-v1.327.1) (2026-01-16)
+
+
+### Bug Fixes
+
+* dialog in mobile not showing up correctly ([#3244](https://github.com/factorialco/f0/issues/3244)) ([c0f903a](https://github.com/factorialco/f0/commit/c0f903ab8357eb26b62c4080483689334813c222))
+
 ## [1.327.0](https://github.com/factorialco/f0/compare/f0-react-v1.326.0...f0-react-v1.327.0) (2026-01-15)
 
 

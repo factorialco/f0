@@ -78,7 +78,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
               filters={filters}
               value={currentFilters}
               onChange={onFiltersChange}
-              mode="compact"
+              mode={asList ? "simple" : "compact"}
               onOpenChange={setIsFiltersOpen}
             />
           )}

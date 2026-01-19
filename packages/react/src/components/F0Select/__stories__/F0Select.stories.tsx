@@ -722,10 +722,12 @@ export const MultiplePaginatedAsList: Story = {
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
     }),
+    disableSelectAll: true,
+    hideLabel: true,
   },
   render: (args) => {
     return (
-      <div className="w-[400px] h-[500px]">
+      <div className="h-[400px] flex flex-row">
         <F0Select {...(args as any)} />
       </div>
     )
@@ -740,7 +742,7 @@ export const AsList: Story = {
   },
   render: (args) => {
     return (
-      <div className="w-[300px] h-max">
+      <div className="w-[300px] h-max flex">
         <F0Select {...(args as any)} />
       </div>
     )
