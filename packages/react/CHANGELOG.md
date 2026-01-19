@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.329.0](https://github.com/factorialco/f0/compare/f0-react-v1.328.0...f0-react-v1.329.0) (2026-01-19)
+
+
+### Features
+
+* **Nested Table:** implement clearFetchedData functionality for date-nav & pagination changes ([#3247](https://github.com/factorialco/f0/issues/3247)) ([e557cdf](https://github.com/factorialco/f0/commit/e557cdfa6837f2ab22100e0c2d6e965f09fd53f9))
+
 ## [1.328.0](https://github.com/factorialco/f0/compare/f0-react-v1.327.3...f0-react-v1.328.0) (2026-01-16)
 
 
