@@ -53,14 +53,17 @@ export const Default: Story = {
     }
 
     const alertTrigger = async () => {
-      const res = await alert("Alert Title", "Alert Message")
+      const res = await alert({ title: "Alert Title", msg: "Alert Message" })
       console.log(res)
     }
 
     const confirmTrigger = async () => {
-      const res = await confirm("Confirm Title", "Confirm Message")
+      const res = await confirm({
+        title: "Confirm Title",
+        msg: "Confirm Message",
+      })
       if (res) {
-        alert("Item deleted", "Item has been deleted")
+        alert({ title: "Item deleted", msg: "Item has been deleted" })
       }
       console.log(res)
     }
@@ -146,7 +149,7 @@ export const Alert: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await alert("Alert Title", "Alert Message")
+      const res = await alert({ title: "Alert Title", msg: "Alert Message" })
       setRes(res)
     }
 
@@ -199,7 +202,9 @@ const renderConfirm = ({ width }: { width?: DialogWidth } = {}) => {
   const [res, setRes] = useState<DialogActionValue>(undefined)
 
   const alertTrigger = async () => {
-    const res = await confirm("Confirm Title", "Confirm Message", {
+    const res = await confirm({
+      title: "Confirm Title",
+      msg: "Confirm Message",
       width,
     })
     setRes(res)
@@ -280,7 +285,9 @@ export const ConfirmWithPromiseAndCustomLabel: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await confirm("Confirm Title", "Confirm Message", {
+      const res = await confirm({
+        title: "Confirm Title",
+        msg: "Confirm Message",
         confirm: {
           value: () => {
             console.log("Saving started...")
@@ -484,6 +491,52 @@ export const DialogWithDropdownAndPromises: Story = {
               value: "cancel",
               disabled: true,
               label: "Cancel",
+            },
+          ],
+        },
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col gap-4 justify-center items-center">
+        <F0Button onClick={trigger} label="Open Dialog" />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
+  },
+}
+
+export const DialogTriggersADialog: Story = {
+  render: () => {
+    const { openDialog, confirm } = useDialog()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const trigger = async () => {
+      const res = await openDialog({
+        title: "Dialog Title",
+        description: "Dialog Description",
+        content: <div>Dialog Content</div>,
+        actions: {
+          primary: [
+            {
+              value: "p1",
+              label: "Action 1",
+            },
+          ],
+          secondary: [
+            {
+              label: "Open Confirm",
+              value: async () => {
+                return `Confirm-result-${
+                  (
+                    await confirm({
+                      title: "Confirm Title",
+                      msg: "Confirm Message",
+                    })
+                  )?.toString() ?? ""
+                }`
+              },
             },
           ],
         },

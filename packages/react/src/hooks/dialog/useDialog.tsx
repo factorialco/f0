@@ -17,16 +17,8 @@ export type UseDialogReturn = {
   openDialog: (
     definition: Optional<DialogDefinition, "id">
   ) => Promise<DialogActionValue>
-  alert: (
-    title: string,
-    msg: string,
-    options?: AlertDialogOptions
-  ) => Promise<DialogActionValue>
-  confirm: (
-    title: string,
-    msg: string,
-    options?: ConfirmDialogOptions
-  ) => Promise<DialogActionValue>
+  alert: (options: AlertDialogOptions) => Promise<DialogActionValue>
+  confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>
   closeDialog: (id: DialogId) => void
 }
 
@@ -73,16 +65,12 @@ export const useDialog = (): UseDialogReturn => {
   /**
    * Alert Dialog
    */
-  const alert = (
-    title: string,
-    msg: string,
-    options: AlertDialogOptions = {}
-  ): Promise<DialogActionValue> => {
+  const alert = (options: AlertDialogOptions): Promise<DialogActionValue> => {
     const dialog = {
       ...options,
       id: options.id || nanoid(),
-      title,
-      content: <div>{msg}</div>,
+      title: options.title,
+      content: <div>{options.msg}</div>,
       actions: {
         primary: {
           value: options.confirm?.value ?? true,
@@ -97,15 +85,13 @@ export const useDialog = (): UseDialogReturn => {
    * Confirm Dialog
    */
   const confirm = (
-    title: string,
-    msg: string,
-    options: ConfirmDialogOptions = {}
+    options: ConfirmDialogOptions
   ): Promise<DialogActionValue> => {
     const dialog = {
       ...options,
       id: options.id || nanoid(),
-      title,
-      content: <div>{msg}</div>,
+      title: options.title,
+      content: <div>{options.msg}</div>,
       actions: {
         primary: {
           value: options.confirm?.value ?? true,

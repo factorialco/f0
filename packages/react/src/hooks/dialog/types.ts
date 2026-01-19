@@ -6,8 +6,10 @@ import {
 
 export type SimpleDialogOptions = Optional<
   Pick<DialogDefinition, "id" | "title" | "description" | "width">,
-  "id" | "title"
->
+  "id"
+> & {
+  msg: string
+}
 
 export type DialogSimpleAction = {
   label?: string

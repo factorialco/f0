@@ -2,7 +2,7 @@ import { FC } from "react"
 import { F0DialogInternal } from "./F0DialogInternal"
 import { F0DialogInternalProps } from "./internal-types"
 
-const privateProps = ["disableCloseButton"] as const
+const privateProps = ["disableClose"] as const
 
 export const F0Dialog: FC<F0DialogInternalProps> = (props) => {
   const publicProps = privateProps.reduce((acc, key) => {

@@ -18,7 +18,7 @@ import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { ComponentProps, FC, useState } from "react"
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
@@ -408,26 +408,15 @@ export const WithMultiplePrimaryActions: Story = {
     })
 
     await step("Open primary action dropdown menu", async () => {
-      // Find the dropdown trigger (chevron/menu button) - it's usually next to the main button
-      // Try to find buttons that might be the dropdown trigger
-      const buttons = page.getAllByRole("button")
-      const dropdownTrigger =
-        buttons.find(
-          (btn) =>
-            btn.getAttribute("aria-expanded") !== null ||
-            btn.querySelector("[data-testid*='chevron']") ||
-            btn.querySelector("[data-testid*='menu']")
-        ) ||
-        buttons.find(
-          (btn) =>
-            btn.textContent?.includes("Save") &&
-            btn !== page.getByRole("button", { name: /save/i })
-        )
+      // Find the dropdown trigger button - it has data-testid="button-menu"
+      const dropdownTrigger = page.queryByTestId("button-menu")
 
       if (dropdownTrigger) {
         await userEvent.click(dropdownTrigger)
         // Wait for dropdown to open
-        await new Promise((resolve) => setTimeout(resolve, 200))
+        await waitFor(() => {
+          expect(page.getByRole("menu")).toBeInTheDocument()
+        })
 
         // Verify dropdown items are visible
         const saveDraftOption = page.queryByText("Save as draft")
@@ -440,7 +429,10 @@ export const WithMultiplePrimaryActions: Story = {
           } else if (savePublishOption) {
             await userEvent.click(savePublishOption)
           }
-          await new Promise((resolve) => setTimeout(resolve, 100))
+          // Wait for dropdown menu to close after clicking an option
+          await waitFor(() => {
+            expect(page.queryByRole("menu")).not.toBeInTheDocument()
+          })
         }
       } else {
         // Fallback: click the main Save button (which triggers the first action)
@@ -451,6 +443,14 @@ export const WithMultiplePrimaryActions: Story = {
     })
 
     await step("Test secondary action", async () => {
+      // Ensure menu is closed before looking for Cancel button
+      await waitFor(
+        () => {
+          expect(page.queryByRole("menu")).not.toBeInTheDocument()
+        },
+        { timeout: 1000 }
+      )
+
       const cancelButton = page.getByRole("button", { name: /cancel/i })
       expect(cancelButton).toBeInTheDocument()
       await userEvent.click(cancelButton)

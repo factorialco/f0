@@ -9,7 +9,7 @@ export type F0DialogHeaderProps = {
    * Disables the close button of the dialog.
    * @internal
    */
-  disableCloseButton?: boolean
+  disableClose?: boolean
   title?: string
   description?: string
   module?: {
@@ -47,7 +47,7 @@ export type F0DialogInternalProps = {
    * Disables the close button of the dialog.
    * @internal
    */
-  disableCloseButton?: boolean
+  disableClose?: boolean
   // Whether the dialog is open
   isOpen: boolean
   // Callback when dialog is closed

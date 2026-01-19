@@ -23,7 +23,7 @@ const MockF0DialogInternal = vi.hoisted(() => {
       data-description={props.description}
       data-width={props.width}
       data-is-open={props.isOpen}
-      data-disable-close-button={props.disableCloseButton}
+      data-disable-close-button={props.disableClose}
       data-primary-actions={JSON.stringify(props.primaryAction)}
       data-secondary-actions={JSON.stringify(props.secondaryAction)}
     >
@@ -31,7 +31,7 @@ const MockF0DialogInternal = vi.hoisted(() => {
       <button
         data-testid="close-button"
         onClick={props.onClose}
-        disabled={props.disableCloseButton}
+        disabled={props.disableClose}
       >
         Close
       </button>

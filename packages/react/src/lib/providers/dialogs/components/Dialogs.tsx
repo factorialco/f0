@@ -108,7 +108,7 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
     <>
       {f0DialogsWithBlocks.map((dialog) => (
         <F0DialogInternal
-          disableCloseButton={isBlocked(dialog.id)}
+          disableClose={isBlocked(dialog.id)}
           key={dialog.id}
           isOpen
           width={dialog.width}

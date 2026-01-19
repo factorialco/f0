@@ -66,7 +66,7 @@ const dialogContentClassName = cva({
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   asBottomSheetInMobile = true,
   position = "center",
-  disableCloseButton = false,
+  disableClose = false,
   onClose,
   isOpen,
   children,
@@ -147,7 +147,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     tabs,
     activeTabId,
     setActiveTabId,
-    disableCloseButton,
+    disableClose,
   }
 
   if (isSmallScreen && asBottomSheetInMobile) {
@@ -197,6 +197,15 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) =>
+            disableClose ? e.preventDefault() : undefined
+          }
+          onPointerDownOutside={
+            disableClose ? (e) => e.preventDefault() : undefined
+          }
+          onInteractOutside={
+            disableClose ? (e) => e.preventDefault() : undefined
+          }
         >
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>
