@@ -245,6 +245,8 @@ const AiChatCmp = () => {
   )
 }
 
+// fake comment to triger an alpha release
+
 const AiFullscreenChatCmp = () => {
   const { enabled } = useAiChat()
   const [inProgress, setInProgress] = useState(false)
