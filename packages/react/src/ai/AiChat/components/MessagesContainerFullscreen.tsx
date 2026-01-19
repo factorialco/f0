@@ -159,23 +159,82 @@ const Messages = ({
 
     let isAtBottom = true
     const checkAtBottom = () => {
+      // Use a slightly larger threshold for mobile to be safe
+      const threshold = 150
       isAtBottom =
         container.scrollHeight - container.scrollTop - container.clientHeight <
-        100
+        threshold
     }
 
     const handleResize = () => {
-      if (isAtBottom) {
-        scrollToBottom("instant")
-        // Retry once after a short delay for mobile OS animation lag
-        setTimeout(() => scrollToBottom("instant"), 100)
+      // Multiple retries because mobile layout shifts and keyboard animations take time
+      const retries = [50, 150, 300, 600]
+      const timeouts = retries.map((ms) =>
+        setTimeout(() => {
+          if (isAtBottom) {
+            scrollToBottom("instant")
+          }
+        }, ms)
+      )
+      return () => timeouts.forEach(clearTimeout)
+    }
+
+    // Force scroll to bottom when any input gets focus (keyboard appearing)
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement
+      if (
+        target.tagName === "TEXTAREA" ||
+        (target.tagName === "INPUT" &&
+          (target as HTMLInputElement).type === "text")
+      ) {
+        // When focusing an input, we almost always want to see the last messages
+        // wait a bit for keyboard to start appearing
+        setTimeout(() => {
+          scrollToBottom("instant")
+          setTimeout(() => scrollToBottom("instant"), 300)
+        }, 100)
+      }
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      ;(container as any)._startY = e.touches[0].pageY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const { scrollTop, scrollHeight, clientHeight } = container
+      const isAtTop = scrollTop <= 0
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight
+
+      // Get the direction of the swipe
+      const touch = e.touches[0]
+      const currentY = touch.pageY
+      const startY = (container as any)._startY || currentY
+      const direction = currentY > startY ? "down" : "up"
+
+      // 1. If the list is shorter than the container, block all scrolling
+      // 2. If at the top and pulling down, block it
+      // 3. If at the bottom and pulling up, block it
+      if (
+        scrollHeight <= clientHeight ||
+        (isAtTop && direction === "down") ||
+        (isAtBottom && direction === "up")
+      ) {
+        if (e.cancelable) {
+          e.preventDefault()
+        }
       }
     }
 
     const resizeObserver = new ResizeObserver(handleResize)
     resizeObserver.observe(container)
     container.addEventListener("scroll", checkAtBottom)
+    container.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    })
+    container.addEventListener("touchmove", handleTouchMove, { passive: false })
     window.addEventListener("resize", handleResize)
+    window.addEventListener("focusin", handleFocusIn)
+
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", handleResize)
       window.visualViewport.addEventListener("scroll", handleResize)
@@ -184,7 +243,10 @@ const Messages = ({
     return () => {
       resizeObserver.disconnect()
       container.removeEventListener("scroll", checkAtBottom)
+      container.removeEventListener("touchstart", handleTouchStart)
+      container.removeEventListener("touchmove", handleTouchMove)
       window.removeEventListener("resize", handleResize)
+      window.removeEventListener("focusin", handleFocusIn)
       if (window.visualViewport) {
         window.visualViewport.removeEventListener("resize", handleResize)
         window.visualViewport.removeEventListener("scroll", handleResize)
@@ -212,6 +274,10 @@ const Messages = ({
           position: "relative",
           touchAction: showWelcomeBlock ? "none" : "pan-y",
           paddingTop: showWelcomeBlock ? 0 : undefined,
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+          transform: "translateZ(0)",
+          willChange: "scroll-position",
         }}
       >
         <div

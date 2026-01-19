@@ -15,8 +15,10 @@ import {
   createContext,
   useContext,
   useState,
+  useRef,
 } from "react"
 import { ActionItem } from "./ActionItem"
+import { cn } from "@/lib/utils"
 import {
   AssistantMessage,
   ChatButton,
@@ -246,6 +248,25 @@ const AiChatCmp = () => {
 const AiFullscreenChatCmp = () => {
   const { enabled } = useAiChat()
   const [inProgress, setInProgress] = useState(false)
+  const inputContainerRef = useRef<HTMLDivElement>(null)
+
+  // Prevent whole-page scroll when dragging from the input area (iOS bounce fix)
+  useEffect(() => {
+    const el = inputContainerRef.current
+    if (!el) return
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // If the touch starts in the input container, we don't want it to scroll the page
+      if (e.cancelable) {
+        e.preventDefault()
+      }
+    }
+
+    el.addEventListener("touchmove", handleTouchMove, { passive: false })
+    return () => {
+      el.removeEventListener("touchmove", handleTouchMove)
+    }
+  }, [])
 
   // Inject global styles to prevent body scroll
   useEffect(() => {
@@ -257,7 +278,6 @@ const AiFullscreenChatCmp = () => {
         width: 100% !important;
         margin: 0;
         padding: 0;
-        -webkit-overflow-scrolling: touch;
       }
       #root {
         height: 100% !important;
@@ -273,6 +293,7 @@ const AiFullscreenChatCmp = () => {
       * {
         -ms-overflow-style: none !important;
         scrollbar-width: none !important;
+        -webkit-tap-highlight-color: transparent;
       }
     `
     document.head.appendChild(style)
@@ -313,13 +334,8 @@ const AiFullscreenChatCmp = () => {
   return (
     <FullscreenChatContext.Provider value={{ inProgress, setInProgress }}>
       <div
-        className="bg-white flex w-full flex-col overflow-hidden"
+        className="bg-white"
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
           height: "100%",
           width: "100%",
           display: "flex",
@@ -328,19 +344,31 @@ const AiFullscreenChatCmp = () => {
           overscrollBehavior: "none",
         }}
       >
-        <MessagesContainerFullscreen />
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <MessagesContainerFullscreen />
+        </div>
 
         {/* Input section rendered outside the messages container to stay at the bottom */}
         <div
-          className="flex-shrink-0 w-full bg-white border-t border-f1-border"
+          ref={inputContainerRef}
+          className={cn(
+            "flex-shrink-0 w-full bg-white border-t border-f1-border transition-all",
+            "pb-[env(safe-area-inset-bottom,12px)] focus-within:pb-0"
+          )}
           style={{
             flexShrink: 0,
-            flexGrow: 0,
             width: "100%",
             display: "flex",
             flexDirection: "column",
             zIndex: 10,
-            paddingBottom: "env(safe-area-inset-bottom, 12px)",
             touchAction: "none",
           }}
         >

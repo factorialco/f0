@@ -6,7 +6,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -75,6 +75,9 @@ export const ChatOverlay: React.FC<ChatOverlayProps> = ({
 }) => {
   const [hasBeenShown, setHasBeenShown] = useState(false)
   const [domComponentReady, setDomComponentReady] = useState(false)
+
+  // Get safe area insets manually to avoid SafeAreaView automatic behavior
+  const insets = useSafeAreaInsets()
 
   // Animation values for slide from bottom
   const translateY = useSharedValue(SCREEN_HEIGHT)
@@ -160,6 +163,8 @@ export const ChatOverlay: React.FC<ChatOverlayProps> = ({
   // Animated style for keyboard offset - creates a view that pushes content up
   const keyboardOffsetStyle = useAnimatedStyle(() => {
     return {
+      // Apply offset for both iOS and Android. 
+      // Modern Android with edgeToEdgeEnabled needs this as the window doesn't always resize automatically.
       height: Math.abs(keyboardHeight.value),
     }
   })
@@ -198,9 +203,12 @@ export const ChatOverlay: React.FC<ChatOverlayProps> = ({
         {/* Gradient Background */}
         <AiAgentBackground />
 
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: 'transparent' }}
-          edges={['top']}
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'transparent',
+            paddingTop: insets.top,
+          }}
         >
           <View style={[styles.header, { backgroundColor: 'transparent' }]}>
             <CloseButton onPress={onClose} />
@@ -230,10 +238,10 @@ export const ChatOverlay: React.FC<ChatOverlayProps> = ({
                 }}
               />
             </View>
-            {/* Animated view that pushes content up when keyboard appears */}
+            {/* Animated view that pushes content up when keyboard appears (iOS only) */}
             <Animated.View style={keyboardOffsetStyle} />
           </Wrapper>
-        </SafeAreaView>
+        </View>
       </Animated.View>
     </View>
   )

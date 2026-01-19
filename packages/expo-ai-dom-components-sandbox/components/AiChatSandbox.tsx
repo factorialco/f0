@@ -14,6 +14,7 @@ import '@factorialco/f0-react/dist/styles.css'
 
 /**
  * Inner component that uses CopilotKit hooks.
+ * Inner component that uses CopilotKit hooks.
  * Must be rendered inside AiChatProvider to access the CopilotKit context.
  */
 const AiAgentChatContent = () => {
