@@ -384,7 +384,10 @@ describe("useDialog", () => {
     it("should create alert dialog with title and message", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      const promise = result.current.alert("Alert Title", "Alert Message")
+      const promise = result.current.alert({
+        title: "Alert Title",
+        message: "Alert Message",
+      })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
@@ -406,7 +409,7 @@ describe("useDialog", () => {
     it("should use default OK button label from i18n", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      result.current.alert("Title", "Message")
+      result.current.alert({ title: "Title", message: "Message" })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
@@ -419,7 +422,9 @@ describe("useDialog", () => {
     it("should use custom confirm options when provided", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      const promise = result.current.alert("Title", "Message", {
+      const promise = result.current.alert({
+        title: "Title",
+        message: "Message",
         confirm: {
           label: "Custom OK",
           value: "custom-value",
@@ -446,7 +451,9 @@ describe("useDialog", () => {
     it("should use custom ID when provided", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      result.current.alert("Title", "Message", {
+      result.current.alert({
+        title: "Title",
+        message: "Message",
         id: "custom-alert-id",
       })
 
@@ -463,7 +470,9 @@ describe("useDialog", () => {
     it("should return promise with confirm value", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      const promise = result.current.alert("Title", "Message", {
+      const promise = result.current.alert({
+        title: "Title",
+        message: "Message",
         confirm: {
           value: "alert-result",
         },
@@ -488,7 +497,10 @@ describe("useDialog", () => {
     it("should create confirm dialog with title and message", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      const promise = result.current.confirm("Confirm Title", "Confirm Message")
+      const promise = result.current.confirm({
+        title: "Confirm Title",
+        message: "Confirm Message",
+      })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
@@ -510,7 +522,7 @@ describe("useDialog", () => {
     it("should use default OK and Cancel labels from i18n", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      result.current.confirm("Title", "Message")
+      result.current.confirm({ title: "Title", message: "Message" })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
@@ -525,7 +537,9 @@ describe("useDialog", () => {
     it("should use custom confirm and cancel options when provided", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      const promise = result.current.confirm("Title", "Message", {
+      const promise = result.current.confirm({
+        title: "Title",
+        message: "Message",
         confirm: {
           label: "Yes",
           value: "yes",
@@ -558,7 +572,9 @@ describe("useDialog", () => {
     it("should use custom ID when provided", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      result.current.confirm("Title", "Message", {
+      result.current.confirm({
+        title: "Title",
+        message: "Message",
         id: "custom-confirm-id",
       })
 
@@ -575,7 +591,10 @@ describe("useDialog", () => {
     it("should return promise with selected value", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      const promise = result.current.confirm("Title", "Message")
+      const promise = result.current.confirm({
+        title: "Title",
+        message: "Message",
+      })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
