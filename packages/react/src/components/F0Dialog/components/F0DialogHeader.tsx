@@ -22,6 +22,7 @@ export const F0DialogHeader = ({
   tabs,
   activeTabId,
   setActiveTabId,
+  disableClose,
 }: F0DialogHeaderProps) => {
   const translations = useI18n()
 
@@ -111,6 +112,7 @@ export const F0DialogHeader = ({
           <ButtonInternal
             variant="outline"
             icon={CrossIcon}
+            disabled={disableClose}
             onClick={onClose}
             label={translations.actions.close}
             hideLabel

@@ -1,44 +1,41 @@
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import {
-  F0DialogActionsProps,
-  F0DialogPrimaryAction,
-  F0DialogPrimaryActionItem,
-} from "../types"
+import { F0DialogActionsProps } from "../types"
+import { toArray } from "@/lib/toArray"
 
-const isPrimaryActionArray = (
-  action: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
-): action is F0DialogPrimaryActionItem[] => {
-  return Array.isArray(action)
-}
+export const F0DialogFooter = (props: F0DialogActionsProps) => {
+  const primaryActions = toArray(props.primaryAction)
+  const secondaryActions = toArray(props.secondaryAction)
 
-export const F0DialogFooter = ({
-  primaryAction,
-  secondaryAction,
-}: F0DialogActionsProps) => {
-  const hasSecondaryAction = secondaryAction
-  const hasPrimaryAction = primaryAction
+  const hasSecondaryAction = secondaryActions.length > 0
+  const hasPrimaryAction = primaryActions.length > 0
 
   if (!hasPrimaryAction && !hasSecondaryAction) {
     return null
   }
 
+  const toPromise = (onClick: () => void | Promise<void>) => {
+    return new Promise((resolve) => {
+      resolve(onClick())
+    })
+  }
+
   const renderPrimaryAction = () => {
     if (!hasPrimaryAction) return null
 
-    if (isPrimaryActionArray(primaryAction)) {
+    if (primaryActions.length > 1) {
       return (
         <F0ButtonDropdown
-          items={primaryAction.map((action) => ({
-            value: action.value,
+          items={primaryActions.map((action) => ({
+            value: action.value ?? action.label,
             label: action.label,
             icon: action.icon,
             disabled: action.disabled,
             loading: action.loading,
           }))}
           onClick={(value) => {
-            const action = primaryAction.find((a) => a.value === value)
-            action?.onClick()
+            const action = primaryActions.find((a) => a.value === value)
+            return action ? toPromise(action?.onClick) : Promise.resolve()
           }}
           variant="default"
         />
@@ -47,12 +44,12 @@ export const F0DialogFooter = ({
 
     return (
       <F0Button
-        label={primaryAction.label}
-        onClick={primaryAction.onClick}
+        label={primaryActions[0].label}
+        onClick={() => toPromise(primaryActions[0].onClick)}
         variant="default"
-        icon={primaryAction.icon}
-        disabled={primaryAction.disabled}
-        loading={primaryAction.loading}
+        icon={primaryActions[0].icon}
+        disabled={primaryActions[0].disabled}
+        loading={primaryActions[0].loading}
       />
     )
   }
@@ -61,16 +58,18 @@ export const F0DialogFooter = ({
     <div className="flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
       <div className="flex-1" />
       <div className="flex flex-row items-center gap-2">
-        {hasSecondaryAction && (
-          <F0Button
-            label={secondaryAction.label}
-            onClick={secondaryAction.onClick}
-            variant="outline"
-            icon={secondaryAction.icon}
-            disabled={secondaryAction.disabled}
-            loading={secondaryAction.loading}
-          />
-        )}
+        {secondaryActions.length > 0 &&
+          secondaryActions.map((action) => (
+            <F0Button
+              key={action.value ?? action.label}
+              label={action.label}
+              onClick={() => toPromise(action.onClick)}
+              variant="outline"
+              icon={action.icon}
+              disabled={action.disabled}
+              loading={action.loading}
+            />
+          ))}
         {renderPrimaryAction()}
       </div>
     </div>

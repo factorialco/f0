@@ -11,32 +11,16 @@ export type DialogPosition = (typeof dialogPositions)[number]
 export const dialogWidths = ["sm", "md", "lg", "xl"] as const
 export type DialogWidth = (typeof dialogWidths)[number]
 
-export type F0DialogPrimaryAction = {
+export type F0DialogAction = {
+  value?: string
   label: string
   icon?: IconType
-  onClick: () => void
-  disabled?: boolean
-  loading?: boolean
-}
-
-export type F0DialogPrimaryActionItem = {
-  value: string
-  label: string
-  icon?: IconType
-  onClick: () => void
-  disabled?: boolean
-  loading?: boolean
-}
-
-export type F0DialogSecondaryAction = {
-  label: string
-  icon?: IconType
-  onClick: () => void
+  onClick: () => void | Promise<void>
   disabled?: boolean
   loading?: boolean
 }
 
 export type F0DialogActionsProps = {
-  primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
-  secondaryAction?: F0DialogSecondaryAction
+  primaryAction?: F0DialogAction | F0DialogAction[]
+  secondaryAction?: F0DialogAction | F0DialogAction[]
 }
