@@ -40,11 +40,25 @@ export function createAtlaskitDriver(instanceId: symbol): DndDriver {
   return {
     registerDraggable(el, { payload, disabled, handle }) {
       if (disabled) return () => {}
-      return draggable({
+      // Store payload in closure to ensure we always use the latest payload
+      // even if the component re-renders during drag
+      let currentPayload = payload
+      const cleanup = draggable({
         element: el,
-        getInitialData: () => ({ ...payload, instanceId }),
+        getInitialData: () => {
+          return { ...currentPayload, instanceId }
+        },
         dragHandle: handle ?? undefined,
       })
+      // Return cleanup function that also allows updating payload
+      const cleanupFn = () => {
+        cleanup()
+      }
+      // Store update function on cleanup (hacky but works)
+      ;(cleanupFn as any).updatePayload = (newPayload: typeof payload) => {
+        currentPayload = newPayload
+      }
+      return cleanupFn
     },
     registerDroppable(el, { id }) {
       return dropTargetForElements({

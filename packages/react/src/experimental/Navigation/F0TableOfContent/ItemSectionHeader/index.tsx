@@ -12,6 +12,12 @@ interface TOCItemSectionHeaderProps {
   onToggleExpanded?: (id: string) => void
   sortable: boolean
   hideChildrenCounter?: boolean
+  canDropInside?: boolean
+  onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragLeave?: () => void
+  onDrop?: (itemId: string, position: "before" | "after" | "inside") => void
+  currentParentId?: string | null
+  draggedItemId?: string | null
 }
 
 export function ItemSectionHeader({
@@ -23,6 +29,12 @@ export function ItemSectionHeader({
   onToggleExpanded,
   sortable,
   hideChildrenCounter,
+  canDropInside = false,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  currentParentId,
+  draggedItemId,
 }: TOCItemSectionHeaderProps) {
   if (collapsible) {
     return (
@@ -33,6 +45,12 @@ export function ItemSectionHeader({
         onToggleExpanded={onToggleExpanded}
         sortable={sortable}
         hideChildrenCounter={hideChildrenCounter}
+        canDropInside={canDropInside}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        currentParentId={currentParentId}
+        draggedItemId={draggedItemId}
       >
         {children}
       </CollapsibleItemSectionHeader>
@@ -45,6 +63,12 @@ export function ItemSectionHeader({
       isActive={isActive}
       sortable={sortable}
       hideChildrenCounter={hideChildrenCounter}
+      canDropInside={canDropInside}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      currentParentId={currentParentId}
+      draggedItemId={draggedItemId}
     >
       {children}
     </StaticItemSectionHeader>
