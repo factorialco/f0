@@ -1,5 +1,5 @@
-import { L as Nn, C as Yr, c as U, a as Ri, u as An, m as Si, i as On, B as Ni, O as qr, p as Jr, w as kn, S as we, b as Ai, F as Tn, d as Zr, A as Qr, D as es, e as ts, f as Ce, g as is, h as ve, j as Qi, k as ns, l as ui, n as lt, o as rs, q as ss, r as Ot, s as zn, E as os, t as Pt, v as as, x as ls, y as cs, z as ds, G as Ve, H as Pn, I as us, J as hs, K as fs, M as en, N as gs, P as Mn, Q as ps, R as Ln, X as In, Y as yi, T as ms, U as Hn, V as vs, W as ys, Z as bs, _ as xs, $ as ws, a0 as Cs, a1 as _s, a2 as Es, a3 as tn, a4 as Ds, a5 as ct, a6 as hi, a7 as Rs, a8 as Ss, a9 as Ns, aa as As, ab as Os, ac as ks, ad as Ts, ae as zs, af as Ps, ag as Ms, ah as Ls, ai as nn, aj as Is, ak as Hs, al as Bn, am as Bs, an as It, ao as Fn, ap as Wn, aq as Fs, ar as Gn, as as $n, at as Un, au as Ws, av as Gs, aw as rn, ax as $s, ay as jn, az as Us, aA as js, aB as Ks, aC as Vs, aD as Xs, aE as Ys, aF as Kn, aG as qe, aH as Vn, aI as qs, aJ as Js, aK as sn, aL as Zs, aM as Xn, aN as Qs, aO as eo, aP as on, aQ as to, aR as Mt, aS as io, aT as no, aU as ro, aV as so, aW as oo, aX as ao, aY as lo, aZ as co, a_ as uo, a$ as ho } from "./hooks-DxoxfgUs.js";
-import { bz as wd, bM as Cd, bV as _d, b0 as Ed, b1 as Dd, b2 as Rd, b3 as Sd, b4 as Nd, b5 as Ad, b6 as Od, b7 as kd, b9 as Td, ba as zd, bb as Pd, bc as Md, bf as Ld, bg as Id, bh as Hd, bj as Bd, bk as Fd, bl as Wd, bR as Gd, bn as $d, bo as Ud, bs as jd, bt as Kd, bu as Vd, bw as Xd, bx as Yd, by as qd, bB as Jd, bq as Zd, bA as Qd, br as eu, bv as tu, bS as iu, bd as nu, be as ru, bL as su, bG as ou, bJ as au, bF as lu, bW as cu, bE as du, bD as uu, b8 as hu, bi as fu, bp as gu, bC as pu, bH as mu, bN as vu, bO as yu, bP as bu, bX as xu, bm as wu, bI as Cu, bQ as _u, bU as Eu, bK as Du, bT as Ru } from "./hooks-DxoxfgUs.js";
+import { L as Nn, C as Yr, c as U, a as Ri, u as An, m as Si, i as On, B as Ni, O as qr, p as Jr, w as kn, S as we, b as Ai, F as Tn, d as Zr, A as Qr, D as es, e as ts, f as Ce, g as is, h as ve, j as Qi, k as ns, l as ui, n as lt, o as rs, q as ss, r as Ot, s as zn, E as os, t as Pt, v as as, x as ls, y as cs, z as ds, G as Ve, H as Pn, I as us, J as hs, K as fs, M as en, N as gs, P as Mn, Q as ps, R as Ln, X as In, Y as yi, T as ms, U as Hn, V as vs, W as ys, Z as bs, _ as xs, $ as ws, a0 as Cs, a1 as _s, a2 as Es, a3 as tn, a4 as Ds, a5 as ct, a6 as hi, a7 as Rs, a8 as Ss, a9 as Ns, aa as As, ab as Os, ac as ks, ad as Ts, ae as zs, af as Ps, ag as Ms, ah as Ls, ai as nn, aj as Is, ak as Hs, al as Bn, am as Bs, an as It, ao as Fn, ap as Wn, aq as Fs, ar as Gn, as as $n, at as Un, au as Ws, av as Gs, aw as rn, ax as $s, ay as jn, az as Us, aA as js, aB as Ks, aC as Vs, aD as Xs, aE as Ys, aF as Kn, aG as qe, aH as Vn, aI as qs, aJ as Js, aK as sn, aL as Zs, aM as Xn, aN as Qs, aO as eo, aP as on, aQ as to, aR as Mt, aS as io, aT as no, aU as ro, aV as so, aW as oo, aX as ao, aY as lo, aZ as co, a_ as uo, a$ as ho } from "./hooks-juxDRxtV.js";
+import { bz as wd, bM as Cd, bV as _d, b0 as Ed, b1 as Dd, b2 as Rd, b3 as Sd, b4 as Nd, b5 as Ad, b6 as Od, b7 as kd, b9 as Td, ba as zd, bb as Pd, bc as Md, bf as Ld, bg as Id, bh as Hd, bj as Bd, bk as Fd, bl as Wd, bR as Gd, bn as $d, bo as Ud, bs as jd, bt as Kd, bu as Vd, bw as Xd, bx as Yd, by as qd, bB as Jd, bq as Zd, bA as Qd, br as eu, bv as tu, bS as iu, bd as nu, be as ru, bL as su, bG as ou, bJ as au, bF as lu, bW as cu, bE as du, bD as uu, b8 as hu, bi as fu, bp as gu, bC as pu, bH as mu, bN as vu, bO as yu, bP as bu, bX as xu, bm as wu, bI as Cu, bQ as _u, bU as Eu, bK as Du, bT as Ru } from "./hooks-juxDRxtV.js";
 import { jsx as f, jsxs as P, Fragment as xt } from "react/jsx-runtime";
 import M, { forwardRef as oe, useRef as L, useImperativeHandle as fo, Children as Ht, createContext as Ee, useContext as ge, useState as B, useMemo as I, useEffect as H, useCallback as j, useLayoutEffect as bi, createElement as an, isValidElement as Yn, Fragment as go, memo as po, useReducer as mo, cloneElement as vo, PureComponent as yo } from "react";
 import { createPortal as Oi, unstable_batchedUpdates as kt } from "react-dom";
@@ -9047,7 +9047,7 @@ const Oc = async (n) => Promise.resolve(typeof n.value == "function" ? await n.v
   }, [s, e]);
   return f(xt, {
     children: o.map((a) => f(to, {
-      disableCloseButton: i(a.id),
+      disableClose: i(a.id),
       isOpen: !0,
       width: a.width,
       onClose: a.onCloseDialog,
@@ -9097,43 +9097,43 @@ const Oc = async (n) => Promise.resolve(typeof n.value == "function" ? await n.v
   });
   return {
     openDialog: i,
-    alert: (a, l, d = {}) => {
-      const c = {
-        ...d,
-        id: d.id || Mt(),
-        title: a,
+    alert: (a) => {
+      const l = {
+        ...a,
+        id: a.id || Mt(),
+        title: a.title,
         content: f("div", {
-          children: l
+          children: a.msg
         }),
         actions: {
           primary: {
-            value: d.confirm?.value ?? !0,
-            label: d.confirm?.label || n.actions.ok
+            value: a.confirm?.value ?? !0,
+            label: a.confirm?.label || n.actions.ok
           }
         }
       };
-      return i(c);
+      return i(l);
     },
-    confirm: (a, l, d = {}) => {
-      const c = {
-        ...d,
-        id: d.id || Mt(),
-        title: a,
+    confirm: (a) => {
+      const l = {
+        ...a,
+        id: a.id || Mt(),
+        title: a.title,
         content: f("div", {
-          children: l
+          children: a.msg
         }),
         actions: {
           primary: {
-            value: d.confirm?.value ?? !0,
-            label: d.confirm?.label || n.actions.ok
+            value: a.confirm?.value ?? !0,
+            label: a.confirm?.label || n.actions.ok
           },
           secondary: {
-            value: d.cancel?.value ?? !1,
-            label: d.cancel?.label || n.actions.cancel
+            value: a.cancel?.value ?? !1,
+            label: a.cancel?.label || n.actions.cancel
           }
         }
       };
-      return i(c);
+      return i(l);
     },
     closeDialog: (a) => {
       t(a);

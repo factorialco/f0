@@ -4276,7 +4276,9 @@ export declare type SelectionStatus<R extends RecordType, Filters extends Filter
 
 export declare const selectSizes: readonly ["sm", "md"];
 
-declare type SimpleDialogOptions = Optional<Pick<DialogDefinition, "id" | "title" | "description" | "width">, "id" | "title">;
+declare type SimpleDialogOptions = Optional<Pick<DialogDefinition, "id" | "title" | "description" | "width">, "id"> & {
+    msg: string;
+};
 
 /**
  * Response structure for non-paginated data
@@ -4948,8 +4950,8 @@ export declare const useDialog: () => UseDialogReturn;
 
 export declare type UseDialogReturn = {
     openDialog: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
-    alert: (title: string, msg: string, options?: AlertDialogOptions) => Promise<DialogActionValue>;
-    confirm: (title: string, msg: string, options?: ConfirmDialogOptions) => Promise<DialogActionValue>;
+    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
+    confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
     closeDialog: (id: DialogId) => void;
 };
 
@@ -5166,6 +5168,33 @@ declare global {
     }
 }
 
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        liveCompanion: {
+            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        };
+    }
+}
+
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
@@ -5180,33 +5209,6 @@ declare module "gridstack" {
             w: number;
             h: number;
         }>;
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
     }
 }
 
