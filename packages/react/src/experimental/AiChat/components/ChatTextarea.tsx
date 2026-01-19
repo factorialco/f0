@@ -167,7 +167,14 @@ export const ChatTextarea = ({
     removeAttachment,
     clearAttachments,
     fileUploadsEnabled,
+    setFileInputRef,
   } = useAiChat()
+
+  // Register file input ref with context so it can be triggered externally
+  useEffect(() => {
+    setFileInputRef(fileInputRef.current)
+    return () => setFileInputRef(null)
+  }, [setFileInputRef])
 
   const hasDataToSend = inputValue.trim().length > 0 || attachments.length > 0
   const multiplePlaceholders = placeholders.length > 1

@@ -3,6 +3,7 @@ import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { ChatDropZone } from "./ChatDropZone"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
   const {
@@ -10,6 +11,8 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
     autoClearMinutes,
+    addAttachments,
+    fileUploadsEnabled,
   } = useAiChat()
   const { reset } = useCopilotChatInternal()
   useAutoClear({
@@ -40,19 +43,24 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             }
           }}
         >
-          <motion.div
-            className="relative flex h-full w-[360px] flex-col overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
-              ease: "easeOut",
-              delay: shouldPlayEntranceAnimation ? 0.2 : 0,
-            }}
+          <ChatDropZone
+            onFilesDrop={addAttachments}
+            disabled={!fileUploadsEnabled}
           >
-            {children}
-          </motion.div>
+            <motion.div
+              className="relative flex h-full w-[360px] flex-col overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+                ease: "easeOut",
+                delay: shouldPlayEntranceAnimation ? 0.2 : 0,
+              }}
+            >
+              {children}
+            </motion.div>
+          </ChatDropZone>
         </motion.div>
       )}
     </AnimatePresence>

@@ -188,6 +188,16 @@ type AiChatProviderReturnValue = {
       | ((message: string, attachments: File[]) => Promise<BeforeSendResult>)
       | null
   ) => void
+  /**
+   * Trigger the file input to open the file picker dialog.
+   * Use this to programmatically open the file picker (e.g., from a suggestion button).
+   */
+  triggerFileInput: () => void
+  /**
+   * Internal function to set the file input ref from ChatTextarea
+   * @internal
+   */
+  setFileInputRef: (ref: HTMLInputElement | null) => void
 } & Pick<AiChatState, "greeting" | "agent">
 
 const DEFAULT_MINUTES_TO_RESET = 15
@@ -238,6 +248,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const onBeforeSendRef = useRef<
     ((message: string, attachments: File[]) => Promise<BeforeSendResult>) | null
   >(null)
+  // Store the file input ref from ChatTextarea
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -271,6 +283,16 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
     onBeforeSendRef.current = callback
   }
+
+  const setFileInputRef = useCallback((ref: HTMLInputElement | null) => {
+    fileInputRef.current = ref
+  }, [])
+
+  const triggerFileInput = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }, [])
 
   const clear = () => {
     if (clearFunctionRef.current) {
@@ -475,6 +497,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         clearAttachments,
         setOnBeforeSend,
         fileUploadsEnabled: fileValidation !== undefined,
+        triggerFileInput,
+        setFileInputRef,
       }}
     >
       {children}
@@ -519,6 +543,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       clearAttachments: noopFn,
       setOnBeforeSend: noopFn,
       fileUploadsEnabled: false,
+      triggerFileInput: noopFn,
+      setFileInputRef: noopFn,
     }
   }
 
