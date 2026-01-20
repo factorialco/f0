@@ -113,7 +113,7 @@ export const Settings = <
   const currentVisualizationDef = useMemo(
     () => visualizations[currentVisualization],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we are not memoizing the visualization as is a constant
-    [currentVisualization]
+    [currentVisualization, visualizations?.[currentVisualization]]
   )
   const visualizacionSettings = useMemo(
     () => (

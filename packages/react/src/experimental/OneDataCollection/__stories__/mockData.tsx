@@ -374,7 +374,15 @@ export const getMockVisualizations = (options?: {
           },
         ],
       },
-    },
+    } as Visualization<
+      MockUser,
+      FiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >,
     card: {
       type: "card",
       options: {
@@ -569,7 +577,7 @@ export const getMockVisualizations = (options?: {
             render: (item) => ({
               type: "dotTag",
               value: {
-                color: "yellow",
+                color: "yellow" as const,
                 label: item.department,
               },
             }),
@@ -688,7 +696,7 @@ export const getMockVisualizations = (options?: {
           : undefined,
       },
     },
-  })
+  }) as const
 // Example of using the object-based approach (recommended)
 export const sortings = {
   name: {

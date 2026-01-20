@@ -126,6 +126,7 @@ export const useColumns = <
   const columnsWithStatus = useMemo(() => {
     const cols = [...originalColumns]
     const nonEditableColumns = frozenColumns || 1
+
     return [
       // Frozen columns can not be hidden even if the id is in status
       // The frist column is always visible and not sortable even if frozenColumns is 0
