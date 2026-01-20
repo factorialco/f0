@@ -154,7 +154,7 @@
     "oxfmt": "^0.17.0",
     "oxlint": "^1.33.0",
     "playwright": "^1.57.0",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.6",
     "postcss-import": "^16.1.0",
     "react-syntax-highlighter": "^15.6.1",
     "remark-gfm": "^4.0.1",
