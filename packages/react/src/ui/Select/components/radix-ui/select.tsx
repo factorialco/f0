@@ -588,9 +588,36 @@ interface SelectContentImplProps
   onPointerDownOutside?: DismissableLayerProps["onPointerDownOutside"]
 
   position?: "item-aligned" | "popper"
+
+  /**
+   * When true, disables the scroll lock that prevents scrolling outside the select.
+   * Useful for "list" mode where the select is always open.
+   */
+  disableScrollLock?: boolean
 }
 
 const Slot = createSlot("SelectContent.RemoveScroll")
+
+/**
+ * Wrapper component that conditionally renders RemoveScroll.
+ * When disableScrollLock is true, it renders children directly without scroll lock.
+ */
+const ScrollLockWrapper = ({
+  disableScrollLock,
+  children,
+}: {
+  disableScrollLock: boolean
+  children: React.ReactNode
+}) => {
+  if (disableScrollLock) {
+    return children
+  }
+  return (
+    <RemoveScroll as={Slot} allowPinchZoom>
+      {children}
+    </RemoveScroll>
+  )
+}
 
 const SelectContentImpl = React.forwardRef<
   SelectContentImplElement,
@@ -602,6 +629,7 @@ const SelectContentImpl = React.forwardRef<
     onCloseAutoFocus,
     onEscapeKeyDown,
     onPointerDownOutside,
+    disableScrollLock = false,
     //
     // PopperContent props
     side,
@@ -841,7 +869,7 @@ const SelectContentImpl = React.forwardRef<
       isPositioned={isPositioned}
       searchRef={searchRef}
     >
-      <RemoveScroll as={Slot} allowPinchZoom>
+      <ScrollLockWrapper disableScrollLock={disableScrollLock}>
         <FocusScope
           asChild
           // Disable focus trapping entirely to avoid conflicts with other
@@ -865,7 +893,7 @@ const SelectContentImpl = React.forwardRef<
         >
           <DismissableLayer
             asChild
-            disableOutsidePointerEvents
+            disableOutsidePointerEvents={!disableScrollLock}
             onEscapeKeyDown={onEscapeKeyDown}
             onPointerDownOutside={onPointerDownOutside}
             // When focus is trapped, a focusout event may still happen.
@@ -932,7 +960,7 @@ const SelectContentImpl = React.forwardRef<
             />
           </DismissableLayer>
         </FocusScope>
-      </RemoveScroll>
+      </ScrollLockWrapper>
     </SelectContentProvider>
   )
 })

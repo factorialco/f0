@@ -1,16 +1,22 @@
 import { type UserMessageProps } from "@copilotkit/react-ui"
-import { useEffect, useRef } from "react"
+import { useContext, useEffect, useRef } from "react"
+import { FullscreenChatContext } from "../index"
 
 export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
   const isImageMessage = message && "image" in message && message.image
   const ref = useRef<HTMLDivElement>(null)
+
+  // Get context to check if we are in fullscreen
+  const fullscreenContext = useContext(FullscreenChatContext)
+  const isFullscreen = !!fullscreenContext?.setInProgress
+
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current || isFullscreen) return
 
     ref.current.scrollIntoView({
       behavior: "smooth",
     })
-  }, [])
+  }, [isFullscreen])
 
   // Image message
   if (isImageMessage) {

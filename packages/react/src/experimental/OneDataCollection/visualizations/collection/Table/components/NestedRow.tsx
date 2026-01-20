@@ -108,6 +108,7 @@ const NestedRowContent = <
       rowId: rowId,
       item: props.item,
       source: props.source,
+      onClearFetchedData: () => setOpen(false),
     })
 
   const shouldShowLoading = open && isLoading
@@ -174,6 +175,7 @@ const NestedRowContent = <
     <>
       <Row
         {...props}
+        disableHover={true}
         noBorder={shouldHideBorder}
         ref={combinedRowRef}
         nestedRowProps={{
@@ -295,6 +297,7 @@ const NestedRowContent = <
       {shouldShowLoadMore && !isLoading && (
         <LoadMoreRow
           {...props}
+          disableHover={true}
           rowRef={internalRowRef}
           onLoadMoreChildren={loadChildren}
           ref={setLastChildRef}

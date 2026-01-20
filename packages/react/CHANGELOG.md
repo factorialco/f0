@@ -1,5 +1,103 @@
 # Changelog
 
+## [1.330.0](https://github.com/factorialco/f0/compare/f0-react-v1.329.1...f0-react-v1.330.0) (2026-01-20)
+
+
+### Features
+
+* improve ai chat components UI/UX ([#3260](https://github.com/factorialco/f0/issues/3260)) ([0d63858](https://github.com/factorialco/f0/commit/0d638583fcd5d8747f3400f32d8f3bd197bc91c8))
+
+## [1.329.1](https://github.com/factorialco/f0/compare/f0-react-v1.329.0...f0-react-v1.329.1) (2026-01-20)
+
+
+### Bug Fixes
+
+* **datacollection:** cols in settings reacts to changes ([#3265](https://github.com/factorialco/f0/issues/3265)) ([d5b89a8](https://github.com/factorialco/f0/commit/d5b89a8786862c2421fd2e6c71f6809288a4292d))
+
+## [1.329.0](https://github.com/factorialco/f0/compare/f0-react-v1.328.0...f0-react-v1.329.0) (2026-01-19)
+
+
+### Features
+
+* **Nested Table:** implement clearFetchedData functionality for date-nav & pagination changes ([#3247](https://github.com/factorialco/f0/issues/3247)) ([e557cdf](https://github.com/factorialco/f0/commit/e557cdfa6837f2ab22100e0c2d6e965f09fd53f9))
+
+## [1.328.0](https://github.com/factorialco/f0/compare/f0-react-v1.327.3...f0-react-v1.328.0) (2026-01-16)
+
+
+### Features
+
+* card border color ([#3252](https://github.com/factorialco/f0/issues/3252)) ([18f3964](https://github.com/factorialco/f0/commit/18f39640a6b02c952cff2c0ce85ca078b00858c1))
+
+## [1.327.3](https://github.com/factorialco/f0/compare/f0-react-v1.327.2...f0-react-v1.327.3) (2026-01-16)
+
+
+### Bug Fixes
+
+* **F0Select:** improve layout on asList version ([#3243](https://github.com/factorialco/f0/issues/3243)) ([8d0c5ae](https://github.com/factorialco/f0/commit/8d0c5ae521368aa8b5affaeb15dd117a95c48b9e))
+
+## [1.327.2](https://github.com/factorialco/f0/compare/f0-react-v1.327.1...f0-react-v1.327.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* add reset to :focus-visible ([#3246](https://github.com/factorialco/f0/issues/3246)) ([57ef687](https://github.com/factorialco/f0/commit/57ef687101ba7964331764b0e7bc0491adb2887e))
+
+## [1.327.1](https://github.com/factorialco/f0/compare/f0-react-v1.327.0...f0-react-v1.327.1) (2026-01-16)
+
+
+### Bug Fixes
+
+* dialog in mobile not showing up correctly ([#3244](https://github.com/factorialco/f0/issues/3244)) ([c0f903a](https://github.com/factorialco/f0/commit/c0f903ab8357eb26b62c4080483689334813c222))
+
+## [1.327.0](https://github.com/factorialco/f0/compare/f0-react-v1.326.0...f0-react-v1.327.0) (2026-01-15)
+
+
+### Features
+
+* **F0CollapsibleMenu:** add variant prop to F0CollapsibleMenu ([#3239](https://github.com/factorialco/f0/issues/3239)) ([5236466](https://github.com/factorialco/f0/commit/5236466ca3d5fcfdcaa41b9bdf925987782dfad5))
+
+## [1.326.0](https://github.com/factorialco/f0/compare/f0-react-v1.325.0...f0-react-v1.326.0) (2026-01-15)
+
+
+### Features
+
+* **Nested Table:** implement clearFetchedData functionality for filters changes ([#3236](https://github.com/factorialco/f0/issues/3236)) ([6f49085](https://github.com/factorialco/f0/commit/6f49085bf2b8fb365122b305971cb634d2c092aa))
+
+## [1.325.0](https://github.com/factorialco/f0/compare/f0-react-v1.324.0...f0-react-v1.325.0) (2026-01-15)
+
+
+### Features
+
+* **CollapsibleMenu:** new collapsible menu ([#3234](https://github.com/factorialco/f0/issues/3234)) ([121dcfa](https://github.com/factorialco/f0/commit/121dcfa7adb539c31dbc2a17ff60aaa499c63828))
+
+## [1.324.0](https://github.com/factorialco/f0/compare/f0-react-v1.323.0...f0-react-v1.324.0) (2026-01-15)
+
+
+### Features
+
+* **F0Select:** implement 'asList' prop  ([#3231](https://github.com/factorialco/f0/issues/3231)) ([aa3043e](https://github.com/factorialco/f0/commit/aa3043e5deeb4ab20084d29806d89a81c90c918e))
+
+## [1.323.0](https://github.com/factorialco/f0/compare/f0-react-v1.322.1...f0-react-v1.323.0) (2026-01-15)
+
+
+### Features
+
+* **Table:** add disableHover prop and remove unused N/A ([#3232](https://github.com/factorialco/f0/issues/3232)) ([162b9cd](https://github.com/factorialco/f0/commit/162b9cd1721aa4dc863c5e568eeb445dd3b63835))
+
+## [1.322.1](https://github.com/factorialco/f0/compare/f0-react-v1.322.0...f0-react-v1.322.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* make DC hidden columns invisible initially ([#3175](https://github.com/factorialco/f0/issues/3175)) ([ac1deab](https://github.com/factorialco/f0/commit/ac1deaba18b734f02e152e3a3195311408be8ea0))
+
+## [1.322.0](https://github.com/factorialco/f0/compare/f0-react-v1.321.1...f0-react-v1.322.0) (2026-01-14)
+
+
+### Features
+
+* manage new mode type to decide wether to display or not labels ([#3228](https://github.com/factorialco/f0/issues/3228)) ([af2c688](https://github.com/factorialco/f0/commit/af2c68825b0fa33b8a5602ef4e0754e6da5f761e))
+
 ## [1.321.1](https://github.com/factorialco/f0/compare/f0-react-v1.321.0...f0-react-v1.321.1) (2026-01-13)
 
 

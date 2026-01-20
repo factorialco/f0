@@ -15,6 +15,7 @@ import { F0Provider } from "@/lib/providers/f0"
 import { DocsContainer } from "./DocsContainer.tsx"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
@@ -38,7 +39,10 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
         fullScreen: parameters.layout === "fullscreen",
       }}
       i18n={{
-        translations: buildTranslations(defaultTranslations),
+        translations: buildTranslations({
+          ...defaultTranslations,
+          ...aiTranslations,
+        }),
       }}
       l10n={{
         l10n: {
@@ -52,7 +56,6 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
-              console.log("Link clicked", event, ...args)
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()

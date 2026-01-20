@@ -28,6 +28,7 @@ interface SelectTopActionsProps<
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (grouping: GroupingState<R, Grouping>) => void
+  asList?: boolean
 }
 
 export const SelectTopActions = <R extends RecordType = RecordType>({
@@ -41,6 +42,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   filters,
   currentFilters,
   onFiltersChange,
+  asList = false,
 }: SelectTopActionsProps<R>) => {
   const i18n = useI18n()
 
@@ -66,7 +68,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
                 onChange={onSearchChange}
                 value={searchValue}
                 debounceTime={400}
-                autoFocus={!isFiltersOpen}
+                autoFocus={!asList && !isFiltersOpen}
                 clearable
               />
             </div>
@@ -76,7 +78,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
               filters={filters}
               value={currentFilters}
               onChange={onFiltersChange}
-              mode="compact"
+              mode={asList ? "simple" : "compact"}
               onOpenChange={setIsFiltersOpen}
             />
           )}

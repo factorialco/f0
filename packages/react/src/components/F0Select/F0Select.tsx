@@ -15,8 +15,12 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
+import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField } from "@/ui/InputField"
+import { InputMessages } from "@/ui/InputField/components/InputMessages"
+import { Label } from "@/ui/InputField/components/Label"
+import { cva } from "cva"
 import {
   SelectContent,
   Select as SelectPrimitive,
@@ -31,6 +35,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -60,6 +65,21 @@ const defaultSearchFn = (
     option.label.toLowerCase().includes(search.toLowerCase())
   )
 }
+
+const asListContainerVariants = cva({
+  base: "flex flex-col rounded-md border border-solid bg-f1-background max-h-full",
+  variants: {
+    status: {
+      default: "border-f1-border-secondary",
+      error: "border-f1-border-critical-bold",
+      warning: "border-f1-border-warning-bold",
+      info: "border-f1-border-info-bold",
+    },
+  },
+  defaultVariants: {
+    status: "default",
+  },
+})
 
 const F0SelectComponent = forwardRef(function Select<
   T extends string,
@@ -97,10 +117,13 @@ const F0SelectComponent = forwardRef(function Select<
     required,
     multiple,
     portalContainer,
+    asList = false,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
+  const id = useId()
+
   // If inside a OneDialog and no portalContainer is provided, use the dialog's container
   // only for center/fullscreen dialogs (which have focus trap).
   // For side panels (left/right), render in body to prevent clipping.
@@ -603,13 +626,101 @@ const F0SelectComponent = forwardRef(function Select<
         ...commonProps,
         value: selectedItemsValues,
         multiple: true as const,
+        as: asList ? ("list" as const) : undefined,
       } as const)
     : ({
         ...commonProps,
         // Use empty string instead of undefined to maintain controlled component state
         value: selectedItemsValues[0] ?? "",
         multiple: false as const,
+        as: asList ? ("list" as const) : undefined,
       } as const)
+
+  const selectContent = (
+    <SelectContent
+      items={items}
+      taller={!!source?.filters}
+      className={selectContentClassName}
+      emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
+      bottom={<SelectBottomActions actions={actions} />}
+      top={
+        <>
+          <SelectTopActions
+            searchValue={currentSearch}
+            onSearchChange={onSearchChangeLocal}
+            searchBoxPlaceholder={searchBoxPlaceholder}
+            showSearchBox={showSearchBox}
+            grouping={localSource.grouping}
+            currentGrouping={localSource.currentGrouping}
+            onGroupingChange={localSource.setCurrentGrouping}
+            filters={localSource.filters}
+            currentFilters={localSource.currentFilters}
+            onFiltersChange={localSource.setCurrentFilters}
+            asList={asList}
+          />
+          {multiple && !currentSearch && (
+            <SelectAll
+              selectedCount={selectionMeta.selectedItemsCount}
+              indeterminate={
+                selectedState.allSelected === "indeterminate" ||
+                (selectedState.allSelected === false &&
+                  selectionMeta.selectedItemsCount > 0)
+              }
+              value={!!selectedState.allSelected}
+              onChange={handleSelectAllWithTracking}
+              hideCheckbox={disableSelectAll}
+              items={getDisplayItemsForSelection}
+              onDeselect={(value) => onItemCheckChange(value, false)}
+              paddingTop={!showSearchBox && !localSource.filters}
+            />
+          )}
+        </>
+      }
+      forceMinHeight={!!localSource.filters}
+      onScrollBottom={handleScrollBottom}
+      scrollMargin={10}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading || loading}
+      showLoadingIndicator={!!children}
+      portalContainer={effectivePortalContainer}
+    />
+  )
+
+  if (asList) {
+    return (
+      <div
+        className={cn(
+          "flex w-full max-h-full flex-col gap-2",
+          disabled && "cursor-not-allowed opacity-50"
+        )}
+      >
+        {label && !hideLabel && (
+          <Label
+            label={label}
+            required={required}
+            htmlFor={id}
+            icon={labelIcon}
+            disabled={disabled}
+          />
+        )}
+        {/* Select Container */}
+        <div
+          className={cn(
+            "flex-1 min-h-0",
+            asListContainerVariants({
+              status: error ? "error" : status?.type ? status?.type : "default",
+            })
+          )}
+        >
+          <SelectPrimitive {...selectPrimitiveProps}>
+            {selectContent}
+          </SelectPrimitive>
+        </div>
+        {/* Hint or Status Message */}
+        <InputMessages status={status} />
+      </div>
+    )
+  }
 
   return (
     <>
@@ -664,7 +775,7 @@ const F0SelectComponent = forwardRef(function Select<
               size={size}
               loadingIndicator={{
                 asOverlay: true,
-                offset: 26,
+                offset: 34,
               }}
               loading={isInitialLoading || loading || isLoading}
               name={name}
@@ -711,53 +822,7 @@ const F0SelectComponent = forwardRef(function Select<
             </InputField>
           )}
         </SelectTrigger>
-        {openLocal && (
-          <SelectContent
-            items={items}
-            taller={!!source?.filters}
-            className={selectContentClassName}
-            emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
-            bottom={<SelectBottomActions actions={actions} />}
-            top={
-              <>
-                <SelectTopActions
-                  searchValue={currentSearch}
-                  onSearchChange={onSearchChangeLocal}
-                  searchBoxPlaceholder={searchBoxPlaceholder}
-                  showSearchBox={showSearchBox}
-                  grouping={localSource.grouping}
-                  currentGrouping={localSource.currentGrouping}
-                  onGroupingChange={localSource.setCurrentGrouping}
-                  filters={localSource.filters}
-                  currentFilters={localSource.currentFilters}
-                  onFiltersChange={localSource.setCurrentFilters}
-                />
-                {multiple && !currentSearch && (
-                  <SelectAll
-                    selectedCount={selectionMeta.selectedItemsCount}
-                    indeterminate={
-                      selectedState.allSelected === "indeterminate" ||
-                      (selectedState.allSelected === false &&
-                        selectionMeta.selectedItemsCount > 0)
-                    }
-                    value={!!selectedState.allSelected}
-                    onChange={handleSelectAllWithTracking}
-                    hideCheckbox={disableSelectAll}
-                    items={getDisplayItemsForSelection}
-                    onDeselect={(value) => onItemCheckChange(value, false)}
-                  />
-                )}
-              </>
-            }
-            forceMinHeight={!!localSource.filters}
-            onScrollBottom={handleScrollBottom}
-            scrollMargin={10}
-            isLoadingMore={isLoadingMore}
-            isLoading={isLoading || loading}
-            showLoadingIndicator={!!children}
-            portalContainer={effectivePortalContainer}
-          />
-        )}
+        {openLocal && selectContent}
       </SelectPrimitive>
     </>
   )

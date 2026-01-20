@@ -57,7 +57,7 @@ export const WelcomeScreen = ({
       >
         <div
           className={cn(
-            isFullscreen ? "w-full max-w-[540px] flex flex-col" : "px-2"
+            isFullscreen ? "w-full max-w-[540px] flex flex-col" : "pl-3"
           )}
         >
           <motion.div
@@ -65,9 +65,9 @@ export const WelcomeScreen = ({
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             transition={{
-              opacity: { duration: 0.2, ease: "easeOut", delay: 0.4 },
-              scale: { duration: 0.3, ease: [0.25, 0.46, 0.45, 1.94] },
-              filter: { duration: 0.2, ease: "easeOut", delay: 0.4 },
+              duration: 0.3,
+              ease: "easeOut",
+              delay: 0.4,
             }}
           >
             <OneIcon spin size="lg" className="my-4" />
@@ -75,19 +75,15 @@ export const WelcomeScreen = ({
           {greeting && (
             <motion.p
               className={cn(
-                "text-lg font-semibold gradient-text",
+                "text-lg font-semibold text-f1-foreground-secondary gradient-text",
                 isFullscreen && "text-2xl"
               )}
               initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
               transition={{
-                opacity: { duration: 0.2, ease: "easeOut", delay: 0.5 },
-                filter: { duration: 0.2, ease: "easeOut", delay: 0.5 },
-                translateY: {
-                  duration: 0.2,
-                  ease: [0.25, 0.46, 0.45, 1.94],
-                  delay: 0.5,
-                },
+                duration: 0.2,
+                ease: "easeOut",
+                delay: 0.5,
               }}
             >
               {greeting}
@@ -100,16 +96,12 @@ export const WelcomeScreen = ({
                 isFullscreen && "text-2xl"
               )}
               key={message.id}
-              initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
-                opacity: { duration: 0.2, ease: "easeOut", delay: 0.7 },
-                filter: { duration: 0.2, ease: "easeOut", delay: 0.7 },
-                translateY: {
-                  duration: 0.2,
-                  ease: [0.25, 0.46, 0.45, 1.94],
-                  delay: 0.7,
-                },
+                duration: 0.2,
+                ease: "easeOut",
+                delay: 0.7,
               }}
             >
               {message.content}
@@ -118,7 +110,7 @@ export const WelcomeScreen = ({
         </div>
         <div
           className={cn(
-            "-ml-2 flex flex-col gap-[6px]",
+            "gap-2 px-3 pb-1 sm:px-0 sm:pb-0 flex flex-col",
             isFullscreen ? "items-center w-full max-w-[540px]" : "items-start"
           )}
         >
@@ -126,29 +118,18 @@ export const WelcomeScreen = ({
             <motion.div
               className="w-full"
               key={index}
-              initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
-                opacity: {
-                  duration: 0.1,
-                  ease: "easeOut",
-                  delay: 0.9 + index * 0.1,
-                },
-                filter: {
-                  duration: 0.1,
-                  ease: "easeOut",
-                  delay: 0.9 + index * 0.1,
-                },
-                translateY: {
-                  duration: 0.1,
-                  ease: [0.25, 0.46, 0.45, 1.94],
-                  delay: 0.9 + index * 0.1,
-                },
+                duration: 0.1,
+                ease: "easeOut",
+                delay: 0.9 + index * 0.1,
               }}
             >
               <div>
                 <ButtonInternal
                   variant="ghost"
+                  className="sm:border-none border border-f1-border border-solid shadow sm:shadow-none"
                   label={suggestion.message}
                   icon={suggestion.icon}
                   onClick={() =>

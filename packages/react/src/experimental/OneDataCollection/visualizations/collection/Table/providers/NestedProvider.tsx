@@ -1,10 +1,17 @@
 import { RecordType } from "@/hooks/datasource"
 import { ChildrenResponse } from "@/hooks/datasource/types/nested.typings"
-import { createContext, ReactNode, useContext, useState } from "react"
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from "react"
 
 interface NestedDataContextValue<R extends RecordType> {
   fetchedData: Record<string, ChildrenResponse<R>>
   updateFetchedData: (rowId: string, data: ChildrenResponse<R>) => void
+  clearFetchedData: () => void
 }
 
 const NestedDataContext = createContext<
@@ -20,17 +27,28 @@ export const NestedDataProvider = <R extends RecordType>({
     Record<string, ChildrenResponse<R>>
   >({})
 
-  const updateFetchedData = (rowId: string, data: ChildrenResponse<R>) => {
-    setFetchedData((prev) => ({
-      ...prev,
-      [rowId]: data,
-    }))
-  }
+  const updateFetchedData = useCallback(
+    (rowId: string, data: ChildrenResponse<R>) => {
+      setFetchedData((prev) => ({
+        ...prev,
+        [rowId]: data,
+      }))
+    },
+    []
+  )
+
+  const clearFetchedData = useCallback(() => {
+    setFetchedData({})
+  }, [])
 
   return (
     <NestedDataContext.Provider
       value={
-        { fetchedData, updateFetchedData } as NestedDataContextValue<RecordType>
+        {
+          fetchedData,
+          updateFetchedData,
+          clearFetchedData,
+        } as NestedDataContextValue<RecordType>
       }
     >
       {children}

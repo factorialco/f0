@@ -60,7 +60,7 @@ export function FilterList<Definition extends FiltersDefinition>({
   return (
     <div
       className={cn(
-        "z-30 flex h-full w-full shrink-0 flex-col bg-f1-background",
+        "z-30 flex h-full w-full shrink-0 flex-col",
         isCompactMode ? "min-w-[224px]" : "w-[224px]",
         !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
@@ -115,7 +115,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                 onClick={() => onFilterSelect(key as keyof Definition)}
               >
                 <div className="flex w-full items-center justify-start gap-2.5">
-                  <span className="line-clamp-1 w-fit flex-1 text-left">
+                  <span className="line-clamp-1 w-fit flex-1 text-left text-f1-foreground">
                     {filter.label}
                   </span>
                   <AnimatePresence>
@@ -138,7 +138,7 @@ export function FilterList<Definition extends FiltersDefinition>({
           })}
         </div>
         {isCompactMode && (
-          <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
+          <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
             <F0Button
               onClick={onClickApplyFilters}
               label={i18n.filters.applyFilters}

@@ -45,15 +45,16 @@ const dialogContentClassName = cva({
       fullscreen: "",
     },
     width: {
-      sm: "max-w-[539px]",
-      md: "max-w-[680px]",
-      lg: "max-w-[820px]",
+      sm: "max-w-[480px]",
+      md: "max-w-[640px]",
+      lg: "max-w-[800px]",
+      xl: "max-w-[960px]",
     },
   },
   compoundVariants: [
     {
       variant: "fullscreen",
-      width: ["sm", "md", "lg"],
+      width: ["sm", "md", "lg", "xl"],
       class: "max-w-full",
     },
   ],
@@ -103,11 +104,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   const isSidePosition = position === "left" || position === "right"
 
   const variant = useMemo(() => {
-    if (position === "fullscreen") {
-      return "fullscreen"
-    }
     if (isSmallScreen && asBottomSheetInMobile) {
       return "bottomSheet"
+    }
+    if (position === "fullscreen") {
+      return "fullscreen"
     }
     if (isSidePosition) {
       return "sidePosition"

@@ -3,8 +3,5 @@ import { DataCollectionSettingsContextType } from "@/experimental/OneDataCollect
 export const handleTableResetSettings = (
   settings: DataCollectionSettingsContextType
 ) => {
-  settings.setVisualizationSettings("table", {
-    order: [],
-    hidden: [],
-  })
+  settings.setVisualizationSettings("table", {})
 }

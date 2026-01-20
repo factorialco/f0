@@ -1,6 +1,5 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
@@ -17,6 +16,7 @@ import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
+import { useI18n } from "@/ai"
 
 type Turn = Array<Message | Array<Message>>
 
@@ -89,11 +89,10 @@ const Messages = ({
 
   return (
     <>
-      <motion.div
-        layout
+      <div
         className={cn(
-          "scrollbar-macos relative isolate flex flex-col overflow-y-scroll",
-          isFullscreen ? "items-center px-4 pt-3" : "px-4 pt-3",
+          "scrollbar-macos relative isolate flex flex-col overflow-x-hidden overflow-y-scroll",
+          isFullscreen ? "items-center px-4 pt-3" : "pl-4 pr-2 pt-4",
           (!isFullscreen || !noMessages) && "flex-1"
         )}
         ref={messagesContainerRef}
@@ -195,7 +194,7 @@ const Messages = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
       {isOpen && (
         <FeedbackModal
           onSubmit={(message, feedback) => {

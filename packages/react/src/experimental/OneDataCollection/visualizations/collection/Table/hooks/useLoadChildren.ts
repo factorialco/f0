@@ -14,7 +14,7 @@ import {
   NestedResponseWithType,
   NestedVariant,
 } from "@/hooks/datasource/types/nested.typings"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useNestedDataContext } from "../providers/NestedProvider"
 
 interface UseLoadChildrenProps<
@@ -37,6 +37,7 @@ interface UseLoadChildrenProps<
     NavigationFilters,
     Grouping
   >
+  onClearFetchedData: () => void
 }
 
 const isDetailed = <R extends RecordType>(
@@ -75,6 +76,7 @@ export const useLoadChildren = <
   rowId,
   item,
   source,
+  onClearFetchedData,
 }: UseLoadChildrenProps<
   R,
   Filters,
@@ -84,8 +86,11 @@ export const useLoadChildren = <
   NavigationFilters,
   Grouping
 >) => {
-  const { fetchedData: nestedFetchedData, updateFetchedData } =
-    useNestedDataContext<R>()
+  const {
+    fetchedData: nestedFetchedData,
+    updateFetchedData,
+    clearFetchedData,
+  } = useNestedDataContext<R>()
   const [children, setChildren] = useState<R[]>(
     getChildren(nestedFetchedData?.[rowId])
   )
@@ -96,6 +101,36 @@ export const useLoadChildren = <
   const [childrenType, setChildrenType] = useState<NestedVariant>(
     getChildrenType(nestedFetchedData?.[rowId])
   )
+
+  const previousFiltersRef = useRef(source.currentFilters)
+  const previousSortingsRef = useRef(source.currentSortings)
+  const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
+
+  useEffect(() => {
+    const filtersChanged = previousFiltersRef.current !== source.currentFilters
+    const sortingsChanged =
+      previousSortingsRef.current !== source.currentSortings
+    const navigationFiltersChanged =
+      previousNavigationFiltersRef.current !== source.currentNavigationFilters
+
+    if (filtersChanged || sortingsChanged || navigationFiltersChanged) {
+      setChildren([])
+      setPaginationInfo(undefined)
+      setChildrenType("basic")
+      clearFetchedData()
+      onClearFetchedData()
+
+      previousFiltersRef.current = source.currentFilters
+      previousSortingsRef.current = source.currentSortings
+      previousNavigationFiltersRef.current = source.currentNavigationFilters
+    }
+  }, [
+    source.currentFilters,
+    source.currentSortings,
+    source.currentNavigationFilters,
+    clearFetchedData,
+    onClearFetchedData,
+  ])
 
   const loadChildren = useCallback(async () => {
     if (children.length > 0 && !paginationInfo?.hasMore) return children

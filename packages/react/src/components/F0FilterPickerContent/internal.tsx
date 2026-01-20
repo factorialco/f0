@@ -49,7 +49,7 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
         )}
       </div>
       {showApplyButton && (
-        <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
+        <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
           <F0Button
             onClick={onApply}
             label={applyButtonLabel ?? i18n.filters.applyFilters}
