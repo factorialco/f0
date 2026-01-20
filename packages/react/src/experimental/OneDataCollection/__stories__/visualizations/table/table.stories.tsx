@@ -166,10 +166,7 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
 
     const columns = useMemo(() => {
       return [
-        ...((mockVisualizations.table as any)["options"]?.["columns"]?.slice(
-          0,
-          index
-        ) ?? []),
+        ...((tableDef as any)["options"]?.["columns"]?.slice(0, index) ?? []),
       ]
     }, [index, tableDef])
 
