@@ -1875,7 +1875,7 @@ export declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info…";
+        readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
@@ -5124,6 +5124,23 @@ declare global {
     }
 }
 
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
+}
+
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -5151,28 +5168,6 @@ declare module "@tiptap/core" {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
-}
-
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -5180,4 +5175,9 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
