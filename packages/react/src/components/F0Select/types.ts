@@ -42,6 +42,11 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   actions?: Action[]
   /** Container element to render the portal content into */
   portalContainer?: HTMLElement | null
+  /**
+   * When true, renders the select as a static list without the input trigger.
+   * Only displays the dropdown content with max height, border and scroll.
+   */
+  asList?: boolean
 }
 
 /**

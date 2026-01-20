@@ -149,7 +149,10 @@ const SelectContent = forwardRef<
 
     useEffect(() => {
       // Measure the items when the animation is finished
-      virtualizer.measure()
+      // Skip measurement when asList is true to prevent layout shifts from tooltips
+      if (!asList) {
+        virtualizer.measure()
+      }
     }, [virtualizer, animationStarted, asList])
 
     useEffect(() => {
@@ -211,9 +214,13 @@ const SelectContent = forwardRef<
     const content = (
       <SelectPrimitive.Content
         ref={ref}
-        asChild={asChild || asSelectProp === "list"}
+        asChild={asChild}
+        disableScrollLock={asList}
         className={cn(
-          "relative z-50 min-w-[8rem] overflow-hidden text-f1-foreground",
+          "relative z-50 text-f1-foreground",
+          asList
+            ? "flex w-full h-full flex-col"
+            : "min-w-[8rem] overflow-hidden",
           !asList &&
             "rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-md data-[state=closed]:fade-out-0 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:zoom-out-95 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[side=bottom]:slide-in-from-top-2",
           !asList &&
@@ -222,9 +229,9 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),412px)]",
-          className,
           // Hides the content when the virtual list is not ready
-          !asList && isVirtual && !virtualReady && "opacity-0"
+          !asList && isVirtual && !virtualReady && "opacity-0",
+          className
         )}
         position={asList ? "item-aligned" : position}
         collisionPadding={16}
@@ -254,8 +261,14 @@ const SelectContent = forwardRef<
         }}
       >
         <>
-          {props.top}
-          <div className="relative">
+          {asList && <div className="flex-shrink-0">{props.top}</div>}
+          <div
+            className={cn(
+              "relative",
+              asList && "flex flex-col overflow-hidden flex-1 min-h-0"
+            )}
+          >
+            {!asList && props.top}
             {showLoadingIndicator && loadingNewContent && (
               <div
                 className="absolute inset-0 flex cursor-progress items-center justify-center"
@@ -268,10 +281,10 @@ const SelectContent = forwardRef<
             <ScrollArea
               viewportRef={parentRef}
               className={cn(
-                "flex flex-col overflow-y-auto",
+                "flex flex-col",
                 // Dynamic max-height: min of desired height and available viewport space minus top/bottom content
                 asList
-                  ? "max-h-full"
+                  ? "h-full"
                   : taller
                     ? "max-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]"
                     : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]",
@@ -288,14 +301,13 @@ const SelectContent = forwardRef<
               scrollMargin={scrollMargin}
             >
               {asList ? (
-                viewportContent
+                <div className="min-h-0 p-1">{viewportContent}</div>
               ) : (
                 <SelectPrimitive.Viewport
                   asChild
                   className={cn(
                     "p-1",
-                    !asList &&
-                      position === "popper" &&
+                    position === "popper" &&
                       "h-[var(--radix-select-trigger-height)] w-full",
                     isEmpty && "flex h-full"
                   )}

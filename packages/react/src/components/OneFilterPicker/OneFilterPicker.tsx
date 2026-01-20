@@ -193,7 +193,7 @@ const FiltersControls = () => {
         onChange={handleFilterChange}
         onOpenChange={setIsFiltersOpen}
         isOpen={isFiltersOpen}
-        hideLabel={!!presets}
+        hideLabel={!!presets || mode === "simple"}
         mode={mode}
       />
       {!!presets?.length && (

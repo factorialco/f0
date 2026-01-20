@@ -54,7 +54,7 @@ export const DialogContent = forwardRef<
         >
           <div
             className={cn(
-              "relative flex w-[90%] flex-col rounded-xl border bg-f1-background shadow-lg",
+              "relative flex w-[90%] flex-col rounded-xl bg-f1-background shadow-lg",
               "pointer-events-auto",
               className
             )}

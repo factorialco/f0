@@ -72,20 +72,3 @@ export const isFirstCellDetailed = (
 ) => {
   return firstCell && nestedRowProps?.nestedVariant === "detailed"
 }
-
-export const emptyDetailedCellClassName = (
-  nestedRowProps?: NestedRowProps & { rowWithChildren?: boolean }
-) => {
-  const { nestedVariant, onLoadMoreChildren, rowWithChildren } =
-    nestedRowProps ?? {}
-
-  return (
-    nestedVariant === "detailed" &&
-    !onLoadMoreChildren &&
-    !rowWithChildren &&
-    "has-[span:only-child:empty]:pt-0.5 " +
-      " has-[span:only-child:empty]:before:static" +
-      " has-[span:only-child:empty]:before:opacity-[0.5]" +
-      " has-[span:only-child:empty]:before:content-['N/A']"
-  )
-}

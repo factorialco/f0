@@ -79,10 +79,12 @@ export type DataSourceDefinition<
     item,
     filters,
     pagination,
+    sortings,
   }: {
     item: R
     filters?: FiltersState<Filters>
     pagination?: ChildrenPaginationInfo
+    sortings?: SortingsState<Sortings>
   }) => Promise<ChildrenResponse<R>>
   /** Function to determine if an item has children */
   itemsWithChildren?: (item: R) => boolean

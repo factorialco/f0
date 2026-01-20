@@ -168,6 +168,12 @@ export const WithLgWidth: Story = {
   },
 }
 
+export const WithXlWidth: Story = {
+  args: {
+    ...WithLgWidth.args,
+    width: "xl",
+  },
+}
 export const WithDescription: Story = {
   args: {
     isOpen: true,
