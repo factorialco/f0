@@ -501,7 +501,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {!noEdit && (
               <div
                 className={cn(
-                  "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity",
+                  "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),
@@ -514,6 +514,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 )}
                 onClick={handleClickPlaceholder}
                 aria-hidden="true"
+                title={placeholder}
               >
                 {placeholder}
               </div>
