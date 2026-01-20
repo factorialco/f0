@@ -10,9 +10,6 @@ jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
-    permissions:
-      contents: read
-      pull-requests: read
 
   publish-alpha:
     name: "[⚛️ REACT] Build and Publish ALPHA"

@@ -23,14 +23,6 @@ jobs:
       package_core: ${{ steps.changes.outputs.package_core }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Debug - Show event info
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "PR number: ${{ github.event.pull_request.number }}"
-          echo "Head ref: ${{ github.event.pull_request.head.ref }}"
-          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: changes
         with:
@@ -43,8 +35,3 @@ jobs:
               - 'packages/react-native/**'
             package_core: 
               - 'packages/core/**'
-      - name: Debug - Show detected changes
-        run: |
-          echo "package_react: ${{ steps.changes.outputs.package_react }}"
-          echo "package_react_native: ${{ steps.changes.outputs.package_react_native }}"
-          echo "package_core: ${{ steps.changes.outputs.package_core }}"
