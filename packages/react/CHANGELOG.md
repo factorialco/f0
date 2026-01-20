@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.330.0](https://github.com/factorialco/f0/compare/f0-react-v1.329.1...f0-react-v1.330.0) (2026-01-20)
+
+
+### Features
+
+* improve ai chat components UI/UX ([#3260](https://github.com/factorialco/f0/issues/3260)) ([0d63858](https://github.com/factorialco/f0/commit/0d638583fcd5d8747f3400f32d8f3bd197bc91c8))
+
 ## [1.329.1](https://github.com/factorialco/f0/compare/f0-react-v1.329.0...f0-react-v1.329.1) (2026-01-20)
 
 
