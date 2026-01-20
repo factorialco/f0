@@ -141,7 +141,7 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
     docs: {
       description: {
         story:
-          "This story demonstrates how the table columns can be changed after the initial render, the order and hidden state of the columns change aswell.",
+          "This story demonstrates how the table columns can be changed after the initial render, the order and hidden state of the columns change as well.",
       },
     },
   },
@@ -166,9 +166,12 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
 
     const columns = useMemo(() => {
       return [
-        ...((tableDef as any)["options"]?.["columns"]?.slice(0, index) ?? []),
+        ...((mockVisualizations.table as any)["options"]?.["columns"]?.slice(
+          0,
+          index
+        ) ?? []),
       ]
-    }, [index])
+    }, [index, tableDef])
 
     return (
       <div className="flex flex-col gap-4">
