@@ -1875,7 +1875,7 @@ export declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info…";
+        readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
@@ -1960,7 +1960,7 @@ declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"
 
 export declare type DialogWidth = (typeof dialogWidths)[number];
 
-declare const dialogWidths: readonly ["sm", "md", "lg"];
+declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
 
 /**
  * Remove a property from a union of objects.
@@ -2633,6 +2633,11 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     actions?: Action_2[];
     /** Container element to render the portal content into */
     portalContainer?: HTMLElement | null;
+    /**
+     * When true, renders the select as a static list without the input trigger.
+     * Only displays the dropdown content with max height, border and scroll.
+     */
+    asList?: boolean;
 };
 
 export declare type F0SelectItemObject<T, R = unknown> = {
@@ -2800,7 +2805,7 @@ declare interface FilterPickerBaseProps<Filters extends FiltersDefinition> {
  */
 export declare type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>;
 
-export declare type FiltersMode = "default" | "compact";
+export declare type FiltersMode = "default" | "compact" | "simple";
 
 /**
  * Current state of all filters in a collection.
@@ -4411,8 +4416,8 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
 };
 
 declare type TableVisualizationSettings = {
-    order: ColId[];
-    hidden: ColId[];
+    order?: ColId[];
+    hidden?: ColId[];
 };
 
 export declare const Tag: ({ tag }: {
@@ -5119,23 +5124,6 @@ declare global {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
-}
-
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -5163,9 +5151,21 @@ declare module "@tiptap/core" {
     }
 }
 
-
-declare namespace Calendar {
-    var displayName: string;
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
 }
 
 
@@ -5175,4 +5175,9 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
