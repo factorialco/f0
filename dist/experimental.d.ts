@@ -3647,6 +3647,27 @@ export declare type HILActionConfirmationProps = {
 
 declare type HTMLString = string;
 
+/**
+ * Converts an HTML string to TipTap JSON format.
+ * Use this when you have HTML content that needs to be displayed
+ * in NotesTextEditor or RichTextEditor.
+ *
+ * @param html - The HTML string to convert
+ * @returns TipTap JSONContent that can be passed to editor's content prop
+ *
+ * @example
+ * ```tsx
+ * const htmlContent = "<h2>Title</h2><p>Hello world</p>"
+ * const jsonContent = htmlToTipTapJson(htmlContent)
+ *
+ * <NotesTextEditor
+ *   initialEditorState={{ content: jsonContent }}
+ *   ...
+ * />
+ * ```
+ */
+export declare function htmlToTipTapJson(html: string): JSONContent_2;
+
 declare type I18nContextType = TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
 };
@@ -3884,6 +3905,16 @@ declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof Avata
 declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large", "xlarge", "xxlarge"];
 
 declare const internalAvatarTypes: readonly ["base", "rounded"];
+
+/**
+ * Checks if a string contains HTML tags
+ */
+export declare function isHtmlString(content: string): boolean;
+
+/**
+ * Checks if content is TipTap JSON format (object with "type" property)
+ */
+export declare function isTipTapJson(content: unknown): content is JSONContent_2;
 
 export declare function Item({ item, counter, isActive, collapsible, isExpanded, onToggleExpanded, sortable, children, }: TOCItemProps): JSX_2.Element;
 
@@ -6556,6 +6587,23 @@ declare global {
     }
 }
 
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
+}
+
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -6583,21 +6631,9 @@ declare module "@tiptap/core" {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -6607,9 +6643,4 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
