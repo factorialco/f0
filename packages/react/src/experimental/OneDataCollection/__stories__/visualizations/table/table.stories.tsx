@@ -141,7 +141,7 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
     docs: {
       description: {
         story:
-          "This story demonstrates how the table columns can be changed after the initial render, the order and hidden state of the columns change aswell.",
+          "This story demonstrates how the table columns can be changed after the initial render, the order and hidden state of the columns change as well.",
       },
     },
   },
