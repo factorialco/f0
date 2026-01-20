@@ -160,8 +160,6 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
       []
     )
 
-    console.log(mockVisualizations.table)
-
     const columns = useMemo(() => {
       return [
         ...(
