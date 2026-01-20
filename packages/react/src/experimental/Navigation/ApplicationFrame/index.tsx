@@ -18,8 +18,8 @@ import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiP
 import { breakpoints } from "@factorialco/f0-core"
 import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
-import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
-import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
+import { AiChat, AiChatProvider, AiChatProviderProps } from "../../../ai/AiChat"
+import { useAiChat } from "../../../ai/AiChat/providers/AiChatStateProvider"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 export interface ApplicationFrameProps {

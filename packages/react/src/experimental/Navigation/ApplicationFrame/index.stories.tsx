@@ -1,5 +1,6 @@
 import { Lightbulb } from "@/icons/app"
 import ExternalLink from "@/icons/app/ExternalLink"
+import PalmTree from "@/icons/app/PalmTree"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
@@ -30,6 +31,18 @@ const meta: Meta<typeof ApplicationFrame> = {
           message: "Share feedback",
           prompt:
             "Share feedback and help shape One with your feedback in the next message (optional)",
+        },
+        {
+          icon: PalmTree,
+          message: "Create a new task",
+          prompt:
+            "Create a new task and help shape One with your feedback in the next message (optional)",
+        },
+        {
+          icon: Lightbulb,
+          message: "Create a new project",
+          prompt:
+            "Create a new project and help shape One with your feedback in the next message (optional)",
         },
       ],
     },

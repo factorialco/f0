@@ -47,15 +47,15 @@ export const WelcomeScreen = ({
         className="flex w-full flex-1 flex-col justify-end gap-4"
         initial={{ opacity: 1 }}
       >
-        <div className="px-2">
+        <div className="pl-3">
           <motion.div
             className="flex w-fit justify-center"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             transition={{
-              opacity: { duration: 0.2, ease: "easeOut", delay: 0.4 },
-              scale: { duration: 0.3, ease: [0.25, 0.46, 0.45, 1.94] },
-              filter: { duration: 0.2, ease: "easeOut", delay: 0.4 },
+              duration: 0.3,
+              ease: "easeOut",
+              delay: 0.4,
             }}
           >
             <OneIcon spin size="lg" className="my-4" />
@@ -63,16 +63,12 @@ export const WelcomeScreen = ({
           {greeting && (
             <motion.p
               className="text-lg font-semibold text-f1-foreground-secondary"
-              initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
-                opacity: { duration: 0.2, ease: "easeOut", delay: 0.5 },
-                filter: { duration: 0.2, ease: "easeOut", delay: 0.5 },
-                translateY: {
-                  duration: 0.2,
-                  ease: [0.25, 0.46, 0.45, 1.94],
-                  delay: 0.5,
-                },
+                duration: 0.2,
+                ease: "easeOut",
+                delay: 0.5,
               }}
             >
               {greeting}
@@ -82,50 +78,35 @@ export const WelcomeScreen = ({
             <motion.p
               className="text-lg font-semibold text-f1-foreground"
               key={message.id}
-              initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
-                opacity: { duration: 0.2, ease: "easeOut", delay: 0.7 },
-                filter: { duration: 0.2, ease: "easeOut", delay: 0.7 },
-                translateY: {
-                  duration: 0.2,
-                  ease: [0.25, 0.46, 0.45, 1.94],
-                  delay: 0.7,
-                },
+                duration: 0.2,
+                ease: "easeOut",
+                delay: 0.7,
               }}
             >
               {message.content}
             </motion.p>
           ))}
         </div>
-        <div className="-ml-2 flex flex-col items-start gap-[6px]">
+        <div className="flex flex-col items-start gap-2 px-3 pb-1 sm:px-0 sm:pb-0">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               className="w-full"
               key={index}
-              initial={{ opacity: 0, filter: "blur(2px)", translateY: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", translateY: 0 }}
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
-                opacity: {
-                  duration: 0.1,
-                  ease: "easeOut",
-                  delay: 0.9 + index * 0.1,
-                },
-                filter: {
-                  duration: 0.1,
-                  ease: "easeOut",
-                  delay: 0.9 + index * 0.1,
-                },
-                translateY: {
-                  duration: 0.1,
-                  ease: [0.25, 0.46, 0.45, 1.94],
-                  delay: 0.9 + index * 0.1,
-                },
+                duration: 0.1,
+                ease: "easeOut",
+                delay: 0.9 + index * 0.1,
               }}
             >
               <div>
                 <ButtonInternal
                   variant="ghost"
+                  className="sm:border-none border border-f1-border border-solid shadow sm:shadow-none"
                   label={suggestion.message}
                   icon={suggestion.icon}
                   onClick={() =>
