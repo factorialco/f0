@@ -171,7 +171,7 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
           ) ?? []
         ),
       ]
-    }, [index])
+    }, [index, tableDef])
 
     return (
       <div className="flex flex-col gap-4">
