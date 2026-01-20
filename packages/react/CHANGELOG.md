@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.329.1](https://github.com/factorialco/f0/compare/f0-react-v1.329.0...f0-react-v1.329.1) (2026-01-20)
+
+
+### Bug Fixes
+
+* **datacollection:** cols in settings reacts to changes ([#3265](https://github.com/factorialco/f0/issues/3265)) ([d5b89a8](https://github.com/factorialco/f0/commit/d5b89a8786862c2421fd2e6c71f6809288a4292d))
+
 ## [1.329.0](https://github.com/factorialco/f0/compare/f0-react-v1.328.0...f0-react-v1.329.0) (2026-01-19)
 
 
