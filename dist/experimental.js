@@ -39799,7 +39799,7 @@ const GC = (t, e, n) => {
     h(!1), n(M);
   }, m = (M) => {
     s(M);
-  }, g = t && t.length > 1, v = i && d > 0, y = o && Object.keys(o).length > 0, w = be(() => t[e], [e]), k = be(() => f(cte, {
+  }, g = t && t.length > 1, v = i && d > 0, y = o && Object.keys(o).length > 0, w = be(() => t[e], [e, t?.[e]]), k = be(() => f(cte, {
     visualization: w
   }, "visualization-settings"), [w]), b = be(() => lte(w), [w]), _ = be(() => {
     const M = t[e]?.type;
