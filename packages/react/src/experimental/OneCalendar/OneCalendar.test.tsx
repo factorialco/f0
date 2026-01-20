@@ -5,6 +5,7 @@ import { zeroRender as render, screen, within } from "@/testing/test-utils"
 
 import { defaultTranslations, I18nProvider } from "../../lib/providers/i18n"
 import { L10nProvider } from "../../lib/providers/l10n"
+import { WeekStartDay } from "./types"
 import { OneCalendar } from "./OneCalendar"
 
 const TestWrapper = ({
@@ -15,7 +16,11 @@ const TestWrapper = ({
   locale: string
 }) => (
   <I18nProvider translations={defaultTranslations}>
-    <L10nProvider l10n={{ locale }}>{children}</L10nProvider>
+    <L10nProvider
+      l10n={{ locale, date: { weekStartsOn: WeekStartDay.Monday } }}
+    >
+      {children}
+    </L10nProvider>
   </I18nProvider>
 )
 

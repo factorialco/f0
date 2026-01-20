@@ -28,6 +28,8 @@ export interface GranularityDefinition {
   calendarMode?: CalendarMode
   // The view of the calendar that this granularity is used in
   calendarView: CalendarView
+  // Week starts on day (only used by week granularity)
+  weekStartsOn?: WeekStartsOn
   // Label for the granularity in the calendar view
   label: (viewDate: Date, i18n: TranslationsType) => ReactNode
   // Format the date to a date range with dates as string

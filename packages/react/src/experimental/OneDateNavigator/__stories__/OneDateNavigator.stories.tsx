@@ -6,7 +6,7 @@ import { expect, within } from "storybook/test"
 
 import { granularityDefinitions } from "@/experimental/OneCalendar"
 
-import { CalendarView, DateRange } from "../../OneCalendar/types"
+import { CalendarView, DateRange, WeekStartDay } from "../../OneCalendar/types"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"
@@ -235,7 +235,7 @@ export const Simple: Story = {
     defaultValue: {
       granularity: "day",
     } as DatePickerValue,
-    weekStartsOn: 1,
+    weekStartsOn: WeekStartDay.Monday,
     // granularities: ["day", "week", "month"],
   },
 }
@@ -334,7 +334,7 @@ export const WeekViewSundayStart: Story = {
       granularity: "week",
     } as DatePickerValue,
     granularities: ["week"],
-    weekStartsOn: 0, // Sunday
+    weekStartsOn: WeekStartDay.Sunday,
   },
 }
 

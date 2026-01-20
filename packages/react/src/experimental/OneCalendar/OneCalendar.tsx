@@ -6,18 +6,19 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
+import { useL10n } from "@/lib/providers/l10n"
 import {
   GranularityDefinition,
   GranularityDefinitionKey,
-  granularityDefinitions,
   GranularityDefinitionSimple,
+  getGranularityDefinitions,
 } from "./granularities/index"
-import { createWeekGranularity } from "./granularities/week"
 import {
   CalendarMode,
   CalendarView,
   DateRange,
   DateRangeString,
+  WeekStartDay,
   WeekStartsOn,
 } from "./types"
 import { isActiveDate, toDateRange } from "./utils"
@@ -79,9 +80,13 @@ const OneCalendarInternal = ({
   minDate,
   maxDate,
   compact = false,
-  weekStartsOn = 1,
+  weekStartsOn,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
+  const l10n = useL10n()
+
+  const effectiveWeekStartsOn =
+    weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
 
   const [viewDate, setViewDate] = useState<Date>(defaultMonth)
 
@@ -92,12 +97,9 @@ const OneCalendarInternal = ({
   const [motionDirection, setMotionDirection] = useState(1)
 
   const granularity = useMemo(() => {
-    const baseGranularity = granularityDefinitions[view]
-    if (view === "week") {
-      return createWeekGranularity(weekStartsOn)
-    }
-    return baseGranularity
-  }, [view, weekStartsOn])
+    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    return definitions[view]
+  }, [view, effectiveWeekStartsOn])
 
   const setSelected = useCallback(
     (date: Date | DateRange | null) => {
@@ -333,7 +335,7 @@ const OneCalendarInternal = ({
           minDate,
           maxDate,
           compact,
-          weekStartsOn,
+          weekStartsOn: effectiveWeekStartsOn,
         })}
       </div>
     </div>

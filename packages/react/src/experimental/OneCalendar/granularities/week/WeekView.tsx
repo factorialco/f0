@@ -11,7 +11,7 @@ import {
 import { Calendar } from "@/ui/calendar"
 
 import { useL10n } from "../../../../lib/providers/l10n"
-import { DateRange, WeekStartsOn } from "../../types"
+import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"
 
 interface WeekViewProps {
@@ -35,9 +35,12 @@ export function WeekView({
   minDate,
   maxDate,
   compact = false,
-  weekStartsOn = 1,
+  weekStartsOn,
 }: WeekViewProps) {
-  const { locale } = useL10n()
+  const { locale, date } = useL10n()
+
+  const effectiveWeekStartsOn =
+    weekStartsOn ?? date?.weekStartsOn ?? WeekStartDay.Monday
 
   const motionVariants = {
     hidden: (direction: number) => ({
@@ -56,11 +59,11 @@ export function WeekView({
       const normalizedDay = new Date(date)
       normalizedDay.setHours(0, 0, 0, 0)
       return {
-        from: getStartOfWeek(normalizedDay, weekStartsOn),
-        to: getEndOfWeek(normalizedDay, weekStartsOn),
+        from: getStartOfWeek(normalizedDay, effectiveWeekStartsOn),
+        to: getEndOfWeek(normalizedDay, effectiveWeekStartsOn),
       }
     },
-    [weekStartsOn]
+    [effectiveWeekStartsOn]
   )
 
   const handleDayClick: DayClickEventHandler = (day, modifiers) => {
@@ -83,7 +86,7 @@ export function WeekView({
 
     const dateToUse = selected instanceof Date ? selected : selected.from
     return getWeekRangeFromDate(dateToUse)
-  }, [selected, getWeekRangeFromDate])
+  }, [selected, getWeekRangeFromDate, effectiveWeekStartsOn])
 
   const disabled = toCalendarPickerMatcher({ minDate, maxDate })
 
@@ -111,7 +114,7 @@ export function WeekView({
           month={month}
           onMonthChange={onMonthChange}
           locale={getLocale(locale)}
-          weekStartsOn={weekStartsOn}
+          weekStartsOn={effectiveWeekStartsOn}
           showOutsideDays={true}
           showWeekNumber
           fixedWeeks={false}

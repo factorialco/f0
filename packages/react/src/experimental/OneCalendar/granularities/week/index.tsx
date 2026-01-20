@@ -14,7 +14,12 @@ import {
   startOfMonth,
 } from "date-fns"
 
-import { DateRange, DateRangeComplete, WeekStartsOn } from "../../types"
+import {
+  DateRange,
+  DateRangeComplete,
+  WeekStartDay,
+  WeekStartsOn,
+} from "../../types"
 import {
   formatDateRange,
   isAfterOrEqual,
@@ -26,15 +31,15 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { WeekView } from "./WeekView"
 
-// Helper functions that use ISO week functions when weekStartsOn === 1, otherwise use configurable versions
+// Helper functions that use ISO week functions when weekStartsOn === WeekStartDay.Monday, otherwise use configurable versions
 export const getStartOfWeek = (date: Date, weekStartsOn: WeekStartsOn) => {
-  return weekStartsOn === 1
+  return weekStartsOn === WeekStartDay.Monday
     ? startOfISOWeek(date)
     : startOfWeek(date, { weekStartsOn })
 }
 
 export const getEndOfWeek = (date: Date, weekStartsOn: WeekStartsOn) => {
-  return weekStartsOn === 1
+  return weekStartsOn === WeekStartDay.Monday
     ? endOfISOWeek(date)
     : endOfWeek(date, { weekStartsOn })
 }
@@ -44,7 +49,7 @@ export const getIsSameWeek = (
   dateRight: Date,
   weekStartsOn: WeekStartsOn
 ) => {
-  return weekStartsOn === 1
+  return weekStartsOn === WeekStartDay.Monday
     ? isSameISOWeek(dateLeft, dateRight)
     : isSameWeek(dateLeft, dateRight, { weekStartsOn })
 }
@@ -53,7 +58,7 @@ export function toWeekGranularityDateRange<
   T extends Date | DateRange | undefined | null,
 >(
   date: T,
-  weekStartsOn: WeekStartsOn = 1
+  weekStartsOn: WeekStartsOn = WeekStartDay.Monday
 ): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(
     date,
@@ -65,7 +70,7 @@ export function toWeekGranularityDateRange<
 const add = (
   date: DateRangeComplete,
   delta: number,
-  weekStartsOn: WeekStartsOn = 1
+  weekStartsOn: WeekStartsOn = WeekStartDay.Monday
 ): DateRangeComplete => {
   return {
     from: getStartOfWeek(addDays(date.from, delta * 7), weekStartsOn),
@@ -75,7 +80,7 @@ const add = (
 
 const toStringSort = (
   date: DateRange | Date | undefined | null,
-  weekStartsOn: WeekStartsOn = 1
+  weekStartsOn: WeekStartsOn = WeekStartDay.Monday
 ) => {
   const dateRange = toWeekGranularityDateRange(date, weekStartsOn)
   if (!dateRange) {
@@ -105,7 +110,7 @@ const toStringLong = (
     singular: string
     plural: string
   },
-  weekStartsOn: WeekStartsOn = 1
+  weekStartsOn: WeekStartsOn = WeekStartDay.Monday
 ) => {
   const dateRange = toWeekGranularityDateRange(date, weekStartsOn)
   if (!dateRange) {
@@ -141,122 +146,143 @@ const toStringLong = (
 }
 
 export const createWeekGranularity = (
-  weekStartsOn: WeekStartsOn = 1
-): GranularityDefinition => ({
-  calendarView: "week",
-  add: (date, delta) => add(date, delta, weekStartsOn),
-  getPrevNext: (value: DateRange, options) => {
-    const dateRange = toWeekGranularityDateRange(value, weekStartsOn)
-    if (!dateRange) {
-      return { prev: false, next: false }
-    }
+  weekStartsOn: WeekStartsOn = WeekStartDay.Monday
+): GranularityDefinition => {
+  return {
+    weekStartsOn,
+    calendarView: "week",
+    add: function (date, delta) {
+      return add(date, delta, this.weekStartsOn)
+    },
+    getPrevNext: function (value: DateRange, options) {
+      const dateRange = toWeekGranularityDateRange(value, this.weekStartsOn)
+      if (!dateRange) {
+        return { prev: false, next: false }
+      }
 
-    const { from, to } = dateRange
+      const { from, to } = dateRange
 
-    const { from: prevFrom, to: prevTo } = add({ from, to }, -1, weekStartsOn)
-    const { from: nextFrom, to: nextTo } = add({ from, to }, 1, weekStartsOn)
+      const { from: prevFrom, to: prevTo } = add(
+        { from, to },
+        -1,
+        this.weekStartsOn
+      )
+      const { from: nextFrom, to: nextTo } = add(
+        { from, to },
+        1,
+        this.weekStartsOn
+      )
 
-    const minWithGranularity =
-      options.min && getStartOfWeek(options.min, weekStartsOn)
-    const maxWithGranularity =
-      options.max && getEndOfWeek(options.max, weekStartsOn)
+      const minWithGranularity =
+        options.min &&
+        getStartOfWeek(options.min, this.weekStartsOn ?? WeekStartDay.Monday)
+      const maxWithGranularity =
+        options.max &&
+        getEndOfWeek(options.max, this.weekStartsOn ?? WeekStartDay.Monday)
 
-    return {
-      prev: isAfterOrEqual(prevFrom, minWithGranularity)
-        ? { from: prevFrom, to: prevTo }
-        : false,
-      next: isBeforeOrEqual(nextTo, maxWithGranularity)
-        ? { from: nextFrom, to: nextTo }
-        : false,
-    }
-  },
-  toRangeString: (date) => {
-    return formatDateRange(date, "'W'I yyyy")
-  },
-  toRange: (date) => toWeekGranularityDateRange(date, weekStartsOn),
-  toString: (date, i18n, format = "default") => {
-    const formats: Record<DateStringFormat, string> = {
-      default: toStringSort(date, weekStartsOn),
-      long: toStringLong(
-        date,
+      return {
+        prev: isAfterOrEqual(prevFrom, minWithGranularity)
+          ? { from: prevFrom, to: prevTo }
+          : false,
+        next: isBeforeOrEqual(nextTo, maxWithGranularity)
+          ? { from: nextFrom, to: nextTo }
+          : false,
+      }
+    },
+    toRangeString: function (date) {
+      return formatDateRange(date, "'W'I yyyy")
+    },
+    toRange: function (date) {
+      return toWeekGranularityDateRange(date, this.weekStartsOn)
+    },
+    toString: function (date, i18n, format = "default") {
+      const formats: Record<DateStringFormat, string> = {
+        default: toStringSort(date, this.weekStartsOn),
+        long: toStringLong(
+          date,
+          {
+            singular: i18n.date.granularities.week.longSingular,
+            plural: i18n.date.granularities.week.longPlural,
+          },
+          this.weekStartsOn
+        ),
+      }
+      return formats[format] ?? formats.default
+    },
+    toStringMaxWidth: function () {
+      return 240
+    },
+    fromString: function (dateStr) {
+      const dateRangeString = toDateRangeString(dateStr)
+      if (!dateRangeString) {
+        return null
+      }
+      const { from: fromStr, to: toStr } = dateRangeString
+
+      const parseDate = (dateStr: string) => {
+        const trimmed = dateStr.trim()
+
+        const [weekStr, yearStr] = trimmed.split(/\s+/)
+
+        const year = isNaN(Number(yearStr))
+          ? new Date().getFullYear()
+          : +yearStr
+
+        const week = Number(weekStr.replace(/[wW\s]/g, ""))
+        return parse(`${week}`, "I", new Date(year, 0, 1))
+      }
+
+      return toWeekGranularityDateRange(
         {
-          singular: i18n.date.granularities.week.longSingular,
-          plural: i18n.date.granularities.week.longPlural,
+          from: parseDate(fromStr),
+          to: toStr ? parseDate(toStr) : undefined,
         },
-        weekStartsOn
-      ),
-    }
-    return formats[format] ?? formats.default
-  },
-  toStringMaxWidth: () => 240,
-  fromString: (dateStr) => {
-    const dateRangeString = toDateRangeString(dateStr)
-    if (!dateRangeString) {
-      return null
-    }
-    const { from: fromStr, to: toStr } = dateRangeString
+        this.weekStartsOn
+      )
+    },
+    getViewDateFromDate: function (date) {
+      return startOfMonth(date)
+    },
+    navigate: function (date, direction) {
+      return addDays(date, direction * 7)
+    },
+    navigateUIView: function (viewDate, direction) {
+      return addMonths(viewDate, direction)
+    },
+    label: function (viewDate) {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        year: "numeric",
+      }).format(viewDate)
+    },
+    render: function (renderProps) {
+      const weekStartsOnRender =
+        renderProps.weekStartsOn !== undefined
+          ? renderProps.weekStartsOn
+          : this.weekStartsOn
+      const minDate = toWeekGranularityDateRange(
+        renderProps.minDate,
+        weekStartsOnRender
+      )
+      const maxDate = toWeekGranularityDateRange(
+        renderProps.maxDate,
+        weekStartsOnRender
+      )
+      return (
+        <WeekView
+          selected={renderProps.selected}
+          onSelect={renderProps.onSelect}
+          month={renderProps.month}
+          onMonthChange={renderProps.onMonthChange}
+          motionDirection={renderProps.motionDirection}
+          minDate={minDate ? minDate.from : undefined}
+          maxDate={maxDate ? maxDate.to : undefined}
+          compact={renderProps.compact}
+          weekStartsOn={weekStartsOnRender}
+        />
+      )
+    },
+  }
+}
 
-    const parseDate = (dateStr: string) => {
-      const trimmed = dateStr.trim()
-
-      const [weekStr, yearStr] = trimmed.split(/\s+/)
-
-      const year = isNaN(Number(yearStr)) ? new Date().getFullYear() : +yearStr
-
-      const week = Number(weekStr.replace(/[wW\s]/g, ""))
-      return parse(`${week}`, "I", new Date(year, 0, 1))
-    }
-
-    return toWeekGranularityDateRange(
-      {
-        from: parseDate(fromStr),
-        to: toStr ? parseDate(toStr) : undefined,
-      },
-      weekStartsOn
-    )
-  },
-  getViewDateFromDate: (date) => {
-    return startOfMonth(date)
-  },
-  navigate: (date, direction) => {
-    return addDays(date, direction * 7)
-  },
-  navigateUIView: (viewDate, direction) => {
-    return addMonths(viewDate, direction)
-  },
-  label: (viewDate) => {
-    return new Intl.DateTimeFormat("en-US", {
-      month: "long",
-      year: "numeric",
-    }).format(viewDate)
-  },
-  render: (renderProps) => {
-    const weekStartsOnRender =
-      renderProps.weekStartsOn !== undefined
-        ? renderProps.weekStartsOn
-        : weekStartsOn
-    const minDate = toWeekGranularityDateRange(
-      renderProps.minDate,
-      weekStartsOnRender
-    )
-    const maxDate = toWeekGranularityDateRange(
-      renderProps.maxDate,
-      weekStartsOnRender
-    )
-    return (
-      <WeekView
-        selected={renderProps.selected}
-        onSelect={renderProps.onSelect}
-        month={renderProps.month}
-        onMonthChange={renderProps.onMonthChange}
-        motionDirection={renderProps.motionDirection}
-        minDate={minDate ? minDate.from : undefined}
-        maxDate={maxDate ? maxDate.to : undefined}
-        compact={renderProps.compact}
-        weekStartsOn={weekStartsOnRender}
-      />
-    )
-  },
-})
-
-export const weekGranularity = createWeekGranularity(1)
+export const weekGranularity = createWeekGranularity(WeekStartDay.Monday)

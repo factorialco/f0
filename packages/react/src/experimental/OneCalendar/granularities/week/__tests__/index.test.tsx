@@ -7,6 +7,7 @@ import {
 } from "date-fns"
 import { describe, expect, it } from "vitest"
 
+import { WeekStartDay } from "../../../types"
 import { createWeekGranularity, weekGranularity } from "../index"
 
 describe("weekGranularity", () => {
@@ -301,13 +302,13 @@ describe("createWeekGranularity with different weekStartsOn", () => {
   }
 
   describe("weekStartsOn = 0 (Sunday)", () => {
-    const granularity = createWeekGranularity(0)
+    const granularity = createWeekGranularity(WeekStartDay.Sunday)
 
     it("converts a date to the correct week range starting on Sunday", () => {
       const result = granularity.toRange(testDate)
       expect(result).toEqual({
-        from: startOfWeek(testDate, { weekStartsOn: 0 }),
-        to: endOfWeek(testDate, { weekStartsOn: 0 }),
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Sunday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Sunday }),
       })
       // January 15, 2024 is Monday, so week starting Sunday should be Jan 14
       expect(result.from.getDay()).toBe(0) // Sunday
@@ -339,13 +340,13 @@ describe("createWeekGranularity with different weekStartsOn", () => {
   })
 
   describe("weekStartsOn = 2 (Tuesday)", () => {
-    const granularity = createWeekGranularity(2)
+    const granularity = createWeekGranularity(WeekStartDay.Tuesday)
 
     it("converts a date to the correct week range starting on Tuesday", () => {
       const result = granularity.toRange(testDate)
       expect(result).toEqual({
-        from: startOfWeek(testDate, { weekStartsOn: 2 }),
-        to: endOfWeek(testDate, { weekStartsOn: 2 }),
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Tuesday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Tuesday }),
       })
       // January 15, 2024 is Monday, so week starting Tuesday should be Jan 16
       expect(result.from.getDay()).toBe(2) // Tuesday
@@ -359,13 +360,13 @@ describe("createWeekGranularity with different weekStartsOn", () => {
   })
 
   describe("weekStartsOn = 3 (Wednesday)", () => {
-    const granularity = createWeekGranularity(3)
+    const granularity = createWeekGranularity(WeekStartDay.Wednesday)
 
     it("converts a date to the correct week range starting on Wednesday", () => {
       const result = granularity.toRange(testDate)
       expect(result).toEqual({
-        from: startOfWeek(testDate, { weekStartsOn: 3 }),
-        to: endOfWeek(testDate, { weekStartsOn: 3 }),
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Wednesday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Wednesday }),
       })
       // January 15, 2024 is Monday, so week starting Wednesday should be Jan 17
       expect(result.from.getDay()).toBe(3) // Wednesday
@@ -379,13 +380,13 @@ describe("createWeekGranularity with different weekStartsOn", () => {
   })
 
   describe("weekStartsOn = 6 (Saturday)", () => {
-    const granularity = createWeekGranularity(6)
+    const granularity = createWeekGranularity(WeekStartDay.Saturday)
 
     it("converts a date to the correct week range starting on Saturday", () => {
       const result = granularity.toRange(testDate)
       expect(result).toEqual({
-        from: startOfWeek(testDate, { weekStartsOn: 6 }),
-        to: endOfWeek(testDate, { weekStartsOn: 6 }),
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Saturday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Saturday }),
       })
       // January 15, 2024 is Monday, so week starting Saturday should be Jan 13
       expect(result.from.getDay()).toBe(6) // Saturday
@@ -399,7 +400,7 @@ describe("createWeekGranularity with different weekStartsOn", () => {
   })
 
   describe("weekStartsOn = 1 (Monday, ISO) should use ISO functions", () => {
-    const granularity = createWeekGranularity(1)
+    const granularity = createWeekGranularity(WeekStartDay.Monday)
 
     it("converts a date to the correct week range using ISO functions", () => {
       const result = granularity.toRange(testDate)

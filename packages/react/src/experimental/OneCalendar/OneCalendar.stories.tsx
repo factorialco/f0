@@ -14,7 +14,7 @@ import MockDate from "mockdate"
 import { useState } from "react"
 
 import { OneCalendar, OneCalendarInternal } from "./OneCalendar"
-import { DateRange } from "./types"
+import { DateRange, WeekStartDay } from "./types"
 
 const mockDate = new Date(2025, 6, 30)
 const mockTodayDate = new Date(2025, 5, 30)
@@ -90,7 +90,7 @@ export const MonthSingle: Story = {
   args: {
     mode: "single",
     view: "month",
-    weekStartsOn: 1,
+    weekStartsOn: WeekStartDay.Monday,
   },
   render: (args) => {
     const [selectedRange, setSelectedRange] = useState<DateRange | null>(() => {
