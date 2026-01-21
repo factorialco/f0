@@ -132,6 +132,15 @@ export type PaginationInfo =
   | Omit<PageBasedPaginatedResponse<unknown>, "records">
   | Omit<InfiniteScrollPaginatedResponse<unknown>, "records">
 
+export type FetchData<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Options extends BaseFetchOptions<Filters>,
+  FetchReturn = BaseResponse<R>,
+> = (
+  options: Options
+) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>
+
 /**
  * Base data adapter configuration for non-paginated collections
  * @template R - The type of records in the collection
@@ -150,12 +159,7 @@ export type BaseDataAdapter<
    * @param options - The filter options to apply when fetching data
    * @returns Array of records, promise of records, or observable of records
    */
-  fetchData: (
-    options: Options
-  ) =>
-    | FetchReturn
-    | Promise<FetchReturn>
-    | Observable<PromiseState<FetchReturn>>
+  fetchData: FetchData<R, Filters, Options, FetchReturn>
 }
 
 /**

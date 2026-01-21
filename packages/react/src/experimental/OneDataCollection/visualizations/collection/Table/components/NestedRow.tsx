@@ -30,7 +30,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
-import { useLoadChildren } from "../hooks/useLoadChildren"
+import { useLoadDataChildren } from "../hooks/useLoadDataChildren"
 import { NestedDataProvider } from "../providers/NestedProvider"
 import { TableColumnDefinition } from "../types"
 import { LoadMoreRow } from "./LoadMore"
@@ -104,7 +104,7 @@ const NestedRowContent = <
    * - Determining if children are "nested" (have their own children) or "flat"
    */
   const { children, loadChildren, isLoading, childrenType, paginationInfo } =
-    useLoadChildren({
+    useLoadDataChildren({
       rowId: rowId,
       item: props.item,
       source: props.source,

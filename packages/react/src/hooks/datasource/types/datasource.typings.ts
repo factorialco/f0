@@ -5,11 +5,17 @@ import {
 } from "@/components/OneFilterPicker/types"
 import { DataAdapter } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
-import { ChildrenPaginationInfo, ChildrenResponse } from "./nested.typings"
+import {
+  ChildrenPaginationInfo,
+  ChildrenResponse,
+  FetchChildrenOptions,
+} from "./nested.typings"
 import { RecordType } from "./records.typings"
 import { SearchOptions } from "./search.typings"
 import { SelectedItemsState } from "./selection.typings"
 import { SortingsDefinition, SortingsState } from "./sortings.typings"
+import { Observable } from "zen-observable-ts"
+import { PromiseState } from "@/lib/promise-to-observable"
 
 /**
  * Defines the structure and configuration of a data source for a collection.
@@ -75,17 +81,13 @@ export type DataSourceDefinition<
   /*******************************************************/
 
   /***** NESTED RECORDS ***************************************************/
-  fetchChildren?: ({
-    item,
-    filters,
-    pagination,
-    sortings,
-  }: {
-    item: R
-    filters?: FiltersState<Filters>
-    pagination?: ChildrenPaginationInfo
-    sortings?: SortingsState<Sortings>
-  }) => Promise<ChildrenResponse<R>>
+  fetchChildren?: (
+    options: FetchChildrenOptions<R, Filters>
+  ) =>
+    | ChildrenResponse<R>
+    | Promise<ChildrenResponse<R>>
+    | Observable<PromiseState<ChildrenResponse<R>>>
+
   /** Function to determine if an item has children */
   itemsWithChildren?: (item: R) => boolean
   /** Function to get the number of children for an item */
