@@ -562,6 +562,20 @@ declare interface AiChatState {
 
 export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend: _onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
 
+export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
+
+export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
+
+export declare interface AiChatTranslationsProviderProps {
+    children: ReactNode;
+    translations: AiChatTranslations;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const AiFullscreenChat: () => JSX_2.Element | null;
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -619,6 +633,38 @@ declare interface AiPromotionChatState {
     onShow?: () => void;
     onHide?: () => void;
 }
+
+declare const aiTranslations: {
+    ai: {
+        openChat: string;
+        closeChat: string;
+        startNewChat: string;
+        scrollToBottom: string;
+        welcome: string;
+        defaultInitialMessage: string;
+        inputPlaceholder: string;
+        stopAnswerGeneration: string;
+        sendMessage: string;
+        thoughtsGroupTitle: string;
+        resourcesGroupTitle: string;
+        thinking: string;
+        exportTable: string;
+        generatedTableFilename: string;
+        feedbackModal: {
+            positive: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+            negative: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+        };
+        ask: string;
+    };
+};
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
     variant?: "info" | "warning" | "positive" | "destructive" | undefined;
@@ -2554,7 +2600,7 @@ declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info…";
+        readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
@@ -3647,27 +3693,6 @@ export declare type HILActionConfirmationProps = {
 
 declare type HTMLString = string;
 
-/**
- * Converts an HTML string to TipTap JSON format.
- * Use this when you have HTML content that needs to be displayed
- * in NotesTextEditor or RichTextEditor.
- *
- * @param html - The HTML string to convert
- * @returns TipTap JSONContent that can be passed to editor's content prop
- *
- * @example
- * ```tsx
- * const htmlContent = "<h2>Title</h2><p>Hello world</p>"
- * const jsonContent = htmlToTipTapJson(htmlContent)
- *
- * <NotesTextEditor
- *   initialEditorState={{ content: jsonContent }}
- *   ...
- * />
- * ```
- */
-export declare function htmlToTipTapJson(html: string): JSONContent_2;
-
 declare type I18nContextType = TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
 };
@@ -3905,16 +3930,6 @@ declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof Avata
 declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large", "xlarge", "xxlarge"];
 
 declare const internalAvatarTypes: readonly ["base", "rounded"];
-
-/**
- * Checks if a string contains HTML tags
- */
-export declare function isHtmlString(content: string): boolean;
-
-/**
- * Checks if content is TipTap JSON format (object with "type" property)
- */
-export declare function isTipTapJson(content: unknown): content is JSONContent_2;
 
 export declare function Item({ item, counter, isActive, collapsible, isExpanded, onToggleExpanded, sortable, children, }: TOCItemProps): JSX_2.Element;
 
@@ -6175,6 +6190,10 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
 declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 declare interface TwoColumnsItemType {
@@ -6206,6 +6225,8 @@ declare namespace Types {
 declare type URL_2 = string;
 
 export declare function useAiChat(): AiChatProviderReturnValue;
+
+export declare function useAiChatTranslations(): AiChatTranslations;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
@@ -6587,23 +6608,6 @@ declare global {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
-}
-
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -6628,6 +6632,23 @@ declare module "@tiptap/core" {
         transcript: {
             insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
         };
+    }
+}
+
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
     }
 }
 
