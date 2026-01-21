@@ -12,6 +12,12 @@ export type WelcomeScreenSuggestion = {
   icon: IconType
   message: string
   prompt?: string
+  /**
+   * Optional custom click handler. If provided, this will be called instead of
+   * sending the prompt as a message. Use this for actions like opening a file
+   * picker that need special handling beyond just sending a message.
+   */
+  onClick?: () => void
 }
 
 const MAX_SUGGESTIONS = 3
@@ -110,13 +116,17 @@ export const WelcomeScreen = ({
                   className="border border-solid border-f1-border shadow sm:border-none sm:shadow-none"
                   label={suggestion.message}
                   icon={suggestion.icon}
-                  onClick={() =>
-                    sendMessage({
-                      id: randomId(),
-                      role: "user",
-                      content: suggestion.prompt || suggestion.message,
-                    })
-                  }
+                  onClick={() => {
+                    if (suggestion.onClick) {
+                      suggestion.onClick()
+                    } else {
+                      sendMessage({
+                        id: randomId(),
+                        role: "user",
+                        content: suggestion.prompt || suggestion.message,
+                      })
+                    }
+                  }}
                 />
               </div>
             </motion.div>
