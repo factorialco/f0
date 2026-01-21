@@ -26,7 +26,12 @@ export const EditorBubbleMenu = ({
     <BubbleMenu
       appendTo={() => document.body}
       options={{
+        strategy: "fixed",
         placement: "top",
+        offset: 8,
+        flip: true,
+        shift: { padding: 8 },
+        inline: true,
       }}
       editor={editor}
       shouldShow={({ view, state, from, to }) => {
@@ -58,7 +63,7 @@ export const EditorBubbleMenu = ({
       }}
     >
       {!isToolbarOpen && (
-        <div className="dark z-[1100] flex w-max flex-row items-center rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
+        <div className="dark z-[9999] flex w-max flex-row items-center rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
           <Toolbar
             labels={toolbarLabels}
             editor={editor}
