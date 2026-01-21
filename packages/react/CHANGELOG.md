@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.330.1](https://github.com/factorialco/f0/compare/f0-react-v1.330.0...f0-react-v1.330.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* placeholder ellipsis ([#3268](https://github.com/factorialco/f0/issues/3268)) ([28ca89c](https://github.com/factorialco/f0/commit/28ca89caa7c830983f60875d3dab66d6ca1fcff5))
+
+## [1.330.0](https://github.com/factorialco/f0/compare/f0-react-v1.329.1...f0-react-v1.330.0) (2026-01-20)
+
+
+### Features
+
+* improve ai chat components UI/UX ([#3260](https://github.com/factorialco/f0/issues/3260)) ([0d63858](https://github.com/factorialco/f0/commit/0d638583fcd5d8747f3400f32d8f3bd197bc91c8))
+
+## [1.329.1](https://github.com/factorialco/f0/compare/f0-react-v1.329.0...f0-react-v1.329.1) (2026-01-20)
+
+
+### Bug Fixes
+
+* **datacollection:** cols in settings reacts to changes ([#3265](https://github.com/factorialco/f0/issues/3265)) ([d5b89a8](https://github.com/factorialco/f0/commit/d5b89a8786862c2421fd2e6c71f6809288a4292d))
+
+## [1.329.0](https://github.com/factorialco/f0/compare/f0-react-v1.328.0...f0-react-v1.329.0) (2026-01-19)
+
+
+### Features
+
+* **Nested Table:** implement clearFetchedData functionality for date-nav & pagination changes ([#3247](https://github.com/factorialco/f0/issues/3247)) ([e557cdf](https://github.com/factorialco/f0/commit/e557cdfa6837f2ab22100e0c2d6e965f09fd53f9))
+
 ## [1.328.0](https://github.com/factorialco/f0/compare/f0-react-v1.327.3...f0-react-v1.328.0) (2026-01-16)
 
 

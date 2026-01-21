@@ -104,13 +104,16 @@ export const useLoadChildren = <
 
   const previousFiltersRef = useRef(source.currentFilters)
   const previousSortingsRef = useRef(source.currentSortings)
+  const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
 
   useEffect(() => {
     const filtersChanged = previousFiltersRef.current !== source.currentFilters
     const sortingsChanged =
       previousSortingsRef.current !== source.currentSortings
+    const navigationFiltersChanged =
+      previousNavigationFiltersRef.current !== source.currentNavigationFilters
 
-    if (filtersChanged || sortingsChanged) {
+    if (filtersChanged || sortingsChanged || navigationFiltersChanged) {
       setChildren([])
       setPaginationInfo(undefined)
       setChildrenType("basic")
@@ -119,8 +122,15 @@ export const useLoadChildren = <
 
       previousFiltersRef.current = source.currentFilters
       previousSortingsRef.current = source.currentSortings
+      previousNavigationFiltersRef.current = source.currentNavigationFilters
     }
-  }, [source.currentFilters, source.currentSortings, clearFetchedData])
+  }, [
+    source.currentFilters,
+    source.currentSortings,
+    source.currentNavigationFilters,
+    clearFetchedData,
+    onClearFetchedData,
+  ])
 
   const loadChildren = useCallback(async () => {
     if (children.length > 0 && !paginationInfo?.hasMore) return children
