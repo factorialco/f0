@@ -1,15 +1,24 @@
-import { FC } from "react"
-import { F0DialogInternal } from "./F0DialogInternal"
-import { F0DialogInternalProps } from "./internal-types"
+import { FC } from "react";
+import { DialogInternal } from "./internal/F0DialogInternal";
+import { DialogInternalProps } from "./internal/internal-types";
 
-const privateProps = ["disableClose"] as const
+export const F0Dialog: FC<
+  Omit<DialogInternalProps, "disableClose" | "variant"> & {
+    variant?: never;
+  }
+> = (props) => {
+  const internalProps: DialogInternalProps = {
+    ...props,
+    // Private props
+    variant: "default",
+    disableClose: false,
+    // This props only applies to the default variant
+    tabs: props.tabs ?? [],
+    activeTabId: props.activeTabId,
+    setActiveTabId: props.setActiveTabId,
+    // -------------
+  };
+  return <DialogInternal {...internalProps} />;
+};
 
-export const F0Dialog: FC<F0DialogInternalProps> = (props) => {
-  const publicProps = privateProps.reduce((acc, key) => {
-    const { [key]: _, ...rest } = acc
-    return rest
-  }, props as F0DialogInternalProps)
-  return <F0DialogInternal {...publicProps} />
-}
-
-F0Dialog.displayName = "F0Dialog"
+F0Dialog.displayName = "F0Dialog";
