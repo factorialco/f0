@@ -1,10 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "react",
-    "typescript",
-    "vitest"
-  ],
+  "plugins": ["react", "typescript", "vitest"],
   "categories": {
     "correctness": "off"
   },
@@ -29,7 +25,7 @@
         "react/react-in-jsx-scope": "off",
         "react/prop-types": "off",
         "react/display-name": ["error", {}]
-      },      
+      },
       "plugins": ["react", "typescript"]
     },
     {
