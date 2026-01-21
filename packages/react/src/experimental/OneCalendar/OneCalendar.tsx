@@ -12,6 +12,7 @@ import {
   GranularityDefinitionKey,
   GranularityDefinitionSimple,
   getGranularityDefinitions,
+  granularityDefinitions,
 } from "./granularities/index"
 import {
   CalendarMode,
