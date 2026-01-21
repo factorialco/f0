@@ -8,7 +8,11 @@ export {
   AiFullscreenChat,
   type AiChatProviderProps,
 } from "./index"
-export { useAiChat } from "./providers/AiChatStateProvider"
+export {
+  useAiChat,
+  type FileValidationConfig,
+  type RejectedFile,
+} from "./providers/AiChatStateProvider"
 export {
   AiChatTranslationsProvider,
   useAiChatTranslations,

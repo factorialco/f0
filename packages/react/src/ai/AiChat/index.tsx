@@ -31,7 +31,12 @@ import {
 } from "./components"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
-import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import {
+  AiChatStateProvider,
+  useAiChat,
+  type FileValidationConfig,
+  type RejectedFile,
+} from "./providers/AiChatStateProvider"
 
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<{
@@ -55,6 +60,14 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  /**
+   * Configuration for file validation. When provided, enables file uploads in the chat.
+   */
+  fileValidation?: FileValidationConfig
+  /**
+   * Callback when files are rejected during attachment validation
+   */
+  onFilesRejected?: (rejectedFiles: RejectedFile[]) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -73,6 +86,8 @@ const AiChatProviderCmp = ({
   welcomeScreenSuggestions,
   onThumbsUp,
   onThumbsDown,
+  fileValidation,
+  onFilesRejected,
   children,
   agent,
   ...copilotKitProps
@@ -88,6 +103,8 @@ const AiChatProviderCmp = ({
       onThumbsDown={onThumbsDown}
       agent={agent}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
+      fileValidation={fileValidation}
+      onFilesRejected={onFilesRejected}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
