@@ -206,7 +206,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   return (
     <div
-      className="flex min-h-full w-full flex-col"
+      className="flex max-h-full w-full flex-col flex-1 min-h-0"
       role="group"
       aria-label={schema.label}
     >
