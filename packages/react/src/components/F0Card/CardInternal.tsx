@@ -2,13 +2,7 @@ import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { cn, focusRing } from "@/lib/utils"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardSubtitle,
-  CardTitle,
-} from "@/ui/Card"
+import { Card, CardHeader, CardSubtitle, CardTitle } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { type ReactNode, forwardRef, useRef } from "react"
 import { OneEllipsis } from "../OneEllipsis/OneEllipsis"
@@ -19,9 +13,9 @@ import {
   type CardSecondaryLink,
 } from "./components/CardActions"
 import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
-import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import { type CardMetadata as CardMetadataType } from "./types"
+import { CardContent } from "./components/CardContent"
 
 export const cardImageFits = [
   "contain", // Show entire image, no crop
@@ -349,20 +343,11 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           </div>
           {(metadata || children) && (
-            <CardContent className="pointer-events-none">
-              {metadata && (
-                <div
-                  className={cn(
-                    "flex flex-col gap-0.5",
-                    compact && "gap-x-3 gap-y-0",
-                    forceVerticalMetadata && "flex-col gap-y-0.5"
-                  )}
-                >
-                  {metadata.map((item, index) => (
-                    <CardMetadata key={index} metadata={item} />
-                  ))}
-                </div>
-              )}
+            <CardContent
+              metadata={metadata}
+              compact={compact}
+              forceVerticalMetadata={forceVerticalMetadata}
+            >
               {children}
             </CardContent>
           )}

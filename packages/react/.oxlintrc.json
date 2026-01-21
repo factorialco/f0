@@ -85,6 +85,8 @@
                   "**/exports.ts",
                   "@/*/exports",
                   "@/**/exports",
+                  "@/*/internal-exports",
+                  "@/**/internal-exports",
                   "!@/lib/providers/f0"
                 ],
                 "message": "Barrel imports are not allowed. Use specific component imports instead. [Rule: 1]"
@@ -108,7 +110,7 @@
             "paths": [
               {
                 "name": "@/f0",
-                "message": "Barrel imports are not allowed. Use specific component imports instead.  [Rule: 2]"
+                "message": "Barrel imports are not allowed. Use specific component imports instead. [Rule: 2]"
               },
               {
                 "name": "@/experimental",
