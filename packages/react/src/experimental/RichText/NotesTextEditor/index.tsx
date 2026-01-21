@@ -18,7 +18,6 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react"
@@ -187,13 +186,6 @@ const NotesTextEditorComponent = forwardRef<
     },
   }))
 
-  const tippyOptions = useMemo(
-    () => ({
-      offset: [0, 5] as [number, number],
-    }),
-    []
-  )
-
   const handleNodeChange = useCallback(
     ({ node, pos }: { node: Node | null; pos: number; editor: Editor }) => {
       hoveredRef.current = node ? { pos, nodeSize: node.nodeSize } : null
@@ -279,11 +271,7 @@ const NotesTextEditorComponent = forwardRef<
           onClick={() => editor.commands.focus()}
         >
           {!readonly && (
-            <DragHandle
-              editor={editor}
-              tippyOptions={tippyOptions}
-              onNodeChange={handleNodeChange}
-            >
+            <DragHandle editor={editor} onNodeChange={handleNodeChange}>
               <div className="flex flex-row">
                 <ButtonInternal
                   compact

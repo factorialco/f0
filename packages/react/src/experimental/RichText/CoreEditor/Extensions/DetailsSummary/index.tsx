@@ -1,3 +1,3 @@
-import DetailsSummary from "@tiptap/extension-details-summary"
+import { DetailsSummary } from "@tiptap/extension-details"
 
 export const DetailsSummaryExtension = DetailsSummary

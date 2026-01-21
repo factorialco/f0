@@ -1,4 +1,6 @@
-import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
+import { Editor } from "@tiptap/core"
+import { BubbleMenu } from "@tiptap/react/menus"
+import { isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
 import { Toolbar } from "../Toolbar"
 import { ToolbarLabels } from "../Toolbar/types"
@@ -24,15 +26,13 @@ export const EditorBubbleMenu = ({
 }: EditorBubbleMenuProps) => {
   return (
     <BubbleMenu
-      tippyOptions={{
-        duration: 100,
+      appendTo={() =>
+        isFullscreen
+          ? document.body
+          : document.getElementById(editorId) || document.body
+      }
+      options={{
         placement: "top",
-        hideOnClick: false,
-        appendTo: () =>
-          isFullscreen
-            ? document.body
-            : document.getElementById(editorId) || document.body,
-        zIndex: 9999,
       }}
       editor={editor}
       shouldShow={({ view, state, from, to }) => {

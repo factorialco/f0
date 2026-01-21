@@ -1,4 +1,4 @@
-import Details from "@tiptap/extension-details"
+import { Details } from "@tiptap/extension-details"
 
 export const DetailsExtension = Details.configure({
   persist: true,
