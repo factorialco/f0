@@ -421,17 +421,16 @@ const RichTextEditorComponent = forwardRef<
             isToolbarOpen={isToolbarOpen}
             plainHtmlMode={plainHtmlMode}
           />
-
-          <EditorBubbleMenu
-            editorId={editorId}
-            editor={editor}
-            disableButtons={disableAllButtons}
-            toolbarLabels={toolbarLabels}
-            isToolbarOpen={isToolbarOpen}
-            isFullscreen={isFullscreen}
-            plainHtmlMode={plainHtmlMode}
-          />
         </div>
+
+        <EditorBubbleMenu
+          editorId={editorId}
+          editor={editor}
+          disableButtons={disableAllButtons}
+          toolbarLabels={toolbarLabels}
+          isToolbarOpen={isToolbarOpen}
+          plainHtmlMode={plainHtmlMode}
+        />
       </div>
     </FocusScope>
   )

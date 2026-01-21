@@ -308,7 +308,6 @@ const NotesTextEditorComponent = forwardRef<
           disableButtons={false}
           toolbarLabels={toolbarLabels}
           isToolbarOpen={!showBubbleMenu}
-          isFullscreen={false}
           plainHtmlMode={false}
         />
       )}

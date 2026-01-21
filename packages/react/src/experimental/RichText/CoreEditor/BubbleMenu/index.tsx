@@ -10,7 +10,6 @@ interface EditorBubbleMenuProps {
   disableButtons: boolean
   toolbarLabels: ToolbarLabels
   isToolbarOpen: boolean
-  isFullscreen: boolean
   editorId: string
   plainHtmlMode?: boolean
 }
@@ -21,16 +20,11 @@ export const EditorBubbleMenu = ({
   disableButtons,
   toolbarLabels,
   isToolbarOpen,
-  isFullscreen,
   plainHtmlMode = false,
 }: EditorBubbleMenuProps) => {
   return (
     <BubbleMenu
-      appendTo={() =>
-        isFullscreen
-          ? document.body
-          : document.getElementById(editorId) || document.body
-      }
+      appendTo={() => document.body}
       options={{
         placement: "top",
       }}
@@ -64,7 +58,7 @@ export const EditorBubbleMenu = ({
       }}
     >
       {!isToolbarOpen && (
-        <div className="dark z-50 flex w-max flex-row items-center rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
+        <div className="dark z-[1100] flex w-max flex-row items-center rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
           <Toolbar
             labels={toolbarLabels}
             editor={editor}
