@@ -1,3 +1,4 @@
+import type { AnyExtension } from "@tiptap/core"
 import {
   ColorExtension,
   CustomTaskExtension,
@@ -34,7 +35,7 @@ const ExtensionsConfiguration = ({
   placeholder,
   maxCharacters,
   plainHtmlMode = false,
-}: ExtensionsConfigurationProps) => {
+}: ExtensionsConfigurationProps): AnyExtension[] => {
   return [
     StarterKitExtension,
     UnderlineExtension,
