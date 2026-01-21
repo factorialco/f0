@@ -500,6 +500,20 @@ declare interface AiChatState {
 
 export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
 
+export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
+
+export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
+
+export declare interface AiChatTranslationsProviderProps {
+    children: ReactNode;
+    translations: AiChatTranslations;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const AiFullscreenChat: () => JSX_2.Element | null;
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -557,6 +571,38 @@ declare interface AiPromotionChatState {
     onShow?: () => void;
     onHide?: () => void;
 }
+
+declare const aiTranslations: {
+    ai: {
+        openChat: string;
+        closeChat: string;
+        startNewChat: string;
+        scrollToBottom: string;
+        welcome: string;
+        defaultInitialMessage: string;
+        inputPlaceholder: string;
+        stopAnswerGeneration: string;
+        sendMessage: string;
+        thoughtsGroupTitle: string;
+        resourcesGroupTitle: string;
+        thinking: string;
+        exportTable: string;
+        generatedTableFilename: string;
+        feedbackModal: {
+            positive: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+            negative: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+        };
+        ask: string;
+    };
+};
 
 export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
     variant?: "info" | "warning" | "positive" | "destructive" | undefined;
@@ -2483,7 +2529,7 @@ declare const defaultTranslations: {
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info…";
+        readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
@@ -6034,6 +6080,10 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
 declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 declare interface TwoColumnsItemType {
@@ -6065,6 +6115,8 @@ declare namespace Types {
 declare type URL_2 = string;
 
 export declare function useAiChat(): AiChatProviderReturnValue;
+
+export declare function useAiChatTranslations(): AiChatTranslations;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
