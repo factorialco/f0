@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.330.1](https://github.com/factorialco/f0/compare/f0-react-v1.330.0...f0-react-v1.330.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* placeholder ellipsis ([#3268](https://github.com/factorialco/f0/issues/3268)) ([28ca89c](https://github.com/factorialco/f0/commit/28ca89caa7c830983f60875d3dab66d6ca1fcff5))
+
 ## [1.330.0](https://github.com/factorialco/f0/compare/f0-react-v1.329.1...f0-react-v1.330.0) (2026-01-20)
 
 
