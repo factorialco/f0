@@ -87,7 +87,7 @@ describe("F0FilterPickerContent", () => {
       )
 
       const wrapper = container.firstChild as HTMLElement
-      expect(wrapper).toHaveStyle({ width: "800px" })
+      expect(wrapper).toHaveStyle({ maxWidth: "800px" })
     })
 
     it("renders without apply button when showApplyButton is false", async () => {
