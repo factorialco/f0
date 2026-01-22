@@ -21,10 +21,7 @@ type F0DialogNotificationProps = {
    * Limited to 2 actions.
    * @default undefined
    */
-  secondaryAction?:
-    | F0DialogAction
-    | [F0DialogAction]
-    | [F0DialogAction, F0DialogAction]
+  secondaryAction?: F0DialogAction | F0DialogAction[]
 }
 
 export const DialogNotificationInternal = ({

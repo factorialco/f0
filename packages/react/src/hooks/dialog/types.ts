@@ -1,14 +1,21 @@
 import { Optional } from "@/lib/typescript-utils/optional"
 import {
+  DialogActions,
   DialogActionValue,
   DialogDefinition,
 } from "@/lib/providers/dialogs/types"
+import { DialogNotificationType } from "@/components/F0Dialog/types"
 
-export type SimpleDialogOptions = Optional<
-  Pick<DialogDefinition, "id" | "title" | "description" | "width">,
+export type NotificationDialogBaseOptions = Optional<
+  Pick<DialogDefinition, "id" | "title">,
   "id"
 > & {
   msg: string
+  type?: DialogNotificationType
+}
+
+export type NotificationDialogOptions = NotificationDialogBaseOptions & {
+  actions: DialogActions
 }
 
 export type DialogSimpleAction = {
@@ -16,7 +23,7 @@ export type DialogSimpleAction = {
   value?: DialogActionValue
 }
 
-export type ConfirmDialogOptions = SimpleDialogOptions & {
+export type ConfirmDialogOptions = NotificationDialogBaseOptions & {
   /*
    * The label of the confirm action (default: label: "Ok", value: true).
    */
@@ -27,7 +34,7 @@ export type ConfirmDialogOptions = SimpleDialogOptions & {
   cancel?: DialogSimpleAction
 }
 
-export type AlertDialogOptions = SimpleDialogOptions & {
+export type AlertDialogOptions = NotificationDialogBaseOptions & {
   /*
    * The label of the alert action (default: label: "Ok", value: true).
    */

@@ -100,7 +100,37 @@ function DeleteItemButton() {
 
 The hook handles all the state management, dialog rendering, and cleanup automatically. The promise-based API makes it easy to handle user responses with async/await.
 
-## Usage
+## Notification Dialogs
+
+The `openNotificationDialog` method displays a notification dialog which should be used to display messages to the user or ask for a confirmation.
+Notification dialogs have different severity levels: `info`, `warning`, `critical` and `positive`.
+By default, the severity level is `info`.
+
+```tsx
+import { useDialog } from "@/hooks/dialog";
+
+function MyComponent() {
+  const { openNotificationDialog } = useDialog();
+
+  const showNotification = async () => {
+    await openNotificationDialog({
+      title: "Notification Title",
+      msg: "This is a notification message",
+      type: "critical",
+      actions: {
+        primary: {
+          value: true,
+          label: "Actept",
+        },
+      },
+    });
+  };
+
+  return <button onClick={showNotification}>Show Notification</button>;
+}
+```
+
+<Canvas of={UseDialogStories.Notification} />
 
 ### Alert Dialog
 

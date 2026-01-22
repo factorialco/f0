@@ -1,5 +1,5 @@
 import { F0ButtonProps } from "@/components/F0Button"
-import { DialogWidth } from "@/components/F0Dialog/types"
+import { DialogNotificationType, DialogSize } from "@/components/F0Dialog/types"
 import { Optional } from "@/lib/typescript-utils/optional"
 import { ReactNode } from "react"
 
@@ -36,14 +36,11 @@ export type DialogActions = {
   secondary?: DialogAction | DialogAction[]
 }
 
-export const dialogVariants = ["default", "critical", "neutral"] as const
-export type DialogVariant = (typeof dialogVariants)[number]
-
 export type DialogDefinition = {
   /*
-   * The width of the dialog.
+   * The size of the dialog.
    */
-  width?: DialogWidth
+  size?: DialogSize
   /*
    * The id of the dialog.
    */
@@ -64,13 +61,21 @@ export type DialogDefinition = {
    * The actions of the dialog.
    */
   actions: DialogActions
-  /*
-   * The variant of the dialog.
-   */
-  variant?: DialogVariant
+
   /*
    * If true, the dialog will not be closed automatically when an action is clicked.
    * This is useful for dialogs that need to be closed manually
    */
   keepOpen?: boolean
 }
+
+export type DialogDefinitionInternal = DialogDefinition &
+  (
+    | {
+        variant?: "default"
+      }
+    | {
+        variant: "notification"
+        type: DialogNotificationType
+      }
+  )

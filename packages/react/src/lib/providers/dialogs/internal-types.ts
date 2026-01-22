@@ -4,7 +4,7 @@ import {
   DialogDefinition,
 } from "./types"
 
-export type DialogDefinitionInternal = DialogDefinition & {
+export type DialogDefinitionProviderItem = DialogDefinition & {
   onCloseDialog: () => void
   onClickAction: (
     action: DialogAction,

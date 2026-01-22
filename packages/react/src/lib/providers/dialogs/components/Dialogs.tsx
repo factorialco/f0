@@ -2,12 +2,13 @@ import { F0DialogAction } from "@/components/F0Dialog"
 import { DialogAction, DialogActionValuePrimitive, DialogId } from "../types"
 import { toArray } from "@/lib/toArray"
 import { useMemo, useState } from "react"
-import { DialogDefinitionInternal } from "../internal-types"
+import { DialogDefinitionProviderItem } from "../internal-types"
 import { DialogInternal } from "@/components/F0Dialog/internal/DialogInternal"
 import { nanoid } from "nanoid"
+import { DialogNotificationInternal } from "@/components/F0Dialog/internal/DialogNotification"
 
 type DialogsProps = {
-  dialogs: DialogDefinitionInternal[]
+  dialogs: DialogDefinitionProviderItem[]
 }
 
 const materializeActionValue = async (
@@ -41,7 +42,7 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
      * Convert the dialogs to F0Dialog props
      */
     const toF0Action = (
-      dialog: DialogDefinitionInternal,
+      dialog: DialogDefinitionProviderItem,
       action: DialogAction
     ): F0DialogAction => {
       return {
@@ -107,19 +108,34 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
   return (
     <>
       {f0DialogsWithBlocks.map((dialog) => (
-        <DialogInternal
-          disableClose={isBlocked(dialog.id)}
-          key={dialog.id}
-          isOpen
-          width={dialog.width}
-          onClose={dialog.onCloseDialog}
-          title={dialog.title}
-          description={dialog.description}
-          primaryAction={dialog.actions.primary}
-          secondaryAction={dialog.actions.secondary}
-        >
-          {dialog.content}
-        </DialogInternal>
+        <>
+          {dialog.variant === "notification" ? (
+            <DialogNotificationInternal
+              title={dialog.title}
+              description={dialog.description ?? ""}
+              key={dialog.id}
+              type={dialog.type}
+              isOpen
+              onClose={dialog.onCloseDialog}
+              primaryAction={dialog.actions.primary[0]}
+              secondaryAction={dialog.actions.secondary}
+            />
+          ) : (
+            <DialogInternal
+              disableClose={isBlocked(dialog.id)}
+              key={dialog.id}
+              isOpen
+              size={dialog.size}
+              onClose={dialog.onCloseDialog}
+              title={dialog.title}
+              description={dialog.description}
+              primaryAction={dialog.actions.primary}
+              secondaryAction={dialog.actions.secondary}
+            >
+              {dialog.content}
+            </DialogInternal>
+          )}
+        </>
       ))}
     </>
   )

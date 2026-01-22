@@ -6,7 +6,6 @@ import { useDialog } from "../useDialog"
 import { DialogActionValue } from "../../../lib/providers/dialogs/types"
 import { Delete } from "@/icons/app"
 import { Pencil } from "lucide-react"
-import { DialogWidth } from "@/components/F0Dialog/types"
 
 const meta = {
   title: "Dialogs",
@@ -29,7 +28,7 @@ type Story = StoryObj<typeof meta>
 // Basic Variants
 export const Default: Story = {
   render: () => {
-    const { openDialog, alert, confirm } = useDialog()
+    const { openDialog, alert, confirm, openNotificationDialog } = useDialog()
 
     const dialogTrigger = async () => {
       const res = await openDialog({
@@ -57,6 +56,20 @@ export const Default: Story = {
       console.log(res)
     }
 
+    const notificationTrigger = async () => {
+      const res = await openNotificationDialog({
+        title: "Notification Title",
+        msg: "Notification Message",
+        actions: {
+          primary: {
+            value: "primary",
+            label: "Primary Action",
+          },
+        },
+      })
+      console.log(res)
+    }
+
     const confirmTrigger = async () => {
       const res = await confirm({
         title: "Confirm Title",
@@ -75,6 +88,11 @@ export const Default: Story = {
         <F0Button onClick={alertTrigger} label="Open Alert" />
 
         <F0Button onClick={confirmTrigger} label="Open Confirm" />
+
+        <F0Button
+          onClick={notificationTrigger}
+          label="Open Notification Dialog"
+        />
       </div>
     )
   },
@@ -143,6 +161,38 @@ export const Default: Story = {
   },
 }
 
+export const Notification: Story = {
+  render: () => {
+    const { openNotificationDialog } = useDialog()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const notificationTrigger = async () => {
+      const res = await openNotificationDialog({
+        title: "Notification Title",
+        msg: "Notification Message",
+        type: "positive",
+        actions: {
+          primary: {
+            value: "primary",
+            label: "Primary Action",
+          },
+        },
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col gap-4 justify-center items-center">
+        <F0Button
+          onClick={notificationTrigger}
+          label="Open Notification Dialog"
+        />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
+  },
+}
+
 export const Alert: Story = {
   render: () => {
     const { alert } = useDialog()
@@ -197,29 +247,26 @@ export const Alert: Story = {
   },
 }
 
-const renderConfirm = ({ width }: { width?: DialogWidth } = {}) => {
-  const { confirm } = useDialog()
-  const [res, setRes] = useState<DialogActionValue>(undefined)
-
-  const alertTrigger = async () => {
-    const res = await confirm({
-      title: "Confirm Title",
-      msg: "Confirm Message",
-      width,
-    })
-    setRes(res)
-  }
-
-  return (
-    <div className="flex flex-col gap-4 justify-center items-center">
-      <F0Button onClick={alertTrigger} label="Open Alert" />
-      <p>Last action result: {res?.toString()}</p>
-    </div>
-  )
-}
-
 export const Confirm: Story = {
-  render: () => renderConfirm(),
+  render: () => {
+    const { confirm } = useDialog()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const alertTrigger = async () => {
+      const res = await confirm({
+        title: "Confirm Title",
+        msg: "Confirm Message",
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col gap-4 justify-center items-center">
+        <F0Button onClick={alertTrigger} label="Open Alert" />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
+  },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     // Dialogs render in portals, so search the full page
@@ -273,10 +320,6 @@ export const Confirm: Story = {
       expect(page.queryByText("Confirm Title")).not.toBeInTheDocument()
     })
   },
-}
-
-export const ConfirmWithSmWidth: Story = {
-  render: () => renderConfirm({ width: "sm" }),
 }
 
 export const ConfirmWithPromiseAndCustomLabel: Story = {
@@ -449,6 +492,53 @@ export const Dialog: Story = {
       const resultText = canvas.getByText(/Last action result:/)
       expect(resultText).toHaveTextContent("delete")
     })
+  },
+}
+
+export const DialogFullScreen: Story = {
+  render: () => {
+    const { openDialog } = useDialog()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const trigger = async () => {
+      const res = await openDialog({
+        title: "Dialog Title",
+        size: "fullscreen",
+        description: "Dialog Description",
+        content: <div>Dialog Content</div>,
+        actions: {
+          primary: {
+            value: "primary",
+            label: "Primary Action",
+          },
+          secondary: [
+            {
+              value: "delete",
+              icon: Delete,
+              label: "Delete",
+            },
+            {
+              value: "other",
+              icon: Pencil,
+              label: "Other",
+            },
+            {
+              value: "cancel",
+              disabled: true,
+              label: "Cancel",
+            },
+          ],
+        },
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col gap-4 justify-center items-center">
+        <F0Button onClick={trigger} label="Open Dialog" />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
   },
 }
 

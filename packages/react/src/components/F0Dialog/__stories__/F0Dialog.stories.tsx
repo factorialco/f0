@@ -29,6 +29,12 @@ const meta: Meta<typeof F0Dialog> = {
     layout: "fullscreen",
     docs: {
       story: { inline: false, height: "720px" },
+      description: {
+        component: [
+          "<p>F0Dialog is a component that provides a dialog interface for the application. It is used to display a dialog to the user.</p>",
+          "<div class='mt-2 bg-f1-background-secondary p-3 rounded-md'>Check the <a href='/docs/hooks/dialogs'>useDialog</a> before using this component.</div>",
+        ].join(""),
+      },
     },
   },
   tags: ["autodocs", "experimental"],

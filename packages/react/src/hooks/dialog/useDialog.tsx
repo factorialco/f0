@@ -6,16 +6,24 @@ import {
   DialogAction,
   DialogActionValuePrimitive,
   DialogId,
+  DialogDefinitionInternal,
 } from "@/lib/providers/dialogs/types"
 
-import { AlertDialogOptions, ConfirmDialogOptions } from "./types"
+import {
+  AlertDialogOptions,
+  ConfirmDialogOptions,
+  NotificationDialogOptions,
+} from "./types"
 import { Optional } from "@/lib/typescript-utils/optional"
 import { useI18n } from "@/lib/providers/i18n"
-import { DialogDefinitionInternal } from "../../lib/providers/dialogs/internal-types"
+import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs/internal-types"
 
 export type UseDialogReturn = {
   openDialog: (
     definition: Optional<DialogDefinition, "id">
+  ) => Promise<DialogActionValue>
+  openNotificationDialog: (
+    options: NotificationDialogOptions
   ) => Promise<DialogActionValue>
   alert: (options: AlertDialogOptions) => Promise<DialogActionValue>
   confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>
@@ -29,8 +37,14 @@ export const useDialog = (): UseDialogReturn => {
   const openDialog = (
     definition: Optional<DialogDefinition, "id">
   ): Promise<DialogActionValue> => {
+    return _openDialogInternal({ ...definition, variant: "default" })
+  }
+
+  const _openDialogInternal = (
+    definition: Optional<DialogDefinitionInternal, "id">
+  ): Promise<DialogActionValue> => {
     return new Promise((resolve) => {
-      const newDialog: DialogDefinitionInternal = {
+      const newDialog: DialogDefinitionProviderItem = {
         ...definition,
         id: definition.id || nanoid(),
         actions: definition.actions,
@@ -63,22 +77,37 @@ export const useDialog = (): UseDialogReturn => {
   }
 
   /**
+   * Notification Dialog
+   */
+  const openNotificationDialog = (
+    options: NotificationDialogOptions
+  ): Promise<DialogActionValue> => {
+    const dialog = {
+      type: options.type ?? "info",
+      variant: "notification" as const,
+      description: options.msg,
+      id: options.id || nanoid(),
+      title: options.title,
+      content: <></>,
+      actions: options.actions,
+    }
+
+    return _openDialogInternal(dialog)
+  }
+
+  /**
    * Alert Dialog
    */
   const alert = (options: AlertDialogOptions): Promise<DialogActionValue> => {
-    const dialog = {
+    return openNotificationDialog({
       ...options,
-      id: options.id || nanoid(),
-      title: options.title,
-      content: <div>{options.msg}</div>,
       actions: {
         primary: {
           value: options.confirm?.value ?? true,
           label: options.confirm?.label || i18n.actions.ok,
         },
       },
-    }
-    return openDialog(dialog)
+    })
   }
 
   /**
@@ -87,11 +116,8 @@ export const useDialog = (): UseDialogReturn => {
   const confirm = (
     options: ConfirmDialogOptions
   ): Promise<DialogActionValue> => {
-    const dialog = {
+    return openNotificationDialog({
       ...options,
-      id: options.id || nanoid(),
-      title: options.title,
-      content: <div>{options.msg}</div>,
       actions: {
         primary: {
           value: options.confirm?.value ?? true,
@@ -102,8 +128,7 @@ export const useDialog = (): UseDialogReturn => {
           label: options.cancel?.label || i18n.actions.cancel,
         },
       },
-    }
-    return openDialog(dialog)
+    })
   }
 
   const closeDialog = (id: DialogId) => {
@@ -112,6 +137,7 @@ export const useDialog = (): UseDialogReturn => {
 
   return {
     openDialog,
+    openNotificationDialog,
     alert,
     confirm,
     closeDialog,
