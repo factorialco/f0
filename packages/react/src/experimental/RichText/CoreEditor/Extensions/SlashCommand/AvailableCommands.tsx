@@ -8,6 +8,7 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Image,
   List,
   Minus,
   OlList,
@@ -16,6 +17,11 @@ import {
 
 import { ToolbarLabels } from "../../Toolbar/types"
 import { AIBlockConfig } from "../AIBlock"
+import {
+  DEFAULT_ACCEPTED_TYPES,
+  ImageUploadConfig,
+  insertImageFromFile,
+} from "../Image"
 
 interface CommandItem {
   title: string
@@ -38,7 +44,8 @@ interface SlashCommandGroupLabels {
 
 const availableCommands = (
   labels: ToolbarLabels,
-  aiBlockConfig?: AIBlockConfig
+  aiBlockConfig?: AIBlockConfig,
+  imageUploadConfig?: ImageUploadConfig
 ): CommandItem[] => {
   // Get grouped commands and flatten them for backward compatibility
   const defaultGroupLabels: SlashCommandGroupLabels = {
@@ -46,14 +53,20 @@ const availableCommands = (
     lists: "Lists",
     blocks: "Blocks",
   }
-  const groups = getGroupedCommands(labels, defaultGroupLabels, aiBlockConfig)
+  const groups = getGroupedCommands(
+    labels,
+    defaultGroupLabels,
+    aiBlockConfig,
+    imageUploadConfig
+  )
   return groups.flatMap((group) => group.commands)
 }
 
 const getGroupedCommands = (
   labels: ToolbarLabels,
   groupLabels: SlashCommandGroupLabels,
-  aiBlockConfig?: AIBlockConfig
+  aiBlockConfig?: AIBlockConfig,
+  imageUploadConfig?: ImageUploadConfig
 ): CommandGroup[] => [
   // Only include AI Block group if config is provided
   ...(aiBlockConfig?.buttons && aiBlockConfig.buttons.length > 0
@@ -322,6 +335,27 @@ const getGroupedCommands = (
         },
         icon: Minus,
       },
+      ...(imageUploadConfig
+        ? [
+            {
+              title: "Image",
+              command: (editor: Editor) => {
+                // Create a file input to select an image
+                const input = document.createElement("input")
+                input.type = "file"
+                input.accept = DEFAULT_ACCEPTED_TYPES.join(",")
+                input.onchange = () => {
+                  const file = input.files?.[0]
+                  if (file) {
+                    insertImageFromFile(editor, file, imageUploadConfig)
+                  }
+                }
+                input.click()
+              },
+              icon: Image,
+            },
+          ]
+        : []),
     ],
   },
 ]

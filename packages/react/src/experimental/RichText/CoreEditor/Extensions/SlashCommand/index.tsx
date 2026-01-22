@@ -5,6 +5,7 @@ import React from "react"
 import { createRoot, Root } from "react-dom/client"
 
 import { ToolbarLabels } from "../../Toolbar/types"
+import { ImageUploadConfig } from "../Image"
 import {
   AIBlockConfig,
   availableCommands,
@@ -17,7 +18,8 @@ import { CommandList } from "./CommandList"
 const createSlashCommandExtension = (
   labels: ToolbarLabels,
   groupLabels?: SlashCommandGroupLabels,
-  aiBlockConfig?: AIBlockConfig
+  aiBlockConfig?: AIBlockConfig,
+  imageUploadConfig?: ImageUploadConfig
 ) =>
   Extension.create({
     name: "slashCommand",
@@ -93,15 +95,17 @@ const createSlashCommandExtension = (
           items: ({ query }: { query: string }) => {
             // Exact search: the query with spaces must match exactly
             const normalizedQuery = query.toLowerCase().trim()
-            const results = availableCommands(labels, aiBlockConfig).filter(
-              (item: CommandItem) => {
-                const normalizedTitle = item.title.toLowerCase()
-                // If query is empty, show all commands
-                if (!normalizedQuery) return true
-                // Exact string matching (including spaces)
-                return normalizedTitle.includes(normalizedQuery)
-              }
-            )
+            const results = availableCommands(
+              labels,
+              aiBlockConfig,
+              imageUploadConfig
+            ).filter((item: CommandItem) => {
+              const normalizedTitle = item.title.toLowerCase()
+              // If query is empty, show all commands
+              if (!normalizedQuery) return true
+              // Exact string matching (including spaces)
+              return normalizedTitle.includes(normalizedQuery)
+            })
             return results.length > 0 ? results : []
           },
           render: () => {
@@ -191,7 +195,8 @@ const createSlashCommandExtension = (
                 const groupedCommands = getGroupedCommands(
                   labels,
                   finalGroupLabels,
-                  aiBlockConfig
+                  aiBlockConfig,
+                  imageUploadConfig
                 )
 
                 // Filter groups based on query if available
@@ -253,7 +258,8 @@ const createSlashCommandExtension = (
                 const groupedCommands = getGroupedCommands(
                   labels,
                   finalGroupLabels,
-                  aiBlockConfig
+                  aiBlockConfig,
+                  imageUploadConfig
                 )
                 let filteredGroups = groupedCommands
                 if (props.query && props.query.trim()) {
