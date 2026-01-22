@@ -1,4 +1,5 @@
 import { ComponentProps } from "react"
+
 import { BaseHeader } from "../BaseHeader"
 
 type BaseHeaderProps = ComponentProps<typeof BaseHeader>

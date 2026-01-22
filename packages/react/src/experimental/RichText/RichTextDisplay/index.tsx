@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils"
 import DOMPurify from "dompurify"
 import { forwardRef, HTMLAttributes, useMemo } from "react"
 import rehypeStringify from "rehype-stringify"
@@ -6,6 +5,9 @@ import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import { unified } from "unified"
+
+import { cn } from "@/lib/utils"
+
 import "../index.css"
 
 interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {

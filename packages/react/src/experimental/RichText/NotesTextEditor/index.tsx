@@ -1,14 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import {
-  EditorBubbleMenu,
-  Toolbar,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import { Handle, Plus } from "@/icons/app"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -22,6 +11,19 @@ import {
   useRef,
   useState,
 } from "react"
+
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import {
+  EditorBubbleMenu,
+  Toolbar,
+  ToolbarLabels,
+} from "@/experimental/RichText/CoreEditor"
+import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
+import { Handle, Plus } from "@/icons/app"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
+
 import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
 import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"

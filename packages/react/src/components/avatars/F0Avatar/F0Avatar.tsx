@@ -1,4 +1,5 @@
 import { ComponentProps, ReactNode } from "react"
+
 import { F0AvatarCompany, F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarEmoji, F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFile, F0AvatarFileProps } from "../F0AvatarFile"

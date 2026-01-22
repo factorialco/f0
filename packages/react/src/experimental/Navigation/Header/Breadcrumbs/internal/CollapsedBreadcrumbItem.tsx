@@ -1,6 +1,8 @@
+import { forwardRef } from "react"
+
 import { DropdownInternal } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem as ShadBreadcrumbItem } from "@/ui/breadcrumb"
-import { forwardRef } from "react"
+
 import { DropdownItemWithoutIcon } from "../types"
 import { BreadcrumbSeparator } from "./BreadcrumbSeparator"
 

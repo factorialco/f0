@@ -1,10 +1,12 @@
+import { cva } from "cva"
+
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { internalAvatarTypes } from "@/ui/Avatar"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-import { cva } from "cva"
+
 import { AvatarVariant, AvatarVariants, F0Avatar } from "../../F0Avatar"
 import { type AvatarListSize } from "../types"
 import { getAvatarDisplayName } from "../utils"

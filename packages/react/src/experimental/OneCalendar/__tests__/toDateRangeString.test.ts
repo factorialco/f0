@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { DateRangeString } from "../types"
 import { toDateRangeString } from "../utils"
 

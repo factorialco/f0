@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react"
+
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Await } from "@/components/Utilities/Await"
 import { Counter } from "@/experimental/Information/Counter"
 import { cn } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useState } from "react"
 
 type GroupHeaderProps = {
   label: string | Promise<string>

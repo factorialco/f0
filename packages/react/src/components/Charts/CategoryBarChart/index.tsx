@@ -1,10 +1,11 @@
+import { ForwardedRef } from "react"
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import { ForwardedRef } from "react"
 
 import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"

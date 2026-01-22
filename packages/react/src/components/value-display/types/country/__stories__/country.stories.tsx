@@ -1,5 +1,7 @@
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Meta, StoryObj } from "@storybook/react-vite"
+
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const meta = {

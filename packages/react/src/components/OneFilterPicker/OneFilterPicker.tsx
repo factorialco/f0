@@ -1,14 +1,16 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
+
+import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
+import { cn } from "@/lib/utils"
+
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
+
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
 import { getPresetCoveredKeys } from "./internal/getPresetCoveredKeys"
 import { PresetsDefinition } from "./types"
-
-import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
-import { cn } from "@/lib/utils"
-import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 
 /**
  * Props for the Filters component.

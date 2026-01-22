@@ -1,7 +1,8 @@
-import { IconType } from "@/components/F0Icon"
-import { Shortcut } from "@/experimental/Information/Shortcut"
 import { Editor } from "@tiptap/react"
 import { ComponentProps } from "react"
+
+import { IconType } from "@/components/F0Icon"
+import { Shortcut } from "@/experimental/Information/Shortcut"
 
 export interface ToolbarLabels {
   bold: string

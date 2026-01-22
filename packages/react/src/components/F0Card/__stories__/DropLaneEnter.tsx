@@ -1,6 +1,7 @@
-import { useDroppableList } from "@/lib/dnd/hooks"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
+
+import { useDroppableList } from "@/lib/dnd/hooks"
 
 export function DropLaneEnter({
   id,
@@ -51,7 +52,7 @@ export function DropLaneEnter({
         ref={laneRef}
         className={
           "flex w-full flex-col gap-0 rounded border p-2 " +
-          (over ? " border-f1-border-hover" : " border-f1-border-secondary")
+          (over ? "border-f1-border-hover" : "border-f1-border-secondary")
         }
       >
         {children}

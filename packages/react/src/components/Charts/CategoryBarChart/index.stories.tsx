@@ -1,4 +1,5 @@
 import type { Meta } from "@storybook/react-vite"
+
 import { CategoryBarChart } from "./index"
 
 const meta = {

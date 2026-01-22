@@ -1,7 +1,9 @@
 import { OverflowList } from "@/ui/OverflowList"
+
+import type { F0TagListProps, TagType } from "./types"
+
 import { Tag, TagVariant } from "../F0Tag/F0Tag"
 import { TagCounter } from "./components/TagCounter"
-import type { F0TagListProps, TagType } from "./types"
 
 export const F0TagList = <T extends TagType>({
   type,

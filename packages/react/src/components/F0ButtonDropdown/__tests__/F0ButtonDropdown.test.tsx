@@ -1,7 +1,9 @@
-import { IconType } from "@/components/F0Icon"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { IconType } from "@/components/F0Icon"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
 import { F0ButtonDropdown } from "../index"
 // Mock the imported components
 vi.mock("@/ui/Action", () => ({

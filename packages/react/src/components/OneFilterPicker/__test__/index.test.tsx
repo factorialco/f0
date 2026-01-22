@@ -1,9 +1,12 @@
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
 import userEvent from "@testing-library/user-event"
+import "@testing-library/jest-dom/vitest"
 import { describe, expect, it, vi } from "vitest"
-import { OneFilterPicker } from "../index"
+
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
 import type { FiltersDefinition } from "../types"
+
+import { OneFilterPicker } from "../index"
 
 const definition = {
   department: {

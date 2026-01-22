@@ -1,7 +1,9 @@
-import { zeroRender as render } from "@/testing/test-utils"
 import { fireEvent, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render } from "@/testing/test-utils"
+
 import { F0Checkbox } from "../F0Checkbox"
 
 describe("F0Checkbox", () => {

@@ -1,8 +1,10 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { InputField, INPUTFIELD_SIZES } from "../"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+
+import { InputField, INPUTFIELD_SIZES } from "../"
 
 const meta = {
   title: "Components/InputField",

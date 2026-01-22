@@ -1,3 +1,7 @@
+import { Editor } from "@tiptap/react"
+import { compact } from "lodash"
+import { Fragment, ReactNode } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { Picker } from "@/experimental/Information/Reactions/Picker"
@@ -24,9 +28,7 @@ import {
   Underline,
 } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Editor } from "@tiptap/react"
-import { compact } from "lodash"
-import { Fragment, ReactNode } from "react"
+
 import { LinkPopup } from "./LinkPopup"
 import { ToolbarDivider } from "./ToolbarDivider"
 import { ToolbarDropdown } from "./ToolbarDropdown"

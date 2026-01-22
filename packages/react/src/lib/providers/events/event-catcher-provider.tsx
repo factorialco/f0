@@ -7,6 +7,7 @@ import {
   useContext,
   useMemo,
 } from "react"
+
 import { EventCatcherFunction } from "./types"
 
 type ContextType = { onEvent: EventCatcherFunction }

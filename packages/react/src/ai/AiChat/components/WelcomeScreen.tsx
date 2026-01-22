@@ -1,10 +1,11 @@
+import { useCopilotChatInternal } from "@copilotkit/react-core"
+import { Message, randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
+import { useMemo } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
-import { useCopilotChatInternal } from "@copilotkit/react-core"
-import { Message, randomId } from "@copilotkit/shared"
-import { useMemo } from "react"
+
 import OneIcon from "../OneIcon"
 
 export type WelcomeScreenSuggestion = {
@@ -106,7 +107,7 @@ export const WelcomeScreen = ({
               <div>
                 <ButtonInternal
                   variant="ghost"
-                  className="sm:border-none border border-f1-border border-solid shadow sm:shadow-none"
+                  className="border border-solid border-f1-border shadow sm:border-none sm:shadow-none"
                   label={suggestion.message}
                   icon={suggestion.icon}
                   onClick={() =>

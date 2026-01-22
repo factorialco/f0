@@ -1,8 +1,10 @@
+import { ChevronDown, ChevronRight } from "lucide-react"
+
 import { F0Button } from "@/components/F0Button"
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { ChevronDown, ChevronRight } from "lucide-react"
+
 import {
   CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,

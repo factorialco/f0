@@ -7,9 +7,6 @@ import {
   useState,
 } from "react"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
-import { I18nProvider, I18nProviderProps } from "../i18n"
-import { L10nProvider, L10nProviderProps } from "../l10n"
-import { UserPlatformProvider } from "../user-platafform"
 
 import { ImageContextValue, ImageProvider } from "../../imageHandler"
 import { LinkContextValue, LinkProvider } from "../../linkHandler"
@@ -18,6 +15,9 @@ import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
 import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
 import { DataCollectionStorageHandler } from "../datacollection/types"
+import { I18nProvider, I18nProviderProps } from "../i18n"
+import { L10nProvider, L10nProviderProps } from "../l10n"
+import { UserPlatformProvider } from "../user-platafform"
 
 interface LayoutProps {
   fullScreen?: boolean

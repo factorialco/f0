@@ -1,4 +1,5 @@
 import { memo, ReactNode } from "react"
+
 import { F0Icon } from "../../../../components/F0Icon"
 import ChevronRight from "../../../../icons/app/ChevronRight"
 import { Link } from "../../../../lib/linkHandler"

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { ComponentProps, forwardRef, PropsWithChildren } from "react"
 import { describe, expect, it, vi } from "vitest"
+
 import { BaseTabs, TabsSkeleton } from "./index"
 
 // Mock the linkHandler module

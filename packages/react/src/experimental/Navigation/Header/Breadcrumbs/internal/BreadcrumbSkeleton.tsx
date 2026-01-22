@@ -1,5 +1,6 @@
-import { Skeleton } from "@/ui/skeleton"
 import { ComponentPropsWithoutRef, forwardRef } from "react"
+
+import { Skeleton } from "@/ui/skeleton"
 
 /**
  * Loading skeleton for breadcrumb items

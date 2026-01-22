@@ -1,6 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowDown } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
   useCopilotContext,
@@ -10,13 +7,18 @@ import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
+
+import { useI18n } from "@/ai"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ArrowDown } from "@/icons/app"
+import { cn } from "@/lib/utils"
+
 import { isAgentStateMessage } from "../messageTypes"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
-import { useI18n } from "@/ai"
 
 type Turn = Array<Message | Array<Message>>
 

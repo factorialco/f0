@@ -1,9 +1,10 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { useEffect, useState } from "react"
+
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import CrossIcon from "@/icons/app/Cross"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog/dialog"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-import { useEffect, useState } from "react"
 
 type CustomModalProps = {
   isOpen: boolean

@@ -19,6 +19,7 @@ import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
+
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { TableColumnDefinition } from "../types"
 import { useSticky } from "../useSticky"

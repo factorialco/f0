@@ -1,8 +1,10 @@
-import { F0Dialog } from "@/components/F0Dialog"
-import { Input } from "@/experimental/Forms/Fields/Input"
-import { useI18n } from "@/ai"
 import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
+
+import { useI18n } from "@/ai"
+import { F0Dialog } from "@/components/F0Dialog"
+import { Input } from "@/experimental/Forms/Fields/Input"
+
 import { UserReaction } from "./FeedbackProvider"
 
 interface ReactionModalProps {

@@ -1,7 +1,10 @@
-import { Placeholder } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 import { fn } from "storybook/test"
+
+import { Placeholder } from "@/icons/app"
+
 import { F0TableOfContent } from "../index"
 import { TOCItem, TOCItemAction } from "../types"
 

@@ -1,6 +1,7 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
+
 import { DropdownItemObject } from "./internal"
 
 export const DropdownItemContent = ({ item }: { item: DropdownItemObject }) => (

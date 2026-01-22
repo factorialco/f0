@@ -1,4 +1,3 @@
-import { Breadcrumb, BreadcrumbList } from "@/ui/breadcrumb"
 import {
   ReactNode,
   useLayoutEffect,
@@ -7,9 +6,10 @@ import {
   useTransition,
 } from "react"
 
+import { Breadcrumb, BreadcrumbList } from "@/ui/breadcrumb"
+
 import { BreadcrumbItem } from "./internal/BreadcrumbItem"
 import { CollapsedBreadcrumbItem } from "./internal/CollapsedBreadcrumbItem"
-
 import { calculateBreadcrumbState } from "./layoutCalculation"
 import {
   BreadcrumbItemType,

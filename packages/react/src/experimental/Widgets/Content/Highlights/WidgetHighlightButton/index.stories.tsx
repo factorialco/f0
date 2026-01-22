@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { InfoCircle as InfoCircleIcon } from "../../../../../icons/app"
 import { WidgetHighlightButton, WidgetHighlightButtonProps } from "./index"
 

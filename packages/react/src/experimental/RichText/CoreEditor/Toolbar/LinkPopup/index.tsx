@@ -1,3 +1,8 @@
+import * as Popover from "@radix-ui/react-popover"
+import { Editor } from "@tiptap/react"
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
@@ -12,10 +17,7 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import * as Popover from "@radix-ui/react-popover"
-import { Editor } from "@tiptap/react"
-import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+
 import { ToolbarLabels } from "../types"
 
 interface LinkPopupProps {

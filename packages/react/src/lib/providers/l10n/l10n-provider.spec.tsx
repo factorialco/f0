@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+
 import { L10nProvider, useL10n } from "./l10n-provider"
 
 // Test component that uses the l10n hook

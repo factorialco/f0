@@ -1,3 +1,5 @@
+import { Editor } from "@tiptap/react"
+
 import { IconType } from "@/components/F0Icon"
 import {
   CheckDouble,
@@ -11,7 +13,7 @@ import {
   OlList,
   Quote,
 } from "@/icons/app"
-import { Editor } from "@tiptap/react"
+
 import { ToolbarLabels } from "../../Toolbar/types"
 import { AIBlockConfig } from "../AIBlock"
 
