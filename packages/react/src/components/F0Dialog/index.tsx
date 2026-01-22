@@ -1,7 +1,7 @@
 import { experimentalComponent } from "@/lib/experimental";
 import { F0Dialog as F0DialogComponent } from "./F0Dialog";
 
-export { F0DialogContext, F0DialogProvider, useF0Dialog } from "./components/F0DialogProvider";
+export { F0DialogContext, F0DialogProvider, useF0Dialog } from "./_components/F0DialogProvider";
 export type { DialogPosition, DialogWidth, F0DialogActionsProps, F0DialogAction } from "./types";
 
 /**

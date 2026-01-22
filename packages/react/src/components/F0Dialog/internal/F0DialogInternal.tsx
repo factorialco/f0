@@ -2,10 +2,10 @@ import { Dialog, DialogContent } from "@/ui/Dialog/dialog";
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer";
 import { cva } from "cva";
 import { FC, useCallback, useMemo, useState } from "react";
-import { F0DialogProvider } from "../components/F0DialogProvider";
+import { F0DialogProvider } from "../_components/F0DialogProvider";
 import { DialogInternalProps } from "./internal-types";
 import { useIsSmallScreen } from "./utils";
-import { DialogLayout } from "../components/DialogLayout";
+import { DialogLayout } from "../_components/DialogLayout";
 
 const dialogWrapperClassName = cva({
   variants: {
@@ -80,10 +80,6 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   setActiveTabId,
   disableContentPadding,
 }) => {
-
-  // Defailt variant exclusive props
-  const 
-
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
   // correct portalContainer after the dialog content mounts.

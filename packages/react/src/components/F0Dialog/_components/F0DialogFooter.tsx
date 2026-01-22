@@ -64,7 +64,7 @@ export const F0DialogFooter = (props: F0DialogFooterProps) => {
     <div className="flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
       <div
         className={cn(
-          "flex flex-row items-center justify-end gap-2",
+          "flex flex-row items-center justify-end gap-2 w-full",
           props.variant === "notification" && "flex-1 space-between",
         )}
       >
