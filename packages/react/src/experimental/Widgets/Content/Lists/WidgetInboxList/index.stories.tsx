@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { WidgetInboxListItemProps } from "../../ListItems/WidgetInboxListItem"
 import {
   Default as DefaulWidgetInboxListItemStory,

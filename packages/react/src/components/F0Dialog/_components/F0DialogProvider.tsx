@@ -1,18 +1,19 @@
-import { createContext, ReactNode, useContext } from "react";
-import { F0DialogContextType } from "../internal/internal-types";
-import { DialogPosition } from "../types";
+import { createContext, ReactNode, useContext } from "react"
+
+import { F0DialogContextType } from "../internal/internal-types"
+import { DialogPosition } from "../types"
 
 /**
  * The props for the F0DialogProvider component.
  */
 export type F0DialogProviderProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  shownBottomSheet?: boolean;
-  position: DialogPosition;
-  children: ReactNode;
-  portalContainer: HTMLDivElement | null;
-};
+  isOpen: boolean
+  onClose: () => void
+  shownBottomSheet?: boolean
+  position: DialogPosition
+  children: ReactNode
+  portalContainer: HTMLDivElement | null
+}
 
 export const F0DialogContext = createContext<F0DialogContextType>({
   open: false,
@@ -20,7 +21,7 @@ export const F0DialogContext = createContext<F0DialogContextType>({
   position: "center",
   shownBottomSheet: false,
   portalContainer: null,
-});
+})
 
 export const F0DialogProvider = ({
   isOpen,
@@ -42,10 +43,10 @@ export const F0DialogProvider = ({
     >
       {children}
     </F0DialogContext.Provider>
-  );
-};
+  )
+}
 
 export const useF0Dialog = () => {
-  const context = useContext(F0DialogContext);
-  return context;
-};
+  const context = useContext(F0DialogContext)
+  return context
+}

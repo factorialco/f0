@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { Placeholder } from "../../../lib/storybook-utils/placeholder"
-import { Page } from "./index"
 
+import { ComponentProps } from "react"
+
+import { StandardLayout } from "@/layouts/StandardLayout"
+
+import { Placeholder } from "../../../lib/storybook-utils/placeholder"
+import { ApplicationFrame } from "../ApplicationFrame"
 import { PageHeader } from "../Header/PageHeader"
 import * as HeaderStories from "../Header/PageHeader/index.stories"
 import { Tabs } from "../Tabs"
 import * as TabsStories from "../Tabs/index.stories"
-
-import { StandardLayout } from "@/layouts/StandardLayout"
-import { ComponentProps } from "react"
-import { ApplicationFrame } from "../ApplicationFrame"
+import { Page } from "./index"
 
 type TabsProps = ComponentProps<typeof Tabs>
 

@@ -1,6 +1,8 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { F0Icon } from "@/components/F0Icon"
 import { Placeholder } from "@/icons/app"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Action } from "../Action"
 import { actionSizes } from "../types"
 

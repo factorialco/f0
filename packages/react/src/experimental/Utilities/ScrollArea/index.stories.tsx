@@ -1,9 +1,10 @@
-import { F0Button } from "@/components/F0Button"
-import { ScrollArea } from "./index"
-
-import { Placeholder } from "@/lib/storybook-utils/placeholder"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { F0Button } from "@/components/F0Button"
+import { Placeholder } from "@/lib/storybook-utils/placeholder"
+
 import { Alert, AlertTitle } from "../../Information/Alert"
+import { ScrollArea } from "./index"
 
 const meta = {
   title: "ScrollArea",

@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+
 import { BarChartProps } from "../../../components/Charts/BarChart"
 import { Default as BarChartStory } from "../../../components/Charts/BarChart/index.stories"
 import { Placeholder } from "../../../lib/storybook-utils/placeholder"

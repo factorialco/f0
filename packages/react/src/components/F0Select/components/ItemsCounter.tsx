@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
+
 import type { F0SelectItemObject } from "../types"
+
 import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
 
 type ItemsCounterProps = {

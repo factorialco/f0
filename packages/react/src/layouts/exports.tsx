@@ -1,14 +1,14 @@
 import { Component } from "@/lib/component/component"
-import { HomeLayout as HomeLayoutComponent } from "./HomeLayout"
-import {
-  TwoColumnLayout as TwoColumnLayoutComponent,
-  TwoColumnLayoutProps,
-} from "./TwoColumnLayout"
 
+import { HomeLayout as HomeLayoutComponent } from "./HomeLayout"
 import {
   StandardLayout as StandardLayoutComponent,
   StandardLayoutProps,
 } from "./StandardLayout"
+import {
+  TwoColumnLayout as TwoColumnLayoutComponent,
+  TwoColumnLayoutProps,
+} from "./TwoColumnLayout"
 
 export type { StandardLayoutProps, TwoColumnLayoutProps }
 

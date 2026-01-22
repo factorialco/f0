@@ -1,6 +1,9 @@
-import { Reset, Save } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { fn } from "storybook/test"
+
+import { Reset, Save } from "@/icons/app"
+
 import { F0ActionBar } from "."
 
 const meta: Meta<typeof F0ActionBar> = {

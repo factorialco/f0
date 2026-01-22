@@ -1,5 +1,6 @@
 import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
+
 import { Toolbar } from "../Toolbar"
 import { ToolbarLabels } from "../Toolbar/types"
 

@@ -1,8 +1,10 @@
+import { Meta, StoryObj } from "@storybook/react-vite"
+
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app"
-import { Meta, StoryObj } from "@storybook/react-vite"
+
 import {
   DataCollectionSource,
   useDataCollectionSource,

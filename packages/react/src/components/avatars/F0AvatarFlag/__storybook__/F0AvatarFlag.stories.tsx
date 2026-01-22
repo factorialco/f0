@@ -1,7 +1,9 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Tooltip } from "@/experimental/Overlays/Tooltip/index.tsx"
 import { flagsMap } from "@/flags"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { avatarSizes } from "../../internal/BaseAvatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarFlag } from "../F0AvatarFlag.tsx"

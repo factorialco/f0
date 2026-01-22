@@ -1,6 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
+
+import { useState } from "react"
 import { fn } from "storybook/test"
-import { F0Select, selectSizes } from "../index"
 
 import { IconType } from "@/components/F0Icon"
 import {
@@ -10,10 +11,10 @@ import {
 } from "@/hooks/datasource"
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
-
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
-import { useState } from "react"
+
+import { F0Select, selectSizes } from "../index"
 import {
   Employee,
   employeeNonPaginatedSource,
@@ -217,8 +218,8 @@ const meta: Meta = {
       )
       const [searchValue, setSearchValue] = useState("")
       const [selectionStatus, setSelectionStatus] = useState<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          SelectedItemsDetailedStatus<any, any> | undefined
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        SelectedItemsDetailedStatus<any, any> | undefined
       >(undefined)
 
       const handleOnChange = (value: string) => {
@@ -727,7 +728,7 @@ export const MultiplePaginatedAsList: Story = {
   },
   render: (args) => {
     return (
-      <div className="h-[400px] flex flex-row">
+      <div className="flex h-[400px] flex-row">
         <F0Select {...(args as any)} />
       </div>
     )
@@ -742,7 +743,7 @@ export const AsList: Story = {
   },
   render: (args) => {
     return (
-      <div className="w-[300px] h-max flex">
+      <div className="flex h-max w-[300px]">
         <F0Select {...(args as any)} />
       </div>
     )

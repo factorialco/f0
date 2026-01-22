@@ -1,9 +1,9 @@
-import { PromiseState } from "@/lib/promise-to-observable"
 import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
+import { PromiseState } from "@/lib/promise-to-observable"
 import { cn } from "@/lib/utils"
 import {
   COMPANY_NAMES_MOCK,
@@ -57,6 +57,7 @@ import {
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
 import { mockImage } from "@/testing/mocks/images"
+
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,

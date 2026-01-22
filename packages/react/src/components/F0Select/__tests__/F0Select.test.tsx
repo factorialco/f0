@@ -1,12 +1,16 @@
-import type { RecordType } from "@/hooks/datasource"
-import { zeroRender as render } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import type { RecordType } from "@/hooks/datasource"
+
+import { zeroRender as render } from "@/testing/test-utils"
+
+import type { F0SelectItemProps } from "../types"
+
 import { Search } from "../../../icons/app"
 import { F0Select } from "../index"
-import type { F0SelectItemProps } from "../types"
 
 const mockOptions: F0SelectItemProps<string, RecordType>[] = [
   {

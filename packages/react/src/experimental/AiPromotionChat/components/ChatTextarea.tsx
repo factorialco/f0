@@ -1,8 +1,9 @@
+import { motion } from "motion/react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { motion } from "motion/react"
 
 export const ChatTextarea = () => {
   const translation = useI18n()

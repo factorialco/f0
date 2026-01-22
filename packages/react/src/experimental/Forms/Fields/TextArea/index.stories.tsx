@@ -1,5 +1,7 @@
-import { Placeholder } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { Placeholder } from "@/icons/app"
+
 import { Textarea } from "./index"
 
 const meta = {

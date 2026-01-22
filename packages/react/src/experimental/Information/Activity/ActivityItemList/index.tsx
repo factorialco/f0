@@ -1,9 +1,11 @@
-import { categorizeItemsByDate } from "@/lib/date"
-import { useI18n } from "@/lib/providers/i18n"
-import { withSkeleton } from "@/lib/skeleton"
 import sortBy from "lodash/sortBy"
 import throttle from "lodash/throttle"
 import React from "react"
+
+import { categorizeItemsByDate } from "@/lib/date"
+import { useI18n } from "@/lib/providers/i18n"
+import { withSkeleton } from "@/lib/skeleton"
+
 import { ActivityItem } from "../ActivityItem"
 import { Section, SectionProps } from "./Section"
 

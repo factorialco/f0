@@ -1,10 +1,10 @@
 import {
   DialogAction,
   DialogActionValuePrimitive,
-  DialogDefinition,
+  DialogDefinitionInternal,
 } from "./types"
 
-export type DialogDefinitionProviderItem = DialogDefinition & {
+export type DialogDefinitionProviderItem = DialogDefinitionInternal & {
   onCloseDialog: () => void
   onClickAction: (
     action: DialogAction,

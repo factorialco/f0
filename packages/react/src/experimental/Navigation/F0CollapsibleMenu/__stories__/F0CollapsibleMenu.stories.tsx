@@ -1,8 +1,11 @@
-import { BookOpen, File, Placeholder, Question, Video } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentType, ReactNode } from "react"
+
 import { useState } from "react"
 import { fn } from "storybook/test"
+
+import { BookOpen, File, Placeholder, Question, Video } from "@/icons/app"
+
 import { TOCItem, TOCItemAction } from "../../F0TableOfContent"
 import { F0CollapsibleMenu } from "../index"
 

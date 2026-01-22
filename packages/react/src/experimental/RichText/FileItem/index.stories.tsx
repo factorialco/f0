@@ -1,5 +1,7 @@
-import { CrossedCircle, Download } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { CrossedCircle, Download } from "@/icons/app"
+
 import { FileItem } from "."
 
 const meta = {

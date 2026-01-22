@@ -6,6 +6,7 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+
 import { Dropdown, DropdownItem } from "../../Dropdown"
 
 interface SidebarFooterProps {

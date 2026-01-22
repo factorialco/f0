@@ -1,9 +1,10 @@
+import { ComponentProps } from "react"
+
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Counter } from "@/experimental/Information/Counter"
 import { cn } from "@/lib/utils"
-import { ComponentProps } from "react"
 
 export type WidgetSimpleListItemProps<
   Id extends string | number = string | number,

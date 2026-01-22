@@ -1,3 +1,4 @@
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
@@ -12,8 +13,8 @@ import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
+
 import { useF0Dialog } from "./F0DialogProvider"
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
 
 export type DialogHeaderProps = {
   /**

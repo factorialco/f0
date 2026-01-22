@@ -1,7 +1,9 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Check, Warning } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { internalAvatarSizes } from "@/ui/Avatar"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { avatarSizes } from "../../internal/BaseAvatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0Avatar } from "../F0Avatar"

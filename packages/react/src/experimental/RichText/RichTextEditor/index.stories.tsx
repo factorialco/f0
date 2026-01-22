@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from "."
 
 const meta = {

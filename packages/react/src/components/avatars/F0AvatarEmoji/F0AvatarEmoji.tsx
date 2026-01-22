@@ -1,5 +1,6 @@
 import { EmojiImage, EmojiImageProps } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
+
 import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
 
 export const avatarEmojiSizes = ["sm", "md", "lg", "xl"] as const

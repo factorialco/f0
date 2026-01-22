@@ -1,3 +1,6 @@
+import { motion } from "motion/react"
+import { useState } from "react"
+
 import { F0Icon } from "@/components/F0Icon"
 import {
   F0Select,
@@ -6,8 +9,6 @@ import {
   ResolvedRecordType,
 } from "@/components/F0Select"
 import { ChevronDown } from "@/icons/app"
-import { motion } from "motion/react"
-import { useState } from "react"
 
 export type BreadcrumbSelectProps<
   T extends string,

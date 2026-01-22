@@ -1,12 +1,14 @@
+import { AnimatePresence, motion } from "motion/react"
+
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { TableHead as TableHeadRoot } from "@/ui/table"
-import { AnimatePresence, motion } from "motion/react"
+
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
 import { cn, focusRing } from "../../../lib/utils"
-import { useTable } from "../utils/TableContext"
 import { getColWidth } from "../utils/colWidth"
 import { ColumnWidth } from "../utils/sizes"
+import { useTable } from "../utils/TableContext"
 
 interface TableHeadProps {
   children: React.ReactNode

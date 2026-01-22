@@ -1,5 +1,6 @@
 import { colord } from "colord"
 import { registerTheme } from "echarts"
+
 import { baseColors } from "../../../../../../core/src/tokens/colors"
 
 function chartColor(hslValue: string): string {

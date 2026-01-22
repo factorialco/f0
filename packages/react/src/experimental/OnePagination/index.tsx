@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from "react"
+
 import {
   PaginationContent,
   PaginationEllipsis,
@@ -7,7 +9,7 @@ import {
   PaginationPrevious,
   Pagination as PaginationRoot,
 } from "@/ui/pagination"
-import { useCallback, useMemo } from "react"
+
 import { cn } from "../../lib/utils"
 
 interface OnePaginationProps {

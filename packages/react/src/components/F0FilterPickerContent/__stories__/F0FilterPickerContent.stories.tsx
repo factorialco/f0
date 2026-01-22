@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
-import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
+
 import type {
   FiltersDefinition,
   FiltersState,
 } from "../../OneFilterPicker/types"
+
+import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
 import { F0FilterPickerContent } from "../F0FilterPickerContent"
 
 const simpleFilterDefinition = {

@@ -1,7 +1,9 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
 import { useState, useMemo } from "react"
+
 import { F0Button } from "@/components/F0Button"
+
+import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {
   title: "Data Collection/Visualizations/Table",

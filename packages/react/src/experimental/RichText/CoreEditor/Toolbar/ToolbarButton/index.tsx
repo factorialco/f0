@@ -1,9 +1,10 @@
+import { ComponentProps, forwardRef } from "react"
+
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Shortcut } from "@/experimental/Information/Shortcut"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
-import { ComponentProps, forwardRef } from "react"
 
 interface ToolbarButtonProps {
   onClick?: () => void

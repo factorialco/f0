@@ -1,11 +1,13 @@
-import { F0DialogAction } from "@/components/F0Dialog"
-import { DialogAction, DialogActionValuePrimitive, DialogId } from "../types"
-import { toArray } from "@/lib/toArray"
-import { useMemo, useState } from "react"
-import { DialogDefinitionProviderItem } from "../internal-types"
-import { DialogInternal } from "@/components/F0Dialog/internal/DialogInternal"
 import { nanoid } from "nanoid"
+import { Fragment, useMemo, useState } from "react"
+
+import { F0DialogAction } from "@/components/F0Dialog"
+import { DialogInternal } from "@/components/F0Dialog/internal/DialogInternal"
 import { DialogNotificationInternal } from "@/components/F0Dialog/internal/DialogNotification"
+import { toArray } from "@/lib/toArray"
+
+import { DialogDefinitionProviderItem } from "../internal-types"
+import { DialogAction, DialogActionValuePrimitive, DialogId } from "../types"
 
 type DialogsProps = {
   dialogs: DialogDefinitionProviderItem[]
@@ -108,7 +110,7 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
   return (
     <>
       {f0DialogsWithBlocks.map((dialog) => (
-        <>
+        <Fragment key={dialog.id}>
           {dialog.variant === "notification" ? (
             <DialogNotificationInternal
               title={dialog.title}
@@ -135,7 +137,7 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
               {dialog.content}
             </DialogInternal>
           )}
-        </>
+        </Fragment>
       ))}
     </>
   )

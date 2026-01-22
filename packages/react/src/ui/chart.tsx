@@ -1,9 +1,9 @@
+import { cva, type VariantProps } from "cva"
+import DOMPurify from "dompurify"
 import * as React from "react"
 import { useLayoutEffect, useMemo, useState } from "react"
 import * as RechartsPrimitive from "recharts"
 
-import { cva, type VariantProps } from "cva"
-import DOMPurify from "dompurify"
 import { cn } from "../lib/utils"
 
 const variants = cva({

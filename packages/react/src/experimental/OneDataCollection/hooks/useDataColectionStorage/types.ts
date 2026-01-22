@@ -7,11 +7,12 @@ import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource"
-import { DataCollectionSettings } from "../../Settings/SettingsProvider"
+
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
 } from "../../navigationFilters/types"
+import { DataCollectionSettings } from "../../Settings/SettingsProvider"
 
 /**
  * The status of the data collection

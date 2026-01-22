@@ -253,3 +253,64 @@ Placeholder component
 .notes-text-editor .resize-cursor {
   @apply cursor-col-resize;
 }
+
+/* Image styling - Notion style */
+.notes-text-editor .image-node-wrapper {
+  @apply my-4;
+}
+
+.notes-text-editor .image-container {
+  @apply relative inline-block rounded-md;
+  @apply transition-shadow duration-150 ease-out;
+}
+
+.notes-text-editor .image-container img {
+  @apply block h-auto max-w-full rounded-md;
+  @apply transition-all duration-150 ease-out;
+}
+
+.notes-text-editor .image-container.is-selected {
+  @apply rounded-md;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.notes-text-editor .image-container.is-selected img {
+  @apply brightness-[0.98];
+}
+
+.notes-text-editor .image-delete-button {
+  @apply absolute right-2 top-2 flex h-7 w-7 items-center justify-center;
+  @apply rounded-sm text-f1-foreground-secondary;
+  @apply pointer-events-none opacity-0;
+  @apply transition-all duration-150;
+  background-color: white;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+:root.dark .notes-text-editor .image-delete-button {
+  background-color: #2a2a2a;
+}
+
+.notes-text-editor .image-container:hover .image-delete-button,
+.notes-text-editor .image-container.is-selected .image-delete-button {
+  @apply pointer-events-auto opacity-100;
+}
+
+.notes-text-editor .image-container .image-delete-button:hover {
+  background-color: #f0f0f0 !important;
+  @apply text-f1-foreground;
+}
+
+:root.dark .notes-text-editor .image-container .image-delete-button:hover {
+  background-color: #404040 !important;
+}
+
+.notes-text-editor .image-upload-overlay {
+  @apply absolute inset-0 flex items-center justify-center rounded-lg;
+  @apply bg-f1-background/60 backdrop-blur-[2px];
+  @apply transition-opacity duration-200;
+}

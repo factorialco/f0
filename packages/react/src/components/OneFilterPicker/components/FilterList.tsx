@@ -1,17 +1,20 @@
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+
 import type {
   FilterTypeDefinition,
   FilterTypeSchema,
 } from "../filterTypes/types"
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
+
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 
 /**
  * Props for the FilterList component.

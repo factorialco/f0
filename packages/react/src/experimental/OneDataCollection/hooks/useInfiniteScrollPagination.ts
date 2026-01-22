@@ -1,5 +1,6 @@
-import { isInfiniteScrollPagination, PaginationInfo } from "@/hooks/datasource"
 import { useEffect, useRef } from "react"
+
+import { isInfiniteScrollPagination, PaginationInfo } from "@/hooks/datasource"
 
 export const useInfiniteScrollPagination = (
   paginationInfo: PaginationInfo | null,

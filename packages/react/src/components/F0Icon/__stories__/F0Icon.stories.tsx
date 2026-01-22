@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
+import { ComponentProps } from "react"
 
 import * as AIIcons from "@/icons/ai"
 import * as AnimatedIcons from "@/icons/animated"
 import * as Icons from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
 import * as SpecialIcons from "@/icons/special"
-import { ComponentProps } from "react"
+
 import { F0Icon } from "../index"
 
 const meta = {

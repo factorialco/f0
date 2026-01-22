@@ -1,9 +1,9 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { ComponentProps, FC, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
+
 import { F0Button } from "@/components/F0Button"
-import { argTypes, OTHER_ACTIONS, TABS } from "./commons"
-import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
-import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
 import {
   OnePersonListItem,
   OnePersonListItemProps,
@@ -16,11 +16,10 @@ import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, waitFor, within } from "storybook/test"
-import { ComponentProps, FC, useState } from "react"
+
 import { F0Dialog } from "../index"
 import { DialogNotificationInternal } from "../internal/DialogNotification"
+import { argTypes, OTHER_ACTIONS, TABS } from "./commons"
 
 const meta: Meta<typeof F0Dialog> = {
   title: "Dialog",
@@ -172,10 +171,10 @@ export const WithPromisePrimaryAction: Story = {
   },
 }
 
-export const WithSmWidth: Story = {
+export const WithSmsize: Story = {
   args: {
     isOpen: true,
-    width: "sm",
+    size: "sm",
     onClose: () => {},
     title: "Team Status",
     otherActions: OTHER_ACTIONS,
@@ -184,24 +183,24 @@ export const WithSmWidth: Story = {
   },
 }
 
-export const WithMdWidth: Story = {
+export const WithMdsize: Story = {
   args: {
-    ...WithSmWidth.args,
-    width: "md",
+    ...WithSmsize.args,
+    size: "md",
   },
 }
 
-export const WithLgWidth: Story = {
+export const WithLgsize: Story = {
   args: {
-    ...WithMdWidth.args,
-    width: "lg",
+    ...WithMdsize.args,
+    size: "lg",
   },
 }
 
-export const WithXlWidth: Story = {
+export const WithXlsize: Story = {
   args: {
-    ...WithLgWidth.args,
-    width: "xl",
+    ...WithLgsize.args,
+    size: "xl",
   },
 }
 export const WithDescription: Story = {
@@ -238,39 +237,16 @@ export const WithPersonListItems: Story = {
   },
 }
 
-export const WithLeftPosition: Story = {
+export const WithFullscreenSize: Story = {
   args: {
     ...Default.args,
-    position: "left",
-    title: "Activity",
-    otherActions: OTHER_ACTIONS,
-    children: (
-      <ActivityItemList
-        {...(ActivityItemListDefault.args as ComponentProps<
-          typeof ActivityItemList
-        >)}
-      />
-    ),
+    size: "fullscreen",
   },
 }
 
-export const WithRightPosition: Story = {
+export const WithFullscreensizeAndActions: Story = {
   args: {
-    ...Default.args,
-    position: "right",
-  },
-}
-
-export const WithFullscreenPosition: Story = {
-  args: {
-    ...Default.args,
-    position: "fullscreen",
-  },
-}
-
-export const WithFullscreenPositionAndActions: Story = {
-  args: {
-    ...WithFullscreenPosition.args,
+    ...WithFullscreenSize.args,
     tabs: TABS,
     primaryAction: {
       label: "Approve",
@@ -407,7 +383,6 @@ export const WithMultiplePrimaryActions: Story = {
 export const WithModule: Story = {
   args: {
     ...Default.args,
-    position: "right",
     title: "Team Status",
     module: {
       id: "benefits",
@@ -420,58 +395,9 @@ export const WithModule: Story = {
   },
 }
 
-export const WithModuleAndFullscreenPosition: Story = {
+export const WithModuleAndFullscreenSize: Story = {
   args: {
     ...WithModule.args,
-    position: "fullscreen",
-  },
-}
-
-export const WithResourceHeader: Story = {
-  args: {
-    ...Default.args,
-    position: "right",
-    title: "Resource Header",
-    module: {
-      id: "timeoff",
-      label: "Time Off",
-      href: "/timeoff",
-    },
-    children: (
-      <ResourceHeader
-        {...(ResourceHeaderDefault.args as ComponentProps<
-          typeof ResourceHeader
-        >)}
-        primaryAction={undefined}
-        secondaryActions={undefined}
-        otherActions={undefined}
-      />
-    ),
-  },
-}
-
-export const WithResourceHeaderAndFullscreenPosition: Story = {
-  args: {
-    ...WithResourceHeader.args,
-    position: "fullscreen",
-  },
-}
-
-export const WithFewItems: Story = {
-  args: {
-    ...Default.args,
-    position: "right",
-    tabs: TABS,
-    primaryAction: {
-      label: "Approve",
-      icon: CheckDoubleIcon,
-      onClick: () => {},
-    },
-    secondaryAction: {
-      label: "Reject",
-      icon: CrossIcon,
-      onClick: () => {},
-    },
-    children: <ExamplePersonList numberOfItems={3} />,
+    size: "fullscreen",
   },
 }

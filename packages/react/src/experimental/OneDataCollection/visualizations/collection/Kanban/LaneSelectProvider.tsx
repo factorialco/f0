@@ -1,3 +1,12 @@
+import { useEffect } from "react"
+
+import {
+  DataCollectionSource,
+  Lane,
+} from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
+import { SummariesDefinition } from "@/experimental/OneDataCollection/types"
 import {
   Data,
   FiltersDefinition,
@@ -8,15 +17,6 @@ import {
   SortingsDefinition,
   useSelectable,
 } from "@/hooks/datasource"
-import { useEffect } from "react"
-
-import {
-  DataCollectionSource,
-  Lane,
-} from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
-import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-import { SummariesDefinition } from "@/experimental/OneDataCollection/types"
 
 export type LaneSelectProviderProps<
   R extends RecordType,

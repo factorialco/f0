@@ -1,13 +1,14 @@
-import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { Input as ShadcnInput } from "@/ui/input"
-import { InputFieldProps } from "@/ui/InputField"
 import {
   ComponentProps,
   HTMLInputTypeAttribute,
   useMemo,
   useState,
 } from "react"
+
+import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { Input as ShadcnInput } from "@/ui/input"
+import { InputFieldProps } from "@/ui/InputField"
 
 export type InputInternalProps<T extends string> = Pick<
   ComponentProps<typeof ShadcnInput>,

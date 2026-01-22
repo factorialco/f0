@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.333.0](https://github.com/factorialco/f0/compare/f0-react-v1.332.0...f0-react-v1.333.0) (2026-01-22)
+
+
+### Features
+
+* add xml to avatar file types ([#3275](https://github.com/factorialco/f0/issues/3275)) ([29eea64](https://github.com/factorialco/f0/commit/29eea6492e5f668caffab727ba33084dfa655e03))
+
+## [1.332.0](https://github.com/factorialco/f0/compare/f0-react-v1.331.0...f0-react-v1.332.0) (2026-01-22)
+
+
+### Features
+
+* add communities module icon ([#3276](https://github.com/factorialco/f0/issues/3276)) ([46deaf9](https://github.com/factorialco/f0/commit/46deaf9fa82ff06c85ddcda593c63f842cd21a47))
+
+## [1.331.0](https://github.com/factorialco/f0/compare/f0-react-v1.330.2...f0-react-v1.331.0) (2026-01-22)
+
+
+### Features
+
+* add image extension to NotesTextEditor ([#3250](https://github.com/factorialco/f0/issues/3250)) ([08207e5](https://github.com/factorialco/f0/commit/08207e5fe3bc681586ef80875b6a8c374fbd98fd))
+
+## [1.330.2](https://github.com/factorialco/f0/compare/f0-react-v1.330.1...f0-react-v1.330.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* **Popover:** add container prop to fix rendering inside dialogs ([#3255](https://github.com/factorialco/f0/issues/3255)) ([9138284](https://github.com/factorialco/f0/commit/9138284e4324f0bc7981e4309fbcd8eb43eb2087))
+
 ## [1.330.1](https://github.com/factorialco/f0/compare/f0-react-v1.330.0...f0-react-v1.330.1) (2026-01-21)
 
 

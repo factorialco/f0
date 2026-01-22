@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ProductCard } from "./index"
 
 import { ComponentProps } from "react"
+
+import { ProductCard } from "./index"
 
 const meta: Meta<typeof ProductCard> = {
   title: "UpsellingKit/ProductCard",

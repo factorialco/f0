@@ -1,10 +1,12 @@
-import { Calendar } from "@/ui/calendar"
 import { endOfISOWeek, startOfISOWeek } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import {
   DayClickEventHandler,
   DateRange as DayPickerDateRange,
 } from "react-day-picker"
+
+import { Calendar } from "@/ui/calendar"
+
 import { useL10n } from "../../../../lib/providers/l10n"
 import { DateRange } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"

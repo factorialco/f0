@@ -1,7 +1,8 @@
+import { motion } from "motion/react"
+
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { motion } from "motion/react"
 
 export type ChevronToggleProps = {
   open?: boolean
