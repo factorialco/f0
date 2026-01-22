@@ -1881,6 +1881,7 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly working: "Working...";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly removeFile: "Remove file";
