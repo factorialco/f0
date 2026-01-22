@@ -25,7 +25,9 @@
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-tailwindcss": "^0.6.10",
     "tsx": "^4.8.1",
-    "consola": "^3.4.0"
+    "consola": "^3.4.0",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0"
   },
   "pnpm": {
     "overrides": {

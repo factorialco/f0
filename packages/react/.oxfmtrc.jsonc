@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "endOfLine": "lf",
   "semi": false,
   "singleQuote": false,
@@ -6,8 +7,9 @@
   "trailingComma": "es5",
   "jsxSingleQuote": false,
   "printWidth": 80,
-  // "experimentalSortPackageJson": true,
-  // "experimentalSortImports": {},
+  "experimentalSortPackageJson": true,
+  "experimentalSortImports": {},
+  "experimentalTailwindcss": {},
 
   /*
   Oxfmt doesn't support js plugins yet, but there is an initiative to add a tailwind formatter to it https://github.com/oxc-project/oxc/issues/16542
