@@ -1,13 +1,13 @@
-import { F0Button } from "@/components/F0Button";
-import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame";
-import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories";
-import { Placeholder } from "@/icons/app";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ComponentProps, useState } from "react";
-import { F0Dialog } from "../index";
-import { DialogInternal } from "../internal/F0DialogInternal";
-import { argTypes } from "./commons";
-import { dialogVariants } from "../internal/internal-types";
+import { F0Button } from "@/components/F0Button"
+import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
+import { Placeholder } from "@/icons/app"
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ComponentProps, useState } from "react"
+import { F0Dialog } from "../index"
+import { DialogInternal } from "../internal/DialogInternal"
+import { argTypes } from "./commons"
+import { dialogVariants } from "../internal/internal-types"
 
 const meta: Meta<typeof DialogInternal> = {
   title: "Dialog/Internal",
@@ -28,31 +28,33 @@ const meta: Meta<typeof DialogInternal> = {
   },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
-      const [open, setOpen] = useState(isOpen);
+      const [open, setOpen] = useState(isOpen)
 
       const handleClose = () => {
-        setOpen(false);
-      };
+        setOpen(false)
+      }
       const handleOpen = () => {
-        setOpen(true);
-      };
+        setOpen(true)
+      }
 
       return (
         <ApplicationFrame
-          {...(ApplicationFrameStoryMeta.args as ComponentProps<typeof ApplicationFrame>)}
+          {...(ApplicationFrameStoryMeta.args as ComponentProps<
+            typeof ApplicationFrame
+          >)}
         >
           <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
             <F0Button label="Open dialog" onClick={handleOpen} />
             <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
           </div>
         </ApplicationFrame>
-      );
+      )
     },
   ],
-};
+}
 
-export default meta;
-type Story = StoryObj<typeof F0Dialog>;
+export default meta
+type Story = StoryObj<typeof F0Dialog>
 
 export const Default: Story = {
   args: {
@@ -67,4 +69,4 @@ export const Default: Story = {
       onClick: () => {},
     },
   },
-};
+}

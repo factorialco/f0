@@ -1,33 +1,33 @@
-import { F0Button } from "@/components/F0Button";
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown";
-import { F0DialogActionsProps } from "../types";
-import { toArray } from "@/lib/toArray";
-import { DialogVariant } from "../internal/internal-types";
-import { cn } from "@/lib/utils";
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import { F0DialogActionsProps } from "../types"
+import { toArray } from "@/lib/toArray"
+import { DialogVariant } from "../internal/internal-types"
+import { cn } from "@/lib/utils"
+import { ButtonInternal } from "@/components/F0Button/internal"
 
-export type F0DialogFooterProps = F0DialogActionsProps & {
-  variant?: DialogVariant;
-};
+export type DialogFooterProps = F0DialogActionsProps & {
+  variant?: DialogVariant
+}
 
-export const F0DialogFooter = (props: F0DialogFooterProps) => {
-  const primaryActions = toArray(props.primaryAction);
-  const secondaryActions = toArray(props.secondaryAction);
+export const DialogFooter = (props: DialogFooterProps) => {
+  const primaryActions = toArray(props.primaryAction)
+  const secondaryActions = toArray(props.secondaryAction)
 
-  const hasSecondaryAction = secondaryActions.length > 0;
-  const hasPrimaryAction = primaryActions.length > 0;
+  const hasSecondaryAction = secondaryActions.length > 0
+  const hasPrimaryAction = primaryActions.length > 0
 
   if (!hasPrimaryAction && !hasSecondaryAction) {
-    return null;
+    return null
   }
 
   const toPromise = (onClick: () => void | Promise<void>) => {
     return new Promise((resolve) => {
-      resolve(onClick());
-    });
-  };
+      resolve(onClick())
+    })
+  }
 
   const renderPrimaryAction = () => {
-    if (!hasPrimaryAction) return null;
+    if (!hasPrimaryAction) return null
 
     if (primaryActions.length > 1) {
       return (
@@ -40,16 +40,17 @@ export const F0DialogFooter = (props: F0DialogFooterProps) => {
             loading: action.loading,
           }))}
           onClick={(value) => {
-            const action = primaryActions.find((a) => a.value === value);
-            return action ? toPromise(action?.onClick) : Promise.resolve();
+            const action = primaryActions.find((a) => a.value === value)
+            return action ? toPromise(action?.onClick) : Promise.resolve()
           }}
           variant="default"
         />
-      );
+      )
     }
 
     return (
-      <F0Button
+      <ButtonInternal
+        block={props.variant === "notification"}
         label={primaryActions[0].label}
         onClick={() => toPromise(primaryActions[0].onClick)}
         variant="default"
@@ -57,21 +58,24 @@ export const F0DialogFooter = (props: F0DialogFooterProps) => {
         disabled={primaryActions[0].disabled}
         loading={primaryActions[0].loading}
       />
-    );
-  };
+    )
+  }
 
   return (
     <div className="flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
       <div
         className={cn(
-          "flex flex-row items-center justify-end gap-2 w-full",
-          props.variant === "notification" && "flex-1 space-between",
+          "flex flex-row items-center gap-2 w-full",
+          props.variant === "notification"
+            ? "flex-1 justify-between"
+            : "justify-end"
         )}
       >
         {secondaryActions.length > 0 &&
           secondaryActions.map((action) => (
-            <F0Button
+            <ButtonInternal
               key={action.value ?? action.label}
+              block={props.variant === "notification"}
               label={action.label}
               onClick={() => toPromise(action.onClick)}
               variant="outline"
@@ -83,5 +87,5 @@ export const F0DialogFooter = (props: F0DialogFooterProps) => {
         {renderPrimaryAction()}
       </div>
     </div>
-  );
-};
+  )
+}

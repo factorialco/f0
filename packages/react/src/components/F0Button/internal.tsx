@@ -36,6 +36,7 @@ const ButtonInternal = forwardRef<
     noAutoTooltip,
     noTitle,
     iconRotate = false,
+    block = false,
     ...props
   },
   ref
@@ -102,7 +103,7 @@ const ButtonInternal = forwardRef<
         tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
         onClick={handleClick}
         loading={isLoading}
-        className={cn("max-w-full", className)}
+        className={cn("max-w-full", block && "w-full", className)}
         mode={hideLabel ? "only" : "default"}
         aria-label={ariaLabel || props.title || buttonLabel}
         title={

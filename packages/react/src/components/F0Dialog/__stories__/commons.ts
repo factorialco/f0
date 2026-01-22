@@ -1,28 +1,21 @@
-import { Meta } from "@storybook/react-vite";
-import { F0Dialog } from "../F0Dialog";
-import { dialogPositions, dialogWidths } from "../types";
-import { Pencil, Delete } from "@/icons/app";
+import { Meta } from "@storybook/react-vite"
+import { F0Dialog } from "../F0Dialog"
+import { dialogSizes } from "../types"
+import { Pencil, Delete } from "@/icons/app"
 
 export const argTypes: Meta<typeof F0Dialog>["argTypes"] = {
-  position: {
-    description: "The position of the dialog",
+  size: {
+    description: "The size of the dialog.",
     control: {
       type: "select",
-      options: dialogPositions,
-    },
-  },
-  width: {
-    description: "The width of the dialog. ⚠️ Only applies to center position",
-    control: {
-      type: "select",
-      options: dialogWidths,
+      options: dialogSizes,
     },
     table: {
-      type: { summary: "sm | md | lg" },
+      type: { summary: dialogSizes.join(" | ") },
       defaultValue: { summary: "md" },
     },
   },
-};
+}
 
 export const TABS = [
   {
@@ -41,7 +34,7 @@ export const TABS = [
     id: "in-a-break",
     label: "In a break",
   },
-];
+]
 
 export const OTHER_ACTIONS = [
   {
@@ -54,4 +47,4 @@ export const OTHER_ACTIONS = [
     icon: Delete,
     onClick: () => {},
   },
-];
+]

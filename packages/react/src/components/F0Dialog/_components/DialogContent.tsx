@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 import { useF0Dialog } from "./F0DialogProvider"
 
-export type F0DialogContentProps = {
+export type DialogContentProps = {
   children: React.ReactNode
   /**
    * Disable the default padding from the dialog content area
@@ -11,10 +11,10 @@ export type F0DialogContentProps = {
   disableContentPadding?: boolean
 }
 
-export const F0DialogContent = ({
+export const DialogContent = ({
   children,
   disableContentPadding = false,
-}: F0DialogContentProps) => {
+}: DialogContentProps) => {
   const { position } = useF0Dialog()
 
   return (
