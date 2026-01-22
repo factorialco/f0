@@ -1885,8 +1885,8 @@ export declare const defaultTranslations: {
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly removeFile: "Remove file";
         readonly attachFiles: "Attach files";
-        readonly dropZoneTitle: "Drop files here";
-        readonly dropZoneDescription: "Release to attach files to your message";
+        readonly dropZoneTitle: "Add files";
+        readonly dropZoneDescription: "Drop any files here to add them to your message";
         readonly fileTooLarge: "The file '{fileName}' is too large. Maximum size is {maxSize}MB.";
         readonly filesTooLarge: "{count} files exceed the maximum size of {maxSize}MB and were not added.";
         readonly feedbackModal: {
@@ -5188,15 +5188,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

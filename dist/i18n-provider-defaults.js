@@ -363,8 +363,8 @@ const e = {
     generatedTableFilename: "OneGeneratedTable",
     removeFile: "Remove file",
     attachFiles: "Attach files",
-    dropZoneTitle: "Drop files here",
-    dropZoneDescription: "Release to attach files to your message",
+    dropZoneTitle: "Add files",
+    dropZoneDescription: "Drop any files here to add them to your message",
     fileTooLarge: "The file '{fileName}' is too large. Maximum size is {maxSize}MB.",
     filesTooLarge: "{count} files exceed the maximum size of {maxSize}MB and were not added.",
     feedbackModal: {
