@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/F0Button"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
+import { F0Button } from "@/components/F0Button"
 
 type HighlightBannerProps = {
   title: string

@@ -2,6 +2,7 @@ import { F0Icon } from "@/components/F0Icon"
 import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
 import { cn } from "@/lib/utils"
+
 import { ChatSpinner } from "./components/ChatSpinner"
 import "./styles.css"
 

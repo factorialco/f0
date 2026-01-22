@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { useState } from "react"
+
+import { withSkipA11y } from "@/lib/storybook-utils/parameters"
+
 import { CoCreationForm } from "."
 import { CoCreationFormElement } from "../types"
 

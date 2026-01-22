@@ -1,7 +1,18 @@
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
+import {
+  ComponentProps,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from "react"
+
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ProductCard } from "@/components/UpsellingKit/ProductCard"
+import { Carousel } from "@/experimental/Navigation/Carousel"
 import AlertCircle from "@/icons/app/AlertCircle"
 import ChevronRight from "@/icons/app/ChevronRight"
 import CrossIcon from "@/icons/app/Cross"
@@ -9,9 +20,6 @@ import Megaphone from "@/icons/app/Megaphone"
 import { Image } from "@/lib/imageHandler"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
-
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { Carousel } from "@/experimental/Navigation/Carousel"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,14 +29,6 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 import { Skeleton } from "@/ui/skeleton"
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import {
-  ComponentProps,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState,
-} from "react"
 
 type ProductUpdate = {
   title: string

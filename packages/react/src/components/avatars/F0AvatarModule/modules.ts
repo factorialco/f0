@@ -10,6 +10,7 @@ export const modules = {
   calendar: ModuleIcons.Calendar,
   cards: ModuleIcons.Cards,
   "clock-in": ModuleIcons.ClockIn,
+  communities: ModuleIcons.Communities,
   company_attendance: ModuleIcons.TimeTracking,
   company_documents: ModuleIcons.Documents,
   company_projects: ModuleIcons.Projects,

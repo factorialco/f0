@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { OneApprovalHistory } from "."
+
 import type { Status } from "./ApprovalStep"
+
+import { OneApprovalHistory } from "."
 
 const meta = {
   title: "ApprovalHistory",

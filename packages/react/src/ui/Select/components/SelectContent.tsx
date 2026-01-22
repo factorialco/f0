@@ -1,7 +1,3 @@
-import { Spinner } from "@/experimental/Information/Spinner"
-import { useReducedMotion } from "@/lib/a11y"
-import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import {
   ComponentPropsWithoutRef,
@@ -14,6 +10,12 @@ import {
   useRef,
   useState,
 } from "react"
+
+import { Spinner } from "@/experimental/Information/Spinner"
+import { useReducedMotion } from "@/lib/a11y"
+import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
+
 import { VirtualItem } from "../index"
 import { SelectContext } from "../SelectContext"
 import * as SelectPrimitive from "./radix-ui"

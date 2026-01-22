@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+
 import { OmniButton } from "./index"
 
 const meta: Meta<typeof OmniButton> = {

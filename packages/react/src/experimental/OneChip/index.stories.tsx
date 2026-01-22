@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
+
 import * as Icons from "../../icons/app"
 import { Chip } from "./index"
 

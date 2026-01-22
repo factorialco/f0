@@ -1,6 +1,7 @@
+import type { ReactNode } from "react"
+
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
-import type { ReactNode } from "react"
 
 export type KanbanLaneAttributes<TRecord extends RecordType> = {
   id?: string

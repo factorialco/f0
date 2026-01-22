@@ -1,3 +1,9 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import image from "@storybook-static/avatars/person04.jpg"
+import { useState } from "react"
+import { fn } from "storybook/test"
+
 import {
   Add,
   Briefcase,
@@ -16,10 +22,7 @@ import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
-import image from "@storybook-static/avatars/person04.jpg"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useState } from "react"
-import { fn } from "storybook/test"
+
 import {
   cardImageFits,
   cardImageSizes,

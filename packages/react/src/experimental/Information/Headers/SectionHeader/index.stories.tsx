@@ -1,8 +1,11 @@
-import { StandardLayout } from "@/layouts/StandardLayout"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { ComponentProps } from "react"
 import { fn } from "storybook/test"
+
+import { StandardLayout } from "@/layouts/StandardLayout"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import * as Icon from "../../../../icons/app"
 import { SectionHeader } from "./index"
 

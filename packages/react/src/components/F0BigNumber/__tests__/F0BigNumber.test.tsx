@@ -1,9 +1,12 @@
-import { zeroRender } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
 import { screen } from "@testing-library/react"
+import "@testing-library/jest-dom/vitest"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { F0BigNumber } from "../F0BigNumber"
+
+import { zeroRender } from "@/testing/test-utils"
+
 import type { BigNumberProps } from "../types"
+
+import { F0BigNumber } from "../F0BigNumber"
 
 // Mock F0TagBalance component - use vi.hoisted to ensure proper hoisting
 const MockF0TagBalance = vi.hoisted(() => {

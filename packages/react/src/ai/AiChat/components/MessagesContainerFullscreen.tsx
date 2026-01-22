@@ -1,6 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowDown } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
   useCopilotContext,
@@ -9,16 +6,21 @@ import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useContext, useEffect, useMemo, useRef } from "react"
-import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
-import { UserMessage as F0UserMessage } from "./UserMessage"
-import { useAiChat } from "../providers/AiChatStateProvider"
+
+import { useI18n } from "@/ai"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ArrowDown } from "@/icons/app"
+import { cn } from "@/lib/utils"
+
 import { FullscreenChatContext } from "../index"
+import { useAiChat } from "../providers/AiChatStateProvider"
+import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
 import { Thinking } from "./Thinking"
+import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
-import { useI18n } from "@/ai"
 
 /**
  * MessagesContainerFullscreen

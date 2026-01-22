@@ -1,7 +1,9 @@
-import { zeroRender } from "@/testing/test-utils"
 import { fireEvent, screen } from "@testing-library/react"
 import React, { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender } from "@/testing/test-utils"
+
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
 // Mock icons for easier testing

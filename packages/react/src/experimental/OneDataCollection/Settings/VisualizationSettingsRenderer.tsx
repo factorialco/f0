@@ -1,10 +1,11 @@
-import { CollectionProps } from "../types"
+import { ReactNode } from "react"
 
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
-import { ReactNode } from "react"
+
 import { FiltersDefinition } from "../../../components/OneFilterPicker/types"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import { CollectionProps } from "../types"
 import { SortingsDefinition, SummariesDefinition } from "../types"
 import {
   collectionVisualizations,

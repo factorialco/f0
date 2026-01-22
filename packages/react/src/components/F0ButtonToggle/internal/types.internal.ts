@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+
 import { ButtonToggleSize, ButtonToggleVariant } from "../types"
 
 export type F0ButtonToggleInternalProps = {

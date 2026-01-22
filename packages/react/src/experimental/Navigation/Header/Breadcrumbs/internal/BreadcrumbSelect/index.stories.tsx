@@ -1,10 +1,12 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import {
   FIRST_NAMES_MOCK,
   MOCK_ICONS,
   SURNAMES_MOCK,
   getMockValue,
 } from "@/mocks"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import {
   F0SelectItemObject,
   F0SelectItemProps,

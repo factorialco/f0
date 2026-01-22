@@ -1,5 +1,6 @@
-import { Text, TextProps, type HeadingTags } from "@/ui/Text"
 import { forwardRef } from "react"
+
+import { Text, TextProps, type HeadingTags } from "@/ui/Text"
 
 const _allowedVariants = ["heading", "heading-large"] as const
 

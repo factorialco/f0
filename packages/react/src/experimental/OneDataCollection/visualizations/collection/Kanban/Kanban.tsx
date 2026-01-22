@@ -1,9 +1,13 @@
+import { useEffect, useMemo, useState } from "react"
+
 import type {
   CardMetadata,
   CardMetadataProperty,
 } from "@/components/F0Card/types"
 import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import type { KanbanProps } from "@/ui/Kanban/types"
+
 import { useDataCollectionLanesData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
 import { useSelectableLanes } from "@/experimental/OneDataCollection/hooks/useSelectableLanes"
 import {
@@ -16,15 +20,15 @@ import { DndProvider } from "@/lib/dnd/context"
 import { useIsDev } from "@/lib/providers/user-platafform"
 import { Kanban } from "@/ui/Kanban"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
-import type { KanbanProps } from "@/ui/Kanban/types"
-import { useEffect, useMemo, useState } from "react"
-import { ItemActionsDefinition } from "../../../item-actions"
+
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import type {
   GroupingDefinition,
   SortingsDefinition,
   SummariesDefinition,
 } from "../../../types"
+
+import { ItemActionsDefinition } from "../../../item-actions"
 import { KanbanCollectionProps } from "./types"
 
 export const KanbanCollection = <

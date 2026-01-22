@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { F0Chart } from "../index"
 import { ChartDecorator } from "./decorators"
 

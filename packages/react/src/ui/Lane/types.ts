@@ -1,7 +1,8 @@
+import { ReactNode } from "react"
+
 import type { IconType } from "@/components/F0Icon"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
-import { ReactNode } from "react"
 
 export interface LaneProps<Record extends RecordType> {
   /**

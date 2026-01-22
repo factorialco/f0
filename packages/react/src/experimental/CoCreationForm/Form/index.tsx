@@ -1,8 +1,10 @@
+import { motion, Reorder, useDragControls } from "motion/react"
+import { useEffect, useMemo } from "react"
+
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { motion, Reorder, useDragControls } from "motion/react"
-import { useEffect, useMemo } from "react"
+
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { CoCreationFormProvider, useCoCreationFormContext } from "../Context"
 import { DragProvider, useDragContext } from "../DragContext"
@@ -196,7 +198,7 @@ export const CoCreationForm = ({
         </motion.div>
         {applyingChanges && (
           <motion.div
-            className="sticky z-50 flex w-full items-center justify-center bottom-1/2 left-0"
+            className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

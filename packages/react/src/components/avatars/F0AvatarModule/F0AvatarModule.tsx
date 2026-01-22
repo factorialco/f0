@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "cva"
+
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 import { ModuleId, modules } from "./modules"
 

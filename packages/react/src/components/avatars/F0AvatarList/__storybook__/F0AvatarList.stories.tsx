@@ -1,3 +1,7 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import React from "react"
+
 import {
   avatarVariants,
   CompanyAvatarVariant,
@@ -7,8 +11,7 @@ import {
   TeamAvatarVariant,
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import React from "react"
+
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarList } from "../F0AvatarList"
 import { avatarListSizes } from "../types"

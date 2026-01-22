@@ -1,6 +1,8 @@
+import { useRef } from "react"
+
 import { useDraggable } from "@/lib/dnd/hooks"
 import { DragConfig } from "@/ui/Kanban/components/KanbanCard"
-import { useRef } from "react"
+
 import { F0Card } from "../F0Card"
 
 export function DraggableF0Card<T = unknown>({

@@ -1,8 +1,10 @@
+import { motion } from "motion/react"
+import { ReactNode, useState } from "react"
+
 import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"
-import { motion } from "motion/react"
-import { ReactNode, useState } from "react"
+
 import {
   Collapsible,
   CollapsibleContent,

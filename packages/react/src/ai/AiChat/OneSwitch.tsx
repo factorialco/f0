@@ -1,3 +1,8 @@
+import * as SwitchPrimitive from "@radix-ui/react-switch"
+import { motion } from "motion/react"
+import { useState } from "react"
+
+import { useI18n } from "@/ai"
 import { cn, focusRing } from "@/lib/utils"
 import {
   Tooltip,
@@ -5,12 +10,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import * as SwitchPrimitive from "@radix-ui/react-switch"
-import { motion } from "motion/react"
-import { useState } from "react"
+
 import OneIcon from "./OneIcon"
 import { useAiChat } from "./providers/AiChatStateProvider"
-import { useI18n } from "@/ai"
 
 export const OneSwitch = ({
   className,

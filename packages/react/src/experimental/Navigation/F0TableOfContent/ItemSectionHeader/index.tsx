@@ -1,4 +1,5 @@
 import { ReactNode } from "react"
+
 import { TOCItem } from "../types"
 import { CollapsibleItemSectionHeader } from "./CollapsibleItemSectionHeader"
 import { StaticItemSectionHeader } from "./StaticItemSectionHeader"

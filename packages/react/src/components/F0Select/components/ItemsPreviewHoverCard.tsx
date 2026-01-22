@@ -1,13 +1,16 @@
+import type { ReactNode } from "react"
+
+import { motion } from "motion/react"
+
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-import { motion } from "motion/react"
-import type { ReactNode } from "react"
+
 import type { F0SelectItemObject } from "../types"
-import { OneEllipsis } from "@/components/OneEllipsis"
 
 type ItemsPreviewHoverCardProps = {
   items: F0SelectItemObject<string>[]

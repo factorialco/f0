@@ -1,8 +1,12 @@
+import { Observable } from "zen-observable-ts"
+
 import {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/components/OneFilterPicker/types"
+import { PromiseState } from "@/lib/promise-to-observable"
+
 import { DataAdapter } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
 import {
@@ -14,8 +18,6 @@ import { RecordType } from "./records.typings"
 import { SearchOptions } from "./search.typings"
 import { SelectedItemsState } from "./selection.typings"
 import { SortingsDefinition, SortingsState } from "./sortings.typings"
-import { Observable } from "zen-observable-ts"
-import { PromiseState } from "@/lib/promise-to-observable"
 
 /**
  * Defines the structure and configuration of a data source for a collection.

@@ -1,6 +1,8 @@
 import { forwardRef } from "react"
-import { F0TagAvatar } from "../internal/TagAvatar"
+
 import type { F0TagTeamProps } from "./types"
+
+import { F0TagAvatar } from "../internal/TagAvatar"
 
 export const F0TagTeam = forwardRef<HTMLDivElement, F0TagTeamProps>(
   ({ name, src }, ref) => {

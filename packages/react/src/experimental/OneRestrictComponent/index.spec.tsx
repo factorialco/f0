@@ -1,6 +1,8 @@
-import { UserPlatformProvider } from "@/lib/providers/user-platafform"
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
+
+import { UserPlatformProvider } from "@/lib/providers/user-platafform"
+
 import { OneRestrictComponent } from "."
 
 // Mock window.location

@@ -1,6 +1,5 @@
 "use client"
 
-import { ArrowLeft, ArrowRight } from "@/icons/app"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
@@ -9,6 +8,7 @@ import * as React from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
 import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
+import { ArrowLeft, ArrowRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 type CarouselApi = UseEmblaCarouselType[1]

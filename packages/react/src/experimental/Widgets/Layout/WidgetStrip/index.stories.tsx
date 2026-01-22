@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { AreaChartWidget } from "../../Charts/AreaChartWidget"
-import { WidgetStrip } from "./index"
-
 import { AreaChartProps } from "../../../../components/Charts/AreaChart"
+import { AreaChartWidget } from "../../Charts/AreaChartWidget"
 import AreaChartWidgetStoriesMeta from "../../Charts/AreaChartWidget/index.stories"
 import { BarChartWidget } from "../../Charts/BarChartWidget"
 import BarChartWidgetStoriesMeta from "../../Charts/BarChartWidget/index.stories"
@@ -13,6 +11,7 @@ import LineChartWidgetStoriesMeta from "../../Charts/LineChartWidget/index.stori
 import { PieChartWidget } from "../../Charts/PieChartWidget"
 import PieChartWidgetStoriesMeta from "../../Charts/PieChartWidget/index.stories"
 import { Widget } from "../../Widget"
+import { WidgetStrip } from "./index"
 
 /* eslint-disable react/jsx-key */
 const widgets = [

@@ -1,8 +1,10 @@
+import { useRef } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import DownloadIcon from "@/icons/app/Download"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { useRef } from "react"
+
 import { downloadTableAsExcel } from "../../utils/tableExport"
 
 export function Table({

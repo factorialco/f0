@@ -1,11 +1,13 @@
+import { useCopilotChatInternal } from "@copilotkit/react-core"
+import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
+import { motion } from "motion/react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
 import Plus from "@/icons/app/Plus"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { useCopilotChatInternal } from "@copilotkit/react-core"
-import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
-import { motion } from "motion/react"
+
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 export const ChatHeader = (props: HeaderProps) => {

@@ -1,3 +1,5 @@
+import { forwardRef } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import {
@@ -5,7 +7,7 @@ import {
   type BannerAction,
   type BaseBannerProps,
 } from "@/experimental/Banners/BaseBanner"
-import { forwardRef } from "react"
+
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
 type DefaultAction = BannerAction

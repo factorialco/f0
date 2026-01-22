@@ -1,4 +1,3 @@
-import { cn, focusRing } from "@/lib/utils"
 import {
   endOfMonth,
   isAfter,
@@ -7,6 +6,9 @@ import {
   startOfMonth,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
+
+import { cn, focusRing } from "@/lib/utils"
+
 import { CalendarMode, DateRange } from "../../types"
 
 export const getHalfYearFromMonth = (month: number): number =>

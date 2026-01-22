@@ -1,4 +1,5 @@
 import { BadgeProps } from "@/experimental/Information/Badge"
+
 import { F0AvatarModuleProps } from "../F0AvatarModule"
 import { AvatarFileSize, FileDef } from "./types"
 

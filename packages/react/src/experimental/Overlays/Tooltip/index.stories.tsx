@@ -1,5 +1,7 @@
-import { F0Button } from "@/components/F0Button"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { F0Button } from "@/components/F0Button"
+
 import { TooltipInternal } from "./index"
 
 const meta: Meta<typeof TooltipInternal> = {

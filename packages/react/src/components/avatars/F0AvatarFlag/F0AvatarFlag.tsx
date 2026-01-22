@@ -1,6 +1,7 @@
 import { getFlag } from "@/flags/flagsMap.tsx"
 import { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
+
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarFlagProps } from "./types"
 

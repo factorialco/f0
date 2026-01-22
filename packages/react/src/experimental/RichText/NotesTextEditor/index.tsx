@@ -1,14 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import {
-  EditorBubbleMenu,
-  Toolbar,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import { Handle, Plus } from "@/icons/app"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -22,7 +11,28 @@ import {
   useRef,
   useState,
 } from "react"
+
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import {
+  EditorBubbleMenu,
+  Toolbar,
+  ToolbarLabels,
+} from "@/experimental/RichText/CoreEditor"
+import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
+import { Handle, Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
+
 import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
+import {
+  ImageUploadConfig,
+  ImageUploadErrorType,
+  insertImageFromFile,
+} from "../CoreEditor/Extensions/Image"
 import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
 import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
 import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
@@ -42,6 +52,7 @@ interface NotesTextEditorProps {
   initialEditorState?: { content?: JSONContent | string; title?: string }
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
   labels: {
     toolbarLabels: ToolbarLabels
@@ -70,6 +81,7 @@ const NotesTextEditorComponent = forwardRef<
     readonly = false,
     labels,
     aiBlockConfig,
+    imageUploadConfig,
     onTitleChange,
     actions,
     secondaryActions,
@@ -87,12 +99,27 @@ const NotesTextEditorComponent = forwardRef<
     liveCompanionLabels,
     transcriptLabels,
   } = labels
+  const i18n = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
   const editorId = useId()
 
   const [initialContent] = useState(() => initialEditorState?.content || "")
   const [title, setTitle] = useState(initialEditorState?.title || "")
+  const [error, setError] = useState<ImageUploadErrorType | null>(null)
+
+  const getErrorMessage = (errorType: ImageUploadErrorType) => {
+    switch (errorType) {
+      case "file-too-large":
+        return i18n.imageUpload.errors.fileTooLarge
+      case "invalid-type":
+        return i18n.imageUpload.errors.invalidType
+      case "upload-failed":
+        return i18n.imageUpload.errors.uploadFailed
+      default:
+        return i18n.imageUpload.errors.uploadFailed
+    }
+  }
 
   useEffect(() => {
     if (onTitleChange) {
@@ -120,7 +147,15 @@ const NotesTextEditorComponent = forwardRef<
       aiBlockLabels,
       moodTrackerLabels,
       liveCompanionLabels,
-      transcriptLabels
+      transcriptLabels,
+      imageUploadConfig
+        ? {
+            ...imageUploadConfig,
+            onError: (errorType: ImageUploadErrorType) => {
+              setError(errorType)
+            },
+          }
+        : undefined
     ),
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
@@ -185,6 +220,15 @@ const NotesTextEditorComponent = forwardRef<
         .insertContentAt(editor.state.doc.content.size, content)
         .run()
     },
+    insertImage: (file: File) => {
+      if (!editor || !imageUploadConfig) return
+      insertImageFromFile(editor, file, {
+        ...imageUploadConfig,
+        onError: (errorType: ImageUploadErrorType) => {
+          setError(errorType)
+        },
+      })
+    },
   }))
 
   const tippyOptions = useMemo(
@@ -248,6 +292,31 @@ const NotesTextEditorComponent = forwardRef<
           metadata={metadata}
           secondaryActions={secondaryActions}
         />
+      )}
+      {error && (
+        <div className="mx-auto flex w-full max-w-[824px] px-14 py-2">
+          <div className="flex w-max max-w-full items-center gap-4 rounded-md bg-f1-background-critical p-2 drop-shadow-sm">
+            <div className="flex w-full flex-row items-center gap-2">
+              <div className="flex-shrink-0">
+                <F0AvatarAlert size="sm" type="critical" />
+              </div>
+              <p
+                className="w-full max-w-xl flex-grow truncate text-ellipsis text-sm font-semibold text-f1-foreground-critical"
+                title={getErrorMessage(error)}
+              >
+                {getErrorMessage(error)}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <F0Button
+                variant="outline"
+                onClick={() => setError(null)}
+                label={i18n.imageUpload.errors.dismiss}
+                size="sm"
+              />
+            </div>
+          </div>
+        </div>
       )}
       {!readonly && !showBubbleMenu && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
@@ -408,6 +477,7 @@ export const NotesTextEditorSkeleton = ({
 }
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
+export type { ImageUploadConfig } from "./types"
 export { NotesTextEditorComponent as NotesTextEditor }
 export type {
   NotesTextEditorHandle,

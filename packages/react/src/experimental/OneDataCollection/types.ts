@@ -1,8 +1,9 @@
-import { IconType } from "@/components/F0Icon"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/components/OneFilterPicker/types"
+
+import { IconType } from "@/components/F0Icon"
 import {
   DataError,
   GroupingDefinition,
@@ -10,6 +11,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+
 import { DataCollectionSource } from "./hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"

@@ -1,6 +1,8 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Calendar, One, Search, Summary } from "@/icons/ai"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { AIButton } from "../AIButton"
 
 const meta = {
