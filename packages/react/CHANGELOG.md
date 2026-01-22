@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.333.0](https://github.com/factorialco/f0/compare/f0-react-v1.332.0...f0-react-v1.333.0) (2026-01-22)
+
+
+### Features
+
+* add xml to avatar file types ([#3275](https://github.com/factorialco/f0/issues/3275)) ([29eea64](https://github.com/factorialco/f0/commit/29eea6492e5f668caffab727ba33084dfa655e03))
+
 ## [1.332.0](https://github.com/factorialco/f0/compare/f0-react-v1.331.0...f0-react-v1.332.0) (2026-01-22)
 
 
