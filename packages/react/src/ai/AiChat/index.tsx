@@ -18,7 +18,6 @@ import {
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
-import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
   ChatButton,
@@ -165,23 +164,19 @@ const AiChatCmp = () => {
     parameters: [
       {
         name: "message",
-        description: "User-friendly progress message",
+        description: "Main task description",
         required: true,
+      },
+      {
+        name: "detail",
+        description: "Optional subtask or result detail",
+        required: false,
       },
     ],
     // render only when backend wants to display the thinking
     available: "disabled",
-    render: (props) => {
-      return (
-        <div className={props.status ? "-ml-1" : undefined}>
-          <ActionItem
-            title={props.args.message ?? "thinking"}
-            status={props.status === "complete" ? "completed" : props.status}
-            inGroup={props.result?.inGroup}
-          />
-        </div>
-      )
-    },
+    // Render returns empty - thinking is shown by ThinkingIndicator in MessagesContainer
+    render: () => <></>,
   })
 
   useCopilotAction({
@@ -325,23 +320,19 @@ const AiFullscreenChatCmp = () => {
     parameters: [
       {
         name: "message",
-        description: "User-friendly progress message",
+        description: "Main task description",
         required: true,
+      },
+      {
+        name: "detail",
+        description: "Optional subtask or result detail",
+        required: false,
       },
     ],
     // render only when backend wants to display the thinking
     available: "disabled",
-    render: (props) => {
-      return (
-        <div className={props.status ? "-ml-1" : undefined}>
-          <ActionItem
-            title={props.args.message ?? "thinking"}
-            status={props.status === "complete" ? "completed" : props.status}
-            inGroup={props.result?.inGroup}
-          />
-        </div>
-      )
-    },
+    // Render returns empty - thinking is shown by ThinkingIndicator in MessagesContainer
+    render: () => <></>,
   })
 
   if (!enabled) {

@@ -17,7 +17,7 @@ import { isAgentStateMessage } from "../messageTypes"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
-import { Thinking } from "./Thinking"
+import { ThinkingIndicator } from "./ThinkingIndicator"
 import { WelcomeScreen } from "./WelcomeScreen"
 
 type Turn = Array<Message | Array<Message>>
@@ -109,6 +109,17 @@ const Messages = ({
           {turns.map((turnMessages, turnIndex) => {
             const isCurrentTurn = turnIndex === turns.length - 1
 
+            // Filter out thinking arrays - they'll be shown by ThinkingIndicator
+            const nonThinkingMessages = turnMessages.filter(
+              (message): message is Message => !Array.isArray(message)
+            )
+
+            // Check if this turn has any active thinking (for ThinkingIndicator)
+            const hasActiveThinking =
+              isCurrentTurn &&
+              inProgress &&
+              turnMessages.some((message) => Array.isArray(message))
+
             return (
               <div
                 className="flex flex-col items-start justify-start gap-2"
@@ -121,32 +132,14 @@ const Messages = ({
                 }}
                 key={`turn-${turnIndex}`}
               >
-                {turnMessages.map((message, index) => {
+                {nonThinkingMessages.map((message, index) => {
                   const isCurrentMessage =
-                    turnIndex === turns.length - 1 &&
-                    index === turnMessages.length - 1
-
-                  if (Array.isArray(message) && !isCurrentMessage) {
-                    return (
-                      <Thinking
-                        key={`${turnIndex}-${index}`}
-                        messages={message}
-                        isActive={false}
-                        inProgress={inProgress}
-                        RenderMessage={RenderMessage}
-                        AssistantMessage={AssistantMessage}
-                      />
-                    )
-                  }
+                    isCurrentTurn && index === nonThinkingMessages.length - 1
 
                   return (
                     <RenderMessage
                       key={`${turnIndex}-${index}`}
-                      message={
-                        Array.isArray(message)
-                          ? message[message.length - 1] // show last thought when the thinking is ongoing
-                          : message
-                      }
+                      message={message}
                       inProgress={inProgress}
                       index={index}
                       isCurrentMessage={isCurrentMessage}
@@ -159,6 +152,13 @@ const Messages = ({
                     />
                   )
                 })}
+                {/* Show single ThinkingIndicator at the end of current turn */}
+                {hasActiveThinking && (
+                  <ThinkingIndicator
+                    inProgress={inProgress}
+                    messages={messages}
+                  />
+                )}
               </div>
             )
           })}

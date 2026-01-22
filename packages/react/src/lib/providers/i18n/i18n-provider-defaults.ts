@@ -260,6 +260,7 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    working: "Working...",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     removeFile: "Remove file",

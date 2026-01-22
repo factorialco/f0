@@ -18,7 +18,7 @@ import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
-import { Thinking } from "./Thinking"
+import { ThinkingIndicator } from "./ThinkingIndicator"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
@@ -306,78 +306,82 @@ const Messages = ({
             />
           )}
 
-          {turns.map((turnMessages, turnIndex) => (
-            <div
-              className="flex flex-col items-start justify-start gap-2"
-              key={`turn-${turnIndex}`}
-            >
-              {turnMessages.map((message, index) => {
-                const isCurrentMessage =
-                  turnIndex === turns.length - 1 &&
-                  index === turnMessages.length - 1
+          {turns.map((turnMessages, turnIndex) => {
+            const isCurrentTurn = turnIndex === turns.length - 1
 
-                if (Array.isArray(message) && !isCurrentMessage) {
+            // Filter out thinking arrays - they'll be shown by ThinkingIndicator
+            const nonThinkingMessages = turnMessages.filter(
+              (message): message is Message => !Array.isArray(message)
+            )
+
+            // Check if this turn has any active thinking (for ThinkingIndicator)
+            const hasActiveThinking =
+              isCurrentTurn &&
+              inProgress &&
+              turnMessages.some((message) => Array.isArray(message))
+
+            return (
+              <div
+                className="flex flex-col items-start justify-start gap-2"
+                key={`turn-${turnIndex}`}
+              >
+                {nonThinkingMessages.map((message, index) => {
+                  const isCurrentMessage =
+                    isCurrentTurn && index === nonThinkingMessages.length - 1
+
+                  const messageProps = {
+                    key: `${turnIndex}-${index}`,
+                    message: message,
+                    inProgress: inProgress,
+                    index: index,
+                    isCurrentMessage: isCurrentMessage,
+                    AssistantMessage: AssistantMessage,
+                    UserMessage: UserMessage,
+                    ImageRenderer: ImageRenderer,
+                    onRegenerate: onRegenerate,
+                    onCopy: onCopy,
+                    markdownTagRenderers: markdownTagRenderers,
+                    rawData: (message as any).rawData || {},
+                  }
+
+                  const { key, ...messageRestProps } = messageProps
+
+                  if (RenderMessageProp) {
+                    return (
+                      <RenderMessageProp
+                        key={key}
+                        {...(messageRestProps as any)}
+                      />
+                    )
+                  }
+
+                  if (message.role === "user") {
+                    return (
+                      <UserMessage key={key} {...(messageRestProps as any)} />
+                    )
+                  }
+
                   return (
-                    <Thinking
-                      key={`${turnIndex}-${index}`}
-                      messages={message}
-                      isActive={false}
-                      inProgress={inProgress}
-                      RenderMessage={RenderMessageProp as any}
-                      AssistantMessage={AssistantMessage}
-                    />
-                  )
-                }
-
-                const messageToShow = Array.isArray(message)
-                  ? message[message.length - 1]
-                  : message
-
-                const messageProps = {
-                  key: `${turnIndex}-${index}`,
-                  message: messageToShow,
-                  inProgress: inProgress,
-                  index: index,
-                  isCurrentMessage: isCurrentMessage,
-                  AssistantMessage: AssistantMessage,
-                  UserMessage: UserMessage,
-                  ImageRenderer: ImageRenderer,
-                  onRegenerate: onRegenerate,
-                  onCopy: onCopy,
-                  markdownTagRenderers: markdownTagRenderers,
-                  rawData: (messageToShow as any).rawData || {},
-                }
-
-                const { key, ...messageRestProps } = messageProps
-
-                if (RenderMessageProp) {
-                  return (
-                    <RenderMessageProp
+                    <AssistantMessage
                       key={key}
                       {...(messageRestProps as any)}
+                      isGenerating={inProgress && isCurrentMessage}
+                      isLoading={
+                        inProgress && isCurrentMessage && !message.content
+                      }
                     />
                   )
-                }
-
-                if (messageToShow.role === "user") {
-                  return (
-                    <UserMessage key={key} {...(messageRestProps as any)} />
-                  )
-                }
-
-                return (
-                  <AssistantMessage
-                    key={key}
-                    {...(messageRestProps as any)}
-                    isGenerating={inProgress && isCurrentMessage}
-                    isLoading={
-                      inProgress && isCurrentMessage && !messageToShow.content
-                    }
+                })}
+                {/* Show single ThinkingIndicator at the end of current turn */}
+                {hasActiveThinking && (
+                  <ThinkingIndicator
+                    inProgress={inProgress}
+                    messages={messages}
                   />
-                )
-              })}
-            </div>
-          ))}
+                )}
+              </div>
+            )
+          })}
 
           {interrupt}
           <div ref={messagesEndRef} className="h-2" />
