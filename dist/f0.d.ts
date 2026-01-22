@@ -31,11 +31,10 @@ import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
-import { F0DialogInternalProps } from './internal-types';
+import { F0DialogProps } from './F0Dialog';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
-import { FC } from 'react';
 import { FileCellValue } from '../../value-display/types/file';
 import { FileCellValue as FileCellValue_2 } from './types/file';
 import { FolderCellValue } from '../../value-display/types/folder';
@@ -263,7 +262,7 @@ declare const alertAvatarVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-declare type AlertDialogOptions = SimpleDialogOptions & {
+declare type AlertDialogOptions = NotificationDialogBaseOptions & {
     confirm?: DialogSimpleAction;
 };
 
@@ -722,6 +721,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The style of the button.
      */
     style?: React.CSSProperties;
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean;
 } & ({
     /**
      * The URL to navigate to when the button is clicked.
@@ -1157,7 +1161,7 @@ declare type ComponentTypes = (typeof componentTypes)[number];
 
 declare const componentTypes: readonly ["layout", "info", "action", "form"];
 
-declare type ConfirmDialogOptions = SimpleDialogOptions & {
+declare type ConfirmDialogOptions = NotificationDialogBaseOptions & {
     confirm?: DialogSimpleAction;
     cancel?: DialogSimpleAction;
 };
@@ -1916,6 +1920,18 @@ export declare const defaultTranslations: {
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
     };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+        readonly errors: {
+            readonly fileTooLarge: "The file is too large";
+            readonly invalidType: "Invalid file type. Only images are allowed";
+            readonly uploadFailed: "Failed to upload image. Please try again";
+            readonly dismiss: "Dismiss";
+        };
+    };
     readonly coCreationForm: {
         readonly actions: {
             readonly actions: "Actions";
@@ -1980,19 +1996,33 @@ export declare type DialogActionValue = DialogActionValuePrimitive | (() => Prom
 export declare type DialogActionValuePrimitive = string | boolean | number | undefined | null;
 
 export declare type DialogDefinition = {
-    width?: DialogWidth;
+    size?: DialogSize;
     id: DialogId;
     title: string;
     description?: string;
     content: ReactNode;
     actions: DialogActions;
-    variant?: DialogVariant;
     keepOpen?: boolean;
 };
 
+export declare type DialogDefinitionInternal = DialogDefinition & ({
+    variant?: "default";
+    type?: "default";
+} | {
+    variant: "notification";
+    type: DialogNotificationType;
+});
+
 export declare type DialogId = string;
 
-export declare type DialogPosition = (typeof dialogPositions)[number];
+declare type DialogNotificationType = (typeof dialogNotificationTypes)[number];
+
+/**
+ * The levels of the alert.
+ */
+declare const dialogNotificationTypes: readonly ["info", "warning", "critical", "positive"];
+
+declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
 
@@ -2001,13 +2031,9 @@ declare type DialogSimpleAction = {
     value?: DialogActionValue;
 };
 
-export declare type DialogVariant = (typeof dialogVariants)[number];
+export declare type DialogSize = (typeof dialogSizes)[number];
 
-export declare const dialogVariants: readonly ["default", "critical", "neutral"];
-
-export declare type DialogWidth = (typeof dialogWidths)[number];
-
-declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
+declare const dialogSizes: readonly ["sm", "md", "lg", "xl", "fullscreen"];
 
 /**
  * Remove a property from a union of objects.
@@ -2328,7 +2354,7 @@ export declare const F0BigNumber: {
     Skeleton: () => JSX_2.Element;
 };
 
-export declare const F0Button: ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
+export declare const F0Button: ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "block" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 } & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>;
 
@@ -2462,7 +2488,10 @@ export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularitie
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Dialog: FC<F0DialogInternalProps>;
+export declare const F0Dialog: {
+    (props: F0DialogProps): JSX_2.Element;
+    displayName: string;
+};
 
 export declare type F0DialogAction = {
     value?: string;
@@ -2495,6 +2524,9 @@ declare type F0DialogContextType = {
 
 export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
 
+/**
+ * The props for the F0DialogProvider component.
+ */
 declare type F0DialogProviderProps = {
     isOpen: boolean;
     onClose: () => void;
@@ -3481,6 +3513,7 @@ export declare const modules: {
     readonly calendar: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly cards: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "clock-in": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly communities: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -3600,6 +3633,15 @@ export declare interface NextStepsProps {
     title: string;
     items: StepItemProps[];
 }
+
+declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
+    msg: string;
+    type?: DialogNotificationType;
+};
+
+declare type NotificationDialogOptions = NotificationDialogBaseOptions & {
+    actions: DialogActions;
+};
 
 export declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
     options?: NumberFilterOptions_2;
@@ -3941,7 +3983,7 @@ export declare const PrivacyModeProvider: React_2.FC<{
     children: ReactNode;
 }>;
 
-declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "block"];
 
 declare const privateProps_2: readonly ["withBorder"];
 
@@ -4275,10 +4317,6 @@ export declare type SelectionStatus<R extends RecordType, Filters extends Filter
 };
 
 export declare const selectSizes: readonly ["sm", "md"];
-
-declare type SimpleDialogOptions = Optional<Pick<DialogDefinition, "id" | "title" | "description" | "width">, "id"> & {
-    msg: string;
-};
 
 /**
  * Response structure for non-paginated data
@@ -4665,7 +4703,7 @@ declare type TextVariant = NonNullable<TextVariants["variant"]>;
 declare type TextVariants = VariantProps<typeof textVariants>;
 
 declare const textVariants: (props?: ({
-    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
+    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
     align?: "center" | "left" | "right" | undefined;
 } & ({
     class?: ClassValue;
@@ -4950,6 +4988,7 @@ export declare const useDialog: () => UseDialogReturn;
 
 export declare type UseDialogReturn = {
     openDialog: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
+    openNotificationDialog: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
     alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
     confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
     closeDialog: (id: DialogId) => void;

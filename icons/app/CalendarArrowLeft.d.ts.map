@@ -1,1 +1,1 @@
-{"version":3,"file":"CalendarArrowLeft.d.ts","sourceRoot":"","sources":["../../src/icons/app/CalendarArrowLeft.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAA;AAoCrC,QAAA,MAAM,UAAU,gIAAmC,CAAA;AACnD,eAAe,UAAU,CAAA"}
+{"version":3,"file":"CalendarArrowLeft.d.ts","sourceRoot":"","sources":["../../src/icons/app/CalendarArrowLeft.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAA;AAqCrC,QAAA,MAAM,UAAU,gIAAmC,CAAA;AACnD,eAAe,UAAU,CAAA"}
