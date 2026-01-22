@@ -1912,6 +1912,18 @@ export declare const defaultTranslations: {
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
     };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+        readonly errors: {
+            readonly fileTooLarge: "The file is too large";
+            readonly invalidType: "Invalid file type. Only images are allowed";
+            readonly uploadFailed: "Failed to upload image. Please try again";
+            readonly dismiss: "Dismiss";
+        };
+    };
     readonly coCreationForm: {
         readonly actions: {
             readonly actions: "Actions";
@@ -3456,6 +3468,7 @@ export declare const modules: {
     readonly calendar: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly cards: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "clock-in": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly communities: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4636,7 +4649,7 @@ declare type TextVariant = NonNullable<TextVariants["variant"]>;
 declare type TextVariants = VariantProps<typeof textVariants>;
 
 declare const textVariants: (props?: ({
-    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
+    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
     align?: "center" | "left" | "right" | undefined;
 } & ({
     class?: ClassValue;

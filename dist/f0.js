@@ -1,10 +1,10 @@
-import { c as j, a as Di, b as En, m as Ri, B as Si, O as Kr, p as Xr, w as Dn, S as xe, u as Rn, F as Sn, d as Yr, A as Vr, D as qr, e as Jr, f as we, C as me, g as Zr, h as Qr, i as Nn, j as es, k as Mt, P as An, l as On, n as ts, o as kn, q as Tn, r as zn, s as is, t as ns, v as qi, x as rs, y as Pn, z as ss, E as os, G as as, H as ls, J as cs, K as Mn, L as qe, M as ds, U as us, N as hs, I as fs, Q as gs, X as ps, R as ms, T as vs } from "./index-DbA8g6EK.js";
-import { ac as hd, ar as fd, V as gd, W as pd, Y as md, Z as vd, _ as yd, a0 as bd, a1 as xd, a2 as wd, a3 as Cd, a4 as _d, a5 as Ed, a6 as Dd, a7 as Rd, an as Sd, a9 as Nd, aa as Ad, ad as Od, ab as kd, ao as Td, ai as zd, al as Pd, ah as Md, as as Ld, ag as Id, af as Hd, $ as Bd, ae as Fd, aj as Wd, at as Gd, a8 as $d, ak as jd, aq as Ud, am as Kd, ap as Xd } from "./index-DbA8g6EK.js";
+import { c as j, a as Di, b as En, m as Ri, B as Si, O as Kr, p as Xr, w as Dn, S as xe, u as Rn, F as Sn, d as Yr, A as Vr, D as qr, e as Jr, f as we, C as me, g as Zr, h as Qr, i as Nn, j as es, k as Mt, P as An, l as On, n as ts, o as kn, q as Tn, r as zn, s as is, t as ns, v as qi, x as rs, y as Pn, z as ss, E as os, G as as, H as ls, J as cs, K as Mn, L as qe, M as ds, U as us, N as hs, I as fs, Q as gs, X as ps, R as ms, T as vs } from "./index-BgOqEMwS.js";
+import { ac as hd, ar as fd, V as gd, W as pd, Y as md, Z as vd, _ as yd, a0 as bd, a1 as xd, a2 as wd, a3 as Cd, a4 as _d, a5 as Ed, a6 as Dd, a7 as Rd, an as Sd, a9 as Nd, aa as Ad, ad as Od, ab as kd, ao as Td, ai as zd, al as Pd, ah as Md, as as Ld, ag as Id, af as Hd, $ as Bd, ae as Fd, aj as Wd, at as Gd, a8 as $d, ak as jd, aq as Ud, am as Kd, ap as Xd } from "./index-BgOqEMwS.js";
 import { jsx as f, jsxs as P, Fragment as qt } from "react/jsx-runtime";
 import M, { forwardRef as oe, useRef as L, useImperativeHandle as ys, Children as Lt, createContext as Ae, useContext as _e, useState as B, useMemo as H, useEffect as I, useCallback as U, useLayoutEffect as vi, createElement as Ji, isValidElement as Ln, Fragment as bs, memo as xs, useReducer as ws, cloneElement as Cs, PureComponent as _s } from "react";
 import { createPortal as In, unstable_batchedUpdates as At } from "react-dom";
-import { L as Hn, C as Es, i as Bn, D as Ds, S as Zi, a as Rs, f as di, b as lt, c as Ss, A as Ns, d as Ot, e as Fn, E as As, g as zt, h as Os, j as ks, k as Ts, l as Xe, m as Wn, u as zs, G as Ps, n as Ms, o as Qi, p as Ls, q as Gn, r as Is, B as $n, X as jn, Y as yi, s as Hs, t as Un, v as Bs, w as Fs, x as Ws, y as Gs, z as $s, F as js, H as Us, I as Ks, J as en, K as Xs, M as ct, N as ui, O as Ys, P as Vs, Q as qs, R as Js, T as Zs, U as Qs, V as eo, W as to, Z as io, _ as no, $ as ro, a0 as tn, a1 as so, a2 as oo, a3 as Kn, a4 as ao, a5 as lo, a6 as nn, a7 as co, a8 as Xn, a9 as uo, aa as ho, ab as fo, ac as go } from "./hooks-BMqs5ept.js";
-import { aw as Vd, ad as qd, ae as Jd, af as Zd, ai as Qd, aj as eu, an as tu, ao as iu, ap as nu, ar as ru, as as su, at as ou, au, am as lu, aq as cu, ag as du, ah as uu, av as hu, ak as fu, al as gu, ax as pu, ay as mu, az as vu, aA as yu } from "./hooks-BMqs5ept.js";
+import { L as Hn, C as Es, i as Bn, D as Ds, S as Zi, a as Rs, f as di, b as lt, c as Ss, A as Ns, d as Ot, e as Fn, E as As, g as zt, h as Os, j as ks, k as Ts, l as Xe, m as Wn, u as zs, G as Ps, n as Ms, o as Qi, p as Ls, q as Gn, r as Is, B as $n, X as jn, Y as yi, s as Hs, t as Un, v as Bs, w as Fs, x as Ws, y as Gs, z as $s, F as js, H as Us, I as Ks, J as en, K as Xs, M as ct, N as ui, O as Ys, P as Vs, Q as qs, R as Js, T as Zs, U as Qs, V as eo, W as to, Z as io, _ as no, $ as ro, a0 as tn, a1 as so, a2 as oo, a3 as Kn, a4 as ao, a5 as lo, a6 as nn, a7 as co, a8 as Xn, a9 as uo, aa as ho, ab as fo, ac as go } from "./hooks-GhcbZVnl.js";
+import { aw as Vd, ad as qd, ae as Jd, af as Zd, ai as Qd, aj as eu, an as tu, ao as iu, ap as nu, ar as ru, as as su, at as ou, au, am as lu, aq as cu, ag as du, ah as uu, av as hu, ak as fu, al as gu, ax as pu, ay as mu, az as vu, aA as yu } from "./hooks-GhcbZVnl.js";
 import { defaultTranslations as xu } from "./i18n-provider-defaults.js";
 import './f0.css';const po = {
   xs: 1,
@@ -47,26 +47,7 @@ import './f0.css';const po = {
       })]
     })
   });
-}), vo = oe(function({ children: e, sideContent: t, mainColumnPosition: i = "left", sticky: r = !1 }, s) {
-  return f("div", {
-    ref: s,
-    className: "h-full",
-    children: P("div", {
-      className: j("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", r && "md:sticky md:top-0 md:max-h-full"),
-      children: [f("main", {
-        className: j("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", r ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", i === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
-        children: e
-      }), f(yo, {
-        sticky: r,
-        className: j("order-1", i === "right" ? "md:order-1" : "md:order-3"),
-        children: t
-      })]
-    })
-  });
-}), yo = ({ children: n, className: e }) => f("aside", {
-  className: j("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", e),
-  children: n
-}), bo = Di({
+}), vo = Di({
   base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
   variants: {
     variant: {
@@ -80,7 +61,7 @@ import './f0.css';const po = {
     className: j("relative flex-1 overflow-auto", t),
     ...i,
     children: f("div", {
-      className: j(bo({
+      className: j(vo({
         variant: e
       })),
       children: n
@@ -88,7 +69,26 @@ import './f0.css';const po = {
   })
 }));
 Yn.displayName = "StandardLayout";
-const Vn = Ae(null);
+const yo = oe(function({ children: e, sideContent: t, mainColumnPosition: i = "left", sticky: r = !1 }, s) {
+  return f("div", {
+    ref: s,
+    className: "h-full",
+    children: P("div", {
+      className: j("flex h-full max-w-full overflow-auto text-f1-foreground md:flex-row", "flex-col", "overflow-y-auto", r && "md:sticky md:top-0 md:max-h-full"),
+      children: [f("main", {
+        className: j("sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6", r ? "md:h-full md:max-h-full md:overflow-y-auto" : "min-h-full", i === "right" ? "sm:border-l sm:border-l-f1-border-secondary" : "sm:border-r sm:border-r-f1-border-secondary", "border-t border-solid border-t-f1-border-secondary sm:border-t-0"),
+        children: e
+      }), f(bo, {
+        sticky: r,
+        className: j("order-1", i === "right" ? "md:order-1" : "md:order-3"),
+        children: t
+      })]
+    })
+  });
+}), bo = ({ children: n, className: e }) => f("aside", {
+  className: j("min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2", e),
+  children: n
+}), Vn = Ae(null);
 function qn() {
   const n = _e(Vn);
   if (!n)
@@ -7761,7 +7761,7 @@ const $l = oe(function({ children: e, aside: t, header: i, variant: r = "main-as
 }, Yn), Hc = me({
   name: "TwoColumnLayout",
   type: "layout"
-}, vo), Bc = me({
+}, yo), Bc = me({
   name: "HomeLayout",
   type: "layout"
 }, mo);

@@ -2,6 +2,7 @@ export { default as Benefits } from "./Benefits";
 export { default as Calendar } from "./Calendar";
 export { default as Cards } from "./Cards";
 export { default as ClockIn } from "./ClockIn";
+export { default as Communities } from "./Communities";
 export { default as Complaints } from "./Complaints";
 export { default as Discover } from "./Discover";
 export { default as Documents } from "./Documents";

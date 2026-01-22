@@ -2637,6 +2637,18 @@ declare const defaultTranslations: {
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
     };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+        readonly errors: {
+            readonly fileTooLarge: "The file is too large";
+            readonly invalidType: "Invalid file type. Only images are allowed";
+            readonly uploadFailed: "Failed to upload image. Please try again";
+            readonly dismiss: "Dismiss";
+        };
+    };
     readonly coCreationForm: {
         readonly actions: {
             readonly actions: "Actions";
@@ -2711,16 +2723,16 @@ description: string;
 actions?: {
 primary: {
 label: string;
-onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 icon?: IconType_2 | undefined;
+onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 disabled?: boolean | undefined;
 } & {
 variant?: "default" | "critical" | "neutral";
 };
 secondary: {
 label: string;
-onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 icon?: IconType_2 | undefined;
+onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
 disabled?: boolean | undefined;
 };
 };
@@ -3263,7 +3275,7 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "onFocus" | "onBlur" | "size" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+} & Pick<InputFieldProps<string>, "onChange" | "size" | "name" | "onFocus" | "onBlur" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 declare type FavoriteMenuItem = ({
     type: "icon";
@@ -3723,6 +3735,17 @@ declare type IdStructure = {
     children?: IdStructure[];
 };
 
+export declare interface ImageUploadConfig {
+    onUpload: (file: File) => Promise<{
+        url: string;
+        signedId?: string;
+    }>;
+    maxFileSize?: number;
+    onError?: (errorType: ImageUploadErrorType) => void;
+}
+
+declare type ImageUploadErrorType = "file-too-large" | "invalid-type" | "upload-failed";
+
 declare const Indicator: ForwardRefExoticComponent<IndicatorProps & RefAttributes<HTMLDivElement>>;
 
 declare type IndicatorProps = {
@@ -3823,7 +3846,7 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 
 export declare const Input: <T extends string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "role" | "onFocus" | "onBlur" | "status" | "size" | "icon" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -4238,6 +4261,7 @@ export declare const modules: {
     readonly calendar: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly cards: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "clock-in": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly communities: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4418,6 +4442,7 @@ export declare type NotesTextEditorHandle = {
     insertAIBlock: () => void;
     insertTranscript: (title: string, users: User[], messages: Message[]) => void;
     pushContent: (content: string) => void;
+    insertImage: (file: File) => void;
 };
 
 export declare interface NotesTextEditorProps {
@@ -4432,6 +4457,7 @@ export declare interface NotesTextEditorProps {
     };
     readonly?: boolean;
     aiBlockConfig?: AIBlockConfig;
+    imageUploadConfig?: ImageUploadConfig;
     onTitleChange?: (title: string) => void;
     labels: {
         toolbarLabels: ToolbarLabels;
@@ -5998,7 +6024,7 @@ export declare const Textarea: React.FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "icon" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
 

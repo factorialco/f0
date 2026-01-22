@@ -390,6 +390,18 @@ const e = {
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}"
   },
+  imageUpload: {
+    uploading: "Uploading...",
+    uploadError: "Upload failed",
+    insertImage: "Image",
+    deleteImage: "Delete",
+    errors: {
+      fileTooLarge: "The file is too large",
+      invalidType: "Invalid file type. Only images are allowed",
+      uploadFailed: "Failed to upload image. Please try again",
+      dismiss: "Dismiss"
+    }
+  },
   coCreationForm: {
     actions: {
       actions: "Actions",

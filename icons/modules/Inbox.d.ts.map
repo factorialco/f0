@@ -1,1 +1,1 @@
-{"version":3,"file":"Inbox.d.ts","sourceRoot":"","sources":["../../src/icons/modules/Inbox.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAA;AAiBrC,QAAA,MAAM,UAAU,gIAAuB,CAAA;AACvC,eAAe,UAAU,CAAA"}
+{"version":3,"file":"Inbox.d.ts","sourceRoot":"","sources":["../../src/icons/modules/Inbox.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAA;AAkBrC,QAAA,MAAM,UAAU,gIAAuB,CAAA;AACvC,eAAe,UAAU,CAAA"}
