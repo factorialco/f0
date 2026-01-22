@@ -1,14 +1,16 @@
-import { Delete } from "@/icons/app"
-import { Spinner } from "@/experimental/Information/Spinner"
-import { mergeAttributes } from "@tiptap/core"
-import { Image } from "@tiptap/extension-image"
-import { FileHandler } from "@tiptap/extension-file-handler"
 import type { Editor } from "@tiptap/core"
+
+import { mergeAttributes } from "@tiptap/core"
+import { FileHandler } from "@tiptap/extension-file-handler"
+import { Image } from "@tiptap/extension-image"
 import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from "@tiptap/react"
+
+import { Spinner } from "@/experimental/Information/Spinner"
+import { Delete } from "@/icons/app"
 
 export type ImageUploadErrorType =
   | "file-too-large"

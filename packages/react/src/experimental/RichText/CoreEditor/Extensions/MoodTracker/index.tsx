@@ -1,3 +1,12 @@
+import { Node } from "@tiptap/core"
+import {
+  NodeViewContent,
+  NodeViewProps,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from "@tiptap/react"
+import React, { useState } from "react"
+
 import {
   Pulse,
   pulseIcon,
@@ -7,14 +16,6 @@ import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
-import { Node } from "@tiptap/core"
-import {
-  NodeViewContent,
-  NodeViewProps,
-  NodeViewWrapper,
-  ReactNodeViewRenderer,
-} from "@tiptap/react"
-import React, { useState } from "react"
 
 interface MoodTrackerData {
   title: string

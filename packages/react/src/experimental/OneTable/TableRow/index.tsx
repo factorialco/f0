@@ -1,7 +1,8 @@
-import { cn } from "../../../lib/utils"
+import { forwardRef } from "react"
 
 import { TableRow as TableRowRoot } from "@/ui/table"
-import { forwardRef } from "react"
+
+import { cn } from "../../../lib/utils"
 interface TableRowProps {
   children: React.ReactNode
   selected?: boolean

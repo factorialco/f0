@@ -1,5 +1,6 @@
-import { RecordType, SelectedItemsState, SelectionId } from "../types"
 import type { GroupRecord } from "../useData"
+
+import { RecordType, SelectedItemsState, SelectionId } from "../types"
 
 /**
  * Convert the selected state to a selection state map

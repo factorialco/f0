@@ -1,9 +1,10 @@
+import { ComponentProps } from "react"
+
 import type {
   ChartContainer,
   LineChartConfig,
   ChartConfig as OriginalChartConfig,
 } from "@/ui/chart"
-import { ComponentProps } from "react"
 
 export type ChartItem<K extends ChartConfig> = {
   label: string

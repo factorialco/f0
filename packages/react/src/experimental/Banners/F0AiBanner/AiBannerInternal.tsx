@@ -1,10 +1,12 @@
+import { forwardRef } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import { forwardRef } from "react"
+
 import { AiBannerInternalProps, AiBannerSkeletonProps } from "./types"
 
 export const AiBannerInternal = forwardRef<

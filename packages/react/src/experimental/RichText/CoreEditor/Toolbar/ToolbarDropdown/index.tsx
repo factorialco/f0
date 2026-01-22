@@ -1,9 +1,11 @@
-import { F0ButtonToggle } from "@/components/F0ButtonToggle"
-import { IconType } from "@/components/F0Icon"
-import { cn } from "@/lib/utils"
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
+
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
+import { IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
+
 import { ToolbarButton } from "../ToolbarButton"
 
 interface ToolbarDropdownItem {

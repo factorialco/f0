@@ -1,5 +1,6 @@
-import { IconType } from "@/components/F0Icon"
 import { ReactElement } from "react"
+
+import { IconType } from "@/components/F0Icon"
 
 export interface BlockActionItem {
   label: string

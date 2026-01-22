@@ -1,5 +1,7 @@
-import { VerticalOverflowList } from "@/ui/VerticalOverflowList"
 import { FC } from "react"
+
+import { VerticalOverflowList } from "@/ui/VerticalOverflowList"
+
 import { CalendarEvent, CalendarEventProps } from "../CalendarEvent"
 
 export interface CalendarEventListProps {

@@ -1,10 +1,12 @@
+import { motion } from "motion/react"
+import { Dispatch, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
-import { motion } from "motion/react"
-import { Dispatch, useState } from "react"
+
 import { ClockInGraph, ClockInGraphProps } from "../ClockInGraph"
 import { getInfo } from "./helpers"
 import Selector from "./Selector"

@@ -1,9 +1,12 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
+
 import { Lightbulb } from "@/icons/app"
 import ExternalLink from "@/icons/app/ExternalLink"
 import PalmTree from "@/icons/app/PalmTree"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ComponentProps } from "react"
-import { expect, within } from "storybook/test"
+
 import { Page } from "../Page"
 import * as PageStories from "../Page/index.stories"
 import * as SidebarStories from "../Sidebar/index.stories"

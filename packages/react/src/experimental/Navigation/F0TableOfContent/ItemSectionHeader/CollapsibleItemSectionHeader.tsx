@@ -1,7 +1,9 @@
-import { useReducedMotion } from "@/lib/a11y"
-import { Collapsible, CollapsibleContent } from "@/ui/collapsible"
 import { motion } from "motion/react"
 import { ReactNode } from "react"
+
+import { useReducedMotion } from "@/lib/a11y"
+import { Collapsible, CollapsibleContent } from "@/ui/collapsible"
+
 import { Item } from "../Item"
 import { TOCItem } from "../types"
 

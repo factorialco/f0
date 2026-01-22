@@ -1,3 +1,6 @@
+import { AnimatePresence, motion } from "motion/react"
+import { useContext, useEffect, useId, useMemo, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0DialogContext } from "@/components/F0Dialog"
@@ -5,13 +8,13 @@ import { FilterPickerInternal } from "@/components/F0FilterPickerContent/interna
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useState } from "react"
+
+import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
+
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
-import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 

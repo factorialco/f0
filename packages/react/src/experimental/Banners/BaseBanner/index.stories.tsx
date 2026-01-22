@@ -1,5 +1,7 @@
-import { Download, Upsell } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { Download, Upsell } from "@/icons/app"
+
 import { BaseBanner } from "./index"
 
 const meta = {

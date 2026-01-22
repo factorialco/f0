@@ -1,7 +1,9 @@
-import Lightbulb from "@/icons/app/Lightbulb"
-import { useI18n } from "@/lib/providers/i18n"
 import { MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
+
+import Lightbulb from "@/icons/app/Lightbulb"
+import { useI18n } from "@/lib/providers/i18n"
+
 import { AiCollapsibleMessage } from "./AiCollapsibleMessage"
 
 type ThinkingProps = {

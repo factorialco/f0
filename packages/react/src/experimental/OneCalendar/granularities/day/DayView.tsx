@@ -1,10 +1,12 @@
-import { useL10n } from "@/lib/providers/l10n"
-import { Calendar } from "@/ui/calendar"
 import { AnimatePresence, motion } from "motion/react"
 import {
   SelectRangeEventHandler,
   SelectSingleEventHandler,
 } from "react-day-picker"
+
+import { useL10n } from "@/lib/providers/l10n"
+import { Calendar } from "@/ui/calendar"
+
 import { CalendarMode, DateRange } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"
 

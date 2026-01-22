@@ -1,10 +1,12 @@
+import { Reorder } from "motion/react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { CheckCircleLine, Cross, Delete, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { Reorder } from "motion/react"
+
 import { useDragContext } from "../../DragContext"
 import { OnClickOptionActionParams, SelectOptionProps } from "./types"
 

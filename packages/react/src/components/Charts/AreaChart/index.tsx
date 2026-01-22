@@ -1,11 +1,3 @@
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-  LineChartConfig,
-} from "@/ui/chart"
 import { nanoid } from "nanoid"
 import { ForwardedRef } from "react"
 import {
@@ -18,6 +10,16 @@ import {
   XAxisProps,
   YAxis,
 } from "recharts"
+
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  LineChartConfig,
+} from "@/ui/chart"
+
 import { usePrivacyMode } from "../../../lib/privacyMode"
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {

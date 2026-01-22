@@ -3,6 +3,7 @@ import {
   FiltersState,
 } from "@/components/OneFilterPicker/types"
 import { RecordPaths, RecordPathValue } from "@/lib/objectPaths"
+
 import { RecordType } from "./records.typings"
 import { SortOrder } from "./sortings.typings"
 

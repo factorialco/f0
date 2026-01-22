@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import {
@@ -7,7 +9,6 @@ import {
 } from "@/hooks/datasource/types/sortings.typings"
 import { Ascending, Descending } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { useEffect, useState } from "react"
 
 export const EmptySortingValue = "__no-sorting__"
 

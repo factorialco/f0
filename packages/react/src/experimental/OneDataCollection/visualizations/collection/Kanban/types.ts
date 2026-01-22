@@ -9,6 +9,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { KanbanOnCreate, KanbanOnMove } from "@/ui/Kanban/types"
+
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { CollectionProps, SummariesDefinition } from "../../../types"

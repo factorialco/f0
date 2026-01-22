@@ -1,5 +1,7 @@
-import { IconType } from "@/components/F0Icon"
 import { JSONContent } from "@tiptap/react"
+
+import { IconType } from "@/components/F0Icon"
+
 import { FileType } from "./constants"
 
 type resultType = {

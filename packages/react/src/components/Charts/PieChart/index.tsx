@@ -1,3 +1,6 @@
+import { ComponentProps, ForwardedRef } from "react"
+import { Cell, Label, Pie, PieChart as PieChartPrimitive } from "recharts"
+
 import {
   ChartContainer,
   ChartLegend,
@@ -5,8 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-import { ComponentProps, ForwardedRef } from "react"
-import { Cell, Label, Pie, PieChart as PieChartPrimitive } from "recharts"
+
 import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig } from "../utils/types"

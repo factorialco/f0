@@ -1,9 +1,10 @@
+import NumberFlow from "@number-flow/react"
+import { useRef, useState } from "react"
+
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { EmojiImage, getEmojiLabel, useEmojiConfetti } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
-import NumberFlow from "@number-flow/react"
-import { useRef, useState } from "react"
 
 interface User {
   name: string

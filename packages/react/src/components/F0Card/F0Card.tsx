@@ -1,5 +1,7 @@
-import { withSkeleton } from "@/lib/skeleton"
 import { forwardRef } from "react"
+
+import { withSkeleton } from "@/lib/skeleton"
+
 import {
   CardInternal,
   CardInternalProps,

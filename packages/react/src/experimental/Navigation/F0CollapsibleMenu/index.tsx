@@ -2,6 +2,7 @@
 
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
+
 import { F0TableOfContent, TOCItem, TOCProps } from "../F0TableOfContent"
 import { CollapsedBars } from "./CollapsedBars"
 

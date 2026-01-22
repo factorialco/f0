@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import {
   ErrorMessageProps,
@@ -6,7 +8,6 @@ import {
   UpsellRequestResponseDialog,
 } from "@/components/UpsellingKit/UpsellRequestResponseDialog"
 import UpsellIcon from "@/icons/app/Upsell"
-import { useState } from "react"
 
 export interface LoadingStateProps {
   label: string

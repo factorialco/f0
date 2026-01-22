@@ -1,8 +1,9 @@
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
+
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
 export const Description = ({ description }: { description: string }) => {
   const [isExpanded, setIsExpanded] = useState(false)

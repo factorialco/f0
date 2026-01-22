@@ -1,6 +1,7 @@
 import { IconType } from "@/components/F0Icon"
 import { NewColor } from "@/components/tags/F0TagDot"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
+
 import { Message, User } from "../CoreEditor/Extensions/Transcript"
 
 export type { ImageUploadConfig } from "../CoreEditor/Extensions/Image"

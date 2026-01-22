@@ -1,21 +1,22 @@
-import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
-
-import { useGroups } from "@/hooks/datasource/useGroups"
-import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
+import { AnimatePresence, motion } from "motion/react"
+import { useEffect } from "react"
 
 import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
+import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import {
   isInfiniteScrollPagination,
   RecordType,
   SortingsDefinition,
   useSelectable,
 } from "@/hooks/datasource"
+import { useGroups } from "@/hooks/datasource/useGroups"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect } from "react"
+import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
+
 import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
+
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { SummariesDefinition } from "../../../summary"

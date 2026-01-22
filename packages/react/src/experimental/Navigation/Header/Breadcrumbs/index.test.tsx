@@ -1,8 +1,9 @@
+import { within } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import { Home, Settings } from "@/icons/app"
 import { zeroRender as render } from "@/testing/test-utils"
-import { within } from "@testing-library/react"
 
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Breadcrumbs } from "./index"
 
 // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work

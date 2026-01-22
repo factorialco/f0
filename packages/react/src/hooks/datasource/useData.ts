@@ -1,9 +1,3 @@
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/components/OneFilterPicker/types"
-import { getValueByPath } from "@/lib/objectPaths"
-import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 import {
   useCallback,
   useDeferredValue,
@@ -13,6 +7,15 @@ import {
   useState,
 } from "react"
 import { Observable } from "zen-observable-ts"
+
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/components/OneFilterPicker/types"
+
+import { getValueByPath } from "@/lib/objectPaths"
+import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
+
 import {
   BaseFetchOptions,
   GroupingDefinition,

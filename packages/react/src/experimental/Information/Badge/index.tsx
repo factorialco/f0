@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "cva"
+
 import { F0Icon, IconType } from "../../../components/F0Icon"
 
 const badgeVariants = cva({

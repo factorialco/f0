@@ -1,8 +1,10 @@
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0Link } from ".."
 import { linkVariants } from "../types"
 

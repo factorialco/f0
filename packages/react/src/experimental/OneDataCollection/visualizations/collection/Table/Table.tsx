@@ -1,3 +1,6 @@
+import { AnimatePresence, motion } from "motion/react"
+import { Fragment, useEffect, useMemo, useState } from "react"
+
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
@@ -26,8 +29,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
-import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
 import { ItemActionsDefinition } from "../../../item-actions"

@@ -1,6 +1,7 @@
 import * as echarts from "echarts"
 import { AriaComponent } from "echarts/components"
 import { useEffect, useMemo, useRef } from "react"
+
 import { theme as f0LightTheme } from "./themes/f0.light"
 
 // @ts-expect-error - Duplicate echarts types in dependency tree

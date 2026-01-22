@@ -1,3 +1,6 @@
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
+
 import { OneFilterPicker } from "@/components/OneFilterPicker"
 import { GroupingSelector } from "@/experimental/OneDataCollection/Settings/components/GroupingSelector"
 import {
@@ -8,8 +11,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+
 import { F1SearchBox } from "../../../experimental/Forms/Fields/F1SearchBox"
 import { ActiveFiltersChips } from "./ActiveFiltersChips"
 

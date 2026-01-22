@@ -1,9 +1,10 @@
+import { ComponentProps } from "react"
+
 /**
  * Alert tag cell type for displaying alert indicators with labels.
  * Used for showing alerts on items in data collections.
  */
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
-import { ComponentProps } from "react"
 
 export type FileCellValue = ComponentProps<typeof F0AvatarFile>["file"]
 

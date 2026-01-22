@@ -1,4 +1,5 @@
 import type { Meta } from "@storybook/react-vite"
+
 import { RadialProgressChart } from "./index"
 
 const meta: Meta<typeof RadialProgressChart> = {

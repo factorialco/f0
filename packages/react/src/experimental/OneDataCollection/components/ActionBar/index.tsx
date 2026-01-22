@@ -1,3 +1,7 @@
+import NumberFlow from "@number-flow/react"
+import { AnimatePresence, motion } from "motion/react"
+import { Fragment, useCallback, useMemo } from "react"
+
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import {
@@ -8,9 +12,6 @@ import { IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import NumberFlow from "@number-flow/react"
-import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useCallback, useMemo } from "react"
 
 type ActionType = {
   label: string

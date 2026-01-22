@@ -1,7 +1,10 @@
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { F0BigNumber } from ".."
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import type { BigNumberProps } from "../types"
+
+import { F0BigNumber } from ".."
 
 const meta: Meta<typeof F0BigNumber> = {
   component: F0BigNumber,

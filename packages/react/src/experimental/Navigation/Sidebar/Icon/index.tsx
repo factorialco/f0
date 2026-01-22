@@ -1,8 +1,10 @@
+import { useEffect, useRef } from "react"
+
 import { F0Icon } from "@/components/F0Icon"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
-import { useEffect, useRef } from "react"
+
 import { useSidebar } from "../../ApplicationFrame/FrameProvider"
 
 export type SidebarIconProps = {

@@ -1,10 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "react",
-    "typescript",
-    "vitest"
-  ],
+  "plugins": ["react", "typescript", "vitest"],
   "categories": {
     "correctness": "off"
   },
@@ -29,7 +25,7 @@
         "react/react-in-jsx-scope": "off",
         "react/prop-types": "off",
         "react/display-name": ["error", {}]
-      },      
+      },
       "plugins": ["react", "typescript"]
     },
     {
@@ -44,12 +40,7 @@
       }
     },
     {
-      "files": [
-        "**/*.stories.*",
-        "**/__stories__/**",
-        "**/*.test.*",
-        "**/__tests__/**"
-      ],
+      "files": ["**/*.stories.*", "**/__stories__/**", "**/*.test.*", "**/__tests__/**"],
       "rules": {
         "no-console": "off"
       }
@@ -95,12 +86,7 @@
       }
     },
     {
-      "files": [
-        "**/exports.ts",
-        "**/exports.tsx",
-        "**/f0.ts",
-        "**/experimental.ts"
-      ],
+      "files": ["**/exports.ts", "**/exports.tsx", "**/f0.ts", "**/experimental.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -117,14 +103,7 @@
             ],
             "patterns": [
               {
-                "group": [
-                  "f0",
-                  "*f0.ts",
-                  "*/f0",
-                  "**/f0",
-                  "**/f0.ts",
-                  "!@/lib/providers/f0"
-                ],
+                "group": ["f0", "*f0.ts", "*/f0", "**/f0", "**/f0.ts", "!@/lib/providers/f0"],
                 "message": "Barrel imports are not allowed. Use specific component imports instead. [Rule: 4]"
               }
             ]

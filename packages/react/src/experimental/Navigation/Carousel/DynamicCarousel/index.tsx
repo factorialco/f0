@@ -1,7 +1,8 @@
+import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react"
 
 export const SPACE_FOR_WIDGET_SHADOW = 28
 const GAP = 16

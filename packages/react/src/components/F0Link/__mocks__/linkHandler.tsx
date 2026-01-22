@@ -1,5 +1,6 @@
 import { PropsWithChildren, forwardRef } from "react"
 import { vi } from "vitest"
+
 import { LinkProps } from "../../../lib/linkHandler"
 
 const isActive = vi.fn((_path?: string) => false)

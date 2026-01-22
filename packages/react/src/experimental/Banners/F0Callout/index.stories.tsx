@@ -1,5 +1,7 @@
-import { CheckDouble, ExternalLink } from "@/icons/app"
 import { StoryFn, StoryObj } from "@storybook/react-vite"
+
+import { CheckDouble, ExternalLink } from "@/icons/app"
+
 import { F0Callout, F0CalloutProps } from "."
 import { CalloutSkeleton } from "./CalloutInternal"
 

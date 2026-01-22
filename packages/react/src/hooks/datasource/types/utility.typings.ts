@@ -1,5 +1,6 @@
-import { PromiseState } from "@/lib/promise-to-observable"
 import { Observable } from "zen-observable-ts"
+
+import { PromiseState } from "@/lib/promise-to-observable"
 
 /**
  * Utility type for handling both Promise and Observable return types.

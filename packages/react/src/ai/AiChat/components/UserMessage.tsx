@@ -1,5 +1,6 @@
 import { type UserMessageProps } from "@copilotkit/react-ui"
 import { useContext, useEffect, useRef } from "react"
+
 import { FullscreenChatContext } from "../index"
 
 export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {

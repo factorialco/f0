@@ -1,6 +1,7 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
+
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
 

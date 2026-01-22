@@ -1,6 +1,8 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { NewColor } from "@/components/tags/F0TagDot"
 import { AcademicCap, List, Placeholder, Settings } from "@/icons/app"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { NotesTextEditor, NotesTextEditorSkeleton } from "./index"
 
 const meta: Meta<typeof NotesTextEditor> = {

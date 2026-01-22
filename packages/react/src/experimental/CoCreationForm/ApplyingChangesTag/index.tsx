@@ -1,7 +1,8 @@
-import OneIcon from "@/ai/AiChat/OneIcon"
-import { useI18n } from "@/lib/providers/i18n"
 import { motion } from "motion/react"
 import { memo } from "react"
+
+import OneIcon from "@/ai/AiChat/OneIcon"
+import { useI18n } from "@/lib/providers/i18n"
 
 const IconMotion = motion.create(OneIcon)
 

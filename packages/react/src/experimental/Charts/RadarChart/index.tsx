@@ -1,11 +1,3 @@
-import { experimentalComponent } from "@/lib/experimental"
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/ui/chart"
 import { ComponentProps, ForwardedRef } from "react"
 import {
   PolarAngleAxis,
@@ -14,6 +6,16 @@ import {
   Radar,
   RadarChart as RadarChartPrimitive,
 } from "recharts"
+
+import { experimentalComponent } from "@/lib/experimental"
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/ui/chart"
+
 import {
   getCategoricalColor,
   getColor,

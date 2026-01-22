@@ -1,17 +1,3 @@
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import {
-  EditorBubbleMenu,
-  Toolbar,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import { Handle, Plus } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -25,6 +11,22 @@ import {
   useRef,
   useState,
 } from "react"
+
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import {
+  EditorBubbleMenu,
+  Toolbar,
+  ToolbarLabels,
+} from "@/experimental/RichText/CoreEditor"
+import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
+import { Handle, Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
+
 import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
 import {
   ImageUploadConfig,
