@@ -272,9 +272,15 @@ importers:
       '@tiptap/extension-drag-handle-react':
         specifier: ^2.24.0
         version: 2.24.0(@tiptap/extension-drag-handle@2.24.0(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/extension-collaboration@2.24.0(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/pm@2.24.0)(y-prosemirror@1.3.6(prosemirror-model@1.25.0)(prosemirror-state@1.4.3)(prosemirror-view@1.38.1)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)))(@tiptap/extension-node-range@2.24.0(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/pm@2.24.0))(@tiptap/pm@2.24.0)(y-prosemirror@1.3.6(prosemirror-model@1.25.0)(prosemirror-state@1.4.3)(prosemirror-view@1.38.1)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)))(@tiptap/pm@2.24.0)(@tiptap/react@2.24.0(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/pm@2.24.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tiptap/extension-file-handler':
+        specifier: ^3.15.3
+        version: 3.15.3(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/extension-text-style@2.11.7(@tiptap/core@2.24.0(@tiptap/pm@2.24.0)))(@tiptap/pm@2.24.0)
       '@tiptap/extension-highlight':
         specifier: ^2.11.5
         version: 2.11.7(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))
+      '@tiptap/extension-image':
+        specifier: ^2.27.2
+        version: 2.27.2(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))
       '@tiptap/extension-link':
         specifier: ^2.11.5
         version: 2.11.7(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/pm@2.24.0)
@@ -1081,8 +1087,8 @@ packages:
   '@atlaskit/pragmatic-drag-and-drop@1.7.4':
     resolution: {integrity: sha512-lZHnO9BJdHPKnwB0uvVUCyDnIhL+WAHzXQ2EXX0qacogOsnvIUiCgY0BLKhBqTCWln3/f/Ox5jU54MKO6ayh9A==}
 
-  '@atlaskit/tokens@10.0.1':
-    resolution: {integrity: sha512-LtoBGHAltBc777k+ZdXfm9USZKf2Qxegg+vh/09JFUAlB7xdY46oKCl4iSn3DCTRj+9vJmH9Z5QTK8rq92T2nw==}
+  '@atlaskit/tokens@10.1.0':
+    resolution: {integrity: sha512-F7T551Jwqv6kDt3oY/fW0teUzKgZp4OGfWbji0ejeUSF9++suMDzSbsQ5rD8mu6Wui3D1Ru7Q6wtdX4h77k0+A==}
     peerDependencies:
       react: ^18.2.0
 
@@ -6169,6 +6175,13 @@ packages:
       '@tiptap/core': ^2.7.0
       '@tiptap/pm': ^2.7.0
 
+  '@tiptap/extension-file-handler@3.15.3':
+    resolution: {integrity: sha512-wHPBJOxgYI8Tk81c5Z767OvWdntzyXqGq6aa6Q17/uL10B+JmckvcYYXyOkcGWz3cvQu7XC/Lg2YVeAbhsSF5Q==}
+    peerDependencies:
+      '@tiptap/core': ^3.15.3
+      '@tiptap/extension-text-style': ^3.15.3
+      '@tiptap/pm': ^3.15.3
+
   '@tiptap/extension-floating-menu@2.24.0':
     resolution: {integrity: sha512-08T7cA6ILk9byvI0IMHv7MgINNx4fMUjn+1h4mX7k06rUR9P3nXEVQDQWcRZdqQ9orMdL44NtW8e+hGBZRHDQA==}
     peerDependencies:
@@ -6207,6 +6220,11 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.7.0
       '@tiptap/pm': ^2.7.0
+
+  '@tiptap/extension-image@2.27.2':
+    resolution: {integrity: sha512-5zL/BY41FIt72azVrCrv3n+2YJ/JyO8wxCcA4Dk1eXIobcgVyIdo4rG39gCqIOiqziAsqnqoj12QHTBtHsJ6mQ==}
+    peerDependencies:
+      '@tiptap/core': ^2.7.0
 
   '@tiptap/extension-italic@2.11.7':
     resolution: {integrity: sha512-r985bkQfG0HMpmCU0X0p/Xe7U1qgRm2mxvcp6iPCuts2FqxaCoyfNZ8YnMsgVK1mRhM7+CQ5SEg2NOmQNtHvPw==}
@@ -14676,7 +14694,7 @@ snapshots:
   '@atlaskit/css@0.12.2(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/tokens': 6.0.0(@types/react@18.3.18)(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.27.6
       '@compiled/react': 0.18.6(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
@@ -14686,7 +14704,7 @@ snapshots:
   '@atlaskit/ds-lib@5.0.0(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/platform-feature-flags': 1.1.1(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.27.6
       bind-event-listener: 3.0.0
       react: 18.3.1
       react-uid: 2.4.0(@types/react@18.3.18)(react@18.3.1)
@@ -14697,7 +14715,7 @@ snapshots:
   '@atlaskit/ds-lib@5.3.0(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/platform-feature-flags': 1.1.1(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.28.6
       bind-event-listener: 3.0.0
       react: 18.3.1
       react-uid: 2.4.0(@types/react@18.3.18)(react@18.3.1)
@@ -14720,7 +14738,7 @@ snapshots:
       '@atlaskit/css': 0.12.2(@types/react@18.3.18)(react@18.3.1)
       '@atlaskit/ds-lib': 5.0.0(@types/react@18.3.18)(react@18.3.1)
       '@atlaskit/platform-feature-flags': 1.1.1(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.27.6
       '@compiled/react': 0.18.6(react@18.3.1)
       bind-event-listener: 3.0.0
       react: 18.3.1
@@ -14731,7 +14749,7 @@ snapshots:
   '@atlaskit/platform-feature-flags@1.1.1(react@18.3.1)':
     dependencies:
       '@atlaskit/feature-gate-js-client': 5.5.5(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.27.6
     transitivePeerDependencies:
       - react
 
@@ -14754,8 +14772,8 @@ snapshots:
     dependencies:
       '@atlaskit/pragmatic-drag-and-drop': 1.7.4
       '@atlaskit/pragmatic-drag-and-drop-hitbox': 1.1.0
-      '@atlaskit/tokens': 10.0.1(@types/react@18.3.18)(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@atlaskit/tokens': 10.1.0(@types/react@18.3.18)(react@18.3.1)
+      '@babel/runtime': 7.28.6
       '@compiled/react': 0.18.6(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
@@ -14768,13 +14786,13 @@ snapshots:
       bind-event-listener: 3.0.0
       raf-schd: 4.0.3
 
-  '@atlaskit/tokens@10.0.1(@types/react@18.3.18)(react@18.3.1)':
+  '@atlaskit/tokens@10.1.0(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
       '@atlaskit/ds-lib': 5.3.0(@types/react@18.3.18)(react@18.3.1)
       '@atlaskit/platform-feature-flags': 1.1.1(react@18.3.1)
-      '@babel/runtime': 7.28.4
-      '@babel/traverse': 7.28.5
-      '@babel/types': 7.28.5
+      '@babel/runtime': 7.28.6
+      '@babel/traverse': 7.28.6
+      '@babel/types': 7.28.6
       bind-event-listener: 3.0.0
       react: 18.3.1
     transitivePeerDependencies:
@@ -14785,7 +14803,7 @@ snapshots:
     dependencies:
       '@atlaskit/ds-lib': 5.0.0(@types/react@18.3.18)(react@18.3.1)
       '@atlaskit/platform-feature-flags': 1.1.1(react@18.3.1)
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.27.6
       '@babel/traverse': 7.28.0
       '@babel/types': 7.28.0
       bind-event-listener: 3.0.0
@@ -21442,6 +21460,12 @@ snapshots:
       '@tiptap/core': 2.24.0(@tiptap/pm@2.24.0)
       '@tiptap/pm': 2.24.0
 
+  '@tiptap/extension-file-handler@3.15.3(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/extension-text-style@2.11.7(@tiptap/core@2.24.0(@tiptap/pm@2.24.0)))(@tiptap/pm@2.24.0)':
+    dependencies:
+      '@tiptap/core': 2.24.0(@tiptap/pm@2.24.0)
+      '@tiptap/extension-text-style': 2.11.7(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))
+      '@tiptap/pm': 2.24.0
+
   '@tiptap/extension-floating-menu@2.24.0(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))(@tiptap/pm@2.24.0)':
     dependencies:
       '@tiptap/core': 2.24.0(@tiptap/pm@2.24.0)
@@ -21474,6 +21498,10 @@ snapshots:
     dependencies:
       '@tiptap/core': 2.24.0(@tiptap/pm@2.24.0)
       '@tiptap/pm': 2.24.0
+
+  '@tiptap/extension-image@2.27.2(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))':
+    dependencies:
+      '@tiptap/core': 2.24.0(@tiptap/pm@2.24.0)
 
   '@tiptap/extension-italic@2.11.7(@tiptap/core@2.24.0(@tiptap/pm@2.24.0))':
     dependencies:
