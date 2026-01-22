@@ -1,12 +1,12 @@
-import { bh as Pa, bi as B6, bj as j6, bk as H6, bl as V6, bm as W6, bn as Yc, bo as q6, bp as U6, bq as G6, m as ae, br as pk, bs as K6, bt as $a, g as pd, bu as mk, bv as J6, bw as Y6, D as Q6, bx as yg, by as hl, bz as X6, u as Me, bA as gk, bB as yk, bC as vk, bD as bk, c as E, bE as kk, n as Ze, bF as xk, a as $n, bG as Qp, bH as wk, A as We, F as ge, bI as _k, bJ as Ck, B as Vt, bK as Sk, bL as Nk, L as Q, aD as uo, S as G, bM as Xn, bN as Z6, bO as eC, bP as Hf, au as Ek, bQ as Ak, K as Zn, aX as Tk, aC as Xp, bd as In, aE as Vf, aB as Er, ay as tC, bR as vr, f as za, aA as ho, bS as Mk, bT as nC, bU as vg, bV as Ws, bW as Zp, bX as Ba, bY as md, bZ as iC, b_ as Ok, b$ as rC, c0 as em, c1 as ra, c2 as gn, c3 as sC, c4 as oC, c5 as er, c6 as Qc, c7 as aC, c8 as Ro, c9 as Ss, ca as lC, cb as Dk, cc as dC, cd as fC, ce as cC, cf as uC, O as Yt, w as vt, aT as Ik, b2 as Lk, E as tm, e as Zr, cg as hC, ch as Xc, ci as Ls, cj as nm, ck as pC, cl as mC, cm as gC, cn as yC, ar as ja, a4 as gd, d as po, co as Rk, C as vn, a2 as $i, cp as vC, cq as bC, cr as Fk, a0 as Gn, q as Kn, cs as kC, ct as Pk, cu as $k, cv as mo, cw as im, a$ as Wf, aF as yd, aa as sa, cx as xC, cy as zk, cz as wC, cA as _C, P as rm, l as sm, o as om, b5 as CC, cB as Bk, cC as SC, b4 as jk, cD as NC, cE as EC, cF as AC, b7 as bg, cG as Hk, cH as TC, cI as hh, _ as vd, cJ as MC, cK as OC, aq as Ha, y as Vk, at as DC, bc as Va, as as IC, cL as Wk, z as br, a9 as or, aI as bd, bf as ph, V as Wa, aU as qf, aN as LC, a1 as RC, W as qk, cM as Uf, cN as FC, cO as PC, cP as $C, cQ as zC, cR as Uk, b0 as Gk, cS as BC, Y as Kk, cT as am, cU as jC, cV as HC, cW as VC, cX as WC, b1 as qC, cY as UC, ae as GC, af as KC, am as Gf, ak as lm, cZ as dm, al as Jk, ag as kd, c_ as JC, aW as YC, av as mh, c$ as QC, d0 as XC, b as Yk, ab as ZC, aj as eS, G as tS, H as nS, J as iS, d1 as qa, d2 as fm, a3 as cm, d3 as um, d4 as Ua, aY as Qk, d5 as rS, d6 as Xk, d7 as sS, d8 as oS, aO as aS, aP as lS, aG as dS, az as fS, d9 as Zk, da as cS } from "./index-DihjXQc9.js";
-import { dc as dQ, db as fQ, dh as cQ, di as uQ, de as hQ, dd as pQ, dg as mQ, $ as gQ, df as yQ } from "./index-DihjXQc9.js";
-import { u as ex, F as tx, g as uS, h as nx, i as ix, j as hm, k as rx, l as Kf, m as hS, n as pS, o as mS, p as pm, q as Ar, r as sx, s as mm, I as ox, t as gS, v as yS, w as vS, x as ax, y as lx, z as kg, B as bS, C as kS, b as xS, a as wS, D as _S, E as CS, G as SS, J as NS, K as ES, L as dx, M as fx, N as cx, O as ux, P as AS, Q as TS, R as hx, S as xg, T as MS, U as OS, V as DS, W as IS, X as px, Y as wg, Z as LS, _ as gh, $ as mx, a0 as gx, a1 as yx, a2 as RS, a3 as FS, a4 as PS, a5 as $S, a6 as vx, a7 as bx, a8 as kx, a9 as xx, aa as zS, ab as wx, ac as _x, ad as BS, ae as jS, af as Cx, ag as HS, ah as VS, ai as WS, aj as qS, ak as _g, al as Cg, am as Sg, an as US } from "./AiChatTranslationsProvider-Zrbb2nB6.js";
-import { A as bQ, ap as kQ, d as xQ, c as wQ, H as _Q, ao as CQ, f as SQ } from "./AiChatTranslationsProvider-Zrbb2nB6.js";
+import { bf as Pa, bg as B6, bh as j6, bi as H6, bj as V6, bk as W6, bl as Yc, bm as q6, bn as U6, bo as G6, m as ae, bp as pk, bq as K6, br as $a, g as pd, bs as mk, bt as J6, bu as Y6, D as Q6, bv as yg, bw as hl, bx as X6, u as Me, by as gk, bz as yk, bA as vk, bB as bk, c as E, bC as kk, n as Ze, bD as xk, a as $n, bE as Qp, bF as wk, A as We, F as ge, bG as _k, bH as Ck, B as Vt, bI as Sk, bJ as Nk, L as Q, aD as uo, S as G, bK as Xn, bL as Z6, bM as eC, bN as Hf, au as Ek, bO as Ak, K as Zn, aC as Xp, bb as In, aE as Vf, aB as Er, ay as tC, bP as vr, f as za, aA as ho, bQ as Tk, bR as nC, bS as vg, bT as Ws, bU as Zp, bV as Ba, bW as md, bX as iC, bY as Mk, bZ as rC, b_ as em, b$ as ra, c0 as gn, c1 as sC, c2 as oC, c3 as er, c4 as Qc, c5 as aC, c6 as Ro, c7 as Ss, c8 as lC, c9 as Ok, ca as dC, cb as fC, cc as cC, cd as uC, O as Yt, w as vt, aT as Dk, b0 as Ik, E as tm, e as Zr, ce as hC, cf as Xc, cg as Ls, ch as nm, ci as pC, cj as mC, ck as gC, cl as yC, ar as ja, a4 as gd, d as po, cm as Lk, C as vn, a2 as $i, cn as vC, co as bC, cp as Rk, a0 as Gn, q as Kn, cq as kC, cr as Fk, cs as Pk, ct as mo, cu as im, aF as yd, aa as sa, cv as xC, cw as $k, cx as wC, cy as _C, P as rm, l as sm, o as om, b3 as CC, cz as zk, cA as SC, b2 as Bk, cB as NC, cC as EC, cD as AC, b5 as bg, cE as jk, cF as TC, cG as hh, _ as vd, cH as MC, cI as OC, aq as Ha, y as Hk, at as DC, ba as Va, as as IC, cJ as Vk, z as br, a9 as or, aI as bd, bd as ph, V as Wa, aU as Wf, aN as LC, a1 as RC, W as Wk, cK as qf, cL as FC, cM as PC, cN as $C, cO as zC, cP as qk, a_ as Uk, cQ as BC, Y as Gk, cR as am, cS as jC, cT as HC, cU as VC, cV as WC, a$ as qC, cW as UC, ae as GC, af as KC, am as Uf, ak as lm, cX as dm, al as Kk, ag as kd, cY as JC, aW as YC, av as mh, cZ as QC, c_ as XC, b as Jk, ab as ZC, aj as eS, G as tS, H as nS, J as iS, c$ as qa, d0 as fm, a3 as cm, d1 as um, d2 as Ua, aX as Yk, d3 as rS, d4 as Qk, d5 as sS, d6 as oS, aO as aS, aP as lS, aG as dS, az as fS, d7 as Xk, d8 as cS } from "./index-BgOqEMwS.js";
+import { da as dQ, d9 as fQ, df as cQ, dg as uQ, dc as hQ, db as pQ, de as mQ, $ as gQ, dd as yQ } from "./index-BgOqEMwS.js";
+import { u as Zk, F as ex, g as uS, h as tx, i as nx, j as ix, k as hm, l as rx, m as Gf, n as hS, o as pS, p as mS, q as pm, r as Ar, s as sx, t as mm, I as ox, v as gS, w as yS, x as vS, y as Kf, z as ax, B as lx, C as kg, D as bS, E as kS, b as xS, a as wS, G as _S, J as CS, K as SS, L as NS, M as ES, N as dx, O as fx, P as cx, Q as ux, R as AS, S as TS, T as hx, U as xg, V as MS, W as OS, X as DS, Y as IS, Z as px, _ as wg, $ as LS, a0 as gh, a1 as mx, a2 as gx, a3 as yx, a4 as RS, a5 as FS, a6 as PS, a7 as $S, a8 as vx, a9 as bx, aa as kx, ab as xx, ac as zS, ad as wx, ae as _x, af as BS, ag as jS, ah as Cx, ai as HS, aj as VS, ak as WS, al as qS, am as _g, an as Cg, ao as Sg, ap as US } from "./AiChatTranslationsProvider-DhDfqc96.js";
+import { A as bQ, ar as kQ, d as xQ, c as wQ, H as _Q, aq as CQ, f as SQ } from "./AiChatTranslationsProvider-DhDfqc96.js";
 import { jsx as c, jsxs as b, Fragment as we } from "react/jsx-runtime";
 import * as Ge from "react";
 import K, { useContext as zn, useState as P, useEffect as ne, createContext as Bn, forwardRef as ve, useRef as ie, PureComponent as GS, useTransition as KS, useLayoutEffect as us, useId as Jf, useCallback as Ne, useMemo as Y, memo as Ga, Fragment as hi, isValidElement as Sx, cloneElement as gm, createElement as yh, useDebugValue as Nx, createRef as JS, version as Ng, useImperativeHandle as Yf, Children as Ex } from "react";
-import { f as Rs, aB as oa, j as pl, aC as YS, b as Zc, aD as QS, A as XS, d as ml, i as ZS, m as e9, G as t9, g as Eg, aE as n9, l as Ag, aF as i9, p as r9, aG as Ax, aH as Tx, aI as s9, aJ as vh, C as o9, au as a9, a2 as es, D as Ct, t as l9, x as d9, y as f9, F as c9, M as Tg, N as Mg, O as u9, P as h9, aj as p9, aK as bh, aL as Qf, a6 as m9, aM as Mx, aN as g9, aO as y9, aP as v9, ae as kh, aQ as b9, aR as k9, ap as Xf, af as ym, aS as Ox, ac as Dx, ad as hs, a8 as x9, aT as w9, aU as _9, aV as C9, a4 as Zf, aW as ec, aX as tc, a5 as nc, ai as vm, aY as S9, ay as N9, aZ as xh, a_ as E9, a$ as xd, b0 as A9, az as T9, b1 as M9, ax as Ix, aw as O9, av as D9, b2 as I9, b3 as L9, b4 as R9, b5 as F9, aA as Lx, b6 as Rx, an as Fx, b7 as P9, b8 as $9, b9 as z9, a7 as B9, R as j9, T as H9, V as V9, W as W9, Z as q9, U as U9, ba as Og, bb as G9, bc as K9, n as J9 } from "./hooks-BmWzNN2T.js";
-import { a9 as EQ, ak as AQ, al as TQ } from "./hooks-BmWzNN2T.js";
+import { f as Rs, aB as oa, j as pl, aC as YS, b as Zc, aD as QS, A as XS, d as ml, i as ZS, m as e9, G as t9, g as Eg, aE as n9, l as Ag, aF as i9, p as r9, aG as Ax, aH as Tx, aI as s9, aJ as vh, C as o9, au as a9, a2 as es, D as Ct, t as l9, x as d9, y as f9, F as c9, M as Tg, N as Mg, O as u9, P as h9, aj as p9, aK as bh, aL as Qf, a6 as m9, aM as Mx, aN as g9, aO as y9, aP as v9, ae as kh, aQ as b9, aR as k9, ap as Xf, af as ym, aS as Ox, ac as Dx, ad as hs, a8 as x9, aT as w9, aU as _9, aV as C9, a4 as Zf, aW as ec, aX as tc, a5 as nc, ai as vm, aY as S9, ay as N9, aZ as xh, a_ as E9, a$ as xd, b0 as A9, az as T9, b1 as M9, ax as Ix, aw as O9, av as D9, b2 as I9, b3 as L9, b4 as R9, b5 as F9, aA as Lx, b6 as Rx, an as Fx, b7 as P9, b8 as $9, b9 as z9, a7 as B9, R as j9, T as H9, V as V9, W as W9, Z as q9, U as U9, ba as Og, bb as G9, bc as K9, n as J9 } from "./hooks-GhcbZVnl.js";
+import { a9 as EQ, ak as AQ, al as TQ } from "./hooks-GhcbZVnl.js";
 import bm from "react-dom";
 import './experimental.css';function Px(t) {
   const e = Pa(() => B6(t)), { isStatic: n } = zn(j6);
@@ -853,7 +853,7 @@ function H8({ breadcrumbs: t, append: e }) {
   }, `breadcrumb-${t.at(-1)?.id ?? 0}`);
 }
 const Wx = ({ className: t, disabled: e }) => {
-  const { enabled: n, setOpen: i, open: r } = ex(), s = Me(), [o, a] = P(!1);
+  const { enabled: n, setOpen: i, open: r } = Zk(), s = Me(), [o, a] = P(!1);
   return n ? c("div", {
     className: "flex items-center",
     children: c(gk, {
@@ -892,7 +892,7 @@ const Wx = ({ className: t, disabled: e }) => {
                   transitionTimingFunction: "cubic-bezier(0.175,0.885,0.32,1.5)"
                 },
                 children: c("div", {
-                  children: c(tx, {
+                  children: c(ex, {
                     size: "sm",
                     background: r ? "white" : void 0,
                     hover: o
@@ -1247,7 +1247,7 @@ const Vg = ae.create(ge), Wg = {
         whileTap: {
           scale: 0.8
         },
-        icon: nx,
+        icon: tx,
         className: "outline-none",
         variants: Wg,
         initial: i ? "enterFromFavorite" : "initial",
@@ -1288,7 +1288,7 @@ const Vg = ae.create(ge), Wg = {
       asChild: !0,
       children: c(Vt, {
         variant: "outline",
-        icon: ix,
+        icon: nx,
         hideLabel: !0,
         label: e,
         pressed: v,
@@ -1467,7 +1467,7 @@ const Vg = ae.create(ge), Wg = {
   title: t,
   description: i,
   icon: c(ge, {
-    icon: ix,
+    icon: nx,
     size: "lg",
     className: "block"
   }),
@@ -1619,7 +1619,7 @@ function YJ({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i 
               hideLabel: !0,
               onClick: () => d(),
               label: "Open main menu",
-              icon: Tk
+              icon: ix
             })
           })
         })
@@ -1966,7 +1966,7 @@ function uN(t) {
   return t.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
 }
 function hN(t, e, n) {
-  const r = Mk((n || {}).ignore || []), s = pN(e);
+  const r = Tk((n || {}).ignore || []), s = pN(e);
   let o = -1;
   for (; ++o < s.length; )
     nC(t, "text", a);
@@ -2566,7 +2566,7 @@ function a7(t, e) {
   return iC(t, function(i) {
     if ("value" in i && /\r?\n|\r/.test(i.value) || i.type === "break")
       return n = !0, rC;
-  }), !!((!t.depth || t.depth < 3) && Ok(t) && (e.options.setext || n));
+  }), !!((!t.depth || t.depth < 3) && Mk(t) && (e.options.setext || n));
 }
 function l7(t, e, n, i) {
   const r = Math.max(Math.min(6, t.depth || 1), 1), s = n.createTracker(i);
@@ -2677,7 +2677,7 @@ function u7() {
   return "`";
 }
 function sw(t, e) {
-  const n = Ok(t);
+  const n = Mk(t);
   return !!(!e.options.resourceLink && // If there’s a url…
   t.url && // And there’s a no title…
   !t.title && // And the content of `node` is a single text node…
@@ -2853,7 +2853,7 @@ function k7(t, e, n, i) {
 }
 const x7 = (
   /** @type {(node?: unknown) => node is Exclude<PhrasingContent, Html>} */
-  Mk([
+  Tk([
     "break",
     "delete",
     "emphasis",
@@ -3873,7 +3873,7 @@ function kE(t) {
   r.push(vE(n)), s.push(z7()), o.push(B7(n));
 }
 const xE = dC().use(fC).use(kE).use(cC).use(uC), wE = ve(function({ content: e, className: n, format: i = "html", ...r }, s) {
-  const o = Y(() => Dk.sanitize(i === "markdown" ? String(xE.processSync(e)) : e, {
+  const o = Y(() => Ok.sanitize(i === "markdown" ? String(xE.processSync(e)) : e, {
     ADD_ATTR: ["target"],
     ALLOWED_ATTR: ["href", "target", "rel", "class"]
   }), [i, e]), a = /<[^>]*>/.test(o);
@@ -3984,8 +3984,8 @@ const Xg = vt(bw, SE), kw = $n({
   }
 }), Zg = {
   positive: tm,
-  warning: Lk,
-  info: Ik
+  warning: Ik,
+  info: Dk
 }, ey = {
   positive: "text-f1-foreground-positive font-medium",
   warning: "text-f1-foreground-warning font-medium",
@@ -4121,7 +4121,7 @@ const QJ = vt(xw, AE), TE = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i,
       })]
     })
   });
-}, XJ = l9(za("RadarChart", TE)), ME = ae.create(tx), OE = () => {
+}, XJ = l9(za("RadarChart", TE)), ME = ae.create(ex), OE = () => {
   const t = Me();
   return b("div", {
     className: "flex flex-row items-center gap-1 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2 py-1.5 pr-2.5 shadow-md",
@@ -4415,7 +4415,7 @@ const Nm = () => {
   return [
     {
       label: e("coCreationForm.questionTypes.rating"),
-      icon: nx,
+      icon: tx,
       questionType: "rating"
     },
     {
@@ -4435,7 +4435,7 @@ const Nm = () => {
     },
     {
       label: e("coCreationForm.questionTypes.longText"),
-      icon: Kf,
+      icon: Gf,
       questionType: "longText"
     },
     {
@@ -5023,7 +5023,7 @@ const ry = {
       })]
     })
   });
-}, Cw = Ge.forwardRef(({ className: t, label: e, labelIcon: n, icon: i, error: r, hideLabel: s, maxLength: o, clearable: a, disabled: l, value: d, cols: f, rows: u, status: h, hint: p, onChange: m, placeholder: g, ...y }, v) => c(Rk, {
+}, Cw = Ge.forwardRef(({ className: t, label: e, labelIcon: n, icon: i, error: r, hideLabel: s, maxLength: o, clearable: a, disabled: l, value: d, cols: f, rows: u, status: h, hint: p, onChange: m, placeholder: g, ...y }, v) => c(Lk, {
   label: e,
   labelIcon: n,
   icon: i,
@@ -5508,7 +5508,7 @@ function oA({ title: t, isActive: e = !1, onClick: n }) {
   });
 }
 function aA({ author: t, timestamp: e, onClick: n, isActive: i }) {
-  const { locale: r } = vC(), s = bC(r), o = Fk(e, "PPPp", {
+  const { locale: r } = vC(), s = bC(r), o = Rk(e, "PPPp", {
     locale: s
   }), a = `${t.firstName} ${t.lastName}`;
   return b("button", {
@@ -5718,7 +5718,7 @@ const lA = ({ entity: t, selected: e, onSelect: n, onRemove: i, marginLeft: r, s
       className: "flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1",
       children: [c(Q, {
         hideLabel: !0,
-        icon: e ? Pk : $k,
+        icon: e ? Fk : Pk,
         onClick: () => l(!e),
         label: e ? "Collapse" : "Expand",
         size: "sm",
@@ -5774,7 +5774,7 @@ const sy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => c("div", {
       hideLabel: !0,
       label: t,
       onClick: () => e(),
-      icon: Wf,
+      icon: Kf,
       size: "sm",
       variant: "outline"
     }), c("div", {
@@ -6118,7 +6118,7 @@ const sy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => c("div", {
   className: "pr-2 pt-1.5",
   children: c(xC, {
     className: E("max-w-54 w-fit gap-1 text-ellipsis break-all border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]", "rounded-full", i ? "pl-2" : "pl-0"),
-    left: !i && c(zk, {
+    left: !i && c($k, {
       src: t.subAvatar,
       name: t.subName,
       size: "xs",
@@ -6236,7 +6236,7 @@ const sy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => c("div", {
       subAvatar: M.avatar
     }
   })), [k, n]), _ = C.length === 0 ? void 0 : C.length === 1 ? C[0].subItem.subName : C.length + " " + e, A = C.length === 1 ? C[0].subItem.subName : void 0;
-  return c(Rk, {
+  return c(Lk, {
     onClickContent: u,
     role: "combobox",
     label: s,
@@ -6591,8 +6591,8 @@ function vA(t, e) {
   }, 1 / 0)), Math.min(n, i);
 }
 var vo = "ToggleGroup", [Ew] = CC(vo, [
-  Bk
-]), Aw = Bk(), Em = K.forwardRef((t, e) => {
+  zk
+]), Aw = zk(), Em = K.forwardRef((t, e) => {
   const { type: n, ...i } = t;
   if (n === "single")
     return /* @__PURE__ */ c(bA, { ...i, ref: e });
@@ -6608,7 +6608,7 @@ var [Tw, Mw] = Ew(vo), bA = K.forwardRef((t, e) => {
     onValueChange: r = () => {
     },
     ...s
-  } = t, [o, a] = jk({
+  } = t, [o, a] = Bk({
     prop: n,
     defaultProp: i,
     onChange: r
@@ -6631,7 +6631,7 @@ var [Tw, Mw] = Ew(vo), bA = K.forwardRef((t, e) => {
     onValueChange: r = () => {
     },
     ...s
-  } = t, [o = [], a] = jk({
+  } = t, [o = [], a] = Bk({
     prop: n,
     defaultProp: i,
     onChange: r
@@ -6728,7 +6728,7 @@ const Rw = $n({
     variant: "default",
     size: "default"
   }
-}), _A = Ge.forwardRef(({ className: t, variant: e, size: n, ...i }, r) => c(Hk, {
+}), _A = Ge.forwardRef(({ className: t, variant: e, size: n, ...i }, r) => c(jk, {
   ref: r,
   className: E(Rw({
     variant: e,
@@ -6737,7 +6737,7 @@ const Rw = $n({
   })),
   ...i
 }));
-_A.displayName = Hk.displayName;
+_A.displayName = jk.displayName;
 const Fw = Ge.createContext({
   size: "default",
   variant: "default"
@@ -11383,7 +11383,7 @@ const oM = ({ link: t, firstName: e, lastName: n, src: i, onClick: r, canReact: 
   className: "flex w-full flex-col items-start justify-between gap-4 rounded-md bg-gradient-to-r from-[#F5A51C]/30 via-[#E51943]/30 to-[#5596F6]/30 px-3 py-3 ring-1 ring-inset ring-f1-border-secondary sm:flex-row sm:items-center sm:px-4",
   children: [b("div", {
     className: "flex flex-col items-start gap-3 sm:flex-row sm:items-center",
-    children: [c(Vk, {
+    children: [c(Hk, {
       module: "kudos",
       size: "lg"
     }), b("div", {
@@ -11422,7 +11422,7 @@ function lM({ emoji: t, initialCount: e, hasReacted: n = !1, users: i, onInterac
       emoji: t,
       size: "md"
     }),
-    children: c(Wk, {
+    children: c(Vk, {
       value: a,
       spinTiming: {
         duration: 200,
@@ -11465,7 +11465,7 @@ const Uy = (t) => {
     i.removeEventListener("click", Uy), i.addEventListener("click", Uy);
   }), c("div", {
     dangerouslySetInnerHTML: {
-      __html: Dk.sanitize(t)
+      __html: Ok.sanitize(t)
     },
     className: E(n, e && "line-clamp-5")
   });
@@ -11855,7 +11855,7 @@ const Uy = (t) => {
   });
 }, vM = {
   warning: {
-    icon: Lk,
+    icon: Ik,
     iconColor: "warning",
     textColor: "text-f1-foreground-warning"
   },
@@ -11982,7 +11982,7 @@ function xM({ item: t }) {
           label: t.info.title,
           description: t.info.description,
           children: c(ge, {
-            icon: qf,
+            icon: Wf,
             size: "sm"
           })
         })
@@ -12481,7 +12481,7 @@ const H2 = ve(({ action: t, avatarUrl: e, firstName: n, lastName: i }, r) => {
 H2.displayName = "PersonItem";
 const V2 = ve(({ avatarUrl: t, name: e, action: n }, i) => c(Xa, {
   ref: i,
-  leftIcon: () => c(qk, {
+  leftIcon: () => c(Wk, {
     name: e,
     size: "xs",
     src: t
@@ -12591,7 +12591,7 @@ const cc = (t, e) => t && t.type === "copy" ? {
         }), n.info && c(In, {
           label: n.info,
           children: c(ge, {
-            icon: Ik,
+            icon: Dk,
             size: "sm",
             className: "text-f1-icon-secondary"
           })
@@ -12680,7 +12680,7 @@ function IM(t, e) {
   }, [t, e, n, i]);
 }
 function LM({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
-  const { sidebarState: s, toggleSidebar: o, isSmallScreen: a, setForceFloat: l } = go(), d = Ha(), { open: f } = ex(), { open: u } = ic(), h = wk(`(max-width: ${vh.xl}px)`, {
+  const { sidebarState: s, toggleSidebar: o, isSmallScreen: a, setForceFloat: l } = go(), d = Ha(), { open: f } = Zk(), { open: u } = ic(), h = wk(`(max-width: ${vh.xl}px)`, {
     initializeWithValue: !0
   });
   return ne(() => {
@@ -12699,7 +12699,7 @@ function LM({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
         children: [c("div", {
           className: "col-[1/-1]",
           children: r
-        }), c(Uf, {
+        }), c(qf, {
           id: "ai-chat-group",
           children: b("div", {
             className: "relative isolate flex h-full",
@@ -12862,7 +12862,7 @@ const Rh = {
             duration: 0.2
           }
         },
-        children: [c(zk, {
+        children: [c($k, {
           type: "rounded",
           name: [t, e],
           src: n,
@@ -12954,7 +12954,7 @@ function FM({ children: t, header: e, period: n, embedded: i = !1 }) {
           variant: "ghost",
           onClick: () => s(),
           label: "Open main menu",
-          icon: Tk,
+          icon: ix,
           hideLabel: !0
         }), b("div", {
           className: E("flex flex-row items-center", o ? "gap-1.5" : "gap-3"),
@@ -13419,7 +13419,7 @@ function VM({ title: t, items: e, className: n, activeItem: i, collapsible: r = 
 }
 function WM(t) {
   return c($M, {
-    children: c(Uf, {
+    children: c(qf, {
       id: "table-of-contents",
       children: c(VM, {
         ...t
@@ -13621,7 +13621,7 @@ const XM = ({ companies: t, selected: e, onChange: n, children: i, additionalOpt
   });
 }, Zy = ({ company: t, withNotification: e = !1 }) => b("div", {
   className: E("flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden rounded text-lg font-semibold text-f1-foreground transition-colors"),
-  children: [c(qk, {
+  children: [c(Wk, {
     name: t?.name?.[0],
     src: t?.logo,
     size: "sm",
@@ -13668,7 +13668,7 @@ function xY({ user: t, options: e, showActivityButton: n = !1, activityButtonSho
           hideLabel: !0
         }), o && c("div", {
           className: "absolute -right-1 -top-1 rounded-full bg-f1-background",
-          children: c(Uk, {
+          children: c(qk, {
             type: "highlight",
             size: "sm",
             icon: ux
@@ -14032,7 +14032,7 @@ function _Y({ tree: t, onCollapse: e, onSort: n, onFavoritesChange: i, favorites
     n?.(m);
   }, [n]), p = tO();
   return c(nO, {
-    children: c(Uf, {
+    children: c(qf, {
       id: "sidebar-menu",
       children: c(oO, {
         disableDragging: p,
@@ -14160,7 +14160,7 @@ function CY({ onClick: t, placeholder: e, shortcut: n = ["cmd", "k"], ...i }) {
       children: [b("div", {
         className: "flex items-center gap-1",
         children: [c(ge, {
-          icon: Gk,
+          icon: Uk,
           size: "md"
         }), c("span", {
           children: e
@@ -14442,7 +14442,7 @@ const pO = ({ title: t, approvalsRequired: e = 1, status: n, approvers: i }) => 
 function Q2({ title: t, description: e, variant: n = "default", emoji: i, actions: r }) {
   return b("div", {
     className: "flex flex-col items-center justify-center gap-5 p-8",
-    children: [n === "default" && c(Kk, {
+    children: [n === "default" && c(Gk, {
       emoji: i,
       size: "lg"
     }), n !== "default" && c(hs, {
@@ -14557,7 +14557,7 @@ const wO = (t) => Array.isArray(t) ? t.every((e) => xO(e)) ? t : [{
         className: "dark flex h-8 w-full items-center justify-between gap-2 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0",
         children: [b("span", {
           className: "font-medium tabular-nums",
-          children: [c(Wk, {
+          children: [c(Vk, {
             value: n,
             spinTiming: {
               duration: 200,
@@ -14858,7 +14858,7 @@ const EO = (t) => "date" in t, AO = {
   icon: qC,
   className: "animate-spin"
 }) : c(ge, {
-  icon: Gk,
+  icon: Uk,
   className: "text"
 }), TO = ({ value: t, onChange: e, loading: n = !1 }) => {
   const [i, r] = P(!1), s = Jf(), o = ie(null), a = ie(null), l = Me(), d = () => {
@@ -14874,7 +14874,7 @@ const EO = (t) => "date" in t, AO = {
   }, u = (h) => {
     i ? h.key === "Escape" && (h.preventDefault(), d(), r(!1)) : (h.key === "Enter" || h.key === " ") && (h.preventDefault(), f());
   };
-  return c(Uf, {
+  return c(qf, {
     id: s,
     children: c(Dx, {
       transition: {
@@ -15345,7 +15345,7 @@ const zm = ({ paginationInfo: t, setPage: e, className: n }) => {
         animate: "visible",
         exit: "hidden",
         custom: w,
-        variants: Jk({
+        variants: Kk({
           delay: 0.02,
           duration: 0.3
         }),
@@ -15399,7 +15399,7 @@ const zm = ({ paginationInfo: t, setPage: e, className: n }) => {
       data: g.records
     });
   }, [y?.total, g.records]);
-  const { selectedItems: x, groupAllSelectedStatus: k, handleSelectItemChange: C, handleSelectGroupChange: _ } = Gf({
+  const { selectedItems: x, groupAllSelectedStatus: k, handleSelectItemChange: C, handleSelectGroupChange: _ } = Uf({
     data: g,
     paginationInfo: y,
     source: d,
@@ -15557,7 +15557,7 @@ const HO = (t) => {
     selectedIds: e.flatMap((n) => n.selectedIds)
   };
 }, VO = (t) => {
-  const e = Gf({
+  const e = Uf({
     data: t.data || {
       type: "flat",
       records: [],
@@ -15826,7 +15826,7 @@ const Bm = (t, e, n, i) => {
         variant: "ghost",
         size: "sm",
         label: "Add",
-        icon: Wf,
+        icon: Kf,
         hideLabel: !0,
         onClick: i
       })
@@ -15921,7 +15921,7 @@ function sD({ title: t, items: e, renderCard: n, getKey: i, emptyState: r, fetch
         variant: "ghost",
         size: "md",
         className: "w-full justify-center",
-        icon: Wf,
+        icon: Kf,
         label: "Add",
         hideLabel: !0,
         onClick: h
@@ -16811,7 +16811,7 @@ const uD = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
       data: a.records
     });
   }, [l?.total, a.records]);
-  const { isLoading: p } = n, { loadingIndicatorRef: m } = Bm(l, p, u, h), { selectedItems: g, groupAllSelectedStatus: y, handleSelectItemChange: v, handleSelectGroupChange: w } = Gf({
+  const { isLoading: p } = n, { loadingIndicatorRef: m } = Bm(l, p, u, h), { selectedItems: g, groupAllSelectedStatus: y, handleSelectItemChange: v, handleSelectGroupChange: w } = Uf({
     data: a,
     paginationInfo: l,
     source: n,
@@ -17256,10 +17256,10 @@ const mc = 32, Bd = 24, Ql = 18, MD = "1px", nr = 8, C3 = 32, S3 = 4, zh = 40, O
         onClick: (p) => {
           o && (p.stopPropagation(), i?.onExpand?.());
         },
-        children: o && (i?.expanded ? c(Pk, {
+        children: o && (i?.expanded ? c(Fk, {
           className: "pointer-events-none shrink-0",
           size: Ql
-        }) : c($k, {
+        }) : c(Pk, {
           className: "pointer-events-none shrink-0",
           size: Ql
         }))
@@ -17377,7 +17377,7 @@ function si({ children: t, href: e, onClick: n, width: i = "auto", firstCell: r 
     })]
   });
 }
-function Xl({ children: t, width: e = "auto", sortState: n = "none", onSortClick: i, info: r, infoIcon: s = qf, sticky: o, hidden: a = !1, align: l = "left", className: d }) {
+function Xl({ children: t, width: e = "auto", sortState: n = "none", onSortClick: i, info: r, infoIcon: s = Wf, sticky: o, hidden: a = !1, align: l = "left", className: d }) {
   const { isScrolled: f, isScrolledRight: u } = _3(), h = o?.left !== void 0, p = o?.right !== void 0, m = h || p, g = o?.left ?? 0, y = o?.right ?? 0, v = i || r, w = c(we, {
     children: b("div", {
       className: E("flex items-center whitespace-nowrap", v && "gap-1", l === "right" && "flex-row-reverse"),
@@ -17996,7 +17996,7 @@ const M3 = (t, e, n) => {
       data: h.records
     });
   }, [p?.total, h.records]);
-  const A = Y(() => n, [n]), M = (Z, q) => "id" in Z && Z.id !== void 0 && Z.id !== null ? `id:${String(Z.id)}` : `index:${String(q)}`, { selectedItems: T, allSelectedStatus: S, groupAllSelectedStatus: I, handleSelectItemChange: N, handleSelectAll: D, handleSelectGroupChange: R } = Gf({
+  const A = Y(() => n, [n]), M = (Z, q) => "id" in Z && Z.id !== void 0 && Z.id !== null ? `id:${String(Z.id)}` : `index:${String(q)}`, { selectedItems: T, allSelectedStatus: S, groupAllSelectedStatus: I, handleSelectItemChange: N, handleSelectAll: D, handleSelectGroupChange: R } = Uf({
     data: h,
     paginationInfo: p,
     source: e,
@@ -18098,7 +18098,7 @@ const M3 = (t, e, n) => {
               })]
             }, `group-header-${Z.key}`), c(We, {
               children: d && (!oe || se[Z.key]) && Z.records.map((_e, Ee) => c(d, {
-                variants: Jk(),
+                variants: Kk(),
                 initial: oe ? "hidden" : "visible",
                 animate: "visible",
                 exit: "hidden",
@@ -18209,7 +18209,7 @@ const M3 = (t, e, n) => {
   },
   list: {
     name: "List",
-    icon: Kf,
+    icon: Gf,
     settings: {
       default: {}
     },
@@ -18525,7 +18525,7 @@ const M3 = (t, e, n) => {
     value: ee && z,
     delay: 100
   });
-  Yk(() => {
+  Jk(() => {
     r?.({
       filters: u,
       sortings: N,
@@ -18666,7 +18666,7 @@ const M3 = (t, e, n) => {
       ];
     })
   ) : {});
-  Yk(() => {
+  Jk(() => {
     s && l(s);
   }, [s]);
   const d = Y(() => r, e);
@@ -41025,7 +41025,7 @@ const RV = ({ editor: t, disabled: e, labels: n }) => {
                 className: E("flex w-80 appearance-none items-center gap-2 rounded border-0 bg-f1-background py-1 pl-2 pr-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary", t.isActive("link") ? "cursor-auto" : Ze("focus:ring-f1-border-hover") + "hover:ring-f1-border-hover"),
                 children: [c("div", {
                   className: E("flex items-center justify-center", o.length > 0 ? "w-6" : "w-4"),
-                  children: c(Uk, {
+                  children: c(qk, {
                     icon: o.length > 0 ? d(o) ? ho : LS : wg,
                     type: o ? d(o) ? "positive" : "warning" : "neutral",
                     size: o.length > 0 ? "sm" : "lg"
@@ -41258,7 +41258,7 @@ const Ab = ({ items: t, disabled: e = !1, activator: n, darkMode: i = !1, positi
     }
   }], u = [{
     key: "bulletList",
-    icon: Kf,
+    icon: Gf,
     active: (x) => x.isActive("bulletList"),
     onClick: (x) => x.chain().focus().toggleBulletList().run(),
     tooltip: {
@@ -41355,7 +41355,7 @@ const Ab = ({ items: t, disabled: e = !1, activator: n, darkMode: i = !1, positi
         onClick: () => t.chain().focus().toggleCodeBlock().run(),
         isActive: t.isActive("codeBlock")
       }, {
-        icon: Qk,
+        icon: Yk,
         label: s.divider,
         onClick: () => t.chain().focus().setHorizontalRule().run(),
         isActive: t.isActive("horizontalRule")
@@ -47100,7 +47100,7 @@ const sk = ({ content: t, anchorRect: e, editor: n }) => {
     },
     children: [c("div", {
       style: i
-    }), c(Xk, {
+    }), c(Qk, {
       asChild: !0,
       children: c("div", {
         style: i
@@ -47479,7 +47479,7 @@ const mG = cG.extend({
   }], f = (h) => o.users.find((p) => p.id === h), u = (h) => {
     try {
       const p = new Date(h);
-      return Fk(p, "HH:mm");
+      return Rk(p, "HH:mm");
     } catch (p) {
       return console.error(p), h;
     }
@@ -48421,7 +48421,7 @@ const IG = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/, LG = tt.c
         to: o
       }).toggleBulletList().run();
     },
-    icon: Kf
+    icon: Gf
   }, {
     title: t.orderedList,
     command: (r) => {
@@ -48484,7 +48484,7 @@ const IG = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/, LG = tt.c
         to: o
       }).setHorizontalRule().run();
     },
-    icon: Qk
+    icon: Yk
   }, ...i ? [{
     title: "Image",
     command: (r) => {
@@ -48641,7 +48641,7 @@ const R6 = (t, e, n, i) => Ke.create({
             modal: !1,
             children: [c("div", {
               style: h
-            }), c(Xk, {
+            }), c(Qk, {
               asChild: !0,
               children: c("div", {
                 style: h
@@ -49028,7 +49028,7 @@ const R6 = (t, e, n, i) => Ke.create({
               onClick: oe,
               label: "Add paragraph",
               hideLabel: !0,
-              icon: Wf
+              icon: Kf
             }), c("div", {
               className: "flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary",
               draggable: !0,
@@ -50404,7 +50404,7 @@ const mK = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: n
             }), e.info && c(In, {
               label: e.info,
               children: c(ge, {
-                icon: qf,
+                icon: Wf,
                 size: "sm",
                 className: "text-f1-foreground-secondary"
               })
@@ -51432,7 +51432,7 @@ function XY({ id: t, title: e, subtitle: n, avatars: i, remainingCount: r, withP
     withPointerCursor: s,
     children: ["alert" in a && a.alert && c(hs, {
       type: a.alert
-    }), "emoji" in a && a.emoji && c(Kk, {
+    }), "emoji" in a && a.emoji && c(Gk, {
       emoji: a.emoji
     }), b("div", {
       className: "flex-1",
@@ -51471,7 +51471,7 @@ function fk({ id: t, title: e, subtitle: n, onClick: i, module: r }) {
       a.preventDefault(), i?.(t);
     },
     className: s,
-    children: [c(Vk, {
+    children: [c(Hk, {
       module: r ?? "inbox",
       size: "md"
     }), b("div", {
@@ -51650,7 +51650,7 @@ const fJ = ({ title: t, info: e }) => b("div", {
             label: i.label,
             description: i.description,
             children: c(ge, {
-              icon: qf,
+              icon: Wf,
               size: "sm"
             })
           })
@@ -51826,7 +51826,7 @@ const jJ = {
       })
     })
   });
-}), HJ = ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"], iQ = vt(uk, () => c(Zk, {
+}), HJ = ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"], iQ = vt(uk, () => c(Xk, {
   children: c(uk, {
     children: HJ.map((t, e) => c(Vs.Skeleton, {
       height: t
@@ -51843,7 +51843,7 @@ const jJ = {
       children: e
     })
   });
-}), () => c(Zk, {
+}), () => c(Xk, {
   orientation: "horizontal",
   children: b(hk, {
     children: [c(Vs.Skeleton, {}), c(Vs.Skeleton, {}), c(Vs.Skeleton, {})]
@@ -51888,7 +51888,7 @@ export {
   aY as ActivityItemList,
   iT as ActivityItemListSkeleton,
   wS as AiChat,
-  tx as AiChatOneIcon,
+  ex as AiChatOneIcon,
   xS as AiChatProvider,
   kQ as AiChatTextarea,
   xQ as AiChatTranslationsProvider,
@@ -51901,7 +51901,7 @@ export {
   vY as ApplicationFrame,
   BY as AreaChartWidget,
   zY as AutoGrid,
-  Uk as Badge,
+  qk as Badge,
   jY as BarChartWidget,
   nT as BaseActivityItemList,
   EQ as BaseBanner,
@@ -51932,7 +51932,7 @@ export {
   nY as EntitySelect,
   eY as F0ActionBar,
   Xg as F0AiBanner,
-  Vk as F0AvatarModule,
+  Hk as F0AvatarModule,
   QJ as F0Callout,
   bY as F0CollapsibleMenu,
   WM as F0TableOfContent,
@@ -52015,7 +52015,7 @@ export {
   AQ as predefinedPresets,
   yQ as rangeSeparator,
   TQ as selectSizes,
-  ex as useAiChat,
+  Zk as useAiChat,
   SQ as useAiChatTranslations,
   ic as useAiPromotionChat,
   uc as useDataCollectionData,
