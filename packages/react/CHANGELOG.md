@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.331.0](https://github.com/factorialco/f0/compare/f0-react-v1.330.2...f0-react-v1.331.0) (2026-01-22)
+
+
+### Features
+
+* add image extension to NotesTextEditor ([#3250](https://github.com/factorialco/f0/issues/3250)) ([08207e5](https://github.com/factorialco/f0/commit/08207e5fe3bc681586ef80875b6a8c374fbd98fd))
+
 ## [1.330.2](https://github.com/factorialco/f0/compare/f0-react-v1.330.1...f0-react-v1.330.2) (2026-01-22)
 
 
