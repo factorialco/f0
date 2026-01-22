@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.332.0](https://github.com/factorialco/f0/compare/f0-react-v1.331.0...f0-react-v1.332.0) (2026-01-22)
+
+
+### Features
+
+* add communities module icon ([#3276](https://github.com/factorialco/f0/issues/3276)) ([46deaf9](https://github.com/factorialco/f0/commit/46deaf9fa82ff06c85ddcda593c63f842cd21a47))
+
 ## [1.331.0](https://github.com/factorialco/f0/compare/f0-react-v1.330.2...f0-react-v1.331.0) (2026-01-22)
 
 
