@@ -1,12 +1,14 @@
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import { F0DialogActionsProps } from "../types"
-import { toArray } from "@/lib/toArray"
-import { DialogVariant } from "../internal/internal-types"
-import { cn } from "@/lib/utils"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import { toArray } from "@/lib/toArray"
+import { cn } from "@/lib/utils"
+
+import { DialogVariant } from "../internal/internal-types"
+import { DialogNotificationType, F0DialogActionsProps } from "../types"
 
 export type DialogFooterProps = F0DialogActionsProps & {
   variant?: DialogVariant
+  type?: DialogNotificationType
 }
 
 export const DialogFooter = (props: DialogFooterProps) => {
@@ -28,6 +30,8 @@ export const DialogFooter = (props: DialogFooterProps) => {
 
   const renderPrimaryAction = () => {
     if (!hasPrimaryAction) return null
+
+    const _variant = props.type === "critical" ? "critical" : "default"
 
     if (primaryActions.length > 1) {
       return (
@@ -53,7 +57,7 @@ export const DialogFooter = (props: DialogFooterProps) => {
         block={props.variant === "notification"}
         label={primaryActions[0].label}
         onClick={() => toPromise(primaryActions[0].onClick)}
-        variant="default"
+        variant={_variant}
         icon={primaryActions[0].icon}
         disabled={primaryActions[0].disabled}
         loading={primaryActions[0].loading}

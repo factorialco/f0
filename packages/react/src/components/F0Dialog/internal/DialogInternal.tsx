@@ -1,9 +1,10 @@
 import { FC, useMemo } from "react"
-import { DialogInternalProps } from "./internal-types"
+
+import { DialogContent } from "../components/DialogContent"
+import { DialogFooter } from "../components/DialogFooter"
+import { DialogHeader } from "../components/DialogHeader"
 import { DialogWrapper } from "../components/DialogWrapper"
-import { DialogHeader } from "../_components/DialogHeader"
-import { DialogContent } from "../_components/DialogContent"
-import { DialogFooter } from "../_components/DialogFooter"
+import { DialogInternalProps } from "./internal-types"
 
 export const DialogInternal: FC<DialogInternalProps> = ({
   disableClose = false,
@@ -23,6 +24,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   setActiveTabId,
   disableContentPadding,
   variant = "default",
+  type = "default",
 }) => {
   const _memoizedDialogLayout = useMemo(() => {
     return (
@@ -46,6 +48,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
           primaryAction={primaryAction ?? []}
           secondaryAction={secondaryAction ?? []}
           variant={variant}
+          type={type}
         />
       </>
     )

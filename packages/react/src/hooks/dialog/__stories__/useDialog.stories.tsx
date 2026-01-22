@@ -1,11 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { Pencil } from "lucide-react"
 import React, { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
+
 import { F0Button } from "@/components/F0Button"
-import { useDialog } from "../useDialog"
-import { DialogActionValue } from "../../../lib/providers/dialogs/types"
 import { Delete } from "@/icons/app"
-import { Pencil } from "lucide-react"
+
+import { DialogActionValue } from "../../../lib/providers/dialogs/types"
+import { useDialog } from "../useDialog"
 
 const meta = {
   title: "Dialogs",
@@ -74,6 +77,15 @@ export const Default: Story = {
       const res = await confirm({
         title: "Confirm Title",
         msg: "Confirm Message",
+        type: "critical",
+        confirm: {
+          value: () => {
+            return new Promise((resolve) =>
+              setTimeout(() => resolve("confirm"), 1000)
+            )
+          },
+          label: "Confirm",
+        },
       })
       if (res) {
         alert({ title: "Item deleted", msg: "Item has been deleted" })
@@ -182,7 +194,7 @@ export const Notification: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button
           onClick={notificationTrigger}
           label="Open Notification Dialog"
@@ -204,7 +216,7 @@ export const Alert: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={alertTrigger} label="Open Alert" />
         <p>Last action result: {res?.toString()}</p>
       </div>
@@ -261,7 +273,7 @@ export const Confirm: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={alertTrigger} label="Open Alert" />
         <p>Last action result: {res?.toString()}</p>
       </div>
@@ -345,7 +357,7 @@ export const ConfirmWithPromiseAndCustomLabel: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={alertTrigger} label="Open Alert" />
         <p>Last action result: {res?.toString()}</p>
       </div>
@@ -424,7 +436,7 @@ export const Dialog: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={trigger} label="Open Dialog" />
         <p>Last action result: {res?.toString()}</p>
       </div>
@@ -534,7 +546,7 @@ export const DialogFullScreen: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={trigger} label="Open Dialog" />
         <p>Last action result: {res?.toString()}</p>
       </div>
@@ -589,7 +601,7 @@ export const DialogWithDropdownAndPromises: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={trigger} label="Open Dialog" />
         <p>Last action result: {res?.toString()}</p>
       </div>
@@ -635,7 +647,7 @@ export const DialogTriggersADialog: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-center items-center">
+      <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={trigger} label="Open Dialog" />
         <p>Last action result: {res?.toString()}</p>
       </div>

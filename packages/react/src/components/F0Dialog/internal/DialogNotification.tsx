@@ -2,9 +2,10 @@ import {
   AlertAvatarProps,
   F0AvatarAlert,
 } from "@/components/avatars/F0AvatarAlert"
-import { DialogInternal } from "./DialogInternal"
 import { DialogDescription, DialogTitle } from "@/ui/Dialog"
+
 import { F0DialogAction } from "../types"
+import { DialogInternal } from "./DialogInternal"
 
 type F0DialogNotificationProps = {
   type: AlertAvatarProps["type"]
@@ -41,6 +42,7 @@ export const DialogNotificationInternal = ({
       size="sm"
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
+      type={type == "critical" ? "critical" : "default"}
     >
       <div className="flex flex-col gap-4 py-2">
         <F0AvatarAlert type={type} size="lg" />

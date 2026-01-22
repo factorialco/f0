@@ -1,7 +1,9 @@
-import { TabsProps } from "@/experimental/Navigation/Tabs"
 import { ReactNode } from "react"
+
+import { TabsProps } from "@/experimental/Navigation/Tabs"
+
+import { DialogHeaderProps } from "../components/DialogHeader"
 import { DialogPosition, DialogSize, F0DialogAction } from "../types"
-import { DialogHeaderProps } from "../_components/DialogHeader"
 
 export const dialogVariants = ["default", "notification"] as const
 export type DialogVariant = (typeof dialogVariants)[number]
@@ -54,6 +56,12 @@ export type DialogInternalProps = {
   children: ReactNode
   // Disable the default padding from the dialog content area
   disableContentPadding?: boolean
+
+  /**
+   * The type of the dialog. It chenges the primary action variant.
+   * @default "default"
+   */
+  type?: "default" | "critical"
 
   /**
    * The variant of the dialog.

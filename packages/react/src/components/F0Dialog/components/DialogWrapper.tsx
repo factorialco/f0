@@ -1,12 +1,12 @@
-import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-import { F0DialogProvider } from "../_components/F0DialogProvider"
+import { cva } from "cva"
 import { useCallback, useMemo, useState } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import { Dialog, DialogContent } from "@/ui/Dialog"
+import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
-import { useMediaQuery } from "usehooks-ts"
-import { cva } from "cva"
 import { DialogSize } from "../types"
+import { F0DialogProvider } from "./F0DialogProvider"
 
 export const useIsSmallScreen = () =>
   useMediaQuery("(max-width: 560px)", {

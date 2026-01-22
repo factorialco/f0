@@ -1,5 +1,7 @@
-import { useDialogsLayoutContext } from "@/lib/providers/dialogs/DialogsLayoutProvider"
 import { nanoid } from "nanoid"
+
+import { useDialogsLayoutContext } from "@/lib/providers/dialogs/DialogsLayoutProvider"
+import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs/internal-types"
 import {
   DialogDefinition,
   DialogActionValue,
@@ -8,15 +10,14 @@ import {
   DialogId,
   DialogDefinitionInternal,
 } from "@/lib/providers/dialogs/types"
+import { useI18n } from "@/lib/providers/i18n"
+import { Optional } from "@/lib/typescript-utils/optional"
 
 import {
   AlertDialogOptions,
   ConfirmDialogOptions,
   NotificationDialogOptions,
 } from "./types"
-import { Optional } from "@/lib/typescript-utils/optional"
-import { useI18n } from "@/lib/providers/i18n"
-import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs/internal-types"
 
 export type UseDialogReturn = {
   openDialog: (

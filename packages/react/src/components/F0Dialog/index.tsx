@@ -6,7 +6,7 @@ export {
   F0DialogContext,
   F0DialogProvider,
   useF0Dialog,
-} from "./_components/F0DialogProvider"
+} from "./components/F0DialogProvider"
 export type { DialogSize, F0DialogActionsProps, F0DialogAction } from "./types"
 
 /**
