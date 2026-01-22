@@ -7,11 +7,10 @@ import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { SVGProps } from 'react';
 
-export declare const ActionItem: ({ title, subtitle, status }: ActionItemProps) => JSX_2.Element;
+export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
-    subtitle?: string;
     status?: "inProgress" | "executing" | "completed";
     inGroup?: boolean;
 }
@@ -581,7 +580,6 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
-        readonly working: "Working...";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly removeFile: "Remove file";
@@ -776,6 +774,23 @@ declare global {
     }
 }
 
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
+}
+
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -803,21 +818,9 @@ declare module "@tiptap/core" {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -827,9 +830,4 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
