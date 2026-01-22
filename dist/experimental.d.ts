@@ -227,10 +227,11 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status }: ActionItemProps) => JSX_2.Element | null;
+export declare const ActionItem: ({ title, subtitle, status }: ActionItemProps) => JSX_2.Element;
 
 export declare interface ActionItemProps {
     title: string;
+    subtitle?: string;
     status?: "inProgress" | "executing" | "completed";
     inGroup?: boolean;
 }
@@ -6634,23 +6635,6 @@ declare global {
     }
 }
 
-declare module "gridstack" {
-    interface GridStackWidget {
-        id?: string;
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-        meta?: Record<string, unknown>;
-    }
-    interface GridStackNode {
-        allowedSizes?: Array<{
-            w: number;
-            h: number;
-        }>;
-    }
-}
-
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
@@ -6678,9 +6662,21 @@ declare module "@tiptap/core" {
     }
 }
 
-
-declare namespace Calendar {
-    var displayName: string;
+declare module "gridstack" {
+    interface GridStackWidget {
+        id?: string;
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+        meta?: Record<string, unknown>;
+    }
+    interface GridStackNode {
+        allowedSizes?: Array<{
+            w: number;
+            h: number;
+        }>;
+    }
 }
 
 
@@ -6690,4 +6686,9 @@ declare module "@tiptap/core" {
             insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
