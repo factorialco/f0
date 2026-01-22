@@ -1,11 +1,12 @@
-import { Dialogs } from "@/lib/providers/dialogs/components/Dialogs"
-import { DialogDefinitionProviderInternal } from "@/lib/providers/dialogs/internal-types"
-import { DialogId } from "@/lib/providers/dialogs/types"
 import { createContext, useContext, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 
+import { Dialogs } from "@/lib/providers/dialogs/components/Dialogs"
+import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs/internal-types"
+import { DialogId } from "@/lib/providers/dialogs/types"
+
 type DialogsLayoutContextValue = {
-  addDialog: (dialog: DialogDefinitionProviderInternal) => void
+  addDialog: (dialog: DialogDefinitionProviderItem) => void
   removeDialog: (id: DialogId) => void
 }
 
@@ -24,9 +25,9 @@ type DialogsLayoutProviderProps = {
 export const DialogsLayoutProvider = ({
   children,
 }: DialogsLayoutProviderProps) => {
-  const [dialogs, setDialogs] = useState<DialogDefinitionProviderInternal[]>([])
+  const [dialogs, setDialogs] = useState<DialogDefinitionProviderItem[]>([])
 
-  const addDialog = (dialog: DialogDefinitionProviderInternal) => {
+  const addDialog = (dialog: DialogDefinitionProviderItem) => {
     setDialogs((prev) => [...prev, dialog])
   }
 

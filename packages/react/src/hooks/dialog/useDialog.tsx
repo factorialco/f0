@@ -45,8 +45,9 @@ export const useDialog = (): UseDialogReturn => {
     definition: Optional<DialogDefinitionInternal, "id">
   ): Promise<DialogActionValue> => {
     return new Promise((resolve) => {
-      const newDialog: DialogDefinitionProviderItem = {
-        ...definition,
+      // We have to use a cast here because the type of newDialog is not correctly inferred
+      // when using the spread operator with a discriminated union
+      const baseDialog = {
         id: definition.id || nanoid(),
         actions: definition.actions,
         onCloseDialog: () => {
@@ -58,6 +59,27 @@ export const useDialog = (): UseDialogReturn => {
         ) => {
           handleDialogAction(action, value)
         },
+      }
+
+      let newDialog: DialogDefinitionProviderItem
+
+      if (definition.variant === "notification") {
+        if (!definition.type || definition.type === "default") {
+          throw new Error("Notification dialog must have a type")
+        }
+        newDialog = {
+          ...definition,
+          ...baseDialog,
+          variant: "notification",
+          type: definition.type,
+        }
+      } else {
+        newDialog = {
+          ...definition,
+          ...baseDialog,
+          variant: "default",
+          type: undefined,
+        }
       }
 
       const handleDialogAction = async (

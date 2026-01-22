@@ -52,10 +52,9 @@ export const FeedbackModal = ({
 
   return (
     <F0Dialog
-      position="center"
       isOpen
       onClose={handleClose}
-      width="sm"
+      size="sm"
       title={title}
       primaryAction={{
         label: translation.actions.send,

@@ -4,13 +4,7 @@ import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { TabsProps } from "@/experimental/Navigation/Tabs"
 
-import {
-  DialogPosition,
-  DialogWidth,
-  F0DialogPrimaryAction,
-  F0DialogPrimaryActionItem,
-  F0DialogSecondaryAction,
-} from "./types"
+import { DialogPosition, DialogSize, F0DialogAction } from "./types"
 
 export type F0DialogHeaderProps = {
   title?: string
@@ -55,10 +49,10 @@ export type F0DialogInternalProps = {
   // The position of the dialog
   position?: DialogPosition
   // The width of the dialog. Only applies to center position but we can NOT use narrowing as position undefined is valid
-  width?: DialogWidth
+  size?: DialogSize
   // Actions to render in the footer
-  primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
-  secondaryAction?: F0DialogSecondaryAction
+  primaryAction?: F0DialogAction | F0DialogAction[]
+  secondaryAction?: F0DialogAction | F0DialogAction[]
   // Title of the dialog
   title?: string
   // Description of the dialog

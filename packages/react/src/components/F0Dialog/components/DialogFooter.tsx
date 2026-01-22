@@ -3,12 +3,12 @@ import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 
-import { DialogVariant } from "../internal/internal-types"
-import { DialogNotificationType, F0DialogActionsProps } from "../types"
+import { DialogInternalProps, DialogVariant } from "../internal/internal-types"
+import { F0DialogActionsProps } from "../types"
 
 export type DialogFooterProps = F0DialogActionsProps & {
   variant?: DialogVariant
-  type?: DialogNotificationType
+  type?: DialogInternalProps["type"]
 }
 
 export const DialogFooter = (props: DialogFooterProps) => {
