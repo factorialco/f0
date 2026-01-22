@@ -60,6 +60,10 @@ const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
     type: "FILE",
     color: "text-f1-foreground",
   },
+  xml: {
+    type: "XML",
+    color: "text-f1-foreground-positive",
+  },
 }
 
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
@@ -80,6 +84,7 @@ const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   tar: "archive",
   gz: "archive",
   "7z": "archive",
+  xml: "xml",
 }
 
 const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
@@ -126,6 +131,8 @@ const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   // Markdown
   md: "markdown",
   markdown: "markdown",
+  // XML
+  xml: "xml",
 }
 
 const getFileTypeInfo = (file: FileDef): FileTypeInfo => {
