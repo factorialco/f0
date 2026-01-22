@@ -1,10 +1,13 @@
-import { zeroRender } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
 import { act, screen, waitFor } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Dialogs } from "../Dialogs"
-import type { DialogDefinitionInternal } from "../../internal-types"
+import "@testing-library/jest-dom/vitest"
 import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { zeroRender } from "@/testing/test-utils"
+
+import type { DialogDefinitionInternal } from "../../internal-types"
+
+import { Dialogs } from "../Dialogs"
 
 // Mock nanoid
 let nanoidCounter = 0
@@ -13,19 +16,16 @@ vi.mock("nanoid", () => ({
   nanoid: () => mockNanoid(),
 }))
 
-// Mock F0DialogInternal
-const MockF0DialogInternal = vi.hoisted(() => {
+// Mock DialogInternal
+const MockDialogInternal = vi.hoisted(() => {
   return vi.fn(({ children, ...props }: any) => (
     <div
       data-testid="f0-dialog-internal"
-      data-dialog-id={props["data-dialog-id"]}
       data-title={props.title}
       data-description={props.description}
-      data-width={props.width}
+      data-size={props.size}
       data-is-open={props.isOpen}
       data-disable-close-button={props.disableClose}
-      data-primary-actions={JSON.stringify(props.primaryAction)}
-      data-secondary-actions={JSON.stringify(props.secondaryAction)}
     >
       {children}
       <button
@@ -37,7 +37,7 @@ const MockF0DialogInternal = vi.hoisted(() => {
       </button>
       {props.primaryAction?.map((action: any, index: number) => (
         <button
-          key={index}
+          key={`primary-${index}`}
           data-testid={`primary-action-${index}`}
           onClick={action.onClick}
           disabled={action.disabled}
@@ -47,7 +47,7 @@ const MockF0DialogInternal = vi.hoisted(() => {
       ))}
       {props.secondaryAction?.map((action: any, index: number) => (
         <button
-          key={index}
+          key={`secondary-${index}`}
           data-testid={`secondary-action-${index}`}
           onClick={action.onClick}
           disabled={action.disabled}
@@ -59,8 +59,48 @@ const MockF0DialogInternal = vi.hoisted(() => {
   ))
 })
 
-vi.mock("@/components/F0Dialog/F0DialogInternal", () => ({
-  F0DialogInternal: MockF0DialogInternal,
+vi.mock("@/components/F0Dialog/internal/DialogInternal", () => ({
+  DialogInternal: MockDialogInternal,
+}))
+
+// Mock DialogNotificationInternal
+const MockDialogNotificationInternal = vi.hoisted(() => {
+  return vi.fn(({ ...props }: any) => (
+    <div
+      data-testid="f0-dialog-notification-internal"
+      data-title={props.title}
+      data-description={props.description}
+      data-type={props.type}
+      data-is-open={props.isOpen}
+    >
+      <button data-testid="notification-close-button" onClick={props.onClose}>
+        Close
+      </button>
+      {props.primaryAction && (
+        <button
+          data-testid="notification-primary-action"
+          onClick={props.primaryAction.onClick}
+          disabled={props.primaryAction.disabled}
+        >
+          {props.primaryAction.label}
+        </button>
+      )}
+      {props.secondaryAction?.map((action: any, index: number) => (
+        <button
+          key={`notification-secondary-${index}`}
+          data-testid={`notification-secondary-action-${index}`}
+          onClick={action.onClick}
+          disabled={action.disabled}
+        >
+          {action.label}
+        </button>
+      ))}
+    </div>
+  ))
+})
+
+vi.mock("@/components/F0Dialog/internal/DialogNotification", () => ({
+  DialogNotificationInternal: MockDialogNotificationInternal,
 }))
 
 describe("Dialogs", () => {
@@ -70,7 +110,7 @@ describe("Dialogs", () => {
   })
 
   describe("rendering", () => {
-    it("should render F0DialogInternal for each dialog", () => {
+    it("should render DialogInternal for standard dialogs", () => {
       const dialogs: DialogDefinitionInternal[] = [
         {
           id: "dialog-1",
@@ -106,19 +146,49 @@ describe("Dialogs", () => {
       expect(renderedDialogs).toHaveLength(2)
     })
 
+    it("should render DialogNotificationInternal for notification dialogs", () => {
+      const dialogs: DialogDefinitionInternal[] = [
+        {
+          id: "dialog-notification",
+          title: "Notification Dialog",
+          content: <div>Notification Content</div>,
+          variant: "notification",
+          type: "success",
+          actions: {
+            primary: {
+              label: "OK",
+              value: true,
+            },
+          },
+          onCloseDialog: vi.fn(),
+          onClickAction: vi.fn(),
+        },
+      ]
+
+      zeroRender(<Dialogs dialogs={dialogs} />)
+
+      expect(
+        screen.getByTestId("f0-dialog-notification-internal")
+      ).toBeInTheDocument()
+      expect(screen.queryByTestId("f0-dialog-internal")).not.toBeInTheDocument()
+    })
+
     it("should render nothing when dialogs array is empty", () => {
       zeroRender(<Dialogs dialogs={[]} />)
 
       expect(screen.queryByTestId("f0-dialog-internal")).not.toBeInTheDocument()
+      expect(
+        screen.queryByTestId("f0-dialog-notification-internal")
+      ).not.toBeInTheDocument()
     })
 
-    it("should pass correct props to F0DialogInternal", () => {
+    it("should pass correct props to DialogInternal", () => {
       const dialogs: DialogDefinitionInternal[] = [
         {
           id: "dialog-1",
           title: "Test Title",
           description: "Test Description",
-          width: "md",
+          size: "md",
           content: <div>Test Content</div>,
           actions: {
             primary: {
@@ -136,7 +206,39 @@ describe("Dialogs", () => {
       const dialog = screen.getByTestId("f0-dialog-internal")
       expect(dialog).toHaveAttribute("data-title", "Test Title")
       expect(dialog).toHaveAttribute("data-description", "Test Description")
-      expect(dialog).toHaveAttribute("data-width", "md")
+      expect(dialog).toHaveAttribute("data-size", "md")
+      expect(dialog).toHaveAttribute("data-is-open", "true")
+    })
+
+    it("should pass correct props to DialogNotificationInternal", () => {
+      const dialogs: DialogDefinitionInternal[] = [
+        {
+          id: "dialog-notif-1",
+          title: "Notification Title",
+          description: "Notification Description",
+          variant: "notification",
+          type: "warning",
+          content: <div>Content</div>,
+          actions: {
+            primary: {
+              label: "Confirm",
+              value: true,
+            },
+          },
+          onCloseDialog: vi.fn(),
+          onClickAction: vi.fn(),
+        },
+      ]
+
+      zeroRender(<Dialogs dialogs={dialogs} />)
+
+      const dialog = screen.getByTestId("f0-dialog-notification-internal")
+      expect(dialog).toHaveAttribute("data-title", "Notification Title")
+      expect(dialog).toHaveAttribute(
+        "data-description",
+        "Notification Description"
+      )
+      expect(dialog).toHaveAttribute("data-type", "warning")
       expect(dialog).toHaveAttribute("data-is-open", "true")
     })
 
@@ -360,6 +462,46 @@ describe("Dialogs", () => {
 
       const actionButton = screen.getByTestId("primary-action-0")
       expect(actionButton).toBeDisabled()
+    })
+
+    it("should handle actions in notification dialog", async () => {
+      const onClickAction = vi.fn()
+      const dialogs: DialogDefinitionInternal[] = [
+        {
+          id: "dialog-notif-1",
+          title: "Notification",
+          variant: "notification",
+          type: "info",
+          content: <div>Content</div>,
+          actions: {
+            primary: {
+              label: "Confirm",
+              value: "confirmed",
+            },
+          },
+          onCloseDialog: vi.fn(),
+          onClickAction,
+        },
+      ]
+
+      zeroRender(<Dialogs dialogs={dialogs} />)
+
+      const actionButton = screen.getByTestId("notification-primary-action")
+      expect(actionButton).toHaveTextContent("Confirm")
+
+      await act(async () => {
+        await actionButton.click()
+      })
+
+      await waitFor(() => {
+        expect(onClickAction).toHaveBeenCalledWith(
+          expect.objectContaining({
+            label: "Confirm",
+            value: "confirmed",
+          }),
+          "confirmed"
+        )
+      })
     })
   })
 
@@ -693,6 +835,37 @@ describe("Dialogs", () => {
       zeroRender(<Dialogs dialogs={dialogs} />)
 
       const closeButton = screen.getByTestId("close-button")
+
+      await act(async () => {
+        await closeButton.click()
+      })
+
+      expect(onCloseDialog).toHaveBeenCalled()
+    })
+
+    it("should call onCloseDialog when notification close button is clicked", async () => {
+      const onCloseDialog = vi.fn()
+      const dialogs: DialogDefinitionInternal[] = [
+        {
+          id: "dialog-notif-1",
+          title: "Notification",
+          variant: "notification",
+          type: "info",
+          content: <div>Content</div>,
+          actions: {
+            primary: {
+              label: "OK",
+              value: true,
+            },
+          },
+          onCloseDialog,
+          onClickAction: vi.fn(),
+        },
+      ]
+
+      zeroRender(<Dialogs dialogs={dialogs} />)
+
+      const closeButton = screen.getByTestId("notification-close-button")
 
       await act(async () => {
         await closeButton.click()
