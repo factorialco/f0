@@ -1,7 +1,10 @@
+import { useMemo } from "react"
 import { cva } from "cva"
 import { TOCItem } from "../../../experimental/Navigation/F0TableOfContent"
 import { TableOfContentPopoverVariant } from "../internal-types"
 import { cn } from "@/lib/utils"
+
+const MAX_BARS = 16
 
 interface CollapsedBarsProps {
   items: TOCItem[]
@@ -16,7 +19,6 @@ interface CollapsedBarsProps {
 interface FlattenedItem {
   id: string
   depth: number
-  hasChildren: boolean
 }
 
 const barVariants = cva({
@@ -56,33 +58,40 @@ const barVariants = cva({
   },
 })
 
-/**
- * Flattens the menu items tree into a linear list
- * showing the hierarchy through bar widths (max 4 visual levels)
- */
-function flattenItems(
-  items: TOCItem[],
-  depth = 0,
-  maxItems = 12
+function flattenAllItems(items: TOCItem[], depth = 0): FlattenedItem[] {
+  return items.flatMap((item) => [
+    { id: item.id, depth: Math.min(depth, 3) },
+    ...(item.children ? flattenAllItems(item.children, depth + 1) : []),
+  ])
+}
+
+function getVisibleItems(
+  allItems: FlattenedItem[],
+  activeItem?: string
 ): FlattenedItem[] {
-  const result: FlattenedItem[] = []
+  const total = allItems.length
+  if (total <= MAX_BARS) return allItems
 
-  for (const item of items) {
-    if (result.length >= maxItems) break
+  const step = total / (MAX_BARS - 1)
+  const selectedIndices = new Set(
+    Array.from({ length: MAX_BARS - 1 }, (_, i) =>
+      Math.min(Math.floor(i * step), total - 1)
+    )
+  )
+  selectedIndices.add(total - 1)
 
-    result.push({
-      id: item.id,
-      depth: Math.min(depth, 3),
-      hasChildren: Boolean(item.children?.length),
-    })
-
-    if (item.children) {
-      const children = flattenItems(item.children, depth + 1, maxItems)
-      result.push(...children.slice(0, maxItems - result.length))
+  if (activeItem) {
+    const activeIndex = allItems.findIndex((item) => item.id === activeItem)
+    if (activeIndex !== -1 && !selectedIndices.has(activeIndex)) {
+      const closest = [...selectedIndices].reduce((a, b) =>
+        Math.abs(b - activeIndex) < Math.abs(a - activeIndex) ? b : a
+      )
+      selectedIndices.delete(closest)
+      selectedIndices.add(activeIndex)
     }
   }
 
-  return result.slice(0, maxItems)
+  return [...selectedIndices].sort((a, b) => a - b).map((i) => allItems[i])
 }
 
 /**
@@ -97,7 +106,10 @@ export function CollapsedBars({
   align = "left",
   variant = "dark",
 }: CollapsedBarsProps) {
-  const flatItems = flattenItems(items)
+  const flatItems = useMemo(
+    () => getVisibleItems(flattenAllItems(items), activeItem),
+    [items, activeItem]
+  )
 
   return (
     <div

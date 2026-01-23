@@ -224,7 +224,7 @@ export const DarkVariant: Story = {
     docs: {
       description: {
         story:
-          "Dark variant with darker colored bars, designed for light backgrounds. The bars use lighter colors that are visible against dark surfaces.",
+          "Dark variant with lighter colored bars, designed for  backgrounds. The bars use lighter colors that are visible against dark surfaces.",
       },
     },
   },

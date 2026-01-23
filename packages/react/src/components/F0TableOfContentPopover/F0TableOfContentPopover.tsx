@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback, useRef, useState } from "react"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { cva } from "cva"
@@ -39,8 +40,36 @@ export function F0TableOfContentPopover({
   size = "md",
   variant = "light",
 }: F0TableOfContentPopoverProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const shouldScrollRef = useRef(false)
+
+  const handleOpenChange = (open: boolean) => {
+    if (open && !isOpen) {
+      // Transitioning from closed to open - enable scroll
+      shouldScrollRef.current = true
+    }
+    setIsOpen(open)
+  }
+
+  const contentRefCallback = useCallback((container: HTMLDivElement | null) => {
+    if (!container || !shouldScrollRef.current) return
+
+    shouldScrollRef.current = false
+
+    requestAnimationFrame(() => {
+      container
+        .querySelector("[data-active]")
+        ?.scrollIntoView({ block: "center", behavior: "smooth" })
+    })
+  }, [])
+
   return (
-    <HoverCard openDelay={OPEN_DELAY} closeDelay={CLOSE_DELAY}>
+    <HoverCard
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      openDelay={OPEN_DELAY}
+      closeDelay={CLOSE_DELAY}
+    >
       <HoverCardTrigger asChild>
         <button
           className={cn(
@@ -59,10 +88,15 @@ export function F0TableOfContentPopover({
         </button>
       </HoverCardTrigger>
       <HoverCardContent
+        ref={contentRefCallback}
         side={barsAlign === "left" ? "right" : "left"}
         align="center"
         sideOffset={-28}
-        className={contentVariants({ size })}
+        className={cn(
+          contentVariants({ size }),
+          !title && "pt-2",
+          "scrollbar-macos"
+        )}
       >
         <F0TableOfContent
           title={title}
@@ -71,7 +105,6 @@ export function F0TableOfContentPopover({
           collapsible={collapsible}
           hideChildrenCounter={!showChildrenCounter}
           scrollable={false}
-          className={cn(!title && "pt-2")}
         />
       </HoverCardContent>
     </HoverCard>
